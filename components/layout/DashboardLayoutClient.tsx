@@ -1,0 +1,96 @@
+"use client";
+
+import { SidebarProvider, useSidebar } from "./SidebarProvider";
+import { AdaptiveSidebar } from "./AdaptiveSidebar";
+import { MobileNav } from "./MobileNav";
+import { ThemeToggle } from "../theme-toggle";
+import { NotificationBell } from "../notifications/NotificationBell";
+import Link from "next/link";
+import { Button } from "../ui/button";
+import { PanelLeft, PanelLeftClose } from "lucide-react";
+
+function DashboardLayoutInner({
+  children,
+  profile,
+}: {
+  children: React.ReactNode;
+  profile: any;
+}) {
+  const { isCollapsed, toggleSidebar } = useSidebar();
+
+  return (
+    <>
+      {/* Sidebar */}
+      <aside
+        className={`hidden md:flex md:flex-col relative z-10 bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 transition-all duration-300 ${
+          isCollapsed ? "md:w-16" : "md:w-56"
+        }`}
+      >
+        <AdaptiveSidebar profile={profile} isCollapsed={isCollapsed} />
+      </aside>
+
+      {/* Main Content */}
+      <main className="flex-1 overflow-y-auto relative z-10">
+        {/* Header Bar */}
+        <div className="sticky top-0 z-20 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 px-4 sm:px-6 py-3 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            {/* Sidebar Toggle - Desktop */}
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={toggleSidebar}
+              className="hidden md:flex h-8 w-8 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100"
+              title={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+            >
+              {isCollapsed ? (
+                <PanelLeft className="h-4 w-4" />
+              ) : (
+                <PanelLeftClose className="h-4 w-4" />
+              )}
+            </Button>
+
+            {/* Mobile Menu Button */}
+            {profile && <MobileNav userProfile={profile} />}
+
+            {/* Brand on Mobile */}
+            <Link href="/dashboard" className="md:hidden flex items-center space-x-2">
+              <div className="h-7 w-7 rounded-lg bg-slate-900 dark:bg-slate-100 flex items-center justify-center text-white dark:text-slate-900 font-bold text-sm">
+                AI
+              </div>
+            </Link>
+
+            {/* Quick Search Hint - Desktop Only */}
+            <div className="hidden lg:flex items-center gap-2">
+              <kbd className="h-6 select-none items-center gap-1 rounded border border-slate-200 dark:border-slate-700 bg-slate-100 dark:bg-slate-800 px-2 font-mono text-xs font-medium text-slate-600 dark:text-slate-400 hidden sm:inline-flex">
+                <span>⌘K</span>
+              </kbd>
+              <span className="text-sm text-slate-600 dark:text-slate-400">Quick search</span>
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            <ThemeToggle />
+            <NotificationBell />
+          </div>
+        </div>
+
+        <div className="px-3 py-6 sm:px-4 md:px-6 max-w-7xl mx-auto">
+          {children}
+        </div>
+      </main>
+    </>
+  );
+}
+
+export function DashboardLayoutClient({
+  children,
+  profile,
+}: {
+  children: React.ReactNode;
+  profile: any;
+}) {
+  return (
+    <SidebarProvider>
+      <DashboardLayoutInner profile={profile}>{children}</DashboardLayoutInner>
+    </SidebarProvider>
+  );
+}
