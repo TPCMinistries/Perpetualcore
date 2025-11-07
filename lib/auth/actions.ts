@@ -99,15 +99,15 @@ export async function signUp(data: SignUpInput) {
   }
 
   // Create organization and profile
-  if (organizationId && betaTier) {
-    // Beta tester: create profile linked to admin organization
+  if (betaTier) {
+    // Beta tester: create profile linked to admin organization (or without org if none exists)
     const { error: profileError } = await supabase
       .from("profiles")
       .insert({
         id: authData.user.id,
         email: data.email,
         full_name: data.fullName,
-        organization_id: organizationId,
+        organization_id: organizationId, // Can be null if no org found
         beta_tester: true,
         beta_tier: betaTier,
       });
@@ -206,7 +206,24 @@ export async function getUserProfile() {
     .eq("id", user.id)
     .single();
 
-  return profile;
+  // Also fetch admin status from user_profiles
+  const { data: adminProfile, error: adminError } = await supabase
+    .from("user_profiles")
+    .select("is_super_admin, is_admin")
+    .eq("id", user.id)
+    .single();
+
+  if (adminError) {
+    console.error("[getUserProfile] Error fetching admin status:", adminError);
+  }
+
+  console.log("[getUserProfile] Admin profile data:", adminProfile);
+
+  return {
+    ...profile,
+    is_super_admin: adminProfile?.is_super_admin || false,
+    is_admin: adminProfile?.is_admin || false,
+  };
 }
 
 export async function resetOnboarding() {
