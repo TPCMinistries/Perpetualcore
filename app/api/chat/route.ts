@@ -432,10 +432,25 @@ Or, you can copy and paste the text content directly into this chat.`;
 
     // Save user message
     const lastUserMessage = messages[messages.length - 1];
+
+    // Handle content that might be an array (from vision formatting) or string
+    let messageContent: string;
+    if (typeof lastUserMessage.content === 'string') {
+      messageContent = lastUserMessage.content;
+    } else if (Array.isArray(lastUserMessage.content)) {
+      // Extract text from vision array format
+      const textContent = lastUserMessage.content.find(
+        (item: any) => item.type === 'text'
+      );
+      messageContent = textContent?.text || JSON.stringify(lastUserMessage.content);
+    } else {
+      messageContent = String(lastUserMessage.content);
+    }
+
     const { data: savedMessage } = await supabase.from("messages").insert({
       conversation_id: convId,
       role: "user",
-      content: lastUserMessage.content,
+      content: messageContent,
     }).select().single();
 
     // Auto-extract tasks from user message (async, don't wait)
