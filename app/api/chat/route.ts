@@ -171,14 +171,6 @@ export async function POST(req: NextRequest) {
       return new Response("No organization found", { status: 400 });
     }
 
-    let requestBody;
-    try {
-      requestBody = await req.json();
-    } catch (jsonError) {
-      console.error("Failed to parse request JSON:", jsonError);
-      return new Response("Invalid JSON in request body", { status: 400 });
-    }
-
     const {
       messages,
       model: selectedModel,
@@ -194,13 +186,7 @@ export async function POST(req: NextRequest) {
         data: string;
         mimeType: string;
       }>;
-    } = requestBody;
-
-    // Validate messages array
-    if (!Array.isArray(messages) || messages.length === 0) {
-      console.error("Invalid messages array:", messages);
-      return new Response("Invalid messages format", { status: 400 });
-    }
+    } = await req.json();
 
     // Determine which model to use
     const userMessage = messages[messages.length - 1].content;
@@ -446,43 +432,11 @@ Or, you can copy and paste the text content directly into this chat.`;
 
     // Save user message
     const lastUserMessage = messages[messages.length - 1];
-
-    // Handle content that might be an array (from vision formatting) or string
-    let messageContent: string;
-    try {
-      if (typeof lastUserMessage.content === 'string') {
-        messageContent = lastUserMessage.content;
-      } else if (Array.isArray(lastUserMessage.content)) {
-        // Extract text from vision array format
-        const textContent = lastUserMessage.content.find(
-          (item: any) => item.type === 'text'
-        );
-        messageContent = textContent?.text || JSON.stringify(lastUserMessage.content);
-      } else {
-        messageContent = String(lastUserMessage.content);
-      }
-    } catch (contentError) {
-      console.error("Error processing message content:", contentError, lastUserMessage);
-      messageContent = "Error processing message";
-    }
-
-    console.log("Saving message with content type:", typeof messageContent, "length:", messageContent?.length);
-
-    const { data: savedMessage, error: insertError } = await supabase.from("messages").insert({
+    const { data: savedMessage } = await supabase.from("messages").insert({
       conversation_id: convId,
       role: "user",
-      content: messageContent,
+      content: lastUserMessage.content,
     }).select().single();
-
-    if (insertError) {
-      console.error("Failed to insert message:", insertError, {
-        convId,
-        contentType: typeof messageContent,
-        contentLength: messageContent?.length,
-        contentSample: messageContent?.substring(0, 100)
-      });
-      throw new Error(`Failed to save message: ${insertError.message}`);
-    }
 
     // Auto-extract tasks from user message (async, don't wait)
     if (savedMessage) {

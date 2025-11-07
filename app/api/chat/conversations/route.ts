@@ -48,31 +48,9 @@ export async function GET(req: NextRequest) {
           .limit(1)
           .single();
 
-        // Handle content that might be stored as JSON string or array
-        let messagePreview = "";
-        if (lastMessage?.content) {
-          try {
-            // If content is a JSON string, parse it
-            if (typeof lastMessage.content === 'string' && lastMessage.content.startsWith('[')) {
-              const parsed = JSON.parse(lastMessage.content);
-              if (Array.isArray(parsed)) {
-                const textContent = parsed.find((item: any) => item.type === 'text');
-                messagePreview = (textContent?.text || '').substring(0, 100);
-              } else {
-                messagePreview = String(lastMessage.content).substring(0, 100);
-              }
-            } else {
-              messagePreview = String(lastMessage.content).substring(0, 100);
-            }
-          } catch {
-            // If parsing fails, just use as string
-            messagePreview = String(lastMessage.content).substring(0, 100);
-          }
-        }
-
         return {
           ...conv,
-          lastMessage: messagePreview,
+          lastMessage: lastMessage?.content?.substring(0, 100) || "",
           lastMessageAt: lastMessage?.created_at || conv.updated_at,
         };
       })
