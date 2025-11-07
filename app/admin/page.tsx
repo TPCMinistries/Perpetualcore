@@ -3,9 +3,11 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '../../lib/hooks/useAuth';
-import { supabase } from '../../lib/supabase/client';
+import { createClient } from '../../lib/supabase/client';
 import OrganizationManagement from '../components/OrganizationManagement';
 import UserManagement from '../components/UserManagement';
+
+const supabase = createClient();
 
 interface UserProfile {
   id: string;
