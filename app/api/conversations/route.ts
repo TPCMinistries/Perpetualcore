@@ -57,15 +57,15 @@ export async function GET(req: NextRequest) {
     // Return conversations with message counts and last message timestamp
     const conversationsWithCounts = await Promise.all(
       (conversations || []).map(async (conv) => {
-        // Get message count from shared_conversation_messages
+        // Get message count from conversation_messages (FIXED: was shared_conversation_messages)
         const { count } = await supabase
-          .from("shared_conversation_messages")
+          .from("conversation_messages")
           .select("*", { count: "exact", head: true })
           .eq("conversation_id", conv.id);
 
         // Get last message timestamp
         const { data: lastMessage } = await supabase
-          .from("shared_conversation_messages")
+          .from("conversation_messages")
           .select("created_at")
           .eq("conversation_id", conv.id)
           .order("created_at", { ascending: false })
