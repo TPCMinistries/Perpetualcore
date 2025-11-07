@@ -67,7 +67,7 @@ export async function GET(request: Request) {
     cookieStore.delete("oauth_code_verifier");
     cookieStore.delete("oauth_provider_id");
 
-    const supabase = createClient();
+    const supabase = await createClient();
 
     // Get provider configuration
     const { data: provider, error: providerError } = await supabase

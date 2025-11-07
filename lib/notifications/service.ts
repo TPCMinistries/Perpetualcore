@@ -35,7 +35,7 @@ interface CreateNotificationParams {
  * Create a notification with AI prioritization
  */
 export async function createNotification(params: CreateNotificationParams) {
-  const supabase = createClient();
+  const supabase = await createClient();
 
   // Check user preferences
   const { data: prefs } = await supabase
@@ -233,7 +233,7 @@ async function createSnoozedNotification(
   params: CreateNotificationParams,
   snoozeUntil: Date
 ) {
-  const supabase = createClient();
+  const supabase = await createClient();
 
   await supabase.from("notifications").insert({
     user_id: params.userId,
@@ -266,7 +266,7 @@ async function sendEmailNotification(params: CreateNotificationParams) {
  */
 export async function getUnreadNotifications(userId: string) {
   try {
-    const supabase = createClient();
+    const supabase = await createClient();
 
     const { data, error } = await supabase
       .from("notifications")
@@ -298,7 +298,7 @@ export async function getUnreadNotifications(userId: string) {
  */
 export async function getUnreadCount(userId: string): Promise<number> {
   try {
-    const supabase = createClient();
+    const supabase = await createClient();
 
     const { count, error } = await supabase
       .from("notifications")
@@ -326,7 +326,7 @@ export async function getUnreadCount(userId: string): Promise<number> {
  * Mark notification as read
  */
 export async function markAsRead(notificationId: string, userId: string) {
-  const supabase = createClient();
+  const supabase = await createClient();
 
   const { error } = await supabase
     .from("notifications")
@@ -344,7 +344,7 @@ export async function markAsRead(notificationId: string, userId: string) {
  * Mark all notifications as read
  */
 export async function markAllAsRead(userId: string) {
-  const supabase = createClient();
+  const supabase = await createClient();
 
   const { count, error } = await supabase
     .from("notifications")
@@ -378,7 +378,7 @@ export async function snoozeNotification(
   const minutes = durationMap[duration];
   const snoozeUntil = new Date(Date.now() + minutes * 60 * 1000);
 
-  const supabase = createClient();
+  const supabase = await createClient();
 
   const { error } = await supabase
     .from("notifications")

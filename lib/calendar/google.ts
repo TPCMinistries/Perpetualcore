@@ -44,7 +44,7 @@ export async function syncGoogleCalendarEvents(
   organizationId: string
 ): Promise<{ success: boolean; eventsCount: number; error?: string }> {
   try {
-    const supabase = createClient();
+    const supabase = await createClient();
 
     // Get calendar account
     const { data: account } = await supabase
@@ -146,7 +146,7 @@ export async function syncGoogleCalendarEvents(
  * Get upcoming events for a user
  */
 export async function getUpcomingEvents(userId: string, limit: number = 10) {
-  const supabase = createClient();
+  const supabase = await createClient();
 
   const { data: events } = await supabase
     .from("calendar_events")

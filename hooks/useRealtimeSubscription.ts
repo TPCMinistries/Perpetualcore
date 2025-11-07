@@ -39,7 +39,7 @@ export function useRealtimeSubscription({
   enabled = true,
 }: UseRealtimeSubscriptionOptions) {
   const channelRef = useRef<RealtimeChannel | null>(null);
-  const supabase = createClient();
+  const supabase = await createClient();
 
   useEffect(() => {
     if (!enabled) return;

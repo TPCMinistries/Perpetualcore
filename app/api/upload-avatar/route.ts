@@ -30,7 +30,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const supabase = createClient();
+    const supabase = await createClient();
 
     // Generate unique filename
     const fileExt = file.name.split(".").pop();

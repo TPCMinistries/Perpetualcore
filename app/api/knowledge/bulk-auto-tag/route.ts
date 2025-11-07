@@ -16,7 +16,7 @@ const anthropic = new Anthropic({
  */
 export async function POST(req: NextRequest) {
   try {
-    const supabase = createClient();
+    const supabase = await createClient();
 
     const {
       data: { user },

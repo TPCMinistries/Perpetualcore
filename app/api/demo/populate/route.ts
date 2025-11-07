@@ -9,7 +9,7 @@ import {
 
 export async function POST() {
   try {
-    const supabase = createClient();
+    const supabase = await createClient();
 
     // Get current user
     const {

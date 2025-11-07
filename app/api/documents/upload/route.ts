@@ -21,7 +21,7 @@ const SUPPORTED_TYPES = [
 
 export async function POST(req: NextRequest) {
   try {
-    const supabase = createClient();
+    const supabase = await createClient();
 
     // Get authenticated user
     const {

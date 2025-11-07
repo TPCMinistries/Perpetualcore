@@ -5,7 +5,7 @@ import { createClient } from "@/lib/supabase/server";
 // GET /api/admin/usage - Get usage analytics for admin dashboard
 export async function GET(req: NextRequest) {
   try {
-    const supabase = createClient();
+    const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
 
     if (!user) {

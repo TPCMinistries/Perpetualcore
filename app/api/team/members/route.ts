@@ -4,7 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 // GET /api/team/members - Get all members in the user's organization
 export async function GET(req: NextRequest) {
   try {
-    const supabase = createClient();
+    const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
 
     if (!user) {

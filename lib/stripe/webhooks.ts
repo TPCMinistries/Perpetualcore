@@ -71,7 +71,7 @@ export async function handleStripeWebhook(
  * Handle subscription created/updated
  */
 async function handleSubscriptionUpdate(subscription: Stripe.Subscription) {
-  const supabase = createClient();
+  const supabase = await createClient();
 
   const organizationId = subscription.metadata.organizationId;
   const userId = subscription.metadata.userId;
@@ -114,7 +114,7 @@ async function handleSubscriptionUpdate(subscription: Stripe.Subscription) {
  * Handle subscription deleted
  */
 async function handleSubscriptionDeleted(subscription: Stripe.Subscription) {
-  const supabase = createClient();
+  const supabase = await createClient();
 
   const organizationId = subscription.metadata.organizationId;
 
@@ -153,7 +153,7 @@ async function handleTrialWillEnd(subscription: Stripe.Subscription) {
  * Handle invoice created/updated
  */
 async function handleInvoiceUpdate(invoice: Stripe.Invoice) {
-  const supabase = createClient();
+  const supabase = await createClient();
 
   const customerId = invoice.customer as string;
 
@@ -197,7 +197,7 @@ async function handleInvoicePaid(invoice: Stripe.Invoice) {
   await handleInvoiceUpdate(invoice);
 
   const customerId = invoice.customer as string;
-  const supabase = createClient();
+  const supabase = await createClient();
 
   const { data: subscription } = await supabase
     .from("subscriptions")
@@ -218,7 +218,7 @@ async function handleInvoicePaymentFailed(invoice: Stripe.Invoice) {
   await handleInvoiceUpdate(invoice);
 
   const customerId = invoice.customer as string;
-  const supabase = createClient();
+  const supabase = await createClient();
 
   const { data: subscription } = await supabase
     .from("subscriptions")

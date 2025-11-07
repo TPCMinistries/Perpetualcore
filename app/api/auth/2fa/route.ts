@@ -6,7 +6,7 @@ import { verifyTOTP, decryptSecret } from "@/lib/2fa/totp";
 // Get 2FA status for the current user
 export async function GET(request: Request) {
   try {
-    const supabase = createClient();
+    const supabase = await createClient();
     const { data: { user }, error: userError } = await supabase.auth.getUser();
 
     if (userError || !user) {
@@ -39,7 +39,7 @@ export async function GET(request: Request) {
 // Disable 2FA for the current user
 export async function DELETE(request: Request) {
   try {
-    const supabase = createClient();
+    const supabase = await createClient();
     const { data: { user }, error: userError } = await supabase.auth.getUser();
 
     if (userError || !user) {

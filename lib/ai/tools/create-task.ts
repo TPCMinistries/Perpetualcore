@@ -48,7 +48,7 @@ export async function executeCreateTask(
   context: ToolExecutionContext
 ): Promise<string> {
   try {
-    const supabase = createClient();
+    const supabase = await createClient();
 
     // Validate required parameters
     if (!params.title || params.title.trim().length === 0) {

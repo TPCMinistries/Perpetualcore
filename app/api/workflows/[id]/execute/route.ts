@@ -16,7 +16,7 @@ export async function POST(
 ) {
   try {
     const workflowId = params.id;
-    const supabase = createClient();
+    const supabase = await createClient();
 
     // Authenticate user
     const {
@@ -138,7 +138,7 @@ export async function GET(
 ) {
   try {
     const workflowId = params.id;
-    const supabase = createClient();
+    const supabase = await createClient();
 
     // Authenticate user
     const {

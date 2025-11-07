@@ -5,7 +5,7 @@ import { createClient } from "@/lib/supabase/server";
 // Get all tags for the user's organization
 export async function GET(request: Request) {
   try {
-    const supabase = createClient();
+    const supabase = await createClient();
     const { data: { user }, error: userError } = await supabase.auth.getUser();
 
     if (userError || !user) {
@@ -55,7 +55,7 @@ export async function GET(request: Request) {
 // Create a new tag
 export async function POST(request: Request) {
   try {
-    const supabase = createClient();
+    const supabase = await createClient();
     const { data: { user }, error: userError } = await supabase.auth.getUser();
 
     if (userError || !user) {

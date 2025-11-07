@@ -7,7 +7,7 @@ export const dynamic = "force-dynamic";
 // GET - Fetch all projects for user's organization
 export async function GET(req: NextRequest) {
   try {
-    const supabase = createClient();
+    const supabase = await createClient();
 
     const {
       data: { user },
@@ -50,7 +50,7 @@ export async function GET(req: NextRequest) {
 // POST - Create a new project
 export async function POST(req: NextRequest) {
   try {
-    const supabase = createClient();
+    const supabase = await createClient();
 
     const {
       data: { user },

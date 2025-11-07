@@ -12,7 +12,7 @@ import {
 // Verify TOTP code and enable 2FA for the user
 export async function POST(request: Request) {
   try {
-    const supabase = createClient();
+    const supabase = await createClient();
     const { data: { user }, error: userError } = await supabase.auth.getUser();
 
     if (userError || !user) {

@@ -5,7 +5,7 @@ import { createClient } from "@/lib/supabase/server";
 // Get all folders for the user's organization
 export async function GET(request: Request) {
   try {
-    const supabase = createClient();
+    const supabase = await createClient();
     const { data: { user }, error: userError } = await supabase.auth.getUser();
 
     if (userError || !user) {
@@ -52,7 +52,7 @@ export async function GET(request: Request) {
 // Create a new folder
 export async function POST(request: Request) {
   try {
-    const supabase = createClient();
+    const supabase = await createClient();
     const { data: { user }, error: userError } = await supabase.auth.getUser();
 
     if (userError || !user) {

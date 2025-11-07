@@ -6,7 +6,7 @@ import { SSOProvider } from "@/types";
 // Get all SSO providers for the user's organization
 export async function GET(request: Request) {
   try {
-    const supabase = createClient();
+    const supabase = await createClient();
     const {
       data: { user },
       error: userError,
@@ -69,7 +69,7 @@ export async function GET(request: Request) {
 // Create a new SSO provider
 export async function POST(request: Request) {
   try {
-    const supabase = createClient();
+    const supabase = await createClient();
     const {
       data: { user },
       error: userError,

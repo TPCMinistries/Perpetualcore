@@ -72,7 +72,7 @@ export async function processIncomingWhatsAppMessage(
   mediaUrl?: string
 ): Promise<{ success: boolean; reply?: string; error?: string }> {
   try {
-    const supabase = createClient();
+    const supabase = await createClient();
 
     // Clean phone numbers (remove whatsapp: prefix)
     const fromNumber = from.replace("whatsapp:", "");
@@ -181,7 +181,7 @@ async function generateAIResponse(
   userId: string
 ): Promise<string | null> {
   try {
-    const supabase = createClient();
+    const supabase = await createClient();
 
     // Get recent WhatsApp conversation history for context
     const { data: recentMessages } = await supabase
@@ -229,7 +229,7 @@ export async function verifyWhatsAppNumber(
   code: string
 ): Promise<{ success: boolean; error?: string }> {
   try {
-    const supabase = createClient();
+    const supabase = await createClient();
 
     const { data: account, error } = await supabase
       .from("whatsapp_accounts")
@@ -274,7 +274,7 @@ export async function sendVerificationCode(
   organizationId: string
 ): Promise<{ success: boolean; error?: string }> {
   try {
-    const supabase = createClient();
+    const supabase = await createClient();
 
     // Generate 6-digit code
     const code = Math.floor(100000 + Math.random() * 900000).toString();

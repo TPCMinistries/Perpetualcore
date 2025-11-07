@@ -4,7 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 // GET /api/presence?entityType=document&entityId=xxx
 export async function GET(request: Request) {
   try {
-    const supabase = createClient();
+    const supabase = await createClient();
     const { data: { user }, error: userError } = await supabase.auth.getUser();
 
     if (userError || !user) {
@@ -72,7 +72,7 @@ export async function GET(request: Request) {
 // POST /api/presence - Track user presence
 export async function POST(request: Request) {
   try {
-    const supabase = createClient();
+    const supabase = await createClient();
     const { data: { user }, error: userError } = await supabase.auth.getUser();
 
     if (userError || !user) {
@@ -142,7 +142,7 @@ export async function POST(request: Request) {
 // PATCH /api/presence - Update last_active_at timestamp
 export async function PATCH(request: Request) {
   try {
-    const supabase = createClient();
+    const supabase = await createClient();
     const { data: { user }, error: userError } = await supabase.auth.getUser();
 
     if (userError || !user) {
@@ -188,7 +188,7 @@ export async function PATCH(request: Request) {
 // DELETE /api/presence - Remove user presence
 export async function DELETE(request: Request) {
   try {
-    const supabase = createClient();
+    const supabase = await createClient();
     const { data: { user }, error: userError } = await supabase.auth.getUser();
 
     if (userError || !user) {

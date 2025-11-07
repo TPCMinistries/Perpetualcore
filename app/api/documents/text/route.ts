@@ -5,7 +5,7 @@ import { createClient } from "@/lib/supabase/server";
 // Create a new text document
 export async function POST(request: Request) {
   try {
-    const supabase = createClient();
+    const supabase = await createClient();
     const { data: { user }, error: userError } = await supabase.auth.getUser();
 
     if (userError || !user) {

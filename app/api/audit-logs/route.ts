@@ -5,7 +5,7 @@ import { createClient } from "@/lib/supabase/server";
 // Query audit logs with filters
 export async function GET(request: Request) {
   try {
-    const supabase = createClient();
+    const supabase = await createClient();
     const {
       data: { user },
       error: userError,
@@ -108,7 +108,7 @@ export async function GET(request: Request) {
 // Create a new audit log entry
 export async function POST(request: Request) {
   try {
-    const supabase = createClient();
+    const supabase = await createClient();
     const {
       data: { user },
       error: userError,

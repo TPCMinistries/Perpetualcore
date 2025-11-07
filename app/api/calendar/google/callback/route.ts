@@ -28,7 +28,7 @@ export async function GET(req: NextRequest) {
     }
 
     const userId = state;
-    const supabase = createClient();
+    const supabase = await createClient();
 
     // Exchange code for tokens
     const tokens = await exchangeCodeForTokens(code);
