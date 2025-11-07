@@ -1,135 +1,120 @@
-import { createClient } from "@/lib/supabase/server";
 import { NextRequest } from "next/server";
+import { createClient } from "@/lib/supabase/server";
+import OpenAI from "openai";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-export async function POST(req: NextRequest) {
-  console.log("[Chat V2] === REQUEST START ===");
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY,
+});
 
+interface Message {
+  role: "user" | "assistant" | "system";
+  content: string;
+}
+
+export async function POST(req: NextRequest) {
   try {
-    const supabase = await createClient();
-    console.log("[Chat V2] Supabase client created");
+    console.log("[Chat V2] Request received");
 
     // Auth check
+    const supabase = await createClient();
     const { data: { user }, error: authError } = await supabase.auth.getUser();
-    console.log("[Chat V2] User:", user?.id, "Auth error:", authError?.message);
 
-    if (!user) {
-      console.error("[Chat V2] Unauthorized");
-      return new Response("Unauthorized", { status: 401 });
+    if (authError || !user) {
+      console.error("[Chat V2] Auth error:", authError);
+      return new Response(
+        JSON.stringify({ error: "Unauthorized" }),
+        { status: 401, headers: { "Content-Type": "application/json" } }
+      );
     }
 
-    // Get user profile
-    const { data: profile, error: profileError } = await supabase
-      .from("profiles")
-      .select("organization_id")
-      .eq("id", user.id)
-      .single();
-
-    console.log("[Chat V2] Profile:", profile?.organization_id, "Error:", profileError?.message);
-
-    if (!profile) {
-      console.error("[Chat V2] No profile found");
-      return new Response("Profile not found", { status: 404 });
-    }
+    console.log("[Chat V2] User authenticated:", user.id);
 
     const body = await req.json();
-    console.log("[Chat V2] Request body received:", JSON.stringify(body).substring(0, 100));
-
     const { messages, conversationId } = body;
 
-    if (!messages || !Array.isArray(messages) || messages.length === 0) {
-      console.error("[Chat V2] Invalid messages");
-      return new Response("Invalid messages", { status: 400 });
-    }
+    console.log("[Chat V2] Processing", messages?.length, "messages");
 
-    const lastUserMessage = messages[messages.length - 1]?.content || "";
-    console.log("[Chat V2] Last message:", lastUserMessage.substring(0, 50));
+    // Create or get conversation
+    let currentConversationId = conversationId;
 
-    // Create or get conversation ID
-    let convId = conversationId;
+    if (!currentConversationId) {
+      // Get user's organization
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("organization_id")
+        .eq("id", user.id)
+        .single();
 
-    if (!convId) {
-      console.log("[Chat V2] Creating new conversation");
       const { data: newConv, error: convError } = await supabase
         .from("conversations")
         .insert({
           user_id: user.id,
-          organization_id: profile.organization_id,
-          title: lastUserMessage.substring(0, 100) || "New conversation",
-          model: "claude-sonnet-4",
+          organization_id: profile?.organization_id,
+          title: messages[0]?.content?.substring(0, 100) || "New Chat",
+          model: "gpt-4o-mini",
         })
         .select()
         .single();
 
       if (convError) {
         console.error("[Chat V2] Error creating conversation:", convError);
-        return new Response(JSON.stringify({ error: convError.message }), {
-          status: 500,
-          headers: { "Content-Type": "application/json" }
-        });
+        throw convError;
       }
 
-      convId = newConv.id;
-      console.log("[Chat V2] New conversation created:", convId);
+      currentConversationId = newConv.id;
+      console.log("[Chat V2] Created conversation:", currentConversationId);
     }
 
     // Save user message
-    console.log("[Chat V2] Saving user message");
-    const { error: userMsgError } = await supabase.from("messages").insert({
-      conversation_id: convId,
+    const userMessage = messages[messages.length - 1];
+    await supabase.from("messages").insert({
+      conversation_id: currentConversationId,
       role: "user",
-      content: lastUserMessage,
+      content: userMessage.content,
     });
 
-    if (userMsgError) {
-      console.error("[Chat V2] Error saving user message:", userMsgError);
-    }
+    // Stream response from OpenAI
+    const stream = await openai.chat.completions.create({
+      model: "gpt-4o-mini",
+      messages: messages,
+      stream: true,
+      temperature: 0.7,
+    });
 
-    // For now, return a simple mock response to test streaming works
-    console.log("[Chat V2] Starting stream");
-    const stream = new ReadableStream({
-      start(controller) {
+    // Create streaming response
+    const encoder = new TextEncoder();
+    let fullResponse = "";
+
+    const readableStream = new ReadableStream({
+      async start(controller) {
         try {
-          const encoder = new TextEncoder();
-
-          // Send conversation ID
+          // Send conversation ID first
           controller.enqueue(
-            encoder.encode(`data: ${JSON.stringify({ conversationId: convId })}\n\n`)
+            encoder.encode(`data: ${JSON.stringify({ conversationId: currentConversationId })}\n\n`)
           );
 
-          // Send mock response
-          const mockResponse = "Hello! I'm working. This is a test response to verify the streaming works.";
-          const words = mockResponse.split(" ");
-
-          // Stream word by word
-          let index = 0;
-          const interval = setInterval(() => {
-            if (index < words.length) {
-              const word = words[index] + " ";
+          for await (const chunk of stream) {
+            const content = chunk.choices[0]?.delta?.content || "";
+            if (content) {
+              fullResponse += content;
               controller.enqueue(
-                encoder.encode(`data: ${JSON.stringify({ content: word })}\n\n`)
+                encoder.encode(`data: ${JSON.stringify({ content })}\n\n`)
               );
-              index++;
-            } else {
-              clearInterval(interval);
-
-              // Save assistant message
-              supabase.from("messages").insert({
-                conversation_id: convId,
-                role: "assistant",
-                content: mockResponse,
-              }).then(() => {
-                console.log("[Chat V2] Message saved");
-              });
-
-              controller.enqueue(encoder.encode(`data: [DONE]\n\n`));
-              controller.close();
-              console.log("[Chat V2] Stream completed");
             }
-          }, 50);
+          }
 
+          // Save assistant message
+          await supabase.from("messages").insert({
+            conversation_id: currentConversationId,
+            role: "assistant",
+            content: fullResponse,
+          });
+
+          controller.enqueue(encoder.encode("data: [DONE]\n\n"));
+          controller.close();
         } catch (error) {
           console.error("[Chat V2] Stream error:", error);
           controller.error(error);
@@ -137,8 +122,7 @@ export async function POST(req: NextRequest) {
       },
     });
 
-    console.log("[Chat V2] Returning stream response");
-    return new Response(stream, {
+    return new Response(readableStream, {
       headers: {
         "Content-Type": "text/event-stream",
         "Cache-Control": "no-cache",
@@ -147,11 +131,9 @@ export async function POST(req: NextRequest) {
     });
 
   } catch (error: any) {
-    console.error("[Chat V2] === ERROR ===");
-    console.error("[Chat V2] Error message:", error.message);
-    console.error("[Chat V2] Error stack:", error.stack);
+    console.error("[Chat V2] Error:", error);
     return new Response(
-      JSON.stringify({ error: error.message, stack: error.stack }),
+      JSON.stringify({ error: error.message }),
       { status: 500, headers: { "Content-Type": "application/json" } }
     );
   }
