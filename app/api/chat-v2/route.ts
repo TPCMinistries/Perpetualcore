@@ -37,22 +37,14 @@ export async function POST(req: NextRequest) {
 
     console.log("[Chat V2] Processing", messages?.length, "messages");
 
-    // Create or get conversation
+    // Create or get conversation - PERSONAL CHAT ONLY (no org checks)
     let currentConversationId = conversationId;
 
     if (!currentConversationId) {
-      // Get user's organization
-      const { data: profile } = await supabase
-        .from("profiles")
-        .select("organization_id")
-        .eq("id", user.id)
-        .single();
-
       const { data: newConv, error: convError } = await supabase
         .from("conversations")
         .insert({
           user_id: user.id,
-          organization_id: profile?.organization_id,
           title: messages[0]?.content?.substring(0, 100) || "New Chat",
           model: "gpt-4o-mini",
         })
