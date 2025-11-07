@@ -18,7 +18,7 @@ import { AIModel } from "@/types";
 import { AI_MODELS, DEFAULT_MODEL } from "@/lib/ai/config";
 import { ConversationSidebar } from "@/components/conversation-sidebar";
 import { MarkdownMessage } from "@/components/markdown-message";
-import { VoiceConversation } from "@/components/voice-conversation";
+import { VoiceConversation } from "@/components/voice-conversation-fallback";
 
 interface FileAttachment {
   file: File;

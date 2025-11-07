@@ -84,7 +84,7 @@ export function VoiceConversation({ onClose }: VoiceConversationProps) {
 
       // Connect to OpenAI Realtime API
       const ws = new WebSocket(
-        `wss://api.openai.com/v1/realtime?model=gpt-4o-realtime-preview-2024-12-17`,
+        `wss://api.openai.com/v1/realtime?model=gpt-4o-realtime-preview-2024-10-01`,
         ["realtime", `openai-insecure-api-key.${client_secret}`]
       );
 
@@ -103,30 +103,10 @@ export function VoiceConversation({ onClose }: VoiceConversationProps) {
         // Handle different event types
         switch (data.type) {
           case "session.created":
-            console.log("Session created, configuring...");
-            // Now configure the session
-            wsRef.current?.send(
-              JSON.stringify({
-                type: "session.update",
-                session: {
-                  modalities: ["text", "audio"],
-                  instructions: "You are a helpful, friendly AI assistant. Have natural, conversational exchanges with the user. Be concise but informative. Show personality and warmth in your responses.",
-                  voice: apiVoice || selectedVoice,
-                  input_audio_format: "pcm16",
-                  output_audio_format: "pcm16",
-                  input_audio_transcription: {
-                    model: "whisper-1",
-                  },
-                  turn_detection: {
-                    type: "server_vad",
-                    threshold: 0.5,
-                    prefix_padding_ms: 300,
-                    silence_duration_ms: 500,
-                  },
-                  temperature: 0.8,
-                },
-              })
-            );
+            console.log("Session created, now ready!");
+            // Session is ready, just start streaming
+            setState("listening");
+            startAudioStreaming();
             break;
 
           case "session.updated":
