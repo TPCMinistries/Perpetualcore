@@ -40,12 +40,16 @@ export default function SignUpPage() {
   });
 
   async function onSubmit(values: SignUpInput) {
+    console.log("[SignUp] Form submitted with values:", values);
+    console.log("[SignUp] Form errors:", form.formState.errors);
+
     setIsLoading(true);
     setError(null);
     setSuccessMessage(null);
 
     try {
       const result = await signUp(values);
+      console.log("[SignUp] Sign up result:", result);
 
       if (result.error) {
         setError(result.error);
@@ -65,7 +69,7 @@ export default function SignUpPage() {
       router.refresh();
     } catch (err) {
       setError("Something went wrong. Please try again.");
-      console.error(err);
+      console.error("[SignUp] Error:", err);
     } finally {
       setIsLoading(false);
     }
@@ -181,6 +185,20 @@ export default function SignUpPage() {
                     </FormItem>
                   )}
                 />
+              )}
+
+              {/* Debug: Show validation errors */}
+              {Object.keys(form.formState.errors).length > 0 && (
+                <div className="rounded-md bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-700 p-3 text-sm text-yellow-800 dark:text-yellow-200">
+                  <p className="font-semibold mb-1">Please fix the following errors:</p>
+                  <ul className="list-disc list-inside space-y-1">
+                    {Object.entries(form.formState.errors).map(([field, error]) => (
+                      <li key={field}>
+                        <strong>{field}:</strong> {error?.message as string}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
               )}
 
               {error && (
