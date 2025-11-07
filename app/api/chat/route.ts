@@ -167,9 +167,9 @@ export async function POST(req: NextRequest) {
       return new Response("Profile not found", { status: 400 });
     }
 
-    if (!profile || !profile.organization_id) {
-      return new Response("No organization found", { status: 400 });
-    }
+    // Allow personal chat without organization
+    // If no org, we'll use user_id as org_id for RAG search
+    const organizationId = profile?.organization_id || user.id;
 
     const {
       messages,
@@ -358,22 +358,18 @@ Or, you can copy and paste the text content directly into this chat.`;
 
     // Check if we should use RAG
     let relevantDocs: any[] = [];
-    console.log("🔍 RAG TEMPORARILY DISABLED FOR DEBUGGING");
-    const useRAG = false; // TEMPORARILY DISABLED
-
-    // ORIGINAL CODE COMMENTED OUT FOR DEBUGGING
-    // console.log("🔍 Checking RAG for query:", userMessage);
-    // const useRAG = shouldUseRAG(userMessage);
-    // console.log("🔍 shouldUseRAG returned:", useRAG);
+    console.log("🔍 Checking RAG for query:", userMessage);
+    const useRAG = shouldUseRAG(userMessage);
+    console.log("🔍 shouldUseRAG returned:", useRAG);
 
     if (useRAG) {
       try {
-        console.log("🔍 Searching documents for org:", profile.organization_id, "user:", user.id);
+        console.log("🔍 Searching documents for org:", organizationId, "user:", user.id);
         // Search for relevant documents with enhanced context-aware RAG
         // Lower threshold (0.3) to be more inclusive - let the AI decide what's relevant
         relevantDocs = await searchDocuments(
           userMessage,
-          profile.organization_id,
+          organizationId, // Use organizationId variable (user.id if no org)
           user.id, // Pass user ID for permission checking
           10, // Get more chunks for better context
           0.3, // Lower threshold = more permissive, like NotebookLM
@@ -423,7 +419,7 @@ Or, you can copy and paste the text content directly into this chat.`;
         .from("conversations")
         .insert({
           user_id: user.id,
-          organization_id: profile.organization_id,
+          organization_id: organizationId,
           title: messages[0]?.content.substring(0, 100) || "New conversation",
           model,
         })
@@ -449,7 +445,7 @@ Or, you can copy and paste the text content directly into this chat.`;
           lastUserMessage.content,
           savedMessage.id,
           user.id,
-          profile.organization_id
+          organizationId
         ).catch((err) => console.error("Task extraction error:", err));
       });
     }
@@ -556,7 +552,7 @@ Or, you can copy and paste the text content directly into this chat.`;
                 const params = JSON.parse(toolCall.arguments);
                 const result = await executeToolCall(toolCall.name, params, {
                   userId: user.id,
-                  organizationId: profile.organization_id,
+                  organizationId: organizationId,
                   conversationId: convId,
                 });
 
