@@ -6,6 +6,9 @@ import { useAuth } from '../../lib/hooks/useAuth';
 import { createClient } from '../../lib/supabase/client';
 import OrganizationManagement from '../components/OrganizationManagement';
 import UserManagement from '../components/UserManagement';
+import Link from 'next/link';
+import { ArrowLeft, Shield, Mail } from 'lucide-react';
+import { sendBetaCodeEmail } from '@/lib/email/send-beta-code';
 
 const supabase = createClient();
 
@@ -29,33 +32,41 @@ export default function AdminPage() {
   // Check if user is super admin
   useEffect(() => {
     async function checkAdminStatus() {
+      console.log('[Admin] Auth check:', { isAuthenticated, user: user?.email, authLoading });
+
       if (!isAuthenticated || !user) {
+        console.log('[Admin] Not authenticated, redirecting to home');
         router.push('/');
         return;
       }
 
       try {
+        console.log('[Admin] Checking user_profiles for user:', user.id);
         const { data, error } = await supabase
           .from('user_profiles')
           .select('is_super_admin, is_admin')
           .eq('id', user.id)
           .single();
 
+        console.log('[Admin] user_profiles query result:', { data, error });
+
         if (error) {
-          console.error('Error checking admin status:', error);
+          console.error('[Admin] Error checking admin status:', error);
           router.push('/');
           return;
         }
 
         if (!data?.is_super_admin) {
+          console.log('[Admin] User is not super admin:', data);
           alert('Access denied. Super admin privileges required.');
           router.push('/');
           return;
         }
 
+        console.log('[Admin] User is super admin, showing panel');
         setIsSuperAdmin(true);
       } catch (error) {
-        console.error('Error:', error);
+        console.error('[Admin] Error:', error);
         router.push('/');
       } finally {
         setLoading(false);
@@ -69,10 +80,10 @@ export default function AdminPage() {
 
   if (authLoading || loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white flex items-center justify-center">
+      <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex items-center justify-center">
         <div className="text-center">
-          <div className="w-12 h-12 border-4 border-cyan-400 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <div className="text-slate-300">Verifying admin access...</div>
+          <div className="w-12 h-12 border-4 border-cyan-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <div className="text-slate-600 dark:text-slate-400">Verifying admin access...</div>
         </div>
       </div>
     );
@@ -83,70 +94,81 @@ export default function AdminPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white">
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-950">
       {/* Header */}
-      <div className="border-b border-slate-700/50 bg-slate-900/95 backdrop-blur-xl">
-        <div className="max-w-7xl mx-auto px-6 py-4">
+      <div className="sticky top-0 z-10 border-b border-slate-200 dark:border-slate-800 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-2xl font-bold bg-gradient-to-r from-cyan-400 to-purple-400 bg-clip-text text-transparent">
-                🛡️ Super Admin Panel
-              </h1>
-              <p className="text-slate-400 text-sm">Full system control & management</p>
+            <div className="flex items-center gap-4">
+              <Link
+                href="/dashboard"
+                className="flex items-center gap-2 px-3 py-2 text-sm text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors"
+              >
+                <ArrowLeft className="h-4 w-4" />
+                <span>Back to Dashboard</span>
+              </Link>
+              <div className="h-8 w-px bg-slate-200 dark:bg-slate-800" />
+              <div className="flex items-center gap-3">
+                <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-br from-cyan-500 to-purple-500">
+                  <Shield className="h-5 w-5 text-white" />
+                </div>
+                <div>
+                  <h1 className="text-lg font-bold text-slate-900 dark:text-slate-100">
+                    Super Admin Panel
+                  </h1>
+                  <p className="text-xs text-slate-500 dark:text-slate-400">
+                    System control & management
+                  </p>
+                </div>
+              </div>
             </div>
             <div className="flex items-center gap-3">
-              <span className="text-sm text-slate-400">{user?.email}</span>
-              <button
-                onClick={() => router.push('/')}
-                className="px-4 py-2 bg-slate-700 hover:bg-slate-600 text-white rounded-xl transition-all duration-200"
-              >
-                ← Back to Site
-              </button>
+              <span className="text-sm text-slate-600 dark:text-slate-400">{user?.email}</span>
             </div>
           </div>
         </div>
       </div>
 
       {/* Tab Navigation */}
-      <div className="border-b border-slate-700/50 bg-slate-800/50">
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="flex gap-6">
+      <div className="border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex gap-1">
             <button
               onClick={() => setActiveTab('organizations')}
-              className={`px-4 py-3 font-medium transition-all duration-200 border-b-2 ${
+              className={`px-4 py-3 text-sm font-medium transition-all duration-200 border-b-2 ${
                 activeTab === 'organizations'
-                  ? 'border-cyan-400 text-cyan-400'
-                  : 'border-transparent text-slate-400 hover:text-white'
+                  ? 'border-cyan-500 text-cyan-600 dark:text-cyan-400'
+                  : 'border-transparent text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100'
               }`}
             >
               🏢 Organizations
             </button>
             <button
               onClick={() => setActiveTab('users')}
-              className={`px-4 py-3 font-medium transition-all duration-200 border-b-2 ${
+              className={`px-4 py-3 text-sm font-medium transition-all duration-200 border-b-2 ${
                 activeTab === 'users'
-                  ? 'border-cyan-400 text-cyan-400'
-                  : 'border-transparent text-slate-400 hover:text-white'
+                  ? 'border-cyan-500 text-cyan-600 dark:text-cyan-400'
+                  : 'border-transparent text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100'
               }`}
             >
               👥 Users
             </button>
             <button
               onClick={() => setActiveTab('invitations')}
-              className={`px-4 py-3 font-medium transition-all duration-200 border-b-2 ${
+              className={`px-4 py-3 text-sm font-medium transition-all duration-200 border-b-2 ${
                 activeTab === 'invitations'
-                  ? 'border-cyan-400 text-cyan-400'
-                  : 'border-transparent text-slate-400 hover:text-white'
+                  ? 'border-cyan-500 text-cyan-600 dark:text-cyan-400'
+                  : 'border-transparent text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100'
               }`}
             >
-              📧 Beta Invitations
+              🎟️ Beta Codes
             </button>
           </div>
         </div>
       </div>
 
       {/* Content */}
-      <div className="max-w-7xl mx-auto px-6 py-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {activeTab === 'organizations' && <OrganizationManagement />}
         {activeTab === 'users' && <UserManagement />}
         {activeTab === 'invitations' && <BetaInvitations />}
@@ -160,7 +182,11 @@ function BetaInvitations() {
   const [invitations, setInvitations] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [showCreateModal, setShowCreateModal] = useState(false);
-  const [newInvite, setNewInvite] = useState({ email: '', orgId: '' });
+  const [newInvite, setNewInvite] = useState({
+    email: '',
+    maxUses: 1,
+    betaTier: 'standard' as 'standard' | 'premium' | 'unlimited'
+  });
 
   useEffect(() => {
     loadInvitations();
@@ -169,12 +195,8 @@ function BetaInvitations() {
   async function loadInvitations() {
     try {
       const { data, error } = await supabase
-        .from('beta_invitations')
-        .select(`
-          *,
-          organization:organizations(name),
-          invited_by_user:auth.users!invited_by(email)
-        `)
+        .from('beta_invite_codes')
+        .select('*')
         .order('created_at', { ascending: false });
 
       if (error) throw error;
@@ -193,81 +215,133 @@ function BetaInvitations() {
     }
 
     try {
-      const invitationCode = Math.random().toString(36).substring(2, 15);
+      // Generate a random 8-character code (uppercase)
+      const invitationCode = Math.random().toString(36).substring(2, 10).toUpperCase();
 
       const { error } = await supabase
-        .from('beta_invitations')
+        .from('beta_invite_codes')
         .insert({
-          email: newInvite.email,
-          invitation_code: invitationCode,
-          organization_id: newInvite.orgId || null,
-          invited_by: (await supabase.auth.getUser()).data.user?.id,
-          expires_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
+          code: invitationCode,
+          max_uses: newInvite.maxUses,
+          uses_count: 0,
+          beta_tier: newInvite.betaTier,
+          expires_at: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(), // 30 days
+          created_by: (await supabase.auth.getUser()).data.user?.id,
+          notes: `Created for ${newInvite.email}`,
         });
 
       if (error) throw error;
 
-      alert(`Invitation created! Code: ${invitationCode}`);
+      alert(`Beta code created! Code: ${invitationCode}\n\nSend this code to ${newInvite.email} to sign up.`);
       setShowCreateModal(false);
-      setNewInvite({ email: '', orgId: '' });
+      setNewInvite({ email: '', maxUses: 1, betaTier: 'standard' });
       loadInvitations();
     } catch (error: any) {
-      alert(`Error creating invitation: ${error.message}`);
+      alert(`Error creating beta code: ${error.message}`);
+    }
+  }
+
+  async function sendEmail(code: string, email: string, betaTier: string) {
+    if (!email || email === '-') {
+      alert('No email address found for this code. Please add an email in the notes field.');
+      return;
+    }
+
+    if (!confirm(`Send beta code instructions to ${email}?`)) {
+      return;
+    }
+
+    try {
+      const result = await sendBetaCodeEmail({
+        email,
+        betaCode: code,
+        betaTier,
+      });
+
+      if (result.error) {
+        alert(`Error sending email: ${result.error}`);
+      } else {
+        alert(`✅ Email sent successfully to ${email}!`);
+      }
+    } catch (error: any) {
+      alert(`Error sending email: ${error.message}`);
     }
   }
 
   if (loading) {
-    return <div className="text-center py-12 text-slate-400">Loading invitations...</div>;
+    return <div className="text-center py-12 text-slate-600 dark:text-slate-400">Loading beta codes...</div>;
   }
 
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h2 className="text-xl font-bold text-white">Beta Invitations</h2>
-          <p className="text-sm text-slate-400">Manage beta testing access</p>
+          <h2 className="text-2xl font-bold text-slate-900 dark:text-slate-100">Beta Codes</h2>
+          <p className="text-sm text-slate-600 dark:text-slate-400">Manage beta testing access codes</p>
         </div>
         <button
           onClick={() => setShowCreateModal(true)}
-          className="px-4 py-2 bg-gradient-to-r from-cyan-500 to-purple-500 hover:from-cyan-600 hover:to-purple-600 text-white rounded-xl transition-all duration-200"
+          className="px-4 py-2 bg-gradient-to-r from-cyan-500 to-purple-500 hover:from-cyan-600 hover:to-purple-600 text-white rounded-lg transition-all duration-200 shadow-sm"
         >
-          + Create Invitation
+          + Create Code
         </button>
       </div>
 
-      <div className="bg-slate-800/50 rounded-2xl border border-slate-700/50 overflow-hidden">
+      <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 overflow-hidden shadow-sm">
         <table className="w-full">
-          <thead className="bg-slate-700/30">
+          <thead className="bg-slate-50 dark:bg-slate-800/50">
             <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-slate-300 uppercase">Email</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-slate-300 uppercase">Code</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-slate-300 uppercase">Organization</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-slate-300 uppercase">Status</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-slate-300 uppercase">Expires</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-slate-700 dark:text-slate-300 uppercase tracking-wider">Code</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-slate-700 dark:text-slate-300 uppercase tracking-wider">For</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-slate-700 dark:text-slate-300 uppercase tracking-wider">Tier</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-slate-700 dark:text-slate-300 uppercase tracking-wider">Uses</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-slate-700 dark:text-slate-300 uppercase tracking-wider">Expires</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-slate-700 dark:text-slate-300 uppercase tracking-wider">Created</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-slate-700 dark:text-slate-300 uppercase tracking-wider">Actions</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-slate-700/30">
-            {invitations.map((inv) => (
-              <tr key={inv.id} className="hover:bg-slate-700/20">
-                <td className="px-6 py-4 text-sm text-white">{inv.email}</td>
-                <td className="px-6 py-4 text-sm font-mono text-cyan-400">{inv.invitation_code}</td>
-                <td className="px-6 py-4 text-sm text-slate-400">
-                  {inv.organization?.name || 'General Access'}
-                </td>
-                <td className="px-6 py-4 text-sm">
-                  <span className={`px-2 py-1 rounded-full text-xs ${
-                    inv.status === 'pending' ? 'bg-yellow-500/20 text-yellow-400' :
-                    inv.status === 'accepted' ? 'bg-green-500/20 text-green-400' :
-                    'bg-slate-500/20 text-slate-400'
-                  }`}>
-                    {inv.status}
-                  </span>
-                </td>
-                <td className="px-6 py-4 text-sm text-slate-400">
-                  {inv.expires_at ? new Date(inv.expires_at).toLocaleDateString() : 'No expiration'}
-                </td>
-              </tr>
-            ))}
+          <tbody className="divide-y divide-slate-200 dark:divide-slate-800">
+            {invitations.map((inv) => {
+              // Extract email from notes (format: "Created for email@example.com")
+              const emailMatch = inv.notes?.match(/Created for (.+)/);
+              const forEmail = emailMatch ? emailMatch[1] : inv.notes || '-';
+
+              return (
+                <tr key={inv.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
+                  <td className="px-6 py-4 text-sm font-mono text-cyan-600 dark:text-cyan-400 font-bold">{inv.code}</td>
+                  <td className="px-6 py-4 text-sm text-slate-900 dark:text-slate-300">{forEmail}</td>
+                  <td className="px-6 py-4 text-sm">
+                    <span className={`px-2 py-1 rounded-full text-xs capitalize font-medium ${
+                      inv.beta_tier === 'unlimited' ? 'bg-purple-100 dark:bg-purple-500/20 text-purple-700 dark:text-purple-400' :
+                      inv.beta_tier === 'premium' ? 'bg-cyan-100 dark:bg-cyan-500/20 text-cyan-700 dark:text-cyan-400' :
+                      'bg-slate-100 dark:bg-slate-500/20 text-slate-700 dark:text-slate-400'
+                    }`}>
+                      {inv.beta_tier}
+                    </span>
+                  </td>
+                  <td className="px-6 py-4 text-sm text-slate-900 dark:text-slate-300">
+                    {inv.uses_count} / {inv.max_uses}
+                  </td>
+                  <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-400">
+                    {inv.expires_at ? new Date(inv.expires_at).toLocaleDateString() : 'Never'}
+                  </td>
+                  <td className="px-6 py-4 text-sm text-slate-500 dark:text-slate-500">
+                    {new Date(inv.created_at).toLocaleDateString()}
+                  </td>
+                  <td className="px-6 py-4 text-sm">
+                    <button
+                      onClick={() => sendEmail(inv.code, forEmail, inv.beta_tier)}
+                      disabled={!forEmail || forEmail === '-'}
+                      className="inline-flex items-center gap-2 px-3 py-1.5 bg-cyan-500 hover:bg-cyan-600 disabled:bg-slate-300 disabled:cursor-not-allowed text-white rounded-lg text-xs font-medium transition-colors"
+                      title={forEmail && forEmail !== '-' ? `Send instructions to ${forEmail}` : 'No email address'}
+                    >
+                      <Mail className="w-3.5 h-3.5" />
+                      Send Email
+                    </button>
+                  </td>
+                </tr>
+              );
+            })}
           </tbody>
         </table>
       </div>
@@ -275,31 +349,58 @@ function BetaInvitations() {
       {/* Create Modal */}
       {showCreateModal && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-slate-800 border border-slate-700 rounded-2xl max-w-md w-full p-6">
-            <h3 className="text-xl font-bold text-white mb-4">Create Beta Invitation</h3>
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl max-w-md w-full p-6 shadow-xl">
+            <h3 className="text-xl font-bold text-slate-900 dark:text-slate-100 mb-4">Create Beta Code</h3>
             <div className="space-y-4">
               <div>
-                <label className="block text-sm text-slate-400 mb-2">Email Address</label>
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Email (for reference)</label>
                 <input
                   type="email"
                   value={newInvite.email}
                   onChange={(e) => setNewInvite({ ...newInvite, email: e.target.value })}
-                  className="w-full px-4 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white"
+                  className="w-full px-4 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-cyan-500 focus:border-transparent"
                   placeholder="user@example.com"
                 />
+                <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">Who will use this code?</p>
               </div>
-              <div className="flex gap-3">
+
+              <div>
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Beta Tier</label>
+                <select
+                  value={newInvite.betaTier}
+                  onChange={(e) => setNewInvite({ ...newInvite, betaTier: e.target.value as any })}
+                  className="w-full px-4 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-cyan-500 focus:border-transparent"
+                >
+                  <option value="standard">Standard</option>
+                  <option value="premium">Premium</option>
+                  <option value="unlimited">Unlimited</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Max Uses</label>
+                <input
+                  type="number"
+                  min="1"
+                  value={newInvite.maxUses}
+                  onChange={(e) => setNewInvite({ ...newInvite, maxUses: parseInt(e.target.value) || 1 })}
+                  className="w-full px-4 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-cyan-500 focus:border-transparent"
+                />
+                <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">How many people can use this code?</p>
+              </div>
+
+              <div className="flex gap-3 mt-6">
                 <button
                   onClick={() => setShowCreateModal(false)}
-                  className="flex-1 px-4 py-2 border border-slate-600 text-slate-300 rounded-xl hover:bg-slate-700"
+                  className="flex-1 px-4 py-2 border border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
                 >
                   Cancel
                 </button>
                 <button
                   onClick={createInvitation}
-                  className="flex-1 px-4 py-2 bg-gradient-to-r from-cyan-500 to-purple-500 text-white rounded-xl"
+                  className="flex-1 px-4 py-2 bg-gradient-to-r from-cyan-500 to-purple-500 text-white rounded-lg font-medium hover:from-cyan-600 hover:to-purple-600 transition-all shadow-sm"
                 >
-                  Create
+                  Create Code
                 </button>
               </div>
             </div>
