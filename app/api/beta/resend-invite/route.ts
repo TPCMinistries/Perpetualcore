@@ -1,3 +1,4 @@
+import { requireAdmin } from "@/lib/auth/admin";
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { sendBetaInviteEmail } from "@/lib/email";
@@ -20,15 +21,7 @@ export async function POST(request: NextRequest) {
     const supabase = await createClient();
 
     // Get current user
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-
-    if (!user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
-    // TODO: Add admin check here
+    await requireAdmin();
 
     // Send the email
     const result = await sendBetaInviteEmail(email, code, betaTier);

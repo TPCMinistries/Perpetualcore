@@ -1,3 +1,4 @@
+import { requireAdmin } from "@/lib/auth/admin";
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { sendBetaFollowUpEmail } from "@/lib/email";
@@ -12,15 +13,7 @@ export async function POST(request: NextRequest) {
     const supabase = await createClient();
 
     // Get current user
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-
-    if (!user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
-    // TODO: Add admin check here
+    await requireAdmin();
 
     // Get beta testers who haven't been active in the last 3 days
     const threeDaysAgo = new Date();
