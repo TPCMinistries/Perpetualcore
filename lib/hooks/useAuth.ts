@@ -7,7 +7,7 @@ export function useAuth() {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
-  const supabase = await createClient();
+  const supabase = createClient();
 
   useEffect(() => {
     // Get initial session
