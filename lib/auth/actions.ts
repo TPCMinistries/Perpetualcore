@@ -52,6 +52,9 @@ export async function signUp(data: SignUpInput) {
     options: {
       data: {
         full_name: data.fullName,
+        beta_code: data.betaCode,
+        organization_name: data.organizationName,
+        beta_tier: betaTier,
       },
       emailRedirectTo: `${process.env.NEXT_PUBLIC_APP_URL}/auth/callback`,
     },
@@ -65,7 +68,8 @@ export async function signUp(data: SignUpInput) {
     return { error: "Failed to create user" };
   }
 
-  // Check if email confirmation is required
+  // If email confirmation is required, the profile/org will be created via database trigger
+  // when the user confirms their email. We store the data in user metadata above.
   if (authData.session === null) {
     return {
       success: true,
