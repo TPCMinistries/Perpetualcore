@@ -6,7 +6,7 @@ import { verifyTOTP, decryptSecret, verifyBackupCode } from "@/lib/2fa/totp";
 // Verify a 2FA code (for login or sensitive operations)
 export async function POST(request: Request) {
   try {
-    const supabase = await createClient();
+    const supabase = createClient();
     const { data: { user }, error: userError } = await supabase.auth.getUser();
 
     if (userError || !user) {

@@ -32,7 +32,7 @@ export async function importFromJSON(
   };
   errors: string[];
 }> {
-  const supabase = await createClient();
+  const supabase = createClient();
   const errors: string[] = [];
   const imported = {
     conversations: 0,
@@ -252,7 +252,7 @@ export async function importFromNotionZip(
 
   try {
     const zip = await JSZip.loadAsync(zipFile);
-    const supabase = await createClient();
+    const supabase = createClient();
 
     // Check for JSON backup first
     const backupFile = zip.file("backup.json");
@@ -432,7 +432,7 @@ export async function importFromEvernote(
 
   try {
     const notes = parseEvernoteENEX(enexContent);
-    const supabase = await createClient();
+    const supabase = createClient();
 
     for (const note of notes) {
       try {

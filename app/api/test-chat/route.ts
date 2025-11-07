@@ -4,7 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 // Simple test endpoint to diagnose chat issues
 export async function POST(req: NextRequest) {
   try {
-    const supabase = await createClient();
+    const supabase = createClient();
 
     // Test 1: Auth
     const { data: { user }, error: authError } = await supabase.auth.getUser();

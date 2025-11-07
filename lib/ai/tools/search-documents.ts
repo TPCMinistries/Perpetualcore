@@ -37,7 +37,7 @@ export async function executeSearchDocuments(
   context: ToolExecutionContext
 ): Promise<string> {
   try {
-    const supabase = await createClient();
+    const supabase = createClient();
 
     if (!process.env.OPENAI_API_KEY) {
       return "Error: OpenAI API key not configured.";

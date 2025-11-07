@@ -9,7 +9,7 @@ export async function getOrCreateCustomer(
   email: string,
   organizationId: string
 ): Promise<string> {
-  const supabase = await createClient();
+  const supabase = createClient();
 
   // Check if customer already exists
   const { data: subscription } = await supabase
@@ -115,7 +115,7 @@ export async function createPortalSession(
   organizationId: string,
   returnUrl: string
 ): Promise<{ url: string }> {
-  const supabase = await createClient();
+  const supabase = createClient();
 
   const { data: subscription } = await supabase
     .from("subscriptions")
@@ -139,7 +139,7 @@ export async function createPortalSession(
  * Get subscription details
  */
 export async function getSubscription(organizationId: string) {
-  const supabase = await createClient();
+  const supabase = createClient();
 
   const { data: subscription, error } = await supabase
     .from("subscriptions")
@@ -159,7 +159,7 @@ export async function getSubscription(organizationId: string) {
  * Get current usage for organization
  */
 export async function getCurrentUsage(organizationId: string) {
-  const supabase = await createClient();
+  const supabase = createClient();
 
   const currentMonth = new Date().toISOString().slice(0, 7); // YYYY-MM
 
@@ -189,7 +189,7 @@ export async function checkUsageLimit(
   organizationId: string,
   limitType: "ai_messages" | "documents" | "storage"
 ): Promise<boolean> {
-  const supabase = await createClient();
+  const supabase = createClient();
 
   const { data, error } = await supabase.rpc("check_usage_limit", {
     org_id: organizationId,
@@ -213,7 +213,7 @@ export async function incrementUsage(
   usageType: "ai_messages" | "documents" | "emails" | "whatsapp" | "calendar",
   incrementBy: number = 1
 ): Promise<void> {
-  const supabase = await createClient();
+  const supabase = createClient();
 
   await supabase.rpc("increment_usage", {
     org_id: organizationId,
@@ -230,7 +230,7 @@ export async function cancelSubscription(
   organizationId: string,
   cancelAtPeriodEnd: boolean = true
 ): Promise<void> {
-  const supabase = await createClient();
+  const supabase = createClient();
 
   const { data: subscription } = await supabase
     .from("subscriptions")
@@ -262,7 +262,7 @@ export async function cancelSubscription(
 export async function reactivateSubscription(
   organizationId: string
 ): Promise<void> {
-  const supabase = await createClient();
+  const supabase = createClient();
 
   const { data: subscription } = await supabase
     .from("subscriptions")
@@ -292,7 +292,7 @@ export async function reactivateSubscription(
  * Get plan limits for organization
  */
 export async function getPlanLimits(organizationId: string) {
-  const supabase = await createClient();
+  const supabase = createClient();
 
   const { data: subscription } = await supabase
     .from("subscriptions")

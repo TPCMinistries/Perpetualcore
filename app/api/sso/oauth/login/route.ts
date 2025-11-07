@@ -17,7 +17,7 @@ export async function GET(request: Request) {
       );
     }
 
-    const supabase = await createClient();
+    const supabase = createClient();
 
     // Get provider configuration
     const { data: provider, error } = await supabase

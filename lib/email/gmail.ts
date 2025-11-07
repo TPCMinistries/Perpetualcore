@@ -44,7 +44,7 @@ export async function exchangeGmailCode(
     const gmail = google.gmail({ version: "v1", auth: oauth2Client });
     const profile = await gmail.users.getProfile({ userId: "me" });
 
-    const supabase = await createClient();
+    const supabase = createClient();
 
     // Save to database
     const { error } = await supabase.from("email_accounts").upsert({
@@ -94,7 +94,7 @@ async function refreshTokenIfNeeded(account: any): Promise<string | null> {
     const { credentials } = await oauth2Client.refreshAccessToken();
 
     // Update database
-    const supabase = await createClient();
+    const supabase = createClient();
     await supabase
       .from("email_accounts")
       .update({
@@ -219,7 +219,7 @@ export async function syncGmailMessages(
   maxResults: number = 50
 ): Promise<{ success: boolean; emailsCount: number; error?: string }> {
   try {
-    const supabase = await createClient();
+    const supabase = createClient();
 
     // Get account
     const { data: account } = await supabase
@@ -436,7 +436,7 @@ export async function sendGmailMessage(
   }
 ): Promise<{ success: boolean; messageId?: string; error?: string }> {
   try {
-    const supabase = await createClient();
+    const supabase = createClient();
 
     const { data: account } = await supabase
       .from("email_accounts")

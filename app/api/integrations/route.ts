@@ -7,7 +7,7 @@ import { IntegrationProvider } from "@/types";
 // Get all integrations for the user's organization
 export async function GET(request: Request) {
   try {
-    const supabase = await createClient();
+    const supabase = createClient();
     const { data: { user }, error: userError } = await supabase.auth.getUser();
 
     if (userError || !user) {
@@ -73,7 +73,7 @@ export async function GET(request: Request) {
 // Initiate OAuth flow for an integration
 export async function POST(request: Request) {
   try {
-    const supabase = await createClient();
+    const supabase = createClient();
     const { data: { user }, error: userError } = await supabase.auth.getUser();
 
     if (userError || !user) {

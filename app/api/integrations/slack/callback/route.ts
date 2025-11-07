@@ -45,7 +45,7 @@ export async function GET(request: NextRequest) {
     const tokenData = await exchangeCodeForTokens("slack", code);
 
     // Create Supabase client
-    const supabase = await createClient();
+    const supabase = createClient();
 
     // Get user profile for organization
     const { data: profile } = await supabase

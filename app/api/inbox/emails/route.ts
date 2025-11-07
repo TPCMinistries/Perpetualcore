@@ -4,7 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 // GET /api/inbox/emails
 export async function GET(request: Request) {
   try {
-    const supabase = await createClient();
+    const supabase = createClient();
     const { data: { user }, error: userError } = await supabase.auth.getUser();
 
     if (userError || !user) {

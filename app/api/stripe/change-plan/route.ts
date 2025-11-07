@@ -15,7 +15,7 @@ const PRICE_IDS = {
 
 export async function POST(request: Request) {
   try {
-    const supabase = await createClient();
+    const supabase = createClient();
     const {
       data: { user },
       error: userError,

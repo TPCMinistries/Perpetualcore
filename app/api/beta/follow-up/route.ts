@@ -9,7 +9,7 @@ import { sendBetaFollowUpEmail } from "@/lib/email";
  */
 export async function POST(request: NextRequest) {
   try {
-    const supabase = await createClient();
+    const supabase = createClient();
 
     // Get current user
     const {

@@ -13,7 +13,7 @@ export async function DELETE(
   { params }: { params: { id: string; userId: string } }
 ) {
   try {
-    const supabase = await createClient();
+    const supabase = createClient();
 
     const {
       data: { user },

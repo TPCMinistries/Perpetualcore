@@ -3,7 +3,7 @@ import { createClient as createSupabaseClient } from '@supabase/supabase-js';
 import { cookies } from 'next/headers';
 import { Database } from '@/types';
 
-export async function createClient() {
+export function createClient() {
   const cookieStore = cookies();
 
   return createServerClient<Database>(
@@ -54,4 +54,3 @@ export function createAdminClient() {
     }
   );
 }
-// Force rebuild

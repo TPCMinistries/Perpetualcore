@@ -17,7 +17,7 @@ export async function POST(request: NextRequest) {
     const { count = 1, maxUses = 1, betaTier = "standard", expiresInDays, email } =
       await request.json();
 
-    const supabase = await createClient();
+    const supabase = createClient();
 
     // Get current user
     const {
@@ -95,7 +95,7 @@ export async function POST(request: NextRequest) {
 // GET all codes (for admin dashboard)
 export async function GET(request: NextRequest) {
   try {
-    const supabase = await createClient();
+    const supabase = createClient();
 
     // Get current user
     const {

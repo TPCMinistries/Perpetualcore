@@ -8,7 +8,7 @@ export async function getOverviewMetrics(
   organizationId: string,
   period: "7d" | "30d" | "90d" = "30d"
 ) {
-  const supabase = await createClient();
+  const supabase = createClient();
 
   const periodStart = new Date();
   periodStart.setDate(
@@ -101,7 +101,7 @@ export async function getDailyActivity(
   organizationId: string,
   days: number = 30
 ) {
-  const supabase = await createClient();
+  const supabase = createClient();
 
   const startDate = new Date();
   startDate.setDate(startDate.getDate() - days);
@@ -177,7 +177,7 @@ export async function getDailyActivity(
  * Get AI usage statistics
  */
 export async function getAIUsageStats(userId: string, organizationId: string) {
-  const supabase = await createClient();
+  const supabase = createClient();
 
   const thirtyDaysAgo = new Date();
   thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
@@ -234,7 +234,7 @@ export async function getProductivityInsights(
   userId: string,
   organizationId: string
 ) {
-  const supabase = await createClient();
+  const supabase = createClient();
 
   const thirtyDaysAgo = new Date();
   thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
@@ -334,7 +334,7 @@ export async function getIntegrationHealth(
   userId: string,
   organizationId: string
 ) {
-  const supabase = await createClient();
+  const supabase = createClient();
 
   // Check email integration
   const { count: emailAccountsCount } = await supabase
@@ -377,7 +377,7 @@ export async function getIntegrationHealth(
  * Get top documents by access
  */
 export async function getTopDocuments(organizationId: string, limit: number = 10) {
-  const supabase = await createClient();
+  const supabase = createClient();
 
   const { data: documents } = await supabase
     .from("documents")
@@ -393,7 +393,7 @@ export async function getTopDocuments(organizationId: string, limit: number = 10
  * Get recent searches
  */
 export async function getRecentSearches(userId: string, limit: number = 10) {
-  const supabase = await createClient();
+  const supabase = createClient();
 
   // This assumes you have a searches table - if not, this will return empty
   const { data: searches } = await supabase

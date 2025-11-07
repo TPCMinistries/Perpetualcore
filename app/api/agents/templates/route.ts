@@ -67,7 +67,7 @@ const MOCK_TEMPLATES = [
 
 export async function GET() {
   try {
-    const supabase = await createClient();
+    const supabase = createClient();
 
     const { data: templates, error } = await supabase
       .from("agent_templates")

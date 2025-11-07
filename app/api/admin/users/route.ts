@@ -5,7 +5,7 @@ import { createClient } from "@/lib/supabase/server";
 // GET /api/admin/users - Get all users with their roles (admin only)
 export async function GET(req: NextRequest) {
   try {
-    const supabase = await createClient();
+    const supabase = createClient();
     const { data: { user } } = await supabase.auth.getUser();
 
     if (!user) {
@@ -56,7 +56,7 @@ export async function GET(req: NextRequest) {
 // PATCH /api/admin/users - Update user role (admin only)
 export async function PATCH(req: NextRequest) {
   try {
-    const supabase = await createClient();
+    const supabase = createClient();
     const { data: { user } } = await supabase.auth.getUser();
 
     if (!user) {

@@ -215,7 +215,7 @@ export async function processDocument(
 export async function processAndStoreDocument(
   documentId: string
 ): Promise<void> {
-  const supabase = await createClient();
+  const supabase = createClient();
 
   try {
     // Get document from database

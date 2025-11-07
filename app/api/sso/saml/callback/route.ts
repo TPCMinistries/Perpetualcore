@@ -17,7 +17,7 @@ export async function POST(request: Request) {
       );
     }
 
-    const supabase = await createClient();
+    const supabase = createClient();
 
     // Get provider from relay state (provider ID)
     const providerId = relayState;

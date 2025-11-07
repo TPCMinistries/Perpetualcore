@@ -15,7 +15,7 @@ function slugify(text: string): string {
 }
 
 export async function signUp(data: SignUpInput) {
-  const supabase = await createClient();
+  const supabase = createClient();
 
   // Validate beta code if provided
   let betaTier: string | null = null;
@@ -166,7 +166,7 @@ export async function signUp(data: SignUpInput) {
 }
 
 export async function signIn(data: SignInInput) {
-  const supabase = await createClient();
+  const supabase = createClient();
 
   const { error } = await supabase.auth.signInWithPassword({
     email: data.email,
@@ -181,13 +181,13 @@ export async function signIn(data: SignInInput) {
 }
 
 export async function signOut() {
-  const supabase = await createClient();
+  const supabase = createClient();
   await supabase.auth.signOut();
   redirect("/");
 }
 
 export async function getUser() {
-  const supabase = await createClient();
+  const supabase = createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
@@ -195,7 +195,7 @@ export async function getUser() {
 }
 
 export async function getUserProfile() {
-  const supabase = await createClient();
+  const supabase = createClient();
   const user = await getUser();
 
   if (!user) return null;
@@ -227,7 +227,7 @@ export async function getUserProfile() {
 }
 
 export async function resetOnboarding() {
-  const supabase = await createClient();
+  const supabase = createClient();
   const user = await getUser();
 
   if (!user) return { error: "Not authenticated" };

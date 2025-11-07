@@ -5,7 +5,7 @@ import { createClient } from "@/lib/supabase/server";
 // Get all roles for the organization
 export async function GET(request: Request) {
   try {
-    const supabase = await createClient();
+    const supabase = createClient();
     const {
       data: { user },
       error: userError,
@@ -66,7 +66,7 @@ export async function GET(request: Request) {
 // Create a new role
 export async function POST(request: Request) {
   try {
-    const supabase = await createClient();
+    const supabase = createClient();
     const {
       data: { user },
       error: userError,

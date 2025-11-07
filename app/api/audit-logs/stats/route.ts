@@ -5,7 +5,7 @@ import { createClient } from "@/lib/supabase/server";
 // Get audit log statistics
 export async function GET(request: Request) {
   try {
-    const supabase = await createClient();
+    const supabase = createClient();
     const {
       data: { user },
       error: userError,

@@ -5,7 +5,7 @@ import { createClient } from "@/lib/supabase/server";
 // GET /api/activity - Get activity feed for the organization
 export async function GET(request: Request) {
   try {
-    const supabase = await createClient();
+    const supabase = createClient();
     const { data: { user }, error: userError } = await supabase.auth.getUser();
 
     if (userError || !user) {
@@ -87,7 +87,7 @@ export async function GET(request: Request) {
 // POST /api/activity - Create activity log entry (for manual logging)
 export async function POST(request: Request) {
   try {
-    const supabase = await createClient();
+    const supabase = createClient();
     const { data: { user }, error: userError } = await supabase.auth.getUser();
 
     if (userError || !user) {

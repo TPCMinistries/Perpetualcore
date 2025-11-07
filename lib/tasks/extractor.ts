@@ -84,7 +84,7 @@ export async function saveExtractedTasks(
   sourceId?: string
 ): Promise<{ success: boolean; savedCount: number }> {
   try {
-    const supabase = await createClient();
+    const supabase = createClient();
 
     // Filter tasks by confidence threshold
     const highConfidenceTasks = tasks.filter((t) => t.confidence >= 0.7);
@@ -159,7 +159,7 @@ export async function getUserTasks(
     dueBefore?: string;
   }
 ) {
-  const supabase = await createClient();
+  const supabase = createClient();
 
   let query = supabase
     .from("tasks")

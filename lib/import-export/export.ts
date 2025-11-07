@@ -8,7 +8,7 @@ export async function exportAsJSON(
   userId: string,
   organizationId: string
 ): Promise<any> {
-  const supabase = await createClient();
+  const supabase = createClient();
 
   // Fetch all user data in parallel
   const [conversations, documents, tasks, calendarEvents, emails] =
@@ -74,7 +74,7 @@ export async function exportAsJSON(
 export async function exportConversationsAsMarkdown(
   userId: string
 ): Promise<{ filename: string; content: string }[]> {
-  const supabase = await createClient();
+  const supabase = createClient();
 
   const { data: conversations } = await supabase
     .from("conversations")
@@ -127,7 +127,7 @@ export async function exportConversationsAsMarkdown(
 export async function exportTasksAsMarkdown(
   organizationId: string
 ): Promise<string> {
-  const supabase = await createClient();
+  const supabase = createClient();
 
   const { data: tasks } = await supabase
     .from("tasks")
@@ -235,7 +235,7 @@ For questions, visit: https://your-domain.com/help
 export async function exportDocumentsAsCSV(
   organizationId: string
 ): Promise<string> {
-  const supabase = await createClient();
+  const supabase = createClient();
 
   const { data: documents } = await supabase
     .from("documents")
@@ -272,7 +272,7 @@ export async function exportDocumentsAsCSV(
 export async function exportCalendarAsICS(
   organizationId: string
 ): Promise<string> {
-  const supabase = await createClient();
+  const supabase = createClient();
 
   const { data: events } = await supabase
     .from("calendar_events")

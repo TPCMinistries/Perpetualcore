@@ -24,7 +24,7 @@ export async function POST(request: Request) {
     }
 
     // Save to database for tracking
-    const supabase = await createClient();
+    const supabase = createClient();
     const { error: dbError } = await supabase.from("sales_contacts").insert({
       name,
       email,

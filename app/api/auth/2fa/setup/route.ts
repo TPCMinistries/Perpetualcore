@@ -6,7 +6,7 @@ import { generateSecret, generateTOTPUri, encryptSecret } from "@/lib/2fa/totp";
 // Generate a new 2FA secret and QR code URI for setup
 export async function GET(request: Request) {
   try {
-    const supabase = await createClient();
+    const supabase = createClient();
     const { data: { user }, error: userError } = await supabase.auth.getUser();
 
     if (userError || !user) {

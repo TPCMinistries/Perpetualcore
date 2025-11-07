@@ -69,7 +69,7 @@ export class WorkflowExecutionEngine {
    * Initialize the Supabase client
    */
   async init() {
-    this.supabase = await createClient();
+    this.supabase = createClient();
   }
 
   /**

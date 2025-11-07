@@ -38,7 +38,7 @@ async function searchConversations(
   organizationId: string
 ): Promise<SearchResult[]> {
   try {
-    const supabase = await createClient();
+    const supabase = createClient();
 
     // Search in messages content
     const { data: messages } = await supabase
@@ -91,7 +91,7 @@ async function searchDocuments(
   organizationId: string
 ): Promise<SearchResult[]> {
   try {
-    const supabase = await createClient();
+    const supabase = createClient();
 
     // Search in document titles and metadata
     const { data: documents } = await supabase
@@ -134,7 +134,7 @@ async function searchTasks(
   organizationId: string
 ): Promise<SearchResult[]> {
   try {
-    const supabase = await createClient();
+    const supabase = createClient();
 
     // Search in task titles and descriptions
     const { data: tasks } = await supabase
@@ -177,7 +177,7 @@ async function searchCalendarEvents(
   organizationId: string
 ): Promise<SearchResult[]> {
   try {
-    const supabase = await createClient();
+    const supabase = createClient();
 
     // Search in event titles and descriptions
     const { data: events } = await supabase
@@ -220,7 +220,7 @@ async function searchEmails(
   organizationId: string
 ): Promise<SearchResult[]> {
   try {
-    const supabase = await createClient();
+    const supabase = createClient();
 
     // Search in email subjects, content, and from/to
     const { data: emails } = await supabase

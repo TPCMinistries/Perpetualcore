@@ -19,7 +19,7 @@ export async function DELETE(
       );
     }
 
-    const supabase = await createClient();
+    const supabase = createClient();
 
     // Get current user
     const {

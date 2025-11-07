@@ -50,7 +50,7 @@ export async function searchDocuments(
     console.log("🔍 [RAG] First 5 values:", queryEmbedding.slice(0, 5));
 
     // Query Supabase for similar chunks using pgvector
-    const supabase = await createClient();
+    const supabase = createClient();
 
     console.log("🔍 [RAG] Calling enhanced search_document_chunks with params:");
     console.log("  - org_id:", organizationId);

@@ -3,7 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 
 export async function GET() {
   try {
-    const supabase = await createClient();
+    const supabase = createClient();
 
     const { data: templates, error } = await supabase
       .from("assistant_role_templates")

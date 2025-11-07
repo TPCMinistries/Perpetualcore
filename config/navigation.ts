@@ -23,6 +23,7 @@ import {
   Key,
   Webhook,
   Shield,
+  ShieldCheck,
   Code,
   MessageCircle,
   Settings,
@@ -328,6 +329,17 @@ export const NAVIGATION_CONFIG: NavigationSection[] = [
           visibleFor: ["beginner", "intermediate", "advanced"],
           complexity: "standard",
           helpText: "Generate and manage beta invite codes",
+        },
+      },
+      {
+        name: "Admin Panel",
+        href: "/admin",
+        icon: ShieldCheck,
+        adaptiveConfig: {
+          visibleFor: ["beginner", "intermediate", "advanced"],
+          complexity: "standard",
+          helpText: "Super admin dashboard - manage users, organizations, and system settings",
+          badge: "pro",
         },
       },
       {

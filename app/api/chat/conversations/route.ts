@@ -4,7 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 // GET /api/chat/conversations - List all personal AI chat conversations for the current user
 export async function GET(req: NextRequest) {
   try {
-    const supabase = await createClient();
+    const supabase = createClient();
     const { data: { user } } = await supabase.auth.getUser();
 
     if (!user) {

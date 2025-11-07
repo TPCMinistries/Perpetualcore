@@ -38,7 +38,7 @@ export async function searchDocuments(
     const queryEmbedding = embeddingResponse.data[0].embedding;
 
     // Search document chunks using pgvector similarity
-    const supabase = await createClient();
+    const supabase = createClient();
 
     // Get user's organization
     const { data: profile } = await supabase
