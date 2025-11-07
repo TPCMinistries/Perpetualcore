@@ -1,6 +1,73 @@
 "use client";
 
+import { useEffect } from 'react';
+
 export default function PresentationPage() {
+  useEffect(() => {
+    let currentSlide = 0;
+    const slides = document.querySelectorAll('.slide');
+    const totalSlides = slides.length;
+
+    function showSlide(n: number) {
+      slides[currentSlide].classList.remove('active');
+      currentSlide = (n + totalSlides) % totalSlides;
+      slides[currentSlide].classList.add('active');
+
+      const slideCounter = document.getElementById('slideCounter');
+      if (slideCounter) {
+        slideCounter.textContent = `${currentSlide + 1} / ${totalSlides}`;
+      }
+
+      const progress = ((currentSlide + 1) / totalSlides) * 100;
+      const progressBar = document.getElementById('progressBar');
+      if (progressBar) {
+        progressBar.style.width = progress + '%';
+      }
+
+      const prevBtn = document.getElementById('prevBtn') as HTMLButtonElement;
+      const nextBtn = document.getElementById('nextBtn') as HTMLButtonElement;
+      if (prevBtn) prevBtn.disabled = currentSlide === 0;
+      if (nextBtn) nextBtn.disabled = currentSlide === totalSlides - 1;
+
+      (slides[currentSlide] as HTMLElement).scrollTop = 0;
+    }
+
+    function changeSlide(direction: number) {
+      showSlide(currentSlide + direction);
+    }
+
+    const prevBtn = document.getElementById('prevBtn');
+    const nextBtn = document.getElementById('nextBtn');
+
+    if (prevBtn) prevBtn.addEventListener('click', () => changeSlide(-1));
+    if (nextBtn) nextBtn.addEventListener('click', () => changeSlide(1));
+
+    const keyHandler = (event: KeyboardEvent) => {
+      if (event.key === 'ArrowLeft') {
+        if (currentSlide > 0) changeSlide(-1);
+      } else if (event.key === 'ArrowRight' || event.key === ' ') {
+        if (currentSlide < totalSlides - 1) changeSlide(1);
+        event.preventDefault();
+      }
+    };
+
+    document.addEventListener('keydown', keyHandler);
+
+    document.querySelectorAll('.slide').forEach(slide => {
+      slide.addEventListener('click', function(event) {
+        if (!(event.target as HTMLElement).closest('.nav-button') && currentSlide < totalSlides - 1) {
+          changeSlide(1);
+        }
+      });
+    });
+
+    showSlide(0);
+
+    return () => {
+      document.removeEventListener('keydown', keyHandler);
+    };
+  }, []);
+
   return (
     <html lang="en">
       <head>
@@ -735,54 +802,6 @@ options and trade-offs. Skip the jargon.
           <button className="nav-button" id="prevBtn">← Previous</button>
           <button className="nav-button" id="nextBtn">Next →</button>
         </div>
-
-        <script dangerouslySetInnerHTML={{ __html: `
-          let currentSlide = 0;
-          const slides = document.querySelectorAll('.slide');
-          const totalSlides = slides.length;
-
-          function showSlide(n) {
-            slides[currentSlide].classList.remove('active');
-            currentSlide = (n + totalSlides) % totalSlides;
-            slides[currentSlide].classList.add('active');
-
-            document.getElementById('slideCounter').textContent = \`\${currentSlide + 1} / \${totalSlides}\`;
-
-            const progress = ((currentSlide + 1) / totalSlides) * 100;
-            document.getElementById('progressBar').style.width = progress + '%';
-
-            document.getElementById('prevBtn').disabled = currentSlide === 0;
-            document.getElementById('nextBtn').disabled = currentSlide === totalSlides - 1;
-
-            slides[currentSlide].scrollTop = 0;
-          }
-
-          function changeSlide(direction) {
-            showSlide(currentSlide + direction);
-          }
-
-          document.getElementById('prevBtn').addEventListener('click', () => changeSlide(-1));
-          document.getElementById('nextBtn').addEventListener('click', () => changeSlide(1));
-
-          document.addEventListener('keydown', function(event) {
-            if (event.key === 'ArrowLeft') {
-              if (currentSlide > 0) changeSlide(-1);
-            } else if (event.key === 'ArrowRight' || event.key === ' ') {
-              if (currentSlide < totalSlides - 1) changeSlide(1);
-              event.preventDefault();
-            }
-          });
-
-          document.querySelectorAll('.slide').forEach(slide => {
-            slide.addEventListener('click', function(event) {
-              if (!event.target.closest('.nav-button') && currentSlide < totalSlides - 1) {
-                changeSlide(1);
-              }
-            });
-          });
-
-          showSlide(0);
-        ` }} />
       </body>
     </html>
   );
