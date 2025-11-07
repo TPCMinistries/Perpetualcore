@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 
 export default function PresentationPage() {
   const [currentSlide, setCurrentSlide] = useState(0);
-  const totalSlides = 10;
+  const totalSlides = 14;
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -155,6 +155,14 @@ export default function PresentationPage() {
           border-radius: 6px;
         }
 
+        .tool-box {
+          background: #faf5ff;
+          border-left: 4px solid #9f7aea;
+          padding: 1.5rem;
+          margin: 1.5rem 0;
+          border-radius: 6px;
+        }
+
         /* Lists */
         ul, ol {
           margin: 1.5rem 0;
@@ -292,7 +300,7 @@ export default function PresentationPage() {
         <div className={`slide-wrap ${currentSlide === 0 ? 'active' : ''}`}>
           <div className="slide" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', textAlign: 'center' }}>
             <h1>Let's Talk About AI</h1>
-            <p className="subtitle">What it actually is, how it works, and what it means for your business</p>
+            <p className="subtitle">What it actually is, how to use it effectively, and what it means for your business</p>
             <p style={{ marginTop: '3rem', color: '#a0aec0' }}>Lorenzo for Jocelyn</p>
           </div>
         </div>
@@ -312,8 +320,8 @@ export default function PresentationPage() {
 
             <ul>
               <li>You can give it a 50-page document and ask "what are the key points?"</li>
-              <li>You can tell it about a client and say "write me a proposal"</li>
-              <li>You can show it your company data and ask "what patterns do you see?"</li>
+              <li>You can tell it about a situation and say "what should I do?"</li>
+              <li>You can show it your data and ask "what patterns do you see?"</li>
             </ul>
 
             <div className="tip">
@@ -322,8 +330,116 @@ export default function PresentationPage() {
           </div>
         </div>
 
-        {/* SLIDE 3: Two Ways People Use It */}
+        {/* SLIDE 3: Different AI Tools */}
         <div className={`slide-wrap ${currentSlide === 2 ? 'active' : ''}`}>
+          <div className="slide">
+            <h2>Different AI Tools for Different Jobs</h2>
+
+            <p>Just like you wouldn't use Excel for everything, different AI tools are better for different tasks:</p>
+
+            <div className="tool-box">
+              <h3 style={{ marginTop: 0 }}>Claude (what we're using now)</h3>
+              <p><strong>Best for:</strong> Deep thinking, complex analysis, long documents</p>
+              <p style={{ marginBottom: 0 }}><strong>When to use it:</strong> Analyzing proposals, strategic planning, understanding complicated situations</p>
+            </div>
+
+            <div className="tool-box">
+              <h3 style={{ marginTop: 0 }}>ChatGPT</h3>
+              <p><strong>Best for:</strong> Quick answers, creative writing, brainstorming</p>
+              <p style={{ marginBottom: 0 }}><strong>When to use it:</strong> Drafting emails, getting ideas quickly, simple questions</p>
+            </div>
+
+            <div className="tool-box">
+              <h3 style={{ marginTop: 0 }}>Perplexity</h3>
+              <p><strong>Best for:</strong> Research, current information, fact-checking</p>
+              <p style={{ marginBottom: 0 }}><strong>When to use it:</strong> Looking up current events, researching competitors, finding recent data</p>
+            </div>
+
+            <div className="tip">
+              <p style={{ marginBottom: 0 }}>Pro tip: Use Claude for the important stuff, ChatGPT for the quick stuff, and Perplexity when you need current information.</p>
+            </div>
+          </div>
+        </div>
+
+        {/* SLIDE 4: How to Use AI (for YOU) */}
+        <div className={`slide-wrap ${currentSlide === 3 ? 'active' : ''}`}>
+          <div className="slide">
+            <h2>How You Can Use AI Every Day</h2>
+
+            <p>Let's talk about practical things you deal with as COO:</p>
+
+            <h3>Strategy & Planning</h3>
+            <div className="example">
+              <p style={{ fontStyle: 'italic' }}>"I'm looking at three growth strategies: expanding into healthcare, doubling down on education, or adding government contracts. Here's our current capacity, margins, and team structure. What are the pros and cons of each approach?"</p>
+            </div>
+
+            <h3>Analyzing Performance Data</h3>
+            <div className="example">
+              <p style={{ fontStyle: 'italic' }}>"Here's our sales data for the past 2 years. What trends do you see? Where are we gaining ground and where are we losing? What should I look into?"</p>
+            </div>
+
+            <h3>Preparing for Meetings</h3>
+            <div className="example">
+              <p style={{ fontStyle: 'italic' }}>"I'm meeting with our design team lead tomorrow. We're behind on 3 projects. Help me understand what questions I should ask and what solutions might work."</p>
+            </div>
+
+            <div className="tip">
+              <p style={{ marginBottom: 0 }}>The key: Give it context about your role, your company, and what you're trying to accomplish. The more context, the better the advice.</p>
+            </div>
+          </div>
+        </div>
+
+        {/* SLIDE 5: The Context Secret */}
+        <div className={`slide-wrap ${currentSlide === 4 ? 'active' : ''}`}>
+          <div className="slide">
+            <h2>The Secret: Give It Context</h2>
+
+            <p>Here's where most people go wrong. They use AI like Google:</p>
+
+            <div className="example">
+              <p style={{ fontStyle: 'italic', marginBottom: 0 }}>"Write a proposal for this healthcare client"</p>
+            </div>
+
+            <p>That gets you generic garbage. Here's what actually works:</p>
+
+            <div className="tip">
+              <p style={{ fontStyle: 'italic' }}>
+                "Write a proposal for United Healthcare. They're redesigning 3 floors in Chicago. They care about employee wellness and modern collaboration spaces. Their budget is $8-12M. They had Steelcase before and complained about slow turnaround. We can do design concepts in 48 hours. Deadline is July 15."
+              </p>
+              <p style={{ marginBottom: 0 }}><strong>Now you get something useful.</strong></p>
+            </div>
+
+            <p>The more context you give it, the better it works. It's that simple.</p>
+
+            <div className="note">
+              <p style={{ marginBottom: 0 }}><strong>Think of AI like a smart consultant who knows nothing about your business.</strong> You need to tell them the situation before they can help.</p>
+            </div>
+          </div>
+        </div>
+
+        {/* SLIDE 6: Setting Up Custom Instructions */}
+        <div className={`slide-wrap ${currentSlide === 5 ? 'active' : ''}`}>
+          <div className="slide">
+            <h2>Make It Easier: Set Up Custom Instructions</h2>
+
+            <p>Instead of giving context every time, you can set up "Custom Instructions" in ChatGPT or Claude. Tell it once who you are:</p>
+
+            <div className="example">
+              <p style={{ fontStyle: 'italic' }}>
+                "I'm COO of Empire Office Furniture, a $370M commercial furniture dealer. I oversee strategy, operations, design, RFPs, and new business development. We're targeting $1B revenue. I focus on operational efficiency, competitive positioning, and growth opportunities. Give me data-driven insights with clear options and trade-offs. Skip jargon—I want practical advice."
+              </p>
+            </div>
+
+            <p>Now every conversation starts with that context. You don't have to repeat it.</p>
+
+            <div className="tip">
+              <p style={{ marginBottom: 0 }}>This one-time setup saves you hours over time and gives you way better responses.</p>
+            </div>
+          </div>
+        </div>
+
+        {/* SLIDE 7: Two Ways People Use It */}
+        <div className={`slide-wrap ${currentSlide === 6 ? 'active' : ''}`}>
           <div className="slide">
             <h2>There Are Two Ways People Use AI</h2>
 
@@ -346,37 +462,13 @@ export default function PresentationPage() {
             <p>Most people are stuck at the casual level because nobody's shown them the second way.</p>
 
             <div className="note">
-              <p style={{ marginBottom: 0 }}><strong>That second way? That's what I want to explain today.</strong></p>
+              <p style={{ marginBottom: 0 }}><strong>The next few slides show you what the second way looks like for a company like Empire.</strong></p>
             </div>
           </div>
         </div>
 
-        {/* SLIDE 4: The Secret */}
-        <div className={`slide-wrap ${currentSlide === 3 ? 'active' : ''}`}>
-          <div className="slide">
-            <h2>The Secret: Give It Context</h2>
-
-            <p>Here's where most people go wrong. They use AI like Google:</p>
-
-            <div className="example">
-              <p style={{ fontStyle: 'italic', marginBottom: 0 }}>"Write a proposal for this healthcare client"</p>
-            </div>
-
-            <p>That gets you generic garbage. Here's what actually works:</p>
-
-            <div className="tip">
-              <p style={{ fontStyle: 'italic' }}>
-                "Write a proposal for United Healthcare. They're redesigning 3 floors in Chicago. They care about employee wellness and modern collaboration spaces. Their budget is $8-12M. They had Steelcase before and complained about slow turnaround. We can do design concepts in 48 hours. Deadline is July 15."
-              </p>
-              <p style={{ marginBottom: 0 }}><strong>Now you get something useful.</strong></p>
-            </div>
-
-            <p>The more context you give it, the better it works. It's that simple.</p>
-          </div>
-        </div>
-
-        {/* SLIDE 5: Why Your Industry */}
-        <div className={`slide-wrap ${currentSlide === 4 ? 'active' : ''}`}>
+        {/* SLIDE 8: Why Your Industry */}
+        <div className={`slide-wrap ${currentSlide === 7 ? 'active' : ''}`}>
           <div className="slide">
             <h2>Why This Matters for Commercial Furniture</h2>
 
@@ -399,8 +491,8 @@ export default function PresentationPage() {
           </div>
         </div>
 
-        {/* SLIDE 6: Real Examples - RFPs */}
-        <div className={`slide-wrap ${currentSlide === 5 ? 'active' : ''}`}>
+        {/* SLIDE 9: Real Examples - RFPs */}
+        <div className={`slide-wrap ${currentSlide === 8 ? 'active' : ''}`}>
           <div className="slide">
             <h2>Real Example: RFPs</h2>
 
@@ -423,14 +515,46 @@ export default function PresentationPage() {
               <p><strong>Alera Group (insurance):</strong> Went from 10 RFPs per year to 10 per quarter with the same team</p>
             </div>
 
+            <div className="example">
+              <p><strong>Microsoft RFP team:</strong> $746 return for every $1 invested in AI tools</p>
+            </div>
+
             <div className="tip">
-              <p style={{ marginBottom: 0 }}><strong>Translation:</strong> While your competitors are taking 3 weeks to respond, you could be turning proposals around in 3 days.</p>
+              <p style={{ marginBottom: 0 }}><strong>Translation:</strong> While your competitors are taking 3 weeks to respond, you could be turning proposals around in 3 days with better quality.</p>
             </div>
           </div>
         </div>
 
-        {/* SLIDE 7: Design */}
-        <div className={`slide-wrap ${currentSlide === 6 ? 'active' : ''}`}>
+        {/* SLIDE 10: How RFP AI Actually Works */}
+        <div className={`slide-wrap ${currentSlide === 9 ? 'active' : ''}`}>
+          <div className="slide">
+            <h2>How This Actually Works for RFPs</h2>
+
+            <p>Let me walk you through what this looks like in practice:</p>
+
+            <h3>Step 1: Upload the RFP</h3>
+            <p>AI reads the entire document—50 pages, 100 pages, doesn't matter. Takes about 30 seconds.</p>
+
+            <h3>Step 2: Extract Requirements</h3>
+            <p>AI pulls out: budget, timeline, technical specs, evaluation criteria, compliance needs, decision makers.</p>
+
+            <h3>Step 3: Match Your Capabilities</h3>
+            <p>If the system knows your product catalog, past projects, and pricing, it can suggest exactly what to propose.</p>
+
+            <h3>Step 4: Draft the Response</h3>
+            <p>AI writes the first draft based on your previous winning proposals, adjusted for this specific client's needs.</p>
+
+            <h3>Step 5: Your Team Reviews</h3>
+            <p>Your people refine it, add the personal touch, adjust pricing. But you start at 80% done instead of 0%.</p>
+
+            <div className="note">
+              <p style={{ marginBottom: 0 }}><strong>Result:</strong> What took 40 hours now takes 10-15 hours. Same quality, faster turnaround, more proposals your team can handle.</p>
+            </div>
+          </div>
+        </div>
+
+        {/* SLIDE 11: Design */}
+        <div className={`slide-wrap ${currentSlide === 10 ? 'active' : ''}`}>
           <div className="slide">
             <h2>Another Example: Design Work</h2>
 
@@ -454,18 +578,53 @@ export default function PresentationPage() {
             <ul>
               <li>Upload a floor plan, get 15-20 layout options instantly</li>
               <li>Generate photorealistic renderings in seconds</li>
-              <li>Automatic specs and pricing</li>
+              <li>Automatic specs and pricing for each option</li>
               <li>Concept phase: 2-3 days becomes 4-6 hours</li>
             </ul>
 
             <div className="tip">
-              <p style={{ marginBottom: 0 }}>Your designers stop being CAD operators and become strategic advisors. That's what clients actually value.</p>
+              <p style={{ marginBottom: 0 }}>Your designers stop being CAD operators and become strategic advisors. They spend time understanding client needs, not grinding out drawings.</p>
             </div>
           </div>
         </div>
 
-        {/* SLIDE 8: The Big Picture */}
-        <div className={`slide-wrap ${currentSlide === 7 ? 'active' : ''}`}>
+        {/* SLIDE 12: How Design AI Works */}
+        <div className={`slide-wrap ${currentSlide === 11 ? 'active' : ''}`}>
+          <div className="slide">
+            <h2>How Design AI Actually Works</h2>
+
+            <p>Here's the process:</p>
+
+            <h3>For Space Planning:</h3>
+            <ul>
+              <li>Designer uploads floor plan and client requirements</li>
+              <li>AI generates 15-20 different layout options in minutes</li>
+              <li>Each one optimized for workflow, capacity, and code compliance</li>
+              <li>Designer picks best 3-5 and refines them</li>
+            </ul>
+
+            <h3>For Visualization:</h3>
+            <ul>
+              <li>AI creates photorealistic renderings from the floor plans</li>
+              <li>Can show different furniture options, finishes, lighting</li>
+              <li>Client sees what it actually looks like before you order anything</li>
+            </ul>
+
+            <h3>For Specifications:</h3>
+            <ul>
+              <li>AI generates detailed specs for every piece</li>
+              <li>Includes pricing, lead times, alternatives</li>
+              <li>Checks against budget constraints automatically</li>
+            </ul>
+
+            <div className="note">
+              <p style={{ marginBottom: 0 }}><strong>Result:</strong> Design team can handle 3x more projects. Clients get more options to choose from. Better results, faster delivery.</p>
+            </div>
+          </div>
+        </div>
+
+        {/* SLIDE 13: The Big Picture */}
+        <div className={`slide-wrap ${currentSlide === 12 ? 'active' : ''}`}>
           <div className="slide">
             <h2>The Big Picture</h2>
 
@@ -474,8 +633,9 @@ export default function PresentationPage() {
             <div className="note">
               <p><strong>RFPs:</strong> 2-4x more capacity with same team</p>
               <p><strong>Design:</strong> 3x more capacity per designer</p>
-              <p><strong>Sales:</strong> 40% productivity improvement</p>
-              <p style={{ marginBottom: 0 }}><strong>Marketing:</strong> 70% faster campaign creation</p>
+              <p><strong>Sales:</strong> 40% productivity improvement (meetings summarized, CRM updated automatically, follow-ups tracked)</p>
+              <p><strong>Marketing:</strong> 70% faster campaign creation</p>
+              <p style={{ marginBottom: 0 }}><strong>Operations:</strong> Better data analysis, faster decision-making, predictive issue detection</p>
             </div>
 
             <p>Conservative estimate: <strong>$1.5-3M</strong> in operational value in year one.</p>
@@ -488,49 +648,22 @@ export default function PresentationPage() {
           </div>
         </div>
 
-        {/* SLIDE 9: What I Built */}
-        <div className={`slide-wrap ${currentSlide === 8 ? 'active' : ''}`}>
-          <div className="slide">
-            <h2>What I Built</h2>
+        {/* SLIDE 14: Let's Talk */}
+        <div className={`slide-wrap ${currentSlide === 13 ? 'active' : ''}`}>
+          <div className="slide" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+            <h2>Questions?</h2>
 
-            <p>I built something called Perpetual Core to solve this for my own companies. Here's what it does:</p>
-
-            <h3>Multi-Model Intelligence</h3>
-            <p>Uses the right AI for each job—Claude for deep thinking, GPT for speed, Gemini for real-time data.</p>
-
-            <h3>Persistent Memory</h3>
-            <p>Remembers everything. Your past decisions, completed projects, strategic priorities. Gets smarter over time.</p>
-
-            <h3>Knowledge Library</h3>
-            <p>Upload your RFPs, proposals, contracts. AI learns from your entire history.</p>
-
-            <h3>Team Intelligence</h3>
-            <p>Not just individual tools—shared company knowledge that builds up.</p>
+            <p>I wanted to give you a real understanding of what AI can do—both for you personally and for Empire.</p>
 
             <div className="note">
-              <p style={{ marginBottom: 0 }}><strong>For me:</strong> 60% faster content creation, 3x faster decisions, doing what usually takes multiple full teams. And getting better results because I can analyze more options.</p>
+              <p><strong>For you personally:</strong> Better strategic analysis, faster decision-making, smarter planning.</p>
+              <p style={{ marginBottom: 0 }}><strong>For Empire:</strong> Operational capacity that helps you hit that $1B goal.</p>
             </div>
-          </div>
-        </div>
 
-        {/* SLIDE 10: Let's Talk */}
-        <div className={`slide-wrap ${currentSlide === 9 ? 'active' : ''}`}>
-          <div className="slide" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-            <h2>Let's Talk About It</h2>
-
-            <p>Look, I'm not here to do a hard sell. I wanted to show you what's actually possible with this technology.</p>
-
-            <p><strong>When we meet, I can show you:</strong></p>
-            <ul>
-              <li>The platform in action (live demo, not slides)</li>
-              <li>How it would work specifically for Empire</li>
-              <li>What a pilot program would look like</li>
-              <li>Real numbers on cost and return</li>
-            </ul>
+            <p>Happy to talk through any of this in more detail, show you specific examples, or just answer questions about how you could start using AI yourself.</p>
 
             <div className="tip">
-              <p>I work with 2-3 companies per year. Empire's at the top of my list because:</p>
-              <p style={{ marginBottom: 0 }}>• You're the right size (big enough to matter, agile enough to move fast)<br/>• You have clear goals ($1B target)<br/>• The timing is perfect (industry window is open)<br/>• This could validate the model for the entire $60B furniture industry</p>
+              <p style={{ marginBottom: 0 }}>The companies figuring this out now are building advantages that will compound for years. The window is open, but it won't stay open forever.</p>
             </div>
 
             <p style={{ marginTop: '2rem', textAlign: 'center', color: '#718096' }}>— Lorenzo</p>

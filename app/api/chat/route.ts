@@ -358,9 +358,13 @@ Or, you can copy and paste the text content directly into this chat.`;
 
     // Check if we should use RAG
     let relevantDocs: any[] = [];
-    console.log("🔍 Checking RAG for query:", userMessage);
-    const useRAG = shouldUseRAG(userMessage);
-    console.log("🔍 shouldUseRAG returned:", useRAG);
+    console.log("🔍 RAG TEMPORARILY DISABLED FOR DEBUGGING");
+    const useRAG = false; // TEMPORARILY DISABLED
+
+    // ORIGINAL CODE COMMENTED OUT FOR DEBUGGING
+    // console.log("🔍 Checking RAG for query:", userMessage);
+    // const useRAG = shouldUseRAG(userMessage);
+    // console.log("🔍 shouldUseRAG returned:", useRAG);
 
     if (useRAG) {
       try {
