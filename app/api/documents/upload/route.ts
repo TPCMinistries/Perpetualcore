@@ -1,5 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
-import { processAndStoreDocument } from "@/lib/documents/processor";
+// import { processAndStoreDocument } from "@/lib/documents/processor";
 import { NextRequest } from "next/server";
 
 export const runtime = "nodejs";
@@ -146,13 +146,20 @@ export async function POST(req: NextRequest) {
     }
 
     // Process document synchronously to ensure chunks are created
-    try {
-      await processAndStoreDocument(document.id);
-      console.log(`✅ Document ${document.id} processed successfully`);
-    } catch (processError) {
-      console.error("Document processing error:", processError);
-      // Document status will be set to "failed" by processAndStoreDocument
-    }
+    // TEMPORARILY DISABLED FOR DEBUGGING
+    // try {
+    //   await processAndStoreDocument(document.id);
+    //   console.log(`✅ Document ${document.id} processed successfully`);
+    // } catch (processError) {
+    //   console.error("Document processing error:", processError);
+    //   // Document status will be set to "failed" by processAndStoreDocument
+    // }
+
+    // Update status to completed for now
+    await supabase
+      .from("documents")
+      .update({ status: "completed" })
+      .eq("id", document.id);
 
     // Fetch updated document with final status
     const { data: updatedDoc } = await supabase
