@@ -121,7 +121,7 @@ export const NAVIGATION_CONFIG: NavigationSection[] = [
         adaptiveConfig: {
           visibleFor: ["beginner", "intermediate", "advanced"],
           complexity: "essential",
-          helpText: "Your AI's memory - upload documents for context and reference",
+          helpText: "Centralized knowledge base - AI learns from your organization's documents",
         },
       },
       {
@@ -131,7 +131,7 @@ export const NAVIGATION_CONFIG: NavigationSection[] = [
         adaptiveConfig: {
           visibleFor: ["beginner", "intermediate", "advanced"],
           complexity: "essential",
-          helpText: "Manage files - AI automatically learns from your documents",
+          helpText: "Document management with intelligent processing and extraction",
         },
       },
       {
@@ -141,7 +141,7 @@ export const NAVIGATION_CONFIG: NavigationSection[] = [
         adaptiveConfig: {
           visibleFor: ["beginner", "intermediate", "advanced"],
           complexity: "essential",
-          helpText: "AI-extracted tasks from conversations - track your work",
+          helpText: "Intelligent task management with AI-powered extraction and tracking",
         },
       },
       {
@@ -203,8 +203,7 @@ export const NAVIGATION_CONFIG: NavigationSection[] = [
         adaptiveConfig: {
           visibleFor: ["beginner", "intermediate", "advanced"],
           complexity: "standard",
-          badge: "beta",
-          helpText: "Autonomous AI agents that work independently",
+          helpText: "Autonomous AI agents that work independently on complex tasks",
         },
       },
       {
@@ -214,8 +213,7 @@ export const NAVIGATION_CONFIG: NavigationSection[] = [
         adaptiveConfig: {
           visibleFor: ["beginner", "intermediate", "advanced"],
           complexity: "standard",
-          badge: "beta",
-          helpText: "Automate repetitive tasks with custom workflows",
+          helpText: "Automate repetitive tasks with intelligent workflow automation",
         },
       },
     ],
@@ -237,7 +235,7 @@ export const NAVIGATION_CONFIG: NavigationSection[] = [
         adaptiveConfig: {
           visibleFor: ["beginner", "intermediate", "advanced"],
           complexity: "standard",
-          helpText: "Productivity insights and AI usage analytics",
+          helpText: "Comprehensive analytics - productivity metrics and ROI tracking",
         },
       },
       {
@@ -247,7 +245,7 @@ export const NAVIGATION_CONFIG: NavigationSection[] = [
         adaptiveConfig: {
           visibleFor: ["beginner", "intermediate", "advanced"],
           complexity: "standard",
-          helpText: "Recent activity and AI interactions across the platform",
+          helpText: "Activity feed - real-time tracking of AI interactions and workflows",
         },
       },
       {
