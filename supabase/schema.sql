@@ -18,6 +18,9 @@ CREATE TABLE IF NOT EXISTS profiles (
   full_name TEXT,
   avatar_url TEXT,
   organization_id UUID REFERENCES organizations(id) ON DELETE SET NULL,
+  onboarding_completed BOOLEAN DEFAULT FALSE,
+  onboarding_step INTEGER DEFAULT 0,
+  onboarding_skipped BOOLEAN DEFAULT FALSE,
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
