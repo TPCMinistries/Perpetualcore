@@ -15,7 +15,7 @@ export function QuickActions() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
         <Link href="/dashboard/chat" className="w-full group">
           <div className="relative h-16 rounded-lg bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 hover:bg-slate-800 dark:hover:bg-slate-200 transition-all shadow-sm hover:shadow-md overflow-hidden">
-            <div className="absolute inset-0 bg-gradient-to-r from-blue-600/10 via-purple-600/10 to-pink-600/10 opacity-0 group-hover:opacity-100 transition-opacity" />
+            <div className="absolute inset-0 bg-gradient-to-r from-blue-600/10 via-blue-500/10 to-blue-700/10 opacity-0 group-hover:opacity-100 transition-opacity" />
             <div className="relative h-full flex flex-col items-center justify-center gap-0.5">
               <div className="flex items-center gap-2 text-base font-medium">
                 <Sparkles className="h-5 w-5" />
