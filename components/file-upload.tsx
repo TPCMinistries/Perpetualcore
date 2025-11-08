@@ -89,13 +89,24 @@ export function FileUpload({
 
           const data = await response.json();
 
-          setFiles((prev) =>
-            prev.map((f) =>
+          setFiles((prev) => {
+            const updated = prev.map((f) =>
               f.id === fileId
-                ? { ...f, status: "completed", progress: 100, id: data.documentId }
+                ? { ...f, status: "completed", progress: 100, id: data.id }
                 : f
-            )
-          );
+            );
+
+            // Call callback after ALL uploads are complete
+            const allComplete = updated.every(f => f.status === "completed" || f.status === "error");
+            if (allComplete && onUploadComplete) {
+              const completedFiles = updated.filter(f => f.status === "completed");
+              if (completedFiles.length > 0) {
+                onUploadComplete(completedFiles);
+              }
+            }
+
+            return updated;
+          });
         } catch (error) {
           setFiles((prev) =>
             prev.map((f) =>
@@ -110,12 +121,6 @@ export function FileUpload({
             )
           );
         }
-      }
-
-      // Call callback with completed files
-      const completedFiles = files.filter((f) => f.status === "completed");
-      if (onUploadComplete && completedFiles.length > 0) {
-        onUploadComplete(completedFiles);
       }
     },
     [files, onUploadComplete, folderId]
