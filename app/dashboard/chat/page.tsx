@@ -465,35 +465,40 @@ export default function ChatPage() {
           {/* Minimal Header - Claude-like */}
           <div className="border-b border-slate-200/50 dark:border-slate-800/50 bg-white/80 dark:bg-slate-950/80 backdrop-blur-sm sticky top-0 z-10">
             <div className="max-w-3xl mx-auto px-6 py-3 flex items-center justify-between">
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2">
                 <Button
-                  variant="ghost"
+                  variant="outline"
                   size="sm"
                   onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-                  className="h-8 w-8 p-0"
-                  title="Toggle conversations"
+                  className="h-9 px-3 border-slate-300 dark:border-slate-700"
+                  title="View past conversations"
                 >
-                  <MessageSquare className="h-4 w-4" />
+                  <MessageSquare className="h-4 w-4 mr-2" />
+                  <span className="text-sm">History</span>
                 </Button>
-                <Select
-                  value={selectedModel}
-                  onValueChange={(value) => setSelectedModel(value as AIModel)}
-                  disabled={messages.length > 0 || isVoiceMode}
-                >
-                  <SelectTrigger className="border-0 h-8 px-2 text-sm font-medium hover:bg-slate-100 dark:hover:bg-slate-900">
-                    <SelectValue placeholder="Select model" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {Object.values(AI_MODELS).map((model) => (
-                      <SelectItem key={model.id} value={model.id}>
-                        <div className="flex items-center gap-2">
-                          <span>{model.icon}</span>
-                          <span>{model.name}</span>
-                        </div>
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <div className="h-6 w-px bg-slate-300 dark:bg-slate-700" />
+                <div className="flex items-center gap-2">
+                  <span className="text-xs text-slate-600 dark:text-slate-400 font-medium">Model:</span>
+                  <Select
+                    value={selectedModel}
+                    onValueChange={(value) => setSelectedModel(value as AIModel)}
+                    disabled={messages.length > 0 || isVoiceMode}
+                  >
+                    <SelectTrigger className="border border-slate-300 dark:border-slate-700 h-9 px-3 text-sm font-medium bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800 min-w-[180px]">
+                      <SelectValue placeholder="Select model" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {Object.values(AI_MODELS).map((model) => (
+                        <SelectItem key={model.id} value={model.id}>
+                          <div className="flex items-center gap-2">
+                            <span>{model.icon}</span>
+                            <span>{model.name}</span>
+                          </div>
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
 
               {/* Right actions */}
@@ -501,7 +506,7 @@ export default function ChatPage() {
                 variant="ghost"
                 size="sm"
                 onClick={handleNewConversation}
-                className="h-8 text-sm"
+                className="h-9 text-sm px-3"
               >
                 New chat
               </Button>

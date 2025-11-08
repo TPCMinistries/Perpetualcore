@@ -167,21 +167,21 @@ export const NAVIGATION_CONFIG: NavigationSection[] = [
     ],
   },
 
-  // SECTION 3: COMMUNICATIONS - Collapsible for intermediate+ users
+  // SECTION 3: COMMUNICATIONS - Collapsible for all users
   {
     section: "Communications",
     color: "text-slate-600 dark:text-slate-400",
     bgColor: "bg-slate-50 dark:bg-slate-950/30",
     collapsible: true,
     defaultCollapsed: false,
-    visibleFor: ["intermediate", "advanced"],
+    visibleFor: ["beginner", "intermediate", "advanced"],
     items: [
       {
         name: "Email",
         href: "/dashboard/email",
         icon: Mail,
         adaptiveConfig: {
-          visibleFor: ["intermediate", "advanced"],
+          visibleFor: ["beginner", "intermediate", "advanced"],
           complexity: "standard",
           helpText: "AI email assistant - draft, respond, and organize intelligently",
         },
@@ -191,7 +191,7 @@ export const NAVIGATION_CONFIG: NavigationSection[] = [
         href: "/dashboard/calendar",
         icon: Calendar,
         adaptiveConfig: {
-          visibleFor: ["intermediate", "advanced"],
+          visibleFor: ["beginner", "intermediate", "advanced"],
           complexity: "standard",
           helpText: "Meeting transcription, action item extraction, and intelligent briefings",
         },
@@ -209,14 +209,14 @@ export const NAVIGATION_CONFIG: NavigationSection[] = [
     ],
   },
 
-  // SECTION 4: AGENTS & AUTOMATION - Collapsible advanced features
+  // SECTION 4: AGENTS & AUTOMATION - Collapsible for all users
   {
     section: "Agents & Automation",
     color: "text-slate-600 dark:text-slate-400",
     bgColor: "bg-slate-50 dark:bg-slate-950/30",
     collapsible: true,
-    defaultCollapsed: true,
-    visibleFor: ["intermediate", "advanced"],
+    defaultCollapsed: false,
+    visibleFor: ["beginner", "intermediate", "advanced"],
     items: [
       {
         name: "Assistants",
