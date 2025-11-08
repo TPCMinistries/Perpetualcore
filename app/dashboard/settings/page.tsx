@@ -27,11 +27,15 @@ export default function SettingsPage() {
   const handleRestartOnboarding = async () => {
     setIsResetting(true);
     try {
-      // Clear localStorage onboarding data
+      // Clear localStorage onboarding data (all versions)
       if (typeof window !== "undefined") {
         localStorage.removeItem("onboarding-completed");
         localStorage.removeItem("onboarding-step");
         localStorage.removeItem("onboarding-skipped");
+        localStorage.removeItem("onboarding-completed-v2");
+        localStorage.removeItem("onboarding-step-v2");
+        localStorage.removeItem("onboarding-completed-v3"); // NEW
+        localStorage.removeItem("onboarding-step-v3"); // NEW
       }
 
       // Also update database (may fail if columns don't exist yet)
@@ -40,10 +44,10 @@ export default function SettingsPage() {
       if (result.error) {
         toast.error(result.error);
       } else {
-        toast.success("Onboarding reset! Refresh the page to see the tour.");
+        toast.success("Onboarding reset! Redirecting to dashboard...");
         setTimeout(() => {
-          window.location.reload();
-        }, 1500);
+          window.location.href = "/dashboard";
+        }, 1000);
       }
     } catch (error) {
       toast.error("Failed to reset onboarding");

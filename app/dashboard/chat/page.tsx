@@ -548,14 +548,53 @@ export default function ChatPage() {
               </div>
 
               {/* Right actions */}
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={handleNewConversation}
-                className="h-9 text-sm px-3"
-              >
-                New chat
-              </Button>
+              <div className="flex items-center gap-2">
+                {messages.length > 0 && (
+                  <div className="flex items-center gap-1 border-r border-slate-300 dark:border-slate-700 pr-2 mr-1">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => exportConversation("powerpoint")}
+                      disabled={exportingAs !== null}
+                      className="h-8 px-2 text-xs"
+                      title="Export as PowerPoint"
+                    >
+                      <Presentation className="h-3.5 w-3.5 mr-1.5" />
+                      PPT
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => exportConversation("pdf")}
+                      disabled={exportingAs !== null}
+                      className="h-8 px-2 text-xs"
+                      title="Export as PDF"
+                    >
+                      <FileText className="h-3.5 w-3.5 mr-1.5" />
+                      PDF
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => exportConversation("word")}
+                      disabled={exportingAs !== null}
+                      className="h-8 px-2 text-xs"
+                      title="Export as Word"
+                    >
+                      <File className="h-3.5 w-3.5 mr-1.5" />
+                      Word
+                    </Button>
+                  </div>
+                )}
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleNewConversation}
+                  className="h-9 text-sm px-3"
+                >
+                  New chat
+                </Button>
+              </div>
             </div>
           </div>
 
@@ -635,9 +674,9 @@ export default function ChatPage() {
                     prompt: "Help me analyze and understand",
                   },
                   {
-                    icon: "⚡",
-                    title: "Solve problems",
-                    prompt: "Help me solve this problem:",
+                    icon: "📊",
+                    title: "Create presentation",
+                    prompt: "Help me create a presentation about",
                   }
                 ].map((suggestion, idx) => (
                   <button

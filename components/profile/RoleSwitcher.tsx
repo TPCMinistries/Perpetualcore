@@ -26,6 +26,8 @@ const ROLES = [
   { id: "business_owner", label: "Business", icon: Briefcase, color: "text-orange-600" },
   { id: "content_creator", label: "Creator", icon: Palette, color: "text-pink-600" },
   { id: "student", label: "Student", icon: Sparkles, color: "text-indigo-600" },
+  { id: "consultant", label: "Consultant", icon: Users, color: "text-teal-600" },
+  { id: "freelancer", label: "Freelancer", icon: Sparkles, color: "text-yellow-600" },
 ];
 
 export function RoleSwitcher({ currentRole, onRoleChange }: RoleSwitcherProps) {

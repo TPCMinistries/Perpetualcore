@@ -3,11 +3,11 @@
 import { useState } from "react";
 import Link from "next/link";
 import { Sparkles, GraduationCap, FileText } from "lucide-react";
-import { CreateDocumentModal } from "@/components/documents/CreateDocumentModal";
+import { GenerateContentModal } from "@/components/documents/GenerateContentModal";
 import { useRouter } from "next/navigation";
 
 export function QuickActions() {
-  const [createDocModalOpen, setCreateDocModalOpen] = useState(false);
+  const [generateModalOpen, setGenerateModalOpen] = useState(false);
   const router = useRouter();
 
   return (
@@ -45,7 +45,7 @@ export function QuickActions() {
 
         {/* Tertiary CTA - Generate Content */}
         <button
-          onClick={() => setCreateDocModalOpen(true)}
+          onClick={() => setGenerateModalOpen(true)}
           className="w-full group active:scale-[0.98] transition-transform"
         >
           <div className="h-20 md:h-16 rounded-xl border-2 border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 bg-white dark:bg-slate-900 transition-all shadow-md hover:shadow-lg flex flex-col items-center justify-center gap-1 px-4 text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-slate-100 touch-manipulation">
@@ -59,12 +59,11 @@ export function QuickActions() {
         </button>
       </div>
 
-      <CreateDocumentModal
-        open={createDocModalOpen}
-        onOpenChange={setCreateDocModalOpen}
+      <GenerateContentModal
+        open={generateModalOpen}
+        onOpenChange={setGenerateModalOpen}
         onSuccess={() => {
-          setCreateDocModalOpen(false);
-          router.push("/dashboard/documents");
+          setGenerateModalOpen(false);
         }}
       />
     </>

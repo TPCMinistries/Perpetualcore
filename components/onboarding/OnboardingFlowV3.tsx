@@ -24,6 +24,7 @@ interface UserContext {
   userRole: string;
   industry: string;
   primaryGoal: string;
+  primaryGoals: string[]; // New: Support multiple goals
   teamContext: string;
   contentTypes: string[];
   aiExperience: string;
@@ -49,6 +50,7 @@ export function OnboardingFlowV3({ userProfile }: OnboardingFlowV3Props) {
     userRole: "",
     industry: "",
     primaryGoal: "",
+    primaryGoals: [], // New: Support multiple goals
     teamContext: "",
     contentTypes: [],
     aiExperience: "beginner",
@@ -286,6 +288,8 @@ function PersonalInfoStep({
     { id: "business_owner", icon: Briefcase, label: "Business Owner", color: "from-orange-500 to-red-500" },
     { id: "content_creator", icon: Palette, label: "Content Creator", color: "from-pink-500 to-rose-500" },
     { id: "student", icon: Sparkles, label: "Student", color: "from-indigo-500 to-purple-500" },
+    { id: "consultant", icon: Users, label: "Consultant/Advisor", color: "from-teal-500 to-cyan-500" },
+    { id: "freelancer", icon: Zap, label: "Freelancer", color: "from-yellow-500 to-amber-500" },
   ];
 
   const handleRoleSelect = (roleId: string) => {
@@ -376,87 +380,141 @@ function GoalsStep({
       { id: "student_help", label: "Help students with questions using AI" },
       { id: "create_content", label: "Create educational content faster" },
       { id: "track_progress", label: "Track student progress and engagement" },
+      { id: "grade_faster", label: "Speed up grading and feedback" },
+      { id: "curriculum_design", label: "Design and improve curriculum" },
     ],
     researcher: [
       { id: "literature_review", label: "Organize and review research papers" },
       { id: "analyze_data", label: "Analyze data and find insights" },
       { id: "write_papers", label: "Write and edit research papers" },
       { id: "collaborate", label: "Collaborate with other researchers" },
+      { id: "grant_writing", label: "Write grant proposals" },
+      { id: "annotate_sources", label: "Annotate and summarize sources" },
     ],
     developer: [
       { id: "document_code", label: "Document and organize code knowledge" },
       { id: "debug_help", label: "Get help debugging and solving problems" },
       { id: "learn_tech", label: "Learn new technologies faster" },
       { id: "team_docs", label: "Centralize team documentation" },
+      { id: "code_review", label: "Improve code review process" },
+      { id: "api_docs", label: "Maintain API documentation" },
     ],
     business_owner: [
       { id: "organize_docs", label: "Organize business documents and contracts" },
       { id: "market_research", label: "Research markets and competitors" },
       { id: "content_marketing", label: "Create marketing content" },
       { id: "decision_support", label: "Get AI support for business decisions" },
+      { id: "sales_enablement", label: "Enable sales team with knowledge" },
+      { id: "customer_insights", label: "Analyze customer feedback and insights" },
     ],
     content_creator: [
       { id: "ideas", label: "Generate and organize content ideas" },
       { id: "research_topics", label: "Research topics deeply" },
       { id: "draft_content", label: "Draft content faster" },
       { id: "repurpose", label: "Repurpose content across platforms" },
+      { id: "seo_optimize", label: "Optimize content for SEO" },
+      { id: "audience_research", label: "Research audience and trends" },
     ],
     student: [
       { id: "study_help", label: "Get help understanding difficult concepts" },
       { id: "organize_notes", label: "Organize notes and study materials" },
       { id: "research_projects", label: "Research for essays and projects" },
       { id: "exam_prep", label: "Prepare for exams efficiently" },
+      { id: "writing_help", label: "Improve essay and paper writing" },
+      { id: "group_collab", label: "Collaborate on group projects" },
+    ],
+    consultant: [
+      { id: "client_research", label: "Research client industries and competitors" },
+      { id: "proposal_writing", label: "Create compelling proposals" },
+      { id: "knowledge_base", label: "Build consulting knowledge base" },
+      { id: "presentation_prep", label: "Prepare client presentations" },
+      { id: "best_practices", label: "Stay current with best practices" },
+      { id: "client_reports", label: "Generate client reports and insights" },
+    ],
+    freelancer: [
+      { id: "project_management", label: "Manage multiple client projects" },
+      { id: "client_communication", label: "Organize client communications" },
+      { id: "portfolio_content", label: "Create portfolio and marketing content" },
+      { id: "skill_learning", label: "Learn new skills faster" },
+      { id: "invoice_contracts", label: "Organize invoices and contracts" },
+      { id: "time_tracking", label: "Track time and project progress" },
     ],
   };
 
   const roleGoals = goals[userContext.userRole as keyof typeof goals] || goals.student;
 
-  const handleGoalSelect = (goalId: string) => {
-    setUserContext({ ...userContext, primaryGoal: goalId });
+  const handleGoalToggle = (goalId: string) => {
+    const currentGoals = userContext.primaryGoals || [];
+    let newGoals: string[];
+
+    if (currentGoals.includes(goalId)) {
+      // Remove if already selected
+      newGoals = currentGoals.filter((g) => g !== goalId);
+    } else {
+      // Add if not selected
+      newGoals = [...currentGoals, goalId];
+    }
+
+    // Also update primaryGoal to be the first selected goal
+    const primaryGoal = newGoals.length > 0 ? newGoals[0] : "";
+
+    setUserContext({
+      ...userContext,
+      primaryGoal,
+      primaryGoals: newGoals
+    });
   };
 
   return (
     <div className="space-y-6 py-4">
       <div className="text-center">
         <h2 className="text-3xl font-bold mb-2 text-slate-900 dark:text-white">
-          What's your main goal?
+          What are your goals?
         </h2>
         <p className="text-slate-600 dark:text-slate-300">
-          We'll prioritize features that help you achieve this
+          Select all that apply - we'll prioritize features for you
         </p>
+        {userContext.primaryGoals && userContext.primaryGoals.length > 0 && (
+          <p className="text-sm text-purple-600 dark:text-purple-400 mt-2">
+            {userContext.primaryGoals.length} goal{userContext.primaryGoals.length > 1 ? 's' : ''} selected
+          </p>
+        )}
       </div>
 
       <div className="max-w-xl mx-auto space-y-3">
-        {roleGoals.map((goal) => (
-          <button
-            key={goal.id}
-            onClick={() => handleGoalSelect(goal.id)}
-            className={`w-full p-5 rounded-xl border-2 transition-all text-left flex items-center gap-4 ${
-              userContext.primaryGoal === goal.id
-                ? "border-purple-500 dark:border-purple-400 bg-purple-50 dark:bg-purple-950/30 shadow-md"
-                : "border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600 bg-white dark:bg-slate-800"
-            }`}
-          >
-            <div className={`h-10 w-10 rounded-full flex items-center justify-center flex-shrink-0 ${
-              userContext.primaryGoal === goal.id
-                ? "bg-gradient-to-br from-purple-500 to-blue-500"
-                : "bg-slate-100 dark:bg-slate-700"
-            }`}>
-              {userContext.primaryGoal === goal.id ? (
-                <Check className="h-5 w-5 text-white" />
-              ) : (
-                <Zap className="h-5 w-5 text-slate-600 dark:text-slate-300" />
-              )}
-            </div>
-            <span className="font-medium text-slate-900 dark:text-white">{goal.label}</span>
-          </button>
-        ))}
+        {roleGoals.map((goal) => {
+          const isSelected = userContext.primaryGoals?.includes(goal.id) || false;
+          return (
+            <button
+              key={goal.id}
+              onClick={() => handleGoalToggle(goal.id)}
+              className={`w-full p-5 rounded-xl border-2 transition-all text-left flex items-center gap-4 ${
+                isSelected
+                  ? "border-purple-500 dark:border-purple-400 bg-purple-50 dark:bg-purple-950/30 shadow-md"
+                  : "border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600 bg-white dark:bg-slate-800"
+              }`}
+            >
+              <div className={`h-10 w-10 rounded-full flex items-center justify-center flex-shrink-0 ${
+                isSelected
+                  ? "bg-gradient-to-br from-purple-500 to-blue-500"
+                  : "bg-slate-100 dark:bg-slate-700"
+              }`}>
+                {isSelected ? (
+                  <Check className="h-5 w-5 text-white" />
+                ) : (
+                  <Zap className="h-5 w-5 text-slate-600 dark:text-slate-300" />
+                )}
+              </div>
+              <span className="font-medium text-slate-900 dark:text-white">{goal.label}</span>
+            </button>
+          );
+        })}
       </div>
 
       <div className="flex justify-center pt-4">
         <Button
           onClick={onNext}
-          disabled={isLoading || !userContext.primaryGoal}
+          disabled={isLoading || !userContext.primaryGoals || userContext.primaryGoals.length === 0}
           size="lg"
           className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
         >
@@ -479,12 +537,13 @@ function CustomizeStep({
   isLoading: boolean;
 }) {
   const contentTypes = [
-    { id: "documents", label: "Documents & PDFs", icon: "📄" },
-    { id: "research_papers", label: "Research Papers", icon: "📚" },
-    { id: "code", label: "Code & Tech Docs", icon: "💻" },
-    { id: "videos", label: "Videos & Recordings", icon: "🎥" },
-    { id: "images", label: "Images & Diagrams", icon: "🖼️" },
-    { id: "spreadsheets", label: "Spreadsheets & Data", icon: "📊" },
+    { id: "documents", label: "Documents & PDFs", icon: "📄", available: true },
+    { id: "research_papers", label: "Research Papers", icon: "📚", available: true },
+    { id: "code", label: "Code & Tech Docs", icon: "💻", available: true },
+    { id: "spreadsheets", label: "Spreadsheets & Data", icon: "📊", available: true },
+    { id: "presentations", label: "Presentations (PowerPoint)", icon: "📽️", available: true },
+    { id: "images", label: "Images & Diagrams", icon: "🖼️", available: false, comingSoon: true },
+    { id: "videos", label: "Videos & Recordings", icon: "🎥", available: false, comingSoon: true },
   ];
 
   const teamContexts = [
@@ -531,15 +590,23 @@ function CustomizeStep({
             {contentTypes.map((type) => (
               <button
                 key={type.id}
-                onClick={() => toggleContentType(type.id)}
-                className={`p-3 rounded-lg border-2 transition-all text-left flex items-center gap-3 ${
-                  userContext.contentTypes.includes(type.id)
+                onClick={() => type.available !== false && toggleContentType(type.id)}
+                disabled={type.available === false}
+                className={`p-3 rounded-lg border-2 transition-all text-left flex items-center gap-3 relative ${
+                  type.available === false
+                    ? "border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/50 opacity-60 cursor-not-allowed"
+                    : userContext.contentTypes.includes(type.id)
                     ? "border-purple-500 dark:border-purple-400 bg-purple-50 dark:bg-purple-950/30"
                     : "border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600 bg-white dark:bg-slate-800"
                 }`}
               >
                 <span className="text-2xl">{type.icon}</span>
-                <span className="text-sm font-medium text-slate-900 dark:text-white">{type.label}</span>
+                <div className="flex-1">
+                  <span className="text-sm font-medium text-slate-900 dark:text-white">{type.label}</span>
+                  {type.comingSoon && (
+                    <span className="block text-xs text-slate-500 dark:text-slate-400 mt-0.5">Coming soon</span>
+                  )}
+                </div>
                 {userContext.contentTypes.includes(type.id) && (
                   <Check className="h-4 w-4 text-purple-600 dark:text-purple-400 ml-auto" />
                 )}

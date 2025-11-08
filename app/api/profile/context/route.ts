@@ -21,6 +21,7 @@ export async function POST(request: Request) {
       userRole,
       industry,
       primaryGoal,
+      primaryGoals, // New: array of goals
       teamContext,
       contentTypes,
       aiExperience,
@@ -34,6 +35,7 @@ export async function POST(request: Request) {
         user_role: userRole,
         industry: industry,
         primary_goal: primaryGoal,
+        primary_goals: primaryGoals || (primaryGoal ? [primaryGoal] : []), // Store array of goals
         team_context: teamContext,
         content_types: contentTypes,
         ai_experience_level: aiExperience || "beginner",
