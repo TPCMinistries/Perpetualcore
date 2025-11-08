@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { INDUSTRY_CONFIGS } from "@/lib/dashboard/industry-config";
 import { ArrowRight, Briefcase } from "lucide-react";
+import { PublicMobileNav } from "@/components/layout/PublicMobileNav";
 
 export const metadata = {
   title: "Solutions by Industry | Perpetual Core",
@@ -77,7 +78,7 @@ export default function SolutionsPage() {
             </Button>
           </nav>
           <div className="md:hidden flex items-center gap-2">
-            <Link href="/login" className="text-sm font-medium">Sign In</Link>
+            <PublicMobileNav />
             <Button size="sm" asChild className="h-9 shadow-md active:scale-95 transition-all">
               <Link href="/signup">Start Free</Link>
             </Button>

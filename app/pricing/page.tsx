@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Check, Zap, Crown, Building2, Sparkles, ArrowRight } from "lucide-react";
 import { toast } from "sonner";
+import { PublicMobileNav } from "@/components/layout/PublicMobileNav";
 
 const PLANS = [
   {
@@ -219,10 +220,15 @@ export default function PricingPage() {
             </div>
             <span className="text-lg sm:text-xl font-bold">Perpetual Core</span>
           </Link>
-          <div className="flex items-center gap-2 sm:gap-4">
-            <Link href="/login" className="text-sm font-medium hover:underline">
-              Sign In
-            </Link>
+          <div className="flex items-center gap-2">
+            <div className="hidden sm:block">
+              <Link href="/login" className="text-sm font-medium hover:underline">
+                Sign In
+              </Link>
+            </div>
+            <div className="md:hidden">
+              <PublicMobileNav />
+            </div>
             <Button asChild size="sm" className="h-9 shadow-md active:scale-95 transition-all">
               <Link href="/signup">Get Started</Link>
             </Button>

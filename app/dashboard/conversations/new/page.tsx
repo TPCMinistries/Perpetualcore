@@ -34,6 +34,21 @@ interface TeamMember {
   avatar_url: string | null;
 }
 
+interface Space {
+  id: string;
+  name: string;
+  emoji: string;
+  color: string;
+  space_type: string;
+}
+
+interface Project {
+  id: string;
+  name: string;
+  icon: string;
+  color: string;
+}
+
 export default function NewConversationPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);

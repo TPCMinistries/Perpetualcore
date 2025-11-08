@@ -39,6 +39,7 @@ import {
   Send,
 } from "lucide-react";
 import { INDUSTRY_CONFIGS } from "@/lib/dashboard/industry-config";
+import { PublicMobileNav } from "@/components/layout/PublicMobileNav";
 
 // Demo chat messages
 const DEMO_MESSAGES = [
@@ -230,9 +231,7 @@ export default function HomePage() {
             </Button>
           </nav>
           <div className="md:hidden flex items-center gap-2">
-            <Link href="/login" className="text-sm font-medium hover:text-primary">
-              Sign In
-            </Link>
+            <PublicMobileNav />
             <Button size="sm" asChild className="h-9 px-4 text-sm font-semibold shadow-md active:scale-95 transition-all">
               <Link href="/signup">Start Free</Link>
             </Button>
