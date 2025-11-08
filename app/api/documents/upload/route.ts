@@ -39,15 +39,19 @@ export async function POST(req: NextRequest) {
       .eq("id", user.id)
       .single();
 
-    if (profileError || !profile || !profile.organization_id) {
+    if (profileError || !profile) {
       return new Response("Profile not found", { status: 400 });
     }
+
+    // Allow personal uploads without organization
+    // Use user_id as org_id if no org exists
+    const organizationId = profile.organization_id || user.id;
 
     // Get subscription plan
     const { data: subscription } = await supabase
       .from("subscriptions")
       .select("plan")
-      .eq("organization_id", profile.organization_id)
+      .eq("organization_id", organizationId)
       .single();
 
     const plan = subscription?.plan || "free";
@@ -85,7 +89,7 @@ export async function POST(req: NextRequest) {
       const { data: documents } = await supabase
         .from("documents")
         .select("file_size")
-        .eq("organization_id", profile.organization_id);
+        .eq("organization_id", organizationId);
 
       const totalStorage =
         documents?.reduce((sum, doc) => sum + (doc.file_size || 0), 0) || 0;
@@ -122,7 +126,7 @@ export async function POST(req: NextRequest) {
     const { data: document, error: docError } = await supabase
       .from("documents")
       .insert({
-        organization_id: profile.organization_id,
+        organization_id: organizationId,
         user_id: user.id,
         title: file.name,
         content: "", // Will be filled during processing
