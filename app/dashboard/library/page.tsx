@@ -38,6 +38,8 @@ interface Document {
   status: "processing" | "completed" | "failed";
   error_message?: string;
   folder_id?: string | null;
+  knowledge_space_id?: string | null;
+  project_id?: string | null;
   metadata: {
     wordCount: number;
     charCount: number;
@@ -301,25 +303,25 @@ export default function LibraryPage() {
   return (
     <div className="h-screen bg-slate-50 dark:bg-slate-950 flex flex-col">
       {/* Header */}
-      <div className="border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-8 py-4">
+      <div className="border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-8 py-6">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <div className="h-12 w-12 rounded-lg bg-slate-900 dark:bg-slate-100 flex items-center justify-center">
-              <BookOpen className="h-6 w-6 text-white dark:text-slate-900" />
+            <div className="h-14 w-14 rounded-xl bg-gradient-to-br from-slate-900 to-slate-700 dark:from-slate-100 dark:to-slate-300 flex items-center justify-center shadow-lg">
+              <BookOpen className="h-7 w-7 text-white dark:text-slate-900" />
             </div>
             <div>
-              <h1 className="text-3xl font-semibold text-slate-900 dark:text-slate-100">
+              <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-100">
                 Library
               </h1>
-              <p className="text-slate-600 dark:text-slate-400 mt-1">
-                Your unified knowledge hub - {stats.total} documents across all spaces
+              <p className="text-sm text-slate-600 dark:text-slate-400 mt-1.5 max-w-2xl">
+                Your organization's centralized knowledge base. {stats.total} documents organized across {spaces.length} spaces, searchable and AI-enhanced.
               </p>
             </div>
           </div>
           <Link href="/dashboard/chat">
-            <Button className="bg-slate-900 dark:bg-slate-100 hover:bg-slate-800 dark:hover:bg-slate-200 text-white dark:text-slate-900">
-              <MessageSquare className="h-4 w-4 mr-2" />
-              Chat with Library
+            <Button size="lg" className="bg-slate-900 dark:bg-slate-100 hover:bg-slate-800 dark:hover:bg-slate-200 text-white dark:text-slate-900 shadow-lg">
+              <Brain className="h-5 w-5 mr-2" />
+              Ask AI Anything
             </Button>
           </Link>
         </div>
@@ -363,9 +365,30 @@ export default function LibraryPage() {
 
           {/* Overview Tab */}
           <TabsContent value="overview" className="mt-0">
-            <div className="p-8 space-y-6">
+            <div className="p-8 space-y-8">
+              {/* Intro Card */}
+              <Card className="border-blue-200 dark:border-blue-900 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 p-6">
+                <div className="flex items-start gap-4">
+                  <div className="h-12 w-12 rounded-lg bg-blue-500 flex items-center justify-center flex-shrink-0">
+                    <Brain className="h-6 w-6 text-white" />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100 mb-2">
+                      Your AI-Enhanced Knowledge Base
+                    </h3>
+                    <p className="text-sm text-slate-700 dark:text-slate-300 leading-relaxed">
+                      Welcome to your Library - the central hub for all organizational knowledge. Every document is automatically processed,
+                      summarized, and made searchable by AI. Organize using <strong>Spaces</strong> (team-specific knowledge) or <strong>Projects</strong> (cross-functional work),
+                      then chat with any document or your entire library instantly.
+                    </p>
+                  </div>
+                </div>
+              </Card>
+
               {/* Stats Cards */}
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+              <div>
+                <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-100 mb-4">Quick Stats</h2>
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                 <Card className="border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6">
                   <div className="flex items-center justify-between">
                     <div>
@@ -419,6 +442,7 @@ export default function LibraryPage() {
                     <TrendingUp className="h-8 w-8 text-green-500" />
                   </div>
                 </Card>
+                </div>
               </div>
 
               {/* Document Types Distribution */}
@@ -456,6 +480,14 @@ export default function LibraryPage() {
           {/* All Documents Tab */}
           <TabsContent value="all" className="mt-0">
             <div className="p-8">
+              {/* Explanation */}
+              <div className="mb-6 pb-4 border-b border-slate-200 dark:border-slate-800">
+                <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-100 mb-2">All Documents</h2>
+                <p className="text-sm text-slate-600 dark:text-slate-400">
+                  Browse, search, and manage every document in your knowledge base. Use filters to find specific types, or search across titles, summaries, and content.
+                </p>
+              </div>
+
               {/* Search & Actions Bar */}
               <div className="mb-6 space-y-4">
                 <div className="flex items-center gap-3">
@@ -579,49 +611,93 @@ export default function LibraryPage() {
           {/* By Space Tab */}
           <TabsContent value="spaces" className="mt-0">
             <div className="p-8">
-              <div className="mb-6">
-                <Select
-                  value={selectedSpaceId || "all"}
-                  onValueChange={(value) => setSelectedSpaceId(value === "all" ? null : value)}
-                >
-                  <SelectTrigger className="w-64">
-                    <SelectValue placeholder="Select a space" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Spaces</SelectItem>
-                    {spaces.map((space) => (
-                      <SelectItem key={space.id} value={space.id}>
-                        <div className="flex items-center gap-2">
-                          <span>{space.emoji}</span>
-                          <span>{space.name}</span>
-                          <span className="text-xs text-slate-500">({space.space_type})</span>
-                        </div>
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+              {/* Explanation */}
+              <div className="mb-8">
+                <Card className="border-purple-200 dark:border-purple-900 bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-950/30 dark:to-pink-950/30 p-6">
+                  <div className="flex items-start gap-4">
+                    <div className="h-12 w-12 rounded-lg bg-purple-500 flex items-center justify-center flex-shrink-0">
+                      <Building2 className="h-6 w-6 text-white" />
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100 mb-2">
+                        Knowledge Spaces
+                      </h3>
+                      <p className="text-sm text-slate-700 dark:text-slate-300 leading-relaxed">
+                        <strong>Spaces</strong> are team-specific knowledge containers. Think of them as dedicated libraries for different departments (Engineering, Sales, Marketing) or teams.
+                        Documents in a Space are only accessible to that team and can be used in team conversations with scoped AI context.
+                      </p>
+                    </div>
+                  </div>
+                </Card>
               </div>
 
-              {filteredDocuments.length === 0 ? (
+              {spaces.length === 0 ? (
                 <EmptyState
                   icon={Building2}
-                  title="No documents in this space"
-                  description="Documents added to this space will appear here."
+                  title="No Knowledge Spaces yet"
+                  description="Create your first Space to organize documents by team or department."
                 />
               ) : (
-                <div className="grid gap-6 lg:grid-cols-2 2xl:grid-cols-3">
-                  {filteredDocuments.map((doc) => (
-                    <DocumentCard
-                      key={doc.id}
-                      doc={doc}
-                      onDelete={handleDelete}
-                      onGenerateSummary={handleGenerateSummary}
-                      onOpenChat={handleOpenChat}
-                      onOpenPreview={handleOpenPreview}
-                      onTagsChange={fetchAll}
-                      generatingSummary={generatingSummary}
-                    />
-                  ))}
+                <div className="space-y-6">
+                  {spaces.map((space) => {
+                    const spaceDocuments = documents.filter(
+                      (doc) => doc.knowledge_space_id === space.id && doc.status === "completed"
+                    );
+                    return (
+                      <Card key={space.id} className="border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6">
+                        <div className="flex items-center justify-between mb-4">
+                          <div className="flex items-center gap-3">
+                            <div className={`h-10 w-10 rounded-lg ${space.color || 'bg-slate-200 dark:bg-slate-700'} flex items-center justify-center text-2xl`}>
+                              {space.emoji}
+                            </div>
+                            <div>
+                              <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100">{space.name}</h3>
+                              <p className="text-sm text-slate-600 dark:text-slate-400">
+                                {space.space_type} • {spaceDocuments.length} document{spaceDocuments.length !== 1 ? 's' : ''}
+                              </p>
+                            </div>
+                          </div>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setSelectedSpaceId(space.id)}
+                          >
+                            View All
+                          </Button>
+                        </div>
+
+                        {spaceDocuments.length === 0 ? (
+                          <div className="text-center py-8 text-sm text-slate-500">
+                            No documents in this space yet
+                          </div>
+                        ) : (
+                          <div className="grid gap-4 lg:grid-cols-3">
+                            {spaceDocuments.slice(0, 3).map((doc) => (
+                              <div
+                                key={doc.id}
+                                className="border border-slate-200 dark:border-slate-700 rounded-lg p-4 hover:border-slate-300 dark:hover:border-slate-600 transition-colors cursor-pointer"
+                                onClick={() => handleOpenPreview(doc)}
+                              >
+                                <div className="flex items-start gap-3">
+                                  <FileText className="h-5 w-5 text-slate-400 flex-shrink-0 mt-0.5" />
+                                  <div className="min-w-0 flex-1">
+                                    <h4 className="text-sm font-medium text-slate-900 dark:text-slate-100 truncate">
+                                      {doc.title}
+                                    </h4>
+                                    {doc.document_type && (
+                                      <span className="inline-block mt-1 px-2 py-0.5 bg-slate-100 dark:bg-slate-800 text-xs rounded text-slate-600 dark:text-slate-400">
+                                        {doc.document_type}
+                                      </span>
+                                    )}
+                                  </div>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </Card>
+                    );
+                  })}
                 </div>
               )}
             </div>
@@ -630,48 +706,93 @@ export default function LibraryPage() {
           {/* By Project Tab */}
           <TabsContent value="projects" className="mt-0">
             <div className="p-8">
-              <div className="mb-6">
-                <Select
-                  value={selectedProjectId || "all"}
-                  onValueChange={(value) => setSelectedProjectId(value === "all" ? null : value)}
-                >
-                  <SelectTrigger className="w-64">
-                    <SelectValue placeholder="Select a project" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Projects</SelectItem>
-                    {projects.map((project) => (
-                      <SelectItem key={project.id} value={project.id}>
-                        <div className="flex items-center gap-2">
-                          <span>{project.icon}</span>
-                          <span>{project.name}</span>
-                        </div>
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+              {/* Explanation */}
+              <div className="mb-8">
+                <Card className="border-green-200 dark:border-green-900 bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-950/30 dark:to-emerald-950/30 p-6">
+                  <div className="flex items-start gap-4">
+                    <div className="h-12 w-12 rounded-lg bg-green-500 flex items-center justify-center flex-shrink-0">
+                      <Briefcase className="h-6 w-6 text-white" />
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100 mb-2">
+                        Project-Based Organization
+                      </h3>
+                      <p className="text-sm text-slate-700 dark:text-slate-300 leading-relaxed">
+                        <strong>Projects</strong> are cross-functional workspaces that bring together documents from different teams.
+                        Perfect for initiatives, campaigns, or deliverables that span multiple departments. Documents can belong to multiple projects simultaneously.
+                      </p>
+                    </div>
+                  </div>
+                </Card>
               </div>
 
-              {filteredDocuments.length === 0 ? (
+              {projects.length === 0 ? (
                 <EmptyState
                   icon={Briefcase}
-                  title="No documents in this project"
-                  description="Documents added to this project will appear here."
+                  title="No Projects yet"
+                  description="Create your first Project to organize cross-functional work and deliverables."
                 />
               ) : (
-                <div className="grid gap-6 lg:grid-cols-2 2xl:grid-cols-3">
-                  {filteredDocuments.map((doc) => (
-                    <DocumentCard
-                      key={doc.id}
-                      doc={doc}
-                      onDelete={handleDelete}
-                      onGenerateSummary={handleGenerateSummary}
-                      onOpenChat={handleOpenChat}
-                      onOpenPreview={handleOpenPreview}
-                      onTagsChange={fetchAll}
-                      generatingSummary={generatingSummary}
-                    />
-                  ))}
+                <div className="space-y-6">
+                  {projects.map((project) => {
+                    const projectDocuments = documents.filter(
+                      (doc) => doc.project_id === project.id && doc.status === "completed"
+                    );
+                    return (
+                      <Card key={project.id} className="border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6">
+                        <div className="flex items-center justify-between mb-4">
+                          <div className="flex items-center gap-3">
+                            <div className={`h-10 w-10 rounded-lg ${project.color || 'bg-slate-200 dark:bg-slate-700'} flex items-center justify-center text-2xl`}>
+                              {project.icon}
+                            </div>
+                            <div>
+                              <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100">{project.name}</h3>
+                              <p className="text-sm text-slate-600 dark:text-slate-400">
+                                {projectDocuments.length} document{projectDocuments.length !== 1 ? 's' : ''}
+                              </p>
+                            </div>
+                          </div>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setSelectedProjectId(project.id)}
+                          >
+                            View All
+                          </Button>
+                        </div>
+
+                        {projectDocuments.length === 0 ? (
+                          <div className="text-center py-8 text-sm text-slate-500">
+                            No documents in this project yet
+                          </div>
+                        ) : (
+                          <div className="grid gap-4 lg:grid-cols-3">
+                            {projectDocuments.slice(0, 3).map((doc) => (
+                              <div
+                                key={doc.id}
+                                className="border border-slate-200 dark:border-slate-700 rounded-lg p-4 hover:border-slate-300 dark:hover:border-slate-600 transition-colors cursor-pointer"
+                                onClick={() => handleOpenPreview(doc)}
+                              >
+                                <div className="flex items-start gap-3">
+                                  <FileText className="h-5 w-5 text-slate-400 flex-shrink-0 mt-0.5" />
+                                  <div className="min-w-0 flex-1">
+                                    <h4 className="text-sm font-medium text-slate-900 dark:text-slate-100 truncate">
+                                      {doc.title}
+                                    </h4>
+                                    {doc.document_type && (
+                                      <span className="inline-block mt-1 px-2 py-0.5 bg-slate-100 dark:bg-slate-800 text-xs rounded text-slate-600 dark:text-slate-400">
+                                        {doc.document_type}
+                                      </span>
+                                    )}
+                                  </div>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </Card>
+                    );
+                  })}
                 </div>
               )}
             </div>
