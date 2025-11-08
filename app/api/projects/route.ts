@@ -81,6 +81,7 @@ export async function POST(req: NextRequest) {
       .from("projects")
       .insert({
         organization_id: profile.organization_id,
+        created_by: user.id,
         name: name.trim(),
         color: color || "#6366f1",
         icon: icon || "📁",

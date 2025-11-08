@@ -55,12 +55,12 @@ export default function SolutionsPage() {
     <div className="min-h-screen bg-gradient-to-b from-background via-background to-muted/20">
       {/* Navigation */}
       <header className="border-b backdrop-blur-2xl bg-card/80 sticky top-0 z-50 shadow-sm">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
+        <div className="container mx-auto px-3 sm:px-4 py-3 sm:py-4 flex items-center justify-between">
           <Link href="/" className="flex items-center space-x-2">
             <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-primary to-purple-600 flex items-center justify-center text-primary-foreground font-bold shadow-lg">
               AI
             </div>
-            <span className="text-xl font-bold">Perpetual Core</span>
+            <span className="text-lg sm:text-xl font-bold">Perpetual Core</span>
           </Link>
           <nav className="hidden md:flex items-center gap-8">
             <Link href="/#features" className="text-sm font-medium hover:text-primary transition">
@@ -78,7 +78,7 @@ export default function SolutionsPage() {
           </nav>
           <div className="md:hidden flex items-center gap-2">
             <Link href="/login" className="text-sm font-medium">Sign In</Link>
-            <Button size="sm" asChild>
+            <Button size="sm" asChild className="h-9 shadow-md active:scale-95 transition-all">
               <Link href="/signup">Start Free</Link>
             </Button>
           </div>
@@ -86,24 +86,24 @@ export default function SolutionsPage() {
       </header>
 
       {/* Hero Section */}
-      <section className="container mx-auto px-4 py-24 md:py-32">
+      <section className="container mx-auto px-4 py-16 sm:py-24 md:py-32">
         <div className="max-w-4xl mx-auto text-center">
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full backdrop-blur-2xl bg-gradient-to-r from-primary/20 to-purple-500/20 border-2 border-primary/30 text-primary text-sm font-medium mb-8 shadow-xl">
-            <Briefcase className="h-4 w-4" />
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full backdrop-blur-2xl bg-gradient-to-r from-primary/20 to-purple-500/20 border-2 border-primary/30 text-primary text-xs sm:text-sm font-medium mb-6 sm:mb-8 shadow-xl">
+            <Briefcase className="h-4 w-4 flex-shrink-0" />
             <span className="font-semibold">12+ Industry Solutions</span>
           </div>
 
-          <h1 className="text-6xl md:text-8xl font-extrabold tracking-tight mb-8 bg-gradient-to-r from-gray-900 via-primary to-purple-600 dark:from-white dark:via-primary dark:to-purple-400 bg-clip-text text-transparent leading-tight">
+          <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-8xl font-extrabold tracking-tight mb-6 sm:mb-8 bg-gradient-to-r from-gray-900 via-primary to-purple-600 dark:from-white dark:via-primary dark:to-purple-400 bg-clip-text text-transparent leading-tight px-4">
             Built for Your Industry
           </h1>
 
-          <p className="text-xl md:text-2xl text-muted-foreground mb-12 max-w-3xl mx-auto leading-relaxed">
+          <p className="text-base sm:text-lg md:text-xl lg:text-2xl text-muted-foreground mb-8 sm:mb-12 max-w-3xl mx-auto leading-relaxed px-4">
             Tailored AI solutions designed specifically for professionals who need institutional memory and expertise preservation
           </p>
 
-          <Button size="lg" asChild className="text-lg px-8 py-6 shadow-2xl hover:shadow-3xl transition-all">
+          <Button size="lg" asChild className="text-base sm:text-lg px-6 sm:px-8 py-5 sm:py-6 h-auto shadow-2xl hover:shadow-3xl transition-all active:scale-95 touch-manipulation">
             <Link href="/signup">
-              Start Free Trial <ArrowRight className="ml-2 h-5 w-5" />
+              Start Free Trial <ArrowRight className="ml-2 h-4 sm:h-5 w-4 sm:w-5" />
             </Link>
           </Button>
         </div>

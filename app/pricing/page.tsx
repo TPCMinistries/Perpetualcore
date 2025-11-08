@@ -212,39 +212,39 @@ export default function PricingPage() {
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white dark:from-gray-900 dark:to-gray-800">
       {/* Header */}
       <header className="border-b bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm sticky top-0 z-10">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
+        <div className="container mx-auto px-3 sm:px-4 py-3 sm:py-4 flex items-center justify-between">
           <Link href="/" className="flex items-center space-x-2">
-            <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center text-primary-foreground font-bold">
+            <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center text-primary-foreground font-bold shadow-lg">
               AI
             </div>
-            <span className="text-xl font-bold">Perpetual Core</span>
+            <span className="text-lg sm:text-xl font-bold">Perpetual Core</span>
           </Link>
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2 sm:gap-4">
             <Link href="/login" className="text-sm font-medium hover:underline">
               Sign In
             </Link>
-            <Button asChild>
+            <Button asChild size="sm" className="h-9 shadow-md active:scale-95 transition-all">
               <Link href="/signup">Get Started</Link>
             </Button>
           </div>
         </div>
       </header>
 
-      <div className="container mx-auto px-4 py-16">
+      <div className="container mx-auto px-4 py-12 sm:py-16">
         {/* Hero Section */}
-        <div className="text-center mb-16">
-          <h1 className="text-5xl font-bold tracking-tight mb-4">
+        <div className="text-center mb-12 sm:mb-16">
+          <h1 className="text-4xl sm:text-5xl font-bold tracking-tight mb-4 px-4">
             Simple, Transparent Pricing
           </h1>
-          <p className="text-xl text-muted-foreground max-w-2xl mx-auto mb-8">
+          <p className="text-base sm:text-xl text-muted-foreground max-w-2xl mx-auto mb-6 sm:mb-8 px-4">
             Choose the perfect plan for your needs. All plans include a 14-day free trial.
           </p>
 
           {/* Billing Toggle */}
-          <div className="inline-flex items-center gap-4 p-1 bg-muted rounded-lg">
+          <div className="inline-flex items-center gap-2 sm:gap-4 p-1 bg-muted rounded-lg touch-manipulation">
             <button
               onClick={() => setBillingInterval("monthly")}
-              className={`px-6 py-2 rounded-md font-medium transition ${
+              className={`px-4 sm:px-6 py-2 rounded-md font-medium transition active:scale-95 ${
                 billingInterval === "monthly"
                   ? "bg-white dark:bg-gray-800 shadow"
                   : "text-muted-foreground"
@@ -254,14 +254,14 @@ export default function PricingPage() {
             </button>
             <button
               onClick={() => setBillingInterval("yearly")}
-              className={`px-6 py-2 rounded-md font-medium transition relative ${
+              className={`px-4 sm:px-6 py-2 rounded-md font-medium transition active:scale-95 relative ${
                 billingInterval === "yearly"
                   ? "bg-white dark:bg-gray-800 shadow"
                   : "text-muted-foreground"
               }`}
             >
               Yearly
-              <span className="absolute -top-2 -right-2 bg-green-500 text-white text-xs px-2 py-0.5 rounded-full">
+              <span className="absolute -top-2 -right-2 bg-green-500 text-white text-xs px-2 py-0.5 rounded-full shadow-md">
                 Save 20%
               </span>
             </button>
@@ -269,7 +269,7 @@ export default function PricingPage() {
         </div>
 
         {/* Pricing Cards */}
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8 mb-16">
+        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8 mb-12 sm:mb-16">
           {PLANS.map((plan) => {
             const Icon = plan.icon;
             const yearlyPrice = plan.price ? Math.floor(plan.price * 12 * 0.8) : null;

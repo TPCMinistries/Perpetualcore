@@ -174,12 +174,12 @@ export default function HomePage() {
 
       {/* Navigation */}
       <header className="border-b backdrop-blur-2xl bg-card/80 sticky top-0 z-50 shadow-sm">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
+        <div className="container mx-auto px-3 sm:px-4 py-3 sm:py-4 flex items-center justify-between">
           <Link href="/" className="flex items-center space-x-2">
-            <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-primary to-purple-600 flex items-center justify-center text-primary-foreground font-bold shadow-lg">
+            <div className="h-8 w-8 sm:h-8 sm:w-8 rounded-lg bg-gradient-to-br from-primary to-purple-600 flex items-center justify-center text-primary-foreground font-bold shadow-lg">
               AI
             </div>
-            <span className="text-xl font-bold">Perpetual Core</span>
+            <span className="text-lg sm:text-xl font-bold">Perpetual Core</span>
           </Link>
           <nav className="hidden md:flex items-center gap-8">
             <div className="relative group">
@@ -230,10 +230,10 @@ export default function HomePage() {
             </Button>
           </nav>
           <div className="md:hidden flex items-center gap-2">
-            <Link href="/login" className="text-sm font-medium">
+            <Link href="/login" className="text-sm font-medium hover:text-primary">
               Sign In
             </Link>
-            <Button size="sm" asChild>
+            <Button size="sm" asChild className="h-9 px-4 text-sm font-semibold shadow-md active:scale-95 transition-all">
               <Link href="/signup">Start Free</Link>
             </Button>
           </div>
@@ -241,7 +241,7 @@ export default function HomePage() {
       </header>
 
       {/* Hero Section - Premium Redesign */}
-      <section className="container mx-auto px-4 pt-24 pb-32 md:pt-32 md:pb-48 relative overflow-hidden">
+      <section className="container mx-auto px-4 pt-16 pb-20 sm:pt-24 sm:pb-32 md:pt-32 md:pb-48 relative overflow-hidden">
         {/* Subtle animated background */}
         <div
           className="absolute inset-0 bg-gradient-to-br from-primary/5 via-purple-500/5 to-blue-500/5 opacity-40 transition-all duration-1000"
@@ -252,15 +252,15 @@ export default function HomePage() {
 
         <div className="max-w-6xl mx-auto relative z-10">
           {/* Badge */}
-          <div className="flex justify-center mb-12 animate-on-scroll">
-            <div className="inline-flex items-center gap-3 px-5 py-2.5 rounded-full backdrop-blur-2xl bg-primary/10 border border-primary/20 text-primary text-sm font-semibold shadow-lg">
+          <div className="flex justify-center mb-8 sm:mb-12 animate-on-scroll">
+            <div className="inline-flex items-center gap-2 sm:gap-3 px-4 sm:px-5 py-2 sm:py-2.5 rounded-full backdrop-blur-2xl bg-primary/10 border border-primary/20 text-primary text-xs sm:text-sm font-semibold shadow-lg">
               <div className="h-2 w-2 rounded-full bg-primary animate-pulse" />
               <span className="tracking-wide">Infinite Memory AI Platform</span>
             </div>
           </div>
 
           {/* Massive Headline */}
-          <h1 className="text-center text-7xl md:text-8xl lg:text-9xl font-black tracking-tighter mb-12 leading-[0.95] animate-on-scroll">
+          <h1 className="text-center text-5xl sm:text-6xl md:text-7xl lg:text-9xl font-black tracking-tighter mb-8 sm:mb-12 leading-[0.95] animate-on-scroll px-2">
             <span className="block bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900 dark:from-white dark:via-gray-100 dark:to-white bg-clip-text text-transparent">
               Your AI Brain
             </span>
@@ -270,80 +270,82 @@ export default function HomePage() {
           </h1>
 
           {/* Subtitle with more breathing room */}
-          <p className="text-center text-xl md:text-2xl lg:text-3xl text-muted-foreground/80 mb-16 max-w-4xl mx-auto leading-relaxed font-light animate-on-scroll">
+          <p className="text-center text-base sm:text-xl md:text-2xl lg:text-3xl text-muted-foreground/80 mb-10 sm:mb-16 max-w-4xl mx-auto leading-relaxed font-light animate-on-scroll px-4">
             Access <span className="font-semibold text-foreground">GPT-4, Claude, and Gemini</span> in one place.
-            <br className="hidden md:block" />
+            <br className="hidden sm:block" />
             Infinite context. Team collaboration. 24/7 automation.
           </p>
 
-          {/* CTA Buttons - Larger, more dramatic */}
-          <div className="flex flex-col sm:flex-row gap-6 justify-center mb-20 animate-on-scroll">
+          {/* CTA Buttons - Mobile optimized */}
+          <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 justify-center mb-12 sm:mb-20 animate-on-scroll px-4">
             <Button
               size="lg"
               asChild
-              className="text-xl px-12 py-8 h-auto rounded-2xl shadow-2xl hover:shadow-3xl transition-all bg-gradient-to-r from-primary to-purple-600 hover:from-primary/90 hover:to-purple-600/90"
+              className="text-base sm:text-xl px-8 sm:px-12 py-6 sm:py-8 h-auto rounded-2xl shadow-2xl hover:shadow-3xl transition-all bg-gradient-to-r from-primary to-purple-600 hover:from-primary/90 hover:to-purple-600/90 active:scale-95 touch-manipulation"
             >
               <Link href="/signup">
-                Start Free Trial <ArrowRight className="ml-3 h-6 w-6" />
+                Start Free Trial <ArrowRight className="ml-2 sm:ml-3 h-5 sm:h-6 w-5 sm:w-6" />
               </Link>
             </Button>
             <Button
               size="lg"
               variant="outline"
               asChild
-              className="text-xl px-12 py-8 h-auto rounded-2xl backdrop-blur-2xl bg-transparent border-2 hover:bg-accent/50 shadow-xl hover:shadow-2xl transition-all"
+              className="text-base sm:text-xl px-8 sm:px-12 py-6 sm:py-8 h-auto rounded-2xl backdrop-blur-2xl bg-transparent border-2 hover:bg-accent/50 shadow-xl hover:shadow-2xl transition-all active:scale-95 touch-manipulation"
             >
               <Link href="/pricing">View Pricing</Link>
             </Button>
           </div>
 
-          {/* Trust indicators - More subtle */}
-          <div className="flex flex-wrap items-center justify-center gap-8 text-sm text-muted-foreground/60 mb-24 animate-on-scroll">
+          {/* Trust indicators - Mobile optimized */}
+          <div className="flex flex-wrap items-center justify-center gap-4 sm:gap-8 text-xs sm:text-sm text-muted-foreground/60 mb-12 sm:mb-24 animate-on-scroll px-4">
             <div className="flex items-center gap-2">
-              <Check className="h-4 w-4 text-green-600" />
+              <Check className="h-4 w-4 text-green-600 flex-shrink-0" />
               <span>14-day free trial</span>
             </div>
             <div className="flex items-center gap-2">
-              <Check className="h-4 w-4 text-green-600" />
-              <span>No credit card required</span>
+              <Check className="h-4 w-4 text-green-600 flex-shrink-0" />
+              <span className="hidden sm:inline">No credit card required</span>
+              <span className="sm:hidden">No credit card</span>
             </div>
             <div className="flex items-center gap-2">
-              <Check className="h-4 w-4 text-green-600" />
+              <Check className="h-4 w-4 text-green-600 flex-shrink-0" />
               <span>Cancel anytime</span>
             </div>
           </div>
 
-          {/* Model Pills - Redesigned */}
-          <div className="flex flex-wrap items-center justify-center gap-4 animate-on-scroll">
-            <div className="px-6 py-3 rounded-2xl backdrop-blur-2xl bg-blue-500/10 border border-blue-500/20 text-blue-700 dark:text-blue-400 font-semibold shadow-lg hover:shadow-xl transition-all hover:scale-105">
+          {/* Model Pills - Mobile optimized */}
+          <div className="flex flex-wrap items-center justify-center gap-3 sm:gap-4 animate-on-scroll px-4">
+            <div className="px-4 sm:px-6 py-2.5 sm:py-3 rounded-2xl backdrop-blur-2xl bg-blue-500/10 border border-blue-500/20 text-blue-700 dark:text-blue-400 text-sm sm:text-base font-semibold shadow-lg hover:shadow-xl transition-all active:scale-95 touch-manipulation">
               <MessageSquare className="inline h-4 w-4 mr-2" />
               GPT-4
             </div>
-            <div className="px-6 py-3 rounded-2xl backdrop-blur-2xl bg-purple-500/10 border border-purple-500/20 text-purple-700 dark:text-purple-400 font-semibold shadow-lg hover:shadow-xl transition-all hover:scale-105">
+            <div className="px-4 sm:px-6 py-2.5 sm:py-3 rounded-2xl backdrop-blur-2xl bg-purple-500/10 border border-purple-500/20 text-purple-700 dark:text-purple-400 text-sm sm:text-base font-semibold shadow-lg hover:shadow-xl transition-all active:scale-95 touch-manipulation">
               <Brain className="inline h-4 w-4 mr-2" />
               Claude
             </div>
-            <div className="px-6 py-3 rounded-2xl backdrop-blur-2xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-700 dark:text-emerald-400 font-semibold shadow-lg hover:shadow-xl transition-all hover:scale-105">
+            <div className="px-4 sm:px-6 py-2.5 sm:py-3 rounded-2xl backdrop-blur-2xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-700 dark:text-emerald-400 text-sm sm:text-base font-semibold shadow-lg hover:shadow-xl transition-all active:scale-95 touch-manipulation">
               <Sparkles className="inline h-4 w-4 mr-2" />
               Gemini
             </div>
-            <div className="px-6 py-3 rounded-2xl backdrop-blur-2xl bg-orange-500/10 border border-orange-500/20 text-orange-700 dark:text-orange-400 font-semibold shadow-lg hover:shadow-xl transition-all hover:scale-105">
+            <div className="px-4 sm:px-6 py-2.5 sm:py-3 rounded-2xl backdrop-blur-2xl bg-orange-500/10 border border-orange-500/20 text-orange-700 dark:text-orange-400 text-sm sm:text-base font-semibold shadow-lg hover:shadow-xl transition-all active:scale-95 touch-manipulation">
               <Infinity className="inline h-4 w-4 mr-2" />
-              Infinite Memory
+              <span className="hidden sm:inline">Infinite Memory</span>
+              <span className="sm:hidden">Infinite</span>
             </div>
           </div>
         </div>
       </section>
 
       {/* Interactive Chat Demo - THE Centerpiece */}
-      <section className="container mx-auto px-4 py-32 md:py-40 relative animate-on-scroll">
+      <section className="container mx-auto px-4 py-16 sm:py-24 md:py-40 relative animate-on-scroll">
         <div className="max-w-7xl mx-auto">
           {/* Section Header */}
-          <div className="text-center mb-20">
-            <h2 className="text-6xl md:text-7xl font-black tracking-tight mb-6 bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900 dark:from-white dark:via-gray-100 dark:to-white bg-clip-text text-transparent">
+          <div className="text-center mb-12 sm:mb-20">
+            <h2 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black tracking-tight mb-4 sm:mb-6 bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900 dark:from-white dark:via-gray-100 dark:to-white bg-clip-text text-transparent px-4">
               See The Magic
             </h2>
-            <p className="text-2xl md:text-3xl text-muted-foreground/80 font-light max-w-3xl mx-auto">
+            <p className="text-lg sm:text-xl md:text-2xl lg:text-3xl text-muted-foreground/80 font-light max-w-3xl mx-auto px-4">
               Watch how Perpetual Core remembers context from weeks ago
             </p>
           </div>
@@ -351,41 +353,43 @@ export default function HomePage() {
           {/* Massive Chat Interface */}
           <div className="relative group">
             {/* Dramatic glow effect */}
-            <div className="absolute -inset-4 bg-gradient-to-r from-primary/30 via-purple-500/30 to-pink-500/30 rounded-[3rem] opacity-20 group-hover:opacity-30 blur-3xl transition-all duration-700"></div>
+            <div className="absolute -inset-2 sm:-inset-4 bg-gradient-to-r from-primary/30 via-purple-500/30 to-pink-500/30 rounded-2xl sm:rounded-[3rem] opacity-20 group-hover:opacity-30 blur-3xl transition-all duration-700"></div>
 
-            <div className="relative backdrop-blur-3xl bg-card/90 border-2 border-border/50 rounded-[2.5rem] shadow-[0_20px_70px_-15px_rgba(0,0,0,0.3)] dark:shadow-[0_20px_70px_-15px_rgba(0,0,0,0.6)] overflow-hidden">
-              {/* Chat Header - More premium */}
-              <div className="border-b border-border/50 bg-gradient-to-b from-muted/40 to-muted/20 px-8 py-6">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-4">
-                    <div className="h-14 w-14 rounded-2xl bg-gradient-to-br from-primary via-purple-600 to-purple-700 flex items-center justify-center shadow-xl">
-                      <Brain className="h-7 w-7 text-white" />
+            <div className="relative backdrop-blur-3xl bg-card/90 border-2 border-border/50 rounded-2xl sm:rounded-[2.5rem] shadow-[0_20px_70px_-15px_rgba(0,0,0,0.3)] dark:shadow-[0_20px_70px_-15px_rgba(0,0,0,0.6)] overflow-hidden">
+              {/* Chat Header - Mobile optimized */}
+              <div className="border-b border-border/50 bg-gradient-to-b from-muted/40 to-muted/20 px-4 sm:px-8 py-4 sm:py-6">
+                <div className="flex items-center justify-between gap-2">
+                  <div className="flex items-center gap-2 sm:gap-4 flex-1 min-w-0">
+                    <div className="h-10 w-10 sm:h-14 sm:w-14 rounded-xl sm:rounded-2xl bg-gradient-to-br from-primary via-purple-600 to-purple-700 flex items-center justify-center shadow-xl flex-shrink-0">
+                      <Brain className="h-5 w-5 sm:h-7 sm:w-7 text-white" />
                     </div>
-                    <div>
-                      <h3 className="text-lg font-bold">Perpetual Core Assistant</h3>
-                      <p className="text-sm text-muted-foreground">Infinite memory • Always in context</p>
+                    <div className="flex-1 min-w-0">
+                      <h3 className="text-sm sm:text-lg font-bold truncate">Perpetual Core Assistant</h3>
+                      <p className="text-xs sm:text-sm text-muted-foreground hidden sm:block">Infinite memory • Always in context</p>
+                      <p className="text-xs text-muted-foreground sm:hidden truncate">Always in context</p>
                     </div>
                   </div>
-                  <div className="flex items-center gap-3 px-4 py-2 rounded-full bg-green-500/10 border border-green-500/20">
-                    <div className="h-2.5 w-2.5 rounded-full bg-green-500 animate-pulse shadow-lg shadow-green-500/50"></div>
-                    <span className="text-sm font-semibold text-green-700 dark:text-green-400">Active</span>
+                  <div className="flex items-center gap-2 sm:gap-3 px-2 sm:px-4 py-1.5 sm:py-2 rounded-full bg-green-500/10 border border-green-500/20 flex-shrink-0">
+                    <div className="h-2 w-2 sm:h-2.5 sm:w-2.5 rounded-full bg-green-500 animate-pulse shadow-lg shadow-green-500/50"></div>
+                    <span className="text-xs sm:text-sm font-semibold text-green-700 dark:text-green-400">Active</span>
                   </div>
                 </div>
               </div>
 
-              {/* Chat Messages - More spacious */}
-              <div className="p-10 space-y-6 min-h-[500px] max-h-[600px] overflow-y-auto bg-gradient-to-b from-background/30 via-background/50 to-muted/20">
+              {/* Chat Messages - Mobile optimized */}
+              <div className="p-4 sm:p-10 space-y-4 sm:space-y-6 min-h-[400px] sm:min-h-[500px] max-h-[500px] sm:max-h-[600px] overflow-y-auto bg-gradient-to-b from-background/30 via-background/50 to-muted/20">
                 <ChatDemo />
               </div>
 
-              {/* Chat Input - Larger, more premium */}
-              <div className="border-t border-border/50 bg-gradient-to-b from-muted/20 to-muted/40 px-8 py-6">
-                <div className="flex items-center gap-4">
-                  <div className="flex-1 backdrop-blur-2xl bg-background/60 border-2 border-border/50 rounded-2xl px-6 py-4 text-base text-muted-foreground hover:border-primary/30 transition-colors">
-                    Ask anything... your AI never forgets
+              {/* Chat Input - Mobile optimized */}
+              <div className="border-t border-border/50 bg-gradient-to-b from-muted/20 to-muted/40 px-4 sm:px-8 py-4 sm:py-6">
+                <div className="flex items-center gap-2 sm:gap-4">
+                  <div className="flex-1 backdrop-blur-2xl bg-background/60 border-2 border-border/50 rounded-xl sm:rounded-2xl px-4 sm:px-6 py-3 sm:py-4 text-sm sm:text-base text-muted-foreground hover:border-primary/30 transition-colors">
+                    <span className="hidden sm:inline">Ask anything... your AI never forgets</span>
+                    <span className="sm:hidden">Ask anything...</span>
                   </div>
-                  <Button size="lg" className="h-14 w-14 rounded-2xl shadow-xl bg-gradient-to-r from-primary to-purple-600 hover:from-primary/90 hover:to-purple-600/90">
-                    <Send className="h-5 w-5" />
+                  <Button size="lg" className="h-11 w-11 sm:h-14 sm:w-14 rounded-xl sm:rounded-2xl shadow-xl bg-gradient-to-r from-primary to-purple-600 hover:from-primary/90 hover:to-purple-600/90 active:scale-95 touch-manipulation">
+                    <Send className="h-4 w-4 sm:h-5 sm:w-5" />
                   </Button>
                 </div>
               </div>
