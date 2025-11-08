@@ -15,7 +15,7 @@ export function PublicMobileNav() {
         <Button
           variant="ghost"
           size="icon"
-          className="md:hidden h-10 w-10 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-900 dark:text-slate-100 shadow-sm active:scale-95 transition-all"
+          className="md:hidden h-10 w-10 rounded-lg bg-primary/10 dark:bg-primary/20 hover:bg-primary/20 dark:hover:bg-primary/30 text-primary border border-primary/20 dark:border-primary/30 shadow-lg active:scale-95 transition-all"
         >
           <Menu className="h-5 w-5" />
           <span className="sr-only">Toggle navigation menu</span>
