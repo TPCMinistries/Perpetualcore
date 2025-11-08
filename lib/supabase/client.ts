@@ -17,12 +17,29 @@ export function createClient() {
         storage: typeof window !== 'undefined' ? window.localStorage : undefined,
       },
       cookies: {
-        // Extend cookie lifetime to 30 days
-        options: {
-          maxAge: 60 * 60 * 24 * 30, // 30 days in seconds
-          path: '/',
-          sameSite: 'lax',
-          secure: process.env.NODE_ENV === 'production',
+        getAll() {
+          if (typeof document === 'undefined') return [];
+          return document.cookie.split('; ').map(cookie => {
+            const [name, ...rest] = cookie.split('=');
+            return { name, value: rest.join('=') };
+          });
+        },
+        setAll(cookiesToSet) {
+          cookiesToSet.forEach(({ name, value, options }) => {
+            // Extend cookie lifetime to 30 days for persistent sessions
+            const maxAge = 60 * 60 * 24 * 30; // 30 days
+            const cookieOptions = [
+              `${name}=${value}`,
+              `Max-Age=${maxAge}`,
+              'Path=/',
+              'SameSite=Lax',
+              process.env.NODE_ENV === 'production' ? 'Secure' : '',
+            ].filter(Boolean).join('; ');
+
+            if (typeof document !== 'undefined') {
+              document.cookie = cookieOptions;
+            }
+          });
         },
       },
     }
