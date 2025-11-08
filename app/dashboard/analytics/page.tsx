@@ -127,45 +127,48 @@ export default function AnalyticsPage() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="border border-slate-200 dark:border-slate-800 rounded-xl p-8 bg-white dark:bg-slate-900">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <div className="h-12 w-12 rounded-lg bg-slate-900 dark:bg-slate-100 flex items-center justify-center">
-              <BarChart3 className="h-6 w-6 text-white dark:text-slate-900" />
+      <div className="border border-slate-200 dark:border-slate-800 rounded-xl p-4 md:p-8 bg-white dark:bg-slate-900">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div className="flex items-center gap-3 md:gap-4">
+            <div className="h-10 w-10 md:h-12 md:w-12 rounded-lg bg-slate-900 dark:bg-slate-100 flex items-center justify-center flex-shrink-0">
+              <BarChart3 className="h-5 w-5 md:h-6 md:w-6 text-white dark:text-slate-900" />
             </div>
-            <div>
-              <h1 className="text-3xl font-semibold text-slate-900 dark:text-slate-100">
+            <div className="min-w-0">
+              <h1 className="text-2xl md:text-3xl font-semibold text-slate-900 dark:text-slate-100">
                 Analytics
               </h1>
-              <p className="text-slate-600 dark:text-slate-400 mt-1">
+              <p className="text-xs md:text-sm text-slate-600 dark:text-slate-400 mt-1">
                 Insights into your productivity and AI usage
               </p>
             </div>
           </div>
-          <div className="flex gap-2">
+          <div className="flex gap-2 w-full sm:w-auto">
             <Button
               variant={period === "7d" ? "default" : "outline"}
               size="sm"
               onClick={() => setPeriod("7d")}
-              className={period === "7d" ? "bg-slate-900 dark:bg-slate-100 hover:bg-slate-800 dark:hover:bg-slate-200 text-white dark:text-slate-900" : "border-slate-200 dark:border-slate-800"}
+              className={`flex-1 sm:flex-none ${period === "7d" ? "bg-slate-900 dark:bg-slate-100 hover:bg-slate-800 dark:hover:bg-slate-200 text-white dark:text-slate-900" : "border-slate-200 dark:border-slate-800"}`}
             >
-              7 Days
+              <span className="hidden sm:inline">7 Days</span>
+              <span className="sm:hidden">7d</span>
             </Button>
             <Button
               variant={period === "30d" ? "default" : "outline"}
               size="sm"
               onClick={() => setPeriod("30d")}
-              className={period === "30d" ? "bg-slate-900 dark:bg-slate-100 hover:bg-slate-800 dark:hover:bg-slate-200 text-white dark:text-slate-900" : "border-slate-200 dark:border-slate-800"}
+              className={`flex-1 sm:flex-none ${period === "30d" ? "bg-slate-900 dark:bg-slate-100 hover:bg-slate-800 dark:hover:bg-slate-200 text-white dark:text-slate-900" : "border-slate-200 dark:border-slate-800"}`}
             >
-              30 Days
+              <span className="hidden sm:inline">30 Days</span>
+              <span className="sm:hidden">30d</span>
             </Button>
             <Button
               variant={period === "90d" ? "default" : "outline"}
               size="sm"
               onClick={() => setPeriod("90d")}
-              className={period === "90d" ? "bg-slate-900 dark:bg-slate-100 hover:bg-slate-800 dark:hover:bg-slate-200 text-white dark:text-slate-900" : "border-slate-200 dark:border-slate-800"}
+              className={`flex-1 sm:flex-none ${period === "90d" ? "bg-slate-900 dark:bg-slate-100 hover:bg-slate-800 dark:hover:bg-slate-200 text-white dark:text-slate-900" : "border-slate-200 dark:border-slate-800"}`}
             >
-              90 Days
+              <span className="hidden sm:inline">90 Days</span>
+              <span className="sm:hidden">90d</span>
             </Button>
           </div>
         </div>
