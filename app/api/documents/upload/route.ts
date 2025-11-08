@@ -1,5 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
-import { processAndStoreDocument } from "@/lib/documents/processor";
+// import { processAndStoreDocument } from "@/lib/documents/processor";
 import { NextRequest } from "next/server";
 
 export const runtime = "nodejs";
@@ -145,26 +145,21 @@ export async function POST(req: NextRequest) {
       return new Response("Failed to create document record", { status: 500 });
     }
 
-    // Process document synchronously to ensure chunks are created
-    try {
-      await processAndStoreDocument(document.id);
-      console.log(`✅ Document ${document.id} processed successfully`);
-    } catch (processError) {
-      console.error("Document processing error:", processError);
-      // Document status will be set to "failed" by processAndStoreDocument
-    }
+    // Trigger async document processing via separate endpoint
+    // Don't await - let it process in the background
+    fetch(`${req.nextUrl.origin}/api/documents/process`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ documentId: document.id }),
+    }).catch(error => {
+      console.error("Failed to trigger document processing:", error);
+    });
 
-    // Fetch updated document with final status
-    const { data: updatedDoc } = await supabase
-      .from("documents")
-      .select("id, title, status, file_size, created_at")
-      .eq("id", document.id)
-      .single();
-
-    return Response.json(updatedDoc || {
+    // Return immediately with processing status
+    return Response.json({
       id: document.id,
       title: document.title,
-      status: "failed",
+      status: "processing",
       file_size: document.file_size,
       created_at: document.created_at,
     });
