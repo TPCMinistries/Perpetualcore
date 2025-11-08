@@ -143,32 +143,32 @@ export default async function DashboardPage() {
 
   return (
     <div className="space-y-12 pb-16">
-      {/* Hero Section - Refined and Elegant */}
+      {/* Hero Section - Premium & Elegant */}
       <div className="relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-slate-50/50 via-blue-50/30 to-blue-100/20 dark:from-slate-900/50 dark:via-blue-950/20 dark:to-blue-900/10 rounded-2xl" />
 
-        <div className="relative border border-slate-200/60 dark:border-slate-800/60 rounded-2xl p-6 md:p-12 bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl">
+        <div className="relative border border-slate-200/60 dark:border-slate-800/60 rounded-2xl p-6 md:p-12 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl shadow-lg">
           <div className="flex flex-col sm:flex-row items-start justify-between mb-6 md:mb-8">
             <div className="flex items-start gap-4 md:gap-6 w-full">
-              <div className="h-12 w-12 md:h-14 md:w-14 rounded-xl bg-gradient-to-br from-slate-900 to-slate-700 dark:from-slate-100 dark:to-slate-300 flex items-center justify-center shadow-sm flex-shrink-0">
-                <IconComponent className="h-6 w-6 md:h-7 md:w-7 text-white dark:text-slate-900" />
+              <div className="h-14 w-14 md:h-14 md:w-14 rounded-xl bg-gradient-to-br from-slate-900 to-slate-700 dark:from-slate-100 dark:to-slate-300 flex items-center justify-center shadow-md flex-shrink-0">
+                <IconComponent className="h-7 w-7 md:h-7 md:w-7 text-white dark:text-slate-900" />
               </div>
               <div className="flex-1 min-w-0">
-                <h1 className="text-2xl md:text-4xl font-semibold tracking-tight text-slate-900 dark:text-slate-100 mb-2">
+                <h1 className="text-2xl md:text-4xl font-bold tracking-tight text-slate-900 dark:text-slate-100 mb-2">
                   {config.headline}
                 </h1>
-                <p className="text-sm text-slate-600 dark:text-slate-400">
-                  Welcome back, <span className="text-slate-900 dark:text-slate-100 font-medium">{profile?.full_name || "User"}</span>
+                <p className="text-sm md:text-sm text-slate-600 dark:text-slate-400 font-medium">
+                  Welcome back, <span className="text-slate-900 dark:text-slate-100 font-semibold">{profile?.full_name || "User"}</span>
                 </p>
               </div>
             </div>
           </div>
 
-          <p className="text-base text-slate-700 dark:text-slate-300 max-w-2xl mb-8 leading-relaxed">
+          <p className="text-sm md:text-base text-slate-700 dark:text-slate-300 max-w-2xl mb-6 md:mb-8 leading-relaxed">
             {config.welcomeMessage}
           </p>
 
-          {/* Action Buttons - Clean Design */}
+          {/* Action Buttons - Premium Design */}
           <QuickActions />
         </div>
       </div>
@@ -204,23 +204,23 @@ export default async function DashboardPage() {
             const iconColor = iconColors[metric.gradient] || iconColors["from-blue-600 to-blue-700"];
 
             return (
-              <Card key={index} className="border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 transition-colors bg-white dark:bg-slate-900">
-                <CardContent className="pt-6">
-                  <div className="flex items-center justify-between mb-4">
-                    <div className={`h-11 w-11 rounded-lg ${iconColor} flex items-center justify-center`}>
-                      <Icon className="h-5 w-5" />
+              <Card key={index} className="border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 transition-all shadow-sm hover:shadow-md bg-white dark:bg-slate-900">
+                <CardContent className="p-5 md:pt-6">
+                  <div className="flex items-center justify-between mb-3 md:mb-4">
+                    <div className={`h-12 w-12 md:h-11 md:w-11 rounded-xl ${iconColor} flex items-center justify-center shadow-sm`}>
+                      <Icon className="h-5 w-5 md:h-5 md:w-5" />
                     </div>
                     {metric.change !== 0 && (
-                      <div className={`flex items-center gap-1 text-xs font-medium ${isPositive ? "text-emerald-600 dark:text-emerald-400" : "text-red-600 dark:text-red-400"}`}>
-                        {isPositive ? <TrendingUp className="h-3.5 w-3.5" /> : <TrendingDown className="h-3.5 w-3.5" />}
+                      <div className={`flex items-center gap-1 text-xs md:text-xs font-semibold px-2 py-1 rounded-md ${isPositive ? "text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/30" : "text-red-700 dark:text-red-400 bg-red-50 dark:bg-red-950/30"}`}>
+                        {isPositive ? <TrendingUp className="h-3 w-3" /> : <TrendingDown className="h-3 w-3" />}
                         {Math.abs(metric.change)}%
                       </div>
                     )}
                   </div>
-                  <p className="text-sm text-slate-600 dark:text-slate-400 mb-1">
+                  <p className="text-sm md:text-sm text-slate-600 dark:text-slate-400 mb-1.5 font-medium">
                     {metric.title}
                   </p>
-                  <p className="text-3xl font-semibold text-slate-900 dark:text-slate-100 mb-1">
+                  <p className="text-3xl md:text-3xl font-bold text-slate-900 dark:text-slate-100 mb-1.5 tracking-tight">
                     {metric.value}
                   </p>
                   <p className="text-xs text-slate-500 dark:text-slate-500">
@@ -276,26 +276,26 @@ export default async function DashboardPage() {
             const iconColor = iconColors[gradient] || iconColors["from-blue-600 to-blue-700"];
 
             const insightContent = (
-              <Card key={index} className="border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 transition-colors bg-white dark:bg-slate-900 h-full group cursor-pointer">
-                <CardContent className="p-6">
-                  <div className="flex items-start gap-4 mb-4">
-                    <div className={`h-11 w-11 rounded-lg ${iconColor} flex items-center justify-center flex-shrink-0`}>
-                      <Icon className="h-5 w-5" />
+              <Card key={index} className="border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 transition-all shadow-sm hover:shadow-lg bg-white dark:bg-slate-900 h-full group cursor-pointer active:scale-[0.98]">
+                <CardContent className="p-5 md:p-6">
+                  <div className="flex items-start gap-3 md:gap-4 mb-3 md:mb-4">
+                    <div className={`h-12 w-12 md:h-11 md:w-11 rounded-xl ${iconColor} flex items-center justify-center flex-shrink-0 shadow-sm`}>
+                      <Icon className="h-5 w-5 md:h-5 md:w-5" />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <h3 className="font-medium text-base text-slate-900 dark:text-slate-100 mb-2 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">{insight.title}</h3>
-                      <Badge className={`${impactColor} text-xs px-2 py-0.5`}>
+                      <h3 className="font-semibold text-base md:text-base text-slate-900 dark:text-slate-100 mb-2 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors leading-snug">{insight.title}</h3>
+                      <Badge className={`${impactColor} text-xs font-semibold px-2.5 py-1`}>
                         {insight.impact.toUpperCase()}
                       </Badge>
                     </div>
                   </div>
 
-                  <p className="text-sm text-slate-600 dark:text-slate-400 mb-4 leading-relaxed">
+                  <p className="text-sm md:text-sm text-slate-600 dark:text-slate-400 mb-4 leading-relaxed">
                     {insight.description}
                   </p>
 
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-500">
+                  <div className="flex items-center justify-between pt-2 border-t border-slate-100 dark:border-slate-800">
+                    <div className="flex items-center gap-1.5 text-xs font-medium text-slate-600 dark:text-slate-400">
                       <Zap className="h-3.5 w-3.5" />
                       <span>{insight.confidence}% Confidence</span>
                     </div>
