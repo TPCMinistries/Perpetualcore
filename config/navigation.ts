@@ -62,13 +62,13 @@ export interface NavigationSection {
 }
 
 /**
- * Complete navigation configuration with adaptive complexity
- * Premium $15M navigation with collapsible sections and optimal information hierarchy
+ * Task-based navigation - optimized for clarity and discoverability
+ * Organized by user intent rather than technical categories
  */
 export const NAVIGATION_CONFIG: NavigationSection[] = [
-  // SECTION 1: PINNED - Essential daily features (always visible, never collapses)
+  // FAVORITES - No header, most-used features at top
   {
-    section: "Pinned",
+    section: "", // Empty = no header displayed
     color: "text-slate-600 dark:text-slate-400",
     bgColor: "bg-slate-50 dark:bg-slate-950/30",
     items: [
@@ -108,9 +108,9 @@ export const NAVIGATION_CONFIG: NavigationSection[] = [
     ],
   },
 
-  // SECTION 2: WORKSPACE - Core productivity tools (always visible)
+  // WORK - Core productivity features
   {
-    section: "Workspace",
+    section: "Work",
     color: "text-slate-600 dark:text-slate-400",
     bgColor: "bg-slate-50 dark:bg-slate-950/30",
     items: [
@@ -145,37 +145,15 @@ export const NAVIGATION_CONFIG: NavigationSection[] = [
         },
       },
       {
-        name: "Team Chat",
-        href: "/dashboard/conversations",
-        icon: MessageCircle,
+        name: "Meetings",
+        href: "/dashboard/calendar",
+        icon: Calendar,
         adaptiveConfig: {
-          visibleFor: ["intermediate", "advanced"],
+          visibleFor: ["beginner", "intermediate", "advanced"],
           complexity: "standard",
-          helpText: "Collaborate with your team - AI assists in conversations",
+          helpText: "Meeting transcription, action item extraction, and intelligent briefings",
         },
       },
-      {
-        name: "Inbox",
-        href: "/dashboard/inbox",
-        icon: Inbox,
-        adaptiveConfig: {
-          visibleFor: ["intermediate", "advanced"],
-          complexity: "standard",
-          helpText: "Unified inbox for communications and AI notifications",
-        },
-      },
-    ],
-  },
-
-  // SECTION 3: COMMUNICATIONS - Collapsible for all users
-  {
-    section: "Communications",
-    color: "text-slate-600 dark:text-slate-400",
-    bgColor: "bg-slate-50 dark:bg-slate-950/30",
-    collapsible: true,
-    defaultCollapsed: false,
-    visibleFor: ["beginner", "intermediate", "advanced"],
-    items: [
       {
         name: "Email",
         href: "/dashboard/email",
@@ -187,35 +165,25 @@ export const NAVIGATION_CONFIG: NavigationSection[] = [
         },
       },
       {
-        name: "Meetings",
-        href: "/dashboard/calendar",
-        icon: Calendar,
+        name: "Team Chat",
+        href: "/dashboard/conversations",
+        icon: MessageCircle,
         adaptiveConfig: {
           visibleFor: ["beginner", "intermediate", "advanced"],
           complexity: "standard",
-          helpText: "Meeting transcription, action item extraction, and intelligent briefings",
-        },
-      },
-      {
-        name: "Notifications",
-        href: "/dashboard/notifications",
-        icon: Bell,
-        adaptiveConfig: {
-          visibleFor: ["intermediate", "advanced"],
-          complexity: "standard",
-          helpText: "Manage notifications and alerts in one place",
+          helpText: "Collaborate with your team - AI assists in conversations",
         },
       },
     ],
   },
 
-  // SECTION 4: AGENTS & AUTOMATION - Collapsible for all users
+  // AI TOOLS - Intelligent automation
   {
-    section: "Agents & Automation",
+    section: "AI Tools",
     color: "text-slate-600 dark:text-slate-400",
     bgColor: "bg-slate-50 dark:bg-slate-950/30",
     collapsible: true,
-    defaultCollapsed: false,
+    defaultCollapsed: true,
     visibleFor: ["beginner", "intermediate", "advanced"],
     items: [
       {
@@ -223,20 +191,9 @@ export const NAVIGATION_CONFIG: NavigationSection[] = [
         href: "/dashboard/assistants",
         icon: Sparkles,
         adaptiveConfig: {
-          visibleFor: ["intermediate", "advanced"],
+          visibleFor: ["beginner", "intermediate", "advanced"],
           complexity: "standard",
           helpText: "Pre-configured AI assistants for specific tasks",
-        },
-      },
-      {
-        name: "Workflows",
-        href: "/dashboard/workflows",
-        icon: Zap,
-        adaptiveConfig: {
-          visibleFor: ["intermediate", "advanced"],
-          complexity: "advanced",
-          badge: "beta",
-          helpText: "Automate repetitive tasks with custom workflows",
         },
       },
       {
@@ -244,50 +201,53 @@ export const NAVIGATION_CONFIG: NavigationSection[] = [
         href: "/dashboard/agents",
         icon: Bot,
         adaptiveConfig: {
-          visibleFor: ["intermediate", "advanced"],
-          complexity: "advanced",
+          visibleFor: ["beginner", "intermediate", "advanced"],
+          complexity: "standard",
           badge: "beta",
           helpText: "Autonomous AI agents that work independently",
         },
       },
       {
-        name: "Scheduled Jobs",
-        href: "/dashboard/scheduled-jobs",
-        icon: Clock,
+        name: "Workflows",
+        href: "/dashboard/workflows",
+        icon: Zap,
         adaptiveConfig: {
-          visibleFor: ["advanced"],
-          complexity: "advanced",
-          helpText: "Schedule AI tasks to run automatically",
+          visibleFor: ["beginner", "intermediate", "advanced"],
+          complexity: "standard",
+          badge: "beta",
+          helpText: "Automate repetitive tasks with custom workflows",
         },
       },
     ],
   },
 
-  // SECTION 5: INSIGHTS - Analytics (always visible for intermediate+)
+  // INSIGHTS - Analytics and monitoring (collapsible, collapsed by default)
   {
     section: "Insights",
     color: "text-slate-600 dark:text-slate-400",
     bgColor: "bg-slate-50 dark:bg-slate-950/30",
-    visibleFor: ["intermediate", "advanced"],
+    collapsible: true,
+    defaultCollapsed: true,
+    visibleFor: ["beginner", "intermediate", "advanced"],
     items: [
-      {
-        name: "Activity",
-        href: "/dashboard/activity",
-        icon: Activity,
-        adaptiveConfig: {
-          visibleFor: ["intermediate", "advanced"],
-          complexity: "standard",
-          helpText: "Recent activity and AI interactions across the platform",
-        },
-      },
       {
         name: "Analytics",
         href: "/dashboard/analytics",
         icon: BarChart3,
         adaptiveConfig: {
-          visibleFor: ["intermediate", "advanced"],
+          visibleFor: ["beginner", "intermediate", "advanced"],
           complexity: "standard",
           helpText: "Productivity insights and AI usage analytics",
+        },
+      },
+      {
+        name: "Activity",
+        href: "/dashboard/activity",
+        icon: Activity,
+        adaptiveConfig: {
+          visibleFor: ["beginner", "intermediate", "advanced"],
+          complexity: "standard",
+          helpText: "Recent activity and AI interactions across the platform",
         },
       },
       {
@@ -295,7 +255,7 @@ export const NAVIGATION_CONFIG: NavigationSection[] = [
         href: "/dashboard/usage",
         icon: Zap,
         adaptiveConfig: {
-          visibleFor: ["intermediate", "advanced"],
+          visibleFor: ["beginner", "intermediate", "advanced"],
           complexity: "standard",
           helpText: "Monitor API usage, tokens, and billing",
         },
@@ -303,14 +263,16 @@ export const NAVIGATION_CONFIG: NavigationSection[] = [
     ],
   },
 
-  // SECTION 6: SETTINGS & MORE - Configuration and support
+  // SETTINGS - Bottom of sidebar (collapsible, collapsed by default)
   {
-    section: "Settings & More",
+    section: "Settings",
     color: "text-slate-600 dark:text-slate-400",
     bgColor: "bg-slate-50 dark:bg-slate-950/30",
+    collapsible: true,
+    defaultCollapsed: true,
     items: [
       {
-        name: "Settings",
+        name: "Preferences",
         href: "/dashboard/settings",
         icon: Settings,
         adaptiveConfig: {
@@ -320,38 +282,17 @@ export const NAVIGATION_CONFIG: NavigationSection[] = [
         },
       },
       {
-        name: "Beta Codes",
-        href: "/dashboard/beta-codes",
-        icon: Ticket,
-        adaptiveConfig: {
-          visibleFor: ["beginner", "intermediate", "advanced"],
-          complexity: "standard",
-          helpText: "Generate and manage beta invite codes",
-        },
-      },
-      {
-        name: "Admin Panel",
-        href: "/admin",
-        icon: ShieldCheck,
-        adaptiveConfig: {
-          visibleFor: ["beginner", "intermediate", "advanced"],
-          complexity: "standard",
-          helpText: "Super admin dashboard - manage users, organizations, and system settings",
-          badge: "pro",
-        },
-      },
-      {
         name: "Team",
         href: "/dashboard/team",
         icon: Users,
         adaptiveConfig: {
-          visibleFor: ["intermediate", "advanced"],
+          visibleFor: ["beginner", "intermediate", "advanced"],
           complexity: "standard",
           helpText: "Manage team members and access permissions",
         },
       },
       {
-        name: "Help & Learning",
+        name: "Help",
         href: "/dashboard/help",
         icon: HelpCircle,
         adaptiveConfig: {
@@ -365,7 +306,7 @@ export const NAVIGATION_CONFIG: NavigationSection[] = [
         href: "/dashboard/support",
         icon: Headphones,
         adaptiveConfig: {
-          visibleFor: ["intermediate", "advanced"],
+          visibleFor: ["beginner", "intermediate", "advanced"],
           complexity: "standard",
           helpText: "Contact support team for personalized assistance",
         },
