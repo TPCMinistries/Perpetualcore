@@ -31,6 +31,7 @@ import {
   Smartphone,
   Send,
   Ticket,
+  Share2,
 } from "lucide-react";
 import { UserExperienceLevel, AdaptiveNavConfig } from "@/types/user-experience";
 
@@ -115,23 +116,13 @@ export const NAVIGATION_CONFIG: NavigationSection[] = [
     bgColor: "bg-slate-50 dark:bg-slate-950/30",
     items: [
       {
-        name: "Knowledge",
-        href: "/dashboard/knowledge",
+        name: "Library",
+        href: "/dashboard/library",
         icon: BookOpen,
         adaptiveConfig: {
           visibleFor: ["beginner", "intermediate", "advanced"],
           complexity: "essential",
-          helpText: "Centralized knowledge base - AI learns from your organization's documents",
-        },
-      },
-      {
-        name: "Documents",
-        href: "/dashboard/documents",
-        icon: FileText,
-        adaptiveConfig: {
-          visibleFor: ["beginner", "intermediate", "advanced"],
-          complexity: "essential",
-          helpText: "Document management with intelligent processing and extraction",
+          helpText: "Unified document library with AI-powered organization across all your spaces",
         },
       },
       {
@@ -287,6 +278,17 @@ export const NAVIGATION_CONFIG: NavigationSection[] = [
           visibleFor: ["beginner", "intermediate", "advanced"],
           complexity: "standard",
           helpText: "Manage team members and access permissions",
+        },
+      },
+      {
+        name: "Share & Invite",
+        href: "/dashboard/share",
+        icon: Share2,
+        adaptiveConfig: {
+          visibleFor: ["beginner", "intermediate", "advanced"],
+          complexity: "essential",
+          isCore: true,
+          helpText: "Invite teammates, friends, or students to join your AI brain",
         },
       },
       {
