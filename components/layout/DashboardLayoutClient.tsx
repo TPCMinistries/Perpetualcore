@@ -5,6 +5,7 @@ import { AdaptiveSidebar } from "./AdaptiveSidebar";
 import { MobileNav } from "./MobileNav";
 import { ThemeToggle } from "../theme-toggle";
 import { NotificationBell } from "../notifications/NotificationBell";
+import { RoleSwitcher } from "../profile/RoleSwitcher";
 import Link from "next/link";
 import { Button } from "../ui/button";
 import { PanelLeft, PanelLeftClose } from "lucide-react";
@@ -69,6 +70,7 @@ function DashboardLayoutInner({
             </div>
           </div>
           <div className="flex items-center gap-2">
+            <RoleSwitcher currentRole={profile?.user_role} />
             <ThemeToggle />
             <NotificationBell />
           </div>
