@@ -21,6 +21,16 @@ CREATE TABLE IF NOT EXISTS profiles (
   onboarding_completed BOOLEAN DEFAULT FALSE,
   onboarding_step INTEGER DEFAULT 0,
   onboarding_skipped BOOLEAN DEFAULT FALSE,
+  -- User context for personalization
+  user_role TEXT, -- teacher, researcher, developer, student, business_owner, content_creator
+  industry TEXT, -- education, technology, healthcare, legal, creative, finance
+  primary_goal TEXT, -- What they want to achieve first
+  team_context TEXT, -- solo, team_member, team_lead, educator, student
+  content_types TEXT[], -- Types of content they work with
+  ai_experience_level TEXT DEFAULT 'beginner', -- beginner, intermediate, advanced
+  preferred_name TEXT, -- How they want to be addressed
+  timezone TEXT,
+  use_case_tags TEXT[],
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );

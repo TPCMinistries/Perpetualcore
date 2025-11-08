@@ -2,7 +2,7 @@ import { redirect } from "next/navigation";
 import { getUser, getUserProfile } from "@/lib/auth/actions";
 import { CommandPalette } from "@/components/command-palette/CommandPalette";
 import { Toaster } from "sonner";
-import { OnboardingFlowV2 } from "@/components/onboarding/OnboardingFlowV2";
+import { OnboardingFlowV3 } from "@/components/onboarding/OnboardingFlowV3";
 import { AnimatedBackground } from "@/components/ui/animated-background";
 import { DashboardLayoutClient } from "@/components/layout/DashboardLayoutClient";
 
@@ -31,7 +31,7 @@ export default async function DashboardLayout({
       <CommandPalette />
 
       {/* Onboarding Flow */}
-      {profile && <OnboardingFlowV2 userProfile={profile} />}
+      {profile && <OnboardingFlowV3 userProfile={profile} />}
 
       {/* Client-side layout with sidebar state */}
       <DashboardLayoutClient profile={profile}>
