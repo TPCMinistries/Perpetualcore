@@ -22,6 +22,8 @@ import {
   Users,
   Lock,
   Globe,
+  Hash,
+  UserCircle,
 } from "lucide-react";
 import { toast } from "sonner";
 import Link from "next/link";
@@ -54,19 +56,26 @@ export default function NewConversationPage() {
   const [loading, setLoading] = useState(false);
   const [documents, setDocuments] = useState<Document[]>([]);
   const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
+  const [spaces, setSpaces] = useState<Space[]>([]);
+  const [projects, setProjects] = useState<Project[]>([]);
   const [selectedParticipants, setSelectedParticipants] = useState<string[]>([]);
 
   const [formData, setFormData] = useState({
     title: "",
     description: "",
+    conversation_type: "channel" as "channel" | "dm" | "group_dm",
     context_type: "general" as "general" | "document" | "training" | "project",
     document_id: "",
+    knowledge_space_id: "",
+    project_id: "",
     is_private: false,
   });
 
   useEffect(() => {
     loadDocuments();
     loadTeamMembers();
+    loadSpaces();
+    loadProjects();
   }, []);
 
   async function loadDocuments() {
@@ -91,6 +100,30 @@ export default function NewConversationPage() {
     } catch (error) {
       console.error("Error loading team members:", error);
       // Not critical - can create conversation without inviting members
+    }
+  }
+
+  async function loadSpaces() {
+    try {
+      const response = await fetch("/api/spaces");
+      const data = await response.json();
+      if (response.ok) {
+        setSpaces(data.spaces || []);
+      }
+    } catch (error) {
+      console.error("Error loading spaces:", error);
+    }
+  }
+
+  async function loadProjects() {
+    try {
+      const response = await fetch("/api/projects");
+      if (response.ok) {
+        const data = await response.json();
+        setProjects(data || []);
+      }
+    } catch (error) {
+      console.error("Error loading projects:", error);
     }
   }
 
@@ -119,8 +152,11 @@ export default function NewConversationPage() {
         body: JSON.stringify({
           title: formData.title,
           description: formData.description || null,
+          conversation_type: formData.conversation_type,
           context_type: formData.context_type,
           document_id: formData.document_id || null,
+          knowledge_space_id: formData.knowledge_space_id || null,
+          project_id: formData.project_id || null,
           is_private: formData.is_private,
           participant_ids: selectedParticipants,
         }),
@@ -199,6 +235,133 @@ export default function NewConversationPage() {
                 rows={3}
               />
             </div>
+
+            {/* Conversation Type */}
+            <div className="space-y-2">
+              <Label className="text-base font-semibold">Conversation Type</Label>
+              <div className="grid grid-cols-3 gap-3">
+                <button
+                  type="button"
+                  onClick={() => setFormData({ ...formData, conversation_type: "channel" })}
+                  className={`p-4 rounded-lg border-2 transition-all ${
+                    formData.conversation_type === "channel"
+                      ? "border-indigo-600 bg-indigo-50 dark:bg-indigo-950/30"
+                      : "border-border hover:border-indigo-300"
+                  }`}
+                >
+                  <div className="flex flex-col items-center gap-2 text-center">
+                    <Hash className="h-5 w-5 text-indigo-600" />
+                    <div className="font-semibold">Channel</div>
+                    <div className="text-xs text-muted-foreground">
+                      Team collaboration
+                    </div>
+                  </div>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setFormData({ ...formData, conversation_type: "dm" })}
+                  className={`p-4 rounded-lg border-2 transition-all ${
+                    formData.conversation_type === "dm"
+                      ? "border-indigo-600 bg-indigo-50 dark:bg-indigo-950/30"
+                      : "border-border hover:border-indigo-300"
+                  }`}
+                >
+                  <div className="flex flex-col items-center gap-2 text-center">
+                    <UserCircle className="h-5 w-5 text-indigo-600" />
+                    <div className="font-semibold">Direct Message</div>
+                    <div className="text-xs text-muted-foreground">
+                      1-on-1 chat
+                    </div>
+                  </div>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setFormData({ ...formData, conversation_type: "group_dm" })}
+                  className={`p-4 rounded-lg border-2 transition-all ${
+                    formData.conversation_type === "group_dm"
+                      ? "border-indigo-600 bg-indigo-50 dark:bg-indigo-950/30"
+                      : "border-border hover:border-indigo-300"
+                  }`}
+                >
+                  <div className="flex flex-col items-center gap-2 text-center">
+                    <Users className="h-5 w-5 text-indigo-600" />
+                    <div className="font-semibold">Group DM</div>
+                    <div className="text-xs text-muted-foreground">
+                      Small group
+                    </div>
+                  </div>
+                </button>
+              </div>
+            </div>
+
+            {/* Space Selection */}
+            {spaces.length > 0 && (
+              <div className="space-y-2">
+                <Label htmlFor="space" className="text-base font-semibold">
+                  Knowledge Space (Optional)
+                </Label>
+                <Select
+                  value={formData.knowledge_space_id}
+                  onValueChange={(value) =>
+                    setFormData({ ...formData, knowledge_space_id: value })
+                  }
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select a space to organize this conversation" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {spaces.map((space) => (
+                      <SelectItem key={space.id} value={space.id}>
+                        <div className="flex items-center gap-2">
+                          <span>{space.emoji}</span>
+                          <span>{space.name}</span>
+                          <span className="text-xs text-muted-foreground">
+                            ({space.space_type})
+                          </span>
+                        </div>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <p className="text-xs text-muted-foreground">
+                  Organize conversations by department, project, or client
+                </p>
+              </div>
+            )}
+
+            {/* Project Selection */}
+            {projects.length > 0 && (
+              <div className="space-y-2">
+                <Label htmlFor="project" className="text-base font-semibold">
+                  Project (Optional)
+                </Label>
+                <Select
+                  value={formData.project_id}
+                  onValueChange={(value) =>
+                    setFormData({ ...formData, project_id: value })
+                  }
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Link to a project" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {projects.map((project) => (
+                      <SelectItem key={project.id} value={project.id}>
+                        <div className="flex items-center gap-2">
+                          <span>{project.icon}</span>
+                          <span>{project.name}</span>
+                        </div>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <p className="text-xs text-muted-foreground">
+                  Group related conversations together
+                </p>
+              </div>
+            )}
 
             {/* Context Type */}
             <div className="space-y-2">
