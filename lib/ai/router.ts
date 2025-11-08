@@ -119,8 +119,17 @@ export async function* streamChatCompletion(
         throw new Error(`All models in fallback chain failed. Last error: ${error.message}`);
       }
 
-      // Otherwise, log and continue to next fallback
-      console.log(`[Router] 🔄 Falling back to next model...`);
+      // Otherwise, emit fallback notification and continue to next model
+      const nextModel = fallbackChain[i + 1];
+      console.log(`[Router] 🔄 Falling back to ${nextModel}...`);
+
+      // Yield fallback event for UI to display
+      yield {
+        fallback: true,
+        from: attemptModel,
+        to: nextModel,
+        reason: error.message,
+      } as any;
     }
   }
 

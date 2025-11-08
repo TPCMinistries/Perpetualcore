@@ -183,19 +183,17 @@ export const NAVIGATION_CONFIG: NavigationSection[] = [
         adaptiveConfig: {
           visibleFor: ["intermediate", "advanced"],
           complexity: "standard",
-          badge: "coming-soon",
           helpText: "AI email assistant - draft, respond, and organize intelligently",
         },
       },
       {
-        name: "Calendar",
+        name: "Meetings",
         href: "/dashboard/calendar",
         icon: Calendar,
         adaptiveConfig: {
           visibleFor: ["intermediate", "advanced"],
           complexity: "standard",
-          badge: "coming-soon",
-          helpText: "AI-powered scheduling and meeting management",
+          helpText: "Meeting transcription, action item extraction, and intelligent briefings",
         },
       },
       {
@@ -211,9 +209,9 @@ export const NAVIGATION_CONFIG: NavigationSection[] = [
     ],
   },
 
-  // SECTION 4: AI TOOLS - Collapsible advanced features
+  // SECTION 4: AGENTS & AUTOMATION - Collapsible advanced features
   {
-    section: "AI Tools",
+    section: "Agents & Automation",
     color: "text-slate-600 dark:text-slate-400",
     bgColor: "bg-slate-50 dark:bg-slate-950/30",
     collapsible: true,

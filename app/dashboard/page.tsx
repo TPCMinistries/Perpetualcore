@@ -44,6 +44,7 @@ export default async function DashboardPage() {
       description: "Your activity is up 32% this week. You're on track for a highly productive month.",
       impact: "high" as const,
       confidence: 94,
+      link: "/dashboard/analytics",
     },
     {
       type: "recommendation" as const,
@@ -51,13 +52,15 @@ export default async function DashboardPage() {
       description: "Consider setting up automated agents for repetitive tasks. Could save 5+ hours/week.",
       impact: "medium" as const,
       confidence: 87,
+      link: "/dashboard/agents",
     },
     {
       type: "opportunity" as const,
-      title: "Untapped Feature",
-      description: "You haven't used document analysis yet. It could streamline your research process.",
-      impact: "medium" as const,
-      confidence: 91,
+      title: "Cost Savings Optimization",
+      description: "Auto-router saved $4.50 this week by selecting cost-efficient models for 70% of queries.",
+      impact: "high" as const,
+      confidence: 98,
+      link: "/dashboard/analytics",
     },
   ];
 
@@ -264,15 +267,15 @@ export default async function DashboardPage() {
             };
             const iconColor = iconColors[gradient] || iconColors["from-blue-500 to-cyan-500"];
 
-            return (
-              <Card key={index} className="border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 transition-colors bg-white dark:bg-slate-900 h-full">
+            const insightContent = (
+              <Card key={index} className="border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 transition-colors bg-white dark:bg-slate-900 h-full group cursor-pointer">
                 <CardContent className="p-6">
                   <div className="flex items-start gap-4 mb-4">
                     <div className={`h-11 w-11 rounded-lg ${iconColor} flex items-center justify-center flex-shrink-0`}>
                       <Icon className="h-5 w-5" />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <h3 className="font-medium text-base text-slate-900 dark:text-slate-100 mb-2">{insight.title}</h3>
+                      <h3 className="font-medium text-base text-slate-900 dark:text-slate-100 mb-2 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">{insight.title}</h3>
                       <Badge className={`${impactColor} text-xs px-2 py-0.5`}>
                         {insight.impact.toUpperCase()}
                       </Badge>
@@ -283,13 +286,22 @@ export default async function DashboardPage() {
                     {insight.description}
                   </p>
 
-                  <div className="flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-500">
-                    <Zap className="h-3.5 w-3.5" />
-                    <span>{insight.confidence}% Confidence</span>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-500">
+                      <Zap className="h-3.5 w-3.5" />
+                      <span>{insight.confidence}% Confidence</span>
+                    </div>
+                    <ArrowRight className="h-4 w-4 text-slate-400 group-hover:text-blue-600 dark:group-hover:text-blue-400 group-hover:translate-x-1 transition-all" />
                   </div>
                 </CardContent>
               </Card>
             );
+
+            return insight.link ? (
+              <Link key={index} href={insight.link}>
+                {insightContent}
+              </Link>
+            ) : insightContent;
           })}
         </div>
       </div>

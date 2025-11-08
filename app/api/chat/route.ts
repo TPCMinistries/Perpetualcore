@@ -498,6 +498,22 @@ Or, you can copy and paste the text content directly into this chat.`;
               conversationMessages,
               AVAILABLE_TOOLS // Pass available tools
             )) {
+              // Handle fallback events
+              if ((chunk as any).fallback) {
+                controller.enqueue(
+                  encoder.encode(
+                    JSON.stringify({
+                      fallback: {
+                        from: (chunk as any).from,
+                        to: (chunk as any).to,
+                        reason: (chunk as any).reason,
+                      },
+                    }) + "\n"
+                  )
+                );
+                continue;
+              }
+
               if (chunk.done) {
                 usage = chunk.usage;
                 break;

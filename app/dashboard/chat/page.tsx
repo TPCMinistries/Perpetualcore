@@ -446,168 +446,45 @@ export default function ChatPage() {
   }
 
   return (
-    <div className="flex gap-4 h-[calc(100vh-6rem)]">
-      {/* Conversation Sidebar */}
-      <ConversationSidebar
-        mode="personal"
-        currentConversationId={conversationId}
-        onConversationSelect={handleConversationSelect}
-        onNewConversation={handleNewConversation}
-      />
-
-      {/* Main Chat Area */}
-      <div className="flex flex-col flex-1 min-w-0">
-          {/* Header - Clean and Professional */}
-          <div className="border-b border-slate-200 dark:border-slate-800 px-6 py-4 mb-4 bg-white dark:bg-slate-900">
-            <div className="flex items-center justify-between mb-4">
-              <div>
-                <h1 className="text-xl font-semibold text-slate-900 dark:text-slate-100">
-                  AI Chat {isVoiceMode && <span className="text-emerald-600">(Voice Mode)</span>}
-                </h1>
-                <p className="text-sm text-slate-600 dark:text-slate-400">
-                  {isVoiceMode ? "🎤 Voice conversation mode active" : "Intelligent multi-model AI assistant"}
-                </p>
-              </div>
+    <div className="flex h-[calc(100vh-6rem)]">
+      {/* Main Chat Area - Centered Layout */}
+      <div className="flex flex-col flex-1 min-w-0 max-w-full">
+          {/* Minimal Header - Claude-like */}
+          <div className="border-b border-slate-200/50 dark:border-slate-800/50 bg-white/80 dark:bg-slate-950/80 backdrop-blur-sm sticky top-0 z-10">
+            <div className="max-w-3xl mx-auto px-6 py-3 flex items-center justify-between">
               <div className="flex items-center gap-3">
-                {/* Voice Mode Toggle */}
-                <Button
-                  variant={isVoiceMode ? "default" : "outline"}
-                  size="sm"
-                  onClick={() => {
-                    console.log("Voice mode clicked, current state:", isVoiceMode);
-                    setIsVoiceMode(!isVoiceMode);
-                    console.log("Voice mode new state:", !isVoiceMode);
-                  }}
-                  className={isVoiceMode ? "bg-emerald-600 hover:bg-emerald-700" : "border-slate-200 dark:border-slate-800"}
-                  title={isVoiceMode ? "Switch to text mode" : "Switch to voice mode"}
+                <Select
+                  value={selectedModel}
+                  onValueChange={(value) => setSelectedModel(value as AIModel)}
+                  disabled={messages.length > 0 || isVoiceMode}
                 >
-                  {isVoiceMode ? (
-                    <>
-                      <PhoneOff className="h-4 w-4 mr-2" />
-                      End Voice
-                    </>
-                  ) : (
-                    <>
-                      <Phone className="h-4 w-4 mr-2" />
-                      Voice Mode
-                    </>
-                  )}
-                </Button>
-
-                <div className="w-64">
-                  <Select
-                    value={selectedModel}
-                    onValueChange={(value) => setSelectedModel(value as AIModel)}
-                    disabled={messages.length > 0 || isVoiceMode}
-                  >
-                    <SelectTrigger className="border-slate-200 dark:border-slate-800">
-                      <SelectValue placeholder="Select model" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {Object.values(AI_MODELS).map((model) => (
-                        <SelectItem key={model.id} value={model.id}>
-                          <div className="flex items-center gap-2">
-                            <span>{model.icon}</span>
-                            <span>{model.name}</span>
-                          </div>
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                {/* Export Buttons */}
-                {messages.length > 0 && (
-                  <div className="flex items-center gap-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => exportConversation("pdf")}
-                      disabled={exportingAs === "pdf"}
-                      className="border-slate-200 dark:border-slate-800"
-                      title="Export as PDF"
-                    >
-                      {exportingAs === "pdf" ? (
-                        <Loader2 className="h-4 w-4 animate-spin" />
-                      ) : (
-                        <FileText className="h-4 w-4" />
-                      )}
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => exportConversation("powerpoint")}
-                      disabled={exportingAs === "powerpoint"}
-                      className="border-slate-200 dark:border-slate-800"
-                      title="Export as PowerPoint"
-                    >
-                      {exportingAs === "powerpoint" ? (
-                        <Loader2 className="h-4 w-4 animate-spin" />
-                      ) : (
-                        <Presentation className="h-4 w-4" />
-                      )}
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => exportConversation("excel")}
-                      disabled={exportingAs === "excel"}
-                      className="border-slate-200 dark:border-slate-800"
-                      title="Export as Excel"
-                    >
-                      {exportingAs === "excel" ? (
-                        <Loader2 className="h-4 w-4 animate-spin" />
-                      ) : (
-                        <FileSpreadsheet className="h-4 w-4" />
-                      )}
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => exportConversation("word")}
-                      disabled={exportingAs === "word"}
-                      className="border-slate-200 dark:border-slate-800"
-                      title="Export as Word"
-                    >
-                      {exportingAs === "word" ? (
-                        <Loader2 className="h-4 w-4 animate-spin" />
-                      ) : (
-                        <File className="h-4 w-4" />
-                      )}
-                    </Button>
-                  </div>
-                )}
+                  <SelectTrigger className="border-0 h-8 px-2 text-sm font-medium hover:bg-slate-100 dark:hover:bg-slate-900">
+                    <SelectValue placeholder="Select model" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {Object.values(AI_MODELS).map((model) => (
+                      <SelectItem key={model.id} value={model.id}>
+                        <div className="flex items-center gap-2">
+                          <span>{model.icon}</span>
+                          <span>{model.name}</span>
+                        </div>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
+
+              {/* Right actions */}
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleNewConversation}
+                className="h-8 text-sm"
+              >
+                New chat
+              </Button>
             </div>
-
-        {/* Model and RAG Indicators */}
-        {(currentModel || (ragInfo && ragInfo.used)) && (
-          <div className="flex items-center gap-2">
-            {currentModel && (
-              <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-blue-50 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-900/40 rounded-lg text-xs">
-                <span className="font-medium text-blue-700 dark:text-blue-400">
-                  {currentModel.icon} {currentModel.name}
-                </span>
-                <span className="text-blue-600 dark:text-blue-500">
-                  • {currentModel.reason}
-                </span>
-              </div>
-            )}
-
-            {ragInfo && ragInfo.used && (
-              <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-900/40 rounded-lg text-xs">
-                <FileText className="h-3.5 w-3.5 text-emerald-700 dark:text-emerald-400" />
-                <span className="font-medium text-emerald-700 dark:text-emerald-400">
-                  Using your documents
-                </span>
-                <span className="text-emerald-600 dark:text-emerald-500">
-                  • {ragInfo.documentsCount} {ragInfo.documentsCount === 1 ? 'source' : 'sources'}
-                </span>
-              </div>
-            )}
           </div>
-        )}
-      </div>
 
       {/* Voice Mode or Text Mode */}
       {isVoiceMode ? (
@@ -616,11 +493,12 @@ export default function ChatPage() {
         </div>
       ) : (
         <>
-      {/* Messages */}
-      <div className="flex-1 overflow-y-auto space-y-4 mb-4">
+      {/* Messages - Centered like Claude */}
+      <div className="flex-1 overflow-y-auto">
+        <div className="max-w-3xl mx-auto px-6">
         {messages.length === 0 ? (
-          <div className="flex flex-col items-center justify-center h-full text-center px-4">
-            <div className="max-w-3xl w-full space-y-8">
+          <div className="flex flex-col items-center justify-center min-h-[60vh] text-center">
+            <div className="w-full space-y-8">
               {/* Hero Section - Clean */}
               <div className="py-12">
                 <div className="h-16 w-16 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center mx-auto mb-6">
@@ -714,29 +592,26 @@ export default function ChatPage() {
             </div>
           </div>
         ) : (
-          <>
+          <div className="space-y-6 py-6">
             {messages.map((message, index) => (
-              <div
-                key={index}
-                className={`flex gap-4 ${
-                  message.role === "user" ? "justify-end" : ""
-                }`}
-              >
-                {message.role === "assistant" && (
-                  <div className="flex-shrink-0">
-                    <div className="h-8 w-8 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center">
-                      <Bot className="h-4 w-4 text-slate-700 dark:text-slate-300" />
+              <div key={index} className="group">
+                <div className="flex gap-4 max-w-full">
+                  {message.role === "assistant" && (
+                    <div className="flex-shrink-0">
+                      <div className="h-7 w-7 rounded-md bg-gradient-to-br from-purple-500 to-blue-600 flex items-center justify-center">
+                        <Bot className="h-4 w-4 text-white" />
+                      </div>
                     </div>
-                  </div>
-                )}
-                <div className="relative group max-w-[70%]">
-                  <div
-                    className={`px-4 py-3 rounded-2xl ${
-                      message.role === "user"
-                        ? "bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900"
-                        : "bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-slate-100"
-                    }`}
-                  >
+                  )}
+                  {message.role === "user" && (
+                    <div className="flex-shrink-0">
+                      <div className="h-7 w-7 rounded-md bg-slate-900 dark:bg-slate-700 flex items-center justify-center">
+                        <User className="h-4 w-4 text-white" />
+                      </div>
+                    </div>
+                  )}
+                  <div className="relative flex-1 min-w-0">
+                    <div className="prose prose-slate dark:prose-invert max-w-none">
                     {message.attachments && message.attachments.length > 0 && (
                       <div className="mb-2 flex flex-wrap gap-2">
                         {message.attachments.map((attachment, attIndex) => (
@@ -764,172 +639,169 @@ export default function ChatPage() {
                         ))}
                       </div>
                     )}
-                    {message.role === "assistant" ? (
-                      <MarkdownMessage content={message.content} />
-                    ) : (
-                      <div className="whitespace-pre-wrap break-words">
-                        {message.content}
-                      </div>
+                      {message.role === "assistant" ? (
+                        <MarkdownMessage content={message.content} />
+                      ) : (
+                        <div className="whitespace-pre-wrap break-words text-slate-900 dark:text-slate-100">
+                          {message.content}
+                        </div>
+                      )}
+                      {/* Model/RAG indicators */}
+                      {message.role === "assistant" && index === messages.length - 1 && (
+                        <div className="flex items-center gap-2 mt-3 text-xs text-slate-500">
+                          {currentModel && (
+                            <span className="inline-flex items-center gap-1">
+                              {currentModel.icon} {currentModel.name}
+                            </span>
+                          )}
+                          {ragInfo && ragInfo.used && (
+                            <span className="inline-flex items-center gap-1">
+                              <FileText className="h-3 w-3" />
+                              {ragInfo.documentsCount} {ragInfo.documentsCount === 1 ? 'source' : 'sources'}
+                            </span>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                    {message.role === "assistant" && message.content && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => copyToClipboard(message.content, index)}
+                        className="absolute top-0 right-0 h-6 w-6 p-0 opacity-0 group-hover:opacity-100 transition-opacity hover:bg-slate-100 dark:hover:bg-slate-800"
+                        title="Copy to clipboard"
+                      >
+                        {copiedMessageIndex === index ? (
+                          <Check className="h-3.5 w-3.5 text-emerald-600" />
+                        ) : (
+                          <Copy className="h-3.5 w-3.5" />
+                        )}
+                      </Button>
                     )}
                   </div>
-                  {message.role === "assistant" && message.content && (
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => copyToClipboard(message.content, index)}
-                      className="absolute -top-2 -right-2 h-7 w-7 p-0 opacity-0 group-hover:opacity-100 transition-opacity bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 rounded-md"
-                      title="Copy to clipboard"
-                    >
-                      {copiedMessageIndex === index ? (
-                        <Check className="h-3.5 w-3.5 text-emerald-600" />
-                      ) : (
-                        <Copy className="h-3.5 w-3.5" />
-                      )}
-                    </Button>
-                  )}
                 </div>
-                {message.role === "user" && (
-                  <div className="flex-shrink-0">
-                    <div className="h-8 w-8 rounded-full bg-slate-900 dark:bg-slate-100 flex items-center justify-center">
-                      <User className="h-4 w-4 text-white dark:text-slate-900" />
-                    </div>
-                  </div>
-                )}
               </div>
             ))}
             <div ref={messagesEndRef} />
-          </>
+          </div>
         )}
+        </div>
       </div>
 
-      {/* Attachments Preview */}
-      {attachments.length > 0 && (
-        <div className="mb-3 flex flex-wrap gap-2">
-          {attachments.map((attachment, index) => (
-            <div
-              key={index}
-              className="relative group bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg p-2 flex items-center gap-2"
-            >
-              {attachment.type === "image" && attachment.preview ? (
-                <img
-                  src={attachment.preview}
-                  alt={attachment.file.name}
-                  className="h-14 w-14 object-cover rounded"
-                />
-              ) : (
-                <FileText className="h-6 w-6 text-slate-600 dark:text-slate-400" />
-              )}
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium truncate text-slate-900 dark:text-slate-100">
-                  {attachment.file.name}
-                </p>
-                <p className="text-xs text-slate-500 dark:text-slate-500">
-                  {(attachment.file.size / 1024).toFixed(1)} KB
-                </p>
-              </div>
-              <button
-                type="button"
-                onClick={() => removeAttachment(index)}
-                className="h-5 w-5 bg-red-500 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-600"
-              >
-                <X className="h-3 w-3" />
-              </button>
+      {/* Input Area - Centered like Claude */}
+      <div className="border-t border-slate-200/50 dark:border-slate-800/50 bg-white/80 dark:bg-slate-950/80 backdrop-blur-sm">
+        <div className="max-w-3xl mx-auto px-6 py-4">
+          {/* Attachments Preview */}
+          {attachments.length > 0 && (
+            <div className="mb-3 flex flex-wrap gap-2">
+              {attachments.map((attachment, index) => (
+                <div
+                  key={index}
+                  className="relative group bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg p-2 flex items-center gap-2"
+                >
+                  {attachment.type === "image" && attachment.preview ? (
+                    <img
+                      src={attachment.preview}
+                      alt={attachment.file.name}
+                      className="h-12 w-12 object-cover rounded"
+                    />
+                  ) : (
+                    <FileText className="h-5 w-5 text-slate-600 dark:text-slate-400" />
+                  )}
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium truncate text-slate-900 dark:text-slate-100">
+                      {attachment.file.name}
+                    </p>
+                    <p className="text-xs text-slate-500">
+                      {(attachment.file.size / 1024).toFixed(1)} KB
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => removeAttachment(index)}
+                    className="h-5 w-5 bg-red-500 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-600"
+                  >
+                    <X className="h-3 w-3" />
+                  </button>
+                </div>
+              ))}
             </div>
-          ))}
-        </div>
-      )}
+          )}
 
-      {/* Input Area - Clean Design */}
-      <div
-        onDragOver={handleDragOver}
-        onDragLeave={handleDragLeave}
-        onDrop={handleDrop}
-        className={`rounded-xl border transition-colors bg-white dark:bg-slate-900 p-3 ${
-          isDragging
-            ? "border-slate-400 dark:border-slate-600 bg-slate-50 dark:bg-slate-800"
-            : "border-slate-200 dark:border-slate-800"
-        }`}
-      >
-        <form onSubmit={handleSubmit} className="flex gap-2 items-end">
-          <input
-            ref={fileInputRef}
-            type="file"
-            multiple
-            accept=".pdf,.docx,.txt,.csv,image/*"
-            onChange={(e) => handleFileSelect(e.target.files)}
-            className="hidden"
-          />
-          <Button
-            type="button"
-            variant="ghost"
-            size="icon"
-            onClick={() => fileInputRef.current?.click()}
-            disabled={isLoading}
-            title="Attach files"
-            className="h-9 w-9 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100"
-          >
-            <Paperclip className="h-4 w-4" />
-          </Button>
-          <Button
-            type="button"
-            variant="ghost"
-            size="icon"
-            onClick={toggleVoiceRecording}
-            disabled={isLoading}
-            title={isRecording ? "Stop recording" : "Start voice input"}
-            className={`h-9 w-9 ${
-              isRecording
-                ? "bg-red-500 text-white hover:bg-red-600 animate-pulse"
-                : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100"
+          {/* Input Box */}
+          <div
+            onDragOver={handleDragOver}
+            onDragLeave={handleDragLeave}
+            onDrop={handleDrop}
+            className={`rounded-2xl border transition-all shadow-sm ${
+              isDragging
+                ? "border-slate-400 dark:border-slate-600 bg-slate-50 dark:bg-slate-800 shadow-lg"
+                : "border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 hover:border-slate-400 dark:hover:border-slate-600"
             }`}
           >
-            {isRecording ? (
-              <MicOff className="h-4 w-4" />
-            ) : (
-              <Mic className="h-4 w-4" />
-            )}
-          </Button>
-          <Textarea
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            placeholder={
-              isRecording
-                ? "Listening..."
-                : isDragging
-                ? "Drop files here..."
-                : "Message AI..."
-            }
-            disabled={isLoading}
-            className="flex-1 min-h-[36px] max-h-[200px] resize-none border-0 focus-visible:ring-0 bg-transparent text-slate-900 dark:text-slate-100 placeholder:text-slate-500"
-            rows={1}
-            onInput={(e) => {
-              const target = e.target as HTMLTextAreaElement;
-              target.style.height = '36px';
-              target.style.height = target.scrollHeight + 'px';
-            }}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter' && !e.shiftKey) {
-                e.preventDefault();
-                const form = e.currentTarget.form;
-                if (form) {
-                  form.requestSubmit();
+            <form onSubmit={handleSubmit} className="flex gap-2 items-end p-2">
+              <input
+                ref={fileInputRef}
+                type="file"
+                multiple
+                accept=".pdf,.docx,.txt,.csv,image/*"
+                onChange={(e) => handleFileSelect(e.target.files)}
+                className="hidden"
+              />
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                onClick={() => fileInputRef.current?.click()}
+                disabled={isLoading}
+                title="Attach files"
+                className="h-9 w-9 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-100 dark:hover:bg-slate-800"
+              >
+                <Paperclip className="h-4 w-4" />
+              </Button>
+              <Textarea
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                placeholder={
+                  isRecording
+                    ? "Listening..."
+                    : isDragging
+                    ? "Drop files here..."
+                    : "Message..."
                 }
-              }
-            }}
-          />
-          <Button
-            type="submit"
-            disabled={isLoading || (!input.trim() && attachments.length === 0)}
-            className="h-9 w-9 p-0 bg-slate-900 dark:bg-slate-100 hover:bg-slate-800 dark:hover:bg-slate-200 text-white dark:text-slate-900"
-            size="icon"
-          >
-            {isLoading ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
-            ) : (
-              <Send className="h-4 w-4" />
-            )}
-          </Button>
-        </form>
+                disabled={isLoading}
+                className="flex-1 min-h-[36px] max-h-[200px] resize-none border-0 focus-visible:ring-0 bg-transparent text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 px-2"
+                rows={1}
+                onInput={(e) => {
+                  const target = e.target as HTMLTextAreaElement;
+                  target.style.height = '36px';
+                  target.style.height = target.scrollHeight + 'px';
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    const form = e.currentTarget.form;
+                    if (form) {
+                      form.requestSubmit();
+                    }
+                  }
+                }}
+              />
+              <Button
+                type="submit"
+                disabled={isLoading || (!input.trim() && attachments.length === 0)}
+                className="h-9 w-9 p-0 rounded-lg bg-slate-900 dark:bg-slate-100 hover:bg-slate-800 dark:hover:bg-slate-200 text-white dark:text-slate-900 disabled:opacity-50"
+                size="icon"
+              >
+                {isLoading ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <Send className="h-4 w-4" />
+                )}
+              </Button>
+            </form>
+          </div>
+        </div>
       </div>
       </>
       )}
