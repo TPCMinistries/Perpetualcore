@@ -40,15 +40,15 @@
 
 ---
 
-## ⚠️ Required: Database Migration
+## ⚠️ Required: Database Migrations
 
-The onboarding system needs database columns to track user progress.
+The onboarding system needs database columns to track user progress AND user context for personalization.
 
-### Option 1: Supabase SQL Editor (Recommended)
+### Run BOTH Migrations in Supabase SQL Editor
 
 1. Go to your Supabase Dashboard: https://hgxxxmtfmvguotkowxbu.supabase.co
 2. Navigate to **SQL Editor**
-3. Run this SQL:
+3. Run **Migration 1** (Onboarding tracking):
 
 ```sql
 -- Add onboarding fields to profiles table
@@ -61,6 +61,28 @@ ADD COLUMN IF NOT EXISTS onboarding_skipped BOOLEAN DEFAULT FALSE;
 CREATE INDEX IF NOT EXISTS idx_profiles_onboarding_completed ON profiles(onboarding_completed);
 ```
 
+4. Then run **Migration 2** (User personalization):
+
+```sql
+-- Add user context fields for personalization
+ALTER TABLE profiles
+ADD COLUMN IF NOT EXISTS user_role TEXT, -- e.g., 'teacher', 'researcher', 'developer', 'student', 'business_owner', 'content_creator'
+ADD COLUMN IF NOT EXISTS industry TEXT, -- e.g., 'education', 'technology', 'healthcare', 'legal', 'creative', 'finance'
+ADD COLUMN IF NOT EXISTS primary_goal TEXT, -- What they want to achieve first
+ADD COLUMN IF NOT EXISTS team_context TEXT, -- 'solo', 'team_member', 'team_lead', 'educator', 'student'
+ADD COLUMN IF NOT EXISTS content_types TEXT[], -- Array of content types they'll work with
+ADD COLUMN IF NOT EXISTS ai_experience_level TEXT DEFAULT 'beginner', -- 'beginner', 'intermediate', 'advanced'
+ADD COLUMN IF NOT EXISTS preferred_name TEXT, -- How they want to be addressed
+ADD COLUMN IF NOT EXISTS timezone TEXT, -- For scheduling and timestamps
+ADD COLUMN IF NOT EXISTS use_case_tags TEXT[]; -- Flexible tags for filtering/segmentation
+
+-- Add indexes for common queries
+CREATE INDEX IF NOT EXISTS idx_profiles_user_role ON profiles(user_role);
+CREATE INDEX IF NOT EXISTS idx_profiles_industry ON profiles(industry);
+CREATE INDEX IF NOT EXISTS idx_profiles_team_context ON profiles(team_context);
+CREATE INDEX IF NOT EXISTS idx_profiles_ai_experience ON profiles(ai_experience_level);
+```
+
 ### Option 2: Use Migration File
 
 The migration file already exists at:
@@ -71,12 +93,25 @@ If you have Supabase CLI set up:
 supabase db push
 ```
 
-### Verify Migration
+### Verify Migrations
 
-After running the migration, verify by checking the profiles table in Supabase Table Editor. You should see three new columns:
+After running BOTH migrations, verify by checking the profiles table in Supabase Table Editor. You should see these new columns:
+
+**Onboarding Tracking:**
 - `onboarding_completed` (boolean)
 - `onboarding_step` (integer)
 - `onboarding_skipped` (boolean)
+
+**User Personalization:**
+- `user_role` (text)
+- `industry` (text)
+- `primary_goal` (text)
+- `team_context` (text)
+- `content_types` (text[])
+- `ai_experience_level` (text)
+- `preferred_name` (text)
+- `timezone` (text)
+- `use_case_tags` (text[])
 
 ---
 
