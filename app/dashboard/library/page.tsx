@@ -445,51 +445,179 @@ export default function LibraryPage() {
                 </div>
               </div>
 
-              {/* Document Types Distribution */}
-              <Card className="border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6">
-                <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-100 mb-4">
-                  Document Types Distribution
-                </h2>
-                <div className="space-y-3">
-                  {Object.entries(stats.byType)
-                    .sort(([, a], [, b]) => b - a)
-                    .map(([type, count]) => {
-                      const percentage = (count / stats.total) * 100;
-                      return (
-                        <div key={type} className="space-y-1">
-                          <div className="flex items-center justify-between text-sm">
-                            <span className="text-slate-900 dark:text-slate-100 font-medium">{type}</span>
-                            <span className="text-slate-600 dark:text-slate-400">
-                              {count} ({percentage.toFixed(0)}%)
-                            </span>
+              {/* Two Column Layout */}
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                {/* Recent Documents - Takes 2 columns */}
+                <div className="lg:col-span-2">
+                  <Card className="border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6">
+                    <div className="flex items-center justify-between mb-4">
+                      <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-100">
+                        Recent Documents
+                      </h2>
+                      <Button variant="ghost" size="sm" onClick={() => setActiveTab("all")}>
+                        View All →
+                      </Button>
+                    </div>
+                    {documents.length === 0 ? (
+                      <div className="text-center py-12">
+                        <Upload className="h-12 w-12 text-slate-300 mx-auto mb-3" />
+                        <p className="text-slate-500 mb-4">No documents yet</p>
+                        <FileUpload onUploadComplete={handleUploadComplete} />
+                      </div>
+                    ) : (
+                      <div className="space-y-3">
+                        {documents.slice(0, 5).map((doc) => (
+                          <div
+                            key={doc.id}
+                            className="flex items-center gap-3 p-3 rounded-lg border border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600 transition-colors cursor-pointer"
+                            onClick={() => handleOpenPreview(doc)}
+                          >
+                            <FileText className="h-5 w-5 text-slate-400 flex-shrink-0" />
+                            <div className="flex-1 min-w-0">
+                              <h4 className="text-sm font-medium text-slate-900 dark:text-slate-100 truncate">
+                                {doc.title}
+                              </h4>
+                              <p className="text-xs text-slate-500 mt-0.5">
+                                {new Date(doc.created_at).toLocaleDateString()} • {(doc.file_size / 1024).toFixed(1)} KB
+                              </p>
+                            </div>
+                            {doc.document_type && (
+                              <span className="px-2 py-1 bg-slate-100 dark:bg-slate-800 text-xs rounded text-slate-600 dark:text-slate-400">
+                                {doc.document_type}
+                              </span>
+                            )}
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleOpenChat(doc);
+                              }}
+                            >
+                              <MessageSquare className="h-4 w-4" />
+                            </Button>
                           </div>
-                          <div className="h-2 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
-                            <div
-                              className="h-full bg-slate-900 dark:bg-slate-100 transition-all duration-500"
-                              style={{ width: `${percentage}%` }}
-                            />
-                          </div>
-                        </div>
-                      );
-                    })}
+                        ))}
+                      </div>
+                    )}
+                  </Card>
                 </div>
-              </Card>
+
+                {/* Quick Actions - Takes 1 column */}
+                <div>
+                  <Card className="border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6">
+                    <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-100 mb-4">
+                      Quick Actions
+                    </h2>
+                    <div className="space-y-3">
+                      <FileUpload onUploadComplete={handleUploadComplete} />
+                      <Button
+                        variant="outline"
+                        className="w-full justify-start"
+                        onClick={() => setCreateDocModalOpen(true)}
+                      >
+                        <FileText className="h-4 w-4 mr-2" />
+                        Create Document
+                      </Button>
+                      <Link href="/dashboard/chat" className="block">
+                        <Button variant="outline" className="w-full justify-start">
+                          <Brain className="h-4 w-4 mr-2" />
+                          Chat with Library
+                        </Button>
+                      </Link>
+                      <Button
+                        variant="outline"
+                        className="w-full justify-start"
+                        onClick={() => setActiveTab("spaces")}
+                      >
+                        <Building2 className="h-4 w-4 mr-2" />
+                        Browse by Space
+                      </Button>
+                      <Button
+                        variant="outline"
+                        className="w-full justify-start"
+                        onClick={() => setActiveTab("projects")}
+                      >
+                        <Briefcase className="h-4 w-4 mr-2" />
+                        Browse by Project
+                      </Button>
+                    </div>
+                  </Card>
+                </div>
+              </div>
+
+              {/* Document Types Distribution */}
+              {Object.keys(stats.byType).length > 0 && (
+                <Card className="border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6">
+                  <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-100 mb-4">
+                    Document Types Distribution
+                  </h2>
+                  <div className="space-y-3">
+                    {Object.entries(stats.byType)
+                      .sort(([, a], [, b]) => b - a)
+                      .map(([type, count]) => {
+                        const percentage = (count / stats.total) * 100;
+                        return (
+                          <div key={type} className="space-y-1">
+                            <div className="flex items-center justify-between text-sm">
+                              <span className="text-slate-900 dark:text-slate-100 font-medium">{type}</span>
+                              <span className="text-slate-600 dark:text-slate-400">
+                                {count} ({percentage.toFixed(0)}%)
+                              </span>
+                            </div>
+                            <div className="h-2 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
+                              <div
+                                className="h-full bg-slate-900 dark:bg-slate-100 transition-all duration-500"
+                                style={{ width: `${percentage}%` }}
+                              />
+                            </div>
+                          </div>
+                        );
+                      })}
+                  </div>
+                </Card>
+              )}
             </div>
           </TabsContent>
 
           {/* All Documents Tab */}
           <TabsContent value="all" className="mt-0">
             <div className="p-8">
-              {/* Explanation */}
-              <div className="mb-6 pb-4 border-b border-slate-200 dark:border-slate-800">
-                <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-100 mb-2">All Documents</h2>
-                <p className="text-sm text-slate-600 dark:text-slate-400">
-                  Browse, search, and manage every document in your knowledge base. Use filters to find specific types, or search across titles, summaries, and content.
-                </p>
-              </div>
+              {/* Upload Area - Prominent when no documents */}
+              {documents.length === 0 ? (
+                <Card className="border-2 border-dashed border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/50 p-12 text-center mb-8">
+                  <Upload className="h-16 w-16 text-slate-400 mx-auto mb-4" />
+                  <h2 className="text-xl font-semibold text-slate-900 dark:text-slate-100 mb-2">
+                    Your Knowledge Base Awaits
+                  </h2>
+                  <p className="text-slate-600 dark:text-slate-400 mb-6 max-w-md mx-auto">
+                    Upload documents, PDFs, or create new docs to build your AI-powered knowledge library.
+                    Every document is automatically processed, summarized, and made searchable.
+                  </p>
+                  <div className="flex items-center justify-center gap-3">
+                    <FileUpload onUploadComplete={handleUploadComplete} />
+                    <Button onClick={() => setCreateDocModalOpen(true)}>
+                      <FileText className="h-4 w-4 mr-2" />
+                      Create Document
+                    </Button>
+                  </div>
+                </Card>
+              ) : (
+                <>
+                  {/* Explanation */}
+                  <div className="mb-6 pb-4 border-b border-slate-200 dark:border-slate-800">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-100 mb-2">All Documents</h2>
+                        <p className="text-sm text-slate-600 dark:text-slate-400">
+                          Browse, search, and manage every document in your knowledge base. Use filters to find specific types, or search across titles, summaries, and content.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
 
-              {/* Search & Actions Bar */}
-              <div className="mb-6 space-y-4">
+                  {/* Search & Actions Bar */}
+                  <div className="mb-6 space-y-4">
                 <div className="flex items-center gap-3">
                   <div className="relative flex-1">
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
@@ -604,6 +732,8 @@ export default function LibraryPage() {
                   onSelectDocument={() => {}}
                   onSelectAll={() => {}}
                 />
+              )}
+                </>
               )}
             </div>
           </TabsContent>
