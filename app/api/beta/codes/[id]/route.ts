@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { requireAdmin } from "@/lib/auth/admin";
 
 /**
  * DELETE /api/beta/codes/[id]
@@ -21,16 +22,8 @@ export async function DELETE(
 
     const supabase = await createClient();
 
-    // Get current user
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-
-    if (!user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
-    // TODO: Add admin check here
+    // Require admin authorization
+    await requireAdmin();
 
     // Delete the code
     const { error } = await supabase
@@ -49,9 +42,8 @@ export async function DELETE(
     return NextResponse.json({ success: true });
   } catch (error: any) {
     console.error("Error deleting code:", error);
-    return NextResponse.json(
-      { error: "Failed to delete code" },
-      { status: 500 }
-    );
+    const status = error.message === "Unauthorized" ? 401 : error.message.includes("Forbidden") ? 403 : 500;
+    const message = status === 500 ? "Failed to delete code" : error.message;
+    return NextResponse.json({ error: message }, { status });
   }
 }

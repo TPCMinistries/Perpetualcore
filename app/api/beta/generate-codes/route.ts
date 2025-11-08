@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { sendBetaInviteEmail } from "@/lib/email";
+import { requireAdmin } from "@/lib/auth/admin";
 
 // Simple helper to generate a random code
 function generateCode(length: number = 8): string {
@@ -14,22 +15,13 @@ function generateCode(length: number = 8): string {
 
 export async function POST(request: NextRequest) {
   try {
+    // Require admin authorization
+    const { user } = await requireAdmin();
+
     const { count = 1, maxUses = 1, betaTier = "standard", expiresInDays, email } =
       await request.json();
 
     const supabase = await createClient();
-
-    // Get current user
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-
-    if (!user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
-    // TODO: Add admin check here
-    // For now, any logged-in user can generate codes (you can restrict this later)
 
     const codes = [];
     const expiresAt = expiresInDays
@@ -85,28 +77,19 @@ export async function POST(request: NextRequest) {
     });
   } catch (error: any) {
     console.error("Error generating invite codes:", error);
-    return NextResponse.json(
-      { error: "Failed to generate invite codes" },
-      { status: 500 }
-    );
+    const status = error.message === "Unauthorized" ? 401 : error.message.includes("Forbidden") ? 403 : 500;
+    const message = status === 500 ? "Failed to generate invite codes" : error.message;
+    return NextResponse.json({ error: message }, { status });
   }
 }
 
 // GET all codes (for admin dashboard)
 export async function GET(request: NextRequest) {
   try {
+    // Require admin authorization
+    await requireAdmin();
+
     const supabase = await createClient();
-
-    // Get current user
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-
-    if (!user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
-    // TODO: Add admin check here
 
     const { data, error } = await supabase
       .from("beta_invite_codes")
@@ -124,9 +107,8 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ codes: data });
   } catch (error: any) {
     console.error("Error fetching invite codes:", error);
-    return NextResponse.json(
-      { error: "Failed to fetch invite codes" },
-      { status: 500 }
-    );
+    const status = error.message === "Unauthorized" ? 401 : error.message.includes("Forbidden") ? 403 : 500;
+    const message = status === 500 ? "Failed to fetch invite codes" : error.message;
+    return NextResponse.json({ error: message }, { status });
   }
 }

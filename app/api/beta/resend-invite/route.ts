@@ -36,9 +36,8 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ success: true });
   } catch (error: any) {
     console.error("Error resending invite:", error);
-    return NextResponse.json(
-      { error: "Failed to resend invite" },
-      { status: 500 }
-    );
+    const status = error.message === "Unauthorized" ? 401 : error.message.includes("Forbidden") ? 403 : 500;
+    const message = status === 500 ? "Failed to resend invite" : error.message;
+    return NextResponse.json({ error: message }, { status });
   }
 }

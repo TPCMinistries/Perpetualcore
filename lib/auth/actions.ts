@@ -221,8 +221,6 @@ export async function getUserProfile() {
     console.error("[getUserProfile] Error fetching admin status:", adminError);
   }
 
-  console.log("[getUserProfile] Admin profile data:", adminProfile);
-
   return {
     ...profile,
     is_super_admin: adminProfile?.is_super_admin || false,
@@ -253,5 +251,33 @@ export async function resetOnboarding() {
   }
 
   // Always return success so the client-side reset can work
+  return { success: true };
+}
+
+export async function requestPasswordReset(email: string) {
+  const supabase = await createClient();
+
+  const { error } = await supabase.auth.resetPasswordForEmail(email, {
+    redirectTo: `${process.env.NEXT_PUBLIC_APP_URL}/auth/update-password`,
+  });
+
+  if (error) {
+    return { error: error.message };
+  }
+
+  return { success: true };
+}
+
+export async function updatePassword(newPassword: string) {
+  const supabase = await createClient();
+
+  const { error } = await supabase.auth.updateUser({
+    password: newPassword,
+  });
+
+  if (error) {
+    return { error: error.message };
+  }
+
   return { success: true };
 }

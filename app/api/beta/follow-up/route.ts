@@ -72,9 +72,8 @@ export async function POST(request: NextRequest) {
     });
   } catch (error: any) {
     console.error("Error sending follow-up emails:", error);
-    return NextResponse.json(
-      { error: "Failed to send follow-up emails" },
-      { status: 500 }
-    );
+    const status = error.message === "Unauthorized" ? 401 : error.message.includes("Forbidden") ? 403 : 500;
+    const message = status === 500 ? "Failed to send follow-up emails" : error.message;
+    return NextResponse.json({ error: message }, { status });
   }
 }

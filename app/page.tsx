@@ -100,9 +100,6 @@ function ChatDemo() {
 
 export default function HomePage() {
   const [scrollY, setScrollY] = useState(0);
-  const [activeUsersCount, setActiveUsersCount] = useState(0);
-  const [messagesCount, setMessagesCount] = useState(0);
-  const [isStatsVisible, setIsStatsVisible] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => setScrollY(window.scrollY);
@@ -126,63 +123,6 @@ export default function HomePage() {
 
     return () => observer.disconnect();
   }, []);
-
-  // Animated counter for stats
-  useEffect(() => {
-    if (isStatsVisible) {
-      // Active Users counter
-      const usersEnd = 5000;
-      const usersDuration = 2000;
-      const usersIncrement = usersEnd / (usersDuration / 16);
-      const usersTimer = setInterval(() => {
-        setActiveUsersCount((c) => {
-          if (c >= usersEnd) {
-            clearInterval(usersTimer);
-            return usersEnd;
-          }
-          return Math.min(Math.floor(c + usersIncrement), usersEnd);
-        });
-      }, 16);
-
-      // Messages counter
-      const messagesEnd = 1000000;
-      const messagesIncrement = messagesEnd / (usersDuration / 16);
-      const messagesTimer = setInterval(() => {
-        setMessagesCount((c) => {
-          if (c >= messagesEnd) {
-            clearInterval(messagesTimer);
-            return messagesEnd;
-          }
-          return Math.min(Math.floor(c + messagesIncrement), messagesEnd);
-        });
-      }, 16);
-
-      return () => {
-        clearInterval(usersTimer);
-        clearInterval(messagesTimer);
-      };
-    }
-  }, [isStatsVisible]);
-
-  useEffect(() => {
-    const statsObserver = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting && !isStatsVisible) {
-            setIsStatsVisible(true);
-          }
-        });
-      },
-      { threshold: 0.5 }
-    );
-
-    const statsElement = document.getElementById("stats-section");
-    if (statsElement) {
-      statsObserver.observe(statsElement);
-    }
-
-    return () => statsObserver.disconnect();
-  }, [isStatsVisible]);
 
   // Map industry config keys to solutions URLs
   const solutionUrls: { [key: string]: string } = {
@@ -832,88 +772,27 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Benefits Section with Animated Stats */}
-      <section id="stats-section" className="container mx-auto px-4 py-20 animate-on-scroll">
-        <div className="max-w-6xl mx-auto grid md:grid-cols-2 gap-16 items-center">
-          <div>
-            <h2 className="text-4xl md:text-5xl font-bold mb-6 bg-gradient-to-r from-gray-900 via-primary to-purple-600 dark:from-white dark:via-primary dark:to-purple-400 bg-clip-text text-transparent">
-              Why teams choose Perpetual Core
-            </h2>
-            <div className="space-y-4">
-              {benefits.map((benefit) => (
-                <div key={benefit} className="flex items-start gap-3">
-                  <Check className="h-6 w-6 text-green-500 flex-shrink-0 mt-0.5" />
-                  <p className="text-lg">{benefit}</p>
-                </div>
-              ))}
-            </div>
-            <Button size="lg" asChild className="mt-8 shadow-lg hover:shadow-xl transition-shadow">
+      {/* Benefits Section */}
+      <section className="container mx-auto px-4 py-20 animate-on-scroll">
+        <div className="max-w-6xl mx-auto">
+          <h2 className="text-4xl md:text-5xl font-bold mb-6 text-center bg-gradient-to-r from-gray-900 via-primary to-purple-600 dark:from-white dark:via-primary dark:to-purple-400 bg-clip-text text-transparent">
+            Why teams choose Perpetual Core
+          </h2>
+          <div className="grid md:grid-cols-2 gap-6 max-w-4xl mx-auto mt-12">
+            {benefits.map((benefit) => (
+              <div key={benefit} className="flex items-start gap-3">
+                <Check className="h-6 w-6 text-green-500 flex-shrink-0 mt-0.5" />
+                <p className="text-lg">{benefit}</p>
+              </div>
+            ))}
+          </div>
+          <div className="text-center mt-12">
+            <Button size="lg" asChild className="shadow-lg hover:shadow-xl transition-shadow">
               <Link href="/signup">
                 Start Your Free Trial <ArrowRight className="ml-2 h-5 w-5" />
               </Link>
             </Button>
           </div>
-          <div className="backdrop-blur-2xl bg-gradient-to-br from-primary/20 to-primary/5 rounded-2xl p-12 border-2 border-primary/20 shadow-2xl">
-            <div className="text-center">
-              <div className="text-6xl font-extrabold text-primary mb-2">10x</div>
-              <div className="text-xl font-semibold mb-8">Faster Workflows</div>
-              <div className="grid grid-cols-2 gap-6 text-center">
-                <div>
-                  <div className="text-3xl font-bold mb-1">
-                    {activeUsersCount.toLocaleString()}
-                    {activeUsersCount >= 5000 ? "+" : ""}
-                  </div>
-                  <div className="text-sm text-muted-foreground">Active Users</div>
-                </div>
-                <div>
-                  <div className="text-3xl font-bold mb-1">
-                    {messagesCount >= 1000000 ? "1M+" : `${Math.floor(messagesCount / 1000)}K+`}
-                  </div>
-                  <div className="text-sm text-muted-foreground">AI Messages</div>
-                </div>
-                <div>
-                  <div className="text-3xl font-bold mb-1">99.9%</div>
-                  <div className="text-sm text-muted-foreground">Uptime</div>
-                </div>
-                <div>
-                  <div className="text-3xl font-bold mb-1">24/7</div>
-                  <div className="text-sm text-muted-foreground">Support</div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Testimonials - Enhanced Glassmorphic */}
-      <section className="container mx-auto px-4 py-20 animate-on-scroll">
-        <div className="text-center mb-16">
-          <h2 className="text-4xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-gray-900 via-primary to-purple-600 dark:from-white dark:via-primary dark:to-purple-400 bg-clip-text text-transparent">
-            Loved by teams worldwide
-          </h2>
-          <p className="text-xl text-muted-foreground">See what our customers have to say</p>
-        </div>
-
-        <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
-          {testimonials.map((testimonial) => (
-            <Card
-              key={testimonial.author}
-              className="backdrop-blur-2xl bg-card/80 border-2 border-border hover:border-primary/50 transition-all duration-300 shadow-xl hover:shadow-2xl"
-            >
-              <CardContent className="p-6">
-                <div className="flex gap-1 mb-4">
-                  {[...Array(5)].map((_, i) => (
-                    <Star key={i} className="h-5 w-5 fill-yellow-400 text-yellow-400" />
-                  ))}
-                </div>
-                <p className="text-muted-foreground mb-4 italic">&quot;{testimonial.quote}&quot;</p>
-                <div>
-                  <div className="font-semibold">{testimonial.author}</div>
-                  <div className="text-sm text-muted-foreground">{testimonial.role}</div>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
         </div>
       </section>
 
@@ -1025,12 +904,7 @@ export default function HomePage() {
                   </Link>
                 </li>
                 <li>
-                  <Link href="#" className="hover:text-primary transition">
-                    Roadmap
-                  </Link>
-                </li>
-                <li>
-                  <Link href="#" className="hover:text-primary transition">
+                  <Link href="/dashboard/changelog" className="hover:text-primary transition">
                     Changelog
                   </Link>
                 </li>
@@ -1040,23 +914,8 @@ export default function HomePage() {
               <h4 className="font-semibold mb-4">Company</h4>
               <ul className="space-y-2 text-sm text-muted-foreground">
                 <li>
-                  <Link href="#" className="hover:text-primary transition">
-                    About
-                  </Link>
-                </li>
-                <li>
-                  <Link href="#" className="hover:text-primary transition">
-                    Blog
-                  </Link>
-                </li>
-                <li>
-                  <Link href="#" className="hover:text-primary transition">
-                    Careers
-                  </Link>
-                </li>
-                <li>
-                  <Link href="#" className="hover:text-primary transition">
-                    Contact
+                  <Link href="/contact-sales" className="hover:text-primary transition">
+                    Contact Sales
                   </Link>
                 </li>
               </ul>
@@ -1077,11 +936,6 @@ export default function HomePage() {
                 <li>
                   <Link href="/cookies" className="hover:text-primary transition">
                     Cookies
-                  </Link>
-                </li>
-                <li>
-                  <Link href="#" className="hover:text-primary transition">
-                    Security
                   </Link>
                 </li>
               </ul>
@@ -1167,27 +1021,6 @@ const benefits = [
   "Real-time collaboration for distributed teams",
   "Seamless integration with 50+ apps and services",
   "24/7 customer support with 99.9% uptime SLA",
-];
-
-const testimonials = [
-  {
-    author: "Sarah Chen",
-    role: "CEO, TechStartup Inc",
-    quote:
-      "Perpetual Core transformed how our team works. We're 3x more productive and our customers love the faster response times.",
-  },
-  {
-    author: "Michael Rodriguez",
-    role: "Product Manager, InnovateCo",
-    quote:
-      "The AI automation features are game-changing. What used to take hours now takes minutes. Highly recommend!",
-  },
-  {
-    author: "Emily Thompson",
-    role: "Head of Operations, ScaleUp Ltd",
-    quote:
-      "Best investment we've made this year. The ROI was clear within the first month. Our team can't imagine working without it.",
-  },
 ];
 
 const pricingTiers = [
