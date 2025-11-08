@@ -19,6 +19,7 @@ import {
   MoreVertical,
   BotOff,
   Info,
+  Building2,
 } from "lucide-react";
 import { toast } from "sonner";
 import Link from "next/link";
@@ -39,6 +40,7 @@ export default function ConversationPage() {
   const [aiEnabled, setAiEnabled] = useState(true);
   const [documentContext, setDocumentContext] = useState<{title: string, content: string} | null>(null);
   const [availableDocuments, setAvailableDocuments] = useState<any[]>([]);
+  const [spaceInfo, setSpaceInfo] = useState<{name: string, emoji: string, docCount: number} | null>(null);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -53,6 +55,12 @@ export default function ConversationPage() {
       loadDocument(conversation.document_id);
     }
   }, [conversation?.document_id]);
+
+  useEffect(() => {
+    if (conversation?.knowledge_space_id) {
+      loadSpaceInfo(conversation.knowledge_space_id);
+    }
+  }, [conversation?.knowledge_space_id]);
 
   useEffect(() => {
     scrollToBottom();
@@ -182,6 +190,43 @@ export default function ConversationPage() {
       }
     } catch (error: any) {
       console.error("Error loading documents:", error);
+    }
+  }
+
+  async function loadSpaceInfo(spaceId: string) {
+    try {
+      const supabase = createClient();
+
+      // Fetch space details
+      const { data: spaceData, error: spaceError } = await supabase
+        .from("knowledge_spaces")
+        .select("id, name, emoji")
+        .eq("id", spaceId)
+        .single();
+
+      if (spaceError || !spaceData) {
+        console.error("Error loading space:", spaceError);
+        return;
+      }
+
+      // Count documents in this space
+      const { count, error: countError } = await supabase
+        .from("documents")
+        .select("id", { count: "exact", head: true })
+        .eq("knowledge_space_id", spaceId)
+        .eq("status", "completed");
+
+      if (countError) {
+        console.error("Error counting space documents:", countError);
+      }
+
+      setSpaceInfo({
+        name: spaceData.name,
+        emoji: spaceData.emoji,
+        docCount: count || 0,
+      });
+    } catch (error: any) {
+      console.error("Error loading space info:", error);
     }
   }
 
@@ -396,6 +441,12 @@ export default function ConversationPage() {
                   <span className="inline-flex items-center px-2 py-1 rounded-full text-xs bg-green-100 dark:bg-green-950 text-green-700 dark:text-green-300">
                     <FileText className="h-3 w-3 mr-1" />
                     Document linked: {documentContext.title}
+                  </span>
+                )}
+                {spaceInfo && (
+                  <span className="inline-flex items-center px-2 py-1 rounded-full text-xs bg-blue-100 dark:bg-blue-950 text-blue-700 dark:text-blue-300">
+                    <Building2 className="h-3 w-3 mr-1" />
+                    Space: {spaceInfo.emoji} {spaceInfo.name}
                   </span>
                 )}
               </div>
