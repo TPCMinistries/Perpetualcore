@@ -27,10 +27,19 @@ export async function middleware(request: NextRequest) {
           return request.cookies.get(name)?.value;
         },
         set(name: string, value: string, options: CookieOptions) {
+          // Extend cookie lifetime to 30 days for persistent sessions
+          const extendedOptions = {
+            ...options,
+            maxAge: 60 * 60 * 24 * 30, // 30 days
+            path: '/',
+            sameSite: 'lax' as const,
+            secure: process.env.NODE_ENV === 'production',
+          };
+
           request.cookies.set({
             name,
             value,
-            ...options,
+            ...extendedOptions,
           });
           response = NextResponse.next({
             request: {
@@ -40,7 +49,7 @@ export async function middleware(request: NextRequest) {
           response.cookies.set({
             name,
             value,
-            ...options,
+            ...extendedOptions,
           });
         },
         remove(name: string, options: CookieOptions) {

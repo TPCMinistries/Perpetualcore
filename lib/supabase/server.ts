@@ -16,7 +16,15 @@ export async function createClient() {
         },
         set(name: string, value: string, options: CookieOptions) {
           try {
-            cookieStore.set({ name, value, ...options });
+            // Extend cookie lifetime to 30 days for persistent sessions
+            const extendedOptions = {
+              ...options,
+              maxAge: 60 * 60 * 24 * 30, // 30 days
+              path: '/',
+              sameSite: 'lax' as const,
+              secure: process.env.NODE_ENV === 'production',
+            };
+            cookieStore.set({ name, value, ...extendedOptions });
           } catch (error) {
             // The `set` method was called from a Server Component.
             // This can be ignored if you have middleware refreshing
