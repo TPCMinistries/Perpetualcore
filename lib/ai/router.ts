@@ -324,10 +324,14 @@ async function* streamGemini(
     throw new Error("Google AI client not initialized");
   }
 
-  const model = client.getGenerativeModel({ model: "gemini-2.0-flash-exp" });
-
   const systemMessage = messages.find((m) => m.role === "system");
   const conversationMessages = messages.filter((m) => m.role !== "system");
+
+  // Create model with system instruction
+  const model = client.getGenerativeModel({
+    model: "gemini-2.0-flash-exp",
+    systemInstruction: systemMessage?.content,
+  });
 
   // Build conversation history
   const history = conversationMessages.slice(0, -1).map((m) => ({
