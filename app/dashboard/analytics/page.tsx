@@ -195,8 +195,8 @@ export default function AnalyticsPage() {
                 {data.overview.messages}
               </p>
             </div>
-            <div className="h-10 w-10 rounded-lg bg-green-50 dark:bg-green-950/30 flex items-center justify-center">
-              <Activity className="h-5 w-5 text-green-600 dark:text-green-400" />
+            <div className="h-10 w-10 rounded-lg bg-blue-50 dark:bg-blue-950/30 flex items-center justify-center">
+              <Activity className="h-5 w-5 text-blue-600 dark:text-blue-400" />
             </div>
           </div>
         </Card>
@@ -209,8 +209,8 @@ export default function AnalyticsPage() {
                 {data.overview.documents}
               </p>
             </div>
-            <div className="h-10 w-10 rounded-lg bg-purple-50 dark:bg-purple-950/30 flex items-center justify-center">
-              <FileText className="h-5 w-5 text-purple-600 dark:text-purple-400" />
+            <div className="h-10 w-10 rounded-lg bg-blue-50 dark:bg-blue-950/30 flex items-center justify-center">
+              <FileText className="h-5 w-5 text-blue-700 dark:text-blue-400" />
             </div>
           </div>
         </Card>
@@ -223,8 +223,8 @@ export default function AnalyticsPage() {
                 {data.overview.completedTasks}
               </p>
             </div>
-            <div className="h-10 w-10 rounded-lg bg-orange-50 dark:bg-orange-950/30 flex items-center justify-center">
-              <CheckCircle2 className="h-5 w-5 text-orange-600 dark:text-orange-400" />
+            <div className="h-10 w-10 rounded-lg bg-emerald-50 dark:bg-emerald-950/30 flex items-center justify-center">
+              <CheckCircle2 className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
             </div>
           </div>
         </Card>
@@ -268,7 +268,7 @@ export default function AnalyticsPage() {
 
                   {/* Bar */}
                   <div
-                    className="w-full bg-slate-600 dark:bg-slate-400 rounded-t hover:bg-slate-700 dark:hover:bg-slate-300 transition-colors cursor-pointer"
+                    className="w-full bg-blue-600 dark:bg-blue-500 rounded-t hover:bg-blue-700 dark:hover:bg-blue-400 transition-colors cursor-pointer"
                     style={{
                       height: `${Math.max(height, 2)}%`,
                       minHeight: total > 0 ? "4px" : "0",
@@ -296,8 +296,8 @@ export default function AnalyticsPage() {
         <Card className="border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <div className="h-10 w-10 rounded-lg bg-yellow-50 dark:bg-yellow-950/30 flex items-center justify-center">
-                <Zap className="h-5 w-5 text-yellow-600 dark:text-yellow-400" />
+              <div className="h-10 w-10 rounded-lg bg-blue-50 dark:bg-blue-950/30 flex items-center justify-center">
+                <Zap className="h-5 w-5 text-blue-600 dark:text-blue-400" />
               </div>
               <span className="text-slate-900 dark:text-slate-100">AI Usage</span>
             </CardTitle>
@@ -314,7 +314,7 @@ export default function AnalyticsPage() {
 
               <div className="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-800/50 rounded-lg border border-slate-200 dark:border-slate-700">
                 <div className="flex items-center gap-2">
-                  <MessageCircle className="h-4 w-4 text-green-600 dark:text-green-400" />
+                  <MessageCircle className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
                   <span className="text-sm font-medium text-slate-700 dark:text-slate-300">WhatsApp Replies</span>
                 </div>
                 <span className="font-semibold text-slate-900 dark:text-slate-100">{data.ai.aiWhatsAppMessages}</span>
@@ -322,7 +322,7 @@ export default function AnalyticsPage() {
 
               <div className="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-800/50 rounded-lg border border-slate-200 dark:border-slate-700">
                 <div className="flex items-center gap-2">
-                  <Mail className="h-4 w-4 text-purple-600 dark:text-purple-400" />
+                  <Mail className="h-4 w-4 text-blue-700 dark:text-blue-400" />
                   <span className="text-sm font-medium text-slate-700 dark:text-slate-300">Email AI Actions</span>
                 </div>
                 <span className="font-semibold text-slate-900 dark:text-slate-100">{data.ai.emailAIActions}</span>
@@ -330,7 +330,7 @@ export default function AnalyticsPage() {
 
               <div className="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-800/50 rounded-lg border border-slate-200 dark:border-slate-700">
                 <div className="flex items-center gap-2">
-                  <Zap className="h-4 w-4 text-orange-600 dark:text-orange-400" />
+                  <Zap className="h-4 w-4 text-amber-600 dark:text-amber-400" />
                   <span className="text-sm font-medium text-slate-700 dark:text-slate-300">AI Notifications</span>
                 </div>
                 <span className="font-semibold text-slate-900 dark:text-slate-100">{data.ai.aiNotifications}</span>
@@ -352,8 +352,8 @@ export default function AnalyticsPage() {
         <Card className="border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <div className="h-10 w-10 rounded-lg bg-green-50 dark:bg-green-950/30 flex items-center justify-center">
-                <Target className="h-5 w-5 text-green-600 dark:text-green-400" />
+              <div className="h-10 w-10 rounded-lg bg-emerald-50 dark:bg-emerald-950/30 flex items-center justify-center">
+                <Target className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
               </div>
               <span className="text-slate-900 dark:text-slate-100">Productivity Insights</span>
             </CardTitle>
@@ -371,7 +371,7 @@ export default function AnalyticsPage() {
                 </div>
                 <div className="w-full bg-slate-200 dark:bg-slate-700 rounded-full h-2 overflow-hidden">
                   <div
-                    className="bg-green-600 dark:bg-green-500 h-2 rounded-full transition-all"
+                    className="bg-emerald-600 dark:bg-emerald-500 h-2 rounded-full transition-all"
                     style={{
                       width: `${data.productivity.taskCompletionRate}%`,
                     }}
@@ -391,7 +391,7 @@ export default function AnalyticsPage() {
 
               <div className="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-800/50 rounded-lg border border-slate-200 dark:border-slate-700">
                 <div className="flex items-center gap-2">
-                  <Activity className="h-4 w-4 text-purple-600 dark:text-purple-400" />
+                  <Activity className="h-4 w-4 text-blue-700 dark:text-blue-400" />
                   <span className="text-sm font-medium text-slate-700 dark:text-slate-300">Most Active Hour</span>
                 </div>
                 <span className="font-semibold text-slate-900 dark:text-slate-100">
@@ -399,9 +399,9 @@ export default function AnalyticsPage() {
                 </span>
               </div>
 
-              <div className="flex items-center justify-between p-4 bg-orange-50 dark:bg-orange-950/30 rounded-lg border border-orange-200 dark:border-orange-800">
+              <div className="flex items-center justify-between p-4 bg-amber-50 dark:bg-amber-950/30 rounded-lg border border-amber-200 dark:border-amber-800">
                 <div className="flex items-center gap-2">
-                  <Flame className="h-5 w-5 text-orange-600 dark:text-orange-400" />
+                  <Flame className="h-5 w-5 text-amber-600 dark:text-amber-400" />
                   <span className="text-sm font-semibold text-slate-900 dark:text-slate-100">Current Streak</span>
                 </div>
                 <span className="text-2xl font-semibold text-slate-900 dark:text-slate-100">
@@ -440,8 +440,8 @@ export default function AnalyticsPage() {
                   </div>
                 </div>
                 {data.integrations.email.connected ? (
-                  <div className="h-8 w-8 rounded-full bg-green-50 dark:bg-green-950/30 flex items-center justify-center">
-                    <CheckCircle2 className="h-5 w-5 text-green-600 dark:text-green-400" />
+                  <div className="h-8 w-8 rounded-full bg-emerald-50 dark:bg-emerald-950/30 flex items-center justify-center">
+                    <CheckCircle2 className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
                   </div>
                 ) : (
                   <XCircle className="h-5 w-5 text-slate-400" />
@@ -450,8 +450,8 @@ export default function AnalyticsPage() {
 
               <div className="flex items-center justify-between p-4 bg-slate-50 dark:bg-slate-800/50 rounded-lg border border-slate-200 dark:border-slate-700">
                 <div className="flex items-center gap-3">
-                  <div className="h-10 w-10 rounded-lg bg-purple-50 dark:bg-purple-950/30 flex items-center justify-center">
-                    <Calendar className="h-5 w-5 text-purple-600 dark:text-purple-400" />
+                  <div className="h-10 w-10 rounded-lg bg-blue-50 dark:bg-blue-950/30 flex items-center justify-center">
+                    <Calendar className="h-5 w-5 text-blue-700 dark:text-blue-400" />
                   </div>
                   <div>
                     <p className="font-semibold text-slate-900 dark:text-slate-100">Calendar</p>
@@ -462,8 +462,8 @@ export default function AnalyticsPage() {
                   </div>
                 </div>
                 {data.integrations.calendar.connected ? (
-                  <div className="h-8 w-8 rounded-full bg-green-50 dark:bg-green-950/30 flex items-center justify-center">
-                    <CheckCircle2 className="h-5 w-5 text-green-600 dark:text-green-400" />
+                  <div className="h-8 w-8 rounded-full bg-emerald-50 dark:bg-emerald-950/30 flex items-center justify-center">
+                    <CheckCircle2 className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
                   </div>
                 ) : (
                   <XCircle className="h-5 w-5 text-slate-400" />
@@ -472,8 +472,8 @@ export default function AnalyticsPage() {
 
               <div className="flex items-center justify-between p-4 bg-slate-50 dark:bg-slate-800/50 rounded-lg border border-slate-200 dark:border-slate-700">
                 <div className="flex items-center gap-3">
-                  <div className="h-10 w-10 rounded-lg bg-green-50 dark:bg-green-950/30 flex items-center justify-center">
-                    <MessageCircle className="h-5 w-5 text-green-600 dark:text-green-400" />
+                  <div className="h-10 w-10 rounded-lg bg-emerald-50 dark:bg-emerald-950/30 flex items-center justify-center">
+                    <MessageCircle className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
                   </div>
                   <div>
                     <p className="font-semibold text-slate-900 dark:text-slate-100">WhatsApp</p>
@@ -484,8 +484,8 @@ export default function AnalyticsPage() {
                   </div>
                 </div>
                 {data.integrations.whatsapp.connected ? (
-                  <div className="h-8 w-8 rounded-full bg-green-50 dark:bg-green-950/30 flex items-center justify-center">
-                    <CheckCircle2 className="h-5 w-5 text-green-600 dark:text-green-400" />
+                  <div className="h-8 w-8 rounded-full bg-emerald-50 dark:bg-emerald-950/30 flex items-center justify-center">
+                    <CheckCircle2 className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
                   </div>
                 ) : (
                   <XCircle className="h-5 w-5 text-slate-400" />
@@ -498,8 +498,8 @@ export default function AnalyticsPage() {
         <Card className="border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <div className="h-10 w-10 rounded-lg bg-violet-50 dark:bg-violet-950/30 flex items-center justify-center">
-                <TrendingUp className="h-5 w-5 text-violet-600 dark:text-violet-400" />
+              <div className="h-10 w-10 rounded-lg bg-slate-100 dark:bg-slate-800 flex items-center justify-center">
+                <TrendingUp className="h-5 w-5 text-slate-700 dark:text-slate-300" />
               </div>
               <span className="text-slate-900 dark:text-slate-100">Additional Metrics</span>
             </CardTitle>
@@ -523,7 +523,7 @@ export default function AnalyticsPage() {
                 <span className="font-semibold text-slate-900 dark:text-slate-100">{data.overview.notifications}</span>
               </div>
 
-              <div className="flex items-center justify-between p-4 bg-violet-50 dark:bg-violet-950/30 rounded-lg border border-violet-200 dark:border-violet-800">
+              <div className="flex items-center justify-between p-4 bg-blue-50 dark:bg-blue-950/30 rounded-lg border border-blue-200 dark:border-blue-800">
                 <span className="text-sm font-semibold text-slate-900 dark:text-slate-100">Storage Used</span>
                 <span className="font-semibold text-lg text-slate-900 dark:text-slate-100">
                   {formatBytes(data.overview.storageBytes)}
