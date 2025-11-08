@@ -204,13 +204,93 @@ export interface DocumentTag {
   created_at: string;
 }
 
+// Many-to-many junction table types
+export interface DocumentProject {
+  id: string;
+  document_id: string;
+  project_id: string;
+  added_by: string | null;
+  added_at: string;
+}
+
+export interface DocumentFolder {
+  id: string;
+  document_id: string;
+  folder_id: string;
+  added_by: string | null;
+  added_at: string;
+  position: number;
+}
+
+export interface DocumentKnowledgeSpace {
+  id: string;
+  document_id: string;
+  knowledge_space_id: string;
+  added_by: string | null;
+  added_at: string;
+  is_pinned: boolean;
+}
+
+// Project type
+export interface Project {
+  id: string;
+  organization_id: string;
+  created_by: string;
+  name: string;
+  description: string | null;
+  color: string;
+  icon: string;
+  emoji: string;
+  is_archived: boolean;
+  sort_order: number;
+  conversation_count: number;
+  created_at: string;
+  updated_at: string;
+}
+
+// Knowledge Space type
+export interface KnowledgeSpace {
+  id: string;
+  organization_id: string;
+  name: string;
+  description: string | null;
+  space_type: 'team' | 'project' | 'department' | 'client';
+  emoji: string;
+  color: string;
+  owner_id: string;
+  member_ids: string[];
+  moderator_ids: string[];
+  is_private: boolean;
+  is_archived: boolean;
+  document_count: number;
+  member_count: number;
+  created_at: string;
+  updated_at: string;
+}
+
+// Related document with context overlap
+export interface RelatedDocument {
+  related_document_id: string;
+  document_title: string;
+  similarity_score: number;
+  shared_projects: number;
+  shared_folders: number;
+  shared_spaces: number;
+  shared_tags: number;
+  relationship_strength: 'very_strong' | 'strong' | 'moderate' | 'weak';
+}
+
 export interface DocumentWithDetails extends Document {
   folder?: Folder | null;
+  folders?: Folder[];  // Multiple folders support
   tags?: Tag[];
+  projects?: Project[];  // Multiple projects support
+  knowledge_spaces?: KnowledgeSpace[];  // Multiple spaces support
   user?: {
     full_name: string | null;
     email: string;
   };
+  related_documents?: RelatedDocument[];  // Contextual intelligence
 }
 
 export interface DocumentChunk {
