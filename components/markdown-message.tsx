@@ -27,49 +27,49 @@ export function MarkdownMessage({ content }: MarkdownMessageProps) {
           // Headings
           h1: ({ node, ...props }) => (
             <h1
-              className="text-2xl font-bold mt-6 mb-4 text-foreground border-b border-border pb-2"
+              className="text-2xl font-bold mt-6 mb-4 text-slate-900 dark:text-slate-100 border-b border-slate-200 dark:border-slate-800 pb-2"
               {...props}
             />
           ),
           h2: ({ node, ...props }) => (
             <h2
-              className="text-xl font-bold mt-5 mb-3 text-foreground"
+              className="text-xl font-bold mt-6 mb-3 text-slate-900 dark:text-slate-100"
               {...props}
             />
           ),
           h3: ({ node, ...props }) => (
             <h3
-              className="text-lg font-semibold mt-4 mb-2 text-foreground"
+              className="text-lg font-semibold mt-5 mb-2 text-slate-900 dark:text-slate-100"
               {...props}
             />
           ),
           h4: ({ node, ...props }) => (
             <h4
-              className="text-base font-semibold mt-3 mb-2 text-foreground"
+              className="text-base font-semibold mt-4 mb-2 text-slate-900 dark:text-slate-100"
               {...props}
             />
           ),
 
           // Paragraphs
           p: ({ node, ...props }) => (
-            <p className="mb-4 leading-7 text-foreground" {...props} />
+            <p className="mb-5 leading-[1.7] text-[15px] text-slate-800 dark:text-slate-200" {...props} />
           ),
 
           // Lists
           ul: ({ node, ...props }) => (
             <ul
-              className="mb-4 ml-6 list-disc space-y-2 text-foreground"
+              className="mb-5 ml-6 list-disc space-y-2.5 text-[15px] text-slate-800 dark:text-slate-200 marker:text-slate-500 dark:marker:text-slate-400"
               {...props}
             />
           ),
           ol: ({ node, ...props }) => (
             <ol
-              className="mb-4 ml-6 list-decimal space-y-2 text-foreground"
+              className="mb-5 ml-6 list-decimal space-y-2.5 text-[15px] text-slate-800 dark:text-slate-200 marker:text-slate-500 dark:marker:text-slate-400 marker:font-medium"
               {...props}
             />
           ),
           li: ({ node, ...props }) => (
-            <li className="leading-7" {...props} />
+            <li className="leading-[1.7] pl-2" {...props} />
           ),
 
           // Links
