@@ -24,6 +24,7 @@ import { toast } from "sonner";
 import Link from "next/link";
 import { MarkdownMessage } from "@/components/markdown-message";
 import { SharedConversationWithParticipants, ConversationMessageWithProfile } from "@/types";
+import { createClient } from "@/lib/supabase/client";
 
 export default function ConversationPage() {
   const params = useParams();
@@ -56,6 +57,69 @@ export default function ConversationPage() {
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
+
+  // Set up real-time subscription for new messages
+  useEffect(() => {
+    const supabase = createClient();
+
+    console.log(`[Team Chat] Setting up realtime subscription for conversation ${conversationId}`);
+
+    // Subscribe to INSERT events on conversation_messages for this conversation
+    const channel = supabase
+      .channel(`conversation:${conversationId}`)
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'conversation_messages',
+          filter: `conversation_id=eq.${conversationId}`,
+        },
+        async (payload) => {
+          console.log('[Team Chat] New message received via realtime:', payload.new);
+
+          // Fetch the complete message with profile data
+          const { data: newMessageData, error } = await supabase
+            .from('conversation_messages')
+            .select(`
+              *,
+              profiles:user_id (
+                id,
+                full_name,
+                email,
+                avatar_url
+              )
+            `)
+            .eq('id', payload.new.id)
+            .single();
+
+          if (error) {
+            console.error('[Team Chat] Error fetching new message details:', error);
+            // Fallback: reload all messages
+            loadMessages();
+            return;
+          }
+
+          // Add the new message to state
+          setMessages((prev) => [...prev, newMessageData as ConversationMessageWithProfile]);
+
+          // Show toast notification if message is from another user
+          if (newMessageData.role === 'user' && newMessageData.profiles) {
+            const senderName = newMessageData.profiles.full_name || newMessageData.profiles.email || 'Someone';
+            toast.info(`${senderName} sent a message`);
+          }
+        }
+      )
+      .subscribe((status) => {
+        console.log('[Team Chat] Realtime subscription status:', status);
+      });
+
+    // Cleanup subscription on unmount
+    return () => {
+      console.log(`[Team Chat] Cleaning up realtime subscription for conversation ${conversationId}`);
+      supabase.removeChannel(channel);
+    };
+  }, [conversationId]);
 
   function scrollToBottom() {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
