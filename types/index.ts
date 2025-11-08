@@ -265,12 +265,12 @@ export interface UsageLog {
   created_at: string;
 }
 
-export type AIModel = 'auto' | 'claude-opus-4' | 'claude-sonnet-4' | 'gpt-4o' | 'gpt-4o-mini' | 'gemini-2.0-flash-exp' | 'deepseek-chat' | 'gamma';
+export type AIModel = 'auto' | 'claude-opus-4' | 'claude-sonnet-4' | 'gpt-4o' | 'gpt-4o-mini' | 'gemini-2.0-flash-exp' | 'gamma';
 
 export interface AIModelConfig {
   id: AIModel;
   name: string;
-  provider: 'anthropic' | 'openai' | 'google' | 'deepseek' | 'gamma';
+  provider: 'anthropic' | 'openai' | 'google' | 'gamma';
   costPer1kTokens: number;
   maxTokens: number;
   icon?: string;
@@ -279,7 +279,7 @@ export interface AIModelConfig {
 export interface ModelSelection {
   model: string;
   reason: string;
-  provider: 'anthropic' | 'openai' | 'google' | 'deepseek' | 'gamma';
+  provider: 'anthropic' | 'openai' | 'google' | 'gamma';
   displayName: string;
   icon?: string;
 }

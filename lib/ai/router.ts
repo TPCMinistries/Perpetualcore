@@ -4,6 +4,14 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 import { AIModel } from "@/types";
 import { Tool } from "./tools/schema";
 import { formatToolsForOpenAI, formatToolsForClaude } from "./tools/registry";
+import {
+  selectBestModel,
+  getFallbackChain,
+  isModelAvailable,
+  calculateCost,
+  UserTier,
+  ModelSelectionContext,
+} from "./model-selector";
 
 // Lazy initialization to avoid build-time errors
 let anthropic: Anthropic | null = null;
@@ -34,16 +42,6 @@ function getGoogleAI() {
   return googleAI;
 }
 
-let deepseek: OpenAI | null = null;
-function getDeepSeek() {
-  if (!deepseek && process.env.DEEPSEEK_API_KEY) {
-    deepseek = new OpenAI({
-      apiKey: process.env.DEEPSEEK_API_KEY,
-      baseURL: "https://api.deepseek.com",
-    });
-  }
-  return deepseek;
-}
 
 export interface ChatMessage {
   role: "user" | "assistant" | "system";
@@ -68,22 +66,80 @@ export interface StreamChunk {
   tool_calls?: ToolCall[];
 }
 
+/**
+ * Stream chat completion with intelligent model selection and automatic fallback
+ * This is the main entry point for all AI requests
+ */
 export async function* streamChatCompletion(
+  model: AIModel,
+  messages: ChatMessage[],
+  tools?: Tool[],
+  userTier: UserTier = 'free',
+  context?: ModelSelectionContext
+): AsyncGenerator<StreamChunk> {
+  // Resolve 'auto' to best model for this request
+  let selectedModel = model;
+  if (model === "auto") {
+    selectedModel = selectBestModel(messages, userTier, {
+      ...context,
+      hasTools: !!tools,
+    });
+    console.log(`[Router] Auto-selected model: ${selectedModel} (tier: ${userTier})`);
+  }
+
+  // Get fallback chain for reliability
+  const fallbackChain = getFallbackChain(selectedModel);
+  console.log(`[Router] Fallback chain:`, fallbackChain);
+
+  // Try each model in the fallback chain
+  for (let i = 0; i < fallbackChain.length; i++) {
+    const attemptModel = fallbackChain[i];
+
+    try {
+      console.log(`[Router] Attempting model: ${attemptModel} (attempt ${i + 1}/${fallbackChain.length})`);
+
+      // Check if model is available (has API key)
+      if (!isModelAvailable(attemptModel)) {
+        console.warn(`[Router] ${attemptModel} not available (missing API key), trying next...`);
+        continue;
+      }
+
+      // Try to stream from this model
+      yield* streamFromModel(attemptModel, messages, tools);
+
+      // Success! Log and return
+      console.log(`[Router] ✅ Successfully streamed from ${attemptModel}`);
+      return;
+
+    } catch (error: any) {
+      console.error(`[Router] ❌ ${attemptModel} failed:`, error.message);
+
+      // If this was the last model in the chain, throw the error
+      if (i === fallbackChain.length - 1) {
+        throw new Error(`All models in fallback chain failed. Last error: ${error.message}`);
+      }
+
+      // Otherwise, log and continue to next fallback
+      console.log(`[Router] 🔄 Falling back to next model...`);
+    }
+  }
+
+  // Should never reach here, but just in case
+  throw new Error('Failed to stream from any model in fallback chain');
+}
+
+/**
+ * Internal function to route to the correct model implementation
+ */
+async function* streamFromModel(
   model: AIModel,
   messages: ChatMessage[],
   tools?: Tool[]
 ): AsyncGenerator<StreamChunk> {
-  // Skip auto - it should be resolved before this
-  if (model === "auto") {
-    model = "claude-sonnet-4";
-  }
-
   if (model === "claude-opus-4" || model === "claude-sonnet-4") {
     yield* streamClaude(messages, model, tools);
   } else if (model === "gpt-4o" || model === "gpt-4o-mini") {
     yield* streamOpenAI(messages, model, tools);
-  } else if (model === "deepseek-chat") {
-    yield* streamDeepSeek(messages, tools);
   } else if (model === "gemini-2.0-flash-exp") {
     yield* streamGemini(messages);
   } else if (model === "gamma") {
@@ -110,7 +166,7 @@ async function* streamClaude(
   const anthropicModel = model === "claude-opus-4"
     ? "claude-opus-4-20250514"
     : model === "claude-sonnet-4"
-    ? "claude-3-haiku-20240307" // Using Haiku for sonnet-4 due to tier restrictions
+    ? "claude-sonnet-3-5-20241022" // Actual Sonnet 3.5
     : "claude-3-haiku-20240307"; // Default to Haiku
 
   const client = getAnthropic();
@@ -250,77 +306,6 @@ async function* streamOpenAI(
   yield { content: "", done: true, usage };
 }
 
-async function* streamDeepSeek(
-  messages: ChatMessage[],
-  tools?: Tool[]
-): AsyncGenerator<StreamChunk> {
-  const client = getDeepSeek();
-  if (!client) {
-    throw new Error("DeepSeek client not initialized");
-  }
-
-  const stream = await client.chat.completions.create({
-    model: "deepseek-chat",
-    messages: messages.map((m) => ({
-      role: m.role,
-      content: m.content,
-    })),
-    tools: tools ? formatToolsForOpenAI(tools) : undefined,
-    stream: true,
-  });
-
-  let usage: UsageMetadata | undefined;
-  let accumulatedToolCalls: Map<number, ToolCall> = new Map();
-
-  for await (const chunk of stream) {
-    const content = chunk.choices[0]?.delta?.content || "";
-    if (content) {
-      yield {
-        content,
-        done: false,
-      };
-    }
-
-    // Handle tool calls - DeepSeek uses OpenAI format
-    const deltaToolCalls = chunk.choices[0]?.delta?.tool_calls;
-    if (deltaToolCalls) {
-      for (const toolCall of deltaToolCalls) {
-        const index = toolCall.index;
-        const existing = accumulatedToolCalls.get(index);
-
-        if (!existing) {
-          // New tool call
-          accumulatedToolCalls.set(index, {
-            id: toolCall.id || "",
-            name: toolCall.function?.name || "",
-            arguments: toolCall.function?.arguments || "",
-          });
-        } else {
-          // Append to existing tool call
-          if (toolCall.function?.arguments) {
-            existing.arguments += toolCall.function.arguments;
-          }
-        }
-      }
-    }
-
-    // DeepSeek includes usage in the final chunk (if available)
-    if (chunk.usage) {
-      usage = {
-        inputTokens: chunk.usage.prompt_tokens || 0,
-        outputTokens: chunk.usage.completion_tokens || 0,
-      };
-    }
-  }
-
-  // Yield accumulated tool calls if any
-  if (accumulatedToolCalls.size > 0) {
-    const toolCalls = Array.from(accumulatedToolCalls.values());
-    yield { content: "", done: false, tool_calls: toolCalls };
-  }
-
-  yield { content: "", done: true, usage };
-}
 
 async function* streamGemini(
   messages: ChatMessage[]
@@ -426,15 +411,32 @@ async function* streamGamma(
 // Non-streaming version for simpler use cases
 export async function getChatCompletion(
   model: AIModel,
-  messages: ChatMessage[]
-): Promise<string> {
+  messages: ChatMessage[],
+  userTier: UserTier = 'free'
+): Promise<{ response: string; cost: number; usage: UsageMetadata }> {
   let fullResponse = "";
+  let finalUsage: UsageMetadata = { inputTokens: 0, outputTokens: 0 };
+  let actualModel: AIModel = model;
 
-  for await (const chunk of streamChatCompletion(model, messages)) {
+  for await (const chunk of streamChatCompletion(model, messages, undefined, userTier)) {
     if (!chunk.done) {
       fullResponse += chunk.content;
+    } else if (chunk.usage) {
+      finalUsage = chunk.usage;
     }
   }
 
-  return fullResponse;
+  // Calculate cost (will be 0 for free models)
+  const cost = calculateCost(actualModel, finalUsage.inputTokens, finalUsage.outputTokens);
+
+  console.log(`[Router] Request completed. Tokens: ${finalUsage.inputTokens + finalUsage.outputTokens}, Cost: $${cost.toFixed(4)}`);
+
+  return {
+    response: fullResponse,
+    cost,
+    usage: finalUsage,
+  };
 }
+
+// Export the cost calculator for external use
+export { calculateCost } from "./model-selector";
