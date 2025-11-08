@@ -13,7 +13,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Send, Loader2, Bot, User, Paperclip, X, FileText, Image as ImageIcon, Mic, MicOff, Copy, Check, Download, FileSpreadsheet, Presentation, File, Phone, PhoneOff } from "lucide-react";
+import { Send, Loader2, Bot, User, Paperclip, X, FileText, Image as ImageIcon, Mic, MicOff, Copy, Check, Download, FileSpreadsheet, Presentation, File, Phone, PhoneOff, Menu, MessageSquare } from "lucide-react";
 import { AIModel } from "@/types";
 import { AI_MODELS, DEFAULT_MODEL } from "@/lib/ai/config";
 import { ConversationSidebar } from "@/components/conversation-sidebar";
@@ -55,6 +55,7 @@ export default function ChatPage() {
   const [copiedMessageIndex, setCopiedMessageIndex] = useState<number | null>(null);
   const [exportingAs, setExportingAs] = useState<string | null>(null);
   const [isVoiceMode, setIsVoiceMode] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -446,13 +447,32 @@ export default function ChatPage() {
   }
 
   return (
-    <div className="flex h-[calc(100vh-6rem)]">
+    <div className="flex h-[calc(100vh-6rem)] relative">
+      {/* Collapsible Sidebar */}
+      <div className={`${isSidebarOpen ? 'w-64' : 'w-0'} transition-all duration-300 overflow-hidden border-r border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950`}>
+        <ConversationSidebar
+          mode="personal"
+          currentConversationId={conversationId}
+          onConversationSelect={handleConversationSelect}
+          onNewConversation={handleNewConversation}
+        />
+      </div>
+
       {/* Main Chat Area - Centered Layout */}
       <div className="flex flex-col flex-1 min-w-0 max-w-full">
           {/* Minimal Header - Claude-like */}
           <div className="border-b border-slate-200/50 dark:border-slate-800/50 bg-white/80 dark:bg-slate-950/80 backdrop-blur-sm sticky top-0 z-10">
             <div className="max-w-3xl mx-auto px-6 py-3 flex items-center justify-between">
               <div className="flex items-center gap-3">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+                  className="h-8 w-8 p-0"
+                  title="Toggle conversations"
+                >
+                  <MessageSquare className="h-4 w-4" />
+                </Button>
                 <Select
                   value={selectedModel}
                   onValueChange={(value) => setSelectedModel(value as AIModel)}
@@ -497,12 +517,12 @@ export default function ChatPage() {
       <div className="flex-1 overflow-y-auto">
         <div className="max-w-3xl mx-auto px-6">
         {messages.length === 0 ? (
-          <div className="flex flex-col items-center justify-center min-h-[60vh] text-center">
-            <div className="w-full space-y-8">
+          <div className="flex flex-col items-center justify-center min-h-[50vh] text-center py-8">
+            <div className="w-full space-y-6">
               {/* Hero Section - Clean */}
-              <div className="py-12">
-                <div className="h-16 w-16 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center mx-auto mb-6">
-                  <Bot className="h-8 w-8 text-slate-700 dark:text-slate-300" />
+              <div className="py-8">
+                <div className="h-16 w-16 rounded-full bg-gradient-to-br from-purple-500 to-blue-600 flex items-center justify-center mx-auto mb-6">
+                  <Bot className="h-8 w-8 text-white" />
                 </div>
                 <h2 className="text-3xl font-semibold mb-3 text-slate-900 dark:text-slate-100">
                   What can I help you with today?
@@ -520,7 +540,7 @@ export default function ChatPage() {
               </div>
 
               {/* Quick Start Suggestions - Minimal Cards */}
-              <div className="grid md:grid-cols-2 gap-3">
+              <div className="grid md:grid-cols-2 gap-3 mb-6">
                 {[
                   {
                     icon: "💡",
@@ -559,36 +579,6 @@ export default function ChatPage() {
                 ))}
               </div>
 
-              {/* Model Info - Subtle */}
-              {selectedModel === "auto" && (
-                <div className="border border-slate-200 dark:border-slate-800 rounded-lg p-5 bg-white dark:bg-slate-900">
-                  <h3 className="font-medium text-xs uppercase tracking-wide text-slate-600 dark:text-slate-400 mb-3">
-                    Available AI Models
-                  </h3>
-                  <div className="grid grid-cols-2 md:grid-cols-5 gap-3 text-xs">
-                    <div className="flex items-center gap-2">
-                      <div className="h-1.5 w-1.5 rounded-full bg-blue-500" />
-                      <span className="text-slate-600 dark:text-slate-400">GPT-4o Mini</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <div className="h-1.5 w-1.5 rounded-full bg-purple-500" />
-                      <span className="text-slate-600 dark:text-slate-400">Claude</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <div className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
-                      <span className="text-slate-600 dark:text-slate-400">GPT-4o</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <div className="h-1.5 w-1.5 rounded-full bg-amber-500" />
-                      <span className="text-slate-600 dark:text-slate-400">Gemini</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <div className="h-1.5 w-1.5 rounded-full bg-pink-500" />
-                      <span className="text-slate-600 dark:text-slate-400">Gamma</span>
-                    </div>
-                  </div>
-                </div>
-              )}
             </div>
           </div>
         ) : (
@@ -767,10 +757,10 @@ export default function ChatPage() {
                     ? "Listening..."
                     : isDragging
                     ? "Drop files here..."
-                    : "Message..."
+                    : "Ask me anything..."
                 }
                 disabled={isLoading}
-                className="flex-1 min-h-[36px] max-h-[200px] resize-none border-0 focus-visible:ring-0 bg-transparent text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 px-2"
+                className="flex-1 min-h-[36px] max-h-[200px] resize-none border-0 focus-visible:ring-0 bg-transparent text-slate-900 dark:text-slate-100 placeholder:text-slate-500 dark:placeholder:text-slate-500 px-2 text-[15px]"
                 rows={1}
                 onInput={(e) => {
                   const target = e.target as HTMLTextAreaElement;
