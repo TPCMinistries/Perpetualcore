@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Select,
   SelectContent,
@@ -44,6 +45,8 @@ import {
   Clock,
   CheckCircle2,
   XCircle,
+  UserCheck,
+  Calendar,
 } from "lucide-react";
 import { toast } from "sonner";
 import { formatDistanceToNow } from "date-fns";
@@ -59,16 +62,63 @@ interface TeamMember {
   avatar?: string;
 }
 
+interface GuestUser {
+  id: string;
+  email: string;
+  expires_at: string | null;
+  invited_by: string;
+  invited_at: string;
+  permissions: {
+    can_view_documents: boolean;
+    can_download_documents: boolean;
+    can_create_conversations: boolean;
+    can_invite_others: boolean;
+    can_use_ai: boolean;
+  };
+}
+
 export default function TeamSettingsPage() {
   const [inviteDialogOpen, setInviteDialogOpen] = useState(false);
+  const [guestInviteDialogOpen, setGuestInviteDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [deleteGuestDialogOpen, setDeleteGuestDialogOpen] = useState(false);
   const [selectedMember, setSelectedMember] = useState<TeamMember | null>(null);
+  const [selectedGuest, setSelectedGuest] = useState<GuestUser | null>(null);
   const [inviting, setInviting] = useState(false);
 
   const [inviteForm, setInviteForm] = useState({
     email: "",
     role: "member",
   });
+
+  const [guestForm, setGuestForm] = useState({
+    email: "",
+    expires_in_days: "30",
+    permissions: {
+      can_view_documents: true,
+      can_download_documents: false,
+      can_create_conversations: false,
+      can_invite_others: false,
+      can_use_ai: true,
+    },
+  });
+
+  const [guests, setGuests] = useState<GuestUser[]>([
+    {
+      id: "g1",
+      email: "external@partner.com",
+      expires_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
+      invited_by: "John Doe",
+      invited_at: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
+      permissions: {
+        can_view_documents: true,
+        can_download_documents: false,
+        can_create_conversations: false,
+        can_invite_others: false,
+        can_use_ai: true,
+      },
+    },
+  ]);
 
   const [members, setMembers] = useState<TeamMember[]>([
     {
@@ -164,6 +214,61 @@ export default function TeamSettingsPage() {
       setSelectedMember(null);
     } catch (error) {
       toast.error("Failed to remove member");
+    }
+  }
+
+  async function handleInviteGuest() {
+    if (!guestForm.email) {
+      toast.error("Please enter an email address");
+      return;
+    }
+
+    setInviting(true);
+    try {
+      const expiresAt = guestForm.expires_in_days
+        ? new Date(Date.now() + parseInt(guestForm.expires_in_days) * 24 * 60 * 60 * 1000).toISOString()
+        : null;
+
+      const newGuest: GuestUser = {
+        id: `g${guests.length + 1}`,
+        email: guestForm.email,
+        expires_at: expiresAt,
+        invited_by: "Current User",
+        invited_at: new Date().toISOString(),
+        permissions: guestForm.permissions,
+      };
+
+      setGuests([...guests, newGuest]);
+      toast.success(`Guest invitation sent to ${guestForm.email}`);
+      setGuestInviteDialogOpen(false);
+      setGuestForm({
+        email: "",
+        expires_in_days: "30",
+        permissions: {
+          can_view_documents: true,
+          can_download_documents: false,
+          can_create_conversations: false,
+          can_invite_others: false,
+          can_use_ai: true,
+        },
+      });
+    } catch (error) {
+      toast.error("Failed to send guest invitation");
+    } finally {
+      setInviting(false);
+    }
+  }
+
+  async function handleRemoveGuest() {
+    if (!selectedGuest) return;
+
+    try {
+      setGuests(guests.filter((g) => g.id !== selectedGuest.id));
+      toast.success(`Guest ${selectedGuest.email} removed`);
+      setDeleteGuestDialogOpen(false);
+      setSelectedGuest(null);
+    } catch (error) {
+      toast.error("Failed to remove guest");
     }
   }
 
@@ -466,6 +571,217 @@ export default function TeamSettingsPage() {
         </CardContent>
       </Card>
 
+      {/* Guest Users Section */}
+      <Card>
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <div>
+              <CardTitle>Guest Users</CardTitle>
+              <CardDescription>
+                Invite external collaborators with limited access and expiration
+              </CardDescription>
+            </div>
+            <Dialog open={guestInviteDialogOpen} onOpenChange={setGuestInviteDialogOpen}>
+              <DialogTrigger asChild>
+                <Button variant="outline">
+                  <UserCheck className="h-4 w-4 mr-2" />
+                  Invite Guest
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-xl">
+                <DialogHeader>
+                  <DialogTitle>Invite Guest User</DialogTitle>
+                  <DialogDescription>
+                    Send a time-limited invitation with custom permissions
+                  </DialogDescription>
+                </DialogHeader>
+                <div className="space-y-4 py-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="guest-email">Email Address</Label>
+                    <Input
+                      id="guest-email"
+                      type="email"
+                      placeholder="external@partner.com"
+                      value={guestForm.email}
+                      onChange={(e) =>
+                        setGuestForm({ ...guestForm, email: e.target.value })
+                      }
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="expires">Access Duration</Label>
+                    <Select
+                      value={guestForm.expires_in_days}
+                      onValueChange={(value) =>
+                        setGuestForm({ ...guestForm, expires_in_days: value })
+                      }
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="7">7 days</SelectItem>
+                        <SelectItem value="14">14 days</SelectItem>
+                        <SelectItem value="30">30 days</SelectItem>
+                        <SelectItem value="60">60 days</SelectItem>
+                        <SelectItem value="90">90 days</SelectItem>
+                        <SelectItem value="">No expiration</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-3">
+                    <Label>Permissions</Label>
+                    <div className="space-y-3 border rounded-lg p-4">
+                      <div className="flex items-center space-x-2">
+                        <Checkbox
+                          id="can_view"
+                          checked={guestForm.permissions.can_view_documents}
+                          onCheckedChange={(checked) =>
+                            setGuestForm({
+                              ...guestForm,
+                              permissions: {
+                                ...guestForm.permissions,
+                                can_view_documents: checked === true,
+                              },
+                            })
+                          }
+                        />
+                        <Label htmlFor="can_view" className="font-normal cursor-pointer">
+                          Can view documents
+                        </Label>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <Checkbox
+                          id="can_download"
+                          checked={guestForm.permissions.can_download_documents}
+                          onCheckedChange={(checked) =>
+                            setGuestForm({
+                              ...guestForm,
+                              permissions: {
+                                ...guestForm.permissions,
+                                can_download_documents: checked === true,
+                              },
+                            })
+                          }
+                        />
+                        <Label htmlFor="can_download" className="font-normal cursor-pointer">
+                          Can download documents
+                        </Label>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <Checkbox
+                          id="can_converse"
+                          checked={guestForm.permissions.can_create_conversations}
+                          onCheckedChange={(checked) =>
+                            setGuestForm({
+                              ...guestForm,
+                              permissions: {
+                                ...guestForm.permissions,
+                                can_create_conversations: checked === true,
+                              },
+                            })
+                          }
+                        />
+                        <Label htmlFor="can_converse" className="font-normal cursor-pointer">
+                          Can create conversations
+                        </Label>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <Checkbox
+                          id="can_ai"
+                          checked={guestForm.permissions.can_use_ai}
+                          onCheckedChange={(checked) =>
+                            setGuestForm({
+                              ...guestForm,
+                              permissions: {
+                                ...guestForm.permissions,
+                                can_use_ai: checked === true,
+                              },
+                            })
+                          }
+                        />
+                        <Label htmlFor="can_ai" className="font-normal cursor-pointer">
+                          Can use AI features
+                        </Label>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <DialogFooter>
+                  <Button variant="outline" onClick={() => setGuestInviteDialogOpen(false)}>
+                    Cancel
+                  </Button>
+                  <Button onClick={handleInviteGuest} disabled={inviting}>
+                    {inviting ? "Sending..." : "Send Invitation"}
+                  </Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
+          </div>
+        </CardHeader>
+        <CardContent>
+          {guests.length > 0 ? (
+            <div className="space-y-3">
+              {guests.map((guest) => (
+                <div
+                  key={guest.id}
+                  className="flex items-center justify-between p-4 rounded-lg border hover:bg-muted/50 transition-colors"
+                >
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2 mb-1">
+                      <p className="font-medium">{guest.email}</p>
+                      <Badge variant="outline" className="bg-orange-50 border-orange-300 text-orange-700 dark:bg-orange-950/30">
+                        <UserCheck className="h-3 w-3 mr-1" />
+                        Guest
+                      </Badge>
+                    </div>
+                    <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                      <span>Invited by {guest.invited_by}</span>
+                      <span>•</span>
+                      {guest.expires_at ? (
+                        <span className="flex items-center gap-1">
+                          <Calendar className="h-3 w-3" />
+                          Expires {formatDistanceToNow(new Date(guest.expires_at), { addSuffix: true })}
+                        </span>
+                      ) : (
+                        <span>No expiration</span>
+                      )}
+                    </div>
+                    <div className="flex gap-2 mt-2">
+                      {guest.permissions.can_view_documents && (
+                        <Badge variant="secondary" className="text-xs">View Docs</Badge>
+                      )}
+                      {guest.permissions.can_download_documents && (
+                        <Badge variant="secondary" className="text-xs">Download</Badge>
+                      )}
+                      {guest.permissions.can_use_ai && (
+                        <Badge variant="secondary" className="text-xs">AI</Badge>
+                      )}
+                    </div>
+                  </div>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => {
+                      setSelectedGuest(guest);
+                      setDeleteGuestDialogOpen(true);
+                    }}
+                    className="text-destructive hover:text-destructive"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-8 text-muted-foreground">
+              <UserCheck className="h-12 w-12 mx-auto mb-3 opacity-30" />
+              <p>No guest users invited yet</p>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
       {/* Remove Member Dialog */}
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <AlertDialogContent>
@@ -485,6 +801,30 @@ export default function TeamSettingsPage() {
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
               Remove Member
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Remove Guest Dialog */}
+      <AlertDialog open={deleteGuestDialogOpen} onOpenChange={setDeleteGuestDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Remove Guest User</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to revoke access for {selectedGuest?.email}?
+              They will immediately lose access to all resources.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setSelectedGuest(null)}>
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleRemoveGuest}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Remove Guest
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
