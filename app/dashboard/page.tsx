@@ -64,7 +64,7 @@ export default async function DashboardPage() {
     },
   ];
 
-  // Metrics Data
+  // Metrics Data - Enterprise color strategy
   const metrics = [
     {
       title: "AI Conversations",
@@ -73,7 +73,8 @@ export default async function DashboardPage() {
       trend: "up" as const,
       icon: Brain,
       description: "This month",
-      gradient: "from-blue-500 to-cyan-500",
+      gradient: "from-blue-600 to-blue-700", // Primary brand: Deep trustworthy blue
+      category: "core" as const,
     },
     {
       title: "Documents Processed",
@@ -82,7 +83,8 @@ export default async function DashboardPage() {
       trend: "up" as const,
       icon: BarChart3,
       description: "This week",
-      gradient: "from-purple-500 to-pink-500",
+      gradient: "from-blue-500 to-blue-600", // Core usage: Soft primary blue
+      category: "core" as const,
     },
     {
       title: "Time Saved",
@@ -91,7 +93,8 @@ export default async function DashboardPage() {
       trend: "up" as const,
       icon: Zap,
       description: "Estimated this week",
-      gradient: "from-green-500 to-emerald-500",
+      gradient: "from-emerald-600 to-teal-600", // Efficiency: Emerald green/teal
+      category: "efficiency" as const,
     },
     {
       title: "Active Workflows",
@@ -100,7 +103,8 @@ export default async function DashboardPage() {
       trend: "up" as const,
       icon: ActivityIcon,
       description: "Running now",
-      gradient: "from-orange-500 to-amber-500",
+      gradient: "from-slate-600 to-slate-700", // Neutral: Professional gray
+      category: "status" as const,
     },
   ];
 
@@ -118,22 +122,22 @@ export default async function DashboardPage() {
   function getInsightColor(type: "prediction" | "recommendation" | "opportunity") {
     switch (type) {
       case "prediction":
-        return "from-blue-500 to-cyan-500";
+        return "from-blue-600 to-blue-700"; // Primary brand blue
       case "recommendation":
-        return "from-purple-500 to-pink-500";
+        return "from-amber-600 to-orange-600"; // Warning/optimization - muted gold
       case "opportunity":
-        return "from-green-500 to-emerald-500";
+        return "from-emerald-600 to-teal-600"; // Efficiency - emerald green
     }
   }
 
   function getImpactBadgeColor(impact: "high" | "medium" | "low") {
     switch (impact) {
       case "high":
-        return "bg-green-500/20 text-green-400 border-green-500/50";
+        return "bg-emerald-100 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400 border-0";
       case "medium":
-        return "bg-yellow-500/20 text-yellow-400 border-yellow-500/50";
+        return "bg-amber-100 dark:bg-amber-950/40 text-amber-700 dark:text-amber-400 border-0";
       case "low":
-        return "bg-gray-500/20 text-gray-400 border-gray-500/50";
+        return "bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-400 border-0";
     }
   }
 
@@ -141,7 +145,7 @@ export default async function DashboardPage() {
     <div className="space-y-12 pb-16">
       {/* Hero Section - Refined and Elegant */}
       <div className="relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-slate-50/50 via-blue-50/30 to-purple-50/20 dark:from-slate-900/50 dark:via-blue-950/20 dark:to-purple-950/10 rounded-2xl" />
+        <div className="absolute inset-0 bg-gradient-to-br from-slate-50/50 via-blue-50/30 to-blue-100/20 dark:from-slate-900/50 dark:via-blue-950/20 dark:to-blue-900/10 rounded-2xl" />
 
         <div className="relative border border-slate-200/60 dark:border-slate-800/60 rounded-2xl p-8 md:p-12 bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl">
           <div className="flex items-start justify-between mb-8">
@@ -186,14 +190,17 @@ export default async function DashboardPage() {
             const Icon = metric.icon;
             const isPositive = metric.trend === "up";
 
-            // Subtle color accents for each metric
+            // Enterprise color strategy - strategic and controlled
             const iconColors: Record<string, string> = {
-              "from-blue-500 to-cyan-500": "bg-blue-100 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400",
-              "from-purple-500 to-pink-500": "bg-purple-100 dark:bg-purple-950/40 text-purple-600 dark:text-purple-400",
-              "from-green-500 to-emerald-500": "bg-emerald-100 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400",
-              "from-orange-500 to-amber-500": "bg-orange-100 dark:bg-orange-950/40 text-orange-600 dark:text-orange-400",
+              // Primary brand blue - core metrics
+              "from-blue-600 to-blue-700": "bg-blue-100 dark:bg-blue-950/40 text-blue-700 dark:text-blue-400",
+              "from-blue-500 to-blue-600": "bg-blue-50 dark:bg-blue-950/30 text-blue-600 dark:text-blue-400",
+              // Efficiency/value - emerald green
+              "from-emerald-600 to-teal-600": "bg-emerald-50 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-400",
+              // Status/neutral - professional gray
+              "from-slate-600 to-slate-700": "bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300",
             };
-            const iconColor = iconColors[metric.gradient] || iconColors["from-blue-500 to-cyan-500"];
+            const iconColor = iconColors[metric.gradient] || iconColors["from-blue-600 to-blue-700"];
 
             return (
               <Card key={index} className="border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 transition-colors bg-white dark:bg-slate-900">
@@ -259,13 +266,13 @@ export default async function DashboardPage() {
             };
             const impactColor = impactColors[insight.impact];
 
-            // Subtle icon colors
+            // Enterprise icon colors - strategic mapping
             const iconColors: Record<string, string> = {
-              "from-blue-500 to-cyan-500": "bg-blue-100 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400",
-              "from-purple-500 to-pink-500": "bg-purple-100 dark:bg-purple-950/40 text-purple-600 dark:text-purple-400",
-              "from-green-500 to-emerald-500": "bg-emerald-100 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400",
+              "from-blue-600 to-blue-700": "bg-blue-100 dark:bg-blue-950/40 text-blue-700 dark:text-blue-400",
+              "from-amber-600 to-orange-600": "bg-amber-50 dark:bg-amber-950/30 text-amber-700 dark:text-amber-400",
+              "from-emerald-600 to-teal-600": "bg-emerald-50 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-400",
             };
-            const iconColor = iconColors[gradient] || iconColors["from-blue-500 to-cyan-500"];
+            const iconColor = iconColors[gradient] || iconColors["from-blue-600 to-blue-700"];
 
             const insightContent = (
               <Card key={index} className="border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 transition-colors bg-white dark:bg-slate-900 h-full group cursor-pointer">
@@ -319,19 +326,19 @@ export default async function DashboardPage() {
           {config.quickActions.map((action, index) => {
             const ActionIcon = action.icon;
 
-            // Refined icon colors
+            // Enterprise icon colors - strategic mapping only
             const iconColors: Record<string, string> = {
-              blue: "bg-blue-100 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400",
-              purple: "bg-purple-100 dark:bg-purple-950/40 text-purple-600 dark:text-purple-400",
-              green: "bg-emerald-100 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400",
-              orange: "bg-orange-100 dark:bg-orange-950/40 text-orange-600 dark:text-orange-400",
-              cyan: "bg-cyan-100 dark:bg-cyan-950/40 text-cyan-600 dark:text-cyan-400",
-              pink: "bg-pink-100 dark:bg-pink-950/40 text-pink-600 dark:text-pink-400",
-              indigo: "bg-indigo-100 dark:bg-indigo-950/40 text-indigo-600 dark:text-indigo-400",
-              violet: "bg-violet-100 dark:bg-violet-950/40 text-violet-600 dark:text-violet-400",
-              sky: "bg-sky-100 dark:bg-sky-950/40 text-sky-600 dark:text-sky-400",
-              emerald: "bg-emerald-100 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400",
-              primary: "bg-blue-100 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400"
+              blue: "bg-blue-100 dark:bg-blue-950/40 text-blue-700 dark:text-blue-400",
+              purple: "bg-blue-50 dark:bg-blue-950/30 text-blue-600 dark:text-blue-400", // Map purple to blue
+              green: "bg-emerald-100 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400",
+              orange: "bg-amber-100 dark:bg-amber-950/40 text-amber-700 dark:text-amber-400", // Map orange to amber
+              cyan: "bg-blue-100 dark:bg-blue-950/40 text-blue-700 dark:text-blue-400", // Map cyan to blue
+              pink: "bg-blue-50 dark:bg-blue-950/30 text-blue-600 dark:text-blue-400", // Map pink to blue
+              indigo: "bg-blue-100 dark:bg-blue-950/40 text-blue-700 dark:text-blue-400", // Map indigo to blue
+              violet: "bg-blue-50 dark:bg-blue-950/30 text-blue-600 dark:text-blue-400", // Map violet to blue
+              sky: "bg-blue-100 dark:bg-blue-950/40 text-blue-700 dark:text-blue-400", // Map sky to blue
+              emerald: "bg-emerald-100 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400",
+              primary: "bg-blue-100 dark:bg-blue-950/40 text-blue-700 dark:text-blue-400"
             };
             const iconColor = iconColors[action.color as keyof typeof iconColors] || iconColors.primary;
 
