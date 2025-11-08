@@ -67,4 +67,4 @@ export const AI_MODELS: Record<AIModel, AIModelConfig> = {
   },
 };
 
-export const DEFAULT_MODEL: AIModel = "auto";
+export const DEFAULT_MODEL: AIModel = "gpt-4o-mini";
