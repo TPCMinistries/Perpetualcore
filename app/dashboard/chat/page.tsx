@@ -13,7 +13,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Send, Loader2, Bot, User, Paperclip, X, FileText, Image as ImageIcon, Mic, MicOff, Copy, Check, Download, FileSpreadsheet, Presentation, File, Phone, PhoneOff, Menu, MessageSquare } from "lucide-react";
+import { Send, Loader2, Bot, User, Paperclip, X, FileText, Image as ImageIcon, Mic, MicOff, Copy, Check, Download, FileSpreadsheet, Presentation, File, Phone, PhoneOff, Menu, MessageSquare, Brain, Building2 } from "lucide-react";
+import { createClient } from "@/lib/supabase/client";
 import { AIModel } from "@/types";
 import { AI_MODELS, DEFAULT_MODEL } from "@/lib/ai/config";
 import { ConversationSidebar } from "@/components/conversation-sidebar";
@@ -56,6 +57,10 @@ export default function ChatPage() {
   const [exportingAs, setExportingAs] = useState<string | null>(null);
   const [isVoiceMode, setIsVoiceMode] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [libraryStats, setLibraryStats] = useState<{
+    docCount: number;
+    spacesCount: number;
+  } | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -110,6 +115,47 @@ export default function ChatPage() {
         setRecognition(recognitionInstance);
       }
     }
+  }, []);
+
+  // Fetch library stats to show full context access
+  useEffect(() => {
+    async function fetchLibraryStats() {
+      try {
+        const supabase = createClient();
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) return;
+
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("organization_id")
+          .eq("id", user.id)
+          .single();
+
+        if (!profile?.organization_id) return;
+
+        const [docs, spaces] = await Promise.all([
+          supabase
+            .from("documents")
+            .select("id", { count: "exact", head: true })
+            .eq("organization_id", profile.organization_id)
+            .eq("status", "completed"),
+          supabase
+            .from("knowledge_spaces")
+            .select("id", { count: "exact", head: true })
+            .eq("organization_id", profile.organization_id)
+            .eq("is_archived", false),
+        ]);
+
+        setLibraryStats({
+          docCount: docs.count || 0,
+          spacesCount: spaces.count || 0,
+        });
+      } catch (error) {
+        console.error("Error fetching library stats:", error);
+      }
+    }
+
+    fetchLibraryStats();
   }, []);
 
   const handleFileSelect = async (files: FileList | null) => {
@@ -512,6 +558,30 @@ export default function ChatPage() {
               </Button>
             </div>
           </div>
+
+      {/* Library Context Banner */}
+      {libraryStats && (
+        <div className="bg-gradient-to-r from-purple-50 to-blue-50 dark:from-purple-950/20 dark:to-blue-950/20 border-b border-purple-100 dark:border-purple-900/30">
+          <div className="max-w-3xl mx-auto px-6 py-3">
+            <div className="flex items-center gap-3 text-sm">
+              <Brain className="h-4 w-4 text-purple-600 dark:text-purple-400 flex-shrink-0" />
+              <span className="text-slate-700 dark:text-slate-300">
+                Your AI assistant has access to your <strong>entire library</strong>
+              </span>
+              <div className="flex items-center gap-3 ml-auto text-xs text-slate-600 dark:text-slate-400">
+                <div className="flex items-center gap-1.5">
+                  <FileText className="h-3.5 w-3.5" />
+                  <span className="font-medium">{libraryStats.docCount} documents</span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <Building2 className="h-3.5 w-3.5" />
+                  <span className="font-medium">{libraryStats.spacesCount} spaces</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Voice Mode or Text Mode */}
       {isVoiceMode ? (
