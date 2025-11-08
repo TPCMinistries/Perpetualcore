@@ -32,7 +32,7 @@ function DashboardLayoutInner({
       {/* Main Content */}
       <main className="flex-1 overflow-y-auto relative z-10">
         {/* Header Bar */}
-        <div className="sticky top-0 z-20 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 px-4 sm:px-6 py-3 flex items-center justify-between">
+        <div className="sticky top-0 z-20 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 px-4 sm:px-6 py-3 flex items-center justify-between shadow-sm">
           <div className="flex items-center gap-3">
             {/* Sidebar Toggle - Desktop */}
             <Button
@@ -53,10 +53,11 @@ function DashboardLayoutInner({
             {profile && <MobileNav userProfile={profile} />}
 
             {/* Brand on Mobile */}
-            <Link href="/dashboard" className="md:hidden flex items-center space-x-2">
-              <div className="h-7 w-7 rounded-lg bg-slate-900 dark:bg-slate-100 flex items-center justify-center text-white dark:text-slate-900 font-bold text-sm">
+            <Link href="/dashboard" className="md:hidden flex items-center space-x-2 group">
+              <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-slate-900 to-slate-700 dark:from-slate-100 dark:to-slate-300 flex items-center justify-center text-white dark:text-slate-900 font-bold text-sm shadow-sm">
                 AI
               </div>
+              <span className="font-bold text-slate-900 dark:text-slate-100 text-sm group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">Perpetual Core</span>
             </Link>
 
             {/* Quick Search Hint - Desktop Only */}

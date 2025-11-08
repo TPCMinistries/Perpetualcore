@@ -57,24 +57,28 @@ export function MobileNav({ userProfile }: MobileNavProps) {
   return (
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>
-        <Button variant="ghost" size="icon" className="md:hidden">
-          <Menu className="h-6 w-6" />
+        <Button
+          variant="ghost"
+          size="icon"
+          className="md:hidden h-10 w-10 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-900 dark:text-slate-100 shadow-sm active:scale-95 transition-all"
+        >
+          <Menu className="h-5 w-5" />
           <span className="sr-only">Toggle navigation menu</span>
         </Button>
       </SheetTrigger>
-      <SheetContent side="left" className="w-72 p-0">
-        <div className="flex h-full flex-col">
+      <SheetContent side="left" className="w-80 p-0 bg-white dark:bg-slate-900">
+        <div className="flex h-full flex-col bg-white dark:bg-slate-900">
           {/* Logo/Brand */}
-          <div className="border-b border-slate-200 dark:border-slate-800 px-6 py-4">
+          <div className="border-b border-slate-200 dark:border-slate-800 px-6 py-5 bg-gradient-to-r from-slate-50/50 to-blue-50/30 dark:from-slate-900/50 dark:to-blue-950/20">
             <Link
               href="/dashboard"
-              className="flex items-center space-x-2"
+              className="flex items-center space-x-3 group"
               onClick={() => setOpen(false)}
             >
-              <div className="h-8 w-8 rounded-lg bg-slate-900 dark:bg-slate-100 flex items-center justify-center font-bold text-white dark:text-slate-900">
+              <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-slate-900 to-slate-700 dark:from-slate-100 dark:to-slate-300 flex items-center justify-center font-bold text-white dark:text-slate-900 shadow-md">
                 AI
               </div>
-              <span className="text-lg font-semibold text-slate-900 dark:text-slate-100">Perpetual Core</span>
+              <span className="text-xl font-bold text-slate-900 dark:text-slate-100 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">Perpetual Core</span>
             </Link>
           </div>
 
@@ -139,19 +143,19 @@ export function MobileNav({ userProfile }: MobileNavProps) {
                           href={item.href}
                           onClick={() => setOpen(false)}
                           className={cn(
-                            "relative flex items-center justify-between rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
+                            "relative flex items-center justify-between rounded-xl px-4 py-3 text-sm font-semibold transition-all active:scale-[0.98]",
                             active
-                              ? "bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-slate-100"
-                              : "text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800/50 hover:text-slate-900 dark:hover:text-slate-100"
+                              ? "bg-blue-50 dark:bg-blue-950/30 text-blue-700 dark:text-blue-400 shadow-sm"
+                              : "text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-slate-100"
                           )}
                           title={item.adaptiveConfig.helpText}
                         >
-                          {/* Active indicator - Linear style left border */}
+                          {/* Active indicator */}
                           {active && (
-                            <div className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-5 bg-slate-900 dark:bg-slate-100 rounded-r" />
+                            <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-blue-600 dark:bg-blue-500 rounded-r shadow-sm" />
                           )}
 
-                          <div className={`flex items-center space-x-3 ${active ? "ml-2" : ""}`}>
+                          <div className={`flex items-center space-x-3 ${active ? "ml-1" : ""}`}>
                             <item.icon className="h-5 w-5 flex-shrink-0" />
                             <span>{item.name}</span>
                           </div>
