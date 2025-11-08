@@ -1,10 +1,17 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { MessageSquare, Plus, ChevronLeft, ChevronRight, ChevronDown, ChevronRight as ChevronRightIcon, FolderPlus, MoreVertical, Folder, Search, Trash2, Edit2 } from "lucide-react";
+import { MessageSquare, Plus, ChevronLeft, ChevronRight, ChevronDown, ChevronRight as ChevronRightIcon, FolderPlus, MoreVertical, Folder, Search, Trash2, Edit2, Building2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { formatDistanceToNow } from "date-fns";
 import { toast } from "sonner";
 import {
@@ -34,6 +41,14 @@ interface Project {
   created_at: string;
 }
 
+interface Space {
+  id: string;
+  name: string;
+  emoji: string;
+  color: string;
+  space_type: string;
+}
+
 interface Conversation {
   id: string;
   title: string;
@@ -41,6 +56,7 @@ interface Conversation {
   updated_at: string;
   model: string;
   project_id?: string;
+  knowledge_space_id?: string;
 }
 
 interface ConversationSidebarProps {
@@ -58,6 +74,8 @@ export function ConversationSidebar({
 }: ConversationSidebarProps) {
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [projects, setProjects] = useState<Project[]>([]);
+  const [spaces, setSpaces] = useState<Space[]>([]);
+  const [selectedSpaceId, setSelectedSpaceId] = useState<string>("all");
   const [isLoading, setIsLoading] = useState(true);
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [expandedProjects, setExpandedProjects] = useState<Set<string>>(new Set(["all"]));
@@ -80,9 +98,10 @@ export function ConversationSidebar({
         ? "/api/chat/conversations"  // Personal AI chats
         : "/api/conversations";       // Team conversations
 
-      const [conversationsRes, projectsRes] = await Promise.all([
+      const [conversationsRes, projectsRes, spacesRes] = await Promise.all([
         fetch(conversationsEndpoint),
         fetch("/api/projects"),
+        fetch("/api/spaces"),
       ]);
 
       if (conversationsRes.ok) {
@@ -93,6 +112,11 @@ export function ConversationSidebar({
       if (projectsRes.ok) {
         const projData = await projectsRes.json();
         setProjects(projData);
+      }
+
+      if (spacesRes.ok) {
+        const spacesData = await spacesRes.json();
+        setSpaces(spacesData.spaces || []);
       }
     } catch (error) {
       console.error("Failed to fetch data:", error);
@@ -242,10 +266,12 @@ export function ConversationSidebar({
     setEditingTitle("");
   };
 
-  // Filter conversations by search query
-  const filteredConversations = (conversations || []).filter((c) =>
-    c.title.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  // Filter conversations by search query and selected space
+  const filteredConversations = (conversations || []).filter((c) => {
+    const matchesSearch = c.title.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesSpace = selectedSpaceId === "all" || c.knowledge_space_id === selectedSpaceId;
+    return matchesSearch && matchesSpace;
+  });
 
   // Group conversations by project
   const unassignedConversations = filteredConversations.filter((c) => !c.project_id);
@@ -303,6 +329,39 @@ export function ConversationSidebar({
           className="pl-9 text-sm"
         />
       </div>
+
+      {/* Spaces Selector */}
+      {spaces.length > 0 && (
+        <div className="mb-4">
+          <Select value={selectedSpaceId} onValueChange={setSelectedSpaceId}>
+            <SelectTrigger className="w-full text-sm">
+              <div className="flex items-center gap-2">
+                <Building2 className="h-4 w-4" />
+                <SelectValue placeholder="All Spaces" />
+              </div>
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">
+                <div className="flex items-center gap-2">
+                  <Building2 className="h-4 w-4" />
+                  <span>All Spaces</span>
+                </div>
+              </SelectItem>
+              {spaces.map((space) => (
+                <SelectItem key={space.id} value={space.id}>
+                  <div className="flex items-center gap-2">
+                    <span>{space.emoji}</span>
+                    <span>{space.name}</span>
+                    <span className="text-xs text-muted-foreground">
+                      ({space.space_type})
+                    </span>
+                  </div>
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+      )}
 
       {/* New Project Button - Moved higher for visibility */}
       {!isCreatingProject ? (
