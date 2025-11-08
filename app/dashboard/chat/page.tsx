@@ -449,14 +449,16 @@ export default function ChatPage() {
   return (
     <div className="flex h-[calc(100vh-6rem)] relative">
       {/* Collapsible Sidebar */}
-      <div className={`${isSidebarOpen ? 'w-64' : 'w-0'} transition-all duration-300 overflow-hidden border-r border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950`}>
-        <ConversationSidebar
-          mode="personal"
-          currentConversationId={conversationId}
-          onConversationSelect={handleConversationSelect}
-          onNewConversation={handleNewConversation}
-        />
-      </div>
+      {isSidebarOpen && (
+        <div className="w-64 border-r border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 flex-shrink-0">
+          <ConversationSidebar
+            mode="personal"
+            currentConversationId={conversationId}
+            onConversationSelect={handleConversationSelect}
+            onNewConversation={handleNewConversation}
+          />
+        </div>
+      )}
 
       {/* Main Chat Area - Centered Layout */}
       <div className="flex flex-col flex-1 min-w-0 max-w-full">
