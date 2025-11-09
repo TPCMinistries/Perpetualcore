@@ -13,13 +13,17 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Send, Loader2, Bot, User, Paperclip, X, FileText, Image as ImageIcon, Mic, MicOff, Copy, Check, Download, FileSpreadsheet, Presentation, File, Phone, PhoneOff, Menu, MessageSquare, Brain, Building2 } from "lucide-react";
+import { Send, Loader2, Bot, User, Paperclip, X, FileText, Image as ImageIcon, Mic, MicOff, Copy, Check, Download, FileSpreadsheet, Presentation, File, Phone, PhoneOff, Menu, MessageSquare, Brain, Building2, Sparkles, Library, Command, Zap } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { AIModel } from "@/types";
 import { AI_MODELS, DEFAULT_MODEL } from "@/lib/ai/config";
 import { ConversationSidebar } from "@/components/conversation-sidebar";
 import { MarkdownMessage } from "@/components/markdown-message";
 import { VoiceConversation } from "@/components/voice-conversation-fallback";
+import PromptCommandPalette from "@/components/chat/PromptCommandPalette";
+import PromptLibrary from "@/components/chat/PromptLibrary";
+import QuickActionsToolbar from "@/components/chat/QuickActionsToolbar";
+import { type PromptTemplate } from "@/lib/prompts/templates";
 
 interface FileAttachment {
   file: File;
@@ -63,6 +67,12 @@ export default function ChatPage() {
   } | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Prompt menu state
+  const [commandPaletteOpen, setCommandPaletteOpen] = useState(false);
+  const [promptLibraryOpen, setPromptLibraryOpen] = useState(false);
+  const [quickActionsVisible, setQuickActionsVisible] = useState(false);
+  const [selectedText, setSelectedText] = useState("");
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -157,6 +167,49 @@ export default function ChatPage() {
 
     fetchLibraryStats();
   }, []);
+
+  // Command Palette keyboard shortcut (Cmd/Ctrl + K)
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === "k") {
+        e.preventDefault();
+        setCommandPaletteOpen(true);
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, []);
+
+  // Handle prompt template selection
+  const handlePromptSelect = (template: PromptTemplate) => {
+    let promptText = template.prompt;
+
+    // Fill in variables if present
+    if (template.variables && template.variables.length > 0) {
+      // For now, just insert placeholders
+      template.variables.forEach((variable) => {
+        promptText = promptText.replace(`{${variable}}`, `[${variable.toUpperCase()}]`);
+      });
+    }
+
+    setInput(promptText);
+    // Focus on textarea after inserting prompt
+    setTimeout(() => {
+      const textarea = document.querySelector('textarea');
+      textarea?.focus();
+    }, 100);
+  };
+
+  // Handle quick action
+  const handleQuickAction = (actionId: string, prompt: string) => {
+    setInput(prompt);
+    setQuickActionsVisible(false);
+    setTimeout(() => {
+      const textarea = document.querySelector('textarea');
+      textarea?.focus();
+    }, 100);
+  };
 
   const handleFileSelect = async (files: FileList | null) => {
     if (!files || files.length === 0) return;
@@ -797,6 +850,45 @@ export default function ChatPage() {
       {/* Input Area - Centered like Claude */}
       <div className="border-t border-slate-200/50 dark:border-slate-800/50 bg-white/80 dark:bg-slate-950/80 backdrop-blur-sm">
         <div className="max-w-3xl mx-auto px-6 py-4">
+          {/* Prompt Menu Buttons */}
+          <div className="flex items-center gap-2 mb-3">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setCommandPaletteOpen(true)}
+              className="gap-2"
+            >
+              <Command className="h-4 w-4" />
+              <span className="hidden sm:inline">Quick Prompts</span>
+              <kbd className="hidden md:inline-flex h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium opacity-100">
+                <span className="text-xs">⌘</span>K
+              </kbd>
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setPromptLibraryOpen(true)}
+              className="gap-2"
+            >
+              <Library className="h-4 w-4" />
+              <span className="hidden sm:inline">Browse Library</span>
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setQuickActionsVisible(!quickActionsVisible)}
+              className="gap-2"
+            >
+              <Zap className="h-4 w-4" />
+              <span className="hidden sm:inline">Quick Actions</span>
+            </Button>
+            <div className="flex-1" />
+            <div className="flex items-center gap-1 text-xs text-muted-foreground">
+              <Sparkles className="h-3 w-3" />
+              <span className="hidden md:inline">AI-Powered Prompts</span>
+            </div>
+          </div>
+
           {/* Attachments Preview */}
           {attachments.length > 0 && (
             <div className="mb-3 flex flex-wrap gap-2">
@@ -873,7 +965,7 @@ export default function ChatPage() {
                     ? "Listening..."
                     : isDragging
                     ? "Drop files here..."
-                    : "Ask me anything..."
+                    : "Ask me anything... (or use ⌘K for prompts)"
                 }
                 disabled={isLoading}
                 className="flex-1 min-h-[36px] max-h-[200px] resize-none border-0 focus-visible:ring-0 bg-transparent text-slate-900 dark:text-slate-100 placeholder:text-slate-500 dark:placeholder:text-slate-500 px-2 text-[15px]"
@@ -911,6 +1003,25 @@ export default function ChatPage() {
       </div>
       </>
       )}
+
+      {/* Prompt Menu Components */}
+      <PromptCommandPalette
+        open={commandPaletteOpen}
+        onOpenChange={setCommandPaletteOpen}
+        onSelectPrompt={handlePromptSelect}
+      />
+
+      <PromptLibrary
+        open={promptLibraryOpen}
+        onOpenChange={setPromptLibraryOpen}
+        onSelectPrompt={handlePromptSelect}
+      />
+
+      <QuickActionsToolbar
+        visible={quickActionsVisible}
+        onAction={handleQuickAction}
+        selectedText={selectedText}
+      />
       </div>
     </div>
   );
