@@ -436,10 +436,10 @@ export default function SettingsPage() {
           {/* Preferences Tab */}
           <TabsContent value="preferences" className="space-y-6">
             {/* Appearance Section */}
-            <Card className="border-blue-200 dark:border-blue-800/50 bg-white dark:bg-slate-900 shadow-xl p-8">
+            <Card className="border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-xl p-8">
               <div className="flex items-center gap-3 mb-6">
-                <div className="h-10 w-10 rounded-lg bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center">
-                  <Palette className="h-5 w-5 text-white" />
+                <div className="h-10 w-10 rounded-lg bg-slate-900 dark:bg-slate-100 flex items-center justify-center">
+                  <Palette className="h-5 w-5 text-white dark:text-slate-900" />
                 </div>
                 <div>
                   <h2 className="text-xl font-semibold text-slate-900 dark:text-white">Appearance</h2>
@@ -510,10 +510,10 @@ export default function SettingsPage() {
             </Card>
 
             {/* AI Settings */}
-            <Card className="border-purple-200 dark:border-purple-800/50 bg-white dark:bg-slate-900 shadow-xl p-8">
+            <Card className="border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-xl p-8">
               <div className="flex items-center gap-3 mb-6">
-                <div className="h-10 w-10 rounded-lg bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center">
-                  <Bot className="h-5 w-5 text-white" />
+                <div className="h-10 w-10 rounded-lg bg-slate-900 dark:bg-slate-100 flex items-center justify-center">
+                  <Bot className="h-5 w-5 text-white dark:text-slate-900" />
                 </div>
                 <div>
                   <h2 className="text-xl font-semibold text-slate-900 dark:text-white">AI Settings</h2>
@@ -605,10 +605,10 @@ export default function SettingsPage() {
             </Card>
 
             {/* Notifications Section */}
-            <Card className="border-amber-200 dark:border-amber-800/50 bg-white dark:bg-slate-900 shadow-xl p-8">
+            <Card className="border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-xl p-8">
               <div className="flex items-center gap-3 mb-6">
-                <div className="h-10 w-10 rounded-lg bg-gradient-to-br from-amber-500 to-orange-500 flex items-center justify-center">
-                  <Bell className="h-5 w-5 text-white" />
+                <div className="h-10 w-10 rounded-lg bg-slate-900 dark:bg-slate-100 flex items-center justify-center">
+                  <Bell className="h-5 w-5 text-white dark:text-slate-900" />
                 </div>
                 <div>
                   <h2 className="text-xl font-semibold text-slate-900 dark:text-white">Notifications</h2>
@@ -704,10 +704,10 @@ export default function SettingsPage() {
             </Card>
 
             {/* Editor Preferences */}
-            <Card className="border-green-200 dark:border-green-800/50 bg-white dark:bg-slate-900 shadow-xl p-8">
+            <Card className="border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-xl p-8">
               <div className="flex items-center gap-3 mb-6">
-                <div className="h-10 w-10 rounded-lg bg-gradient-to-br from-green-500 to-emerald-500 flex items-center justify-center">
-                  <Code2 className="h-5 w-5 text-white" />
+                <div className="h-10 w-10 rounded-lg bg-slate-900 dark:bg-slate-100 flex items-center justify-center">
+                  <Code2 className="h-5 w-5 text-white dark:text-slate-900" />
                 </div>
                 <div>
                   <h2 className="text-xl font-semibold text-slate-900 dark:text-white">Editor Preferences</h2>
@@ -775,10 +775,10 @@ export default function SettingsPage() {
             </Card>
 
             {/* Privacy & Data */}
-            <Card className="border-red-200 dark:border-red-800/50 bg-white dark:bg-slate-900 shadow-xl p-8">
+            <Card className="border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-xl p-8">
               <div className="flex items-center gap-3 mb-6">
-                <div className="h-10 w-10 rounded-lg bg-gradient-to-br from-red-500 to-pink-500 flex items-center justify-center">
-                  {preferences.analyticsEnabled ? <Eye className="h-5 w-5 text-white" /> : <EyeOff className="h-5 w-5 text-white" />}
+                <div className="h-10 w-10 rounded-lg bg-slate-900 dark:bg-slate-100 flex items-center justify-center">
+                  {preferences.analyticsEnabled ? <Eye className="h-5 w-5 text-white dark:text-slate-900" /> : <EyeOff className="h-5 w-5 text-white dark:text-slate-900" />}
                 </div>
                 <div>
                   <h2 className="text-xl font-semibold text-slate-900 dark:text-white">Privacy & Data</h2>
@@ -834,10 +834,10 @@ export default function SettingsPage() {
             </Card>
 
             {/* Accessibility */}
-            <Card className="border-indigo-200 dark:border-indigo-800/50 bg-white dark:bg-slate-900 shadow-xl p-8">
+            <Card className="border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-xl p-8">
               <div className="flex items-center gap-3 mb-6">
-                <div className="h-10 w-10 rounded-lg bg-gradient-to-br from-indigo-500 to-violet-500 flex items-center justify-center">
-                  <Accessibility className="h-5 w-5 text-white" />
+                <div className="h-10 w-10 rounded-lg bg-slate-900 dark:bg-slate-100 flex items-center justify-center">
+                  <Accessibility className="h-5 w-5 text-white dark:text-slate-900" />
                 </div>
                 <div>
                   <h2 className="text-xl font-semibold text-slate-900 dark:text-white">Accessibility</h2>
@@ -897,10 +897,10 @@ export default function SettingsPage() {
             </Card>
 
             {/* Performance */}
-            <Card className="border-cyan-200 dark:border-cyan-800/50 bg-white dark:bg-slate-900 shadow-xl p-8">
+            <Card className="border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-xl p-8">
               <div className="flex items-center gap-3 mb-6">
-                <div className="h-10 w-10 rounded-lg bg-gradient-to-br from-cyan-500 to-blue-500 flex items-center justify-center">
-                  <Gauge className="h-5 w-5 text-white" />
+                <div className="h-10 w-10 rounded-lg bg-slate-900 dark:bg-slate-100 flex items-center justify-center">
+                  <Gauge className="h-5 w-5 text-white dark:text-slate-900" />
                 </div>
                 <div>
                   <h2 className="text-xl font-semibold text-slate-900 dark:text-white">Performance</h2>
@@ -956,8 +956,8 @@ export default function SettingsPage() {
             {/* Interface */}
             <Card className="border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-xl p-8">
               <div className="flex items-center gap-3 mb-6">
-                <div className="h-10 w-10 rounded-lg bg-gradient-to-br from-slate-500 to-slate-700 flex items-center justify-center">
-                  <Layout className="h-5 w-5 text-white" />
+                <div className="h-10 w-10 rounded-lg bg-slate-900 dark:bg-slate-100 flex items-center justify-center">
+                  <Layout className="h-5 w-5 text-white dark:text-slate-900" />
                 </div>
                 <div>
                   <h2 className="text-xl font-semibold text-slate-900 dark:text-white">Interface</h2>
@@ -1024,7 +1024,7 @@ export default function SettingsPage() {
                   toast.success("All preferences saved!");
                   // Here you would save to localStorage or API
                 }}
-                className="bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white shadow-lg px-8"
+                className="bg-slate-900 dark:bg-slate-100 hover:bg-slate-800 dark:hover:bg-slate-200 text-white dark:text-slate-900 shadow-lg px-8"
               >
                 <Save className="h-4 w-4 mr-2" />
                 Save All Preferences
