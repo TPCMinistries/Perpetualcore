@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { resend, EMAIL_FROM } from "@/lib/email/config";
+import { renderEmailTemplate } from "@/lib/email/templates/sequences/template-mapper";
 
 // This endpoint should be called by a cron job (Vercel Cron or external service)
 // Add authentication header check for security
@@ -38,28 +39,24 @@ export async function GET(request: NextRequest) {
     // Send each email
     for (const emailData of pendingEmails) {
       try {
-        // Replace template variables
+        // Replace template variables in subject
         const subject = emailData.subject
           .replace("{FIRST_NAME}", emailData.lead_first_name || "there")
           .replace("{LEAD_MAGNET_NAME}", "AI Productivity Guide");
 
-        // For now, send a simple email (later we'll add template rendering)
+        // Render email template using React email templates
+        const html = await renderEmailTemplate(emailData.email_template, {
+          firstName: emailData.lead_first_name || "there",
+          leadMagnetName: "AI Productivity Guide",
+          leadMagnetUrl: `${process.env.NEXT_PUBLIC_APP_URL}/downloads/ai-productivity-guide.pdf`,
+        });
+
+        // Send email using professional template
         const { data: emailResult, error: sendError } = await resend.emails.send({
           from: EMAIL_FROM,
           to: emailData.lead_email,
           subject,
-          html: `
-            <html>
-              <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
-                <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
-                  <h2>Hi ${emailData.lead_first_name || "there"}!</h2>
-                  <p>This is email from your ${emailData.sequence_name} sequence.</p>
-                  <p>${emailData.email_template}</p>
-                  <p>Best regards,<br/>The Perpetual Core Team</p>
-                </div>
-              </body>
-            </html>
-          `,
+          html,
         });
 
         if (sendError) {
