@@ -37,6 +37,7 @@ import {
   Play,
   ChevronDown,
   Send,
+  Building2,
 } from "lucide-react";
 import { INDUSTRY_CONFIGS } from "@/lib/dashboard/industry-config";
 import { PublicMobileNav } from "@/components/layout/PublicMobileNav";
@@ -350,6 +351,153 @@ export default function HomePage() {
               <span className="sm:hidden">Infinite</span>
             </div>
           </div>
+        </div>
+      </section>
+
+      {/* Value Proposition Banner - Above Chat Demo */}
+      <section className="bg-gradient-to-r from-slate-900 to-slate-800 dark:from-slate-800 dark:to-slate-900 py-12 sm:py-16 animate-on-scroll">
+        <div className="container mx-auto px-4">
+          <div className="text-center text-white max-w-4xl mx-auto">
+            <h2 className="text-3xl sm:text-4xl font-bold mb-6">
+              Save 15-20 Hours Per Employee Per Month
+            </h2>
+            <p className="text-lg sm:text-xl text-slate-200 mb-8">
+              The average team using Perpetual Core eliminates 60-80% of repetitive work. Your AI remembers every conversation, document, and decision—so your team never wastes time searching or repeating themselves.
+            </p>
+            <div className="grid md:grid-cols-3 gap-6 sm:gap-8 text-center">
+              <div>
+                <div className="text-4xl font-bold text-green-400 mb-2">60-90 days</div>
+                <div className="text-slate-300">Average ROI timeline</div>
+              </div>
+              <div>
+                <div className="text-4xl font-bold text-green-400 mb-2">85%</div>
+                <div className="text-slate-300">Team adoption rate</div>
+              </div>
+              <div>
+                <div className="text-4xl font-bold text-green-400 mb-2">$150K+</div>
+                <div className="text-slate-300">Avg annual savings (50 employees)</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Visitor Segmentation - Who is this for? */}
+      <section className="container mx-auto px-4 py-16 sm:py-20 animate-on-scroll">
+        <div className="text-center mb-12">
+          <h2 className="text-3xl sm:text-4xl font-bold mb-4">Choose Your Path</h2>
+          <p className="text-lg sm:text-xl text-muted-foreground max-w-2xl mx-auto">
+            Whether you're an individual, small team, or enterprise—we have a solution designed for you
+          </p>
+        </div>
+
+        <div className="grid md:grid-cols-3 gap-6 max-w-6xl mx-auto">
+          {/* Individual / DIY */}
+          <Card className="relative overflow-hidden border-2 border-border hover:border-primary/50 hover:shadow-2xl transition-all group cursor-pointer">
+            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-500 to-cyan-500" />
+            <CardContent className="p-8">
+              <div className="h-14 w-14 rounded-xl bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center mb-6">
+                <Sparkles className="h-7 w-7 text-white" />
+              </div>
+              <h3 className="text-2xl font-bold mb-3">Individuals & Freelancers</h3>
+              <p className="text-muted-foreground mb-6 leading-relaxed">
+                Get started on your own. Perfect for professionals who want powerful AI without the overhead.
+              </p>
+              <div className="space-y-3 mb-6">
+                <div className="flex items-start gap-2">
+                  <Check className="h-5 w-5 text-green-500 flex-shrink-0 mt-0.5" />
+                  <span className="text-sm">All AI models in one place</span>
+                </div>
+                <div className="flex items-start gap-2">
+                  <Check className="h-5 w-5 text-green-500 flex-shrink-0 mt-0.5" />
+                  <span className="text-sm">Infinite conversation memory</span>
+                </div>
+                <div className="flex items-start gap-2">
+                  <Check className="h-5 w-5 text-green-500 flex-shrink-0 mt-0.5" />
+                  <span className="text-sm">Self-service setup</span>
+                </div>
+              </div>
+              <div className="text-center">
+                <div className="text-3xl font-bold mb-1">$49<span className="text-lg text-muted-foreground font-normal">/month</span></div>
+                <Button asChild className="w-full mt-4 shadow-lg">
+                  <Link href="/signup">Start Free Trial</Link>
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Mid-Market / Teams */}
+          <Card className="relative overflow-hidden border-2 border-primary shadow-2xl scale-105 cursor-pointer">
+            <div className="absolute top-0 right-0 bg-primary text-primary-foreground px-4 py-1 text-xs font-semibold">
+              MOST POPULAR
+            </div>
+            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-purple-500 to-pink-500" />
+            <CardContent className="p-8">
+              <div className="h-14 w-14 rounded-xl bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center mb-6">
+                <Users className="h-7 w-7 text-white" />
+              </div>
+              <h3 className="text-2xl font-bold mb-3">Teams (10-100 employees)</h3>
+              <p className="text-muted-foreground mb-6 leading-relaxed">
+                Guided implementation with hands-on training. We set everything up and ensure your team adopts it.
+              </p>
+              <div className="space-y-3 mb-6">
+                <div className="flex items-start gap-2">
+                  <Check className="h-5 w-5 text-green-500 flex-shrink-0 mt-0.5" />
+                  <span className="text-sm">Full implementation + training</span>
+                </div>
+                <div className="flex items-start gap-2">
+                  <Check className="h-5 w-5 text-green-500 flex-shrink-0 mt-0.5" />
+                  <span className="text-sm">90-day optimization support</span>
+                </div>
+                <div className="flex items-start gap-2">
+                  <Check className="h-5 w-5 text-green-500 flex-shrink-0 mt-0.5" />
+                  <span className="text-sm">Dedicated success manager</span>
+                </div>
+              </div>
+              <div className="text-center">
+                <div className="text-3xl font-bold mb-1">$7,500<span className="text-lg text-muted-foreground font-normal"> setup</span></div>
+                <div className="text-sm text-muted-foreground mb-3">+ $199/mo per 10 users</div>
+                <Button asChild className="w-full mt-4 shadow-lg bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700">
+                  <Link href="/consultation">Book Strategy Call</Link>
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Enterprise */}
+          <Card className="relative overflow-hidden border-2 border-border hover:border-primary/50 hover:shadow-2xl transition-all group cursor-pointer">
+            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-orange-500 to-red-500" />
+            <CardContent className="p-8">
+              <div className="h-14 w-14 rounded-xl bg-gradient-to-br from-orange-500 to-red-500 flex items-center justify-center mb-6">
+                <Building2 className="h-7 w-7 text-white" />
+              </div>
+              <h3 className="text-2xl font-bold mb-3">Enterprise (100+ employees)</h3>
+              <p className="text-muted-foreground mb-6 leading-relaxed">
+                White-glove implementation for large organizations. Custom deployment, SSO, compliance, and SLAs.
+              </p>
+              <div className="space-y-3 mb-6">
+                <div className="flex items-start gap-2">
+                  <Check className="h-5 w-5 text-green-500 flex-shrink-0 mt-0.5" />
+                  <span className="text-sm">Custom deployment & training</span>
+                </div>
+                <div className="flex items-start gap-2">
+                  <Check className="h-5 w-5 text-green-500 flex-shrink-0 mt-0.5" />
+                  <span className="text-sm">SSO, HIPAA, SOC 2 compliance</span>
+                </div>
+                <div className="flex items-start gap-2">
+                  <Check className="h-5 w-5 text-green-500 flex-shrink-0 mt-0.5" />
+                  <span className="text-sm">99.9% SLA + 24/7 support</span>
+                </div>
+              </div>
+              <div className="text-center">
+                <div className="text-3xl font-bold mb-1">Custom<span className="text-lg text-muted-foreground font-normal"> pricing</span></div>
+                <div className="text-sm text-muted-foreground mb-3">$50K-$150K implementation</div>
+                <Button asChild variant="outline" className="w-full mt-4 shadow-lg">
+                  <Link href="/enterprise-demo">Schedule Demo</Link>
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
         </div>
       </section>
 

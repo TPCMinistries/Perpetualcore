@@ -41,18 +41,18 @@ const PLANS = [
     description: "For individuals and professionals",
     price: 49,
     priceId: process.env.NEXT_PUBLIC_STRIPE_PRICE_PRO_MONTHLY,
-    interval: "month",
+    interval: "per user/month",
     icon: Zap,
     popular: true,
     badge: "Most Popular",
     features: [
-      "1,000 AI messages per month",
+      "1,000 AI messages per user/month",
       "All AI models (GPT-4, Claude, Gemini)",
       "$0.05 per message overage",
       "Unlimited documents",
-      "10 GB storage",
+      "10 GB storage per user",
       "Email & Calendar integration",
-      "5 AI workflows",
+      "Unlimited AI workflows",
       "Priority email support",
     ],
     limits: {
@@ -63,60 +63,57 @@ const PLANS = [
     },
   },
   {
-    id: "business",
-    name: "Business",
-    description: "For teams and growing businesses",
-    price: 149,
+    id: "team",
+    name: "Team",
+    description: "For small teams (3-10 people)",
+    price: 39,
     priceId: process.env.NEXT_PUBLIC_STRIPE_PRICE_BUSINESS_MONTHLY,
-    interval: "month",
+    interval: "per user/month",
     icon: Crown,
     popular: false,
-    badge: null,
+    badge: "Save $10/user",
     features: [
-      "4,000 AI messages per month",
+      "1,000 AI messages per user/month",
       "All AI models (GPT-4, Claude, Gemini)",
       "$0.04 per message overage",
       "Everything in Pro",
-      "50 GB storage",
-      "Team collaboration (up to 5 users)",
-      "Shared workspaces",
+      "50 GB storage per user",
+      "Team collaboration & shared workspaces",
       "Role-based permissions",
-      "Admin dashboard",
-      "Team analytics",
+      "Admin dashboard & analytics",
       "Priority support",
     ],
     limits: {
-      ai_messages: 4000,
+      ai_messages: 1000,
       documents: -1,
       storage_gb: 50,
-      team_members: 5,
+      team_members: 10,
     },
   },
   {
     id: "enterprise",
     name: "Enterprise",
-    description: "For large organizations and industries",
-    price: 499,
+    description: "For organizations with 10+ employees",
+    price: null,
     priceId: null,
-    interval: "starting at",
+    interval: "custom pricing",
     icon: Building2,
     popular: false,
     badge: "Contact Sales",
     features: [
-      "20,000+ AI messages (or custom volume)",
-      "$0.03 per message overage (negotiable)",
-      "Everything in Business",
+      "Custom volume & pricing",
+      "Everything in Team",
       "Unlimited team members",
       "Unlimited storage",
-      "Custom AI models & fine-tuning",
+      "Implementation & training ($7,500-$150K)",
       "Dedicated success manager",
       "99.9% SLA",
-      "SOC 2, HIPAA compliance",
-      "24/7 phone support",
-      "Custom contracts",
+      "SOC 2, HIPAA, SSO",
+      "24/7 priority support",
+      "Custom contracts & SLAs",
     ],
     limits: {
-      ai_messages: 20000,
+      ai_messages: -1,
       documents: -1,
       storage_gb: -1,
       team_members: -1,
@@ -126,8 +123,16 @@ const PLANS = [
 
 const FAQ_ITEMS = [
   {
+    question: "How does per-user pricing work?",
+    answer: "Pro and Team plans are billed per active user per month. Each user gets their full allocation of AI messages, storage, and features. Team plans offer volume discounts—the more users you have, the better the per-user rate.",
+  },
+  {
+    question: "What's included in Enterprise implementation?",
+    answer: "Enterprise implementation ($7,500-$150K) includes: AI readiness assessment, custom deployment, team training, change management support, 90-day optimization period, and dedicated success manager. Pricing scales with team size: 10-50 employees (~$7,500), 50-100 employees (~$15K-$25K), 100+ employees (~$50K-$150K).",
+  },
+  {
     question: "How does usage-based overage pricing work?",
-    answer: "If you exceed your monthly message limit, you'll only pay for what you use beyond the base amount. Pro: $0.05/message, Business: $0.04/message, Enterprise: $0.03/message (negotiable). Overage charges appear on your next bill. This ensures you never lose access while keeping costs transparent.",
+    answer: "If you exceed your monthly message limit, you'll only pay for what you use beyond the base amount. Pro: $0.05/message, Team: $0.04/message. Enterprise plans have negotiable overage rates. Overage charges appear on your next bill.",
   },
   {
     question: "Can I change plans later?",
@@ -135,7 +140,7 @@ const FAQ_ITEMS = [
   },
   {
     question: "What payment methods do you accept?",
-    answer: "We accept all major credit cards (Visa, MasterCard, American Express) via Stripe. Enterprise plans can also pay via invoice.",
+    answer: "We accept all major credit cards (Visa, MasterCard, American Express) via Stripe. Enterprise plans can also pay via invoice with NET 30 terms.",
   },
   {
     question: "Is there a free trial?",
@@ -146,16 +151,8 @@ const FAQ_ITEMS = [
     answer: "Your data remains accessible for 30 days after cancellation. You can export all your data at any time.",
   },
   {
-    question: "Can I get a refund?",
-    answer: "Yes, we offer a 30-day money-back guarantee for all paid plans. Contact support for a full refund within 30 days.",
-  },
-  {
     question: "Do you offer discounts for nonprofits or students?",
     answer: "Yes! We offer 50% discounts for verified nonprofits and educational institutions. Contact sales for details.",
-  },
-  {
-    question: "How do industry-specific plans work?",
-    answer: "We offer tailored solutions for Law Firms, Healthcare, Real Estate, and more starting at $499/month with custom features and volume pricing. Contact sales to discuss your specific needs.",
   },
 ];
 
@@ -171,9 +168,15 @@ export default function PricingPage() {
       return;
     }
 
-    // Handle enterprise tiers (Business & Enterprise)
-    if (planId === "business" || planId === "enterprise") {
-      router.push("/contact-sales?plan=" + planId);
+    // Handle enterprise tier - direct to sales
+    if (planId === "enterprise") {
+      router.push("/enterprise-demo");
+      return;
+    }
+
+    // Handle team plan - for 10+ users, direct to consultation
+    if (planId === "team") {
+      router.push("/consultation");
       return;
     }
 

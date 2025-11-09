@@ -301,7 +301,6 @@ export default function PresentationPage() {
           <div className="slide" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', textAlign: 'center' }}>
             <h1>Let's Talk About AI</h1>
             <p className="subtitle">What it actually is, how to use it effectively, and what it means for your business</p>
-            <p style={{ marginTop: '3rem', color: '#a0aec0' }}>Lorenzo for Jocelyn</p>
           </div>
         </div>
 
@@ -665,8 +664,6 @@ export default function PresentationPage() {
             <div className="tip">
               <p style={{ marginBottom: 0 }}>The companies figuring this out now are building advantages that will compound for years. The window is open, but it won't stay open forever.</p>
             </div>
-
-            <p style={{ marginTop: '2rem', textAlign: 'center', color: '#718096' }}>— Lorenzo</p>
           </div>
         </div>
 
