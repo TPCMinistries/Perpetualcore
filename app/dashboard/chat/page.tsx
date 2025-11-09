@@ -67,6 +67,7 @@ export default function ChatPage() {
   } | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   // Prompt menu state
   const [commandPaletteOpen, setCommandPaletteOpen] = useState(false);
@@ -167,6 +168,15 @@ export default function ChatPage() {
 
     fetchLibraryStats();
   }, []);
+
+  // Auto-resize textarea when input changes
+  useEffect(() => {
+    const textarea = textareaRef.current;
+    if (textarea) {
+      textarea.style.height = '36px';
+      textarea.style.height = textarea.scrollHeight + 'px';
+    }
+  }, [input]);
 
   // Command Palette keyboard shortcut (Cmd/Ctrl + K)
   useEffect(() => {
@@ -958,6 +968,7 @@ export default function ChatPage() {
                 <Paperclip className="h-4 w-4" />
               </Button>
               <Textarea
+                ref={textareaRef}
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 placeholder={
