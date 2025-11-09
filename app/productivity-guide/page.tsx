@@ -113,7 +113,7 @@ export default function ProductivityGuidePage() {
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-cyan-50 dark:from-slate-950 dark:via-purple-950 dark:to-slate-900">
       <div className="max-w-7xl mx-auto px-4 py-12 sm:px-6 lg:px-8">
         {/* Alert Bar */}
-        <div className="mb-8 bg-gradient-to-r from-amber-500 to-orange-500 text-white rounded-lg p-4 shadow-lg">
+        <div className="mb-8 bg-gradient-to-r from-purple-600 via-blue-600 to-cyan-600 text-white rounded-lg p-4 shadow-lg">
           <div className="flex items-center justify-center gap-2 text-center">
             <AlertCircle className="h-5 w-5 flex-shrink-0" />
             <p className="text-sm font-semibold">
@@ -158,8 +158,8 @@ export default function ProductivityGuidePage() {
           {/* Pain Points & Benefits */}
           <div className="space-y-8">
             {/* Pain Section */}
-            <div className="bg-red-50 dark:bg-red-950 border-2 border-red-200 dark:border-red-800 rounded-2xl p-6">
-              <h2 className="text-2xl font-bold text-red-900 dark:text-red-100 mb-4">
+            <div className="bg-purple-50 dark:bg-purple-950 border-2 border-purple-200 dark:border-purple-800 rounded-2xl p-6">
+              <h2 className="text-2xl font-bold text-purple-900 dark:text-purple-100 mb-4">
                 Are You Struggling With...
               </h2>
               <ul className="space-y-3">
@@ -170,8 +170,8 @@ export default function ProductivityGuidePage() {
                   "Your team working overtime on tasks machines could handle?",
                   "Competitors moving faster because they're already using AI?",
                 ].map((pain, i) => (
-                  <li key={i} className="flex items-start gap-3 text-red-900 dark:text-red-100">
-                    <span className="text-red-600 dark:text-red-400 font-bold mt-0.5">✗</span>
+                  <li key={i} className="flex items-start gap-3 text-purple-900 dark:text-purple-100">
+                    <span className="text-purple-600 dark:text-purple-400 font-bold mt-0.5">✗</span>
                     <span className="text-sm font-medium">{pain}</span>
                   </li>
                 ))}

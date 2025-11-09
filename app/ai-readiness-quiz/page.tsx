@@ -22,6 +22,8 @@ import {
   Zap,
   Download,
 } from "lucide-react";
+import type { LeadSegment, SegmentationResult } from "@/lib/leads/segmentation";
+import { getThankYouMessage } from "@/lib/leads/segmentation";
 
 interface QuizAnswer {
   questionId: string;
@@ -113,6 +115,7 @@ export default function AIReadinessQuiz() {
   });
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [segmentData, setSegmentData] = useState<SegmentationResult | null>(null);
 
   const progress = ((step + 1) / (questions.length + 2)) * 100;
   const totalScore = answers.reduce((sum, answer) => sum + answer.points, 0);
@@ -156,7 +159,10 @@ export default function AIReadinessQuiz() {
 
       if (!response.ok) throw new Error("Failed to submit");
 
+      const result = await response.json();
+
       setSubmitted(true);
+      setSegmentData(result.segmentData);
       setStep(step + 1);
       toast.success("Success! Check your email for your personalized report.");
     } catch (error) {
@@ -421,6 +427,10 @@ export default function AIReadinessQuiz() {
   const recommendation = getRecommendation();
   const ScoreLevelIcon = scoreLevel.icon;
 
+  // Get segment-specific messaging
+  const segment = segmentData?.segment || "product";
+  const thankYouMessage = getThankYouMessage(segment);
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-cyan-50 dark:from-slate-950 dark:via-purple-950 dark:to-slate-900 py-12 px-4">
       <div className="max-w-4xl mx-auto space-y-6">
@@ -503,22 +513,26 @@ export default function AIReadinessQuiz() {
             <div className="bg-gradient-to-r from-purple-100 to-blue-100 dark:from-purple-950 dark:to-blue-950 rounded-lg p-6">
               <h3 className="font-bold text-slate-900 dark:text-slate-100 mb-3 flex items-center gap-2">
                 <Rocket className="h-5 w-5" />
-                Recommended Next Steps:
+                {thankYouMessage.title}
               </h3>
+              <p className="text-slate-700 dark:text-slate-300 mb-4">
+                {thankYouMessage.description}
+              </p>
               <ul className="space-y-2 text-slate-700 dark:text-slate-300">
-                <li className="flex items-start gap-2">
-                  <CheckCircle2 className="h-5 w-5 text-green-600 flex-shrink-0 mt-0.5" />
-                  <span>Download our free 65-page AI Productivity Guide (sent to your email)</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <CheckCircle2 className="h-5 w-5 text-green-600 flex-shrink-0 mt-0.5" />
-                  <span>Identify your top 3 time-consuming tasks to automate first</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <CheckCircle2 className="h-5 w-5 text-green-600 flex-shrink-0 mt-0.5" />
-                  <span>Book a free 15-minute consultation to create your custom plan</span>
-                </li>
+                {thankYouMessage.nextSteps.map((step, i) => (
+                  <li key={i} className="flex items-start gap-2">
+                    <CheckCircle2 className="h-5 w-5 text-green-600 flex-shrink-0 mt-0.5" />
+                    <span>{step}</span>
+                  </li>
+                ))}
               </ul>
+              {segmentData && (
+                <div className="mt-4 pt-4 border-t border-purple-200 dark:border-purple-800">
+                  <p className="text-sm text-slate-600 dark:text-slate-400">
+                    <strong>Estimated Value:</strong> {segmentData.estimatedValue}
+                  </p>
+                </div>
+              )}
             </div>
           </CardContent>
         </Card>
@@ -530,18 +544,34 @@ export default function AIReadinessQuiz() {
               Ready to Transform Your Workflow?
             </h2>
             <p className="text-lg mb-6 text-purple-100">
-              Let's create a custom AI implementation plan for your business
+              {segment === "enterprise"
+                ? "Let's discuss a custom enterprise implementation plan"
+                : segment === "consulting"
+                ? "Let's create a custom AI strategy for your team"
+                : "Get started with AI automation today"}
             </p>
             <Button
-              onClick={() => window.location.href = "/demo"}
+              onClick={() => {
+                if (segment === "enterprise") {
+                  window.location.href = "/enterprise-demo";
+                } else if (segment === "consulting") {
+                  window.location.href = "/consultation";
+                } else {
+                  window.location.href = "/signup";
+                }
+              }}
               size="lg"
               className="bg-white text-purple-600 hover:bg-purple-50 h-14 px-8 text-lg font-bold"
             >
-              Book Your Free Consultation
+              {segmentData?.recommendedCTA || "Get Started"}
               <ArrowRight className="ml-2 h-5 w-5" />
             </Button>
             <p className="text-sm text-purple-100 mt-4">
-              15-minute call • No pressure • Custom recommendations
+              {segment === "enterprise"
+                ? "Executive briefing • White-glove implementation • ROI guarantee"
+                : segment === "consulting"
+                ? "Strategy call • Implementation support • Custom roadmap"
+                : "Free trial • No credit card • Start in minutes"}
             </p>
           </CardContent>
         </Card>

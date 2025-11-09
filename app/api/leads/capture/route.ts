@@ -2,11 +2,13 @@ import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { resend, EMAIL_FROM } from "@/lib/email/config";
 import { NurtureDay1 } from "@/lib/email/templates/sequences/NurtureDay1";
+import { segmentLead } from "@/lib/leads/segmentation";
+import type { QuizData } from "@/lib/leads/segmentation";
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { firstName, lastName, email, company, source, leadMagnet } = body;
+    const { firstName, lastName, email, company, source, leadMagnet, metadata } = body;
 
     // Validate required fields
     if (!email || !firstName) {
@@ -18,6 +20,19 @@ export async function POST(request: NextRequest) {
 
     // Create Supabase client with service role to bypass RLS
     const supabase = await createClient();
+
+    // Determine lead segment from quiz data if available
+    let segment = "product"; // Default segment
+    let segmentData = null;
+
+    if (metadata?.answers && Array.isArray(metadata.answers)) {
+      const quizData: QuizData = {
+        quizScore: metadata.quizScore,
+        answers: metadata.answers,
+      };
+      segmentData = segmentLead(quizData, company);
+      segment = segmentData.segment;
+    }
 
     // Check if lead already exists
     const { data: existingLead } = await supabase
@@ -38,6 +53,8 @@ export async function POST(request: NextRequest) {
           company,
           source: source || "lead-magnet",
           lead_magnet: leadMagnet || "ai-productivity-guide",
+          segment,
+          metadata: metadata || {},
           updated_at: new Date().toISOString(),
         })
         .eq("email", email)
@@ -57,6 +74,8 @@ export async function POST(request: NextRequest) {
           company,
           source: source || "lead-magnet",
           lead_magnet: leadMagnet || "ai-productivity-guide",
+          segment,
+          metadata: metadata || {},
           status: "active",
         })
         .select()
@@ -84,6 +103,8 @@ export async function POST(request: NextRequest) {
       success: true,
       message: "Lead captured successfully",
       leadId,
+      segment,
+      segmentData,
     });
   } catch (error: any) {
     console.error("Lead capture error:", error);

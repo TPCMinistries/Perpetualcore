@@ -6,6 +6,9 @@ import { NurtureDay4 } from "./NurtureDay4";
 import { NurtureDay5 } from "./NurtureDay5";
 import { NurtureDay6 } from "./NurtureDay6";
 import { SalesDay1 } from "./SalesDay1";
+import { ProductDay3 } from "./ProductDay3";
+import { ConsultingDay2 } from "./ConsultingDay2";
+import { EnterpriseDay2 } from "./EnterpriseDay2";
 
 interface TemplateData {
   firstName: string;
@@ -30,6 +33,20 @@ const templateMap: Record<string, (data: TemplateData) => React.ReactElement> = 
     firstName: data.firstName,
     companyName: data.companyName,
   }),
+  // Product-focused templates
+  product_day_3: (data) => ProductDay3({ firstName: data.firstName }),
+  product_day_4: (data) => NurtureDay3({ firstName: data.firstName }), // Reuse for now
+  product_day_5: (data) => NurtureDay4({ firstName: data.firstName }), // Reuse for now
+  // Consulting-focused templates
+  consulting_day_2: (data) => ConsultingDay2({ firstName: data.firstName }),
+  consulting_day_3: (data) => NurtureDay3({ firstName: data.firstName }), // Reuse for now
+  consulting_day_4: (data) => NurtureDay5({ firstName: data.firstName }), // ROI calculator
+  consulting_day_5: (data) => NurtureDay6({ firstName: data.firstName }), // Reuse for now
+  // Enterprise-focused templates
+  enterprise_day_2: (data) => EnterpriseDay2({ firstName: data.firstName }),
+  enterprise_day_3: (data) => NurtureDay3({ firstName: data.firstName }), // Reuse for now
+  enterprise_day_4: (data) => NurtureDay4({ firstName: data.firstName }), // Reuse for now
+  enterprise_day_5: (data) => NurtureDay6({ firstName: data.firstName }), // Reuse for now
 };
 
 /**
