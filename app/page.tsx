@@ -288,9 +288,9 @@ export default function HomePage() {
 
           {/* Subtitle with more breathing room */}
           <p className="text-center text-base sm:text-xl md:text-2xl lg:text-3xl text-muted-foreground/80 mb-10 sm:mb-16 max-w-4xl mx-auto leading-relaxed font-light animate-on-scroll px-4">
-            Access <span className="font-semibold text-foreground">GPT-4, Claude, and Gemini</span> in one place.
+            Unlike ChatGPT, your conversations <span className="font-semibold text-foreground">never forget</span>.
             <br className="hidden sm:block" />
-            Infinite context. Team collaboration. 24/7 automation.
+            Access GPT-4, Claude, and Gemini in one AI Operating System.
           </p>
 
           {/* CTA Buttons - Mobile optimized */}
@@ -436,27 +436,27 @@ export default function HomePage() {
               <div className="h-14 w-14 rounded-xl bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center mb-6">
                 <Users className="h-7 w-7 text-white" />
               </div>
-              <h3 className="text-2xl font-bold mb-3">Teams (10-100 employees)</h3>
+              <h3 className="text-2xl font-bold mb-3">Teams (10-50 employees)</h3>
               <p className="text-muted-foreground mb-6 leading-relaxed">
                 Guided implementation with hands-on training. We set everything up and ensure your team adopts it.
               </p>
               <div className="space-y-3 mb-6">
                 <div className="flex items-start gap-2">
                   <Check className="h-5 w-5 text-green-500 flex-shrink-0 mt-0.5" />
-                  <span className="text-sm">Full implementation + training</span>
+                  <span className="text-sm">Team tier: $499/mo (10 users)</span>
                 </div>
                 <div className="flex items-start gap-2">
                   <Check className="h-5 w-5 text-green-500 flex-shrink-0 mt-0.5" />
-                  <span className="text-sm">90-day optimization support</span>
+                  <span className="text-sm">Business tier: $1,999/mo (50 users)</span>
                 </div>
                 <div className="flex items-start gap-2">
                   <Check className="h-5 w-5 text-green-500 flex-shrink-0 mt-0.5" />
-                  <span className="text-sm">Dedicated success manager</span>
+                  <span className="text-sm">Implementation call included</span>
                 </div>
               </div>
               <div className="text-center">
-                <div className="text-3xl font-bold mb-1">$7,500<span className="text-lg text-muted-foreground font-normal"> setup</span></div>
-                <div className="text-sm text-muted-foreground mb-3">+ $199/mo per 10 users</div>
+                <div className="text-3xl font-bold mb-1">From $499<span className="text-lg text-muted-foreground font-normal">/month</span></div>
+                <div className="text-sm text-muted-foreground mb-3">Team (10) or Business (50 users)</div>
                 <Button asChild className="w-full mt-4 shadow-lg bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700">
                   <Link href="/consultation">Book Strategy Call</Link>
                 </Button>
@@ -478,7 +478,7 @@ export default function HomePage() {
               <div className="space-y-3 mb-6">
                 <div className="flex items-start gap-2">
                   <Check className="h-5 w-5 text-green-500 flex-shrink-0 mt-0.5" />
-                  <span className="text-sm">Custom deployment & training</span>
+                  <span className="text-sm">$9,999/mo for 250 users</span>
                 </div>
                 <div className="flex items-start gap-2">
                   <Check className="h-5 w-5 text-green-500 flex-shrink-0 mt-0.5" />
@@ -490,8 +490,8 @@ export default function HomePage() {
                 </div>
               </div>
               <div className="text-center">
-                <div className="text-3xl font-bold mb-1">Custom<span className="text-lg text-muted-foreground font-normal"> pricing</span></div>
-                <div className="text-sm text-muted-foreground mb-3">$50K-$150K implementation</div>
+                <div className="text-3xl font-bold mb-1">$9,999<span className="text-lg text-muted-foreground font-normal">/month</span></div>
+                <div className="text-sm text-muted-foreground mb-3">+ $7,500 implementation</div>
                 <Button asChild variant="outline" className="w-full mt-4 shadow-lg">
                   <Link href="/enterprise-demo">Schedule Demo</Link>
                 </Button>
@@ -591,10 +591,10 @@ export default function HomePage() {
       <section className="container mx-auto px-4 py-20 animate-on-scroll">
         <div className="text-center mb-16">
           <h2 className="text-4xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-gray-900 via-primary to-purple-600 dark:from-white dark:via-primary dark:to-purple-400 bg-clip-text text-transparent">
-            Why Perpetual Core is Different
+            An AI Operating System, Not Just Chat
           </h2>
           <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-            Not just another AI chat tool. A complete operating system for your digital brain.
+            ChatGPT forgets after 200 messages. We never forget. Plus team collaboration, automation, and your entire knowledge base in one place.
           </p>
         </div>
 

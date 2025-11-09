@@ -91,8 +91,8 @@ export default function ConsultationPage() {
               </h2>
               <div className="space-y-4">
                 {[
-                  "You have a team of 10-100 people and want everyone working smarter",
-                  "You're currently spending $1,000+/month on disconnected productivity tools",
+                  "You have a team of 10-50 people and want everyone working smarter",
+                  "You're currently spending $500+/month on disconnected productivity tools",
                   "You know AI is important but don't know where to start",
                   "Your team is resistant to change and needs proper onboarding",
                   "You want measurable ROI, not just buzzwords and hype",
@@ -107,24 +107,29 @@ export default function ConsultationPage() {
               </div>
             </div>
 
-            {/* Investment */}
+            {/* Pricing Tiers */}
             <div className="border-t border-slate-200 dark:border-slate-800 pt-12">
               <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-6">
-                Implementation Partnership
+                Choose Your Team Plan
               </h2>
-              <div className="bg-gradient-to-br from-purple-50 to-blue-50 dark:from-purple-950/30 dark:to-blue-950/30 rounded-2xl p-8 border border-purple-200 dark:border-purple-800">
+
+              {/* Team Tier */}
+              <div className="bg-gradient-to-br from-purple-50 to-blue-50 dark:from-purple-950/30 dark:to-blue-950/30 rounded-2xl p-8 border border-purple-200 dark:border-purple-800 mb-6">
                 <div className="mb-6">
-                  <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-4">
-                    What You Get:
+                  <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-2">
+                    Team Plan (Up to 10 Users)
                   </h3>
+                  <p className="text-sm text-slate-600 dark:text-slate-400 mb-4">
+                    Perfect for small teams ready to transform their productivity
+                  </p>
                   <ul className="space-y-3">
                     {[
-                      "Comprehensive AI readiness assessment & custom implementation roadmap",
-                      "Hands-on setup and configuration of Perpetual Core for your team",
-                      "Team training sessions and change management support",
-                      "90 days of implementation support with weekly optimization calls",
-                      "Direct access to our implementation team via Slack",
-                      "Perpetual Core Pro plan included for your entire team",
+                      "Unlimited premium AI models (GPT-4, Claude, o1)",
+                      "Shared team knowledge base",
+                      "Implementation call included",
+                      "Slack/Teams integration",
+                      "API access",
+                      "50 GB storage",
                     ].map((item, i) => (
                       <li key={i} className="flex items-start gap-3 text-slate-700 dark:text-slate-300">
                         <CheckCircle2 className="h-5 w-5 text-purple-600 dark:text-purple-400 flex-shrink-0 mt-0.5" />
@@ -135,23 +140,70 @@ export default function ConsultationPage() {
                 </div>
                 <div className="border-t border-purple-200 dark:border-purple-700 pt-6">
                   <div className="flex items-baseline gap-2 mb-2">
-                    <span className="text-4xl font-bold text-slate-900 dark:text-white">$7,500</span>
-                    <span className="text-slate-600 dark:text-slate-400">one-time</span>
+                    <span className="text-4xl font-bold text-slate-900 dark:text-white">$499</span>
+                    <span className="text-slate-600 dark:text-slate-400">/month</span>
                   </div>
                   <p className="text-slate-600 dark:text-slate-400 mb-4">
-                    + Perpetual Core Pro ($199/month per 10 users after 90 days)
+                    For up to 10 team members
                   </p>
-                  <div className="bg-white/60 dark:bg-slate-900/60 rounded-lg p-4 mb-4">
+                  <div className="bg-white/60 dark:bg-slate-900/60 rounded-lg p-4">
                     <p className="text-sm font-semibold text-slate-900 dark:text-white mb-1">
-                      Average Client Results:
+                      ROI Example:
                     </p>
                     <p className="text-sm text-slate-600 dark:text-slate-400">
-                      15-20 hours saved per employee per month • ROI in 60-90 days
+                      Save 15 hours/employee/month × 10 people = 150 hours saved (~$7,500/mo value)
                     </p>
                   </div>
-                  <p className="text-xs text-slate-500 dark:text-slate-500">
-                    Limited to 4 new clients per month to ensure quality implementation
+                </div>
+              </div>
+
+              {/* Business Tier */}
+              <div className="bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800 rounded-2xl p-8 border-2 border-slate-300 dark:border-slate-700">
+                <div className="mb-6">
+                  <div className="flex items-center gap-2 mb-2">
+                    <h3 className="text-xl font-bold text-slate-900 dark:text-white">
+                      Business Plan (Up to 50 Users)
+                    </h3>
+                    <span className="px-3 py-1 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 text-xs font-semibold rounded-full">
+                      BEST VALUE
+                    </span>
+                  </div>
+                  <p className="text-sm text-slate-600 dark:text-slate-400 mb-4">
+                    For growing companies that need scale and compliance
                   </p>
+                  <ul className="space-y-3">
+                    {[
+                      "Everything in Team, plus:",
+                      "Up to 50 team members",
+                      "SSO & SAML authentication",
+                      "Custom AI training on your data",
+                      "99.9% SLA",
+                      "Priority support",
+                      "Advanced analytics",
+                    ].map((item, i) => (
+                      <li key={i} className="flex items-start gap-3 text-slate-700 dark:text-slate-300">
+                        <CheckCircle2 className="h-5 w-5 text-green-600 dark:text-green-400 flex-shrink-0 mt-0.5" />
+                        <span>{item}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+                <div className="border-t border-slate-200 dark:border-slate-700 pt-6">
+                  <div className="flex items-baseline gap-2 mb-2">
+                    <span className="text-4xl font-bold text-slate-900 dark:text-white">$1,999</span>
+                    <span className="text-slate-600 dark:text-slate-400">/month</span>
+                  </div>
+                  <p className="text-slate-600 dark:text-slate-400 mb-4">
+                    For up to 50 team members (only $40/user/month)
+                  </p>
+                  <div className="bg-white/60 dark:bg-slate-900/60 rounded-lg p-4">
+                    <p className="text-sm font-semibold text-slate-900 dark:text-white mb-1">
+                      ROI Example:
+                    </p>
+                    <p className="text-sm text-slate-600 dark:text-slate-400">
+                      Save 15 hours/employee/month × 50 people = 750 hours saved (~$37,500/mo value)
+                    </p>
+                  </div>
                 </div>
               </div>
             </div>

@@ -170,36 +170,55 @@ export default function EnterpriseDemoPage() {
 
               <div className="mt-8 bg-gradient-to-br from-purple-50 to-blue-50 dark:from-purple-950/30 dark:to-blue-950/30 rounded-2xl p-8 border border-purple-200 dark:border-purple-800">
                 <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-4">
-                  Investment Structure
+                  Enterprise Plan Pricing
                 </h3>
-                <div className="space-y-4">
+                <div className="space-y-6">
                   <div>
                     <div className="flex items-baseline gap-2 mb-2">
-                      <span className="text-4xl font-bold text-slate-900 dark:text-white">Custom Pricing</span>
+                      <span className="text-4xl font-bold text-slate-900 dark:text-white">$9,999</span>
+                      <span className="text-slate-600 dark:text-slate-400">/month</span>
                     </div>
-                    <p className="text-slate-600 dark:text-slate-400 mb-4">
-                      Based on organization size, deployment complexity, and support requirements
+                    <p className="text-slate-600 dark:text-slate-400 mb-1">
+                      For up to 250 team members
+                    </p>
+                    <p className="text-sm text-slate-500 dark:text-slate-500">
+                      Only $40 per user/month at full capacity
                     </p>
                   </div>
+
                   <div className="bg-white/60 dark:bg-slate-900/60 rounded-lg p-4">
-                    <p className="text-sm font-semibold text-slate-900 dark:text-white mb-2">
-                      Typical Enterprise Engagement:
+                    <p className="text-sm font-semibold text-slate-900 dark:text-white mb-3">
+                      What's Included:
                     </p>
-                    <ul className="text-sm text-slate-600 dark:text-slate-400 space-y-1">
-                      <li>• $50,000-$150,000 implementation (one-time)</li>
-                      <li>• $2,000-$10,000/month platform + support (based on seats)</li>
-                      <li>• Annual contracts with volume discounts available</li>
+                    <ul className="text-sm text-slate-600 dark:text-slate-400 space-y-2">
+                      <li>• Unlimited premium AI models (GPT-4, Claude, o1)</li>
+                      <li>• $7,500 white-glove implementation (one-time)</li>
+                      <li>• SSO, SAML, HIPAA, SOC 2 compliance</li>
+                      <li>• 24/7 priority support with 99.9% SLA</li>
+                      <li>• Dedicated success manager</li>
+                      <li>• Custom training on your data</li>
                     </ul>
                   </div>
+
                   <div className="bg-green-50 dark:bg-green-950/30 rounded-lg p-4 border border-green-200 dark:border-green-800">
                     <p className="text-sm font-semibold text-green-900 dark:text-green-100 mb-1">
-                      Average Enterprise ROI
+                      ROI Example (250 employees):
                     </p>
                     <p className="text-sm text-green-800 dark:text-green-200">
-                      $800K-$2.5M annual savings for 100-500 employee organizations
+                      Save 15 hours/employee/month × 250 people = 3,750 hours saved (~$187,500/mo value for $9,999/mo cost)
                     </p>
                   </div>
-                  <p className="text-xs text-slate-500 dark:text-slate-500 mt-4">
+
+                  <div className="border-t border-purple-200 dark:border-purple-700 pt-4">
+                    <p className="text-sm font-semibold text-slate-900 dark:text-white mb-2">
+                      Need more than 250 users?
+                    </p>
+                    <p className="text-sm text-slate-600 dark:text-slate-400">
+                      Custom pricing available for organizations with 250+ employees. Contact us for a tailored quote.
+                    </p>
+                  </div>
+
+                  <p className="text-xs text-slate-500 dark:text-slate-500">
                     Limited availability - accepting 2 new enterprise clients per quarter
                   </p>
                 </div>
