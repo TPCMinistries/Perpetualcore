@@ -262,32 +262,37 @@ export default function TeamConversationsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-white dark:bg-slate-950">
-      <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-white dark:from-slate-950 dark:to-slate-900">
+      <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
         {/* Header */}
-        <div className="mb-8">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-100">
+        <div className="mb-10">
+          <div className="flex items-start justify-between">
+            <div className="space-y-3">
+              <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
+                <MessageSquare className="h-4 w-4 text-slate-700 dark:text-slate-300" />
+                <span className="text-sm font-medium text-slate-700 dark:text-slate-300">Team Collaboration</span>
+              </div>
+              <h1 className="text-4xl font-bold text-slate-900 dark:text-slate-100 tracking-tight">
                 Team Conversations
               </h1>
-              <p className="mt-2 text-slate-600 dark:text-slate-400">
-                Collaborate with your team using AI-powered conversations
+              <p className="text-lg text-slate-600 dark:text-slate-400 max-w-2xl">
+                Collaborate with your team using AI-powered conversations. Create channels, share ideas, and work together seamlessly.
               </p>
             </div>
             <Button
               onClick={() => setCreateModalOpen(true)}
-              className="bg-slate-900 dark:bg-slate-100 hover:bg-slate-800 dark:hover:bg-slate-200 text-white dark:text-slate-900"
+              size="lg"
+              className="bg-slate-900 dark:bg-slate-100 hover:bg-slate-800 dark:hover:bg-slate-200 text-white dark:text-slate-900 shadow-lg hover:shadow-xl transition-all"
             >
-              <Plus className="mr-2 h-4 w-4" />
+              <Plus className="mr-2 h-5 w-5" />
               New Conversation
             </Button>
           </div>
 
           {/* Filters */}
-          <div className="mt-6 flex flex-wrap gap-3">
+          <div className="mt-8 flex flex-wrap gap-3">
             <Select value={filterType} onValueChange={setFilterType}>
-              <SelectTrigger className="w-[180px]">
+              <SelectTrigger className="w-[200px] h-11 border-slate-300 dark:border-slate-700">
                 <SelectValue placeholder="All types" />
               </SelectTrigger>
               <SelectContent>
@@ -300,13 +305,13 @@ export default function TeamConversationsPage() {
             </Select>
 
             <Select value={filterStatus} onValueChange={setFilterStatus}>
-              <SelectTrigger className="w-[180px]">
+              <SelectTrigger className="w-[200px] h-11 border-slate-300 dark:border-slate-700">
                 <SelectValue placeholder="Status" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="active">Active</SelectItem>
+                <SelectItem value="active">Active Conversations</SelectItem>
                 <SelectItem value="archived">Archived</SelectItem>
-                <SelectItem value="all">All</SelectItem>
+                <SelectItem value="all">All Conversations</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -318,19 +323,22 @@ export default function TeamConversationsPage() {
             <Loader2 className="h-8 w-8 animate-spin text-slate-700 dark:text-slate-300" />
           </div>
         ) : conversations.length === 0 ? (
-          <div className="rounded-lg border-2 border-dashed border-slate-200 dark:border-slate-800 p-12 text-center">
-            <MessageSquare className="mx-auto h-12 w-12 text-slate-400 dark:text-slate-600" />
-            <h3 className="mt-4 text-lg font-semibold text-slate-900 dark:text-slate-100">
+          <div className="rounded-2xl border-2 border-dashed border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 p-16 text-center">
+            <div className="inline-flex items-center justify-center w-20 h-20 rounded-2xl bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-800 dark:to-slate-900 shadow-sm mb-6">
+              <MessageSquare className="h-10 w-10 text-slate-700 dark:text-slate-300" />
+            </div>
+            <h3 className="text-2xl font-bold text-slate-900 dark:text-slate-100">
               No conversations yet
             </h3>
-            <p className="mt-2 text-slate-600 dark:text-slate-400">
-              Get started by creating your first team conversation
+            <p className="mt-3 text-base text-slate-600 dark:text-slate-400 max-w-md mx-auto">
+              Get started by creating your first team conversation and start collaborating with AI assistance
             </p>
             <Button
               onClick={() => setCreateModalOpen(true)}
-              className="mt-4 bg-slate-900 dark:bg-slate-100 hover:bg-slate-800 dark:hover:bg-slate-200 text-white dark:text-slate-900"
+              size="lg"
+              className="mt-6 bg-slate-900 dark:bg-slate-100 hover:bg-slate-800 dark:hover:bg-slate-200 text-white dark:text-slate-900 shadow-lg"
             >
-              <Plus className="mr-2 h-4 w-4" />
+              <Plus className="mr-2 h-5 w-5" />
               Create Conversation
             </Button>
           </div>
@@ -342,32 +350,38 @@ export default function TeamConversationsPage() {
                 onClick={() =>
                   router.push(`/dashboard/team/conversations/${conversation.id}`)
                 }
-                className="group rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 text-left transition-all hover:border-slate-300 dark:hover:border-slate-700 hover:shadow-md"
+                className="group relative rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-7 text-left transition-all hover:border-slate-300 dark:hover:border-slate-700 hover:shadow-xl hover:shadow-slate-200/50 dark:hover:shadow-slate-900/50 hover:-translate-y-0.5"
               >
-                <div className="flex items-start justify-between">
+                <div className="flex items-start justify-between mb-4">
                   <div className="flex-1 min-w-0">
-                    <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100 group-hover:text-slate-700 dark:group-hover:text-slate-200 truncate">
+                    <h3 className="text-xl font-bold text-slate-900 dark:text-slate-100 group-hover:text-slate-800 dark:group-hover:text-slate-200 truncate mb-2">
                       {conversation.title}
                     </h3>
                     {conversation.description && (
-                      <p className="mt-1 text-sm text-slate-600 dark:text-slate-400 line-clamp-2">
+                      <p className="text-sm text-slate-600 dark:text-slate-400 line-clamp-2 leading-relaxed">
                         {conversation.description}
                       </p>
                     )}
                   </div>
-                  {conversation.is_private && (
-                    <Lock className="ml-2 h-4 w-4 text-slate-400 dark:text-slate-600 flex-shrink-0" />
-                  )}
-                  {conversation.is_archived && (
-                    <Archive className="ml-2 h-4 w-4 text-slate-400 dark:text-slate-600 flex-shrink-0" />
-                  )}
+                  <div className="flex gap-2 ml-3 flex-shrink-0">
+                    {conversation.is_private && (
+                      <div className="w-8 h-8 rounded-lg bg-slate-100 dark:bg-slate-800 flex items-center justify-center">
+                        <Lock className="h-4 w-4 text-slate-600 dark:text-slate-400" />
+                      </div>
+                    )}
+                    {conversation.is_archived && (
+                      <div className="w-8 h-8 rounded-lg bg-slate-100 dark:bg-slate-800 flex items-center justify-center">
+                        <Archive className="h-4 w-4 text-slate-600 dark:text-slate-400" />
+                      </div>
+                    )}
+                  </div>
                 </div>
 
-                <div className="mt-4 flex flex-wrap gap-2">
+                <div className="flex flex-wrap gap-2 mb-5">
                   <Badge
                     variant="secondary"
                     className={cn(
-                      "text-xs",
+                      "text-xs font-medium px-3 py-1",
                       getContextTypeColor(conversation.context_type)
                     )}
                   >
@@ -377,27 +391,31 @@ export default function TeamConversationsPage() {
                     <Badge
                       key={tag}
                       variant="outline"
-                      className="text-xs text-slate-600 dark:text-slate-400"
+                      className="text-xs font-medium px-3 py-1 border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300"
                     >
-                      <Tag className="mr-1 h-3 w-3" />
+                      <Tag className="mr-1.5 h-3 w-3" />
                       {tag}
                     </Badge>
                   ))}
                 </div>
 
-                <div className="mt-4 flex items-center justify-between text-sm text-slate-600 dark:text-slate-400">
-                  <div className="flex items-center gap-4">
-                    <div className="flex items-center gap-1">
-                      <MessageSquare className="h-4 w-4" />
-                      <span>{conversation.message_count?.[0]?.count || 0}</span>
+                <div className="flex items-center justify-between pt-4 border-t border-slate-100 dark:border-slate-800">
+                  <div className="flex items-center gap-5">
+                    <div className="flex items-center gap-2">
+                      <div className="w-8 h-8 rounded-lg bg-slate-100 dark:bg-slate-800 flex items-center justify-center">
+                        <MessageSquare className="h-4 w-4 text-slate-600 dark:text-slate-400" />
+                      </div>
+                      <span className="text-sm font-semibold text-slate-900 dark:text-slate-100">{conversation.message_count?.[0]?.count || 0}</span>
                     </div>
-                    <div className="flex items-center gap-1">
-                      <Users className="h-4 w-4" />
-                      <span>{conversation.participant_count?.[0]?.count || 0}</span>
+                    <div className="flex items-center gap-2">
+                      <div className="w-8 h-8 rounded-lg bg-slate-100 dark:bg-slate-800 flex items-center justify-center">
+                        <Users className="h-4 w-4 text-slate-600 dark:text-slate-400" />
+                      </div>
+                      <span className="text-sm font-semibold text-slate-900 dark:text-slate-100">{conversation.participant_count?.[0]?.count || 0}</span>
                     </div>
                   </div>
-                  <div className="flex items-center gap-1">
-                    <Clock className="h-4 w-4" />
+                  <div className="flex items-center gap-1.5 text-xs font-medium text-slate-500 dark:text-slate-500">
+                    <Clock className="h-3.5 w-3.5" />
                     <span>{formatDate(conversation.last_message_at)}</span>
                   </div>
                 </div>
@@ -409,32 +427,44 @@ export default function TeamConversationsPage() {
 
       {/* Create Conversation Modal */}
       <Dialog open={createModalOpen} onOpenChange={setCreateModalOpen}>
-        <DialogContent className="sm:max-w-[500px]">
-          <DialogHeader>
-            <DialogTitle>Create New Conversation</DialogTitle>
-            <DialogDescription>
-              Start a new team conversation to collaborate with AI assistance
-            </DialogDescription>
+        <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
+          <DialogHeader className="pb-6 border-b border-slate-100 dark:border-slate-800">
+            <div className="flex items-center gap-3 mb-2">
+              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-800 dark:to-slate-900 flex items-center justify-center">
+                <Plus className="h-6 w-6 text-slate-700 dark:text-slate-300" />
+              </div>
+              <div>
+                <DialogTitle className="text-2xl">Create New Conversation</DialogTitle>
+                <DialogDescription className="text-base mt-1">
+                  Start collaborating with your team using AI assistance
+                </DialogDescription>
+              </div>
+            </div>
           </DialogHeader>
 
-          <div className="space-y-4 py-4">
-            <div className="space-y-2">
-              <Label htmlFor="title">Title *</Label>
+          <div className="space-y-6 py-6">
+            <div className="space-y-3">
+              <Label htmlFor="title" className="text-sm font-semibold text-slate-900 dark:text-slate-100">
+                Conversation Title *
+              </Label>
               <Input
                 id="title"
-                placeholder="E.g., Q1 Planning, Product Launch, etc."
+                placeholder="E.g., Q1 Strategy Planning, Product Launch Discussion..."
                 value={newConversation.title}
                 onChange={(e) =>
                   setNewConversation({ ...newConversation, title: e.target.value })
                 }
+                className="h-12 text-base border-slate-300 dark:border-slate-700 focus:ring-2 focus:ring-slate-900 dark:focus:ring-slate-100"
               />
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="description">Description</Label>
+            <div className="space-y-3">
+              <Label htmlFor="description" className="text-sm font-semibold text-slate-900 dark:text-slate-100">
+                Description
+              </Label>
               <Textarea
                 id="description"
-                placeholder="What is this conversation about?"
+                placeholder="Describe the purpose and goals of this conversation..."
                 value={newConversation.description}
                 onChange={(e) =>
                   setNewConversation({
@@ -442,43 +472,81 @@ export default function TeamConversationsPage() {
                     description: e.target.value,
                   })
                 }
-                rows={3}
+                rows={4}
+                className="resize-none text-base border-slate-300 dark:border-slate-700 focus:ring-2 focus:ring-slate-900 dark:focus:ring-slate-100"
               />
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="context_type">Type</Label>
+            <div className="space-y-3">
+              <Label htmlFor="context_type" className="text-sm font-semibold text-slate-900 dark:text-slate-100">
+                Conversation Type
+              </Label>
               <Select
                 value={newConversation.context_type}
                 onValueChange={(value: any) =>
                   setNewConversation({ ...newConversation, context_type: value })
                 }
               >
-                <SelectTrigger>
+                <SelectTrigger className="h-12 border-slate-300 dark:border-slate-700">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="general">General Discussion</SelectItem>
-                  <SelectItem value="document">Document Review</SelectItem>
-                  <SelectItem value="training">Training Session</SelectItem>
-                  <SelectItem value="project">Project Planning</SelectItem>
+                  <SelectItem value="general">
+                    <div className="flex items-center gap-2 py-1">
+                      <MessageSquare className="h-4 w-4" />
+                      <div>
+                        <div className="font-medium">General Discussion</div>
+                        <div className="text-xs text-slate-500">Open-ended team conversation</div>
+                      </div>
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="document">
+                    <div className="flex items-center gap-2 py-1">
+                      <MessageSquare className="h-4 w-4" />
+                      <div>
+                        <div className="font-medium">Document Review</div>
+                        <div className="text-xs text-slate-500">Collaborate on documents</div>
+                      </div>
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="training">
+                    <div className="flex items-center gap-2 py-1">
+                      <MessageSquare className="h-4 w-4" />
+                      <div>
+                        <div className="font-medium">Training Session</div>
+                        <div className="text-xs text-slate-500">Learning and development</div>
+                      </div>
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="project">
+                    <div className="flex items-center gap-2 py-1">
+                      <MessageSquare className="h-4 w-4" />
+                      <div>
+                        <div className="font-medium">Project Planning</div>
+                        <div className="text-xs text-slate-500">Plan and execute projects</div>
+                      </div>
+                    </div>
+                  </SelectItem>
                 </SelectContent>
               </Select>
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="tags">Tags (comma-separated)</Label>
+            <div className="space-y-3">
+              <Label htmlFor="tags" className="text-sm font-semibold text-slate-900 dark:text-slate-100">
+                Tags
+              </Label>
               <Input
                 id="tags"
-                placeholder="e.g., planning, marketing, urgent"
+                placeholder="Add tags separated by commas (e.g., planning, marketing, urgent)"
                 value={newConversation.tags}
                 onChange={(e) =>
                   setNewConversation({ ...newConversation, tags: e.target.value })
                 }
+                className="h-12 text-base border-slate-300 dark:border-slate-700 focus:ring-2 focus:ring-slate-900 dark:focus:ring-slate-100"
               />
             </div>
 
-            <div className="flex items-center space-x-2">
+            <div className="flex items-start space-x-3 p-4 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
               <input
                 type="checkbox"
                 id="is_private"
@@ -489,38 +557,47 @@ export default function TeamConversationsPage() {
                     is_private: e.target.checked,
                   })
                 }
-                className="h-4 w-4 rounded border-slate-300 text-slate-900 focus:ring-slate-900"
+                className="mt-1 h-5 w-5 rounded border-slate-300 text-slate-900 focus:ring-slate-900"
               />
-              <Label htmlFor="is_private" className="cursor-pointer font-normal">
-                Make this conversation private
-              </Label>
+              <div className="flex-1">
+                <Label htmlFor="is_private" className="cursor-pointer font-semibold text-slate-900 dark:text-slate-100 flex items-center gap-2">
+                  <Lock className="h-4 w-4" />
+                  Private Conversation
+                </Label>
+                <p className="text-sm text-slate-600 dark:text-slate-400 mt-1">
+                  Only invited members can view and participate in this conversation
+                </p>
+              </div>
             </div>
           </div>
 
-          <div className="flex justify-end gap-3">
+          <div className="flex justify-end gap-3 pt-6 border-t border-slate-100 dark:border-slate-800">
             <Button
               variant="outline"
+              size="lg"
               onClick={() => {
                 setCreateModalOpen(false);
                 resetForm();
               }}
               disabled={creating}
+              className="min-w-[100px]"
             >
               Cancel
             </Button>
             <Button
               onClick={handleCreateConversation}
               disabled={creating || !newConversation.title.trim()}
-              className="bg-slate-900 dark:bg-slate-100 hover:bg-slate-800 dark:hover:bg-slate-200 text-white dark:text-slate-900"
+              size="lg"
+              className="min-w-[180px] bg-slate-900 dark:bg-slate-100 hover:bg-slate-800 dark:hover:bg-slate-200 text-white dark:text-slate-900 shadow-lg"
             >
               {creating ? (
                 <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  <Loader2 className="mr-2 h-5 w-5 animate-spin" />
                   Creating...
                 </>
               ) : (
                 <>
-                  <Plus className="mr-2 h-4 w-4" />
+                  <Plus className="mr-2 h-5 w-5" />
                   Create Conversation
                 </>
               )}
