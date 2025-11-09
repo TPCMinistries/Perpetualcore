@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -75,6 +75,7 @@ export default function SettingsPage() {
   const [isResetting, setIsResetting] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [theme, setTheme] = useState<"light" | "dark" | "system">("system");
+  const saveTimeoutRef = useRef<NodeJS.Timeout>();
 
   // User profile state
   const [profile, setProfile] = useState({
@@ -169,12 +170,117 @@ export default function SettingsPage() {
     }
   }
 
-  function loadPreferences() {
-    if (typeof window !== "undefined") {
+  async function loadPreferences() {
+    if (typeof window === "undefined") return;
+
+    try {
+      // First, load from localStorage for immediate UI update
       const savedTheme = localStorage.getItem("theme") as "light" | "dark" | "system" || "system";
       setTheme(savedTheme);
+
+      const savedPreferences = localStorage.getItem("preferences");
+      if (savedPreferences) {
+        try {
+          const parsed = JSON.parse(savedPreferences);
+          setPreferences(parsed);
+        } catch (e) {
+          console.error("Error parsing saved preferences:", e);
+        }
+      }
+
+      // Then, load from database to sync across devices
+      const response = await fetch("/api/preferences");
+      if (response.ok) {
+        const { preferences: dbPreferences } = await response.json();
+
+        if (dbPreferences && Object.keys(dbPreferences).length > 0) {
+          // Merge with defaults to ensure all fields exist
+          const mergedPreferences = { ...preferences, ...dbPreferences };
+          setPreferences(mergedPreferences);
+
+          // Update localStorage with database preferences
+          localStorage.setItem("preferences", JSON.stringify(mergedPreferences));
+        }
+      }
+    } catch (error) {
+      console.error("Error loading preferences:", error);
     }
   }
+
+  // Save to localStorage immediately for instant feedback
+  const savePreferencesToLocalStorage = useCallback((prefs: typeof preferences) => {
+    if (typeof window === "undefined") return;
+    localStorage.setItem("preferences", JSON.stringify(prefs));
+  }, []);
+
+  // Save to database with debouncing (500ms)
+  const savePreferencesToDatabase = useCallback((prefs: typeof preferences) => {
+    // Clear existing timeout
+    if (saveTimeoutRef.current) {
+      clearTimeout(saveTimeoutRef.current);
+    }
+
+    // Set new timeout to save after 500ms of inactivity
+    saveTimeoutRef.current = setTimeout(async () => {
+      try {
+        const response = await fetch("/api/preferences", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ preferences: prefs }),
+        });
+
+        if (!response.ok) {
+          console.error("Failed to save preferences to database");
+        }
+      } catch (error) {
+        console.error("Error saving preferences to database:", error);
+      }
+    }, 500);
+  }, []);
+
+  // Combined save function - saves to both localStorage and database
+  const savePreferences = useCallback((prefs: typeof preferences) => {
+    savePreferencesToLocalStorage(prefs);
+    savePreferencesToDatabase(prefs);
+  }, [savePreferencesToLocalStorage, savePreferencesToDatabase]);
+
+  // Manual save all preferences function
+  const handleSaveAllPreferences = async () => {
+    setIsSaving(true);
+    try {
+      // Clear any pending debounced saves
+      if (saveTimeoutRef.current) {
+        clearTimeout(saveTimeoutRef.current);
+      }
+
+      // Save immediately to both localStorage and database
+      savePreferencesToLocalStorage(preferences);
+
+      const response = await fetch("/api/preferences", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ preferences }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to save preferences");
+      }
+
+      toast.success("All preferences saved successfully!");
+    } catch (error) {
+      console.error("Error saving preferences:", error);
+      toast.error("Failed to save preferences");
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  // Helper function to update preferences and trigger auto-save
+  const updatePreference = useCallback((updates: Partial<typeof preferences>) => {
+    const newPreferences = { ...preferences, ...updates };
+    setPreferences(newPreferences);
+    savePreferences(newPreferences);
+  }, [preferences, savePreferences]);
 
   const handleRestartOnboarding = async () => {
     setIsResetting(true);
@@ -501,7 +607,7 @@ export default function SettingsPage() {
                   <Switch
                     checked={preferences.compactMode}
                     onCheckedChange={(checked) => {
-                      setPreferences({ ...preferences, compactMode: checked });
+                      updatePreference({ compactMode: checked });
                       toast.success(checked ? "Compact mode enabled" : "Compact mode disabled");
                     }}
                   />
@@ -525,7 +631,7 @@ export default function SettingsPage() {
                 <div className="grid grid-cols-2 gap-6">
                   <div className="space-y-2">
                     <Label className="text-slate-700 dark:text-slate-300 font-medium">Default Model</Label>
-                    <Select value={preferences.defaultModel} onValueChange={(value) => setPreferences({ ...preferences, defaultModel: value })}>
+                    <Select value={preferences.defaultModel} onValueChange={(value) => updatePreference({ defaultModel: value })}>
                       <SelectTrigger>
                         <SelectValue />
                       </SelectTrigger>
@@ -541,7 +647,7 @@ export default function SettingsPage() {
 
                   <div className="space-y-2">
                     <Label className="text-slate-700 dark:text-slate-300 font-medium">Context Window</Label>
-                    <Select value={preferences.contextWindow} onValueChange={(value) => setPreferences({ ...preferences, contextWindow: value })}>
+                    <Select value={preferences.contextWindow} onValueChange={(value) => updatePreference({ contextWindow: value })}>
                       <SelectTrigger>
                         <SelectValue />
                       </SelectTrigger>
@@ -565,7 +671,7 @@ export default function SettingsPage() {
                   </div>
                   <Slider
                     value={[preferences.temperature]}
-                    onValueChange={([value]) => setPreferences({ ...preferences, temperature: value })}
+                    onValueChange={([value]) => updatePreference({ temperature: value })}
                     min={0}
                     max={1}
                     step={0.1}
@@ -584,7 +690,7 @@ export default function SettingsPage() {
                   </div>
                   <Switch
                     checked={preferences.enableRAG}
-                    onCheckedChange={(checked) => setPreferences({ ...preferences, enableRAG: checked })}
+                    onCheckedChange={(checked) => updatePreference({ enableRAG: checked })}
                   />
                 </div>
 
@@ -598,7 +704,7 @@ export default function SettingsPage() {
                   </div>
                   <Switch
                     checked={preferences.streamResponses}
-                    onCheckedChange={(checked) => setPreferences({ ...preferences, streamResponses: checked })}
+                    onCheckedChange={(checked) => updatePreference({ streamResponses: checked })}
                   />
                 </div>
               </div>
@@ -627,7 +733,7 @@ export default function SettingsPage() {
                   </div>
                   <Switch
                     checked={preferences.emailNotifications}
-                    onCheckedChange={(checked) => setPreferences({ ...preferences, emailNotifications: checked })}
+                    onCheckedChange={(checked) => updatePreference({ emailNotifications: checked })}
                   />
                 </div>
 
@@ -641,7 +747,7 @@ export default function SettingsPage() {
                   </div>
                   <Switch
                     checked={preferences.desktopNotifications}
-                    onCheckedChange={(checked) => setPreferences({ ...preferences, desktopNotifications: checked })}
+                    onCheckedChange={(checked) => updatePreference({ desktopNotifications: checked })}
                   />
                 </div>
 
@@ -655,7 +761,7 @@ export default function SettingsPage() {
                   </div>
                   <Switch
                     checked={preferences.documentUpdates}
-                    onCheckedChange={(checked) => setPreferences({ ...preferences, documentUpdates: checked })}
+                    onCheckedChange={(checked) => updatePreference({ documentUpdates: checked })}
                   />
                 </div>
 
@@ -669,7 +775,7 @@ export default function SettingsPage() {
                   </div>
                   <Switch
                     checked={preferences.teamActivity}
-                    onCheckedChange={(checked) => setPreferences({ ...preferences, teamActivity: checked })}
+                    onCheckedChange={(checked) => updatePreference({ teamActivity: checked })}
                   />
                 </div>
 
@@ -683,7 +789,7 @@ export default function SettingsPage() {
                   </div>
                   <Switch
                     checked={preferences.weeklyDigest}
-                    onCheckedChange={(checked) => setPreferences({ ...preferences, weeklyDigest: checked })}
+                    onCheckedChange={(checked) => updatePreference({ weeklyDigest: checked })}
                   />
                 </div>
 
@@ -697,7 +803,7 @@ export default function SettingsPage() {
                   </div>
                   <Switch
                     checked={preferences.soundEffects}
-                    onCheckedChange={(checked) => setPreferences({ ...preferences, soundEffects: checked })}
+                    onCheckedChange={(checked) => updatePreference({ soundEffects: checked })}
                   />
                 </div>
               </div>
@@ -726,7 +832,7 @@ export default function SettingsPage() {
                   </div>
                   <Switch
                     checked={preferences.autoSave}
-                    onCheckedChange={(checked) => setPreferences({ ...preferences, autoSave: checked })}
+                    onCheckedChange={(checked) => updatePreference({ autoSave: checked })}
                   />
                 </div>
 
@@ -740,7 +846,7 @@ export default function SettingsPage() {
                   </div>
                   <Switch
                     checked={preferences.syntaxHighlighting}
-                    onCheckedChange={(checked) => setPreferences({ ...preferences, syntaxHighlighting: checked })}
+                    onCheckedChange={(checked) => updatePreference({ syntaxHighlighting: checked })}
                   />
                 </div>
 
@@ -754,7 +860,7 @@ export default function SettingsPage() {
                   </div>
                   <Switch
                     checked={preferences.lineNumbers}
-                    onCheckedChange={(checked) => setPreferences({ ...preferences, lineNumbers: checked })}
+                    onCheckedChange={(checked) => updatePreference({ lineNumbers: checked })}
                   />
                 </div>
 
@@ -768,7 +874,7 @@ export default function SettingsPage() {
                   </div>
                   <Switch
                     checked={preferences.wordWrap}
-                    onCheckedChange={(checked) => setPreferences({ ...preferences, wordWrap: checked })}
+                    onCheckedChange={(checked) => updatePreference({ wordWrap: checked })}
                   />
                 </div>
               </div>
@@ -794,7 +900,7 @@ export default function SettingsPage() {
                   </div>
                   <Switch
                     checked={preferences.analyticsEnabled}
-                    onCheckedChange={(checked) => setPreferences({ ...preferences, analyticsEnabled: checked })}
+                    onCheckedChange={(checked) => updatePreference({ analyticsEnabled: checked })}
                   />
                 </div>
 
@@ -805,7 +911,7 @@ export default function SettingsPage() {
                   </div>
                   <Switch
                     checked={preferences.usageTracking}
-                    onCheckedChange={(checked) => setPreferences({ ...preferences, usageTracking: checked })}
+                    onCheckedChange={(checked) => updatePreference({ usageTracking: checked })}
                   />
                 </div>
 
@@ -816,7 +922,7 @@ export default function SettingsPage() {
                   </div>
                   <Switch
                     checked={preferences.errorReporting}
-                    onCheckedChange={(checked) => setPreferences({ ...preferences, errorReporting: checked })}
+                    onCheckedChange={(checked) => updatePreference({ errorReporting: checked })}
                   />
                 </div>
 
@@ -827,7 +933,7 @@ export default function SettingsPage() {
                   </div>
                   <Switch
                     checked={preferences.shareAnonymousData}
-                    onCheckedChange={(checked) => setPreferences({ ...preferences, shareAnonymousData: checked })}
+                    onCheckedChange={(checked) => updatePreference({ shareAnonymousData: checked })}
                   />
                 </div>
               </div>
@@ -848,7 +954,7 @@ export default function SettingsPage() {
               <div className="space-y-6">
                 <div className="space-y-2">
                   <Label className="text-slate-700 dark:text-slate-300 font-medium">Font Size</Label>
-                  <Select value={preferences.fontSize} onValueChange={(value) => setPreferences({ ...preferences, fontSize: value })}>
+                  <Select value={preferences.fontSize} onValueChange={(value) => updatePreference({ fontSize: value })}>
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
@@ -868,7 +974,7 @@ export default function SettingsPage() {
                   </div>
                   <Switch
                     checked={preferences.reduceAnimations}
-                    onCheckedChange={(checked) => setPreferences({ ...preferences, reduceAnimations: checked })}
+                    onCheckedChange={(checked) => updatePreference({ reduceAnimations: checked })}
                   />
                 </div>
 
@@ -879,7 +985,7 @@ export default function SettingsPage() {
                   </div>
                   <Switch
                     checked={preferences.highContrast}
-                    onCheckedChange={(checked) => setPreferences({ ...preferences, highContrast: checked })}
+                    onCheckedChange={(checked) => updatePreference({ highContrast: checked })}
                   />
                 </div>
 
@@ -890,7 +996,7 @@ export default function SettingsPage() {
                   </div>
                   <Switch
                     checked={preferences.screenReaderOptimized}
-                    onCheckedChange={(checked) => setPreferences({ ...preferences, screenReaderOptimized: checked })}
+                    onCheckedChange={(checked) => updatePreference({ screenReaderOptimized: checked })}
                   />
                 </div>
               </div>
@@ -919,7 +1025,7 @@ export default function SettingsPage() {
                   </div>
                   <Switch
                     checked={preferences.enableCache}
-                    onCheckedChange={(checked) => setPreferences({ ...preferences, enableCache: checked })}
+                    onCheckedChange={(checked) => updatePreference({ enableCache: checked })}
                   />
                 </div>
 
@@ -933,7 +1039,7 @@ export default function SettingsPage() {
                   </div>
                   <Switch
                     checked={preferences.preloadDocuments}
-                    onCheckedChange={(checked) => setPreferences({ ...preferences, preloadDocuments: checked })}
+                    onCheckedChange={(checked) => updatePreference({ preloadDocuments: checked })}
                   />
                 </div>
 
@@ -947,7 +1053,7 @@ export default function SettingsPage() {
                   </div>
                   <Switch
                     checked={preferences.lazyLoadImages}
-                    onCheckedChange={(checked) => setPreferences({ ...preferences, lazyLoadImages: checked })}
+                    onCheckedChange={(checked) => updatePreference({ lazyLoadImages: checked })}
                   />
                 </div>
               </div>
@@ -969,7 +1075,7 @@ export default function SettingsPage() {
                 <div className="grid grid-cols-2 gap-6">
                   <div className="space-y-2">
                     <Label className="text-slate-700 dark:text-slate-300 font-medium">Default View</Label>
-                    <Select value={preferences.defaultView} onValueChange={(value) => setPreferences({ ...preferences, defaultView: value })}>
+                    <Select value={preferences.defaultView} onValueChange={(value) => updatePreference({ defaultView: value })}>
                       <SelectTrigger>
                         <SelectValue />
                       </SelectTrigger>
@@ -992,7 +1098,7 @@ export default function SettingsPage() {
 
                   <div className="space-y-2">
                     <Label className="text-slate-700 dark:text-slate-300 font-medium">Sidebar Position</Label>
-                    <Select value={preferences.sidebarPosition} onValueChange={(value) => setPreferences({ ...preferences, sidebarPosition: value })}>
+                    <Select value={preferences.sidebarPosition} onValueChange={(value) => updatePreference({ sidebarPosition: value })}>
                       <SelectTrigger>
                         <SelectValue />
                       </SelectTrigger>
@@ -1011,7 +1117,7 @@ export default function SettingsPage() {
                   </div>
                   <Switch
                     checked={preferences.showTooltips}
-                    onCheckedChange={(checked) => setPreferences({ ...preferences, showTooltips: checked })}
+                    onCheckedChange={(checked) => updatePreference({ showTooltips: checked })}
                   />
                 </div>
               </div>
@@ -1020,14 +1126,21 @@ export default function SettingsPage() {
             {/* Save All Preferences Button */}
             <div className="flex justify-end">
               <Button
-                onClick={() => {
-                  toast.success("All preferences saved!");
-                  // Here you would save to localStorage or API
-                }}
+                onClick={handleSaveAllPreferences}
+                disabled={isSaving}
                 className="bg-slate-900 dark:bg-slate-100 hover:bg-slate-800 dark:hover:bg-slate-200 text-white dark:text-slate-900 shadow-lg px-8"
               >
-                <Save className="h-4 w-4 mr-2" />
-                Save All Preferences
+                {isSaving ? (
+                  <>
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    Saving...
+                  </>
+                ) : (
+                  <>
+                    <Save className="h-4 w-4 mr-2" />
+                    Save All Preferences
+                  </>
+                )}
               </Button>
             </div>
           </TabsContent>
