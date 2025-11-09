@@ -384,65 +384,73 @@ export default function ConversationPage() {
   return (
     <div className="flex h-screen flex-col bg-white dark:bg-slate-950">
       {/* Header */}
-      <div className="border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-4 py-3">
+      <div className="border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 px-6 py-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
             <Button
               variant="ghost"
               size="icon"
               onClick={() => router.push("/dashboard/team/conversations")}
+              className="hover:bg-slate-100 dark:hover:bg-slate-900"
             >
-              <ArrowLeft className="h-5 w-5" />
+              <ArrowLeft className="h-5 w-5 text-slate-700 dark:text-slate-300" />
             </Button>
             <div>
-              <div className="flex items-center gap-2">
-                <h1 className="text-lg font-semibold text-slate-900 dark:text-slate-100">
+              <div className="flex items-center gap-3">
+                <h1 className="text-xl font-semibold text-slate-900 dark:text-slate-100">
                   {conversation.title}
                 </h1>
                 {conversation.is_private && (
-                  <Lock className="h-4 w-4 text-slate-400 dark:text-slate-600" />
+                  <Lock className="h-4 w-4 text-slate-500 dark:text-slate-400" />
                 )}
                 {conversation.is_archived && (
-                  <Badge variant="secondary" className="text-xs">
+                  <Badge
+                    variant="secondary"
+                    className="text-xs bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300"
+                  >
                     Archived
                   </Badge>
                 )}
               </div>
-              <div className="flex items-center gap-2 mt-1">
-                <p className="text-sm text-slate-600 dark:text-slate-400">
-                  {conversation.description || "No description"}
+              {conversation.description && (
+                <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">
+                  {conversation.description}
                 </p>
-              </div>
+              )}
             </div>
           </div>
 
-          <div className="flex items-center gap-2">
-            <div className="flex items-center gap-1">
-              <Users className="h-4 w-4 text-slate-500" />
-              <span className="text-sm text-slate-600 dark:text-slate-400">
-                {participants.length}
+          <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2 px-3 py-1.5 rounded-md bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
+              <Users className="h-4 w-4 text-slate-600 dark:text-slate-400" />
+              <span className="text-sm font-medium text-slate-900 dark:text-slate-100">
+                {participants.length} {participants.length === 1 ? 'member' : 'members'}
               </span>
             </div>
 
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon">
-                  <MoreVertical className="h-5 w-5" />
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="hover:bg-slate-100 dark:hover:bg-slate-900"
+                >
+                  <MoreVertical className="h-5 w-5 text-slate-700 dark:text-slate-300" />
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
+              <DropdownMenuContent align="end" className="w-56">
                 <DropdownMenuItem onClick={() => {}}>
                   <Settings className="mr-2 h-4 w-4" />
-                  Settings
+                  Conversation Settings
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => {}}>
                   <Users className="mr-2 h-4 w-4" />
-                  Manage Participants
+                  Manage Members
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={handleArchive}>
                   <Archive className="mr-2 h-4 w-4" />
-                  {conversation.is_archived ? "Restore" : "Archive"}
+                  {conversation.is_archived ? "Restore Conversation" : "Archive Conversation"}
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
@@ -451,12 +459,12 @@ export default function ConversationPage() {
 
         {/* Tags */}
         {conversation.tags && conversation.tags.length > 0 && (
-          <div className="flex flex-wrap gap-2 mt-3">
+          <div className="flex flex-wrap gap-2 mt-4">
             {conversation.tags.map((tag) => (
               <Badge
                 key={tag}
                 variant="outline"
-                className="text-xs text-slate-600 dark:text-slate-400"
+                className="text-xs border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300"
               >
                 <Tag className="mr-1 h-3 w-3" />
                 {tag}
@@ -470,16 +478,16 @@ export default function ConversationPage() {
       <div className="flex-1 overflow-y-auto">
         <div className="mx-auto max-w-4xl px-4 py-6">
           {messages.length === 0 ? (
-            <div className="flex h-full flex-col items-center justify-center space-y-4 text-center py-12">
-              <div className="rounded-full bg-slate-100 dark:bg-slate-800 p-4">
-                <Send className="h-8 w-8 text-slate-700 dark:text-slate-300" />
+            <div className="flex h-full flex-col items-center justify-center space-y-6 text-center py-16">
+              <div className="rounded-2xl bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800 p-6 shadow-sm">
+                <MessageSquare className="h-12 w-12 text-slate-700 dark:text-slate-300" />
               </div>
-              <div>
-                <h2 className="text-xl font-semibold text-slate-900 dark:text-slate-100">
+              <div className="max-w-md">
+                <h2 className="text-2xl font-bold text-slate-900 dark:text-slate-100">
                   Start the conversation
                 </h2>
-                <p className="mt-2 text-slate-600 dark:text-slate-400">
-                  Send a message to begin collaborating with your team and AI
+                <p className="mt-3 text-base text-slate-600 dark:text-slate-400 leading-relaxed">
+                  Send your first message to begin collaborating with your team and AI assistant
                 </p>
               </div>
             </div>
@@ -503,23 +511,23 @@ export default function ConversationPage() {
 
                   <div
                     className={cn(
-                      "max-w-[75%] rounded-lg px-4 py-3",
+                      "max-w-[75%] rounded-2xl px-5 py-3.5 shadow-sm",
                       message.role === "user"
                         ? "bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900"
-                        : "bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-slate-100"
+                        : "bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-slate-100"
                     )}
                   >
                     {message.role === "user" && message.user_name && (
-                      <div className="mb-1 text-xs font-medium opacity-75">
+                      <div className="mb-1.5 text-xs font-semibold opacity-70">
                         {message.user_name}
                       </div>
                     )}
-                    <p className="whitespace-pre-wrap break-words text-sm">
+                    <p className="whitespace-pre-wrap break-words text-[15px] leading-relaxed">
                       {message.content}
                     </p>
                     <div
                       className={cn(
-                        "mt-1 text-xs opacity-60",
+                        "mt-2 text-xs font-medium opacity-50",
                         message.role === "user"
                           ? "text-white dark:text-slate-900"
                           : "text-slate-600 dark:text-slate-400"
@@ -560,39 +568,47 @@ export default function ConversationPage() {
       </div>
 
       {/* Input */}
-      <div className="border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-4">
+      <div className="border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 px-6 py-5">
         <div className="mx-auto max-w-4xl">
           {canSendMessages ? (
-            <div className="flex items-end gap-2">
-              <div className="flex-1">
-                <Textarea
-                  ref={textareaRef}
-                  value={input}
-                  onChange={(e) => setInput(e.target.value)}
-                  onKeyDown={handleKeyDown}
-                  placeholder="Type a message... (Press Enter to send, Shift+Enter for new line)"
-                  className="min-h-[60px] max-h-[200px] resize-none"
-                  disabled={sending}
-                />
+            <div className="space-y-3">
+              <div className="flex items-end gap-3">
+                <div className="flex-1">
+                  <Textarea
+                    ref={textareaRef}
+                    value={input}
+                    onChange={(e) => setInput(e.target.value)}
+                    onKeyDown={handleKeyDown}
+                    placeholder="Type your message..."
+                    className="min-h-[60px] max-h-[200px] resize-none rounded-xl border-slate-300 dark:border-slate-700 focus:ring-2 focus:ring-slate-900 dark:focus:ring-slate-100 focus:border-transparent"
+                    disabled={sending}
+                  />
+                </div>
+                <Button
+                  onClick={sendMessage}
+                  disabled={!input.trim() || sending}
+                  size="icon"
+                  className="h-[60px] w-[60px] rounded-xl bg-slate-900 dark:bg-slate-100 hover:bg-slate-800 dark:hover:bg-slate-200 text-white dark:text-slate-900 shadow-sm disabled:opacity-50"
+                >
+                  {sending ? (
+                    <Loader2 className="h-6 w-6 animate-spin" />
+                  ) : (
+                    <Send className="h-6 w-6" />
+                  )}
+                </Button>
               </div>
-              <Button
-                onClick={sendMessage}
-                disabled={!input.trim() || sending}
-                size="icon"
-                className="mb-2 bg-slate-900 dark:bg-slate-100 hover:bg-slate-800 dark:hover:bg-slate-200 text-white dark:text-slate-900"
-              >
-                {sending ? (
-                  <Loader2 className="h-5 w-5 animate-spin" />
-                ) : (
-                  <Send className="h-5 w-5" />
-                )}
-              </Button>
+              <p className="text-xs text-slate-500 dark:text-slate-500 text-center">
+                Press <kbd className="px-1.5 py-0.5 bg-slate-100 dark:bg-slate-800 rounded border border-slate-300 dark:border-slate-700 font-mono">Enter</kbd> to send, <kbd className="px-1.5 py-0.5 bg-slate-100 dark:bg-slate-800 rounded border border-slate-300 dark:border-slate-700 font-mono">Shift + Enter</kbd> for new line
+              </p>
             </div>
           ) : (
-            <div className="text-center py-4">
-              <p className="text-sm text-slate-600 dark:text-slate-400">
-                You don't have permission to send messages in this conversation
-              </p>
+            <div className="text-center py-6">
+              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
+                <Lock className="h-4 w-4 text-slate-500 dark:text-slate-400" />
+                <p className="text-sm font-medium text-slate-700 dark:text-slate-300">
+                  You don't have permission to send messages in this conversation
+                </p>
+              </div>
             </div>
           )}
         </div>
