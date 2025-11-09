@@ -106,21 +106,21 @@ export default function LeadMagnetPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-white dark:from-slate-950 dark:to-slate-900">
+    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-cyan-50 dark:from-slate-950 dark:via-purple-950 dark:to-slate-900">
       <div className="max-w-6xl mx-auto px-4 py-16 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="text-center mb-16">
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 mb-6">
-            <Sparkles className="h-4 w-4 text-slate-700 dark:text-slate-300" />
-            <span className="text-sm font-medium text-slate-700 dark:text-slate-300">
-              FREE DOWNLOAD
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-purple-600 to-blue-600 text-white shadow-lg mb-6 animate-pulse">
+            <Sparkles className="h-4 w-4" />
+            <span className="text-sm font-bold">
+              FREE DOWNLOAD - LIMITED TIME
             </span>
           </div>
-          <h1 className="text-5xl sm:text-6xl font-bold text-slate-900 dark:text-slate-100 mb-6 tracking-tight">
+          <h1 className="text-5xl sm:text-7xl font-bold mb-6 tracking-tight bg-gradient-to-r from-purple-600 via-blue-600 to-cyan-600 bg-clip-text text-transparent">
             The Ultimate AI<br />Productivity Guide
           </h1>
-          <p className="text-xl text-slate-600 dark:text-slate-400 max-w-2xl mx-auto">
-            Discover how top-performing teams are using AI to save 20+ hours per week and 10x their output
+          <p className="text-xl text-slate-700 dark:text-slate-300 max-w-2xl mx-auto font-medium">
+            Discover how top-performing teams are using AI to save <span className="text-purple-600 font-bold">20+ hours per week</span> and <span className="text-blue-600 font-bold">10x their output</span>
           </p>
         </div>
 
@@ -136,36 +136,40 @@ export default function LeadMagnetPage() {
                 {
                   icon: Zap,
                   title: "AI Automation Playbook",
-                  description: "Step-by-step workflows to automate your most time-consuming tasks"
+                  description: "Step-by-step workflows to automate your most time-consuming tasks",
+                  gradient: "from-yellow-400 to-orange-500"
                 },
                 {
                   icon: TrendingUp,
                   title: "ROI Calculator Template",
-                  description: "Calculate exactly how much time and money AI can save your business"
+                  description: "Calculate exactly how much time and money AI can save your business",
+                  gradient: "from-green-400 to-emerald-500"
                 },
                 {
                   icon: Clock,
                   title: "20+ Ready-to-Use Prompts",
-                  description: "Copy-paste prompts for marketing, sales, support, and operations"
+                  description: "Copy-paste prompts for marketing, sales, support, and operations",
+                  gradient: "from-blue-400 to-cyan-500"
                 },
                 {
                   icon: Download,
                   title: "Implementation Checklist",
-                  description: "Your 30-day roadmap to AI transformation"
+                  description: "Your 30-day roadmap to AI transformation",
+                  gradient: "from-purple-400 to-pink-500"
                 },
               ].map((item, index) => (
                 <div
                   key={index}
-                  className="flex gap-4 p-6 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm hover:shadow-md transition-shadow"
+                  className="group flex gap-4 p-6 rounded-2xl bg-white dark:bg-slate-900 border-2 border-slate-200 dark:border-slate-800 shadow-lg hover:shadow-2xl hover:scale-[1.02] transition-all duration-300 hover:border-purple-300 dark:hover:border-purple-700"
                 >
-                  <div className="w-12 h-12 rounded-lg bg-slate-100 dark:bg-slate-800 flex items-center justify-center flex-shrink-0">
-                    <item.icon className="h-6 w-6 text-slate-700 dark:text-slate-300" />
+                  <div className={`w-14 h-14 rounded-xl bg-gradient-to-br ${item.gradient} flex items-center justify-center flex-shrink-0 shadow-lg group-hover:scale-110 transition-transform`}>
+                    <item.icon className="h-7 w-7 text-white" />
                   </div>
                   <div>
-                    <h3 className="font-semibold text-slate-900 dark:text-slate-100 mb-1">
+                    <h3 className="font-bold text-lg text-slate-900 dark:text-slate-100 mb-1 group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors">
                       {item.title}
                     </h3>
-                    <p className="text-sm text-slate-600 dark:text-slate-400">
+                    <p className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
                       {item.description}
                     </p>
                   </div>
@@ -182,14 +186,17 @@ export default function LeadMagnetPage() {
 
           {/* Form */}
           <div className="lg:sticky lg:top-8">
-            <Card className="shadow-2xl border-2 border-slate-200 dark:border-slate-800">
+            <Card className="shadow-2xl border-2 border-purple-200 dark:border-purple-800 bg-gradient-to-br from-white to-purple-50 dark:from-slate-900 dark:to-purple-950">
               <CardContent className="p-8">
-                <div className="mb-6">
-                  <h3 className="text-2xl font-bold text-slate-900 dark:text-slate-100 mb-2">
+                <div className="mb-6 text-center">
+                  <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-purple-600 to-blue-600 shadow-lg mb-4">
+                    <Download className="h-8 w-8 text-white" />
+                  </div>
+                  <h3 className="text-3xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent mb-2">
                     Get Instant Access
                   </h3>
-                  <p className="text-slate-600 dark:text-slate-400">
-                    Enter your details below to download the guide
+                  <p className="text-slate-600 dark:text-slate-400 font-medium">
+                    Join 10,000+ professionals already using AI
                   </p>
                 </div>
 
@@ -252,17 +259,17 @@ export default function LeadMagnetPage() {
                     type="submit"
                     disabled={loading}
                     size="lg"
-                    className="w-full h-14 text-lg bg-slate-900 dark:bg-slate-100 hover:bg-slate-800 dark:hover:bg-slate-200 text-white dark:text-slate-900 shadow-lg"
+                    className="w-full h-16 text-lg bg-gradient-to-r from-purple-600 via-blue-600 to-cyan-600 hover:from-purple-700 hover:via-blue-700 hover:to-cyan-700 text-white shadow-2xl hover:shadow-purple-500/50 transition-all duration-300 hover:scale-[1.02] font-bold"
                   >
                     {loading ? (
                       <>
-                        <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                        Sending...
+                        <Loader2 className="mr-2 h-6 w-6 animate-spin" />
+                        Sending to your inbox...
                       </>
                     ) : (
                       <>
-                        <Download className="mr-2 h-5 w-5" />
-                        Download Guide Now
+                        <Download className="mr-2 h-6 w-6" />
+                        Get My Free Guide Now
                       </>
                     )}
                   </Button>
