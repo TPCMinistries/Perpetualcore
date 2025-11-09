@@ -166,6 +166,21 @@ export async function signUp(data: SignUpInput) {
     return { error: "Organization name or beta code is required" };
   }
 
+  // Send welcome email
+  try {
+    await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/email/welcome`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        userName: data.fullName,
+        userEmail: data.email,
+      }),
+    });
+  } catch (emailError) {
+    // Don't fail signup if email fails, just log it
+    console.error("Failed to send welcome email:", emailError);
+  }
+
   return { success: true };
 }
 
