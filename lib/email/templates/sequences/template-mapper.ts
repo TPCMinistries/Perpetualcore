@@ -2,6 +2,9 @@ import { render } from "@react-email/render";
 import { NurtureDay1 } from "./NurtureDay1";
 import { NurtureDay2 } from "./NurtureDay2";
 import { NurtureDay3 } from "./NurtureDay3";
+import { NurtureDay4 } from "./NurtureDay4";
+import { NurtureDay5 } from "./NurtureDay5";
+import { NurtureDay6 } from "./NurtureDay6";
 import { SalesDay1 } from "./SalesDay1";
 
 interface TemplateData {
@@ -20,6 +23,9 @@ const templateMap: Record<string, (data: TemplateData) => React.ReactElement> = 
   }),
   nurture_day_2: (data) => NurtureDay2({ firstName: data.firstName }),
   nurture_day_3: (data) => NurtureDay3({ firstName: data.firstName }),
+  nurture_day_4: (data) => NurtureDay4({ firstName: data.firstName }),
+  nurture_day_5: (data) => NurtureDay5({ firstName: data.firstName }),
+  nurture_day_6: (data) => NurtureDay6({ firstName: data.firstName }),
   sales_day_1: (data) => SalesDay1({
     firstName: data.firstName,
     companyName: data.companyName,
