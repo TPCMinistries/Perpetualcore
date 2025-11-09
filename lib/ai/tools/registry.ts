@@ -10,12 +10,18 @@ import {
   searchDocumentsTool,
   executeSearchDocuments,
 } from "./search-documents";
+import {
+  searchConversationsTool,
+  searchConversations,
+  SearchConversationsInput,
+} from "./search-conversations";
 
 // Registry of all available tools
 export const AVAILABLE_TOOLS: Tool[] = [
   webSearchTool,
   createTaskTool,
   searchDocumentsTool,
+  searchConversationsTool, // NEW: Search conversation history
   // More tools will be added here
 ];
 
@@ -37,6 +43,21 @@ export async function executeToolCall(
 
       case "search_documents":
         return await executeSearchDocuments(params, context);
+
+      case "search_conversations": {
+        const result = await searchConversations(params as SearchConversationsInput);
+        if (result.totalFound === 0) {
+          return "No previous conversations found matching your query.";
+        }
+
+        // Format results for the AI
+        let response = `Found ${result.totalFound} previous conversation${result.totalFound > 1 ? "s" : ""} about "${params.query}":\n\n`;
+        result.results.forEach((conv, idx) => {
+          response += `${idx + 1}. **${conv.conversationTitle}** (${new Date(conv.createdAt).toLocaleDateString()})\n`;
+          response += `   ${conv.messageRole === "user" ? "User" : "Assistant"}: ${conv.snippet}\n\n`;
+        });
+        return response;
+      }
 
       // Add more tool cases here as they're implemented
       // case "create_calendar_event":
