@@ -4,8 +4,12 @@ import { useState, useRef, useEffect } from "react";
 import { useAuth } from "@/lib/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { Send, Paperclip, Loader2 } from "lucide-react";
+import { Send, Paperclip, Loader2, Sparkles, Library, Command, Zap } from "lucide-react";
 import { cn } from "@/lib/utils";
+import PromptCommandPalette from "@/components/chat/PromptCommandPalette";
+import PromptLibrary from "@/components/chat/PromptLibrary";
+import QuickActionsToolbar from "@/components/chat/QuickActionsToolbar";
+import { type PromptTemplate } from "@/lib/prompts/templates";
 
 interface Message {
   role: "user" | "assistant";
@@ -22,6 +26,12 @@ export default function ChatV2Page() {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
+  // Prompt menu state
+  const [commandPaletteOpen, setCommandPaletteOpen] = useState(false);
+  const [promptLibraryOpen, setPromptLibraryOpen] = useState(false);
+  const [quickActionsVisible, setQuickActionsVisible] = useState(false);
+  const [selectedText, setSelectedText] = useState("");
+
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
@@ -29,6 +39,42 @@ export default function ChatV2Page() {
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
+
+  // Command Palette keyboard shortcut (Cmd/Ctrl + K)
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === "k") {
+        e.preventDefault();
+        setCommandPaletteOpen(true);
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, []);
+
+  // Handle prompt template selection
+  const handlePromptSelect = (template: PromptTemplate) => {
+    let promptText = template.prompt;
+
+    // Fill in variables if present
+    if (template.variables && template.variables.length > 0) {
+      // For now, just insert placeholders
+      template.variables.forEach((variable) => {
+        promptText = promptText.replace(`{${variable}}`, `[${variable.toUpperCase()}]`);
+      });
+    }
+
+    setInput(promptText);
+    textareaRef.current?.focus();
+  };
+
+  // Handle quick action
+  const handleQuickAction = (actionId: string, prompt: string) => {
+    setInput(prompt);
+    setQuickActionsVisible(false);
+    textareaRef.current?.focus();
+  };
 
   const sendMessage = async () => {
     if (!input.trim() || isLoading) return;
@@ -207,6 +253,45 @@ export default function ChatV2Page() {
       {/* Input */}
       <div className="border-t bg-white p-4">
         <div className="mx-auto max-w-3xl">
+          {/* Prompt Menu Buttons */}
+          <div className="flex items-center gap-2 mb-3">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setCommandPaletteOpen(true)}
+              className="gap-2"
+            >
+              <Command className="h-4 w-4" />
+              <span className="hidden sm:inline">Quick Prompts</span>
+              <kbd className="hidden md:inline-flex h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium opacity-100">
+                <span className="text-xs">⌘</span>K
+              </kbd>
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setPromptLibraryOpen(true)}
+              className="gap-2"
+            >
+              <Library className="h-4 w-4" />
+              <span className="hidden sm:inline">Browse Library</span>
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setQuickActionsVisible(!quickActionsVisible)}
+              className="gap-2"
+            >
+              <Zap className="h-4 w-4" />
+              <span className="hidden sm:inline">Quick Actions</span>
+            </Button>
+            <div className="flex-1" />
+            <div className="flex items-center gap-1 text-xs text-muted-foreground">
+              <Sparkles className="h-3 w-3" />
+              <span className="hidden md:inline">AI-Powered Prompts</span>
+            </div>
+          </div>
+
           <div className="flex items-end space-x-2">
             <Button
               variant="ghost"
@@ -222,7 +307,7 @@ export default function ChatV2Page() {
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 onKeyDown={handleKeyDown}
-                placeholder="Message AI..."
+                placeholder="Message AI... (or use prompts above)"
                 className="min-h-[60px] max-h-[200px] resize-none"
                 disabled={isLoading}
               />
@@ -241,10 +326,29 @@ export default function ChatV2Page() {
             </Button>
           </div>
           <p className="mt-2 text-center text-xs text-muted-foreground">
-            Press Enter to send, Shift + Enter for new line
+            Press Enter to send, Shift + Enter for new line, ⌘K for prompts
           </p>
         </div>
       </div>
+
+      {/* Prompt Menu Components */}
+      <PromptCommandPalette
+        open={commandPaletteOpen}
+        onOpenChange={setCommandPaletteOpen}
+        onSelectPrompt={handlePromptSelect}
+      />
+
+      <PromptLibrary
+        open={promptLibraryOpen}
+        onOpenChange={setPromptLibraryOpen}
+        onSelectPrompt={handlePromptSelect}
+      />
+
+      <QuickActionsToolbar
+        visible={quickActionsVisible}
+        onAction={handleQuickAction}
+        selectedText={selectedText}
+      />
     </div>
   );
 }
