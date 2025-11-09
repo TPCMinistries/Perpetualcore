@@ -223,6 +223,23 @@ export default function HomePage() {
             <Link href="/pricing" className="text-sm font-medium hover:text-primary transition">
               Pricing
             </Link>
+            <div className="relative group">
+              <button className="text-sm font-medium hover:text-primary transition flex items-center gap-1">
+                Enterprise <ChevronDown className="h-4 w-4 group-hover:rotate-180 transition-transform" />
+              </button>
+              <div className="absolute top-full right-0 mt-2 w-64 backdrop-blur-2xl bg-card/95 border border-border rounded-lg shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
+                <div className="p-2">
+                  <Link href="/consultation" className="block px-3 py-2.5 text-sm hover:bg-accent rounded-md transition">
+                    <div className="font-medium">Guided Implementation</div>
+                    <div className="text-xs text-muted-foreground">For teams of 10-100</div>
+                  </Link>
+                  <Link href="/enterprise-demo" className="block px-3 py-2.5 text-sm hover:bg-accent rounded-md transition">
+                    <div className="font-medium">Enterprise Solutions</div>
+                    <div className="text-xs text-muted-foreground">White-glove for 100+ employees</div>
+                  </Link>
+                </div>
+              </div>
+            </div>
             <Link href="/login" className="text-sm font-medium hover:underline">
               Sign In
             </Link>
