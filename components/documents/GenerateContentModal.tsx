@@ -63,32 +63,32 @@ export function GenerateContentModal({
       label: "Document",
       icon: FileText,
       description: "Rich text document (HTML)",
-      color: "text-blue-600",
-      bgColor: "bg-blue-50 dark:bg-blue-950/30",
+      color: "text-slate-700 dark:text-slate-300",
+      bgColor: "bg-slate-100 dark:bg-slate-800",
     },
     {
       id: "powerpoint" as ContentType,
       label: "PowerPoint",
       icon: Presentation,
       description: "Presentation slides (.pptx)",
-      color: "text-orange-600",
-      bgColor: "bg-orange-50 dark:bg-orange-950/30",
+      color: "text-slate-700 dark:text-slate-300",
+      bgColor: "bg-slate-100 dark:bg-slate-800",
     },
     {
       id: "spreadsheet" as ContentType,
       label: "Spreadsheet",
       icon: FileSpreadsheet,
       description: "Excel spreadsheet (.xlsx)",
-      color: "text-green-600",
-      bgColor: "bg-green-50 dark:bg-green-950/30",
+      color: "text-slate-700 dark:text-slate-300",
+      bgColor: "bg-slate-100 dark:bg-slate-800",
     },
     {
       id: "image" as ContentType,
       label: "AI Image",
       icon: ImageIcon,
       description: "DALL-E 3 generated image",
-      color: "text-purple-600",
-      bgColor: "bg-purple-50 dark:bg-purple-950/30",
+      color: "text-slate-700 dark:text-slate-300",
+      bgColor: "bg-slate-100 dark:bg-slate-800",
     },
   ];
 
@@ -287,7 +287,7 @@ export function GenerateContentModal({
       <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <Sparkles className="h-5 w-5 text-purple-600" />
+            <Sparkles className="h-5 w-5 text-slate-700 dark:text-slate-300" />
             Generate Content
           </DialogTitle>
           <DialogDescription>
@@ -306,7 +306,7 @@ export function GenerateContentModal({
                   onClick={() => setContentType(type.id)}
                   className={`p-4 rounded-lg border-2 transition-all text-left ${
                     contentType === type.id
-                      ? "border-purple-500 dark:border-purple-400 bg-purple-50 dark:bg-purple-950/30"
+                      ? "border-slate-900 dark:border-slate-100 bg-slate-50 dark:bg-slate-900"
                       : "border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600"
                   }`}
                 >
@@ -442,7 +442,7 @@ export function GenerateContentModal({
             <Button
               onClick={handleDownload}
               disabled={generating || (contentType !== "image" && !title.trim()) || !prompt.trim()}
-              className="flex-1 bg-purple-600 hover:bg-purple-700 text-white"
+              className="flex-1 bg-slate-900 dark:bg-slate-100 hover:bg-slate-800 dark:hover:bg-slate-200 text-white dark:text-slate-900"
             >
               {generating ? (
                 <>
@@ -459,8 +459,8 @@ export function GenerateContentModal({
           </div>
 
           {/* Help Text */}
-          <div className="bg-blue-50 dark:bg-blue-950/20 rounded-lg p-3">
-            <p className="text-xs text-blue-900 dark:text-blue-300">
+          <div className="bg-slate-100 dark:bg-slate-800 rounded-lg p-3">
+            <p className="text-xs text-slate-700 dark:text-slate-300">
               {contentType === "image" ? (
                 <>
                   <strong>Tip:</strong> DALL-E 3 creates high-quality images. Standard quality costs ~$0.04, HD costs ~$0.08 per image.
