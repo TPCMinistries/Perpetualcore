@@ -1,7 +1,7 @@
 "use client";
 
 import { Card, CardContent } from "@/components/ui/card";
-import { CheckCircle2, Shield, Users, Zap, Building2, Lock, Clock, Calendar } from "lucide-react";
+import { CheckCircle2, Shield, Users, Zap, Building2, Lock, Clock, Calendar, TrendingUp } from "lucide-react";
 // import { InlineWidget } from "react-calendly";
 
 export default function EnterpriseDemoPage() {
