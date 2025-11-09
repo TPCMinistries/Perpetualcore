@@ -195,20 +195,47 @@ export async function GET(req: NextRequest) {
     const { searchParams } = new URL(req.url);
     const folderId = searchParams.get("folder_id");
 
-    // Build query with optional folder filter
+    // Build query with left joins to fetch many-to-many relationships
+    // Note: Using left joins so documents without projects/folders/spaces are still returned
     let query = supabase
       .from("documents")
-      .select("*")
+      .select(`
+        *,
+        document_projects (
+          projects (
+            id,
+            name,
+            icon,
+            color
+          )
+        ),
+        document_folders (
+          folders (
+            id,
+            name,
+            color
+          )
+        ),
+        document_knowledge_spaces (
+          knowledge_spaces (
+            id,
+            name,
+            emoji,
+            color
+          )
+        )
+      `)
       .eq("organization_id", profile.organization_id)
       .eq("status", "completed"); // Only show successfully uploaded documents
 
-    // Apply folder filter if provided
+    // Apply folder filter if provided (check if document is in the folder via junction table)
     if (folderId && folderId !== "null") {
-      query = query.eq("folder_id", folderId);
+      // We need to filter documents that have this folder_id in the junction table
+      query = query.eq("document_folders.folder_id", folderId);
     }
 
     // Execute query
-    const { data: documents, error } = await query.order("created_at", { ascending: false });
+    const { data: rawDocuments, error } = await query.order("created_at", { ascending: false });
 
     // Log any errors for debugging
     if (error) {
@@ -220,7 +247,7 @@ export async function GET(req: NextRequest) {
     }
 
     // Return empty array if no documents (don't fall back to mock)
-    if (!documents || documents.length === 0) {
+    if (!rawDocuments || rawDocuments.length === 0) {
       console.log("No documents found in database");
       return Response.json({
         success: true,
@@ -228,9 +255,42 @@ export async function GET(req: NextRequest) {
       });
     }
 
+    // Transform the data to flatten junction tables
+    const documents = rawDocuments.map((doc: any) => {
+      // Extract projects from junction table
+      const projects = (doc.document_projects || [])
+        .map((link: any) => link.projects)
+        .filter(Boolean);
+
+      // Extract folders from junction table
+      const folders = (doc.document_folders || [])
+        .map((link: any) => link.folders)
+        .filter(Boolean);
+
+      // Extract knowledge spaces from junction table
+      const knowledge_spaces = (doc.document_knowledge_spaces || [])
+        .map((link: any) => link.knowledge_spaces)
+        .filter(Boolean);
+
+      // Remove the junction table data and add flattened arrays
+      const {
+        document_projects,
+        document_folders,
+        document_knowledge_spaces,
+        ...docData
+      } = doc;
+
+      return {
+        ...docData,
+        projects,
+        folders,
+        knowledge_spaces,
+      };
+    });
+
     return Response.json({
       success: true,
-      documents: documents || [],
+      documents,
     });
   } catch (error) {
     console.error("Documents API error, returning mock data:", error);

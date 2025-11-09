@@ -23,8 +23,29 @@ import {
   Check,
 } from "lucide-react";
 import { TagSelector } from "./TagSelector";
+import { MultiAssignmentSelector } from "./MultiAssignmentSelector";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
+
+interface Project {
+  id: string;
+  name: string;
+  icon: string;
+  color: string;
+}
+
+interface Folder {
+  id: string;
+  name: string;
+  color?: string;
+}
+
+interface KnowledgeSpace {
+  id: string;
+  name: string;
+  emoji: string;
+  color: string;
+}
 
 interface Document {
   id: string;
@@ -34,7 +55,6 @@ interface Document {
   file_url?: string;
   status: "processing" | "completed" | "failed";
   error_message?: string;
-  folder_id?: string | null;
   metadata: {
     wordCount: number;
     charCount: number;
@@ -50,8 +70,10 @@ interface Document {
   user: {
     full_name: string;
   };
-  folder?: any | null;
   tags?: any[];
+  projects?: Project[];
+  folders?: Folder[];
+  knowledge_spaces?: KnowledgeSpace[];
 }
 
 interface DocumentCardProps {
@@ -244,12 +266,6 @@ export function DocumentCard({
                 </span>
               )}
             </div>
-            {doc.folder && (
-              <div className="text-sm text-slate-600 dark:text-slate-400 flex items-center gap-2 mt-4 backdrop-blur-xl bg-indigo-100/50 dark:bg-indigo-900/30 px-4 py-2 rounded-xl w-fit border border-indigo-200/50 dark:border-indigo-800/50">
-                <FolderIcon className="h-4 w-4" />
-                <span className="font-medium">{doc.folder.name}</span>
-              </div>
-            )}
           </div>
 
           {/* Status badge - Enhanced */}
@@ -314,26 +330,65 @@ export function DocumentCard({
           </div>
         )}
 
-        {/* Tags */}
-        <div className="mb-4">
-          <div className="flex items-center gap-2 flex-wrap mb-2">
-            <TagSelector
+        {/* Multi-Assignments: Projects, Folders, Spaces */}
+        <div className="mb-4 space-y-3">
+          {/* Projects */}
+          <div className="space-y-2">
+            <div className="text-xs font-medium text-slate-600 dark:text-slate-400">Projects</div>
+            <MultiAssignmentSelector
               documentId={doc.id}
-              selectedTags={doc.tags || []}
-              onTagsChange={onTagsChange}
+              type="projects"
+              selectedItems={doc.projects || []}
+              onItemsChange={onTagsChange}
             />
-            {!showSuggestions && doc.status === "completed" && (
-              <Button
-                variant="outline"
-                size="sm"
-                className="h-7 text-xs backdrop-blur-xl bg-blue-500/10 border-blue-500/30 hover:bg-blue-500/20 text-blue-600 dark:text-blue-400"
-                onClick={handleGenerateAutoTags}
-                disabled={loadingAutoTags}
-              >
-                <Sparkles className="h-3 w-3 mr-1" />
-                {loadingAutoTags ? "Generating..." : "Auto-Tag"}
-              </Button>
-            )}
+          </div>
+
+          {/* Folders */}
+          <div className="space-y-2">
+            <div className="text-xs font-medium text-slate-600 dark:text-slate-400">Folders</div>
+            <MultiAssignmentSelector
+              documentId={doc.id}
+              type="folders"
+              selectedItems={doc.folders || []}
+              onItemsChange={onTagsChange}
+            />
+          </div>
+
+          {/* Knowledge Spaces */}
+          <div className="space-y-2">
+            <div className="text-xs font-medium text-slate-600 dark:text-slate-400">Knowledge Spaces</div>
+            <MultiAssignmentSelector
+              documentId={doc.id}
+              type="spaces"
+              selectedItems={doc.knowledge_spaces || []}
+              onItemsChange={onTagsChange}
+            />
+          </div>
+        </div>
+
+        {/* Tags */}
+        <div className="mb-4 border-t border-slate-200/60 dark:border-slate-800/60 pt-4">
+          <div className="space-y-2">
+            <div className="text-xs font-medium text-slate-600 dark:text-slate-400">Tags</div>
+            <div className="flex items-center gap-2 flex-wrap">
+              <TagSelector
+                documentId={doc.id}
+                selectedTags={doc.tags || []}
+                onTagsChange={onTagsChange}
+              />
+              {!showSuggestions && doc.status === "completed" && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="h-7 text-xs backdrop-blur-xl bg-blue-500/10 border-blue-500/30 hover:bg-blue-500/20 text-blue-600 dark:text-blue-400"
+                  onClick={handleGenerateAutoTags}
+                  disabled={loadingAutoTags}
+                >
+                  <Sparkles className="h-3 w-3 mr-1" />
+                  {loadingAutoTags ? "Generating..." : "Auto-Tag"}
+                </Button>
+              )}
+            </div>
           </div>
 
           {/* Tag Suggestions */}

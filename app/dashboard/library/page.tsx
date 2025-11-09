@@ -37,9 +37,6 @@ interface Document {
   file_url?: string;
   status: "processing" | "completed" | "failed";
   error_message?: string;
-  folder_id?: string | null;
-  knowledge_space_id?: string | null;
-  project_id?: string | null;
   metadata: {
     wordCount: number;
     charCount: number;
@@ -53,8 +50,10 @@ interface Document {
   user: {
     full_name: string;
   };
-  folder?: FolderType | null;
   tags?: TagType[];
+  projects?: Project[];
+  folders?: FolderType[];
+  knowledge_spaces?: Space[];
 }
 
 interface Space {
@@ -771,7 +770,9 @@ export default function LibraryPage() {
                 <div className="space-y-6">
                   {spaces.map((space) => {
                     const spaceDocuments = documents.filter(
-                      (doc) => doc.knowledge_space_id === space.id && doc.status === "completed"
+                      (doc) =>
+                        doc.status === "completed" &&
+                        doc.knowledge_spaces?.some((s) => s.id === space.id)
                     );
                     return (
                       <Card key={space.id} className="border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6">
@@ -866,7 +867,9 @@ export default function LibraryPage() {
                 <div className="space-y-6">
                   {projects.map((project) => {
                     const projectDocuments = documents.filter(
-                      (doc) => doc.project_id === project.id && doc.status === "completed"
+                      (doc) =>
+                        doc.status === "completed" &&
+                        doc.projects?.some((p) => p.id === project.id)
                     );
                     return (
                       <Card key={project.id} className="border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6">
