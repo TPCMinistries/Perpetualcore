@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef, useCallback } from "react";
+import { useRouter } from "next/navigation";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -15,6 +16,14 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import {
   CreditCard,
   Download,
@@ -71,11 +80,25 @@ import { resetOnboarding } from "@/lib/auth/actions";
 import { createClient } from "@/lib/supabase/client";
 
 export default function SettingsPage() {
+  const router = useRouter();
   const [activeTab, setActiveTab] = useState("account");
   const [isResetting, setIsResetting] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [theme, setTheme] = useState<"light" | "dark" | "system">("system");
   const saveTimeoutRef = useRef<NodeJS.Timeout>();
+
+  // Dialog states
+  const [passwordDialogOpen, setPasswordDialogOpen] = useState(false);
+  const [apiKeysDialogOpen, setApiKeysDialogOpen] = useState(false);
+  const [isChangingPassword, setIsChangingPassword] = useState(false);
+  const [isExportingData, setIsExportingData] = useState(false);
+
+  // Password form state
+  const [passwordForm, setPasswordForm] = useState({
+    currentPassword: "",
+    newPassword: "",
+    confirmPassword: "",
+  });
 
   // User profile state
   const [profile, setProfile] = useState({
@@ -350,6 +373,95 @@ export default function SettingsPage() {
     toast.success(`Theme changed to ${newTheme}`);
   };
 
+  const handleChangePassword = async () => {
+    if (!passwordForm.newPassword || !passwordForm.confirmPassword) {
+      toast.error("Please fill in all password fields");
+      return;
+    }
+
+    if (passwordForm.newPassword !== passwordForm.confirmPassword) {
+      toast.error("New passwords do not match");
+      return;
+    }
+
+    if (passwordForm.newPassword.length < 8) {
+      toast.error("Password must be at least 8 characters");
+      return;
+    }
+
+    setIsChangingPassword(true);
+    try {
+      const supabase = createClient();
+      const { error } = await supabase.auth.updateUser({
+        password: passwordForm.newPassword,
+      });
+
+      if (error) throw error;
+
+      toast.success("Password changed successfully!");
+      setPasswordDialogOpen(false);
+      setPasswordForm({
+        currentPassword: "",
+        newPassword: "",
+        confirmPassword: "",
+      });
+    } catch (error: any) {
+      console.error("Error changing password:", error);
+      toast.error(error.message || "Failed to change password");
+    } finally {
+      setIsChangingPassword(false);
+    }
+  };
+
+  const handleManageTeam = () => {
+    router.push("/dashboard/team");
+  };
+
+  const handleViewBilling = () => {
+    toast.info("Billing portal coming soon!");
+    // Future: router.push("/dashboard/billing");
+  };
+
+  const handleExportData = async () => {
+    setIsExportingData(true);
+    try {
+      const supabase = createClient();
+      const { data: { user } } = await supabase.auth.getUser();
+
+      if (!user) {
+        toast.error("You must be logged in to export data");
+        return;
+      }
+
+      // Gather all user data
+      const exportData = {
+        profile: profile,
+        preferences: preferences,
+        exportedAt: new Date().toISOString(),
+        userId: user.id,
+      };
+
+      // Create a blob and download
+      const dataStr = JSON.stringify(exportData, null, 2);
+      const dataBlob = new Blob([dataStr], { type: "application/json" });
+      const url = URL.createObjectURL(dataBlob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `perpetual-core-data-${new Date().toISOString().split('T')[0]}.json`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+
+      toast.success("Data exported successfully!");
+    } catch (error) {
+      console.error("Error exporting data:", error);
+      toast.error("Failed to export data");
+    } finally {
+      setIsExportingData(false);
+    }
+  };
+
   const getRoleBadge = (role: string) => {
     const badges = {
       admin: { label: "Admin", icon: Crown },
@@ -527,7 +639,11 @@ export default function SettingsPage() {
                 </div>
               </div>
 
-              <Button variant="outline" className="border-slate-300 dark:border-slate-700">
+              <Button
+                variant="outline"
+                className="border-slate-300 dark:border-slate-700"
+                onClick={() => setPasswordDialogOpen(true)}
+              >
                 <Key className="h-4 w-4 mr-2" />
                 Change Password
               </Button>
@@ -1173,11 +1289,19 @@ export default function SettingsPage() {
                 </div>
 
                 <div className="flex gap-3">
-                  <Button variant="outline" className="flex-1">
+                  <Button
+                    variant="outline"
+                    className="flex-1"
+                    onClick={handleManageTeam}
+                  >
                     <Users className="h-4 w-4 mr-2" />
                     Manage Team
                   </Button>
-                  <Button variant="outline" className="flex-1">
+                  <Button
+                    variant="outline"
+                    className="flex-1"
+                    onClick={handleViewBilling}
+                  >
                     <CreditCard className="h-4 w-4 mr-2" />
                     View Billing
                   </Button>
@@ -1211,7 +1335,11 @@ export default function SettingsPage() {
                 </div>
 
                 <div className="space-y-4">
-                  <Button variant="outline" className="w-full justify-start h-auto p-4">
+                  <Button
+                    variant="outline"
+                    className="w-full justify-start h-auto p-4"
+                    onClick={() => setApiKeysDialogOpen(true)}
+                  >
                     <div className="flex items-center gap-4 w-full">
                       <div className="h-10 w-10 rounded-lg bg-slate-100 dark:bg-slate-800 flex items-center justify-center">
                         <Key className="h-5 w-5 text-slate-900 dark:text-slate-100" />
@@ -1223,13 +1351,24 @@ export default function SettingsPage() {
                     </div>
                   </Button>
 
-                  <Button variant="outline" className="w-full justify-start h-auto p-4">
+                  <Button
+                    variant="outline"
+                    className="w-full justify-start h-auto p-4"
+                    onClick={handleExportData}
+                    disabled={isExportingData}
+                  >
                     <div className="flex items-center gap-4 w-full">
                       <div className="h-10 w-10 rounded-lg bg-slate-100 dark:bg-slate-800 flex items-center justify-center">
-                        <Download className="h-5 w-5 text-slate-900 dark:text-slate-100" />
+                        {isExportingData ? (
+                          <Loader2 className="h-5 w-5 text-slate-900 dark:text-slate-100 animate-spin" />
+                        ) : (
+                          <Download className="h-5 w-5 text-slate-900 dark:text-slate-100" />
+                        )}
                       </div>
                       <div className="flex-1 text-left">
-                        <p className="font-medium text-slate-900 dark:text-white">Export Data</p>
+                        <p className="font-medium text-slate-900 dark:text-white">
+                          {isExportingData ? "Exporting..." : "Export Data"}
+                        </p>
                         <p className="text-sm text-slate-600 dark:text-slate-400">Download all your data</p>
                       </div>
                     </div>
@@ -1240,6 +1379,100 @@ export default function SettingsPage() {
           </TabsContent>
         </Tabs>
       </div>
+
+      {/* Change Password Dialog */}
+      <Dialog open={passwordDialogOpen} onOpenChange={setPasswordDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Change Password</DialogTitle>
+            <DialogDescription>
+              Update your password to keep your account secure
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="new-password">New Password</Label>
+              <Input
+                id="new-password"
+                type="password"
+                placeholder="Enter new password"
+                value={passwordForm.newPassword}
+                onChange={(e) => setPasswordForm({ ...passwordForm, newPassword: e.target.value })}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="confirm-password">Confirm Password</Label>
+              <Input
+                id="confirm-password"
+                type="password"
+                placeholder="Confirm new password"
+                value={passwordForm.confirmPassword}
+                onChange={(e) => setPasswordForm({ ...passwordForm, confirmPassword: e.target.value })}
+              />
+            </div>
+            <p className="text-xs text-slate-500 dark:text-slate-400">
+              Password must be at least 8 characters long
+            </p>
+          </div>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => {
+                setPasswordDialogOpen(false);
+                setPasswordForm({ currentPassword: "", newPassword: "", confirmPassword: "" });
+              }}
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={handleChangePassword}
+              disabled={isChangingPassword}
+              className="bg-slate-900 dark:bg-slate-100 hover:bg-slate-800 dark:hover:bg-slate-200 text-white dark:text-slate-900"
+            >
+              {isChangingPassword ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  Changing...
+                </>
+              ) : (
+                <>
+                  <Key className="h-4 w-4 mr-2" />
+                  Change Password
+                </>
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* API Keys Dialog */}
+      <Dialog open={apiKeysDialogOpen} onOpenChange={setApiKeysDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>API Keys</DialogTitle>
+            <DialogDescription>
+              Manage your API access tokens for integrations
+            </DialogDescription>
+          </DialogHeader>
+          <div className="py-6">
+            <div className="text-center">
+              <Key className="h-12 w-12 mx-auto text-slate-400 mb-4" />
+              <h3 className="font-semibold mb-2 text-slate-900 dark:text-white">No API Keys Yet</h3>
+              <p className="text-sm text-slate-600 dark:text-slate-400 mb-4">
+                API key management is coming soon. You'll be able to create and manage tokens for third-party integrations.
+              </p>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setApiKeysDialogOpen(false)}
+            >
+              Close
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
