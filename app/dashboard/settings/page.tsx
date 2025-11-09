@@ -8,6 +8,14 @@ import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Switch } from "@/components/ui/switch";
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Slider } from "@/components/ui/slider";
+import {
   CreditCard,
   Download,
   Sparkles,
@@ -31,6 +39,32 @@ import {
   Lock,
   Loader2,
   CheckCircle2,
+  Bot,
+  Code2,
+  Database,
+  Eye,
+  EyeOff,
+  Gauge,
+  Languages,
+  Layout,
+  Maximize2,
+  Minimize2,
+  Sliders,
+  Volume2,
+  VolumeX,
+  Wifi,
+  HardDrive,
+  Thermometer,
+  FileText,
+  MessageSquare,
+  Braces,
+  AlignLeft,
+  Type,
+  Accessibility,
+  Laptop,
+  Grid,
+  List,
+  BarChart3,
 } from "lucide-react";
 import { toast } from "sonner";
 import { resetOnboarding } from "@/lib/auth/actions";
@@ -54,11 +88,54 @@ export default function SettingsPage() {
 
   // Preferences state
   const [preferences, setPreferences] = useState({
+    // Notifications
     emailNotifications: true,
     desktopNotifications: false,
+    pushNotifications: true,
+    documentUpdates: true,
+    teamActivity: true,
+    weeklyDigest: false,
+
+    // Editor
     autoSave: true,
+    autoSaveInterval: 30,
     soundEffects: false,
     compactMode: false,
+    syntaxHighlighting: true,
+    lineNumbers: true,
+    wordWrap: true,
+
+    // AI
+    defaultModel: "gpt-4o-mini",
+    temperature: 0.7,
+    enableRAG: true,
+    maxTokens: 4000,
+    streamResponses: true,
+    contextWindow: "auto",
+
+    // Privacy
+    analyticsEnabled: true,
+    usageTracking: true,
+    errorReporting: true,
+    shareAnonymousData: false,
+
+    // Accessibility
+    fontSize: "medium",
+    reduceAnimations: false,
+    highContrast: false,
+    screenReaderOptimized: false,
+
+    // Performance
+    enableCache: true,
+    preloadDocuments: true,
+    lazyLoadImages: true,
+    maxCacheSize: 500,
+
+    // Interface
+    sidebarPosition: "left",
+    defaultView: "grid",
+    itemsPerPage: 20,
+    showTooltips: true,
   });
 
   useEffect(() => {
@@ -358,7 +435,7 @@ export default function SettingsPage() {
 
           {/* Preferences Tab */}
           <TabsContent value="preferences" className="space-y-6">
-            {/* Theme Selection */}
+            {/* Appearance Section */}
             <Card className="border-blue-200 dark:border-blue-800/50 bg-white dark:bg-slate-900 shadow-xl p-8">
               <div className="flex items-center gap-3 mb-6">
                 <div className="h-10 w-10 rounded-lg bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center">
@@ -370,69 +447,183 @@ export default function SettingsPage() {
                 </div>
               </div>
 
-              <div className="space-y-4">
-                <Label className="text-slate-700 dark:text-slate-300 font-medium">Theme</Label>
-                <div className="grid grid-cols-3 gap-4">
-                  <button
-                    onClick={() => handleThemeChange("light")}
-                    className={`p-6 rounded-xl border-2 transition-all ${
-                      theme === "light"
-                        ? "border-blue-500 bg-blue-50 dark:bg-blue-950/30 shadow-lg"
-                        : "border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700"
-                    }`}
-                  >
-                    <Sun className={`h-8 w-8 mx-auto mb-3 ${theme === "light" ? "text-blue-500" : "text-slate-400"}`} />
-                    <p className={`font-medium text-center ${theme === "light" ? "text-blue-700 dark:text-blue-400" : "text-slate-600 dark:text-slate-400"}`}>
-                      Light
-                    </p>
-                  </button>
-                  <button
-                    onClick={() => handleThemeChange("dark")}
-                    className={`p-6 rounded-xl border-2 transition-all ${
-                      theme === "dark"
-                        ? "border-blue-500 bg-blue-50 dark:bg-blue-950/30 shadow-lg"
-                        : "border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700"
-                    }`}
-                  >
-                    <Moon className={`h-8 w-8 mx-auto mb-3 ${theme === "dark" ? "text-blue-500" : "text-slate-400"}`} />
-                    <p className={`font-medium text-center ${theme === "dark" ? "text-blue-700 dark:text-blue-400" : "text-slate-600 dark:text-slate-400"}`}>
-                      Dark
-                    </p>
-                  </button>
-                  <button
-                    onClick={() => handleThemeChange("system")}
-                    className={`p-6 rounded-xl border-2 transition-all ${
-                      theme === "system"
-                        ? "border-blue-500 bg-blue-50 dark:bg-blue-950/30 shadow-lg"
-                        : "border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700"
-                    }`}
-                  >
-                    <Monitor className={`h-8 w-8 mx-auto mb-3 ${theme === "system" ? "text-blue-500" : "text-slate-400"}`} />
-                    <p className={`font-medium text-center ${theme === "system" ? "text-blue-700 dark:text-blue-400" : "text-slate-600 dark:text-slate-400"}`}>
-                      System
-                    </p>
-                  </button>
+              <div className="space-y-6">
+                <div>
+                  <Label className="text-slate-700 dark:text-slate-300 font-medium mb-3 block">Theme</Label>
+                  <div className="grid grid-cols-3 gap-4">
+                    <button
+                      onClick={() => handleThemeChange("light")}
+                      className={`p-6 rounded-xl border-2 transition-all ${
+                        theme === "light"
+                          ? "border-blue-500 bg-blue-50 dark:bg-blue-950/30 shadow-lg"
+                          : "border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700"
+                      }`}
+                    >
+                      <Sun className={`h-8 w-8 mx-auto mb-3 ${theme === "light" ? "text-blue-500" : "text-slate-400"}`} />
+                      <p className={`font-medium text-center ${theme === "light" ? "text-blue-700 dark:text-blue-400" : "text-slate-600 dark:text-slate-400"}`}>
+                        Light
+                      </p>
+                    </button>
+                    <button
+                      onClick={() => handleThemeChange("dark")}
+                      className={`p-6 rounded-xl border-2 transition-all ${
+                        theme === "dark"
+                          ? "border-blue-500 bg-blue-50 dark:bg-blue-950/30 shadow-lg"
+                          : "border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700"
+                      }`}
+                    >
+                      <Moon className={`h-8 w-8 mx-auto mb-3 ${theme === "dark" ? "text-blue-500" : "text-slate-400"}`} />
+                      <p className={`font-medium text-center ${theme === "dark" ? "text-blue-700 dark:text-blue-400" : "text-slate-600 dark:text-slate-400"}`}>
+                        Dark
+                      </p>
+                    </button>
+                    <button
+                      onClick={() => handleThemeChange("system")}
+                      className={`p-6 rounded-xl border-2 transition-all ${
+                        theme === "system"
+                          ? "border-blue-500 bg-blue-50 dark:bg-blue-950/30 shadow-lg"
+                          : "border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700"
+                      }`}
+                    >
+                      <Monitor className={`h-8 w-8 mx-auto mb-3 ${theme === "system" ? "text-blue-500" : "text-slate-400"}`} />
+                      <p className={`font-medium text-center ${theme === "system" ? "text-blue-700 dark:text-blue-400" : "text-slate-600 dark:text-slate-400"}`}>
+                        System
+                      </p>
+                    </button>
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-between p-4 rounded-lg border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
+                  <div>
+                    <p className="font-medium text-slate-900 dark:text-white">Compact Mode</p>
+                    <p className="text-sm text-slate-600 dark:text-slate-400">Reduce spacing for denser interface</p>
+                  </div>
+                  <Switch
+                    checked={preferences.compactMode}
+                    onCheckedChange={(checked) => {
+                      setPreferences({ ...preferences, compactMode: checked });
+                      toast.success(checked ? "Compact mode enabled" : "Compact mode disabled");
+                    }}
+                  />
                 </div>
               </div>
             </Card>
 
-            {/* Notification Settings */}
-            <Card className="border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-xl p-8">
+            {/* AI Settings */}
+            <Card className="border-purple-200 dark:border-purple-800/50 bg-white dark:bg-slate-900 shadow-xl p-8">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="h-10 w-10 rounded-lg bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center">
+                  <Bot className="h-5 w-5 text-white" />
+                </div>
+                <div>
+                  <h2 className="text-xl font-semibold text-slate-900 dark:text-white">AI Settings</h2>
+                  <p className="text-sm text-slate-600 dark:text-slate-400">Configure AI behavior and defaults</p>
+                </div>
+              </div>
+
+              <div className="space-y-6">
+                <div className="grid grid-cols-2 gap-6">
+                  <div className="space-y-2">
+                    <Label className="text-slate-700 dark:text-slate-300 font-medium">Default Model</Label>
+                    <Select value={preferences.defaultModel} onValueChange={(value) => setPreferences({ ...preferences, defaultModel: value })}>
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="gpt-4o">GPT-4o (Recommended)</SelectItem>
+                        <SelectItem value="gpt-4o-mini">GPT-4o Mini (Faster)</SelectItem>
+                        <SelectItem value="gpt-4-turbo">GPT-4 Turbo</SelectItem>
+                        <SelectItem value="claude-3-opus">Claude 3 Opus</SelectItem>
+                        <SelectItem value="claude-3-sonnet">Claude 3 Sonnet</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label className="text-slate-700 dark:text-slate-300 font-medium">Context Window</Label>
+                    <Select value={preferences.contextWindow} onValueChange={(value) => setPreferences({ ...preferences, contextWindow: value })}>
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="auto">Auto (Recommended)</SelectItem>
+                        <SelectItem value="short">Short (4K tokens)</SelectItem>
+                        <SelectItem value="medium">Medium (8K tokens)</SelectItem>
+                        <SelectItem value="long">Long (16K tokens)</SelectItem>
+                        <SelectItem value="xl">Extra Long (32K tokens)</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <Label className="text-slate-700 dark:text-slate-300 font-medium">Temperature: {preferences.temperature.toFixed(1)}</Label>
+                    <span className="text-xs text-slate-500 dark:text-slate-400">
+                      {preferences.temperature < 0.3 ? "Focused" : preferences.temperature < 0.7 ? "Balanced" : "Creative"}
+                    </span>
+                  </div>
+                  <Slider
+                    value={[preferences.temperature]}
+                    onValueChange={([value]) => setPreferences({ ...preferences, temperature: value })}
+                    min={0}
+                    max={1}
+                    step={0.1}
+                    className="w-full"
+                  />
+                  <p className="text-xs text-slate-500 dark:text-slate-400">Lower values make output more focused and deterministic</p>
+                </div>
+
+                <div className="flex items-center justify-between p-4 rounded-lg border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
+                  <div className="flex items-center gap-3">
+                    <Database className="h-5 w-5 text-purple-500" />
+                    <div>
+                      <p className="font-medium text-slate-900 dark:text-white">Enable RAG (Retrieval)</p>
+                      <p className="text-sm text-slate-600 dark:text-slate-400">Search uploaded documents for relevant context</p>
+                    </div>
+                  </div>
+                  <Switch
+                    checked={preferences.enableRAG}
+                    onCheckedChange={(checked) => setPreferences({ ...preferences, enableRAG: checked })}
+                  />
+                </div>
+
+                <div className="flex items-center justify-between p-4 rounded-lg border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
+                  <div className="flex items-center gap-3">
+                    <Wifi className="h-5 w-5 text-blue-500" />
+                    <div>
+                      <p className="font-medium text-slate-900 dark:text-white">Stream Responses</p>
+                      <p className="text-sm text-slate-600 dark:text-slate-400">Show AI responses as they're generated</p>
+                    </div>
+                  </div>
+                  <Switch
+                    checked={preferences.streamResponses}
+                    onCheckedChange={(checked) => setPreferences({ ...preferences, streamResponses: checked })}
+                  />
+                </div>
+              </div>
+            </Card>
+
+            {/* Notifications Section */}
+            <Card className="border-amber-200 dark:border-amber-800/50 bg-white dark:bg-slate-900 shadow-xl p-8">
               <div className="flex items-center gap-3 mb-6">
                 <div className="h-10 w-10 rounded-lg bg-gradient-to-br from-amber-500 to-orange-500 flex items-center justify-center">
                   <Bell className="h-5 w-5 text-white" />
                 </div>
                 <div>
                   <h2 className="text-xl font-semibold text-slate-900 dark:text-white">Notifications</h2>
-                  <p className="text-sm text-slate-600 dark:text-slate-400">Manage your notification preferences</p>
+                  <p className="text-sm text-slate-600 dark:text-slate-400">Control how you receive updates</p>
                 </div>
               </div>
 
-              <div className="space-y-6">
+              <div className="space-y-4">
                 <div className="flex items-center justify-between p-4 rounded-lg border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
-                  <div>
-                    <p className="font-medium text-slate-900 dark:text-white">Email Notifications</p>
-                    <p className="text-sm text-slate-600 dark:text-slate-400">Receive updates via email</p>
+                  <div className="flex items-center gap-3">
+                    <Mail className="h-5 w-5 text-amber-500" />
+                    <div>
+                      <p className="font-medium text-slate-900 dark:text-white">Email Notifications</p>
+                      <p className="text-sm text-slate-600 dark:text-slate-400">Receive important updates via email</p>
+                    </div>
                   </div>
                   <Switch
                     checked={preferences.emailNotifications}
@@ -441,9 +632,12 @@ export default function SettingsPage() {
                 </div>
 
                 <div className="flex items-center justify-between p-4 rounded-lg border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
-                  <div>
-                    <p className="font-medium text-slate-900 dark:text-white">Desktop Notifications</p>
-                    <p className="text-sm text-slate-600 dark:text-slate-400">Show browser notifications</p>
+                  <div className="flex items-center gap-3">
+                    <Laptop className="h-5 w-5 text-blue-500" />
+                    <div>
+                      <p className="font-medium text-slate-900 dark:text-white">Desktop Notifications</p>
+                      <p className="text-sm text-slate-600 dark:text-slate-400">Show browser push notifications</p>
+                    </div>
                   </div>
                   <Switch
                     checked={preferences.desktopNotifications}
@@ -452,20 +646,54 @@ export default function SettingsPage() {
                 </div>
 
                 <div className="flex items-center justify-between p-4 rounded-lg border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
-                  <div>
-                    <p className="font-medium text-slate-900 dark:text-white">Auto-save</p>
-                    <p className="text-sm text-slate-600 dark:text-slate-400">Automatically save your work</p>
+                  <div className="flex items-center gap-3">
+                    <FileText className="h-5 w-5 text-green-500" />
+                    <div>
+                      <p className="font-medium text-slate-900 dark:text-white">Document Updates</p>
+                      <p className="text-sm text-slate-600 dark:text-slate-400">Notify when documents are shared or edited</p>
+                    </div>
                   </div>
                   <Switch
-                    checked={preferences.autoSave}
-                    onCheckedChange={(checked) => setPreferences({ ...preferences, autoSave: checked })}
+                    checked={preferences.documentUpdates}
+                    onCheckedChange={(checked) => setPreferences({ ...preferences, documentUpdates: checked })}
                   />
                 </div>
 
                 <div className="flex items-center justify-between p-4 rounded-lg border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
-                  <div>
-                    <p className="font-medium text-slate-900 dark:text-white">Sound Effects</p>
-                    <p className="text-sm text-slate-600 dark:text-slate-400">Play sounds for actions</p>
+                  <div className="flex items-center gap-3">
+                    <Users className="h-5 w-5 text-purple-500" />
+                    <div>
+                      <p className="font-medium text-slate-900 dark:text-white">Team Activity</p>
+                      <p className="text-sm text-slate-600 dark:text-slate-400">Get notified of team member actions</p>
+                    </div>
+                  </div>
+                  <Switch
+                    checked={preferences.teamActivity}
+                    onCheckedChange={(checked) => setPreferences({ ...preferences, teamActivity: checked })}
+                  />
+                </div>
+
+                <div className="flex items-center justify-between p-4 rounded-lg border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
+                  <div className="flex items-center gap-3">
+                    <BarChart3 className="h-5 w-5 text-indigo-500" />
+                    <div>
+                      <p className="font-medium text-slate-900 dark:text-white">Weekly Digest</p>
+                      <p className="text-sm text-slate-600 dark:text-slate-400">Summary email every Monday morning</p>
+                    </div>
+                  </div>
+                  <Switch
+                    checked={preferences.weeklyDigest}
+                    onCheckedChange={(checked) => setPreferences({ ...preferences, weeklyDigest: checked })}
+                  />
+                </div>
+
+                <div className="flex items-center justify-between p-4 rounded-lg border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
+                  <div className="flex items-center gap-3">
+                    {preferences.soundEffects ? <Volume2 className="h-5 w-5 text-pink-500" /> : <VolumeX className="h-5 w-5 text-slate-400" />}
+                    <div>
+                      <p className="font-medium text-slate-900 dark:text-white">Sound Effects</p>
+                      <p className="text-sm text-slate-600 dark:text-slate-400">Play audio feedback for actions</p>
+                    </div>
                   </div>
                   <Switch
                     checked={preferences.soundEffects}
@@ -474,6 +702,334 @@ export default function SettingsPage() {
                 </div>
               </div>
             </Card>
+
+            {/* Editor Preferences */}
+            <Card className="border-green-200 dark:border-green-800/50 bg-white dark:bg-slate-900 shadow-xl p-8">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="h-10 w-10 rounded-lg bg-gradient-to-br from-green-500 to-emerald-500 flex items-center justify-center">
+                  <Code2 className="h-5 w-5 text-white" />
+                </div>
+                <div>
+                  <h2 className="text-xl font-semibold text-slate-900 dark:text-white">Editor Preferences</h2>
+                  <p className="text-sm text-slate-600 dark:text-slate-400">Customize your editing experience</p>
+                </div>
+              </div>
+
+              <div className="space-y-4">
+                <div className="flex items-center justify-between p-4 rounded-lg border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
+                  <div className="flex items-center gap-3">
+                    <Save className="h-5 w-5 text-green-500" />
+                    <div>
+                      <p className="font-medium text-slate-900 dark:text-white">Auto-save</p>
+                      <p className="text-sm text-slate-600 dark:text-slate-400">Automatically save changes every {preferences.autoSaveInterval} seconds</p>
+                    </div>
+                  </div>
+                  <Switch
+                    checked={preferences.autoSave}
+                    onCheckedChange={(checked) => setPreferences({ ...preferences, autoSave: checked })}
+                  />
+                </div>
+
+                <div className="flex items-center justify-between p-4 rounded-lg border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
+                  <div className="flex items-center gap-3">
+                    <Braces className="h-5 w-5 text-blue-500" />
+                    <div>
+                      <p className="font-medium text-slate-900 dark:text-white">Syntax Highlighting</p>
+                      <p className="text-sm text-slate-600 dark:text-slate-400">Colorize code blocks and markdown</p>
+                    </div>
+                  </div>
+                  <Switch
+                    checked={preferences.syntaxHighlighting}
+                    onCheckedChange={(checked) => setPreferences({ ...preferences, syntaxHighlighting: checked })}
+                  />
+                </div>
+
+                <div className="flex items-center justify-between p-4 rounded-lg border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
+                  <div className="flex items-center gap-3">
+                    <AlignLeft className="h-5 w-5 text-purple-500" />
+                    <div>
+                      <p className="font-medium text-slate-900 dark:text-white">Line Numbers</p>
+                      <p className="text-sm text-slate-600 dark:text-slate-400">Show line numbers in code editor</p>
+                    </div>
+                  </div>
+                  <Switch
+                    checked={preferences.lineNumbers}
+                    onCheckedChange={(checked) => setPreferences({ ...preferences, lineNumbers: checked })}
+                  />
+                </div>
+
+                <div className="flex items-center justify-between p-4 rounded-lg border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
+                  <div className="flex items-center gap-3">
+                    <AlignLeft className="h-5 w-5 text-amber-500" />
+                    <div>
+                      <p className="font-medium text-slate-900 dark:text-white">Word Wrap</p>
+                      <p className="text-sm text-slate-600 dark:text-slate-400">Wrap long lines instead of scrolling</p>
+                    </div>
+                  </div>
+                  <Switch
+                    checked={preferences.wordWrap}
+                    onCheckedChange={(checked) => setPreferences({ ...preferences, wordWrap: checked })}
+                  />
+                </div>
+              </div>
+            </Card>
+
+            {/* Privacy & Data */}
+            <Card className="border-red-200 dark:border-red-800/50 bg-white dark:bg-slate-900 shadow-xl p-8">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="h-10 w-10 rounded-lg bg-gradient-to-br from-red-500 to-pink-500 flex items-center justify-center">
+                  {preferences.analyticsEnabled ? <Eye className="h-5 w-5 text-white" /> : <EyeOff className="h-5 w-5 text-white" />}
+                </div>
+                <div>
+                  <h2 className="text-xl font-semibold text-slate-900 dark:text-white">Privacy & Data</h2>
+                  <p className="text-sm text-slate-600 dark:text-slate-400">Control your data and privacy settings</p>
+                </div>
+              </div>
+
+              <div className="space-y-4">
+                <div className="flex items-center justify-between p-4 rounded-lg border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
+                  <div>
+                    <p className="font-medium text-slate-900 dark:text-white">Analytics</p>
+                    <p className="text-sm text-slate-600 dark:text-slate-400">Help improve the platform with usage data</p>
+                  </div>
+                  <Switch
+                    checked={preferences.analyticsEnabled}
+                    onCheckedChange={(checked) => setPreferences({ ...preferences, analyticsEnabled: checked })}
+                  />
+                </div>
+
+                <div className="flex items-center justify-between p-4 rounded-lg border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
+                  <div>
+                    <p className="font-medium text-slate-900 dark:text-white">Usage Tracking</p>
+                    <p className="text-sm text-slate-600 dark:text-slate-400">Track feature usage and interactions</p>
+                  </div>
+                  <Switch
+                    checked={preferences.usageTracking}
+                    onCheckedChange={(checked) => setPreferences({ ...preferences, usageTracking: checked })}
+                  />
+                </div>
+
+                <div className="flex items-center justify-between p-4 rounded-lg border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
+                  <div>
+                    <p className="font-medium text-slate-900 dark:text-white">Error Reporting</p>
+                    <p className="text-sm text-slate-600 dark:text-slate-400">Automatically report errors to help fix bugs</p>
+                  </div>
+                  <Switch
+                    checked={preferences.errorReporting}
+                    onCheckedChange={(checked) => setPreferences({ ...preferences, errorReporting: checked })}
+                  />
+                </div>
+
+                <div className="flex items-center justify-between p-4 rounded-lg border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
+                  <div>
+                    <p className="font-medium text-slate-900 dark:text-white">Share Anonymous Data</p>
+                    <p className="text-sm text-slate-600 dark:text-slate-400">Share aggregated insights for research</p>
+                  </div>
+                  <Switch
+                    checked={preferences.shareAnonymousData}
+                    onCheckedChange={(checked) => setPreferences({ ...preferences, shareAnonymousData: checked })}
+                  />
+                </div>
+              </div>
+            </Card>
+
+            {/* Accessibility */}
+            <Card className="border-indigo-200 dark:border-indigo-800/50 bg-white dark:bg-slate-900 shadow-xl p-8">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="h-10 w-10 rounded-lg bg-gradient-to-br from-indigo-500 to-violet-500 flex items-center justify-center">
+                  <Accessibility className="h-5 w-5 text-white" />
+                </div>
+                <div>
+                  <h2 className="text-xl font-semibold text-slate-900 dark:text-white">Accessibility</h2>
+                  <p className="text-sm text-slate-600 dark:text-slate-400">Make the interface work better for you</p>
+                </div>
+              </div>
+
+              <div className="space-y-6">
+                <div className="space-y-2">
+                  <Label className="text-slate-700 dark:text-slate-300 font-medium">Font Size</Label>
+                  <Select value={preferences.fontSize} onValueChange={(value) => setPreferences({ ...preferences, fontSize: value })}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="small">Small</SelectItem>
+                      <SelectItem value="medium">Medium (Default)</SelectItem>
+                      <SelectItem value="large">Large</SelectItem>
+                      <SelectItem value="xl">Extra Large</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="flex items-center justify-between p-4 rounded-lg border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
+                  <div>
+                    <p className="font-medium text-slate-900 dark:text-white">Reduce Animations</p>
+                    <p className="text-sm text-slate-600 dark:text-slate-400">Minimize motion effects</p>
+                  </div>
+                  <Switch
+                    checked={preferences.reduceAnimations}
+                    onCheckedChange={(checked) => setPreferences({ ...preferences, reduceAnimations: checked })}
+                  />
+                </div>
+
+                <div className="flex items-center justify-between p-4 rounded-lg border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
+                  <div>
+                    <p className="font-medium text-slate-900 dark:text-white">High Contrast</p>
+                    <p className="text-sm text-slate-600 dark:text-slate-400">Increase contrast for better visibility</p>
+                  </div>
+                  <Switch
+                    checked={preferences.highContrast}
+                    onCheckedChange={(checked) => setPreferences({ ...preferences, highContrast: checked })}
+                  />
+                </div>
+
+                <div className="flex items-center justify-between p-4 rounded-lg border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
+                  <div>
+                    <p className="font-medium text-slate-900 dark:text-white">Screen Reader Optimized</p>
+                    <p className="text-sm text-slate-600 dark:text-slate-400">Enhanced ARIA labels and navigation</p>
+                  </div>
+                  <Switch
+                    checked={preferences.screenReaderOptimized}
+                    onCheckedChange={(checked) => setPreferences({ ...preferences, screenReaderOptimized: checked })}
+                  />
+                </div>
+              </div>
+            </Card>
+
+            {/* Performance */}
+            <Card className="border-cyan-200 dark:border-cyan-800/50 bg-white dark:bg-slate-900 shadow-xl p-8">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="h-10 w-10 rounded-lg bg-gradient-to-br from-cyan-500 to-blue-500 flex items-center justify-center">
+                  <Gauge className="h-5 w-5 text-white" />
+                </div>
+                <div>
+                  <h2 className="text-xl font-semibold text-slate-900 dark:text-white">Performance</h2>
+                  <p className="text-sm text-slate-600 dark:text-slate-400">Optimize speed and resource usage</p>
+                </div>
+              </div>
+
+              <div className="space-y-4">
+                <div className="flex items-center justify-between p-4 rounded-lg border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
+                  <div className="flex items-center gap-3">
+                    <HardDrive className="h-5 w-5 text-cyan-500" />
+                    <div>
+                      <p className="font-medium text-slate-900 dark:text-white">Enable Cache</p>
+                      <p className="text-sm text-slate-600 dark:text-slate-400">Cache data locally for faster loading</p>
+                    </div>
+                  </div>
+                  <Switch
+                    checked={preferences.enableCache}
+                    onCheckedChange={(checked) => setPreferences({ ...preferences, enableCache: checked })}
+                  />
+                </div>
+
+                <div className="flex items-center justify-between p-4 rounded-lg border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
+                  <div className="flex items-center gap-3">
+                    <FileText className="h-5 w-5 text-blue-500" />
+                    <div>
+                      <p className="font-medium text-slate-900 dark:text-white">Preload Documents</p>
+                      <p className="text-sm text-slate-600 dark:text-slate-400">Load recently used documents in background</p>
+                    </div>
+                  </div>
+                  <Switch
+                    checked={preferences.preloadDocuments}
+                    onCheckedChange={(checked) => setPreferences({ ...preferences, preloadDocuments: checked })}
+                  />
+                </div>
+
+                <div className="flex items-center justify-between p-4 rounded-lg border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
+                  <div className="flex items-center gap-3">
+                    <Camera className="h-5 w-5 text-purple-500" />
+                    <div>
+                      <p className="font-medium text-slate-900 dark:text-white">Lazy Load Images</p>
+                      <p className="text-sm text-slate-600 dark:text-slate-400">Load images only when visible</p>
+                    </div>
+                  </div>
+                  <Switch
+                    checked={preferences.lazyLoadImages}
+                    onCheckedChange={(checked) => setPreferences({ ...preferences, lazyLoadImages: checked })}
+                  />
+                </div>
+              </div>
+            </Card>
+
+            {/* Interface */}
+            <Card className="border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-xl p-8">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="h-10 w-10 rounded-lg bg-gradient-to-br from-slate-500 to-slate-700 flex items-center justify-center">
+                  <Layout className="h-5 w-5 text-white" />
+                </div>
+                <div>
+                  <h2 className="text-xl font-semibold text-slate-900 dark:text-white">Interface</h2>
+                  <p className="text-sm text-slate-600 dark:text-slate-400">Customize layout and navigation</p>
+                </div>
+              </div>
+
+              <div className="space-y-6">
+                <div className="grid grid-cols-2 gap-6">
+                  <div className="space-y-2">
+                    <Label className="text-slate-700 dark:text-slate-300 font-medium">Default View</Label>
+                    <Select value={preferences.defaultView} onValueChange={(value) => setPreferences({ ...preferences, defaultView: value })}>
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="grid">
+                          <div className="flex items-center gap-2">
+                            <Grid className="h-4 w-4" />
+                            Grid View
+                          </div>
+                        </SelectItem>
+                        <SelectItem value="list">
+                          <div className="flex items-center gap-2">
+                            <List className="h-4 w-4" />
+                            List View
+                          </div>
+                        </SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label className="text-slate-700 dark:text-slate-300 font-medium">Sidebar Position</Label>
+                    <Select value={preferences.sidebarPosition} onValueChange={(value) => setPreferences({ ...preferences, sidebarPosition: value })}>
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="left">Left</SelectItem>
+                        <SelectItem value="right">Right</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-between p-4 rounded-lg border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
+                  <div>
+                    <p className="font-medium text-slate-900 dark:text-white">Show Tooltips</p>
+                    <p className="text-sm text-slate-600 dark:text-slate-400">Display helpful hints on hover</p>
+                  </div>
+                  <Switch
+                    checked={preferences.showTooltips}
+                    onCheckedChange={(checked) => setPreferences({ ...preferences, showTooltips: checked })}
+                  />
+                </div>
+              </div>
+            </Card>
+
+            {/* Save All Preferences Button */}
+            <div className="flex justify-end">
+              <Button
+                onClick={() => {
+                  toast.success("All preferences saved!");
+                  // Here you would save to localStorage or API
+                }}
+                className="bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white shadow-lg px-8"
+              >
+                <Save className="h-4 w-4 mr-2" />
+                Save All Preferences
+              </Button>
+            </div>
           </TabsContent>
 
           {/* Organization Tab */}
