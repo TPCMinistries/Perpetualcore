@@ -5,14 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Dialog,
   DialogContent,
@@ -23,29 +16,48 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { toast } from "sonner";
 import {
   Users,
   UserPlus,
   Mail,
-  MoreVertical,
-  Shield,
-  Trash2,
-  Crown,
   Search,
   Loader2,
+  Activity,
+  BarChart3,
+  Shield,
+  FolderKanban,
 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 
+// Import team components
+import ActivityFeed from "@/components/team/ActivityFeed";
+import TeamAnalyticsDashboard from "@/components/team/TeamAnalyticsDashboard";
+import PermissionsManager from "@/components/team/PermissionsManager";
+import GroupManager from "@/components/team/GroupManager";
+import MemberCard from "@/components/team/MemberCard";
+import OnlineIndicator from "@/components/team/OnlineIndicator";
+
 interface TeamMember {
   id: string;
-  full_name: string;
+  full_name: string | null;
   email: string;
   avatar_url: string | null;
   role: string;
   status: string;
   created_at: string;
   last_active_at: string | null;
+  is_online?: boolean;
+  job_title?: string | null;
+  department?: string | null;
+  expertise?: string[] | null;
 }
 
 export default function TeamManagementPage() {
@@ -56,6 +68,7 @@ export default function TeamManagementPage() {
   const [inviteEmail, setInviteEmail] = useState("");
   const [inviteRole, setInviteRole] = useState("member");
   const [inviting, setInviting] = useState(false);
+  const [activeTab, setActiveTab] = useState("overview");
 
   useEffect(() => {
     loadTeamMembers();
@@ -133,80 +146,11 @@ export default function TeamManagementPage() {
     }
   }
 
-  async function handleRemoveMember(memberId: string) {
-    if (!confirm("Are you sure you want to remove this team member?")) {
-      return;
-    }
-
-    try {
-      const response = await fetch(`/api/team/members/${memberId}`, {
-        method: "DELETE",
-      });
-
-      if (!response.ok) throw new Error("Failed to remove member");
-
-      toast.success("Team member removed");
-      loadTeamMembers();
-    } catch (error) {
-      console.error("Error removing member:", error);
-      toast.error("Failed to remove team member");
-    }
-  }
-
-  async function handleUpdateRole(memberId: string, newRole: string) {
-    try {
-      const response = await fetch(`/api/team/members/${memberId}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ role: newRole }),
-      });
-
-      if (!response.ok) throw new Error("Failed to update role");
-
-      toast.success("Role updated successfully");
-      loadTeamMembers();
-    } catch (error) {
-      console.error("Error updating role:", error);
-      toast.error("Failed to update role");
-    }
-  }
-
-  const getRoleBadgeColor = (role: string) => {
-    switch (role) {
-      case "owner":
-        return "bg-purple-100 text-purple-700 dark:bg-purple-900 dark:text-purple-300";
-      case "admin":
-        return "bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300";
-      case "member":
-        return "bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300";
-      default:
-        return "bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300";
-    }
-  };
-
-  const getRoleIcon = (role: string) => {
-    switch (role) {
-      case "owner":
-        return <Crown className="h-3 w-3" />;
-      case "admin":
-        return <Shield className="h-3 w-3" />;
-      default:
-        return null;
-    }
-  };
-
-  const getInitials = (name: string) => {
-    return name
-      .split(" ")
-      .map(n => n[0])
-      .join("")
-      .toUpperCase()
-      .slice(0, 2);
-  };
-
   const filteredMembers = members.filter((member) =>
     member.full_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    member.email?.toLowerCase().includes(searchQuery.toLowerCase())
+    member.email?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    member.job_title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    member.department?.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   if (loading) {
@@ -267,7 +211,10 @@ export default function TeamManagementPage() {
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
+                      <SelectItem value="viewer">Viewer</SelectItem>
                       <SelectItem value="member">Member</SelectItem>
+                      <SelectItem value="contributor">Contributor</SelectItem>
+                      <SelectItem value="manager">Manager</SelectItem>
                       <SelectItem value="admin">Admin</SelectItem>
                     </SelectContent>
                   </Select>
@@ -296,100 +243,129 @@ export default function TeamManagementPage() {
         </div>
       </div>
 
-      {/* Search */}
-      <Card>
-        <CardContent className="p-4">
-          <div className="relative">
-            <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-            <Input
-              placeholder="Search team members..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-9"
-            />
-          </div>
-        </CardContent>
-      </Card>
+      {/* Tabs Navigation */}
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+        <TabsList className="grid w-full grid-cols-5 lg:w-auto lg:inline-grid">
+          <TabsTrigger value="overview" className="flex items-center gap-2">
+            <Users className="h-4 w-4" />
+            <span className="hidden sm:inline">Overview</span>
+          </TabsTrigger>
+          <TabsTrigger value="activity" className="flex items-center gap-2">
+            <Activity className="h-4 w-4" />
+            <span className="hidden sm:inline">Activity</span>
+          </TabsTrigger>
+          <TabsTrigger value="analytics" className="flex items-center gap-2">
+            <BarChart3 className="h-4 w-4" />
+            <span className="hidden sm:inline">Analytics</span>
+          </TabsTrigger>
+          <TabsTrigger value="groups" className="flex items-center gap-2">
+            <FolderKanban className="h-4 w-4" />
+            <span className="hidden sm:inline">Groups</span>
+          </TabsTrigger>
+          <TabsTrigger value="permissions" className="flex items-center gap-2">
+            <Shield className="h-4 w-4" />
+            <span className="hidden sm:inline">Permissions</span>
+          </TabsTrigger>
+        </TabsList>
 
-      {/* Team Members List */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Team Members</CardTitle>
-          <CardDescription>
-            Manage your team members and their permissions
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          {filteredMembers.length === 0 ? (
-            <div className="text-center py-12">
-              <Users className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-              <h3 className="font-semibold mb-2">No team members found</h3>
-              <p className="text-sm text-muted-foreground mb-4">
-                {searchQuery ? "Try a different search" : "Invite team members to get started"}
-              </p>
-            </div>
-          ) : (
-            <div className="space-y-4">
-              {filteredMembers.map((member) => (
-                <div
-                  key={member.id}
-                  className="flex items-center justify-between p-4 rounded-lg border hover:bg-muted/50 transition-colors"
-                >
-                  <div className="flex items-center gap-4">
-                    <Avatar className="h-12 w-12">
-                      <AvatarImage src={member.avatar_url || undefined} />
-                      <AvatarFallback className="bg-blue-50 dark:bg-blue-950/30 text-blue-600 dark:text-blue-400">
-                        {getInitials(member.full_name || "U")}
-                      </AvatarFallback>
-                    </Avatar>
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <p className="font-medium">{member.full_name}</p>
-                        <Badge variant="outline" className={getRoleBadgeColor(member.role)}>
-                          <span className="flex items-center gap-1">
-                            {getRoleIcon(member.role)}
-                            {member.role}
-                          </span>
-                        </Badge>
-                      </div>
-                      <p className="text-sm text-muted-foreground">{member.email}</p>
-                      {member.last_active_at && (
-                        <p className="text-xs text-muted-foreground">
-                          Last active: {new Date(member.last_active_at).toLocaleDateString()}
-                        </p>
-                      )}
+        {/* Overview Tab */}
+        <TabsContent value="overview" className="space-y-6">
+          <div className="grid gap-6 md:grid-cols-3">
+            <div className="md:col-span-2 space-y-6">
+              {/* Search */}
+              <Card>
+                <CardContent className="p-4">
+                  <div className="relative">
+                    <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                    <Input
+                      placeholder="Search team members..."
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      className="pl-9"
+                    />
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Team Members List */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>Team Members</CardTitle>
+                  <CardDescription>
+                    All members in your organization
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  {filteredMembers.length === 0 ? (
+                    <div className="text-center py-12">
+                      <Users className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+                      <h3 className="font-semibold mb-2">No team members found</h3>
+                      <p className="text-sm text-muted-foreground mb-4">
+                        {searchQuery ? "Try a different search" : "Invite team members to get started"}
+                      </p>
                     </div>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Select
-                      value={member.role}
-                      onValueChange={(value) => handleUpdateRole(member.id, value)}
-                      disabled={member.role === "owner"}
-                    >
-                      <SelectTrigger className="w-32">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="member">Member</SelectItem>
-                        <SelectItem value="admin">Admin</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    {member.role !== "owner" && (
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleRemoveMember(member.id)}
-                      >
-                        <Trash2 className="h-4 w-4 text-destructive" />
-                      </Button>
-                    )}
-                  </div>
-                </div>
-              ))}
+                  ) : (
+                    <div className="grid gap-4 md:grid-cols-2">
+                      {filteredMembers.map((member) => (
+                        <MemberCard key={member.id} member={member} showStatus={true} />
+                      ))}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
             </div>
-          )}
-        </CardContent>
-      </Card>
+
+            {/* Sidebar */}
+            <div className="space-y-6">
+              <OnlineIndicator />
+
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg">Quick Stats</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-muted-foreground">Total Members</span>
+                    <Badge variant="outline">{members.length}</Badge>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-muted-foreground">Online Now</span>
+                    <Badge variant="outline" className="bg-green-50 dark:bg-green-950/30">
+                      {members.filter(m => m.is_online).length}
+                    </Badge>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-muted-foreground">Admins</span>
+                    <Badge variant="outline">
+                      {members.filter(m => m.role === "admin" || m.role === "owner").length}
+                    </Badge>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+        </TabsContent>
+
+        {/* Activity Tab */}
+        <TabsContent value="activity" className="space-y-6">
+          <ActivityFeed limit={100} showFilters={true} />
+        </TabsContent>
+
+        {/* Analytics Tab */}
+        <TabsContent value="analytics" className="space-y-6">
+          <TeamAnalyticsDashboard />
+        </TabsContent>
+
+        {/* Groups Tab */}
+        <TabsContent value="groups" className="space-y-6">
+          <GroupManager />
+        </TabsContent>
+
+        {/* Permissions Tab */}
+        <TabsContent value="permissions" className="space-y-6">
+          <PermissionsManager />
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }
