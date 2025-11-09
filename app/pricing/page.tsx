@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Check, Zap, Crown, Building2, Sparkles, ArrowRight } from "lucide-react";
+import { Check, Zap, Crown, Building2, Sparkles, ArrowRight, Users, Briefcase } from "lucide-react";
 import { toast } from "sonner";
 import { PublicMobileNav } from "@/components/layout/PublicMobileNav";
 
@@ -21,138 +21,192 @@ const PLANS = [
     popular: false,
     badge: null,
     features: [
-      "50 AI messages per month",
-      "Gemini model only",
+      "Infinite conversation memory",
+      "Personal knowledge base (RAG)",
+      "Gemini model (unlimited)",
       "5 documents",
       "1 GB storage",
-      "Email support",
-      "Community access",
+      "5 basic automations",
+      "Community support",
     ],
     limits: {
-      ai_messages: 50,
+      ai_messages: -1,
       documents: 5,
       storage_gb: 1,
       team_members: 1,
     },
   },
   {
-    id: "pro",
-    name: "Pro",
+    id: "starter",
+    name: "Starter",
     description: "For individuals and professionals",
     price: 49,
     priceId: process.env.NEXT_PUBLIC_STRIPE_PRICE_PRO_MONTHLY,
-    interval: "per user/month",
+    interval: "per month",
     icon: Zap,
     popular: true,
     badge: "Most Popular",
     features: [
-      "1,000 AI messages per user/month",
-      "All AI models (GPT-4, Claude, Gemini)",
-      "$0.05 per message overage",
-      "Unlimited documents",
-      "10 GB storage per user",
+      "Everything in Free, plus:",
+      "GPT-4o Mini (unlimited)",
+      "100 premium model messages/mo (Claude, GPT-4)",
+      "Unlimited documents & knowledge base",
+      "10 GB storage",
       "Email & Calendar integration",
-      "Unlimited AI workflows",
+      "Unlimited automations & workflows",
       "Priority email support",
     ],
     limits: {
-      ai_messages: 1000,
+      ai_messages: -1,
       documents: -1,
       storage_gb: 10,
       team_members: 1,
     },
   },
   {
-    id: "team",
-    name: "Team",
-    description: "For small teams (3-10 people)",
-    price: 39,
+    id: "pro",
+    name: "Pro",
+    description: "Power users who need unlimited AI",
+    price: 99,
     priceId: process.env.NEXT_PUBLIC_STRIPE_PRICE_BUSINESS_MONTHLY,
-    interval: "per user/month",
+    interval: "per month",
     icon: Crown,
     popular: false,
-    badge: "Save $10/user",
+    badge: null,
     features: [
-      "1,000 AI messages per user/month",
-      "All AI models (GPT-4, Claude, Gemini)",
-      "$0.04 per message overage",
-      "Everything in Pro",
-      "50 GB storage per user",
-      "Team collaboration & shared workspaces",
-      "Role-based permissions",
-      "Admin dashboard & analytics",
-      "Priority support",
+      "Everything in Starter, plus:",
+      "Unlimited premium models (Claude, GPT-4, o1)",
+      "Advanced workflows & automations",
+      "50 GB storage",
+      "API access",
+      "Priority support (4-hour response)",
+      "Early access to new features",
     ],
     limits: {
-      ai_messages: 1000,
+      ai_messages: -1,
       documents: -1,
       storage_gb: 50,
+      team_members: 1,
+    },
+  },
+  {
+    id: "team",
+    name: "Team",
+    description: "For small teams (up to 10 people)",
+    price: 499,
+    priceId: null,
+    interval: "per month",
+    icon: Users,
+    popular: false,
+    badge: "Best Value",
+    features: [
+      "Everything in Pro, plus:",
+      "Up to 10 team members",
+      "Shared team knowledge base",
+      "Team automation library",
+      "Slack/Teams integration",
+      "Role-based access control",
+      "Team analytics dashboard",
+      "Implementation call included",
+      "Dedicated success manager",
+    ],
+    limits: {
+      ai_messages: -1,
+      documents: -1,
+      storage_gb: 500,
       team_members: 10,
     },
   },
   {
-    id: "enterprise",
-    name: "Enterprise",
-    description: "For organizations with 10+ employees",
-    price: null,
+    id: "business",
+    name: "Business",
+    description: "For growing companies (up to 50 people)",
+    price: 1999,
     priceId: null,
-    interval: "custom pricing",
-    icon: Building2,
+    interval: "per month",
+    icon: Briefcase,
     popular: false,
-    badge: "Contact Sales",
+    badge: null,
     features: [
-      "Custom volume & pricing",
-      "Everything in Team",
-      "Unlimited team members",
+      "Everything in Team, plus:",
+      "Up to 50 team members",
+      "SSO & SAML authentication",
+      "Custom AI training on your data",
+      "Advanced security & compliance",
       "Unlimited storage",
-      "Implementation & training ($7,500-$150K)",
-      "Dedicated success manager",
       "99.9% SLA",
-      "SOC 2, HIPAA, SSO",
-      "24/7 priority support",
-      "Custom contracts & SLAs",
+      "Priority phone support (2-hour response)",
+      "Quarterly business reviews",
     ],
     limits: {
       ai_messages: -1,
       documents: -1,
       storage_gb: -1,
-      team_members: -1,
+      team_members: 50,
+    },
+  },
+  {
+    id: "enterprise",
+    name: "Enterprise",
+    description: "For large organizations (100+ people)",
+    price: 9999,
+    priceId: null,
+    interval: "per month",
+    icon: Building2,
+    popular: false,
+    badge: "Contact Sales",
+    features: [
+      "Everything in Business, plus:",
+      "Up to 250 team members (or custom)",
+      "White-glove implementation ($7,500)",
+      "Custom deployment options",
+      "SOC 2, HIPAA compliance",
+      "White-label capabilities",
+      "99.95% SLA + 24/7 support",
+      "Dedicated account team",
+      "Custom development available",
+    ],
+    limits: {
+      ai_messages: -1,
+      documents: -1,
+      storage_gb: -1,
+      team_members: 250,
     },
   },
 ];
 
 const FAQ_ITEMS = [
   {
-    question: "How does per-user pricing work?",
-    answer: "Pro and Team plans are billed per active user per month. Each user gets their full allocation of AI messages, storage, and features. Team plans offer volume discounts—the more users you have, the better the per-user rate.",
+    question: "How does the 'unlimited' AI work? Won't I get a surprise bill?",
+    answer: "No surprise bills! Starter includes unlimited GPT-4o Mini + 100 premium model messages (Claude, GPT-4). If you hit the 100 premium limit, you can still use GPT-4o Mini unlimited. Pro includes truly unlimited everything. We built this specifically to avoid surprise bills—you know exactly what you're paying.",
+  },
+  {
+    question: "What's the difference between GPT-4o Mini and premium models?",
+    answer: "GPT-4o Mini is fast, cheap, and great for 90% of tasks (writing emails, quick questions, summarization). Premium models (Claude Sonnet, GPT-4, o1) are more powerful for complex reasoning, coding, and analysis. Most users find Mini handles their daily work, and save premium messages for when they really need it.",
+  },
+  {
+    question: "How does team pricing work?",
+    answer: "Team plans ($499/mo for up to 10 users = $49.90/user), Business ($1,999/mo for up to 50 users = $39.98/user), Enterprise ($9,999/mo for up to 250 users = $39.99/user). Everyone on the team gets full access to all features. No per-user billing—one flat monthly price.",
   },
   {
     question: "What's included in Enterprise implementation?",
-    answer: "Enterprise implementation ($7,500-$150K) includes: AI readiness assessment, custom deployment, team training, change management support, 90-day optimization period, and dedicated success manager. Pricing scales with team size: 10-50 employees (~$7,500), 50-100 employees (~$15K-$25K), 100+ employees (~$50K-$150K).",
-  },
-  {
-    question: "How does usage-based overage pricing work?",
-    answer: "If you exceed your monthly message limit, you'll only pay for what you use beyond the base amount. Pro: $0.05/message, Team: $0.04/message. Enterprise plans have negotiable overage rates. Overage charges appear on your next bill.",
+    answer: "Enterprise includes a one-time $7,500 white-glove implementation: custom deployment, SSO setup, team training (virtual or on-site), change management support, 90-day optimization period, and dedicated success manager. We ensure your team actually adopts it.",
   },
   {
     question: "Can I change plans later?",
-    answer: "Yes! You can upgrade or downgrade your plan at any time. Changes take effect immediately, and we'll prorate any charges.",
+    answer: "Yes! You can upgrade or downgrade anytime. Upgrades take effect immediately. Downgrades take effect at your next billing cycle. We prorate everything fairly.",
   },
   {
     question: "What payment methods do you accept?",
-    answer: "We accept all major credit cards (Visa, MasterCard, American Express) via Stripe. Enterprise plans can also pay via invoice with NET 30 terms.",
+    answer: "All major credit cards (Visa, MasterCard, Amex) via Stripe. Business and Enterprise plans can pay via invoice (NET 30). Annual plans get 20% off and can pay via wire transfer.",
   },
   {
     question: "Is there a free trial?",
-    answer: "Yes! All paid plans come with a 14-day free trial. No credit card required for the Free plan.",
+    answer: "Yes! Starter and Pro get 14-day free trials (no credit card required). Team, Business, and Enterprise get 30-day pilots with dedicated onboarding. Free plan is free forever.",
   },
   {
-    question: "What happens to my data if I cancel?",
-    answer: "Your data remains accessible for 30 days after cancellation. You can export all your data at any time.",
-  },
-  {
-    question: "Do you offer discounts for nonprofits or students?",
-    answer: "Yes! We offer 50% discounts for verified nonprofits and educational institutions. Contact sales for details.",
+    question: "What makes this different from ChatGPT?",
+    answer: "ChatGPT forgets. Perpetual Core never forgets—infinite conversation history, personal knowledge base (RAG on your docs), team collaboration, automation/workflows, and integrations (email, calendar, Slack). We're an AI Operating System, not just chat.",
   },
 ];
 
@@ -168,15 +222,14 @@ export default function PricingPage() {
       return;
     }
 
-    // Handle enterprise tier - direct to sales
-    if (planId === "enterprise") {
-      router.push("/enterprise-demo");
+    // Handle team/business/enterprise - direct to consultation/sales
+    if (planId === "team" || planId === "business") {
+      router.push("/consultation");
       return;
     }
 
-    // Handle team plan - for 10+ users, direct to consultation
-    if (planId === "team") {
-      router.push("/consultation");
+    if (planId === "enterprise") {
+      router.push("/enterprise-demo");
       return;
     }
 
