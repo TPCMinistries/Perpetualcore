@@ -152,24 +152,24 @@ export function OnboardingFlowV3({ userProfile }: OnboardingFlowV3Props) {
   const progress = ((currentStep + 1) / STEPS.length) * 100;
 
   return (
-    <div className="fixed inset-0 bg-black/60 backdrop-blur-md z-50 flex items-center justify-center p-4">
-      <Card className="w-full max-w-3xl bg-white dark:bg-slate-900 p-8 relative shadow-2xl border-slate-200 dark:border-slate-800">
+    <div className="fixed inset-0 bg-black/60 backdrop-blur-md z-50 flex items-center justify-center p-4 overflow-y-auto">
+      <Card className="w-full max-w-3xl bg-white dark:bg-slate-900 p-8 relative shadow-2xl border-slate-200 dark:border-slate-800 my-auto max-h-[90vh] overflow-y-auto">
         <button
           onClick={handleSkip}
-          className="absolute top-4 right-4 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors"
+          className="absolute top-4 right-4 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors z-10"
           disabled={isLoading}
         >
           <X className="h-5 w-5" />
         </button>
 
-        <div className="mb-8">
+        <div className="mb-6 md:mb-8">
           <Progress value={progress} className="h-2 bg-slate-100 dark:bg-slate-800" />
           <p className="text-xs text-slate-500 dark:text-slate-400 mt-2 text-center">
             Step {currentStep + 1} of {STEPS.length}
           </p>
         </div>
 
-        <div className="min-h-[500px] flex flex-col justify-center">
+        <div className="min-h-[300px] md:min-h-[400px] flex flex-col justify-center">
           {currentStep === 0 && (
             <WelcomeStep onNext={handleNext} isLoading={isLoading} />
           )}
