@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Check, Zap, Crown, Building2, Sparkles, ArrowRight, Users, Briefcase } from "lucide-react";
+import { Check, Zap, Crown, Building2, Sparkles, ArrowRight, Users, Briefcase, Star, Rocket } from "lucide-react";
 import { toast } from "sonner";
 import { PublicMobileNav } from "@/components/layout/PublicMobileNav";
 
@@ -148,16 +148,16 @@ const PLANS = [
   {
     id: "enterprise",
     name: "Enterprise",
-    description: "For large organizations (100+ people)",
+    description: "For large organizations (100-250 people)",
     price: 9999,
     priceId: null,
     interval: "per month",
     icon: Building2,
     popular: false,
-    badge: "Contact Sales",
+    badge: null,
     features: [
       "Everything in Business, plus:",
-      "Up to 250 team members (or custom)",
+      "Up to 250 team members",
       "White-glove implementation ($7,500)",
       "Custom deployment options",
       "SOC 2, HIPAA compliance",
@@ -172,6 +172,38 @@ const PLANS = [
       storage_gb: -1,
       team_members: 250,
     },
+    borderColor: "border-purple-200 dark:border-purple-800",
+    bgColor: "bg-purple-50/50 dark:bg-purple-950/20",
+  },
+  {
+    id: "custom",
+    name: "Custom",
+    description: "For enterprises (250+ people)",
+    price: null,
+    priceId: null,
+    interval: "custom",
+    icon: Rocket,
+    popular: false,
+    badge: "Contact Sales",
+    features: [
+      "Everything in Enterprise, plus:",
+      "Unlimited team members",
+      "On-premise deployment options",
+      "Custom SLAs & guarantees",
+      "Dedicated infrastructure",
+      "Custom integrations & development",
+      "Executive business reviews",
+      "Custom contract terms",
+      "Volume pricing available",
+    ],
+    limits: {
+      ai_messages: -1,
+      documents: -1,
+      storage_gb: -1,
+      team_members: -1,
+    },
+    borderColor: "border-amber-200 dark:border-amber-800",
+    bgColor: "bg-gradient-to-br from-amber-50 to-yellow-50 dark:from-amber-950/20 dark:to-yellow-950/20",
   },
 ];
 
@@ -228,7 +260,7 @@ export default function PricingPage() {
       return;
     }
 
-    if (planId === "enterprise") {
+    if (planId === "enterprise" || planId === "custom") {
       router.push("/enterprise-demo");
       return;
     }
@@ -328,6 +360,25 @@ export default function PricingPage() {
               </span>
             </button>
           </div>
+
+          {/* Trust Signals */}
+          <div className="mt-8 flex flex-wrap items-center justify-center gap-6 sm:gap-8 text-sm text-muted-foreground">
+            <div className="flex items-center gap-2">
+              <Star className="h-5 w-5 text-yellow-500 fill-yellow-500" />
+              <span className="font-semibold text-foreground">4.9/5</span>
+              <span className="hidden sm:inline">from 500+ users</span>
+            </div>
+            <div className="hidden sm:block h-4 w-px bg-border" />
+            <div className="flex items-center gap-2">
+              <Check className="h-5 w-5 text-green-500" />
+              <span><strong className="text-foreground">85%</strong> team adoption rate</span>
+            </div>
+            <div className="hidden sm:block h-4 w-px bg-border" />
+            <div className="flex items-center gap-2">
+              <Zap className="h-5 w-5 text-blue-500" />
+              <span><strong className="text-foreground">60-90 day</strong> ROI</span>
+            </div>
+          </div>
         </div>
 
         {/* Pricing Cards */}
@@ -340,19 +391,21 @@ export default function PricingPage() {
                 ? Math.floor(yearlyPrice / 12)
                 : plan.price;
 
+            const monthlySavings = plan.price && yearlyPrice ? plan.price - Math.floor(yearlyPrice / 12) : 0;
+
             return (
               <Card
                 key={plan.id}
                 className={`relative ${
                   plan.popular
                     ? "border-primary shadow-lg scale-105"
-                    : "border-border"
-                }`}
+                    : (plan as any).borderColor || "border-border"
+                } ${(plan as any).bgColor || ""}`}
               >
-                {plan.popular && (
+                {(plan.popular || plan.badge) && (
                   <div className="absolute -top-4 left-0 right-0 flex justify-center">
-                    <span className="bg-primary text-primary-foreground text-sm font-medium px-4 py-1 rounded-full">
-                      Most Popular
+                    <span className={`${plan.popular ? 'bg-primary text-primary-foreground' : 'bg-gradient-to-r from-amber-500 to-orange-500 text-white'} text-sm font-medium px-4 py-1 rounded-full shadow-lg`}>
+                      {plan.badge || "Most Popular"}
                     </span>
                   </div>
                 )}
@@ -377,11 +430,16 @@ export default function PricingPage() {
                             /month
                           </span>
                         </div>
-                        {billingInterval === "yearly" && (
-                          <div className="text-sm text-muted-foreground mt-1">
-                            ${yearlyPrice}/year (billed annually)
+                        {billingInterval === "yearly" && yearlyPrice ? (
+                          <div className="text-sm mt-2">
+                            <div className="text-muted-foreground">
+                              ${yearlyPrice}/year (billed annually)
+                            </div>
+                            <div className="text-green-600 dark:text-green-400 font-semibold mt-1">
+                              Save ${monthlySavings * 12}/year
+                            </div>
                           </div>
-                        )}
+                        ) : null}
                       </>
                     )}
                   </div>
@@ -389,14 +447,20 @@ export default function PricingPage() {
 
                 <CardContent>
                   <Button
-                    className="w-full mb-6"
-                    variant={plan.popular ? "default" : "outline"}
+                    className={`w-full mb-6 ${
+                      plan.popular
+                        ? "bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 shadow-lg"
+                        : plan.id === "custom"
+                        ? "bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white shadow-lg"
+                        : ""
+                    }`}
+                    variant={plan.popular || plan.id === "custom" ? "default" : "outline"}
                     onClick={() => handleSubscribe(plan.id, plan.priceId || null)}
                     disabled={isLoading === plan.id}
                   >
                     {isLoading === plan.id ? (
                       "Loading..."
-                    ) : plan.id === "enterprise" ? (
+                    ) : plan.id === "enterprise" || plan.id === "custom" ? (
                       "Contact Sales"
                     ) : plan.id === "free" ? (
                       "Get Started Free"
