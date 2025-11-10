@@ -2,6 +2,7 @@
 
 import { Card, CardContent } from "@/components/ui/card";
 import { CheckCircle2, Shield, Users, Zap, Building2, Lock, Clock, Calendar, TrendingUp, ArrowRight, Sparkles, Award, BarChart3 } from "lucide-react";
+import EnterpriseDemoBookingForm from "@/components/forms/EnterpriseDemoBookingForm";
 // import { InlineWidget } from "react-calendly";
 
 export default function EnterpriseDemoPage() {
@@ -226,24 +227,24 @@ export default function EnterpriseDemoPage() {
             </div>
           </div>
 
-          {/* Booking CTA - Right Column - 2/5 width */}
+          {/* Booking Form - Right Column - 2/5 width */}
           <div className="lg:col-span-2">
             <div className="sticky top-8 space-y-6">
-              {/* Main CTA Card */}
-              <div className="bg-gradient-to-br from-slate-900 to-slate-800 dark:from-slate-800 dark:to-slate-900 rounded-2xl p-8 text-white shadow-2xl border border-slate-700">
+              {/* Booking Form Card */}
+              <div className="bg-white dark:bg-slate-900 rounded-2xl p-8 shadow-2xl border border-slate-200 dark:border-slate-800">
                 <div className="text-center mb-6">
                   <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-purple-500 to-blue-600 mb-4">
                     <Building2 className="h-8 w-8 text-white" />
                   </div>
-                  <h3 className="text-2xl font-bold mb-2">
-                    Schedule Executive Briefing
+                  <h3 className="text-2xl font-bold mb-2 text-slate-900 dark:text-white">
+                    Request Executive Briefing
                   </h3>
-                  <p className="text-slate-300 text-sm">
+                  <p className="text-slate-600 dark:text-slate-400 text-sm">
                     60-minute strategic session with our enterprise team
                   </p>
                 </div>
 
-                <div className="space-y-3 mb-6">
+                <div className="space-y-3 mb-8 p-4 bg-slate-50 dark:bg-slate-800 rounded-xl">
                   {[
                     "C-suite and VP-level discussion",
                     "Custom ROI analysis for your org",
@@ -251,27 +252,13 @@ export default function EnterpriseDemoPage() {
                     "Reference calls available",
                   ].map((item, i) => (
                     <div key={i} className="flex items-center gap-2 text-sm">
-                      <CheckCircle2 className="h-4 w-4 text-green-400 flex-shrink-0" />
-                      <span className="text-slate-200">{item}</span>
+                      <CheckCircle2 className="h-4 w-4 text-green-600 dark:text-green-400 flex-shrink-0" />
+                      <span className="text-slate-700 dark:text-slate-300">{item}</span>
                     </div>
                   ))}
                 </div>
 
-                <a
-                  href="https://cal.com/perpetualcore/enterprise"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="block w-full text-center px-6 py-4 text-lg font-bold text-slate-900 bg-white hover:bg-slate-100 rounded-xl transition-all shadow-lg hover:shadow-xl group"
-                >
-                  <span className="flex items-center justify-center gap-2">
-                    Book Executive Briefing
-                    <ArrowRight className="h-5 w-5 group-hover:translate-x-1 transition-transform" />
-                  </span>
-                </a>
-
-                <p className="text-xs text-slate-400 text-center mt-4">
-                  Typically scheduled within 48 hours
-                </p>
+                <EnterpriseDemoBookingForm />
               </div>
 
               {/* Enterprise Stats */}
