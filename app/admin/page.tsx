@@ -9,7 +9,7 @@ import { createClient } from '../../lib/supabase/client';
 import OrganizationManagement from '../components/OrganizationManagement';
 import UserManagement from '../components/UserManagement';
 import Link from 'next/link';
-import { ArrowLeft, Shield, Mail } from 'lucide-react';
+import { ArrowLeft, Shield, Mail, DollarSign, TrendingUp, Users as UsersIcon, CreditCard, Target, ArrowUpRight, ArrowDownRight } from 'lucide-react';
 import { sendBetaCodeEmail } from '@/lib/email/send-beta-code';
 
 const supabase = createClient();
@@ -29,7 +29,7 @@ export default function AdminPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(true);
   const [isSuperAdmin, setIsSuperAdmin] = useState(false);
-  const [activeTab, setActiveTab] = useState<'users' | 'organizations' | 'invitations'>('organizations');
+  const [activeTab, setActiveTab] = useState<'users' | 'organizations' | 'invitations' | 'revenue'>('organizations');
 
   // Check if user is super admin
   useEffect(() => {
@@ -165,6 +165,16 @@ export default function AdminPage() {
             >
               🎟️ Beta Codes
             </button>
+            <button
+              onClick={() => setActiveTab('revenue')}
+              className={`px-4 py-3 text-sm font-medium transition-all duration-200 border-b-2 ${
+                activeTab === 'revenue'
+                  ? 'border-cyan-500 text-cyan-600 dark:text-cyan-400'
+                  : 'border-transparent text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100'
+              }`}
+            >
+              💰 Revenue
+            </button>
           </div>
         </div>
       </div>
@@ -174,6 +184,235 @@ export default function AdminPage() {
         {activeTab === 'organizations' && <OrganizationManagement />}
         {activeTab === 'users' && <UserManagement />}
         {activeTab === 'invitations' && <BetaInvitations />}
+        {activeTab === 'revenue' && <RevenueAnalytics />}
+      </div>
+    </div>
+  );
+}
+
+// Revenue Analytics Component
+function RevenueAnalytics() {
+  const [stats, setStats] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    loadRevenueStats();
+  }, []);
+
+  async function loadRevenueStats() {
+    try {
+      const response = await fetch('/api/admin/revenue');
+      const data = await response.json();
+      if (response.ok) {
+        setStats(data);
+      } else {
+        console.error('Error loading revenue stats:', data.error);
+      }
+    } catch (error) {
+      console.error('Error loading revenue stats:', error);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  if (loading) {
+    return <div className="text-center py-12 text-slate-600 dark:text-slate-400">Loading revenue analytics...</div>;
+  }
+
+  if (!stats) {
+    return <div className="text-center py-12 text-red-600 dark:text-red-400">Failed to load revenue analytics</div>;
+  }
+
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(amount);
+  };
+
+  const formatPercent = (value: number) => {
+    return `${value >= 0 ? '+' : ''}${value.toFixed(1)}%`;
+  };
+
+  return (
+    <div className="space-y-6">
+      {/* Header */}
+      <div>
+        <h2 className="text-2xl font-bold text-slate-900 dark:text-slate-100">Revenue & Growth</h2>
+        <p className="text-sm text-slate-600 dark:text-slate-400">Track revenue, conversions, and customer metrics</p>
+      </div>
+
+      {/* Summary Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        {/* MRR */}
+        <div className="bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-950/20 dark:to-emerald-950/20 rounded-xl border border-green-200 dark:border-green-800 p-6">
+          <div className="flex items-center justify-between mb-2">
+            <div className="text-sm font-medium text-green-700 dark:text-green-400">MRR</div>
+            <DollarSign className="h-5 w-5 text-green-600 dark:text-green-400" />
+          </div>
+          <div className="text-3xl font-bold text-green-900 dark:text-green-100 mb-1">
+            {formatCurrency(stats.summary.mrr)}
+          </div>
+          <div className="text-xs text-green-600 dark:text-green-400">Monthly Recurring Revenue</div>
+        </div>
+
+        {/* ARR */}
+        <div className="bg-gradient-to-br from-purple-50 to-violet-50 dark:from-purple-950/20 dark:to-violet-950/20 rounded-xl border border-purple-200 dark:border-purple-800 p-6">
+          <div className="flex items-center justify-between mb-2">
+            <div className="text-sm font-medium text-purple-700 dark:text-purple-400">ARR</div>
+            <TrendingUp className="h-5 w-5 text-purple-600 dark:text-purple-400" />
+          </div>
+          <div className="text-3xl font-bold text-purple-900 dark:text-purple-100 mb-1">
+            {formatCurrency(stats.summary.arr)}
+          </div>
+          <div className="text-xs text-purple-600 dark:text-purple-400">Annual Recurring Revenue</div>
+        </div>
+
+        {/* Total Customers */}
+        <div className="bg-gradient-to-br from-blue-50 to-cyan-50 dark:from-blue-950/20 dark:to-cyan-950/20 rounded-xl border border-blue-200 dark:border-blue-800 p-6">
+          <div className="flex items-center justify-between mb-2">
+            <div className="text-sm font-medium text-blue-700 dark:text-blue-400">Customers</div>
+            <UsersIcon className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+          </div>
+          <div className="text-3xl font-bold text-blue-900 dark:text-blue-100 mb-1">
+            {stats.summary.total_customers}
+          </div>
+          <div className="text-xs text-blue-600 dark:text-blue-400">
+            {stats.summary.paid_customers} paid • {stats.summary.trial_customers} trial
+          </div>
+        </div>
+
+        {/* Growth Rate */}
+        <div className="bg-gradient-to-br from-orange-50 to-amber-50 dark:from-orange-950/20 dark:to-amber-950/20 rounded-xl border border-orange-200 dark:border-orange-800 p-6">
+          <div className="flex items-center justify-between mb-2">
+            <div className="text-sm font-medium text-orange-700 dark:text-orange-400">Growth</div>
+            {stats.summary.growth_rate >= 0 ? (
+              <ArrowUpRight className="h-5 w-5 text-orange-600 dark:text-orange-400" />
+            ) : (
+              <ArrowDownRight className="h-5 w-5 text-orange-600 dark:text-orange-400" />
+            )}
+          </div>
+          <div className="text-3xl font-bold text-orange-900 dark:text-orange-100 mb-1">
+            {formatPercent(stats.summary.growth_rate)}
+          </div>
+          <div className="text-xs text-orange-600 dark:text-orange-400">Last 30 days</div>
+        </div>
+      </div>
+
+      {/* Metrics Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Trial Conversion */}
+        <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-6">
+          <div className="flex items-center gap-3 mb-4">
+            <div className="w-10 h-10 rounded-lg bg-cyan-100 dark:bg-cyan-900/30 flex items-center justify-center">
+              <Target className="h-5 w-5 text-cyan-600 dark:text-cyan-400" />
+            </div>
+            <div>
+              <div className="text-sm font-medium text-slate-700 dark:text-slate-300">Trial Conversion</div>
+              <div className="text-2xl font-bold text-slate-900 dark:text-slate-100">
+                {stats.summary.trial_conversion_rate.toFixed(1)}%
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Churn Rate */}
+        <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-6">
+          <div className="flex items-center gap-3 mb-4">
+            <div className="w-10 h-10 rounded-lg bg-red-100 dark:bg-red-900/30 flex items-center justify-center">
+              <ArrowDownRight className="h-5 w-5 text-red-600 dark:text-red-400" />
+            </div>
+            <div>
+              <div className="text-sm font-medium text-slate-700 dark:text-slate-300">Churn Rate</div>
+              <div className="text-2xl font-bold text-slate-900 dark:text-slate-100">
+                {stats.summary.churn_rate.toFixed(1)}%
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Est. LTV */}
+        <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-6">
+          <div className="flex items-center gap-3 mb-4">
+            <div className="w-10 h-10 rounded-lg bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
+              <CreditCard className="h-5 w-5 text-green-600 dark:text-green-400" />
+            </div>
+            <div>
+              <div className="text-sm font-medium text-slate-700 dark:text-slate-300">Est. LTV</div>
+              <div className="text-2xl font-bold text-slate-900 dark:text-slate-100">
+                {formatCurrency(stats.summary.estimated_ltv)}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Revenue by Plan */}
+      <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 overflow-hidden">
+        <div className="px-6 py-4 border-b border-slate-200 dark:border-slate-800">
+          <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100">Revenue by Plan</h3>
+        </div>
+        <div className="overflow-x-auto">
+          <table className="w-full">
+            <thead className="bg-slate-50 dark:bg-slate-800/50">
+              <tr>
+                <th className="px-6 py-3 text-left text-xs font-medium text-slate-700 dark:text-slate-300 uppercase">Plan</th>
+                <th className="px-6 py-3 text-right text-xs font-medium text-slate-700 dark:text-slate-300 uppercase">Customers</th>
+                <th className="px-6 py-3 text-right text-xs font-medium text-slate-700 dark:text-slate-300 uppercase">MRR</th>
+                <th className="px-6 py-3 text-right text-xs font-medium text-slate-700 dark:text-slate-300 uppercase">ARR</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-200 dark:divide-slate-800">
+              {stats.revenue_by_plan.map((plan: any) => (
+                <tr key={plan.plan} className="hover:bg-slate-50 dark:hover:bg-slate-800/50">
+                  <td className="px-6 py-4 text-sm font-medium text-slate-900 dark:text-slate-100 capitalize">{plan.plan}</td>
+                  <td className="px-6 py-4 text-sm text-right text-slate-600 dark:text-slate-400">{plan.customer_count}</td>
+                  <td className="px-6 py-4 text-sm text-right font-semibold text-slate-900 dark:text-slate-100">
+                    {formatCurrency(plan.monthly_revenue)}
+                  </td>
+                  <td className="px-6 py-4 text-sm text-right text-slate-600 dark:text-slate-400">
+                    {formatCurrency(plan.annual_revenue)}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      {/* Top Customers */}
+      <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 overflow-hidden">
+        <div className="px-6 py-4 border-b border-slate-200 dark:border-slate-800">
+          <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100">Top 10 Customers by Revenue</h3>
+        </div>
+        <div className="overflow-x-auto">
+          <table className="w-full">
+            <thead className="bg-slate-50 dark:bg-slate-800/50">
+              <tr>
+                <th className="px-6 py-3 text-left text-xs font-medium text-slate-700 dark:text-slate-300 uppercase">Customer</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-slate-700 dark:text-slate-300 uppercase">Plan</th>
+                <th className="px-6 py-3 text-right text-xs font-medium text-slate-700 dark:text-slate-300 uppercase">MRR</th>
+                <th className="px-6 py-3 text-right text-xs font-medium text-slate-700 dark:text-slate-300 uppercase">ARR</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-200 dark:divide-slate-800">
+              {stats.top_customers.map((customer: any, idx: number) => (
+                <tr key={idx} className="hover:bg-slate-50 dark:hover:bg-slate-800/50">
+                  <td className="px-6 py-4">
+                    <div className="text-sm font-medium text-slate-900 dark:text-slate-100">{customer.user_name || 'N/A'}</div>
+                    <div className="text-xs text-slate-500 dark:text-slate-500">{customer.user_email}</div>
+                  </td>
+                  <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-400 capitalize">
+                    {customer.plan} <span className="text-xs">({customer.billing_interval})</span>
+                  </td>
+                  <td className="px-6 py-4 text-sm text-right font-semibold text-slate-900 dark:text-slate-100">
+                    {formatCurrency(customer.monthly_revenue)}
+                  </td>
+                  <td className="px-6 py-4 text-sm text-right text-slate-600 dark:text-slate-400">
+                    {formatCurrency(customer.annual_revenue)}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   );
