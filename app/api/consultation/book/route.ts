@@ -79,6 +79,19 @@ export async function POST(req: NextRequest) {
       p_user_agent: userAgent,
     });
 
+    // Enroll lead in email sequence
+    try {
+      await supabase.rpc("enroll_lead_in_sequence", {
+        p_lead_type: "consultation",
+        p_lead_id: booking.id,
+        p_sequence_name: "consultation_nurture"
+      });
+      console.log(`[ConsultationBooking] Enrolled lead ${booking.id} in sequence`);
+    } catch (seqError) {
+      console.error(`[ConsultationBooking] Failed to enroll in sequence:`, seqError);
+      // Don't fail the booking if sequence enrollment fails
+    }
+
     // Send email notifications (non-blocking - don't fail if emails fail)
     try {
       // Send admin notification

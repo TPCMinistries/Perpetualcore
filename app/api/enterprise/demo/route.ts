@@ -90,6 +90,19 @@ export async function POST(req: NextRequest) {
       p_user_agent: userAgent,
     });
 
+    // Enroll lead in email sequence
+    try {
+      await supabase.rpc("enroll_lead_in_sequence", {
+        p_lead_type: "enterprise_demo",
+        p_lead_id: demo.id,
+        p_sequence_name: "enterprise_demo_follow_up"
+      });
+      console.log(`[EnterpriseDemoRequest] Enrolled lead ${demo.id} in sequence`);
+    } catch (seqError) {
+      console.error(`[EnterpriseDemoRequest] Failed to enroll in sequence:`, seqError);
+      // Don't fail the demo request if sequence enrollment fails
+    }
+
     // Send email notifications (non-blocking - don't fail if emails fail)
     try {
       // Send admin notification
