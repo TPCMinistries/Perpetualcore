@@ -9,7 +9,7 @@ import { createClient } from '../../lib/supabase/client';
 import OrganizationManagement from '../components/OrganizationManagement';
 import UserManagement from '../components/UserManagement';
 import Link from 'next/link';
-import { ArrowLeft, Shield, Mail, DollarSign, TrendingUp, Users as UsersIcon, CreditCard, Target, ArrowUpRight, ArrowDownRight } from 'lucide-react';
+import { ArrowLeft, Shield, Mail, DollarSign, TrendingUp, Users as UsersIcon, CreditCard, Target, ArrowUpRight, ArrowDownRight, UserPlus, Building2, Phone, Calendar as CalendarIcon, Clock, CheckCircle2, XCircle } from 'lucide-react';
 import { sendBetaCodeEmail } from '@/lib/email/send-beta-code';
 
 const supabase = createClient();
@@ -29,7 +29,7 @@ export default function AdminPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(true);
   const [isSuperAdmin, setIsSuperAdmin] = useState(false);
-  const [activeTab, setActiveTab] = useState<'users' | 'organizations' | 'invitations' | 'revenue'>('organizations');
+  const [activeTab, setActiveTab] = useState<'users' | 'organizations' | 'invitations' | 'revenue' | 'leads'>('organizations');
 
   // Check if user is super admin
   useEffect(() => {
@@ -175,6 +175,16 @@ export default function AdminPage() {
             >
               💰 Revenue
             </button>
+            <button
+              onClick={() => setActiveTab('leads')}
+              className={`px-4 py-3 text-sm font-medium transition-all duration-200 border-b-2 ${
+                activeTab === 'leads'
+                  ? 'border-cyan-500 text-cyan-600 dark:text-cyan-400'
+                  : 'border-transparent text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100'
+              }`}
+            >
+              📧 Leads
+            </button>
           </div>
         </div>
       </div>
@@ -185,6 +195,7 @@ export default function AdminPage() {
         {activeTab === 'users' && <UserManagement />}
         {activeTab === 'invitations' && <BetaInvitations />}
         {activeTab === 'revenue' && <RevenueAnalytics />}
+        {activeTab === 'leads' && <LeadsManagement />}
       </div>
     </div>
   );
@@ -648,6 +659,341 @@ function BetaInvitations() {
           </div>
         </div>
       )}
+    </div>
+  );
+}
+
+// Leads Management Component
+function LeadsManagement() {
+  const [data, setData] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const [updatingLead, setUpdatingLead] = useState<string | null>(null);
+
+  useEffect(() => {
+    loadLeads();
+  }, []);
+
+  async function loadLeads() {
+    try {
+      const response = await fetch('/api/admin/leads');
+      const result = await response.json();
+      if (response.ok) {
+        setData(result);
+      } else {
+        console.error('Error loading leads:', result.error);
+      }
+    } catch (error) {
+      console.error('Error loading leads:', error);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function updateLeadStatus(leadId: string, leadType: 'consultation' | 'demo', newStatus: string) {
+    setUpdatingLead(leadId);
+    try {
+      const response = await fetch('/api/admin/leads', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          lead_id: leadId,
+          lead_type: leadType,
+          status: newStatus,
+        }),
+      });
+
+      if (response.ok) {
+        await loadLeads();
+      } else {
+        const error = await response.json();
+        alert(`Error updating lead: ${error.error}`);
+      }
+    } catch (error: any) {
+      alert(`Error updating lead: ${error.message}`);
+    } finally {
+      setUpdatingLead(null);
+    }
+  }
+
+  if (loading) {
+    return <div className="text-center py-12 text-slate-600 dark:text-slate-400">Loading leads...</div>;
+  }
+
+  if (!data) {
+    return <div className="text-center py-12 text-red-600 dark:text-red-400">Failed to load leads</div>;
+  }
+
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    });
+  };
+
+  const getStatusBadge = (status: string) => {
+    const statusColors: Record<string, string> = {
+      pending: 'bg-yellow-100 dark:bg-yellow-500/20 text-yellow-700 dark:text-yellow-400',
+      contacted: 'bg-blue-100 dark:bg-blue-500/20 text-blue-700 dark:text-blue-400',
+      scheduled: 'bg-cyan-100 dark:bg-cyan-500/20 text-cyan-700 dark:text-cyan-400',
+      demo_scheduled: 'bg-cyan-100 dark:bg-cyan-500/20 text-cyan-700 dark:text-cyan-400',
+      completed: 'bg-green-100 dark:bg-green-500/20 text-green-700 dark:text-green-400',
+      demo_completed: 'bg-green-100 dark:bg-green-500/20 text-green-700 dark:text-green-400',
+      proposal_sent: 'bg-purple-100 dark:bg-purple-500/20 text-purple-700 dark:text-purple-400',
+      won: 'bg-emerald-100 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-400',
+      lost: 'bg-red-100 dark:bg-red-500/20 text-red-700 dark:text-red-400',
+      canceled: 'bg-slate-100 dark:bg-slate-500/20 text-slate-700 dark:text-slate-400',
+      no_show: 'bg-slate-100 dark:bg-slate-500/20 text-slate-700 dark:text-slate-400',
+    };
+
+    return (
+      <span className={`px-2 py-1 rounded-full text-xs font-medium ${statusColors[status] || 'bg-slate-100 text-slate-700'}`}>
+        {status.replace('_', ' ')}
+      </span>
+    );
+  };
+
+  return (
+    <div className="space-y-6">
+      {/* Header */}
+      <div>
+        <h2 className="text-2xl font-bold text-slate-900 dark:text-slate-100">Lead Management</h2>
+        <p className="text-sm text-slate-600 dark:text-slate-400">Track consultation bookings and enterprise demo requests</p>
+      </div>
+
+      {/* Summary Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        {/* Total Leads */}
+        <div className="bg-gradient-to-br from-cyan-50 to-blue-50 dark:from-cyan-950/20 dark:to-blue-950/20 rounded-xl border border-cyan-200 dark:border-cyan-800 p-6">
+          <div className="flex items-center justify-between mb-2">
+            <div className="text-sm font-medium text-cyan-700 dark:text-cyan-400">Total Leads</div>
+            <UserPlus className="h-5 w-5 text-cyan-600 dark:text-cyan-400" />
+          </div>
+          <div className="text-3xl font-bold text-cyan-900 dark:text-cyan-100 mb-1">
+            {data.summary.total_leads}
+          </div>
+          <div className="text-xs text-cyan-600 dark:text-cyan-400">
+            {data.summary.consultations_count} consultations • {data.summary.demos_count} demos
+          </div>
+        </div>
+
+        {/* Pending */}
+        <div className="bg-gradient-to-br from-yellow-50 to-amber-50 dark:from-yellow-950/20 dark:to-amber-950/20 rounded-xl border border-yellow-200 dark:border-yellow-800 p-6">
+          <div className="flex items-center justify-between mb-2">
+            <div className="text-sm font-medium text-yellow-700 dark:text-yellow-400">Pending</div>
+            <Clock className="h-5 w-5 text-yellow-600 dark:text-yellow-400" />
+          </div>
+          <div className="text-3xl font-bold text-yellow-900 dark:text-yellow-100 mb-1">
+            {data.summary.pending}
+          </div>
+          <div className="text-xs text-yellow-600 dark:text-yellow-400">Awaiting follow-up</div>
+        </div>
+
+        {/* Scheduled */}
+        <div className="bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-950/20 dark:to-emerald-950/20 rounded-xl border border-green-200 dark:border-green-800 p-6">
+          <div className="flex items-center justify-between mb-2">
+            <div className="text-sm font-medium text-green-700 dark:text-green-400">Scheduled</div>
+            <CalendarIcon className="h-5 w-5 text-green-600 dark:text-green-400" />
+          </div>
+          <div className="text-3xl font-bold text-green-900 dark:text-green-100 mb-1">
+            {data.summary.scheduled}
+          </div>
+          <div className="text-xs text-green-600 dark:text-green-400">Meetings booked</div>
+        </div>
+
+        {/* Quick Actions */}
+        <div className="bg-gradient-to-br from-purple-50 to-violet-50 dark:from-purple-950/20 dark:to-violet-950/20 rounded-xl border border-purple-200 dark:border-purple-800 p-6">
+          <div className="flex items-center justify-between mb-2">
+            <div className="text-sm font-medium text-purple-700 dark:text-purple-400">Quick Stats</div>
+            <Building2 className="h-5 w-5 text-purple-600 dark:text-purple-400" />
+          </div>
+          <div className="space-y-1">
+            <div className="text-sm text-purple-900 dark:text-purple-100">
+              <span className="font-semibold">{data.consultations.filter((c: any) => c.company_name).length}</span>
+              <span className="text-xs text-purple-600 dark:text-purple-400 ml-1">with companies</span>
+            </div>
+            <div className="text-sm text-purple-900 dark:text-purple-100">
+              <span className="font-semibold">{data.consultations.filter((c: any) => c.phone).length + data.demos.filter((d: any) => d.phone).length}</span>
+              <span className="text-xs text-purple-600 dark:text-purple-400 ml-1">with phone</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Consultation Bookings Table */}
+      <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 overflow-hidden">
+        <div className="px-6 py-4 border-b border-slate-200 dark:border-slate-800">
+          <div className="flex items-center gap-2">
+            <Phone className="h-5 w-5 text-slate-600 dark:text-slate-400" />
+            <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100">
+              Consultation Bookings ({data.consultations.length})
+            </h3>
+          </div>
+        </div>
+        <div className="overflow-x-auto">
+          <table className="w-full">
+            <thead className="bg-slate-50 dark:bg-slate-800/50">
+              <tr>
+                <th className="px-6 py-3 text-left text-xs font-medium text-slate-700 dark:text-slate-300 uppercase">Contact</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-slate-700 dark:text-slate-300 uppercase">Company</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-slate-700 dark:text-slate-300 uppercase">Size</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-slate-700 dark:text-slate-300 uppercase">Budget</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-slate-700 dark:text-slate-300 uppercase">Status</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-slate-700 dark:text-slate-300 uppercase">Source</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-slate-700 dark:text-slate-300 uppercase">Created</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-slate-700 dark:text-slate-300 uppercase">Actions</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-200 dark:divide-slate-800">
+              {data.consultations.length === 0 ? (
+                <tr>
+                  <td colSpan={8} className="px-6 py-8 text-center text-sm text-slate-500 dark:text-slate-400">
+                    No consultation bookings yet
+                  </td>
+                </tr>
+              ) : (
+                data.consultations.map((consultation: any) => (
+                  <tr key={consultation.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/50">
+                    <td className="px-6 py-4">
+                      <div className="text-sm font-medium text-slate-900 dark:text-slate-100">{consultation.full_name || 'N/A'}</div>
+                      <div className="text-xs text-slate-500 dark:text-slate-500">{consultation.email}</div>
+                      {consultation.phone && <div className="text-xs text-slate-500 dark:text-slate-500">{consultation.phone}</div>}
+                    </td>
+                    <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-400">{consultation.company_name || '-'}</td>
+                    <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-400">{consultation.company_size || '-'}</td>
+                    <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-400">{consultation.budget_range || '-'}</td>
+                    <td className="px-6 py-4">
+                      <select
+                        value={consultation.status}
+                        onChange={(e) => updateLeadStatus(consultation.id, 'consultation', e.target.value)}
+                        disabled={updatingLead === consultation.id}
+                        className="text-xs px-2 py-1 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-cyan-500"
+                      >
+                        <option value="pending">Pending</option>
+                        <option value="scheduled">Scheduled</option>
+                        <option value="completed">Completed</option>
+                        <option value="canceled">Canceled</option>
+                        <option value="no_show">No Show</option>
+                      </select>
+                    </td>
+                    <td className="px-6 py-4 text-xs text-slate-500 dark:text-slate-500">
+                      {consultation.utm_source || consultation.utm_medium ? (
+                        <div>
+                          {consultation.utm_source && <div>Source: {consultation.utm_source}</div>}
+                          {consultation.utm_medium && <div>Medium: {consultation.utm_medium}</div>}
+                        </div>
+                      ) : (
+                        'Direct'
+                      )}
+                    </td>
+                    <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-400">{formatDate(consultation.created_at)}</td>
+                    <td className="px-6 py-4">
+                      <a
+                        href={`mailto:${consultation.email}`}
+                        className="inline-flex items-center gap-1 text-xs text-cyan-600 dark:text-cyan-400 hover:text-cyan-700 dark:hover:text-cyan-300"
+                      >
+                        <Mail className="h-3.5 w-3.5" />
+                        Email
+                      </a>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      {/* Enterprise Demo Requests Table */}
+      <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 overflow-hidden">
+        <div className="px-6 py-4 border-b border-slate-200 dark:border-slate-800">
+          <div className="flex items-center gap-2">
+            <Building2 className="h-5 w-5 text-slate-600 dark:text-slate-400" />
+            <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100">
+              Enterprise Demo Requests ({data.demos.length})
+            </h3>
+          </div>
+        </div>
+        <div className="overflow-x-auto">
+          <table className="w-full">
+            <thead className="bg-slate-50 dark:bg-slate-800/50">
+              <tr>
+                <th className="px-6 py-3 text-left text-xs font-medium text-slate-700 dark:text-slate-300 uppercase">Contact</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-slate-700 dark:text-slate-300 uppercase">Company</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-slate-700 dark:text-slate-300 uppercase">Industry</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-slate-700 dark:text-slate-300 uppercase">Size</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-slate-700 dark:text-slate-300 uppercase">Users</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-slate-700 dark:text-slate-300 uppercase">Status</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-slate-700 dark:text-slate-300 uppercase">Source</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-slate-700 dark:text-slate-300 uppercase">Created</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-slate-700 dark:text-slate-300 uppercase">Actions</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-200 dark:divide-slate-800">
+              {data.demos.length === 0 ? (
+                <tr>
+                  <td colSpan={9} className="px-6 py-8 text-center text-sm text-slate-500 dark:text-slate-400">
+                    No enterprise demo requests yet
+                  </td>
+                </tr>
+              ) : (
+                data.demos.map((demo: any) => (
+                  <tr key={demo.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/50">
+                    <td className="px-6 py-4">
+                      <div className="text-sm font-medium text-slate-900 dark:text-slate-100">{demo.full_name || 'N/A'}</div>
+                      <div className="text-xs text-slate-500 dark:text-slate-500">{demo.job_title || 'N/A'}</div>
+                      <div className="text-xs text-slate-500 dark:text-slate-500">{demo.email}</div>
+                      {demo.phone && <div className="text-xs text-slate-500 dark:text-slate-500">{demo.phone}</div>}
+                    </td>
+                    <td className="px-6 py-4 text-sm font-medium text-slate-900 dark:text-slate-100">{demo.company_name}</td>
+                    <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-400">{demo.industry || '-'}</td>
+                    <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-400">{demo.company_size || '-'}</td>
+                    <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-400">{demo.estimated_users || '-'}</td>
+                    <td className="px-6 py-4">
+                      <select
+                        value={demo.status}
+                        onChange={(e) => updateLeadStatus(demo.id, 'demo', e.target.value)}
+                        disabled={updatingLead === demo.id}
+                        className="text-xs px-2 py-1 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-cyan-500"
+                      >
+                        <option value="pending">Pending</option>
+                        <option value="contacted">Contacted</option>
+                        <option value="demo_scheduled">Demo Scheduled</option>
+                        <option value="demo_completed">Demo Completed</option>
+                        <option value="proposal_sent">Proposal Sent</option>
+                        <option value="won">Won</option>
+                        <option value="lost">Lost</option>
+                      </select>
+                    </td>
+                    <td className="px-6 py-4 text-xs text-slate-500 dark:text-slate-500">
+                      {demo.utm_source || demo.utm_medium ? (
+                        <div>
+                          {demo.utm_source && <div>Source: {demo.utm_source}</div>}
+                          {demo.utm_medium && <div>Medium: {demo.utm_medium}</div>}
+                        </div>
+                      ) : (
+                        'Direct'
+                      )}
+                    </td>
+                    <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-400">{formatDate(demo.created_at)}</td>
+                    <td className="px-6 py-4">
+                      <a
+                        href={`mailto:${demo.email}`}
+                        className="inline-flex items-center gap-1 text-xs text-cyan-600 dark:text-cyan-400 hover:text-cyan-700 dark:hover:text-cyan-300"
+                      >
+                        <Mail className="h-3.5 w-3.5" />
+                        Email
+                      </a>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
     </div>
   );
 }
