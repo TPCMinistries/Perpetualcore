@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Check, Zap, Crown, Building2, Sparkles, ArrowRight, Users, Briefcase, Star, Rocket } from "lucide-react";
+import { Check, Zap, Crown, Building2, Sparkles, ArrowRight, Users, Briefcase, Rocket } from "lucide-react";
 import { toast } from "sonner";
 import { PublicMobileNav } from "@/components/layout/PublicMobileNav";
 
@@ -361,22 +361,21 @@ export default function PricingPage() {
             </button>
           </div>
 
-          {/* Trust Signals */}
+          {/* Guarantees */}
           <div className="mt-8 flex flex-wrap items-center justify-center gap-6 sm:gap-8 text-sm text-muted-foreground">
             <div className="flex items-center gap-2">
-              <Star className="h-5 w-5 text-yellow-500 fill-yellow-500" />
-              <span className="font-semibold text-foreground">4.9/5</span>
-              <span className="hidden sm:inline">from 500+ users</span>
+              <Check className="h-5 w-5 text-green-500" />
+              <span className="font-medium text-foreground">14-day free trial</span>
             </div>
             <div className="hidden sm:block h-4 w-px bg-border" />
             <div className="flex items-center gap-2">
               <Check className="h-5 w-5 text-green-500" />
-              <span><strong className="text-foreground">85%</strong> team adoption rate</span>
+              <span className="font-medium text-foreground">No credit card required</span>
             </div>
             <div className="hidden sm:block h-4 w-px bg-border" />
             <div className="flex items-center gap-2">
-              <Zap className="h-5 w-5 text-blue-500" />
-              <span><strong className="text-foreground">60-90 day</strong> ROI</span>
+              <Check className="h-5 w-5 text-green-500" />
+              <span className="font-medium text-foreground">Cancel anytime</span>
             </div>
           </div>
         </div>
