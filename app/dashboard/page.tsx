@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { ActivityFeed } from "@/components/activity/ActivityFeed";
 import { CoachingSection } from "@/components/ai-coach/CoachingSection";
 import { QuickActions } from "@/components/dashboard/QuickActions";
+import { DashboardWithOnboarding } from "@/components/dashboard/DashboardWithOnboarding";
 import {
   ArrowRight,
   Sparkles,
@@ -21,6 +22,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { getIndustryConfig } from "@/lib/dashboard/industry-config";
+import { getDashboardMetrics } from "@/lib/dashboard/metrics";
 
 export default async function DashboardPage() {
   const user = await getUser();
@@ -31,10 +33,14 @@ export default async function DashboardPage() {
 
   const profile = await getUserProfile();
 
-  const industry = "personal";
+  // Use profile's industry if set, otherwise default to "personal"
+  const industry = profile?.industry || "personal";
   const config = getIndustryConfig(industry);
 
   const IconComponent = config.icon;
+
+  // Fetch real metrics from database
+  const metricsData = await getDashboardMetrics();
 
   // AI Insights Data
   const insights = [
@@ -64,13 +70,13 @@ export default async function DashboardPage() {
     },
   ];
 
-  // Metrics Data - Enterprise color strategy
+  // Metrics Data - Enterprise color strategy with real data from database
   const metrics = [
     {
       title: "AI Conversations",
-      value: "47",
-      change: 24.1,
-      trend: "up" as const,
+      value: String(metricsData.conversations.value),
+      change: metricsData.conversations.change,
+      trend: metricsData.conversations.trend,
       icon: Brain,
       description: "This month",
       gradient: "from-blue-600 to-blue-700", // Primary brand: Deep trustworthy blue
@@ -78,9 +84,9 @@ export default async function DashboardPage() {
     },
     {
       title: "Documents Processed",
-      value: "12",
-      change: 15.3,
-      trend: "up" as const,
+      value: String(metricsData.documents.value),
+      change: metricsData.documents.change,
+      trend: metricsData.documents.trend,
       icon: BarChart3,
       description: "This week",
       gradient: "from-blue-500 to-blue-600", // Core usage: Soft primary blue
@@ -88,9 +94,9 @@ export default async function DashboardPage() {
     },
     {
       title: "Time Saved",
-      value: "8h",
-      change: 31.5,
-      trend: "up" as const,
+      value: metricsData.timeSaved.value,
+      change: metricsData.timeSaved.change,
+      trend: metricsData.timeSaved.trend,
       icon: Zap,
       description: "Estimated this week",
       gradient: "from-emerald-600 to-teal-600", // Efficiency: Emerald green/teal
@@ -98,9 +104,9 @@ export default async function DashboardPage() {
     },
     {
       title: "Active Workflows",
-      value: "3",
-      change: 0,
-      trend: "up" as const,
+      value: String(metricsData.activeWorkflows.value),
+      change: metricsData.activeWorkflows.change,
+      trend: metricsData.activeWorkflows.trend,
       icon: ActivityIcon,
       description: "Running now",
       gradient: "from-slate-600 to-slate-700", // Neutral: Professional gray
@@ -142,6 +148,7 @@ export default async function DashboardPage() {
   }
 
   return (
+    <DashboardWithOnboarding>
     <div className="space-y-12 pb-16">
       {/* Hero Section - Premium & Elegant */}
       <div className="relative overflow-hidden">
@@ -404,5 +411,6 @@ export default async function DashboardPage() {
         </CardContent>
       </Card>
     </div>
+    </DashboardWithOnboarding>
   );
 }
