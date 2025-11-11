@@ -261,38 +261,60 @@ export default function AssistantsPage() {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="border border-slate-200 dark:border-slate-800 rounded-xl p-8 bg-white dark:bg-slate-900">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <div className="h-12 w-12 rounded-lg bg-slate-900 dark:bg-slate-100 flex items-center justify-center">
-              <Brain className="h-6 w-6 text-white dark:text-slate-900" />
+      {/* Premium Header */}
+      <div className="relative overflow-hidden border border-slate-200 dark:border-slate-800 rounded-2xl bg-gradient-to-br from-slate-50 via-white to-slate-50 dark:from-slate-900 dark:via-slate-900 dark:to-slate-800">
+        <div className="absolute inset-0 bg-grid-slate-200/50 dark:bg-grid-slate-700/50 [mask-image:linear-gradient(0deg,transparent,black)]"></div>
+        <div className="relative p-8">
+          <div className="flex items-start justify-between">
+            <div className="flex items-start gap-5">
+              <div className="h-16 w-16 rounded-2xl bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 flex items-center justify-center shadow-lg shadow-indigo-500/50">
+                <Users className="h-8 w-8 text-white" />
+              </div>
+              <div className="max-w-2xl">
+                <h1 className="text-4xl font-bold text-slate-900 dark:text-slate-100 mb-2">
+                  Your AI Executive Suite
+                </h1>
+                <p className="text-lg text-slate-600 dark:text-slate-400 leading-relaxed">
+                  Build your dream team with 14 executive-level AI specialists. Get instant access to world-class expertise in strategy, sales, marketing, operations, legal, HR, and more—without the $2M+ annual cost of hiring a full C-suite.
+                </p>
+                <div className="mt-4 flex flex-wrap gap-4 text-sm text-slate-600 dark:text-slate-400">
+                  <div className="flex items-center gap-2">
+                    <CheckCircle2 className="h-4 w-4 text-green-600 dark:text-green-400" />
+                    <span>Available 24/7</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <CheckCircle2 className="h-4 w-4 text-green-600 dark:text-green-400" />
+                    <span>Zero onboarding time</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <CheckCircle2 className="h-4 w-4 text-green-600 dark:text-green-400" />
+                    <span>Infinite scalability</span>
+                  </div>
+                </div>
+              </div>
             </div>
-            <div>
-              <h1 className="text-3xl font-semibold text-slate-900 dark:text-slate-100">
-                AI Assistants
-              </h1>
-              <p className="text-slate-600 dark:text-slate-400 mt-1">
-                Create custom AI assistants tailored to specific roles and tasks
-              </p>
+            <div className="flex flex-col gap-2">
+              <Button
+                onClick={seedStarterAssistants}
+                disabled={actionLoading === "seed"}
+                className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white shadow-lg shadow-indigo-500/30 min-w-[200px]"
+                size="lg"
+              >
+                <Sparkles className="mr-2 h-5 w-5" />
+                {actionLoading === "seed" ? "Building Your Team..." : "Build Your Executive Team"}
+              </Button>
+              <Button
+                asChild
+                variant="outline"
+                className="border-slate-200 dark:border-slate-800"
+                size="lg"
+              >
+                <Link href="/dashboard/assistants/browse">
+                  <Plus className="mr-2 h-4 w-4" />
+                  Create Custom Role
+                </Link>
+              </Button>
             </div>
-          </div>
-          <div className="flex gap-2">
-            <Button
-              variant="outline"
-              onClick={seedStarterAssistants}
-              disabled={actionLoading === "seed"}
-              className="border-slate-200 dark:border-slate-800"
-            >
-              <Sparkles className="mr-2 h-4 w-4" />
-              {actionLoading === "seed" ? "Seeding..." : "Seed Starter Assistants"}
-            </Button>
-            <Button asChild className="bg-slate-900 dark:bg-slate-100 hover:bg-slate-800 dark:hover:bg-slate-200 text-white dark:text-slate-900">
-              <Link href="/dashboard/assistants/browse">
-                <Plus className="mr-2 h-4 w-4" />
-                Create Assistant
-              </Link>
-            </Button>
           </div>
         </div>
       </div>
@@ -302,11 +324,11 @@ export default function AssistantsPage() {
         <Card className="p-6 border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-slate-600 dark:text-slate-400">Total Assistants</p>
+              <p className="text-sm text-slate-600 dark:text-slate-400">Team Members</p>
               <p className="text-3xl font-semibold text-slate-900 dark:text-slate-100 mt-1">{stats.total}</p>
             </div>
             <div className="h-10 w-10 rounded-lg bg-indigo-50 dark:bg-indigo-950/30 flex items-center justify-center">
-              <Bot className="h-5 w-5 text-indigo-600 dark:text-indigo-400" />
+              <Users className="h-5 w-5 text-indigo-600 dark:text-indigo-400" />
             </div>
           </div>
         </Card>
@@ -314,7 +336,7 @@ export default function AssistantsPage() {
         <Card className="p-6 border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-slate-600 dark:text-slate-400">Active</p>
+              <p className="text-sm text-slate-600 dark:text-slate-400">Active Executives</p>
               <p className="text-3xl font-semibold text-slate-900 dark:text-slate-100 mt-1">{stats.active}</p>
             </div>
             <div className="h-10 w-10 rounded-lg bg-green-50 dark:bg-green-950/30 flex items-center justify-center">
@@ -326,7 +348,7 @@ export default function AssistantsPage() {
         <Card className="p-6 border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-slate-600 dark:text-slate-400">Conversations</p>
+              <p className="text-sm text-slate-600 dark:text-slate-400">Strategic Sessions</p>
               <p className="text-3xl font-semibold text-slate-900 dark:text-slate-100 mt-1">{stats.total_conversations}</p>
             </div>
             <div className="h-10 w-10 rounded-lg bg-purple-50 dark:bg-purple-950/30 flex items-center justify-center">
@@ -338,11 +360,11 @@ export default function AssistantsPage() {
         <Card className="p-6 border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-slate-600 dark:text-slate-400">Total Messages</p>
+              <p className="text-sm text-slate-600 dark:text-slate-400">Expert Insights</p>
               <p className="text-3xl font-semibold text-slate-900 dark:text-slate-100 mt-1">{stats.total_messages}</p>
             </div>
             <div className="h-10 w-10 rounded-lg bg-orange-50 dark:bg-orange-950/30 flex items-center justify-center">
-              <TrendingUp className="h-5 w-5 text-orange-600 dark:text-orange-400" />
+              <Brain className="h-5 w-5 text-orange-600 dark:text-orange-400" />
             </div>
           </div>
         </Card>
@@ -474,16 +496,16 @@ export default function AssistantsPage() {
       {/* Assistants Grid */}
       {assistants.length === 0 ? (
         <EmptyState
-          icon={Bot}
-          title="No assistants yet"
-          description="Create custom AI assistants tailored to your specific needs, or get started with our 8 pre-configured starter assistants"
+          icon={Users}
+          title="Build Your AI Executive Team"
+          description="Get instant access to 14 world-class executives—CEO, CFO, CMO, Legal, HR, Operations, and more. Replace $2M+ in annual salaries with AI expertise available 24/7."
           action={{
-            label: "Create Your First Assistant",
-            href: "/dashboard/assistants/create",
+            label: actionLoading === "seed" ? "Building Your Team..." : "Build Your Executive Team",
+            onClick: seedStarterAssistants,
           }}
           secondaryAction={{
-            label: actionLoading === "seed" ? "Creating..." : "Seed 8 Starter Assistants",
-            onClick: seedStarterAssistants,
+            label: "Create Custom Role",
+            href: "/dashboard/assistants/browse",
           }}
         />
       ) : filteredAssistants.length === 0 ? (
@@ -500,7 +522,7 @@ export default function AssistantsPage() {
         <div>
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-xl font-semibold">
-              {filteredAssistants.length} Assistant{filteredAssistants.length !== 1 ? "s" : ""}
+              {filteredAssistants.length} Executive{filteredAssistants.length !== 1 ? "s" : ""} on Your Team
             </h2>
           </div>
 
