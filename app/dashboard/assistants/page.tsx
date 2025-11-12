@@ -232,7 +232,7 @@ export default function AssistantsPage() {
                   Executive Suite
                 </h1>
                 <p className="text-slate-600 dark:text-slate-400 mt-1 max-w-2xl">
-                  Build your AI executive team with 14 specialist advisors across strategy, sales, marketing, operations, legal, HR, and more.
+                  Build your AI executive team with 15 specialist advisors across strategy, sales, marketing, operations, legal, HR, and more.
                 </p>
               </div>
             </div>
@@ -393,7 +393,7 @@ export default function AssistantsPage() {
         <EmptyState
           icon={Users}
           title="Build Your Executive Team"
-          description="Get instant access to 14 executive-level AI specialists—CEO, CFO, CMO, Legal, HR, Operations, and more."
+          description="Get instant access to 15 executive-level AI specialists—CEO, CFO, Legal, HR, Sales, Marketing, Social Media, Operations, and more."
           action={{
             label: actionLoading === "seed" ? "Building Team..." : "Build Executive Team",
             onClick: seedStarterAssistants,

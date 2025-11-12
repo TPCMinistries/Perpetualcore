@@ -184,7 +184,7 @@ export const NAVIGATION_CONFIG: NavigationSection[] = [
         adaptiveConfig: {
           visibleFor: ["beginner", "intermediate", "advanced"],
           complexity: "standard",
-          helpText: "Build your AI executive team - 14 specialists including CEO, CFO, Legal, HR, Sales, Marketing, and more",
+          helpText: "Build your AI executive team - 15 specialist advisors including CEO, CFO, Legal, HR, Sales, Marketing, Social Media, and more",
         },
       },
       {
