@@ -222,22 +222,26 @@ export default function AssistantChatPage() {
   return (
     <div className="flex flex-col h-[calc(100vh-8rem)]">
       {/* Header */}
-      <div className="border-b bg-card p-4">
+      <div className="border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 p-4">
         <Button variant="ghost" size="sm" asChild className="mb-2">
           <Link href="/dashboard/assistants">
             <ArrowLeft className="mr-2 h-4 w-4" />
-            Back to Assistants
+            Back to Executive Suite
           </Link>
         </Button>
         <div className="flex items-center gap-3">
-          <div className="text-4xl">{assistant.avatar_emoji}</div>
+          <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-blue-600 to-blue-700 flex items-center justify-center text-2xl">
+            {assistant.avatar_emoji}
+          </div>
           <div className="flex-1">
-            <h1 className="text-2xl font-bold">{assistant.name}</h1>
-            <p className="text-sm text-muted-foreground">
+            <h1 className="text-2xl font-semibold text-slate-900 dark:text-slate-100">{assistant.name}</h1>
+            <p className="text-sm text-slate-600 dark:text-slate-400">
               {assistant.description}
             </p>
           </div>
-          <Badge variant="outline">{assistant.role.replace("_", " ")}</Badge>
+          <Badge variant="outline" className="border-blue-200 dark:border-blue-800 text-blue-700 dark:text-blue-300">
+            {assistant.role.replace("_", " ")}
+          </Badge>
         </div>
       </div>
 
@@ -264,8 +268,8 @@ export default function AssistantChatPage() {
             <Card
               className={`max-w-[80%] p-4 ${
                 message.role === "user"
-                  ? "bg-primary text-primary-foreground"
-                  : "bg-card"
+                  ? "bg-gradient-to-br from-blue-600 to-blue-700 text-white border-blue-600"
+                  : "bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800"
               }`}
             >
               <div className="whitespace-pre-wrap break-words">
@@ -273,8 +277,8 @@ export default function AssistantChatPage() {
               </div>
 
               {message.role === "assistant" && (
-                <div className="flex items-center gap-1 mt-2 pt-2 border-t">
-                  <span className="text-xs text-muted-foreground mr-2">
+                <div className="flex items-center gap-1 mt-2 pt-2 border-t border-slate-200 dark:border-slate-700">
+                  <span className="text-xs text-slate-600 dark:text-slate-400 mr-2">
                     Rate this response:
                   </span>
                   {[1, 2, 3, 4, 5].map((rating) => (
@@ -287,7 +291,7 @@ export default function AssistantChatPage() {
                         className={`h-3 w-3 ${
                           message.rating && message.rating >= rating
                             ? "fill-yellow-500 text-yellow-500"
-                            : "text-muted-foreground"
+                            : "text-slate-400 dark:text-slate-600"
                         }`}
                       />
                     </button>
@@ -295,7 +299,11 @@ export default function AssistantChatPage() {
                 </div>
               )}
 
-              <div className="text-xs text-muted-foreground mt-2">
+              <div className={`text-xs mt-2 ${
+                message.role === "user"
+                  ? "text-blue-100"
+                  : "text-slate-500 dark:text-slate-500"
+              }`}>
                 {new Date(message.created_at).toLocaleTimeString()}
               </div>
             </Card>
@@ -321,14 +329,14 @@ export default function AssistantChatPage() {
       </div>
 
       {/* Input */}
-      <div className="border-t bg-card p-4">
+      <div className="border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 p-4">
         <div className="flex gap-2">
           <Textarea
             value={inputMessage}
             onChange={(e) => setInputMessage(e.target.value)}
             onKeyDown={handleKeyDown}
             placeholder={`Message ${assistant.name}...`}
-            className="resize-none"
+            className="resize-none border-slate-200 dark:border-slate-800 focus:border-blue-500 dark:focus:border-blue-500"
             rows={3}
             disabled={sending}
           />
@@ -336,7 +344,7 @@ export default function AssistantChatPage() {
             onClick={sendMessage}
             disabled={!inputMessage.trim() || sending}
             size="icon"
-            className="h-full"
+            className="h-full bg-gradient-to-br from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white"
           >
             {sending ? (
               <Loader2 className="h-4 w-4 animate-spin" />
@@ -345,7 +353,7 @@ export default function AssistantChatPage() {
             )}
           </Button>
         </div>
-        <p className="text-xs text-muted-foreground mt-2">
+        <p className="text-xs text-slate-600 dark:text-slate-400 mt-2">
           Press Enter to send, Shift+Enter for new line
         </p>
       </div>
