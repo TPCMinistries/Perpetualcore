@@ -161,6 +161,33 @@ export default function NewAgentPage() {
         </div>
       </div>
 
+      {/* How AI Agents Work - Info Card */}
+      <Card className="max-w-3xl border-slate-200 dark:border-slate-800 bg-gradient-to-br from-purple-50 to-blue-50 dark:from-purple-950/20 dark:to-blue-950/20">
+        <CardHeader>
+          <CardTitle className="text-lg text-slate-900 dark:text-slate-100">
+            How AI Agents Work
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-3 text-sm text-slate-700 dark:text-slate-300">
+          <p>
+            <strong>Proactive Monitoring:</strong> Your agent runs automatically in the
+            background, monitoring its assigned domain (emails, calendar, documents, etc.)
+          </p>
+          <p>
+            <strong>Intelligent Analysis:</strong> Uses AI to analyze content and determine
+            what requires action or attention
+          </p>
+          <p>
+            <strong>Task Creation:</strong> Automatically creates tasks for you when it
+            identifies actionable items
+          </p>
+          <p>
+            <strong>Always Learning:</strong> Agents improve over time based on your
+            feedback and usage patterns
+          </p>
+        </CardContent>
+      </Card>
+
       {/* Form */}
       <form onSubmit={handleSubmit} className="max-w-3xl">
         <Card className="border-slate-200 dark:border-slate-800">
@@ -304,33 +331,6 @@ export default function NewAgentPage() {
           </CardContent>
         </Card>
       </form>
-
-      {/* Help Card */}
-      <Card className="max-w-3xl border-slate-200 dark:border-slate-800 bg-gradient-to-br from-purple-50 to-blue-50 dark:from-purple-950/20 dark:to-blue-950/20">
-        <CardHeader>
-          <CardTitle className="text-lg text-slate-900 dark:text-slate-100">
-            How AI Agents Work
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-3 text-sm text-slate-700 dark:text-slate-300">
-          <p>
-            <strong>Proactive Monitoring:</strong> Your agent runs automatically in the
-            background, monitoring its assigned domain (emails, calendar, documents, etc.)
-          </p>
-          <p>
-            <strong>Intelligent Analysis:</strong> Uses AI to analyze content and determine
-            what requires action or attention
-          </p>
-          <p>
-            <strong>Task Creation:</strong> Automatically creates tasks for you when it
-            identifies actionable items
-          </p>
-          <p>
-            <strong>Always Learning:</strong> Agents improve over time based on your
-            feedback and usage patterns
-          </p>
-        </CardContent>
-      </Card>
     </div>
   );
 }
