@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Sparkles, GraduationCap, FileText } from "lucide-react";
+import { Sparkles, ClipboardList, FileText } from "lucide-react";
 import { GenerateContentModal } from "@/components/documents/GenerateContentModal";
 import { useRouter } from "next/navigation";
 
@@ -28,17 +28,17 @@ export function QuickActions() {
           </div>
         </Link>
 
-        {/* Secondary CTA - Execute Task */}
+        {/* Secondary CTA - Manage Tasks */}
         <Link href="/dashboard/tasks" className="w-full group active:scale-[0.98] transition-transform">
           <div className="relative h-20 md:h-16 rounded-xl bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 hover:bg-slate-800 dark:hover:bg-slate-200 transition-all shadow-lg hover:shadow-xl overflow-hidden touch-manipulation">
             <div className="absolute inset-0 bg-gradient-to-r from-emerald-600/10 via-emerald-500/10 to-teal-600/10 opacity-0 group-hover:opacity-100 transition-opacity" />
             <div className="relative h-full flex flex-col items-center justify-center gap-1 px-4">
               <div className="flex items-center gap-2.5 text-base md:text-base font-semibold">
-                <GraduationCap className="h-5 w-5 md:h-5 md:w-5" />
-                Execute Task
+                <ClipboardList className="h-5 w-5 md:h-5 md:w-5" />
+                Manage Tasks
               </div>
-              <p className="text-xs opacity-90 text-center hidden sm:block">Agent-powered workflow execution</p>
-              <p className="text-xs opacity-90 text-center sm:hidden">AI agent workflows</p>
+              <p className="text-xs opacity-90 text-center hidden sm:block">Track and complete your work</p>
+              <p className="text-xs opacity-90 text-center sm:hidden">Track your work</p>
             </div>
           </div>
         </Link>

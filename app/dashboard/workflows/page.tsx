@@ -192,7 +192,7 @@ export default function WorkflowsPage() {
                 Workflows
               </h1>
               <p className="text-slate-600 dark:text-slate-400 text-sm mt-1">
-                Automate tasks by connecting multiple AI assistants
+                Multi-step automation recipes that orchestrate complex processes
               </p>
             </div>
           </div>
@@ -250,7 +250,7 @@ export default function WorkflowsPage() {
           <EmptyState
             icon={Workflow}
             title={workflows.length === 0 ? "No workflows yet" : "No workflows found"}
-            description={workflows.length === 0 ? "Create your first workflow to automate tasks" : "Try a different search term or category"}
+            description={workflows.length === 0 ? "Workflows break complex processes into sequential steps (like onboarding employees or launching products). Start with a template or build your own." : "Try a different search term or category"}
           />
           {workflows.length === 0 && (
             <div className="flex gap-2 justify-center mt-6">

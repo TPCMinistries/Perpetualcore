@@ -238,7 +238,7 @@ export default function AgentsPage() {
                 AI Agents
               </h1>
               <p className="text-slate-600 dark:text-slate-400 mt-1">
-                Autonomous workers that monitor and act on your behalf
+                Proactive assistants that monitor your work and automatically create tasks
               </p>
             </div>
           </div>
@@ -464,7 +464,7 @@ export default function AgentsPage() {
         <EmptyState
           icon={Bot}
           title="No AI agents yet"
-          description="Create your first AI agent to automate tasks and work smarter. Start from a template or build a custom agent tailored to your needs."
+          description="Agents monitor your work (emails, calendar, documents) and automatically create tasks in your Tasks page. They're proactive assistants that notice what needs to be done."
           action={{
             label: "Create Agent",
             onClick: () => (window.location.href = "/dashboard/agents/new"),

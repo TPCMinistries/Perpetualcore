@@ -1,24 +1,28 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { useRouter } from "next/navigation"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
-import { Badge } from "@/components/ui/badge"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Switch } from "@/components/ui/switch";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
-import { Slider } from "@/components/ui/slider"
-import { Switch } from "@/components/ui/switch"
-import { Checkbox } from "@/components/ui/checkbox"
+  ArrowLeft,
+  Activity,
+  CheckCircle2,
+  XCircle,
+  TrendingUp,
+  Clock,
+  Sparkles,
+  Loader2,
+  Settings as SettingsIcon,
+  Trash2,
+  Play,
+  BarChart3,
+} from "lucide-react";
+import { toast } from "sonner";
+import Link from "next/link";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -29,214 +33,299 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from "@/components/ui/alert-dialog"
-import { toast } from "sonner"
-import {
-  Bot,
-  Save,
-  Trash2,
-  Play,
-  Settings,
-  History,
-  Code,
-  Zap,
-  ArrowLeft,
-  Activity,
-  Clock,
-  CheckCircle2,
-  XCircle,
-  TrendingUp,
-  MessageSquare,
-  Send,
-  Loader2,
-} from "lucide-react"
+} from "@/components/ui/alert-dialog";
+
+interface Agent {
+  id: string;
+  name: string;
+  description: string | null;
+  agent_type: string;
+  personality: string;
+  instructions: string | null;
+  enabled: boolean;
+  total_actions: number;
+  successful_actions: number;
+  failed_actions: number;
+  last_active_at: string | null;
+  created_at: string;
+}
+
+interface AgentAction {
+  id: string;
+  action_type: string;
+  action_data: any;
+  status: "success" | "failed" | "pending";
+  error_message: string | null;
+  task_id: string | null;
+  created_at: string;
+}
 
 export default function AgentDetailPage({ params }: { params: { id: string } }) {
-  const router = useRouter()
-  const [activeTab, setActiveTab] = useState("config")
-  const [isSaving, setIsSaving] = useState(false)
-  const [isTesting, setIsTesting] = useState(false)
-  const [testInput, setTestInput] = useState("")
-  const [testMessages, setTestMessages] = useState<Array<{ role: string; content: string }>>([])
+  const router = useRouter();
+  const [agent, setAgent] = useState<Agent | null>(null);
+  const [actions, setActions] = useState<AgentAction[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [deleting, setDeleting] = useState(false);
+  const [running, setRunning] = useState(false);
 
-  // Agent configuration state
-  const [config, setConfig] = useState({
-    name: "Customer Support Agent",
-    description: "Handles customer inquiries and support tickets",
-    model: "gpt-4",
-    temperature: 0.7,
-    maxTokens: 2000,
-    systemPrompt: "You are a helpful customer support agent. Be friendly, professional, and provide accurate information.",
-    status: "active",
-    tools: ["web_search", "knowledge_base", "email"],
-    autoRetry: true,
-    logConversations: true,
-  })
+  useEffect(() => {
+    fetchAgentData();
+  }, [params.id]);
 
-  // Mock run history
-  const [runs] = useState([
-    {
-      id: "1",
-      timestamp: new Date("2024-01-26T10:30:00"),
-      status: "success",
-      duration: 1.2,
-      tokensUsed: 450,
-      input: "How do I reset my password?",
-      output: "To reset your password, click on 'Forgot Password' on the login page...",
-    },
-    {
-      id: "2",
-      timestamp: new Date("2024-01-26T09:15:00"),
-      status: "success",
-      duration: 0.8,
-      tokensUsed: 320,
-      input: "What's your return policy?",
-      output: "Our return policy allows returns within 30 days of purchase...",
-    },
-    {
-      id: "3",
-      timestamp: new Date("2024-01-26T08:45:00"),
-      status: "error",
-      duration: 0.3,
-      tokensUsed: 150,
-      input: "Track my order #12345",
-      output: "Error: Unable to connect to order tracking service",
-    },
-  ])
-
-  const availableTools = [
-    { id: "web_search", label: "Web Search", description: "Search the internet for information" },
-    { id: "knowledge_base", label: "Knowledge Base", description: "Query internal documentation" },
-    { id: "email", label: "Email", description: "Send emails to users" },
-    { id: "database", label: "Database", description: "Query customer database" },
-    { id: "calendar", label: "Calendar", description: "Schedule appointments" },
-    { id: "analytics", label: "Analytics", description: "Track and analyze metrics" },
-  ]
-
-  const modelOptions = [
-    { value: "gpt-4", label: "GPT-4", description: "Most capable, slower" },
-    { value: "gpt-4-turbo", label: "GPT-4 Turbo", description: "Fast and capable" },
-    { value: "gpt-3.5-turbo", label: "GPT-3.5 Turbo", description: "Fast and cost-effective" },
-    { value: "claude-3-opus", label: "Claude 3 Opus", description: "Advanced reasoning" },
-    { value: "claude-3-sonnet", label: "Claude 3 Sonnet", description: "Balanced performance" },
-  ]
-
-  const handleSave = async () => {
-    setIsSaving(true)
+  async function fetchAgentData() {
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000))
-      toast.success("Agent configuration saved successfully")
+      // Fetch agent details
+      const agentRes = await fetch(`/api/agents/${params.id}`);
+      if (agentRes.ok) {
+        const agentData = await agentRes.json();
+        setAgent(agentData.agent);
+      }
+
+      // Fetch agent actions
+      const actionsRes = await fetch(`/api/agents/${params.id}/actions`);
+      if (actionsRes.ok) {
+        const actionsData = await actionsRes.json();
+        setActions(actionsData.actions || []);
+      }
     } catch (error) {
-      toast.error("Failed to save agent configuration")
+      console.error("Error fetching agent data:", error);
+      toast.error("Failed to load agent data");
     } finally {
-      setIsSaving(false)
+      setLoading(false);
     }
   }
 
-  const handleTest = async () => {
-    if (!testInput.trim()) {
-      toast.error("Please enter a test message")
-      return
-    }
-
-    setIsTesting(true)
-    setTestMessages([...testMessages, { role: "user", content: testInput }])
+  async function toggleAgent() {
+    if (!agent) return;
 
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 2000))
-      const response = "This is a simulated response from the agent. In production, this would be the actual agent's response based on your configuration."
-      setTestMessages(prev => [...prev, { role: "assistant", content: response }])
-      setTestInput("")
+      const response = await fetch(`/api/agents/${params.id}/toggle`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ enabled: !agent.enabled }),
+      });
+
+      if (response.ok) {
+        setAgent({ ...agent, enabled: !agent.enabled });
+        toast.success(`Agent ${!agent.enabled ? "enabled" : "disabled"}`);
+      } else {
+        toast.error("Failed to update agent");
+      }
     } catch (error) {
-      toast.error("Failed to test agent")
+      console.error("Error toggling agent:", error);
+      toast.error("Failed to update agent");
+    }
+  }
+
+  async function runAgent() {
+    if (!agent) return;
+
+    setRunning(true);
+
+    try {
+      const response = await fetch(`/api/agents/${params.id}/run`, {
+        method: "POST",
+      });
+
+      const data = await response.json();
+
+      if (response.ok && data.success) {
+        toast.success(data.message);
+        // Refresh agent data to show updated last_active_at and stats
+        fetchAgentData();
+      } else {
+        toast.error(data.error || data.message || "Failed to run agent");
+      }
+    } catch (error) {
+      console.error("Error running agent:", error);
+      toast.error("Failed to run agent");
     } finally {
-      setIsTesting(false)
+      setRunning(false);
     }
   }
 
-  const handleDelete = async () => {
+  async function deleteAgent() {
+    setDeleting(true);
+
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000))
-      toast.success("Agent deleted successfully")
-      router.push("/dashboard/agents")
+      const response = await fetch(`/api/agents/${params.id}`, {
+        method: "DELETE",
+      });
+
+      if (response.ok) {
+        toast.success("Agent deleted successfully");
+        router.push("/dashboard/agents");
+      } else {
+        toast.error("Failed to delete agent");
+        setDeleting(false);
+      }
     } catch (error) {
-      toast.error("Failed to delete agent")
+      console.error("Error deleting agent:", error);
+      toast.error("Failed to delete agent");
+      setDeleting(false);
     }
   }
 
-  const formatDuration = (seconds: number) => {
-    return `${seconds.toFixed(2)}s`
+  function getSuccessRate() {
+    if (!agent || agent.total_actions === 0) return 0;
+    return Math.round((agent.successful_actions / agent.total_actions) * 100);
   }
 
-  const formatDate = (date: Date) => {
-    return new Intl.DateTimeFormat("en-US", {
-      month: "short",
-      day: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-    }).format(date)
+  function getActionIcon(actionType: string) {
+    switch (actionType) {
+      case "create_task":
+        return "✓";
+      case "send_email":
+        return "✉";
+      case "create_reminder":
+        return "🔔";
+      case "update_document":
+        return "📄";
+      case "schedule_meeting":
+        return "📅";
+      case "analyze_sentiment":
+        return "💭";
+      case "send_notification":
+        return "🔔";
+      default:
+        return "•";
+    }
+  }
+
+  function formatActionType(type: string) {
+    return type
+      .split("_")
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(" ");
+  }
+
+  function formatTimestamp(timestamp: string) {
+    const date = new Date(timestamp);
+    const now = new Date();
+    const diffMs = now.getTime() - date.getTime();
+    const diffMins = Math.floor(diffMs / 60000);
+    const diffHours = Math.floor(diffMs / 3600000);
+    const diffDays = Math.floor(diffMs / 86400000);
+
+    if (diffMins < 60) return `${diffMins}m ago`;
+    if (diffHours < 24) return `${diffHours}h ago`;
+    return `${diffDays}d ago`;
+  }
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <Loader2 className="h-8 w-8 animate-spin text-slate-400" />
+      </div>
+    );
+  }
+
+  if (!agent) {
+    return (
+      <div className="text-center py-12">
+        <p className="text-slate-600 dark:text-slate-400">Agent not found</p>
+        <Button asChild className="mt-4">
+          <Link href="/dashboard/agents">Back to Agents</Link>
+        </Button>
+      </div>
+    );
   }
 
   return (
-    <div className="space-y-6 pb-16">
+    <div className="space-y-6">
       {/* Header */}
-      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-pink-50 via-rose-50 to-red-50 dark:from-pink-950/20 dark:via-rose-950/20 dark:to-red-950/20 border border-pink-100 dark:border-pink-900/20 p-8 shadow-lg">
-        <div className="absolute inset-0 bg-grid-pattern opacity-5"></div>
-        <div className="relative">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => router.push("/dashboard/agents")}
-            className="mb-4 text-pink-700 dark:text-pink-300 hover:bg-pink-100 dark:hover:bg-pink-900/20"
-          >
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            Back to Agents
-          </Button>
+      <div className="flex items-center gap-4">
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => router.push("/dashboard/agents")}
+          className="text-slate-600 dark:text-slate-400"
+        >
+          <ArrowLeft className="h-4 w-4 mr-2" />
+          Back to Agents
+        </Button>
+      </div>
 
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <div className="h-16 w-16 rounded-2xl bg-gradient-to-br from-pink-500 to-red-600 flex items-center justify-center shadow-lg">
-                <Bot className="h-8 w-8 text-white" />
+      {/* Agent Info Card */}
+      <Card className="border-slate-200 dark:border-slate-800">
+        <CardHeader>
+          <div className="flex items-start justify-between">
+            <div className="flex items-start gap-4">
+              <div className="h-16 w-16 rounded-xl bg-gradient-to-br from-purple-500 to-purple-700 flex items-center justify-center text-2xl">
+                🤖
               </div>
               <div>
-                <div className="flex items-center gap-3">
-                  <h1 className="text-3xl font-bold bg-gradient-to-r from-pink-900 via-rose-800 to-red-900 dark:from-pink-100 dark:via-rose-100 dark:to-red-100 bg-clip-text text-transparent">
-                    {config.name}
+                <div className="flex items-center gap-3 mb-2">
+                  <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100">
+                    {agent.name}
                   </h1>
-                  <Badge variant="outline" className="bg-green-100 dark:bg-green-900/40 border-green-300 dark:border-green-700 text-green-700 dark:text-green-300">
-                    <CheckCircle2 className="h-3 w-3 mr-1" />
-                    {config.status}
+                  <Badge
+                    variant={agent.enabled ? "default" : "secondary"}
+                    className={
+                      agent.enabled
+                        ? "bg-green-100 dark:bg-green-950 text-green-700 dark:text-green-300"
+                        : "bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300"
+                    }
+                  >
+                    {agent.enabled ? "Active" : "Paused"}
+                  </Badge>
+                  <Badge variant="outline" className="text-xs">
+                    {formatActionType(agent.agent_type)}
                   </Badge>
                 </div>
-                <p className="text-pink-700 dark:text-pink-300 mt-1">
-                  {config.description}
+                <p className="text-slate-600 dark:text-slate-400 mb-2">
+                  {agent.description || "No description provided"}
                 </p>
+                <div className="flex items-center gap-4 text-sm text-slate-600 dark:text-slate-400">
+                  <span>Personality: {agent.personality}</span>
+                  {agent.last_active_at && (
+                    <span>Last active: {formatTimestamp(agent.last_active_at)}</span>
+                  )}
+                </div>
               </div>
             </div>
             <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400">
+                <span>{agent.enabled ? "Active" : "Paused"}</span>
+                <Switch checked={agent.enabled} onCheckedChange={toggleAgent} />
+              </div>
               <Button
-                onClick={handleSave}
-                disabled={isSaving}
-                className="bg-gradient-to-r from-pink-600 to-red-600 hover:from-pink-700 hover:to-red-700"
+                variant="outline"
+                size="sm"
+                onClick={runAgent}
+                disabled={running || !agent.enabled}
+                className="border-purple-300 dark:border-purple-700 text-purple-600 dark:text-purple-400"
               >
-                {isSaving ? (
+                {running ? (
                   <>
                     <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                    Saving...
+                    Running...
                   </>
                 ) : (
                   <>
-                    <Save className="h-4 w-4 mr-2" />
-                    Save Changes
+                    <Play className="h-4 w-4 mr-2" />
+                    Run Now
                   </>
                 )}
               </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                asChild
+                className="border-slate-300 dark:border-slate-700"
+              >
+                <Link href={`/dashboard/agents/${params.id}/settings`}>
+                  <SettingsIcon className="h-4 w-4 mr-2" />
+                  Settings
+                </Link>
+              </Button>
               <AlertDialog>
                 <AlertDialogTrigger asChild>
-                  <Button variant="outline" className="border-red-200 dark:border-red-800 text-red-600 hover:bg-red-50 dark:hover:bg-red-950/20">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="border-red-300 dark:border-red-800 text-red-600 dark:text-red-400"
+                  >
                     <Trash2 className="h-4 w-4 mr-2" />
                     Delete
                   </Button>
@@ -245,454 +334,165 @@ export default function AgentDetailPage({ params }: { params: { id: string } }) 
                   <AlertDialogHeader>
                     <AlertDialogTitle>Delete Agent</AlertDialogTitle>
                     <AlertDialogDescription>
-                      Are you sure you want to delete "{config.name}"? This action cannot be undone.
-                      All associated data and history will be permanently deleted.
+                      Are you sure you want to delete "{agent.name}"? This action cannot be
+                      undone. All action history will also be deleted.
                     </AlertDialogDescription>
                   </AlertDialogHeader>
                   <AlertDialogFooter>
                     <AlertDialogCancel>Cancel</AlertDialogCancel>
                     <AlertDialogAction
-                      onClick={handleDelete}
+                      onClick={deleteAgent}
+                      disabled={deleting}
                       className="bg-red-600 hover:bg-red-700"
                     >
-                      Delete Agent
+                      {deleting ? (
+                        <>
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          Deleting...
+                        </>
+                      ) : (
+                        "Delete Agent"
+                      )}
                     </AlertDialogAction>
                   </AlertDialogFooter>
                 </AlertDialogContent>
               </AlertDialog>
             </div>
           </div>
-        </div>
+        </CardHeader>
+      </Card>
+
+      {/* Stats Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <Card className="border-slate-200 dark:border-slate-800">
+          <CardContent className="pt-6">
+            <div className="flex items-center gap-3">
+              <div className="h-10 w-10 rounded-lg bg-blue-100 dark:bg-blue-950 flex items-center justify-center">
+                <Activity className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+              </div>
+              <div>
+                <p className="text-sm text-slate-600 dark:text-slate-400">Total Actions</p>
+                <p className="text-2xl font-bold text-slate-900 dark:text-slate-100">
+                  {agent.total_actions}
+                </p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="border-slate-200 dark:border-slate-800">
+          <CardContent className="pt-6">
+            <div className="flex items-center gap-3">
+              <div className="h-10 w-10 rounded-lg bg-green-100 dark:bg-green-950 flex items-center justify-center">
+                <CheckCircle2 className="h-5 w-5 text-green-600 dark:text-green-400" />
+              </div>
+              <div>
+                <p className="text-sm text-slate-600 dark:text-slate-400">Successful</p>
+                <p className="text-2xl font-bold text-slate-900 dark:text-slate-100">
+                  {agent.successful_actions}
+                </p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="border-slate-200 dark:border-slate-800">
+          <CardContent className="pt-6">
+            <div className="flex items-center gap-3">
+              <div className="h-10 w-10 rounded-lg bg-red-100 dark:bg-red-950 flex items-center justify-center">
+                <XCircle className="h-5 w-5 text-red-600 dark:text-red-400" />
+              </div>
+              <div>
+                <p className="text-sm text-slate-600 dark:text-slate-400">Failed</p>
+                <p className="text-2xl font-bold text-slate-900 dark:text-slate-100">
+                  {agent.failed_actions}
+                </p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="border-slate-200 dark:border-slate-800">
+          <CardContent className="pt-6">
+            <div className="flex items-center gap-3">
+              <div className="h-10 w-10 rounded-lg bg-purple-100 dark:bg-purple-950 flex items-center justify-center">
+                <TrendingUp className="h-5 w-5 text-purple-600 dark:text-purple-400" />
+              </div>
+              <div>
+                <p className="text-sm text-slate-600 dark:text-slate-400">Success Rate</p>
+                <p className="text-2xl font-bold text-slate-900 dark:text-slate-100">
+                  {getSuccessRate()}%
+                </p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
       </div>
 
-      {/* Tabs */}
-      <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid w-full grid-cols-4">
-          <TabsTrigger value="config">
-            <Settings className="h-4 w-4 mr-2" />
-            Configuration
-          </TabsTrigger>
-          <TabsTrigger value="test">
-            <Play className="h-4 w-4 mr-2" />
-            Test
-          </TabsTrigger>
-          <TabsTrigger value="history">
-            <History className="h-4 w-4 mr-2" />
-            History
-          </TabsTrigger>
-          <TabsTrigger value="analytics">
-            <TrendingUp className="h-4 w-4 mr-2" />
-            Analytics
-          </TabsTrigger>
-        </TabsList>
-
-        {/* Configuration Tab */}
-        <TabsContent value="config" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Basic Information</CardTitle>
-              <CardDescription>
-                Configure the basic settings for your agent
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid gap-4 md:grid-cols-2">
-                <div className="space-y-2">
-                  <Label htmlFor="name">Agent Name</Label>
-                  <Input
-                    id="name"
-                    value={config.name}
-                    onChange={(e) => setConfig({ ...config, name: e.target.value })}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="status">Status</Label>
-                  <Select value={config.status} onValueChange={(value) => setConfig({ ...config, status: value })}>
-                    <SelectTrigger id="status">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="active">Active</SelectItem>
-                      <SelectItem value="inactive">Inactive</SelectItem>
-                      <SelectItem value="draft">Draft</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="description">Description</Label>
-                <Textarea
-                  id="description"
-                  value={config.description}
-                  onChange={(e) => setConfig({ ...config, description: e.target.value })}
-                  rows={3}
-                />
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>Model Configuration</CardTitle>
-              <CardDescription>
-                Choose the AI model and configure its parameters
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="space-y-2">
-                <Label htmlFor="model">Model</Label>
-                <Select value={config.model} onValueChange={(value) => setConfig({ ...config, model: value })}>
-                  <SelectTrigger id="model">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {modelOptions.map((model) => (
-                      <SelectItem key={model.value} value={model.value}>
-                        <div className="flex flex-col">
-                          <span className="font-medium">{model.label}</span>
-                          <span className="text-xs text-muted-foreground">{model.description}</span>
-                        </div>
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <Label htmlFor="temperature">Temperature</Label>
-                  <span className="text-sm text-muted-foreground">{config.temperature}</span>
-                </div>
-                <Slider
-                  id="temperature"
-                  min={0}
-                  max={2}
-                  step={0.1}
-                  value={[config.temperature]}
-                  onValueChange={([value]) => setConfig({ ...config, temperature: value })}
-                />
-                <p className="text-xs text-muted-foreground">
-                  Lower values are more focused and deterministic, higher values are more creative
-                </p>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="maxTokens">Max Tokens</Label>
-                <Input
-                  id="maxTokens"
-                  type="number"
-                  value={config.maxTokens}
-                  onChange={(e) => setConfig({ ...config, maxTokens: parseInt(e.target.value) })}
-                />
-                <p className="text-xs text-muted-foreground">
-                  Maximum number of tokens in the response
-                </p>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>System Prompt</CardTitle>
-              <CardDescription>
-                Define how the agent should behave and respond
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Textarea
-                value={config.systemPrompt}
-                onChange={(e) => setConfig({ ...config, systemPrompt: e.target.value })}
-                rows={6}
-                className="font-mono text-sm"
-              />
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>Tools & Capabilities</CardTitle>
-              <CardDescription>
-                Enable tools that the agent can use to perform tasks
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-3">
-                {availableTools.map((tool) => (
-                  <div
-                    key={tool.id}
-                    className="flex items-start space-x-3 p-3 rounded-lg border bg-muted/50"
-                  >
-                    <Checkbox
-                      id={tool.id}
-                      checked={config.tools.includes(tool.id)}
-                      onCheckedChange={(checked) => {
-                        if (checked) {
-                          setConfig({ ...config, tools: [...config.tools, tool.id] })
-                        } else {
-                          setConfig({
-                            ...config,
-                            tools: config.tools.filter((t) => t !== tool.id),
-                          })
+      {/* Actions Tab */}
+      <Card className="border-slate-200 dark:border-slate-800">
+        <CardHeader>
+          <CardTitle className="text-slate-900 dark:text-slate-100">Recent Activity</CardTitle>
+          <CardDescription>Actions performed by this agent</CardDescription>
+        </CardHeader>
+        <CardContent>
+          {actions.length === 0 ? (
+            <div className="text-center py-12">
+              <BarChart3 className="h-12 w-12 text-slate-400 mx-auto mb-4" />
+              <p className="text-slate-600 dark:text-slate-400">No actions yet</p>
+              <p className="text-sm text-slate-500 dark:text-slate-500 mt-2">
+                This agent hasn't performed any actions yet
+              </p>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {actions.map((action) => (
+                <div
+                  key={action.id}
+                  className="flex items-start gap-4 p-4 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900"
+                >
+                  <div className="text-2xl">{getActionIcon(action.action_type)}</div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className="font-medium text-slate-900 dark:text-slate-100">
+                        {formatActionType(action.action_type)}
+                      </span>
+                      <Badge
+                        variant={
+                          action.status === "success"
+                            ? "default"
+                            : action.status === "failed"
+                            ? "destructive"
+                            : "secondary"
                         }
-                      }}
-                    />
-                    <div className="flex-1">
-                      <label
-                        htmlFor={tool.id}
-                        className="text-sm font-medium leading-none cursor-pointer"
+                        className="text-xs"
                       >
-                        {tool.label}
-                      </label>
-                      <p className="text-xs text-muted-foreground mt-1">
-                        {tool.description}
+                        {action.status}
+                      </Badge>
+                      <span className="text-xs text-slate-500 dark:text-slate-500">
+                        {formatTimestamp(action.created_at)}
+                      </span>
+                    </div>
+                    {action.error_message && (
+                      <p className="text-sm text-red-600 dark:text-red-400">
+                        {action.error_message}
                       </p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>Advanced Settings</CardTitle>
-              <CardDescription>
-                Additional configuration options
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex items-center justify-between">
-                <div className="space-y-0.5">
-                  <Label htmlFor="autoRetry">Auto Retry on Failure</Label>
-                  <p className="text-xs text-muted-foreground">
-                    Automatically retry failed requests
-                  </p>
-                </div>
-                <Switch
-                  id="autoRetry"
-                  checked={config.autoRetry}
-                  onCheckedChange={(checked) => setConfig({ ...config, autoRetry: checked })}
-                />
-              </div>
-
-              <div className="flex items-center justify-between">
-                <div className="space-y-0.5">
-                  <Label htmlFor="logConversations">Log Conversations</Label>
-                  <p className="text-xs text-muted-foreground">
-                    Store conversation history for analysis
-                  </p>
-                </div>
-                <Switch
-                  id="logConversations"
-                  checked={config.logConversations}
-                  onCheckedChange={(checked) => setConfig({ ...config, logConversations: checked })}
-                />
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        {/* Test Tab */}
-        <TabsContent value="test" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Test Playground</CardTitle>
-              <CardDescription>
-                Test your agent configuration with sample inputs
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="space-y-4 max-h-96 overflow-y-auto p-4 rounded-lg border bg-muted/20">
-                {testMessages.length === 0 ? (
-                  <div className="text-center py-8 text-muted-foreground">
-                    <MessageSquare className="h-12 w-12 mx-auto mb-3 opacity-50" />
-                    <p>No messages yet. Send a test message to see how your agent responds.</p>
-                  </div>
-                ) : (
-                  testMessages.map((message, index) => (
-                    <div
-                      key={index}
-                      className={`flex ${message.role === "user" ? "justify-end" : "justify-start"}`}
-                    >
-                      <div
-                        className={`max-w-[80%] rounded-lg p-3 ${
-                          message.role === "user"
-                            ? "bg-pink-100 dark:bg-pink-900/40 text-pink-900 dark:text-pink-100"
-                            : "bg-muted"
-                        }`}
+                    )}
+                    {action.task_id && (
+                      <Link
+                        href={`/dashboard/tasks`}
+                        className="text-sm text-blue-600 dark:text-blue-400 hover:underline"
                       >
-                        <p className="text-sm">{message.content}</p>
-                      </div>
-                    </div>
-                  ))
-                )}
-                {isTesting && (
-                  <div className="flex justify-start">
-                    <div className="bg-muted rounded-lg p-3">
-                      <Loader2 className="h-4 w-4 animate-spin" />
-                    </div>
+                        View created task →
+                      </Link>
+                    )}
                   </div>
-                )}
-              </div>
-
-              <div className="flex gap-2">
-                <Input
-                  placeholder="Type a test message..."
-                  value={testInput}
-                  onChange={(e) => setTestInput(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter" && !e.shiftKey) {
-                      e.preventDefault()
-                      handleTest()
-                    }
-                  }}
-                  disabled={isTesting}
-                />
-                <Button onClick={handleTest} disabled={isTesting}>
-                  <Send className="h-4 w-4" />
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        {/* History Tab */}
-        <TabsContent value="history" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Run History</CardTitle>
-              <CardDescription>
-                Recent executions of this agent
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {runs.map((run) => (
-                  <div
-                    key={run.id}
-                    className="p-4 rounded-lg border hover:bg-muted/50 transition-colors"
-                  >
-                    <div className="flex items-start justify-between mb-3">
-                      <div className="flex items-center gap-2">
-                        <Badge
-                          variant="outline"
-                          className={
-                            run.status === "success"
-                              ? "bg-green-100 dark:bg-green-900/40 border-green-300 dark:border-green-700 text-green-700 dark:text-green-300"
-                              : "bg-red-100 dark:bg-red-900/40 border-red-300 dark:border-red-700 text-red-700 dark:text-red-300"
-                          }
-                        >
-                          {run.status === "success" ? (
-                            <CheckCircle2 className="h-3 w-3 mr-1" />
-                          ) : (
-                            <XCircle className="h-3 w-3 mr-1" />
-                          )}
-                          {run.status}
-                        </Badge>
-                        <span className="text-xs text-muted-foreground flex items-center gap-1">
-                          <Clock className="h-3 w-3" />
-                          {formatDate(run.timestamp)}
-                        </span>
-                      </div>
-                      <div className="flex items-center gap-3 text-xs text-muted-foreground">
-                        <span className="flex items-center gap-1">
-                          <Activity className="h-3 w-3" />
-                          {formatDuration(run.duration)}
-                        </span>
-                        <span className="flex items-center gap-1">
-                          <Code className="h-3 w-3" />
-                          {run.tokensUsed} tokens
-                        </span>
-                      </div>
-                    </div>
-                    <div className="space-y-2 text-sm">
-                      <div>
-                        <span className="font-medium">Input:</span>
-                        <p className="text-muted-foreground mt-1">{run.input}</p>
-                      </div>
-                      <div>
-                        <span className="font-medium">Output:</span>
-                        <p className="text-muted-foreground mt-1">{run.output}</p>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        {/* Analytics Tab */}
-        <TabsContent value="analytics" className="space-y-6">
-          <div className="grid gap-4 md:grid-cols-4">
-            <Card>
-              <CardHeader className="pb-3">
-                <CardTitle className="text-sm font-medium">Total Runs</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">1,234</div>
-                <p className="text-xs text-muted-foreground mt-1">
-                  <span className="text-green-600">+12%</span> from last month
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader className="pb-3">
-                <CardTitle className="text-sm font-medium">Success Rate</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">98.5%</div>
-                <p className="text-xs text-muted-foreground mt-1">
-                  <span className="text-green-600">+2.1%</span> from last month
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader className="pb-3">
-                <CardTitle className="text-sm font-medium">Avg Response Time</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">1.2s</div>
-                <p className="text-xs text-muted-foreground mt-1">
-                  <span className="text-green-600">-0.3s</span> from last month
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader className="pb-3">
-                <CardTitle className="text-sm font-medium">Tokens Used</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">45.2K</div>
-                <p className="text-xs text-muted-foreground mt-1">
-                  <span className="text-green-600">+8%</span> from last month
-                </p>
-              </CardContent>
-            </Card>
-          </div>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>Performance Metrics</CardTitle>
-              <CardDescription>
-                Detailed analytics coming soon
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="h-64 flex items-center justify-center border rounded-lg bg-muted/20">
-                <div className="text-center">
-                  <TrendingUp className="h-12 w-12 mx-auto mb-3 text-muted-foreground opacity-50" />
-                  <p className="text-muted-foreground">Charts and graphs will be displayed here</p>
                 </div>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-      </Tabs>
+              ))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
     </div>
-  )
+  );
 }
