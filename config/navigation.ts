@@ -178,13 +178,13 @@ export const NAVIGATION_CONFIG: NavigationSection[] = [
     visibleFor: ["beginner", "intermediate", "advanced"],
     items: [
       {
-        name: "Assistants",
+        name: "Executive Suite",
         href: "/dashboard/assistants",
-        icon: Sparkles,
+        icon: Users,
         adaptiveConfig: {
           visibleFor: ["beginner", "intermediate", "advanced"],
           complexity: "standard",
-          helpText: "Pre-configured AI assistants for specific tasks",
+          helpText: "Build your AI executive team - 14 specialists including CEO, CFO, Legal, HR, Sales, Marketing, and more",
         },
       },
       {

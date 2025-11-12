@@ -37,6 +37,7 @@ import {
   CheckCircle2,
   Clock,
   Brain,
+  AlertCircle,
 } from "lucide-react";
 import { toast } from "sonner";
 import Link from "next/link";
@@ -318,6 +319,59 @@ export default function AssistantsPage() {
           </div>
         </div>
       </div>
+
+      {/* Professional Disclaimer */}
+      <Card className="p-6 border-amber-200 dark:border-amber-800 bg-amber-50 dark:bg-amber-950/20">
+        <div className="flex items-start gap-4">
+          <div className="flex-shrink-0">
+            <AlertCircle className="h-6 w-6 text-amber-600 dark:text-amber-400" />
+          </div>
+          <div className="flex-1 space-y-3">
+            <div>
+              <h3 className="font-semibold text-amber-900 dark:text-amber-100 mb-2">
+                Important Professional Disclaimer
+              </h3>
+              <p className="text-sm text-amber-800 dark:text-amber-200 leading-relaxed">
+                Our AI Executive Suite provides general guidance, strategic insights, and educational information to help you make informed business decisions. However, these AI advisors are not substitutes for licensed professionals.
+              </p>
+            </div>
+            <div className="grid md:grid-cols-2 gap-4 text-xs text-amber-700 dark:text-amber-300">
+              <div className="flex items-start gap-2">
+                <div className="flex-shrink-0 mt-0.5">
+                  <div className="h-1.5 w-1.5 rounded-full bg-amber-600 dark:bg-amber-400"></div>
+                </div>
+                <div>
+                  <span className="font-medium">Legal Matters:</span> The Legal & Contracts Advisor provides general legal information and guidance. For binding legal advice, contract review, or representation, consult a licensed attorney in your jurisdiction.
+                </div>
+              </div>
+              <div className="flex items-start gap-2">
+                <div className="flex-shrink-0 mt-0.5">
+                  <div className="h-1.5 w-1.5 rounded-full bg-amber-600 dark:bg-amber-400"></div>
+                </div>
+                <div>
+                  <span className="font-medium">HR & Employment:</span> The HR Director offers general guidance on people operations. For employment law compliance, workplace investigations, or complex employee matters, consult qualified HR professionals and employment attorneys.
+                </div>
+              </div>
+              <div className="flex items-start gap-2">
+                <div className="flex-shrink-0 mt-0.5">
+                  <div className="h-1.5 w-1.5 rounded-full bg-amber-600 dark:bg-amber-400"></div>
+                </div>
+                <div>
+                  <span className="font-medium">Financial Decisions:</span> The Strategic Business Advisor provides business strategy and financial planning insights. For tax advice, accounting, investment decisions, or financial planning, consult certified accountants and financial advisors.
+                </div>
+              </div>
+              <div className="flex items-start gap-2">
+                <div className="flex-shrink-0 mt-0.5">
+                  <div className="h-1.5 w-1.5 rounded-full bg-amber-600 dark:bg-amber-400"></div>
+                </div>
+                <div>
+                  <span className="font-medium">Verify Critical Decisions:</span> Always verify important business decisions with qualified professionals in the relevant field. AI advisors should augment—not replace—professional judgment and expertise.
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </Card>
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
