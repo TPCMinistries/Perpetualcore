@@ -691,6 +691,106 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* AI Executive Suite - NEW FEATURE SHOWCASE */}
+      <section className="container mx-auto px-4 py-20 sm:py-32 animate-on-scroll bg-gradient-to-b from-background via-muted/10 to-background">
+        <div className="max-w-6xl mx-auto">
+          {/* Section Badge & Header */}
+          <div className="text-center mb-16">
+            <div className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full backdrop-blur-2xl bg-gradient-to-r from-blue-500/20 to-purple-500/20 border-2 border-blue-500/30 text-blue-700 dark:text-blue-300 text-sm font-semibold mb-6 shadow-xl">
+              <Users className="h-4 w-4" />
+              <span>NEW: AI Executive Suite</span>
+            </div>
+            <h2 className="text-4xl md:text-5xl lg:text-6xl font-black tracking-tight mb-6 bg-gradient-to-r from-gray-900 via-blue-600 to-purple-600 dark:from-white dark:via-blue-400 dark:to-purple-400 bg-clip-text text-transparent">
+              Build Your AI Executive Team
+            </h2>
+            <p className="text-xl md:text-2xl text-muted-foreground/90 max-w-3xl mx-auto leading-relaxed">
+              Get instant access to 15 executive-level AI specialists—CEO, CFO, Legal, HR, Sales, Marketing, Social Media, Operations, and more. One click builds your entire C-suite.
+            </p>
+          </div>
+
+          {/* Executive Team Grid - 3 columns */}
+          <div className="grid md:grid-cols-3 gap-6 mb-12">
+            {/* Strategic Leadership */}
+            <Card className="backdrop-blur-2xl bg-gradient-to-br from-blue-500/5 to-cyan-500/5 border-2 border-border hover:border-blue-500/50 transition-all duration-300 hover:shadow-2xl group">
+              <CardContent className="p-6">
+                <div className="h-14 w-14 rounded-2xl bg-gradient-to-br from-blue-500 to-cyan-600 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300 shadow-lg">
+                  <Briefcase className="h-7 w-7 text-white" />
+                </div>
+                <h3 className="text-lg font-bold mb-2 text-slate-900 dark:text-slate-100">Strategic Leadership</h3>
+                <p className="text-sm text-muted-foreground leading-relaxed">
+                  CEO, CFO, Legal & Contracts, Operations Director
+                </p>
+              </CardContent>
+            </Card>
+
+            {/* Revenue & Growth */}
+            <Card className="backdrop-blur-2xl bg-gradient-to-br from-purple-500/5 to-pink-500/5 border-2 border-border hover:border-purple-500/50 transition-all duration-300 hover:shadow-2xl group">
+              <CardContent className="p-6">
+                <div className="h-14 w-14 rounded-2xl bg-gradient-to-br from-purple-500 to-pink-600 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300 shadow-lg">
+                  <TrendingUp className="h-7 w-7 text-white" />
+                </div>
+                <h3 className="text-lg font-bold mb-2 text-slate-900 dark:text-slate-100">Revenue & Growth</h3>
+                <p className="text-sm text-muted-foreground leading-relaxed">
+                  Sales, Marketing, Social Media Creator, BizDev, Customer Success
+                </p>
+              </CardContent>
+            </Card>
+
+            {/* Product & Innovation */}
+            <Card className="backdrop-blur-2xl bg-gradient-to-br from-emerald-500/5 to-green-500/5 border-2 border-border hover:border-emerald-500/50 transition-all duration-300 hover:shadow-2xl group">
+              <CardContent className="p-6">
+                <div className="h-14 w-14 rounded-2xl bg-gradient-to-br from-emerald-500 to-green-600 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300 shadow-lg">
+                  <Sparkles className="h-7 w-7 text-white" />
+                </div>
+                <h3 className="text-lg font-bold mb-2 text-slate-900 dark:text-slate-100">Product & Innovation</h3>
+                <p className="text-sm text-muted-foreground leading-relaxed">
+                  Product Manager, Technical Architecture, Innovation & Trends
+                </p>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Key Features & CTA */}
+          <div className="bg-gradient-to-br from-slate-900 to-slate-800 dark:from-slate-800 dark:to-slate-900 rounded-3xl p-8 sm:p-12 text-white shadow-2xl">
+            <div className="grid md:grid-cols-2 gap-8 items-center">
+              <div>
+                <h3 className="text-2xl sm:text-3xl font-bold mb-4">Why Teams Love This</h3>
+                <div className="space-y-3">
+                  <div className="flex items-start gap-3">
+                    <Check className="h-5 w-5 text-green-400 flex-shrink-0 mt-0.5" />
+                    <span className="text-slate-200"><strong className="text-white">Crystal clear expertise:</strong> Each advisor has specific "Use me for" instructions—no guesswork</span>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <Check className="h-5 w-5 text-green-400 flex-shrink-0 mt-0.5" />
+                    <span className="text-slate-200"><strong className="text-white">Social Media Creator writes your posts:</strong> LinkedIn, Twitter, Instagram—ready to publish</span>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <Check className="h-5 w-5 text-green-400 flex-shrink-0 mt-0.5" />
+                    <span className="text-slate-200"><strong className="text-white">One-click setup:</strong> Build your entire executive team in seconds, customize later</span>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <Check className="h-5 w-5 text-green-400 flex-shrink-0 mt-0.5" />
+                    <span className="text-slate-200"><strong className="text-white">24/7 availability:</strong> Access CEO strategy, legal review, or social posts anytime</span>
+                  </div>
+                </div>
+              </div>
+              <div className="text-center md:text-right">
+                <div className="inline-block">
+                  <div className="text-5xl sm:text-6xl font-black mb-2 bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">15</div>
+                  <div className="text-lg text-slate-300 mb-6">Executive Advisors</div>
+                  <Button size="lg" asChild className="bg-white text-slate-900 hover:bg-slate-100 shadow-xl hover:shadow-2xl transition-all text-lg px-8 py-6 h-auto">
+                    <Link href="/signup">
+                      Start Free Trial <ArrowRight className="ml-2 h-5 w-5" />
+                    </Link>
+                  </Button>
+                  <p className="text-xs text-slate-400 mt-3">Available on all plans</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Industries We Serve - REDESIGNED & MOVED DOWN */}
       <section id="industries" className="container mx-auto px-4 py-20 animate-on-scroll">
         <div className="text-center mb-16">
