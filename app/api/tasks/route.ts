@@ -95,13 +95,23 @@ export async function POST(req: NextRequest) {
       description: body.description || null,
       priority: body.priority || "medium",
       status: body.status || "todo",
+      execution_status: body.executionStatus || "pending",
+      execution_type: body.executionType || "manual",
       due_date: body.dueDate || null,
-      // Note: assigned_to and assigned_by columns don't exist in current schema
-      // assigned_to: body.assignedTo || user.id,
-      // assigned_by: user.id,
+      assigned_to_type: body.assignedToType || null,
+      assigned_to_id: body.assignedToId || null,
+      assigned_by: body.assignedToId ? user.id : null,
+      workflow_id: body.workflowId || null,
+      agent_id: body.agentId || null,
+      automation_rules: body.automationRules || null,
+      estimated_duration_minutes: body.estimatedDurationMinutes || null,
+      parent_task_id: body.parentTaskId || null,
       project_name: body.projectName || null,
       tags: body.tags || [],
       source_type: "manual",
+      execution_log: [],
+      retry_count: 0,
+      max_retries: body.maxRetries || 3,
     };
 
     const { data: task, error } = await supabase

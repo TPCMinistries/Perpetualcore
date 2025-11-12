@@ -102,9 +102,16 @@ export async function saveExtractedTasks(
       priority: task.priority,
       due_date: task.dueDate || null,
       status: "todo",
-      // removed assigned_to - column doesn't exist
-      // removed ai_confidence - column doesn't exist
-      // removed ai_context - column doesn't exist
+      execution_status: "pending",
+      execution_type: task.execution_type || "manual",
+      estimated_duration_minutes: task.estimated_duration_minutes || null,
+      ai_confidence: task.confidence,
+      ai_context: task.context,
+      ai_extracted: true,
+      source_type: sourceType,
+      execution_log: [],
+      retry_count: 0,
+      max_retries: 3,
     }));
 
     const { data, error } = await supabase.from("tasks").insert(tasksToInsert).select();
