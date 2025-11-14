@@ -3,7 +3,6 @@
 import { useState, useRef, useEffect } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Card } from "@/components/ui/card";
 import {
@@ -13,13 +12,39 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Send, Loader2, Bot, User, Paperclip, X, FileText, Image as ImageIcon, Mic, MicOff, Copy, Check, Download, FileSpreadsheet, Presentation, File, Phone, PhoneOff, Menu, MessageSquare, Brain, Building2 } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
+  Send,
+  Loader2,
+  Bot,
+  User,
+  Paperclip,
+  X,
+  FileText,
+  Image as ImageIcon,
+  Mic,
+  Copy,
+  Check,
+  Presentation,
+  File,
+  Phone,
+  MessageSquare,
+  Brain,
+  Building2,
+} from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { AIModel } from "@/types";
 import { AI_MODELS, DEFAULT_MODEL } from "@/lib/ai/config";
 import { ConversationSidebar } from "@/components/conversation-sidebar";
 import { MarkdownMessage } from "@/components/markdown-message";
-import { VoiceConversation } from "@/components/voice-conversation-fallback";
+import { VoiceConversation } from "@/components/voice-conversation";
+import { VoiceDictation } from "@/components/voice-dictation";
 
 interface FileAttachment {
   file: File;
@@ -51,11 +76,10 @@ export default function ChatPage() {
   } | null>(null);
   const [attachments, setAttachments] = useState<FileAttachment[]>([]);
   const [isDragging, setIsDragging] = useState(false);
-  const [isRecording, setIsRecording] = useState(false);
-  const [recognition, setRecognition] = useState<any>(null);
   const [copiedMessageIndex, setCopiedMessageIndex] = useState<number | null>(null);
   const [exportingAs, setExportingAs] = useState<string | null>(null);
   const [isVoiceMode, setIsVoiceMode] = useState(false);
+  const [isDictationOpen, setIsDictationOpen] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [libraryStats, setLibraryStats] = useState<{
     docCount: number;
@@ -73,50 +97,6 @@ export default function ChatPage() {
   }, [messages]);
 
   // Initialize speech recognition
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      const SpeechRecognition =
-        (window as any).SpeechRecognition ||
-        (window as any).webkitSpeechRecognition;
-
-      if (SpeechRecognition) {
-        const recognitionInstance = new SpeechRecognition();
-        recognitionInstance.continuous = true;
-        recognitionInstance.interimResults = true;
-        recognitionInstance.lang = "en-US";
-
-        recognitionInstance.onresult = (event: any) => {
-          let interimTranscript = "";
-          let finalTranscript = "";
-
-          for (let i = event.resultIndex; i < event.results.length; i++) {
-            const transcript = event.results[i][0].transcript;
-            if (event.results[i].isFinal) {
-              finalTranscript += transcript + " ";
-            } else {
-              interimTranscript += transcript;
-            }
-          }
-
-          if (finalTranscript) {
-            setInput((prev) => prev + finalTranscript);
-          }
-        };
-
-        recognitionInstance.onerror = (event: any) => {
-          console.error("Speech recognition error:", event.error);
-          setIsRecording(false);
-        };
-
-        recognitionInstance.onend = () => {
-          setIsRecording(false);
-        };
-
-        setRecognition(recognitionInstance);
-      }
-    }
-  }, []);
-
   // Fetch library stats to show full context access
   useEffect(() => {
     async function fetchLibraryStats() {
@@ -261,27 +241,13 @@ export default function ChatPage() {
     setRagInfo(null);
   };
 
-  const toggleVoiceRecording = () => {
-    if (!recognition) {
-      alert(
-        "Speech recognition is not supported in your browser. Please use Chrome, Edge, or Safari."
-      );
-      return;
-    }
-
-    if (isRecording) {
-      recognition.stop();
-      setIsRecording(false);
-    } else {
-      try {
-        recognition.start();
-        setIsRecording(true);
-      } catch (error) {
-        console.error("Error starting recognition:", error);
-      }
-    }
+  const handleDictationInsert = (text: string) => {
+    setInput((prev) => {
+      if (!prev.trim()) return text;
+      return `${prev.trim()} ${text}`;
+    });
+    toast.success("Dictation added to composer");
   };
-
   const copyToClipboard = async (text: string, index: number) => {
     try {
       await navigator.clipboard.writeText(text);
@@ -547,8 +513,8 @@ export default function ChatPage() {
                 </div>
               </div>
 
-              {/* Right actions */}
-              <div className="flex items-center gap-2">
+                {/* Right actions */}
+                <div className="flex items-center gap-2">
                 {messages.length > 0 && (
                   <div className="flex items-center gap-1 border-r border-slate-300 dark:border-slate-700 pr-2 mr-1">
                     <Button
@@ -585,7 +551,25 @@ export default function ChatPage() {
                       Word
                     </Button>
                   </div>
-                )}
+                  )}
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setIsDictationOpen(true)}
+                    className="h-9 text-sm px-3"
+                  >
+                    <Mic className="h-4 w-4 mr-2" />
+                    Dictate
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setIsVoiceMode(true)}
+                    className="h-9 text-sm px-3"
+                  >
+                    <Phone className="h-4 w-4 mr-2" />
+                    Voice
+                  </Button>
                 <Button
                   variant="ghost"
                   size="sm"
@@ -865,16 +849,33 @@ export default function ChatPage() {
               >
                 <Paperclip className="h-4 w-4" />
               </Button>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => setIsDictationOpen(true)}
+                  disabled={isLoading}
+                  title="Dictation mode"
+                  className="h-9 w-9 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-100 dark:hover:bg-slate-800"
+                >
+                  <Mic className="h-4 w-4" />
+                </Button>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => setIsVoiceMode(true)}
+                  title="Start live voice conversation"
+                  className="h-9 w-9 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-100 dark:hover:bg-slate-800"
+                >
+                  <Phone className="h-4 w-4" />
+                </Button>
               <Textarea
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
-                placeholder={
-                  isRecording
-                    ? "Listening..."
-                    : isDragging
-                    ? "Drop files here..."
-                    : "Ask me anything..."
-                }
+                  placeholder={
+                    isDragging ? "Drop files here..." : "Ask me anything..."
+                  }
                 disabled={isLoading}
                 className="flex-1 min-h-[36px] max-h-[200px] resize-none border-0 focus-visible:ring-0 bg-transparent text-slate-900 dark:text-slate-100 placeholder:text-slate-500 dark:placeholder:text-slate-500 px-2 text-[15px]"
                 rows={1}
@@ -909,9 +910,24 @@ export default function ChatPage() {
           </div>
         </div>
       </div>
-      </>
-      )}
+        </>
+        )}
+        </div>
       </div>
+      <Dialog open={isDictationOpen} onOpenChange={setIsDictationOpen}>
+        <DialogContent className="sm:max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Dictation mode</DialogTitle>
+            <DialogDescription>
+              Record your voice and automatically insert the transcript into chat.
+            </DialogDescription>
+          </DialogHeader>
+          <VoiceDictation
+            onInsert={handleDictationInsert}
+            onClose={() => setIsDictationOpen(false)}
+          />
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
