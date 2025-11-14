@@ -12,8 +12,6 @@ const openai = new OpenAI({
 export async function POST(req: NextRequest) {
   try {
     const supabase = await createClient();
-
-    // Get authenticated user
     const {
       data: { user },
     } = await supabase.auth.getUser();
@@ -23,24 +21,29 @@ export async function POST(req: NextRequest) {
     }
 
     const formData = await req.formData();
-    const audioFile = formData.get("audio") as File;
+    const audioFile = formData.get("audio");
 
-    if (!audioFile) {
-      return new Response("No audio file provided", { status: 400 });
+    if (!(audioFile instanceof File)) {
+      return new Response("No audio provided", { status: 400 });
     }
 
-    // Transcribe using Whisper
+    if (!process.env.OPENAI_API_KEY) {
+      console.error("OPENAI_API_KEY missing for transcription endpoint");
+      return new Response("Server configuration error", { status: 500 });
+    }
+
     const transcription = await openai.audio.transcriptions.create({
       file: audioFile,
-      model: "whisper-1",
-      language: "en",
+      model: "gpt-4o-mini-transcribe",
+      response_format: "json",
+      temperature: 0.2,
     });
 
     return Response.json({
-      text: transcription.text,
+      text: transcription.text?.trim() ?? "",
     });
   } catch (error) {
-    console.error("Transcription error:", error);
+    console.error("Voice transcription error:", error);
     return new Response("Transcription failed", { status: 500 });
   }
 }

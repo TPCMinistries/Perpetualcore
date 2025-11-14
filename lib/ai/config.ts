@@ -19,11 +19,11 @@ export const AI_MODELS: Record<AIModel, AIModelConfig> = {
   },
   "claude-sonnet-4": {
     id: "claude-sonnet-4",
-    name: "Claude 3 Haiku",
+    name: "Claude 3.5 Sonnet",
     provider: "anthropic",
-    costPer1kTokens: 0.00025,
+    costPer1kTokens: 0.003,
     maxTokens: 200000,
-    icon: "⚡",
+    icon: "🎼",
   },
   "gpt-4o": {
     id: "gpt-4o",
@@ -48,14 +48,6 @@ export const AI_MODELS: Record<AIModel, AIModelConfig> = {
     costPer1kTokens: 0.00125,
     maxTokens: 1000000,
     icon: "✨",
-  },
-  "deepseek-chat": {
-    id: "deepseek-chat",
-    name: "DeepSeek V3",
-    provider: "deepseek",
-    costPer1kTokens: 0.00014,
-    maxTokens: 64000,
-    icon: "🧠",
   },
   "gamma": {
     id: "gamma",

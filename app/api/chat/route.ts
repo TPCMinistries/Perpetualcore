@@ -17,11 +17,11 @@ export const dynamic = "force-dynamic";
  */
 function buildOptimizedSystemPrompt(model: AIModel, userMessage: string): string {
   const msg = userMessage.toLowerCase();
-  const isComplexTask = msg.length > 500 ||
+  const isComplexTask =
+    msg.length > 500 ||
     msg.match(/analyze|research|complex|detailed|explain|compare|comprehensive/i);
-  const isCodeTask = msg.match(/code|program|function|debug|implement/i);
 
-  // Base capabilities all models have
+  // Base capabilities all models share
   const basePrompt = `You are an advanced AI assistant with persistent memory and intelligent capabilities.
 
 CORE CAPABILITIES:
@@ -37,9 +37,7 @@ RESPONSE QUALITY STANDARDS:
 • Structure complex information clearly with headings, lists, and examples
 • Admit uncertainty rather than guess`;
 
-  // Model-specific optimizations
   if (model === "claude-opus-4") {
-    // Claude Opus: Best for deep reasoning and analysis
     return `${basePrompt}
 
 ADVANCED REASONING MODE:
@@ -56,44 +54,17 @@ Excellence is expected. Provide thorough, well-reasoned responses that demonstra
   }
 
   if (model === "claude-sonnet-4") {
-    // Claude Haiku: Fast and creative
     return `${basePrompt}
 
 PERFORMANCE MODE:
-You are Claude Haiku, optimized for speed and creativity while maintaining high quality.
-• Provide clear, concise responses
-• Use creative problem-solving approaches
-• Balance thoroughness with efficiency
-• Maintain conversational and helpful tone`;
-  }
-
-  if (model === "deepseek-chat") {
-    // DeepSeek V3: Exceptional at code and math
-    if (isCodeTask) {
-      return `${basePrompt}
-
-CODE EXCELLENCE MODE:
-You are DeepSeek V3, specialized in code generation and technical problem-solving.
-• Write clean, well-documented, production-ready code
-• Follow best practices and design patterns
-• Include error handling and edge cases
-• Explain your implementation choices
-• Provide examples and usage instructions
-• Consider performance, security, and maintainability`;
-    }
-
-    return `${basePrompt}
-
-ANALYTICAL MODE:
-You are DeepSeek V3, optimized for logical reasoning and precise analysis.
-• Approach problems methodically
-• Provide accurate calculations and data analysis
-• Use step-by-step reasoning for complex problems
-• Be precise with technical details`;
+You are Claude 3.5 Sonnet, optimized for fast but thoughtful collaboration.
+• Treat code, architecture, and strategy like a senior engineer
+• Provide clear deltas, TODOs, and safeguards when editing code
+• When brainstorming, give multiple structured options with pros/cons
+• Keep answers energetic yet grounded in evidence`;
   }
 
   if (model === "gpt-4o") {
-    // GPT-4o: Vision, web search, real-time info
     return `${basePrompt}
 
 MULTIMODAL & REAL-TIME MODE:
@@ -114,7 +85,6 @@ When providing current information:
   }
 
   if (model === "gemini-2.0-flash-exp") {
-    // Gemini: Massive context window
     return `${basePrompt}
 
 LONG-CONTEXT MODE:
@@ -131,7 +101,17 @@ When working with large documents:
 4. Highlight connections and relationships in the material`;
   }
 
-  // Default for GPT-4o Mini and others
+  if (model === "gpt-4o-mini") {
+    return `${basePrompt}
+
+AGILE MODE:
+You are GPT-4o Mini, focused on fast, cost-efficient support.
+• Deliver concise, actionable responses
+• Flag when upgrading to GPT-4o or Claude Opus would add value
+• Ask clarifying questions early when context is thin`;
+  }
+
+  // Default fallback
   return `${basePrompt}
 
 EFFICIENCY MODE:
@@ -188,37 +168,31 @@ export async function POST(req: NextRequest) {
       }>;
     } = await req.json();
 
-    // Determine which model to use
-    const userMessage = messages[messages.length - 1].content;
-    let modelSelection;
-
-    // Auto-select model based on attachments if present
-    if (attachments && attachments.length > 0) {
-      const hasImages = attachments.some((a) => a.type === "image");
-      const hasLargeDoc = attachments.some(
-        (a) => a.type === "document" && a.data.length > 100000
+      // Determine which model to use
+      const userMessage = messages[messages.length - 1].content;
+      const approxConversationTokens = Math.round(
+        messages.reduce((sum, message) => sum + message.content.length / 4, 0)
       );
+      const attachmentMeta =
+        attachments?.map((attachment) => {
+          const base64Payload = attachment.data.includes(",")
+            ? attachment.data.split(",")[1]
+            : attachment.data;
+          return {
+            type: attachment.type,
+            mimeType: attachment.mimeType,
+            size: base64Payload ? Math.floor((base64Payload.length * 3) / 4) : undefined,
+          };
+        }) ?? [];
 
-      if (hasImages && isAutoMode(selectedModel)) {
-        // Images -> GPT-4o (vision capable)
-        modelSelection = {
-          model: "gpt-4o",
-          provider: "openai",
-          reason: "Image analysis with vision",
-          displayName: AI_MODELS["gpt-4o"].name,
-          icon: AI_MODELS["gpt-4o"].icon,
-        };
-      } else if (hasLargeDoc && isAutoMode(selectedModel)) {
-        // Large documents -> Gemini (massive context)
-        modelSelection = {
-          model: "gemini-2.0-flash-exp",
-          provider: "google",
-          reason: "Large document processing",
-          displayName: AI_MODELS["gemini-2.0-flash-exp"].name,
-          icon: AI_MODELS["gemini-2.0-flash-exp"].icon,
-        };
-      } else if (isAutoMode(selectedModel)) {
-        modelSelection = selectBestModel(userMessage);
+      let modelSelection;
+      if (isAutoMode(selectedModel)) {
+        modelSelection = selectBestModel(userMessage, {
+          attachments: attachmentMeta,
+          conversationTokens: approxConversationTokens,
+          messageCount: messages.length,
+          preferFastResponse: userMessage.length < 280,
+        });
       } else {
         const modelInfo = AI_MODELS[selectedModel];
         modelSelection = {
@@ -229,20 +203,6 @@ export async function POST(req: NextRequest) {
           icon: modelInfo.icon,
         };
       }
-    } else if (isAutoMode(selectedModel)) {
-      // Auto-select best model
-      modelSelection = selectBestModel(userMessage);
-    } else {
-      // User manually selected a model
-      const modelInfo = AI_MODELS[selectedModel];
-      modelSelection = {
-        model: selectedModel,
-        provider: modelInfo.provider,
-        reason: "Manually selected",
-        displayName: modelInfo.name,
-        icon: modelInfo.icon,
-      };
-    }
 
     const model = modelSelection.model as AIModel;
 
