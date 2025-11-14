@@ -1,139 +1,286 @@
-import { ModelSelection } from "@/types";
+import { AIModel, ModelSelection } from "@/types";
 import { AI_MODELS } from "./config";
 
-/**
- * Advanced Cost-Aware Model Router
- * Intelligently selects the best model based on task complexity and cost optimization
- *
- * Strategy:
- * - Use ultra-cheap models (DeepSeek, GPT-4o Mini, Haiku) for 80% of tasks
- * - Reserve premium models (Opus, GPT-4o) for tasks requiring their unique capabilities
- * - Balance quality vs cost for maximum value
- */
-export function selectBestModel(userMessage: string): ModelSelection {
-  const msg = userMessage.toLowerCase();
-  const messageLength = userMessage.length;
+type CandidateModel = Exclude<AIModel, "auto" | "gamma">;
 
-  // ========================================
-  // TIER 1: Premium Models (Use Sparingly)
-  // ========================================
+interface ModelCapability {
+  vision: boolean;
+  longContext: number; // tokens
+  reasoning: number; // 0-1
+  coding: number; // 0-1
+  creative: number; // 0-1
+  analytical: number; // 0-1
+  realtime: boolean;
+  speed: number; // 0-1
+  costWeight: number; // 0-1 (higher = more expensive)
+}
 
-  // Mission-critical reasoning: Claude Opus ($0.015/1k)
-  // Only use for extremely complex tasks that justify the cost
-  if (msg.match(/critical|mission-critical|life-or-death|legal advice|medical diagnosis|financial decision/i) ||
-      msg.match(/^(?=.*complex)(?=.*(?:analysis|reasoning|problem)).*$/i)) {
-    return {
-      model: "claude-opus-4",
-      reason: "Premium reasoning for critical tasks",
-      provider: "anthropic",
-      displayName: AI_MODELS["claude-opus-4"].name,
-      icon: AI_MODELS["claude-opus-4"].icon,
-    };
-  }
+interface TaskSignals {
+  tokensEstimate: number;
+  isCodeTask: boolean;
+  isCreativeTask: boolean;
+  needsVision: boolean;
+  needsRealtime: boolean;
+  needsDeepReasoning: boolean;
+  needsAnalyticalPrecision: boolean;
+  needsLongContext: boolean;
+  preferFastResponse: boolean;
+  attachmentsSummary?: string;
+}
 
-  // Vision tasks: GPT-4o ($0.005/1k)
-  if (msg.match(/image|picture|photo|screenshot|visual|diagram|chart|graph/i) &&
-      msg.match(/analyze|describe|explain|what.*see|identify/i)) {
-    return {
-      model: "gpt-4o",
-      reason: "Vision capabilities for image analysis",
-      provider: "openai",
-      displayName: AI_MODELS["gpt-4o"].name,
-      icon: AI_MODELS["gpt-4o"].icon,
-    };
-  }
+export interface AttachmentMeta {
+  type: "image" | "document";
+  mimeType?: string;
+  size?: number;
+}
 
-  // Real-time web search: GPT-4o ($0.005/1k)
-  if (msg.match(/latest|current|today|now|recent|breaking|news|what'?s happening|live|real-time/i)) {
-    return {
-      model: "gpt-4o",
-      reason: "Web search for real-time information",
-      provider: "openai",
-      displayName: AI_MODELS["gpt-4o"].name,
-      icon: AI_MODELS["gpt-4o"].icon,
-    };
-  }
+export interface RoutingContext {
+  attachments?: AttachmentMeta[];
+  conversationTokens?: number;
+  messageCount?: number;
+  userTier?: "free" | "pro" | "business" | "enterprise";
+  preferFastResponse?: boolean;
+  preferPremium?: boolean;
+}
 
-  // ========================================
-  // TIER 2: Specialized Models
-  // ========================================
+const MODEL_CAPABILITIES: Record<CandidateModel, ModelCapability> = {
+  "gpt-4o": {
+    vision: true,
+    longContext: 120_000,
+    reasoning: 0.85,
+    coding: 0.8,
+    creative: 0.8,
+    analytical: 0.85,
+    realtime: true,
+    speed: 0.7,
+    costWeight: 0.65,
+  },
+  "gpt-4o-mini": {
+    vision: false,
+    longContext: 80_000,
+    reasoning: 0.6,
+    coding: 0.55,
+    creative: 0.65,
+    analytical: 0.6,
+    realtime: false,
+    speed: 0.85,
+    costWeight: 0.15,
+  },
+  "claude-sonnet-4": {
+    vision: false,
+    longContext: 200_000,
+    reasoning: 0.8,
+    coding: 0.9,
+    creative: 0.85,
+    analytical: 0.8,
+    realtime: false,
+    speed: 0.75,
+    costWeight: 0.35,
+  },
+  "claude-opus-4": {
+    vision: false,
+    longContext: 200_000,
+    reasoning: 1,
+    coding: 0.95,
+    creative: 0.9,
+    analytical: 0.95,
+    realtime: false,
+    speed: 0.55,
+    costWeight: 1,
+  },
+  "gemini-2.0-flash-exp": {
+    vision: true,
+    longContext: 1_000_000,
+    reasoning: 0.7,
+    coding: 0.65,
+    creative: 0.8,
+    analytical: 0.7,
+    realtime: false,
+    speed: 0.8,
+    costWeight: 0.2,
+  },
+};
 
-  // Massive context: Gemini 2.0 Flash ($0.00125/1k)
-  if (msg.match(/analyze.*(?:document|file|text)|summarize.*(?:long|entire|whole)|review.*(?:all|entire|full)/i) ||
-      messageLength > 15000) {
-    return {
-      model: "gemini-2.0-flash-exp",
-      reason: "1M token context for large documents",
-      provider: "google",
-      displayName: AI_MODELS["gemini-2.0-flash-exp"].name,
-      icon: AI_MODELS["gemini-2.0-flash-exp"].icon,
-    };
-  }
+const DEFAULT_MODEL_ORDER: CandidateModel[] = [
+  "gpt-4o",
+  "claude-opus-4",
+  "claude-sonnet-4",
+  "gemini-2.0-flash-exp",
+  "gpt-4o-mini",
+];
 
-  // ========================================
-  // TIER 3: Ultra-Cheap Models (Default)
-  // ========================================
+const CODE_REGEX = /\b(code|program|function|class|api|bug|debug|stacktrace|typescript|python|javascript|sql|regex|algorithm|unit test)\b/i;
+const CREATIVE_REGEX = /\b(write|draft|compose|story|script|copy|creative|idea|tagline|narrative)\b/i;
+const REALTIME_REGEX = /\b(latest|current|today|now|breaking|news|real-time|up-to-date|live)\b/i;
+const ANALYTICAL_REGEX = /\b(calculate|math|equation|statistic|analyze|percent|table|chart|data|budget|forecast)\b/i;
+const REASONING_REGEX = /\b(why|how|strategy|plan|evaluate|compare|assess|risk|architecture|roadmap)\b/i;
 
-  // Complex coding: DeepSeek V3 ($0.00014/1k)
-  // DeepSeek V3 excels at code generation and is 93% cheaper than GPT-4o Mini
-  if (msg.match(/code|program|script|function|class|debug|error|bug|syntax|implement|refactor|algorithm/i) ||
-      msg.match(/python|javascript|typescript|java|c\+\+|rust|go|sql|react|node/i)) {
-    return {
-      model: "deepseek-chat",
-      reason: "Exceptional coding at 93% cost savings",
-      provider: "deepseek",
-      displayName: AI_MODELS["deepseek-chat"].name,
-      icon: AI_MODELS["deepseek-chat"].icon,
-    };
-  }
+const LARGE_MESSAGE_TOKEN_THRESHOLD = 6_000;
 
-  // Writing, brainstorming, creative tasks: Claude Haiku ($0.00025/1k)
-  // Haiku is great for creative writing and fast responses
-  if (msg.match(/write|draft|compose|create|brainstorm|ideas|creative|story|email|letter/i) ||
-      msg.match(/help me (?:write|draft|compose)/i)) {
-    return {
-      model: "claude-sonnet-4",
-      reason: "Fast, creative responses",
-      provider: "anthropic",
-      displayName: AI_MODELS["claude-sonnet-4"].name,
-      icon: AI_MODELS["claude-sonnet-4"].icon,
-    };
-  }
+function estimateTokens(text: string): number {
+  // Quick heuristic: 4 chars ≈ 1 token
+  return Math.ceil(text.length / 4);
+}
 
-  // Math, calculations, data analysis: DeepSeek V3 ($0.00014/1k)
-  // DeepSeek is excellent at mathematical reasoning
-  if (msg.match(/calculate|compute|math|equation|formula|statistics|data analysis|numbers/i)) {
-    return {
-      model: "deepseek-chat",
-      reason: "Strong mathematical reasoning",
-      provider: "deepseek",
-      displayName: AI_MODELS["deepseek-chat"].name,
-      icon: AI_MODELS["deepseek-chat"].icon,
-    };
-  }
+function analyzeTask(userMessage: string, context: RoutingContext): TaskSignals {
+  const lower = userMessage.toLowerCase();
+  const conversationTokens = context.conversationTokens ?? 0;
+  const messageTokens = estimateTokens(userMessage);
+  const totalTokens = messageTokens + conversationTokens;
 
-  // Longer messages (>500 chars): Use Haiku for speed
-  if (messageLength > 500) {
-    return {
-      model: "claude-sonnet-4",
-      reason: "Fast processing for longer queries",
-      provider: "anthropic",
-      displayName: AI_MODELS["claude-sonnet-4"].name,
-      icon: AI_MODELS["claude-sonnet-4"].icon,
-    };
-  }
+  const attachments = context.attachments ?? [];
+  const hasImages = attachments.some((a) => a.type === "image");
+  const documentBytes = attachments
+    .filter((a) => a.type === "document")
+    .reduce((sum, doc) => sum + (doc.size ?? 0), 0);
+  const needsLongContext =
+    totalTokens > LARGE_MESSAGE_TOKEN_THRESHOLD || documentBytes > 750_000;
 
-  // ========================================
-  // DEFAULT: DeepSeek V3 ($0.00014/1k)
-  // ========================================
-  // For general questions, conversations, and simple tasks
-  // DeepSeek V3 offers GPT-4 class quality at 1/35th the cost
   return {
-    model: "deepseek-chat",
-    reason: "Best value for general tasks",
-    provider: "deepseek",
-    displayName: AI_MODELS["deepseek-chat"].name,
-    icon: AI_MODELS["deepseek-chat"].icon,
+    tokensEstimate: totalTokens,
+    isCodeTask: CODE_REGEX.test(lower),
+    isCreativeTask: CREATIVE_REGEX.test(lower),
+    needsVision: hasImages,
+    needsRealtime: REALTIME_REGEX.test(lower),
+    needsDeepReasoning: lower.length > 900 || REASONING_REGEX.test(lower),
+    needsAnalyticalPrecision: ANALYTICAL_REGEX.test(lower),
+    needsLongContext,
+    preferFastResponse:
+      context.preferFastResponse ??
+      (lower.length < 280 &&
+        !REALTIME_REGEX.test(lower) &&
+        !REASONING_REGEX.test(lower)),
+    attachmentsSummary:
+      attachments.length > 0
+        ? `${attachments.length} attachment${attachments.length > 1 ? "s" : ""}`
+        : undefined,
+  };
+}
+
+function getAllowedModels(userTier: RoutingContext["userTier"]): CandidateModel[] {
+  switch (userTier) {
+    case "free":
+      return ["gpt-4o-mini", "gemini-2.0-flash-exp"];
+    case "pro":
+      return ["gpt-4o", "claude-sonnet-4", "gemini-2.0-flash-exp", "gpt-4o-mini"];
+    case "business":
+    case "enterprise":
+    default:
+      return DEFAULT_MODEL_ORDER;
+  }
+}
+
+function scoreModel(
+  model: CandidateModel,
+  signals: TaskSignals,
+  context: RoutingContext
+): { score: number; rationale: string[] } {
+  const capability = MODEL_CAPABILITIES[model];
+  let score = capability.speed * 6 - capability.costWeight * 5;
+  const reasons: string[] = [];
+
+  if (signals.needsVision) {
+    if (capability.vision) {
+      score += 25;
+      reasons.push("Vision-ready for image analysis");
+    } else {
+      score -= 20;
+    }
+  }
+
+  if (signals.needsRealtime) {
+    if (capability.realtime) {
+      score += 8;
+      reasons.push("Real-time search capable");
+    } else {
+      score -= 4;
+    }
+  }
+
+  if (signals.isCodeTask) {
+    score += capability.coding * 12;
+    if (capability.coding > 0.8) {
+      reasons.push("Optimized for coding & debugging");
+    }
+  }
+
+  if (signals.isCreativeTask) {
+    score += capability.creative * 6;
+    if (capability.creative > 0.75) {
+      reasons.push("Great for creative writing");
+    }
+  }
+
+  if (signals.needsAnalyticalPrecision) {
+    score += capability.analytical * 10;
+    if (capability.analytical > 0.8) {
+      reasons.push("Strong analytical/mathematical accuracy");
+    }
+  }
+
+  if (signals.needsDeepReasoning) {
+    score += capability.reasoning * 15;
+    if (capability.reasoning > 0.85) {
+      reasons.push("Highest reasoning depth");
+    }
+  }
+
+  if (signals.needsLongContext) {
+    if (capability.longContext >= signals.tokensEstimate + 1_000) {
+      score += 18;
+      reasons.push("Can handle the long context safely");
+    } else {
+      score -= 35;
+    }
+  }
+
+  if (signals.preferFastResponse) {
+    score += capability.speed * 8;
+    if (capability.speed > 0.8) {
+      reasons.push("Optimized for fast responses");
+    }
+  }
+
+  if (context.preferPremium) {
+    score += capability.costWeight > 0.5 ? 4 : -2;
+  }
+
+  return { score, rationale: reasons };
+}
+
+export function selectBestModel(
+  userMessage: string,
+  context: RoutingContext = {}
+): ModelSelection {
+  const signals = analyzeTask(userMessage, context);
+  const allowedModels = getAllowedModels(context.userTier);
+
+  let bestModel: CandidateModel = allowedModels[0];
+  let bestScore = -Infinity;
+  let bestReasons: string[] = [];
+
+  for (const model of allowedModels) {
+    const { score, rationale } = scoreModel(model, signals, context);
+    if (score > bestScore) {
+      bestScore = score;
+      bestModel = model;
+      bestReasons = rationale;
+    }
+  }
+
+  const info = AI_MODELS[bestModel];
+  const reason =
+    bestReasons.slice(0, 3).join(" • ") ||
+    `Balanced quality, speed, and cost for this request${
+      signals.attachmentsSummary ? ` (${signals.attachmentsSummary})` : ""
+    }`;
+
+  return {
+    model: bestModel,
+    reason,
+    provider: info.provider,
+    displayName: info.name,
+    icon: info.icon,
   };
 }
 
