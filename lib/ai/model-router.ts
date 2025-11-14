@@ -26,6 +26,8 @@ interface TaskSignals {
   needsLongContext: boolean;
   preferFastResponse: boolean;
   attachmentsSummary?: string;
+  documentBytes: number;
+  attachmentsCount: number;
 }
 
 export interface AttachmentMeta {
@@ -154,6 +156,8 @@ function analyzeTask(userMessage: string, context: RoutingContext): TaskSignals 
       attachments.length > 0
         ? `${attachments.length} attachment${attachments.length > 1 ? "s" : ""}`
         : undefined,
+    documentBytes,
+    attachmentsCount: attachments.length,
   };
 }
 
@@ -231,6 +235,14 @@ function scoreModel(
       reasons.push("Can handle the long context safely");
     } else {
       score -= 35;
+    }
+    if (signals.documentBytes > 1_500_000) {
+      if (capability.longContext < 300_000) {
+        score -= 20;
+      } else if (capability.longContext >= 500_000) {
+        score += 8;
+        reasons.push("Ultra-long context capacity");
+      }
     }
   }
 
