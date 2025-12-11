@@ -1,12 +1,13 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { X, ArrowRight, Brain, Upload, Users, Sparkles, Check, Rocket, Zap, BookOpen, Code, Briefcase, GraduationCap, Palette, TrendingUp } from "lucide-react";
+import { X, ArrowRight, Brain, Upload, Users, Sparkles, Check, Rocket, Zap, BookOpen, Code, Briefcase, GraduationCap, Palette, TrendingUp, MessageSquare, Loader2, Wand2 } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 
@@ -281,22 +282,69 @@ function PersonalInfoStep({
   onNext: () => void;
   isLoading: boolean;
 }) {
+  const [showCustomInput, setShowCustomInput] = useState(false);
+  const [customDescription, setCustomDescription] = useState("");
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
+
+  // Broader, more universal categories
   const roles = [
-    { id: "teacher", icon: GraduationCap, label: "Teacher/Educator", color: "from-green-500 to-teal-500" },
-    { id: "researcher", icon: BookOpen, label: "Researcher", color: "from-purple-500 to-pink-500" },
-    { id: "developer", icon: Code, label: "Developer/Engineer", color: "from-blue-500 to-indigo-500" },
-    { id: "business_owner", icon: Briefcase, label: "Business Owner", color: "from-orange-500 to-red-500" },
-    { id: "content_creator", icon: Palette, label: "Content Creator", color: "from-pink-500 to-rose-500" },
-    { id: "student", icon: Sparkles, label: "Student", color: "from-indigo-500 to-purple-500" },
-    { id: "consultant", icon: Users, label: "Consultant/Advisor", color: "from-teal-500 to-cyan-500" },
-    { id: "freelancer", icon: Zap, label: "Freelancer", color: "from-yellow-500 to-amber-500" },
+    { id: "professional", icon: Briefcase, label: "Working Professional", description: "Employee, manager, or executive", color: "from-blue-500 to-indigo-500" },
+    { id: "entrepreneur", icon: Zap, label: "Entrepreneur / Founder", description: "Building or running a business", color: "from-orange-500 to-red-500" },
+    { id: "creative", icon: Palette, label: "Creative / Creator", description: "Writer, designer, artist, content creator", color: "from-pink-500 to-rose-500" },
+    { id: "technical", icon: Code, label: "Technical / Developer", description: "Engineer, developer, data scientist", color: "from-cyan-500 to-blue-500" },
+    { id: "student_educator", icon: GraduationCap, label: "Student or Educator", description: "Learning or teaching", color: "from-green-500 to-teal-500" },
+    { id: "researcher", icon: BookOpen, label: "Researcher / Analyst", description: "Research, analysis, consulting", color: "from-purple-500 to-pink-500" },
   ];
 
   const handleRoleSelect = (roleId: string) => {
+    setShowCustomInput(false);
     setUserContext({ ...userContext, userRole: roleId });
   };
 
-  const canProceed = userContext.userRole && userContext.preferredName;
+  const handleCustomSelect = () => {
+    setShowCustomInput(true);
+    setUserContext({ ...userContext, userRole: "custom" });
+  };
+
+  const handleAnalyzeNeeds = async () => {
+    if (customDescription.trim().length < 10) {
+      toast.error("Please describe your needs in more detail");
+      return;
+    }
+
+    setIsAnalyzing(true);
+    try {
+      const response = await fetch("/api/onboarding/analyze-needs", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userDescription: customDescription }),
+      });
+
+      const data = await response.json();
+
+      if (data.success && data.analysis) {
+        // Apply the AI-suggested configuration
+        setUserContext({
+          ...userContext,
+          userRole: data.analysis.userRole || "custom",
+          primaryGoals: data.analysis.primaryGoals || [],
+          industry: data.analysis.suggestedCategory || "personal",
+        });
+        toast.success("Perfect! We've personalized your experience");
+        onNext();
+      } else {
+        toast.error(data.error || "Failed to analyze your needs");
+      }
+    } catch (error) {
+      console.error("Error analyzing needs:", error);
+      toast.error("Something went wrong. Please try selecting a category instead.");
+    } finally {
+      setIsAnalyzing(false);
+    }
+  };
+
+  const canProceed = (userContext.userRole && userContext.userRole !== "custom" && userContext.preferredName) ||
+                     (userContext.userRole === "custom" && customDescription.trim().length >= 10);
 
   return (
     <div className="space-y-6 py-4">
@@ -321,44 +369,109 @@ function PersonalInfoStep({
             onChange={(e) => setUserContext({ ...userContext, preferredName: e.target.value })}
             className="text-lg"
           />
-          <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-            We'll use this throughout the platform
-          </p>
         </div>
 
-        <div>
-          <Label className="text-sm font-medium mb-3 block">What best describes you?</Label>
-          <div className="grid grid-cols-2 gap-3">
-            {roles.map((role) => (
-              <button
-                key={role.id}
-                onClick={() => handleRoleSelect(role.id)}
-                className={`p-4 rounded-xl border-2 transition-all text-left ${
-                  userContext.userRole === role.id
-                    ? "border-purple-500 dark:border-purple-400 bg-purple-50 dark:bg-purple-950/30 shadow-md"
-                    : "border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600 bg-white dark:bg-slate-800"
-                }`}
-              >
-                <div className={`h-10 w-10 rounded-lg bg-gradient-to-br ${role.color} flex items-center justify-center mb-2`}>
-                  <role.icon className="h-5 w-5 text-white" />
-                </div>
-                <h3 className="font-semibold text-sm text-slate-900 dark:text-white">{role.label}</h3>
-              </button>
-            ))}
+        {!showCustomInput ? (
+          <div>
+            <Label className="text-sm font-medium mb-3 block">What best describes you?</Label>
+            <div className="grid grid-cols-2 gap-3">
+              {roles.map((role) => (
+                <button
+                  key={role.id}
+                  onClick={() => handleRoleSelect(role.id)}
+                  className={`p-4 rounded-xl border-2 transition-all text-left ${
+                    userContext.userRole === role.id
+                      ? "border-purple-500 dark:border-purple-400 bg-purple-50 dark:bg-purple-950/30 shadow-md"
+                      : "border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600 bg-white dark:bg-slate-800"
+                  }`}
+                >
+                  <div className={`h-10 w-10 rounded-lg bg-gradient-to-br ${role.color} flex items-center justify-center mb-2`}>
+                    <role.icon className="h-5 w-5 text-white" />
+                  </div>
+                  <h3 className="font-semibold text-sm text-slate-900 dark:text-white">{role.label}</h3>
+                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">{role.description}</p>
+                </button>
+              ))}
+            </div>
+
+            {/* Custom/Other option */}
+            <button
+              onClick={handleCustomSelect}
+              className={`w-full mt-3 p-4 rounded-xl border-2 border-dashed transition-all text-left flex items-center gap-4 ${
+                userContext.userRole === "custom"
+                  ? "border-purple-500 dark:border-purple-400 bg-purple-50 dark:bg-purple-950/30"
+                  : "border-slate-300 dark:border-slate-600 hover:border-purple-400 dark:hover:border-purple-500 bg-white dark:bg-slate-800"
+              }`}
+            >
+              <div className="h-10 w-10 rounded-lg bg-gradient-to-br from-purple-500 to-blue-500 flex items-center justify-center">
+                <Wand2 className="h-5 w-5 text-white" />
+              </div>
+              <div>
+                <h3 className="font-semibold text-sm text-slate-900 dark:text-white">Something else? Tell us!</h3>
+                <p className="text-xs text-slate-500 dark:text-slate-400">AI will personalize your experience</p>
+              </div>
+            </button>
           </div>
-        </div>
+        ) : (
+          <div className="space-y-4">
+            <div>
+              <Label className="text-sm font-medium mb-2 block">Tell us about your needs</Label>
+              <Textarea
+                placeholder="Describe what you do and what you want to accomplish. For example: 'I'm a freelance consultant helping small businesses with marketing. I need to organize client research, track projects, and quickly reference past conversations...'"
+                value={customDescription}
+                onChange={(e) => setCustomDescription(e.target.value)}
+                className="min-h-[120px] text-base"
+              />
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-2">
+                The more detail you provide, the better we can personalize your experience
+              </p>
+            </div>
+
+            <div className="flex gap-3">
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setShowCustomInput(false);
+                  setUserContext({ ...userContext, userRole: "" });
+                }}
+                disabled={isAnalyzing}
+              >
+                Back to Categories
+              </Button>
+              <Button
+                onClick={handleAnalyzeNeeds}
+                disabled={isAnalyzing || customDescription.trim().length < 10}
+                className="flex-1 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
+              >
+                {isAnalyzing ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Analyzing...
+                  </>
+                ) : (
+                  <>
+                    <Wand2 className="mr-2 h-4 w-4" />
+                    Personalize My Experience
+                  </>
+                )}
+              </Button>
+            </div>
+          </div>
+        )}
       </div>
 
-      <div className="flex justify-center pt-4">
-        <Button
-          onClick={onNext}
-          disabled={isLoading || !canProceed}
-          size="lg"
-          className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
-        >
-          Continue <ArrowRight className="ml-2 h-4 w-4" />
-        </Button>
-      </div>
+      {!showCustomInput && (
+        <div className="flex justify-center pt-4">
+          <Button
+            onClick={onNext}
+            disabled={isLoading || !canProceed}
+            size="lg"
+            className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
+          >
+            Continue <ArrowRight className="ml-2 h-4 w-4" />
+          </Button>
+        </div>
+      )}
     </div>
   );
 }
@@ -374,74 +487,68 @@ function GoalsStep({
   onNext: () => void;
   isLoading: boolean;
 }) {
+  // Goals mapped to new broader categories
   const goals = {
-    teacher: [
-      { id: "organize_materials", label: "Organize course materials and lesson plans" },
-      { id: "student_help", label: "Help students with questions using AI" },
-      { id: "create_content", label: "Create educational content faster" },
-      { id: "track_progress", label: "Track student progress and engagement" },
-      { id: "grade_faster", label: "Speed up grading and feedback" },
-      { id: "curriculum_design", label: "Design and improve curriculum" },
+    professional: [
+      { id: "organize_work", label: "Organize work documents and information" },
+      { id: "meeting_prep", label: "Prepare for meetings and presentations" },
+      { id: "email_drafts", label: "Draft emails and communications faster" },
+      { id: "research", label: "Research topics and gather information" },
+      { id: "project_tracking", label: "Track projects and tasks" },
+      { id: "knowledge_retention", label: "Remember important conversations and decisions" },
     ],
-    researcher: [
-      { id: "literature_review", label: "Organize and review research papers" },
-      { id: "analyze_data", label: "Analyze data and find insights" },
-      { id: "write_papers", label: "Write and edit research papers" },
-      { id: "collaborate", label: "Collaborate with other researchers" },
-      { id: "grant_writing", label: "Write grant proposals" },
-      { id: "annotate_sources", label: "Annotate and summarize sources" },
-    ],
-    developer: [
-      { id: "document_code", label: "Document and organize code knowledge" },
-      { id: "debug_help", label: "Get help debugging and solving problems" },
-      { id: "learn_tech", label: "Learn new technologies faster" },
-      { id: "team_docs", label: "Centralize team documentation" },
-      { id: "code_review", label: "Improve code review process" },
-      { id: "api_docs", label: "Maintain API documentation" },
-    ],
-    business_owner: [
-      { id: "organize_docs", label: "Organize business documents and contracts" },
+    entrepreneur: [
+      { id: "business_docs", label: "Organize business documents and contracts" },
       { id: "market_research", label: "Research markets and competitors" },
-      { id: "content_marketing", label: "Create marketing content" },
+      { id: "content_marketing", label: "Create marketing and sales content" },
       { id: "decision_support", label: "Get AI support for business decisions" },
-      { id: "sales_enablement", label: "Enable sales team with knowledge" },
-      { id: "customer_insights", label: "Analyze customer feedback and insights" },
+      { id: "customer_insights", label: "Understand customers better" },
+      { id: "automate_tasks", label: "Automate repetitive business tasks" },
     ],
-    content_creator: [
-      { id: "ideas", label: "Generate and organize content ideas" },
+    creative: [
+      { id: "ideas", label: "Generate and organize ideas" },
       { id: "research_topics", label: "Research topics deeply" },
       { id: "draft_content", label: "Draft content faster" },
       { id: "repurpose", label: "Repurpose content across platforms" },
-      { id: "seo_optimize", label: "Optimize content for SEO" },
-      { id: "audience_research", label: "Research audience and trends" },
+      { id: "organize_projects", label: "Organize creative projects" },
+      { id: "feedback_iteration", label: "Get feedback and iterate" },
     ],
-    student: [
-      { id: "study_help", label: "Get help understanding difficult concepts" },
-      { id: "organize_notes", label: "Organize notes and study materials" },
-      { id: "research_projects", label: "Research for essays and projects" },
-      { id: "exam_prep", label: "Prepare for exams efficiently" },
-      { id: "writing_help", label: "Improve essay and paper writing" },
-      { id: "group_collab", label: "Collaborate on group projects" },
+    technical: [
+      { id: "document_code", label: "Document and organize technical knowledge" },
+      { id: "debug_help", label: "Get help debugging and problem solving" },
+      { id: "learn_tech", label: "Learn new technologies faster" },
+      { id: "architecture", label: "Design and document system architecture" },
+      { id: "code_review", label: "Improve code and review process" },
+      { id: "api_docs", label: "Create and maintain documentation" },
     ],
-    consultant: [
-      { id: "client_research", label: "Research client industries and competitors" },
-      { id: "proposal_writing", label: "Create compelling proposals" },
-      { id: "knowledge_base", label: "Build consulting knowledge base" },
-      { id: "presentation_prep", label: "Prepare client presentations" },
-      { id: "best_practices", label: "Stay current with best practices" },
-      { id: "client_reports", label: "Generate client reports and insights" },
+    student_educator: [
+      { id: "study_help", label: "Understand difficult concepts" },
+      { id: "organize_notes", label: "Organize notes and materials" },
+      { id: "research_projects", label: "Research for projects and papers" },
+      { id: "create_content", label: "Create educational content" },
+      { id: "writing_help", label: "Improve writing skills" },
+      { id: "exam_prep", label: "Prepare for exams or lessons" },
     ],
-    freelancer: [
-      { id: "project_management", label: "Manage multiple client projects" },
-      { id: "client_communication", label: "Organize client communications" },
-      { id: "portfolio_content", label: "Create portfolio and marketing content" },
-      { id: "skill_learning", label: "Learn new skills faster" },
-      { id: "invoice_contracts", label: "Organize invoices and contracts" },
-      { id: "time_tracking", label: "Track time and project progress" },
+    researcher: [
+      { id: "literature_review", label: "Organize and review research" },
+      { id: "analyze_data", label: "Analyze data and find insights" },
+      { id: "write_papers", label: "Write and edit papers/reports" },
+      { id: "collaborate", label: "Collaborate with others" },
+      { id: "grant_writing", label: "Write proposals and grants" },
+      { id: "knowledge_base", label: "Build a personal knowledge base" },
+    ],
+    // Fallback for custom roles
+    custom: [
+      { id: "organize", label: "Organize information and documents" },
+      { id: "research", label: "Research and learn new things" },
+      { id: "create", label: "Create content and drafts" },
+      { id: "communicate", label: "Communicate more effectively" },
+      { id: "track", label: "Track tasks and projects" },
+      { id: "remember", label: "Remember important information" },
     ],
   };
 
-  const roleGoals = goals[userContext.userRole as keyof typeof goals] || goals.student;
+  const roleGoals = goals[userContext.userRole as keyof typeof goals] || goals.custom;
 
   const handleGoalToggle = (goalId: string) => {
     const currentGoals = userContext.primaryGoals || [];

@@ -1,11 +1,19 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { verifyTOTP, decryptSecret } from "@/lib/2fa/totp";
+import { rateLimiters } from "@/lib/rate-limit";
+import { logger } from "@/lib/logging";
 
 // GET /api/auth/2fa
 // Get 2FA status for the current user
-export async function GET(request: Request) {
+export async function GET(request: NextRequest) {
   try {
+    // Rate limit: 10 requests per minute (auth limiter)
+    const rateLimitResult = await rateLimiters.auth.check(request);
+    if (!rateLimitResult.success) {
+      return rateLimitResult.response;
+    }
+
     const supabase = await createClient();
     const { data: { user }, error: userError } = await supabase.auth.getUser();
 
@@ -37,8 +45,14 @@ export async function GET(request: Request) {
 
 // DELETE /api/auth/2fa
 // Disable 2FA for the current user
-export async function DELETE(request: Request) {
+export async function DELETE(request: NextRequest) {
   try {
+    // Rate limit: 5 requests per minute (strict for security endpoints)
+    const rateLimitResult = await rateLimiters.strict.check(request);
+    if (!rateLimitResult.success) {
+      return rateLimitResult.response;
+    }
+
     const supabase = await createClient();
     const { data: { user }, error: userError } = await supabase.auth.getUser();
 
@@ -103,6 +117,12 @@ export async function DELETE(request: Request) {
     });
 
     if (!isValid) {
+      // Log failed disable attempt
+      logger.security("2FA disable verification failed", {
+        userId: user.id,
+        path: "/api/auth/2fa",
+      });
+
       return NextResponse.json(
         { error: "Invalid verification code" },
         { status: 400 }
@@ -120,19 +140,25 @@ export async function DELETE(request: Request) {
       .eq("user_id", user.id);
 
     if (updateError) {
-      console.error("Error disabling 2FA:", updateError);
+      logger.error("Error disabling 2FA", { error: updateError, userId: user.id, path: "/api/auth/2fa" });
       return NextResponse.json(
         { error: "Failed to disable 2FA" },
         { status: 500 }
       );
     }
 
+    // Log successful 2FA disable
+    logger.security("2FA disabled for user", {
+      userId: user.id,
+      path: "/api/auth/2fa",
+    });
+
     return NextResponse.json({
       success: true,
       message: "2FA disabled successfully",
     });
   } catch (error) {
-    console.error("2FA disable error:", error);
+    logger.error("2FA disable error", { error, path: "/api/auth/2fa" });
     return NextResponse.json(
       { error: "Failed to disable 2FA" },
       { status: 500 }

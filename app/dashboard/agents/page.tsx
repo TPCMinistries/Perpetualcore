@@ -48,6 +48,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { EmptyState } from "@/components/ui/empty-state";
+import { AgentsPageSkeleton } from "@/components/ui/skeletons";
 
 interface Agent {
   id: string;
@@ -212,16 +213,7 @@ export default function AgentsPage() {
       : 0;
 
   if (isLoading) {
-    return (
-      <div className="space-y-6">
-        <div className="border border-slate-200 dark:border-slate-800 rounded-xl p-8 bg-white dark:bg-slate-900">
-          <h1 className="text-3xl font-semibold text-slate-900 dark:text-slate-100">
-            AI Agents
-          </h1>
-          <p className="text-slate-600 dark:text-slate-400">Loading agents...</p>
-        </div>
-      </div>
-    );
+    return <AgentsPageSkeleton />;
   }
 
   return (

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useRouter, useParams } from "next/navigation";
 import {
   ArrowLeft,
@@ -12,6 +12,9 @@ import {
   User,
   Download,
   Trash2,
+  Cloud,
+  CloudOff,
+  Loader2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -19,6 +22,8 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
 import { RichTextEditor } from "@/components/documents/RichTextEditor";
 import { toast } from "sonner";
+import { useAutoSave } from "@/hooks/useAutoSave";
+import { sanitizeHtmlWithSafeLinks } from "@/lib/sanitize";
 
 interface Document {
   id: string;
@@ -47,7 +52,30 @@ export default function DocumentViewPage() {
   const [editing, setEditing] = useState(false);
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
-  const [saving, setSaving] = useState(false);
+
+  // Auto-save functionality
+  const handleAutoSave = useCallback(async () => {
+    if (!title.trim() || !content.trim()) return;
+
+    const response = await fetch(`/api/documents/text/${documentId}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ title, content }),
+    });
+
+    if (!response.ok) {
+      throw new Error("Failed to save");
+    }
+
+    const data = await response.json();
+    setDocument(data.document);
+  }, [documentId, title, content]);
+
+  const { isDirty, isSaving, lastSavedAt, setDirty, triggerSave } = useAutoSave({
+    onSave: handleAutoSave,
+    delay: 3000, // 3 seconds
+    enabled: editing,
+  });
 
   useEffect(() => {
     fetchDocument();
@@ -84,32 +112,24 @@ export default function DocumentViewPage() {
       return;
     }
 
-    setSaving(true);
-
     try {
-      const response = await fetch(`/api/documents/text/${documentId}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          title,
-          content,
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error("Failed to update document");
-      }
-
-      const data = await response.json();
-      setDocument(data.document);
+      await triggerSave();
       setEditing(false);
       toast.success("Document updated successfully");
     } catch (error) {
       console.error("Error updating document:", error);
       toast.error("Failed to update document");
-    } finally {
-      setSaving(false);
     }
+  };
+
+  const handleTitleChange = (newTitle: string) => {
+    setTitle(newTitle);
+    setDirty(true);
+  };
+
+  const handleContentChange = (newContent: string) => {
+    setContent(newContent);
+    setDirty(true);
   };
 
   const handleCancelEdit = () => {
@@ -212,13 +232,32 @@ export default function DocumentViewPage() {
           <div className="flex items-center gap-2">
             {editing ? (
               <>
+                {/* Auto-save status indicator */}
+                <div className="flex items-center gap-2 text-sm text-muted-foreground mr-2">
+                  {isSaving ? (
+                    <>
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      Saving...
+                    </>
+                  ) : isDirty ? (
+                    <>
+                      <CloudOff className="h-4 w-4" />
+                      Unsaved changes
+                    </>
+                  ) : lastSavedAt ? (
+                    <>
+                      <Cloud className="h-4 w-4 text-green-500" />
+                      Saved
+                    </>
+                  ) : null}
+                </div>
                 <Button variant="outline" onClick={handleCancelEdit}>
                   <X className="h-4 w-4 mr-2" />
                   Cancel
                 </Button>
-                <Button onClick={handleSave} disabled={saving}>
+                <Button onClick={handleSave} disabled={isSaving}>
                   <Save className="h-4 w-4 mr-2" />
-                  {saving ? "Saving..." : "Save"}
+                  {isSaving ? "Saving..." : "Save & Close"}
                 </Button>
               </>
             ) : (
@@ -262,7 +301,7 @@ export default function DocumentViewPage() {
             <Input
               id="title"
               value={title}
-              onChange={(e) => setTitle(e.target.value)}
+              onChange={(e) => handleTitleChange(e.target.value)}
               className="text-lg font-medium h-12"
             />
           </div>
@@ -277,7 +316,7 @@ export default function DocumentViewPage() {
           <Label className="mb-2 block">Content</Label>
           <RichTextEditor
             value={content}
-            onChange={setContent}
+            onChange={handleContentChange}
             minHeight="500px"
           />
         </div>
@@ -287,7 +326,7 @@ export default function DocumentViewPage() {
             {isTextDocument ? (
               <div
                 className="prose prose-sm max-w-none"
-                dangerouslySetInnerHTML={{ __html: document.content_html || "" }}
+                dangerouslySetInnerHTML={{ __html: sanitizeHtmlWithSafeLinks(document.content_html || "") }}
               />
             ) : (
               <div className="text-center py-12">

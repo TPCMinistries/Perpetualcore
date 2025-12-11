@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 
+const isDev = process.env.NODE_ENV === "development";
+
 // POST /api/search/saved/[id]/execute
 // Execute a saved search and increment usage counter
 export async function POST(
@@ -58,7 +60,7 @@ export async function POST(
       name: savedSearch.name,
     });
   } catch (error) {
-    console.error("Execute saved search API error:", error);
+    if (isDev) console.error("Execute saved search API error:", error);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }

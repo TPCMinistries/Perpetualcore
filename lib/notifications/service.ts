@@ -253,11 +253,74 @@ async function createSnoozedNotification(
 }
 
 /**
- * Send email notification (stub - integrate with email service)
+ * Send email notification via Resend
  */
 async function sendEmailNotification(params: CreateNotificationParams) {
-  // TODO: Integrate with email service (SendGrid, etc.)
-  console.log("Would send email notification:", params.title);
+  try {
+    // Import email service
+    const { sendEmail } = await import("@/lib/email");
+    
+    // Get user email
+    const supabase = await createClient();
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("email")
+      .eq("id", params.userId)
+      .single();
+    
+    if (!profile?.email) {
+      console.warn("No email found for user:", params.userId);
+      return;
+    }
+    
+    // Create email HTML
+    const html = `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      </head>
+      <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background-color: #f9fafb; padding: 40px 20px;">
+        <table width="100%" cellpadding="0" cellspacing="0" style="max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+          <tr>
+            <td style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 40px 30px; text-align: center;">
+              <h1 style="margin: 0; color: #ffffff; font-size: 24px; font-weight: 700;">Perpetual Core Notification</h1>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding: 40px 30px;">
+              <h2 style="margin: 0 0 20px; color: #111827; font-size: 20px; font-weight: 600;">${params.title}</h2>
+              <p style="margin: 0 0 20px; color: #4b5563; font-size: 16px; line-height: 1.6;">${params.message}</p>
+              ${params.actionUrl ? `
+                <div style="text-align: center; margin: 30px 0;">
+                  <a href="${params.actionUrl}" style="display: inline-block; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: #ffffff; text-decoration: none; padding: 12px 24px; border-radius: 6px; font-weight: 600;">${params.actionLabel || 'View Details'}</a>
+                </div>
+              ` : ''}
+            </td>
+          </tr>
+          <tr>
+            <td style="padding: 20px 30px; background-color: #f9fafb; text-align: center; border-top: 1px solid #e5e7eb;">
+              <p style="margin: 0; color: #6b7280; font-size: 12px;">This is an automated notification from Perpetual Core</p>
+            </td>
+          </tr>
+        </table>
+      </body>
+      </html>
+    `;
+    
+    // Send email
+    await sendEmail(
+      profile.email,
+      params.title,
+      html
+    );
+    
+    console.log("Email notification sent:", params.title);
+  } catch (error) {
+    console.error("Error sending email notification:", error);
+    // Don't throw - email failure shouldn't break notification creation
+  }
 }
 
 /**

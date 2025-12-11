@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { getChatCompletion } from "@/lib/ai/router";
 
 // POST /api/email/ai-generate
 export async function POST(request: Request) {
@@ -21,70 +22,81 @@ export async function POST(request: Request) {
       );
     }
 
-    // In production, this would call OpenAI API or Claude API
-    // For now, we'll return a mock response based on the prompt
+    // Build the system prompt
+    const systemPrompt = `You are a professional email writing assistant. Write clear, concise, and professional emails based on the user's request.
 
-    // Determine email type from prompt
-    const promptLower = prompt.toLowerCase();
+Guidelines:
+- Keep the tone professional but friendly
+- Be concise and get to the point
+- Use proper email formatting
+- Include a clear subject line
+- Don't include placeholder text like [Your Name] - leave those blank for the user to fill in
+- If replying to an email, maintain appropriate context
+
+Respond ONLY with valid JSON in this exact format:
+{
+  "subject": "Email subject line",
+  "body": "Email body text with proper line breaks"
+}`;
+
+    // Build the user prompt with context
+    let userPrompt = `Write an email based on this request: ${prompt}`;
+
+    if (context.subject) {
+      userPrompt += `\n\nExisting subject: ${context.subject}`;
+    }
+
+    if (context.recipients && context.recipients.length > 0) {
+      userPrompt += `\n\nRecipients: ${context.recipients.join(", ")}`;
+    }
+
+    if (context.replyTo) {
+      userPrompt += `\n\nThis is a reply to the following email:\nFrom: ${context.replyTo.from}\nSubject: ${context.replyTo.subject}\nContent: ${context.replyTo.body?.slice(0, 500) || ""}`;
+    }
+
+    // Call the real AI router
+    const response = await getChatCompletion("gpt-4o-mini", [
+      { role: "system", content: systemPrompt },
+      { role: "user", content: userPrompt }
+    ]);
+
+    // Parse the JSON response
     let generatedSubject = "";
     let generatedBody = "";
 
-    if (promptLower.includes("follow") || promptLower.includes("check")) {
-      generatedSubject = context.subject || "Following up on our conversation";
-      generatedBody = `Hi there,\n\nI wanted to follow up on our recent conversation. I hope this message finds you well.\n\nI'm reaching out to check if you had any questions or if there's anything I can help you with.\n\nLooking forward to hearing from you.\n\nBest regards`;
-    } else if (promptLower.includes("thank")) {
-      generatedSubject = context.subject || "Thank you!";
-      generatedBody = `Hi,\n\nI wanted to take a moment to thank you for your time and consideration. It was great connecting with you.\n\nI appreciate your insights and look forward to staying in touch.\n\nBest regards`;
-    } else if (promptLower.includes("introduc")) {
-      generatedSubject = context.subject || "Introduction and next steps";
-      generatedBody = `Hi there,\n\nMy name is [Your Name], and I'm reaching out to introduce myself and explore potential opportunities for collaboration.\n\nI'd love to schedule a brief call to discuss how we might work together.\n\nWould you be available for a quick chat this week?\n\nBest regards`;
-    } else if (promptLower.includes("meeting") || promptLower.includes("schedule")) {
-      generatedSubject = context.subject || "Meeting request";
-      generatedBody = `Hi,\n\nI hope this email finds you well. I'd like to schedule a meeting to discuss [topic].\n\nWould you be available for a 30-minute call this week? I'm flexible on timing and happy to work around your schedule.\n\nPlease let me know what works best for you.\n\nBest regards`;
-    } else if (promptLower.includes("proposal") || promptLower.includes("offer")) {
-      generatedSubject = context.subject || "Proposal for your review";
-      generatedBody = `Hi,\n\nI'm excited to share a proposal that I think could be valuable for your team.\n\nI've attached a detailed overview of our solution and how it can help address [specific need].\n\nI'd be happy to schedule a call to walk through the details and answer any questions you might have.\n\nLooking forward to your feedback.\n\nBest regards`;
-    } else {
-      // Generic response based on prompt
-      generatedSubject = context.subject || prompt.slice(0, 50);
-      generatedBody = `Hi,\n\n${prompt}\n\nPlease let me know if you have any questions or need any additional information.\n\nBest regards`;
+    try {
+      // Clean up the response - remove markdown code blocks if present
+      let cleanResponse = response.response;
+      if (cleanResponse.startsWith("```json")) {
+        cleanResponse = cleanResponse.slice(7);
+      } else if (cleanResponse.startsWith("```")) {
+        cleanResponse = cleanResponse.slice(3);
+      }
+      if (cleanResponse.endsWith("```")) {
+        cleanResponse = cleanResponse.slice(0, -3);
+      }
+      cleanResponse = cleanResponse.trim();
+
+      const parsed = JSON.parse(cleanResponse);
+      generatedSubject = parsed.subject || "";
+      generatedBody = parsed.body || "";
+    } catch (parseError) {
+      // If JSON parsing fails, use the raw response as body
+      console.warn("Failed to parse AI response as JSON, using raw response:", parseError);
+      generatedSubject = context.subject || "Email";
+      generatedBody = response.response;
     }
-
-    // In production, you would:
-    // 1. Call OpenAI API with appropriate system prompt
-    // 2. Include context (previous emails, user's style, etc.)
-    // 3. Format the response appropriately
-    // 4. Handle rate limiting and errors
-
-    /* Example production code:
-    const response = await openai.chat.completions.create({
-      model: "gpt-4",
-      messages: [
-        {
-          role: "system",
-          content: "You are a professional email writing assistant. Write clear, concise, and professional emails based on the user's request."
-        },
-        {
-          role: "user",
-          content: `Write an email for the following request: ${prompt}\n\nContext: ${JSON.stringify(context)}`
-        }
-      ],
-      temperature: 0.7,
-    });
-
-    const emailContent = response.choices[0].message.content;
-    // Parse subject and body from response
-    */
 
     return NextResponse.json({
       subject: generatedSubject,
       body: generatedBody,
-      model: "mock", // Would be "gpt-4" or "claude-3-opus" in production
+      model: "gpt-4o-mini",
+      usage: response.usage,
     });
   } catch (error) {
     console.error("AI generate email API error:", error);
     return NextResponse.json(
-      { error: "Internal server error" },
+      { error: "Failed to generate email. Please try again." },
       { status: 500 }
     );
   }

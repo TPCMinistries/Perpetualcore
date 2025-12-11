@@ -120,6 +120,19 @@ export const searchConversationsTool = {
 This tool searches the ENTIRE conversation history across all chats, not just the current conversation.
 
 IMPORTANT: Always use this tool when users reference past conversations or ask about previous discussions.`,
-  parameters: searchConversationsSchema,
+  parameters: {
+    type: "object" as const,
+    properties: {
+      query: {
+        type: "string",
+        description: "The search query to find in previous conversations",
+      },
+      limit: {
+        type: "number",
+        description: "Maximum number of results to return (default: 10)",
+      },
+    },
+    required: ["query"],
+  },
   execute: searchConversations,
 };

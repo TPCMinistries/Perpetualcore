@@ -4,6 +4,8 @@ import { NextRequest } from "next/server";
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
+const isDev = process.env.NODE_ENV === "development";
+
 /**
  * GET /api/organization/users
  * Get all users in the current user's organization
@@ -46,7 +48,7 @@ export async function GET(req: NextRequest) {
       .order("full_name");
 
     if (error) {
-      console.error("Error fetching organization users:", error);
+      if (isDev) console.error("Error fetching organization users:", error);
       return new Response("Failed to fetch users", { status: 500 });
     }
 
@@ -59,7 +61,7 @@ export async function GET(req: NextRequest) {
 
     return Response.json({ users: formattedUsers });
   } catch (error) {
-    console.error("Organization users error:", error);
+    if (isDev) console.error("Organization users error:", error);
     return new Response("Internal server error", { status: 500 });
   }
 }

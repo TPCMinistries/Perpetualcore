@@ -1,6 +1,7 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import FileUpload from '@/components/marketplace/FileUpload';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -15,13 +16,33 @@ interface UploadedFile {
 }
 
 export default function TestUploadPage() {
+  const router = useRouter();
   const [configFile, setConfigFile] = useState<UploadedFile | undefined>();
   const [imageFile, setImageFile] = useState<UploadedFile | undefined>();
+  const [isAllowed, setIsAllowed] = useState(false);
+
+  // Only allow access in development
+  useEffect(() => {
+    if (process.env.NODE_ENV !== 'development') {
+      router.replace('/404');
+    } else {
+      setIsAllowed(true);
+    }
+  }, [router]);
+
+  if (!isAllowed) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-pulse">Loading...</div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white dark:from-gray-900 dark:to-gray-800 p-8">
       <div className="max-w-4xl mx-auto space-y-8">
         <div>
+          <Badge variant="destructive" className="mb-4">Development Only</Badge>
           <h1 className="text-4xl font-bold mb-2">🧪 File Upload Test</h1>
           <p className="text-muted-foreground">
             Test Cloudinary integration before full marketplace integration

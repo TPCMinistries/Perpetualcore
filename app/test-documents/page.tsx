@@ -1,12 +1,33 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { FileText, FileSpreadsheet, Presentation, Download } from "lucide-react";
 
 export default function TestDocumentsPage() {
+  const router = useRouter();
   const [loading, setLoading] = useState<string | null>(null);
+  const [isAllowed, setIsAllowed] = useState(false);
+
+  // Only allow access in development
+  useEffect(() => {
+    if (process.env.NODE_ENV !== 'development') {
+      router.replace('/404');
+    } else {
+      setIsAllowed(true);
+    }
+  }, [router]);
+
+  if (!isAllowed) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-pulse">Loading...</div>
+      </div>
+    );
+  }
 
   const generateDocument = async (type: "powerpoint" | "pdf" | "excel") => {
     setLoading(type);
@@ -110,6 +131,9 @@ The system uses jsPDF library to create high-quality PDF documents that can be c
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 p-8">
       <div className="max-w-4xl mx-auto">
+        <div className="mb-4">
+          <Badge variant="destructive">Development Only</Badge>
+        </div>
         <h1 className="text-4xl font-bold mb-2 text-center">
           Document Generation Test
         </h1>

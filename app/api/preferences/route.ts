@@ -1,6 +1,8 @@
 import { createClient } from "@/lib/supabase/server";
 import { NextRequest, NextResponse } from "next/server";
 
+const isDev = process.env.NODE_ENV === "development";
+
 export async function GET() {
   try {
     const supabase = await createClient();
@@ -21,7 +23,7 @@ export async function GET() {
       .single();
 
     if (profileError) {
-      console.error("Error loading preferences:", profileError);
+      if (isDev) console.error("Error loading preferences:", profileError);
       return NextResponse.json(
         { error: "Failed to load preferences" },
         { status: 500 }
@@ -32,7 +34,7 @@ export async function GET() {
       preferences: profile?.preferences || {}
     });
   } catch (error) {
-    console.error("Error in GET /api/preferences:", error);
+    if (isDev) console.error("Error in GET /api/preferences:", error);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }
@@ -69,7 +71,7 @@ export async function POST(request: NextRequest) {
       .eq("id", user.id);
 
     if (updateError) {
-      console.error("Error saving preferences:", updateError);
+      if (isDev) console.error("Error saving preferences:", updateError);
       return NextResponse.json(
         { error: "Failed to save preferences" },
         { status: 500 }
@@ -81,7 +83,7 @@ export async function POST(request: NextRequest) {
       message: "Preferences saved successfully"
     });
   } catch (error) {
-    console.error("Error in POST /api/preferences:", error);
+    if (isDev) console.error("Error in POST /api/preferences:", error);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }

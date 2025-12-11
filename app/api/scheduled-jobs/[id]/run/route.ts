@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 
+const isDev = process.env.NODE_ENV === "development";
+
 export async function POST(
   request: Request,
   { params }: { params: { id: string } }
@@ -44,7 +46,7 @@ export async function POST(
       .single();
 
     if (executionError) {
-      console.error("Error creating execution:", executionError);
+      if (isDev) console.error("Error creating execution:", executionError);
       return NextResponse.json({ error: "Failed to start execution" }, { status: 500 });
     }
 
@@ -78,7 +80,7 @@ export async function POST(
       message: "Job execution started"
     });
   } catch (error) {
-    console.error("Run job API error:", error);
+    if (isDev) console.error("Run job API error:", error);
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }

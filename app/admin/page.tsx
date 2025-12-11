@@ -9,7 +9,7 @@ import { createClient } from '../../lib/supabase/client';
 import OrganizationManagement from '../components/OrganizationManagement';
 import UserManagement from '../components/UserManagement';
 import Link from 'next/link';
-import { ArrowLeft, Shield, Mail, DollarSign, TrendingUp, Users as UsersIcon, CreditCard, Target, ArrowUpRight, ArrowDownRight, UserPlus, Building2, Phone, Calendar as CalendarIcon, Clock, CheckCircle2, XCircle } from 'lucide-react';
+import { ArrowLeft, Shield, Mail, DollarSign, TrendingUp, Users as UsersIcon, CreditCard, Target, ArrowUpRight, ArrowDownRight, UserPlus, Building2, Phone, Calendar as CalendarIcon, Clock, CheckCircle2, XCircle, Handshake, ShoppingBag, Eye, Package } from 'lucide-react';
 import { sendBetaCodeEmail } from '@/lib/email/send-beta-code';
 
 const supabase = createClient();
@@ -29,7 +29,7 @@ export default function AdminPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(true);
   const [isSuperAdmin, setIsSuperAdmin] = useState(false);
-  const [activeTab, setActiveTab] = useState<'users' | 'organizations' | 'invitations' | 'revenue' | 'leads'>('organizations');
+  const [activeTab, setActiveTab] = useState<'users' | 'organizations' | 'invitations' | 'revenue' | 'leads' | 'partners' | 'marketplace'>('organizations');
 
   // Check if user is super admin
   useEffect(() => {
@@ -185,6 +185,26 @@ export default function AdminPage() {
             >
               📧 Leads
             </button>
+            <button
+              onClick={() => setActiveTab('partners')}
+              className={`px-4 py-3 text-sm font-medium transition-all duration-200 border-b-2 ${
+                activeTab === 'partners'
+                  ? 'border-cyan-500 text-cyan-600 dark:text-cyan-400'
+                  : 'border-transparent text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100'
+              }`}
+            >
+              🤝 Partners
+            </button>
+            <button
+              onClick={() => setActiveTab('marketplace')}
+              className={`px-4 py-3 text-sm font-medium transition-all duration-200 border-b-2 ${
+                activeTab === 'marketplace'
+                  ? 'border-cyan-500 text-cyan-600 dark:text-cyan-400'
+                  : 'border-transparent text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100'
+              }`}
+            >
+              🛒 Marketplace
+            </button>
           </div>
         </div>
       </div>
@@ -196,6 +216,8 @@ export default function AdminPage() {
         {activeTab === 'invitations' && <BetaInvitations />}
         {activeTab === 'revenue' && <RevenueAnalytics />}
         {activeTab === 'leads' && <LeadsManagement />}
+        {activeTab === 'partners' && <PartnersManagement />}
+        {activeTab === 'marketplace' && <MarketplaceManagement />}
       </div>
     </div>
   );
@@ -994,6 +1016,508 @@ function LeadsManagement() {
           </table>
         </div>
       </div>
+    </div>
+  );
+}
+
+// Partners Management Component
+function PartnersManagement() {
+  const [data, setData] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const [updating, setUpdating] = useState<string | null>(null);
+  const [showRejectModal, setShowRejectModal] = useState<string | null>(null);
+  const [rejectionReason, setRejectionReason] = useState('');
+
+  useEffect(() => {
+    loadPartners();
+  }, []);
+
+  async function loadPartners() {
+    try {
+      const response = await fetch('/api/admin/partners');
+      const result = await response.json();
+      if (response.ok) {
+        setData(result);
+      } else {
+        console.error('Error loading partners:', result.error);
+      }
+    } catch (error) {
+      console.error('Error loading partners:', error);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function updateStatus(partnerId: string, status: string, reason?: string) {
+    setUpdating(partnerId);
+    try {
+      const response = await fetch('/api/admin/partners', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          partner_id: partnerId,
+          status,
+          rejection_reason: reason,
+        }),
+      });
+
+      if (response.ok) {
+        await loadPartners();
+        setShowRejectModal(null);
+        setRejectionReason('');
+      } else {
+        const error = await response.json();
+        alert(`Error updating partner: ${error.error}`);
+      }
+    } catch (error: any) {
+      alert(`Error updating partner: ${error.message}`);
+    } finally {
+      setUpdating(null);
+    }
+  }
+
+  if (loading) {
+    return <div className="text-center py-12 text-slate-600 dark:text-slate-400">Loading partners...</div>;
+  }
+
+  if (!data) {
+    return <div className="text-center py-12 text-red-600 dark:text-red-400">Failed to load partners</div>;
+  }
+
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric',
+    });
+  };
+
+  return (
+    <div className="space-y-6">
+      {/* Header */}
+      <div>
+        <h2 className="text-2xl font-bold text-slate-900 dark:text-slate-100">Partner Applications</h2>
+        <p className="text-sm text-slate-600 dark:text-slate-400">Review and approve partner program applications</p>
+      </div>
+
+      {/* Summary Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+        <div className="bg-gradient-to-br from-cyan-50 to-blue-50 dark:from-cyan-950/20 dark:to-blue-950/20 rounded-xl border border-cyan-200 dark:border-cyan-800 p-6">
+          <div className="flex items-center justify-between mb-2">
+            <div className="text-sm font-medium text-cyan-700 dark:text-cyan-400">Total</div>
+            <Handshake className="h-5 w-5 text-cyan-600 dark:text-cyan-400" />
+          </div>
+          <div className="text-3xl font-bold text-cyan-900 dark:text-cyan-100">{data.summary.total}</div>
+        </div>
+
+        <div className="bg-gradient-to-br from-yellow-50 to-amber-50 dark:from-yellow-950/20 dark:to-amber-950/20 rounded-xl border border-yellow-200 dark:border-yellow-800 p-6">
+          <div className="flex items-center justify-between mb-2">
+            <div className="text-sm font-medium text-yellow-700 dark:text-yellow-400">Pending</div>
+            <Clock className="h-5 w-5 text-yellow-600 dark:text-yellow-400" />
+          </div>
+          <div className="text-3xl font-bold text-yellow-900 dark:text-yellow-100">{data.summary.pending}</div>
+        </div>
+
+        <div className="bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-950/20 dark:to-emerald-950/20 rounded-xl border border-green-200 dark:border-green-800 p-6">
+          <div className="flex items-center justify-between mb-2">
+            <div className="text-sm font-medium text-green-700 dark:text-green-400">Approved</div>
+            <CheckCircle2 className="h-5 w-5 text-green-600 dark:text-green-400" />
+          </div>
+          <div className="text-3xl font-bold text-green-900 dark:text-green-100">{data.summary.approved}</div>
+        </div>
+
+        <div className="bg-gradient-to-br from-red-50 to-rose-50 dark:from-red-950/20 dark:to-rose-950/20 rounded-xl border border-red-200 dark:border-red-800 p-6">
+          <div className="flex items-center justify-between mb-2">
+            <div className="text-sm font-medium text-red-700 dark:text-red-400">Rejected</div>
+            <XCircle className="h-5 w-5 text-red-600 dark:text-red-400" />
+          </div>
+          <div className="text-3xl font-bold text-red-900 dark:text-red-100">{data.summary.rejected}</div>
+        </div>
+      </div>
+
+      {/* Partners Table */}
+      <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="w-full">
+            <thead className="bg-slate-50 dark:bg-slate-800/50">
+              <tr>
+                <th className="px-6 py-3 text-left text-xs font-medium text-slate-700 dark:text-slate-300 uppercase">Contact</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-slate-700 dark:text-slate-300 uppercase">Company</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-slate-700 dark:text-slate-300 uppercase">Type</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-slate-700 dark:text-slate-300 uppercase">Referral Code</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-slate-700 dark:text-slate-300 uppercase">Status</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-slate-700 dark:text-slate-300 uppercase">Applied</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-slate-700 dark:text-slate-300 uppercase">Actions</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-200 dark:divide-slate-800">
+              {data.partners.length === 0 ? (
+                <tr>
+                  <td colSpan={7} className="px-6 py-8 text-center text-sm text-slate-500 dark:text-slate-400">
+                    No partner applications yet
+                  </td>
+                </tr>
+              ) : (
+                data.partners.map((partner: any) => (
+                  <tr key={partner.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/50">
+                    <td className="px-6 py-4">
+                      <div className="text-sm font-medium text-slate-900 dark:text-slate-100">{partner.contact_name}</div>
+                      <div className="text-xs text-slate-500">{partner.contact_email}</div>
+                    </td>
+                    <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-400">{partner.company_name || '-'}</td>
+                    <td className="px-6 py-4">
+                      <span className="px-2 py-1 rounded-full text-xs font-medium bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 capitalize">
+                        {partner.partner_type || 'affiliate'}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 text-sm font-mono text-cyan-600 dark:text-cyan-400">{partner.referral_code}</td>
+                    <td className="px-6 py-4">
+                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                        partner.status === 'approved' ? 'bg-green-100 dark:bg-green-500/20 text-green-700 dark:text-green-400' :
+                        partner.status === 'rejected' ? 'bg-red-100 dark:bg-red-500/20 text-red-700 dark:text-red-400' :
+                        'bg-yellow-100 dark:bg-yellow-500/20 text-yellow-700 dark:text-yellow-400'
+                      }`}>
+                        {partner.status}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-400">{formatDate(partner.created_at)}</td>
+                    <td className="px-6 py-4">
+                      {partner.status === 'pending' && (
+                        <div className="flex gap-2">
+                          <button
+                            onClick={() => updateStatus(partner.id, 'approved')}
+                            disabled={updating === partner.id}
+                            className="px-3 py-1.5 bg-green-500 hover:bg-green-600 disabled:bg-green-300 text-white rounded-lg text-xs font-medium transition-colors"
+                          >
+                            {updating === partner.id ? '...' : 'Approve'}
+                          </button>
+                          <button
+                            onClick={() => setShowRejectModal(partner.id)}
+                            disabled={updating === partner.id}
+                            className="px-3 py-1.5 bg-red-500 hover:bg-red-600 disabled:bg-red-300 text-white rounded-lg text-xs font-medium transition-colors"
+                          >
+                            Reject
+                          </button>
+                        </div>
+                      )}
+                      {partner.status !== 'pending' && (
+                        <span className="text-xs text-slate-400">Reviewed</span>
+                      )}
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      {/* Rejection Modal */}
+      {showRejectModal && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl max-w-md w-full p-6 shadow-xl">
+            <h3 className="text-xl font-bold text-slate-900 dark:text-slate-100 mb-4">Reject Application</h3>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Rejection Reason (optional)</label>
+                <textarea
+                  value={rejectionReason}
+                  onChange={(e) => setRejectionReason(e.target.value)}
+                  className="w-full px-4 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-cyan-500 focus:border-transparent"
+                  placeholder="Enter reason for rejection..."
+                  rows={3}
+                />
+              </div>
+              <div className="flex gap-3">
+                <button
+                  onClick={() => { setShowRejectModal(null); setRejectionReason(''); }}
+                  className="flex-1 px-4 py-2 border border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={() => updateStatus(showRejectModal, 'rejected', rejectionReason)}
+                  disabled={updating === showRejectModal}
+                  className="flex-1 px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg font-medium transition-colors"
+                >
+                  {updating === showRejectModal ? 'Rejecting...' : 'Reject'}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// Marketplace Management Component
+function MarketplaceManagement() {
+  const [data, setData] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const [updating, setUpdating] = useState<string | null>(null);
+  const [showRejectModal, setShowRejectModal] = useState<string | null>(null);
+  const [rejectionReason, setRejectionReason] = useState('');
+
+  useEffect(() => {
+    loadMarketplace();
+  }, []);
+
+  async function loadMarketplace() {
+    try {
+      const response = await fetch('/api/admin/marketplace');
+      const result = await response.json();
+      if (response.ok) {
+        setData(result);
+      } else {
+        console.error('Error loading marketplace:', result.error);
+      }
+    } catch (error) {
+      console.error('Error loading marketplace:', error);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function updateStatus(itemId: string, status: string, reason?: string) {
+    setUpdating(itemId);
+    try {
+      const response = await fetch('/api/admin/marketplace', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          item_id: itemId,
+          status,
+          rejection_reason: reason,
+        }),
+      });
+
+      if (response.ok) {
+        await loadMarketplace();
+        setShowRejectModal(null);
+        setRejectionReason('');
+      } else {
+        const error = await response.json();
+        alert(`Error updating item: ${error.error}`);
+      }
+    } catch (error: any) {
+      alert(`Error updating item: ${error.message}`);
+    } finally {
+      setUpdating(null);
+    }
+  }
+
+  if (loading) {
+    return <div className="text-center py-12 text-slate-600 dark:text-slate-400">Loading marketplace items...</div>;
+  }
+
+  if (!data) {
+    return <div className="text-center py-12 text-red-600 dark:text-red-400">Failed to load marketplace items</div>;
+  }
+
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric',
+    });
+  };
+
+  const formatPrice = (price: number) => {
+    return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(price);
+  };
+
+  return (
+    <div className="space-y-6">
+      {/* Header */}
+      <div>
+        <h2 className="text-2xl font-bold text-slate-900 dark:text-slate-100">Marketplace Items</h2>
+        <p className="text-sm text-slate-600 dark:text-slate-400">Review and approve marketplace submissions</p>
+      </div>
+
+      {/* Summary Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-4">
+        <div className="bg-gradient-to-br from-cyan-50 to-blue-50 dark:from-cyan-950/20 dark:to-blue-950/20 rounded-xl border border-cyan-200 dark:border-cyan-800 p-4">
+          <div className="text-sm font-medium text-cyan-700 dark:text-cyan-400">Total</div>
+          <div className="text-2xl font-bold text-cyan-900 dark:text-cyan-100">{data.summary.total}</div>
+        </div>
+
+        <div className="bg-gradient-to-br from-yellow-50 to-amber-50 dark:from-yellow-950/20 dark:to-amber-950/20 rounded-xl border border-yellow-200 dark:border-yellow-800 p-4">
+          <div className="text-sm font-medium text-yellow-700 dark:text-yellow-400">Pending</div>
+          <div className="text-2xl font-bold text-yellow-900 dark:text-yellow-100">{data.summary.pending_review}</div>
+        </div>
+
+        <div className="bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-950/20 dark:to-emerald-950/20 rounded-xl border border-green-200 dark:border-green-800 p-4">
+          <div className="text-sm font-medium text-green-700 dark:text-green-400">Approved</div>
+          <div className="text-2xl font-bold text-green-900 dark:text-green-100">{data.summary.approved}</div>
+        </div>
+
+        <div className="bg-gradient-to-br from-red-50 to-rose-50 dark:from-red-950/20 dark:to-rose-950/20 rounded-xl border border-red-200 dark:border-red-800 p-4">
+          <div className="text-sm font-medium text-red-700 dark:text-red-400">Rejected</div>
+          <div className="text-2xl font-bold text-red-900 dark:text-red-100">{data.summary.rejected}</div>
+        </div>
+
+        <div className="bg-gradient-to-br from-purple-50 to-violet-50 dark:from-purple-950/20 dark:to-violet-950/20 rounded-xl border border-purple-200 dark:border-purple-800 p-4">
+          <div className="text-sm font-medium text-purple-700 dark:text-purple-400">Agents</div>
+          <div className="text-2xl font-bold text-purple-900 dark:text-purple-100">{data.summary.agents}</div>
+        </div>
+
+        <div className="bg-gradient-to-br from-orange-50 to-amber-50 dark:from-orange-950/20 dark:to-amber-950/20 rounded-xl border border-orange-200 dark:border-orange-800 p-4">
+          <div className="text-sm font-medium text-orange-700 dark:text-orange-400">Workflows</div>
+          <div className="text-2xl font-bold text-orange-900 dark:text-orange-100">{data.summary.workflows}</div>
+        </div>
+      </div>
+
+      {/* Items Table */}
+      <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="w-full">
+            <thead className="bg-slate-50 dark:bg-slate-800/50">
+              <tr>
+                <th className="px-6 py-3 text-left text-xs font-medium text-slate-700 dark:text-slate-300 uppercase">Item</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-slate-700 dark:text-slate-300 uppercase">Creator</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-slate-700 dark:text-slate-300 uppercase">Type</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-slate-700 dark:text-slate-300 uppercase">Price</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-slate-700 dark:text-slate-300 uppercase">Status</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-slate-700 dark:text-slate-300 uppercase">Submitted</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-slate-700 dark:text-slate-300 uppercase">Actions</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-200 dark:divide-slate-800">
+              {data.items.length === 0 ? (
+                <tr>
+                  <td colSpan={7} className="px-6 py-8 text-center text-sm text-slate-500 dark:text-slate-400">
+                    No marketplace items yet
+                  </td>
+                </tr>
+              ) : (
+                data.items.map((item: any) => (
+                  <tr key={item.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/50">
+                    <td className="px-6 py-4">
+                      <div className="flex items-center gap-3">
+                        {item.thumbnail_url ? (
+                          <img src={item.thumbnail_url} alt="" className="w-10 h-10 rounded-lg object-cover" />
+                        ) : (
+                          <div className="w-10 h-10 rounded-lg bg-slate-100 dark:bg-slate-800 flex items-center justify-center">
+                            <Package className="w-5 h-5 text-slate-400" />
+                          </div>
+                        )}
+                        <div>
+                          <div className="text-sm font-medium text-slate-900 dark:text-slate-100">{item.name}</div>
+                          <div className="text-xs text-slate-500 line-clamp-1">{item.short_description}</div>
+                        </div>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className="text-sm text-slate-900 dark:text-slate-100">{item.profiles?.full_name || 'Unknown'}</div>
+                      <div className="text-xs text-slate-500">{item.profiles?.email}</div>
+                    </td>
+                    <td className="px-6 py-4">
+                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                        item.type === 'agent' ? 'bg-purple-100 dark:bg-purple-500/20 text-purple-700 dark:text-purple-400' :
+                        'bg-orange-100 dark:bg-orange-500/20 text-orange-700 dark:text-orange-400'
+                      }`}>
+                        {item.type}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 text-sm font-medium text-slate-900 dark:text-slate-100">
+                      {item.price === 0 ? 'Free' : formatPrice(item.price)}
+                    </td>
+                    <td className="px-6 py-4">
+                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                        item.status === 'approved' ? 'bg-green-100 dark:bg-green-500/20 text-green-700 dark:text-green-400' :
+                        item.status === 'rejected' ? 'bg-red-100 dark:bg-red-500/20 text-red-700 dark:text-red-400' :
+                        item.status === 'suspended' ? 'bg-slate-100 dark:bg-slate-500/20 text-slate-700 dark:text-slate-400' :
+                        'bg-yellow-100 dark:bg-yellow-500/20 text-yellow-700 dark:text-yellow-400'
+                      }`}>
+                        {item.status.replace('_', ' ')}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-400">{formatDate(item.created_at)}</td>
+                    <td className="px-6 py-4">
+                      {item.status === 'pending_review' && (
+                        <div className="flex gap-2">
+                          <button
+                            onClick={() => updateStatus(item.id, 'approved')}
+                            disabled={updating === item.id}
+                            className="px-3 py-1.5 bg-green-500 hover:bg-green-600 disabled:bg-green-300 text-white rounded-lg text-xs font-medium transition-colors"
+                          >
+                            {updating === item.id ? '...' : 'Approve'}
+                          </button>
+                          <button
+                            onClick={() => setShowRejectModal(item.id)}
+                            disabled={updating === item.id}
+                            className="px-3 py-1.5 bg-red-500 hover:bg-red-600 disabled:bg-red-300 text-white rounded-lg text-xs font-medium transition-colors"
+                          >
+                            Reject
+                          </button>
+                        </div>
+                      )}
+                      {item.status === 'approved' && (
+                        <button
+                          onClick={() => updateStatus(item.id, 'suspended')}
+                          disabled={updating === item.id}
+                          className="px-3 py-1.5 bg-slate-500 hover:bg-slate-600 disabled:bg-slate-300 text-white rounded-lg text-xs font-medium transition-colors"
+                        >
+                          Suspend
+                        </button>
+                      )}
+                      {item.status === 'suspended' && (
+                        <button
+                          onClick={() => updateStatus(item.id, 'approved')}
+                          disabled={updating === item.id}
+                          className="px-3 py-1.5 bg-green-500 hover:bg-green-600 disabled:bg-green-300 text-white rounded-lg text-xs font-medium transition-colors"
+                        >
+                          Restore
+                        </button>
+                      )}
+                      {item.status === 'rejected' && (
+                        <span className="text-xs text-slate-400">Rejected</span>
+                      )}
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      {/* Rejection Modal */}
+      {showRejectModal && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl max-w-md w-full p-6 shadow-xl">
+            <h3 className="text-xl font-bold text-slate-900 dark:text-slate-100 mb-4">Reject Item</h3>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Rejection Reason (optional)</label>
+                <textarea
+                  value={rejectionReason}
+                  onChange={(e) => setRejectionReason(e.target.value)}
+                  className="w-full px-4 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-cyan-500 focus:border-transparent"
+                  placeholder="Enter reason for rejection..."
+                  rows={3}
+                />
+              </div>
+              <div className="flex gap-3">
+                <button
+                  onClick={() => { setShowRejectModal(null); setRejectionReason(''); }}
+                  className="flex-1 px-4 py-2 border border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={() => updateStatus(showRejectModal, 'rejected', rejectionReason)}
+                  disabled={updating === showRejectModal}
+                  className="flex-1 px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg font-medium transition-colors"
+                >
+                  {updating === showRejectModal ? 'Rejecting...' : 'Reject'}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

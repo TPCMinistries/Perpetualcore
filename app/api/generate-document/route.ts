@@ -3,10 +3,15 @@ import pptxgen from "pptxgenjs";
 import { jsPDF } from "jspdf";
 import ExcelJS from "exceljs";
 import { Document, Packer, Paragraph, TextRun, HeadingLevel, AlignmentType } from "docx";
+import { rateLimiters, checkRateLimit } from "@/lib/rate-limit";
 
 // POST /api/generate-document - Generate PowerPoint, PDF, or Excel documents
 export async function POST(req: NextRequest) {
   try {
+    // Apply rate limiting - document generation is resource intensive
+    const rateLimitResponse = await checkRateLimit(req, rateLimiters.export);
+    if (rateLimitResponse) return rateLimitResponse;
+
     const body = await req.json();
     const { type, title, content, slides, data } = body;
 

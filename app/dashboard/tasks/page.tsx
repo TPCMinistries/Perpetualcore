@@ -35,6 +35,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { TasksPageSkeleton } from "@/components/ui/skeletons";
 
 interface ExecutionLogEntry {
   event: string;
@@ -299,18 +300,7 @@ export default function TasksPage() {
   const displayTasks = filter === "all" ? tasks : filter === "todo" ? todoTasks : completedTasks;
 
   if (loading) {
-    return (
-      <div className="p-8">
-        <div className="flex items-center justify-center h-64">
-          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-12">
-            <div className="h-12 w-12 rounded-lg bg-slate-100 dark:bg-slate-800 flex items-center justify-center mx-auto mb-4">
-              <CheckSquare className="h-6 w-6 text-slate-600 dark:text-slate-400 animate-pulse" />
-            </div>
-            <p className="text-slate-900 dark:text-slate-100 font-medium">Loading tasks...</p>
-          </div>
-        </div>
-      </div>
-    );
+    return <TasksPageSkeleton />;
   }
 
   return (

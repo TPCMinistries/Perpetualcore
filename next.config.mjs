@@ -7,7 +7,7 @@ if (typeof self === 'undefined') {
 
 const withPWA = withPWAInit({
   dest: 'public',
-  disable: true, // Temporarily disabled for build
+  disable: process.env.NODE_ENV === 'development', // Enable in production only
   register: true,
   skipWaiting: true,
   sw: 'service-worker.js',
@@ -111,9 +111,11 @@ const nextConfig = {
   compress: true,
   reactStrictMode: true,
 
-  // Skip type checking and linting during build (handled by IDE and pre-commit hooks)
+  // Type checking handled by IDE, CI, and Vercel (has sufficient memory)
+  // Local builds skip due to TypeScript memory limits on large codebases
+  // Run `npm run type-check` separately for local validation
   typescript: {
-    ignoreBuildErrors: true,
+    ignoreBuildErrors: process.env.VERCEL !== '1',
   },
   eslint: {
     ignoreDuringBuilds: true,
@@ -141,7 +143,61 @@ const nextConfig = {
 
   // Headers for better caching and security
   async headers() {
+    // Security headers applied to all routes
+    const securityHeaders = [
+      {
+        key: 'X-DNS-Prefetch-Control',
+        value: 'on',
+      },
+      {
+        key: 'Strict-Transport-Security',
+        value: 'max-age=63072000; includeSubDomains; preload',
+      },
+      {
+        key: 'X-Content-Type-Options',
+        value: 'nosniff',
+      },
+      {
+        key: 'X-Frame-Options',
+        value: 'SAMEORIGIN',
+      },
+      {
+        key: 'X-XSS-Protection',
+        value: '1; mode=block',
+      },
+      {
+        key: 'Referrer-Policy',
+        value: 'strict-origin-when-cross-origin',
+      },
+      {
+        key: 'Permissions-Policy',
+        value: 'camera=(), microphone=(self), geolocation=(), interest-cohort=()',
+      },
+      {
+        key: 'Content-Security-Policy',
+        value: [
+          "default-src 'self'",
+          "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://js.stripe.com https://apis.google.com https://www.googletagmanager.com https://www.google-analytics.com https://cdn.sentry.io",
+          "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+          "img-src 'self' data: blob: https: http:",
+          "font-src 'self' https://fonts.gstatic.com data:",
+          "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.stripe.com https://api.openai.com https://api.anthropic.com https://*.sentry.io https://www.google-analytics.com https://vitals.vercel-insights.com",
+          "frame-src 'self' https://js.stripe.com https://hooks.stripe.com",
+          "object-src 'none'",
+          "base-uri 'self'",
+          "form-action 'self'",
+          "frame-ancestors 'self'",
+          "upgrade-insecure-requests",
+        ].join('; '),
+      },
+    ];
+
     return [
+      {
+        // Apply security headers to all routes
+        source: '/:path*',
+        headers: securityHeaders,
+      },
       {
         source: '/:all*(svg|jpg|jpeg|png|gif|ico|webp|avif)',
         headers: [
@@ -157,6 +213,16 @@ const nextConfig = {
           {
             key: 'Cache-Control',
             value: 'public, max-age=31536000, immutable',
+          },
+        ],
+      },
+      {
+        // API routes - prevent caching of sensitive data
+        source: '/api/:path*',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'no-store, max-age=0',
           },
         ],
       },

@@ -6,6 +6,8 @@ import Stripe from "stripe";
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
+const isDev = process.env.NODE_ENV === "development";
+
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: "2024-12-18.acacia",
 });
@@ -13,8 +15,44 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
 const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET!;
 
 /**
+ * Check if a webhook event has already been processed (idempotency check)
+ * This prevents duplicate processing when Stripe retries webhooks
+ */
+async function isEventProcessed(supabase: any, eventId: string): Promise<boolean> {
+  const { data, error } = await supabase
+    .from("stripe_webhook_events")
+    .select("id")
+    .eq("event_id", eventId)
+    .single();
+
+  return !!data && !error;
+}
+
+/**
+ * Mark a webhook event as processed
+ */
+async function markEventProcessed(
+  supabase: any,
+  eventId: string,
+  eventType: string,
+  status: "processed" | "failed" = "processed",
+  errorMessage?: string
+): Promise<void> {
+  await supabase.from("stripe_webhook_events").upsert({
+    event_id: eventId,
+    event_type: eventType,
+    status,
+    error_message: errorMessage || null,
+    processed_at: new Date().toISOString(),
+  });
+}
+
+/**
  * POST - Handle Stripe webhook events
  * Processes subscription, marketplace, API billing, and partner commission events
+ *
+ * IMPORTANT: This handler is idempotent - it tracks processed event IDs
+ * to prevent duplicate processing on webhook retries.
  */
 export async function POST(req: NextRequest) {
   const body = await req.text();
@@ -28,15 +66,22 @@ export async function POST(req: NextRequest) {
 
   try {
     event = stripe.webhooks.constructEvent(body, signature, webhookSecret);
-  } catch (err: any) {
-    console.error(`Webhook signature verification failed:`, err.message);
+  } catch (err: unknown) {
+    const errorMessage = err instanceof Error ? err.message : "Unknown error";
+    if (isDev) console.error(`Webhook signature verification failed:`, errorMessage);
     return NextResponse.json(
-      { error: `Webhook Error: ${err.message}` },
+      { error: `Webhook Error: ${errorMessage}` },
       { status: 400 }
     );
   }
 
   const supabase = await createClient();
+
+  // Idempotency check: Skip if we've already processed this event
+  if (await isEventProcessed(supabase, event.id)) {
+    if (isDev) console.log(`Event already processed: ${event.id}`);
+    return NextResponse.json({ received: true, duplicate: true });
+  }
 
   try {
     switch (event.type) {
@@ -83,14 +128,22 @@ export async function POST(req: NextRequest) {
       }
 
       default:
-        console.log(`Unhandled event type: ${event.type}`);
+        if (isDev) console.log(`Unhandled event type: ${event.type}`);
     }
 
+    // Mark event as successfully processed
+    await markEventProcessed(supabase, event.id, event.type, "processed");
+
     return NextResponse.json({ received: true });
-  } catch (error: any) {
-    console.error(`Error processing webhook:`, error);
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : "Unknown error";
+    if (isDev) console.error(`Error processing webhook:`, errorMessage);
+
+    // Mark event as failed (but still record it to prevent infinite retries)
+    await markEventProcessed(supabase, event.id, event.type, "failed", errorMessage);
+
     return NextResponse.json(
-      { error: `Webhook handler failed: ${error.message}` },
+      { error: `Webhook handler failed: ${errorMessage}` },
       { status: 500 }
     );
   }

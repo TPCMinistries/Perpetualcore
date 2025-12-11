@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 
+const isDev = process.env.NODE_ENV === "development";
+
 export async function GET() {
   try {
     const supabase = await createClient();
@@ -31,7 +33,7 @@ export async function GET() {
 
     return NextResponse.json(profile);
   } catch (error) {
-    console.error("User profile API error:", error);
+    if (isDev) console.error("User profile API error:", error);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }

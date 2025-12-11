@@ -126,6 +126,70 @@ export interface Database {
         Insert: Omit<Database['public']['Tables']['usage_logs']['Row'], 'created_at'>;
         Update: Partial<Database['public']['Tables']['usage_logs']['Insert']>;
       };
+      whatsapp_accounts: {
+        Row: {
+          id: string;
+          user_id: string;
+          organization_id: string;
+          phone_number: string;
+          twilio_phone_number: string | null;
+          status: string;
+          verification_code: string | null;
+          verified_at: string | null;
+          enabled: boolean;
+          ai_enabled: boolean;
+          notification_enabled: boolean;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: Omit<Database['public']['Tables']['whatsapp_accounts']['Row'], 'created_at' | 'updated_at'>;
+        Update: Partial<Database['public']['Tables']['whatsapp_accounts']['Insert']>;
+      };
+      whatsapp_messages: {
+        Row: {
+          id: string;
+          whatsapp_account_id: string;
+          organization_id: string;
+          user_id: string;
+          twilio_message_sid: string | null;
+          direction: string;
+          from_number: string;
+          to_number: string;
+          body: string | null;
+          media_url: string | null;
+          media_content_type: string | null;
+          num_media: number;
+          status: string;
+          error_message: string | null;
+          ai_response: boolean;
+          ai_model: string | null;
+          processing_time_ms: number | null;
+          twilio_status: string | null;
+          raw_data: Json | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: Omit<Database['public']['Tables']['whatsapp_messages']['Row'], 'created_at' | 'updated_at'>;
+        Update: Partial<Database['public']['Tables']['whatsapp_messages']['Insert']>;
+      };
+      whatsapp_conversations: {
+        Row: {
+          id: string;
+          whatsapp_account_id: string;
+          organization_id: string;
+          user_id: string;
+          phone_number: string;
+          title: string | null;
+          last_message_at: string | null;
+          last_message_preview: string | null;
+          message_count: number;
+          unread_count: number;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: Omit<Database['public']['Tables']['whatsapp_conversations']['Row'], 'created_at' | 'updated_at'>;
+        Update: Partial<Database['public']['Tables']['whatsapp_conversations']['Insert']>;
+      };
     };
     Views: {};
     Functions: {};

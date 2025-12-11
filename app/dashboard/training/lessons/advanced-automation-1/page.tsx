@@ -410,7 +410,7 @@ return result;`}
             <div className="p-4 bg-red-50 dark:bg-red-950/20 rounded-lg border border-red-200">
               <h4 className="font-semibold text-sm mb-2 text-red-700 dark:text-red-400">✗ DON'T</h4>
               <ul className="text-xs space-y-2">
-                <li>• Create overly complex workflows (>20 steps)</li>
+                <li>• Create overly complex workflows (&gt;20 steps)</li>
                 <li>• Hardcode values - use variables instead</li>
                 <li>• Ignore error handling</li>
                 <li>• Skip testing before activating</li>

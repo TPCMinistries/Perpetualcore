@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { Resend } from "resend";
 
 // POST /api/email/send
 export async function POST(request: Request) {
@@ -94,27 +95,86 @@ export async function POST(request: Request) {
       );
     }
 
-    // In a production environment, you would:
-    // 1. Queue the email for sending (e.g., using a background job processor)
-    // 2. Use a service like SendGrid, Mailgun, or AWS SES
-    // 3. Handle OAuth for Gmail/Outlook
-    // 4. Track sending status and delivery
-
-    // For now, we'll mark it as sent immediately if not scheduled
+    // Send email via Resend if not scheduled
     if (!isScheduled) {
-      await supabase
-        .from("emails")
-        .update({
-          status: "sent",
-          sent_at: new Date().toISOString(),
-        })
-        .eq("id", email.id);
+      // Initialize Resend if API key is available
+      const resendApiKey = process.env.RESEND_API_KEY;
+
+      if (resendApiKey) {
+        const resend = new Resend(resendApiKey);
+        const fromAddress = process.env.EMAIL_FROM_ADDRESS || process.env.RESEND_FROM_EMAIL || "noreply@perpetualcore.com";
+        const fromName = profile.full_name || "Perpetual Core";
+
+        try {
+          const { data: resendData, error: resendError } = await resend.emails.send({
+            from: `${fromName} <${fromAddress}>`,
+            to: to_emails,
+            cc: cc_emails.length > 0 ? cc_emails : undefined,
+            bcc: bcc_emails.length > 0 ? bcc_emails : undefined,
+            subject: subject,
+            html: body_html || `<pre style="font-family: sans-serif;">${body_text}</pre>`,
+            text: body_text,
+            replyTo: emailAccount?.email_address || profile.email,
+          });
+
+          if (resendError) {
+            console.error("Resend error:", resendError);
+            // Update email status to failed
+            await supabase
+              .from("emails")
+              .update({
+                status: "failed",
+                error_message: resendError.message,
+              })
+              .eq("id", email.id);
+
+            return NextResponse.json(
+              { error: `Failed to send email: ${resendError.message}` },
+              { status: 500 }
+            );
+          }
+
+          // Update email with Resend message ID and mark as sent
+          await supabase
+            .from("emails")
+            .update({
+              status: "sent",
+              sent_at: new Date().toISOString(),
+              external_id: resendData?.id,
+            })
+            .eq("id", email.id);
+        } catch (sendError: any) {
+          console.error("Email send error:", sendError);
+          await supabase
+            .from("emails")
+            .update({
+              status: "failed",
+              error_message: sendError.message,
+            })
+            .eq("id", email.id);
+
+          return NextResponse.json(
+            { error: `Failed to send email: ${sendError.message}` },
+            { status: 500 }
+          );
+        }
+      } else {
+        // No Resend API key - mark as sent for demo purposes
+        console.warn("RESEND_API_KEY not configured - email not actually sent");
+        await supabase
+          .from("emails")
+          .update({
+            status: "sent",
+            sent_at: new Date().toISOString(),
+          })
+          .eq("id", email.id);
+      }
 
       // Log activity
-      await fetch("/api/activity", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
+      try {
+        await supabase.from("activity_logs").insert({
+          organization_id: profile.organization_id,
+          user_id: user.id,
           action_type: "created",
           entity_type: "email",
           entity_id: email.id,
@@ -123,14 +183,17 @@ export async function POST(request: Request) {
             to: to_emails,
             scheduled: false,
           },
-        }),
-      });
+        });
+      } catch (activityError) {
+        // Non-critical, just log
+        console.error("Failed to log activity:", activityError);
+      }
     } else {
       // Log scheduled email activity
-      await fetch("/api/activity", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
+      try {
+        await supabase.from("activity_logs").insert({
+          organization_id: profile.organization_id,
+          user_id: user.id,
           action_type: "created",
           entity_type: "email",
           entity_id: email.id,
@@ -140,8 +203,10 @@ export async function POST(request: Request) {
             scheduled: true,
             scheduled_at,
           },
-        }),
-      });
+        });
+      } catch (activityError) {
+        console.error("Failed to log activity:", activityError);
+      }
     }
 
     return NextResponse.json({

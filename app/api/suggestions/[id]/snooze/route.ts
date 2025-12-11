@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 
+const isDev = process.env.NODE_ENV === "development";
+
 export async function POST(
   request: Request,
   { params }: { params: { id: string } }
@@ -43,13 +45,13 @@ export async function POST(
       .single();
 
     if (updateError) {
-      console.error("Error snoozing suggestion:", updateError);
+      if (isDev) console.error("Error snoozing suggestion:", updateError);
       return NextResponse.json({ error: "Failed to snooze suggestion" }, { status: 500 });
     }
 
     return NextResponse.json({ suggestion: updatedSuggestion });
   } catch (error) {
-    console.error("Snooze suggestion API error:", error);
+    if (isDev) console.error("Snooze suggestion API error:", error);
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }

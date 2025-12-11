@@ -39,7 +39,6 @@ function ContactSalesForm() {
     setIsSubmitting(true);
 
     try {
-      // TODO: Send to your CRM or email service
       const response = await fetch("/api/contact-sales", {
         method: "POST",
         headers: { "Content-Type": "application/json" },

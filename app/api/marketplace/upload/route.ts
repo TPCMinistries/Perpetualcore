@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { uploadToCloudinary } from '@/lib/cloudinary/config';
 import { createClient } from '@/lib/supabase/server';
+import { rateLimiters, checkRateLimit } from '@/lib/rate-limit';
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
 const ALLOWED_TYPES = {
@@ -10,6 +11,10 @@ const ALLOWED_TYPES = {
 
 export async function POST(request: NextRequest) {
   try {
+    // Apply rate limiting - file uploads are resource intensive
+    const rateLimitResponse = await checkRateLimit(request, rateLimiters.strict);
+    if (rateLimitResponse) return rateLimitResponse;
+
     // Check authentication
     const supabase = await createClient();
     const { data: { user }, error: authError } = await supabase.auth.getUser();

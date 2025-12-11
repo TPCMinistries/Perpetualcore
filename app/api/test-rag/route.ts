@@ -1,6 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { searchDocuments, shouldUseRAG } from "@/lib/documents/rag";
-import { NextRequest } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -8,8 +8,14 @@ export const dynamic = "force-dynamic";
 /**
  * Diagnostic endpoint to test RAG functionality
  * Visit /api/test-rag to see if RAG is working
+ *
+ * DEVELOPMENT ONLY - Returns 404 in production
  */
 export async function GET(req: NextRequest) {
+  // Block access in production
+  if (process.env.NODE_ENV === "production") {
+    return NextResponse.json({ error: "Not found" }, { status: 404 });
+  }
   const results: any = {
     timestamp: new Date().toISOString(),
     tests: {},

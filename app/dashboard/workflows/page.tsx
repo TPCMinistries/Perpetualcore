@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Input } from "@/components/ui/input";
 import { Workflow, Plus, Search, Play, Pause, Trash2, Edit, Eye, Clock, CheckCircle2, XCircle, Zap } from "lucide-react";
+import { WorkflowsPageSkeleton } from "@/components/ui/skeletons";
 import { toast } from "sonner";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -164,18 +165,7 @@ export default function WorkflowsPage() {
   }
 
   if (loading) {
-    return (
-      <div className="space-y-6">
-        <div className="animate-pulse">
-          <div className="h-8 bg-muted rounded w-1/4 mb-6"></div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {[...Array(6)].map((_, i) => (
-              <div key={i} className="h-64 bg-muted rounded"></div>
-            ))}
-          </div>
-        </div>
-      </div>
-    );
+    return <WorkflowsPageSkeleton />;
   }
 
   return (

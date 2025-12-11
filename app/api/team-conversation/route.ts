@@ -1,8 +1,9 @@
 import { createClient } from "@/lib/supabase/server";
 import { NextRequest, NextResponse } from "next/server";
-import { getAIModel } from "@/lib/ai/config";
 
 export const runtime = "edge";
+
+const DEFAULT_MODEL = "gpt-4o-mini";
 
 export async function POST(request: NextRequest) {
   try {
@@ -87,9 +88,6 @@ export async function POST(request: NextRequest) {
       })),
     ];
 
-    // Get AI model
-    const model = getAIModel("auto");
-
     // Create streaming response
     const encoder = new TextEncoder();
     const stream = new ReadableStream({
@@ -104,7 +102,7 @@ export async function POST(request: NextRequest) {
                 Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
               },
               body: JSON.stringify({
-                model: model.model,
+                model: DEFAULT_MODEL,
                 messages: aiMessages,
                 stream: true,
                 temperature: 0.7,

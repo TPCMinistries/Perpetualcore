@@ -4,6 +4,8 @@ import { NextRequest } from "next/server";
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
+const isDev = process.env.NODE_ENV === "development";
+
 export async function POST(req: NextRequest) {
   try {
     const supabase = await createClient();
@@ -35,11 +37,11 @@ export async function POST(req: NextRequest) {
     // Check if API key is available
     const apiKey = process.env.OPENAI_API_KEY;
     if (!apiKey) {
-      console.error("OPENAI_API_KEY is not set in environment variables");
+      if (isDev) console.error("OPENAI_API_KEY is not set in environment variables");
       return new Response("Server configuration error: OpenAI API key not found", { status: 500 });
     }
 
-    console.log("Creating Realtime API session with API key:", apiKey.substring(0, 10) + "...");
+    if (isDev) console.log("Creating Realtime API session with API key:", apiKey.substring(0, 10) + "...");
 
     // For the Realtime API, we just return the API key directly
     // The client will use it to connect via WebSocket
@@ -49,7 +51,7 @@ export async function POST(req: NextRequest) {
       voice: voice,
     });
   } catch (error) {
-    console.error("Voice token error:", error);
+    if (isDev) console.error("Voice token error:", error);
     return new Response("Internal server error", { status: 500 });
   }
 }

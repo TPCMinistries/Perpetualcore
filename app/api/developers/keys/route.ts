@@ -6,6 +6,8 @@ import crypto from "crypto";
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
+const isDev = process.env.NODE_ENV === "development";
+
 /**
  * POST - Generate new API key
  */
@@ -74,7 +76,7 @@ export async function POST(req: NextRequest) {
       .single();
 
     if (keyError) {
-      console.error("Error creating API key:", keyError);
+      if (isDev) console.error("Error creating API key:", keyError);
       return NextResponse.json(
         { error: "Failed to create API key" },
         { status: 500 }
@@ -118,7 +120,7 @@ export async function POST(req: NextRequest) {
         "Save this key securely. You won't be able to see it again!",
     });
   } catch (error: any) {
-    console.error("API key generation error:", error);
+    if (isDev) console.error("API key generation error:", error);
     return NextResponse.json(
       { error: error.message || "Failed to generate API key" },
       { status: 500 }
@@ -161,7 +163,7 @@ export async function GET(req: NextRequest) {
       .order("created_at", { ascending: false });
 
     if (error) {
-      console.error("Error fetching API keys:", error);
+      if (isDev) console.error("Error fetching API keys:", error);
       return NextResponse.json(
         { error: "Failed to fetch API keys" },
         { status: 500 }
@@ -172,7 +174,7 @@ export async function GET(req: NextRequest) {
       keys: keys || [],
     });
   } catch (error: any) {
-    console.error("API keys fetch error:", error);
+    if (isDev) console.error("API keys fetch error:", error);
     return NextResponse.json(
       { error: error.message || "Failed to fetch API keys" },
       { status: 500 }
@@ -213,7 +215,7 @@ export async function DELETE(req: NextRequest) {
       .eq("user_id", user.id); // Ensure user owns the key
 
     if (error) {
-      console.error("Error revoking API key:", error);
+      if (isDev) console.error("Error revoking API key:", error);
       return NextResponse.json(
         { error: "Failed to revoke API key" },
         { status: 500 }
@@ -225,7 +227,7 @@ export async function DELETE(req: NextRequest) {
       message: "API key revoked successfully",
     });
   } catch (error: any) {
-    console.error("API key revocation error:", error);
+    if (isDev) console.error("API key revocation error:", error);
     return NextResponse.json(
       { error: error.message || "Failed to revoke API key" },
       { status: 500 }

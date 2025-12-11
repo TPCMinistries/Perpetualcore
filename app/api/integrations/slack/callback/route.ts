@@ -32,7 +32,8 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    const { user_id, provider, timestamp } = stateData;
+    const { userId, timestamp } = stateData;
+    const user_id = userId; // Normalize field name
 
     // Check if state is too old (10 minutes)
     if (Date.now() - timestamp > 600000) {
@@ -49,9 +50,9 @@ export async function GET(request: NextRequest) {
 
     // Get user profile for organization
     const { data: profile } = await supabase
-      .from("user_profiles")
+      .from("profiles")
       .select("organization_id")
-      .eq("user_id", user_id)
+      .eq("id", user_id)
       .single();
 
     if (!profile) {
@@ -65,27 +66,26 @@ export async function GET(request: NextRequest) {
       ? new Date(Date.now() + tokenData.expires_in * 1000).toISOString()
       : null;
 
-    // Save integration to database
-    const { error: insertError } = await supabase.from("integrations").upsert(
+    // Save integration to user_integrations table
+    const { error: insertError } = await supabase.from("user_integrations").upsert(
       {
-        organization_id: profile.organization_id,
         user_id,
         provider: "slack",
-        provider_user_id: tokenData.authed_user?.id || null,
-        provider_team_id: tokenData.team?.id || null,
+        provider_account_id: tokenData.authed_user?.id || tokenData.team?.id || null,
         access_token: tokenData.access_token, // NOTE: Should be encrypted in production
         refresh_token: tokenData.refresh_token || null, // NOTE: Should be encrypted in production
         token_expires_at: expiresAt,
         scopes: tokenData.scope ? tokenData.scope.split(",") : [],
         metadata: {
+          team_id: tokenData.team?.id || null,
           team_name: tokenData.team?.name || null,
           user_name: tokenData.authed_user?.name || null,
         },
         is_active: true,
-        last_synced_at: new Date().toISOString(),
+        last_used_at: new Date().toISOString(),
       },
       {
-        onConflict: "organization_id,provider,provider_user_id",
+        onConflict: "user_id,provider",
       }
     );
 

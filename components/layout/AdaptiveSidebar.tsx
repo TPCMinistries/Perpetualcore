@@ -122,11 +122,10 @@ export function AdaptiveSidebar({ profile, isCollapsed }: AdaptiveSidebarProps) 
                 {group.items.map((item) => {
                   const active = isActive(item.href);
 
-                  // Temporarily show Admin Panel for debugging
-                  // TODO: Re-enable check once profile loading is fixed
-                  // if (item.name === "Admin Panel" && !profile?.is_super_admin) {
-                  //   return null;
-                  // }
+                  // Hide Admin Panel for non-super-admins
+                  if (item.name === "Admin Panel" && !profile?.is_super_admin) {
+                    return null;
+                  }
 
                   return (
                     <Link

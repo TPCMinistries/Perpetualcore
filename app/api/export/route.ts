@@ -8,15 +8,21 @@ import {
   exportDocumentsAsCSV,
   exportCalendarAsICS,
 } from "@/lib/import-export/export";
+import { rateLimiters, checkRateLimit } from "@/lib/rate-limit";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
+
+const isDev = process.env.NODE_ENV === "development";
 
 /**
  * GET - Export user data in various formats
  */
 export async function GET(req: NextRequest) {
   try {
+    // Rate limiting - 5 requests per minute for export
+    const rateLimitResponse = await checkRateLimit(req, rateLimiters.export);
+    if (rateLimitResponse) return rateLimitResponse;
     const supabase = await createClient();
 
     const {
@@ -97,7 +103,7 @@ export async function GET(req: NextRequest) {
         );
     }
   } catch (error) {
-    console.error("Export API error:", error);
+    if (isDev) console.error("Export API error:", error);
     return NextResponse.json(
       { error: "Failed to export data" },
       { status: 500 }

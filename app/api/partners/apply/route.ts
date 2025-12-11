@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
-import { sendPartnerApplicationEmail } from "@/lib/email";
+import { sendPartnerApplicationEmail, sendPartnerAdminNotificationEmail } from "@/lib/email";
 import crypto from "crypto";
 
 export const runtime = "nodejs";
@@ -139,7 +139,15 @@ export async function POST(req: NextRequest) {
       application_id: partner.id,
     });
 
-    // TODO: Send notification email to admin
+    // Send notification email to admin
+    await sendPartnerAdminNotificationEmail({
+      partner_name,
+      partner_email,
+      partner_type,
+      company_name,
+      application_id: partner.id,
+    });
+
     console.log("New partner application:", {
       id: partner.id,
       name: partner_name,

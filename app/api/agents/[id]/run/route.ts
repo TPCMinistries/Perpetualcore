@@ -1,13 +1,23 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { processEmailsForAgent } from "@/lib/agents/email-monitor";
+import { processDocumentsForAgent } from "@/lib/agents/document-analyzer";
+import { processTasksForAgent } from "@/lib/agents/task-manager";
+import { processCalendarForAgent } from "@/lib/agents/calendar-monitor";
+import { processDigestForAgent } from "@/lib/agents/daily-digest";
+import { logger } from "@/lib/logging";
+import { rateLimiters, checkRateLimit } from "@/lib/rate-limit";
 
 /**
  * Manually trigger an agent to run immediately
  * POST /api/agents/[id]/run
  */
-export async function POST(request: Request, { params }: { params: { id: string } }) {
+export async function POST(request: NextRequest, { params }: { params: { id: string } }) {
   try {
+    // Apply rate limiting - agents are expensive operations
+    const rateLimitResponse = await checkRateLimit(request, rateLimiters.strict);
+    if (rateLimitResponse) return rateLimitResponse;
+
     const supabase = await createClient();
     const { data: { user }, error: userError } = await supabase.auth.getUser();
 
@@ -33,23 +43,43 @@ export async function POST(request: Request, { params }: { params: { id: string 
       return NextResponse.json({ error: "Cannot run disabled agent" }, { status: 400 });
     }
 
-    console.log(`[Manual Run] Processing agent "${agent.name}" (${agentId})`);
+    logger.info(`[Manual Run] Processing agent "${agent.name}" (${agentId})`, {
+      agentId,
+      agentName: agent.name,
+      agentType: agent.agent_type,
+    });
 
     // Process based on agent type
-    let result;
+    let result: { processed: number; created?: number; analyzed?: number };
     switch (agent.agent_type) {
       case "email_monitor":
         result = await processEmailsForAgent(agentId);
         break;
 
-      case "calendar_monitor":
       case "document_analyzer":
+        const docResult = await processDocumentsForAgent(agentId);
+        result = { processed: docResult.processed, created: docResult.analyzed };
+        break;
+
       case "task_manager":
+        const taskResult = await processTasksForAgent(agentId);
+        result = { processed: taskResult.processed, created: taskResult.updated };
+        break;
+
+      case "calendar_monitor":
+        const calResult = await processCalendarForAgent(agentId);
+        result = { processed: calResult.processed, created: calResult.tasksCreated };
+        break;
+
+      case "daily_digest":
+        const digestResult = await processDigestForAgent(agentId);
+        result = { processed: digestResult.processed ? 1 : 0, created: digestResult.digestId ? 1 : 0 };
+        break;
+
       case "meeting_assistant":
       case "email_organizer":
       case "research_assistant":
       case "workflow_optimizer":
-      case "daily_digest":
       case "sentiment_monitor":
         // These agent types aren't implemented yet
         return NextResponse.json({
@@ -70,7 +100,13 @@ export async function POST(request: Request, { params }: { params: { id: string 
       .update({ last_active_at: new Date().toISOString() })
       .eq("id", agentId);
 
-    console.log(`[Manual Run] Agent "${agent.name}" processed: ${result.processed} emails, ${result.created} tasks created`);
+    const createdCount = result.created ?? 0;
+    logger.info(`[Manual Run] Agent "${agent.name}" processed`, {
+      agentId,
+      agentName: agent.name,
+      processed: result.processed,
+      created: createdCount,
+    });
 
     return NextResponse.json({
       success: true,
@@ -81,15 +117,15 @@ export async function POST(request: Request, { params }: { params: { id: string 
       },
       result: {
         processed: result.processed,
-        created: result.created,
+        created: createdCount,
       },
-      message: result.created > 0
-        ? `Successfully processed ${result.processed} items and created ${result.created} new task${result.created !== 1 ? 's' : ''}`
+      message: createdCount > 0
+        ? `Successfully processed ${result.processed} items and created ${createdCount} new item${createdCount !== 1 ? 's' : ''}`
         : `Processed ${result.processed} items but found no actionable items`,
       timestamp: new Date().toISOString(),
     });
   } catch (error) {
-    console.error("[Manual Run] Error:", error);
+    logger.error("[Manual Run] Error", { error });
     return NextResponse.json(
       {
         success: false,

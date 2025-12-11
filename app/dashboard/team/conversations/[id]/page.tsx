@@ -29,6 +29,7 @@ import {
   Globe,
   Bot,
   User as UserIcon,
+  MessageSquare,
 } from "lucide-react";
 import { useRouter, useParams } from "next/navigation";
 import { cn } from "@/lib/utils";

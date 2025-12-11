@@ -1,8 +1,16 @@
-import { NextRequest } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 
-// Simple test endpoint to diagnose chat issues
+/**
+ * Simple test endpoint to diagnose chat issues
+ *
+ * DEVELOPMENT ONLY - Returns 404 in production
+ */
 export async function POST(req: NextRequest) {
+  // Block access in production
+  if (process.env.NODE_ENV === "production") {
+    return NextResponse.json({ error: "Not found" }, { status: 404 });
+  }
   try {
     const supabase = await createClient();
 

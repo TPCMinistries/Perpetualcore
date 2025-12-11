@@ -19,12 +19,13 @@ interface Suggestion {
   id: string;
   title: string;
   description: string;
-  category: string;
+  suggestion_type: string; // Was category
   priority: string;
-  suggested_action: string;
-  action_url: string | null;
-  confidence_score: number;
+  suggested_action: any; // Can be object or string
+  relevance_score: number; // Was confidence_score
+  confidence: number;
   status: string;
+  context_tags: string[];
 }
 
 export function SuggestionsWidget() {
@@ -103,8 +104,15 @@ export function SuggestionsWidget() {
     }
   }
 
-  function getCategoryIcon(category: string) {
+  function getCategoryIcon(type: string) {
     return <Sparkles className="h-4 w-4" />;
+  }
+
+  function getActionText(action: any): string {
+    if (typeof action === "string") return action;
+    if (action?.type) return action.type;
+    if (action?.details) return JSON.stringify(action.details).slice(0, 50);
+    return "Take action";
   }
 
   if (loading) {
@@ -174,7 +182,7 @@ export function SuggestionsWidget() {
             {/* Header */}
             <div className="flex items-start justify-between gap-2">
               <div className="flex items-start gap-2 flex-1">
-                <div className="mt-0.5">{getCategoryIcon(suggestion.category)}</div>
+                <div className="mt-0.5">{getCategoryIcon(suggestion.suggestion_type)}</div>
                 <div className="flex-1 min-w-0">
                   <h4 className="font-medium text-sm leading-tight">
                     {suggestion.title}
@@ -195,51 +203,35 @@ export function SuggestionsWidget() {
             {/* Action */}
             <div className="flex items-center gap-2 text-xs">
               <span className="text-muted-foreground">Suggested:</span>
-              <span className="font-medium">{suggestion.suggested_action}</span>
+              <span className="font-medium">{getActionText(suggestion.suggested_action)}</span>
             </div>
 
             {/* Confidence */}
-            {suggestion.confidence_score && (
+            {(suggestion.relevance_score || suggestion.confidence) && (
               <div className="flex items-center gap-2 text-xs text-muted-foreground">
                 <span>Confidence:</span>
                 <div className="flex-1 bg-muted rounded-full h-1.5 max-w-[100px]">
                   <div
                     className="bg-primary h-full rounded-full"
-                    style={{ width: `${suggestion.confidence_score * 100}%` }}
+                    style={{ width: `${(suggestion.relevance_score || suggestion.confidence) * 100}%` }}
                   ></div>
                 </div>
-                <span>{Math.round(suggestion.confidence_score * 100)}%</span>
+                <span>{Math.round((suggestion.relevance_score || suggestion.confidence) * 100)}%</span>
               </div>
             )}
 
             {/* Actions */}
             <div className="flex items-center gap-2 pt-2 border-t">
-              {suggestion.action_url ? (
-                <Button
-                  size="sm"
-                  variant="default"
-                  className="flex-1"
-                  onClick={() => {
-                    acceptSuggestion(suggestion.id);
-                    window.location.href = suggestion.action_url!;
-                  }}
-                  disabled={actionLoading === suggestion.id}
-                >
-                  <CheckCircle className="mr-2 h-3 w-3" />
-                  Take Action
-                </Button>
-              ) : (
-                <Button
-                  size="sm"
-                  variant="default"
-                  className="flex-1"
-                  onClick={() => acceptSuggestion(suggestion.id)}
-                  disabled={actionLoading === suggestion.id}
-                >
-                  <CheckCircle className="mr-2 h-3 w-3" />
-                  Accept
-                </Button>
-              )}
+              <Button
+                size="sm"
+                variant="default"
+                className="flex-1"
+                onClick={() => acceptSuggestion(suggestion.id)}
+                disabled={actionLoading === suggestion.id}
+              >
+                <CheckCircle className="mr-2 h-3 w-3" />
+                Accept
+              </Button>
 
               <Button
                 size="sm"

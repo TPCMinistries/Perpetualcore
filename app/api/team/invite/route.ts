@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { sendTeamInvitationEmail } from "@/lib/email";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -95,8 +96,27 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // TODO: Send invitation email here
-    // await sendInvitationEmail(email, invitation.token);
+    // Get organization name and inviter's name
+    const { data: org } = await supabase
+      .from("organizations")
+      .select("name")
+      .eq("id", profile.organization_id)
+      .single();
+
+    const { data: inviterProfile } = await supabase
+      .from("profiles")
+      .select("full_name, email")
+      .eq("id", user.id)
+      .single();
+
+    // Send invitation email
+    await sendTeamInvitationEmail({
+      email,
+      inviterName: inviterProfile?.full_name || inviterProfile?.email || "A team member",
+      organizationName: org?.name || "your organization",
+      role: role || "member",
+      inviteToken: invitation.token,
+    });
 
     return NextResponse.json({
       message: "Invitation sent successfully",

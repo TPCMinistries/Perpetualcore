@@ -49,7 +49,7 @@ Example:
   }
 ]`;
 
-    const response = await getChatCompletion("gpt-4o-mini", [
+    const result = await getChatCompletion("gpt-4o-mini", [
       {
         role: "system",
         content:
@@ -58,8 +58,9 @@ Example:
       { role: "user", content: prompt },
     ]);
 
-    // Parse JSON response
-    const jsonMatch = response.match(/\[[\s\S]*\]/);
+    // Parse JSON response - getChatCompletion returns { response: string, ... }
+    const responseText = result.response;
+    const jsonMatch = responseText.match(/\[[\s\S]*\]/);
     if (!jsonMatch) {
       console.log("No tasks extracted from text");
       return [];

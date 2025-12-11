@@ -9,6 +9,8 @@ import {
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
+const isDev = process.env.NODE_ENV === "development";
+
 /**
  * POST - Import user data from various formats
  */
@@ -72,7 +74,7 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json(result);
   } catch (error) {
-    console.error("Import API error:", error);
+    if (isDev) console.error("Import API error:", error);
     return NextResponse.json(
       { error: "Failed to import data" },
       { status: 500 }

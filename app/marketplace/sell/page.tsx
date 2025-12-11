@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -19,90 +19,91 @@ import {
   BarChart3,
   Wallet,
   Clock,
+  Loader2,
 } from "lucide-react";
+
+interface Stats {
+  totalEarnings: number;
+  pendingPayout: number;
+  totalSales: number;
+  activeListings: number;
+  averageRating: number;
+  totalReviews: number;
+}
+
+interface Listing {
+  id: string;
+  type: string;
+  name: string;
+  status: string;
+  price: number;
+  pricing_type: string;
+  subscription_interval?: string;
+  total_sales: number;
+  total_revenue: number;
+  average_rating: number;
+  review_count: number;
+  created_at: string;
+}
+
+interface Sale {
+  id: string;
+  item_name: string;
+  buyer: string;
+  price: number;
+  creator_payout: number;
+  date: string;
+}
+
+interface ChartData {
+  date: string;
+  sales: number;
+  revenue: number;
+}
 
 export default function SellerDashboardPage() {
   const [activeTab, setActiveTab] = useState("overview");
+  const [loading, setLoading] = useState(true);
+  const [stats, setStats] = useState<Stats>({
+    totalEarnings: 0,
+    pendingPayout: 0,
+    totalSales: 0,
+    activeListings: 0,
+    averageRating: 0,
+    totalReviews: 0,
+  });
+  const [listings, setListings] = useState<Listing[]>([]);
+  const [recentSales, setRecentSales] = useState<Sale[]>([]);
+  const [chartData, setChartData] = useState<ChartData[]>([]);
 
-  // Mock data - replace with actual API calls
-  const stats = {
-    totalEarnings: 12450,
-    pendingPayout: 2340,
-    totalSales: 856,
-    activeListings: 8,
-    averageRating: 4.8,
-    totalReviews: 124,
-  };
+  useEffect(() => {
+    async function fetchSellerData() {
+      try {
+        const response = await fetch("/api/marketplace/seller/analytics");
+        if (response.ok) {
+          const data = await response.json();
+          setStats(data.stats);
+          setListings(data.listings || []);
+          setRecentSales(data.recentSales || []);
+          setChartData(data.chartData || []);
+        }
+      } catch (error) {
+        console.error("Error fetching seller data:", error);
+      } finally {
+        setLoading(false);
+      }
+    }
 
-  const listings = [
-    {
-      id: "1",
-      type: "agent",
-      name: "Legal Document Analyzer",
-      status: "approved",
-      price: 99,
-      pricing_type: "one_time",
-      total_sales: 856,
-      total_revenue: 84744,
-      average_rating: 4.8,
-      review_count: 124,
-      created_at: "2024-12-15",
-    },
-    {
-      id: "2",
-      type: "workflow",
-      name: "Contract Review Automation",
-      status: "approved",
-      price: 49,
-      pricing_type: "subscription",
-      subscription_interval: "monthly",
-      total_sales: 234,
-      total_revenue: 11466,
-      average_rating: 4.6,
-      review_count: 45,
-      created_at: "2024-11-20",
-    },
-    {
-      id: "3",
-      type: "agent",
-      name: "Legal Research Assistant",
-      status: "pending_review",
-      price: 149,
-      pricing_type: "one_time",
-      total_sales: 0,
-      total_revenue: 0,
-      average_rating: 0,
-      review_count: 0,
-      created_at: "2025-01-18",
-    },
-  ];
+    fetchSellerData();
+  }, []);
 
-  const recentSales = [
-    {
-      id: "1",
-      item_name: "Legal Document Analyzer",
-      buyer: "Sarah M.",
-      price: 99,
-      creator_payout: 69.3,
-      date: "2025-01-20",
-    },
-    {
-      id: "2",
-      item_name: "Contract Review Automation",
-      buyer: "John D.",
-      price: 49,
-      creator_payout: 34.3,
-      date: "2025-01-19",
-    },
-    {
-      id: "3",
-      item_name: "Legal Document Analyzer",
-      buyer: "Emily R.",
-      price: 99,
-      creator_payout: 69.3,
-      date: "2025-01-18",
-    },
-  ];
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white dark:from-gray-900 dark:to-gray-800 flex items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white dark:from-gray-900 dark:to-gray-800">
@@ -455,18 +456,95 @@ export default function SellerDashboardPage() {
           <TabsContent value="analytics" className="space-y-4">
             <Card>
               <CardHeader>
-                <CardTitle>Analytics Coming Soon</CardTitle>
+                <CardTitle>Sales Analytics</CardTitle>
                 <CardDescription>
-                  Detailed insights into your sales performance
+                  Your sales performance over the last 30 days
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="text-center py-12">
-                  <BarChart3 className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                  <p className="text-muted-foreground">
-                    Advanced analytics features are coming soon
-                  </p>
-                </div>
+                {chartData.length > 0 ? (
+                  <div className="space-y-6">
+                    {/* Summary Stats */}
+                    <div className="grid grid-cols-3 gap-4">
+                      <div className="text-center p-4 bg-muted/50 rounded-lg">
+                        <div className="text-2xl font-bold text-green-600">
+                          ${stats.totalEarnings.toLocaleString()}
+                        </div>
+                        <div className="text-sm text-muted-foreground">Total Earnings</div>
+                      </div>
+                      <div className="text-center p-4 bg-muted/50 rounded-lg">
+                        <div className="text-2xl font-bold">{stats.totalSales}</div>
+                        <div className="text-sm text-muted-foreground">Total Sales</div>
+                      </div>
+                      <div className="text-center p-4 bg-muted/50 rounded-lg">
+                        <div className="text-2xl font-bold">
+                          ${stats.totalSales > 0 ? (stats.totalEarnings / stats.totalSales).toFixed(2) : "0"}
+                        </div>
+                        <div className="text-sm text-muted-foreground">Avg. Per Sale</div>
+                      </div>
+                    </div>
+
+                    {/* Simple Bar Chart */}
+                    <div>
+                      <h4 className="font-medium mb-4">Daily Revenue (Last 30 Days)</h4>
+                      <div className="flex items-end gap-1 h-32">
+                        {chartData.slice(-30).map((day, index) => {
+                          const maxRevenue = Math.max(...chartData.map(d => d.revenue), 1);
+                          const height = (day.revenue / maxRevenue) * 100;
+                          return (
+                            <div
+                              key={day.date}
+                              className="flex-1 bg-primary/20 hover:bg-primary/40 rounded-t transition-colors relative group"
+                              style={{ height: `${Math.max(height, 2)}%` }}
+                              title={`${day.date}: $${day.revenue.toFixed(2)} (${day.sales} sales)`}
+                            >
+                              <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-popover text-popover-foreground text-xs p-1 rounded opacity-0 group-hover:opacity-100 whitespace-nowrap z-10 pointer-events-none">
+                                ${day.revenue.toFixed(2)}
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                      <div className="flex justify-between text-xs text-muted-foreground mt-2">
+                        <span>{chartData[0]?.date}</span>
+                        <span>{chartData[chartData.length - 1]?.date}</span>
+                      </div>
+                    </div>
+
+                    {/* Top Performers */}
+                    <div>
+                      <h4 className="font-medium mb-4">Top Performing Items</h4>
+                      <div className="space-y-2">
+                        {listings
+                          .sort((a, b) => b.total_revenue - a.total_revenue)
+                          .slice(0, 5)
+                          .map((listing) => (
+                            <div key={listing.id} className="flex items-center justify-between p-3 border rounded-lg">
+                              <div>
+                                <div className="font-medium">{listing.name}</div>
+                                <div className="text-sm text-muted-foreground">
+                                  {listing.total_sales} sales
+                                </div>
+                              </div>
+                              <div className="text-right">
+                                <div className="font-medium text-green-600">
+                                  ${(listing.total_revenue * 0.7).toLocaleString()}
+                                </div>
+                                <div className="text-xs text-muted-foreground">earnings</div>
+                              </div>
+                            </div>
+                          ))}
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="text-center py-12">
+                    <BarChart3 className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                    <p className="text-muted-foreground">
+                      No sales data yet. Create your first listing to start tracking analytics.
+                    </p>
+                  </div>
+                )}
               </CardContent>
             </Card>
           </TabsContent>

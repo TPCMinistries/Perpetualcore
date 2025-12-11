@@ -14,7 +14,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { ArrowLeft, Loader2, Sparkles } from "lucide-react";
+import { ArrowLeft, Loader2, Sparkles, Clock, Settings2 } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
+import { Slider } from "@/components/ui/slider";
+import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import Link from "next/link";
 
@@ -23,51 +26,61 @@ const AGENT_TYPES = [
     value: "email_monitor",
     label: "Email Monitor",
     description: "Automatically monitors emails and creates actionable tasks",
+    implemented: true,
   },
   {
     value: "calendar_monitor",
     label: "Calendar Monitor",
-    description: "Tracks calendar events and sends reminders",
+    description: "Tracks calendar events, detects conflicts, and creates prep tasks",
+    implemented: true,
   },
   {
     value: "document_analyzer",
     label: "Document Analyzer",
-    description: "Analyzes documents and extracts key information",
+    description: "Analyzes documents and extracts key information, tags, and action items",
+    implemented: true,
   },
   {
     value: "task_manager",
     label: "Task Manager",
-    description: "Automatically organizes and prioritizes tasks",
+    description: "Automatically organizes, prioritizes, and flags overdue tasks",
+    implemented: true,
+  },
+  {
+    value: "daily_digest",
+    label: "Daily Digest",
+    description: "Sends personalized daily summaries with tasks, calendar, and recommendations",
+    implemented: true,
   },
   {
     value: "meeting_assistant",
     label: "Meeting Assistant",
     description: "Prepares meeting agendas and follows up on action items",
+    implemented: false,
   },
   {
     value: "email_organizer",
     label: "Email Organizer",
     description: "Categorizes and organizes emails automatically",
+    implemented: false,
   },
   {
     value: "research_assistant",
     label: "Research Assistant",
     description: "Conducts research and compiles findings",
+    implemented: false,
   },
   {
     value: "workflow_optimizer",
     label: "Workflow Optimizer",
     description: "Analyzes workflows and suggests improvements",
-  },
-  {
-    value: "daily_digest",
-    label: "Daily Digest",
-    description: "Sends daily summary of important updates",
+    implemented: false,
   },
   {
     value: "sentiment_monitor",
     label: "Sentiment Monitor",
     description: "Monitors sentiment in communications",
+    implemented: false,
   },
 ];
 
@@ -79,6 +92,41 @@ const PERSONALITIES = [
   { value: "enthusiastic", label: "Enthusiastic" },
 ];
 
+// Agent-specific configuration defaults
+const AGENT_CONFIG_DEFAULTS: Record<string, Record<string, any>> = {
+  email_monitor: {
+    autoCreateTasks: true,
+    priorityThreshold: "medium",
+    filterSenders: [],
+  },
+  calendar_monitor: {
+    hoursAhead: 24,
+    createPrepTasks: true,
+    notifyConflicts: true,
+    trackResponseStatus: true,
+    importantAttendees: [],
+  },
+  document_analyzer: {
+    autoTag: true,
+    generateSummary: true,
+    createTasksFromActions: true,
+    minConfidenceScore: 0.7,
+  },
+  task_manager: {
+    autoPrioritize: true,
+    flagOverdue: true,
+    overdueThresholdHours: 24,
+  },
+  daily_digest: {
+    includeCalendar: true,
+    includeTasks: true,
+    includeDocuments: true,
+    includeInsights: true,
+    digestTime: "09:00",
+    deliveryMethod: "in_app",
+  },
+};
+
 export default function NewAgentPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
@@ -88,7 +136,7 @@ export default function NewAgentPage() {
     agent_type: "",
     personality: "professional",
     instructions: "",
-    config: {},
+    configuration: {} as Record<string, any>,
   });
 
   async function handleSubmit(e: React.FormEvent) {
@@ -96,6 +144,13 @@ export default function NewAgentPage() {
 
     if (!formData.name || !formData.agent_type) {
       toast.error("Please fill in all required fields");
+      return;
+    }
+
+    // Check if selected agent type is implemented
+    const agentType = AGENT_TYPES.find(t => t.value === formData.agent_type);
+    if (agentType && !agentType.implemented) {
+      toast.error(`${agentType.label} is coming soon and cannot be created yet.`);
       return;
     }
 
@@ -125,7 +180,21 @@ export default function NewAgentPage() {
   }
 
   function handleChange(field: string, value: string) {
-    setFormData((prev) => ({ ...prev, [field]: value }));
+    setFormData((prev) => {
+      const updated = { ...prev, [field]: value };
+      // When agent type changes, load default configuration
+      if (field === "agent_type" && AGENT_CONFIG_DEFAULTS[value]) {
+        updated.configuration = { ...AGENT_CONFIG_DEFAULTS[value] };
+      }
+      return updated;
+    });
+  }
+
+  function handleConfigChange(key: string, value: any) {
+    setFormData((prev) => ({
+      ...prev,
+      configuration: { ...prev.configuration, [key]: value },
+    }));
   }
 
   const selectedType = AGENT_TYPES.find((t) => t.value === formData.agent_type);
@@ -222,7 +291,14 @@ export default function NewAgentPage() {
               </Label>
               <Select
                 value={formData.agent_type}
-                onValueChange={(value) => handleChange("agent_type", value)}
+                onValueChange={(value) => {
+                  const agentType = AGENT_TYPES.find(t => t.value === value);
+                  if (agentType && !agentType.implemented) {
+                    toast.info(`${agentType.label} is coming soon!`);
+                    return;
+                  }
+                  handleChange("agent_type", value);
+                }}
                 required
               >
                 <SelectTrigger className="border-slate-300 dark:border-slate-700">
@@ -230,8 +306,19 @@ export default function NewAgentPage() {
                 </SelectTrigger>
                 <SelectContent>
                   {AGENT_TYPES.map((type) => (
-                    <SelectItem key={type.value} value={type.value}>
-                      {type.label}
+                    <SelectItem
+                      key={type.value}
+                      value={type.value}
+                      className={!type.implemented ? "opacity-60" : ""}
+                    >
+                      <div className="flex items-center gap-2">
+                        <span>{type.label}</span>
+                        {!type.implemented && (
+                          <Badge variant="outline" className="text-xs px-1.5 py-0">
+                            Coming Soon
+                          </Badge>
+                        )}
+                      </div>
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -240,6 +327,12 @@ export default function NewAgentPage() {
                 <p className="text-sm text-slate-600 dark:text-slate-400">
                   {selectedType.description}
                 </p>
+              )}
+              {selectedType && !selectedType.implemented && (
+                <div className="flex items-center gap-2 text-sm text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/30 px-3 py-2 rounded-md">
+                  <Clock className="h-4 w-4" />
+                  <span>This agent type is coming soon. Only Email Monitor is currently available.</span>
+                </div>
               )}
             </div>
 
@@ -298,6 +391,293 @@ export default function NewAgentPage() {
                 Optional: Provide custom instructions to customize the agent's behavior
               </p>
             </div>
+
+            {/* Agent-Specific Configuration */}
+            {formData.agent_type && AGENT_CONFIG_DEFAULTS[formData.agent_type] && (
+              <Card className="border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/50">
+                <CardHeader className="pb-4">
+                  <div className="flex items-center gap-2">
+                    <Settings2 className="h-5 w-5 text-purple-600" />
+                    <CardTitle className="text-lg text-slate-900 dark:text-slate-100">
+                      {selectedType?.label} Settings
+                    </CardTitle>
+                  </div>
+                  <CardDescription className="text-slate-600 dark:text-slate-400">
+                    Configure specific behaviors for this agent type
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  {/* Email Monitor Configuration */}
+                  {formData.agent_type === "email_monitor" && (
+                    <>
+                      <div className="flex items-center justify-between">
+                        <div className="space-y-0.5">
+                          <Label className="text-slate-900 dark:text-slate-100">Auto-create Tasks</Label>
+                          <p className="text-sm text-slate-600 dark:text-slate-400">
+                            Automatically create tasks from actionable emails
+                          </p>
+                        </div>
+                        <Switch
+                          checked={formData.configuration.autoCreateTasks ?? true}
+                          onCheckedChange={(checked) => handleConfigChange("autoCreateTasks", checked)}
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label className="text-slate-900 dark:text-slate-100">Priority Threshold</Label>
+                        <Select
+                          value={formData.configuration.priorityThreshold ?? "medium"}
+                          onValueChange={(value) => handleConfigChange("priorityThreshold", value)}
+                        >
+                          <SelectTrigger className="border-slate-300 dark:border-slate-700">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="low">Low - Process all emails</SelectItem>
+                            <SelectItem value="medium">Medium - Skip routine emails</SelectItem>
+                            <SelectItem value="high">High - Only urgent emails</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <p className="text-sm text-slate-600 dark:text-slate-400">
+                          Minimum priority level to process emails
+                        </p>
+                      </div>
+                    </>
+                  )}
+
+                  {/* Calendar Monitor Configuration */}
+                  {formData.agent_type === "calendar_monitor" && (
+                    <>
+                      <div className="space-y-2">
+                        <div className="flex items-center justify-between">
+                          <Label className="text-slate-900 dark:text-slate-100">Hours Ahead to Monitor</Label>
+                          <Badge variant="outline">{formData.configuration.hoursAhead ?? 24}h</Badge>
+                        </div>
+                        <Slider
+                          value={[formData.configuration.hoursAhead ?? 24]}
+                          onValueChange={([value]) => handleConfigChange("hoursAhead", value)}
+                          min={6}
+                          max={72}
+                          step={6}
+                          className="w-full"
+                        />
+                        <p className="text-sm text-slate-600 dark:text-slate-400">
+                          How far ahead to look for upcoming events
+                        </p>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <div className="space-y-0.5">
+                          <Label className="text-slate-900 dark:text-slate-100">Create Prep Tasks</Label>
+                          <p className="text-sm text-slate-600 dark:text-slate-400">
+                            Auto-create preparation tasks for meetings
+                          </p>
+                        </div>
+                        <Switch
+                          checked={formData.configuration.createPrepTasks ?? true}
+                          onCheckedChange={(checked) => handleConfigChange("createPrepTasks", checked)}
+                        />
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <div className="space-y-0.5">
+                          <Label className="text-slate-900 dark:text-slate-100">Notify Conflicts</Label>
+                          <p className="text-sm text-slate-600 dark:text-slate-400">
+                            Alert when scheduling conflicts are detected
+                          </p>
+                        </div>
+                        <Switch
+                          checked={formData.configuration.notifyConflicts ?? true}
+                          onCheckedChange={(checked) => handleConfigChange("notifyConflicts", checked)}
+                        />
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <div className="space-y-0.5">
+                          <Label className="text-slate-900 dark:text-slate-100">Track RSVP Status</Label>
+                          <p className="text-sm text-slate-600 dark:text-slate-400">
+                            Monitor for missing responses to meeting invites
+                          </p>
+                        </div>
+                        <Switch
+                          checked={formData.configuration.trackResponseStatus ?? true}
+                          onCheckedChange={(checked) => handleConfigChange("trackResponseStatus", checked)}
+                        />
+                      </div>
+                    </>
+                  )}
+
+                  {/* Document Analyzer Configuration */}
+                  {formData.agent_type === "document_analyzer" && (
+                    <>
+                      <div className="flex items-center justify-between">
+                        <div className="space-y-0.5">
+                          <Label className="text-slate-900 dark:text-slate-100">Auto-tag Documents</Label>
+                          <p className="text-sm text-slate-600 dark:text-slate-400">
+                            Automatically add relevant tags to documents
+                          </p>
+                        </div>
+                        <Switch
+                          checked={formData.configuration.autoTag ?? true}
+                          onCheckedChange={(checked) => handleConfigChange("autoTag", checked)}
+                        />
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <div className="space-y-0.5">
+                          <Label className="text-slate-900 dark:text-slate-100">Generate Summaries</Label>
+                          <p className="text-sm text-slate-600 dark:text-slate-400">
+                            Create AI summaries for analyzed documents
+                          </p>
+                        </div>
+                        <Switch
+                          checked={formData.configuration.generateSummary ?? true}
+                          onCheckedChange={(checked) => handleConfigChange("generateSummary", checked)}
+                        />
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <div className="space-y-0.5">
+                          <Label className="text-slate-900 dark:text-slate-100">Extract Action Items</Label>
+                          <p className="text-sm text-slate-600 dark:text-slate-400">
+                            Create tasks from action items in documents
+                          </p>
+                        </div>
+                        <Switch
+                          checked={formData.configuration.createTasksFromActions ?? true}
+                          onCheckedChange={(checked) => handleConfigChange("createTasksFromActions", checked)}
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <div className="flex items-center justify-between">
+                          <Label className="text-slate-900 dark:text-slate-100">Confidence Threshold</Label>
+                          <Badge variant="outline">{Math.round((formData.configuration.minConfidenceScore ?? 0.7) * 100)}%</Badge>
+                        </div>
+                        <Slider
+                          value={[(formData.configuration.minConfidenceScore ?? 0.7) * 100]}
+                          onValueChange={([value]) => handleConfigChange("minConfidenceScore", value / 100)}
+                          min={50}
+                          max={95}
+                          step={5}
+                          className="w-full"
+                        />
+                        <p className="text-sm text-slate-600 dark:text-slate-400">
+                          Minimum AI confidence to apply tags or extract items
+                        </p>
+                      </div>
+                    </>
+                  )}
+
+                  {/* Task Manager Configuration */}
+                  {formData.agent_type === "task_manager" && (
+                    <>
+                      <div className="flex items-center justify-between">
+                        <div className="space-y-0.5">
+                          <Label className="text-slate-900 dark:text-slate-100">Auto-prioritize Tasks</Label>
+                          <p className="text-sm text-slate-600 dark:text-slate-400">
+                            Automatically adjust task priorities based on context
+                          </p>
+                        </div>
+                        <Switch
+                          checked={formData.configuration.autoPrioritize ?? true}
+                          onCheckedChange={(checked) => handleConfigChange("autoPrioritize", checked)}
+                        />
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <div className="space-y-0.5">
+                          <Label className="text-slate-900 dark:text-slate-100">Flag Overdue Tasks</Label>
+                          <p className="text-sm text-slate-600 dark:text-slate-400">
+                            Highlight tasks that are past due date
+                          </p>
+                        </div>
+                        <Switch
+                          checked={formData.configuration.flagOverdue ?? true}
+                          onCheckedChange={(checked) => handleConfigChange("flagOverdue", checked)}
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <div className="flex items-center justify-between">
+                          <Label className="text-slate-900 dark:text-slate-100">Overdue Threshold</Label>
+                          <Badge variant="outline">{formData.configuration.overdueThresholdHours ?? 24}h</Badge>
+                        </div>
+                        <Slider
+                          value={[formData.configuration.overdueThresholdHours ?? 24]}
+                          onValueChange={([value]) => handleConfigChange("overdueThresholdHours", value)}
+                          min={1}
+                          max={72}
+                          step={1}
+                          className="w-full"
+                        />
+                        <p className="text-sm text-slate-600 dark:text-slate-400">
+                          Hours after due date before task is flagged overdue
+                        </p>
+                      </div>
+                    </>
+                  )}
+
+                  {/* Daily Digest Configuration */}
+                  {formData.agent_type === "daily_digest" && (
+                    <>
+                      <div className="space-y-2">
+                        <Label className="text-slate-900 dark:text-slate-100">Digest Time</Label>
+                        <Input
+                          type="time"
+                          value={formData.configuration.digestTime ?? "09:00"}
+                          onChange={(e) => handleConfigChange("digestTime", e.target.value)}
+                          className="border-slate-300 dark:border-slate-700 w-32"
+                        />
+                        <p className="text-sm text-slate-600 dark:text-slate-400">
+                          When to generate and deliver daily digest
+                        </p>
+                      </div>
+                      <div className="space-y-2">
+                        <Label className="text-slate-900 dark:text-slate-100">Delivery Method</Label>
+                        <Select
+                          value={formData.configuration.deliveryMethod ?? "in_app"}
+                          onValueChange={(value) => handleConfigChange("deliveryMethod", value)}
+                        >
+                          <SelectTrigger className="border-slate-300 dark:border-slate-700">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="in_app">In-App Notification</SelectItem>
+                            <SelectItem value="email">Email</SelectItem>
+                            <SelectItem value="both">Both</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="pt-2 border-t border-slate-200 dark:border-slate-700">
+                        <Label className="text-slate-900 dark:text-slate-100 mb-3 block">Include in Digest</Label>
+                        <div className="space-y-3">
+                          <div className="flex items-center justify-between">
+                            <Label className="text-sm text-slate-700 dark:text-slate-300 font-normal">Calendar Events</Label>
+                            <Switch
+                              checked={formData.configuration.includeCalendar ?? true}
+                              onCheckedChange={(checked) => handleConfigChange("includeCalendar", checked)}
+                            />
+                          </div>
+                          <div className="flex items-center justify-between">
+                            <Label className="text-sm text-slate-700 dark:text-slate-300 font-normal">Tasks Overview</Label>
+                            <Switch
+                              checked={formData.configuration.includeTasks ?? true}
+                              onCheckedChange={(checked) => handleConfigChange("includeTasks", checked)}
+                            />
+                          </div>
+                          <div className="flex items-center justify-between">
+                            <Label className="text-sm text-slate-700 dark:text-slate-300 font-normal">Recent Documents</Label>
+                            <Switch
+                              checked={formData.configuration.includeDocuments ?? true}
+                              onCheckedChange={(checked) => handleConfigChange("includeDocuments", checked)}
+                            />
+                          </div>
+                          <div className="flex items-center justify-between">
+                            <Label className="text-sm text-slate-700 dark:text-slate-300 font-normal">AI Insights</Label>
+                            <Switch
+                              checked={formData.configuration.includeInsights ?? true}
+                              onCheckedChange={(checked) => handleConfigChange("includeInsights", checked)}
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    </>
+                  )}
+                </CardContent>
+              </Card>
+            )}
 
             {/* Action Buttons */}
             <div className="flex items-center gap-3 pt-4">

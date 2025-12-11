@@ -65,14 +65,39 @@ export async function getOnboardingProgress() {
   try {
     const supabase = await createClient();
 
-    const { data, error } = await supabase.rpc("get_onboarding_progress");
-
-    if (error) {
-      console.error("Error getting onboarding progress:", error);
-      return { error: "Failed to get progress", data: [] };
+    const { data: { user }, error: userError } = await supabase.auth.getUser();
+    if (userError || !user) {
+      return { error: "Not authenticated", data: [] };
     }
 
-    return { data };
+    // Check actual user activity instead of relying on manual progress tracking
+    const [conversationsResult, documentsResult] = await Promise.all([
+      // Check if user has any conversations
+      supabase
+        .from("conversations")
+        .select("id", { count: "exact", head: true })
+        .eq("user_id", user.id)
+        .limit(1),
+      // Check if user has any documents
+      supabase
+        .from("documents")
+        .select("id", { count: "exact", head: true })
+        .eq("user_id", user.id)
+        .limit(1),
+    ]);
+
+    const hasConversations = (conversationsResult.data?.length || 0) > 0;
+    const hasDocuments = (documentsResult.data?.length || 0) > 0;
+    // User has searched if they have conversations (as search is typically done in chat)
+    const hasSearched = hasConversations && hasDocuments;
+
+    const progress = [
+      { step_key: "first_conversation", completed: hasConversations },
+      { step_key: "first_document", completed: hasDocuments },
+      { step_key: "first_search", completed: hasSearched },
+    ];
+
+    return { data: progress };
   } catch (error: any) {
     console.error("Error in getOnboardingProgress:", error);
     return { error: error.message || "An error occurred", data: [] };

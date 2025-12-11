@@ -32,6 +32,7 @@ import {
   Send,
   Ticket,
   Share2,
+  Brain,
 } from "lucide-react";
 import { UserExperienceLevel, AdaptiveNavConfig } from "@/types/user-experience";
 
@@ -219,6 +220,16 @@ export const NAVIGATION_CONFIG: NavigationSection[] = [
     defaultCollapsed: true,
     visibleFor: ["beginner", "intermediate", "advanced"],
     items: [
+      {
+        name: "Intelligence",
+        href: "/dashboard/intelligence",
+        icon: Brain,
+        adaptiveConfig: {
+          visibleFor: ["beginner", "intermediate", "advanced"],
+          complexity: "standard",
+          helpText: "View insights, patterns, preferences, and AI-generated suggestions",
+        },
+      },
       {
         name: "Analytics",
         href: "/dashboard/analytics",

@@ -293,12 +293,30 @@ export async function GET(request: Request) {
       true
     );
 
-    // TODO: Properly sign in user with Supabase Auth
-    // For now, redirect to login page with a success message
-    // In production, you'd want to create a proper session here
+    // Sign in user with Supabase Auth using admin API to generate session
+    // This creates a magic link token that will auto-sign-in the user
+    const { data: linkData, error: linkError } = await supabase.auth.admin.generateLink({
+      type: "magiclink",
+      email: mappedProfile.email,
+      options: {
+        redirectTo: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard`,
+      },
+    });
 
-    // Redirect to dashboard
-    return NextResponse.redirect(`${process.env.NEXT_PUBLIC_APP_URL}/dashboard`);
+    if (linkError || !linkData?.properties?.hashed_token) {
+      console.error("Failed to generate auth link:", linkError);
+      // Fallback: redirect to login with SSO session created
+      // User can try logging in again
+      return NextResponse.redirect(
+        `${process.env.NEXT_PUBLIC_APP_URL}/login?sso_success=true&email=${encodeURIComponent(mappedProfile.email)}`
+      );
+    }
+
+    // Extract token from the magic link and redirect to verify endpoint
+    const token = linkData.properties.hashed_token;
+    const verifyUrl = `${process.env.NEXT_PUBLIC_APP_URL}/auth/callback?token_hash=${token}&type=magiclink&next=/dashboard`;
+
+    return NextResponse.redirect(verifyUrl);
   } catch (error) {
     console.error("OAuth callback error:", error);
     return NextResponse.redirect(

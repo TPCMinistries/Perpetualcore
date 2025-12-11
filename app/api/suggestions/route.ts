@@ -14,12 +14,12 @@ export async function GET(request: Request) {
     const status = searchParams.get("status") || "pending";
     const limit = searchParams.get("limit") ? parseInt(searchParams.get("limit")!) : undefined;
 
-    // Build query
+    // Build query - use predictive_suggestions table
     let query = supabase
-      .from("ai_suggestions")
+      .from("predictive_suggestions")
       .select("*")
       .eq("user_id", user.id)
-      .order("priority", { ascending: false })
+      .order("relevance_score", { ascending: false })
       .order("created_at", { ascending: false });
 
     // Apply status filter
@@ -27,10 +27,7 @@ export async function GET(request: Request) {
       query = query.eq("status", status);
     }
 
-    // Only show non-expired suggestions for pending/viewed
-    if (status === "pending" || status === "viewed") {
-      query = query.or("expires_at.is.null,expires_at.gt.now()");
-    }
+    // predictive_suggestions doesn't have expires_at, skip expiration filter
 
     // Apply limit
     if (limit) {
@@ -46,7 +43,7 @@ export async function GET(request: Request) {
 
     // Get stats
     const { data: statsData } = await supabase
-      .from("ai_suggestions")
+      .from("predictive_suggestions")
       .select("status")
       .eq("user_id", user.id);
 
@@ -96,18 +93,21 @@ export async function POST(request: Request) {
     } = body;
 
     const { data: suggestion, error: createError } = await supabase
-      .from("ai_suggestions")
+      .from("predictive_suggestions")
       .insert({
         organization_id: profile.organization_id,
         user_id: user.id,
         title,
         description,
-        category,
+        suggestion_type: category || "recommendation",
         priority: priority || "medium",
-        suggested_action,
-        action_url,
-        confidence_score,
-        reasoning,
+        suggested_action: suggested_action || {},
+        relevance_score: confidence_score || 0.5,
+        confidence: confidence_score || 0.5,
+        context_tags: [],
+        based_on_insights: [],
+        based_on_patterns: [],
+        based_on_preferences: [],
         status: "pending",
       })
       .select()

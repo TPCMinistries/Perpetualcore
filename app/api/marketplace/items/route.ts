@@ -43,6 +43,7 @@ export async function POST(req: NextRequest) {
       tags,
       features,
       config,
+      preview_image,
     } = body;
 
     // Validate required fields
@@ -96,6 +97,7 @@ export async function POST(req: NextRequest) {
         tags: tags || [],
         features: features || [],
         config: config || {},
+        preview_image: preview_image || null,
         status: "pending_review",
       })
       .select()

@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 
+const isDev = process.env.NODE_ENV === "development";
+
 export async function GET(
   request: Request,
   { params }: { params: { id: string } }
@@ -24,13 +26,13 @@ export async function GET(
       .order("last_message_at", { ascending: false });
 
     if (error) {
-      console.error("Error fetching conversations:", error);
+      if (isDev) console.error("Error fetching conversations:", error);
       return NextResponse.json({ error: "Failed to fetch conversations" }, { status: 500 });
     }
 
     return NextResponse.json({ conversations: conversations || [] });
   } catch (error) {
-    console.error("Conversations API error:", error);
+    if (isDev) console.error("Conversations API error:", error);
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }
@@ -73,13 +75,13 @@ export async function POST(
       .single();
 
     if (createError) {
-      console.error("Error creating conversation:", createError);
+      if (isDev) console.error("Error creating conversation:", createError);
       return NextResponse.json({ error: "Failed to create conversation" }, { status: 500 });
     }
 
     return NextResponse.json({ conversation }, { status: 201 });
   } catch (error) {
-    console.error("Create conversation API error:", error);
+    if (isDev) console.error("Create conversation API error:", error);
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }

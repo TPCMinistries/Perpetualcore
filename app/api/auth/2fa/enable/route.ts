@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import {
   verifyTOTP,
@@ -7,11 +7,19 @@ import {
   generateBackupCodes,
   hashBackupCode,
 } from "@/lib/2fa/totp";
+import { rateLimiters } from "@/lib/rate-limit";
+import { logger } from "@/lib/logging";
 
 // POST /api/auth/2fa/enable
 // Verify TOTP code and enable 2FA for the user
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
   try {
+    // Rate limit: 5 requests per minute (strict for security endpoints)
+    const rateLimitResult = await rateLimiters.strict.check(request);
+    if (!rateLimitResult.success) {
+      return rateLimitResult.response;
+    }
+
     const supabase = await createClient();
     const { data: { user }, error: userError } = await supabase.auth.getUser();
 
@@ -94,12 +102,18 @@ export async function POST(request: Request) {
       .eq("user_id", user.id);
 
     if (updateError) {
-      console.error("Error enabling 2FA:", updateError);
+      logger.error("Error enabling 2FA", { error: updateError, userId: user.id, path: "/api/auth/2fa/enable" });
       return NextResponse.json(
         { error: "Failed to enable 2FA" },
         { status: 500 }
       );
     }
+
+    // Log successful 2FA enablement
+    logger.security("2FA enabled for user", {
+      userId: user.id,
+      path: "/api/auth/2fa/enable",
+    });
 
     // Return backup codes (IMPORTANT: User must save these!)
     return NextResponse.json({
@@ -108,7 +122,7 @@ export async function POST(request: Request) {
       backupCodes, // Return unhashed codes for user to save
     });
   } catch (error) {
-    console.error("2FA enable error:", error);
+    logger.error("2FA enable error", { error, path: "/api/auth/2fa/enable" });
     return NextResponse.json(
       { error: "Failed to enable 2FA" },
       { status: 500 }

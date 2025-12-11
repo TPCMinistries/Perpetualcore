@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { getUserTasks, extractTasksFromText, saveExtractedTasks } from "@/lib/tasks/extractor";
+import { rateLimiters } from "@/lib/rate-limit";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -10,6 +11,12 @@ export const dynamic = "force-dynamic";
  */
 export async function GET(req: NextRequest) {
   try {
+    // Rate limit: 100 requests per minute
+    const rateLimitResult = await rateLimiters.api.check(req);
+    if (!rateLimitResult.success) {
+      return rateLimitResult.response;
+    }
+
     const supabase = await createClient();
 
     // Get authenticated user
@@ -40,6 +47,12 @@ export async function GET(req: NextRequest) {
  */
 export async function POST(req: NextRequest) {
   try {
+    // Rate limit: 100 requests per minute
+    const rateLimitResult = await rateLimiters.api.check(req);
+    if (!rateLimitResult.success) {
+      return rateLimitResult.response;
+    }
+
     const supabase = await createClient();
 
     const {
@@ -137,6 +150,12 @@ export async function POST(req: NextRequest) {
  */
 export async function PUT(req: NextRequest) {
   try {
+    // Rate limit: 100 requests per minute
+    const rateLimitResult = await rateLimiters.api.check(req);
+    if (!rateLimitResult.success) {
+      return rateLimitResult.response;
+    }
+
     const supabase = await createClient();
 
     const {
@@ -183,6 +202,12 @@ export async function PUT(req: NextRequest) {
  */
 export async function DELETE(req: NextRequest) {
   try {
+    // Rate limit: 100 requests per minute
+    const rateLimitResult = await rateLimiters.api.check(req);
+    if (!rateLimitResult.success) {
+      return rateLimitResult.response;
+    }
+
     const supabase = await createClient();
 
     const {

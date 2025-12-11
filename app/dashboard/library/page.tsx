@@ -18,7 +18,7 @@ import {
   Briefcase, Brain, Loader2, Eye
 } from "lucide-react";
 import { EmptyState } from "@/components/ui/empty-state";
-import { DocumentCardSkeleton } from "@/components/ui/skeletons";
+import { DocumentGridSkeleton } from "@/components/ui/skeletons";
 import { FolderModal } from "@/components/documents/FolderModal";
 import { DocumentChatModal } from "@/components/documents/DocumentChatModal";
 import { DocumentPreviewModal } from "@/components/documents/DocumentPreviewModal";
@@ -692,7 +692,7 @@ export default function LibraryPage() {
 
               {/* Documents Grid/List */}
               {isLoading ? (
-                <DocumentCardSkeleton />
+                <DocumentGridSkeleton />
               ) : filteredDocuments.length === 0 ? (
                 <EmptyState
                   icon={Upload}

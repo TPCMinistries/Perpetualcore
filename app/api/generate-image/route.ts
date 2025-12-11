@@ -1,14 +1,20 @@
 import { NextRequest, NextResponse } from "next/server";
 import OpenAI from "openai";
 import { createClient } from "@/lib/supabase/server";
+import { rateLimiters, checkRateLimit } from "@/lib/rate-limit";
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY!,
 });
 
+const isDev = process.env.NODE_ENV === "development";
+
 // POST /api/generate-image - Generate images with DALL-E 3
 export async function POST(req: NextRequest) {
   try {
+    // Rate limiting - 10 requests per minute for image generation
+    const rateLimitResponse = await checkRateLimit(req, rateLimiters.imageGen);
+    if (rateLimitResponse) return rateLimitResponse;
     const supabase = await createClient();
 
     // Get authenticated user
@@ -55,7 +61,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    console.log("Generating image with DALL-E 3:", {
+    if (isDev) console.log("Generating image with DALL-E 3:", {
       prompt: prompt.substring(0, 100),
       size,
       quality,
@@ -79,7 +85,7 @@ export async function POST(req: NextRequest) {
       throw new Error("No image URL returned from DALL-E");
     }
 
-    console.log("✅ Image generated successfully");
+    if (isDev) console.log("✅ Image generated successfully");
 
     return NextResponse.json({
       imageUrl,
@@ -90,7 +96,7 @@ export async function POST(req: NextRequest) {
       style,
     });
   } catch (error: any) {
-    console.error("Error generating image:", error);
+    if (isDev) console.error("Error generating image:", error);
 
     // Handle OpenAI-specific errors
     if (error?.status === 400) {

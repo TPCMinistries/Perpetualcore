@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -16,68 +17,112 @@ import {
   Workflow,
   ExternalLink,
   Package,
+  Loader2,
+  Play,
+  CheckCircle2,
 } from "lucide-react";
+import { toast } from "sonner";
+
+interface Purchase {
+  id: string;
+  item: {
+    id: string;
+    name: string;
+    type: "agent" | "workflow";
+    description: string;
+    category: string;
+    creator_name: string;
+  };
+  purchase_type: "one_time" | "subscription";
+  price_paid: number;
+  subscription_status?: string;
+  subscription_end_date?: string;
+  purchased_at: string;
+  status: string;
+}
+
+interface Stats {
+  totalPurchases: number;
+  activeSubscriptions: number;
+  totalSpent: number;
+}
 
 export default function MyPurchasesPage() {
+  const router = useRouter();
   const [searchQuery, setSearchQuery] = useState("");
+  const [purchases, setPurchases] = useState<Purchase[]>([]);
+  const [stats, setStats] = useState<Stats>({
+    totalPurchases: 0,
+    activeSubscriptions: 0,
+    totalSpent: 0,
+  });
+  const [loading, setLoading] = useState(true);
+  const [activatingId, setActivatingId] = useState<string | null>(null);
 
-  // Mock data - replace with actual API call
-  const purchases = [
-    {
-      id: "1",
-      item: {
-        id: "1",
-        name: "Legal Document Analyzer",
-        type: "agent",
-        description: "AI agent that analyzes legal documents and extracts key clauses, risks, and recommendations.",
-        category: "Legal",
-        creator_name: "LawTech AI",
-      },
-      purchase_type: "one_time",
-      price_paid: 99,
-      purchased_at: "2025-01-20T10:30:00Z",
-      status: "completed",
-    },
-    {
-      id: "2",
-      item: {
-        id: "2",
-        name: "Contract Review Automation",
-        type: "workflow",
-        description: "Complete workflow for automating patient intake, insurance verification, and appointment scheduling.",
-        category: "Legal",
-        creator_name: "LawTech AI",
-      },
-      purchase_type: "subscription",
-      price_paid: 49,
-      subscription_status: "active",
-      subscription_end_date: "2025-02-20T10:30:00Z",
-      purchased_at: "2025-01-10T14:20:00Z",
-      status: "completed",
-    },
-    {
-      id: "3",
-      item: {
-        id: "4",
-        name: "Social Media Content Pipeline",
-        type: "workflow",
-        description: "Automated workflow for generating, scheduling, and posting social media content across platforms.",
-        category: "Marketing",
-        creator_name: "Content AI",
-      },
-      purchase_type: "subscription",
-      price_paid: 49,
-      subscription_status: "active",
-      subscription_end_date: "2025-02-15T09:15:00Z",
-      purchased_at: "2025-01-05T09:15:00Z",
-      status: "completed",
-    },
-  ];
+  useEffect(() => {
+    fetchPurchases();
+  }, []);
+
+  async function handleActivate(purchase: Purchase) {
+    if (!purchase.item?.id) return;
+
+    setActivatingId(purchase.id);
+    try {
+      const response = await fetch("/api/marketplace/activate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          purchaseId: purchase.id,
+          itemId: purchase.item.id,
+          itemType: purchase.item.type,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Failed to activate item");
+      }
+
+      toast.success(`${purchase.item.name} has been activated!`);
+
+      // Navigate to the appropriate page
+      if (purchase.item.type === "agent") {
+        router.push("/dashboard/agents");
+      } else {
+        router.push("/dashboard/workflows");
+      }
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : "Failed to activate item";
+      toast.error(errorMessage);
+    } finally {
+      setActivatingId(null);
+    }
+  }
+
+  async function fetchPurchases() {
+    try {
+      const response = await fetch("/api/marketplace/purchases");
+      if (response.ok) {
+        const data = await response.json();
+        setPurchases(data.purchases || []);
+        setStats(data.stats || {
+          totalPurchases: 0,
+          activeSubscriptions: 0,
+          totalSpent: 0,
+        });
+      }
+    } catch (error) {
+      console.error("Error fetching purchases:", error);
+    } finally {
+      setLoading(false);
+    }
+  }
 
   const filteredPurchases = purchases.filter((purchase) =>
-    purchase.item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    purchase.item.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    purchase.item.category.toLowerCase().includes(searchQuery.toLowerCase())
+    purchase.item?.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    purchase.item?.description?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    purchase.item?.category?.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   return (
@@ -111,7 +156,7 @@ export default function MyPurchasesPage() {
               <Package className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{purchases.length}</div>
+              <div className="text-2xl font-bold">{stats.totalPurchases}</div>
               <p className="text-xs text-muted-foreground">
                 AI agents and workflows
               </p>
@@ -124,9 +169,7 @@ export default function MyPurchasesPage() {
               <Calendar className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">
-                {purchases.filter((p) => p.subscription_status === "active").length}
-              </div>
+              <div className="text-2xl font-bold">{stats.activeSubscriptions}</div>
               <p className="text-xs text-muted-foreground">
                 Recurring monthly
               </p>
@@ -139,9 +182,7 @@ export default function MyPurchasesPage() {
               <DollarSign className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">
-                ${purchases.reduce((acc, p) => acc + p.price_paid, 0)}
-              </div>
+              <div className="text-2xl font-bold">${stats.totalSpent}</div>
               <p className="text-xs text-muted-foreground">
                 Lifetime value
               </p>
@@ -164,7 +205,12 @@ export default function MyPurchasesPage() {
 
         {/* Purchases List */}
         <div className="space-y-4">
-          {filteredPurchases.length === 0 ? (
+          {loading ? (
+            <div className="flex items-center justify-center py-12">
+              <Loader2 className="h-8 w-8 animate-spin text-primary" />
+              <span className="ml-2 text-muted-foreground">Loading purchases...</span>
+            </div>
+          ) : filteredPurchases.length === 0 ? (
             <Card>
               <CardContent className="py-12 text-center">
                 <Package className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
@@ -186,7 +232,7 @@ export default function MyPurchasesPage() {
                   <div className="flex items-start justify-between">
                     <div className="flex items-start gap-4 flex-1">
                       <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
-                        {purchase.item.type === "agent" ? (
+                        {purchase.item?.type === "agent" ? (
                           <Bot className="h-6 w-6 text-primary" />
                         ) : (
                           <Workflow className="h-6 w-6 text-primary" />
@@ -194,14 +240,14 @@ export default function MyPurchasesPage() {
                       </div>
                       <div className="flex-1">
                         <div className="flex items-center gap-2 mb-2">
-                          <CardTitle className="text-xl">{purchase.item.name}</CardTitle>
-                          <Badge variant="secondary">{purchase.item.category}</Badge>
+                          <CardTitle className="text-xl">{purchase.item?.name || "Unknown Item"}</CardTitle>
+                          <Badge variant="secondary">{purchase.item?.category || "Unknown"}</Badge>
                           <Badge variant="outline">
-                            {purchase.item.type === "agent" ? "AI Agent" : "Workflow"}
+                            {purchase.item?.type === "agent" ? "AI Agent" : "Workflow"}
                           </Badge>
                         </div>
                         <CardDescription className="mb-3">
-                          {purchase.item.description}
+                          {purchase.item?.description || "No description available"}
                         </CardDescription>
                         <div className="flex items-center gap-4 text-sm text-muted-foreground">
                           <div className="flex items-center gap-1">
@@ -218,11 +264,11 @@ export default function MyPurchasesPage() {
                             )}
                           </div>
                         </div>
-                        {purchase.subscription_status === "active" && (
+                        {purchase.subscription_status === "active" && purchase.subscription_end_date && (
                           <div className="mt-2">
                             <Badge variant="default" className="text-xs">
                               Active Subscription - Renews{" "}
-                              {new Date(purchase.subscription_end_date!).toLocaleDateString()}
+                              {new Date(purchase.subscription_end_date).toLocaleDateString()}
                             </Badge>
                           </div>
                         )}
@@ -230,14 +276,28 @@ export default function MyPurchasesPage() {
                     </div>
                     <div className="flex flex-col gap-2">
                       <Button size="sm" asChild>
-                        <Link href={`/marketplace/${purchase.item.id}`}>
+                        <Link href={`/marketplace/${purchase.item?.id}`}>
                           <ExternalLink className="mr-2 h-4 w-4" />
                           View Details
                         </Link>
                       </Button>
-                      <Button size="sm" variant="outline" disabled>
-                        <Download className="mr-2 h-4 w-4" />
-                        Download
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => handleActivate(purchase)}
+                        disabled={activatingId === purchase.id}
+                      >
+                        {activatingId === purchase.id ? (
+                          <>
+                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                            Activating...
+                          </>
+                        ) : (
+                          <>
+                            <Play className="mr-2 h-4 w-4" />
+                            Activate
+                          </>
+                        )}
                       </Button>
                     </div>
                   </div>
@@ -245,10 +305,10 @@ export default function MyPurchasesPage() {
                 <CardContent>
                   <div className="flex items-center justify-between pt-4 border-t">
                     <div className="text-sm text-muted-foreground">
-                      by {purchase.item.creator_name}
+                      by {purchase.item?.creator_name || "Unknown Creator"}
                     </div>
                     <Button variant="ghost" size="sm" asChild>
-                      <Link href={`/marketplace/${purchase.item.id}#reviews`}>
+                      <Link href={`/marketplace/${purchase.item?.id}#reviews`}>
                         <Star className="mr-2 h-4 w-4" />
                         Leave a Review
                       </Link>

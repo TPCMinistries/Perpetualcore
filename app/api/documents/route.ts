@@ -1,170 +1,18 @@
 import { createClient } from "@/lib/supabase/server";
 import { NextRequest } from "next/server";
+import { rateLimiters } from "@/lib/rate-limit";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-// Mock documents as fallback
-const MOCK_DOCUMENTS = [
-  {
-    id: "mock-1",
-    title: "Getting Started with Perpetual Core.pdf",
-    file_type: "application/pdf",
-    file_size: 245670,
-    file_url: null,
-    status: "completed",
-    folder_id: null,
-    metadata: {
-      wordCount: 1523,
-      charCount: 9847,
-      isRichText: false,
-    },
-    summary: "This document provides a comprehensive introduction to Perpetual Core, covering the main features including AI Chat, document management, workflow automation, and integrations. It explains how to get started with the platform and maximize productivity.",
-    key_points: [
-      "Perpetual Core combines multiple productivity tools into one intelligent platform",
-      "Document uploads are automatically processed and made searchable",
-      "Workflows can automate repetitive tasks across integrated services",
-      "Natural language AI chat helps with brainstorming and task completion"
-    ],
-    document_type: "Guide",
-    summary_generated_at: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
-    summary_tokens_used: 2847,
-    summary_cost_usd: "0.0142",
-    created_at: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
-    user: {
-      full_name: "Demo User",
-    },
-    folder: null,
-    tags: [
-      { tag: { id: "tag-1", name: "onboarding", color: "#3b82f6" } }
-    ],
-  },
-  {
-    id: "mock-2",
-    title: "Project Requirements Document.docx",
-    file_type: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-    file_size: 189340,
-    file_url: null,
-    status: "completed",
-    folder_id: null,
-    metadata: {
-      wordCount: 3245,
-      charCount: 19234,
-      isRichText: false,
-    },
-    summary: "Detailed requirements document outlining the scope, objectives, and technical specifications for the upcoming platform redesign project. Includes timeline, resource allocation, and success metrics.",
-    key_points: [
-      "Project aims to modernize the user interface and improve performance",
-      "Timeline set for 6-month completion with 3 major milestones",
-      "Budget allocated for additional development resources",
-      "Success metrics include 40% reduction in page load times"
-    ],
-    document_type: "Requirements",
-    summary_generated_at: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
-    summary_tokens_used: 4521,
-    summary_cost_usd: "0.0226",
-    created_at: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
-    user: {
-      full_name: "Demo User",
-    },
-    folder: null,
-    tags: [
-      { tag: { id: "tag-2", name: "project", color: "#8b5cf6" } },
-      { tag: { id: "tag-3", name: "important", color: "#ef4444" } }
-    ],
-  },
-  {
-    id: "mock-3",
-    title: "Meeting Notes - Q4 Planning.txt",
-    file_type: "text/plain",
-    file_size: 12450,
-    file_url: null,
-    status: "completed",
-    folder_id: null,
-    metadata: {
-      wordCount: 856,
-      charCount: 5234,
-      isRichText: false,
-    },
-    summary: "Notes from the Q4 planning meeting discussing goals, resource allocation, and strategic priorities for the final quarter. Team decided to focus on customer retention and product improvements.",
-    key_points: [
-      "Top priority: Improve customer retention by 15%",
-      "Launch two new features based on customer feedback",
-      "Increase marketing budget for holiday campaigns",
-      "Schedule monthly check-ins to track progress"
-    ],
-    document_type: "Meeting Notes",
-    summary_generated_at: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
-    summary_tokens_used: 1234,
-    summary_cost_usd: "0.0062",
-    created_at: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
-    user: {
-      full_name: "Demo User",
-    },
-    folder: null,
-    tags: [
-      { tag: { id: "tag-4", name: "meeting", color: "#10b981" } }
-    ],
-  },
-  {
-    id: "mock-4",
-    title: "API Integration Guide.md",
-    file_type: "text/markdown",
-    file_size: 34120,
-    file_url: null,
-    status: "completed",
-    folder_id: null,
-    metadata: {
-      wordCount: 2134,
-      charCount: 13567,
-      isRichText: false,
-    },
-    summary: null,
-    key_points: null,
-    document_type: null,
-    summary_generated_at: null,
-    summary_tokens_used: null,
-    summary_cost_usd: null,
-    created_at: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
-    user: {
-      full_name: "Demo User",
-    },
-    folder: null,
-    tags: [
-      { tag: { id: "tag-5", name: "technical", color: "#f59e0b" } },
-      { tag: { id: "tag-6", name: "documentation", color: "#6366f1" } }
-    ],
-  },
-  {
-    id: "mock-5",
-    title: "Financial Report 2024.csv",
-    file_type: "text/csv",
-    file_size: 45230,
-    file_url: null,
-    status: "processing",
-    folder_id: null,
-    metadata: {
-      wordCount: 0,
-      charCount: 0,
-      isRichText: false,
-    },
-    summary: null,
-    key_points: null,
-    document_type: null,
-    summary_generated_at: null,
-    summary_tokens_used: null,
-    summary_cost_usd: null,
-    created_at: new Date(Date.now() - 30 * 60 * 1000).toISOString(),
-    user: {
-      full_name: "Demo User",
-    },
-    folder: null,
-    tags: [],
-  },
-];
-
 export async function GET(req: NextRequest) {
   try {
+    // Rate limit: 100 requests per minute
+    const rateLimitResult = await rateLimiters.api.check(req);
+    if (!rateLimitResult.success) {
+      return rateLimitResult.response;
+    }
+
     const supabase = await createClient();
 
     // Get authenticated user
@@ -184,10 +32,10 @@ export async function GET(req: NextRequest) {
       .single();
 
     if (!profile || !profile.organization_id) {
-      console.log("Using mock documents (no organization found)");
+      console.log("No organization found for user");
       return Response.json({
         success: true,
-        documents: MOCK_DOCUMENTS,
+        documents: [],
       });
     }
 
@@ -241,8 +89,9 @@ export async function GET(req: NextRequest) {
     if (error) {
       console.error("Database query error:", error);
       return Response.json({
-        success: true,
-        documents: MOCK_DOCUMENTS,
+        success: false,
+        error: "Failed to fetch documents",
+        documents: [],
       });
     }
 
@@ -293,16 +142,23 @@ export async function GET(req: NextRequest) {
       documents,
     });
   } catch (error) {
-    console.error("Documents API error, returning mock data:", error);
+    console.error("Documents API error:", error);
     return Response.json({
-      success: true,
-      documents: MOCK_DOCUMENTS,
+      success: false,
+      error: "Internal server error",
+      documents: [],
     });
   }
 }
 
 export async function DELETE(req: NextRequest) {
   try {
+    // Rate limit: 100 requests per minute
+    const rateLimitResult = await rateLimiters.api.check(req);
+    if (!rateLimitResult.success) {
+      return rateLimitResult.response;
+    }
+
     const supabase = await createClient();
 
     // Get authenticated user

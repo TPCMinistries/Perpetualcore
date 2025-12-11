@@ -1,119 +1,144 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { sendSalesInquiryEmail, sendSalesConfirmationEmail } from "@/lib/email";
+import { z } from "zod";
+import { validationErrorResponse } from "@/lib/validations/schemas";
+
+// Simple in-memory rate limiting (resets on server restart)
+const rateLimitMap = new Map<string, { count: number; resetTime: number }>();
+const RATE_LIMIT_WINDOW_MS = 60 * 60 * 1000; // 1 hour
+const MAX_REQUESTS_PER_WINDOW = 5; // 5 requests per hour per IP
+
+function isRateLimited(ip: string): boolean {
+  const now = Date.now();
+  const record = rateLimitMap.get(ip);
+
+  if (!record || now > record.resetTime) {
+    rateLimitMap.set(ip, { count: 1, resetTime: now + RATE_LIMIT_WINDOW_MS });
+    return false;
+  }
+
+  if (record.count >= MAX_REQUESTS_PER_WINDOW) {
+    return true;
+  }
+
+  record.count++;
+  return false;
+}
+
+// Zod schema for contact sales form
+const contactSalesSchema = z.object({
+  name: z.string()
+    .min(1, "Name is required")
+    .max(100, "Name is too long")
+    .transform(s => s.trim().replace(/[<>]/g, "")),
+  email: z.string()
+    .email("Invalid email address")
+    .max(254, "Email is too long")
+    .toLowerCase()
+    .trim(),
+  company: z.string()
+    .min(1, "Company name is required")
+    .max(200, "Company name is too long")
+    .transform(s => s.trim().replace(/[<>]/g, "")),
+  phone: z.string()
+    .max(30, "Phone number is too long")
+    .transform(s => s.trim().replace(/[<>]/g, ""))
+    .optional()
+    .nullable(),
+  employees: z.enum(["1-10", "11-50", "51-200", "201-500", "501-1000", "1001+"], {
+    errorMap: () => ({ message: "Please select a valid company size" }),
+  }),
+  plan: z.enum(["Pro", "Enterprise", "Custom"], {
+    errorMap: () => ({ message: "Please select a valid plan" }),
+  }),
+  message: z.string()
+    .max(2000, "Message is too long")
+    .transform(s => s.trim().replace(/[<>]/g, ""))
+    .optional()
+    .nullable(),
+});
 
 export async function POST(request: Request) {
   try {
-    const body = await request.json();
-    const { name, email, company, phone, employees, plan, message } = body;
+    // Get IP for rate limiting
+    const forwardedFor = request.headers.get("x-forwarded-for");
+    const ip = forwardedFor?.split(",")[0]?.trim() || "unknown";
 
-    // Validate required fields
-    if (!name || !email || !company || !employees || !plan) {
+    // Check rate limit
+    if (isRateLimited(ip)) {
       return NextResponse.json(
-        { error: "Missing required fields" },
-        { status: 400 }
+        { error: "Too many requests. Please try again later." },
+        { status: 429 }
       );
     }
 
-    // Validate email format
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
-      return NextResponse.json(
-        { error: "Invalid email address" },
-        { status: 400 }
-      );
+    // Validate input with Zod
+    let validatedData;
+    try {
+      const rawBody = await request.json();
+      validatedData = contactSalesSchema.parse(rawBody);
+    } catch (error) {
+      return validationErrorResponse(error);
     }
+
+    const {
+      name: sanitizedName,
+      email: sanitizedEmail,
+      company: sanitizedCompany,
+      phone: sanitizedPhone,
+      employees: sanitizedEmployees,
+      plan: sanitizedPlan,
+      message: sanitizedMessage,
+    } = validatedData;
 
     // Save to database for tracking
     const supabase = await createClient();
     const { error: dbError } = await supabase.from("sales_contacts").insert({
-      name,
-      email,
-      company,
-      phone: phone || null,
-      company_size: employees,
-      interested_in: plan,
-      message: message || null,
+      name: sanitizedName,
+      email: sanitizedEmail,
+      company: sanitizedCompany,
+      phone: sanitizedPhone,
+      company_size: sanitizedEmployees,
+      interested_in: sanitizedPlan,
+      message: sanitizedMessage,
       created_at: new Date().toISOString(),
       status: "new",
     });
 
     if (dbError) {
-      console.error("Failed to save contact to database:", dbError);
-      // Continue even if DB save fails - we'll still send emails
+      // Log error but continue - we'll still try to send emails
+      if (process.env.NODE_ENV === "development") {
+        console.error("Failed to save contact to database:", dbError);
+      }
     }
 
-    // TODO: Send email to sales team
-    // Example using Resend:
-    // await resend.emails.send({
-    //   from: 'noreply@aios-platform.com',
-    //   to: 'sales@aios-platform.com',
-    //   subject: `New ${plan} inquiry from ${company}`,
-    //   html: `
-    //     <h2>New Sales Contact</h2>
-    //     <p><strong>Name:</strong> ${name}</p>
-    //     <p><strong>Email:</strong> ${email}</p>
-    //     <p><strong>Company:</strong> ${company}</p>
-    //     <p><strong>Phone:</strong> ${phone || 'Not provided'}</p>
-    //     <p><strong>Company Size:</strong> ${employees}</p>
-    //     <p><strong>Interested In:</strong> ${plan}</p>
-    //     <p><strong>Message:</strong> ${message || 'None'}</p>
-    //   `,
-    // });
+    // Send email to sales team
+    await sendSalesInquiryEmail({
+      name: sanitizedName,
+      email: sanitizedEmail,
+      company: sanitizedCompany,
+      phone: sanitizedPhone || undefined,
+      employees: sanitizedEmployees,
+      plan: sanitizedPlan,
+      message: sanitizedMessage || undefined,
+    });
 
-    // TODO: Send confirmation email to prospect
-    // await resend.emails.send({
-    //   from: 'sales@aios-platform.com',
-    //   to: email,
-    //   subject: 'Thanks for your interest in Perpetual Core Platform',
-    //   html: `
-    //     <h2>Thank you for contacting us!</h2>
-    //     <p>Hi ${name},</p>
-    //     <p>We've received your inquiry about the ${plan} plan and will get back to you within 24 hours.</p>
-    //     <p>In the meantime, feel free to explore our <a href="https://aios-platform.com/docs">documentation</a>.</p>
-    //     <p>Best regards,<br>The Perpetual Core Team</p>
-    //   `,
-    // });
-
-    // TODO: Integrate with CRM (HubSpot, Salesforce, etc.)
-    // Example HubSpot:
-    // await fetch('https://api.hubapi.com/contacts/v1/contact', {
-    //   method: 'POST',
-    //   headers: {
-    //     'Authorization': `Bearer ${process.env.HUBSPOT_API_KEY}`,
-    //     'Content-Type': 'application/json',
-    //   },
-    //   body: JSON.stringify({
-    //     properties: [
-    //       { property: 'email', value: email },
-    //       { property: 'firstname', value: name.split(' ')[0] },
-    //       { property: 'lastname', value: name.split(' ').slice(1).join(' ') },
-    //       { property: 'company', value: company },
-    //       { property: 'phone', value: phone },
-    //       { property: 'interested_plan', value: plan },
-    //     ],
-    //   }),
-    // });
-
-    // Log for now (until email service is configured)
-    console.log("New sales contact:", {
-      name,
-      email,
-      company,
-      phone,
-      employees,
-      plan,
-      message,
-      timestamp: new Date().toISOString(),
+    // Send confirmation email to prospect
+    await sendSalesConfirmationEmail({
+      name: sanitizedName,
+      email: sanitizedEmail,
+      plan: sanitizedPlan,
     });
 
     return NextResponse.json({
       success: true,
       message: "Contact information received. Our team will reach out within 24 hours.",
     });
-  } catch (error: any) {
-    console.error("Contact sales error:", error);
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : "Failed to submit contact form";
     return NextResponse.json(
-      { error: error.message || "Failed to submit contact form" },
+      { error: errorMessage },
       { status: 500 }
     );
   }

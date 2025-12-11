@@ -1,43 +1,41 @@
-// @ts-nocheck
 import { NextRequest } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import {
+  checkAdminAccess,
+  unauthorizedResponse,
+  forbiddenResponse,
+} from "@/lib/admin/checkAdmin";
+import {
+  updateUserRoleSchema,
+  validateBody,
+  validationErrorResponse,
+  ValidationError,
+} from "@/lib/validations/schemas";
 
 // GET /api/admin/users - Get all users with their roles (admin only)
 export async function GET(req: NextRequest) {
   try {
-    const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
+    const { isAdmin, user, error: authError } = await checkAdminAccess();
 
     if (!user) {
-      return new Response(JSON.stringify({ error: "Unauthorized" }), {
-        status: 401,
-        headers: { "Content-Type": "application/json" }
-      });
+      return unauthorizedResponse();
     }
 
-    // Check if user is admin
-    const { data: profile } = await supabase
-      .from("profiles")
-      .select("role")
-      .eq("id", user.id)
-      .single();
-
-    if (!profile || profile.role !== "admin") {
-      return new Response(JSON.stringify({ error: "Admin access required" }), {
-        status: 403,
-        headers: { "Content-Type": "application/json" }
-      });
+    if (!isAdmin) {
+      return forbiddenResponse();
     }
+
+    const supabase = await createClient();
 
     // Get all users with their profiles
-    const { data: users, error } = await supabase
+    const { data: users, error: fetchError } = await supabase
       .from("profiles")
       .select("id, email, full_name, role, created_at, updated_at")
       .order("created_at", { ascending: false });
 
-    if (error) {
-      console.error("Error fetching users:", error);
-      return new Response(JSON.stringify({ error: error.message }), {
+    if (fetchError) {
+      console.error("Error fetching users:", fetchError);
+      return new Response(JSON.stringify({ error: fetchError.message }), {
         status: 500,
         headers: { "Content-Type": "application/json" }
       });
@@ -56,47 +54,25 @@ export async function GET(req: NextRequest) {
 // PATCH /api/admin/users - Update user role (admin only)
 export async function PATCH(req: NextRequest) {
   try {
-    const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
+    const { isAdmin, user, error: authError } = await checkAdminAccess();
 
     if (!user) {
-      return new Response(JSON.stringify({ error: "Unauthorized" }), {
-        status: 401,
-        headers: { "Content-Type": "application/json" }
-      });
+      return unauthorizedResponse();
     }
 
-    // Check if user is admin
-    const { data: profile } = await supabase
-      .from("profiles")
-      .select("role")
-      .eq("id", user.id)
-      .single();
-
-    if (!profile || profile.role !== "admin") {
-      return new Response(JSON.stringify({ error: "Admin access required" }), {
-        status: 403,
-        headers: { "Content-Type": "application/json" }
-      });
+    if (!isAdmin) {
+      return forbiddenResponse();
     }
 
-    const { userId, role } = await req.json();
-
-    if (!userId || !role) {
-      return new Response(JSON.stringify({ error: "userId and role are required" }), {
-        status: 400,
-        headers: { "Content-Type": "application/json" }
-      });
+    // Validate input with Zod
+    let validatedData;
+    try {
+      validatedData = await validateBody(req, updateUserRoleSchema);
+    } catch (error) {
+      return validationErrorResponse(error);
     }
 
-    // Validate role
-    const validRoles = ["admin", "member", "viewer"];
-    if (!validRoles.includes(role)) {
-      return new Response(JSON.stringify({ error: "Invalid role. Must be admin, member, or viewer" }), {
-        status: 400,
-        headers: { "Content-Type": "application/json" }
-      });
-    }
+    const { userId, role } = validatedData;
 
     // Prevent admin from removing their own admin role
     if (userId === user.id && role !== "admin") {
@@ -106,26 +82,29 @@ export async function PATCH(req: NextRequest) {
       });
     }
 
+    const supabase = await createClient();
+
     // Update user role
-    const { data: updatedUser, error } = await supabase
+    const { data: updatedUser, error: updateError } = await supabase
       .from("profiles")
       .update({ role, updated_at: new Date().toISOString() })
       .eq("id", userId)
       .select("id, email, full_name, role")
       .single();
 
-    if (error) {
-      console.error("Error updating user role:", error);
-      return new Response(JSON.stringify({ error: error.message }), {
+    if (updateError) {
+      console.error("Error updating user role:", updateError);
+      return new Response(JSON.stringify({ error: updateError.message }), {
         status: 500,
         headers: { "Content-Type": "application/json" }
       });
     }
 
     return Response.json({ user: updatedUser });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Error in PATCH /api/admin/users:", error);
-    return new Response(JSON.stringify({ error: error.message }), {
+    const message = error instanceof Error ? error.message : "Unknown error";
+    return new Response(JSON.stringify({ error: message }), {
       status: 500,
       headers: { "Content-Type": "application/json" }
     });

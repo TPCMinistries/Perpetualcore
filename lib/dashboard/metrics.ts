@@ -118,14 +118,17 @@ export async function getDashboardMetrics(): Promise<DashboardMetrics> {
 
     // Query active workflows/agents - assuming there's an agents table
     // If this fails, we'll default to 0
-    const { data: activeAgents, error: agentError } = await supabase
-      .from("agents")
-      .select("id", { count: "exact", head: true })
-      .eq("user_id", user.id)
-      .eq("status", "active")
-      .catch(() => ({ data: null, error: null }));
-
-    const activeCount = activeAgents?.length || 0;
+    let activeCount = 0;
+    try {
+      const { data: activeAgents } = await supabase
+        .from("agents")
+        .select("id", { count: "exact", head: true })
+        .eq("user_id", user.id)
+        .eq("status", "active");
+      activeCount = activeAgents?.length || 0;
+    } catch {
+      // Table may not exist, default to 0
+    }
 
     return {
       conversations: {

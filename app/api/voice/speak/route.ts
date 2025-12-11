@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { NextRequest } from "next/server";
 import OpenAI from "openai";
+import { rateLimiters, checkRateLimit } from "@/lib/rate-limit";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -11,6 +12,10 @@ const openai = new OpenAI({
 
 export async function POST(req: NextRequest) {
   try {
+    // Apply rate limiting - TTS is an expensive operation
+    const rateLimitResponse = await checkRateLimit(req, rateLimiters.imageGen);
+    if (rateLimitResponse) return rateLimitResponse;
+
     const supabase = await createClient();
 
     // Get authenticated user

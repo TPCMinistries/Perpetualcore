@@ -13,7 +13,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Send, Loader2, Bot, User, Paperclip, X, FileText, Image as ImageIcon, Mic, MicOff, Copy, Check, Download, FileSpreadsheet, Presentation, File, Phone, PhoneOff, Menu, MessageSquare, Brain, Building2, Sparkles, Library, Command, Zap } from "lucide-react";
+import { Send, Loader2, Bot, User, Paperclip, X, FileText, Image as ImageIcon, Mic, MicOff, Copy, Check, Download, FileSpreadsheet, Presentation, File, Phone, PhoneOff, Menu, MessageSquare, Brain, Building2, Sparkles, Library, Command, Zap, ThumbsUp, ThumbsDown } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { AIModel } from "@/types";
 import { AI_MODELS, DEFAULT_MODEL } from "@/lib/ai/config";
@@ -35,6 +35,8 @@ interface Message {
   role: "user" | "assistant";
   content: string;
   attachments?: FileAttachment[];
+  id?: string; // Message ID from database for feedback
+  feedback?: "helpful" | "not_helpful" | null;
 }
 
 export default function ChatPage() {
@@ -357,6 +359,40 @@ export default function ChatPage() {
     }
   };
 
+  const submitFeedback = async (messageId: string | undefined, helpful: boolean, index: number) => {
+    if (!messageId) {
+      toast.error("Cannot submit feedback for this message");
+      return;
+    }
+
+    try {
+      const response = await fetch("/api/chat/feedback", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ messageId, helpful }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to submit feedback");
+      }
+
+      // Update local state to show feedback was recorded
+      setMessages((prev) => {
+        const updated = [...prev];
+        updated[index] = {
+          ...updated[index],
+          feedback: helpful ? "helpful" : "not_helpful",
+        };
+        return updated;
+      });
+
+      toast.success(helpful ? "Thanks for the feedback!" : "Thanks, we'll improve!");
+    } catch (error) {
+      console.error("Feedback error:", error);
+      toast.error("Failed to submit feedback");
+    }
+  };
+
   const exportConversation = async (type: "powerpoint" | "pdf" | "excel" | "word") => {
     if (messages.length === 0) {
       toast.error("No conversation to export");
@@ -487,7 +523,15 @@ export default function ChatPage() {
       });
 
       if (!response.ok) {
-        throw new Error("Failed to get response");
+        const errorText = await response.text();
+        let errorMessage = "Failed to get response";
+        try {
+          const errorData = JSON.parse(errorText);
+          errorMessage = errorData.error || errorData.message || errorMessage;
+        } catch {
+          errorMessage = errorText || `HTTP ${response.status}: ${response.statusText}`;
+        }
+        throw new Error(errorMessage);
       }
 
       const reader = response.body?.getReader();
@@ -525,6 +569,18 @@ export default function ChatPage() {
               setConversationId(data.conversationId);
             }
 
+            // Capture messageId for feedback when stream is done
+            if (data.messageId) {
+              setMessages((prev) => {
+                const newMessages = [...prev];
+                newMessages[newMessages.length - 1] = {
+                  ...newMessages[newMessages.length - 1],
+                  id: data.messageId,
+                };
+                return newMessages;
+              });
+            }
+
             if (data.content) {
               assistantMessage += data.content;
               setMessages((prev) => {
@@ -532,6 +588,7 @@ export default function ChatPage() {
                 newMessages[newMessages.length - 1] = {
                   role: "assistant",
                   content: assistantMessage,
+                  id: newMessages[newMessages.length - 1].id, // Preserve messageId if set
                 };
                 return newMessages;
               });
@@ -541,13 +598,18 @@ export default function ChatPage() {
           }
         }
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error("Chat error:", error);
+      const errorMessage = error?.message || "Unknown error occurred";
+      
+      // Show detailed error to user
+      toast.error(`Chat error: ${errorMessage}`);
+      
       setMessages((prev) => [
         ...prev,
         {
           role: "assistant",
-          content: "Sorry, I encountered an error. Please try again.",
+          content: `❌ **Error:** ${errorMessage}\n\nPlease check:\n- Server logs for details\n- Browser console (F12)\n- Network tab for request/response\n\nIf this persists, try:\n- Refreshing the page\n- Trying a different model\n- Checking your API keys`,
         },
       ]);
     } finally {
@@ -833,19 +895,51 @@ export default function ChatPage() {
                       )}
                     </div>
                     {message.role === "assistant" && message.content && (
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => copyToClipboard(message.content, index)}
-                        className="absolute top-0 right-0 h-6 w-6 p-0 opacity-0 group-hover:opacity-100 transition-opacity hover:bg-slate-100 dark:hover:bg-slate-800"
-                        title="Copy to clipboard"
-                      >
-                        {copiedMessageIndex === index ? (
-                          <Check className="h-3.5 w-3.5 text-emerald-600" />
-                        ) : (
-                          <Copy className="h-3.5 w-3.5" />
+                      <div className="absolute top-0 right-0 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                        {/* Feedback buttons */}
+                        {message.id && !message.feedback && (
+                          <>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => submitFeedback(message.id, true, index)}
+                              className="h-6 w-6 p-0 hover:bg-emerald-100 dark:hover:bg-emerald-900/30"
+                              title="This was helpful"
+                            >
+                              <ThumbsUp className="h-3.5 w-3.5 text-slate-500 hover:text-emerald-600" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => submitFeedback(message.id, false, index)}
+                              className="h-6 w-6 p-0 hover:bg-red-100 dark:hover:bg-red-900/30"
+                              title="This wasn't helpful"
+                            >
+                              <ThumbsDown className="h-3.5 w-3.5 text-slate-500 hover:text-red-600" />
+                            </Button>
+                          </>
                         )}
-                      </Button>
+                        {/* Show feedback status if already given */}
+                        {message.feedback && (
+                          <span className="text-xs px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400">
+                            {message.feedback === "helpful" ? "👍 Thanks!" : "👎 Noted"}
+                          </span>
+                        )}
+                        {/* Copy button */}
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => copyToClipboard(message.content, index)}
+                          className="h-6 w-6 p-0 hover:bg-slate-100 dark:hover:bg-slate-800"
+                          title="Copy to clipboard"
+                        >
+                          {copiedMessageIndex === index ? (
+                            <Check className="h-3.5 w-3.5 text-emerald-600" />
+                          ) : (
+                            <Copy className="h-3.5 w-3.5" />
+                          )}
+                        </Button>
+                      </div>
                     )}
                   </div>
                 </div>

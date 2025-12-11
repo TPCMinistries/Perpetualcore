@@ -215,9 +215,27 @@ export default function HomePage() {
                 </div>
               </div>
             </div>
-            <Link href="#features" className="text-sm font-medium hover:text-primary transition">
-              Features
-            </Link>
+            <div className="relative group">
+              <button className="text-sm font-medium hover:text-primary transition flex items-center gap-1">
+                Features <ChevronDown className="h-4 w-4 group-hover:rotate-180 transition-transform" />
+              </button>
+              <div className="absolute top-full left-0 mt-2 w-64 backdrop-blur-2xl bg-card/95 border border-border rounded-lg shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
+                <div className="p-2">
+                  <Link href="/features/intelligence" className="block px-3 py-2.5 text-sm hover:bg-accent rounded-md transition">
+                    <div className="font-medium">Intelligence System</div>
+                    <div className="text-xs text-muted-foreground">Adaptive learning & insights</div>
+                  </Link>
+                  <Link href="/agents" className="block px-3 py-2.5 text-sm hover:bg-accent rounded-md transition">
+                    <div className="font-medium">Agents Library</div>
+                    <div className="text-xs text-muted-foreground">30+ pre-built AI agents</div>
+                  </Link>
+                  <Link href="#features" className="block px-3 py-2.5 text-sm hover:bg-accent rounded-md transition">
+                    <div className="font-medium">All Features</div>
+                    <div className="text-xs text-muted-foreground">Complete feature list</div>
+                  </Link>
+                </div>
+              </div>
+            </div>
             <Link href="#how-it-works" className="text-sm font-medium hover:text-primary transition">
               How It Works
             </Link>
@@ -230,6 +248,10 @@ export default function HomePage() {
               </button>
               <div className="absolute top-full right-0 mt-2 w-64 backdrop-blur-2xl bg-card/95 border border-border rounded-lg shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
                 <div className="p-2">
+                  <Link href="/consulting" className="block px-3 py-2.5 text-sm hover:bg-accent rounded-md transition">
+                    <div className="font-medium">Transformation Stack</div>
+                    <div className="text-xs text-muted-foreground">Complete consulting & implementation</div>
+                  </Link>
                   <Link href="/consultation" className="block px-3 py-2.5 text-sm hover:bg-accent rounded-md transition">
                     <div className="font-medium">Guided Implementation</div>
                     <div className="text-xs text-muted-foreground">For teams of 10-100</div>
@@ -272,25 +294,25 @@ export default function HomePage() {
           <div className="flex justify-center mb-8 sm:mb-12 animate-on-scroll">
             <div className="inline-flex items-center gap-2 sm:gap-3 px-4 sm:px-5 py-2 sm:py-2.5 rounded-full backdrop-blur-2xl bg-primary/10 border border-primary/20 text-primary text-xs sm:text-sm font-semibold shadow-lg">
               <div className="h-2 w-2 rounded-full bg-primary animate-pulse" />
-              <span className="tracking-wide">Infinite Memory AI Platform</span>
+              <span className="tracking-wide">AI That Never Forgets</span>
             </div>
           </div>
 
           {/* Massive Headline */}
           <h1 className="text-center text-5xl sm:text-6xl md:text-7xl lg:text-9xl font-black tracking-tighter mb-8 sm:mb-12 leading-[0.95] animate-on-scroll px-2">
             <span className="block bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900 dark:from-white dark:via-gray-100 dark:to-white bg-clip-text text-transparent">
-              Your AI Brain
+              Your Second Brain
             </span>
             <span className="block mt-2 bg-gradient-to-r from-primary via-purple-600 to-primary bg-clip-text text-transparent">
-              Never Forgets
+              Powered by AI
             </span>
           </h1>
 
           {/* Subtitle with more breathing room */}
           <p className="text-center text-base sm:text-xl md:text-2xl lg:text-3xl text-muted-foreground/80 mb-10 sm:mb-16 max-w-4xl mx-auto leading-relaxed font-light animate-on-scroll px-4">
-            Unlike ChatGPT, your conversations <span className="font-semibold text-foreground">never forget</span>.
+            ChatGPT forgets after 200 messages. <span className="font-semibold text-foreground">Perpetual Core never forgets</span>.
             <br className="hidden sm:block" />
-            Access GPT-4, Claude, and Gemini in one AI Operating System.
+            GPT-4, Claude & Gemini in one place. Your documents. Your team's knowledge. <span className="font-semibold text-foreground">All connected</span>.
           </p>
 
           {/* CTA Buttons - Mobile optimized */}
@@ -791,56 +813,84 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Industries We Serve - REDESIGNED & MOVED DOWN */}
-      <section id="industries" className="container mx-auto px-4 py-20 animate-on-scroll">
+      {/* Who It's For - Universal Use Cases */}
+      <section id="use-cases" className="container mx-auto px-4 py-20 animate-on-scroll">
         <div className="text-center mb-16">
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full backdrop-blur-2xl bg-gradient-to-r from-primary/20 to-purple-500/20 border-2 border-primary/30 text-primary text-sm font-medium mb-6 shadow-xl">
-            <Briefcase className="h-4 w-4" />
-            <span className="font-semibold">Built for Your Industry</span>
+            <Users className="h-4 w-4" />
+            <span className="font-semibold">Built For Everyone</span>
           </div>
           <h2 className="text-4xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-gray-900 via-primary to-purple-600 dark:from-white dark:via-primary dark:to-purple-400 bg-clip-text text-transparent">
-            Featured Industries
+            Your AI Brain, Your Way
           </h2>
           <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-            Tailored AI solutions for professionals who need institutional memory and expertise preservation
+            Whether you're building a business, creating content, or managing complex projects—we adapt to you
           </p>
         </div>
 
-        {/* Featured 6 Industries in 2 rows of 3 */}
+        {/* Universal Use Cases */}
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-5xl mx-auto mb-12">
-          {["law-firm", "healthcare", "sales", "real-estate", "non-profit", "education"].map((industryKey) => {
-            const industry = INDUSTRY_CONFIGS[industryKey];
-            if (!industry) return null;
-
-            const Icon = industry.icon;
-            const gradients: { [key: string]: string } = {
-              "law-firm": "from-blue-500 to-cyan-600",
-              healthcare: "from-green-500 to-emerald-600",
-              sales: "from-purple-500 to-pink-600",
-              "real-estate": "from-orange-500 to-amber-600",
-              "non-profit": "from-rose-500 to-pink-600",
-              education: "from-amber-500 to-orange-600",
-            };
-            const gradient = gradients[industryKey as keyof typeof gradients] || "from-blue-500 to-purple-600";
-
-            const solutionUrl = solutionUrls[industryKey] || `/solutions/${industryKey}`;
-
+          {[
+            {
+              id: "entrepreneurs",
+              icon: Zap,
+              name: "Entrepreneurs & Founders",
+              description: "Build your business brain. Organize research, track decisions, and never lose an idea.",
+              gradient: "from-orange-500 to-red-500",
+            },
+            {
+              id: "professionals",
+              icon: Briefcase,
+              name: "Working Professionals",
+              description: "Stay on top of projects, prepare for meetings, and recall any conversation instantly.",
+              gradient: "from-blue-500 to-indigo-600",
+            },
+            {
+              id: "creators",
+              icon: Sparkles,
+              name: "Creators & Writers",
+              description: "Capture ideas, research deeply, and create content faster with AI that knows your style.",
+              gradient: "from-pink-500 to-rose-500",
+            },
+            {
+              id: "developers",
+              icon: Bot,
+              name: "Developers & Technical",
+              description: "Document code knowledge, debug faster, and build a searchable technical brain.",
+              gradient: "from-cyan-500 to-blue-500",
+            },
+            {
+              id: "researchers",
+              icon: FileText,
+              name: "Researchers & Analysts",
+              description: "Organize papers, synthesize findings, and build a knowledge base that grows with you.",
+              gradient: "from-purple-500 to-pink-500",
+            },
+            {
+              id: "teams",
+              icon: Users,
+              name: "Teams & Organizations",
+              description: "Preserve institutional knowledge. Onboard faster. Never lose expertise when people leave.",
+              gradient: "from-emerald-500 to-teal-500",
+            },
+          ].map((useCase) => {
+            const Icon = useCase.icon;
             return (
-              <Link key={industryKey} href={solutionUrl} className="group relative block">
+              <Link key={useCase.id} href="/signup" className="group relative block">
                 <div
-                  className={`absolute -inset-0.5 bg-gradient-to-r ${gradient} rounded-2xl opacity-0 group-hover:opacity-20 blur transition-opacity duration-500`}
+                  className={`absolute -inset-0.5 bg-gradient-to-r ${useCase.gradient} rounded-2xl opacity-0 group-hover:opacity-20 blur transition-opacity duration-500`}
                 />
                 <Card className="relative h-full backdrop-blur-2xl bg-card/80 border-2 border-border hover:border-primary/50 transition-all duration-300 shadow-xl hover:shadow-2xl">
                   <CardContent className="p-6 text-center">
                     <div
-                      className={`h-16 w-16 rounded-xl bg-gradient-to-br ${gradient} flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-300 shadow-lg`}
+                      className={`h-16 w-16 rounded-xl bg-gradient-to-br ${useCase.gradient} flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-300 shadow-lg`}
                     >
                       <Icon className="h-8 w-8 text-white" />
                     </div>
                     <h3 className="text-lg font-bold mb-2 text-foreground group-hover:text-primary transition-colors">
-                      {industry.name}
+                      {useCase.name}
                     </h3>
-                    <p className="text-sm text-muted-foreground line-clamp-2">{industry.subheadline}</p>
+                    <p className="text-sm text-muted-foreground">{useCase.description}</p>
                   </CardContent>
                 </Card>
               </Link>
@@ -849,10 +899,10 @@ export default function HomePage() {
         </div>
 
         <div className="text-center">
-          <p className="text-muted-foreground mb-4">Plus 6 more industries tailored for your needs</p>
-          <Button size="lg" variant="outline" asChild className="backdrop-blur-2xl bg-card/80 border-2 shadow-xl hover:shadow-2xl transition-all">
+          <p className="text-muted-foreground mb-4">Don't see your use case? Tell us what you need—AI will personalize your experience</p>
+          <Button size="lg" asChild className="bg-gradient-to-r from-primary to-purple-600 hover:from-primary/90 hover:to-purple-700 shadow-xl hover:shadow-2xl transition-all">
             <Link href="/signup">
-              View All Solutions <ArrowRight className="ml-2 h-5 w-5" />
+              Get Started Free <ArrowRight className="ml-2 h-5 w-5" />
             </Link>
           </Button>
         </div>
@@ -1155,7 +1205,7 @@ export default function HomePage() {
                 <span className="text-lg font-bold">Perpetual Core</span>
               </div>
               <p className="text-sm text-muted-foreground">
-                Your intelligent productivity platform powered by cutting-edge AI
+                The AI operating system that never forgets. Infinite memory, all models, your knowledge.
               </p>
             </div>
             <div>
@@ -1210,7 +1260,7 @@ export default function HomePage() {
             </div>
           </div>
           <div className="border-t pt-8 text-center text-sm text-muted-foreground">
-            <p>© 2024 AI Operating System. All rights reserved.</p>
+            <p>© 2025 Perpetual Core. All rights reserved.</p>
           </div>
         </div>
       </footer>
@@ -1293,24 +1343,24 @@ const benefits = [
 
 const pricingTiers = [
   {
-    name: "Free",
-    price: 0,
-    description: "Perfect for trying out Perpetual Core",
-    features: "50 messages/month",
+    name: "Starter",
+    price: 49,
+    description: "For individuals and freelancers",
+    features: "Unlimited AI • Infinite memory",
     popular: false,
   },
   {
-    name: "Pro",
-    price: 49,
-    description: "For individuals and professionals",
-    features: "1,000 messages/month",
+    name: "Team",
+    price: 499,
+    description: "For growing teams (up to 10 users)",
+    features: "Team knowledge base • Collaboration",
     popular: true,
   },
   {
     name: "Business",
-    price: 149,
-    description: "For teams and growing businesses",
-    features: "4,000 messages/month",
+    price: 1999,
+    description: "For organizations (up to 50 users)",
+    features: "SSO • Priority support • Onboarding",
     popular: false,
   },
 ];

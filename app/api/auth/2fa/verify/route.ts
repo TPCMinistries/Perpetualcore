@@ -1,11 +1,41 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { verifyTOTP, decryptSecret, verifyBackupCode } from "@/lib/2fa/totp";
+import { z } from "zod";
+import { validationErrorResponse } from "@/lib/validations/schemas";
+import { rateLimiters } from "@/lib/rate-limit";
+import { logger } from "@/lib/logging";
+
+// Schema for 2FA verification - must be either TOTP (6 digits) or backup code
+const verifySchema = z.object({
+  token: z.string().min(1, "Token is required"),
+  useBackupCode: z.boolean().optional().default(false),
+}).refine(
+  (data) => {
+    // If using backup code, allow alphanumeric format
+    if (data.useBackupCode) {
+      return /^[A-Za-z0-9]{6,12}$/.test(data.token);
+    }
+    // Otherwise, must be exactly 6 digits (TOTP)
+    return /^\d{6}$/.test(data.token);
+  },
+  (data) => ({
+    message: data.useBackupCode
+      ? "Backup code must be 6-12 alphanumeric characters"
+      : "Token must be exactly 6 digits",
+  })
+);
 
 // POST /api/auth/2fa/verify
 // Verify a 2FA code (for login or sensitive operations)
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
   try {
+    // Rate limit: 5 requests per minute (strict for security endpoints)
+    const rateLimitResult = await rateLimiters.strict.check(request);
+    if (!rateLimitResult.success) {
+      return rateLimitResult.response;
+    }
+
     const supabase = await createClient();
     const { data: { user }, error: userError } = await supabase.auth.getUser();
 
@@ -13,15 +43,16 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const body = await request.json();
-    const { token, useBackupCode = false } = body;
-
-    if (!token) {
-      return NextResponse.json(
-        { error: "Verification code is required" },
-        { status: 400 }
-      );
+    // Validate and parse request body
+    let body;
+    try {
+      const rawBody = await request.json();
+      body = verifySchema.parse(rawBody);
+    } catch (error) {
+      return validationErrorResponse(error);
     }
+
+    const { token, useBackupCode } = body;
 
     // Get user profile with 2FA data
     const { data: profile } = await supabase
@@ -113,11 +144,25 @@ export async function POST(request: Request) {
     });
 
     if (!isValid) {
+      // Log failed verification attempt
+      logger.security("2FA verification failed", {
+        userId: user.id,
+        method: useBackupCode ? "backup_code" : "totp",
+        path: "/api/auth/2fa/verify",
+      });
+
       return NextResponse.json(
         { error: "Invalid verification code" },
         { status: 400 }
       );
     }
+
+    // Log successful verification
+    logger.security("2FA verification successful", {
+      userId: user.id,
+      method: usedBackupCode ? "backup_code" : "totp",
+      path: "/api/auth/2fa/verify",
+    });
 
     return NextResponse.json({
       success: true,
@@ -125,7 +170,7 @@ export async function POST(request: Request) {
       usedBackupCode,
     });
   } catch (error) {
-    console.error("2FA verify error:", error);
+    logger.error("2FA verify error", { error, path: "/api/auth/2fa/verify" });
     return NextResponse.json(
       { error: "Failed to verify code" },
       { status: 500 }

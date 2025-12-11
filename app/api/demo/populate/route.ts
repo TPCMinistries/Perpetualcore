@@ -7,8 +7,15 @@ import {
   sampleCalendarEvents,
 } from "@/lib/demo/sampleData";
 
+/**
+ * Demo data population endpoint
+ *
+ * Requires authentication. Only available in development or for super admins.
+ */
 export async function POST() {
   try {
+    // Block in production unless super admin
+    const isDev = process.env.NODE_ENV !== "production";
     const supabase = await createClient();
 
     // Get current user
@@ -21,12 +28,17 @@ export async function POST() {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    // Get user's profile to get organization_id
+    // Get user's profile to get organization_id and check role
     const { data: profile, error: profileError } = await supabase
       .from("profiles")
-      .select("organization_id")
+      .select("organization_id, role")
       .eq("id", user.id)
       .single();
+
+    // Block in production unless user is super_admin
+    if (!isDev && profile?.role !== "super_admin") {
+      return NextResponse.json({ error: "Not found" }, { status: 404 });
+    }
 
     if (profileError || !profile) {
       return NextResponse.json(

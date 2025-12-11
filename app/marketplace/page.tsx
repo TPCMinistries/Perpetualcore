@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -8,77 +8,109 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Search, Star, TrendingUp, Zap, Bot, Workflow, DollarSign, Users } from "lucide-react";
+import { MarketplacePageSkeleton } from "@/components/ui/skeletons";
+
+interface MarketplaceItem {
+  id: string;
+  type: "agent" | "workflow";
+  name: string;
+  description: string;
+  price: number;
+  pricing_type: "one_time" | "subscription";
+  subscription_interval?: string;
+  category: string;
+  tags: string[];
+  creator_id: string;
+  status: string;
+  created_at: string;
+  // Computed/joined fields
+  rating?: number;
+  reviews?: number;
+  sales?: number;
+  creator?: { name: string; verified: boolean };
+}
 
 export default function MarketplacePage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [filter, setFilter] = useState("all");
   const [sortBy, setSortBy] = useState("popular");
+  const [marketplaceItems, setMarketplaceItems] = useState<MarketplaceItem[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [stats, setStats] = useState({
+    totalAgents: 0,
+    totalWorkflows: 0,
+    totalCustomers: 0,
+    totalPaidToCreators: 0,
+  });
 
-  // Mock data - replace with actual API call
-  const marketplaceItems = [
-    {
-      id: "1",
-      type: "agent",
-      name: "Legal Document Analyzer",
-      description: "AI agent that analyzes legal documents and extracts key clauses, risks, and recommendations.",
-      price: 99,
-      pricing_type: "one_time",
-      category: "Legal",
-      rating: 4.8,
-      reviews: 124,
-      sales: 856,
-      thumbnail: null,
-      tags: ["legal", "document-analysis", "contracts"],
-      creator: { name: "LawTech AI", verified: true },
-    },
-    {
-      id: "2",
-      type: "workflow",
-      name: "Patient Intake Automation",
-      description: "Complete workflow for automating patient intake, insurance verification, and appointment scheduling.",
-      price: 29,
-      pricing_type: "subscription",
-      subscription_interval: "monthly",
-      category: "Healthcare",
-      rating: 4.9,
-      reviews: 89,
-      sales: 543,
-      thumbnail: null,
-      tags: ["healthcare", "automation", "intake"],
-      creator: { name: "MedFlow", verified: true },
-    },
-    {
-      id: "3",
-      type: "agent",
-      name: "Real Estate Property Matcher",
-      description: "Intelligent agent that matches clients with properties based on preferences, budget, and lifestyle.",
-      price: 149,
-      pricing_type: "one_time",
-      category: "Real Estate",
-      rating: 4.7,
-      reviews: 67,
-      sales: 421,
-      thumbnail: null,
-      tags: ["real-estate", "matching", "crm"],
-      creator: { name: "PropTech Solutions", verified: false },
-    },
-    {
-      id: "4",
-      type: "workflow",
-      name: "Social Media Content Pipeline",
-      description: "Automated workflow for generating, scheduling, and posting social media content across platforms.",
-      price: 49,
-      pricing_type: "subscription",
-      subscription_interval: "monthly",
-      category: "Marketing",
-      rating: 4.6,
-      reviews: 156,
-      sales: 789,
-      thumbnail: null,
-      tags: ["marketing", "social-media", "automation"],
-      creator: { name: "Content AI", verified: true },
-    },
-  ];
+  useEffect(() => {
+    fetchMarketplaceItems();
+  }, [filter]);
+
+  async function fetchMarketplaceItems() {
+    setLoading(true);
+    try {
+      const typeParam = filter === "agents" ? "agent" : filter === "workflows" ? "workflow" : "";
+      const url = `/api/marketplace/items${typeParam ? `?type=${typeParam}` : ""}`;
+
+      const response = await fetch(url);
+      if (response.ok) {
+        const data = await response.json();
+        // Add default values for fields that might not exist yet
+        const itemsWithDefaults = (data.items || []).map((item: MarketplaceItem) => ({
+          ...item,
+          rating: item.rating || 0,
+          reviews: item.reviews || 0,
+          sales: item.sales || 0,
+          creator: item.creator || { name: "Creator", verified: false },
+        }));
+        setMarketplaceItems(itemsWithDefaults);
+
+        // Calculate stats
+        const agents = data.items?.filter((i: MarketplaceItem) => i.type === "agent").length || 0;
+        const workflows = data.items?.filter((i: MarketplaceItem) => i.type === "workflow").length || 0;
+        setStats({
+          totalAgents: agents,
+          totalWorkflows: workflows,
+          totalCustomers: 0, // Would come from a separate stats endpoint
+          totalPaidToCreators: 0,
+        });
+      }
+    } catch (error) {
+      console.error("Error fetching marketplace items:", error);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  // Filter and sort items
+  const filteredItems = marketplaceItems
+    .filter((item) => {
+      if (searchQuery) {
+        const query = searchQuery.toLowerCase();
+        return (
+          item.name.toLowerCase().includes(query) ||
+          item.description.toLowerCase().includes(query) ||
+          item.tags.some((tag) => tag.toLowerCase().includes(query))
+        );
+      }
+      return true;
+    })
+    .sort((a, b) => {
+      switch (sortBy) {
+        case "rating":
+          return (b.rating || 0) - (a.rating || 0);
+        case "newest":
+          return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+        case "price-low":
+          return a.price - b.price;
+        case "price-high":
+          return b.price - a.price;
+        case "popular":
+        default:
+          return (b.sales || 0) - (a.sales || 0);
+      }
+    });
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white dark:from-gray-900 dark:to-gray-800">
@@ -141,20 +173,20 @@ export default function MarketplacePage() {
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
             <div>
-              <div className="text-3xl font-bold text-primary mb-2">2,400+</div>
+              <div className="text-3xl font-bold text-primary mb-2">{stats.totalAgents || 0}</div>
               <div className="text-sm text-muted-foreground">AI Agents</div>
             </div>
             <div>
-              <div className="text-3xl font-bold text-primary mb-2">1,800+</div>
+              <div className="text-3xl font-bold text-primary mb-2">{stats.totalWorkflows || 0}</div>
               <div className="text-sm text-muted-foreground">Workflows</div>
             </div>
             <div>
-              <div className="text-3xl font-bold text-primary mb-2">15K+</div>
-              <div className="text-sm text-muted-foreground">Satisfied Customers</div>
+              <div className="text-3xl font-bold text-primary mb-2">{marketplaceItems.length}</div>
+              <div className="text-sm text-muted-foreground">Total Listings</div>
             </div>
             <div>
-              <div className="text-3xl font-bold text-primary mb-2">$2.1M</div>
-              <div className="text-sm text-muted-foreground">Paid to Creators</div>
+              <div className="text-3xl font-bold text-primary mb-2">70%</div>
+              <div className="text-sm text-muted-foreground">Creator Revenue Share</div>
             </div>
           </div>
         </div>
@@ -191,7 +223,7 @@ export default function MarketplacePage() {
             </div>
 
             <div className="text-sm text-muted-foreground">
-              Showing {marketplaceItems.length} items
+              Showing {filteredItems.length} items
             </div>
           </div>
         </div>
@@ -199,8 +231,39 @@ export default function MarketplacePage() {
 
       {/* Marketplace Items Grid */}
       <section className="container mx-auto px-4 py-12">
+        {loading ? (
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            {Array.from({ length: 8 }).map((_, i) => (
+              <Card key={i} className="overflow-hidden animate-pulse">
+                <div className="h-40 bg-muted" />
+                <CardContent className="p-4 space-y-3">
+                  <div className="h-5 bg-muted rounded w-3/4" />
+                  <div className="h-4 bg-muted rounded w-full" />
+                  <div className="h-4 bg-muted rounded w-2/3" />
+                  <div className="flex items-center justify-between pt-2">
+                    <div className="h-6 bg-muted rounded w-16" />
+                    <div className="h-8 bg-muted rounded w-20" />
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        ) : filteredItems.length === 0 ? (
+          <div className="text-center py-12">
+            <Bot className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+            <h3 className="text-lg font-medium mb-2">No items found</h3>
+            <p className="text-muted-foreground mb-4">
+              {searchQuery
+                ? "Try adjusting your search or filters"
+                : "Be the first to list an agent or workflow!"}
+            </p>
+            <Button asChild>
+              <Link href="/marketplace/sell">Start Selling</Link>
+            </Button>
+          </div>
+        ) : (
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {marketplaceItems.map((item) => (
+          {filteredItems.map((item) => (
             <Link key={item.id} href={`/marketplace/${item.id}`}>
               <Card className="h-full hover:shadow-lg transition-shadow cursor-pointer">
                 <CardHeader>
@@ -270,6 +333,7 @@ export default function MarketplacePage() {
             </Link>
           ))}
         </div>
+        )}
       </section>
 
       {/* CTA Section */}

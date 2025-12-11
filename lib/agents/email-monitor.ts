@@ -1,10 +1,12 @@
 /**
  * Email Monitor Agent
- * 
+ *
  * Monitors emails and automatically creates tasks for actionable items
  */
 
 import { createClient } from "@/lib/supabase/server";
+import { fetchUnreadEmails, isGmailConnected, markAsRead } from "@/lib/integrations/gmail";
+import { logger } from "@/lib/logging";
 
 export interface EmailAnalysis {
   isActionable: boolean;
@@ -80,7 +82,7 @@ export async function analyzeEmail(email: {
 export async function processEmailsForAgent(agentId: string) {
   const supabase = await createClient();
 
-  // Get agent details
+  // Get agent details with creator's profile
   const { data: agent, error: agentError } = await supabase
     .from("ai_agents")
     .select("*, profiles!inner(organization_id, id)")
@@ -89,34 +91,74 @@ export async function processEmailsForAgent(agentId: string) {
     .single();
 
   if (agentError || !agent) {
-    console.error(`Agent ${agentId} not found or disabled`);
+    logger.warn(`Agent ${agentId} not found or disabled`);
+    return { processed: 0, created: 0, error: "Agent not found or disabled" };
+  }
+
+  const userId = agent.profiles.id;
+  const organizationId = agent.profiles.organization_id;
+
+  // Check if user has Gmail connected
+  const gmailConnected = await isGmailConnected(userId);
+  if (!gmailConnected) {
+    logger.info(`Gmail not connected for agent ${agentId}`, { userId, agentId });
+
+    // Log the check action
+    await supabase.from("agent_actions").insert({
+      agent_id: agentId,
+      action_type: "check_emails",
+      action_data: { reason: "Gmail not connected" },
+      status: "skipped",
+    });
+
+    return { processed: 0, created: 0, error: "Gmail not connected" };
+  }
+
+  // Get agent config for last check time
+  const agentConfig = (agent.config as Record<string, unknown>) || {};
+  const lastCheckTime = agentConfig.last_email_check
+    ? new Date(agentConfig.last_email_check as string)
+    : new Date(Date.now() - 24 * 60 * 60 * 1000); // Default: 24 hours ago
+
+  // Fetch unread emails from Gmail
+  const emails = await fetchUnreadEmails(userId, 20, lastCheckTime);
+
+  if (emails.length === 0) {
+    logger.debug(`No new emails for agent ${agentId}`, { userId, agentId });
+
+    // Update last check time
+    await supabase
+      .from("ai_agents")
+      .update({
+        config: { ...agentConfig, last_email_check: new Date().toISOString() },
+      })
+      .eq("id", agentId);
+
     return { processed: 0, created: 0 };
   }
 
-  // In a real implementation, this would fetch emails from an email provider
-  // For now, we simulate finding actionable emails
-  // You would integrate with Gmail API, Outlook API, etc. here
-  
-  const simulatedEmails = [
-    // Example: simulated email that would create a task
-    // In production, replace with actual email fetching logic
-  ];
+  logger.info(`Processing ${emails.length} emails for agent ${agentId}`, { userId, agentId });
 
   let processed = 0;
   let created = 0;
 
-  for (const email of simulatedEmails) {
+  for (const email of emails) {
     processed++;
 
-    const analysis = await analyzeEmail(email);
+    const analysis = await analyzeEmail({
+      subject: email.subject,
+      from: email.from,
+      body: email.body,
+      receivedAt: email.receivedAt,
+    });
 
     if (analysis.isActionable) {
-      // Create task via API
+      // Create task
       try {
         const { data: task, error: taskError } = await supabase
           .from("tasks")
           .insert({
-            organization_id: agent.profiles.organization_id,
+            organization_id: organizationId,
             title: analysis.suggestedTaskTitle,
             description: analysis.suggestedDescription,
             priority: analysis.priority,
@@ -125,6 +167,8 @@ export async function processEmailsForAgent(agentId: string) {
             source_type: "agent",
             agent_id: agentId,
             ai_context: JSON.stringify({
+              email_id: email.id,
+              email_thread_id: email.threadId,
               email_from: email.from,
               email_subject: email.subject,
               email_received_at: email.receivedAt,
@@ -135,13 +179,17 @@ export async function processEmailsForAgent(agentId: string) {
           .single();
 
         if (taskError) {
-          console.error(`Failed to create task for agent ${agentId}:`, taskError);
-          
-          // Log failed action
+          logger.error(`Failed to create task for agent ${agentId}`, {
+            agentId,
+            error: taskError,
+            emailId: email.id,
+          });
+
           await supabase.from("agent_actions").insert({
             agent_id: agentId,
             action_type: "create_task",
             action_data: {
+              email_id: email.id,
               email_subject: email.subject,
               email_from: email.from,
             },
@@ -150,25 +198,65 @@ export async function processEmailsForAgent(agentId: string) {
           });
         } else {
           created++;
-          
+
           // Log successful action
           await supabase.from("agent_actions").insert({
             agent_id: agentId,
             action_type: "create_task",
             action_data: {
+              email_id: email.id,
               email_subject: email.subject,
               email_from: email.from,
               task_title: analysis.suggestedTaskTitle,
+              task_id: task.id,
             },
             status: "success",
             task_id: task.id,
           });
+
+          // Optionally mark email as read if configured
+          if (agentConfig.mark_processed_as_read) {
+            await markAsRead(userId, email.id);
+          }
+
+          logger.info(`Created task from email for agent ${agentId}`, {
+            agentId,
+            taskId: task.id,
+            emailSubject: email.subject,
+          });
         }
       } catch (error) {
-        console.error(`Error creating task for agent ${agentId}:`, error);
+        logger.error(`Error creating task for agent ${agentId}`, { error, agentId });
       }
+    } else {
+      // Log skipped email
+      await supabase.from("agent_actions").insert({
+        agent_id: agentId,
+        action_type: "analyze_email",
+        action_data: {
+          email_id: email.id,
+          email_subject: email.subject,
+          email_from: email.from,
+          analysis_result: "not_actionable",
+        },
+        status: "success",
+      });
     }
   }
+
+  // Update last check time
+  await supabase
+    .from("ai_agents")
+    .update({
+      config: { ...agentConfig, last_email_check: new Date().toISOString() },
+    })
+    .eq("id", agentId);
+
+  logger.info(`Email processing complete for agent ${agentId}`, {
+    agentId,
+    processed,
+    created,
+  });
 
   return { processed, created };
 }
@@ -186,7 +274,7 @@ export async function processAllEmailMonitorAgents() {
     .eq("enabled", true);
 
   if (error) {
-    console.error("Failed to fetch email monitor agents:", error);
+    logger.error("Failed to fetch email monitor agents", { error });
     return { totalAgents: 0, totalProcessed: 0, totalCreated: 0 };
   }
 
@@ -198,9 +286,14 @@ export async function processAllEmailMonitorAgents() {
       const result = await processEmailsForAgent(agent.id);
       totalProcessed += result.processed;
       totalCreated += result.created;
-      console.log(`Agent "${agent.name}" (${agent.id}): processed ${result.processed}, created ${result.created} tasks`);
+      logger.info(`Agent "${agent.name}" processed`, {
+        agentId: agent.id,
+        agentName: agent.name,
+        processed: result.processed,
+        created: result.created,
+      });
     } catch (error) {
-      console.error(`Error processing agent ${agent.id}:`, error);
+      logger.error(`Error processing agent ${agent.id}`, { error, agentId: agent.id });
     }
   }
 

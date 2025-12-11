@@ -3,6 +3,8 @@ import { createClient } from "@/lib/supabase/server";
 
 export const runtime = "nodejs";
 
+const isDev = process.env.NODE_ENV === "development";
+
 // GET /api/notifications - Get user's notifications
 export async function GET(req: NextRequest) {
   try {
@@ -17,17 +19,11 @@ export async function GET(req: NextRequest) {
     const unreadOnly = searchParams.get("unread") === "true";
     const limit = parseInt(searchParams.get("limit") || "50");
 
+    // Note: triggered_by join removed due to missing FK relationship in schema
+    // If you need profile data, either add the FK or do a separate query
     let query = supabase
       .from("notifications")
-      .select(`
-        *,
-        triggered_by_profile:triggered_by (
-          id,
-          full_name,
-          email,
-          avatar_url
-        )
-      `)
+      .select("*")
       .eq("user_id", user.id)
       .order("created_at", { ascending: false })
       .limit(limit);
@@ -39,7 +35,7 @@ export async function GET(req: NextRequest) {
     const { data: notifications, error } = await query;
 
     if (error) {
-      console.error("Error fetching notifications:", error);
+      if (isDev) console.error("Error fetching notifications:", error);
       return Response.json({ error: error.message }, { status: 500 });
     }
 
@@ -55,7 +51,7 @@ export async function GET(req: NextRequest) {
       unreadCount: unreadCount || 0
     });
   } catch (error: any) {
-    console.error("Error in GET /api/notifications:", error);
+    if (isDev) console.error("Error in GET /api/notifications:", error);
     return Response.json({ error: error.message }, { status: 500 });
   }
 }
@@ -84,13 +80,13 @@ export async function PATCH(req: NextRequest) {
       .eq("user_id", user.id);
 
     if (error) {
-      console.error("Error updating notifications:", error);
+      if (isDev) console.error("Error updating notifications:", error);
       return Response.json({ error: error.message }, { status: 500 });
     }
 
     return Response.json({ success: true });
   } catch (error: any) {
-    console.error("Error in PATCH /api/notifications:", error);
+    if (isDev) console.error("Error in PATCH /api/notifications:", error);
     return Response.json({ error: error.message }, { status: 500 });
   }
 }

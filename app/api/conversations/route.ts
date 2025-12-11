@@ -1,9 +1,16 @@
 import { NextRequest } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { rateLimiters } from "@/lib/rate-limit";
 
 // GET /api/conversations - List all conversations for the user
 export async function GET(req: NextRequest) {
   try {
+    // Rate limit: 100 requests per minute
+    const rateLimitResult = await rateLimiters.api.check(req);
+    if (!rateLimitResult.success) {
+      return rateLimitResult.response;
+    }
+
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
 
@@ -95,6 +102,12 @@ export async function GET(req: NextRequest) {
 // POST /api/conversations - Create a new shared conversation
 export async function POST(req: NextRequest) {
   try {
+    // Rate limit: 100 requests per minute
+    const rateLimitResult = await rateLimiters.api.check(req);
+    if (!rateLimitResult.success) {
+      return rateLimitResult.response;
+    }
+
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
 

@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 
+const isDev = process.env.NODE_ENV === "development";
+
 // GET /api/users - Get all users in the organization for mention autocomplete
 export async function GET(request: Request) {
   try {
@@ -33,7 +35,7 @@ export async function GET(request: Request) {
       .order("full_name", { ascending: true });
 
     if (usersError) {
-      console.error("Error fetching users:", usersError);
+      if (isDev) console.error("Error fetching users:", usersError);
       return NextResponse.json(
         { error: "Failed to fetch users" },
         { status: 500 }
@@ -42,7 +44,7 @@ export async function GET(request: Request) {
 
     return NextResponse.json({ users: users || [] });
   } catch (error) {
-    console.error("Users API error:", error);
+    if (isDev) console.error("Users API error:", error);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }

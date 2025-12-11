@@ -1,4 +1,4 @@
-import { createClient } from "@/lib/supabase/server";
+import { createClient, createAdminClient } from "@/lib/supabase/server";
 import { streamChatCompletion, ChatMessage, UsageMetadata, ToolCall } from "@/lib/ai/router";
 import { AIModel } from "@/types";
 import { NextRequest } from "next/server";
@@ -7,6 +7,9 @@ import { AI_MODELS } from "@/lib/ai/config";
 import { searchDocuments, buildRAGContext, shouldUseRAG } from "@/lib/documents/rag";
 import { calculateCost } from "@/lib/ai/cost-calculator";
 import { AVAILABLE_TOOLS, executeToolCall } from "@/lib/ai/tools/registry";
+import { loadUserPreferences, applyPreferencesToPrompt } from "@/lib/intelligence/preference-loader";
+import { getIntelligenceSummary } from "@/lib/intelligence";
+import { rateLimiters, checkRateLimit } from "@/lib/rate-limit";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -146,8 +149,58 @@ Provide high-quality responses efficiently.
 • Maintain accuracy and helpfulness`;
 }
 
+/**
+ * Build intelligence context from learned insights, patterns, and preferences
+ * This context makes the AI aware of what it has learned about the user
+ */
+function buildIntelligenceContext(intelligence: {
+  insights: any[];
+  patterns: any[];
+  preferences: any[];
+  suggestions: any[];
+}): string | null {
+  const contextParts: string[] = [];
+
+  // Add relevant insights
+  if (intelligence.insights && intelligence.insights.length > 0) {
+    const insightSummaries = intelligence.insights
+      .slice(0, 3)
+      .map((i: any) => `• ${i.title} (${i.insight_type})`)
+      .join("\n");
+    contextParts.push(`LEARNED INSIGHTS ABOUT THIS USER:\n${insightSummaries}`);
+  }
+
+  // Add recognized patterns
+  if (intelligence.patterns && intelligence.patterns.length > 0) {
+    const patternSummaries = intelligence.patterns
+      .slice(0, 3)
+      .map((p: any) => `• ${p.pattern_name} (observed ${p.occurrence_count} times)`)
+      .join("\n");
+    contextParts.push(`RECOGNIZED PATTERNS:\n${patternSummaries}`);
+  }
+
+  // Add pending suggestions (so AI can proactively mention relevant ones)
+  if (intelligence.suggestions && intelligence.suggestions.length > 0) {
+    const topSuggestion = intelligence.suggestions[0];
+    if (topSuggestion && topSuggestion.relevance_score > 0.7) {
+      contextParts.push(`PROACTIVE SUGGESTION: You may want to proactively mention: "${topSuggestion.suggestion_text}" if relevant to the conversation.`);
+    }
+  }
+
+  if (contextParts.length === 0) return null;
+
+  return `\n\n--- PERSONALIZATION CONTEXT (from learned intelligence) ---\n${contextParts.join("\n\n")}\n\nUse this context to provide more personalized, relevant responses. Don't explicitly mention that you're using learned intelligence unless asked.`;
+}
+
+const isDev = process.env.NODE_ENV === "development";
+
 export async function POST(req: NextRequest) {
   try {
+    // Rate limiting - 30 requests per minute for chat API
+    const rateLimitResponse = await checkRateLimit(req, rateLimiters.chat);
+    if (rateLimitResponse) return rateLimitResponse;
+
+    if (isDev) console.log("📨 Chat API called");
     const supabase = await createClient();
 
     // Get authenticated user
@@ -159,16 +212,100 @@ export async function POST(req: NextRequest) {
       return new Response("Unauthorized", { status: 401 });
     }
 
-    // Get user's profile
-    const { data: profile, error: profileError } = await supabase
+    // Get user's profile, create if doesn't exist
+    // Use admin client to bypass RLS for profile creation
+    if (isDev) console.log("🔍 Checking for profile for user:", user.id);
+    let adminSupabase;
+    try {
+      const { createAdminClient } = await import("@/lib/supabase/server");
+      adminSupabase = createAdminClient();
+      if (isDev) console.log("✅ Admin client created");
+    } catch (error: any) {
+      if (isDev) console.error("❌ Failed to create admin client:", error);
+      if (isDev) console.error("Error stack:", error?.stack);
+      return new Response(
+        JSON.stringify({ 
+          error: "Server configuration error", 
+          details: error?.message || "Failed to initialize admin client. Check SUPABASE_SERVICE_ROLE_KEY in .env.local"
+        }),
+        { status: 500, headers: { "Content-Type": "application/json" } }
+      );
+    }
+    
+    let { data: profile, error: profileError } = await adminSupabase
       .from("profiles")
       .select("*")
       .eq("id", user.id)
       .single();
+    
+    if (isDev) console.log("🔍 Profile query result:", {
+      found: !!profile,
+      error: profileError?.message,
+      userId: user.id
+    });
 
-    if (profileError) {
-      console.error("Profile error:", profileError);
-      return new Response("Profile not found", { status: 400 });
+    // If profile doesn't exist, create it using admin client (bypasses RLS)
+    if (profileError || !profile) {
+      if (isDev) console.log("Profile not found, creating one with admin client...");
+      
+      // Create profile with minimal required fields
+      const profileData: any = {
+        id: user.id,
+        email: user.email || "",
+        full_name: user.user_metadata?.full_name || user.email?.split("@")[0] || "User",
+      };
+      
+      // Try to create organization if user has org name in metadata
+      const orgName = user.user_metadata?.organization_name;
+      if (orgName) {
+        // Check if org exists
+        const { data: existingOrg } = await adminSupabase
+          .from("organizations")
+          .select("id")
+          .eq("name", orgName)
+          .single();
+        
+        if (existingOrg) {
+          profileData.organization_id = existingOrg.id;
+        } else {
+          // Create new organization
+          const orgSlug = `${orgName.toLowerCase().replace(/[^a-z0-9]/g, '-')}-${Date.now()}`;
+          const { data: newOrg, error: orgError } = await adminSupabase
+            .from("organizations")
+            .insert({
+              name: orgName,
+              slug: orgSlug,
+            })
+            .select()
+            .single();
+          
+          if (!orgError && newOrg) {
+            profileData.organization_id = newOrg.id;
+          }
+        }
+      }
+      
+      const { data: newProfile, error: createError } = await adminSupabase
+        .from("profiles")
+        .insert(profileData)
+        .select()
+        .single();
+
+      if (createError) {
+        if (isDev) console.error("Error creating profile:", createError);
+        if (isDev) console.error("Profile data attempted:", profileData);
+        return new Response(
+          JSON.stringify({ 
+            error: "Failed to create profile", 
+            details: createError.message,
+            code: createError.code,
+            hint: createError.hint
+          }),
+          { status: 500, headers: { "Content-Type": "application/json" } }
+        );
+      }
+      profile = newProfile;
+      if (isDev) console.log("✅ Profile created successfully:", profile.id);
     }
 
     // Allow personal chat without organization
@@ -332,7 +469,7 @@ Or, you can copy and paste the text content directly into this chat.`;
               }
               return `[Document: ${a.name}]\n(Could not extract readable text. File type: ${a.mimeType})`;
             } catch (error) {
-              console.error(`Error extracting text from ${a.name}:`, error);
+              if (isDev) console.error(`Error extracting text from ${a.name}:`, error);
               return `[Document: ${a.name}]\n(Unable to extract text)`;
             }
           })
@@ -360,15 +497,40 @@ Or, you can copy and paste the text content directly into this chat.`;
     // Build model-specific optimized system prompt
     let systemPrompt = buildOptimizedSystemPrompt(model, userMessage);
 
+    // Load and apply user intelligence (preferences, patterns, insights)
+    try {
+      if (isDev) console.log("🧠 Loading user intelligence...");
+      const [preferences, intelligence] = await Promise.all([
+        loadUserPreferences(user.id),
+        getIntelligenceSummary(organizationId, user.id),
+      ]);
+
+      // Apply learned preferences to system prompt
+      if (Object.keys(preferences).length > 0) {
+        if (isDev) console.log("🎯 Applying user preferences:", Object.keys(preferences));
+        systemPrompt = applyPreferencesToPrompt(systemPrompt, preferences);
+      }
+
+      // Inject relevant intelligence context
+      const intelligenceContext = buildIntelligenceContext(intelligence);
+      if (intelligenceContext) {
+        if (isDev) console.log("💡 Injecting intelligence context");
+        systemPrompt += intelligenceContext;
+      }
+    } catch (error) {
+      if (isDev) console.error("⚠️ Intelligence loading error (non-fatal):", error);
+      // Continue without intelligence - this should not block chat
+    }
+
     // Check if we should use RAG
     let relevantDocs: any[] = [];
-    console.log("🔍 Checking RAG for query:", userMessage);
+    if (isDev) console.log("🔍 Checking RAG for query:", userMessage);
     const useRAG = shouldUseRAG(userMessage);
-    console.log("🔍 shouldUseRAG returned:", useRAG);
+    if (isDev) console.log("🔍 shouldUseRAG returned:", useRAG);
 
     if (useRAG) {
       try {
-        console.log("🔍 Searching documents for org:", organizationId, "user:", user.id);
+        if (isDev) console.log("🔍 Searching documents for org:", organizationId, "user:", user.id);
         // Search for relevant documents with enhanced context-aware RAG
         // Lower threshold (0.3) to be more inclusive - let the AI decide what's relevant
         relevantDocs = await searchDocuments(
@@ -382,24 +544,24 @@ Or, you can copy and paste the text content directly into this chat.`;
             conversationId: conversationId || undefined, // Pass conversation context
           }
         );
-        console.log("🔍 Search results:", relevantDocs.length, "documents found");
+        if (isDev) console.log("🔍 Search results:", relevantDocs.length, "documents found");
 
         if (relevantDocs.length > 0) {
-          console.log("✅ RAG: Injecting", relevantDocs.length, "document chunks into context");
+          if (isDev) console.log("✅ RAG: Injecting", relevantDocs.length, "document chunks into context");
           // Build RAG context
           const ragContext = buildRAGContext(relevantDocs);
 
           // Prepend RAG context to system prompt
           systemPrompt = ragContext + "\n\n" + systemPrompt;
         } else {
-          console.log("⚠️ RAG: No relevant documents found");
+          if (isDev) console.log("⚠️ RAG: No relevant documents found");
         }
       } catch (error) {
         // Fail gracefully if RAG isn't set up yet
-        console.error("❌ RAG search error:", error);
+        if (isDev) console.error("❌ RAG search error:", error);
       }
     } else {
-      console.log("⏭️ RAG: Skipped (query doesn't match criteria)");
+      if (isDev) console.log("⏭️ RAG: Skipped (query doesn't match criteria)");
     }
 
     // Inject system prompt
@@ -450,7 +612,7 @@ Or, you can copy and paste the text content directly into this chat.`;
           savedMessage.id,
           user.id,
           organizationId
-        ).catch((err) => console.error("Task extraction error:", err));
+        ).catch((err) => isDev && console.error("Task extraction error:", err));
       });
     }
 
@@ -555,7 +717,7 @@ Or, you can copy and paste the text content directly into this chat.`;
             }
 
             // Execute tool calls
-            console.log(`🔧 Executing ${toolCallsToExecute.length} tool call(s)`);
+            if (isDev) console.log(`🔧 Executing ${toolCallsToExecute.length} tool call(s)`);
             const toolResults: string[] = [];
 
             for (const toolCall of toolCallsToExecute) {
@@ -587,9 +749,9 @@ Or, you can copy and paste the text content directly into this chat.`;
                   )
                 );
 
-                console.log(`✅ Tool ${toolCall.name} executed successfully`);
+                if (isDev) console.log(`✅ Tool ${toolCall.name} executed successfully`);
               } catch (error: any) {
-                console.error(`❌ Tool ${toolCall.name} failed:`, error);
+                if (isDev) console.error(`❌ Tool ${toolCall.name} failed:`, error);
                 const errorMsg = `Error: ${error.message}`;
                 toolResults.push(errorMsg);
 
@@ -641,31 +803,49 @@ Or, you can copy and paste the text content directly into this chat.`;
               tokens_used: cost.totalTokens,
               cost_usd: cost.totalCost.toFixed(6),
             };
-            console.log(
+            if (isDev) console.log(
               `💰 Usage tracked: ${cost.totalTokens} tokens, $${cost.totalCost.toFixed(6)} for ${model}`
             );
           }
 
           // Save assistant message with cost tracking
-          await supabase.from("messages").insert({
+          const { data: savedAssistantMessage } = await supabase.from("messages").insert({
             conversation_id: convId,
             role: "assistant",
             content: finalResponse,
             user_id: user.id,
             ...costData,
-          });
+          }).select("id").single();
 
-          // Send final chunk with conversation ID
+          // Send final chunk with conversation ID and message ID for feedback
           controller.enqueue(
             encoder.encode(
               JSON.stringify({
                 done: true,
                 conversationId: convId,
+                messageId: savedAssistantMessage?.id,
               }) + "\n"
             )
           );
+
+          // Process conversation for intelligence (async, don't wait)
+          if (profile?.organization_id) {
+            import("@/lib/intelligence")
+              .then(({ processConversationForIntelligence }) => {
+                processConversationForIntelligence(
+                  convId,
+                  profile.organization_id,
+                  user.id
+                ).catch((err) =>
+                  isDev && console.error("Error processing intelligence:", err)
+                );
+              })
+              .catch((err) =>
+                isDev && console.error("Error importing intelligence module:", err)
+              );
+          }
         } catch (error) {
-          console.error("Streaming error:", error);
+          if (isDev) console.error("Streaming error:", error);
           controller.error(error);
         } finally {
           controller.close();
@@ -680,8 +860,19 @@ Or, you can copy and paste the text content directly into this chat.`;
         Connection: "keep-alive",
       },
     });
-  } catch (error) {
-    console.error("Chat API error:", error);
-    return new Response("Internal server error", { status: 500 });
+  } catch (error: any) {
+    if (isDev) console.error("❌ Chat API error:", error);
+    if (isDev) console.error("Error stack:", error?.stack);
+    return new Response(
+      JSON.stringify({ 
+        error: "Internal server error", 
+        details: error?.message || "Unknown error",
+        type: error?.constructor?.name
+      }),
+      { 
+        status: 500,
+        headers: { "Content-Type": "application/json" }
+      }
+    );
   }
 }

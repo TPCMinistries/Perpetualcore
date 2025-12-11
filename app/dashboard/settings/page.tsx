@@ -92,6 +92,11 @@ export default function SettingsPage() {
   const [apiKeysDialogOpen, setApiKeysDialogOpen] = useState(false);
   const [isChangingPassword, setIsChangingPassword] = useState(false);
   const [isExportingData, setIsExportingData] = useState(false);
+  const [apiKeys, setApiKeys] = useState<any[]>([]);
+  const [newKeyName, setNewKeyName] = useState("");
+  const [newKeyExpires, setNewKeyExpires] = useState("");
+  const [isCreatingKey, setIsCreatingKey] = useState(false);
+  const [newlyCreatedKey, setNewlyCreatedKey] = useState<string | null>(null);
 
   // Password form state
   const [passwordForm, setPasswordForm] = useState({
@@ -413,13 +418,81 @@ export default function SettingsPage() {
     }
   };
 
+  const fetchApiKeys = async () => {
+    try {
+      const response = await fetch("/api/api-keys");
+      if (response.ok) {
+        const data = await response.json();
+        setApiKeys(data.apiKeys || []);
+      }
+    } catch (error) {
+      console.error("Error fetching API keys:", error);
+    }
+  };
+
+  const handleCreateApiKey = async () => {
+    if (!newKeyName.trim()) {
+      toast.error("Please enter a name for the API key");
+      return;
+    }
+
+    setIsCreatingKey(true);
+    try {
+      const response = await fetch("/api/api-keys", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: newKeyName,
+          expiresIn: newKeyExpires || null,
+        }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setNewlyCreatedKey(data.apiKey.fullKey);
+        setNewKeyName("");
+        setNewKeyExpires("");
+        fetchApiKeys();
+        toast.success("API key created successfully!");
+      } else {
+        const error = await response.json();
+        toast.error(error.error || "Failed to create API key");
+      }
+    } catch (error) {
+      toast.error("Failed to create API key");
+    } finally {
+      setIsCreatingKey(false);
+    }
+  };
+
+  const handleRevokeApiKey = async (keyId: string) => {
+    try {
+      const response = await fetch(`/api/api-keys?id=${keyId}`, {
+        method: "DELETE",
+      });
+
+      if (response.ok) {
+        toast.success("API key revoked");
+        fetchApiKeys();
+      } else {
+        toast.error("Failed to revoke API key");
+      }
+    } catch (error) {
+      toast.error("Failed to revoke API key");
+    }
+  };
+
+  const copyToClipboard = (text: string) => {
+    navigator.clipboard.writeText(text);
+    toast.success("Copied to clipboard!");
+  };
+
   const handleManageTeam = () => {
     router.push("/dashboard/team");
   };
 
   const handleViewBilling = () => {
-    toast.info("Billing portal coming soon!");
-    // Future: router.push("/dashboard/billing");
+    router.push("/dashboard/settings/billing");
   };
 
   const handleExportData = async () => {
@@ -1446,23 +1519,125 @@ export default function SettingsPage() {
       </Dialog>
 
       {/* API Keys Dialog */}
-      <Dialog open={apiKeysDialogOpen} onOpenChange={setApiKeysDialogOpen}>
-        <DialogContent>
+      <Dialog open={apiKeysDialogOpen} onOpenChange={(open) => {
+        setApiKeysDialogOpen(open);
+        if (open) {
+          fetchApiKeys();
+          setNewlyCreatedKey(null);
+        }
+      }}>
+        <DialogContent className="max-w-2xl">
           <DialogHeader>
             <DialogTitle>API Keys</DialogTitle>
             <DialogDescription>
-              Manage your API access tokens for integrations
+              Create and manage API keys for programmatic access
             </DialogDescription>
           </DialogHeader>
-          <div className="py-6">
-            <div className="text-center">
-              <Key className="h-12 w-12 mx-auto text-slate-400 mb-4" />
-              <h3 className="font-semibold mb-2 text-slate-900 dark:text-white">No API Keys Yet</h3>
-              <p className="text-sm text-slate-600 dark:text-slate-400 mb-4">
-                API key management is coming soon. You'll be able to create and manage tokens for third-party integrations.
-              </p>
+
+          <div className="space-y-6 py-4">
+            {/* Newly created key alert */}
+            {newlyCreatedKey && (
+              <div className="p-4 bg-green-50 dark:bg-green-950/30 border border-green-200 dark:border-green-800 rounded-lg">
+                <p className="text-sm font-medium text-green-900 dark:text-green-100 mb-2">
+                  Your new API key (copy it now - you won't see it again):
+                </p>
+                <div className="flex items-center gap-2">
+                  <code className="flex-1 p-2 bg-white dark:bg-slate-800 rounded border text-sm font-mono overflow-hidden text-ellipsis">
+                    {newlyCreatedKey}
+                  </code>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => copyToClipboard(newlyCreatedKey)}
+                  >
+                    Copy
+                  </Button>
+                </div>
+              </div>
+            )}
+
+            {/* Create new key form */}
+            <div className="space-y-4 p-4 border rounded-lg">
+              <h4 className="font-medium text-slate-900 dark:text-white">Create New API Key</h4>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="keyName">Name</Label>
+                  <Input
+                    id="keyName"
+                    placeholder="e.g., Production Server"
+                    value={newKeyName}
+                    onChange={(e) => setNewKeyName(e.target.value)}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="keyExpires">Expiration</Label>
+                  <Select value={newKeyExpires} onValueChange={setNewKeyExpires}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Never expires" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="">Never expires</SelectItem>
+                      <SelectItem value="30d">30 days</SelectItem>
+                      <SelectItem value="90d">90 days</SelectItem>
+                      <SelectItem value="1y">1 year</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+              <Button
+                onClick={handleCreateApiKey}
+                disabled={isCreatingKey || !newKeyName.trim()}
+                className="w-full"
+              >
+                {isCreatingKey ? (
+                  <>
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    Creating...
+                  </>
+                ) : (
+                  <>
+                    <Key className="h-4 w-4 mr-2" />
+                    Create API Key
+                  </>
+                )}
+              </Button>
+            </div>
+
+            {/* Existing keys */}
+            <div className="space-y-3">
+              <h4 className="font-medium text-slate-900 dark:text-white">Your API Keys</h4>
+              {apiKeys.length === 0 ? (
+                <p className="text-sm text-slate-500 dark:text-slate-400 text-center py-4">
+                  No API keys yet. Create one above to get started.
+                </p>
+              ) : (
+                <div className="space-y-2">
+                  {apiKeys.filter(k => k.is_active).map((key) => (
+                    <div
+                      key={key.id}
+                      className="flex items-center justify-between p-3 border rounded-lg"
+                    >
+                      <div>
+                        <p className="font-medium text-slate-900 dark:text-white">{key.name}</p>
+                        <p className="text-sm text-slate-500 dark:text-slate-400">
+                          {key.key_preview} • Created {new Date(key.created_at).toLocaleDateString()}
+                          {key.expires_at && ` • Expires ${new Date(key.expires_at).toLocaleDateString()}`}
+                        </p>
+                      </div>
+                      <Button
+                        size="sm"
+                        variant="destructive"
+                        onClick={() => handleRevokeApiKey(key.id)}
+                      >
+                        Revoke
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
+
           <DialogFooter>
             <Button
               variant="outline"

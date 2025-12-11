@@ -1,6 +1,12 @@
 import Stripe from "stripe";
 import { stripe } from "./client";
 import { createClient } from "@/lib/supabase/server";
+import {
+  sendTrialEndingEmail,
+  sendPaymentReceiptEmail,
+  sendPaymentFailedEmail,
+  sendMarketplacePurchaseEmail,
+} from "@/lib/email";
 
 /**
  * Handle Stripe webhook events
@@ -46,15 +52,24 @@ export async function handleStripeWebhook(
 
       // Payment events
       case "payment_intent.succeeded":
-        console.log("Payment succeeded:", event.data.object.id);
+        // Payment succeeded - logged for debugging in dev only
+        if (process.env.NODE_ENV === "development") {
+          console.log("Payment succeeded:", event.data.object.id);
+        }
         break;
 
       case "payment_intent.payment_failed":
-        console.log("Payment failed:", event.data.object.id);
+        // Payment failed - logged for debugging in dev only
+        if (process.env.NODE_ENV === "development") {
+          console.log("Payment failed:", event.data.object.id);
+        }
         break;
 
       default:
-        console.log(`Unhandled event type: ${event.type}`);
+        // Unhandled events - only log in development
+        if (process.env.NODE_ENV === "development") {
+          console.log(`Unhandled event type: ${event.type}`);
+        }
     }
 
     return { success: true };
@@ -78,7 +93,7 @@ async function handleSubscriptionUpdate(subscription: Stripe.Subscription) {
   const plan = subscription.metadata.plan as "free" | "pro" | "enterprise";
 
   if (!organizationId || !userId) {
-    console.error("Missing metadata in subscription:", subscription.id);
+    // Missing metadata - this subscription wasn't created through our app
     return;
   }
 
@@ -107,7 +122,7 @@ async function handleSubscriptionUpdate(subscription: Stripe.Subscription) {
       : null,
   });
 
-  console.log(`Subscription ${subscription.id} updated for org ${organizationId}`);
+  // Subscription updated successfully
 }
 
 /**
@@ -119,7 +134,7 @@ async function handleSubscriptionDeleted(subscription: Stripe.Subscription) {
   const organizationId = subscription.metadata.organizationId;
 
   if (!organizationId) {
-    console.error("Missing organizationId in subscription:", subscription.id);
+    // Missing metadata - subscription wasn't created through our app
     return;
   }
 
@@ -135,7 +150,7 @@ async function handleSubscriptionDeleted(subscription: Stripe.Subscription) {
     })
     .eq("organization_id", organizationId);
 
-  console.log(`Subscription deleted for org ${organizationId}, downgraded to free`);
+  // Subscription canceled, downgraded to free
 }
 
 /**
@@ -143,10 +158,37 @@ async function handleSubscriptionDeleted(subscription: Stripe.Subscription) {
  */
 async function handleTrialWillEnd(subscription: Stripe.Subscription) {
   const organizationId = subscription.metadata.organizationId;
-  console.log(`Trial ending soon for org ${organizationId}`);
+  const userId = subscription.metadata.userId;
+  const plan = subscription.metadata.plan || "Pro";
 
-  // TODO: Send email notification to user about trial ending
-  // You can implement email notification here
+  if (!userId) return;
+
+  const supabase = await createClient();
+
+  // Get user details
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("email, full_name")
+    .eq("id", userId)
+    .single();
+
+  if (profile?.email) {
+    // Calculate days remaining
+    const trialEnd = subscription.trial_end
+      ? new Date(subscription.trial_end * 1000)
+      : new Date();
+    const daysRemaining = Math.max(
+      0,
+      Math.ceil((trialEnd.getTime() - Date.now()) / (1000 * 60 * 60 * 24))
+    );
+
+    await sendTrialEndingEmail({
+      email: profile.email,
+      name: profile.full_name || "there",
+      daysRemaining,
+      plan,
+    });
+  }
 }
 
 /**
@@ -165,7 +207,7 @@ async function handleInvoiceUpdate(invoice: Stripe.Invoice) {
     .single();
 
   if (!subscription) {
-    console.error("No subscription found for customer:", customerId);
+    // No subscription found for this customer
     return;
   }
 
@@ -187,7 +229,7 @@ async function handleInvoiceUpdate(invoice: Stripe.Invoice) {
     hosted_invoice_url: invoice.hosted_invoice_url || null,
   });
 
-  console.log(`Invoice ${invoice.id} updated for org ${subscription.organization_id}`);
+  // Invoice updated successfully
 }
 
 /**
@@ -201,13 +243,29 @@ async function handleInvoicePaid(invoice: Stripe.Invoice) {
 
   const { data: subscription } = await supabase
     .from("subscriptions")
-    .select("organization_id")
+    .select("organization_id, user_id")
     .eq("stripe_customer_id", customerId)
     .single();
 
   if (subscription) {
-    console.log(`Invoice paid for org ${subscription.organization_id}`);
-    // TODO: Send receipt email
+
+    // Get user details
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("email, full_name")
+      .eq("id", subscription.user_id)
+      .single();
+
+    if (profile?.email) {
+      await sendPaymentReceiptEmail({
+        email: profile.email,
+        name: profile.full_name || "there",
+        amount: invoice.amount_paid,
+        currency: invoice.currency,
+        invoiceUrl: invoice.hosted_invoice_url || undefined,
+        invoicePdf: invoice.invoice_pdf || undefined,
+      });
+    }
   }
 }
 
@@ -222,13 +280,27 @@ async function handleInvoicePaymentFailed(invoice: Stripe.Invoice) {
 
   const { data: subscription } = await supabase
     .from("subscriptions")
-    .select("organization_id")
+    .select("organization_id, user_id")
     .eq("stripe_customer_id", customerId)
     .single();
 
   if (subscription) {
-    console.log(`Invoice payment failed for org ${subscription.organization_id}`);
-    // TODO: Send payment failed email
+
+    // Get user details
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("email, full_name")
+      .eq("id", subscription.user_id)
+      .single();
+
+    if (profile?.email) {
+      await sendPaymentFailedEmail({
+        email: profile.email,
+        name: profile.full_name || "there",
+        amount: invoice.amount_due,
+        currency: invoice.currency,
+      });
+    }
   }
 }
 
@@ -236,10 +308,62 @@ async function handleInvoicePaymentFailed(invoice: Stripe.Invoice) {
  * Handle checkout session completed
  */
 async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
-  console.log("Checkout completed:", session.id);
+  const metadata = session.metadata;
+
+  // Handle marketplace purchases
+  if (metadata?.type === "marketplace_purchase") {
+    const supabase = await createClient();
+
+    const itemId = metadata.item_id;
+    const buyerId = metadata.buyer_id;
+    const pricingType = metadata.pricing_type;
+
+    // Update purchase record to completed
+    const { error: updateError } = await supabase
+      .from("marketplace_purchases")
+      .update({
+        status: "completed",
+        stripe_session_id: session.id,
+        ...(pricingType === "subscription" && session.subscription
+          ? { stripe_subscription_id: session.subscription as string }
+          : {}),
+      })
+      .eq("item_id", itemId)
+      .eq("buyer_id", buyerId)
+      .eq("status", "pending");
+
+    if (updateError) {
+      console.error("Error updating marketplace purchase:", updateError);
+    }
+
+    // Get item and buyer details for email
+    const { data: item } = await supabase
+      .from("marketplace_items")
+      .select("name, type")
+      .eq("id", itemId)
+      .single();
+
+    const { data: buyer } = await supabase
+      .from("profiles")
+      .select("email, full_name")
+      .eq("id", buyerId)
+      .single();
+
+    if (item && buyer?.email) {
+      // Send purchase confirmation email
+      await sendMarketplacePurchaseEmail({
+        buyer_email: buyer.email,
+        buyer_name: buyer.full_name || "there",
+        item_name: item.name,
+        item_type: item.type,
+        price: (session.amount_total || 0) / 100,
+        purchase_id: session.id,
+        download_url: `${process.env.NEXT_PUBLIC_APP_URL}/marketplace/my-purchases`,
+      });
+    }
+  }
 
   // Subscription will be handled by subscription.created event
-  // This is mainly for one-time payments if you add them later
 }
 
 /**

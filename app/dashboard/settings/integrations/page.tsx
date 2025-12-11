@@ -83,8 +83,14 @@ export default function IntegrationsPage() {
 
       if (!user) return;
 
-      // Mock data - in production, fetch from database
-      const mockIntegrations: Integration[] = [
+      // Fetch user's connected integrations from database
+      const { data: userIntegrations } = await supabase
+        .from("user_integrations")
+        .select("*")
+        .eq("user_id", user.id);
+
+      // Available integrations catalog - merge with user's connected integrations
+      const availableIntegrations: Integration[] = [
         {
           id: "slack",
           name: "Slack",
@@ -117,7 +123,7 @@ export default function IntegrationsPage() {
           icon: Calendar,
           color: "text-blue-600",
           bgColor: "bg-blue-50 dark:bg-blue-950/30",
-          connected: true,
+          connected: false,
           oauth: true,
           configurable: false,
         },
@@ -141,13 +147,9 @@ export default function IntegrationsPage() {
           icon: Sparkles,
           color: "text-green-600",
           bgColor: "bg-green-50 dark:bg-green-950/30",
-          connected: true,
+          connected: false,
           oauth: false,
           configurable: true,
-          settings: {
-            apiKey: "sk-****...****",
-            enabled: true,
-          },
         },
         {
           id: "anthropic",
@@ -157,13 +159,9 @@ export default function IntegrationsPage() {
           icon: Sparkles,
           bgColor: "bg-orange-50 dark:bg-orange-950/30",
           color: "text-orange-600",
-          connected: true,
+          connected: false,
           oauth: false,
           configurable: true,
-          settings: {
-            apiKey: "sk-****...****",
-            enabled: true,
-          },
         },
         {
           id: "notion",
@@ -221,13 +219,9 @@ export default function IntegrationsPage() {
           icon: Code,
           color: "text-indigo-600",
           bgColor: "bg-indigo-50 dark:bg-indigo-950/30",
-          connected: true,
+          connected: false,
           oauth: false,
           configurable: true,
-          settings: {
-            webhookUrl: "https://api.example.com/webhooks",
-            enabled: true,
-          },
         },
         {
           id: "rest-api",
@@ -243,7 +237,22 @@ export default function IntegrationsPage() {
         },
       ];
 
-      setIntegrations(mockIntegrations);
+      // Merge user's connected integrations with available catalog
+      const mergedIntegrations = availableIntegrations.map((integration) => {
+        const userIntegration = userIntegrations?.find(
+          (ui: any) => ui.integration_id === integration.id
+        );
+        if (userIntegration) {
+          return {
+            ...integration,
+            connected: userIntegration.is_connected || false,
+            settings: userIntegration.settings || {},
+          };
+        }
+        return integration;
+      });
+
+      setIntegrations(mergedIntegrations);
     } catch (error) {
       console.error("Error loading integrations:", error);
       toast.error("Failed to load integrations");
@@ -252,15 +261,27 @@ export default function IntegrationsPage() {
     }
   }
 
-  function handleConnect(integration: Integration) {
+  async function handleConnect(integration: Integration) {
     if (integration.oauth) {
       toast.info(`Redirecting to ${integration.name} OAuth...`);
-      setTimeout(() => {
-        toast.success(`Connected to ${integration.name}!`);
-        setIntegrations(integrations.map(i =>
-          i.id === integration.id ? { ...i, connected: true } : i
-        ));
-      }, 2000);
+
+      // Map integration IDs to OAuth endpoints
+      const oauthEndpoints: Record<string, string> = {
+        "gmail": "/api/integrations/google/connect?service=gmail",
+        "google-calendar": "/api/integrations/google/connect?service=calendar",
+        "slack": "/api/integrations/slack/connect",
+        "github": "/api/integrations/github/connect",
+      };
+
+      const endpoint = oauthEndpoints[integration.id];
+
+      if (endpoint) {
+        // Redirect to real OAuth flow
+        window.location.href = endpoint;
+      } else {
+        // For integrations without implemented OAuth, show info message
+        toast.info(`${integration.name} OAuth is not configured yet. Please add the API keys in your environment.`);
+      }
     } else if (integration.configurable) {
       setConfigDialog({ open: true, integration });
       setConfigValues(integration.settings || {});
@@ -271,7 +292,18 @@ export default function IntegrationsPage() {
 
   async function handleDisconnect(integrationId: string) {
     try {
+      const supabase = createClient();
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
       const integration = integrations.find(i => i.id === integrationId);
+
+      await supabase
+        .from("user_integrations")
+        .update({ is_connected: false })
+        .eq("user_id", user.id)
+        .eq("integration_id", integrationId);
+
       toast.success(`Disconnected from ${integration?.name}`);
       setIntegrations(integrations.map(i =>
         i.id === integrationId ? { ...i, connected: false } : i
@@ -286,8 +318,20 @@ export default function IntegrationsPage() {
     try {
       if (!configDialog.integration) return;
 
-      // Save configuration
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      const supabase = createClient();
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        toast.error("Not authenticated");
+        return;
+      }
+
+      // Save configuration to database
+      await supabase.from("user_integrations").upsert({
+        user_id: user.id,
+        integration_id: configDialog.integration.id,
+        is_connected: true,
+        settings: configValues,
+      });
 
       toast.success(`${configDialog.integration.name} configured successfully`);
 

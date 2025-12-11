@@ -1,7 +1,8 @@
 import { createRouteHandlerClient } from "@supabase/auth-helpers-nextjs";
 import { cookies } from "next/headers";
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import Anthropic from "@anthropic-ai/sdk";
+import { rateLimiters, checkRateLimit } from "@/lib/rate-limit";
 
 const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
@@ -32,8 +33,12 @@ When helping users:
 
 Keep responses concise but comprehensive. Format responses with clear structure using bullet points and numbered lists when appropriate.`;
 
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
   try {
+    // Apply rate limiting - AI coach uses expensive API calls
+    const rateLimitResponse = await checkRateLimit(request, rateLimiters.chat);
+    if (rateLimitResponse) return rateLimitResponse;
+
     const supabase = createRouteHandlerClient({ cookies });
     const {
       data: { session },

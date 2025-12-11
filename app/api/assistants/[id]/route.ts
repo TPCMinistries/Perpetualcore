@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 
+const isDev = process.env.NODE_ENV === "development";
+
 export async function GET(
   request: Request,
   { params }: { params: { id: string } }
@@ -27,7 +29,7 @@ export async function GET(
 
     return NextResponse.json({ assistant });
   } catch (error) {
-    console.error("Get assistant API error:", error);
+    if (isDev) console.error("Get assistant API error:", error);
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }
@@ -62,13 +64,13 @@ export async function DELETE(
       .eq("id", assistantId);
 
     if (deleteError) {
-      console.error("Error deleting assistant:", deleteError);
+      if (isDev) console.error("Error deleting assistant:", deleteError);
       return NextResponse.json({ error: "Failed to delete assistant" }, { status: 500 });
     }
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error("Delete assistant API error:", error);
+    if (isDev) console.error("Delete assistant API error:", error);
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { WorkflowExecutionEngine } from "@/lib/workflow-engine";
+import { rateLimiters, checkRateLimit } from "@/lib/rate-limit";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -15,6 +16,10 @@ export async function POST(
   { params }: { params: { id: string } }
 ) {
   try {
+    // Apply rate limiting - workflow execution can be expensive
+    const rateLimitResponse = await checkRateLimit(request, rateLimiters.strict);
+    if (rateLimitResponse) return rateLimitResponse;
+
     const workflowId = params.id;
     const supabase = await createClient();
 

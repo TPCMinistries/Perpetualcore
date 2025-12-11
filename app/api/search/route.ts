@@ -1,15 +1,21 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { universalSearch } from "@/lib/search/universal";
+import { rateLimiters, checkRateLimit } from "@/lib/rate-limit";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
+
+const isDev = process.env.NODE_ENV === "development";
 
 /**
  * GET - Universal search across all content
  */
 export async function GET(req: NextRequest) {
   try {
+    // Rate limiting - 60 requests per minute for search
+    const rateLimitResponse = await checkRateLimit(req, rateLimiters.search);
+    if (rateLimitResponse) return rateLimitResponse;
     const supabase = await createClient();
 
     const {
@@ -80,7 +86,7 @@ export async function GET(req: NextRequest) {
 
     return NextResponse.json(searchResults);
   } catch (error) {
-    console.error("Search API error:", error);
+    if (isDev) console.error("Search API error:", error);
     return NextResponse.json(
       { error: "Failed to perform search" },
       { status: 500 }

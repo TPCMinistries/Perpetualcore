@@ -8,6 +8,8 @@ import {
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
+const isDev = process.env.NODE_ENV === "development";
+
 /**
  * POST - Connect WhatsApp number (send verification code)
  */
@@ -65,7 +67,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json(result);
     }
   } catch (error) {
-    console.error("WhatsApp connect error:", error);
+    if (isDev) console.error("WhatsApp connect error:", error);
     return NextResponse.json(
       { error: "Failed to connect WhatsApp" },
       { status: 500 }
@@ -95,7 +97,7 @@ export async function GET(req: NextRequest) {
       .order("created_at", { ascending: false });
 
     if (error) {
-      console.error("Error fetching WhatsApp accounts:", error);
+      if (isDev) console.error("Error fetching WhatsApp accounts:", error);
       return NextResponse.json(
         { error: "Failed to fetch accounts" },
         { status: 500 }
@@ -104,7 +106,7 @@ export async function GET(req: NextRequest) {
 
     return NextResponse.json({ accounts: accounts || [] });
   } catch (error) {
-    console.error("WhatsApp connect GET error:", error);
+    if (isDev) console.error("WhatsApp connect GET error:", error);
     return NextResponse.json(
       { error: "Failed to fetch accounts" },
       { status: 500 }

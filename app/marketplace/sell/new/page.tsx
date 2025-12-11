@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -9,12 +9,18 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ArrowLeft, Upload, DollarSign, Tag, Sparkles } from "lucide-react";
+import { ArrowLeft, Upload, DollarSign, Tag, Sparkles, FileJson, X, Loader2, Image as ImageIcon } from "lucide-react";
 import { toast } from "sonner";
 
 export default function NewMarketplaceItemPage() {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isUploadingConfig, setIsUploadingConfig] = useState(false);
+  const [isUploadingImage, setIsUploadingImage] = useState(false);
+  const [configFile, setConfigFile] = useState<{ name: string; url: string } | null>(null);
+  const [imageFile, setImageFile] = useState<{ name: string; url: string } | null>(null);
+  const configInputRef = useRef<HTMLInputElement>(null);
+  const imageInputRef = useRef<HTMLInputElement>(null);
   const [formData, setFormData] = useState({
     type: "agent",
     name: "",
@@ -57,7 +63,8 @@ export default function NewMarketplaceItemPage() {
           price: parseFloat(formData.price),
           tags,
           features,
-          config: {}, // Placeholder for actual agent/workflow config
+          config: configFile ? { file_url: configFile.url } : {},
+          preview_image: imageFile?.url || null,
         }),
       });
 
@@ -79,6 +86,107 @@ export default function NewMarketplaceItemPage() {
 
   const handleInputChange = (field: string, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
+  };
+
+  const handleConfigUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Validate file type
+    const validTypes = ["application/json", "application/zip", "application/x-zip-compressed"];
+    if (!validTypes.includes(file.type) && !file.name.endsWith(".json") && !file.name.endsWith(".zip")) {
+      toast.error("Please upload a JSON or ZIP file");
+      return;
+    }
+
+    // Validate file size (max 10MB)
+    if (file.size > 10 * 1024 * 1024) {
+      toast.error("File size must be less than 10MB");
+      return;
+    }
+
+    setIsUploadingConfig(true);
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append("type", "config");
+
+      const response = await fetch("/api/marketplace/upload", {
+        method: "POST",
+        body: formData,
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Failed to upload file");
+      }
+
+      setConfigFile({ name: file.name, url: data.url });
+      toast.success("Configuration file uploaded!");
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : "Failed to upload file";
+      toast.error(errorMessage);
+    } finally {
+      setIsUploadingConfig(false);
+      if (configInputRef.current) {
+        configInputRef.current.value = "";
+      }
+    }
+  };
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Validate file type
+    if (!file.type.startsWith("image/")) {
+      toast.error("Please upload an image file");
+      return;
+    }
+
+    // Validate file size (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error("Image size must be less than 5MB");
+      return;
+    }
+
+    setIsUploadingImage(true);
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append("type", "image");
+
+      const response = await fetch("/api/marketplace/upload", {
+        method: "POST",
+        body: formData,
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Failed to upload image");
+      }
+
+      setImageFile({ name: file.name, url: data.url });
+      toast.success("Preview image uploaded!");
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : "Failed to upload image";
+      toast.error(errorMessage);
+    } finally {
+      setIsUploadingImage(false);
+      if (imageInputRef.current) {
+        imageInputRef.current.value = "";
+      }
+    }
+  };
+
+  const removeConfigFile = () => {
+    setConfigFile(null);
+  };
+
+  const removeImageFile = () => {
+    setImageFile(null);
   };
 
   return (
@@ -346,27 +454,147 @@ export default function NewMarketplaceItemPage() {
               </CardContent>
             </Card>
 
-            {/* Configuration Upload (Placeholder) */}
+            {/* Configuration Upload */}
             <Card>
               <CardHeader>
                 <CardTitle>Configuration</CardTitle>
                 <CardDescription>
-                  Upload your {formData.type === "agent" ? "agent" : "workflow"} configuration
+                  Upload your {formData.type === "agent" ? "agent" : "workflow"} configuration file
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <input
+                  ref={configInputRef}
+                  type="file"
+                  accept=".json,.zip"
+                  onChange={handleConfigUpload}
+                  className="hidden"
+                />
+                {configFile ? (
+                  <div className="flex items-center justify-between p-4 border rounded-lg bg-muted/50">
+                    <div className="flex items-center gap-3">
+                      <FileJson className="h-8 w-8 text-primary" />
+                      <div>
+                        <p className="font-medium">{configFile.name}</p>
+                        <p className="text-xs text-muted-foreground">Configuration file uploaded</p>
+                      </div>
+                    </div>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={removeConfigFile}
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
+                  </div>
+                ) : (
+                  <div
+                    className="border-2 border-dashed rounded-lg p-8 text-center cursor-pointer hover:border-primary/50 transition-colors"
+                    onClick={() => configInputRef.current?.click()}
+                  >
+                    {isUploadingConfig ? (
+                      <>
+                        <Loader2 className="h-12 w-12 text-muted-foreground mx-auto mb-4 animate-spin" />
+                        <p className="text-sm text-muted-foreground">Uploading...</p>
+                      </>
+                    ) : (
+                      <>
+                        <Upload className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                        <p className="text-sm text-muted-foreground mb-2">
+                          Click to upload your configuration file
+                        </p>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            configInputRef.current?.click();
+                          }}
+                        >
+                          Choose File
+                        </Button>
+                        <p className="text-xs text-muted-foreground mt-2">
+                          Accepts JSON or ZIP files (max 10MB)
+                        </p>
+                      </>
+                    )}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Preview Image Upload */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Preview Image</CardTitle>
+                <CardDescription>
+                  Upload a preview image for your listing (optional)
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="border-2 border-dashed rounded-lg p-8 text-center">
-                  <Upload className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                  <p className="text-sm text-muted-foreground mb-2">
-                    Upload your configuration file
-                  </p>
-                  <Button type="button" variant="outline" disabled>
-                    Choose File
-                  </Button>
-                  <p className="text-xs text-muted-foreground mt-2">
-                    Configuration upload coming soon
-                  </p>
-                </div>
+                <input
+                  ref={imageInputRef}
+                  type="file"
+                  accept="image/*"
+                  onChange={handleImageUpload}
+                  className="hidden"
+                />
+                {imageFile ? (
+                  <div className="flex items-center justify-between p-4 border rounded-lg bg-muted/50">
+                    <div className="flex items-center gap-3">
+                      <img
+                        src={imageFile.url}
+                        alt="Preview"
+                        className="h-16 w-16 object-cover rounded"
+                      />
+                      <div>
+                        <p className="font-medium">{imageFile.name}</p>
+                        <p className="text-xs text-muted-foreground">Preview image uploaded</p>
+                      </div>
+                    </div>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={removeImageFile}
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
+                  </div>
+                ) : (
+                  <div
+                    className="border-2 border-dashed rounded-lg p-8 text-center cursor-pointer hover:border-primary/50 transition-colors"
+                    onClick={() => imageInputRef.current?.click()}
+                  >
+                    {isUploadingImage ? (
+                      <>
+                        <Loader2 className="h-12 w-12 text-muted-foreground mx-auto mb-4 animate-spin" />
+                        <p className="text-sm text-muted-foreground">Uploading...</p>
+                      </>
+                    ) : (
+                      <>
+                        <ImageIcon className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                        <p className="text-sm text-muted-foreground mb-2">
+                          Click to upload a preview image
+                        </p>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            imageInputRef.current?.click();
+                          }}
+                        >
+                          Choose Image
+                        </Button>
+                        <p className="text-xs text-muted-foreground mt-2">
+                          PNG, JPG, or GIF (max 5MB)
+                        </p>
+                      </>
+                    )}
+                  </div>
+                )}
               </CardContent>
             </Card>
 

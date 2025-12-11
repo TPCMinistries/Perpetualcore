@@ -7,6 +7,7 @@ import { ActivityFeed } from "@/components/activity/ActivityFeed";
 import { CoachingSection } from "@/components/ai-coach/CoachingSection";
 import { QuickActions } from "@/components/dashboard/QuickActions";
 import { DashboardWithOnboarding } from "@/components/dashboard/DashboardWithOnboarding";
+import { SuggestionsWidget } from "@/components/suggestions/SuggestionsWidget";
 import {
   ArrowRight,
   Sparkles,
@@ -243,6 +244,20 @@ export default async function DashboardPage() {
       {/* Smart Coaching Section - Temporarily disabled */}
       {/* <CoachingSection /> */}
 
+      {/* AI Suggestions - Proactive recommendations */}
+      <div>
+        <div className="flex items-center gap-3 md:gap-4 mb-6">
+          <div className="h-10 w-10 rounded-lg bg-yellow-100 dark:bg-yellow-950/40 flex items-center justify-center flex-shrink-0">
+            <Lightbulb className="h-5 w-5 text-yellow-700 dark:text-yellow-400" />
+          </div>
+          <div className="min-w-0">
+            <h2 className="text-xl md:text-2xl font-semibold tracking-tight text-slate-900 dark:text-slate-100">Smart Suggestions</h2>
+            <p className="text-xs md:text-sm text-slate-600 dark:text-slate-400">AI-powered recommendations based on your activity</p>
+          </div>
+        </div>
+        <SuggestionsWidget />
+      </div>
+
       {/* AI Insights - Clean and Professional */}
       <div>
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
@@ -318,6 +333,34 @@ export default async function DashboardPage() {
               </Link>
             ) : insightContent;
           })}
+          
+          {/* Intelligence System Link */}
+          <Link href="/dashboard/intelligence" className="block">
+            <div className="group relative overflow-hidden rounded-xl border-2 border-primary/20 bg-gradient-to-br from-primary/5 via-purple-500/5 to-blue-500/5 p-6 transition-all hover:border-primary/40 hover:shadow-lg">
+              <div className="flex items-start gap-4">
+                <div className="flex-shrink-0 h-12 w-12 rounded-xl bg-gradient-to-br from-primary via-purple-600 to-primary flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
+                  <Brain className="h-6 w-6 text-white" />
+                </div>
+                <div className="flex-1">
+                  <div className="flex items-center justify-between mb-2">
+                    <h3 className="font-semibold text-base text-slate-900 dark:text-slate-100 group-hover:text-primary transition-colors">
+                      Intelligence Dashboard
+                    </h3>
+                    <span className="text-xs font-semibold px-2 py-1 rounded-full bg-primary/10 text-primary border border-primary/20">
+                      NEW
+                    </span>
+                  </div>
+                  <p className="text-sm text-slate-600 dark:text-slate-400 mb-3">
+                    View insights, patterns, preferences, and AI-generated suggestions from your conversations.
+                  </p>
+                  <div className="flex items-center gap-2 text-xs text-primary font-medium">
+                    <span>Explore Intelligence</span>
+                    <ArrowRight className="h-3 w-3 group-hover:translate-x-1 transition-transform" />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </Link>
         </div>
       </div>
 

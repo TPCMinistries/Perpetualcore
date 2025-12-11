@@ -5,6 +5,8 @@ import { getSubscription } from "@/lib/stripe/subscriptions";
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
+const isDev = process.env.NODE_ENV === "development";
+
 /**
  * GET - Get current subscription
  */
@@ -44,7 +46,7 @@ export async function GET(req: NextRequest) {
 
     return NextResponse.json({ subscription });
   } catch (error) {
-    console.error("Subscription fetch error:", error);
+    if (isDev) console.error("Subscription fetch error:", error);
     return NextResponse.json(
       { error: "Failed to fetch subscription" },
       { status: 500 }

@@ -4,14 +4,25 @@
 RAG vector search returns 0 results despite documents being uploaded and embeddings created.
 
 ## Root Cause Identified
-The `search_document_chunks` function likely doesn't have `SECURITY DEFINER`, causing it to be blocked by RLS policies when trying to join documents and document_chunks tables.
+**Function signature mismatch**: The TypeScript code calls `search_document_chunks` with **8 parameters**, but the database may have an older **4-parameter** version of the function.
+
+The 8 parameters are:
+1. `query_embedding` - The vector to search for
+2. `org_id` - Organization ID
+3. `requesting_user_id` - User making the request
+4. `match_threshold` - Similarity threshold (default 0.7)
+5. `match_count` - Max results (default 5)
+6. `search_scope` - 'personal', 'team', 'organization', or 'all'
+7. `conversation_id` - Optional conversation context
+8. `space_id` - Optional knowledge space filter
 
 ## Solution
-I've created a comprehensive fix that:
-1. Recreates the search function with `SECURITY DEFINER`
-2. Fixes all RLS policies
-3. Creates necessary indexes
-4. Includes self-test
+Run the 8-parameter function migration that:
+1. Drops old 4-parameter function
+2. Creates new 8-parameter function with `SECURITY DEFINER`
+3. Fixes all RLS policies
+4. Creates necessary indexes
+5. Includes self-test
 
 ## How to Fix (2 minutes)
 
@@ -20,16 +31,16 @@ I've created a comprehensive fix that:
 2. Navigate to **SQL Editor**
 3. Copy and paste the entire contents of:
    ```
-   /supabase/FIX_RAG_SEARCH_COMPLETE.sql
+   /supabase/migrations/20241107_fix_rag_search_function.sql
    ```
 4. Click **Run**
 
 ### Step 2: Check the Output
 You should see:
-- ✅ "SUCCESS: Vector search is working!"
+- ✅ "SUCCESS: Enhanced RAG search is working!"
 - Function shows `security_type = DEFINER`
-- Document and chunk counts
-- RLS policies listed
+- Document and chunk counts (total, completed, with embeddings)
+- Test results showing matching chunks found
 
 ### Step 3: Test in Your App
 1. Your dev server is running at: http://localhost:3000
@@ -170,9 +181,10 @@ But this adds complexity and latency. `SECURITY DEFINER` with proper org filteri
 ## Files Reference
 
 ### Fix Scripts (SQL)
-- `/supabase/FIX_RAG_SEARCH_COMPLETE.sql` ← **RUN THIS ONE**
+- `/supabase/migrations/20241107_fix_rag_search_function.sql` ← **RUN THIS ONE**
+- `/supabase/FIX_RAG_SEARCH_COMPLETE.sql` - Older 4-parameter version (superseded)
 - `/supabase/DIAGNOSE_RAG_ISSUE.sql` - Diagnostics (if needed)
-- `/supabase/SETUP_VECTOR_SEARCH.sql` - Original (now superseded)
+- `/supabase/SETUP_VECTOR_SEARCH.sql` - Original (superseded)
 
 ### Code Files
 - `/lib/documents/rag.ts` - RAG implementation with logging

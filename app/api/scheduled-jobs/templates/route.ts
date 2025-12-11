@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 
+const isDev = process.env.NODE_ENV === "development";
+
 export async function GET() {
   try {
     const supabase = await createClient();
@@ -12,13 +14,13 @@ export async function GET() {
       .order("usage_count", { ascending: false });
 
     if (error) {
-      console.error("Error fetching templates:", error);
+      if (isDev) console.error("Error fetching templates:", error);
       return NextResponse.json({ error: "Failed to fetch templates" }, { status: 500 });
     }
 
     return NextResponse.json({ templates: templates || [] });
   } catch (error) {
-    console.error("Templates API error:", error);
+    if (isDev) console.error("Templates API error:", error);
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }
