@@ -196,6 +196,25 @@ const isDev = process.env.NODE_ENV === "development";
 
 export async function POST(req: NextRequest) {
   try {
+    // Check if at least one AI provider is configured
+    const hasAIProvider = !!(
+      process.env.ANTHROPIC_API_KEY ||
+      process.env.OPENAI_API_KEY ||
+      process.env.GOOGLE_AI_API_KEY
+    );
+
+    if (!hasAIProvider) {
+      console.error("❌ No AI provider configured. Add ANTHROPIC_API_KEY, OPENAI_API_KEY, or GOOGLE_AI_API_KEY to environment variables.");
+      return new Response(
+        JSON.stringify({
+          error: "AI service not configured",
+          message: "Please configure at least one AI provider (Anthropic, OpenAI, or Google) in environment variables.",
+          hint: "Add ANTHROPIC_API_KEY, OPENAI_API_KEY, or GOOGLE_AI_API_KEY to your Vercel environment variables."
+        }),
+        { status: 503, headers: { "Content-Type": "application/json" } }
+      );
+    }
+
     // Rate limiting - 30 requests per minute for chat API
     const rateLimitResponse = await checkRateLimit(req, rateLimiters.chat);
     if (rateLimitResponse) return rateLimitResponse;
@@ -215,18 +234,31 @@ export async function POST(req: NextRequest) {
     // Get user's profile, create if doesn't exist
     // Use admin client to bypass RLS for profile creation
     if (isDev) console.log("🔍 Checking for profile for user:", user.id);
+
+    // Check if service role key is configured
+    if (!process.env.SUPABASE_SERVICE_ROLE_KEY) {
+      console.error("❌ SUPABASE_SERVICE_ROLE_KEY not configured");
+      return new Response(
+        JSON.stringify({
+          error: "Server configuration error",
+          message: "SUPABASE_SERVICE_ROLE_KEY is not configured. Please add it to your Vercel environment variables."
+        }),
+        { status: 503, headers: { "Content-Type": "application/json" } }
+      );
+    }
+
     let adminSupabase;
     try {
       const { createAdminClient } = await import("@/lib/supabase/server");
       adminSupabase = createAdminClient();
       if (isDev) console.log("✅ Admin client created");
     } catch (error: any) {
-      if (isDev) console.error("❌ Failed to create admin client:", error);
+      console.error("❌ Failed to create admin client:", error);
       if (isDev) console.error("Error stack:", error?.stack);
       return new Response(
-        JSON.stringify({ 
-          error: "Server configuration error", 
-          details: error?.message || "Failed to initialize admin client. Check SUPABASE_SERVICE_ROLE_KEY in .env.local"
+        JSON.stringify({
+          error: "Server configuration error",
+          details: error?.message || "Failed to initialize admin client. Check SUPABASE_SERVICE_ROLE_KEY in environment variables."
         }),
         { status: 500, headers: { "Content-Type": "application/json" } }
       );
