@@ -111,11 +111,11 @@ const nextConfig = {
   compress: true,
   reactStrictMode: true,
 
-  // Type checking handled by IDE, CI, and Vercel (has sufficient memory)
-  // Local builds skip due to TypeScript memory limits on large codebases
-  // Run `npm run type-check` separately for local validation
+  // Skip TypeScript checking during build - codebase is too large for Vercel's memory limits
+  // Type checking is handled by: IDE (real-time), ESLint (via @typescript-eslint), and CI
+  // The "Map maximum size exceeded" error occurs during Next.js type checking on large codebases
   typescript: {
-    ignoreBuildErrors: process.env.VERCEL !== '1',
+    ignoreBuildErrors: true,
   },
   eslint: {
     ignoreDuringBuilds: true,
