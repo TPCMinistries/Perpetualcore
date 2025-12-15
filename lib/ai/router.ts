@@ -149,6 +149,8 @@ async function* streamFromModel(
     yield* streamClaude(messages, model, tools);
   } else if (model === "gpt-4o" || model === "gpt-4o-mini") {
     yield* streamOpenAI(messages, model, tools);
+  } else if (model === "deepseek-chat") {
+    yield* streamDeepSeek(messages, tools);
   } else if (model === "gemini-2.0-flash-exp") {
     yield* streamGemini(messages);
   } else if (model === "gamma") {
@@ -315,6 +317,88 @@ async function* streamOpenAI(
   yield { content: "", done: true, usage };
 }
 
+// DeepSeek client (uses OpenAI-compatible API)
+let deepseek: OpenAI | null = null;
+function getDeepSeek() {
+  if (!deepseek && process.env.DEEPSEEK_API_KEY) {
+    deepseek = new OpenAI({
+      apiKey: process.env.DEEPSEEK_API_KEY,
+      baseURL: "https://api.deepseek.com/v1",
+    });
+  }
+  return deepseek;
+}
+
+async function* streamDeepSeek(
+  messages: ChatMessage[],
+  tools?: Tool[]
+): AsyncGenerator<StreamChunk> {
+  const client = getDeepSeek();
+  if (!client) {
+    throw new Error("DeepSeek client not initialized");
+  }
+
+  const stream = await client.chat.completions.create({
+    model: "deepseek-chat",
+    messages: messages.map((m) => ({
+      role: m.role,
+      content: m.content,
+    })),
+    tools: tools ? formatToolsForOpenAI(tools) : undefined,
+    stream: true,
+    stream_options: { include_usage: true },
+  });
+
+  let usage: UsageMetadata | undefined;
+  let accumulatedToolCalls: Map<number, ToolCall> = new Map();
+
+  for await (const chunk of stream) {
+    const content = chunk.choices[0]?.delta?.content || "";
+    if (content) {
+      yield {
+        content,
+        done: false,
+      };
+    }
+
+    // Handle tool calls - DeepSeek streams them incrementally like OpenAI
+    const deltaToolCalls = chunk.choices[0]?.delta?.tool_calls;
+    if (deltaToolCalls) {
+      for (const toolCall of deltaToolCalls) {
+        const index = toolCall.index;
+        const existing = accumulatedToolCalls.get(index);
+
+        if (!existing) {
+          accumulatedToolCalls.set(index, {
+            id: toolCall.id || "",
+            name: toolCall.function?.name || "",
+            arguments: toolCall.function?.arguments || "",
+          });
+        } else {
+          if (toolCall.function?.arguments) {
+            existing.arguments += toolCall.function.arguments;
+          }
+        }
+      }
+    }
+
+    // DeepSeek includes usage in the final chunk
+    if (chunk.usage) {
+      usage = {
+        inputTokens: chunk.usage.prompt_tokens || 0,
+        outputTokens: chunk.usage.completion_tokens || 0,
+      };
+    }
+  }
+
+  // Yield accumulated tool calls if any
+  if (accumulatedToolCalls.size > 0) {
+    const toolCalls = Array.from(accumulatedToolCalls.values());
+    yield { content: "", done: false, tool_calls: toolCalls };
+  }
+
+  yield { content: "", done: true, usage };
+}
 
 async function* streamGemini(
   messages: ChatMessage[]

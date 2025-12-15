@@ -23,6 +23,7 @@ export const MODEL_COSTS: Record<AIModel, ModelCosts> = {
   'gpt-4o': { inputCostPer1M: 2.50, outputCostPer1M: 10.0 },
   'gpt-4o-mini': { inputCostPer1M: 0.15, outputCostPer1M: 0.60 },
   'gemini-2.0-flash-exp': { inputCostPer1M: 0.0, outputCostPer1M: 0.0 }, // Free during preview
+  'deepseek-chat': { inputCostPer1M: 0.14, outputCostPer1M: 0.28 }, // DeepSeek V3 pricing
   'gamma': { inputCostPer1M: 0.0, outputCostPer1M: 0.0 }, // Separate pricing model
   'auto': { inputCostPer1M: 0.0, outputCostPer1M: 0.0 }, // Dynamic
 };
@@ -163,6 +164,7 @@ export function getFallbackChain(primaryModel: AIModel): AIModel[] {
     'gpt-4o': ['gpt-4o', 'gpt-4o-mini', 'claude-sonnet-4', 'gemini-2.0-flash-exp'],
     'gpt-4o-mini': ['gpt-4o-mini', 'gemini-2.0-flash-exp', 'claude-sonnet-4'],
     'gemini-2.0-flash-exp': ['gemini-2.0-flash-exp', 'gpt-4o-mini', 'claude-sonnet-4'],
+    'deepseek-chat': ['deepseek-chat', 'gpt-4o-mini', 'claude-sonnet-4'], // DeepSeek fallback chain
     'gamma': ['gamma'], // No fallback for specialized presentation tool
     'auto': ['gpt-4o-mini'], // Should never hit this (auto resolved earlier)
   };
@@ -180,6 +182,7 @@ export function isModelAvailable(model: AIModel): boolean {
     'gpt-4o': process.env.OPENAI_API_KEY,
     'gpt-4o-mini': process.env.OPENAI_API_KEY,
     'gemini-2.0-flash-exp': process.env.GOOGLE_AI_API_KEY,
+    'deepseek-chat': process.env.DEEPSEEK_API_KEY,
     'gamma': process.env.GAMMA_API_KEY,
   };
 
@@ -262,6 +265,12 @@ export function getModelInfo(model: AIModel): {
       provider: 'Google',
       description: 'Experimental model, free during preview',
       icon: '✨',
+    },
+    'deepseek-chat': {
+      name: 'DeepSeek V3',
+      provider: 'DeepSeek',
+      description: 'Excellent for code and math, very cost-effective',
+      icon: '🧠',
     },
     'gamma': {
       name: 'Gamma',

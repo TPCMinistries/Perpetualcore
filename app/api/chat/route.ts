@@ -529,12 +529,21 @@ Or, you can copy and paste the text content directly into this chat.`;
     // Build model-specific optimized system prompt
     let systemPrompt = buildOptimizedSystemPrompt(model, userMessage);
 
+    // Helper function to add timeout to promises to prevent hangs
+    const withTimeout = <T>(promise: Promise<T>, timeoutMs: number, fallback: T): Promise<T> => {
+      return Promise.race([
+        promise,
+        new Promise<T>((resolve) => setTimeout(() => resolve(fallback), timeoutMs))
+      ]);
+    };
+
     // Load and apply user intelligence (preferences, patterns, insights)
+    // Use timeout to prevent intelligence queries from blocking chat if tables don't exist or RLS hangs
     try {
       if (isDev) console.log("🧠 Loading user intelligence...");
       const [preferences, intelligence] = await Promise.all([
-        loadUserPreferences(user.id),
-        getIntelligenceSummary(organizationId, user.id),
+        withTimeout(loadUserPreferences(user.id), 3000, {}),
+        withTimeout(getIntelligenceSummary(organizationId, user.id), 3000, { insights: [], patterns: [], preferences: [], suggestions: [] }),
       ]);
 
       // Apply learned preferences to system prompt
@@ -565,16 +574,21 @@ Or, you can copy and paste the text content directly into this chat.`;
         if (isDev) console.log("🔍 Searching documents for org:", organizationId, "user:", user.id);
         // Search for relevant documents with enhanced context-aware RAG
         // Lower threshold (0.3) to be more inclusive - let the AI decide what's relevant
-        relevantDocs = await searchDocuments(
-          userMessage,
-          organizationId, // Use organizationId variable (user.id if no org)
-          user.id, // Pass user ID for permission checking
-          10, // Get more chunks for better context
-          0.3, // Lower threshold = more permissive, like NotebookLM
-          {
-            scope: 'all', // Search all accessible documents (personal + shared + org)
-            conversationId: conversationId || undefined, // Pass conversation context
-          }
+        // Use timeout to prevent RAG from blocking chat if vector DB hangs
+        relevantDocs = await withTimeout(
+          searchDocuments(
+            userMessage,
+            organizationId, // Use organizationId variable (user.id if no org)
+            user.id, // Pass user ID for permission checking
+            10, // Get more chunks for better context
+            0.3, // Lower threshold = more permissive, like NotebookLM
+            {
+              scope: 'all', // Search all accessible documents (personal + shared + org)
+              conversationId: conversationId || undefined, // Pass conversation context
+            }
+          ),
+          5000, // 5 second timeout for RAG
+          [] // Return empty array on timeout
         );
         if (isDev) console.log("🔍 Search results:", relevantDocs.length, "documents found");
 
