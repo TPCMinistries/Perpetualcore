@@ -15,7 +15,8 @@ export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
 
 /**
  * Stripe pricing configuration
- * Update these Price IDs from your Stripe Dashboard
+ * Matches perpetualcore.com/pricing
+ * Update these Price IDs from your Stripe Dashboard after creating products
  */
 export const STRIPE_PLANS = {
   free: {
@@ -25,115 +26,227 @@ export const STRIPE_PLANS = {
     priceMonthly: 0,
     priceAnnual: 0,
   },
+  starter: {
+    name: "Starter",
+    priceMonthlyId: process.env.STRIPE_STARTER_MONTHLY_PRICE_ID || null,
+    priceAnnualId: process.env.STRIPE_STARTER_ANNUAL_PRICE_ID || null,
+    priceMonthly: 49,
+    priceAnnual: 470, // 20% discount
+  },
   pro: {
     name: "Pro",
-    priceMonthlyId: process.env.STRIPE_PRO_MONTHLY_PRICE_ID || "price_pro_monthly",
-    priceAnnualId: process.env.STRIPE_PRO_ANNUAL_PRICE_ID || "price_pro_annual",
-    priceMonthly: 49,
-    priceAnnual: 470, // 20% discount ($588 → $470)
+    priceMonthlyId: process.env.STRIPE_PRO_MONTHLY_PRICE_ID || null,
+    priceAnnualId: process.env.STRIPE_PRO_ANNUAL_PRICE_ID || null,
+    priceMonthly: 99,
+    priceAnnual: 950, // 20% discount
+  },
+  team: {
+    name: "Team",
+    priceMonthlyId: process.env.STRIPE_TEAM_MONTHLY_PRICE_ID || null,
+    priceAnnualId: process.env.STRIPE_TEAM_ANNUAL_PRICE_ID || null,
+    priceMonthly: 499,
+    priceAnnual: 4790, // 20% discount
   },
   business: {
     name: "Business",
-    priceMonthlyId: process.env.STRIPE_BUSINESS_MONTHLY_PRICE_ID || "price_business_monthly",
-    priceAnnualId: process.env.STRIPE_BUSINESS_ANNUAL_PRICE_ID || "price_business_annual",
-    priceMonthly: 149,
-    priceAnnual: 1430, // 20% discount ($1,788 → $1,430)
+    priceMonthlyId: process.env.STRIPE_BUSINESS_MONTHLY_PRICE_ID || null,
+    priceAnnualId: process.env.STRIPE_BUSINESS_ANNUAL_PRICE_ID || null,
+    priceMonthly: 1999,
+    priceAnnual: 19190, // 20% discount
   },
   enterprise: {
     name: "Enterprise",
-    priceMonthlyId: null, // Custom pricing
+    priceMonthlyId: process.env.STRIPE_ENTERPRISE_MONTHLY_PRICE_ID || null,
+    priceAnnualId: process.env.STRIPE_ENTERPRISE_ANNUAL_PRICE_ID || null,
+    priceMonthly: 9999,
+    priceAnnual: 95990, // 20% discount
+  },
+  custom: {
+    name: "Custom",
+    priceMonthlyId: null, // Contact sales
     priceAnnualId: null,
-    priceMonthly: 499, // Starting price
-    priceAnnual: 4790, // 20% discount
+    priceMonthly: null,
+    priceAnnual: null,
   },
 } as const;
 
 /**
- * Plan limits and features
+ * Plan limits and features - matches perpetualcore.com/pricing
  */
 export const PLAN_LIMITS = {
   free: {
-    aiMessages: 50, // 50 per month (Gemini only)
+    aiMessages: -1, // Unlimited Gemini
+    premiumMessages: 0,
     documents: 5,
     storageGB: 1,
     teamMembers: 1,
-    messageHistory: 30, // days
-    overageRate: null, // No overage allowed
+    automations: 5,
     features: {
-      basicAI: true, // Gemini only
-      advancedAI: false,
+      geminiUnlimited: true,
+      gpt4oMini: false,
+      premiumModels: false,
       calendar: false,
       email: false,
       whatsapp: false,
-      tasks: false,
-      voice: false,
-      agents: false,
-      prioritySupport: false,
-      customIntegrations: false,
+      workflows: false,
+      api: false,
+      slackTeams: false,
       sso: false,
+      customTraining: false,
+      whiteLabel: false,
+      onPremise: false,
+      support: "community",
+    },
+  },
+  starter: {
+    aiMessages: -1, // Unlimited GPT-4o Mini
+    premiumMessages: 100, // 100 Claude/GPT-4 messages
+    documents: -1, // Unlimited
+    storageGB: 10,
+    teamMembers: 1,
+    automations: -1, // Unlimited
+    features: {
+      geminiUnlimited: true,
+      gpt4oMini: true,
+      premiumModels: true, // Limited to 100/mo
+      calendar: true,
+      email: true,
+      whatsapp: false,
+      workflows: true,
+      api: false,
+      slackTeams: false,
+      sso: false,
+      customTraining: false,
+      whiteLabel: false,
+      onPremise: false,
+      support: "priority_email",
     },
   },
   pro: {
-    aiMessages: 1000, // 1,000 per month
-    documents: -1, // unlimited
-    storageGB: 10,
+    aiMessages: -1, // Unlimited all models
+    premiumMessages: -1, // Unlimited
+    documents: -1,
+    storageGB: 50,
     teamMembers: 1,
-    messageHistory: -1, // unlimited
-    overageRate: 0.05, // $0.05 per message overage
+    automations: -1,
     features: {
-      basicAI: true,
-      advancedAI: true, // All AI models
-      calendar: "full", // sync + send
-      email: "full", // sync + send
+      geminiUnlimited: true,
+      gpt4oMini: true,
+      premiumModels: true, // Unlimited
+      calendar: true,
+      email: true,
       whatsapp: false,
-      tasks: true,
-      voice: false,
-      agents: false,
-      prioritySupport: true,
-      customIntegrations: false,
+      workflows: true,
+      api: true,
+      slackTeams: false,
       sso: false,
+      customTraining: false,
+      whiteLabel: false,
+      onPremise: false,
+      support: "priority_4hr",
+    },
+  },
+  team: {
+    aiMessages: -1,
+    premiumMessages: -1,
+    documents: -1,
+    storageGB: -1, // Included per member
+    teamMembers: 10,
+    automations: -1,
+    features: {
+      geminiUnlimited: true,
+      gpt4oMini: true,
+      premiumModels: true,
+      calendar: true,
+      email: true,
+      whatsapp: false,
+      workflows: true,
+      api: true,
+      slackTeams: true,
+      sso: false,
+      customTraining: false,
+      whiteLabel: false,
+      onPremise: false,
+      support: "dedicated_success",
     },
   },
   business: {
-    aiMessages: 4000, // 4,000 per month
-    documents: -1, // unlimited
-    storageGB: 50,
-    teamMembers: 5,
-    messageHistory: -1,
-    overageRate: 0.04, // $0.04 per message overage
+    aiMessages: -1,
+    premiumMessages: -1,
+    documents: -1,
+    storageGB: -1, // Unlimited
+    teamMembers: 50,
+    automations: -1,
     features: {
-      basicAI: true,
-      advancedAI: true,
-      calendar: "full",
-      email: "full",
+      geminiUnlimited: true,
+      gpt4oMini: true,
+      premiumModels: true,
+      calendar: true,
+      email: true,
       whatsapp: true,
-      tasks: true,
-      voice: false,
-      agents: 5, // 5 autonomous agents
-      prioritySupport: true,
-      customIntegrations: false,
-      sso: false,
+      workflows: true,
+      api: true,
+      slackTeams: true,
+      sso: true,
+      customTraining: true,
+      whiteLabel: false,
+      onPremise: false,
+      support: "priority_phone_2hr",
+      sla: "99.9%",
     },
   },
   enterprise: {
-    aiMessages: 20000, // 20,000+ per month (customizable)
+    aiMessages: -1,
+    premiumMessages: -1,
     documents: -1,
-    storageGB: -1, // unlimited
-    teamMembers: -1, // unlimited
-    messageHistory: -1,
-    overageRate: 0.03, // $0.03 per message (negotiable)
+    storageGB: -1,
+    teamMembers: 250,
+    automations: -1,
     features: {
-      basicAI: true,
-      advancedAI: true,
-      calendar: "full",
-      email: "full",
+      geminiUnlimited: true,
+      gpt4oMini: true,
+      premiumModels: true,
+      calendar: true,
+      email: true,
       whatsapp: true,
-      tasks: true,
-      voice: true,
-      agents: -1, // unlimited
-      prioritySupport: true,
-      customIntegrations: true,
+      workflows: true,
+      api: true,
+      slackTeams: true,
       sso: true,
+      customTraining: true,
+      whiteLabel: true,
+      onPremise: false,
+      support: "24_7_dedicated",
+      sla: "99.95%",
+      hipaa: true,
+      soc2: true,
+    },
+  },
+  custom: {
+    aiMessages: -1,
+    premiumMessages: -1,
+    documents: -1,
+    storageGB: -1,
+    teamMembers: -1, // Unlimited
+    automations: -1,
+    features: {
+      geminiUnlimited: true,
+      gpt4oMini: true,
+      premiumModels: true,
+      calendar: true,
+      email: true,
+      whatsapp: true,
+      workflows: true,
+      api: true,
+      slackTeams: true,
+      sso: true,
+      customTraining: true,
+      whiteLabel: true,
+      onPremise: true,
+      support: "custom",
+      sla: "custom",
+      hipaa: true,
+      soc2: true,
     },
   },
 } as const;
