@@ -132,11 +132,11 @@ const PLANS = [
       "Up to 50 team members",
       "SSO & SAML authentication",
       "Custom AI training on your data",
-      "Advanced security & compliance",
+      "Advanced security controls",
       "Unlimited storage",
-      "99.9% SLA",
       "Priority phone support (2-hour response)",
       "Quarterly business reviews",
+      "Dedicated success manager",
     ],
     limits: {
       ai_messages: -1,
@@ -160,10 +160,10 @@ const PLANS = [
       "Up to 250 team members",
       "White-glove implementation ($7,500)",
       "Custom deployment options",
-      "SOC 2, HIPAA compliance",
+      "Enterprise security (SOC 2 infrastructure)",
       "White-label capabilities",
-      "99.95% SLA + 24/7 support",
       "Dedicated account team",
+      "Priority support with escalation path",
       "Custom development available",
     ],
     limits: {
@@ -574,7 +574,7 @@ export default function PricingPage() {
             <CardContent className="p-8">
               <h2 className="text-3xl font-bold mb-4">Ready to get started?</h2>
               <p className="text-lg mb-6 opacity-90">
-                Join thousands of teams already using Perpetual Core to supercharge their productivity.
+                Start your 14-day free trial and experience AI that never forgets.
               </p>
               <Button size="lg" variant="secondary" asChild>
                 <Link href="/signup">
@@ -589,7 +589,7 @@ export default function PricingPage() {
       {/* Footer */}
       <footer className="border-t mt-16 py-8">
         <div className="container mx-auto px-4 text-center text-sm text-muted-foreground">
-          <p>© 2024 AI Operating System. All rights reserved.</p>
+          <p>© 2025 Perpetual Core. All rights reserved.</p>
           <div className="flex justify-center gap-6 mt-4">
             <Link href="/terms" className="hover:underline">Terms</Link>
             <Link href="/privacy" className="hover:underline">Privacy</Link>
