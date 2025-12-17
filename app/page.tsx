@@ -381,23 +381,23 @@ export default function HomePage() {
         <div className="container mx-auto px-4">
           <div className="text-center text-white max-w-4xl mx-auto">
             <h2 className="text-3xl sm:text-4xl font-bold mb-6">
-              Save 15-20 Hours Per Employee Per Month
+              Stop Losing Context. Stop Repeating Yourself.
             </h2>
             <p className="text-lg sm:text-xl text-slate-200 mb-8">
-              The average team using Perpetual Core eliminates 60-80% of repetitive work. Your AI remembers every conversation, document, and decision—so your team never wastes time searching or repeating themselves.
+              ChatGPT forgets after 200 messages. Your AI should remember everything. Perpetual Core gives you infinite memory, all AI models in one place, and your documents searchable by AI.
             </p>
             <div className="grid md:grid-cols-3 gap-6 sm:gap-8 text-center">
               <div>
-                <div className="text-4xl font-bold text-green-400 mb-2">60-90 days</div>
-                <div className="text-slate-300">Average ROI timeline</div>
+                <div className="text-4xl font-bold text-green-400 mb-2">Infinite</div>
+                <div className="text-slate-300">Conversation memory</div>
               </div>
               <div>
-                <div className="text-4xl font-bold text-green-400 mb-2">85%</div>
-                <div className="text-slate-300">Team adoption rate</div>
+                <div className="text-4xl font-bold text-green-400 mb-2">4 Models</div>
+                <div className="text-slate-300">GPT-4, Claude, Gemini, DeepSeek</div>
               </div>
               <div>
-                <div className="text-4xl font-bold text-green-400 mb-2">$150K+</div>
-                <div className="text-slate-300">Avg annual savings (50 employees)</div>
+                <div className="text-4xl font-bold text-green-400 mb-2">RAG</div>
+                <div className="text-slate-300">Search your documents with AI</div>
               </div>
             </div>
           </div>
@@ -495,7 +495,7 @@ export default function HomePage() {
               </div>
               <h3 className="text-2xl font-bold mb-3">Enterprise (100+ employees)</h3>
               <p className="text-muted-foreground mb-6 leading-relaxed">
-                White-glove implementation for large organizations. Custom deployment, SSO, compliance, and SLAs.
+                Custom implementation for large organizations. Dedicated support and tailored solutions.
               </p>
               <div className="space-y-3 mb-6">
                 <div className="flex items-start gap-2">
@@ -504,18 +504,18 @@ export default function HomePage() {
                 </div>
                 <div className="flex items-start gap-2">
                   <Check className="h-5 w-5 text-green-500 flex-shrink-0 mt-0.5" />
-                  <span className="text-sm">SSO, HIPAA, SOC 2 compliance</span>
+                  <span className="text-sm">Dedicated account manager</span>
                 </div>
                 <div className="flex items-start gap-2">
                   <Check className="h-5 w-5 text-green-500 flex-shrink-0 mt-0.5" />
-                  <span className="text-sm">99.9% SLA + 24/7 support</span>
+                  <span className="text-sm">Custom onboarding & training</span>
                 </div>
               </div>
               <div className="text-center">
                 <div className="text-3xl font-bold mb-1">$9,999<span className="text-lg text-muted-foreground font-normal">/month</span></div>
-                <div className="text-sm text-muted-foreground mb-3">+ $7,500 implementation</div>
+                <div className="text-sm text-muted-foreground mb-3">Contact for custom pricing</div>
                 <Button asChild variant="outline" className="w-full mt-4 shadow-lg">
-                  <Link href="/enterprise-demo">Schedule Demo</Link>
+                  <Link href="/contact-sales">Contact Sales</Link>
                 </Button>
               </div>
             </CardContent>
@@ -991,29 +991,29 @@ export default function HomePage() {
                   <div className="flex items-center gap-3 p-4 rounded-lg backdrop-blur-2xl bg-muted/50 border border-border shadow-lg">
                     <Check className="h-6 w-6 text-green-500 flex-shrink-0" />
                     <div>
-                      <div className="font-semibold">SOC 2 Type II Compliant</div>
-                      <div className="text-sm text-muted-foreground">Annual security audits</div>
+                      <div className="font-semibold">Row-Level Security</div>
+                      <div className="text-sm text-muted-foreground">Your data is isolated and protected</div>
                     </div>
                   </div>
                   <div className="flex items-center gap-3 p-4 rounded-lg backdrop-blur-2xl bg-muted/50 border border-border shadow-lg">
                     <Check className="h-6 w-6 text-green-500 flex-shrink-0" />
                     <div>
-                      <div className="font-semibold">GDPR & CCPA Ready</div>
-                      <div className="text-sm text-muted-foreground">Full data privacy compliance</div>
+                      <div className="font-semibold">Encrypted at Rest & Transit</div>
+                      <div className="text-sm text-muted-foreground">Industry-standard encryption</div>
                     </div>
                   </div>
                   <div className="flex items-center gap-3 p-4 rounded-lg backdrop-blur-2xl bg-muted/50 border border-border shadow-lg">
                     <Check className="h-6 w-6 text-green-500 flex-shrink-0" />
                     <div>
-                      <div className="font-semibold">256-bit Encryption</div>
-                      <div className="text-sm text-muted-foreground">Bank-level security</div>
+                      <div className="font-semibold">Never Used for Training</div>
+                      <div className="text-sm text-muted-foreground">Your data stays private</div>
                     </div>
                   </div>
                   <div className="flex items-center gap-3 p-4 rounded-lg backdrop-blur-2xl bg-muted/50 border border-border shadow-lg">
                     <Check className="h-6 w-6 text-green-500 flex-shrink-0" />
                     <div>
-                      <div className="font-semibold">99.9% Uptime SLA</div>
-                      <div className="text-sm text-muted-foreground">Always available when you need it</div>
+                      <div className="font-semibold">Hosted on Vercel & Supabase</div>
+                      <div className="text-sm text-muted-foreground">Enterprise-grade infrastructure</div>
                     </div>
                   </div>
                 </div>
@@ -1171,7 +1171,7 @@ export default function HomePage() {
           <CardContent className="p-12 text-center">
             <h2 className="text-4xl md:text-5xl font-bold mb-4">Ready to transform your workflow?</h2>
             <p className="text-xl mb-8 opacity-90">
-              Join thousands of teams using Perpetual Core to work smarter, not harder
+              The AI platform that never forgets—infinite memory, all models, your knowledge
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Button size="lg" variant="secondary" asChild className="text-lg px-8 shadow-xl hover:shadow-2xl transition-shadow">
@@ -1323,44 +1323,44 @@ const steps = [
     description: "Create your account in seconds. No credit card required for the 14-day trial.",
   },
   {
-    title: "Connect Your Tools",
-    description: "Integrate with Gmail, Google Calendar, Slack, and your favorite productivity apps.",
+    title: "Upload Your Knowledge",
+    description: "Add documents, notes, and data. Your AI will learn and search across everything.",
   },
   {
-    title: "Start Automating",
-    description: "Chat with AI, create workflows, and watch your productivity soar.",
+    title: "Start Chatting",
+    description: "Ask questions, get answers from your documents, and never lose context again.",
   },
 ];
 
 const benefits = [
-  "Save 10+ hours per week on repetitive tasks",
-  "Access multiple AI models from one platform",
-  "Enterprise-grade security with SOC 2 compliance",
-  "Real-time collaboration for distributed teams",
-  "Seamless integration with 50+ apps and services",
-  "24/7 customer support with 99.9% uptime SLA",
+  "Never lose context—infinite conversation memory",
+  "Access GPT-4, Claude, Gemini, and DeepSeek in one place",
+  "Search your documents with AI-powered RAG",
+  "Team knowledge bases for shared expertise",
+  "Connect with Google Calendar, Gmail, Slack, and GitHub",
+  "Your data is never used for AI model training",
 ];
 
 const pricingTiers = [
   {
     name: "Starter",
     price: 49,
-    description: "For individuals and freelancers",
-    features: "Unlimited AI • Infinite memory",
+    description: "For individuals",
+    features: "Unlimited AI • Infinite memory • 1 user",
     popular: false,
+  },
+  {
+    name: "Pro",
+    price: 99,
+    description: "For power users",
+    features: "Everything in Starter • Priority support",
+    popular: true,
   },
   {
     name: "Team",
     price: 499,
-    description: "For growing teams (up to 10 users)",
+    description: "For teams (up to 10 users)",
     features: "Team knowledge base • Collaboration",
-    popular: true,
-  },
-  {
-    name: "Business",
-    price: 1999,
-    description: "For organizations (up to 50 users)",
-    features: "SSO • Priority support • Onboarding",
     popular: false,
   },
 ];
