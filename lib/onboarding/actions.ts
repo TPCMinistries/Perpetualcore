@@ -75,20 +75,20 @@ export async function getOnboardingProgress() {
       // Check if user has any conversations
       supabase
         .from("conversations")
-        .select("id", { count: "exact", head: true })
+        .select("id")
         .eq("user_id", user.id)
         .limit(1),
       // Check if user has any documents
       supabase
         .from("documents")
-        .select("id", { count: "exact", head: true })
+        .select("id")
         .eq("user_id", user.id)
         .limit(1),
     ]);
 
-    const hasConversations = (conversationsResult.data?.length || 0) > 0;
-    const hasDocuments = (documentsResult.data?.length || 0) > 0;
-    // User has searched if they have conversations (as search is typically done in chat)
+    const hasConversations = (conversationsResult.data?.length ?? 0) > 0;
+    const hasDocuments = (documentsResult.data?.length ?? 0) > 0;
+    // User has searched if they have both conversations and documents
     const hasSearched = hasConversations && hasDocuments;
 
     const progress = [
@@ -101,6 +101,56 @@ export async function getOnboardingProgress() {
   } catch (error: any) {
     console.error("Error in getOnboardingProgress:", error);
     return { error: error.message || "An error occurred", data: [] };
+  }
+}
+
+// Dismiss the onboarding checklist
+export async function dismissOnboardingChecklist() {
+  try {
+    const supabase = await createClient();
+
+    const { data: { user }, error: userError } = await supabase.auth.getUser();
+    if (userError || !user) {
+      return { error: "Not authenticated" };
+    }
+
+    const { error } = await supabase
+      .from("profiles")
+      .update({ onboarding_checklist_dismissed: true })
+      .eq("id", user.id);
+
+    if (error) {
+      console.error("Error dismissing checklist:", error);
+      return { error: "Failed to dismiss checklist" };
+    }
+
+    return { success: true };
+  } catch (error: any) {
+    console.error("Error in dismissOnboardingChecklist:", error);
+    return { error: error.message || "An error occurred" };
+  }
+}
+
+// Check if checklist is dismissed
+export async function isChecklistDismissed() {
+  try {
+    const supabase = await createClient();
+
+    const { data: { user }, error: userError } = await supabase.auth.getUser();
+    if (userError || !user) {
+      return { dismissed: false };
+    }
+
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("onboarding_checklist_dismissed")
+      .eq("id", user.id)
+      .single();
+
+    return { dismissed: profile?.onboarding_checklist_dismissed || false };
+  } catch (error: any) {
+    console.error("Error checking checklist dismissed:", error);
+    return { dismissed: false };
   }
 }
 

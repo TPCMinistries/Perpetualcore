@@ -3,9 +3,10 @@
 import { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import { Check, Circle, Sparkles, MessageSquare, Upload, Search } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Check, Circle, Sparkles, MessageSquare, Upload, Search, X } from "lucide-react";
 import Link from "next/link";
-import { getOnboardingProgress, markStepComplete } from "@/lib/onboarding/actions";
+import { getOnboardingProgress, dismissOnboardingChecklist, isChecklistDismissed } from "@/lib/onboarding/actions";
 
 interface ChecklistStep {
   key: string;
@@ -24,6 +25,7 @@ export function OnboardingChecklist() {
   ]);
 
   const [isLoading, setIsLoading] = useState(true);
+  const [isDismissed, setIsDismissed] = useState(false);
 
   useEffect(() => {
     loadProgress();
@@ -31,6 +33,15 @@ export function OnboardingChecklist() {
 
   const loadProgress = async () => {
     setIsLoading(true);
+
+    // Check if dismissed first
+    const { dismissed } = await isChecklistDismissed();
+    if (dismissed) {
+      setIsDismissed(true);
+      setIsLoading(false);
+      return;
+    }
+
     const { data } = await getOnboardingProgress();
 
     if (data) {
@@ -48,11 +59,17 @@ export function OnboardingChecklist() {
     setIsLoading(false);
   };
 
+  const handleDismiss = async () => {
+    await dismissOnboardingChecklist();
+    setIsDismissed(true);
+  };
+
   const completedCount = steps.filter(s => s.completed).length;
   const progress = (completedCount / steps.length) * 100;
 
-  if (completedCount === steps.length) {
-    return null; // Hide checklist when all steps are complete
+  // Hide if dismissed or all steps complete
+  if (isDismissed || completedCount === steps.length) {
+    return null;
   }
 
   return (
@@ -68,11 +85,22 @@ export function OnboardingChecklist() {
               Complete these steps to unlock the full power of Perpetual Core
             </p>
           </div>
-          <div className="text-right flex-shrink-0">
-            <p className="text-2xl font-bold text-slate-900 dark:text-slate-100">
-              {completedCount}/{steps.length}
-            </p>
-            <p className="text-xs text-slate-600 dark:text-slate-400">completed</p>
+          <div className="text-right flex-shrink-0 flex items-start gap-2">
+            <div>
+              <p className="text-2xl font-bold text-slate-900 dark:text-slate-100">
+                {completedCount}/{steps.length}
+              </p>
+              <p className="text-xs text-slate-600 dark:text-slate-400">completed</p>
+            </div>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300"
+              onClick={handleDismiss}
+              title="Dismiss checklist"
+            >
+              <X className="h-4 w-4" />
+            </Button>
           </div>
         </div>
 
