@@ -79,82 +79,23 @@ export async function POST(
       })),
     ];
 
-    // Create streaming response
+    // Create streaming response using AsyncGenerator
     const encoder = new TextEncoder();
     const stream = new ReadableStream({
       async start(controller) {
         try {
-          const response = await streamChatCompletion(
-            "claude-sonnet-4", // Use Sonnet for fast, quality responses
-            chatMessages,
-            {
-              temperature: 0.7,
-              max_tokens: 2000,
+          // streamChatCompletion returns an AsyncGenerator
+          for await (const chunk of streamChatCompletion(
+            "claude-sonnet-4",
+            chatMessages
+          )) {
+            if (chunk.content) {
+              controller.enqueue(
+                encoder.encode(`data: ${JSON.stringify({ content: chunk.content })}\n\n`)
+              );
             }
-          );
-
-          const reader = response.getReader();
-          let buffer = "";
-
-          while (true) {
-            const { done, value } = await reader.read();
-            if (done) break;
-
-            // Decode the chunk
-            const text = new TextDecoder().decode(value);
-            buffer += text;
-
-            // Process complete SSE events
-            const lines = buffer.split("\n");
-            buffer = lines.pop() || ""; // Keep incomplete line in buffer
-
-            for (const line of lines) {
-              if (line.startsWith("data: ")) {
-                const data = line.slice(6);
-                if (data === "[DONE]") {
-                  controller.enqueue(encoder.encode("data: [DONE]\n\n"));
-                  continue;
-                }
-
-                try {
-                  const parsed = JSON.parse(data);
-                  // Extract content from the response
-                  let content = "";
-                  if (parsed.choices?.[0]?.delta?.content) {
-                    content = parsed.choices[0].delta.content;
-                  } else if (parsed.delta?.text) {
-                    content = parsed.delta.text;
-                  } else if (parsed.content) {
-                    content = parsed.content;
-                  }
-
-                  if (content) {
-                    controller.enqueue(
-                      encoder.encode(`data: ${JSON.stringify({ content })}\n\n`)
-                    );
-                  }
-                } catch {
-                  // Skip unparseable chunks
-                }
-              }
-            }
-          }
-
-          // Process any remaining buffer
-          if (buffer.startsWith("data: ") && buffer.length > 6) {
-            const data = buffer.slice(6);
-            try {
-              const parsed = JSON.parse(data);
-              const content = parsed.choices?.[0]?.delta?.content ||
-                             parsed.delta?.text ||
-                             parsed.content || "";
-              if (content) {
-                controller.enqueue(
-                  encoder.encode(`data: ${JSON.stringify({ content })}\n\n`)
-                );
-              }
-            } catch {
-              // Skip
+            if (chunk.done) {
+              break;
             }
           }
 
@@ -162,7 +103,10 @@ export async function POST(
           controller.close();
         } catch (error) {
           console.error("Streaming error:", error);
-          controller.error(error);
+          controller.enqueue(
+            encoder.encode(`data: ${JSON.stringify({ error: "Failed to get response" })}\n\n`)
+          );
+          controller.close();
         }
       },
     });

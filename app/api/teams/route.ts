@@ -137,9 +137,9 @@ export async function POST(request: NextRequest) {
     }
 
     // Check if user has permission to create teams
-    if (!["admin", "owner"].includes(profile.user_role || "")) {
+    if (!["admin", "owner", "manager"].includes(profile.user_role || "")) {
       return NextResponse.json(
-        { error: "Permission denied. Only admins can create teams." },
+        { error: "Permission denied. Only admins and managers can create teams." },
         { status: 403 }
       );
     }
@@ -208,7 +208,6 @@ export async function POST(request: NextRequest) {
       user_id: user.id,
       role: "lead",
       can_manage_members: true,
-      can_edit_settings: true,
       can_manage_projects: true,
     });
 
