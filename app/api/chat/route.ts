@@ -10,6 +10,7 @@ import { AVAILABLE_TOOLS, executeToolCall } from "@/lib/ai/tools/registry";
 import { loadUserPreferences, applyPreferencesToPrompt } from "@/lib/intelligence/preference-loader";
 import { getIntelligenceSummary } from "@/lib/intelligence";
 import { rateLimiters, checkRateLimit } from "@/lib/rate-limit";
+import { loadTeamContext, loadUserTeamContext, buildTeamSystemPrompt, LoadedTeamContext } from "@/lib/intelligence/team-context";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -563,6 +564,27 @@ Or, you can copy and paste the text content directly into this chat.`;
       // Continue without intelligence - this should not block chat
     }
 
+    // Load and apply team context if user has an active team context set
+    let activeTeamContext: LoadedTeamContext | null = null;
+    try {
+      if (profile?.active_team_context) {
+        if (isDev) console.log("👥 Loading team context:", profile.active_team_context);
+        activeTeamContext = await withTimeout(
+          loadTeamContext(profile.active_team_context),
+          3000,
+          null
+        );
+
+        if (activeTeamContext) {
+          if (isDev) console.log("✅ Team context loaded:", activeTeamContext.teamName);
+          systemPrompt = buildTeamSystemPrompt(systemPrompt, activeTeamContext);
+        }
+      }
+    } catch (error) {
+      if (isDev) console.error("⚠️ Team context loading error (non-fatal):", error);
+      // Continue without team context - this should not block chat
+    }
+
     // Check if we should use RAG
     let relevantDocs: any[] = [];
     if (isDev) console.log("🔍 Checking RAG for query:", userMessage);
@@ -575,6 +597,22 @@ Or, you can copy and paste the text content directly into this chat.`;
         // Search for relevant documents with enhanced context-aware RAG
         // Lower threshold (0.3) to be more inclusive - let the AI decide what's relevant
         // Use timeout to prevent RAG from blocking chat if vector DB hangs
+        // Build RAG options with optional team filtering
+        const ragOptions: {
+          scope: 'all' | 'personal' | 'team';
+          conversationId?: string;
+          teamId?: string;
+        } = {
+          scope: activeTeamContext ? 'team' : 'all', // Filter to team if active context
+          conversationId: conversationId || undefined,
+        };
+
+        // Add team filter if team context is active
+        if (activeTeamContext) {
+          ragOptions.teamId = activeTeamContext.teamId;
+          if (isDev) console.log("🔍 RAG filtered to team:", activeTeamContext.teamName);
+        }
+
         relevantDocs = await withTimeout(
           searchDocuments(
             userMessage,
@@ -582,10 +620,7 @@ Or, you can copy and paste the text content directly into this chat.`;
             user.id, // Pass user ID for permission checking
             10, // Get more chunks for better context
             0.3, // Lower threshold = more permissive, like NotebookLM
-            {
-              scope: 'all', // Search all accessible documents (personal + shared + org)
-              conversationId: conversationId || undefined, // Pass conversation context
-            }
+            ragOptions
           ),
           5000, // 5 second timeout for RAG
           [] // Return empty array on timeout
@@ -693,6 +728,22 @@ Or, you can copy and paste the text content directly into this chat.`;
                 JSON.stringify({
                   ragUsed: true,
                   documentsCount: relevantDocs.length,
+                }) + "\n"
+              )
+            );
+          }
+
+          // Send team context info if active
+          if (activeTeamContext) {
+            controller.enqueue(
+              encoder.encode(
+                JSON.stringify({
+                  teamContext: {
+                    teamId: activeTeamContext.teamId,
+                    teamName: activeTeamContext.teamName,
+                    teamEmoji: activeTeamContext.teamEmoji,
+                    teamColor: activeTeamContext.teamColor,
+                  },
                 }) + "\n"
               )
             );

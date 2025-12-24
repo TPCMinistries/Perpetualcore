@@ -1,10 +1,11 @@
 import { createClient } from "@/lib/supabase/server";
-import { NextRequest } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
+import { CreateProjectRequest, ProjectStage } from "@/types/work";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-// GET - Fetch all projects for user's organization
+// GET - Fetch all projects for user's organization with filters
 export async function GET(req: NextRequest) {
   try {
     const supabase = await createClient();
@@ -14,7 +15,7 @@ export async function GET(req: NextRequest) {
     } = await supabase.auth.getUser();
 
     if (!user) {
-      return new Response("Unauthorized", { status: 401 });
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     // Get user's profile to find organization
@@ -25,29 +26,112 @@ export async function GET(req: NextRequest) {
       .single();
 
     if (!profile) {
-      return new Response("Profile not found", { status: 404 });
+      return NextResponse.json({ error: "Profile not found" }, { status: 404 });
     }
 
-    // Fetch projects for this organization
-    const { data: projects, error } = await supabase
+    // Parse query parameters
+    const { searchParams } = new URL(req.url);
+    const stage = searchParams.get("stage") as ProjectStage | null;
+    const teamId = searchParams.get("team_id");
+    const includeArchived = searchParams.get("archived") === "true";
+    const withMembers = searchParams.get("members") === "true";
+    const groupByStage = searchParams.get("group_by_stage") === "true";
+
+    // Build query
+    let query = supabase
       .from("projects")
-      .select("*")
+      .select(
+        withMembers
+          ? `
+          *,
+          team:teams(id, name, emoji, color),
+          project_members(
+            id,
+            user_id,
+            role,
+            can_edit_project,
+            can_manage_tasks,
+            joined_at,
+            profiles:user_id(id, full_name, email, avatar_url)
+          )
+        `
+          : `
+          *,
+          team:teams(id, name, emoji, color)
+        `
+      )
       .eq("organization_id", profile.organization_id)
-      .order("created_at", { ascending: true });
+      .order("sort_order", { ascending: true })
+      .order("updated_at", { ascending: false });
+
+    // Apply filters
+    if (stage) {
+      query = query.eq("current_stage", stage);
+    }
+
+    if (teamId) {
+      query = query.eq("team_id", teamId);
+    }
+
+    if (!includeArchived) {
+      query = query.eq("is_archived", false);
+    }
+
+    const { data: projects, error } = await query;
 
     if (error) {
       console.error("Error fetching projects:", error);
-      return new Response("Failed to fetch projects", { status: 500 });
+      return NextResponse.json(
+        { error: "Failed to fetch projects" },
+        { status: 500 }
+      );
     }
 
-    return Response.json(projects || []);
+    // Transform data
+    const transformedProjects = (projects || []).map((project: any) => ({
+      ...project,
+      members: project.project_members?.map((m: any) => ({
+        ...m,
+        user: m.profiles,
+        profiles: undefined,
+      })),
+      member_count: project.project_members?.length || 0,
+      project_members: undefined,
+    }));
+
+    // Optionally group by stage for Kanban view
+    if (groupByStage) {
+      const grouped = {
+        ideation: transformedProjects.filter(
+          (p: any) => p.current_stage === "ideation"
+        ),
+        planning: transformedProjects.filter(
+          (p: any) => p.current_stage === "planning"
+        ),
+        in_progress: transformedProjects.filter(
+          (p: any) => p.current_stage === "in_progress"
+        ),
+        review: transformedProjects.filter(
+          (p: any) => p.current_stage === "review"
+        ),
+        complete: transformedProjects.filter(
+          (p: any) => p.current_stage === "complete"
+        ),
+      };
+      return NextResponse.json({ projects: grouped, grouped: true });
+    }
+
+    return NextResponse.json({ projects: transformedProjects });
   } catch (error) {
     console.error("Projects API error:", error);
-    return new Response("Internal server error", { status: 500 });
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 }
+    );
   }
 }
 
-// POST - Create a new project
+// POST - Create a new project (workspace)
 export async function POST(req: NextRequest) {
   try {
     const supabase = await createClient();
@@ -57,7 +141,7 @@ export async function POST(req: NextRequest) {
     } = await supabase.auth.getUser();
 
     if (!user) {
-      return new Response("Unauthorized", { status: 401 });
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     // Get user's profile to find organization
@@ -68,35 +152,94 @@ export async function POST(req: NextRequest) {
       .single();
 
     if (!profile) {
-      return new Response("Profile not found", { status: 404 });
+      return NextResponse.json({ error: "Profile not found" }, { status: 404 });
     }
 
-    const { name, color, icon } = await req.json();
+    const body: CreateProjectRequest = await req.json();
 
-    if (!name || !name.trim()) {
-      return new Response("Project name is required", { status: 400 });
+    if (!body.name || !body.name.trim()) {
+      return NextResponse.json(
+        { error: "Project name is required" },
+        { status: 400 }
+      );
     }
 
+    // If team_id provided, verify it exists
+    if (body.team_id) {
+      const { data: team } = await supabase
+        .from("teams")
+        .select("id")
+        .eq("id", body.team_id)
+        .eq("organization_id", profile.organization_id)
+        .single();
+
+      if (!team) {
+        return NextResponse.json(
+          { error: "Team not found" },
+          { status: 404 }
+        );
+      }
+    }
+
+    // Create the project
     const { data: project, error } = await supabase
       .from("projects")
       .insert({
         organization_id: profile.organization_id,
         created_by: user.id,
-        name: name.trim(),
-        color: color || "#6366f1",
-        icon: icon || "📁",
+        name: body.name.trim(),
+        description: body.description,
+        color: body.color || "#6366f1",
+        emoji: body.emoji || "📁",
+        team_id: body.team_id,
+        start_date: body.start_date,
+        target_date: body.target_date,
+        priority: body.priority || "medium",
+        current_stage: "ideation", // All new projects start in ideation
       })
-      .select()
+      .select(
+        `
+        *,
+        team:teams(id, name, emoji, color)
+      `
+      )
       .single();
 
     if (error) {
       console.error("Error creating project:", error);
-      return new Response("Failed to create project", { status: 500 });
+
+      // Handle unique constraint violation
+      if (error.code === "23505") {
+        return NextResponse.json(
+          { error: "A project with this name already exists" },
+          { status: 409 }
+        );
+      }
+
+      return NextResponse.json(
+        { error: "Failed to create project" },
+        { status: 500 }
+      );
     }
 
-    return Response.json(project);
+    // Add creator as project owner
+    await supabase.from("project_members").insert({
+      project_id: project.id,
+      user_id: user.id,
+      role: "owner",
+      can_edit_project: true,
+      can_manage_tasks: true,
+      can_upload_files: true,
+      can_invite_members: true,
+      can_manage_milestones: true,
+    });
+
+    return NextResponse.json({ project }, { status: 201 });
   } catch (error) {
     console.error("Projects API error:", error);
-    return new Response("Internal server error", { status: 500 });
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 }
+    );
   }
 }

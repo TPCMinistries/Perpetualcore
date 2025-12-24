@@ -33,6 +33,8 @@ import {
   Ticket,
   Share2,
   Brain,
+  FolderKanban,
+  UsersRound,
 } from "lucide-react";
 import { UserExperienceLevel, AdaptiveNavConfig } from "@/types/user-experience";
 
@@ -110,12 +112,34 @@ export const NAVIGATION_CONFIG: NavigationSection[] = [
     ],
   },
 
-  // WORK - Core productivity features
+  // WORK - Core productivity features (restructured with Projects & Teams first)
   {
     section: "Work",
     color: "text-slate-600 dark:text-slate-400",
     bgColor: "bg-slate-50 dark:bg-slate-950/30",
     items: [
+      {
+        name: "Projects",
+        href: "/dashboard/projects",
+        icon: FolderKanban,
+        adaptiveConfig: {
+          visibleFor: ["beginner", "intermediate", "advanced"],
+          complexity: "essential",
+          isCore: true,
+          helpText: "Project workspaces with Kanban boards, team files, chat, and milestones",
+        },
+      },
+      {
+        name: "Teams",
+        href: "/dashboard/teams",
+        icon: UsersRound,
+        adaptiveConfig: {
+          visibleFor: ["beginner", "intermediate", "advanced"],
+          complexity: "essential",
+          isCore: true,
+          helpText: "Manage departments and project teams with context-aware AI",
+        },
+      },
       {
         name: "Library",
         href: "/dashboard/library",
@@ -132,8 +156,8 @@ export const NAVIGATION_CONFIG: NavigationSection[] = [
         icon: CheckSquare,
         adaptiveConfig: {
           visibleFor: ["beginner", "intermediate", "advanced"],
-          complexity: "essential",
-          helpText: "Intelligent task management with AI-powered extraction and tracking",
+          complexity: "standard",
+          helpText: "Intelligent task management - global or project-scoped with AI extraction",
         },
       },
       {
@@ -144,26 +168,6 @@ export const NAVIGATION_CONFIG: NavigationSection[] = [
           visibleFor: ["beginner", "intermediate", "advanced"],
           complexity: "standard",
           helpText: "Meeting transcription, action item extraction, and intelligent briefings",
-        },
-      },
-      {
-        name: "Email",
-        href: "/dashboard/email",
-        icon: Mail,
-        adaptiveConfig: {
-          visibleFor: ["beginner", "intermediate", "advanced"],
-          complexity: "standard",
-          helpText: "AI email assistant - draft, respond, and organize intelligently",
-        },
-      },
-      {
-        name: "Team Chat",
-        href: "/dashboard/conversations",
-        icon: MessageCircle,
-        adaptiveConfig: {
-          visibleFor: ["beginner", "intermediate", "advanced"],
-          complexity: "standard",
-          helpText: "Collaborate with your team - AI assists in conversations",
         },
       },
     ],
