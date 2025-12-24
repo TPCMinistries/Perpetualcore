@@ -32,8 +32,10 @@ export async function GET(req: NextRequest) {
     const searchParams = req.nextUrl.searchParams;
     const status = searchParams.get("status") || undefined;
     const priority = searchParams.get("priority") || undefined;
+    const projectId = searchParams.get("project_id") || undefined;
+    const teamId = searchParams.get("team_id") || undefined;
 
-    const tasks = await getUserTasks(user.id, { status, priority });
+    const tasks = await getUserTasks(user.id, { status, priority, projectId, teamId });
 
     return NextResponse.json({ tasks, count: tasks.length });
   } catch (error) {
@@ -120,6 +122,8 @@ export async function POST(req: NextRequest) {
       estimated_duration_minutes: body.estimatedDurationMinutes || null,
       parent_task_id: body.parentTaskId || null,
       project_name: body.projectName || null,
+      project_id: body.projectId || null,
+      team_id: body.teamId || null,
       tags: body.tags || [],
       source_type: "manual",
       execution_log: [],

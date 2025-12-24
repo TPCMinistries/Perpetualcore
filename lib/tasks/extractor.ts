@@ -165,6 +165,8 @@ export async function getUserTasks(
     priority?: string;
     assignedTo?: string;
     dueBefore?: string;
+    projectId?: string;
+    teamId?: string;
   }
 ) {
   const supabase = await createClient();
@@ -183,10 +185,13 @@ export async function getUserTasks(
     query = query.eq("priority", filters.priority);
   }
 
-  // Note: assigned_to column doesn't exist in current schema
-  // if (filters?.assignedTo) {
-  //   query = query.eq("assigned_to", filters.assignedTo);
-  // }
+  if (filters?.projectId) {
+    query = query.eq("project_id", filters.projectId);
+  }
+
+  if (filters?.teamId) {
+    query = query.eq("team_id", filters.teamId);
+  }
 
   if (filters?.dueBefore) {
     query = query.lte("due_date", filters.dueBefore);

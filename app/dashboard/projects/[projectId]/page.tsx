@@ -63,6 +63,40 @@ import {
   KANBAN_COLUMNS,
 } from "@/types/work";
 import { cn } from "@/lib/utils";
+import { toast } from "sonner";
+import { ProjectAssistant } from "@/components/projects/ProjectAssistant";
+
+interface Task {
+  id: string;
+  title: string;
+  description?: string;
+  status: "todo" | "in_progress" | "completed";
+  priority: "low" | "medium" | "high" | "urgent";
+  due_date?: string;
+  created_at: string;
+}
+
+interface Document {
+  id: string;
+  name: string;
+  type: string;
+  file_url?: string;
+  file_size?: number;
+  status: string;
+  created_at: string;
+  added_at?: string;
+}
+
+interface Conversation {
+  id: string;
+  title: string;
+  description?: string;
+  context_type: string;
+  is_private: boolean;
+  created_at: string;
+  last_message_at?: string;
+  creator_name?: string;
+}
 
 export default function ProjectWorkspacePage() {
   const router = useRouter();
@@ -74,6 +108,28 @@ export default function ProjectWorkspacePage() {
   const [activeTab, setActiveTab] = useState("overview");
   const [milestoneDialogOpen, setMilestoneDialogOpen] = useState(false);
   const [creatingMilestone, setCreatingMilestone] = useState(false);
+
+  // Tasks state
+  const [tasks, setTasks] = useState<Task[]>([]);
+  const [tasksLoading, setTasksLoading] = useState(false);
+  const [taskDialogOpen, setTaskDialogOpen] = useState(false);
+  const [creatingTask, setCreatingTask] = useState(false);
+  const [newTaskTitle, setNewTaskTitle] = useState("");
+  const [newTaskDescription, setNewTaskDescription] = useState("");
+  const [newTaskPriority, setNewTaskPriority] = useState<"low" | "medium" | "high" | "urgent">("medium");
+  const [newTaskDueDate, setNewTaskDueDate] = useState("");
+
+  // Documents state
+  const [documents, setDocuments] = useState<Document[]>([]);
+  const [documentsLoading, setDocumentsLoading] = useState(false);
+
+  // Conversations state
+  const [conversations, setConversations] = useState<Conversation[]>([]);
+  const [conversationsLoading, setConversationsLoading] = useState(false);
+  const [chatDialogOpen, setChatDialogOpen] = useState(false);
+  const [creatingChat, setCreatingChat] = useState(false);
+  const [newChatTitle, setNewChatTitle] = useState("");
+  const [newChatDescription, setNewChatDescription] = useState("");
 
   // Milestone form state
   const [newMilestoneName, setNewMilestoneName] = useState("");
@@ -118,7 +174,10 @@ export default function ProjectWorkspacePage() {
   };
 
   const handleCreateMilestone = async () => {
-    if (!newMilestoneName.trim()) return;
+    if (!newMilestoneName.trim()) {
+      toast.error("Please enter a milestone name");
+      return;
+    }
 
     setCreatingMilestone(true);
     try {
@@ -142,9 +201,14 @@ export default function ProjectWorkspacePage() {
         );
         setMilestoneDialogOpen(false);
         resetMilestoneForm();
+        toast.success("Milestone created successfully");
+      } else {
+        const errorData = await response.json();
+        toast.error(errorData.error || "Failed to create milestone");
       }
     } catch (error) {
       console.error("Error creating milestone:", error);
+      toast.error("Failed to create milestone. Please try again.");
     } finally {
       setCreatingMilestone(false);
     }
@@ -155,43 +219,55 @@ export default function ProjectWorkspacePage() {
     const completedAt = isCompleting ? new Date().toISOString() : null;
 
     try {
-      await fetch(`/api/projects/${projectId}/milestones?id=${milestone.id}`, {
+      const response = await fetch(`/api/projects/${projectId}/milestones?id=${milestone.id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ completed_at: completedAt }),
       });
 
-      setProject((prev) =>
-        prev
-          ? {
-              ...prev,
-              milestones: prev.milestones.map((m) =>
-                m.id === milestone.id ? { ...m, completed_at: completedAt } : m
-              ),
-            }
-          : null
-      );
+      if (response.ok) {
+        setProject((prev) =>
+          prev
+            ? {
+                ...prev,
+                milestones: prev.milestones.map((m) =>
+                  m.id === milestone.id ? { ...m, completed_at: completedAt } : m
+                ),
+              }
+            : null
+        );
+        toast.success(isCompleting ? "Milestone completed" : "Milestone reopened");
+      } else {
+        toast.error("Failed to update milestone");
+      }
     } catch (error) {
       console.error("Error toggling milestone:", error);
+      toast.error("Failed to update milestone");
     }
   };
 
   const handleDeleteMilestone = async (milestoneId: string) => {
     try {
-      await fetch(`/api/projects/${projectId}/milestones?id=${milestoneId}`, {
+      const response = await fetch(`/api/projects/${projectId}/milestones?id=${milestoneId}`, {
         method: "DELETE",
       });
 
-      setProject((prev) =>
-        prev
-          ? {
-              ...prev,
-              milestones: prev.milestones.filter((m) => m.id !== milestoneId),
-            }
-          : null
-      );
+      if (response.ok) {
+        setProject((prev) =>
+          prev
+            ? {
+                ...prev,
+                milestones: prev.milestones.filter((m) => m.id !== milestoneId),
+              }
+            : null
+        );
+        toast.success("Milestone deleted");
+      } else {
+        toast.error("Failed to delete milestone");
+      }
     } catch (error) {
       console.error("Error deleting milestone:", error);
+      toast.error("Failed to delete milestone");
     }
   };
 
@@ -201,6 +277,212 @@ export default function ProjectWorkspacePage() {
     setNewMilestoneDueDate("");
     setNewMilestoneStage("planning");
   };
+
+  // Task functions
+  const fetchTasks = async () => {
+    setTasksLoading(true);
+    try {
+      const response = await fetch(`/api/tasks?project_id=${projectId}`);
+      if (response.ok) {
+        const data = await response.json();
+        setTasks(data.tasks || []);
+      }
+    } catch (error) {
+      console.error("Error fetching tasks:", error);
+    } finally {
+      setTasksLoading(false);
+    }
+  };
+
+  const handleCreateTask = async () => {
+    if (!newTaskTitle.trim()) {
+      toast.error("Please enter a task title");
+      return;
+    }
+
+    setCreatingTask(true);
+    try {
+      const response = await fetch("/api/tasks", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          title: newTaskTitle,
+          description: newTaskDescription,
+          priority: newTaskPriority,
+          dueDate: newTaskDueDate || undefined,
+          projectId: projectId,
+        }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setTasks((prev) => [data.task, ...prev]);
+        setTaskDialogOpen(false);
+        resetTaskForm();
+        toast.success("Task created successfully");
+      } else {
+        const errorData = await response.json();
+        toast.error(errorData.error || "Failed to create task");
+      }
+    } catch (error) {
+      console.error("Error creating task:", error);
+      toast.error("Failed to create task");
+    } finally {
+      setCreatingTask(false);
+    }
+  };
+
+  const handleToggleTask = async (task: Task) => {
+    const newStatus = task.status === "completed" ? "todo" : "completed";
+    try {
+      const response = await fetch("/api/tasks", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: task.id, status: newStatus }),
+      });
+
+      if (response.ok) {
+        setTasks((prev) =>
+          prev.map((t) => (t.id === task.id ? { ...t, status: newStatus } : t))
+        );
+        toast.success(newStatus === "completed" ? "Task completed" : "Task reopened");
+      }
+    } catch (error) {
+      console.error("Error updating task:", error);
+      toast.error("Failed to update task");
+    }
+  };
+
+  const handleDeleteTask = async (taskId: string) => {
+    try {
+      const response = await fetch(`/api/tasks?id=${taskId}`, {
+        method: "DELETE",
+      });
+
+      if (response.ok) {
+        setTasks((prev) => prev.filter((t) => t.id !== taskId));
+        toast.success("Task deleted");
+      }
+    } catch (error) {
+      console.error("Error deleting task:", error);
+      toast.error("Failed to delete task");
+    }
+  };
+
+  const resetTaskForm = () => {
+    setNewTaskTitle("");
+    setNewTaskDescription("");
+    setNewTaskPriority("medium");
+    setNewTaskDueDate("");
+  };
+
+  // Document functions
+  const fetchDocuments = async () => {
+    setDocumentsLoading(true);
+    try {
+      const response = await fetch(`/api/projects/${projectId}/documents`);
+      if (response.ok) {
+        const data = await response.json();
+        setDocuments(data.documents || []);
+      }
+    } catch (error) {
+      console.error("Error fetching documents:", error);
+    } finally {
+      setDocumentsLoading(false);
+    }
+  };
+
+  const handleRemoveDocument = async (documentId: string) => {
+    try {
+      const response = await fetch(`/api/projects/${projectId}/documents?document_id=${documentId}`, {
+        method: "DELETE",
+      });
+
+      if (response.ok) {
+        setDocuments((prev) => prev.filter((d) => d.id !== documentId));
+        toast.success("Document removed from project");
+      } else {
+        toast.error("Failed to remove document");
+      }
+    } catch (error) {
+      console.error("Error removing document:", error);
+      toast.error("Failed to remove document");
+    }
+  };
+
+  const formatFileSize = (bytes?: number) => {
+    if (!bytes) return "Unknown size";
+    if (bytes < 1024) return `${bytes} B`;
+    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+    return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+  };
+
+  // Conversation functions
+  const fetchConversations = async () => {
+    setConversationsLoading(true);
+    try {
+      const response = await fetch(`/api/projects/${projectId}/conversations`);
+      if (response.ok) {
+        const data = await response.json();
+        setConversations(data.conversations || []);
+      }
+    } catch (error) {
+      console.error("Error fetching conversations:", error);
+    } finally {
+      setConversationsLoading(false);
+    }
+  };
+
+  const handleCreateConversation = async () => {
+    if (!newChatTitle.trim()) {
+      toast.error("Please enter a conversation title");
+      return;
+    }
+
+    setCreatingChat(true);
+    try {
+      const response = await fetch(`/api/projects/${projectId}/conversations`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          title: newChatTitle,
+          description: newChatDescription,
+        }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setConversations((prev) => [data.conversation, ...prev]);
+        setChatDialogOpen(false);
+        setNewChatTitle("");
+        setNewChatDescription("");
+        toast.success("Conversation created");
+        // Navigate to the conversation
+        router.push(`/dashboard/team/conversations/${data.conversation.id}`);
+      } else {
+        const errorData = await response.json();
+        toast.error(errorData.error || "Failed to create conversation");
+      }
+    } catch (error) {
+      console.error("Error creating conversation:", error);
+      toast.error("Failed to create conversation");
+    } finally {
+      setCreatingChat(false);
+    }
+  };
+
+  // Fetch data when tabs change
+  useEffect(() => {
+    if (activeTab === "tasks" && tasks.length === 0) {
+      fetchTasks();
+    }
+    if (activeTab === "files" && documents.length === 0) {
+      fetchDocuments();
+    }
+    if (activeTab === "chat" && conversations.length === 0) {
+      fetchConversations();
+    }
+  }, [activeTab]);
 
   if (loading) {
     return (
@@ -693,20 +975,198 @@ export default function ProjectWorkspacePage() {
                 </CardContent>
               </Card>
             </div>
+
+            {/* Project Assistant */}
+            <div className="mt-6">
+              <ProjectAssistant
+                projectId={projectId}
+                projectName={project.name}
+                projectStage={project.current_stage}
+              />
+            </div>
           </TabsContent>
 
           {/* Tasks Tab */}
           <TabsContent value="tasks" className="mt-0">
             <Card>
-              <CardContent className="p-12 text-center">
-                <CheckSquare className="h-12 w-12 text-muted-foreground/50 mx-auto mb-4" />
-                <h3 className="text-lg font-medium mb-2">Project Task Board</h3>
-                <p className="text-muted-foreground mb-4">
-                  Manage tasks specific to this project. Coming soon.
-                </p>
-                <Button variant="outline" onClick={() => router.push("/dashboard/tasks")}>
-                  View Global Tasks
-                </Button>
+              <CardHeader className="flex flex-row items-center justify-between">
+                <div>
+                  <CardTitle>Project Tasks</CardTitle>
+                  <CardDescription>
+                    Tasks specific to this project
+                  </CardDescription>
+                </div>
+                <Dialog open={taskDialogOpen} onOpenChange={setTaskDialogOpen}>
+                  <DialogTrigger asChild>
+                    <Button size="sm">
+                      <Plus className="h-4 w-4 mr-2" />
+                      Add Task
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent>
+                    <DialogHeader>
+                      <DialogTitle>Create Task</DialogTitle>
+                      <DialogDescription>
+                        Add a new task to this project
+                      </DialogDescription>
+                    </DialogHeader>
+                    <div className="space-y-4 py-4">
+                      <div className="space-y-2">
+                        <Label>Title</Label>
+                        <Input
+                          placeholder="e.g., Review design mockups"
+                          value={newTaskTitle}
+                          onChange={(e) => setNewTaskTitle(e.target.value)}
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label>Description</Label>
+                        <Textarea
+                          placeholder="Task details..."
+                          value={newTaskDescription}
+                          onChange={(e) => setNewTaskDescription(e.target.value)}
+                        />
+                      </div>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                          <Label>Priority</Label>
+                          <Select
+                            value={newTaskPriority}
+                            onValueChange={(v) => setNewTaskPriority(v as typeof newTaskPriority)}
+                          >
+                            <SelectTrigger>
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="low">Low</SelectItem>
+                              <SelectItem value="medium">Medium</SelectItem>
+                              <SelectItem value="high">High</SelectItem>
+                              <SelectItem value="urgent">Urgent</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="space-y-2">
+                          <Label>Due Date</Label>
+                          <Input
+                            type="date"
+                            value={newTaskDueDate}
+                            onChange={(e) => setNewTaskDueDate(e.target.value)}
+                          />
+                        </div>
+                      </div>
+                    </div>
+                    <DialogFooter>
+                      <Button variant="outline" onClick={() => setTaskDialogOpen(false)}>
+                        Cancel
+                      </Button>
+                      <Button onClick={handleCreateTask} disabled={creatingTask}>
+                        {creatingTask ? "Creating..." : "Create Task"}
+                      </Button>
+                    </DialogFooter>
+                  </DialogContent>
+                </Dialog>
+              </CardHeader>
+              <CardContent>
+                {tasksLoading ? (
+                  <div className="flex items-center justify-center py-8">
+                    <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary" />
+                  </div>
+                ) : tasks.length > 0 ? (
+                  <div className="space-y-3">
+                    {tasks.map((task) => (
+                      <div
+                        key={task.id}
+                        className={cn(
+                          "flex items-center gap-3 p-3 rounded-lg border",
+                          task.status === "completed" && "bg-muted/50"
+                        )}
+                      >
+                        <button
+                          onClick={() => handleToggleTask(task)}
+                          className="shrink-0"
+                        >
+                          {task.status === "completed" ? (
+                            <CheckCircle className="h-5 w-5 text-green-500" />
+                          ) : (
+                            <Circle className="h-5 w-5 text-muted-foreground" />
+                          )}
+                        </button>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2">
+                            <span
+                              className={cn(
+                                "font-medium",
+                                task.status === "completed" && "line-through text-muted-foreground"
+                              )}
+                            >
+                              {task.title}
+                            </span>
+                            <Badge
+                              variant="outline"
+                              className={cn(
+                                "text-xs",
+                                task.priority === "urgent" && "border-red-500 text-red-500",
+                                task.priority === "high" && "border-orange-500 text-orange-500",
+                                task.priority === "medium" && "border-blue-500 text-blue-500",
+                                task.priority === "low" && "border-slate-500 text-slate-500"
+                              )}
+                            >
+                              {task.priority}
+                            </Badge>
+                          </div>
+                          {task.description && (
+                            <p className="text-sm text-muted-foreground line-clamp-1">
+                              {task.description}
+                            </p>
+                          )}
+                        </div>
+                        {task.due_date && (
+                          <div className="flex items-center gap-1 text-sm text-muted-foreground">
+                            <Clock className="h-3 w-3" />
+                            {new Date(task.due_date).toLocaleDateString("en-US", {
+                              month: "short",
+                              day: "numeric",
+                            })}
+                          </div>
+                        )}
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" size="icon" className="h-8 w-8">
+                              <MoreHorizontal className="h-4 w-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuItem>
+                              <Pencil className="h-4 w-4 mr-2" />
+                              Edit
+                            </DropdownMenuItem>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem
+                              className="text-destructive"
+                              onClick={() => handleDeleteTask(task.id)}
+                            >
+                              <Trash2 className="h-4 w-4 mr-2" />
+                              Delete
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-8">
+                    <CheckSquare className="h-10 w-10 text-muted-foreground/50 mx-auto mb-3" />
+                    <p className="text-muted-foreground mb-4">No tasks yet</p>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setTaskDialogOpen(true)}
+                    >
+                      <Plus className="h-4 w-4 mr-2" />
+                      Add First Task
+                    </Button>
+                  </div>
+                )}
               </CardContent>
             </Card>
           </TabsContent>
@@ -714,15 +1174,98 @@ export default function ProjectWorkspacePage() {
           {/* Files Tab */}
           <TabsContent value="files" className="mt-0">
             <Card>
-              <CardContent className="p-12 text-center">
-                <FileText className="h-12 w-12 text-muted-foreground/50 mx-auto mb-4" />
-                <h3 className="text-lg font-medium mb-2">Project Files</h3>
-                <p className="text-muted-foreground mb-4">
-                  Documents and files scoped to this project. Coming soon.
-                </p>
-                <Button variant="outline" onClick={() => router.push("/dashboard/library")}>
-                  View Library
+              <CardHeader className="flex flex-row items-center justify-between">
+                <div>
+                  <CardTitle>Project Files</CardTitle>
+                  <CardDescription>
+                    Documents linked to this project
+                  </CardDescription>
+                </div>
+                <Button size="sm" onClick={() => router.push("/dashboard/library")}>
+                  <Plus className="h-4 w-4 mr-2" />
+                  Link Document
                 </Button>
+              </CardHeader>
+              <CardContent>
+                {documentsLoading ? (
+                  <div className="flex items-center justify-center py-8">
+                    <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary" />
+                  </div>
+                ) : documents.length > 0 ? (
+                  <div className="space-y-3">
+                    {documents.map((doc) => (
+                      <div
+                        key={doc.id}
+                        className="flex items-center gap-3 p-3 rounded-lg border hover:bg-muted/50 transition-colors"
+                      >
+                        <div className="p-2 bg-primary/10 rounded-lg">
+                          <FileText className="h-5 w-5 text-primary" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <a
+                            href={`/dashboard/documents/${doc.id}`}
+                            className="font-medium hover:underline block truncate"
+                          >
+                            {doc.name}
+                          </a>
+                          <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                            <span className="uppercase">{doc.type}</span>
+                            <span>-</span>
+                            <span>{formatFileSize(doc.file_size)}</span>
+                            {doc.added_at && (
+                              <>
+                                <span>-</span>
+                                <span>Added {new Date(doc.added_at).toLocaleDateString()}</span>
+                              </>
+                            )}
+                          </div>
+                        </div>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" size="icon" className="h-8 w-8">
+                              <MoreHorizontal className="h-4 w-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuItem onClick={() => router.push(`/dashboard/documents/${doc.id}`)}>
+                              <FileText className="h-4 w-4 mr-2" />
+                              Open Document
+                            </DropdownMenuItem>
+                            {doc.file_url && (
+                              <DropdownMenuItem asChild>
+                                <a href={doc.file_url} target="_blank" rel="noopener noreferrer">
+                                  <FileText className="h-4 w-4 mr-2" />
+                                  Download
+                                </a>
+                              </DropdownMenuItem>
+                            )}
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem
+                              className="text-destructive"
+                              onClick={() => handleRemoveDocument(doc.id)}
+                            >
+                              <Trash2 className="h-4 w-4 mr-2" />
+                              Remove from Project
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-8">
+                    <FileText className="h-10 w-10 text-muted-foreground/50 mx-auto mb-3" />
+                    <p className="text-muted-foreground mb-4">No documents linked yet</p>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => router.push("/dashboard/library")}
+                    >
+                      <Plus className="h-4 w-4 mr-2" />
+                      Link Document from Library
+                    </Button>
+                  </div>
+                )}
               </CardContent>
             </Card>
           </TabsContent>
@@ -730,15 +1273,109 @@ export default function ProjectWorkspacePage() {
           {/* Chat Tab */}
           <TabsContent value="chat" className="mt-0">
             <Card>
-              <CardContent className="p-12 text-center">
-                <MessageSquare className="h-12 w-12 text-muted-foreground/50 mx-auto mb-4" />
-                <h3 className="text-lg font-medium mb-2">Project Conversations</h3>
-                <p className="text-muted-foreground mb-4">
-                  AI-assisted discussions specific to this project. Coming soon.
-                </p>
-                <Button variant="outline" onClick={() => router.push("/dashboard/chat")}>
-                  Go to Chat
-                </Button>
+              <CardHeader className="flex flex-row items-center justify-between">
+                <div>
+                  <CardTitle>Project Conversations</CardTitle>
+                  <CardDescription>
+                    AI-assisted discussions for this project
+                  </CardDescription>
+                </div>
+                <Dialog open={chatDialogOpen} onOpenChange={setChatDialogOpen}>
+                  <DialogTrigger asChild>
+                    <Button size="sm">
+                      <Plus className="h-4 w-4 mr-2" />
+                      New Conversation
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent>
+                    <DialogHeader>
+                      <DialogTitle>Start Conversation</DialogTitle>
+                      <DialogDescription>
+                        Create a new conversation for this project
+                      </DialogDescription>
+                    </DialogHeader>
+                    <div className="space-y-4 py-4">
+                      <div className="space-y-2">
+                        <Label>Title</Label>
+                        <Input
+                          placeholder="e.g., Sprint Planning Discussion"
+                          value={newChatTitle}
+                          onChange={(e) => setNewChatTitle(e.target.value)}
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label>Description (optional)</Label>
+                        <Textarea
+                          placeholder="What is this conversation about?"
+                          value={newChatDescription}
+                          onChange={(e) => setNewChatDescription(e.target.value)}
+                        />
+                      </div>
+                    </div>
+                    <DialogFooter>
+                      <Button variant="outline" onClick={() => setChatDialogOpen(false)}>
+                        Cancel
+                      </Button>
+                      <Button onClick={handleCreateConversation} disabled={creatingChat}>
+                        {creatingChat ? "Creating..." : "Start Conversation"}
+                      </Button>
+                    </DialogFooter>
+                  </DialogContent>
+                </Dialog>
+              </CardHeader>
+              <CardContent>
+                {conversationsLoading ? (
+                  <div className="flex items-center justify-center py-8">
+                    <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary" />
+                  </div>
+                ) : conversations.length > 0 ? (
+                  <div className="space-y-3">
+                    {conversations.map((conv) => (
+                      <a
+                        key={conv.id}
+                        href={`/dashboard/team/conversations/${conv.id}`}
+                        className="flex items-center gap-3 p-3 rounded-lg border hover:bg-muted/50 transition-colors block"
+                      >
+                        <div className="p-2 bg-primary/10 rounded-lg">
+                          <MessageSquare className="h-5 w-5 text-primary" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="font-medium truncate">{conv.title}</div>
+                          {conv.description && (
+                            <p className="text-sm text-muted-foreground line-clamp-1">
+                              {conv.description}
+                            </p>
+                          )}
+                          <div className="flex items-center gap-2 text-xs text-muted-foreground mt-1">
+                            {conv.creator_name && <span>By {conv.creator_name}</span>}
+                            <span>-</span>
+                            <span>
+                              {conv.last_message_at
+                                ? `Last activity ${new Date(conv.last_message_at).toLocaleDateString()}`
+                                : `Created ${new Date(conv.created_at).toLocaleDateString()}`}
+                            </span>
+                          </div>
+                        </div>
+                        <Badge variant={conv.is_private ? "secondary" : "outline"}>
+                          {conv.is_private ? "Private" : "Team"}
+                        </Badge>
+                      </a>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-8">
+                    <MessageSquare className="h-10 w-10 text-muted-foreground/50 mx-auto mb-3" />
+                    <p className="text-muted-foreground mb-4">No conversations yet</p>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setChatDialogOpen(true)}
+                    >
+                      <Plus className="h-4 w-4 mr-2" />
+                      Start First Conversation
+                    </Button>
+                  </div>
+                )}
               </CardContent>
             </Card>
           </TabsContent>
