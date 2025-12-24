@@ -43,6 +43,7 @@ import {
 } from "@/components/ui/select";
 import { Team, TeamType, DEPARTMENT_PRESETS } from "@/types/work";
 import { cn } from "@/lib/utils";
+import { toast } from "sonner";
 
 export default function TeamsPage() {
   const router = useRouter();
@@ -99,9 +100,14 @@ export default function TeamsPage() {
         setTeams([...teams, data.team]);
         setCreateDialogOpen(false);
         resetForm();
+        toast.success("Team created successfully");
+      } else {
+        const errorData = await response.json();
+        toast.error(errorData.error || "Failed to create team");
       }
     } catch (error) {
       console.error("Error creating team:", error);
+      toast.error("Failed to create team");
     } finally {
       setCreating(false);
     }
