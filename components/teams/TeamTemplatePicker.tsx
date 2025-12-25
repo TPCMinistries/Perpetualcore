@@ -203,15 +203,16 @@ export function TeamTemplatePickerCompact({
     : BOS_2_TEAM_TEMPLATES;
 
   return (
-    <div className={cn("space-y-3", className)}>
-      <div className="flex gap-2">
+    <div className={cn("space-y-4", className)}>
+      {/* Category Tabs */}
+      <div className="flex rounded-lg border p-1 bg-muted/30">
         <button
           onClick={() => setActiveCategory("bos_2")}
           className={cn(
-            "flex-1 py-2 px-3 rounded-lg text-sm font-medium transition-colors flex items-center justify-center gap-2",
+            "flex-1 py-2.5 px-4 rounded-md text-sm font-medium transition-all flex items-center justify-center gap-2",
             activeCategory === "bos_2"
-              ? "bg-primary text-primary-foreground"
-              : "bg-muted hover:bg-muted/80"
+              ? "bg-primary text-primary-foreground shadow-sm"
+              : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
           )}
         >
           <Sparkles className="h-4 w-4" />
@@ -220,10 +221,10 @@ export function TeamTemplatePickerCompact({
         <button
           onClick={() => setActiveCategory("traditional")}
           className={cn(
-            "flex-1 py-2 px-3 rounded-lg text-sm font-medium transition-colors flex items-center justify-center gap-2",
+            "flex-1 py-2.5 px-4 rounded-md text-sm font-medium transition-all flex items-center justify-center gap-2",
             activeCategory === "traditional"
-              ? "bg-primary text-primary-foreground"
-              : "bg-muted hover:bg-muted/80"
+              ? "bg-primary text-primary-foreground shadow-sm"
+              : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
           )}
         >
           <Building2 className="h-4 w-4" />
@@ -231,42 +232,65 @@ export function TeamTemplatePickerCompact({
         </button>
       </div>
 
-      <ScrollArea className="h-[250px]">
+      {/* Template List */}
+      <ScrollArea className="h-[280px]">
         <div className="grid gap-2 pr-4">
           {templates.map((template) => (
             <button
               key={template.id}
               onClick={() => onSelect(template)}
               className={cn(
-                "w-full text-left p-3 rounded-lg border transition-all flex items-center gap-3",
-                "hover:border-primary/50 hover:bg-accent/50",
+                "w-full text-left p-4 rounded-xl border-2 transition-all",
+                "hover:border-primary/50 hover:bg-accent/30",
                 selectedTemplateId === template.id
-                  ? "border-primary bg-primary/5"
-                  : "border-border"
+                  ? "border-primary bg-primary/5 shadow-sm"
+                  : "border-transparent bg-muted/30"
               )}
             >
-              <div
-                className="w-8 h-8 rounded-md flex items-center justify-center text-base shrink-0"
-                style={{ backgroundColor: `${template.color}20` }}
-              >
-                {template.emoji}
-              </div>
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2">
-                  <span className="font-medium text-sm">{template.name}</span>
-                  {template.workflow_stages && (
-                    <span className="text-[10px] text-muted-foreground">
-                      {template.workflow_stages.length} stages
-                    </span>
+              <div className="flex items-start gap-3">
+                <div
+                  className="w-10 h-10 rounded-lg flex items-center justify-center text-xl shrink-0"
+                  style={{ backgroundColor: `${template.color}20` }}
+                >
+                  {template.emoji}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 mb-0.5">
+                    <span className="font-semibold text-sm">{template.name}</span>
+                    {template.workflow_stages && (
+                      <span className="text-xs text-muted-foreground bg-muted px-1.5 py-0.5 rounded">
+                        {template.workflow_stages.length} stages
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-xs text-muted-foreground line-clamp-2">
+                    {template.description}
+                  </p>
+                  {/* Stage color dots for BOS 2.0 */}
+                  {template.workflow_stages && template.workflow_stages.length > 0 && (
+                    <div className="flex items-center gap-1 mt-2">
+                      {template.workflow_stages.slice(0, 6).map((stage) => (
+                        <div
+                          key={stage.id}
+                          className="w-2.5 h-2.5 rounded-full"
+                          style={{ backgroundColor: stage.color }}
+                          title={stage.name}
+                        />
+                      ))}
+                      {template.workflow_stages.length > 6 && (
+                        <span className="text-[10px] text-muted-foreground ml-1">
+                          +{template.workflow_stages.length - 6}
+                        </span>
+                      )}
+                    </div>
                   )}
                 </div>
-                <p className="text-xs text-muted-foreground truncate">
-                  {template.description}
-                </p>
+                {selectedTemplateId === template.id && (
+                  <div className="w-5 h-5 rounded-full bg-primary flex items-center justify-center shrink-0">
+                    <Check className="h-3 w-3 text-primary-foreground" />
+                  </div>
+                )}
               </div>
-              {selectedTemplateId === template.id && (
-                <Check className="h-4 w-4 text-primary shrink-0" />
-              )}
             </button>
           ))}
         </div>
