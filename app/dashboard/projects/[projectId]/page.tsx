@@ -137,6 +137,12 @@ export default function ProjectWorkspacePage() {
   const [newMilestoneDueDate, setNewMilestoneDueDate] = useState("");
   const [newMilestoneStage, setNewMilestoneStage] = useState<ProjectStage>("planning");
 
+  // Team assignment state
+  const [changeTeamDialogOpen, setChangeTeamDialogOpen] = useState(false);
+  const [availableTeams, setAvailableTeams] = useState<Array<{ id: string; name: string; emoji?: string; color?: string }>>([]);
+  const [selectedTeamId, setSelectedTeamId] = useState<string | null>(null);
+  const [changingTeam, setChangingTeam] = useState(false);
+
   useEffect(() => {
     fetchProject();
   }, [projectId]);
@@ -375,6 +381,65 @@ export default function ProjectWorkspacePage() {
     setNewTaskPriority("medium");
     setNewTaskDueDate("");
   };
+
+  // Team functions
+  const fetchAvailableTeams = async () => {
+    try {
+      const response = await fetch("/api/teams");
+      if (response.ok) {
+        const data = await response.json();
+        setAvailableTeams(data.teams || []);
+      }
+    } catch (error) {
+      console.error("Error fetching teams:", error);
+    }
+  };
+
+  const handleChangeTeam = async () => {
+    setChangingTeam(true);
+    try {
+      const response = await fetch(`/api/projects/${projectId}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ team_id: selectedTeamId }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        // Update project with new team info
+        if (selectedTeamId) {
+          const newTeam = availableTeams.find(t => t.id === selectedTeamId);
+          setProject(prev => prev ? {
+            ...prev,
+            team_id: selectedTeamId,
+            team: newTeam ? { id: newTeam.id, name: newTeam.name, emoji: newTeam.emoji, color: newTeam.color } : null
+          } : null);
+        } else {
+          setProject(prev => prev ? { ...prev, team_id: null, team: null } : null);
+        }
+        setChangeTeamDialogOpen(false);
+        toast.success(selectedTeamId ? "Team assigned successfully" : "Team removed from project");
+      } else {
+        const errorData = await response.json();
+        toast.error(errorData.error || "Failed to update team");
+      }
+    } catch (error) {
+      console.error("Error changing team:", error);
+      toast.error("Failed to update team");
+    } finally {
+      setChangingTeam(false);
+    }
+  };
+
+  // Open team dialog handler
+  useEffect(() => {
+    if (changeTeamDialogOpen && availableTeams.length === 0) {
+      fetchAvailableTeams();
+    }
+    if (changeTeamDialogOpen && project) {
+      setSelectedTeamId(project.team_id || null);
+    }
+  }, [changeTeamDialogOpen]);
 
   // Document functions
   const fetchDocuments = async () => {
@@ -1478,20 +1543,78 @@ export default function ProjectWorkspacePage() {
 
           {/* Team Tab */}
           <TabsContent value="team" className="mt-0">
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between">
-                <div>
-                  <CardTitle>Team Members</CardTitle>
-                  <CardDescription>
-                    People working on this project
-                  </CardDescription>
-                </div>
-                <Button size="sm">
-                  <Plus className="h-4 w-4 mr-2" />
-                  Add Member
-                </Button>
-              </CardHeader>
-              <CardContent>
+            <div className="space-y-6">
+              {/* Associated Team Section */}
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between">
+                  <div>
+                    <CardTitle>Associated Team</CardTitle>
+                    <CardDescription>
+                      The team this project belongs to
+                    </CardDescription>
+                  </div>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => setChangeTeamDialogOpen(true)}
+                  >
+                    {project.team ? "Change Team" : "Assign Team"}
+                  </Button>
+                </CardHeader>
+                <CardContent>
+                  {project.team ? (
+                    <div
+                      className="flex items-center gap-4 p-4 rounded-lg border cursor-pointer hover:bg-muted/50 transition-colors"
+                      onClick={() => router.push(`/dashboard/teams/${project.team_id}`)}
+                    >
+                      <div
+                        className="w-12 h-12 rounded-lg flex items-center justify-center text-2xl"
+                        style={{ backgroundColor: `${project.team.color}20` }}
+                      >
+                        {project.team.emoji || "👥"}
+                      </div>
+                      <div className="flex-1">
+                        <p className="font-medium">{project.team.name}</p>
+                        <p className="text-sm text-muted-foreground">
+                          Click to view team details
+                        </p>
+                      </div>
+                      <Badge variant="secondary">Team</Badge>
+                    </div>
+                  ) : (
+                    <div className="text-center py-6">
+                      <Users className="h-10 w-10 text-muted-foreground/50 mx-auto mb-3" />
+                      <p className="text-muted-foreground mb-4">
+                        No team assigned to this project
+                      </p>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setChangeTeamDialogOpen(true)}
+                      >
+                        <Plus className="h-4 w-4 mr-2" />
+                        Assign a Team
+                      </Button>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+
+              {/* Individual Members Section */}
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between">
+                  <div>
+                    <CardTitle>Team Members</CardTitle>
+                    <CardDescription>
+                      Individual people working on this project
+                    </CardDescription>
+                  </div>
+                  <Button size="sm">
+                    <Plus className="h-4 w-4 mr-2" />
+                    Add Member
+                  </Button>
+                </CardHeader>
+                <CardContent>
                 {project.members && project.members.length > 0 ? (
                   <div className="space-y-3">
                     {project.members.map((member) => (
@@ -1546,11 +1669,61 @@ export default function ProjectWorkspacePage() {
                     </p>
                   </div>
                 )}
-              </CardContent>
-            </Card>
+                </CardContent>
+              </Card>
+            </div>
           </TabsContent>
         </Tabs>
       </div>
+
+      {/* Change Team Dialog */}
+      <Dialog open={changeTeamDialogOpen} onOpenChange={setChangeTeamDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Assign Team</DialogTitle>
+            <DialogDescription>
+              Choose which team this project belongs to
+            </DialogDescription>
+          </DialogHeader>
+          <div className="py-4">
+            <Label className="mb-2 block">Select Team</Label>
+            <Select
+              value={selectedTeamId || "none"}
+              onValueChange={(value) => setSelectedTeamId(value === "none" ? null : value)}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Select a team..." />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="none">
+                  <span className="text-muted-foreground">No team (unassigned)</span>
+                </SelectItem>
+                {availableTeams.map((team) => (
+                  <SelectItem key={team.id} value={team.id}>
+                    <div className="flex items-center gap-2">
+                      <span>{team.emoji || "👥"}</span>
+                      <span>{team.name}</span>
+                    </div>
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            {selectedTeamId && (
+              <p className="text-sm text-muted-foreground mt-2">
+                Team members will have access to this project
+              </p>
+            )}
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setChangeTeamDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleChangeTeam} disabled={changingTeam}>
+              {changingTeam ? "Saving..." : "Save"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
