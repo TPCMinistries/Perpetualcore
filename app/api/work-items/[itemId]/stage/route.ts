@@ -60,7 +60,7 @@ export async function PUT(
       );
     }
 
-    // Verify team membership
+    // Verify team access (member, creator, or admin)
     const { data: membership } = await supabase
       .from("team_members")
       .select("id")
@@ -68,7 +68,23 @@ export async function PUT(
       .eq("user_id", user.id)
       .single();
 
-    if (!membership) {
+    // Also check if user created the team or is an admin
+    const { data: teamAccess } = await supabase
+      .from("teams")
+      .select("created_by")
+      .eq("id", existingItem.team_id)
+      .single();
+
+    const { data: userProfile } = await supabase
+      .from("profiles")
+      .select("user_role")
+      .eq("id", user.id)
+      .single();
+
+    const isAdmin = ["admin", "owner", "business_owner"].includes(userProfile?.user_role || "");
+    const isCreator = teamAccess?.created_by === user.id;
+
+    if (!membership && !isCreator && !isAdmin) {
       return NextResponse.json(
         { error: "Not a member of this team" },
         { status: 403 }
