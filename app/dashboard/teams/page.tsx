@@ -11,10 +11,12 @@ import {
   MoreHorizontal,
   Settings,
   Archive,
-  Trash2,
+  Sparkles,
+  Workflow,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -34,14 +36,8 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Team, TeamType, DEPARTMENT_PRESETS } from "@/types/work";
+import { Team, TeamType, TeamTemplate } from "@/types/work";
+import { TeamTemplatePickerCompact } from "@/components/teams/TeamTemplatePicker";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 
@@ -53,11 +49,10 @@ export default function TeamsPage() {
   const [creating, setCreating] = useState(false);
 
   // Form state
+  const [selectedTemplate, setSelectedTemplate] = useState<TeamTemplate | null>(null);
   const [newTeamName, setNewTeamName] = useState("");
   const [newTeamDescription, setNewTeamDescription] = useState("");
-  const [newTeamType, setNewTeamType] = useState<TeamType>("project_team");
-  const [newTeamEmoji, setNewTeamEmoji] = useState("📁");
-  const [newTeamColor, setNewTeamColor] = useState("#6366f1");
+  const [createStep, setCreateStep] = useState<"template" | "details">("template");
 
   // Fetch teams
   useEffect(() => {
@@ -79,7 +74,9 @@ export default function TeamsPage() {
   };
 
   const handleCreateTeam = async () => {
-    if (!newTeamName.trim()) return;
+    if (!selectedTemplate) return;
+    const teamName = newTeamName.trim() || selectedTemplate.name;
+    if (!teamName) return;
 
     setCreating(true);
     try {
@@ -87,11 +84,14 @@ export default function TeamsPage() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          name: newTeamName,
-          description: newTeamDescription,
-          team_type: newTeamType,
-          emoji: newTeamEmoji,
-          color: newTeamColor,
+          name: teamName,
+          description: newTeamDescription || selectedTemplate.description,
+          team_type: selectedTemplate.team_type,
+          emoji: selectedTemplate.emoji,
+          color: selectedTemplate.color,
+          template_id: selectedTemplate.id,
+          ai_context: selectedTemplate.ai_context,
+          workflow_stages: selectedTemplate.workflow_stages,
         }),
       });
 
@@ -101,6 +101,8 @@ export default function TeamsPage() {
         setCreateDialogOpen(false);
         resetForm();
         toast.success("Team created successfully");
+        // Navigate to the new team
+        router.push(`/dashboard/teams/${data.team.id}`);
       } else {
         const errorData = await response.json();
         toast.error(errorData.error || "Failed to create team");
@@ -130,11 +132,16 @@ export default function TeamsPage() {
   };
 
   const resetForm = () => {
+    setSelectedTemplate(null);
     setNewTeamName("");
     setNewTeamDescription("");
-    setNewTeamType("project_team");
-    setNewTeamEmoji("📁");
-    setNewTeamColor("#6366f1");
+    setCreateStep("template");
+  };
+
+  const handleTemplateSelect = (template: TeamTemplate) => {
+    setSelectedTemplate(template);
+    setNewTeamName(template.name);
+    setNewTeamDescription(template.description);
   };
 
   // Separate departments and project teams
@@ -159,88 +166,144 @@ export default function TeamsPage() {
             Manage departments and project teams with context-aware AI
           </p>
         </div>
-        <Dialog open={createDialogOpen} onOpenChange={setCreateDialogOpen}>
+        <Dialog open={createDialogOpen} onOpenChange={(open) => {
+          setCreateDialogOpen(open);
+          if (!open) resetForm();
+        }}>
           <DialogTrigger asChild>
             <Button>
               <Plus className="h-4 w-4 mr-2" />
               New Team
             </Button>
           </DialogTrigger>
-          <DialogContent>
+          <DialogContent className="sm:max-w-[500px]">
             <DialogHeader>
-              <DialogTitle>Create New Team</DialogTitle>
+              <DialogTitle>
+                {createStep === "template" ? "Choose Team Template" : "Customize Team"}
+              </DialogTitle>
               <DialogDescription>
-                Create a new team or project group. Teams have their own AI
-                context and can be assigned to projects.
+                {createStep === "template"
+                  ? "Select a template to start with. BOS 2.0 teams include AI-first workflows and lifecycle stages."
+                  : "Customize the team name and description, or use the template defaults."}
               </DialogDescription>
             </DialogHeader>
-            <div className="space-y-4 py-4">
-              <div className="space-y-2">
-                <Label htmlFor="name">Team Name</Label>
-                <Input
-                  id="name"
-                  placeholder="e.g., Product Launch Team"
-                  value={newTeamName}
-                  onChange={(e) => setNewTeamName(e.target.value)}
+
+            {createStep === "template" ? (
+              <>
+                <TeamTemplatePickerCompact
+                  selectedTemplateId={selectedTemplate?.id}
+                  onSelect={handleTemplateSelect}
                 />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="description">Description</Label>
-                <Textarea
-                  id="description"
-                  placeholder="What does this team focus on?"
-                  value={newTeamDescription}
-                  onChange={(e) => setNewTeamDescription(e.target.value)}
-                />
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="type">Team Type</Label>
-                  <Select
-                    value={newTeamType}
-                    onValueChange={(v) => setNewTeamType(v as TeamType)}
+                <DialogFooter>
+                  <Button
+                    variant="outline"
+                    onClick={() => setCreateDialogOpen(false)}
                   >
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="project_team">Project Team</SelectItem>
-                      <SelectItem value="department">Department</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="color">Color</Label>
-                  <div className="flex gap-2">
+                    Cancel
+                  </Button>
+                  <Button
+                    onClick={() => setCreateStep("details")}
+                    disabled={!selectedTemplate}
+                  >
+                    Continue
+                  </Button>
+                </DialogFooter>
+              </>
+            ) : (
+              <>
+                <div className="space-y-4 py-4">
+                  {/* Selected template preview */}
+                  {selectedTemplate && (
+                    <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/50 border">
+                      <div
+                        className="w-10 h-10 rounded-lg flex items-center justify-center text-xl"
+                        style={{ backgroundColor: `${selectedTemplate.color}20` }}
+                      >
+                        {selectedTemplate.emoji}
+                      </div>
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2">
+                          <span className="font-medium text-sm">{selectedTemplate.name}</span>
+                          {selectedTemplate.category === "bos_2" && (
+                            <Badge variant="secondary" className="text-[10px]">
+                              <Sparkles className="h-3 w-3 mr-1" />
+                              AI-First
+                            </Badge>
+                          )}
+                        </div>
+                        {selectedTemplate.workflow_stages && (
+                          <div className="flex items-center gap-1 mt-1">
+                            <Workflow className="h-3 w-3 text-muted-foreground" />
+                            <span className="text-xs text-muted-foreground">
+                              {selectedTemplate.workflow_stages.length} workflow stages
+                            </span>
+                          </div>
+                        )}
+                      </div>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setCreateStep("template")}
+                      >
+                        Change
+                      </Button>
+                    </div>
+                  )}
+
+                  <div className="space-y-2">
+                    <Label htmlFor="name">Team Name</Label>
                     <Input
-                      id="color"
-                      type="color"
-                      value={newTeamColor}
-                      onChange={(e) => setNewTeamColor(e.target.value)}
-                      className="w-12 h-10 p-1 cursor-pointer"
+                      id="name"
+                      placeholder={selectedTemplate?.name || "e.g., Product Launch Team"}
+                      value={newTeamName}
+                      onChange={(e) => setNewTeamName(e.target.value)}
                     />
-                    <Input
-                      value={newTeamEmoji}
-                      onChange={(e) => setNewTeamEmoji(e.target.value)}
-                      placeholder="Emoji"
-                      className="w-16"
-                      maxLength={2}
+                    <p className="text-xs text-muted-foreground">
+                      Leave blank to use template name: {selectedTemplate?.name}
+                    </p>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="description">Description</Label>
+                    <Textarea
+                      id="description"
+                      placeholder={selectedTemplate?.description || "What does this team focus on?"}
+                      value={newTeamDescription}
+                      onChange={(e) => setNewTeamDescription(e.target.value)}
+                      rows={3}
                     />
                   </div>
+
+                  {selectedTemplate?.ai_context?.suggestions_focus && (
+                    <div className="space-y-2">
+                      <Label className="text-muted-foreground">AI Focus Areas</Label>
+                      <div className="flex flex-wrap gap-1.5">
+                        {selectedTemplate.ai_context.suggestions_focus.map((focus, i) => (
+                          <span
+                            key={i}
+                            className="text-xs px-2 py-1 rounded-full bg-primary/10 text-primary"
+                          >
+                            {focus}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
-              </div>
-            </div>
-            <DialogFooter>
-              <Button
-                variant="outline"
-                onClick={() => setCreateDialogOpen(false)}
-              >
-                Cancel
-              </Button>
-              <Button onClick={handleCreateTeam} disabled={creating}>
-                {creating ? "Creating..." : "Create Team"}
-              </Button>
-            </DialogFooter>
+
+                <DialogFooter>
+                  <Button
+                    variant="outline"
+                    onClick={() => setCreateStep("template")}
+                  >
+                    Back
+                  </Button>
+                  <Button onClick={handleCreateTeam} disabled={creating}>
+                    {creating ? "Creating..." : "Create Team"}
+                  </Button>
+                </DialogFooter>
+              </>
+            )}
           </DialogContent>
         </Dialog>
       </div>
@@ -300,10 +363,7 @@ export default function TeamsPage() {
                 </p>
                 <Button
                   variant="outline"
-                  onClick={() => {
-                    setNewTeamType("project_team");
-                    setCreateDialogOpen(true);
-                  }}
+                  onClick={() => setCreateDialogOpen(true)}
                 >
                   <Plus className="h-4 w-4 mr-2" />
                   Create Project Team
@@ -328,6 +388,9 @@ function TeamCard({
   onArchive: () => void;
 }) {
   const memberCount = (team as any).member_count || 0;
+  const workflowStages = (team as any).workflow_stages;
+  const templateId = (team as any).template_id;
+  const isBOS2 = templateId?.includes("-engine") || templateId?.includes("training") || templateId?.includes("research") || templateId?.includes("technology") || templateId?.includes("opportunities") || workflowStages?.length > 0;
 
   return (
     <Card
@@ -344,9 +407,17 @@ function TeamCard({
               {team.emoji || "👥"}
             </div>
             <div>
-              <h3 className="font-semibold group-hover:text-primary transition-colors">
-                {team.name}
-              </h3>
+              <div className="flex items-center gap-2">
+                <h3 className="font-semibold group-hover:text-primary transition-colors">
+                  {team.name}
+                </h3>
+                {isBOS2 && (
+                  <Badge variant="secondary" className="text-[10px] px-1.5 py-0 h-4">
+                    <Sparkles className="h-2.5 w-2.5 mr-0.5" />
+                    BOS 2.0
+                  </Badge>
+                )}
+              </div>
               <p className="text-xs text-muted-foreground capitalize">
                 {team.team_type.replace("_", " ")}
               </p>
@@ -390,11 +461,19 @@ function TeamCard({
           </p>
         )}
         <div className="flex items-center justify-between text-sm">
-          <div className="flex items-center gap-1 text-muted-foreground">
-            <Users className="h-4 w-4" />
-            <span>
-              {memberCount} member{memberCount !== 1 ? "s" : ""}
-            </span>
+          <div className="flex items-center gap-3">
+            <div className="flex items-center gap-1 text-muted-foreground">
+              <Users className="h-4 w-4" />
+              <span>
+                {memberCount} member{memberCount !== 1 ? "s" : ""}
+              </span>
+            </div>
+            {workflowStages && workflowStages.length > 0 && (
+              <div className="flex items-center gap-1 text-muted-foreground">
+                <Workflow className="h-3.5 w-3.5" />
+                <span className="text-xs">{workflowStages.length} stages</span>
+              </div>
+            )}
           </div>
           <ChevronRight className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
         </div>

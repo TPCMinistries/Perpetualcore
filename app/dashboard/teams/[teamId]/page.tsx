@@ -22,6 +22,7 @@ import {
   Save,
   Archive,
   Sparkles,
+  Workflow,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -74,8 +75,12 @@ import {
   TeamWithMembers,
   Project,
   TeamAIContext,
+  WorkflowStage,
 } from "@/types/work";
 import { TeamAssistant } from "@/components/teams/TeamAssistant";
+import { WorkflowStageCards } from "@/components/teams/WorkflowPipeline";
+import { WorkItemKanban, WorkItemForm } from "@/components/work-items";
+import { WorkItem, getItemTypeForTeam, getItemTypeLabel } from "@/types/work";
 
 // Document and Conversation interfaces
 interface Document {
@@ -124,6 +129,12 @@ export default function TeamDetailPage() {
   const [documents, setDocuments] = useState<Document[]>([]);
   const [conversations, setConversations] = useState<Conversation[]>([]);
 
+  // Work items state (for BOS 2.0 teams)
+  const [workItemFormOpen, setWorkItemFormOpen] = useState(false);
+  const [workItemInitialStage, setWorkItemInitialStage] = useState<string | undefined>();
+  const [selectedWorkItem, setSelectedWorkItem] = useState<WorkItem | undefined>();
+  const [workItemCounts, setWorkItemCounts] = useState<Record<string, number>>({});
+
   // UI state
   const [addMemberOpen, setAddMemberOpen] = useState(false);
   const [editSettingsOpen, setEditSettingsOpen] = useState(false);
@@ -165,6 +176,13 @@ export default function TeamDetailPage() {
       fetchConversations();
     }
   }, [activeTab]);
+
+  // Fetch work item counts for BOS 2.0 teams
+  useEffect(() => {
+    if (team && (team as any).workflow_stages?.length > 0) {
+      fetchWorkItemCounts();
+    }
+  }, [team, teamId]);
 
   const fetchTeam = async () => {
     try {
@@ -229,6 +247,18 @@ export default function TeamDetailPage() {
       }
     } catch (error) {
       console.error("Error fetching conversations:", error);
+    }
+  };
+
+  const fetchWorkItemCounts = async () => {
+    try {
+      const response = await fetch(`/api/work-items/stats?team_id=${teamId}`);
+      if (response.ok) {
+        const data = await response.json();
+        setWorkItemCounts(data.stage_counts || {});
+      }
+    } catch (error) {
+      console.error("Error fetching work item counts:", error);
     }
   };
 
@@ -459,6 +489,12 @@ export default function TeamDetailPage() {
                 <Badge variant="secondary" className="capitalize">
                   {team.team_type.replace("_", " ")}
                 </Badge>
+                {(team as any).workflow_stages && (team as any).workflow_stages.length > 0 && (
+                  <Badge variant="outline" className="text-xs">
+                    <Sparkles className="h-3 w-3 mr-1" />
+                    BOS 2.0
+                  </Badge>
+                )}
               </div>
               {team.description && (
                 <p className="text-sm text-muted-foreground mt-1">
@@ -505,6 +541,12 @@ export default function TeamDetailPage() {
               <Activity className="h-4 w-4" />
               Activity
             </TabsTrigger>
+            {(team as any).workflow_stages && (team as any).workflow_stages.length > 0 && (
+              <TabsTrigger value="items" className="gap-2">
+                <Workflow className="h-4 w-4" />
+                {getItemTypeLabel(getItemTypeForTeam((team as any).template_id))}s
+              </TabsTrigger>
+            )}
           </TabsList>
 
           {/* Overview Tab */}
@@ -538,6 +580,39 @@ export default function TeamDetailPage() {
                     </CardContent>
                   </Card>
                 </div>
+
+                {/* Workflow Pipeline (for BOS 2.0 teams) */}
+                {(team as any).workflow_stages && (team as any).workflow_stages.length > 0 && (
+                  <Card>
+                    <CardHeader className="pb-3">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <CardTitle className="text-base">Workflow Pipeline</CardTitle>
+                          <Badge variant="secondary" className="text-[10px]">
+                            <Sparkles className="h-3 w-3 mr-1" />
+                            BOS 2.0
+                          </Badge>
+                        </div>
+                        <span className="text-xs text-muted-foreground">
+                          {(team as any).workflow_stages.length} lifecycle stages
+                        </span>
+                      </div>
+                      <CardDescription className="text-xs">
+                        Track items through the lifecycle stages of this team
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <WorkflowStageCards
+                        stages={(team as any).workflow_stages as WorkflowStage[]}
+                        counts={workItemCounts}
+                        onStageClick={(stage) => {
+                          setActiveTab("items");
+                          toast.info(`Viewing ${stage.name} stage`);
+                        }}
+                      />
+                    </CardContent>
+                  </Card>
+                )}
 
                 {/* Team AI Assistant */}
                 <TeamAssistant
@@ -919,8 +994,65 @@ export default function TeamDetailPage() {
               </CardContent>
             </Card>
           </TabsContent>
+
+          {/* Items Tab (for BOS 2.0 teams with workflow stages) */}
+          {(team as any).workflow_stages && (team as any).workflow_stages.length > 0 && (
+            <TabsContent value="items">
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h3 className="text-lg font-semibold">
+                      {getItemTypeLabel(getItemTypeForTeam((team as any).template_id))} Pipeline
+                    </h3>
+                    <p className="text-sm text-muted-foreground">
+                      Drag items between stages to update their status
+                    </p>
+                  </div>
+                  <Button onClick={() => {
+                    setWorkItemInitialStage(undefined);
+                    setSelectedWorkItem(undefined);
+                    setWorkItemFormOpen(true);
+                  }}>
+                    <Plus className="h-4 w-4 mr-2" />
+                    Add {getItemTypeLabel(getItemTypeForTeam((team as any).template_id))}
+                  </Button>
+                </div>
+                <WorkItemKanban
+                  teamId={teamId}
+                  stages={(team as any).workflow_stages as WorkflowStage[]}
+                  itemType={getItemTypeForTeam((team as any).template_id)}
+                  onItemClick={(item) => {
+                    setSelectedWorkItem(item);
+                    setWorkItemFormOpen(true);
+                  }}
+                  onCreateClick={(stageId) => {
+                    setWorkItemInitialStage(stageId);
+                    setSelectedWorkItem(undefined);
+                    setWorkItemFormOpen(true);
+                  }}
+                />
+              </div>
+            </TabsContent>
+          )}
         </Tabs>
       </div>
+
+      {/* Work Item Form Dialog */}
+      {(team as any).workflow_stages && (team as any).workflow_stages.length > 0 && (
+        <WorkItemForm
+          open={workItemFormOpen}
+          onOpenChange={setWorkItemFormOpen}
+          teamId={teamId}
+          itemType={getItemTypeForTeam((team as any).template_id)}
+          stages={(team as any).workflow_stages as WorkflowStage[]}
+          initialStageId={workItemInitialStage}
+          editItem={selectedWorkItem}
+          onSuccess={() => {
+            // Refresh the kanban
+            setWorkItemFormOpen(false);
+          }}
+        />
+      )}
 
       {/* Add Member Dialog */}
       <Dialog open={addMemberOpen} onOpenChange={setAddMemberOpen}>

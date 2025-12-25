@@ -35,6 +35,7 @@ import {
   Brain,
   FolderKanban,
   UsersRound,
+  Radar,
 } from "lucide-react";
 import { UserExperienceLevel, AdaptiveNavConfig } from "@/types/user-experience";
 
@@ -182,6 +183,17 @@ export const NAVIGATION_CONFIG: NavigationSection[] = [
     defaultCollapsed: true,
     visibleFor: ["beginner", "intermediate", "advanced"],
     items: [
+      {
+        name: "Command Center",
+        href: "/dashboard/command-center",
+        icon: Radar,
+        adaptiveConfig: {
+          visibleFor: ["beginner", "intermediate", "advanced"],
+          complexity: "standard",
+          badge: "new",
+          helpText: "Exception-based management - monitor system health and handle failures",
+        },
+      },
       {
         name: "Executive Suite",
         href: "/dashboard/assistants",

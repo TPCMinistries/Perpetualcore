@@ -162,26 +162,37 @@ export async function POST(request: NextRequest) {
         .replace(/[^a-z0-9]+/g, "-")
         .replace(/^-|-$/g, "");
 
+    // Build team data with optional template fields
+    const teamData: Record<string, unknown> = {
+      organization_id: profile.organization_id,
+      name: body.name,
+      slug,
+      description: body.description,
+      team_type: body.team_type || "department",
+      color: body.color || "#6366f1",
+      emoji: body.emoji,
+      ai_context: body.ai_context || {
+        personality: "professional",
+        tools: [],
+        prompts: {},
+        content_filters: [],
+        suggestions_focus: [],
+      },
+      created_by: user.id,
+    };
+
+    // Add template-specific fields if provided
+    if ((body as any).template_id) {
+      teamData.template_id = (body as any).template_id;
+    }
+    if ((body as any).workflow_stages) {
+      teamData.workflow_stages = (body as any).workflow_stages;
+    }
+
     // Create the team
     const { data: team, error: createError } = await supabase
       .from("teams")
-      .insert({
-        organization_id: profile.organization_id,
-        name: body.name,
-        slug,
-        description: body.description,
-        team_type: body.team_type || "department",
-        color: body.color || "#6366f1",
-        emoji: body.emoji,
-        ai_context: body.ai_context || {
-          personality: "professional",
-          tools: [],
-          prompts: {},
-          content_filters: [],
-          suggestions_focus: [],
-        },
-        created_by: user.id,
-      })
+      .insert(teamData)
       .select()
       .single();
 
