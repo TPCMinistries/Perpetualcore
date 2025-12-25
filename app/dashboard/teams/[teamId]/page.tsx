@@ -142,6 +142,10 @@ export default function TeamDetailPage() {
   const [removeMemberDialogOpen, setRemoveMemberDialogOpen] = useState(false);
   const [memberToRemove, setMemberToRemove] = useState<TeamMember | null>(null);
   const [saving, setSaving] = useState(false);
+  const [createProjectOpen, setCreateProjectOpen] = useState(false);
+  const [newProjectName, setNewProjectName] = useState("");
+  const [newProjectDescription, setNewProjectDescription] = useState("");
+  const [creatingProject, setCreatingProject] = useState(false);
 
   // Form state for settings
   const [editForm, setEditForm] = useState({
@@ -440,6 +444,47 @@ export default function TeamDetailPage() {
     } catch (error) {
       console.error("Error creating conversation:", error);
       toast.error("Failed to create conversation");
+    }
+  };
+
+  const handleCreateProject = async () => {
+    if (!newProjectName.trim()) {
+      toast.error("Project name is required");
+      return;
+    }
+    setCreatingProject(true);
+    try {
+      const response = await fetch("/api/projects", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: newProjectName.trim(),
+          description: newProjectDescription.trim() || undefined,
+          team_id: teamId,
+        }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        toast.success("Project created successfully");
+        setCreateProjectOpen(false);
+        setNewProjectName("");
+        setNewProjectDescription("");
+        // Add the new project to the list
+        setProjects((prev) => [...prev, data.project]);
+        // Update team project count
+        setTeam((prev) =>
+          prev ? { ...prev, project_count: (prev.project_count || 0) + 1 } : null
+        );
+      } else {
+        const error = await response.json();
+        toast.error(error.error || "Failed to create project");
+      }
+    } catch (error) {
+      console.error("Error creating project:", error);
+      toast.error("Failed to create project");
+    } finally {
+      setCreatingProject(false);
     }
   };
 
@@ -833,7 +878,7 @@ export default function TeamDetailPage() {
                     Projects assigned to this team
                   </CardDescription>
                 </div>
-                <Button onClick={() => router.push(`/dashboard/projects?team=${teamId}`)}>
+                <Button onClick={() => setCreateProjectOpen(true)}>
                   <Plus className="h-4 w-4 mr-2" />
                   New Project
                 </Button>
@@ -870,7 +915,7 @@ export default function TeamDetailPage() {
                       <Button
                         variant="outline"
                         className="mt-4"
-                        onClick={() => router.push(`/dashboard/projects?team=${teamId}`)}
+                        onClick={() => setCreateProjectOpen(true)}
                       >
                         Create First Project
                       </Button>
@@ -1284,6 +1329,48 @@ export default function TeamDetailPage() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Create Project Dialog */}
+      <Dialog open={createProjectOpen} onOpenChange={setCreateProjectOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Create New Project</DialogTitle>
+            <DialogDescription>
+              Create a new project for {team?.name || "this team"}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="projectName">Project Name *</Label>
+              <Input
+                id="projectName"
+                placeholder="Enter project name"
+                value={newProjectName}
+                onChange={(e) => setNewProjectName(e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="projectDescription">Description</Label>
+              <Textarea
+                id="projectDescription"
+                placeholder="Add a description (optional)"
+                value={newProjectDescription}
+                onChange={(e) => setNewProjectDescription(e.target.value)}
+                rows={3}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setCreateProjectOpen(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleCreateProject} disabled={!newProjectName.trim() || creatingProject}>
+              {creatingProject ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
+              Create Project
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
