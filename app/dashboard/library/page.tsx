@@ -28,6 +28,7 @@ import { CreateDocumentModal } from "@/components/documents/CreateDocumentModal"
 import { LibraryModeSwitch, LibraryMode } from "@/components/library/LibraryModeSwitch";
 import { LibraryAssistant } from "@/components/library/LibraryAssistant";
 import { KnowledgeGraph, GraphNode, GraphLink } from "@/components/library/KnowledgeGraph";
+import { SmartCollections } from "@/components/library/SmartCollections";
 import { Folder as FolderType, Tag as TagType } from "@/types";
 import { createClient } from "@/lib/supabase/client";
 import Link from "next/link";
@@ -115,6 +116,11 @@ export default function LibraryPage() {
   const [graphNodes, setGraphNodes] = useState<GraphNode[]>([]);
   const [graphLinks, setGraphLinks] = useState<GraphLink[]>([]);
   const [isGraphLoading, setIsGraphLoading] = useState(false);
+
+  // Smart Collections state
+  const [selectedCollectionId, setSelectedCollectionId] = useState<string | null>(null);
+  const [collectionDocIds, setCollectionDocIds] = useState<string[] | null>(null);
+  const [showCollections, setShowCollections] = useState(true);
 
   const [stats, setStats] = useState<LibraryStats>({
     total: 0,
@@ -404,6 +410,13 @@ export default function LibraryPage() {
   }
 
   const filteredDocuments = documents.filter((doc) => {
+    // Filter by collection if selected
+    if (collectionDocIds && collectionDocIds.length > 0) {
+      if (!collectionDocIds.includes(doc.id)) {
+        return false;
+      }
+    }
+
     if (searchQuery) {
       const query = searchQuery.toLowerCase();
       const matchesTitle = doc.title.toLowerCase().includes(query);
@@ -541,9 +554,49 @@ export default function LibraryPage() {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                className="h-full overflow-y-auto"
+                className="h-full flex"
               >
+                {/* Smart Collections Sidebar */}
+                {showCollections && (
+                  <div className="w-80 border-r border-white/10 p-4 overflow-y-auto bg-slate-900/30">
+                    <SmartCollections
+                      selectedCollectionId={selectedCollectionId}
+                      onCollectionSelect={(collection) => {
+                        if (selectedCollectionId === collection.id) {
+                          // Deselect
+                          setSelectedCollectionId(null);
+                          setCollectionDocIds(null);
+                        } else {
+                          setSelectedCollectionId(collection.id);
+                          setCollectionDocIds(collection.documentIds);
+                        }
+                      }}
+                    />
+                  </div>
+                )}
+
+                {/* Main Content */}
+                <div className="flex-1 overflow-y-auto">
                 <div className="p-6 space-y-6">
+                  {/* Collection Filter Badge */}
+                  {selectedCollectionId && (
+                    <div className="flex items-center gap-2">
+                      <span className="px-3 py-1.5 rounded-full bg-purple-500/20 text-purple-300 text-sm flex items-center gap-2">
+                        <Sparkles className="h-3.5 w-3.5" />
+                        Showing documents from collection
+                        <button
+                          onClick={() => {
+                            setSelectedCollectionId(null);
+                            setCollectionDocIds(null);
+                          }}
+                          className="ml-1 hover:text-white"
+                        >
+                          <X className="h-3.5 w-3.5" />
+                        </button>
+                      </span>
+                    </div>
+                  )}
+
                   {/* Quick Stats */}
                   <div className="grid grid-cols-4 gap-4">
                     <Card className="bg-white/5 border-white/10 p-4">
@@ -710,6 +763,7 @@ export default function LibraryPage() {
                       onSelectAll={() => {}}
                     />
                   )}
+                </div>
                 </div>
               </motion.div>
             )}
