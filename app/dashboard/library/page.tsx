@@ -468,6 +468,18 @@ export default function LibraryPage() {
         <LibraryAssistant
           isCollapsed={isAssistantCollapsed}
           onToggleCollapse={() => setIsAssistantCollapsed(!isAssistantCollapsed)}
+          onDocumentClick={(docId) => {
+            const doc = documents.find(d => d.id === docId);
+            if (doc) {
+              handleOpenPreview(doc);
+            }
+          }}
+          onDocumentChat={(docId) => {
+            const doc = documents.find(d => d.id === docId);
+            if (doc) {
+              handleOpenChat(doc);
+            }
+          }}
         />
 
         {/* Content Area */}
