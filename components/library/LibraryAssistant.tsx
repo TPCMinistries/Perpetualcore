@@ -24,6 +24,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { glassClasses, motionVariants } from "@/lib/design/library-theme";
 import ReactMarkdown from "react-markdown";
 
 interface Message {

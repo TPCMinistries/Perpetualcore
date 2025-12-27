@@ -21,6 +21,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { libraryTheme, glassClasses } from "@/lib/design/library-theme";
 
 // Dynamically import ForceGraph2D to avoid SSR issues
 const ForceGraph2D = dynamic(() => import("react-force-graph-2d"), {
@@ -62,12 +63,13 @@ interface KnowledgeGraphProps {
   className?: string;
 }
 
+// Use neon colors from the theme for vibrant graph nodes
 const nodeColors: Record<GraphNode["type"], string> = {
-  document: "#3B82F6", // Blue
-  concept: "#8B5CF6",  // Purple
-  person: "#10B981",   // Green
-  project: "#F59E0B",  // Orange
-  space: "#14B8A6",    // Teal
+  document: libraryTheme.neon.blue,
+  concept: libraryTheme.neon.purple,
+  person: libraryTheme.neon.green,
+  project: libraryTheme.neon.amber,
+  space: libraryTheme.neon.cyan,
 };
 
 const nodeIcons: Record<GraphNode["type"], React.ElementType> = {

@@ -31,6 +31,7 @@ import { Folder as FolderType, Tag as TagType } from "@/types";
 import { createClient } from "@/lib/supabase/client";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
+import { glassClasses, glowClasses, motionVariants, staggerContainer, staggerItem } from "@/lib/design/library-theme";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -453,15 +454,25 @@ export default function LibraryPage() {
   const pendingSummaries = stats.total - stats.withSummaries;
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-50 to-slate-100 dark:from-slate-950 dark:to-slate-900">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-slate-100 to-violet-50 dark:from-slate-950 dark:via-slate-900 dark:to-violet-950/20">
+      {/* Ambient glow effects */}
+      <div className="fixed inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-0 left-1/4 w-96 h-96 bg-violet-500/10 rounded-full blur-3xl" />
+        <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl" />
+      </div>
+
       {/* Hero Header */}
-      <div className="border-b border-slate-200 dark:border-slate-800 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl">
+      <div className={cn("border-b border-white/20 dark:border-white/10 relative z-10", glassClasses.panel)}>
         <div className="max-w-7xl mx-auto px-8 py-8">
           <div className="flex items-start justify-between">
             <div className="flex items-center gap-5">
-              <div className="h-16 w-16 rounded-2xl bg-gradient-to-br from-violet-600 via-purple-600 to-indigo-600 flex items-center justify-center shadow-xl shadow-purple-500/25">
+              <motion.div
+                className="h-16 w-16 rounded-2xl bg-gradient-to-br from-violet-600 via-purple-600 to-indigo-600 flex items-center justify-center shadow-xl shadow-purple-500/30"
+                whileHover={{ scale: 1.05, boxShadow: "0 0 30px rgba(139, 92, 246, 0.5)" }}
+                transition={{ type: "spring", stiffness: 400, damping: 10 }}
+              >
                 <BookOpen className="h-8 w-8 text-white" />
-              </div>
+              </motion.div>
               <div>
                 <h1 className="text-3xl font-bold text-slate-900 dark:text-white">
                   Library
@@ -474,14 +485,14 @@ export default function LibraryPage() {
 
             <div className="flex items-center gap-3">
               {/* View Mode Toggle */}
-              <div className="flex items-center gap-1 p-1 rounded-xl bg-slate-100 dark:bg-slate-800">
+              <div className={cn("flex items-center gap-1 p-1 rounded-xl", glassClasses.subtle)}>
                 <button
                   onClick={() => setViewMode("files")}
                   className={cn(
                     "px-4 py-2 rounded-lg text-sm font-medium transition-all",
                     viewMode === "files"
-                      ? "bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-sm"
-                      : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
+                      ? "bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-md shadow-violet-500/10"
+                      : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-white/50 dark:hover:bg-slate-700/50"
                   )}
                 >
                   <FileText className="h-4 w-4 inline mr-2" />
@@ -492,8 +503,8 @@ export default function LibraryPage() {
                   className={cn(
                     "px-4 py-2 rounded-lg text-sm font-medium transition-all",
                     viewMode === "graph"
-                      ? "bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-sm"
-                      : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
+                      ? "bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-md shadow-violet-500/10"
+                      : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-white/50 dark:hover:bg-slate-700/50"
                   )}
                 >
                   <Network className="h-4 w-4 inline mr-2" />
@@ -574,55 +585,78 @@ export default function LibraryPage() {
                 className="max-w-7xl mx-auto px-8 py-8 space-y-8"
               >
                 {/* Stats Cards */}
-                <div className="grid grid-cols-3 gap-6">
-                  <Card className="p-6 bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 hover:shadow-lg hover:border-violet-200 dark:hover:border-violet-800 transition-all cursor-pointer group">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="text-sm font-medium text-slate-500 dark:text-slate-400">Documents</p>
-                        <h3 className="text-4xl font-bold text-slate-900 dark:text-white mt-2">{stats.total}</h3>
-                        <p className="text-sm text-emerald-600 dark:text-emerald-400 mt-1 flex items-center gap-1">
-                          <TrendingUp className="h-3.5 w-3.5" />
-                          +{stats.recentCount} this month
-                        </p>
+                <motion.div
+                  className="grid grid-cols-3 gap-6"
+                  variants={staggerContainer}
+                  initial="hidden"
+                  animate="show"
+                >
+                  <motion.div variants={staggerItem}>
+                    <Card className={cn(
+                      "p-6 cursor-pointer group transition-all duration-300",
+                      glassClasses.card,
+                      "hover:shadow-[0_0_30px_rgba(59,130,246,0.15)] hover:border-blue-300 dark:hover:border-blue-700"
+                    )}>
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="text-sm font-medium text-slate-500 dark:text-slate-400">Documents</p>
+                          <h3 className="text-4xl font-bold text-slate-900 dark:text-white mt-2">{stats.total}</h3>
+                          <p className="text-sm text-emerald-600 dark:text-emerald-400 mt-1 flex items-center gap-1">
+                            <TrendingUp className="h-3.5 w-3.5" />
+                            +{stats.recentCount} this month
+                          </p>
+                        </div>
+                        <div className="h-14 w-14 rounded-2xl bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center group-hover:scale-110 group-hover:shadow-[0_0_20px_rgba(59,130,246,0.4)] transition-all">
+                          <FileText className="h-7 w-7 text-blue-600 dark:text-blue-400" />
+                        </div>
                       </div>
-                      <div className="h-14 w-14 rounded-2xl bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center group-hover:scale-110 transition-transform">
-                        <FileText className="h-7 w-7 text-blue-600 dark:text-blue-400" />
-                      </div>
-                    </div>
-                  </Card>
+                    </Card>
+                  </motion.div>
 
-                  <Card className="p-6 bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 hover:shadow-lg hover:border-violet-200 dark:hover:border-violet-800 transition-all cursor-pointer group">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="text-sm font-medium text-slate-500 dark:text-slate-400">AI Summaries</p>
-                        <h3 className="text-4xl font-bold text-slate-900 dark:text-white mt-2">{stats.withSummaries}</h3>
-                        <p className="text-sm text-amber-600 dark:text-amber-400 mt-1 flex items-center gap-1">
-                          <Zap className="h-3.5 w-3.5" />
-                          {pendingSummaries} pending
-                        </p>
+                  <motion.div variants={staggerItem}>
+                    <Card className={cn(
+                      "p-6 cursor-pointer group transition-all duration-300",
+                      glassClasses.card,
+                      "hover:shadow-[0_0_30px_rgba(168,85,247,0.15)] hover:border-purple-300 dark:hover:border-purple-700"
+                    )}>
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="text-sm font-medium text-slate-500 dark:text-slate-400">AI Summaries</p>
+                          <h3 className="text-4xl font-bold text-slate-900 dark:text-white mt-2">{stats.withSummaries}</h3>
+                          <p className="text-sm text-amber-600 dark:text-amber-400 mt-1 flex items-center gap-1">
+                            <Zap className="h-3.5 w-3.5" />
+                            {pendingSummaries} pending
+                          </p>
+                        </div>
+                        <div className="h-14 w-14 rounded-2xl bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center group-hover:scale-110 group-hover:shadow-[0_0_20px_rgba(168,85,247,0.4)] transition-all">
+                          <Sparkles className="h-7 w-7 text-purple-600 dark:text-purple-400" />
+                        </div>
                       </div>
-                      <div className="h-14 w-14 rounded-2xl bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center group-hover:scale-110 transition-transform">
-                        <Sparkles className="h-7 w-7 text-purple-600 dark:text-purple-400" />
-                      </div>
-                    </div>
-                  </Card>
+                    </Card>
+                  </motion.div>
 
-                  <Card className="p-6 bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 hover:shadow-lg hover:border-violet-200 dark:hover:border-violet-800 transition-all cursor-pointer group">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="text-sm font-medium text-slate-500 dark:text-slate-400">Collections</p>
-                        <h3 className="text-4xl font-bold text-slate-900 dark:text-white mt-2">{collections.length}</h3>
-                        <p className="text-sm text-violet-600 dark:text-violet-400 mt-1 flex items-center gap-1">
-                          <Layers className="h-3.5 w-3.5" />
-                          Auto-organized
-                        </p>
+                  <motion.div variants={staggerItem}>
+                    <Card className={cn(
+                      "p-6 cursor-pointer group transition-all duration-300",
+                      glassClasses.card,
+                      "hover:shadow-[0_0_30px_rgba(139,92,246,0.15)] hover:border-violet-300 dark:hover:border-violet-700"
+                    )}>
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="text-sm font-medium text-slate-500 dark:text-slate-400">Collections</p>
+                          <h3 className="text-4xl font-bold text-slate-900 dark:text-white mt-2">{collections.length}</h3>
+                          <p className="text-sm text-violet-600 dark:text-violet-400 mt-1 flex items-center gap-1">
+                            <Layers className="h-3.5 w-3.5" />
+                            Auto-organized
+                          </p>
+                        </div>
+                        <div className="h-14 w-14 rounded-2xl bg-violet-100 dark:bg-violet-900/30 flex items-center justify-center group-hover:scale-110 group-hover:shadow-[0_0_20px_rgba(139,92,246,0.4)] transition-all">
+                          <FolderOpen className="h-7 w-7 text-violet-600 dark:text-violet-400" />
+                        </div>
                       </div>
-                      <div className="h-14 w-14 rounded-2xl bg-violet-100 dark:bg-violet-900/30 flex items-center justify-center group-hover:scale-110 transition-transform">
-                        <FolderOpen className="h-7 w-7 text-violet-600 dark:text-violet-400" />
-                      </div>
-                    </div>
-                  </Card>
-                </div>
+                    </Card>
+                  </motion.div>
+                </motion.div>
 
                 {/* Search & Filters */}
                 <div className="flex items-center gap-4">
@@ -786,13 +820,27 @@ export default function LibraryPage() {
                     </div>
                   </Card>
                 ) : (
-                  <div className="space-y-4">
-                    {filteredDocuments.map((doc) => (
-                      <Card
+                  <motion.div
+                    className="space-y-4"
+                    variants={staggerContainer}
+                    initial="hidden"
+                    animate="show"
+                  >
+                    {filteredDocuments.map((doc, index) => (
+                      <motion.div
                         key={doc.id}
-                        className="p-6 bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 hover:shadow-lg hover:border-violet-200 dark:hover:border-violet-700 transition-all group cursor-pointer"
-                        onClick={() => handleOpenPreview(doc)}
+                        variants={staggerItem}
+                        whileHover={{ scale: 1.01, y: -2 }}
+                        transition={{ type: "spring", stiffness: 400, damping: 25 }}
                       >
+                        <Card
+                          className={cn(
+                            "p-6 group cursor-pointer transition-all duration-300",
+                            glassClasses.card,
+                            "hover:shadow-[0_0_30px_rgba(139,92,246,0.1)] hover:border-violet-300 dark:hover:border-violet-700"
+                          )}
+                          onClick={() => handleOpenPreview(doc)}
+                        >
                         <div className="flex items-start gap-5">
                           {/* Icon */}
                           <div className="h-12 w-12 rounded-xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center flex-shrink-0 group-hover:bg-violet-100 dark:group-hover:bg-violet-900/30 transition-colors">
@@ -872,8 +920,9 @@ export default function LibraryPage() {
                           </div>
                         </div>
                       </Card>
+                      </motion.div>
                     ))}
-                  </div>
+                  </motion.div>
                 )}
               </motion.div>
             )}
@@ -888,7 +937,12 @@ export default function LibraryPage() {
               animate={{ x: 0, opacity: 1 }}
               exit={{ x: 400, opacity: 0 }}
               transition={{ type: "spring", damping: 25, stiffness: 200 }}
-              className="fixed right-0 top-0 h-screen w-[400px] border-l border-slate-200 dark:border-slate-800 bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl shadow-2xl z-40"
+              className={cn(
+                "fixed right-0 top-0 h-screen w-[400px] z-40",
+                "border-l border-white/20 dark:border-white/10",
+                "bg-white/90 dark:bg-slate-900/90 backdrop-blur-2xl",
+                "shadow-[-20px_0_60px_rgba(139,92,246,0.1)]"
+              )}
             >
               <LibraryAssistant
                 isCollapsed={false}
