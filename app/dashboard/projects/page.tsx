@@ -1530,7 +1530,7 @@ Respond ONLY with valid JSON, no other text.`
                   icon: stage.icon,
                   description: stage.description || "",
                 }}
-                projects={projects[stage.slug as ProjectStage] || []}
+                projects={Array.isArray(projects[stage.slug as ProjectStage]) ? projects[stage.slug as ProjectStage] : []}
                 allStages={stages}
                 onProjectClick={(id) =>
                   router.push(`/dashboard/projects/${id}`)
@@ -1633,7 +1633,7 @@ function KanbanColumn({
         />
         <h3 className="font-semibold">{column.title}</h3>
         <Badge variant="secondary" className="ml-auto">
-          {projects.length}
+          {projects?.length || 0}
         </Badge>
       </div>
 
@@ -1647,7 +1647,7 @@ function KanbanColumn({
         onDragLeave={onDragLeave}
         onDrop={(e) => onDrop(e, column.id)}
       >
-        {projects.map((project) => (
+        {(projects || []).map((project) => (
           <div
             key={project.id}
             draggable
@@ -1670,7 +1670,7 @@ function KanbanColumn({
             />
           </div>
         ))}
-        {projects.length === 0 && (
+        {(!projects || projects.length === 0) && (
           <div className="text-center py-8 text-muted-foreground text-sm">
             No projects in {column.title.toLowerCase()}
           </div>

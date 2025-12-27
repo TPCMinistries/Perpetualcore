@@ -12,6 +12,7 @@ interface FileUploadProps {
   maxSize?: number; // in bytes
   acceptedFileTypes?: Record<string, string[]>;
   folderId?: string | null;
+  variant?: "dropzone" | "button"; // button variant for use in headers/toolbars
 }
 
 export interface UploadedFile {
@@ -36,11 +37,15 @@ export function FileUpload({
     "text/csv": [".csv"],
   },
   folderId = null,
+  variant = "dropzone",
 }: FileUploadProps) {
   const [files, setFiles] = useState<UploadedFile[]>([]);
+  const [isUploading, setIsUploading] = useState(false);
 
   const onDrop = useCallback(
     async (acceptedFiles: File[]) => {
+      setIsUploading(true);
+
       // Create file entries with uploading status
       const newFiles: UploadedFile[] = acceptedFiles.map((file) => ({
         id: Math.random().toString(36).substring(7),
@@ -98,32 +103,47 @@ export function FileUpload({
 
             // Call callback after ALL uploads are complete
             const allComplete = updated.every(f => f.status === "completed" || f.status === "error");
-            if (allComplete && onUploadComplete) {
-              const completedFiles = updated.filter(f => f.status === "completed");
-              if (completedFiles.length > 0) {
-                onUploadComplete(completedFiles);
+            if (allComplete) {
+              setIsUploading(false);
+              if (onUploadComplete) {
+                const completedFiles = updated.filter(f => f.status === "completed");
+                if (completedFiles.length > 0) {
+                  onUploadComplete(completedFiles);
+                }
+              }
+              // Clear files after short delay for button variant
+              if (variant === "button") {
+                setTimeout(() => setFiles([]), 1500);
               }
             }
 
             return updated;
           });
         } catch (error) {
-          setFiles((prev) =>
-            prev.map((f) =>
+          setFiles((prev) => {
+            const updated = prev.map((f) =>
               f.id === fileId
                 ? {
                     ...f,
-                    status: "error",
+                    status: "error" as const,
                     progress: 0,
                     error: "Upload failed. Please try again.",
                   }
                 : f
-            )
-          );
+            );
+
+            // Check if all uploads complete (including errors)
+            const allComplete = updated.every(f => f.status === "completed" || f.status === "error");
+            if (allComplete) {
+              setIsUploading(false);
+            }
+
+            return updated;
+          });
         }
       }
     },
-    [files, onUploadComplete, folderId]
+    [files, onUploadComplete, folderId, variant]
   );
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
@@ -143,6 +163,28 @@ export function FileUpload({
     return (bytes / (1024 * 1024)).toFixed(1) + " MB";
   };
 
+  // Button variant - compact button for headers/toolbars
+  if (variant === "button") {
+    return (
+      <div {...getRootProps()} className="relative">
+        <input {...getInputProps()} />
+        <Button
+          variant="outline"
+          className="gap-2"
+          disabled={isUploading}
+        >
+          {isUploading ? (
+            <Loader2 className="h-4 w-4 animate-spin" />
+          ) : (
+            <Upload className="h-4 w-4" />
+          )}
+          {isUploading ? "Uploading..." : "Upload"}
+        </Button>
+      </div>
+    );
+  }
+
+  // Dropzone variant - full drag & drop area
   return (
     <div className="space-y-4">
       <Card

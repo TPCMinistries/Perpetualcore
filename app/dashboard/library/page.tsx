@@ -10,29 +10,34 @@ import { FileUpload, UploadedFile } from "@/components/file-upload";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
 import {
   FileText, Trash2, Upload, FolderIcon, FolderPlus, Sparkles,
   Search, Filter, X, MessageSquare, LayoutGrid, List,
   BookOpen, TrendingUp, BarChart3, Tag, Calendar, Building2,
   Briefcase, Brain, Loader2, Eye, Network, FolderOpen, Plus,
-  Settings, RefreshCw
+  Settings, RefreshCw, ChevronRight, MoreHorizontal, Clock,
+  Layers, Zap, ArrowRight, PanelRightOpen, PanelRightClose
 } from "lucide-react";
 import { EmptyState } from "@/components/ui/empty-state";
 import { DocumentGridSkeleton } from "@/components/ui/skeletons";
 import { FolderModal } from "@/components/documents/FolderModal";
 import { DocumentChatModal } from "@/components/documents/DocumentChatModal";
 import { DocumentPreviewModal } from "@/components/documents/DocumentPreviewModal";
-import { DocumentCard } from "@/components/documents/DocumentCard";
-import { DocumentTable } from "@/components/documents/DocumentTable";
 import { CreateDocumentModal } from "@/components/documents/CreateDocumentModal";
-import { LibraryModeSwitch, LibraryMode } from "@/components/library/LibraryModeSwitch";
 import { LibraryAssistant } from "@/components/library/LibraryAssistant";
 import { KnowledgeGraph, GraphNode, GraphLink } from "@/components/library/KnowledgeGraph";
-import { SmartCollections } from "@/components/library/SmartCollections";
 import { Folder as FolderType, Tag as TagType } from "@/types";
 import { createClient } from "@/lib/supabase/client";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 interface Document {
   id: string;
@@ -76,6 +81,15 @@ interface Project {
   color: string;
 }
 
+interface Collection {
+  id: string;
+  name: string;
+  documentIds: string[];
+  confidence?: number;
+  keywords?: string[];
+  is_pinned?: boolean;
+}
+
 interface LibraryStats {
   total: number;
   byType: Record<string, number>;
@@ -83,12 +97,15 @@ interface LibraryStats {
   recentCount: number;
 }
 
+type ViewMode = "files" | "graph";
+
 export default function LibraryPage() {
   const router = useRouter();
 
-  // Mode state
-  const [mode, setMode] = useState<LibraryMode>("files");
-  const [isAssistantCollapsed, setIsAssistantCollapsed] = useState(false);
+  // View state
+  const [viewMode, setViewMode] = useState<ViewMode>("files");
+  const [displayMode, setDisplayMode] = useState<"grid" | "list">("list");
+  const [isAiPanelOpen, setIsAiPanelOpen] = useState(false);
 
   // Data state
   const [documents, setDocuments] = useState<Document[]>([]);
@@ -100,10 +117,15 @@ export default function LibraryPage() {
   const [selectedFolderId, setSelectedFolderId] = useState<string | null>(null);
   const [folders, setFolders] = useState<FolderType[]>([]);
 
+  // Collections state
+  const [collections, setCollections] = useState<Collection[]>([]);
+  const [selectedCollectionId, setSelectedCollectionId] = useState<string | null>(null);
+  const [collectionDocIds, setCollectionDocIds] = useState<string[] | null>(null);
+  const [isLoadingCollections, setIsLoadingCollections] = useState(false);
+
   // UI state
   const [searchQuery, setSearchQuery] = useState("");
   const [filterType, setFilterType] = useState<string | null>(null);
-  const [viewMode, setViewMode] = useState<"grid" | "list">("list");
   const [chatModalOpen, setChatModalOpen] = useState(false);
   const [chatDocument, setChatDocument] = useState<{ id: string; title: string } | null>(null);
   const [previewModalOpen, setPreviewModalOpen] = useState(false);
@@ -117,11 +139,6 @@ export default function LibraryPage() {
   const [graphLinks, setGraphLinks] = useState<GraphLink[]>([]);
   const [isGraphLoading, setIsGraphLoading] = useState(false);
 
-  // Smart Collections state
-  const [selectedCollectionId, setSelectedCollectionId] = useState<string | null>(null);
-  const [collectionDocIds, setCollectionDocIds] = useState<string[] | null>(null);
-  const [showCollections, setShowCollections] = useState(true);
-
   const [stats, setStats] = useState<LibraryStats>({
     total: 0,
     byType: {},
@@ -134,10 +151,14 @@ export default function LibraryPage() {
   }, [selectedFolderId, selectedSpaceId, selectedProjectId]);
 
   useEffect(() => {
-    if (mode === "graph") {
+    if (viewMode === "graph") {
       buildGraphData();
     }
-  }, [mode, documents, spaces, projects]);
+  }, [viewMode, documents, spaces, projects]);
+
+  useEffect(() => {
+    fetchCollections();
+  }, []);
 
   async function fetchAll() {
     setIsLoading(true);
@@ -153,16 +174,12 @@ export default function LibraryPage() {
 
   async function fetchDocuments() {
     try {
-      let url = "/api/documents";
       const params = new URLSearchParams();
-      if (selectedFolderId) params.append("folder_id", selectedFolderId);
-      if (selectedSpaceId) params.append("space_id", selectedSpaceId);
-      if (selectedProjectId) params.append("project_id", selectedProjectId);
-      if (params.toString()) url += `?${params.toString()}`;
+      if (selectedFolderId) params.set("folder_id", selectedFolderId);
+      if (selectedSpaceId) params.set("space_id", selectedSpaceId);
+      if (selectedProjectId) params.set("project_id", selectedProjectId);
 
-      const response = await fetch(url);
-      if (!response.ok) throw new Error("Failed to fetch documents");
-
+      const response = await fetch(`/api/documents?${params}`);
       const data = await response.json();
       setDocuments(data.documents || []);
     } catch (error) {
@@ -174,10 +191,8 @@ export default function LibraryPage() {
   async function fetchFolders() {
     try {
       const response = await fetch("/api/documents/folders");
-      if (response.ok) {
-        const data = await response.json();
-        setFolders(data.folders || []);
-      }
+      const data = await response.json();
+      setFolders(data.folders || []);
     } catch (error) {
       console.error("Error fetching folders:", error);
     }
@@ -186,10 +201,8 @@ export default function LibraryPage() {
   async function fetchSpaces() {
     try {
       const response = await fetch("/api/spaces");
-      if (response.ok) {
-        const data = await response.json();
-        setSpaces(data.spaces || []);
-      }
+      const data = await response.json();
+      setSpaces(data.spaces || []);
     } catch (error) {
       console.error("Error fetching spaces:", error);
     }
@@ -198,9 +211,12 @@ export default function LibraryPage() {
   async function fetchProjects() {
     try {
       const response = await fetch("/api/projects");
-      if (response.ok) {
-        const data = await response.json();
-        setProjects(data || []);
+      const data = await response.json();
+      if (data.projects) {
+        const projectsList = Array.isArray(data.projects)
+          ? data.projects
+          : Object.values(data.projects).flat();
+        setProjects(projectsList as Project[]);
       }
     } catch (error) {
       console.error("Error fetching projects:", error);
@@ -210,132 +226,120 @@ export default function LibraryPage() {
   async function fetchStats() {
     try {
       const supabase = createClient();
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
-
-      const { data: profile } = await supabase
-        .from("profiles")
-        .select("organization_id")
-        .eq("id", user.id)
-        .single();
-
-      if (!profile?.organization_id) return;
+      const { data: profile } = await supabase.auth.getUser();
+      if (!profile.user) return;
 
       const { data: docs } = await supabase
         .from("documents")
         .select("id, document_type, summary, created_at")
-        .eq("organization_id", profile.organization_id)
+        .eq("user_id", profile.user.id)
         .eq("status", "completed");
 
-      const byType: Record<string, number> = {};
-      let withSummaries = 0;
-      const thirtyDaysAgo = new Date();
-      thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+      if (docs) {
+        const byType: Record<string, number> = {};
+        let withSummaries = 0;
+        let recentCount = 0;
+        const thirtyDaysAgo = new Date();
+        thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
 
-      docs?.forEach((doc) => {
-        const type = doc.document_type || "Uncategorized";
-        byType[type] = (byType[type] || 0) + 1;
-        if (doc.summary) withSummaries++;
-      });
+        docs.forEach((doc) => {
+          if (doc.document_type) {
+            byType[doc.document_type] = (byType[doc.document_type] || 0) + 1;
+          }
+          if (doc.summary) withSummaries++;
+          if (new Date(doc.created_at) > thirtyDaysAgo) recentCount++;
+        });
 
-      const recentCount = docs?.filter(
-        (doc) => new Date(doc.created_at) >= thirtyDaysAgo
-      ).length || 0;
-
-      setStats({
-        total: docs?.length || 0,
-        byType,
-        withSummaries,
-        recentCount,
-      });
+        setStats({
+          total: docs.length,
+          byType,
+          withSummaries,
+          recentCount,
+        });
+      }
     } catch (error) {
       console.error("Error fetching stats:", error);
     }
   }
 
+  async function fetchCollections() {
+    setIsLoadingCollections(true);
+    try {
+      const response = await fetch("/api/library/collections");
+      const data = await response.json();
+      setCollections(data.collections || []);
+    } catch (error) {
+      console.error("Error fetching collections:", error);
+    } finally {
+      setIsLoadingCollections(false);
+    }
+  }
+
+  async function generateCollections() {
+    setIsLoadingCollections(true);
+    try {
+      const response = await fetch("/api/library/collections/generate", {
+        method: "POST",
+      });
+      if (response.ok) {
+        await fetchCollections();
+        toast.success("Smart collections generated!");
+      }
+    } catch (error) {
+      toast.error("Failed to generate collections");
+    } finally {
+      setIsLoadingCollections(false);
+    }
+  }
+
   function buildGraphData() {
     setIsGraphLoading(true);
-
-    // Build nodes from documents, projects, spaces
     const nodes: GraphNode[] = [];
     const links: GraphLink[] = [];
 
-    // Add document nodes
-    documents.filter(d => d.status === "completed").forEach(doc => {
+    documents.forEach((doc) => {
       nodes.push({
-        id: `doc-${doc.id}`,
+        id: doc.id,
+        label: doc.title,
         type: "document",
-        label: doc.title.length > 25 ? doc.title.slice(0, 25) + "..." : doc.title,
-        size: 15 + (doc.metadata?.wordCount || 0) / 500,
-        metadata: { documentId: doc.id, fullTitle: doc.title }
-      });
-
-      // Link to projects
-      doc.projects?.forEach(project => {
-        links.push({
-          source: `doc-${doc.id}`,
-          target: `project-${project.id}`,
-          type: "belongs_to",
-          strength: 0.8
-        });
-      });
-
-      // Link to spaces
-      doc.knowledge_spaces?.forEach(space => {
-        links.push({
-          source: `doc-${doc.id}`,
-          target: `space-${space.id}`,
-          type: "belongs_to",
-          strength: 0.7
-        });
+        color: "#3b82f6",
+        metadata: { documentId: doc.id },
       });
     });
 
-    // Add project nodes
-    projects.forEach(project => {
-      nodes.push({
-        id: `project-${project.id}`,
-        type: "project",
-        label: project.name,
-        size: 22,
-        metadata: { projectId: project.id }
-      });
-    });
-
-    // Add space nodes
-    spaces.forEach(space => {
+    spaces.forEach((space) => {
       nodes.push({
         id: `space-${space.id}`,
-        type: "space",
         label: space.name,
-        size: 20,
-        metadata: { spaceId: space.id }
+        type: "space",
+        color: space.color || "#8b5cf6",
       });
     });
 
-    // Add concept nodes from document types
-    const conceptCounts: Record<string, number> = {};
-    documents.forEach(doc => {
-      if (doc.document_type) {
-        conceptCounts[doc.document_type] = (conceptCounts[doc.document_type] || 0) + 1;
-      }
-    });
-
-    Object.entries(conceptCounts).forEach(([type, count]) => {
+    projects.forEach((project) => {
       nodes.push({
-        id: `concept-${type}`,
-        type: "concept",
-        label: type,
-        size: 12 + count * 3
+        id: `project-${project.id}`,
+        label: project.name,
+        type: "project",
+        color: project.color || "#10b981",
       });
+    });
 
-      // Link documents to their type concepts
-      documents.filter(d => d.document_type === type).forEach(doc => {
+    documents.forEach((doc) => {
+      doc.knowledge_spaces?.forEach((space) => {
         links.push({
-          source: `doc-${doc.id}`,
-          target: `concept-${type}`,
-          type: "references",
-          strength: 0.5
+          source: doc.id,
+          target: `space-${space.id}`,
+          type: "belongs_to",
+          strength: 0.8,
+        });
+      });
+      doc.projects?.forEach((project) => {
+        links.push({
+          source: doc.id,
+          target: `project-${project.id}`,
+          type: "belongs_to",
+          strength: 0.7,
         });
       });
     });
@@ -345,20 +349,23 @@ export default function LibraryPage() {
     setIsGraphLoading(false);
   }
 
-  async function handleDelete(documentId: string) {
-    if (!confirm("Are you sure you want to delete this document?")) return;
+  function handleUploadComplete(files: UploadedFile[]) {
+    fetchAll();
+    toast.success(`Uploaded ${files.length} file(s) successfully`);
+  }
 
+  async function handleDelete(documentId: string) {
     try {
       const response = await fetch(`/api/documents?id=${documentId}`, {
         method: "DELETE",
       });
-
-      if (!response.ok) throw new Error("Failed to delete document");
-
-      toast.success("Document deleted");
-      fetchAll();
+      if (response.ok) {
+        setDocuments((prev) => prev.filter((d) => d.id !== documentId));
+        toast.success("Document deleted");
+      } else {
+        toast.error("Failed to delete document");
+      }
     } catch (error) {
-      console.error("Error deleting document:", error);
       toast.error("Failed to delete document");
     }
   }
@@ -369,15 +376,14 @@ export default function LibraryPage() {
       const response = await fetch(`/api/documents/${documentId}/summary`, {
         method: "POST",
       });
-
-      if (!response.ok) throw new Error("Failed to generate summary");
-
-      const data = await response.json();
-      toast.success(`Summary generated! Cost: $${data.summary.cost_usd}`);
-      fetchAll();
-    } catch (error: any) {
-      console.error("Error generating summary:", error);
-      toast.error(error.message || "Failed to generate summary");
+      if (response.ok) {
+        await fetchDocuments();
+        toast.success("Summary generated");
+      } else {
+        toast.error("Failed to generate summary");
+      }
+    } catch (error) {
+      toast.error("Failed to generate summary");
     } finally {
       setGeneratingSummary(null);
     }
@@ -393,13 +399,18 @@ export default function LibraryPage() {
     setPreviewModalOpen(true);
   }
 
-  function handleUploadComplete(files: UploadedFile[]) {
-    toast.success(`${files.length} file(s) uploaded!`);
-    fetchAll();
-  }
-
   function handleGraphNodeClick(node: GraphNode) {
-    console.log("Node clicked:", node);
+    // Navigate based on node type
+    if (node.type === "document" && node.metadata?.documentId) {
+      const doc = documents.find(d => d.id === node.metadata?.documentId);
+      if (doc) handleOpenPreview(doc);
+    } else if (node.type === "project") {
+      const projectId = node.id.replace("project-", "");
+      router.push(`/dashboard/projects/${projectId}`);
+    } else if (node.type === "space") {
+      const spaceId = node.id.replace("space-", "");
+      router.push(`/dashboard/spaces/${spaceId}`);
+    }
   }
 
   function handleGraphNodeDoubleClick(node: GraphNode) {
@@ -409,28 +420,29 @@ export default function LibraryPage() {
     }
   }
 
-  const filteredDocuments = documents.filter((doc) => {
-    // Filter by collection if selected
-    if (collectionDocIds && collectionDocIds.length > 0) {
-      if (!collectionDocIds.includes(doc.id)) {
-        return false;
-      }
-    }
+  function formatFileSize(bytes: number): string {
+    if (bytes < 1024) return bytes + " B";
+    if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + " KB";
+    return (bytes / (1024 * 1024)).toFixed(1) + " MB";
+  }
 
+  function formatDate(dateString: string): string {
+    const date = new Date(dateString);
+    return date.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+  }
+
+  const filteredDocuments = documents.filter((doc) => {
+    if (collectionDocIds && collectionDocIds.length > 0) {
+      if (!collectionDocIds.includes(doc.id)) return false;
+    }
     if (searchQuery) {
       const query = searchQuery.toLowerCase();
       const matchesTitle = doc.title.toLowerCase().includes(query);
       const matchesSummary = doc.summary?.toLowerCase().includes(query);
       const matchesType = doc.document_type?.toLowerCase().includes(query);
-      if (!matchesTitle && !matchesSummary && !matchesType) {
-        return false;
-      }
+      if (!matchesTitle && !matchesSummary && !matchesType) return false;
     }
-
-    if (filterType && doc.document_type !== filterType) {
-      return false;
-    }
-
+    if (filterType && doc.document_type !== filterType) return false;
     return doc.status === "completed";
   });
 
@@ -438,104 +450,109 @@ export default function LibraryPage() {
     new Set(documents.map((doc) => doc.document_type).filter(Boolean))
   ).sort();
 
+  const pendingSummaries = stats.total - stats.withSummaries;
+
   return (
-    <div className="h-screen bg-slate-950 flex flex-col overflow-hidden">
-      {/* Header */}
-      <div className="border-b border-white/10 bg-slate-900/80 backdrop-blur-xl px-6 py-4">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-blue-600 via-purple-600 to-violet-600 flex items-center justify-center shadow-lg shadow-purple-500/20">
-              <BookOpen className="h-6 w-6 text-white" />
+    <div className="min-h-screen bg-gradient-to-b from-slate-50 to-slate-100 dark:from-slate-950 dark:to-slate-900">
+      {/* Hero Header */}
+      <div className="border-b border-slate-200 dark:border-slate-800 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl">
+        <div className="max-w-7xl mx-auto px-8 py-8">
+          <div className="flex items-start justify-between">
+            <div className="flex items-center gap-5">
+              <div className="h-16 w-16 rounded-2xl bg-gradient-to-br from-violet-600 via-purple-600 to-indigo-600 flex items-center justify-center shadow-xl shadow-purple-500/25">
+                <BookOpen className="h-8 w-8 text-white" />
+              </div>
+              <div>
+                <h1 className="text-3xl font-bold text-slate-900 dark:text-white">
+                  Library
+                </h1>
+                <p className="text-base text-slate-500 dark:text-slate-400 mt-1">
+                  {stats.total} documents • {collections.length} collections • {spaces.length} spaces
+                </p>
+              </div>
             </div>
-            <div>
-              <h1 className="text-2xl font-bold text-white">
-                Library
-              </h1>
-              <p className="text-sm text-slate-400 mt-0.5">
-                {stats.total} documents • {spaces.length} spaces • {projects.length} projects
-              </p>
+
+            <div className="flex items-center gap-3">
+              {/* View Mode Toggle */}
+              <div className="flex items-center gap-1 p-1 rounded-xl bg-slate-100 dark:bg-slate-800">
+                <button
+                  onClick={() => setViewMode("files")}
+                  className={cn(
+                    "px-4 py-2 rounded-lg text-sm font-medium transition-all",
+                    viewMode === "files"
+                      ? "bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-sm"
+                      : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
+                  )}
+                >
+                  <FileText className="h-4 w-4 inline mr-2" />
+                  Files
+                </button>
+                <button
+                  onClick={() => setViewMode("graph")}
+                  className={cn(
+                    "px-4 py-2 rounded-lg text-sm font-medium transition-all",
+                    viewMode === "graph"
+                      ? "bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-sm"
+                      : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
+                  )}
+                >
+                  <Network className="h-4 w-4 inline mr-2" />
+                  Graph
+                </button>
+              </div>
+
+              {/* AI Assistant Toggle */}
+              <Button
+                variant="outline"
+                onClick={() => setIsAiPanelOpen(!isAiPanelOpen)}
+                className={cn(
+                  "gap-2 border-2 transition-all",
+                  isAiPanelOpen
+                    ? "border-violet-500 bg-violet-50 dark:bg-violet-950/50 text-violet-700 dark:text-violet-300"
+                    : "border-slate-200 dark:border-slate-700"
+                )}
+              >
+                <Sparkles className="h-4 w-4" />
+                AI Assistant
+                {isAiPanelOpen ? (
+                  <PanelRightClose className="h-4 w-4" />
+                ) : (
+                  <PanelRightOpen className="h-4 w-4" />
+                )}
+              </Button>
+
+              <div className="h-8 w-px bg-slate-200 dark:bg-slate-700" />
+
+              <FileUpload onUploadComplete={handleUploadComplete} variant="button" />
+
+              <Button
+                onClick={() => setCreateDocModalOpen(true)}
+                className="bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-700 hover:to-purple-700 text-white shadow-lg shadow-purple-500/25"
+              >
+                <Plus className="h-4 w-4 mr-2" />
+                New Doc
+              </Button>
             </div>
-          </div>
-
-          <div className="flex items-center gap-4">
-            <LibraryModeSwitch mode={mode} onModeChange={setMode} />
-
-            <div className="h-8 w-px bg-white/10" />
-
-            <FileUpload onUploadComplete={handleUploadComplete} />
-
-            <Button
-              onClick={() => setCreateDocModalOpen(true)}
-              className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-lg shadow-purple-500/20"
-            >
-              <Plus className="h-4 w-4 mr-2" />
-              New Doc
-            </Button>
           </div>
         </div>
       </div>
 
-      {/* Main Content Area */}
-      <div className="flex-1 flex overflow-hidden">
-        {/* AI Assistant Panel */}
-        <LibraryAssistant
-          isCollapsed={isAssistantCollapsed}
-          onToggleCollapse={() => setIsAssistantCollapsed(!isAssistantCollapsed)}
-          onDocumentClick={(docId) => {
-            const doc = documents.find(d => d.id === docId);
-            if (doc) {
-              handleOpenPreview(doc);
-            }
-          }}
-          onDocumentChat={(docId) => {
-            const doc = documents.find(d => d.id === docId);
-            if (doc) {
-              handleOpenChat(doc);
-            }
-          }}
-        />
-
-        {/* Content Area */}
-        <div className="flex-1 overflow-hidden">
+      {/* Main Content with Optional AI Panel */}
+      <div className="flex">
+        {/* Main Content Area */}
+        <div className={cn(
+          "flex-1 transition-all duration-300",
+          isAiPanelOpen ? "mr-[400px]" : ""
+        )}>
           <AnimatePresence mode="wait">
-            {/* AI Assistant Mode */}
-            {mode === "assistant" && (
-              <motion.div
-                key="assistant"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                className="h-full flex items-center justify-center p-8"
-              >
-                <div className="text-center max-w-md">
-                  <div className="h-20 w-20 rounded-2xl bg-gradient-to-br from-blue-600 to-purple-600 flex items-center justify-center mx-auto mb-6 shadow-2xl shadow-purple-500/30">
-                    <Brain className="h-10 w-10 text-white" />
-                  </div>
-                  <h2 className="text-2xl font-bold text-white mb-3">
-                    AI-Powered Discovery
-                  </h2>
-                  <p className="text-slate-400 mb-6">
-                    Use the assistant panel on the left to ask questions, search your documents,
-                    or let AI help you discover relevant content you didn't know you needed.
-                  </p>
-                  <Button
-                    onClick={() => setIsAssistantCollapsed(false)}
-                    className="bg-white/10 hover:bg-white/20 text-white"
-                  >
-                    Open Assistant
-                  </Button>
-                </div>
-              </motion.div>
-            )}
-
-            {/* Knowledge Graph Mode */}
-            {mode === "graph" && (
+            {/* Graph View */}
+            {viewMode === "graph" && (
               <motion.div
                 key="graph"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                className="h-full"
+                className="h-[calc(100vh-180px)]"
               >
                 <KnowledgeGraph
                   nodes={graphNodes}
@@ -547,23 +564,135 @@ export default function LibraryPage() {
               </motion.div>
             )}
 
-            {/* Files Mode */}
-            {mode === "files" && (
+            {/* Files View */}
+            {viewMode === "files" && (
               <motion.div
                 key="files"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                className="h-full flex"
+                className="max-w-7xl mx-auto px-8 py-8 space-y-8"
               >
-                {/* Smart Collections Sidebar */}
-                {showCollections && (
-                  <div className="w-80 border-r border-white/10 p-4 overflow-y-auto bg-slate-900/30">
-                    <SmartCollections
-                      selectedCollectionId={selectedCollectionId}
-                      onCollectionSelect={(collection) => {
+                {/* Stats Cards */}
+                <div className="grid grid-cols-3 gap-6">
+                  <Card className="p-6 bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 hover:shadow-lg hover:border-violet-200 dark:hover:border-violet-800 transition-all cursor-pointer group">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm font-medium text-slate-500 dark:text-slate-400">Documents</p>
+                        <h3 className="text-4xl font-bold text-slate-900 dark:text-white mt-2">{stats.total}</h3>
+                        <p className="text-sm text-emerald-600 dark:text-emerald-400 mt-1 flex items-center gap-1">
+                          <TrendingUp className="h-3.5 w-3.5" />
+                          +{stats.recentCount} this month
+                        </p>
+                      </div>
+                      <div className="h-14 w-14 rounded-2xl bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center group-hover:scale-110 transition-transform">
+                        <FileText className="h-7 w-7 text-blue-600 dark:text-blue-400" />
+                      </div>
+                    </div>
+                  </Card>
+
+                  <Card className="p-6 bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 hover:shadow-lg hover:border-violet-200 dark:hover:border-violet-800 transition-all cursor-pointer group">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm font-medium text-slate-500 dark:text-slate-400">AI Summaries</p>
+                        <h3 className="text-4xl font-bold text-slate-900 dark:text-white mt-2">{stats.withSummaries}</h3>
+                        <p className="text-sm text-amber-600 dark:text-amber-400 mt-1 flex items-center gap-1">
+                          <Zap className="h-3.5 w-3.5" />
+                          {pendingSummaries} pending
+                        </p>
+                      </div>
+                      <div className="h-14 w-14 rounded-2xl bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center group-hover:scale-110 transition-transform">
+                        <Sparkles className="h-7 w-7 text-purple-600 dark:text-purple-400" />
+                      </div>
+                    </div>
+                  </Card>
+
+                  <Card className="p-6 bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 hover:shadow-lg hover:border-violet-200 dark:hover:border-violet-800 transition-all cursor-pointer group">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm font-medium text-slate-500 dark:text-slate-400">Collections</p>
+                        <h3 className="text-4xl font-bold text-slate-900 dark:text-white mt-2">{collections.length}</h3>
+                        <p className="text-sm text-violet-600 dark:text-violet-400 mt-1 flex items-center gap-1">
+                          <Layers className="h-3.5 w-3.5" />
+                          Auto-organized
+                        </p>
+                      </div>
+                      <div className="h-14 w-14 rounded-2xl bg-violet-100 dark:bg-violet-900/30 flex items-center justify-center group-hover:scale-110 transition-transform">
+                        <FolderOpen className="h-7 w-7 text-violet-600 dark:text-violet-400" />
+                      </div>
+                    </div>
+                  </Card>
+                </div>
+
+                {/* Search & Filters */}
+                <div className="flex items-center gap-4">
+                  <div className="relative flex-1">
+                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400" />
+                    <Input
+                      type="text"
+                      placeholder="Search your library..."
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      className="pl-12 h-12 text-base bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700 focus:border-violet-500 focus:ring-violet-500/20"
+                    />
+                    {searchQuery && (
+                      <button
+                        onClick={() => setSearchQuery("")}
+                        className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300"
+                      >
+                        <X className="h-5 w-5" />
+                      </button>
+                    )}
+                  </div>
+
+                  <div className="flex items-center gap-2 p-1 rounded-xl bg-slate-100 dark:bg-slate-800">
+                    <button
+                      onClick={() => setDisplayMode("list")}
+                      className={cn(
+                        "p-2.5 rounded-lg transition-all",
+                        displayMode === "list"
+                          ? "bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-sm"
+                          : "text-slate-500 hover:text-slate-700 dark:hover:text-slate-300"
+                      )}
+                    >
+                      <List className="h-5 w-5" />
+                    </button>
+                    <button
+                      onClick={() => setDisplayMode("grid")}
+                      className={cn(
+                        "p-2.5 rounded-lg transition-all",
+                        displayMode === "grid"
+                          ? "bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-sm"
+                          : "text-slate-500 hover:text-slate-700 dark:hover:text-slate-300"
+                      )}
+                    >
+                      <LayoutGrid className="h-5 w-5" />
+                    </button>
+                  </div>
+                </div>
+
+                {/* Collection Pills */}
+                <div className="flex items-center gap-3 overflow-x-auto pb-2">
+                  <span className="text-sm font-medium text-slate-500 dark:text-slate-400 flex-shrink-0">Collections:</span>
+                  <button
+                    onClick={() => {
+                      setSelectedCollectionId(null);
+                      setCollectionDocIds(null);
+                    }}
+                    className={cn(
+                      "px-4 py-2 rounded-full text-sm font-medium transition-all flex-shrink-0",
+                      selectedCollectionId === null
+                        ? "bg-violet-600 text-white shadow-md shadow-violet-500/25"
+                        : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700"
+                    )}
+                  >
+                    All Documents
+                  </button>
+                  {collections.map((collection) => (
+                    <button
+                      key={collection.id}
+                      onClick={() => {
                         if (selectedCollectionId === collection.id) {
-                          // Deselect
                           setSelectedCollectionId(null);
                           setCollectionDocIds(null);
                         } else {
@@ -571,204 +700,211 @@ export default function LibraryPage() {
                           setCollectionDocIds(collection.documentIds);
                         }
                       }}
-                    />
+                      className={cn(
+                        "px-4 py-2 rounded-full text-sm font-medium transition-all flex-shrink-0 flex items-center gap-2",
+                        selectedCollectionId === collection.id
+                          ? "bg-violet-600 text-white shadow-md shadow-violet-500/25"
+                          : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700"
+                      )}
+                    >
+                      {collection.name}
+                      <Badge variant="secondary" className="text-xs">
+                        {collection.documentIds.length}
+                      </Badge>
+                    </button>
+                  ))}
+                  {collections.length === 0 && (
+                    <button
+                      onClick={generateCollections}
+                      disabled={isLoadingCollections}
+                      className="px-4 py-2 rounded-full text-sm font-medium bg-gradient-to-r from-violet-600 to-purple-600 text-white flex items-center gap-2 hover:shadow-lg hover:shadow-violet-500/25 transition-all flex-shrink-0"
+                    >
+                      {isLoadingCollections ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : (
+                        <Sparkles className="h-4 w-4" />
+                      )}
+                      Generate Smart Collections
+                    </button>
+                  )}
+                </div>
+
+                {/* Type Filters */}
+                {documentTypes.length > 0 && (
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <Filter className="h-4 w-4 text-slate-400" />
+                    <button
+                      onClick={() => setFilterType(null)}
+                      className={cn(
+                        "px-3 py-1.5 rounded-lg text-sm font-medium transition-all",
+                        filterType === null
+                          ? "bg-slate-900 dark:bg-white text-white dark:text-slate-900"
+                          : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700"
+                      )}
+                    >
+                      All Types
+                    </button>
+                    {documentTypes.map((type) => (
+                      <button
+                        key={type}
+                        onClick={() => setFilterType(type === filterType ? null : type)}
+                        className={cn(
+                          "px-3 py-1.5 rounded-lg text-sm font-medium transition-all",
+                          filterType === type
+                            ? "bg-slate-900 dark:bg-white text-white dark:text-slate-900"
+                            : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700"
+                        )}
+                      >
+                        {type}
+                      </button>
+                    ))}
                   </div>
                 )}
 
-                {/* Main Content */}
-                <div className="flex-1 overflow-y-auto">
-                <div className="p-6 space-y-6">
-                  {/* Collection Filter Badge */}
-                  {selectedCollectionId && (
-                    <div className="flex items-center gap-2">
-                      <span className="px-3 py-1.5 rounded-full bg-purple-500/20 text-purple-300 text-sm flex items-center gap-2">
-                        <Sparkles className="h-3.5 w-3.5" />
-                        Showing documents from collection
-                        <button
-                          onClick={() => {
-                            setSelectedCollectionId(null);
-                            setCollectionDocIds(null);
-                          }}
-                          className="ml-1 hover:text-white"
-                        >
-                          <X className="h-3.5 w-3.5" />
-                        </button>
-                      </span>
-                    </div>
-                  )}
-
-                  {/* Quick Stats */}
-                  <div className="grid grid-cols-4 gap-4">
-                    <Card className="bg-white/5 border-white/10 p-4">
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <p className="text-xs text-slate-400">Total Documents</p>
-                          <h3 className="text-2xl font-bold text-white mt-1">{stats.total}</h3>
-                        </div>
-                        <FileText className="h-8 w-8 text-blue-400" />
+                {/* Documents */}
+                {isLoading ? (
+                  <DocumentGridSkeleton />
+                ) : filteredDocuments.length === 0 ? (
+                  <Card className="border-2 border-dashed border-slate-200 dark:border-slate-700 bg-white/50 dark:bg-slate-900/50 p-16 text-center">
+                    <div className="max-w-md mx-auto">
+                      <div className="h-20 w-20 rounded-2xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center mx-auto mb-6">
+                        <Upload className="h-10 w-10 text-slate-400" />
                       </div>
-                    </Card>
-                    <Card className="bg-white/5 border-white/10 p-4">
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <p className="text-xs text-slate-400">AI Summaries</p>
-                          <h3 className="text-2xl font-bold text-white mt-1">{stats.withSummaries}</h3>
-                        </div>
-                        <Sparkles className="h-8 w-8 text-purple-400" />
-                      </div>
-                    </Card>
-                    <Card className="bg-white/5 border-white/10 p-4">
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <p className="text-xs text-slate-400">Spaces</p>
-                          <h3 className="text-2xl font-bold text-white mt-1">{spaces.length}</h3>
-                        </div>
-                        <Building2 className="h-8 w-8 text-teal-400" />
-                      </div>
-                    </Card>
-                    <Card className="bg-white/5 border-white/10 p-4">
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <p className="text-xs text-slate-400">Recent (30d)</p>
-                          <h3 className="text-2xl font-bold text-white mt-1">{stats.recentCount}</h3>
-                        </div>
-                        <TrendingUp className="h-8 w-8 text-green-400" />
-                      </div>
-                    </Card>
-                  </div>
-
-                  {/* Search & Filters */}
-                  <div className="flex items-center gap-4">
-                    <div className="relative flex-1">
-                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
-                      <Input
-                        type="text"
-                        placeholder="Search your entire library..."
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                        className="pl-10 bg-white/5 border-white/10 text-white placeholder-slate-400 focus:border-purple-500/50 focus:ring-purple-500/20"
-                      />
-                      {searchQuery && (
-                        <button
-                          onClick={() => setSearchQuery("")}
-                          className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white"
-                        >
-                          <X className="h-4 w-4" />
-                        </button>
-                      )}
-                    </div>
-
-                    <div className="flex items-center gap-2">
-                      <Button
-                        variant={viewMode === "grid" ? "default" : "ghost"}
-                        size="sm"
-                        onClick={() => setViewMode("grid")}
-                        className={viewMode === "grid" ? "bg-white/10" : "text-slate-400 hover:text-white"}
-                      >
-                        <LayoutGrid className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant={viewMode === "list" ? "default" : "ghost"}
-                        size="sm"
-                        onClick={() => setViewMode("list")}
-                        className={viewMode === "list" ? "bg-white/10" : "text-slate-400 hover:text-white"}
-                      >
-                        <List className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </div>
-
-                  {/* Type Filters */}
-                  {documentTypes.length > 0 && (
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <Filter className="h-4 w-4 text-slate-500" />
-                      <button
-                        onClick={() => setFilterType(null)}
-                        className={cn(
-                          "px-3 py-1.5 rounded-lg text-xs font-medium transition-all",
-                          filterType === null
-                            ? "bg-gradient-to-r from-blue-600 to-purple-600 text-white"
-                            : "bg-white/5 text-slate-400 hover:text-white"
-                        )}
-                      >
-                        All Types
-                      </button>
-                      {documentTypes.map((type) => (
-                        <button
-                          key={type}
-                          onClick={() => setFilterType(type)}
-                          className={cn(
-                            "px-3 py-1.5 rounded-lg text-xs font-medium transition-all",
-                            filterType === type
-                              ? "bg-gradient-to-r from-blue-600 to-purple-600 text-white"
-                              : "bg-white/5 text-slate-400 hover:text-white"
-                          )}
-                        >
-                          {type}
-                        </button>
-                      ))}
-                    </div>
-                  )}
-
-                  {/* Documents */}
-                  {isLoading ? (
-                    <DocumentGridSkeleton />
-                  ) : filteredDocuments.length === 0 ? (
-                    <Card className="bg-white/5 border-white/10 border-2 border-dashed p-12 text-center">
-                      <Upload className="h-16 w-16 text-slate-500 mx-auto mb-4" />
-                      <h2 className="text-xl font-semibold text-white mb-2">
+                      <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-3">
                         Your Knowledge Base Awaits
                       </h2>
-                      <p className="text-slate-400 mb-6 max-w-md mx-auto">
+                      <p className="text-slate-500 dark:text-slate-400 mb-8">
                         Upload documents, PDFs, or create new docs to build your AI-powered knowledge library.
                       </p>
-                      <div className="flex items-center justify-center gap-3">
+                      <div className="flex items-center justify-center gap-4">
                         <FileUpload onUploadComplete={handleUploadComplete} />
-                        <Button onClick={() => setCreateDocModalOpen(true)} variant="outline" className="border-white/20 text-white hover:bg-white/10">
-                          <FileText className="h-4 w-4 mr-2" />
+                        <Button onClick={() => setCreateDocModalOpen(true)} variant="outline" size="lg">
+                          <FileText className="h-5 w-5 mr-2" />
                           Create Document
                         </Button>
                       </div>
-                    </Card>
-                  ) : viewMode === "grid" ? (
-                    <div className="grid gap-6 lg:grid-cols-2 2xl:grid-cols-3">
-                      {filteredDocuments.map((doc) => (
-                        <DocumentCard
-                          key={doc.id}
-                          doc={doc}
-                          onDelete={handleDelete}
-                          onGenerateSummary={handleGenerateSummary}
-                          onOpenChat={handleOpenChat}
-                          onOpenPreview={handleOpenPreview}
-                          onTagsChange={fetchAll}
-                          generatingSummary={generatingSummary}
-                        />
-                      ))}
                     </div>
-                  ) : (
-                    <DocumentTable
-                      documents={filteredDocuments}
-                      folders={folders}
-                      onDelete={handleDelete}
-                      onGenerateSummary={handleGenerateSummary}
-                      onOpenChat={handleOpenChat}
-                      onOpenPreview={handleOpenPreview}
-                      onTagsChange={fetchAll}
-                      onMoveToFolder={() => {}}
-                      onDragStart={() => {}}
-                      onDragEnd={() => {}}
-                      generatingSummary={generatingSummary}
-                      selectedDocuments={[]}
-                      onSelectDocument={() => {}}
-                      onSelectAll={() => {}}
-                    />
-                  )}
-                </div>
-                </div>
+                  </Card>
+                ) : (
+                  <div className="space-y-4">
+                    {filteredDocuments.map((doc) => (
+                      <Card
+                        key={doc.id}
+                        className="p-6 bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 hover:shadow-lg hover:border-violet-200 dark:hover:border-violet-700 transition-all group cursor-pointer"
+                        onClick={() => handleOpenPreview(doc)}
+                      >
+                        <div className="flex items-start gap-5">
+                          {/* Icon */}
+                          <div className="h-12 w-12 rounded-xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center flex-shrink-0 group-hover:bg-violet-100 dark:group-hover:bg-violet-900/30 transition-colors">
+                            <FileText className="h-6 w-6 text-slate-500 dark:text-slate-400 group-hover:text-violet-600 dark:group-hover:text-violet-400 transition-colors" />
+                          </div>
+
+                          {/* Content */}
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-start justify-between gap-4">
+                              <div className="flex-1 min-w-0">
+                                <h3 className="text-lg font-semibold text-slate-900 dark:text-white group-hover:text-violet-600 dark:group-hover:text-violet-400 transition-colors truncate">
+                                  {doc.title}
+                                </h3>
+                                <div className="flex items-center gap-4 mt-1.5 text-sm text-slate-500 dark:text-slate-400">
+                                  <span className="flex items-center gap-1">
+                                    <Clock className="h-3.5 w-3.5" />
+                                    {formatDate(doc.created_at)}
+                                  </span>
+                                  <span>{formatFileSize(doc.file_size)}</span>
+                                  <span>{doc.metadata?.wordCount?.toLocaleString() || 0} words</span>
+                                  {doc.document_type && (
+                                    <Badge variant="secondary" className="text-xs">
+                                      {doc.document_type}
+                                    </Badge>
+                                  )}
+                                </div>
+                              </div>
+
+                              {/* Actions */}
+                              <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleOpenChat(doc);
+                                  }}
+                                  className="text-slate-500 hover:text-violet-600 dark:hover:text-violet-400"
+                                >
+                                  <MessageSquare className="h-4 w-4 mr-1" />
+                                  Chat
+                                </Button>
+                                <DropdownMenu>
+                                  <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
+                                    <Button variant="ghost" size="icon" className="h-8 w-8">
+                                      <MoreHorizontal className="h-4 w-4" />
+                                    </Button>
+                                  </DropdownMenuTrigger>
+                                  <DropdownMenuContent align="end">
+                                    <DropdownMenuItem onClick={() => handleOpenPreview(doc)}>
+                                      <Eye className="h-4 w-4 mr-2" />
+                                      Preview
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem onClick={() => handleGenerateSummary(doc.id)}>
+                                      <Sparkles className="h-4 w-4 mr-2" />
+                                      Generate Summary
+                                    </DropdownMenuItem>
+                                    <DropdownMenuSeparator />
+                                    <DropdownMenuItem
+                                      onClick={() => handleDelete(doc.id)}
+                                      className="text-red-600 dark:text-red-400"
+                                    >
+                                      <Trash2 className="h-4 w-4 mr-2" />
+                                      Delete
+                                    </DropdownMenuItem>
+                                  </DropdownMenuContent>
+                                </DropdownMenu>
+                              </div>
+                            </div>
+
+                            {/* Summary Preview */}
+                            {doc.summary && (
+                              <p className="mt-3 text-sm text-slate-600 dark:text-slate-400 line-clamp-2">
+                                {doc.summary}
+                              </p>
+                            )}
+                          </div>
+                        </div>
+                      </Card>
+                    ))}
+                  </div>
+                )}
               </motion.div>
             )}
           </AnimatePresence>
         </div>
+
+        {/* Floating AI Assistant Panel */}
+        <AnimatePresence>
+          {isAiPanelOpen && (
+            <motion.div
+              initial={{ x: 400, opacity: 0 }}
+              animate={{ x: 0, opacity: 1 }}
+              exit={{ x: 400, opacity: 0 }}
+              transition={{ type: "spring", damping: 25, stiffness: 200 }}
+              className="fixed right-0 top-0 h-screen w-[400px] border-l border-slate-200 dark:border-slate-800 bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl shadow-2xl z-40"
+            >
+              <LibraryAssistant
+                isCollapsed={false}
+                onToggleCollapse={() => setIsAiPanelOpen(false)}
+                onDocumentClick={(docId) => {
+                  const doc = documents.find(d => d.id === docId);
+                  if (doc) handleOpenPreview(doc);
+                }}
+                onDocumentChat={(docId) => {
+                  const doc = documents.find(d => d.id === docId);
+                  if (doc) handleOpenChat(doc);
+                }}
+              />
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
 
       {/* Modals */}
@@ -797,7 +933,10 @@ export default function LibraryPage() {
       <CreateDocumentModal
         open={createDocModalOpen}
         onOpenChange={setCreateDocModalOpen}
-        onSuccess={fetchAll}
+        onSuccess={() => {
+          setCreateDocModalOpen(false);
+          fetchAll();
+        }}
       />
     </div>
   );

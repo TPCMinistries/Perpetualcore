@@ -1,10 +1,10 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Users, Circle, Eye } from "lucide-react";
+import { cn } from "@/lib/utils";
 import { createClient } from "@/lib/supabase/client";
-import { Badge } from "@/components/ui/badge";
-import { Avatar } from "@/components/ui/avatar";
-import { Users, Eye, Edit3, MessageSquare } from "lucide-react";
 import {
   Tooltip,
   TooltipContent,
@@ -12,49 +12,127 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 
-interface User {
+interface Viewer {
   id: string;
-  full_name: string;
-  avatar_url?: string;
-  status: "viewing" | "editing" | "commenting" | "idle";
-  last_active_at: string;
+  userId: string;
+  name: string;
+  avatarUrl?: string;
+  lastSeen: string;
 }
 
 interface PresenceIndicatorProps {
-  entityType: string;
-  entityId: string;
-  currentUserId?: string;
+  documentId: string;
+  className?: string;
+  showCount?: boolean;
+  maxAvatars?: number;
 }
 
+const PRESENCE_COLORS = [
+  "#22C55E", // green
+  "#3B82F6", // blue
+  "#8B5CF6", // purple
+  "#F59E0B", // amber
+  "#EF4444", // red
+  "#14B8A6", // teal
+];
+
 export function PresenceIndicator({
-  entityType,
-  entityId,
-  currentUserId,
+  documentId,
+  className,
+  showCount = true,
+  maxAvatars = 3,
 }: PresenceIndicatorProps) {
-  const [activeUsers, setActiveUsers] = useState<User[]>([]);
-  const [isTracking, setIsTracking] = useState(false);
-  const supabase = createClient();
+  const [viewers, setViewers] = useState<Viewer[]>([]);
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+  const supabaseRef = useRef(createClient());
+  const intervalRef = useRef<NodeJS.Timeout | null>(null);
+
+  const fetchPresence = useCallback(async () => {
+    const supabase = supabaseRef.current;
+
+    // Get current user
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+
+    setCurrentUserId(user.id);
+
+    // Update our presence
+    await supabase
+      .from("document_presence")
+      .upsert({
+        document_id: documentId,
+        user_id: user.id,
+        last_seen: new Date().toISOString(),
+      }, {
+        onConflict: "document_id,user_id",
+      });
+
+    // Fetch others viewing this document (active in last 5 minutes)
+    const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000).toISOString();
+
+    const { data: presenceData } = await supabase
+      .from("document_presence")
+      .select(\`
+        id,
+        user_id,
+        last_seen,
+        profiles!inner(id, full_name, avatar_url)
+      \`)
+      .eq("document_id", documentId)
+      .gte("last_seen", fiveMinutesAgo);
+
+    if (presenceData) {
+      const viewerList: Viewer[] = presenceData.map((p: any) => ({
+        id: p.id,
+        userId: p.user_id,
+        name: p.profiles?.full_name || "Unknown",
+        avatarUrl: p.profiles?.avatar_url,
+        lastSeen: p.last_seen,
+      }));
+
+      setViewers(viewerList);
+    }
+  }, [documentId]);
 
   useEffect(() => {
-    if (!currentUserId) return;
-
-    // Track current user's presence
-    trackPresence("viewing");
-    setIsTracking(true);
-
-    // Fetch initial presence data
     fetchPresence();
 
-    // Subscribe to presence changes
+    // Update presence every 30 seconds
+    intervalRef.current = setInterval(fetchPresence, 30000);
+
+    // Clean up on unmount
+    return () => {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+      }
+
+      // Remove our presence
+      const supabase = supabaseRef.current;
+      supabase.auth.getUser().then(({ data: { user } }) => {
+        if (user) {
+          supabase
+            .from("document_presence")
+            .delete()
+            .eq("document_id", documentId)
+            .eq("user_id", user.id);
+        }
+      });
+    };
+  }, [documentId, fetchPresence]);
+
+  // Set up realtime subscription
+  useEffect(() => {
+    const supabase = supabaseRef.current;
+
     const channel = supabase
-      .channel(`presence:${entityType}:${entityId}`)
+      .channel(\`presence:\${documentId}\`)
       .on(
         "postgres_changes",
         {
           event: "*",
           schema: "public",
-          table: "realtime_presence",
-          filter: `entity_type=eq.${entityType},entity_id=eq.${entityId}`,
+          table: "document_presence",
+          filter: \`document_id=eq.\${documentId}\`,
         },
         () => {
           fetchPresence();
@@ -62,216 +140,144 @@ export function PresenceIndicator({
       )
       .subscribe();
 
-    // Update presence periodically (every 30 seconds)
-    const interval = setInterval(() => {
-      updatePresence();
-    }, 30000);
-
-    // Cleanup on unmount
     return () => {
-      channel.unsubscribe();
-      clearInterval(interval);
-      removePresence();
+      supabase.removeChannel(channel);
     };
-  }, [entityType, entityId, currentUserId]);
+  }, [documentId, fetchPresence]);
 
-  async function trackPresence(status: "viewing" | "editing" | "commenting") {
-    if (!currentUserId) return;
+  // Filter out current user for display
+  const otherViewers = viewers.filter(v => v.userId !== currentUserId);
+  const visibleViewers = otherViewers.slice(0, maxAvatars);
+  const remainingCount = otherViewers.length - maxAvatars;
 
-    try {
-      const response = await fetch("/api/presence", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          entityType,
-          entityId,
-          status,
-        }),
-      });
-
-      if (!response.ok) {
-        console.error("Failed to track presence");
-      }
-    } catch (error) {
-      console.error("Error tracking presence:", error);
-    }
-  }
-
-  async function updatePresence() {
-    if (!currentUserId) return;
-
-    try {
-      await fetch("/api/presence", {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          entityType,
-          entityId,
-        }),
-      });
-    } catch (error) {
-      console.error("Error updating presence:", error);
-    }
-  }
-
-  async function removePresence() {
-    if (!currentUserId) return;
-
-    try {
-      await fetch(
-        `/api/presence?entityType=${entityType}&entityId=${entityId}`,
-        {
-          method: "DELETE",
-        }
-      );
-    } catch (error) {
-      console.error("Error removing presence:", error);
-    }
-  }
-
-  async function fetchPresence() {
-    try {
-      const response = await fetch(
-        `/api/presence?entityType=${entityType}&entityId=${entityId}`
-      );
-      if (response.ok) {
-        const data = await response.json();
-        // Filter out current user and only show active users (within last 2 minutes)
-        const twoMinutesAgo = new Date(Date.now() - 2 * 60 * 1000);
-        const active = data.presence.filter(
-          (user: any) =>
-            user.id !== currentUserId &&
-            new Date(user.last_active_at) > twoMinutesAgo
-        );
-        setActiveUsers(active);
-      }
-    } catch (error) {
-      console.error("Error fetching presence:", error);
-    }
-  }
-
-  function changeStatus(status: "viewing" | "editing" | "commenting") {
-    trackPresence(status);
-  }
-
-  const getStatusIcon = (status: string) => {
-    switch (status) {
-      case "editing":
-        return <Edit3 className="h-3 w-3" />;
-      case "commenting":
-        return <MessageSquare className="h-3 w-3" />;
-      default:
-        return <Eye className="h-3 w-3" />;
-    }
-  };
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case "editing":
-        return "bg-blue-500";
-      case "commenting":
-        return "bg-purple-500";
-      default:
-        return "bg-green-500";
-    }
-  };
-
-  if (activeUsers.length === 0) {
+  if (otherViewers.length === 0) {
     return null;
   }
 
   return (
-    <div className="flex items-center gap-2">
-      <TooltipProvider>
-        <div className="flex items-center gap-1">
-          <Users className="h-4 w-4 text-muted-foreground" />
-          <span className="text-sm text-muted-foreground">
-            {activeUsers.length} {activeUsers.length === 1 ? "person" : "people"} here
-          </span>
-        </div>
-
+    <TooltipProvider>
+      <motion.div
+        initial={{ opacity: 0, scale: 0.9 }}
+        animate={{ opacity: 1, scale: 1 }}
+        className={cn("flex items-center gap-2", className)}
+      >
+        {/* Viewer Avatars */}
         <div className="flex -space-x-2">
-          {activeUsers.slice(0, 5).map((user) => (
-            <Tooltip key={user.id}>
-              <TooltipTrigger>
-                <div className="relative">
-                  <div className="h-8 w-8 rounded-full bg-primary flex items-center justify-center text-primary-foreground text-xs font-medium border-2 border-background">
-                    {user.avatar_url ? (
-                      <img
-                        src={user.avatar_url}
-                        alt={user.full_name}
-                        className="h-full w-full rounded-full object-cover"
-                      />
-                    ) : (
-                      user.full_name.charAt(0).toUpperCase()
-                    )}
-                  </div>
-                  <div
-                    className={`absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full border-2 border-background ${getStatusColor(
-                      user.status
-                    )} flex items-center justify-center`}
+          <AnimatePresence>
+            {visibleViewers.map((viewer, index) => (
+              <Tooltip key={viewer.id}>
+                <TooltipTrigger asChild>
+                  <motion.div
+                    initial={{ opacity: 0, x: -10 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: -10 }}
+                    transition={{ delay: index * 0.05 }}
+                    className="relative"
                   >
-                    {getStatusIcon(user.status)}
-                  </div>
+                    <div
+                      className="h-7 w-7 rounded-full border-2 border-slate-900 flex items-center justify-center text-xs font-medium text-white"
+                      style={{ backgroundColor: PRESENCE_COLORS[index % PRESENCE_COLORS.length] }}
+                    >
+                      {viewer.avatarUrl ? (
+                        <img
+                          src={viewer.avatarUrl}
+                          alt={viewer.name}
+                          className="h-full w-full rounded-full object-cover"
+                        />
+                      ) : (
+                        viewer.name.charAt(0).toUpperCase()
+                      )}
+                    </div>
+                    {/* Online indicator */}
+                    <span className="absolute bottom-0 right-0 h-2 w-2 rounded-full bg-green-500 border border-slate-900" />
+                  </motion.div>
+                </TooltipTrigger>
+                <TooltipContent side="bottom" className="bg-slate-900 border-slate-700">
+                  <p className="text-sm">{viewer.name}</p>
+                  <p className="text-xs text-slate-400">Viewing now</p>
+                </TooltipContent>
+              </Tooltip>
+            ))}
+          </AnimatePresence>
+
+          {/* +N more indicator */}
+          {remainingCount > 0 && (
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <div className="h-7 w-7 rounded-full border-2 border-slate-900 bg-slate-700 flex items-center justify-center text-xs font-medium text-white">
+                  +{remainingCount}
                 </div>
               </TooltipTrigger>
-              <TooltipContent>
-                <p className="font-medium">{user.full_name}</p>
-                <p className="text-xs text-muted-foreground capitalize">
-                  {user.status}
-                </p>
+              <TooltipContent side="bottom" className="bg-slate-900 border-slate-700">
+                <p className="text-sm">{remainingCount} more viewing</p>
               </TooltipContent>
             </Tooltip>
-          ))}
-
-          {activeUsers.length > 5 && (
-            <div className="h-8 w-8 rounded-full bg-muted flex items-center justify-center text-xs font-medium border-2 border-background">
-              +{activeUsers.length - 5}
-            </div>
           )}
         </div>
-      </TooltipProvider>
 
-      {/* Status Controls for Current User */}
-      {isTracking && (
-        <div className="flex gap-1 ml-2">
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <button
-                onClick={() => changeStatus("viewing")}
-                className="p-1.5 rounded hover:bg-accent transition-colors"
-              >
-                <Eye className="h-4 w-4" />
-              </button>
-            </TooltipTrigger>
-            <TooltipContent>Viewing</TooltipContent>
-          </Tooltip>
+        {/* Text label */}
+        {showCount && (
+          <div className="flex items-center gap-1.5 text-xs text-slate-400">
+            <Eye className="h-3.5 w-3.5" />
+            <span>
+              {otherViewers.length} {otherViewers.length === 1 ? "person" : "people"} viewing
+            </span>
+          </div>
+        )}
+      </motion.div>
+    </TooltipProvider>
+  );
+}
 
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <button
-                onClick={() => changeStatus("editing")}
-                className="p-1.5 rounded hover:bg-accent transition-colors"
-              >
-                <Edit3 className="h-4 w-4" />
-              </button>
-            </TooltipTrigger>
-            <TooltipContent>Editing</TooltipContent>
-          </Tooltip>
+export function LibraryPresence({ className }: { className?: string }) {
+  const [activeViewers, setActiveViewers] = useState<number>(0);
+  const supabaseRef = useRef(createClient());
 
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <button
-                onClick={() => changeStatus("commenting")}
-                className="p-1.5 rounded hover:bg-accent transition-colors"
-              >
-                <MessageSquare className="h-4 w-4" />
-              </button>
-            </TooltipTrigger>
-            <TooltipContent>Commenting</TooltipContent>
-          </Tooltip>
-        </div>
-      )}
+  useEffect(() => {
+    const fetchActiveUsers = async () => {
+      const supabase = supabaseRef.current;
+
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("organization_id")
+        .eq("id", user.id)
+        .single();
+
+      if (!profile?.organization_id) return;
+
+      // Count unique users active in the library (last 5 minutes)
+      const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000).toISOString();
+
+      const { data: activity } = await supabase
+        .from("document_activity")
+        .select("user_id")
+        .eq("organization_id", profile.organization_id)
+        .gte("created_at", fiveMinutesAgo);
+
+      if (activity) {
+        const uniqueUsers = new Set(activity.map(a => a.user_id));
+        setActiveViewers(uniqueUsers.size);
+      }
+    };
+
+    fetchActiveUsers();
+    const interval = setInterval(fetchActiveUsers, 60000);
+
+    return () => clearInterval(interval);
+  }, []);
+
+  if (activeViewers <= 1) return null;
+
+  return (
+    <div className={cn("flex items-center gap-2 text-xs text-slate-400", className)}>
+      <div className="relative">
+        <Users className="h-4 w-4" />
+        <span className="absolute -top-1 -right-1 h-2 w-2 rounded-full bg-green-500 animate-pulse" />
+      </div>
+      <span>{activeViewers} team members active</span>
     </div>
   );
 }
