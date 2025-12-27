@@ -102,34 +102,32 @@ export async function POST(req: NextRequest) {
       });
     }
 
-    // Manual task creation
-    const taskData = {
+    // Manual task creation - using only core columns
+    // Note: Enhanced execution columns require 20250112_enhanced_task_execution.sql migration
+    const taskData: Record<string, any> = {
       organization_id: profile.organization_id,
       user_id: user.id,
       title: body.title,
       description: body.description || null,
       priority: body.priority || "medium",
       status: body.status || "todo",
-      execution_status: body.executionStatus || "pending",
-      execution_type: body.executionType || "manual",
       due_date: body.dueDate || null,
-      assigned_to_type: body.assignedToType || null,
-      assigned_to_id: body.assignedToId || null,
-      assigned_by: body.assignedToId ? user.id : null,
-      workflow_id: body.workflowId || null,
-      agent_id: body.agentId || null,
-      automation_rules: body.automationRules || null,
-      estimated_duration_minutes: body.estimatedDurationMinutes || null,
-      parent_task_id: body.parentTaskId || null,
-      project_name: body.projectName || null,
-      project_id: body.projectId || null,
-      team_id: body.teamId || null,
-      tags: body.tags || [],
-      source_type: "manual",
-      execution_log: [],
-      retry_count: 0,
-      max_retries: body.maxRetries || 3,
     };
+
+    // Add project_id if provided
+    if (body.projectId) {
+      taskData.project_id = body.projectId;
+    }
+
+    // Add team_id if provided
+    if (body.teamId) {
+      taskData.team_id = body.teamId;
+    }
+
+    // Add tags if provided
+    if (body.tags && body.tags.length > 0) {
+      taskData.tags = body.tags;
+    }
 
     const { data: task, error } = await supabase
       .from("tasks")
@@ -178,9 +176,6 @@ export async function PUT(req: NextRequest) {
     }
 
     // Add completed_at timestamp if status changed to completed
-    if (updates.status === "completed" && !updates.completed_at) {
-      updates.completed_at = new Date().toISOString();
-    }
 
     const { data: task, error } = await supabase
       .from("tasks")

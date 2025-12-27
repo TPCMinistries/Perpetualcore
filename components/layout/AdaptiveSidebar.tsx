@@ -53,7 +53,7 @@ export function AdaptiveSidebar({ profile, isCollapsed }: AdaptiveSidebarProps) 
   };
 
   return (
-    <div className="flex h-full flex-col border-r border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900">
+    <div className="flex h-full flex-col overflow-hidden bg-white dark:bg-slate-900">
       {/* Logo/Brand */}
       <div className={`border-b border-slate-200 dark:border-slate-800 py-4 ${isCollapsed ? "px-2" : "px-6"}`}>
         <Link href="/dashboard" className={`flex items-center ${isCollapsed ? "justify-center" : "space-x-2"}`}>

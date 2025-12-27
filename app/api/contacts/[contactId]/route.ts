@@ -1,0 +1,244 @@
+import { NextRequest, NextResponse } from "next/server";
+import { createClient } from "@/lib/supabase/server";
+import { rateLimiters } from "@/lib/rate-limit";
+import { UpdateContactInput } from "@/types/contacts";
+
+export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
+
+interface RouteContext {
+  params: Promise<{ contactId: string }>;
+}
+
+/**
+ * GET - Fetch a single contact with related data
+ */
+export async function GET(req: NextRequest, context: RouteContext) {
+  try {
+    const rateLimitResult = await rateLimiters.api.check(req);
+    if (!rateLimitResult.success) {
+      return rateLimitResult.response;
+    }
+
+    const { contactId } = await context.params;
+    const supabase = await createClient();
+
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    // Fetch contact with interaction count
+    const { data: contact, error } = await supabase
+      .from("contacts")
+      .select("*")
+      .eq("id", contactId)
+      .eq("user_id", user.id)
+      .single();
+
+    if (error || !contact) {
+      return NextResponse.json({ error: "Contact not found" }, { status: 404 });
+    }
+
+    // Get interaction count
+    const { count: interactionCount } = await supabase
+      .from("contact_interactions")
+      .select("*", { count: "exact", head: true })
+      .eq("contact_id", contactId);
+
+    // Get project count
+    const { count: projectCount } = await supabase
+      .from("contact_projects")
+      .select("*", { count: "exact", head: true })
+      .eq("contact_id", contactId);
+
+    // Get recent interactions
+    const { data: recentInteractions } = await supabase
+      .from("contact_interactions")
+      .select("*")
+      .eq("contact_id", contactId)
+      .order("interaction_date", { ascending: false })
+      .limit(5);
+
+    // Get linked projects
+    const { data: linkedProjects } = await supabase
+      .from("contact_projects")
+      .select(`
+        id,
+        role,
+        notes,
+        added_at,
+        project:projects (
+          id,
+          name,
+          emoji,
+          current_stage
+        )
+      `)
+      .eq("contact_id", contactId);
+
+    // Get connections
+    const { data: connectionsA } = await supabase
+      .from("contact_connections")
+      .select(`
+        id,
+        relationship_type,
+        strength,
+        notes,
+        connected_contact:contacts!contact_connections_contact_b_id_fkey (
+          id,
+          full_name,
+          company,
+          avatar_url
+        )
+      `)
+      .eq("contact_a_id", contactId);
+
+    const { data: connectionsB } = await supabase
+      .from("contact_connections")
+      .select(`
+        id,
+        relationship_type,
+        strength,
+        notes,
+        connected_contact:contacts!contact_connections_contact_a_id_fkey (
+          id,
+          full_name,
+          company,
+          avatar_url
+        )
+      `)
+      .eq("contact_b_id", contactId);
+
+    const connections = [...(connectionsA || []), ...(connectionsB || [])];
+
+    return NextResponse.json({
+      contact: {
+        ...contact,
+        interaction_count: interactionCount || 0,
+        project_count: projectCount || 0,
+      },
+      recentInteractions: recentInteractions || [],
+      linkedProjects: linkedProjects || [],
+      connections,
+    });
+  } catch (error) {
+    console.error("Contact GET error:", error);
+    return NextResponse.json({ error: "Failed to fetch contact" }, { status: 500 });
+  }
+}
+
+/**
+ * PUT - Update a contact
+ */
+export async function PUT(req: NextRequest, context: RouteContext) {
+  try {
+    const rateLimitResult = await rateLimiters.api.check(req);
+    if (!rateLimitResult.success) {
+      return rateLimitResult.response;
+    }
+
+    const { contactId } = await context.params;
+    const supabase = await createClient();
+
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const body: Partial<UpdateContactInput> = await req.json();
+
+    // Remove id from body if present (we use the URL param)
+    const { id, ...updates } = body as any;
+
+    // Clean up string fields
+    const cleanedUpdates: Record<string, any> = {};
+
+    for (const [key, value] of Object.entries(updates)) {
+      if (typeof value === "string") {
+        cleanedUpdates[key] = value.trim() || null;
+      } else {
+        cleanedUpdates[key] = value;
+      }
+    }
+
+    const { data: contact, error } = await supabase
+      .from("contacts")
+      .update(cleanedUpdates)
+      .eq("id", contactId)
+      .eq("user_id", user.id)
+      .select()
+      .single();
+
+    if (error) {
+      console.error("Contact update error:", error);
+      return NextResponse.json({ error: "Failed to update contact" }, { status: 500 });
+    }
+
+    if (!contact) {
+      return NextResponse.json({ error: "Contact not found" }, { status: 404 });
+    }
+
+    return NextResponse.json({ contact });
+  } catch (error) {
+    console.error("Contact PUT error:", error);
+    return NextResponse.json({ error: "Failed to update contact" }, { status: 500 });
+  }
+}
+
+/**
+ * DELETE - Delete a contact
+ */
+export async function DELETE(req: NextRequest, context: RouteContext) {
+  try {
+    const rateLimitResult = await rateLimiters.api.check(req);
+    if (!rateLimitResult.success) {
+      return rateLimitResult.response;
+    }
+
+    const { contactId } = await context.params;
+    const supabase = await createClient();
+
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    // Verify ownership before delete
+    const { data: existing } = await supabase
+      .from("contacts")
+      .select("id")
+      .eq("id", contactId)
+      .eq("user_id", user.id)
+      .single();
+
+    if (!existing) {
+      return NextResponse.json({ error: "Contact not found" }, { status: 404 });
+    }
+
+    const { error } = await supabase
+      .from("contacts")
+      .delete()
+      .eq("id", contactId)
+      .eq("user_id", user.id);
+
+    if (error) {
+      console.error("Contact delete error:", error);
+      return NextResponse.json({ error: "Failed to delete contact" }, { status: 500 });
+    }
+
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    console.error("Contact DELETE error:", error);
+    return NextResponse.json({ error: "Failed to delete contact" }, { status: 500 });
+  }
+}

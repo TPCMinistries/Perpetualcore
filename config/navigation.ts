@@ -36,6 +36,7 @@ import {
   FolderKanban,
   UsersRound,
   Radar,
+  Contact,
 } from "lucide-react";
 import { UserExperienceLevel, AdaptiveNavConfig } from "@/types/user-experience";
 
@@ -171,6 +172,17 @@ export const NAVIGATION_CONFIG: NavigationSection[] = [
           helpText: "Meeting transcription, action item extraction, and intelligent briefings",
         },
       },
+      {
+        name: "Contacts",
+        href: "/dashboard/contacts",
+        icon: Contact,
+        adaptiveConfig: {
+          visibleFor: ["beginner", "intermediate", "advanced"],
+          complexity: "essential",
+          isCore: true,
+          helpText: "Your network - track relationships, interactions, and connection opportunities",
+        },
+      },
     ],
   },
 
@@ -191,7 +203,7 @@ export const NAVIGATION_CONFIG: NavigationSection[] = [
           visibleFor: ["beginner", "intermediate", "advanced"],
           complexity: "standard",
           badge: "new",
-          helpText: "Exception-based management - monitor system health and handle failures",
+          helpText: "Monitor system health and handle issues that need attention",
         },
       },
       {

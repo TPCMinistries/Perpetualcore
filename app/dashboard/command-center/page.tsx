@@ -26,6 +26,8 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { NetworkOpportunities } from "@/components/contacts/NetworkOpportunities";
+import { FollowUpReminders } from "@/components/contacts/FollowUpReminders";
 
 interface HealthResponse {
   overall_status: HealthStatus;
@@ -157,7 +159,7 @@ export default function CommandCenterPage() {
             Command Center
           </h1>
           <p className="text-muted-foreground mt-1">
-            Exception-based management — manage exceptions, not tasks
+            Monitor your systems and handle issues that need attention
           </p>
         </div>
 
@@ -205,7 +207,7 @@ export default function CommandCenterPage() {
           <CardContent className="py-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-muted-foreground">Active Exceptions</p>
+                <p className="text-sm text-muted-foreground">Needs Attention</p>
                 <p className="text-2xl font-bold">{totalActive}</p>
               </div>
               <AlertTriangle className="h-8 w-8 text-muted-foreground" />
@@ -266,12 +268,21 @@ export default function CommandCenterPage() {
         />
       )}
 
+      {/* Relationship Intelligence Cards */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        {/* Follow-up Reminders */}
+        <FollowUpReminders maxContacts={5} />
+
+        {/* Network Opportunities - AI-powered contact suggestions */}
+        <NetworkOpportunities maxProjects={3} />
+      </div>
+
       {/* Exception Queue */}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <AlertTriangle className="h-5 w-5" />
-            Exception Queue
+            Issues & Alerts
           </CardTitle>
         </CardHeader>
         <CardContent>

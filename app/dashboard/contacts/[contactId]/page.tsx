@@ -1,0 +1,1016 @@
+"use client";
+
+import { useEffect, useState, use } from "react";
+import { useRouter } from "next/navigation";
+import {
+  ArrowLeft,
+  Star,
+  StarOff,
+  Mail,
+  Phone,
+  Building2,
+  MapPin,
+  Clock,
+  Calendar,
+  Edit,
+  Trash2,
+  MoreHorizontal,
+  MessageSquare,
+  Plus,
+  FileText,
+  Users,
+  Briefcase,
+  ExternalLink,
+  Video,
+  UserPlus,
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Separator } from "@/components/ui/separator";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Contact,
+  ContactInteraction,
+  ContactProject,
+  ContactConnection,
+  InteractionType,
+  RELATIONSHIP_STRENGTH_CONFIG,
+  INTERACTION_TYPE_CONFIG,
+  CONTACT_TYPE_CONFIG,
+  CreateInteractionInput,
+} from "@/types/contacts";
+import { cn } from "@/lib/utils";
+import { toast } from "sonner";
+import { format, formatDistanceToNow } from "date-fns";
+
+interface PageProps {
+  params: Promise<{ contactId: string }>;
+}
+
+export default function ContactDetailPage({ params }: PageProps) {
+  const { contactId } = use(params);
+  const router = useRouter();
+
+  const [contact, setContact] = useState<Contact | null>(null);
+  const [recentInteractions, setRecentInteractions] = useState<ContactInteraction[]>([]);
+  const [linkedProjects, setLinkedProjects] = useState<ContactProject[]>([]);
+  const [connections, setConnections] = useState<ContactConnection[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  // Dialog states
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [interactionDialogOpen, setInteractionDialogOpen] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [saving, setSaving] = useState(false);
+
+  // Edit form state
+  const [editForm, setEditForm] = useState<Partial<Contact>>({});
+
+  // Interaction form state
+  const [newInteraction, setNewInteraction] = useState<CreateInteractionInput>({
+    contact_id: contactId,
+    interaction_type: "meeting",
+    summary: "",
+    key_points: [],
+    action_items: [],
+  });
+
+  useEffect(() => {
+    fetchContact();
+  }, [contactId]);
+
+  const fetchContact = async () => {
+    try {
+      const response = await fetch(`/api/contacts/${contactId}`);
+      if (!response.ok) {
+        router.push("/dashboard/contacts");
+        return;
+      }
+      const data = await response.json();
+      setContact(data.contact);
+      setRecentInteractions(data.recentInteractions || []);
+      setLinkedProjects(data.linkedProjects || []);
+      setConnections(data.connections || []);
+      setEditForm(data.contact);
+    } catch (error) {
+      console.error("Error fetching contact:", error);
+      toast.error("Failed to load contact");
+      router.push("/dashboard/contacts");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleToggleFavorite = async () => {
+    if (!contact) return;
+    try {
+      const response = await fetch(`/api/contacts/${contactId}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ is_favorite: !contact.is_favorite }),
+      });
+
+      if (response.ok) {
+        setContact({ ...contact, is_favorite: !contact.is_favorite });
+        toast.success(contact.is_favorite ? "Removed from favorites" : "Added to favorites");
+      }
+    } catch (error) {
+      console.error("Error toggling favorite:", error);
+    }
+  };
+
+  const handleSaveEdit = async () => {
+    setSaving(true);
+    try {
+      const response = await fetch(`/api/contacts/${contactId}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(editForm),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setContact(data.contact);
+        setEditDialogOpen(false);
+        toast.success("Contact updated");
+      } else {
+        toast.error("Failed to update contact");
+      }
+    } catch (error) {
+      console.error("Error updating contact:", error);
+      toast.error("Failed to update contact");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleLogInteraction = async () => {
+    if (!newInteraction.summary.trim()) {
+      toast.error("Summary is required");
+      return;
+    }
+
+    setSaving(true);
+    try {
+      const response = await fetch(`/api/contacts/${contactId}/interactions`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(newInteraction),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setRecentInteractions([data.interaction, ...recentInteractions]);
+        setInteractionDialogOpen(false);
+        setNewInteraction({
+          contact_id: contactId,
+          interaction_type: "meeting",
+          summary: "",
+          key_points: [],
+          action_items: [],
+        });
+        toast.success("Interaction logged");
+        fetchContact(); // Refresh to get updated last_interaction_at
+      } else {
+        toast.error("Failed to log interaction");
+      }
+    } catch (error) {
+      console.error("Error logging interaction:", error);
+      toast.error("Failed to log interaction");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleDelete = async () => {
+    setSaving(true);
+    try {
+      const response = await fetch(`/api/contacts/${contactId}`, {
+        method: "DELETE",
+      });
+
+      if (response.ok) {
+        toast.success("Contact deleted");
+        router.push("/dashboard/contacts");
+      } else {
+        toast.error("Failed to delete contact");
+      }
+    } catch (error) {
+      console.error("Error deleting contact:", error);
+      toast.error("Failed to delete contact");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const getInitials = (name: string) => {
+    return name
+      .split(" ")
+      .map((n) => n[0])
+      .join("")
+      .toUpperCase()
+      .slice(0, 2);
+  };
+
+  const getInteractionIcon = (type: InteractionType) => {
+    const icons: Record<InteractionType, React.ReactNode> = {
+      email: <Mail className="h-4 w-4" />,
+      call: <Phone className="h-4 w-4" />,
+      video_call: <Video className="h-4 w-4" />,
+      meeting: <Users className="h-4 w-4" />,
+      message: <MessageSquare className="h-4 w-4" />,
+      social_media: <ExternalLink className="h-4 w-4" />,
+      event: <Calendar className="h-4 w-4" />,
+      introduction: <UserPlus className="h-4 w-4" />,
+      note: <FileText className="h-4 w-4" />,
+      other: <MoreHorizontal className="h-4 w-4" />,
+    };
+    return icons[type] || icons.other;
+  };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
+      </div>
+    );
+  }
+
+  if (!contact) {
+    return null;
+  }
+
+  const strengthConfig = RELATIONSHIP_STRENGTH_CONFIG[contact.relationship_strength];
+
+  return (
+    <div className="container mx-auto p-6 max-w-5xl">
+      {/* Back Button */}
+      <Button
+        variant="ghost"
+        className="mb-4 -ml-2"
+        onClick={() => router.push("/dashboard/contacts")}
+      >
+        <ArrowLeft className="h-4 w-4 mr-2" />
+        Back to Contacts
+      </Button>
+
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row items-start gap-6 mb-8">
+        <Avatar className="h-20 w-20">
+          <AvatarImage src={contact.avatar_url || undefined} />
+          <AvatarFallback className={cn("text-2xl", strengthConfig.bgColor, strengthConfig.color)}>
+            {getInitials(contact.full_name)}
+          </AvatarFallback>
+        </Avatar>
+
+        <div className="flex-1">
+          <div className="flex items-center gap-3 flex-wrap">
+            <h1 className="text-3xl font-bold">{contact.full_name}</h1>
+            {contact.is_favorite && (
+              <Star className="h-5 w-5 text-amber-500 fill-amber-500" />
+            )}
+            <Badge
+              variant="secondary"
+              className={cn(strengthConfig.bgColor, strengthConfig.color)}
+            >
+              {strengthConfig.label}
+            </Badge>
+            <Badge variant="outline">
+              {CONTACT_TYPE_CONFIG[contact.contact_type].label}
+            </Badge>
+          </div>
+
+          {(contact.job_title || contact.company) && (
+            <p className="text-lg text-muted-foreground mt-1">
+              {contact.job_title}
+              {contact.job_title && contact.company && " at "}
+              {contact.company && (
+                <span className="inline-flex items-center gap-1">
+                  <Building2 className="h-4 w-4" />
+                  {contact.company}
+                </span>
+              )}
+            </p>
+          )}
+
+          <div className="flex flex-wrap items-center gap-4 mt-3 text-sm text-muted-foreground">
+            {contact.email && (
+              <a
+                href={`mailto:${contact.email}`}
+                className="flex items-center gap-1 hover:text-primary transition-colors"
+              >
+                <Mail className="h-4 w-4" />
+                {contact.email}
+              </a>
+            )}
+            {contact.phone && (
+              <a
+                href={`tel:${contact.phone}`}
+                className="flex items-center gap-1 hover:text-primary transition-colors"
+              >
+                <Phone className="h-4 w-4" />
+                {contact.phone}
+              </a>
+            )}
+            {contact.location && (
+              <span className="flex items-center gap-1">
+                <MapPin className="h-4 w-4" />
+                {contact.location}
+              </span>
+            )}
+          </div>
+        </div>
+
+        <div className="flex items-center gap-2">
+          <Button variant="outline" size="icon" onClick={handleToggleFavorite}>
+            {contact.is_favorite ? (
+              <StarOff className="h-4 w-4" />
+            ) : (
+              <Star className="h-4 w-4" />
+            )}
+          </Button>
+
+          <Button onClick={() => setInteractionDialogOpen(true)}>
+            <Plus className="h-4 w-4 mr-2" />
+            Log Interaction
+          </Button>
+
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" size="icon">
+                <MoreHorizontal className="h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={() => setEditDialogOpen(true)}>
+                <Edit className="h-4 w-4 mr-2" />
+                Edit Contact
+              </DropdownMenuItem>
+              {contact.email && (
+                <DropdownMenuItem onClick={() => window.open(`mailto:${contact.email}`)}>
+                  <Mail className="h-4 w-4 mr-2" />
+                  Send Email
+                </DropdownMenuItem>
+              )}
+              {contact.phone && (
+                <DropdownMenuItem onClick={() => window.open(`tel:${contact.phone}`)}>
+                  <Phone className="h-4 w-4 mr-2" />
+                  Call
+                </DropdownMenuItem>
+              )}
+              <DropdownMenuSeparator />
+              <DropdownMenuItem
+                onClick={() => setDeleteDialogOpen(true)}
+                className="text-destructive"
+              >
+                <Trash2 className="h-4 w-4 mr-2" />
+                Delete Contact
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+      </div>
+
+      {/* Tabs */}
+      <Tabs defaultValue="overview" className="space-y-6">
+        <TabsList>
+          <TabsTrigger value="overview">Overview</TabsTrigger>
+          <TabsTrigger value="timeline">
+            Timeline
+            {recentInteractions.length > 0 && (
+              <Badge variant="secondary" className="ml-2 text-xs">
+                {recentInteractions.length}
+              </Badge>
+            )}
+          </TabsTrigger>
+          <TabsTrigger value="projects">
+            Projects
+            {linkedProjects.length > 0 && (
+              <Badge variant="secondary" className="ml-2 text-xs">
+                {linkedProjects.length}
+              </Badge>
+            )}
+          </TabsTrigger>
+          <TabsTrigger value="connections">
+            Connections
+            {connections.length > 0 && (
+              <Badge variant="secondary" className="ml-2 text-xs">
+                {connections.length}
+              </Badge>
+            )}
+          </TabsTrigger>
+        </TabsList>
+
+        {/* Overview Tab */}
+        <TabsContent value="overview" className="space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* About Card */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-lg">About</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {contact.how_we_met && (
+                  <div>
+                    <Label className="text-muted-foreground">How we met</Label>
+                    <p className="mt-1">{contact.how_we_met}</p>
+                  </div>
+                )}
+
+                {contact.first_met_date && (
+                  <div>
+                    <Label className="text-muted-foreground">First met</Label>
+                    <p className="mt-1">{format(new Date(contact.first_met_date), "MMMM d, yyyy")}</p>
+                  </div>
+                )}
+
+                {contact.ai_summary && (
+                  <div>
+                    <Label className="text-muted-foreground">AI Summary</Label>
+                    <p className="mt-1 text-sm">{contact.ai_summary}</p>
+                  </div>
+                )}
+
+                {!contact.how_we_met && !contact.first_met_date && !contact.ai_summary && (
+                  <p className="text-muted-foreground text-sm">
+                    No additional details yet. Click Edit to add more information.
+                  </p>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Stats Card */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-lg">Activity</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="text-center p-4 rounded-lg bg-muted/50">
+                    <p className="text-2xl font-bold">{contact.interaction_count || 0}</p>
+                    <p className="text-sm text-muted-foreground">Interactions</p>
+                  </div>
+                  <div className="text-center p-4 rounded-lg bg-muted/50">
+                    <p className="text-2xl font-bold">{contact.project_count || 0}</p>
+                    <p className="text-sm text-muted-foreground">Projects</p>
+                  </div>
+                </div>
+
+                {contact.last_interaction_at && (
+                  <div className="flex items-center gap-2 text-sm">
+                    <Clock className="h-4 w-4 text-muted-foreground" />
+                    <span className="text-muted-foreground">Last interaction:</span>
+                    <span>
+                      {formatDistanceToNow(new Date(contact.last_interaction_at), {
+                        addSuffix: true,
+                      })}
+                    </span>
+                  </div>
+                )}
+
+                {contact.next_followup_date && (
+                  <div className="flex items-center gap-2 text-sm">
+                    <Calendar className="h-4 w-4 text-muted-foreground" />
+                    <span className="text-muted-foreground">Follow-up scheduled:</span>
+                    <span>{format(new Date(contact.next_followup_date), "MMM d, yyyy")}</span>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Tags & Skills */}
+            {(contact.tags?.length > 0 ||
+              contact.skills?.length > 0 ||
+              contact.interests?.length > 0) && (
+              <Card className="md:col-span-2">
+                <CardHeader>
+                  <CardTitle className="text-lg">Tags & Expertise</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  {contact.tags?.length > 0 && (
+                    <div>
+                      <Label className="text-muted-foreground">Tags</Label>
+                      <div className="flex flex-wrap gap-2 mt-2">
+                        {contact.tags.map((tag) => (
+                          <Badge key={tag} variant="secondary">
+                            {tag}
+                          </Badge>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {contact.skills?.length > 0 && (
+                    <div>
+                      <Label className="text-muted-foreground">Skills</Label>
+                      <div className="flex flex-wrap gap-2 mt-2">
+                        {contact.skills.map((skill) => (
+                          <Badge key={skill} variant="outline">
+                            {skill}
+                          </Badge>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {contact.interests?.length > 0 && (
+                    <div>
+                      <Label className="text-muted-foreground">Interests</Label>
+                      <div className="flex flex-wrap gap-2 mt-2">
+                        {contact.interests.map((interest) => (
+                          <Badge key={interest} variant="outline" className="bg-muted">
+                            {interest}
+                          </Badge>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Can Help With / Looking For */}
+            {(contact.can_help_with?.length > 0 || contact.looking_for?.length > 0) && (
+              <Card className="md:col-span-2">
+                <CardHeader>
+                  <CardTitle className="text-lg">Opportunities</CardTitle>
+                  <CardDescription>What they offer and what they need</CardDescription>
+                </CardHeader>
+                <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {contact.can_help_with?.length > 0 && (
+                    <div>
+                      <Label className="text-muted-foreground">Can Help With</Label>
+                      <ul className="mt-2 space-y-1">
+                        {contact.can_help_with.map((item, i) => (
+                          <li key={i} className="text-sm flex items-center gap-2">
+                            <span className="w-1.5 h-1.5 rounded-full bg-green-500" />
+                            {item}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+
+                  {contact.looking_for?.length > 0 && (
+                    <div>
+                      <Label className="text-muted-foreground">Looking For</Label>
+                      <ul className="mt-2 space-y-1">
+                        {contact.looking_for.map((item, i) => (
+                          <li key={i} className="text-sm flex items-center gap-2">
+                            <span className="w-1.5 h-1.5 rounded-full bg-blue-500" />
+                            {item}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            )}
+          </div>
+        </TabsContent>
+
+        {/* Timeline Tab */}
+        <TabsContent value="timeline">
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between">
+              <div>
+                <CardTitle>Interaction History</CardTitle>
+                <CardDescription>All communications with this contact</CardDescription>
+              </div>
+              <Button onClick={() => setInteractionDialogOpen(true)}>
+                <Plus className="h-4 w-4 mr-2" />
+                Log Interaction
+              </Button>
+            </CardHeader>
+            <CardContent>
+              {recentInteractions.length === 0 ? (
+                <div className="text-center py-8 text-muted-foreground">
+                  <MessageSquare className="h-8 w-8 mx-auto mb-3 opacity-50" />
+                  <p>No interactions logged yet</p>
+                  <p className="text-sm mt-1">Log your first interaction to start tracking</p>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {recentInteractions.map((interaction) => {
+                    const typeConfig = INTERACTION_TYPE_CONFIG[interaction.interaction_type];
+                    return (
+                      <div
+                        key={interaction.id}
+                        className="flex gap-4 p-4 rounded-lg border"
+                      >
+                        <div
+                          className={cn(
+                            "w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0",
+                            typeConfig.color,
+                            "bg-muted"
+                          )}
+                        >
+                          {getInteractionIcon(interaction.interaction_type)}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <span className="font-medium">{typeConfig.label}</span>
+                            {interaction.subject && (
+                              <span className="text-muted-foreground">- {interaction.subject}</span>
+                            )}
+                            <span className="text-xs text-muted-foreground ml-auto">
+                              {format(new Date(interaction.interaction_date), "MMM d, yyyy h:mm a")}
+                            </span>
+                          </div>
+                          <p className="text-sm mt-1">{interaction.summary}</p>
+                          {interaction.key_points?.length > 0 && (
+                            <div className="mt-2">
+                              <p className="text-xs text-muted-foreground mb-1">Key Points:</p>
+                              <ul className="text-sm space-y-1">
+                                {interaction.key_points.map((point, i) => (
+                                  <li key={i} className="flex items-center gap-2">
+                                    <span className="w-1 h-1 rounded-full bg-primary" />
+                                    {point}
+                                  </li>
+                                ))}
+                              </ul>
+                            </div>
+                          )}
+                          {interaction.action_items?.length > 0 && (
+                            <div className="mt-2">
+                              <p className="text-xs text-muted-foreground mb-1">Action Items:</p>
+                              <ul className="text-sm space-y-1">
+                                {interaction.action_items.map((item, i) => (
+                                  <li key={i} className="flex items-center gap-2">
+                                    <input type="checkbox" className="rounded" disabled />
+                                    {item}
+                                  </li>
+                                ))}
+                              </ul>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* Projects Tab */}
+        <TabsContent value="projects">
+          <Card>
+            <CardHeader>
+              <CardTitle>Linked Projects</CardTitle>
+              <CardDescription>Projects this contact is involved with</CardDescription>
+            </CardHeader>
+            <CardContent>
+              {linkedProjects.length === 0 ? (
+                <div className="text-center py-8 text-muted-foreground">
+                  <Briefcase className="h-8 w-8 mx-auto mb-3 opacity-50" />
+                  <p>No projects linked yet</p>
+                  <p className="text-sm mt-1">Link this contact to relevant projects</p>
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  {linkedProjects.map((lp) => (
+                    <div
+                      key={lp.id}
+                      className="flex items-center gap-3 p-3 rounded-lg border hover:bg-muted/50 cursor-pointer transition-colors"
+                      onClick={() => router.push(`/dashboard/projects/${lp.project_id}`)}
+                    >
+                      <span className="text-2xl">{lp.project?.emoji || "📁"}</span>
+                      <div className="flex-1">
+                        <p className="font-medium">{lp.project?.name}</p>
+                        {lp.role && (
+                          <p className="text-sm text-muted-foreground">Role: {lp.role}</p>
+                        )}
+                      </div>
+                      {lp.project?.current_stage && (
+                        <Badge variant="outline">{lp.project.current_stage}</Badge>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* Connections Tab */}
+        <TabsContent value="connections">
+          <Card>
+            <CardHeader>
+              <CardTitle>Network Connections</CardTitle>
+              <CardDescription>People this contact knows</CardDescription>
+            </CardHeader>
+            <CardContent>
+              {connections.length === 0 ? (
+                <div className="text-center py-8 text-muted-foreground">
+                  <Users className="h-8 w-8 mx-auto mb-3 opacity-50" />
+                  <p>No connections mapped yet</p>
+                  <p className="text-sm mt-1">Add connections to build the relationship web</p>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  {connections.map((conn) => (
+                    <div
+                      key={conn.id}
+                      className="flex items-center gap-3 p-3 rounded-lg border hover:bg-muted/50 cursor-pointer transition-colors"
+                      onClick={() =>
+                        router.push(`/dashboard/contacts/${conn.connected_contact?.id}`)
+                      }
+                    >
+                      <Avatar className="h-10 w-10">
+                        <AvatarImage src={conn.connected_contact?.avatar_url || undefined} />
+                        <AvatarFallback>
+                          {conn.connected_contact?.full_name
+                            ? getInitials(conn.connected_contact.full_name)
+                            : "?"}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div className="flex-1 min-w-0">
+                        <p className="font-medium truncate">
+                          {conn.connected_contact?.full_name}
+                        </p>
+                        {conn.relationship_type && (
+                          <p className="text-sm text-muted-foreground">{conn.relationship_type}</p>
+                        )}
+                      </div>
+                      <Badge variant="outline">{conn.strength}</Badge>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
+
+      {/* Edit Dialog */}
+      <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
+        <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Edit Contact</DialogTitle>
+            <DialogDescription>Update contact information</DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4 py-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="col-span-2 space-y-2">
+                <Label>Name</Label>
+                <Input
+                  value={editForm.full_name || ""}
+                  onChange={(e) => setEditForm({ ...editForm, full_name: e.target.value })}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label>Email</Label>
+                <Input
+                  type="email"
+                  value={editForm.email || ""}
+                  onChange={(e) => setEditForm({ ...editForm, email: e.target.value })}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label>Phone</Label>
+                <Input
+                  value={editForm.phone || ""}
+                  onChange={(e) => setEditForm({ ...editForm, phone: e.target.value })}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label>Company</Label>
+                <Input
+                  value={editForm.company || ""}
+                  onChange={(e) => setEditForm({ ...editForm, company: e.target.value })}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label>Job Title</Label>
+                <Input
+                  value={editForm.job_title || ""}
+                  onChange={(e) => setEditForm({ ...editForm, job_title: e.target.value })}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label>Contact Type</Label>
+                <Select
+                  value={editForm.contact_type}
+                  onValueChange={(value) =>
+                    setEditForm({ ...editForm, contact_type: value as any })
+                  }
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {Object.entries(CONTACT_TYPE_CONFIG).map(([key, config]) => (
+                      <SelectItem key={key} value={key}>
+                        {config.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label>Relationship</Label>
+                <Select
+                  value={editForm.relationship_strength}
+                  onValueChange={(value) =>
+                    setEditForm({ ...editForm, relationship_strength: value as any })
+                  }
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {Object.entries(RELATIONSHIP_STRENGTH_CONFIG).map(([key, config]) => (
+                      <SelectItem key={key} value={key}>
+                        {config.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label>Location</Label>
+                <Input
+                  value={editForm.location || ""}
+                  onChange={(e) => setEditForm({ ...editForm, location: e.target.value })}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label>First Met Date</Label>
+                <Input
+                  type="date"
+                  value={editForm.first_met_date || ""}
+                  onChange={(e) => setEditForm({ ...editForm, first_met_date: e.target.value })}
+                />
+              </div>
+
+              <div className="col-span-2 space-y-2">
+                <Label>How We Met</Label>
+                <Textarea
+                  value={editForm.how_we_met || ""}
+                  onChange={(e) => setEditForm({ ...editForm, how_we_met: e.target.value })}
+                  rows={2}
+                />
+              </div>
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setEditDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleSaveEdit} disabled={saving}>
+              {saving ? "Saving..." : "Save Changes"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Log Interaction Dialog */}
+      <Dialog open={interactionDialogOpen} onOpenChange={setInteractionDialogOpen}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle>Log Interaction</DialogTitle>
+            <DialogDescription>
+              Record an interaction with {contact.full_name}
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label>Interaction Type</Label>
+              <Select
+                value={newInteraction.interaction_type}
+                onValueChange={(value: InteractionType) =>
+                  setNewInteraction({ ...newInteraction, interaction_type: value })
+                }
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {Object.entries(INTERACTION_TYPE_CONFIG).map(([key, config]) => (
+                    <SelectItem key={key} value={key}>
+                      <span className="flex items-center gap-2">
+                        <span className={config.color}>{config.label}</span>
+                      </span>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label>Subject (optional)</Label>
+              <Input
+                placeholder="e.g., Project discussion, Catch-up call"
+                value={newInteraction.subject || ""}
+                onChange={(e) =>
+                  setNewInteraction({ ...newInteraction, subject: e.target.value })
+                }
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label>Summary *</Label>
+              <Textarea
+                placeholder="What did you discuss? Key takeaways?"
+                value={newInteraction.summary}
+                onChange={(e) =>
+                  setNewInteraction({ ...newInteraction, summary: e.target.value })
+                }
+                rows={4}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label>Date & Time</Label>
+              <Input
+                type="datetime-local"
+                value={
+                  newInteraction.interaction_date
+                    ? new Date(newInteraction.interaction_date).toISOString().slice(0, 16)
+                    : new Date().toISOString().slice(0, 16)
+                }
+                onChange={(e) =>
+                  setNewInteraction({
+                    ...newInteraction,
+                    interaction_date: new Date(e.target.value).toISOString(),
+                  })
+                }
+              />
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setInteractionDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleLogInteraction} disabled={saving}>
+              {saving ? "Logging..." : "Log Interaction"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Delete Contact</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to delete {contact.full_name}? This action cannot be undone.
+              All interactions and linked projects will also be removed.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setDeleteDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button variant="destructive" onClick={handleDelete} disabled={saving}>
+              {saving ? "Deleting..." : "Delete Contact"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
+}

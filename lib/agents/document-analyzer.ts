@@ -222,15 +222,7 @@ export async function processDocumentsForAgent(agentId: string) {
             title: `Action from "${doc.title}": ${actionItem.substring(0, 100)}`,
             description: `Action item extracted from document:\n\n${actionItem}\n\nSource document: ${doc.title}`,
             priority: "medium",
-            execution_type: "manual",
-            execution_status: "pending",
-            source_type: "agent",
-            agent_id: agentId,
-            ai_context: JSON.stringify({
-              document_id: doc.id,
-              document_title: doc.title,
-              action_item: actionItem,
-            }),
+            status: "todo",
           });
         }
       }

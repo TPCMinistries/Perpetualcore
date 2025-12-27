@@ -5,17 +5,17 @@ export const dynamic = "force-dynamic";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
+import { motion, AnimatePresence } from "framer-motion";
 import { FileUpload, UploadedFile } from "@/components/file-upload";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   FileText, Trash2, Upload, FolderIcon, FolderPlus, Sparkles,
   Search, Filter, X, MessageSquare, LayoutGrid, List,
   BookOpen, TrendingUp, BarChart3, Tag, Calendar, Building2,
-  Briefcase, Brain, Loader2, Eye
+  Briefcase, Brain, Loader2, Eye, Network, FolderOpen, Plus,
+  Settings, RefreshCw
 } from "lucide-react";
 import { EmptyState } from "@/components/ui/empty-state";
 import { DocumentGridSkeleton } from "@/components/ui/skeletons";
@@ -25,9 +25,13 @@ import { DocumentPreviewModal } from "@/components/documents/DocumentPreviewModa
 import { DocumentCard } from "@/components/documents/DocumentCard";
 import { DocumentTable } from "@/components/documents/DocumentTable";
 import { CreateDocumentModal } from "@/components/documents/CreateDocumentModal";
+import { LibraryModeSwitch, LibraryMode } from "@/components/library/LibraryModeSwitch";
+import { LibraryAssistant } from "@/components/library/LibraryAssistant";
+import { KnowledgeGraph, GraphNode, GraphLink } from "@/components/library/KnowledgeGraph";
 import { Folder as FolderType, Tag as TagType } from "@/types";
 import { createClient } from "@/lib/supabase/client";
 import Link from "next/link";
+import { cn } from "@/lib/utils";
 
 interface Document {
   id: string;
@@ -80,7 +84,12 @@ interface LibraryStats {
 
 export default function LibraryPage() {
   const router = useRouter();
-  const [activeTab, setActiveTab] = useState("all");
+
+  // Mode state
+  const [mode, setMode] = useState<LibraryMode>("files");
+  const [isAssistantCollapsed, setIsAssistantCollapsed] = useState(false);
+
+  // Data state
   const [documents, setDocuments] = useState<Document[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [spaces, setSpaces] = useState<Space[]>([]);
@@ -89,6 +98,8 @@ export default function LibraryPage() {
   const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
   const [selectedFolderId, setSelectedFolderId] = useState<string | null>(null);
   const [folders, setFolders] = useState<FolderType[]>([]);
+
+  // UI state
   const [searchQuery, setSearchQuery] = useState("");
   const [filterType, setFilterType] = useState<string | null>(null);
   const [viewMode, setViewMode] = useState<"grid" | "list">("list");
@@ -99,6 +110,12 @@ export default function LibraryPage() {
   const [folderModalOpen, setFolderModalOpen] = useState(false);
   const [createDocModalOpen, setCreateDocModalOpen] = useState(false);
   const [generatingSummary, setGeneratingSummary] = useState<string | null>(null);
+
+  // Graph state
+  const [graphNodes, setGraphNodes] = useState<GraphNode[]>([]);
+  const [graphLinks, setGraphLinks] = useState<GraphLink[]>([]);
+  const [isGraphLoading, setIsGraphLoading] = useState(false);
+
   const [stats, setStats] = useState<LibraryStats>({
     total: 0,
     byType: {},
@@ -109,6 +126,12 @@ export default function LibraryPage() {
   useEffect(() => {
     fetchAll();
   }, [selectedFolderId, selectedSpaceId, selectedProjectId]);
+
+  useEffect(() => {
+    if (mode === "graph") {
+      buildGraphData();
+    }
+  }, [mode, documents, spaces, projects]);
 
   async function fetchAll() {
     setIsLoading(true);
@@ -224,6 +247,98 @@ export default function LibraryPage() {
     }
   }
 
+  function buildGraphData() {
+    setIsGraphLoading(true);
+
+    // Build nodes from documents, projects, spaces
+    const nodes: GraphNode[] = [];
+    const links: GraphLink[] = [];
+
+    // Add document nodes
+    documents.filter(d => d.status === "completed").forEach(doc => {
+      nodes.push({
+        id: `doc-${doc.id}`,
+        type: "document",
+        label: doc.title.length > 25 ? doc.title.slice(0, 25) + "..." : doc.title,
+        size: 15 + (doc.metadata?.wordCount || 0) / 500,
+        metadata: { documentId: doc.id, fullTitle: doc.title }
+      });
+
+      // Link to projects
+      doc.projects?.forEach(project => {
+        links.push({
+          source: `doc-${doc.id}`,
+          target: `project-${project.id}`,
+          type: "belongs_to",
+          strength: 0.8
+        });
+      });
+
+      // Link to spaces
+      doc.knowledge_spaces?.forEach(space => {
+        links.push({
+          source: `doc-${doc.id}`,
+          target: `space-${space.id}`,
+          type: "belongs_to",
+          strength: 0.7
+        });
+      });
+    });
+
+    // Add project nodes
+    projects.forEach(project => {
+      nodes.push({
+        id: `project-${project.id}`,
+        type: "project",
+        label: project.name,
+        size: 22,
+        metadata: { projectId: project.id }
+      });
+    });
+
+    // Add space nodes
+    spaces.forEach(space => {
+      nodes.push({
+        id: `space-${space.id}`,
+        type: "space",
+        label: space.name,
+        size: 20,
+        metadata: { spaceId: space.id }
+      });
+    });
+
+    // Add concept nodes from document types
+    const conceptCounts: Record<string, number> = {};
+    documents.forEach(doc => {
+      if (doc.document_type) {
+        conceptCounts[doc.document_type] = (conceptCounts[doc.document_type] || 0) + 1;
+      }
+    });
+
+    Object.entries(conceptCounts).forEach(([type, count]) => {
+      nodes.push({
+        id: `concept-${type}`,
+        type: "concept",
+        label: type,
+        size: 12 + count * 3
+      });
+
+      // Link documents to their type concepts
+      documents.filter(d => d.document_type === type).forEach(doc => {
+        links.push({
+          source: `doc-${doc.id}`,
+          target: `concept-${type}`,
+          type: "references",
+          strength: 0.5
+        });
+      });
+    });
+
+    setGraphNodes(nodes);
+    setGraphLinks(links);
+    setIsGraphLoading(false);
+  }
+
   async function handleDelete(documentId: string) {
     if (!confirm("Are you sure you want to delete this document?")) return;
 
@@ -277,6 +392,17 @@ export default function LibraryPage() {
     fetchAll();
   }
 
+  function handleGraphNodeClick(node: GraphNode) {
+    console.log("Node clicked:", node);
+  }
+
+  function handleGraphNodeDoubleClick(node: GraphNode) {
+    if (node.type === "document" && node.metadata?.documentId) {
+      const doc = documents.find(d => d.id === node.metadata?.documentId);
+      if (doc) handleOpenPreview(doc);
+    }
+  }
+
   const filteredDocuments = documents.filter((doc) => {
     if (searchQuery) {
       const query = searchQuery.toLowerCase();
@@ -300,637 +426,283 @@ export default function LibraryPage() {
   ).sort();
 
   return (
-    <div className="h-screen bg-slate-50 dark:bg-slate-950 flex flex-col">
+    <div className="h-screen bg-slate-950 flex flex-col overflow-hidden">
       {/* Header */}
-      <div className="border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-8 py-6">
+      <div className="border-b border-white/10 bg-slate-900/80 backdrop-blur-xl px-6 py-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <div className="h-14 w-14 rounded-xl bg-gradient-to-br from-slate-900 to-slate-700 dark:from-slate-100 dark:to-slate-300 flex items-center justify-center shadow-lg">
-              <BookOpen className="h-7 w-7 text-white dark:text-slate-900" />
+            <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-blue-600 via-purple-600 to-violet-600 flex items-center justify-center shadow-lg shadow-purple-500/20">
+              <BookOpen className="h-6 w-6 text-white" />
             </div>
             <div>
-              <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-100">
+              <h1 className="text-2xl font-bold text-white">
                 Library
               </h1>
-              <p className="text-sm text-slate-600 dark:text-slate-400 mt-1.5 max-w-2xl">
-                Your organization's centralized knowledge base. {stats.total} documents organized across {spaces.length} spaces, searchable and AI-enhanced.
+              <p className="text-sm text-slate-400 mt-0.5">
+                {stats.total} documents • {spaces.length} spaces • {projects.length} projects
               </p>
             </div>
           </div>
-          <Link href="/dashboard/chat">
-            <Button size="lg" className="bg-slate-900 dark:bg-slate-100 hover:bg-slate-800 dark:hover:bg-slate-200 text-white dark:text-slate-900 shadow-lg">
-              <Brain className="h-5 w-5 mr-2" />
-              Ask AI Anything
+
+          <div className="flex items-center gap-4">
+            <LibraryModeSwitch mode={mode} onModeChange={setMode} />
+
+            <div className="h-8 w-px bg-white/10" />
+
+            <FileUpload onUploadComplete={handleUploadComplete} />
+
+            <Button
+              onClick={() => setCreateDocModalOpen(true)}
+              className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-lg shadow-purple-500/20"
+            >
+              <Plus className="h-4 w-4 mr-2" />
+              New Doc
             </Button>
-          </Link>
+          </div>
         </div>
       </div>
 
-      {/* Tabs Navigation */}
-      <div className="border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900">
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <div className="px-8">
-            <TabsList className="bg-transparent border-0 p-0 h-auto">
-              <TabsTrigger
-                value="overview"
-                className="data-[state=active]:border-b-2 data-[state=active]:border-slate-900 dark:data-[state=active]:border-slate-100 rounded-none px-4 py-3"
+      {/* Main Content Area */}
+      <div className="flex-1 flex overflow-hidden">
+        {/* AI Assistant Panel */}
+        <LibraryAssistant
+          isCollapsed={isAssistantCollapsed}
+          onToggleCollapse={() => setIsAssistantCollapsed(!isAssistantCollapsed)}
+        />
+
+        {/* Content Area */}
+        <div className="flex-1 overflow-hidden">
+          <AnimatePresence mode="wait">
+            {/* AI Assistant Mode */}
+            {mode === "assistant" && (
+              <motion.div
+                key="assistant"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="h-full flex items-center justify-center p-8"
               >
-                <BarChart3 className="h-4 w-4 mr-2" />
-                Overview
-              </TabsTrigger>
-              <TabsTrigger
-                value="all"
-                className="data-[state=active]:border-b-2 data-[state=active]:border-slate-900 dark:data-[state=active]:border-slate-100 rounded-none px-4 py-3"
-              >
-                <FileText className="h-4 w-4 mr-2" />
-                All Documents
-              </TabsTrigger>
-              <TabsTrigger
-                value="spaces"
-                className="data-[state=active]:border-b-2 data-[state=active]:border-slate-900 dark:data-[state=active]:border-slate-100 rounded-none px-4 py-3"
-              >
-                <Building2 className="h-4 w-4 mr-2" />
-                By Space
-              </TabsTrigger>
-              <TabsTrigger
-                value="projects"
-                className="data-[state=active]:border-b-2 data-[state=active]:border-slate-900 dark:data-[state=active]:border-slate-100 rounded-none px-4 py-3"
-              >
-                <Briefcase className="h-4 w-4 mr-2" />
-                By Project
-              </TabsTrigger>
-            </TabsList>
-          </div>
-
-          {/* Overview Tab */}
-          <TabsContent value="overview" className="mt-0">
-            <div className="p-8 space-y-8">
-              {/* Intro Card */}
-              <Card className="border-blue-200 dark:border-blue-900 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 p-6">
-                <div className="flex items-start gap-4">
-                  <div className="h-12 w-12 rounded-lg bg-blue-500 flex items-center justify-center flex-shrink-0">
-                    <Brain className="h-6 w-6 text-white" />
+                <div className="text-center max-w-md">
+                  <div className="h-20 w-20 rounded-2xl bg-gradient-to-br from-blue-600 to-purple-600 flex items-center justify-center mx-auto mb-6 shadow-2xl shadow-purple-500/30">
+                    <Brain className="h-10 w-10 text-white" />
                   </div>
-                  <div>
-                    <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100 mb-2">
-                      Your AI-Enhanced Knowledge Base
-                    </h3>
-                    <p className="text-sm text-slate-700 dark:text-slate-300 leading-relaxed">
-                      Welcome to your Library - the central hub for all organizational knowledge. Every document is automatically processed,
-                      summarized, and made searchable by AI. Organize using <strong>Spaces</strong> (team-specific knowledge) or <strong>Projects</strong> (cross-functional work),
-                      then chat with any document or your entire library instantly.
-                    </p>
-                  </div>
-                </div>
-              </Card>
-
-              {/* Stats Cards */}
-              <div>
-                <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-100 mb-4">Quick Stats</h2>
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                <Card className="border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm text-slate-600 dark:text-slate-400">Total Documents</p>
-                      <h3 className="text-3xl font-semibold text-slate-900 dark:text-slate-100 mt-1">
-                        {stats.total}
-                      </h3>
-                    </div>
-                    <FileText className="h-8 w-8 text-slate-400" />
-                  </div>
-                </Card>
-
-                <Card className="border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm text-slate-600 dark:text-slate-400">AI Summaries</p>
-                      <h3 className="text-3xl font-semibold text-slate-900 dark:text-slate-100 mt-1">
-                        {stats.withSummaries}
-                      </h3>
-                      <p className="text-xs text-slate-500 mt-1">
-                        {stats.total > 0
-                          ? `${Math.round((stats.withSummaries / stats.total) * 100)}% coverage`
-                          : "0%"}
-                      </p>
-                    </div>
-                    <Sparkles className="h-8 w-8 text-purple-500" />
-                  </div>
-                </Card>
-
-                <Card className="border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm text-slate-600 dark:text-slate-400">Knowledge Spaces</p>
-                      <h3 className="text-3xl font-semibold text-slate-900 dark:text-slate-100 mt-1">
-                        {spaces.length}
-                      </h3>
-                    </div>
-                    <Building2 className="h-8 w-8 text-blue-500" />
-                  </div>
-                </Card>
-
-                <Card className="border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm text-slate-600 dark:text-slate-400">Recent Activity</p>
-                      <h3 className="text-3xl font-semibold text-slate-900 dark:text-slate-100 mt-1">
-                        {stats.recentCount}
-                      </h3>
-                      <p className="text-xs text-slate-500 mt-1">Last 30 days</p>
-                    </div>
-                    <TrendingUp className="h-8 w-8 text-green-500" />
-                  </div>
-                </Card>
-                </div>
-              </div>
-
-              {/* Two Column Layout */}
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                {/* Recent Documents - Takes 2 columns */}
-                <div className="lg:col-span-2">
-                  <Card className="border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6">
-                    <div className="flex items-center justify-between mb-4">
-                      <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-100">
-                        Recent Documents
-                      </h2>
-                      <Button variant="ghost" size="sm" onClick={() => setActiveTab("all")}>
-                        View All →
-                      </Button>
-                    </div>
-                    {documents.length === 0 ? (
-                      <div className="text-center py-12">
-                        <Upload className="h-12 w-12 text-slate-300 mx-auto mb-3" />
-                        <p className="text-slate-500 mb-4">No documents yet</p>
-                        <FileUpload onUploadComplete={handleUploadComplete} />
-                      </div>
-                    ) : (
-                      <div className="space-y-3">
-                        {documents.slice(0, 5).map((doc) => (
-                          <div
-                            key={doc.id}
-                            className="flex items-center gap-3 p-3 rounded-lg border border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600 transition-colors cursor-pointer"
-                            onClick={() => handleOpenPreview(doc)}
-                          >
-                            <FileText className="h-5 w-5 text-slate-400 flex-shrink-0" />
-                            <div className="flex-1 min-w-0">
-                              <h4 className="text-sm font-medium text-slate-900 dark:text-slate-100 truncate">
-                                {doc.title}
-                              </h4>
-                              <p className="text-xs text-slate-500 mt-0.5">
-                                {new Date(doc.created_at).toLocaleDateString()} • {(doc.file_size / 1024).toFixed(1)} KB
-                              </p>
-                            </div>
-                            {doc.document_type && (
-                              <span className="px-2 py-1 bg-slate-100 dark:bg-slate-800 text-xs rounded text-slate-600 dark:text-slate-400">
-                                {doc.document_type}
-                              </span>
-                            )}
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handleOpenChat(doc);
-                              }}
-                            >
-                              <MessageSquare className="h-4 w-4" />
-                            </Button>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </Card>
-                </div>
-
-                {/* Quick Actions - Takes 1 column */}
-                <div>
-                  <Card className="border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6">
-                    <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-100 mb-4">
-                      Quick Actions
-                    </h2>
-                    <div className="space-y-3">
-                      <FileUpload onUploadComplete={handleUploadComplete} />
-                      <Button
-                        variant="outline"
-                        className="w-full justify-start"
-                        onClick={() => setCreateDocModalOpen(true)}
-                      >
-                        <FileText className="h-4 w-4 mr-2" />
-                        Create Document
-                      </Button>
-                      <Link href="/dashboard/chat" className="block">
-                        <Button variant="outline" className="w-full justify-start">
-                          <Brain className="h-4 w-4 mr-2" />
-                          Chat with Library
-                        </Button>
-                      </Link>
-                      <Button
-                        variant="outline"
-                        className="w-full justify-start"
-                        onClick={() => setActiveTab("spaces")}
-                      >
-                        <Building2 className="h-4 w-4 mr-2" />
-                        Browse by Space
-                      </Button>
-                      <Button
-                        variant="outline"
-                        className="w-full justify-start"
-                        onClick={() => setActiveTab("projects")}
-                      >
-                        <Briefcase className="h-4 w-4 mr-2" />
-                        Browse by Project
-                      </Button>
-                    </div>
-                  </Card>
-                </div>
-              </div>
-
-              {/* Document Types Distribution */}
-              {Object.keys(stats.byType).length > 0 && (
-                <Card className="border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6">
-                  <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-100 mb-4">
-                    Document Types Distribution
+                  <h2 className="text-2xl font-bold text-white mb-3">
+                    AI-Powered Discovery
                   </h2>
-                  <div className="space-y-3">
-                    {Object.entries(stats.byType)
-                      .sort(([, a], [, b]) => b - a)
-                      .map(([type, count]) => {
-                        const percentage = (count / stats.total) * 100;
-                        return (
-                          <div key={type} className="space-y-1">
-                            <div className="flex items-center justify-between text-sm">
-                              <span className="text-slate-900 dark:text-slate-100 font-medium">{type}</span>
-                              <span className="text-slate-600 dark:text-slate-400">
-                                {count} ({percentage.toFixed(0)}%)
-                              </span>
-                            </div>
-                            <div className="h-2 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
-                              <div
-                                className="h-full bg-slate-900 dark:bg-slate-100 transition-all duration-500"
-                                style={{ width: `${percentage}%` }}
-                              />
-                            </div>
-                          </div>
-                        );
-                      })}
-                  </div>
-                </Card>
-              )}
-            </div>
-          </TabsContent>
-
-          {/* All Documents Tab */}
-          <TabsContent value="all" className="mt-0">
-            <div className="p-8">
-              {/* Upload Area - Prominent when no documents */}
-              {documents.length === 0 ? (
-                <Card className="border-2 border-dashed border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/50 p-12 text-center mb-8">
-                  <Upload className="h-16 w-16 text-slate-400 mx-auto mb-4" />
-                  <h2 className="text-xl font-semibold text-slate-900 dark:text-slate-100 mb-2">
-                    Your Knowledge Base Awaits
-                  </h2>
-                  <p className="text-slate-600 dark:text-slate-400 mb-6 max-w-md mx-auto">
-                    Upload documents, PDFs, or create new docs to build your AI-powered knowledge library.
-                    Every document is automatically processed, summarized, and made searchable.
+                  <p className="text-slate-400 mb-6">
+                    Use the assistant panel on the left to ask questions, search your documents,
+                    or let AI help you discover relevant content you didn't know you needed.
                   </p>
-                  <div className="flex items-center justify-center gap-3">
-                    <FileUpload onUploadComplete={handleUploadComplete} />
-                    <Button onClick={() => setCreateDocModalOpen(true)}>
-                      <FileText className="h-4 w-4 mr-2" />
-                      Create Document
-                    </Button>
-                  </div>
-                </Card>
-              ) : (
-                <>
-                  {/* Explanation */}
-                  <div className="mb-6 pb-4 border-b border-slate-200 dark:border-slate-800">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-100 mb-2">All Documents</h2>
-                        <p className="text-sm text-slate-600 dark:text-slate-400">
-                          Browse, search, and manage every document in your knowledge base. Use filters to find specific types, or search across titles, summaries, and content.
-                        </p>
+                  <Button
+                    onClick={() => setIsAssistantCollapsed(false)}
+                    className="bg-white/10 hover:bg-white/20 text-white"
+                  >
+                    Open Assistant
+                  </Button>
+                </div>
+              </motion.div>
+            )}
+
+            {/* Knowledge Graph Mode */}
+            {mode === "graph" && (
+              <motion.div
+                key="graph"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="h-full"
+              >
+                <KnowledgeGraph
+                  nodes={graphNodes}
+                  links={graphLinks}
+                  onNodeClick={handleGraphNodeClick}
+                  onNodeDoubleClick={handleGraphNodeDoubleClick}
+                  isLoading={isGraphLoading}
+                />
+              </motion.div>
+            )}
+
+            {/* Files Mode */}
+            {mode === "files" && (
+              <motion.div
+                key="files"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="h-full overflow-y-auto"
+              >
+                <div className="p-6 space-y-6">
+                  {/* Quick Stats */}
+                  <div className="grid grid-cols-4 gap-4">
+                    <Card className="bg-white/5 border-white/10 p-4">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="text-xs text-slate-400">Total Documents</p>
+                          <h3 className="text-2xl font-bold text-white mt-1">{stats.total}</h3>
+                        </div>
+                        <FileText className="h-8 w-8 text-blue-400" />
                       </div>
+                    </Card>
+                    <Card className="bg-white/5 border-white/10 p-4">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="text-xs text-slate-400">AI Summaries</p>
+                          <h3 className="text-2xl font-bold text-white mt-1">{stats.withSummaries}</h3>
+                        </div>
+                        <Sparkles className="h-8 w-8 text-purple-400" />
+                      </div>
+                    </Card>
+                    <Card className="bg-white/5 border-white/10 p-4">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="text-xs text-slate-400">Spaces</p>
+                          <h3 className="text-2xl font-bold text-white mt-1">{spaces.length}</h3>
+                        </div>
+                        <Building2 className="h-8 w-8 text-teal-400" />
+                      </div>
+                    </Card>
+                    <Card className="bg-white/5 border-white/10 p-4">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="text-xs text-slate-400">Recent (30d)</p>
+                          <h3 className="text-2xl font-bold text-white mt-1">{stats.recentCount}</h3>
+                        </div>
+                        <TrendingUp className="h-8 w-8 text-green-400" />
+                      </div>
+                    </Card>
+                  </div>
+
+                  {/* Search & Filters */}
+                  <div className="flex items-center gap-4">
+                    <div className="relative flex-1">
+                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                      <Input
+                        type="text"
+                        placeholder="Search your entire library..."
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        className="pl-10 bg-white/5 border-white/10 text-white placeholder-slate-400 focus:border-purple-500/50 focus:ring-purple-500/20"
+                      />
+                      {searchQuery && (
+                        <button
+                          onClick={() => setSearchQuery("")}
+                          className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white"
+                        >
+                          <X className="h-4 w-4" />
+                        </button>
+                      )}
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                      <Button
+                        variant={viewMode === "grid" ? "default" : "ghost"}
+                        size="sm"
+                        onClick={() => setViewMode("grid")}
+                        className={viewMode === "grid" ? "bg-white/10" : "text-slate-400 hover:text-white"}
+                      >
+                        <LayoutGrid className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant={viewMode === "list" ? "default" : "ghost"}
+                        size="sm"
+                        onClick={() => setViewMode("list")}
+                        className={viewMode === "list" ? "bg-white/10" : "text-slate-400 hover:text-white"}
+                      >
+                        <List className="h-4 w-4" />
+                      </Button>
                     </div>
                   </div>
 
-                  {/* Search & Actions Bar */}
-                  <div className="mb-6 space-y-4">
-                <div className="flex items-center gap-3">
-                  <div className="relative flex-1">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
-                    <Input
-                      type="text"
-                      placeholder="Search your entire library..."
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
-                      className="pl-9 pr-9"
-                    />
-                    {searchQuery && (
+                  {/* Type Filters */}
+                  {documentTypes.length > 0 && (
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <Filter className="h-4 w-4 text-slate-500" />
                       <button
-                        onClick={() => setSearchQuery("")}
-                        className="absolute right-3 top-1/2 -translate-y-1/2"
+                        onClick={() => setFilterType(null)}
+                        className={cn(
+                          "px-3 py-1.5 rounded-lg text-xs font-medium transition-all",
+                          filterType === null
+                            ? "bg-gradient-to-r from-blue-600 to-purple-600 text-white"
+                            : "bg-white/5 text-slate-400 hover:text-white"
+                        )}
                       >
-                        <X className="h-4 w-4" />
+                        All Types
                       </button>
-                    )}
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Button
-                      variant={viewMode === "grid" ? "default" : "ghost"}
-                      size="sm"
-                      onClick={() => setViewMode("grid")}
-                    >
-                      <LayoutGrid className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      variant={viewMode === "list" ? "default" : "ghost"}
-                      size="sm"
-                      onClick={() => setViewMode("list")}
-                    >
-                      <List className="h-4 w-4" />
-                    </Button>
-                  </div>
-                  <Button onClick={() => setCreateDocModalOpen(true)}>
-                    <FileText className="h-4 w-4 mr-2" />
-                    New Document
-                  </Button>
-                  <FileUpload onUploadComplete={handleUploadComplete} />
-                </div>
+                      {documentTypes.map((type) => (
+                        <button
+                          key={type}
+                          onClick={() => setFilterType(type)}
+                          className={cn(
+                            "px-3 py-1.5 rounded-lg text-xs font-medium transition-all",
+                            filterType === type
+                              ? "bg-gradient-to-r from-blue-600 to-purple-600 text-white"
+                              : "bg-white/5 text-slate-400 hover:text-white"
+                          )}
+                        >
+                          {type}
+                        </button>
+                      ))}
+                    </div>
+                  )}
 
-                {/* Quick Filters */}
-                {documentTypes.length > 0 && (
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <Filter className="h-4 w-4 text-slate-500" />
-                    <button
-                      onClick={() => setFilterType(null)}
-                      className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${
-                        filterType === null
-                          ? "bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900"
-                          : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400"
-                      }`}
-                    >
-                      All Types
-                    </button>
-                    {documentTypes.map((type) => (
-                      <button
-                        key={type}
-                        onClick={() => setFilterType(type)}
-                        className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${
-                          filterType === type
-                            ? "bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900"
-                            : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400"
-                        }`}
-                      >
-                        {type}
-                      </button>
-                    ))}
-                  </div>
-                )}
-              </div>
-
-              {/* Documents Grid/List */}
-              {isLoading ? (
-                <DocumentGridSkeleton />
-              ) : filteredDocuments.length === 0 ? (
-                <EmptyState
-                  icon={Upload}
-                  title="No documents yet"
-                  description="Start building your knowledge base by uploading your first document."
-                />
-              ) : viewMode === "grid" ? (
-                <div className="grid gap-6 lg:grid-cols-2 2xl:grid-cols-3">
-                  {filteredDocuments.map((doc) => (
-                    <DocumentCard
-                      key={doc.id}
-                      doc={doc}
+                  {/* Documents */}
+                  {isLoading ? (
+                    <DocumentGridSkeleton />
+                  ) : filteredDocuments.length === 0 ? (
+                    <Card className="bg-white/5 border-white/10 border-2 border-dashed p-12 text-center">
+                      <Upload className="h-16 w-16 text-slate-500 mx-auto mb-4" />
+                      <h2 className="text-xl font-semibold text-white mb-2">
+                        Your Knowledge Base Awaits
+                      </h2>
+                      <p className="text-slate-400 mb-6 max-w-md mx-auto">
+                        Upload documents, PDFs, or create new docs to build your AI-powered knowledge library.
+                      </p>
+                      <div className="flex items-center justify-center gap-3">
+                        <FileUpload onUploadComplete={handleUploadComplete} />
+                        <Button onClick={() => setCreateDocModalOpen(true)} variant="outline" className="border-white/20 text-white hover:bg-white/10">
+                          <FileText className="h-4 w-4 mr-2" />
+                          Create Document
+                        </Button>
+                      </div>
+                    </Card>
+                  ) : viewMode === "grid" ? (
+                    <div className="grid gap-6 lg:grid-cols-2 2xl:grid-cols-3">
+                      {filteredDocuments.map((doc) => (
+                        <DocumentCard
+                          key={doc.id}
+                          doc={doc}
+                          onDelete={handleDelete}
+                          onGenerateSummary={handleGenerateSummary}
+                          onOpenChat={handleOpenChat}
+                          onOpenPreview={handleOpenPreview}
+                          onTagsChange={fetchAll}
+                          generatingSummary={generatingSummary}
+                        />
+                      ))}
+                    </div>
+                  ) : (
+                    <DocumentTable
+                      documents={filteredDocuments}
+                      folders={folders}
                       onDelete={handleDelete}
                       onGenerateSummary={handleGenerateSummary}
                       onOpenChat={handleOpenChat}
                       onOpenPreview={handleOpenPreview}
                       onTagsChange={fetchAll}
+                      onMoveToFolder={() => {}}
+                      onDragStart={() => {}}
+                      onDragEnd={() => {}}
                       generatingSummary={generatingSummary}
+                      selectedDocuments={[]}
+                      onSelectDocument={() => {}}
+                      onSelectAll={() => {}}
                     />
-                  ))}
+                  )}
                 </div>
-              ) : (
-                <DocumentTable
-                  documents={filteredDocuments}
-                  folders={folders}
-                  onDelete={handleDelete}
-                  onGenerateSummary={handleGenerateSummary}
-                  onOpenChat={handleOpenChat}
-                  onOpenPreview={handleOpenPreview}
-                  onTagsChange={fetchAll}
-                  onMoveToFolder={() => {}}
-                  onDragStart={() => {}}
-                  onDragEnd={() => {}}
-                  generatingSummary={generatingSummary}
-                  selectedDocuments={[]}
-                  onSelectDocument={() => {}}
-                  onSelectAll={() => {}}
-                />
-              )}
-                </>
-              )}
-            </div>
-          </TabsContent>
-
-          {/* By Space Tab */}
-          <TabsContent value="spaces" className="mt-0">
-            <div className="p-8">
-              {/* Explanation */}
-              <div className="mb-8">
-                <Card className="border-purple-200 dark:border-purple-900 bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-950/30 dark:to-pink-950/30 p-6">
-                  <div className="flex items-start gap-4">
-                    <div className="h-12 w-12 rounded-lg bg-purple-500 flex items-center justify-center flex-shrink-0">
-                      <Building2 className="h-6 w-6 text-white" />
-                    </div>
-                    <div>
-                      <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100 mb-2">
-                        Knowledge Spaces
-                      </h3>
-                      <p className="text-sm text-slate-700 dark:text-slate-300 leading-relaxed">
-                        <strong>Spaces</strong> are team-specific knowledge containers. Think of them as dedicated libraries for different departments (Engineering, Sales, Marketing) or teams.
-                        Documents in a Space are only accessible to that team and can be used in team conversations with scoped AI context.
-                      </p>
-                    </div>
-                  </div>
-                </Card>
-              </div>
-
-              {spaces.length === 0 ? (
-                <EmptyState
-                  icon={Building2}
-                  title="No Knowledge Spaces yet"
-                  description="Create your first Space to organize documents by team or department."
-                />
-              ) : (
-                <div className="space-y-6">
-                  {spaces.map((space) => {
-                    const spaceDocuments = documents.filter(
-                      (doc) =>
-                        doc.status === "completed" &&
-                        doc.knowledge_spaces?.some((s) => s.id === space.id)
-                    );
-                    return (
-                      <Card key={space.id} className="border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6">
-                        <div className="flex items-center justify-between mb-4">
-                          <div className="flex items-center gap-3">
-                            <div className={`h-10 w-10 rounded-lg ${space.color || 'bg-slate-200 dark:bg-slate-700'} flex items-center justify-center text-2xl`}>
-                              {space.emoji}
-                            </div>
-                            <div>
-                              <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100">{space.name}</h3>
-                              <p className="text-sm text-slate-600 dark:text-slate-400">
-                                {space.space_type} • {spaceDocuments.length} document{spaceDocuments.length !== 1 ? 's' : ''}
-                              </p>
-                            </div>
-                          </div>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => setSelectedSpaceId(space.id)}
-                          >
-                            View All
-                          </Button>
-                        </div>
-
-                        {spaceDocuments.length === 0 ? (
-                          <div className="text-center py-8 text-sm text-slate-500">
-                            No documents in this space yet
-                          </div>
-                        ) : (
-                          <div className="grid gap-4 lg:grid-cols-3">
-                            {spaceDocuments.slice(0, 3).map((doc) => (
-                              <div
-                                key={doc.id}
-                                className="border border-slate-200 dark:border-slate-700 rounded-lg p-4 hover:border-slate-300 dark:hover:border-slate-600 transition-colors cursor-pointer"
-                                onClick={() => handleOpenPreview(doc)}
-                              >
-                                <div className="flex items-start gap-3">
-                                  <FileText className="h-5 w-5 text-slate-400 flex-shrink-0 mt-0.5" />
-                                  <div className="min-w-0 flex-1">
-                                    <h4 className="text-sm font-medium text-slate-900 dark:text-slate-100 truncate">
-                                      {doc.title}
-                                    </h4>
-                                    {doc.document_type && (
-                                      <span className="inline-block mt-1 px-2 py-0.5 bg-slate-100 dark:bg-slate-800 text-xs rounded text-slate-600 dark:text-slate-400">
-                                        {doc.document_type}
-                                      </span>
-                                    )}
-                                  </div>
-                                </div>
-                              </div>
-                            ))}
-                          </div>
-                        )}
-                      </Card>
-                    );
-                  })}
-                </div>
-              )}
-            </div>
-          </TabsContent>
-
-          {/* By Project Tab */}
-          <TabsContent value="projects" className="mt-0">
-            <div className="p-8">
-              {/* Explanation */}
-              <div className="mb-8">
-                <Card className="border-green-200 dark:border-green-900 bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-950/30 dark:to-emerald-950/30 p-6">
-                  <div className="flex items-start gap-4">
-                    <div className="h-12 w-12 rounded-lg bg-green-500 flex items-center justify-center flex-shrink-0">
-                      <Briefcase className="h-6 w-6 text-white" />
-                    </div>
-                    <div>
-                      <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100 mb-2">
-                        Project-Based Organization
-                      </h3>
-                      <p className="text-sm text-slate-700 dark:text-slate-300 leading-relaxed">
-                        <strong>Projects</strong> are cross-functional workspaces that bring together documents from different teams.
-                        Perfect for initiatives, campaigns, or deliverables that span multiple departments. Documents can belong to multiple projects simultaneously.
-                      </p>
-                    </div>
-                  </div>
-                </Card>
-              </div>
-
-              {projects.length === 0 ? (
-                <EmptyState
-                  icon={Briefcase}
-                  title="No Projects yet"
-                  description="Create your first Project to organize cross-functional work and deliverables."
-                />
-              ) : (
-                <div className="space-y-6">
-                  {projects.map((project) => {
-                    const projectDocuments = documents.filter(
-                      (doc) =>
-                        doc.status === "completed" &&
-                        doc.projects?.some((p) => p.id === project.id)
-                    );
-                    return (
-                      <Card key={project.id} className="border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6">
-                        <div className="flex items-center justify-between mb-4">
-                          <div className="flex items-center gap-3">
-                            <div className={`h-10 w-10 rounded-lg ${project.color || 'bg-slate-200 dark:bg-slate-700'} flex items-center justify-center text-2xl`}>
-                              {project.icon}
-                            </div>
-                            <div>
-                              <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100">{project.name}</h3>
-                              <p className="text-sm text-slate-600 dark:text-slate-400">
-                                {projectDocuments.length} document{projectDocuments.length !== 1 ? 's' : ''}
-                              </p>
-                            </div>
-                          </div>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => setSelectedProjectId(project.id)}
-                          >
-                            View All
-                          </Button>
-                        </div>
-
-                        {projectDocuments.length === 0 ? (
-                          <div className="text-center py-8 text-sm text-slate-500">
-                            No documents in this project yet
-                          </div>
-                        ) : (
-                          <div className="grid gap-4 lg:grid-cols-3">
-                            {projectDocuments.slice(0, 3).map((doc) => (
-                              <div
-                                key={doc.id}
-                                className="border border-slate-200 dark:border-slate-700 rounded-lg p-4 hover:border-slate-300 dark:hover:border-slate-600 transition-colors cursor-pointer"
-                                onClick={() => handleOpenPreview(doc)}
-                              >
-                                <div className="flex items-start gap-3">
-                                  <FileText className="h-5 w-5 text-slate-400 flex-shrink-0 mt-0.5" />
-                                  <div className="min-w-0 flex-1">
-                                    <h4 className="text-sm font-medium text-slate-900 dark:text-slate-100 truncate">
-                                      {doc.title}
-                                    </h4>
-                                    {doc.document_type && (
-                                      <span className="inline-block mt-1 px-2 py-0.5 bg-slate-100 dark:bg-slate-800 text-xs rounded text-slate-600 dark:text-slate-400">
-                                        {doc.document_type}
-                                      </span>
-                                    )}
-                                  </div>
-                                </div>
-                              </div>
-                            ))}
-                          </div>
-                        )}
-                      </Card>
-                    );
-                  })}
-                </div>
-              )}
-            </div>
-          </TabsContent>
-        </Tabs>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
       </div>
 
       {/* Modals */}

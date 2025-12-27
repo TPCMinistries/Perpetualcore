@@ -199,10 +199,23 @@ export default function ConversationPage() {
       setParticipants(formattedParticipants);
 
       // Check if current user can send messages
+      // Allow if: user is a participant with permission, OR is the creator, OR is super admin
       const currentUserParticipant = formattedParticipants.find(
         (p) => p.user_id === user?.id
       );
-      setCanSendMessages(currentUserParticipant?.can_send_messages || false);
+
+      // Check if user is super admin via profile
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("is_super_admin")
+        .eq("id", user?.id)
+        .single();
+
+      const isSuperAdmin = profile?.is_super_admin === true;
+      const isCreator = conversation?.created_by === user?.id;
+      const hasParticipantPermission = currentUserParticipant?.can_send_messages || false;
+
+      setCanSendMessages(hasParticipantPermission || isCreator || isSuperAdmin);
     } catch (error: any) {
       console.error("Error loading participants:", error);
     }

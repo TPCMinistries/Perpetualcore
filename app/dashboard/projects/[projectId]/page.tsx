@@ -20,6 +20,8 @@ import {
   Circle,
   Flag,
   Milestone as MilestoneIcon,
+  Sparkles,
+  Zap,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -46,6 +48,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Switch } from "@/components/ui/switch";
 import {
   Select,
   SelectContent,
@@ -65,6 +68,8 @@ import {
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { ProjectAssistant } from "@/components/projects/ProjectAssistant";
+import { AITaskRunner } from "@/components/tasks/AITaskRunner";
+import { SuggestedContacts } from "@/components/contacts/SuggestedContacts";
 
 interface Task {
   id: string;
@@ -118,6 +123,7 @@ export default function ProjectWorkspacePage() {
   const [newTaskDescription, setNewTaskDescription] = useState("");
   const [newTaskPriority, setNewTaskPriority] = useState<"low" | "medium" | "high" | "urgent">("medium");
   const [newTaskDueDate, setNewTaskDueDate] = useState("");
+  const [runWithAI, setRunWithAI] = useState(false);
 
   // Documents state
   const [documents, setDocuments] = useState<Document[]>([]);
@@ -324,8 +330,36 @@ export default function ProjectWorkspacePage() {
         const data = await response.json();
         setTasks((prev) => [data.task, ...prev]);
         setTaskDialogOpen(false);
+
+        // If "Run with AI" was enabled, execute the task immediately
+        if (runWithAI && data.task?.id) {
+          toast.success("Task created! Running with AI...");
+          try {
+            const execResponse = await fetch("/api/tasks/execute", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ taskId: data.task.id }),
+            });
+
+            if (execResponse.ok) {
+              const execResult = await execResponse.json();
+              if (execResult.strategy === "immediate") {
+                toast.success("AI completed the task!");
+              } else if (execResult.strategy === "decompose") {
+                toast.success(`AI created ${execResult.subtasks?.length || 0} subtasks`);
+              }
+              // Refresh tasks to show updated status
+              fetchProject();
+            }
+          } catch (execError) {
+            console.error("AI execution error:", execError);
+            toast.info("Task created, but AI execution failed");
+          }
+        } else {
+          toast.success("Task created successfully");
+        }
+
         resetTaskForm();
-        toast.success("Task created successfully");
       } else {
         const errorData = await response.json();
         toast.error(errorData.error || "Failed to create task");
@@ -380,6 +414,7 @@ export default function ProjectWorkspacePage() {
     setNewTaskDescription("");
     setNewTaskPriority("medium");
     setNewTaskDueDate("");
+    setRunWithAI(false);
   };
 
   // Team functions
@@ -682,110 +717,377 @@ export default function ProjectWorkspacePage() {
       {/* Tab Content */}
       <div className="flex-1 overflow-y-auto p-6">
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          {/* Overview Tab */}
+          {/* Overview Tab - Premium Design */}
           <TabsContent value="overview" className="mt-0">
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              {/* Progress Card */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-base">Progress</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    <div>
-                      <div className="flex items-center justify-between mb-2">
-                        <span className="text-sm text-muted-foreground">
-                          Tasks
-                        </span>
-                        <span className="text-sm font-medium">
-                          {project.tasks_completed}/{project.tasks_total}
-                        </span>
-                      </div>
-                      <Progress value={project.progress_percent} />
+            {/* Hero Stats Row */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+              {/* Progress Circle */}
+              <Card className="relative overflow-hidden">
+                <div className="absolute top-0 right-0 w-20 h-20 bg-gradient-to-bl from-primary/10 to-transparent rounded-bl-full" />
+                <CardContent className="pt-6">
+                  <div className="flex items-center gap-4">
+                    <div className="relative">
+                      <svg className="w-16 h-16 transform -rotate-90">
+                        <circle
+                          cx="32"
+                          cy="32"
+                          r="28"
+                          stroke="currentColor"
+                          strokeWidth="6"
+                          fill="none"
+                          className="text-muted/20"
+                        />
+                        <circle
+                          cx="32"
+                          cy="32"
+                          r="28"
+                          stroke="currentColor"
+                          strokeWidth="6"
+                          fill="none"
+                          strokeDasharray={`${(project.progress_percent / 100) * 176} 176`}
+                          className="text-primary transition-all duration-500"
+                          strokeLinecap="round"
+                        />
+                      </svg>
+                      <span className="absolute inset-0 flex items-center justify-center text-lg font-bold">
+                        {Math.round(project.progress_percent)}%
+                      </span>
                     </div>
                     <div>
-                      <div className="flex items-center justify-between mb-2">
-                        <span className="text-sm text-muted-foreground">
-                          Milestones
-                        </span>
-                        <span className="text-sm font-medium">
-                          {completedMilestones}/{totalMilestones}
-                        </span>
-                      </div>
-                      <Progress
-                        value={
-                          totalMilestones > 0
-                            ? (completedMilestones / totalMilestones) * 100
-                            : 0
-                        }
-                      />
+                      <p className="text-2xl font-bold">{project.tasks_completed}/{project.tasks_total}</p>
+                      <p className="text-xs text-muted-foreground">Tasks Done</p>
                     </div>
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* Details Card */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-base">Details</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <dl className="space-y-3 text-sm">
-                    {project.team && (
-                      <div className="flex justify-between">
-                        <dt className="text-muted-foreground">Team</dt>
-                        <dd className="font-medium">
-                          {project.team.emoji} {project.team.name}
-                        </dd>
-                      </div>
-                    )}
-                    <div className="flex justify-between">
-                      <dt className="text-muted-foreground">Priority</dt>
-                      <dd className="font-medium capitalize">
-                        {project.priority}
-                      </dd>
-                    </div>
-                    {project.start_date && (
-                      <div className="flex justify-between">
-                        <dt className="text-muted-foreground">Start Date</dt>
-                        <dd className="font-medium">
-                          {new Date(project.start_date).toLocaleDateString()}
-                        </dd>
-                      </div>
-                    )}
-                    {project.target_date && (
-                      <div className="flex justify-between">
-                        <dt className="text-muted-foreground">Target Date</dt>
-                        <dd className="font-medium">
-                          {new Date(project.target_date).toLocaleDateString()}
-                        </dd>
-                      </div>
-                    )}
-                    <div className="flex justify-between">
-                      <dt className="text-muted-foreground">Created</dt>
-                      <dd className="font-medium">
-                        {new Date(project.created_at).toLocaleDateString()}
-                      </dd>
-                    </div>
-                  </dl>
-                </CardContent>
-              </Card>
-
-              {/* Activity Card */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-base">Recent Activity</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-center py-6 text-muted-foreground text-sm">
-                    Activity feed coming soon
                   </div>
                 </CardContent>
               </Card>
 
               {/* Milestones */}
-              <Card className="lg:col-span-2">
-                <CardHeader className="flex flex-row items-center justify-between">
+              <Card className="relative overflow-hidden">
+                <div className="absolute top-0 right-0 w-20 h-20 bg-gradient-to-bl from-green-500/10 to-transparent rounded-bl-full" />
+                <CardContent className="pt-6">
+                  <div className="flex items-center gap-4">
+                    <div className="h-16 w-16 rounded-2xl bg-green-500/10 flex items-center justify-center">
+                      <Flag className="h-8 w-8 text-green-600" />
+                    </div>
+                    <div>
+                      <p className="text-2xl font-bold">{completedMilestones}/{totalMilestones}</p>
+                      <p className="text-xs text-muted-foreground">Milestones Hit</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Team Members */}
+              <Card className="relative overflow-hidden">
+                <div className="absolute top-0 right-0 w-20 h-20 bg-gradient-to-bl from-blue-500/10 to-transparent rounded-bl-full" />
+                <CardContent className="pt-6">
+                  <div className="flex items-center gap-4">
+                    <div className="h-16 w-16 rounded-2xl bg-blue-500/10 flex items-center justify-center">
+                      <Users className="h-8 w-8 text-blue-600" />
+                    </div>
+                    <div>
+                      <p className="text-2xl font-bold">{project.members?.length || 1}</p>
+                      <p className="text-xs text-muted-foreground">Team Members</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Days Remaining */}
+              <Card className="relative overflow-hidden">
+                <div className="absolute top-0 right-0 w-20 h-20 bg-gradient-to-bl from-orange-500/10 to-transparent rounded-bl-full" />
+                <CardContent className="pt-6">
+                  <div className="flex items-center gap-4">
+                    <div className="h-16 w-16 rounded-2xl bg-orange-500/10 flex items-center justify-center">
+                      <Clock className="h-8 w-8 text-orange-600" />
+                    </div>
+                    <div>
+                      <p className="text-2xl font-bold">
+                        {project.target_date
+                          ? Math.max(0, Math.ceil((new Date(project.target_date).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24)))
+                          : "—"}
+                      </p>
+                      <p className="text-xs text-muted-foreground">Days Left</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              {/* Left Column - Main Content */}
+              <div className="lg:col-span-2 space-y-6">
+                {/* AI Insights Card */}
+                <Card className="border-purple-200 dark:border-purple-800 bg-gradient-to-br from-purple-50/50 to-white dark:from-purple-950/20 dark:to-slate-900">
+                  <CardHeader className="pb-3">
+                    <div className="flex items-center gap-2">
+                      <div className="h-8 w-8 rounded-lg bg-purple-500/10 flex items-center justify-center">
+                        <Target className="h-4 w-4 text-purple-600" />
+                      </div>
+                      <div>
+                        <CardTitle className="text-base">AI Project Insights</CardTitle>
+                        <CardDescription>Smart recommendations for your project</CardDescription>
+                      </div>
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-3">
+                      <div className="flex items-start gap-3 p-3 rounded-lg bg-white/60 dark:bg-slate-800/60 border border-purple-100 dark:border-purple-800">
+                        <div className="h-6 w-6 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center flex-shrink-0 mt-0.5">
+                          <CheckCircle className="h-3.5 w-3.5 text-green-600" />
+                        </div>
+                        <div>
+                          <p className="text-sm font-medium">Project is on track</p>
+                          <p className="text-xs text-muted-foreground mt-0.5">
+                            {project.progress_percent >= 50
+                              ? "Great progress! You're ahead of schedule based on your timeline."
+                              : "Consider breaking down larger tasks to maintain momentum."}
+                          </p>
+                        </div>
+                      </div>
+                      {project.tasks_total === 0 && (
+                        <div className="flex items-start gap-3 p-3 rounded-lg bg-white/60 dark:bg-slate-800/60 border border-purple-100 dark:border-purple-800">
+                          <div className="h-6 w-6 rounded-full bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center flex-shrink-0 mt-0.5">
+                            <Target className="h-3.5 w-3.5 text-amber-600" />
+                          </div>
+                          <div>
+                            <p className="text-sm font-medium">Add your first tasks</p>
+                            <p className="text-xs text-muted-foreground mt-0.5">
+                              Break your project into actionable tasks to track progress effectively.
+                            </p>
+                          </div>
+                        </div>
+                      )}
+                      {totalMilestones === 0 && (
+                        <div className="flex items-start gap-3 p-3 rounded-lg bg-white/60 dark:bg-slate-800/60 border border-purple-100 dark:border-purple-800">
+                          <div className="h-6 w-6 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center flex-shrink-0 mt-0.5">
+                            <Flag className="h-3.5 w-3.5 text-blue-600" />
+                          </div>
+                          <div>
+                            <p className="text-sm font-medium">Set key milestones</p>
+                            <p className="text-xs text-muted-foreground mt-0.5">
+                              Define major checkpoints to measure project success.
+                            </p>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Quick Actions */}
+                <Card>
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-base">Quick Actions</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                      <Button
+                        variant="outline"
+                        className="h-auto py-4 flex flex-col items-center gap-2 hover:bg-primary/5 hover:border-primary/50"
+                        onClick={() => setTaskDialogOpen(true)}
+                      >
+                        <CheckSquare className="h-5 w-5 text-primary" />
+                        <span className="text-xs">Add Task</span>
+                      </Button>
+                      <Button
+                        variant="outline"
+                        className="h-auto py-4 flex flex-col items-center gap-2 hover:bg-green-50 hover:border-green-300"
+                        onClick={() => setMilestoneDialogOpen(true)}
+                      >
+                        <Flag className="h-5 w-5 text-green-600" />
+                        <span className="text-xs">Add Milestone</span>
+                      </Button>
+                      <Button
+                        variant="outline"
+                        className="h-auto py-4 flex flex-col items-center gap-2 hover:bg-blue-50 hover:border-blue-300"
+                        onClick={() => setActiveTab("files")}
+                      >
+                        <FileText className="h-5 w-5 text-blue-600" />
+                        <span className="text-xs">Upload File</span>
+                      </Button>
+                      <Button
+                        variant="outline"
+                        className="h-auto py-4 flex flex-col items-center gap-2 hover:bg-purple-50 hover:border-purple-300"
+                        onClick={() => setActiveTab("chat")}
+                      >
+                        <MessageSquare className="h-5 w-5 text-purple-600" />
+                        <span className="text-xs">Start Chat</span>
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Right Column - Sidebar */}
+              <div className="space-y-6">
+                {/* Project Details */}
+                <Card>
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-base">Project Details</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <dl className="space-y-4">
+                      {project.team && (
+                        <div className="flex items-center justify-between">
+                          <dt className="text-sm text-muted-foreground">Team</dt>
+                          <dd className="flex items-center gap-2">
+                            <span className="text-lg">{project.team.emoji}</span>
+                            <span className="text-sm font-medium">{project.team.name}</span>
+                          </dd>
+                        </div>
+                      )}
+                      <div className="flex items-center justify-between">
+                        <dt className="text-sm text-muted-foreground">Priority</dt>
+                        <dd>
+                          <Badge
+                            variant="secondary"
+                            className={cn(
+                              "capitalize",
+                              project.priority === "urgent" && "bg-red-100 text-red-700",
+                              project.priority === "high" && "bg-orange-100 text-orange-700",
+                              project.priority === "medium" && "bg-blue-100 text-blue-700",
+                              project.priority === "low" && "bg-slate-100 text-slate-700"
+                            )}
+                          >
+                            {project.priority}
+                          </Badge>
+                        </dd>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <dt className="text-sm text-muted-foreground">Status</dt>
+                        <dd>
+                          <Badge variant="outline" className="capitalize">
+                            {project.current_stage?.replace(/_/g, " ") || "Ideation"}
+                          </Badge>
+                        </dd>
+                      </div>
+                      {project.target_date && (
+                        <div className="flex items-center justify-between">
+                          <dt className="text-sm text-muted-foreground">Due Date</dt>
+                          <dd className="text-sm font-medium">
+                            {new Date(project.target_date).toLocaleDateString("en-US", {
+                              month: "short",
+                              day: "numeric",
+                              year: "numeric",
+                            })}
+                          </dd>
+                        </div>
+                      )}
+                      <div className="flex items-center justify-between">
+                        <dt className="text-sm text-muted-foreground">Created</dt>
+                        <dd className="text-sm font-medium">
+                          {new Date(project.created_at).toLocaleDateString("en-US", {
+                            month: "short",
+                            day: "numeric",
+                            year: "numeric",
+                          })}
+                        </dd>
+                      </div>
+                    </dl>
+                  </CardContent>
+                </Card>
+
+                {/* Team Members Preview */}
+                <Card>
+                  <CardHeader className="pb-3">
+                    <div className="flex items-center justify-between">
+                      <CardTitle className="text-base">Team</CardTitle>
+                      <Button variant="ghost" size="sm" onClick={() => setActiveTab("team")}>
+                        View All
+                      </Button>
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    {project.members && project.members.length > 0 ? (
+                      <div className="space-y-3">
+                        {project.members.slice(0, 4).map((member) => (
+                          <div key={member.id} className="flex items-center gap-3">
+                            <Avatar className="h-8 w-8">
+                              <AvatarImage src={member.profile?.avatar_url} />
+                              <AvatarFallback className="text-xs">
+                                {member.profile?.full_name?.split(" ").map((n) => n[0]).join("") || "?"}
+                              </AvatarFallback>
+                            </Avatar>
+                            <div className="flex-1 min-w-0">
+                              <p className="text-sm font-medium truncate">{member.profile?.full_name || "Team Member"}</p>
+                              <p className="text-xs text-muted-foreground capitalize">{member.role}</p>
+                            </div>
+                          </div>
+                        ))}
+                        {project.members.length > 4 && (
+                          <p className="text-xs text-muted-foreground text-center">
+                            +{project.members.length - 4} more members
+                          </p>
+                        )}
+                      </div>
+                    ) : (
+                      <div className="text-center py-4">
+                        <Users className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
+                        <p className="text-sm text-muted-foreground">No team members yet</p>
+                        <Button variant="link" size="sm" onClick={() => setActiveTab("team")}>
+                          Add Members
+                        </Button>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+
+                {/* Recent Activity */}
+                <Card>
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-base">Recent Activity</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-4">
+                      <div className="flex items-start gap-3">
+                        <div className="h-2 w-2 rounded-full bg-green-500 mt-2" />
+                        <div>
+                          <p className="text-sm">Project created</p>
+                          <p className="text-xs text-muted-foreground">
+                            {new Date(project.created_at).toLocaleDateString("en-US", {
+                              month: "short",
+                              day: "numeric",
+                            })}
+                          </p>
+                        </div>
+                      </div>
+                      {project.milestones && project.milestones.length > 0 && (
+                        <div className="flex items-start gap-3">
+                          <div className="h-2 w-2 rounded-full bg-blue-500 mt-2" />
+                          <div>
+                            <p className="text-sm">{project.milestones.length} milestone(s) added</p>
+                            <p className="text-xs text-muted-foreground">Recently</p>
+                          </div>
+                        </div>
+                      )}
+                      {project.tasks_total > 0 && (
+                        <div className="flex items-start gap-3">
+                          <div className="h-2 w-2 rounded-full bg-purple-500 mt-2" />
+                          <div>
+                            <p className="text-sm">{project.tasks_total} task(s) created</p>
+                            <p className="text-xs text-muted-foreground">
+                              {project.tasks_completed} completed
+                            </p>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Suggested Contacts from Network */}
+                <SuggestedContacts
+                  projectId={projectId}
+                  projectName={project.name}
+                  compact
+                />
+              </div>
+            </div>
+
+            {/* Milestones Section - Full Width */}
+            <Card className="mt-6">
+              <CardHeader className="flex flex-row items-center justify-between">
                   <div>
                     <CardTitle className="text-base">Milestones</CardTitle>
                     <CardDescription>
@@ -990,57 +1292,6 @@ export default function ProjectWorkspacePage() {
                 </CardContent>
               </Card>
 
-              {/* Quick Stats */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-base">Quick Stats</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    <div className="flex items-center gap-3">
-                      <div className="p-2 bg-blue-500/10 rounded-lg">
-                        <CheckSquare className="h-5 w-5 text-blue-500" />
-                      </div>
-                      <div>
-                        <p className="text-2xl font-bold">
-                          {project.tasks_total}
-                        </p>
-                        <p className="text-sm text-muted-foreground">
-                          Total Tasks
-                        </p>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-3">
-                      <div className="p-2 bg-green-500/10 rounded-lg">
-                        <CheckCircle className="h-5 w-5 text-green-500" />
-                      </div>
-                      <div>
-                        <p className="text-2xl font-bold">
-                          {project.tasks_completed}
-                        </p>
-                        <p className="text-sm text-muted-foreground">
-                          Completed
-                        </p>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-3">
-                      <div className="p-2 bg-purple-500/10 rounded-lg">
-                        <Users className="h-5 w-5 text-purple-500" />
-                      </div>
-                      <div>
-                        <p className="text-2xl font-bold">
-                          {project.member_count}
-                        </p>
-                        <p className="text-sm text-muted-foreground">
-                          Team Members
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-
             {/* Project Assistant */}
             <div className="mt-6">
               <ProjectAssistant
@@ -1119,6 +1370,39 @@ export default function ProjectWorkspacePage() {
                           />
                         </div>
                       </div>
+
+                      {/* AI Execution Option */}
+                      <div className="flex items-center justify-between p-4 rounded-lg bg-gradient-to-r from-purple-50 to-indigo-50 dark:from-purple-950/30 dark:to-indigo-950/30 border border-purple-100 dark:border-purple-900">
+                        <div className="flex items-center gap-3">
+                          <div className="h-10 w-10 rounded-lg bg-gradient-to-br from-purple-500 to-indigo-500 flex items-center justify-center">
+                            <Sparkles className="h-5 w-5 text-white" />
+                          </div>
+                          <div>
+                            <Label htmlFor="run-with-ai" className="text-sm font-medium cursor-pointer">
+                              Run with AI after creation
+                            </Label>
+                            <p className="text-xs text-muted-foreground">
+                              AI will execute this task immediately
+                            </p>
+                          </div>
+                        </div>
+                        <Switch
+                          id="run-with-ai"
+                          checked={runWithAI}
+                          onCheckedChange={setRunWithAI}
+                        />
+                      </div>
+
+                      {runWithAI && (
+                        <div className="text-xs text-muted-foreground bg-muted/50 p-3 rounded-lg">
+                          <p className="font-medium text-foreground mb-1">AI will attempt to:</p>
+                          <ul className="list-disc list-inside space-y-0.5">
+                            <li>Generate content (posts, emails, documents)</li>
+                            <li>Break down complex tasks into subtasks</li>
+                            <li>Identify if human action is needed</li>
+                          </ul>
+                        </div>
+                      )}
                     </div>
                     <DialogFooter>
                       <Button variant="outline" onClick={() => setTaskDialogOpen(false)}>
@@ -1193,6 +1477,14 @@ export default function ProjectWorkspacePage() {
                               day: "numeric",
                             })}
                           </div>
+                        )}
+                        {task.status !== "completed" && (
+                          <AITaskRunner
+                            taskId={task.id}
+                            taskTitle={task.title}
+                            onComplete={fetchProject}
+                            variant="icon"
+                          />
                         )}
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>

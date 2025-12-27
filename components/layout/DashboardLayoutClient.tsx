@@ -27,8 +27,8 @@ function DashboardLayoutInner({
 
       {/* Sidebar */}
       <aside
-        className={`hidden md:flex md:flex-col relative z-10 bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 transition-all duration-300 ${
-          isCollapsed ? "md:w-16" : "md:w-56"
+        className={`hidden md:flex md:flex-col flex-shrink-0 relative z-10 bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 transition-all duration-300 ${
+          isCollapsed ? "md:w-16" : "md:w-64"
         }`}
         aria-label="Main navigation"
       >

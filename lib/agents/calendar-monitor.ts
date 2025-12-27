@@ -232,7 +232,6 @@ export async function processCalendarForAgent(agentId: string): Promise<{
             priority: "high",
             status: "todo",
             due_date: event.start.toISOString(),
-            created_by_agent_id: agentId,
           });
           tasksCreated++;
         }
@@ -244,8 +243,8 @@ export async function processCalendarForAgent(agentId: string): Promise<{
         const { data: existingTask } = await supabase
           .from("tasks")
           .select("id")
-          .eq("created_by_agent_id", agentId)
-          .ilike("title", `%prep%${event.summary}%`)
+          .eq("user_id", userId)
+          .ilike("title", `%Prepare for:%${event.summary}%`)
           .single();
 
         if (!existingTask) {
@@ -259,7 +258,6 @@ export async function processCalendarForAgent(agentId: string): Promise<{
             priority: insight.priority,
             status: "todo",
             due_date: prepTime.toISOString(),
-            created_by_agent_id: agentId,
           });
           tasksCreated++;
 

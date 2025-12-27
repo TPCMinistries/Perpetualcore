@@ -94,7 +94,7 @@ export async function saveExtractedTasks(
       return { success: true, savedCount: 0 };
     }
 
-    // Insert tasks
+    // Insert tasks - using only core columns that exist in the database
     const tasksToInsert = highConfidenceTasks.map((task) => ({
       organization_id: organizationId,
       user_id: userId,
@@ -103,16 +103,6 @@ export async function saveExtractedTasks(
       priority: task.priority,
       due_date: task.dueDate || null,
       status: "todo",
-      execution_status: "pending",
-      execution_type: task.execution_type || "manual",
-      estimated_duration_minutes: task.estimated_duration_minutes || null,
-      ai_confidence: task.confidence,
-      ai_context: task.context,
-      ai_extracted: true,
-      source_type: sourceType,
-      execution_log: [],
-      retry_count: 0,
-      max_retries: 3,
     }));
 
     const { data, error } = await supabase.from("tasks").insert(tasksToInsert).select();
@@ -156,7 +146,7 @@ export async function extractTasksFromChatMessage(
 }
 
 /**
- * Get tasks for a user
+ * Get tasks for a user with deliverable counts
  */
 export async function getUserTasks(
   userId: string,
@@ -197,12 +187,36 @@ export async function getUserTasks(
     query = query.lte("due_date", filters.dueBefore);
   }
 
-  const { data, error } = await query;
+  const { data: tasks, error } = await query;
 
   if (error) {
     console.error("Error fetching tasks:", error);
     return [];
   }
 
-  return data || [];
+  if (!tasks || tasks.length === 0) {
+    return [];
+  }
+
+  // Fetch deliverable counts for all tasks
+  const taskIds = tasks.map((t) => t.id);
+  const { data: deliverableCounts } = await supabase
+    .from("task_deliverables")
+    .select("task_id")
+    .in("task_id", taskIds)
+    .neq("status", "archived");
+
+  // Count deliverables per task
+  const countMap: Record<string, number> = {};
+  if (deliverableCounts) {
+    for (const d of deliverableCounts) {
+      countMap[d.task_id] = (countMap[d.task_id] || 0) + 1;
+    }
+  }
+
+  // Merge counts with tasks
+  return tasks.map((task) => ({
+    ...task,
+    deliverable_count: countMap[task.id] || 0,
+  }));
 }

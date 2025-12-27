@@ -5,15 +5,28 @@ import { getChatCompletion } from "@/lib/ai/router";
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
+interface ExecutionResult {
+  strategy: "immediate" | "decompose" | "blocked";
+  result?: string;
+  content?: {
+    type: "social_posts" | "email" | "document" | "plan" | "research" | "other";
+    items: Array<{
+      title?: string;
+      platform?: string;
+      content: string;
+    }>;
+  };
+  subtasks?: Array<{
+    title: string;
+    description?: string;
+  }>;
+  blockReason?: string;
+  confidence: number;
+}
+
 /**
  * POST /api/tasks/execute
- * Autonomous task execution endpoint - demonstrates Phase 2 (Workflows)
- *
- * This is a simplified example showing how tasks move from passive to active:
- * - AI decides if task is executable
- * - Breaks complex tasks into subtasks
- * - Actually executes simple tasks (like drafting emails)
- * - Logs execution history
+ * AI task execution - actually generates content for executable tasks
  */
 export async function POST(req: NextRequest) {
   try {
@@ -27,11 +40,16 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { taskId } = await req.json();
+    const { taskId, platforms } = await req.json();
 
     if (!taskId) {
       return NextResponse.json({ error: "Task ID required" }, { status: 400 });
     }
+
+    // Default platforms if not specified
+    const selectedPlatforms = platforms && platforms.length > 0
+      ? platforms
+      : ["twitter", "linkedin", "instagram"];
 
     // Fetch the task
     const { data: task, error: fetchError } = await supabase
@@ -44,177 +62,208 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Task not found" }, { status: 404 });
     }
 
-    // Check if task is executable
-    if (task.execution_type === "manual") {
+    // Check if task is already completed
+    if (task.status === "done") {
       return NextResponse.json(
-        { error: "Task is marked as manual - cannot execute autonomously" },
+        { error: "Task is already completed" },
         { status: 400 }
       );
     }
 
-    if (task.execution_status !== "pending" && task.execution_status !== "queued") {
-      return NextResponse.json(
-        { error: `Task cannot be executed - current status: ${task.execution_status}` },
-        { status: 400 }
-      );
-    }
+    // Format platform list for the prompt
+    const platformList = selectedPlatforms.map((p: string) => {
+      const names: Record<string, string> = {
+        twitter: "Twitter/X",
+        linkedin: "LinkedIn",
+        instagram: "Instagram",
+        facebook: "Facebook",
+        youtube: "YouTube",
+      };
+      return names[p] || p;
+    }).join(", ");
 
-    // Mark task as started
-    await supabase.rpc("start_task_execution", {
-      task_id: taskId,
-      executor_id: user.id,
-      executor_type: "workflow",
-    });
+    // Analyze and execute the task with AI
+    const executionPrompt = `You are an AI assistant that executes tasks. Analyze this task and either execute it or explain what's needed.
 
-    // Analyze task to determine execution strategy
-    const analysisPrompt = `Analyze this task and determine how to execute it:
-
-**Task Details:**
+**Task:**
 Title: ${task.title}
-Description: ${task.description || "No description"}
-Priority: ${task.priority}
-Execution Type: ${task.execution_type}
+Description: ${task.description || "No description provided"}
 
-**Your Job:**
-1. Determine if this task is simple enough to execute immediately or needs to be broken down
-2. If it's a task you can execute (like drafting an email, creating a document outline, generating a report), do it
-3. If it's too complex or requires external actions (like scheduling meetings, making purchases), break it into subtasks
+**Target Platforms:** ${platformList}
 
-**Response Format (JSON):**
+**Instructions:**
+1. Determine what kind of output this task needs
+2. If it's content creation (social posts, emails, documents), CREATE the actual content
+3. Create content for EACH of the target platforms specified above: ${platformList}
+4. If it's too complex, break it into subtasks
+5. If it needs human action (like payments, external systems), explain what's needed
+
+**Platform-specific guidelines:**
+- Twitter/X: Max 280 characters, use hashtags, engaging tone
+- LinkedIn: Professional tone, can be longer (up to 3000 chars), industry-focused
+- Instagram: Visual-focused captions, use emojis, relevant hashtags
+- Facebook: Conversational, can include links, moderate length
+- YouTube: Video description/title, include keywords, call-to-action for subscribers
+
+**Response Format (JSON only):**
 {
-  "executable": true/false,
-  "executionStrategy": "immediate" | "decompose" | "blocked",
-  "result": "... actual result if executable ...",
-  "subtasks": [ {title, description, execution_type}... ] if needs decomposition,
-  "blockingReason": "..." if blocked,
-  "confidence": 0.0-1.0
+  "strategy": "immediate" | "decompose" | "blocked",
+  "contentType": "social_posts" | "email" | "document" | "plan" | "research" | "other",
+  "content": [
+    {
+      "title": "Optional title",
+      "platform": "twitter/linkedin/facebook/instagram/email/etc",
+      "content": "The actual generated content here"
+    }
+  ],
+  "subtasks": [{"title": "...", "description": "..."}],
+  "blockReason": "...",
+  "confidence": 0.95,
+  "summary": "Brief summary of what was done"
 }
 
-Examples of EXECUTABLE tasks:
-- "Draft email to customer about product delay"
-- "Create project status report outline"
-- "Summarize meeting notes"
-- "Write social media post"
-- "Generate invoice description"
+**Example for "Create social media posts for product launch" with platforms [Twitter/X, LinkedIn]:**
+{
+  "strategy": "immediate",
+  "contentType": "social_posts",
+  "content": [
+    {"platform": "twitter", "content": "🚀 Exciting news! Our new product is here..."},
+    {"platform": "linkedin", "content": "We're thrilled to announce..."}
+  ],
+  "confidence": 0.95,
+  "summary": "Created 2 social media posts for product launch"
+}
 
-Examples of NEEDS DECOMPOSITION:
-- "Plan Q4 marketing campaign" → break into research, strategy, budget, timeline subtasks
-- "Onboard new employee" → break into account setup, training schedule, equipment order
-- "Launch new product" → break into multiple phases
+Now execute the task for these platforms: ${platformList}. Respond with JSON only.`;
 
-Examples of BLOCKED:
-- "Buy office supplies" → needs human approval/payment
-- "Schedule meeting with CEO" → needs access to calendar systems`;
-
-    const analysis = await getChatCompletion("gpt-4o-mini", [
+    const result = await getChatCompletion("gpt-4o", [
       {
         role: "system",
         content:
-          "You are an AI task execution engine. Analyze tasks and either execute them or break them down. Always respond with valid JSON only.",
+          "You are a task execution AI. When asked to create content, you create ACTUAL content, not placeholders. Always respond with valid JSON only.",
       },
-      { role: "user", content: analysisPrompt },
+      { role: "user", content: executionPrompt },
     ]);
 
     // Parse AI response
-    const jsonMatch = analysis.match(/\{[\s\S]*\}/);
+    const responseText = result.response || result;
+    const jsonMatch = responseText.match(/\{[\s\S]*\}/);
+
     if (!jsonMatch) {
-      throw new Error("Failed to parse execution analysis");
-    }
-
-    const executionPlan = JSON.parse(jsonMatch[0]);
-
-    // Handle different execution strategies
-    if (executionPlan.executionStrategy === "immediate" && executionPlan.executable) {
-      // Task can be executed immediately
-      await supabase.rpc("complete_task_execution", {
-        task_id: taskId,
-        result_data: {
-          strategy: "immediate",
-          result: executionPlan.result,
-          confidence: executionPlan.confidence,
-          ai_model: "gpt-4o-mini",
-        },
-      });
-
-      return NextResponse.json({
-        success: true,
-        strategy: "immediate",
-        result: executionPlan.result,
-        message: "Task executed successfully",
-      });
-    } else if (executionPlan.executionStrategy === "decompose") {
-      // Task needs to be broken down into subtasks
-      const subtaskIds: string[] = [];
-
-      for (const subtask of executionPlan.subtasks || []) {
-        const { data: newSubtask } = await supabase.rpc("create_subtask", {
-          parent_id: taskId,
-          subtask_title: subtask.title,
-          subtask_description: subtask.description || null,
-          subtask_priority: task.priority,
-          subtask_execution_type: subtask.execution_type || "semi_automated",
-        });
-
-        if (newSubtask) {
-          subtaskIds.push(newSubtask);
-        }
-      }
-
-      // Mark parent task as completed (subtasks are now the work)
-      await supabase.rpc("complete_task_execution", {
-        task_id: taskId,
-        result_data: {
-          strategy: "decompose",
-          subtask_count: subtaskIds.length,
-          subtask_ids: subtaskIds,
-        },
-      });
-
-      return NextResponse.json({
-        success: true,
-        strategy: "decompose",
-        subtasks: executionPlan.subtasks,
-        subtaskIds,
-        message: `Task decomposed into ${subtaskIds.length} subtasks`,
-      });
-    } else if (executionPlan.executionStrategy === "blocked") {
-      // Task is blocked - needs human intervention
-      await supabase.rpc("block_task_execution", {
-        task_id: taskId,
-        reason: executionPlan.blockingReason || "Requires human intervention",
-      });
-
-      return NextResponse.json({
-        success: false,
-        strategy: "blocked",
-        reason: executionPlan.blockingReason,
-        message: "Task blocked - requires human action",
-      });
-    } else {
-      // Unknown strategy
-      await supabase.rpc("fail_task_execution", {
-        task_id: taskId,
-        error_message: "AI could not determine execution strategy",
-        should_retry: false,
-      });
-
       return NextResponse.json(
-        { error: "Could not determine how to execute this task" },
+        { error: "AI could not process this task", raw: responseText },
         { status: 500 }
       );
     }
+
+    const executionResult = JSON.parse(jsonMatch[0]);
+
+    // If task was executed immediately with content, save deliverables
+    const savedDeliverables: string[] = [];
+    if (executionResult.strategy === "immediate" && executionResult.content?.length > 0) {
+      const contentType = executionResult.contentType || "other";
+
+      for (const item of executionResult.content) {
+        // Map content type to deliverable type
+        let deliverableType = contentType;
+        if (contentType === "social_posts") {
+          deliverableType = "social_post";
+        }
+
+        // Determine platform from item or content type
+        let platform = item.platform?.toLowerCase().replace("/x", "").trim() || null;
+        if (platform === "twitter") platform = "twitter";
+        else if (platform === "linkedin") platform = "linkedin";
+        else if (platform === "instagram") platform = "instagram";
+        else if (platform === "facebook") platform = "facebook";
+        else if (platform === "youtube") platform = "youtube";
+
+        const { data: deliverable, error: deliverableError } = await supabase
+          .from("task_deliverables")
+          .insert({
+            task_id: taskId,
+            user_id: user.id,
+            content_type: deliverableType,
+            title: item.title || `${platform ? platform.charAt(0).toUpperCase() + platform.slice(1) + " " : ""}${contentType === "social_posts" ? "Post" : "Content"}`,
+            content: item.content,
+            platform: platform,
+            format: "plain",
+            metadata: {
+              char_count: item.content.length,
+              original_platform: item.platform,
+            },
+            ai_generated: true,
+            ai_model: "gpt-4o",
+            ai_prompt_context: task.title,
+          })
+          .select("id")
+          .single();
+
+        if (!deliverableError && deliverable) {
+          savedDeliverables.push(deliverable.id);
+        }
+      }
+
+      // Mark task as done
+      await supabase
+        .from("tasks")
+        .update({ status: "done" })
+        .eq("id", taskId);
+    } else if (executionResult.strategy === "immediate") {
+      // No content but still immediate - just mark done
+      await supabase
+        .from("tasks")
+        .update({ status: "done" })
+        .eq("id", taskId);
+    }
+
+    // If task needs subtasks, create them
+    if (executionResult.strategy === "decompose" && executionResult.subtasks?.length > 0) {
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("organization_id")
+        .eq("id", user.id)
+        .single();
+
+      for (const subtask of executionResult.subtasks) {
+        await supabase.from("tasks").insert({
+          organization_id: profile?.organization_id,
+          user_id: user.id,
+          title: subtask.title,
+          description: subtask.description || null,
+          priority: task.priority,
+          status: "todo",
+          project_id: task.project_id,
+        });
+      }
+
+      // Mark parent as in_progress (waiting for subtasks)
+      await supabase
+        .from("tasks")
+        .update({ status: "in_progress" })
+        .eq("id", taskId);
+    }
+
+    return NextResponse.json({
+      success: true,
+      taskId,
+      ...executionResult,
+      savedDeliverables,
+      deliverableCount: savedDeliverables.length,
+    });
+
   } catch (error) {
     console.error("Task execution error:", error);
     return NextResponse.json(
-      { error: "Failed to execute task", details: error },
+      { error: "Failed to execute task", details: String(error) },
       { status: 500 }
     );
   }
 }
 
 /**
- * GET /api/tasks/execute?organizationId=xxx
- * Get all executable tasks for an organization (ready for autonomous execution)
+ * GET /api/tasks/execute?taskId=xxx
+ * Check execution status or get execution history
  */
 export async function GET(req: NextRequest) {
   try {
@@ -228,39 +277,35 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    // Get user's organization
-    const { data: profile } = await supabase
-      .from("profiles")
-      .select("organization_id")
-      .eq("id", user.id)
-      .single();
+    const taskId = req.nextUrl.searchParams.get("taskId");
 
-    if (!profile) {
-      return NextResponse.json({ error: "Profile not found" }, { status: 400 });
+    if (taskId) {
+      // Get specific task
+      const { data: task } = await supabase
+        .from("tasks")
+        .select("*")
+        .eq("id", taskId)
+        .single();
+
+      return NextResponse.json({ task });
     }
 
-    // Get executable tasks
-    const { data: executableTasks, error } = await supabase.rpc("get_executable_tasks", {
-      for_organization_id: profile.organization_id,
-      execution_type_filter: null, // Get all types
-    });
-
-    if (error) {
-      console.error("Error fetching executable tasks:", error);
-      return NextResponse.json(
-        { error: "Failed to fetch executable tasks" },
-        { status: 500 }
-      );
-    }
+    // Get all tasks that can be executed
+    const { data: tasks } = await supabase
+      .from("tasks")
+      .select("*")
+      .eq("user_id", user.id)
+      .neq("status", "done")
+      .order("created_at", { ascending: false });
 
     return NextResponse.json({
-      tasks: executableTasks || [],
-      count: executableTasks?.length || 0,
+      tasks: tasks || [],
+      count: tasks?.length || 0,
     });
   } catch (error) {
-    console.error("GET executable tasks error:", error);
+    console.error("GET tasks error:", error);
     return NextResponse.json(
-      { error: "Failed to fetch executable tasks" },
+      { error: "Failed to fetch tasks" },
       { status: 500 }
     );
   }

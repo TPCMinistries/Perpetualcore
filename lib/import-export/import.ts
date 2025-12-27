@@ -92,10 +92,6 @@ export async function importFromJSON(
             status: task.status || "todo",
             priority: task.priority || "medium",
             due_date: task.due_date,
-            ai_extracted: task.ai_extracted || false,
-            ai_confidence: task.ai_confidence,
-            tags: task.tags,
-            project_name: task.project_name,
           });
 
           imported.tasks++;

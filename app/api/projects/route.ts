@@ -181,6 +181,12 @@ export async function POST(req: NextRequest) {
       }
     }
 
+    // Build AI context with advanced fields
+    const aiContext: Record<string, unknown> = {};
+    if (body.budget) aiContext.budget = body.budget;
+    if (body.location) aiContext.location = body.location;
+    if (body.expected_participants) aiContext.expected_participants = body.expected_participants;
+
     // Create the project
     const { data: project, error } = await supabase
       .from("projects")
@@ -196,6 +202,10 @@ export async function POST(req: NextRequest) {
         target_date: body.target_date,
         priority: body.priority || "medium",
         current_stage: "ideation", // All new projects start in ideation
+        project_type: body.project_type || "general",
+        client_name: body.client_name,
+        tags: body.tags || [],
+        ai_context: Object.keys(aiContext).length > 0 ? aiContext : undefined,
       })
       .select(
         `
@@ -233,6 +243,35 @@ export async function POST(req: NextRequest) {
       can_invite_members: true,
       can_manage_milestones: true,
     });
+
+    // Add initial milestones if provided
+    if (body.milestones && Array.isArray(body.milestones) && body.milestones.length > 0) {
+      const milestonesData = body.milestones.map((name: string, index: number) => ({
+        project_id: project.id,
+        name,
+        sort_order: index,
+        created_by: user.id,
+      }));
+
+      await supabase.from("project_milestones").insert(milestonesData);
+    }
+
+    // Add initial members if provided
+    if (body.initial_members && Array.isArray(body.initial_members) && body.initial_members.length > 0) {
+      const membersData = body.initial_members.map((userId: string) => ({
+        project_id: project.id,
+        user_id: userId,
+        role: "member",
+        can_edit_project: false,
+        can_manage_tasks: true,
+        can_upload_files: true,
+        can_invite_members: false,
+        can_manage_milestones: false,
+        invited_by: user.id,
+      }));
+
+      await supabase.from("project_members").insert(membersData);
+    }
 
     return NextResponse.json({ project }, { status: 201 });
   } catch (error) {

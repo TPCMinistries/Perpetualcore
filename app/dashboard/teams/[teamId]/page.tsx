@@ -146,6 +146,7 @@ export default function TeamDetailPage() {
   const [newProjectName, setNewProjectName] = useState("");
   const [newProjectDescription, setNewProjectDescription] = useState("");
   const [creatingProject, setCreatingProject] = useState(false);
+  const [kanbanRefreshKey, setKanbanRefreshKey] = useState(0);
 
   // Form state for settings
   const [editForm, setEditForm] = useState({
@@ -1063,6 +1064,7 @@ export default function TeamDetailPage() {
                   </Button>
                 </div>
                 <WorkItemKanban
+                  key={kanbanRefreshKey}
                   teamId={teamId}
                   stages={(team as any).workflow_stages as WorkflowStage[]}
                   itemType={getItemTypeForTeam((team as any).template_id)}
@@ -1093,7 +1095,8 @@ export default function TeamDetailPage() {
           initialStageId={workItemInitialStage}
           editItem={selectedWorkItem}
           onSuccess={() => {
-            // Refresh the kanban
+            // Refresh the kanban by incrementing key
+            setKanbanRefreshKey(prev => prev + 1);
             setWorkItemFormOpen(false);
           }}
         />

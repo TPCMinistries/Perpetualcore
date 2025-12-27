@@ -89,14 +89,14 @@ export function ExceptionQueue({
 
       toast.success(
         action === "acknowledge"
-          ? "Exception acknowledged"
+          ? "Marked as seen"
           : action === "resolve"
-          ? "Exception resolved"
-          : "Exception dismissed"
+          ? "Issue resolved"
+          : "Issue dismissed"
       );
       onRefresh();
     } catch {
-      toast.error("Failed to update exception");
+      toast.error("Something went wrong. Please try again.");
     } finally {
       setActionLoading(null);
     }
@@ -120,10 +120,10 @@ export function ExceptionQueue({
 
       if (!response.ok) throw new Error("Failed to retry");
 
-      toast.success("Retrying operation...");
+      toast.success("Trying again...");
       onRefresh();
     } catch {
-      toast.error("Failed to retry");
+      toast.error("Couldn't retry. Please try again.");
     } finally {
       setActionLoading(null);
     }
@@ -135,10 +135,10 @@ export function ExceptionQueue({
         <CardContent className="py-12 text-center">
           <CheckCircle2 className="h-12 w-12 text-green-500 mx-auto mb-4" />
           <h3 className="text-lg font-medium text-green-700">
-            No Active Exceptions
+            All Clear
           </h3>
           <p className="text-sm text-green-600 mt-1">
-            All systems are running smoothly
+            Everything is running smoothly — no issues to review
           </p>
         </CardContent>
       </Card>
