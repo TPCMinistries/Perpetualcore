@@ -1161,7 +1161,26 @@ function DecisionInbox() {
   const [uploadingFile, setUploadingFile] = useState(false);
 
   useEffect(() => {
-    fetchDecisions();
+    // Fetch decisions whenever filter changes
+    const loadDecisions = async () => {
+      setLoading(true);
+      try {
+        const params = new URLSearchParams();
+        if (filter !== "all") {
+          params.append("status", filter);
+        }
+        const response = await fetch(`/api/decisions?${params}`);
+        if (response.ok) {
+          const data = await response.json();
+          setDecisions(data.decisions || []);
+        }
+      } catch (error) {
+        console.error("Error fetching decisions:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    loadDecisions();
   }, [filter]);
 
   const handleCreateDecision = async () => {
@@ -1238,12 +1257,18 @@ function DecisionInbox() {
       });
       if (response.ok) {
         toast.success("Decision added to inbox!");
-        setExtractedDecisions(prev => prev.filter(d => d.title !== extracted.title));
+        setExtractedDecisions(prev => {
+          const remaining = prev.filter(d => d.title !== extracted.title);
+          // Auto-close panel when all decisions are added
+          if (remaining.length === 0) {
+            setTimeout(() => {
+              setShowProcessAI(false);
+              setAiInput("");
+            }, 500);
+          }
+          return remaining;
+        });
         fetchDecisions();
-        if (extractedDecisions.length <= 1) {
-          setShowProcessAI(false);
-          setAiInput("");
-        }
       }
     } catch (error) {
       toast.error("Failed to add decision");
@@ -1339,8 +1364,6 @@ function DecisionInbox() {
       }
     } catch (error) {
       console.error("Error fetching decisions:", error);
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -1435,8 +1458,8 @@ Example:
 'Hi team, after our discussion we need to decide on the new vendor by Friday. Also, marketing wants approval for the $50k campaign budget. Let's sync on the Q1 roadmap next week.'"
                   value={aiInput}
                   onChange={(e) => setAiInput(e.target.value)}
-                  rows={6}
-                  className="w-full px-4 py-3 rounded-xl border-2 border-blue-200 dark:border-blue-800 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none text-sm"
+                  rows={8}
+                  className="w-full px-4 py-3 rounded-xl border-2 border-blue-200 dark:border-blue-800 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-y text-sm min-h-[150px] max-h-[400px] overflow-y-auto"
                 />
                 <div className="absolute bottom-3 right-3 flex items-center gap-2">
                   <input
@@ -1494,10 +1517,25 @@ Example:
               {/* Extracted Decisions Preview */}
               {extractedDecisions.length > 0 && (
                 <div className="border-t border-blue-200 dark:border-blue-800 pt-4 mt-4">
-                  <h4 className="text-sm font-semibold text-blue-900 dark:text-blue-100 mb-3 flex items-center gap-2">
-                    <Lightbulb className="h-4 w-4" />
-                    Found {extractedDecisions.length} Decision{extractedDecisions.length > 1 ? "s" : ""}
-                  </h4>
+                  <div className="flex items-center justify-between mb-3">
+                    <h4 className="text-sm font-semibold text-blue-900 dark:text-blue-100 flex items-center gap-2">
+                      <Lightbulb className="h-4 w-4" />
+                      Found {extractedDecisions.length} Decision{extractedDecisions.length > 1 ? "s" : ""}
+                    </h4>
+                    <div className="flex items-center gap-2">
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => {
+                          setExtractedDecisions([]);
+                          setAiInput("");
+                        }}
+                        className="text-xs text-muted-foreground hover:text-foreground"
+                      >
+                        Clear All
+                      </Button>
+                    </div>
+                  </div>
                   <div className="space-y-2">
                     {extractedDecisions.map((decision, idx) => (
                       <div
