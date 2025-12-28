@@ -1158,6 +1158,12 @@ function DecisionInbox() {
   const [aiInput, setAiInput] = useState("");
   const [processingAI, setProcessingAI] = useState(false);
   const [extractedDecisions, setExtractedDecisions] = useState<any[]>([]);
+  const [uploadingFile, setUploadingFile] = useState(false);
+  const fileInputRef = useCallback((node: HTMLInputElement | null) => {
+    if (node) {
+      node.addEventListener("change", handleFileUpload as any);
+    }
+  }, []);
 
   useEffect(() => {
     fetchDecisions();
@@ -1246,6 +1252,67 @@ function DecisionInbox() {
       }
     } catch (error) {
       toast.error("Failed to add decision");
+    }
+  };
+
+  // Handle file upload for document processing
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Check file size (max 10MB)
+    if (file.size > 10 * 1024 * 1024) {
+      toast.error("File too large. Maximum size is 10MB.");
+      return;
+    }
+
+    // Check file type
+    const allowedTypes = [
+      "text/plain",
+      "application/pdf",
+      "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+      "application/msword",
+    ];
+    const allowedExtensions = [".txt", ".pdf", ".docx", ".doc"];
+    const fileExt = file.name.toLowerCase().slice(file.name.lastIndexOf("."));
+
+    if (!allowedTypes.includes(file.type) && !allowedExtensions.includes(fileExt)) {
+      toast.error("Unsupported file type. Please upload PDF, Word, or text files.");
+      return;
+    }
+
+    setUploadingFile(true);
+    try {
+      // For text files, read directly
+      if (file.type === "text/plain" || fileExt === ".txt") {
+        const text = await file.text();
+        setAiInput(text);
+        toast.success("Document loaded! Click 'Extract Decisions' to process.");
+      } else {
+        // For PDF/DOCX, send to server for text extraction
+        const formData = new FormData();
+        formData.append("file", file);
+
+        const response = await fetch("/api/documents/extract-text", {
+          method: "POST",
+          body: formData,
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          setAiInput(data.text || "");
+          toast.success("Document loaded! Click 'Extract Decisions' to process.");
+        } else {
+          toast.error("Failed to extract text from document");
+        }
+      }
+    } catch (error) {
+      console.error("File upload error:", error);
+      toast.error("Error processing file");
+    } finally {
+      setUploadingFile(false);
+      // Reset file input
+      e.target.value = "";
     }
   };
 
@@ -1342,7 +1409,7 @@ function DecisionInbox() {
                 <div className="flex-1">
                   <h3 className="font-semibold text-blue-900 dark:text-blue-100">Process with AI</h3>
                   <p className="text-sm text-blue-700/70 dark:text-blue-300/70">
-                    Paste emails, meeting notes, or any text. AI will extract actionable decisions for your inbox.
+                    Paste emails, meeting notes, or upload documents (PDF, Word, TXT). AI will extract actionable decisions.
                   </p>
                 </div>
                 <Button variant="ghost" size="sm" onClick={() => setShowProcessAI(false)}>
@@ -1362,13 +1429,31 @@ Example:
                   className="w-full px-4 py-3 rounded-xl border-2 border-blue-200 dark:border-blue-800 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none text-sm"
                 />
                 <div className="absolute bottom-3 right-3 flex items-center gap-2">
+                  <input
+                    type="file"
+                    id="decision-file-upload"
+                    accept=".txt,.pdf,.docx,.doc"
+                    onChange={handleFileUpload}
+                    className="hidden"
+                  />
                   <Button
                     variant="ghost"
                     size="sm"
                     className="text-blue-600 hover:bg-blue-100 dark:hover:bg-blue-900/50"
+                    onClick={() => document.getElementById("decision-file-upload")?.click()}
+                    disabled={uploadingFile}
                   >
-                    <Upload className="h-4 w-4 mr-1" />
-                    Upload
+                    {uploadingFile ? (
+                      <>
+                        <Loader2 className="h-4 w-4 mr-1 animate-spin" />
+                        Loading...
+                      </>
+                    ) : (
+                      <>
+                        <Upload className="h-4 w-4 mr-1" />
+                        Upload
+                      </>
+                    )}
                   </Button>
                 </div>
               </div>
@@ -1952,6 +2037,14 @@ function OpportunitiesTracker() {
   const [filter, setFilter] = useState<"all" | "evaluating" | "pursuing">("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [showNewForm, setShowNewForm] = useState(false);
+  const [creating, setCreating] = useState(false);
+  const [newOpportunity, setNewOpportunity] = useState({
+    title: "",
+    description: "",
+    estimated_value: "",
+    source: "manual",
+    due_date: "",
+  });
 
   useEffect(() => {
     fetchOpportunities();
@@ -1973,6 +2066,40 @@ function OpportunitiesTracker() {
       console.error("Error fetching opportunities:", error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleCreateOpportunity = async () => {
+    if (!newOpportunity.title.trim()) {
+      toast.error("Title is required");
+      return;
+    }
+    setCreating(true);
+    try {
+      const response = await fetch("/api/opportunities", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          title: newOpportunity.title.trim(),
+          description: newOpportunity.description.trim() || null,
+          estimated_value: newOpportunity.estimated_value ? parseFloat(newOpportunity.estimated_value) : null,
+          source: newOpportunity.source,
+          due_date: newOpportunity.due_date || null,
+        }),
+      });
+      if (response.ok) {
+        toast.success("Opportunity created! AI evaluation will begin shortly.");
+        setShowNewForm(false);
+        setNewOpportunity({ title: "", description: "", estimated_value: "", source: "manual", due_date: "" });
+        fetchOpportunities();
+      } else {
+        const err = await response.json();
+        toast.error(err.error || "Failed to create opportunity");
+      }
+    } catch (error) {
+      toast.error("Error creating opportunity");
+    } finally {
+      setCreating(false);
     }
   };
 
@@ -2035,6 +2162,108 @@ function OpportunitiesTracker() {
           Add Opportunity
         </Button>
       </div>
+
+      {/* New Opportunity Form */}
+      {showNewForm && (
+        <Card className="border-purple-200 dark:border-purple-800/50 bg-purple-50/50 dark:bg-purple-950/20">
+          <CardContent className="py-5">
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="h-10 w-10 rounded-xl bg-purple-100 dark:bg-purple-900/50 flex items-center justify-center">
+                    <Target className="h-5 w-5 text-purple-600" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold">New Opportunity</h3>
+                    <p className="text-sm text-muted-foreground">Add a new opportunity to your pipeline</p>
+                  </div>
+                </div>
+                <Button variant="ghost" size="sm" onClick={() => setShowNewForm(false)}>
+                  <XCircle className="h-4 w-4" />
+                </Button>
+              </div>
+
+              <div className="grid gap-4">
+                <div>
+                  <label className="text-sm font-medium mb-1 block">Title *</label>
+                  <input
+                    type="text"
+                    placeholder="e.g., New Partnership with Acme Corp"
+                    value={newOpportunity.title}
+                    onChange={(e) => setNewOpportunity({ ...newOpportunity, title: e.target.value })}
+                    className="w-full px-3 py-2 rounded-lg border bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                  />
+                </div>
+
+                <div>
+                  <label className="text-sm font-medium mb-1 block">Description</label>
+                  <textarea
+                    placeholder="Describe the opportunity..."
+                    value={newOpportunity.description}
+                    onChange={(e) => setNewOpportunity({ ...newOpportunity, description: e.target.value })}
+                    rows={3}
+                    className="w-full px-3 py-2 rounded-lg border bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                  />
+                </div>
+
+                <div className="grid grid-cols-3 gap-4">
+                  <div>
+                    <label className="text-sm font-medium mb-1 block">Estimated Value ($)</label>
+                    <input
+                      type="number"
+                      placeholder="50000"
+                      value={newOpportunity.estimated_value}
+                      onChange={(e) => setNewOpportunity({ ...newOpportunity, estimated_value: e.target.value })}
+                      className="w-full px-3 py-2 rounded-lg border bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="text-sm font-medium mb-1 block">Source</label>
+                    <select
+                      value={newOpportunity.source}
+                      onChange={(e) => setNewOpportunity({ ...newOpportunity, source: e.target.value })}
+                      className="w-full px-3 py-2 rounded-lg border bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                    >
+                      <option value="manual">Manual Entry</option>
+                      <option value="inbound">Inbound Lead</option>
+                      <option value="outbound">Outbound</option>
+                      <option value="referral">Referral</option>
+                      <option value="partner">Partner</option>
+                      <option value="grant">Grant Program</option>
+                      <option value="rfp">RFP Response</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="text-sm font-medium mb-1 block">Decision Deadline</label>
+                    <input
+                      type="date"
+                      value={newOpportunity.due_date}
+                      onChange={(e) => setNewOpportunity({ ...newOpportunity, due_date: e.target.value })}
+                      className="w-full px-3 py-2 rounded-lg border bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                    />
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-between pt-2">
+                  <p className="text-sm text-muted-foreground flex items-center gap-2">
+                    <Sparkles className="h-4 w-4 text-purple-500" />
+                    AI will automatically evaluate this opportunity using the 5-Factor Framework
+                  </p>
+                  <div className="flex items-center gap-2">
+                    <Button variant="outline" onClick={() => setShowNewForm(false)}>Cancel</Button>
+                    <Button onClick={handleCreateOpportunity} disabled={creating} className="bg-purple-600 hover:bg-purple-700">
+                      {creating ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Plus className="h-4 w-4 mr-2" />}
+                      Create Opportunity
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Pipeline Summary Cards - 3 cards like Lovable */}
       <div className="grid grid-cols-3 gap-4">
