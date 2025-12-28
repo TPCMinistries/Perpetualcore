@@ -40,6 +40,19 @@ import {
   DollarSign,
   BarChart3,
   Plus,
+  Search,
+  Sparkles,
+  Upload,
+  Archive,
+  LayoutGrid,
+  List,
+  MessageSquare,
+  Lightbulb,
+  Calendar,
+  FileText,
+  MoreHorizontal,
+  Mail,
+  StickyNote,
 } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
@@ -1140,6 +1153,12 @@ function DecisionInbox() {
   const [newDecision, setNewDecision] = useState({ title: "", description: "", priority: "medium" });
   const [creating, setCreating] = useState(false);
 
+  // Process with AI state
+  const [showProcessAI, setShowProcessAI] = useState(false);
+  const [aiInput, setAiInput] = useState("");
+  const [processingAI, setProcessingAI] = useState(false);
+  const [extractedDecisions, setExtractedDecisions] = useState<any[]>([]);
+
   useEffect(() => {
     fetchDecisions();
   }, [filter]);
@@ -1168,6 +1187,65 @@ function DecisionInbox() {
       toast.error("Error creating decision");
     } finally {
       setCreating(false);
+    }
+  };
+
+  // Process with AI - extract decisions from emails, meeting notes, etc.
+  const handleProcessWithAI = async () => {
+    if (!aiInput.trim()) {
+      toast.error("Please paste some content to process");
+      return;
+    }
+    setProcessingAI(true);
+    setExtractedDecisions([]);
+    try {
+      const response = await fetch("/api/decisions/extract", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ content: aiInput }),
+      });
+      if (response.ok) {
+        const data = await response.json();
+        if (data.decisions && data.decisions.length > 0) {
+          setExtractedDecisions(data.decisions);
+          toast.success(`Found ${data.decisions.length} potential decision(s)`);
+        } else {
+          toast.info("No clear decisions found in the content");
+        }
+      } else {
+        toast.error("Failed to process content");
+      }
+    } catch (error) {
+      console.error("Error processing with AI:", error);
+      toast.error("Error processing content");
+    } finally {
+      setProcessingAI(false);
+    }
+  };
+
+  // Add extracted decision to inbox
+  const handleAddExtractedDecision = async (extracted: any) => {
+    try {
+      const response = await fetch("/api/decisions", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          title: extracted.title,
+          description: extracted.context || extracted.description,
+          priority: extracted.priority || "medium",
+        }),
+      });
+      if (response.ok) {
+        toast.success("Decision added to inbox!");
+        setExtractedDecisions(prev => prev.filter(d => d.title !== extracted.title));
+        fetchDecisions();
+        if (extractedDecisions.length <= 1) {
+          setShowProcessAI(false);
+          setAiInput("");
+        }
+      }
+    } catch (error) {
+      toast.error("Failed to add decision");
     }
   };
 
@@ -1234,12 +1312,139 @@ function DecisionInbox() {
               </button>
             ))}
           </div>
+          <Button
+            variant="outline"
+            onClick={() => setShowProcessAI(!showProcessAI)}
+            className={cn(
+              "gap-2",
+              showProcessAI && "bg-blue-50 dark:bg-blue-950/30 border-blue-300 dark:border-blue-700"
+            )}
+          >
+            <Sparkles className="h-4 w-4 text-blue-500" />
+            Process with AI
+          </Button>
           <Button onClick={() => setShowNewForm(true)}>
             <FileCheck className="h-4 w-4 mr-2" />
             New Decision
           </Button>
         </div>
       </div>
+
+      {/* Process with AI Panel - Chat-like interface for extracting decisions */}
+      {showProcessAI && (
+        <Card className="border-blue-200 dark:border-blue-800/50 bg-gradient-to-br from-blue-50 to-cyan-50 dark:from-blue-950/30 dark:to-cyan-950/30">
+          <CardContent className="py-5">
+            <div className="space-y-4">
+              <div className="flex items-start gap-3">
+                <div className="h-10 w-10 rounded-xl bg-blue-100 dark:bg-blue-900/50 flex items-center justify-center flex-shrink-0">
+                  <Sparkles className="h-5 w-5 text-blue-600" />
+                </div>
+                <div className="flex-1">
+                  <h3 className="font-semibold text-blue-900 dark:text-blue-100">Process with AI</h3>
+                  <p className="text-sm text-blue-700/70 dark:text-blue-300/70">
+                    Paste emails, meeting notes, or any text. AI will extract actionable decisions for your inbox.
+                  </p>
+                </div>
+                <Button variant="ghost" size="sm" onClick={() => setShowProcessAI(false)}>
+                  <XCircle className="h-4 w-4" />
+                </Button>
+              </div>
+
+              <div className="relative">
+                <textarea
+                  placeholder="Paste your email, meeting notes, or any content here...
+
+Example:
+'Hi team, after our discussion we need to decide on the new vendor by Friday. Also, marketing wants approval for the $50k campaign budget. Let's sync on the Q1 roadmap next week.'"
+                  value={aiInput}
+                  onChange={(e) => setAiInput(e.target.value)}
+                  rows={6}
+                  className="w-full px-4 py-3 rounded-xl border-2 border-blue-200 dark:border-blue-800 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none text-sm"
+                />
+                <div className="absolute bottom-3 right-3 flex items-center gap-2">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="text-blue-600 hover:bg-blue-100 dark:hover:bg-blue-900/50"
+                  >
+                    <Upload className="h-4 w-4 mr-1" />
+                    Upload
+                  </Button>
+                </div>
+              </div>
+
+              <div className="flex items-center justify-between">
+                <p className="text-xs text-blue-600/70 dark:text-blue-400/70">
+                  AI will analyze the content and suggest decisions to add to your inbox
+                </p>
+                <Button
+                  onClick={handleProcessWithAI}
+                  disabled={processingAI || !aiInput.trim()}
+                  className="bg-blue-600 hover:bg-blue-700"
+                >
+                  {processingAI ? (
+                    <>
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      Processing...
+                    </>
+                  ) : (
+                    <>
+                      <Sparkles className="h-4 w-4 mr-2" />
+                      Extract Decisions
+                    </>
+                  )}
+                </Button>
+              </div>
+
+              {/* Extracted Decisions Preview */}
+              {extractedDecisions.length > 0 && (
+                <div className="border-t border-blue-200 dark:border-blue-800 pt-4 mt-4">
+                  <h4 className="text-sm font-semibold text-blue-900 dark:text-blue-100 mb-3 flex items-center gap-2">
+                    <Lightbulb className="h-4 w-4" />
+                    Found {extractedDecisions.length} Decision{extractedDecisions.length > 1 ? "s" : ""}
+                  </h4>
+                  <div className="space-y-2">
+                    {extractedDecisions.map((decision, idx) => (
+                      <div
+                        key={idx}
+                        className="flex items-start gap-3 p-3 rounded-lg bg-white dark:bg-slate-900 border border-blue-100 dark:border-blue-800"
+                      >
+                        <div className="flex-1">
+                          <p className="font-medium text-sm">{decision.title}</p>
+                          {decision.context && (
+                            <p className="text-xs text-muted-foreground mt-1">{decision.context}</p>
+                          )}
+                          {decision.priority && (
+                            <Badge variant="outline" className="text-xs mt-2 capitalize">
+                              {decision.priority}
+                            </Badge>
+                          )}
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => setExtractedDecisions(prev => prev.filter((_, i) => i !== idx))}
+                          >
+                            Skip
+                          </Button>
+                          <Button
+                            size="sm"
+                            onClick={() => handleAddExtractedDecision(decision)}
+                          >
+                            <Plus className="h-3 w-3 mr-1" />
+                            Add
+                          </Button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* New Decision Form */}
       {showNewForm && (
@@ -1744,20 +1949,17 @@ function OpportunitiesTracker() {
   const [loading, setLoading] = useState(true);
   const [opportunities, setOpportunities] = useState<any[]>([]);
   const [selectedOpportunity, setSelectedOpportunity] = useState<any | null>(null);
-  const [filter, setFilter] = useState<"all" | "pending" | "approved" | "rejected">("all");
+  const [filter, setFilter] = useState<"all" | "evaluating" | "pursuing">("all");
+  const [searchQuery, setSearchQuery] = useState("");
   const [showNewForm, setShowNewForm] = useState(false);
 
   useEffect(() => {
     fetchOpportunities();
-  }, [filter]);
+  }, []);
 
   const fetchOpportunities = async () => {
     try {
-      const params = new URLSearchParams();
-      if (filter !== "all") {
-        params.append("final_decision", filter === "pending" ? "" : filter);
-      }
-      const response = await fetch(`/api/opportunities?${params}`);
+      const response = await fetch(`/api/opportunities`);
       if (response.ok) {
         const data = await response.json();
         const opps = data.opportunities || [];
@@ -1774,6 +1976,30 @@ function OpportunitiesTracker() {
     }
   };
 
+  // Filter opportunities based on search and status
+  const filteredOpportunities = useMemo(() => {
+    let filtered = opportunities;
+
+    // Search filter
+    if (searchQuery) {
+      filtered = filtered.filter(o =>
+        o.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        o.description?.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+    }
+
+    // Status filter
+    if (filter === "evaluating") {
+      filtered = filtered.filter(o =>
+        o.weighted_composite_score && (!o.final_decision || o.final_decision === "")
+      );
+    } else if (filter === "pursuing") {
+      filtered = filtered.filter(o => o.final_decision === "approved");
+    }
+
+    return filtered;
+  }, [opportunities, searchQuery, filter]);
+
   // Calculate pipeline metrics
   const pipelineMetrics = useMemo(() => {
     const totalValue = opportunities
@@ -1782,17 +2008,8 @@ function OpportunitiesTracker() {
     const inEvaluation = opportunities.filter(
       (o) => o.weighted_composite_score && (!o.final_decision || o.final_decision === "")
     ).length;
-    const pending = opportunities.filter(
-      (o) => !o.weighted_composite_score && (!o.final_decision || o.final_decision === "")
-    ).length;
-    const approved = opportunities.filter((o) => o.final_decision === "approved").length;
-    const avgScore = opportunities.length > 0
-      ? opportunities
-          .filter((o) => o.weighted_composite_score)
-          .reduce((sum, o) => sum + (o.weighted_composite_score || 0), 0) /
-        Math.max(opportunities.filter((o) => o.weighted_composite_score).length, 1)
-      : 0;
-    return { totalValue, inEvaluation, pending, approved, avgScore };
+    const activelyPursuing = opportunities.filter((o) => o.final_decision === "approved").length;
+    return { totalValue, inEvaluation, activelyPursuing };
   }, [opportunities]);
 
   if (loading) {
@@ -1808,113 +2025,62 @@ function OpportunitiesTracker() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-xl font-semibold flex items-center gap-2">
-            <TrendingUp className="h-5 w-5 text-purple-500" />
-            Opportunities Pipeline
-          </h2>
-          <p className="text-sm text-muted-foreground mt-1">
-            Track and evaluate opportunities with the 5-factor decision framework
+          <h2 className="text-2xl font-semibold">Opportunities</h2>
+          <p className="text-muted-foreground">
+            Pipeline tracking with AI-powered evaluation
           </p>
         </div>
         <Button onClick={() => setShowNewForm(true)}>
           <Plus className="h-4 w-4 mr-2" />
-          New Opportunity
+          Add Opportunity
         </Button>
       </div>
 
-      {/* Pipeline Summary Cards */}
-      <div className="grid grid-cols-5 gap-4">
-        <Card className="bg-gradient-to-br from-purple-50 to-violet-50 dark:from-purple-950/30 dark:to-violet-950/30 border-purple-200/50 dark:border-purple-800/30">
-          <CardContent className="py-4">
-            <div className="flex items-center justify-between">
+      {/* Pipeline Summary Cards - 3 cards like Lovable */}
+      <div className="grid grid-cols-3 gap-4">
+        <Card>
+          <CardContent className="py-5">
+            <div className="flex items-center gap-4">
+              <div className="h-12 w-12 rounded-xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center">
+                <TrendingUp className="h-6 w-6 text-slate-600 dark:text-slate-400" />
+              </div>
               <div>
-                <p className="text-xs font-medium text-purple-600 dark:text-purple-400 uppercase tracking-wide">Active Pipeline</p>
-                <p className="text-2xl font-bold text-purple-700 dark:text-purple-300 mt-1">
-                  ${(pipelineMetrics.totalValue / 1000).toFixed(0)}K
+                <p className="text-sm text-muted-foreground">Active Pipeline</p>
+                <p className="text-2xl font-bold">
+                  ${pipelineMetrics.totalValue.toLocaleString()}
                 </p>
               </div>
-              <div className="h-10 w-10 rounded-lg bg-purple-100 dark:bg-purple-900/50 flex items-center justify-center">
-                <DollarSign className="h-5 w-5 text-purple-600 dark:text-purple-400" />
-              </div>
             </div>
           </CardContent>
         </Card>
 
-        <Card className="bg-gradient-to-br from-blue-50 to-cyan-50 dark:from-blue-950/30 dark:to-cyan-950/30 border-blue-200/50 dark:border-blue-800/30">
-          <CardContent className="py-4">
-            <div className="flex items-center justify-between">
+        <Card>
+          <CardContent className="py-5">
+            <div className="flex items-center gap-4">
+              <div className="h-12 w-12 rounded-xl bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
+                <BarChart3 className="h-6 w-6 text-green-600 dark:text-green-400" />
+              </div>
               <div>
-                <p className="text-xs font-medium text-blue-600 dark:text-blue-400 uppercase tracking-wide">In Evaluation</p>
-                <p className="text-2xl font-bold text-blue-700 dark:text-blue-300 mt-1">{pipelineMetrics.inEvaluation}</p>
-              </div>
-              <div className="h-10 w-10 rounded-lg bg-blue-100 dark:bg-blue-900/50 flex items-center justify-center">
-                <BarChart3 className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                <p className="text-sm text-muted-foreground">In Evaluation</p>
+                <p className="text-2xl font-bold">{pipelineMetrics.inEvaluation}</p>
               </div>
             </div>
           </CardContent>
         </Card>
 
-        <Card className="bg-gradient-to-br from-amber-50 to-yellow-50 dark:from-amber-950/30 dark:to-yellow-950/30 border-amber-200/50 dark:border-amber-800/30">
-          <CardContent className="py-4">
-            <div className="flex items-center justify-between">
+        <Card>
+          <CardContent className="py-5">
+            <div className="flex items-center gap-4">
+              <div className="h-12 w-12 rounded-xl bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
+                <CheckCircle2 className="h-6 w-6 text-blue-600 dark:text-blue-400" />
+              </div>
               <div>
-                <p className="text-xs font-medium text-amber-600 dark:text-amber-400 uppercase tracking-wide">Needs Scoring</p>
-                <p className="text-2xl font-bold text-amber-700 dark:text-amber-300 mt-1">{pipelineMetrics.pending}</p>
-              </div>
-              <div className="h-10 w-10 rounded-lg bg-amber-100 dark:bg-amber-900/50 flex items-center justify-center">
-                <AlertCircle className="h-5 w-5 text-amber-600 dark:text-amber-400" />
+                <p className="text-sm text-muted-foreground">Actively Pursuing</p>
+                <p className="text-2xl font-bold">{pipelineMetrics.activelyPursuing}</p>
               </div>
             </div>
           </CardContent>
         </Card>
-
-        <Card className="bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-950/30 dark:to-emerald-950/30 border-green-200/50 dark:border-green-800/30">
-          <CardContent className="py-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-xs font-medium text-green-600 dark:text-green-400 uppercase tracking-wide">Approved</p>
-                <p className="text-2xl font-bold text-green-700 dark:text-green-300 mt-1">{pipelineMetrics.approved}</p>
-              </div>
-              <div className="h-10 w-10 rounded-lg bg-green-100 dark:bg-green-900/50 flex items-center justify-center">
-                <CheckCircle2 className="h-5 w-5 text-green-600 dark:text-green-400" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="bg-gradient-to-br from-slate-50 to-gray-50 dark:from-slate-950/30 dark:to-gray-950/30 border-slate-200/50 dark:border-slate-800/30">
-          <CardContent className="py-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-xs font-medium text-slate-600 dark:text-slate-400 uppercase tracking-wide">Avg Score</p>
-                <p className="text-2xl font-bold text-slate-700 dark:text-slate-300 mt-1">
-                  {pipelineMetrics.avgScore > 0 ? Math.round(pipelineMetrics.avgScore) : "--"}%
-                </p>
-              </div>
-              <div className="h-10 w-10 rounded-lg bg-slate-100 dark:bg-slate-900/50 flex items-center justify-center">
-                <Target className="h-5 w-5 text-slate-600 dark:text-slate-400" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Filter Tabs */}
-      <div className="flex items-center gap-1 p-1 rounded-lg bg-muted w-fit">
-        {(["all", "pending", "approved", "rejected"] as const).map((f) => (
-          <button
-            key={f}
-            onClick={() => setFilter(f)}
-            className={cn(
-              "px-4 py-2 rounded-md text-sm font-medium transition-colors capitalize",
-              filter === f
-                ? "bg-white dark:bg-slate-800 shadow-sm"
-                : "text-muted-foreground hover:text-foreground"
-            )}
-          >
-            {f === "pending" ? "Needs Decision" : f}
-          </button>
-        ))}
       </div>
 
       {/* Master-Detail Layout */}
@@ -1924,11 +2090,7 @@ function OpportunitiesTracker() {
             <Briefcase className="h-16 w-16 mx-auto mb-4 text-muted-foreground opacity-50" />
             <h3 className="text-lg font-semibold mb-2">No opportunities found</h3>
             <p className="text-muted-foreground max-w-md mx-auto mb-4">
-              {filter === "pending"
-                ? "No pending opportunities to evaluate. Add a new opportunity to get started."
-                : filter === "all"
-                  ? "Start tracking opportunities to see them here."
-                  : `No ${filter} opportunities yet.`}
+              Start tracking opportunities to see them here with AI-powered evaluation.
             </p>
             <Button onClick={() => setShowNewForm(true)}>
               <Plus className="h-4 w-4 mr-2" />
@@ -1939,15 +2101,30 @@ function OpportunitiesTracker() {
       ) : (
         <div className="grid grid-cols-5 gap-6">
           {/* Opportunities List - Left Side */}
-          <div className="col-span-2 space-y-3">
-            {opportunities.map((opp) => (
-              <OpportunityListItem
-                key={opp.id}
-                opportunity={opp}
-                isSelected={selectedOpportunity?.id === opp.id}
-                onSelect={() => setSelectedOpportunity(opp)}
+          <div className="col-span-2 space-y-4">
+            {/* Search */}
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <input
+                type="text"
+                placeholder="Search opportunities..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full pl-10 pr-4 py-2.5 rounded-lg border bg-white dark:bg-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
-            ))}
+            </div>
+
+            {/* Opportunity Cards */}
+            <div className="space-y-3">
+              {filteredOpportunities.map((opp) => (
+                <OpportunityListItem
+                  key={opp.id}
+                  opportunity={opp}
+                  isSelected={selectedOpportunity?.id === opp.id}
+                  onSelect={() => setSelectedOpportunity(opp)}
+                />
+              ))}
+            </div>
           </div>
 
           {/* Opportunity Detail - Right Side */}
@@ -1972,7 +2149,7 @@ function OpportunitiesTracker() {
   );
 }
 
-// Opportunity List Item (compact card for left panel)
+// Opportunity List Item - Matches Lovable design
 function OpportunityListItem({
   opportunity,
   isSelected,
@@ -1985,76 +2162,85 @@ function OpportunityListItem({
   const score = opportunity.weighted_composite_score;
   const hasScore = score !== null && score !== undefined;
 
-  const getScoreBorderColor = () => {
-    if (!hasScore) return "";
-    if (score >= 80) return "border-l-green-500";
-    if (score >= 60) return "border-l-yellow-500";
-    return "border-l-red-500";
+  // Determine status
+  const getStatus = () => {
+    if (opportunity.final_decision === "approved") return { label: "Pursuing", color: "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400" };
+    if (opportunity.final_decision === "rejected") return { label: "Rejected", color: "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400" };
+    if (hasScore) return { label: "Evaluating", color: "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400" };
+    return { label: "New", color: "bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-400" };
   };
 
-  const typeLabels: Record<string, string> = {
-    grant: "Grant",
-    rfp: "RFP",
-    partnership: "Partnership",
-    contract: "Contract",
-    sponsorship: "Sponsorship",
+  const status = getStatus();
+
+  // Format due date
+  const getDueText = () => {
+    if (!opportunity.due_date) return null;
+    const due = new Date(opportunity.due_date);
+    const now = new Date();
+    const diffDays = Math.ceil((due.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+    if (diffDays < 0) return "Overdue";
+    if (diffDays === 0) return "Today";
+    if (diffDays <= 7) return `${diffDays} days`;
+    if (diffDays <= 30) return `${Math.ceil(diffDays / 7)} weeks`;
+    return due.toLocaleDateString("en-US", { month: "short", day: "numeric" });
   };
+
+  const dueText = getDueText();
 
   return (
     <Card
       className={cn(
-        "cursor-pointer transition-all hover:shadow-md border-l-4",
-        isSelected
-          ? "ring-2 ring-purple-500 dark:ring-purple-400 bg-purple-50/50 dark:bg-purple-950/20"
-          : "hover:bg-muted/50",
-        hasScore ? getScoreBorderColor() : "border-l-gray-300 dark:border-l-gray-700"
+        "cursor-pointer transition-all hover:shadow-md",
+        isSelected && "ring-2 ring-blue-500 dark:ring-blue-400"
       )}
       onClick={onSelect}
     >
       <CardContent className="p-4">
         <div className="flex items-start justify-between gap-3">
           <div className="flex-1 min-w-0">
-            <h4 className="font-medium truncate">{opportunity.title}</h4>
-            <div className="flex items-center gap-2 mt-1">
-              {opportunity.opportunity_type && (
-                <Badge variant="outline" className="text-xs">
-                  {typeLabels[opportunity.opportunity_type] || opportunity.opportunity_type}
-                </Badge>
-              )}
+            <h4 className="font-medium">{opportunity.title}</h4>
+            <div className="flex items-center gap-2 mt-2">
+              <Badge className={cn("text-xs font-normal", status.color)}>
+                {status.label}
+              </Badge>
+            </div>
+            <div className="flex items-center gap-3 mt-2 text-sm text-muted-foreground">
               {opportunity.estimated_value && (
-                <span className="text-xs text-muted-foreground">
-                  ${(opportunity.estimated_value / 1000).toFixed(0)}K
+                <span className="flex items-center gap-1">
+                  <DollarSign className="h-3 w-3" />
+                  ${opportunity.estimated_value.toLocaleString()}
+                </span>
+              )}
+              {dueText && (
+                <span className="flex items-center gap-1">
+                  <CalendarDays className="h-3 w-3" />
+                  {dueText}
                 </span>
               )}
             </div>
           </div>
-          <div className="flex flex-col items-end gap-1">
-            {hasScore ? (
-              <div
-                className={cn(
-                  "h-10 w-10 rounded-lg flex items-center justify-center font-bold text-sm",
-                  score >= 80
-                    ? "bg-green-100 text-green-700 dark:bg-green-900/50 dark:text-green-300"
-                    : score >= 60
-                      ? "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/50 dark:text-yellow-300"
-                      : "bg-red-100 text-red-700 dark:bg-red-900/50 dark:text-red-300"
-                )}
-              >
-                {Math.round(score)}
-              </div>
-            ) : (
-              <div className="h-10 w-10 rounded-lg bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
-                <span className="text-xs text-muted-foreground">--</span>
-              </div>
-            )}
-          </div>
+          {/* Score Badge */}
+          {hasScore && (
+            <div
+              className={cn(
+                "h-11 w-11 rounded-full flex items-center justify-center font-bold text-sm border-2",
+                score >= 80
+                  ? "bg-green-50 text-green-700 border-green-500 dark:bg-green-900/30 dark:text-green-300"
+                  : score >= 60
+                    ? "bg-yellow-50 text-yellow-700 border-yellow-500 dark:bg-yellow-900/30 dark:text-yellow-300"
+                    : "bg-red-50 text-red-700 border-red-500 dark:bg-red-900/30 dark:text-red-300"
+              )}
+            >
+              {Math.round(score)}
+            </div>
+          )}
         </div>
       </CardContent>
     </Card>
   );
 }
 
-// Opportunity Detail Panel (full scoring breakdown on right)
+// Opportunity Detail Panel - Lovable Design with Decision Framework
 function OpportunityDetailPanel({
   opportunity,
   onUpdate,
@@ -2065,33 +2251,25 @@ function OpportunityDetailPanel({
   const score = opportunity.weighted_composite_score;
   const hasScore = score !== null && score !== undefined;
 
-  const getScoreColor = () => {
-    if (!hasScore) return { bg: "bg-gray-100", text: "text-gray-600", ring: "ring-gray-300" };
-    if (score >= 80) return { bg: "bg-green-100 dark:bg-green-900/30", text: "text-green-600 dark:text-green-400", ring: "ring-green-500" };
-    if (score >= 60) return { bg: "bg-yellow-100 dark:bg-yellow-900/30", text: "text-yellow-600 dark:text-yellow-400", ring: "ring-yellow-500" };
-    return { bg: "bg-red-100 dark:bg-red-900/30", text: "text-red-600 dark:text-red-400", ring: "ring-red-500" };
+  // Get status for badge
+  const getStatus = () => {
+    if (opportunity.final_decision === "approved") return { label: "Pursuing", color: "bg-green-100 text-green-700" };
+    if (opportunity.final_decision === "rejected") return { label: "Rejected", color: "bg-red-100 text-red-700" };
+    if (hasScore) return { label: "Evaluating", color: "bg-blue-100 text-blue-700" };
+    return { label: "New", color: "bg-gray-100 text-gray-700" };
   };
 
-  const getRecommendation = () => {
-    if (!hasScore) return { label: "Not Scored", color: "text-muted-foreground" };
-    if (score >= 80) return { label: "Strong Yes", color: "text-green-600 dark:text-green-400" };
-    if (score >= 70) return { label: "Yes", color: "text-green-500 dark:text-green-400" };
-    if (score >= 60) return { label: "Maybe", color: "text-yellow-600 dark:text-yellow-400" };
-    return { label: "No", color: "text-red-600 dark:text-red-400" };
-  };
+  const status = getStatus();
 
-  const typeLabels: Record<string, string> = {
-    grant: "Grant",
-    rfp: "RFP",
-    partnership: "Partnership",
-    contract: "Contract",
-    sponsorship: "Sponsorship",
-    investment: "Investment",
-    acquisition: "Acquisition",
+  // Source label mapping
+  const sourceLabels: Record<string, string> = {
+    inbound: "Inbound Lead",
+    outbound: "Outbound",
+    referral: "Referral",
+    partner: "Partner",
+    grant: "Grant Program",
+    rfp: "RFP Response",
   };
-
-  const colors = getScoreColor();
-  const recommendation = getRecommendation();
 
   const handleDecision = async (decision: "approved" | "rejected") => {
     try {
@@ -2102,175 +2280,255 @@ function OpportunityDetailPanel({
       });
       if (response.ok) {
         onUpdate();
+        toast.success(decision === "approved" ? "Opportunity approved!" : "Opportunity rejected");
       }
     } catch (error) {
       console.error("Error making decision:", error);
+      toast.error("Failed to update opportunity");
     }
   };
 
+  // Convert score (0-100) to 5-point scale for dot display
+  const scoreTo5Point = (s: number | null) => {
+    if (!s) return 0;
+    return Math.round((s / 100) * 5);
+  };
+
+  // Render dot indicators (●●●●○)
+  const DotIndicator = ({ filled, total = 5 }: { filled: number; total?: number }) => (
+    <div className="flex gap-1">
+      {Array.from({ length: total }).map((_, i) => (
+        <div
+          key={i}
+          className={cn(
+            "h-3 w-3 rounded-full",
+            i < filled ? "bg-blue-500" : "bg-gray-200 dark:bg-gray-700"
+          )}
+        />
+      ))}
+    </div>
+  );
+
   return (
-    <Card className="h-full">
+    <Card>
       <CardContent className="p-6 space-y-6">
         {/* Header */}
         <div className="flex items-start justify-between">
-          <div className="flex-1">
-            <div className="flex items-center gap-2 mb-2">
-              {opportunity.opportunity_type && (
-                <Badge variant="outline">
-                  {typeLabels[opportunity.opportunity_type] || opportunity.opportunity_type}
-                </Badge>
-              )}
-              {opportunity.priority && (
-                <Badge
-                  variant="outline"
-                  className={cn(
-                    opportunity.priority === "urgent" && "border-red-500 text-red-600",
-                    opportunity.priority === "high" && "border-orange-500 text-orange-600"
-                  )}
-                >
-                  {opportunity.priority}
-                </Badge>
-              )}
+          <div className="flex items-center gap-3">
+            <div className="h-10 w-10 rounded-lg bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
+              <Target className="h-5 w-5 text-blue-600" />
             </div>
-            <h2 className="text-xl font-semibold">{opportunity.title}</h2>
-            {opportunity.description && (
-              <p className="text-muted-foreground mt-2">{opportunity.description}</p>
-            )}
+            <div>
+              <h2 className="text-xl font-semibold">{opportunity.title}</h2>
+              <p className="text-sm text-muted-foreground">
+                {sourceLabels[opportunity.source] || opportunity.source || "Opportunity"}
+              </p>
+            </div>
           </div>
+          <Badge className={cn("text-xs", status.color)}>
+            {status.label}
+          </Badge>
+        </div>
+
+        {/* Description */}
+        {opportunity.description && (
+          <p className="text-muted-foreground">{opportunity.description}</p>
+        )}
+
+        {/* Value & Deadline Row */}
+        <div className="grid grid-cols-2 gap-6">
           {opportunity.estimated_value && (
-            <div className="text-right">
-              <p className="text-xs text-muted-foreground uppercase">Est. Value</p>
-              <p className="text-xl font-bold text-purple-600 dark:text-purple-400">
-                ${opportunity.estimated_value.toLocaleString()}
+            <div>
+              <p className="text-sm text-muted-foreground mb-1">Estimated Value</p>
+              <p className="text-2xl font-bold">${opportunity.estimated_value.toLocaleString()}</p>
+            </div>
+          )}
+          {opportunity.due_date && (
+            <div>
+              <p className="text-sm text-muted-foreground mb-1">Deadline</p>
+              <p className="text-2xl font-bold">
+                {new Date(opportunity.due_date).toLocaleDateString("en-US", {
+                  month: "short",
+                  day: "numeric",
+                  year: "numeric",
+                })}
               </p>
             </div>
           )}
         </div>
 
-        {/* Composite Score Display */}
-        <div className={cn("rounded-xl p-6", colors.bg)}>
-          <div className="flex items-center gap-6">
-            {/* Score Circle */}
-            <div className={cn("relative h-24 w-24 rounded-full flex items-center justify-center ring-4", colors.ring, colors.bg)}>
-              <div className="text-center">
-                <span className={cn("text-3xl font-bold", colors.text)}>
-                  {hasScore ? Math.round(score) : "--"}
-                </span>
-                {hasScore && <span className={cn("text-sm", colors.text)}>%</span>}
-              </div>
+        {/* Decision Framework Section */}
+        <div className="border rounded-xl p-5 space-y-5">
+          <div className="flex items-center gap-2">
+            <Sparkles className="h-5 w-5 text-blue-500" />
+            <div>
+              <h3 className="font-semibold">Decision Framework</h3>
+              <p className="text-sm text-muted-foreground">AI-powered evaluation scores</p>
             </div>
+          </div>
 
-            {/* Recommendation */}
-            <div className="flex-1">
-              <p className="text-sm text-muted-foreground mb-1">AI Recommendation</p>
-              <p className={cn("text-2xl font-bold", recommendation.color)}>{recommendation.label}</p>
-              <p className="text-sm text-muted-foreground mt-1">
-                Based on 5-factor weighted analysis
+          {/* Composite Score */}
+          <div className="flex items-center gap-6 p-4 rounded-lg bg-slate-50 dark:bg-slate-800/50">
+            <div
+              className={cn(
+                "h-20 w-20 rounded-full flex items-center justify-center text-2xl font-bold border-4",
+                hasScore
+                  ? score >= 80
+                    ? "border-green-500 text-green-600 bg-green-50 dark:bg-green-900/20"
+                    : score >= 60
+                      ? "border-yellow-500 text-yellow-600 bg-yellow-50 dark:bg-yellow-900/20"
+                      : "border-red-500 text-red-600 bg-red-50 dark:bg-red-900/20"
+                  : "border-gray-300 text-gray-400 bg-gray-50"
+              )}
+            >
+              {hasScore ? Math.round(score) : "--"}
+            </div>
+            <div>
+              <p className="font-semibold text-lg">Composite Score</p>
+              <p className="text-sm text-muted-foreground">
+                Weighted: Hurdle 30%, Brand 25%, Strategic 25%, Risk 15%, Resources 5%
               </p>
             </div>
+          </div>
 
-            {/* Quick Actions */}
-            {!opportunity.final_decision && hasScore && (
-              <div className="flex flex-col gap-2">
-                <Button
-                  size="sm"
-                  className="bg-green-600 hover:bg-green-700"
-                  onClick={() => handleDecision("approved")}
-                >
-                  <CheckCircle2 className="h-4 w-4 mr-1" />
-                  Approve
-                </Button>
-                <Button
-                  size="sm"
-                  variant="outline"
-                  className="border-red-300 text-red-600 hover:bg-red-50"
-                  onClick={() => handleDecision("rejected")}
-                >
-                  <XCircle className="h-4 w-4 mr-1" />
-                  Reject
-                </Button>
+          {/* Individual Scores Grid - Lovable Style */}
+          {hasScore && (
+            <div className="grid grid-cols-3 gap-4">
+              {/* Hurdle Rate - with Pass/Fail badge */}
+              <div className="p-4 rounded-lg border bg-white dark:bg-slate-900">
+                <p className="text-sm text-muted-foreground mb-2">Hurdle Rate</p>
+                <div className="flex items-center justify-between">
+                  <span className="text-2xl font-bold">
+                    {opportunity.hurdle_rate_score ? `${Math.round(opportunity.hurdle_rate_score)}%` : "--"}
+                  </span>
+                  {opportunity.hurdle_rate_score && (
+                    <Badge
+                      className={cn(
+                        "text-xs",
+                        opportunity.hurdle_rate_score >= 70
+                          ? "bg-green-100 text-green-700"
+                          : "bg-red-100 text-red-700"
+                      )}
+                    >
+                      {opportunity.hurdle_rate_score >= 70 ? "Pass" : "Fail"}
+                    </Badge>
+                  )}
+                </div>
               </div>
-            )}
 
-            {opportunity.final_decision && (
+              {/* Brand Alignment - with dots */}
+              <div className="p-4 rounded-lg border bg-white dark:bg-slate-900">
+                <p className="text-sm text-muted-foreground mb-2">Brand Alignment</p>
+                <div className="flex items-center justify-between">
+                  <span className="text-2xl font-bold">
+                    {opportunity.brand_composite_score ? `${scoreTo5Point(opportunity.brand_composite_score)}/5` : "--"}
+                  </span>
+                  <DotIndicator filled={scoreTo5Point(opportunity.brand_composite_score)} />
+                </div>
+              </div>
+
+              {/* Strategic Fit - with dots */}
+              <div className="p-4 rounded-lg border bg-white dark:bg-slate-900">
+                <p className="text-sm text-muted-foreground mb-2">Strategic Fit</p>
+                <div className="flex items-center justify-between">
+                  <span className="text-2xl font-bold">
+                    {opportunity.strategic_composite_score ? `${scoreTo5Point(opportunity.strategic_composite_score)}/5` : "--"}
+                  </span>
+                  <DotIndicator filled={scoreTo5Point(opportunity.strategic_composite_score)} />
+                </div>
+              </div>
+
+              {/* Risk Assessment */}
+              <div className="p-4 rounded-lg border bg-white dark:bg-slate-900">
+                <p className="text-sm text-muted-foreground mb-2">Risk Level</p>
+                <div className="flex items-center justify-between">
+                  <span className="text-2xl font-bold">
+                    {opportunity.risk_composite_score
+                      ? opportunity.risk_composite_score >= 70
+                        ? "Low"
+                        : opportunity.risk_composite_score >= 40
+                          ? "Medium"
+                          : "High"
+                      : "--"}
+                  </span>
+                  {opportunity.risk_composite_score && (
+                    <div
+                      className={cn(
+                        "h-3 w-3 rounded-full",
+                        opportunity.risk_composite_score >= 70
+                          ? "bg-green-500"
+                          : opportunity.risk_composite_score >= 40
+                            ? "bg-yellow-500"
+                            : "bg-red-500"
+                      )}
+                    />
+                  )}
+                </div>
+              </div>
+
+              {/* Resource Demand */}
+              <div className="p-4 rounded-lg border bg-white dark:bg-slate-900">
+                <p className="text-sm text-muted-foreground mb-2">Resources</p>
+                <div className="flex items-center justify-between">
+                  <span className="text-2xl font-bold">
+                    {opportunity.resource_composite_score
+                      ? opportunity.resource_composite_score >= 70
+                        ? "Low"
+                        : opportunity.resource_composite_score >= 40
+                          ? "Medium"
+                          : "High"
+                      : "--"}
+                  </span>
+                  {opportunity.resource_composite_score && (
+                    <DotIndicator filled={scoreTo5Point(opportunity.resource_composite_score)} />
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Action Buttons */}
+          {!opportunity.final_decision && (
+            <div className="flex gap-3 pt-2">
+              <Button
+                className="flex-1 bg-green-600 hover:bg-green-700"
+                onClick={() => handleDecision("approved")}
+              >
+                <CheckCircle2 className="h-4 w-4 mr-2" />
+                Approve & Pursue
+              </Button>
+              <Button
+                variant="outline"
+                className="flex-1 border-red-300 text-red-600 hover:bg-red-50 dark:hover:bg-red-950/20"
+                onClick={() => handleDecision("rejected")}
+              >
+                <XCircle className="h-4 w-4 mr-2" />
+                Decline
+              </Button>
+            </div>
+          )}
+
+          {opportunity.final_decision && (
+            <div className="flex items-center justify-center p-4 rounded-lg bg-slate-50 dark:bg-slate-800/50">
               <Badge
                 className={cn(
-                  "text-sm py-1.5 px-4",
+                  "text-sm py-2 px-6",
                   opportunity.final_decision === "approved"
-                    ? "bg-green-500"
-                    : "bg-red-500"
+                    ? "bg-green-500 text-white"
+                    : "bg-red-500 text-white"
                 )}
               >
-                {opportunity.final_decision === "approved" ? "Approved" : "Rejected"}
+                {opportunity.final_decision === "approved" ? "✓ Approved" : "✗ Declined"}
               </Badge>
-            )}
-          </div>
-        </div>
-
-        {/* Score Breakdown */}
-        {hasScore && (
-          <div className="space-y-4">
-            <h3 className="font-semibold text-sm uppercase tracking-wide text-muted-foreground">
-              Score Breakdown
-            </h3>
-            <div className="space-y-3">
-              <ScoreBreakdownRow
-                label="Hurdle Rate"
-                score={opportunity.hurdle_rate_score}
-                weight={30}
-                color="purple"
-                description="ROI & minimum thresholds"
-              />
-              <ScoreBreakdownRow
-                label="Brand Alignment"
-                score={opportunity.brand_composite_score}
-                weight={25}
-                color="blue"
-                description="Values, quality, audience fit"
-              />
-              <ScoreBreakdownRow
-                label="Strategic Fit"
-                score={opportunity.strategic_composite_score}
-                weight={25}
-                color="green"
-                description="Goals, competencies, diversification"
-              />
-              <ScoreBreakdownRow
-                label="Risk Assessment"
-                score={opportunity.risk_composite_score}
-                weight={15}
-                color="orange"
-                description="Financial, operational, reputational, legal"
-              />
-              <ScoreBreakdownRow
-                label="Resource Demand"
-                score={opportunity.resource_composite_score}
-                weight={5}
-                color="gray"
-                description="Time, capital, energy, opportunity cost"
-              />
             </div>
-          </div>
-        )}
-
-        {/* Due Date / Timeline */}
-        {opportunity.due_date && (
-          <div className="flex items-center gap-2 text-sm text-muted-foreground border-t pt-4">
-            <CalendarDays className="h-4 w-4" />
-            <span>Due: {new Date(opportunity.due_date).toLocaleDateString("en-US", {
-              weekday: "long",
-              month: "long",
-              day: "numeric",
-              year: "numeric",
-            })}</span>
-          </div>
-        )}
+          )}
+        </div>
       </CardContent>
     </Card>
   );
 }
 
-// Score Breakdown Row Component
+// Legacy Score Breakdown Row Component (keeping for backward compatibility)
 function ScoreBreakdownRow({
   label,
   score,
