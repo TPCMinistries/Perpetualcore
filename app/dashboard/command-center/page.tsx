@@ -1278,12 +1278,12 @@ function DecisionInbox() {
 
     setUploadingFile(true);
     try {
-      // For text files, read directly
-      if (file.type === "text/plain" || fileExt === ".txt") {
-        const text = await file.text();
-        setAiInput(text);
-        toast.success("Document loaded! Click 'Extract Decisions' to process.");
-      } else {
+      // Check if it's a binary file (PDF/DOCX) that needs server processing
+      const isPDF = file.type === "application/pdf" || fileExt === ".pdf";
+      const isDOCX = file.type === "application/vnd.openxmlformats-officedocument.wordprocessingml.document" || fileExt === ".docx";
+      const isDOC = file.type === "application/msword" || fileExt === ".doc";
+
+      if (isPDF || isDOCX || isDOC) {
         // For PDF/DOCX, send to server for text extraction
         const formData = new FormData();
         formData.append("file", file);
@@ -1298,7 +1298,22 @@ function DecisionInbox() {
           setAiInput(data.text || "");
           toast.success("Document loaded! Click 'Extract Decisions' to process.");
         } else {
-          toast.error("Failed to extract text from document");
+          const err = await response.json().catch(() => ({}));
+          toast.error(err.error || "Failed to extract text from document");
+        }
+      } else {
+        // For text files (.txt, .md, etc), read directly in browser
+        try {
+          const text = await file.text();
+          if (text && text.trim()) {
+            setAiInput(text);
+            toast.success("Document loaded! Click 'Extract Decisions' to process.");
+          } else {
+            toast.error("The file appears to be empty.");
+          }
+        } catch (readError) {
+          console.error("Error reading file:", readError);
+          toast.error("Could not read this file. Try copying and pasting the content instead.");
         }
       }
     } catch (error) {
