@@ -1159,11 +1159,6 @@ function DecisionInbox() {
   const [processingAI, setProcessingAI] = useState(false);
   const [extractedDecisions, setExtractedDecisions] = useState<any[]>([]);
   const [uploadingFile, setUploadingFile] = useState(false);
-  const fileInputRef = useCallback((node: HTMLInputElement | null) => {
-    if (node) {
-      node.addEventListener("change", handleFileUpload as any);
-    }
-  }, []);
 
   useEffect(() => {
     fetchDecisions();

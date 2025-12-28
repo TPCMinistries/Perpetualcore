@@ -61,15 +61,24 @@ export async function POST(req: NextRequest) {
 
     let extractedText = "";
 
+    // Get file content as buffer for all file types
+    const arrayBuffer = await file.arrayBuffer();
+    const buffer = Buffer.from(arrayBuffer);
+
     // Handle text files directly
     if (file.type === "text/plain" || fileExt === ".txt") {
-      extractedText = await file.text();
+      try {
+        extractedText = buffer.toString("utf-8");
+      } catch (textError) {
+        console.error("Text file parsing error:", textError);
+        return NextResponse.json(
+          { error: "Failed to read text file." },
+          { status: 400 }
+        );
+      }
     }
     // Handle PDF files
     else if (file.type === "application/pdf" || fileExt === ".pdf") {
-      const arrayBuffer = await file.arrayBuffer();
-      const buffer = Buffer.from(arrayBuffer);
-
       try {
         // Use pdf-parse for PDF text extraction
         const pdfParse = await import("pdf-parse");
@@ -88,9 +97,6 @@ export async function POST(req: NextRequest) {
       file.type === "application/vnd.openxmlformats-officedocument.wordprocessingml.document" ||
       fileExt === ".docx"
     ) {
-      const arrayBuffer = await file.arrayBuffer();
-      const buffer = Buffer.from(arrayBuffer);
-
       try {
         // Use mammoth for DOCX text extraction
         const mammoth = await import("mammoth");
@@ -110,6 +116,17 @@ export async function POST(req: NextRequest) {
         { error: "Legacy .doc format not supported. Please convert to .docx" },
         { status: 400 }
       );
+    }
+    // Unknown type that passed validation - try as text
+    else {
+      try {
+        extractedText = buffer.toString("utf-8");
+      } catch {
+        return NextResponse.json(
+          { error: "Could not extract text from this file type." },
+          { status: 400 }
+        );
+      }
     }
 
     // Clean up extracted text

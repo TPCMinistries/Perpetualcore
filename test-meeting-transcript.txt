@@ -1,0 +1,43 @@
+MEETING TRANSCRIPT
+Team Strategy Meeting - December 27, 2024
+Attendees: Lorenzo, Sarah, Michael, Jennifer
+
+---
+
+LORENZO: Thanks everyone for joining. Let's go through our action items from last week and discuss the key decisions we need to make.
+
+SARAH: Sure. First up, we need to decide on the new CRM vendor by end of week. I've narrowed it down to Salesforce and HubSpot. Salesforce is more robust but HubSpot integrates better with our marketing stack.
+
+MICHAEL: I think we should go with HubSpot. The integration advantage will save us at least 10 hours per week. But we need to make this decision by Friday to get the Q1 pricing.
+
+LORENZO: Good point. Let's finalize the CRM decision by Friday. Jennifer, can you prepare a comparison doc by Wednesday?
+
+JENNIFER: Will do. Also, we need to decide whether to approve the $75,000 marketing budget increase for the Q1 campaign. Marketing is pushing hard for this.
+
+LORENZO: That's a significant ask. Let's defer that decision until we see January's revenue numbers. Sarah, remind me to revisit this in our January 15th meeting.
+
+SARAH: Noted. Speaking of budgets, the development team wants to know if they should proceed with the mobile app project or the API overhaul. We can't do both this quarter.
+
+MICHAEL: I'd recommend the API overhaul. It's foundational and the mobile app depends on it anyway.
+
+LORENZO: Makes sense. Let's decide on the API vs mobile app priority by next Monday. Michael, can you get estimates from the dev team?
+
+SARAH: One more thing - the partnership proposal from Acme Corp is still pending. They want an answer by January 10th.
+
+LORENZO: Right, that's worth $200,000 over two years. Let's schedule a dedicated meeting to review the Acme partnership on January 5th. We need to evaluate if it aligns with our brand values.
+
+JENNIFER: I'll also flag that we need to decide on the office expansion. The lease renewal is coming up in February.
+
+LORENZO: Good catch. That's not urgent yet but let's put it on the radar for mid-January.
+
+---
+
+ACTION ITEMS:
+1. Jennifer to prepare CRM comparison doc by Wednesday
+2. CRM vendor decision needed by Friday
+3. Marketing budget ($75K) - defer to January 15th
+4. API vs Mobile app decision by Monday
+5. Acme partnership review meeting - January 5th
+6. Office expansion discussion - mid-January
+
+Meeting adjourned at 3:45 PM.
