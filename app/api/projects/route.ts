@@ -32,10 +32,12 @@ export async function GET(req: NextRequest) {
     // Parse query parameters
     const { searchParams } = new URL(req.url);
     const stage = searchParams.get("stage") as ProjectStage | null;
+    const status = searchParams.get("status"); // planning, active, on_hold, completed, cancelled
     const teamId = searchParams.get("team_id");
     const includeArchived = searchParams.get("archived") === "true";
     const withMembers = searchParams.get("members") === "true";
     const groupByStage = searchParams.get("group_by_stage") === "true";
+    const sourceDecisionId = searchParams.get("source_decision_id");
 
     // Build query
     let query = supabase
@@ -69,8 +71,16 @@ export async function GET(req: NextRequest) {
       query = query.eq("current_stage", stage);
     }
 
+    if (status) {
+      query = query.eq("status", status);
+    }
+
     if (teamId) {
       query = query.eq("team_id", teamId);
+    }
+
+    if (sourceDecisionId) {
+      query = query.eq("source_decision_id", sourceDecisionId);
     }
 
     if (!includeArchived) {

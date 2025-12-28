@@ -9,6 +9,7 @@ import {
   SystemHealthGrid,
   ExceptionQueue,
   ExceptionDetail,
+  DecisionDetailPanel,
 } from "@/components/command-center";
 import {
   Exception,
@@ -456,6 +457,7 @@ function ExecutiveDashboard({ activeTab, onTabChange }: ExecutiveDashboardProps)
   const modules = [
     { id: "daily", label: "Daily View", icon: Target, color: "text-orange-500" },
     { id: "decisions", label: "Decisions", icon: FileCheck, color: "text-blue-500" },
+    { id: "projects", label: "Projects", icon: Briefcase, color: "text-cyan-500" },
     { id: "people", label: "People & Tasks", icon: Users, color: "text-green-500" },
     { id: "opportunities", label: "Opportunities", icon: TrendingUp, color: "text-purple-500" },
     { id: "memory", label: "Notes & Memory", icon: Brain, color: "text-pink-500" },
@@ -485,6 +487,7 @@ function ExecutiveDashboard({ activeTab, onTabChange }: ExecutiveDashboardProps)
       {/* Module Content */}
       {activeTab === "daily" && <DailyCommandView />}
       {activeTab === "decisions" && <DecisionInbox />}
+      {activeTab === "projects" && <ProjectsModule />}
       {activeTab === "people" && <PeopleAndTasks />}
       {activeTab === "opportunities" && <OpportunitiesTracker />}
       {activeTab === "memory" && <NotesAndMemory />}
@@ -1818,6 +1821,14 @@ Example:
           ))}
         </div>
       )}
+
+      {/* Decision Detail Panel */}
+      <DecisionDetailPanel
+        decision={selectedDecision}
+        open={!!selectedDecision}
+        onClose={() => setSelectedDecision(null)}
+        onUpdate={() => fetchDecisions()}
+      />
     </div>
   );
 }
@@ -2866,6 +2877,295 @@ function ScoreBreakdownRow({
     </div>
   );
 }
+
+// =====================================================
+// PROJECTS MODULE
+// =====================================================
+
+function ProjectsModule() {
+  const [loading, setLoading] = useState(true);
+  const [projects, setProjects] = useState<any[]>([]);
+  const [filter, setFilter] = useState<"all" | "active" | "planning" | "completed">("active");
+  const [showNewForm, setShowNewForm] = useState(false);
+  const [newProject, setNewProject] = useState({ name: "", description: "", priority: "medium", target_date: "" });
+  const [creating, setCreating] = useState(false);
+
+  useEffect(() => {
+    fetchProjects();
+  }, [filter]);
+
+  const fetchProjects = async () => {
+    setLoading(true);
+    try {
+      const params = new URLSearchParams();
+      if (filter !== "all") {
+        params.append("status", filter);
+      }
+      const response = await fetch(`/api/projects?${params}`);
+      if (response.ok) {
+        const data = await response.json();
+        setProjects(data.projects || []);
+      }
+    } catch (error) {
+      console.error("Error fetching projects:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleCreateProject = async () => {
+    if (!newProject.name.trim()) {
+      toast.error("Project name is required");
+      return;
+    }
+    setCreating(true);
+    try {
+      const response = await fetch("/api/projects", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(newProject),
+      });
+      if (response.ok) {
+        toast.success("Project created!");
+        setShowNewForm(false);
+        setNewProject({ name: "", description: "", priority: "medium", target_date: "" });
+        fetchProjects();
+      } else {
+        toast.error("Failed to create project");
+      }
+    } catch (error) {
+      toast.error("Error creating project");
+    } finally {
+      setCreating(false);
+    }
+  };
+
+  const statusColors: Record<string, string> = {
+    planning: "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400",
+    active: "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400",
+    on_hold: "bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-400",
+    completed: "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400",
+    cancelled: "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400",
+  };
+
+  const priorityColors: Record<string, string> = {
+    urgent: "border-red-500 text-red-600",
+    high: "border-orange-500 text-orange-600",
+    medium: "border-blue-500 text-blue-600",
+    low: "border-gray-500 text-gray-600",
+  };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-6">
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="text-xl font-semibold flex items-center gap-2">
+            <Briefcase className="h-5 w-5 text-cyan-500" />
+            Projects
+          </h2>
+          <p className="text-sm text-muted-foreground mt-1">
+            Track initiatives from decision to completion
+          </p>
+        </div>
+        <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1 p-1 rounded-lg bg-muted">
+            {["all", "active", "planning", "completed"].map((f) => (
+              <button
+                key={f}
+                onClick={() => setFilter(f as typeof filter)}
+                className={cn(
+                  "px-3 py-1.5 text-sm rounded-md transition-colors capitalize",
+                  filter === f
+                    ? "bg-white dark:bg-slate-800 shadow-sm font-medium"
+                    : "text-muted-foreground hover:text-foreground"
+                )}
+              >
+                {f}
+              </button>
+            ))}
+          </div>
+          <Button onClick={() => setShowNewForm(true)}>
+            <Plus className="h-4 w-4 mr-2" />
+            New Project
+          </Button>
+        </div>
+      </div>
+
+      {/* New Project Form */}
+      {showNewForm && (
+        <Card className="border-cyan-200 dark:border-cyan-800/50 bg-cyan-50/50 dark:bg-cyan-950/20">
+          <CardContent className="py-4">
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <h3 className="font-semibold">New Project</h3>
+                <Button variant="ghost" size="sm" onClick={() => setShowNewForm(false)}>
+                  <XCircle className="h-4 w-4" />
+                </Button>
+              </div>
+              <div className="grid gap-4">
+                <div>
+                  <label className="text-sm font-medium mb-1 block">Project Name *</label>
+                  <input
+                    type="text"
+                    placeholder="Enter project name"
+                    value={newProject.name}
+                    onChange={(e) => setNewProject({ ...newProject, name: e.target.value })}
+                    className="w-full px-3 py-2 rounded-lg border bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-cyan-500"
+                  />
+                </div>
+                <div>
+                  <label className="text-sm font-medium mb-1 block">Description</label>
+                  <textarea
+                    placeholder="Project description..."
+                    value={newProject.description}
+                    onChange={(e) => setNewProject({ ...newProject, description: e.target.value })}
+                    rows={3}
+                    className="w-full px-3 py-2 rounded-lg border bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-cyan-500"
+                  />
+                </div>
+                <div className="flex items-center gap-4">
+                  <div>
+                    <label className="text-sm font-medium mb-1 block">Priority</label>
+                    <select
+                      value={newProject.priority}
+                      onChange={(e) => setNewProject({ ...newProject, priority: e.target.value })}
+                      className="px-3 py-2 rounded-lg border bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-cyan-500"
+                    >
+                      <option value="low">Low</option>
+                      <option value="medium">Medium</option>
+                      <option value="high">High</option>
+                      <option value="urgent">Urgent</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium mb-1 block">Target Date</label>
+                    <input
+                      type="date"
+                      value={newProject.target_date}
+                      onChange={(e) => setNewProject({ ...newProject, target_date: e.target.value })}
+                      min={new Date().toISOString().split("T")[0]}
+                      className="px-3 py-2 rounded-lg border bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-cyan-500"
+                    />
+                  </div>
+                  <div className="flex-1" />
+                  <Button variant="outline" onClick={() => setShowNewForm(false)}>Cancel</Button>
+                  <Button onClick={handleCreateProject} disabled={creating}>
+                    {creating ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Briefcase className="h-4 w-4 mr-2" />}
+                    Create Project
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Projects List */}
+      {projects.length === 0 ? (
+        <Card className="border-dashed">
+          <CardContent className="py-16 text-center">
+            <Briefcase className="h-16 w-16 mx-auto mb-4 text-muted-foreground opacity-50" />
+            <h3 className="text-lg font-semibold mb-2">No projects found</h3>
+            <p className="text-muted-foreground max-w-md mx-auto mb-4">
+              {filter === "active"
+                ? "No active projects. Create one or check other filters."
+                : `No ${filter} projects to show.`}
+            </p>
+            <Button onClick={() => setShowNewForm(true)}>
+              <Briefcase className="h-4 w-4 mr-2" />
+              Create Project
+            </Button>
+          </CardContent>
+        </Card>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {projects.map((project) => (
+            <Card
+              key={project.id}
+              className="cursor-pointer transition-all hover:shadow-md hover:border-cyan-300 dark:hover:border-cyan-700"
+            >
+              <CardContent className="py-4">
+                <div className="flex items-start justify-between mb-3">
+                  <div className="flex-1">
+                    <h3 className="font-semibold truncate">{project.name}</h3>
+                    <div className="flex items-center gap-2 mt-1">
+                      <Badge className={cn("text-xs", statusColors[project.status] || statusColors.active)}>
+                        {project.status}
+                      </Badge>
+                      {project.priority && (
+                        <Badge variant="outline" className={cn("text-xs", priorityColors[project.priority])}>
+                          {project.priority}
+                        </Badge>
+                      )}
+                    </div>
+                  </div>
+                  <Button variant="ghost" size="icon" className="h-8 w-8">
+                    <MoreHorizontal className="h-4 w-4" />
+                  </Button>
+                </div>
+
+                {project.description && (
+                  <p className="text-sm text-muted-foreground line-clamp-2 mb-3">
+                    {project.description}
+                  </p>
+                )}
+
+                {/* Progress Bar */}
+                <div className="mb-3">
+                  <div className="flex items-center justify-between text-xs mb-1">
+                    <span className="text-muted-foreground">Progress</span>
+                    <span className="font-medium">{project.progress_percent || 0}%</span>
+                  </div>
+                  <div className="h-2 bg-muted rounded-full overflow-hidden">
+                    <div
+                      className="h-full bg-cyan-500 transition-all"
+                      style={{ width: `${project.progress_percent || 0}%` }}
+                    />
+                  </div>
+                </div>
+
+                {/* Footer */}
+                <div className="flex items-center justify-between text-xs text-muted-foreground">
+                  {project.target_date && (
+                    <span className="flex items-center gap-1">
+                      <Calendar className="h-3 w-3" />
+                      {new Date(project.target_date).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
+                    </span>
+                  )}
+                  {project.source_decision_id && (
+                    <span className="flex items-center gap-1 text-blue-600">
+                      <FileCheck className="h-3 w-3" />
+                      From Decision
+                    </span>
+                  )}
+                  {project.team?.name && (
+                    <span className="flex items-center gap-1">
+                      <Users className="h-3 w-3" />
+                      {project.team.name}
+                    </span>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// =====================================================
+// NOTES & MEMORY MODULE
+// =====================================================
 
 function NotesAndMemory() {
   const [loading, setLoading] = useState(true);
