@@ -2083,7 +2083,7 @@ function OpportunitiesTracker() {
           title: newOpportunity.title.trim(),
           description: newOpportunity.description.trim() || null,
           estimated_value: newOpportunity.estimated_value ? parseFloat(newOpportunity.estimated_value) : null,
-          source: newOpportunity.source,
+          opportunity_source: newOpportunity.source,
           due_date: newOpportunity.due_date || null,
         }),
       });

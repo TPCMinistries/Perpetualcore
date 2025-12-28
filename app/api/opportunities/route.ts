@@ -128,20 +128,57 @@ export async function POST(request: NextRequest) {
     if (!body.title || body.title.trim() === "") {
       return NextResponse.json({ error: "title is required" }, { status: 400 });
     }
-    if (!body.team_id) {
-      return NextResponse.json({ error: "team_id is required" }, { status: 400 });
-    }
 
-    // Verify team access
-    const { data: team } = await supabase
-      .from("teams")
-      .select("id, workflow_stages")
-      .eq("id", body.team_id)
-      .eq("organization_id", profile.organization_id)
-      .single();
+    // Get team - either specified or first available team
+    let team;
+    if (body.team_id) {
+      // Verify team access
+      const { data: specifiedTeam } = await supabase
+        .from("teams")
+        .select("id, workflow_stages")
+        .eq("id", body.team_id)
+        .eq("organization_id", profile.organization_id)
+        .single();
 
-    if (!team) {
-      return NextResponse.json({ error: "Team not found" }, { status: 404 });
+      if (!specifiedTeam) {
+        return NextResponse.json({ error: "Team not found" }, { status: 404 });
+      }
+      team = specifiedTeam;
+    } else {
+      // Auto-select first team in organization
+      const { data: firstTeam } = await supabase
+        .from("teams")
+        .select("id, workflow_stages")
+        .eq("organization_id", profile.organization_id)
+        .limit(1)
+        .single();
+
+      if (!firstTeam) {
+        // Create a default team if none exists
+        const { data: newTeam } = await supabase
+          .from("teams")
+          .insert({
+            organization_id: profile.organization_id,
+            name: "Opportunities",
+            description: "Default team for opportunity tracking",
+            color: "#8B5CF6",
+            workflow_stages: [
+              { id: "new", name: "New", order: 0 },
+              { id: "evaluating", name: "Evaluating", order: 1 },
+              { id: "pursuing", name: "Pursuing", order: 2 },
+              { id: "closed", name: "Closed", order: 3 },
+            ],
+          })
+          .select("id, workflow_stages")
+          .single();
+
+        if (!newTeam) {
+          return NextResponse.json({ error: "Failed to create default team" }, { status: 500 });
+        }
+        team = newTeam;
+      } else {
+        team = firstTeam;
+      }
     }
 
     // Get first stage
@@ -153,7 +190,7 @@ export async function POST(request: NextRequest) {
       .from("work_items")
       .insert({
         organization_id: profile.organization_id,
-        team_id: body.team_id,
+        team_id: team.id,
         title: body.title.trim(),
         description: body.description?.trim() || null,
         item_type: "opportunity",
