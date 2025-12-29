@@ -128,23 +128,26 @@ export async function POST(
     }
 
     // Create the task linked to this decision
+    // Use only core columns that definitely exist
+    const taskData: Record<string, unknown> = {
+      organization_id: profile.organization_id,
+      user_id: user.id,
+      title: title.trim(),
+      description: description || null,
+      priority: priority || decision.priority || "medium",
+      due_date: due_date || decision.due_date || null,
+      status: "todo",
+      decision_id: decisionId,
+    };
+
+    // Add optional columns if provided
+    if (assigned_to) {
+      taskData.assigned_to = assigned_to;
+    }
+
     const { data: task, error: taskError } = await supabase
       .from("tasks")
-      .insert({
-        organization_id: profile.organization_id,
-        user_id: user.id,
-        title: title.trim(),
-        description: description || null,
-        priority: priority || decision.priority || "medium",
-        due_date: due_date || decision.due_date || null,
-        assigned_to: assigned_to || user.id,
-        assigned_by: user.id,
-        decision_id: decisionId,
-        source_type: "decision",
-        source_id: decisionId,
-        source_reference: `Created from decision: ${decision.title}`,
-        status: "todo",
-      })
+      .insert(taskData)
       .select()
       .single();
 
