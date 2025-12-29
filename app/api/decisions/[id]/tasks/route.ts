@@ -40,19 +40,33 @@ export async function GET(
       return NextResponse.json({ error: "Decision not found" }, { status: 404 });
     }
 
-    // Get tasks linked to this decision
+    // Get tasks linked to this decision (simple query without FK join)
     const { data: tasks, error: tasksError } = await supabase
       .from("tasks")
-      .select(`
-        *,
-        assigned_to_profile:profiles!tasks_assigned_to_fkey(id, full_name, email, avatar_url)
-      `)
+      .select("*")
       .eq("decision_id", decisionId)
       .order("created_at", { ascending: false });
 
     if (tasksError) {
       console.error("Error fetching decision tasks:", tasksError);
       return NextResponse.json({ error: "Failed to fetch tasks" }, { status: 500 });
+    }
+
+    // Get assignee names separately if there are assigned tasks
+    const assignedUserIds = (tasks || [])
+      .filter((t: any) => t.assigned_to)
+      .map((t: any) => t.assigned_to);
+
+    let userMap: Record<string, string> = {};
+    if (assignedUserIds.length > 0) {
+      const { data: profiles } = await supabase
+        .from("profiles")
+        .select("id, full_name")
+        .in("id", assignedUserIds);
+
+      if (profiles) {
+        userMap = Object.fromEntries(profiles.map(p => [p.id, p.full_name]));
+      }
     }
 
     // Format the response
@@ -64,9 +78,7 @@ export async function GET(
       priority: task.priority,
       due_date: task.due_date,
       assigned_to: task.assigned_to,
-      assigned_to_name: task.assigned_to_profile?.full_name || null,
-      assigned_to_email: task.assigned_to_profile?.email || null,
-      assigned_to_avatar: task.assigned_to_profile?.avatar_url || null,
+      assigned_to_name: task.assigned_to ? userMap[task.assigned_to] || null : null,
       created_at: task.created_at,
       completed_at: task.completed_at,
     }));

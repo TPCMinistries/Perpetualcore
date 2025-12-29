@@ -438,13 +438,32 @@ export function DecisionDetailPanel({
         }),
       });
       if (response.ok) {
+        const data = await response.json();
         toast.success("Task created!");
+
+        // Immediately add the new task to the list (optimistic update)
+        if (data.task) {
+          setTasks(prev => [{
+            id: data.task.id,
+            title: data.task.title,
+            description: data.task.description,
+            status: data.task.status || "todo",
+            priority: data.task.priority || "medium",
+            due_date: data.task.due_date,
+            assigned_to: data.task.assigned_to,
+            assigned_to_name: null,
+            created_at: data.task.created_at,
+          }, ...prev]);
+        }
+
         setShowCreateTaskDialog(false);
         setNewTaskTitle("");
         setNewTaskDescription("");
         setNewTaskPriority("medium");
         setNewTaskDueDate("");
         setNewTaskAssignee("");
+
+        // Also refresh from server to get complete data
         fetchDecisionDetails();
       } else {
         const err = await response.json();
