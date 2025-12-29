@@ -48,12 +48,15 @@ import {
   LayoutGrid,
   List,
   MessageSquare,
+  MessageCircle,
   Lightbulb,
   Calendar,
   FileText,
   MoreHorizontal,
   Mail,
   StickyNote,
+  ArrowRight,
+  CheckCircle,
 } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
@@ -453,7 +456,33 @@ interface ExecutiveDashboardProps {
   onTabChange: (tab: string) => void;
 }
 
+// Shared navigation context for cross-module linking
+interface NavigationTarget {
+  type: "decision" | "project" | "opportunity";
+  id: string;
+}
+
 function ExecutiveDashboard({ activeTab, onTabChange }: ExecutiveDashboardProps) {
+  // Cross-module navigation state
+  const [navigationTarget, setNavigationTarget] = useState<NavigationTarget | null>(null);
+
+  // Navigate to a specific item in another module
+  const handleNavigateToItem = (target: NavigationTarget) => {
+    setNavigationTarget(target);
+    if (target.type === "decision") {
+      onTabChange("decisions");
+    } else if (target.type === "project") {
+      onTabChange("projects");
+    } else if (target.type === "opportunity") {
+      onTabChange("opportunities");
+    }
+  };
+
+  // Clear navigation target after it's been used
+  const clearNavigationTarget = () => {
+    setNavigationTarget(null);
+  };
+
   const modules = [
     { id: "daily", label: "Daily View", icon: Target, color: "text-orange-500" },
     { id: "decisions", label: "Decisions", icon: FileCheck, color: "text-blue-500" },
@@ -485,11 +514,24 @@ function ExecutiveDashboard({ activeTab, onTabChange }: ExecutiveDashboardProps)
       </div>
 
       {/* Module Content */}
-      {activeTab === "daily" && <DailyCommandView />}
-      {activeTab === "decisions" && <DecisionInbox />}
-      {activeTab === "projects" && <ProjectsModule />}
+      {activeTab === "daily" && <DailyCommandView onNavigate={handleNavigateToItem} />}
+      {activeTab === "decisions" && (
+        <DecisionInbox
+          navigationTarget={navigationTarget?.type === "decision" ? navigationTarget.id : null}
+          onNavigationHandled={clearNavigationTarget}
+        />
+      )}
+      {activeTab === "projects" && (
+        <ProjectsModule onNavigateToDecision={(id) => handleNavigateToItem({ type: "decision", id })} />
+      )}
       {activeTab === "people" && <PeopleAndTasks />}
-      {activeTab === "opportunities" && <OpportunitiesTracker />}
+      {activeTab === "opportunities" && (
+        <OpportunitiesTracker
+          onNavigateToDecision={(id) => handleNavigateToItem({ type: "decision", id })}
+          navigationTarget={navigationTarget?.type === "opportunity" ? navigationTarget.id : null}
+          onNavigationHandled={clearNavigationTarget}
+        />
+      )}
       {activeTab === "memory" && <NotesAndMemory />}
     </div>
   );
@@ -499,7 +541,11 @@ function ExecutiveDashboard({ activeTab, onTabChange }: ExecutiveDashboardProps)
 // DAILY COMMAND VIEW (Module 1)
 // =====================================================
 
-function DailyCommandView() {
+interface DailyCommandViewProps {
+  onNavigate?: (target: { type: "decision" | "project" | "opportunity"; id: string }) => void;
+}
+
+function DailyCommandView({ onNavigate }: DailyCommandViewProps) {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [data, setData] = useState<DailyCommandSummary | null>(null);
@@ -673,6 +719,11 @@ function DailyCommandView() {
                   {priorities.slice(0, 5).map((priority, idx) => (
                     <div
                       key={priority.id}
+                      onClick={() => {
+                        if (priority.source_type && priority.source_id && onNavigate) {
+                          onNavigate({ type: priority.source_type as "decision" | "project" | "opportunity", id: priority.source_id });
+                        }
+                      }}
                       className="flex items-center gap-4 p-3 rounded-lg hover:bg-muted/50 transition-colors cursor-pointer group"
                     >
                       <div className="h-8 w-8 rounded-full bg-cyan-100 dark:bg-cyan-900/50 flex items-center justify-center text-cyan-700 dark:text-cyan-400 font-semibold text-sm">
@@ -711,7 +762,15 @@ function DailyCommandView() {
               <CardContent>
                 <div className="space-y-2">
                   {deadlines7Days.slice(0, 5).map((item) => (
-                    <div key={item.id} className="flex items-center justify-between p-2 rounded-lg hover:bg-muted/50">
+                    <div
+                      key={item.id}
+                      onClick={() => {
+                        if (item.source_type && item.source_id && onNavigate) {
+                          onNavigate({ type: item.source_type as "decision" | "project" | "opportunity", id: item.source_id });
+                        }
+                      }}
+                      className="flex items-center justify-between p-2 rounded-lg hover:bg-muted/50 cursor-pointer"
+                    >
                       <div className="flex items-center gap-3">
                         <div className={cn(
                           "h-2 w-2 rounded-full",
@@ -1147,7 +1206,12 @@ function DeadlineRow({ item, urgent = false }: { item: DeadlineItem; urgent?: bo
 // PLACEHOLDER COMPONENTS (To be implemented)
 // =====================================================
 
-function DecisionInbox() {
+interface DecisionInboxProps {
+  navigationTarget?: string | null;
+  onNavigationHandled?: () => void;
+}
+
+function DecisionInbox({ navigationTarget, onNavigationHandled }: DecisionInboxProps) {
   const [loading, setLoading] = useState(true);
   const [decisions, setDecisions] = useState<any[]>([]);
   const [filter, setFilter] = useState<"pending" | "decided" | "delegated" | "deferred" | "all">("pending");
@@ -1156,12 +1220,58 @@ function DecisionInbox() {
   const [newDecision, setNewDecision] = useState({ title: "", description: "", priority: "medium" });
   const [creating, setCreating] = useState(false);
 
+  // Handle navigation to a specific decision
+  useEffect(() => {
+    if (navigationTarget && decisions.length > 0) {
+      const targetDecision = decisions.find(d => d.id === navigationTarget);
+      if (targetDecision) {
+        setSelectedDecision(targetDecision);
+        onNavigationHandled?.();
+      } else {
+        // Decision not in current filter, try fetching it directly
+        fetchDecisionById(navigationTarget);
+      }
+    }
+  }, [navigationTarget, decisions]);
+
+  const fetchDecisionById = async (id: string) => {
+    try {
+      const response = await fetch(`/api/decisions/${id}`);
+      if (response.ok) {
+        const data = await response.json();
+        setSelectedDecision(data.decision);
+        onNavigationHandled?.();
+      }
+    } catch (error) {
+      console.error("Error fetching decision:", error);
+    }
+  };
+
   // Process with AI state
   const [showProcessAI, setShowProcessAI] = useState(false);
   const [aiInput, setAiInput] = useState("");
   const [processingAI, setProcessingAI] = useState(false);
   const [extractedDecisions, setExtractedDecisions] = useState<any[]>([]);
   const [uploadingFile, setUploadingFile] = useState(false);
+
+  // Intelligent AI conversation state
+  const [aiMode, setAiMode] = useState<"idle" | "clarify" | "decisions" | "insight">("idle");
+  const [aiQuestions, setAiQuestions] = useState<{
+    id: string;
+    question: string;
+    type: "choice" | "text" | "date" | "priority";
+    options?: string[];
+    context?: string;
+  }[]>([]);
+  const [aiAnswers, setAiAnswers] = useState<{ question: string; answer: string }[]>([]);
+  const [currentAnswers, setCurrentAnswers] = useState<Record<string, string>>({});
+  const [aiInsights, setAiInsights] = useState<{
+    summary: string;
+    key_points: string[];
+    risks?: string[];
+    recommendations?: string[];
+  } | null>(null);
+  const [aiMessage, setAiMessage] = useState<string>("");
 
   useEffect(() => {
     // Fetch decisions whenever filter changes
@@ -1213,51 +1323,134 @@ function DecisionInbox() {
     }
   };
 
-  // Process with AI - extract decisions from emails, meeting notes, etc.
-  const handleProcessWithAI = async () => {
+  // Process with AI - intelligent analysis with clarifying questions
+  const handleProcessWithAI = async (withAnswers: boolean = false) => {
     if (!aiInput.trim()) {
-      toast.error("Please paste some content to process");
+      toast.error("Please share what's on your mind");
       return;
     }
     setProcessingAI(true);
-    setExtractedDecisions([]);
+    if (!withAnswers) {
+      // Reset state for new analysis
+      setExtractedDecisions([]);
+      setAiQuestions([]);
+      setAiInsights(null);
+      setAiMessage("");
+      setAiMode("idle");
+    }
+
     try {
-      const response = await fetch("/api/decisions/extract", {
+      const payload: any = { content: aiInput };
+
+      // Include previous answers if this is a follow-up
+      if (withAnswers && aiAnswers.length > 0) {
+        payload.previous_answers = aiAnswers;
+      }
+
+      const response = await fetch("/api/decisions/analyze", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ content: aiInput }),
+        body: JSON.stringify(payload),
       });
+
       if (response.ok) {
         const data = await response.json();
-        if (data.decisions && data.decisions.length > 0) {
+
+        // Set mode and message
+        setAiMode(data.mode || "idle");
+        setAiMessage(data.message || "");
+
+        // Handle different modes
+        if (data.mode === "clarify" && data.questions?.length > 0) {
+          setAiQuestions(data.questions);
+          toast.info("I have a few questions to understand better");
+        } else if (data.mode === "decisions" && data.decisions?.length > 0) {
           setExtractedDecisions(data.decisions);
           toast.success(`Found ${data.decisions.length} potential decision(s)`);
-        } else {
-          toast.info("No clear decisions found in the content");
+        } else if (data.mode === "insight") {
+          toast.info("Here's my analysis");
+        }
+
+        // Always show insights if provided
+        if (data.insights) {
+          setAiInsights(data.insights);
         }
       } else {
-        toast.error("Failed to process content");
+        toast.error("Failed to analyze content");
       }
     } catch (error) {
       console.error("Error processing with AI:", error);
-      toast.error("Error processing content");
+      toast.error("Error analyzing content");
     } finally {
       setProcessingAI(false);
     }
   };
 
+  // Handle submitting answers to AI questions
+  const handleSubmitAnswers = () => {
+    // Convert current answers to the format expected by the API
+    const formattedAnswers = aiQuestions.map(q => ({
+      question: q.question,
+      answer: currentAnswers[q.id] || ""
+    })).filter(a => a.answer.trim() !== "");
+
+    if (formattedAnswers.length === 0) {
+      toast.error("Please answer at least one question");
+      return;
+    }
+
+    // Add to conversation history
+    setAiAnswers(prev => [...prev, ...formattedAnswers]);
+    setCurrentAnswers({});
+    setAiQuestions([]);
+
+    // Continue the conversation
+    handleProcessWithAI(true);
+  };
+
+  // Reset AI conversation
+  const resetAIConversation = () => {
+    setAiMode("idle");
+    setAiQuestions([]);
+    setAiAnswers([]);
+    setCurrentAnswers({});
+    setAiInsights(null);
+    setAiMessage("");
+    setExtractedDecisions([]);
+    setAiInput("");
+  };
+
   // Add extracted decision to inbox
   const handleAddExtractedDecision = async (extracted: any) => {
     try {
+      // Build decision payload with all available fields
+      const decisionPayload: any = {
+        title: extracted.title,
+        description: extracted.context || extracted.description,
+        priority: extracted.priority || "medium",
+      };
+
+      // Add due date if provided
+      if (extracted.due_date) {
+        decisionPayload.due_date = extracted.due_date;
+      }
+
+      // Store options and stakeholders in metadata/context for now
+      // These can be used when viewing the decision detail
+      if (extracted.options || extracted.stakeholders || extracted.related_to) {
+        decisionPayload.metadata = {
+          ...(extracted.options && { options: extracted.options }),
+          ...(extracted.stakeholders && { stakeholders: extracted.stakeholders }),
+          ...(extracted.related_to && { related_to: extracted.related_to }),
+        };
+      }
+
       const response = await fetch("/api/decisions", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          title: extracted.title,
-          description: extracted.context || extracted.description,
-          priority: extracted.priority || "medium",
-        }),
+        body: JSON.stringify(decisionPayload),
       });
+
       if (response.ok) {
         toast.success("Decision added to inbox!");
         setExtractedDecisions(prev => {
@@ -1265,8 +1458,8 @@ function DecisionInbox() {
           // Auto-close panel when all decisions are added
           if (remaining.length === 0) {
             setTimeout(() => {
+              resetAIConversation();
               setShowProcessAI(false);
-              setAiInput("");
             }, 500);
           }
           return remaining;
@@ -1433,7 +1626,7 @@ function DecisionInbox() {
         </div>
       </div>
 
-      {/* Process with AI Panel - Chat-like interface for extracting decisions */}
+      {/* Process with AI Panel - Intelligent conversational interface */}
       {showProcessAI && (
         <Card className="border-blue-200 dark:border-blue-800/50 bg-gradient-to-br from-blue-50 to-cyan-50 dark:from-blue-950/30 dark:to-cyan-950/30">
           <CardContent className="py-5">
@@ -1443,135 +1636,377 @@ function DecisionInbox() {
                   <Sparkles className="h-5 w-5 text-blue-600" />
                 </div>
                 <div className="flex-1">
-                  <h3 className="font-semibold text-blue-900 dark:text-blue-100">Process with AI</h3>
+                  <h3 className="font-semibold text-blue-900 dark:text-blue-100">AI Decision Assistant</h3>
                   <p className="text-sm text-blue-700/70 dark:text-blue-300/70">
-                    Paste emails, meeting notes, or upload documents (PDF, Word, TXT). AI will extract actionable decisions.
+                    Share what's on your mind - paste documents, describe a situation, or just think out loud. I'll help identify and structure the decisions you need to make.
                   </p>
                 </div>
-                <Button variant="ghost" size="sm" onClick={() => setShowProcessAI(false)}>
+                <Button variant="ghost" size="sm" onClick={() => { setShowProcessAI(false); resetAIConversation(); }}>
                   <XCircle className="h-4 w-4" />
                 </Button>
               </div>
 
-              <div className="relative">
-                <textarea
-                  placeholder="Paste your email, meeting notes, or any content here...
+              {/* Input area - only show when not in clarify mode */}
+              {aiMode !== "clarify" && (
+                <div className="relative">
+                  <textarea
+                    placeholder="What's on your mind?
 
-Example:
-'Hi team, after our discussion we need to decide on the new vendor by Friday. Also, marketing wants approval for the $50k campaign budget. Let's sync on the Q1 roadmap next week.'"
-                  value={aiInput}
-                  onChange={(e) => setAiInput(e.target.value)}
-                  rows={8}
-                  className="w-full px-4 py-3 rounded-xl border-2 border-blue-200 dark:border-blue-800 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-y text-sm min-h-[150px] max-h-[400px] overflow-y-auto"
-                />
-                <div className="absolute bottom-3 right-3 flex items-center gap-2">
-                  <input
-                    type="file"
-                    id="decision-file-upload"
-                    accept=".txt,.pdf,.docx,.doc"
-                    onChange={handleFileUpload}
-                    className="hidden"
+You can paste meeting notes, emails, or just describe your situation...
+
+Examples:
+• 'We're thinking about expanding to a new market but I'm not sure where to start'
+• 'Had a tough conversation with the team about resources'
+• Paste a meeting transcript or email chain"
+                    value={aiInput}
+                    onChange={(e) => setAiInput(e.target.value)}
+                    rows={6}
+                    className="w-full px-4 py-3 rounded-xl border-2 border-blue-200 dark:border-blue-800 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-y text-sm min-h-[120px] max-h-[400px] overflow-y-auto"
                   />
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="text-blue-600 hover:bg-blue-100 dark:hover:bg-blue-900/50"
-                    onClick={() => document.getElementById("decision-file-upload")?.click()}
-                    disabled={uploadingFile}
-                  >
-                    {uploadingFile ? (
-                      <>
-                        <Loader2 className="h-4 w-4 mr-1 animate-spin" />
-                        Loading...
-                      </>
-                    ) : (
-                      <>
-                        <Upload className="h-4 w-4 mr-1" />
-                        Upload
-                      </>
-                    )}
-                  </Button>
+                  <div className="absolute bottom-3 right-3 flex items-center gap-2">
+                    <input
+                      type="file"
+                      id="decision-file-upload"
+                      accept=".txt,.pdf,.docx,.doc"
+                      onChange={handleFileUpload}
+                      className="hidden"
+                    />
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="text-blue-600 hover:bg-blue-100 dark:hover:bg-blue-900/50"
+                      onClick={() => document.getElementById("decision-file-upload")?.click()}
+                      disabled={uploadingFile}
+                    >
+                      {uploadingFile ? (
+                        <>
+                          <Loader2 className="h-4 w-4 mr-1 animate-spin" />
+                          Loading...
+                        </>
+                      ) : (
+                        <>
+                          <Upload className="h-4 w-4 mr-1" />
+                          Upload
+                        </>
+                      )}
+                    </Button>
+                  </div>
                 </div>
-              </div>
+              )}
 
-              <div className="flex items-center justify-between">
-                <p className="text-xs text-blue-600/70 dark:text-blue-400/70">
-                  AI will analyze the content and suggest decisions to add to your inbox
-                </p>
-                <Button
-                  onClick={handleProcessWithAI}
-                  disabled={processingAI || !aiInput.trim()}
-                  className="bg-blue-600 hover:bg-blue-700"
-                >
-                  {processingAI ? (
-                    <>
-                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                      Processing...
-                    </>
-                  ) : (
-                    <>
-                      <Sparkles className="h-4 w-4 mr-2" />
-                      Extract Decisions
-                    </>
-                  )}
-                </Button>
-              </div>
+              {/* AI Message */}
+              {aiMessage && (
+                <div className="flex gap-3 p-4 rounded-xl bg-blue-100/50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-800">
+                  <div className="h-8 w-8 rounded-lg bg-blue-500 flex items-center justify-center flex-shrink-0">
+                    <Sparkles className="h-4 w-4 text-white" />
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-sm text-blue-900 dark:text-blue-100">{aiMessage}</p>
+                  </div>
+                </div>
+              )}
+
+              {/* Clarifying Questions */}
+              {aiQuestions.length > 0 && (
+                <div className="space-y-4 border-t border-blue-200 dark:border-blue-800 pt-4">
+                  <h4 className="text-sm font-semibold text-blue-900 dark:text-blue-100 flex items-center gap-2">
+                    <MessageCircle className="h-4 w-4" />
+                    Help me understand better
+                  </h4>
+                  <div className="space-y-4">
+                    {aiQuestions.map((q) => (
+                      <div key={q.id} className="p-4 rounded-xl bg-white dark:bg-slate-900 border border-blue-100 dark:border-blue-800">
+                        <p className="font-medium text-sm mb-2">{q.question}</p>
+                        {q.context && (
+                          <p className="text-xs text-muted-foreground mb-3">{q.context}</p>
+                        )}
+                        {q.type === "choice" && q.options ? (
+                          <div className="flex flex-wrap gap-2">
+                            {q.options.map((opt, i) => (
+                              <button
+                                key={i}
+                                onClick={() => setCurrentAnswers(prev => ({ ...prev, [q.id]: opt }))}
+                                className={cn(
+                                  "px-3 py-1.5 rounded-lg text-sm border transition-colors",
+                                  currentAnswers[q.id] === opt
+                                    ? "bg-blue-500 text-white border-blue-500"
+                                    : "bg-white dark:bg-slate-800 border-gray-200 dark:border-gray-700 hover:border-blue-300"
+                                )}
+                              >
+                                {opt}
+                              </button>
+                            ))}
+                          </div>
+                        ) : q.type === "priority" ? (
+                          <div className="flex gap-2">
+                            {["low", "medium", "high", "urgent"].map((p) => (
+                              <button
+                                key={p}
+                                onClick={() => setCurrentAnswers(prev => ({ ...prev, [q.id]: p }))}
+                                className={cn(
+                                  "px-3 py-1.5 rounded-lg text-sm border transition-colors capitalize",
+                                  currentAnswers[q.id] === p
+                                    ? "bg-blue-500 text-white border-blue-500"
+                                    : "bg-white dark:bg-slate-800 border-gray-200 dark:border-gray-700 hover:border-blue-300"
+                                )}
+                              >
+                                {p}
+                              </button>
+                            ))}
+                          </div>
+                        ) : (
+                          <input
+                            type={q.type === "date" ? "date" : "text"}
+                            placeholder="Your answer..."
+                            value={currentAnswers[q.id] || ""}
+                            onChange={(e) => setCurrentAnswers(prev => ({ ...prev, [q.id]: e.target.value }))}
+                            className="w-full px-3 py-2 rounded-lg border bg-white dark:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                          />
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={resetAIConversation}
+                    >
+                      Start Over
+                    </Button>
+                    <Button
+                      onClick={handleSubmitAnswers}
+                      disabled={processingAI}
+                      className="bg-blue-600 hover:bg-blue-700"
+                    >
+                      {processingAI ? (
+                        <>
+                          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                          Thinking...
+                        </>
+                      ) : (
+                        <>
+                          <ArrowRight className="h-4 w-4 mr-2" />
+                          Continue
+                        </>
+                      )}
+                    </Button>
+                  </div>
+                </div>
+              )}
+
+              {/* AI Insights */}
+              {aiInsights && (
+                <div className="border-t border-blue-200 dark:border-blue-800 pt-4 space-y-3">
+                  <h4 className="text-sm font-semibold text-blue-900 dark:text-blue-100 flex items-center gap-2">
+                    <Lightbulb className="h-4 w-4" />
+                    Analysis & Insights
+                  </h4>
+                  <div className="p-4 rounded-xl bg-white dark:bg-slate-900 border border-blue-100 dark:border-blue-800 space-y-3">
+                    {aiInsights.summary && (
+                      <p className="text-sm">{aiInsights.summary}</p>
+                    )}
+                    {aiInsights.key_points && aiInsights.key_points.length > 0 && (
+                      <div>
+                        <p className="text-xs font-medium text-muted-foreground mb-1">Key Points</p>
+                        <ul className="text-sm space-y-1">
+                          {aiInsights.key_points.map((point, i) => (
+                            <li key={i} className="flex items-start gap-2">
+                              <span className="text-blue-500 mt-1">•</span>
+                              <span>{point}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                    {aiInsights.risks && aiInsights.risks.length > 0 && (
+                      <div>
+                        <p className="text-xs font-medium text-amber-600 dark:text-amber-400 mb-1">Risks to Consider</p>
+                        <ul className="text-sm space-y-1">
+                          {aiInsights.risks.map((risk, i) => (
+                            <li key={i} className="flex items-start gap-2 text-amber-700 dark:text-amber-300">
+                              <AlertTriangle className="h-3 w-3 mt-1 flex-shrink-0" />
+                              <span>{risk}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                    {aiInsights.recommendations && aiInsights.recommendations.length > 0 && (
+                      <div>
+                        <p className="text-xs font-medium text-green-600 dark:text-green-400 mb-1">Recommendations</p>
+                        <ul className="text-sm space-y-1">
+                          {aiInsights.recommendations.map((rec, i) => (
+                            <li key={i} className="flex items-start gap-2 text-green-700 dark:text-green-300">
+                              <CheckCircle className="h-3 w-3 mt-1 flex-shrink-0" />
+                              <span>{rec}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* Action buttons - only show when not asking questions */}
+              {aiMode !== "clarify" && (
+                <div className="flex items-center justify-between">
+                  <p className="text-xs text-blue-600/70 dark:text-blue-400/70">
+                    {aiMode === "idle"
+                      ? "Share your thoughts and I'll help identify decisions"
+                      : aiMode === "decisions"
+                      ? "Review the decisions below and add them to your inbox"
+                      : "Here's my analysis of your situation"}
+                  </p>
+                  <div className="flex items-center gap-2">
+                    {(aiMode !== "idle" || extractedDecisions.length > 0 || aiInsights) && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={resetAIConversation}
+                      >
+                        Start Fresh
+                      </Button>
+                    )}
+                    <Button
+                      onClick={() => handleProcessWithAI()}
+                      disabled={processingAI || !aiInput.trim()}
+                      className="bg-blue-600 hover:bg-blue-700"
+                    >
+                      {processingAI ? (
+                        <>
+                          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                          Analyzing...
+                        </>
+                      ) : (
+                        <>
+                          <Sparkles className="h-4 w-4 mr-2" />
+                          Analyze
+                        </>
+                      )}
+                    </Button>
+                  </div>
+                </div>
+              )}
 
               {/* Extracted Decisions Preview */}
               {extractedDecisions.length > 0 && (
                 <div className="border-t border-blue-200 dark:border-blue-800 pt-4 mt-4">
                   <div className="flex items-center justify-between mb-3">
                     <h4 className="text-sm font-semibold text-blue-900 dark:text-blue-100 flex items-center gap-2">
-                      <Lightbulb className="h-4 w-4" />
-                      Found {extractedDecisions.length} Decision{extractedDecisions.length > 1 ? "s" : ""}
+                      <FileCheck className="h-4 w-4" />
+                      Found {extractedDecisions.length} Decision{extractedDecisions.length > 1 ? "s" : ""} to Make
                     </h4>
                     <div className="flex items-center gap-2">
                       <Button
                         size="sm"
                         variant="ghost"
-                        onClick={() => {
-                          setExtractedDecisions([]);
-                          setAiInput("");
-                        }}
+                        onClick={resetAIConversation}
                         className="text-xs text-muted-foreground hover:text-foreground"
                       >
                         Clear All
                       </Button>
                     </div>
                   </div>
-                  <div className="space-y-2">
+                  <div className="space-y-3">
                     {extractedDecisions.map((decision, idx) => (
                       <div
                         key={idx}
-                        className="flex items-start gap-3 p-3 rounded-lg bg-white dark:bg-slate-900 border border-blue-100 dark:border-blue-800"
+                        className="p-4 rounded-xl bg-white dark:bg-slate-900 border border-blue-100 dark:border-blue-800"
                       >
-                        <div className="flex-1">
-                          <p className="font-medium text-sm">{decision.title}</p>
-                          {decision.context && (
-                            <p className="text-xs text-muted-foreground mt-1">{decision.context}</p>
-                          )}
-                          {decision.priority && (
-                            <Badge variant="outline" className="text-xs mt-2 capitalize">
-                              {decision.priority}
-                            </Badge>
-                          )}
+                        <div className="flex items-start justify-between gap-3">
+                          <div className="flex-1">
+                            <p className="font-medium">{decision.title}</p>
+                            {(decision.context || decision.description) && (
+                              <p className="text-sm text-muted-foreground mt-1">
+                                {decision.context || decision.description}
+                              </p>
+                            )}
+                            <div className="flex items-center gap-2 mt-2">
+                              {decision.priority && (
+                                <Badge
+                                  variant="outline"
+                                  className={cn(
+                                    "text-xs capitalize",
+                                    decision.priority === "urgent" && "border-red-300 text-red-600",
+                                    decision.priority === "high" && "border-orange-300 text-orange-600",
+                                    decision.priority === "medium" && "border-blue-300 text-blue-600",
+                                    decision.priority === "low" && "border-gray-300 text-gray-600"
+                                  )}
+                                >
+                                  {decision.priority}
+                                </Badge>
+                              )}
+                              {decision.due_date && (
+                                <Badge variant="outline" className="text-xs">
+                                  <Calendar className="h-3 w-3 mr-1" />
+                                  {decision.due_date}
+                                </Badge>
+                              )}
+                              {decision.stakeholders && decision.stakeholders.length > 0 && (
+                                <Badge variant="outline" className="text-xs">
+                                  <Users className="h-3 w-3 mr-1" />
+                                  {decision.stakeholders.length} stakeholder{decision.stakeholders.length > 1 ? "s" : ""}
+                                </Badge>
+                              )}
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => setExtractedDecisions(prev => prev.filter((_, i) => i !== idx))}
+                            >
+                              Skip
+                            </Button>
+                            <Button
+                              size="sm"
+                              onClick={() => handleAddExtractedDecision(decision)}
+                            >
+                              <Plus className="h-3 w-3 mr-1" />
+                              Add to Inbox
+                            </Button>
+                          </div>
                         </div>
-                        <div className="flex items-center gap-2">
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => setExtractedDecisions(prev => prev.filter((_, i) => i !== idx))}
-                          >
-                            Skip
-                          </Button>
-                          <Button
-                            size="sm"
-                            onClick={() => handleAddExtractedDecision(decision)}
-                          >
-                            <Plus className="h-3 w-3 mr-1" />
-                            Add
-                          </Button>
-                        </div>
+
+                        {/* Options with Pros/Cons */}
+                        {decision.options && decision.options.length > 0 && (
+                          <div className="mt-3 pt-3 border-t border-gray-100 dark:border-gray-800">
+                            <p className="text-xs font-medium text-muted-foreground mb-2">Options to Consider:</p>
+                            <div className="grid gap-2">
+                              {decision.options.map((opt: any, optIdx: number) => (
+                                <div key={optIdx} className="p-2 rounded-lg bg-gray-50 dark:bg-slate-800 text-sm">
+                                  <p className="font-medium text-sm">{opt.title}</p>
+                                  {(opt.pros?.length > 0 || opt.cons?.length > 0) && (
+                                    <div className="grid grid-cols-2 gap-2 mt-1">
+                                      {opt.pros?.length > 0 && (
+                                        <div>
+                                          <p className="text-xs text-green-600 dark:text-green-400">Pros:</p>
+                                          <ul className="text-xs text-muted-foreground">
+                                            {opt.pros.map((pro: string, i: number) => (
+                                              <li key={i}>+ {pro}</li>
+                                            ))}
+                                          </ul>
+                                        </div>
+                                      )}
+                                      {opt.cons?.length > 0 && (
+                                        <div>
+                                          <p className="text-xs text-red-600 dark:text-red-400">Cons:</p>
+                                          <ul className="text-xs text-muted-foreground">
+                                            {opt.cons.map((con: string, i: number) => (
+                                              <li key={i}>- {con}</li>
+                                            ))}
+                                          </ul>
+                                        </div>
+                                      )}
+                                    </div>
+                                  )}
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
                       </div>
                     ))}
                   </div>
@@ -2089,7 +2524,13 @@ function PeopleAndTasks() {
   );
 }
 
-function OpportunitiesTracker() {
+interface OpportunitiesTrackerProps {
+  onNavigateToDecision?: (decisionId: string) => void;
+  navigationTarget?: string | null;
+  onNavigationHandled?: () => void;
+}
+
+function OpportunitiesTracker({ onNavigateToDecision, navigationTarget, onNavigationHandled }: OpportunitiesTrackerProps) {
   const [loading, setLoading] = useState(true);
   const [opportunities, setOpportunities] = useState<any[]>([]);
   const [selectedOpportunity, setSelectedOpportunity] = useState<any | null>(null);
@@ -2421,6 +2862,7 @@ function OpportunitiesTracker() {
               <OpportunityDetailPanel
                 opportunity={selectedOpportunity}
                 onUpdate={() => fetchOpportunities()}
+                onNavigateToDecision={onNavigateToDecision}
               />
             ) : (
               <Card className="h-full flex items-center justify-center border-dashed">
@@ -2532,10 +2974,79 @@ function OpportunityListItem({
 function OpportunityDetailPanel({
   opportunity,
   onUpdate,
+  onNavigateToDecision,
 }: {
   opportunity: any;
   onUpdate: () => void;
+  onNavigateToDecision?: (decisionId: string) => void;
 }) {
+  const [relatedItems, setRelatedItems] = useState<any[]>([]);
+  const [creatingDecision, setCreatingDecision] = useState(false);
+  const [showCreateDecisionDialog, setShowCreateDecisionDialog] = useState(false);
+  const [newDecision, setNewDecision] = useState({
+    title: "",
+    description: "",
+    priority: "medium",
+    due_date: "",
+  });
+
+  // Fetch related items on opportunity change
+  useEffect(() => {
+    const fetchRelatedItems = async () => {
+      try {
+        const response = await fetch(`/api/opportunities/${opportunity.id}/related`);
+        if (response.ok) {
+          const data = await response.json();
+          setRelatedItems(data.items || []);
+        }
+      } catch (error) {
+        console.error("Error fetching related items:", error);
+      }
+    };
+    if (opportunity?.id) {
+      fetchRelatedItems();
+    }
+  }, [opportunity?.id]);
+
+  // Check if opportunity has a linked decision
+  const linkedDecision = relatedItems.find(
+    (item) => item.related_type === "decision" && item.relationship_type === "spawned"
+  );
+
+  // Handle creating a decision from this opportunity
+  const handleCreateDecision = async () => {
+    setCreatingDecision(true);
+    try {
+      const response = await fetch(`/api/opportunities/${opportunity.id}/create-decision`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          title: newDecision.title || `Decision: ${opportunity.title}`,
+          description: newDecision.description || opportunity.description,
+          priority: newDecision.priority,
+          due_date: newDecision.due_date || opportunity.due_date,
+        }),
+      });
+      if (response.ok) {
+        const data = await response.json();
+        toast.success("Decision created from opportunity!");
+        setShowCreateDecisionDialog(false);
+        setNewDecision({ title: "", description: "", priority: "medium", due_date: "" });
+        onUpdate();
+        // Navigate to the new decision
+        if (data.decision?.id && onNavigateToDecision) {
+          onNavigateToDecision(data.decision.id);
+        }
+      } else {
+        const err = await response.json();
+        toast.error(err.error || "Failed to create decision");
+      }
+    } catch (error) {
+      toast.error("Error creating decision");
+    } finally {
+      setCreatingDecision(false);
+    }
+  };
   const score = opportunity.weighted_composite_score;
   const hasScore = score !== null && score !== undefined;
 
@@ -2810,8 +3321,144 @@ function OpportunityDetailPanel({
               </Badge>
             </div>
           )}
+
+          {/* Linked Decision - Show if exists or offer to create */}
+          {linkedDecision ? (
+            <div className="p-4 rounded-lg border bg-blue-50/50 dark:bg-blue-950/20 border-blue-200 dark:border-blue-800">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <FileCheck className="h-5 w-5 text-blue-600" />
+                  <div>
+                    <p className="text-sm text-muted-foreground">Linked Decision</p>
+                    <button
+                      onClick={() => onNavigateToDecision?.(linkedDecision.related_id)}
+                      className="font-medium text-blue-600 hover:text-blue-800 hover:underline"
+                    >
+                      {linkedDecision.related_title || "View Decision"}
+                    </button>
+                  </div>
+                </div>
+                <Badge className="bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300">
+                  {linkedDecision.related_status || "pending"}
+                </Badge>
+              </div>
+            </div>
+          ) : opportunity.final_decision === "approved" ? (
+            <Button
+              variant="outline"
+              className="w-full border-blue-300 text-blue-600 hover:bg-blue-50"
+              onClick={() => setShowCreateDecisionDialog(true)}
+            >
+              <FileCheck className="h-4 w-4 mr-2" />
+              Create Formal Decision
+            </Button>
+          ) : null}
         </div>
+
+        {/* Related Items Section */}
+        {relatedItems.length > 0 && (
+          <div className="border rounded-xl p-4 space-y-3">
+            <h4 className="font-medium flex items-center gap-2">
+              <Link2 className="h-4 w-4" />
+              Related Items ({relatedItems.length})
+            </h4>
+            <div className="space-y-2">
+              {relatedItems.map((item) => (
+                <div
+                  key={item.relationship_id}
+                  className="flex items-center justify-between p-2 rounded-lg bg-slate-50 dark:bg-slate-800/50"
+                >
+                  <div className="flex items-center gap-2">
+                    {item.related_type === "decision" && <FileCheck className="h-4 w-4 text-blue-500" />}
+                    {item.related_type === "project" && <Briefcase className="h-4 w-4 text-purple-500" />}
+                    {item.related_type === "opportunity" && <Target className="h-4 w-4 text-green-500" />}
+                    <button
+                      onClick={() => {
+                        if (item.related_type === "decision" && onNavigateToDecision) {
+                          onNavigateToDecision(item.related_id);
+                        }
+                      }}
+                      className="text-sm font-medium hover:underline"
+                    >
+                      {item.related_title || `${item.related_type} ${item.related_id.slice(0, 8)}`}
+                    </button>
+                  </div>
+                  <Badge variant="outline" className="text-xs">
+                    {item.relationship_type}
+                  </Badge>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
       </CardContent>
+
+      {/* Create Decision Dialog */}
+      <Dialog open={showCreateDecisionDialog} onOpenChange={setShowCreateDecisionDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Create Decision from Opportunity</DialogTitle>
+            <DialogDescription>
+              Create a formal decision to track progress and involve stakeholders.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div>
+              <label className="text-sm font-medium mb-1 block">Decision Title</label>
+              <Input
+                placeholder={`Decision: ${opportunity.title}`}
+                value={newDecision.title}
+                onChange={(e) => setNewDecision({ ...newDecision, title: e.target.value })}
+              />
+            </div>
+            <div>
+              <label className="text-sm font-medium mb-1 block">Description</label>
+              <Textarea
+                placeholder={opportunity.description || "Describe what needs to be decided..."}
+                value={newDecision.description}
+                onChange={(e) => setNewDecision({ ...newDecision, description: e.target.value })}
+                rows={3}
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="text-sm font-medium mb-1 block">Priority</label>
+                <Select
+                  value={newDecision.priority}
+                  onValueChange={(value) => setNewDecision({ ...newDecision, priority: value })}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="low">Low</SelectItem>
+                    <SelectItem value="medium">Medium</SelectItem>
+                    <SelectItem value="high">High</SelectItem>
+                    <SelectItem value="urgent">Urgent</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <label className="text-sm font-medium mb-1 block">Due Date</label>
+                <Input
+                  type="date"
+                  value={newDecision.due_date}
+                  onChange={(e) => setNewDecision({ ...newDecision, due_date: e.target.value })}
+                />
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowCreateDecisionDialog(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleCreateDecision} disabled={creatingDecision}>
+              {creatingDecision && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+              Create Decision
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </Card>
   );
 }
@@ -2882,7 +3529,11 @@ function ScoreBreakdownRow({
 // PROJECTS MODULE
 // =====================================================
 
-function ProjectsModule() {
+interface ProjectsModuleProps {
+  onNavigateToDecision?: (decisionId: string) => void;
+}
+
+function ProjectsModule({ onNavigateToDecision }: ProjectsModuleProps) {
   const [loading, setLoading] = useState(true);
   const [projects, setProjects] = useState<any[]>([]);
   const [filter, setFilter] = useState<"all" | "active" | "planning" | "completed">("active");
@@ -3142,10 +3793,17 @@ function ProjectsModule() {
                     </span>
                   )}
                   {project.source_decision_id && (
-                    <span className="flex items-center gap-1 text-blue-600">
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onNavigateToDecision?.(project.source_decision_id);
+                      }}
+                      className="flex items-center gap-1 text-blue-600 hover:text-blue-800 hover:underline transition-colors"
+                      title="View source decision"
+                    >
                       <FileCheck className="h-3 w-3" />
                       From Decision
-                    </span>
+                    </button>
                   )}
                   {project.team?.name && (
                     <span className="flex items-center gap-1">

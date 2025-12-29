@@ -1,0 +1,185 @@
+import { NextRequest, NextResponse } from "next/server";
+import { createClient } from "@/lib/supabase/server";
+
+export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
+
+// GET /api/decisions/[id]/tasks - Get all tasks linked to a decision
+export async function GET(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const { id: decisionId } = await params;
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+
+    if (!user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("organization_id")
+      .eq("id", user.id)
+      .single();
+
+    if (!profile?.organization_id) {
+      return NextResponse.json({ error: "Profile not found" }, { status: 404 });
+    }
+
+    // Verify decision exists and user has access
+    const { data: decision, error: decisionError } = await supabase
+      .from("decisions")
+      .select("id, title")
+      .eq("id", decisionId)
+      .eq("organization_id", profile.organization_id)
+      .single();
+
+    if (decisionError || !decision) {
+      return NextResponse.json({ error: "Decision not found" }, { status: 404 });
+    }
+
+    // Get tasks linked to this decision
+    const { data: tasks, error: tasksError } = await supabase
+      .from("tasks")
+      .select(`
+        *,
+        assigned_to_profile:profiles!tasks_assigned_to_fkey(id, full_name, email, avatar_url)
+      `)
+      .eq("decision_id", decisionId)
+      .order("created_at", { ascending: false });
+
+    if (tasksError) {
+      console.error("Error fetching decision tasks:", tasksError);
+      return NextResponse.json({ error: "Failed to fetch tasks" }, { status: 500 });
+    }
+
+    // Format the response
+    const formattedTasks = (tasks || []).map((task: any) => ({
+      id: task.id,
+      title: task.title,
+      description: task.description,
+      status: task.status,
+      priority: task.priority,
+      due_date: task.due_date,
+      assigned_to: task.assigned_to,
+      assigned_to_name: task.assigned_to_profile?.full_name || null,
+      assigned_to_email: task.assigned_to_profile?.email || null,
+      assigned_to_avatar: task.assigned_to_profile?.avatar_url || null,
+      created_at: task.created_at,
+      completed_at: task.completed_at,
+    }));
+
+    return NextResponse.json({ tasks: formattedTasks });
+  } catch (error) {
+    console.error("Get decision tasks error:", error);
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+  }
+}
+
+// POST /api/decisions/[id]/tasks - Create a task from a decision
+export async function POST(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const { id: decisionId } = await params;
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+
+    if (!user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("organization_id, full_name")
+      .eq("id", user.id)
+      .single();
+
+    if (!profile?.organization_id) {
+      return NextResponse.json({ error: "Profile not found" }, { status: 404 });
+    }
+
+    // Verify decision exists and user has access
+    const { data: decision, error: decisionError } = await supabase
+      .from("decisions")
+      .select("id, title, description, priority, due_date")
+      .eq("id", decisionId)
+      .eq("organization_id", profile.organization_id)
+      .single();
+
+    if (decisionError || !decision) {
+      return NextResponse.json({ error: "Decision not found" }, { status: 404 });
+    }
+
+    const body = await request.json();
+    const {
+      title,
+      description,
+      priority,
+      due_date,
+      assigned_to,
+    } = body;
+
+    if (!title || typeof title !== "string" || title.trim() === "") {
+      return NextResponse.json({ error: "Title is required" }, { status: 400 });
+    }
+
+    // Create the task linked to this decision
+    const { data: task, error: taskError } = await supabase
+      .from("tasks")
+      .insert({
+        organization_id: profile.organization_id,
+        user_id: user.id,
+        title: title.trim(),
+        description: description || null,
+        priority: priority || decision.priority || "medium",
+        due_date: due_date || decision.due_date || null,
+        assigned_to: assigned_to || user.id,
+        assigned_by: user.id,
+        decision_id: decisionId,
+        source_type: "decision",
+        source_id: decisionId,
+        source_reference: `Created from decision: ${decision.title}`,
+        status: "todo",
+      })
+      .select()
+      .single();
+
+    if (taskError) {
+      console.error("Error creating task:", taskError);
+      return NextResponse.json({ error: "Failed to create task" }, { status: 500 });
+    }
+
+    // Record the event on the decision
+    await supabase.from("decision_events").insert({
+      decision_id: decisionId,
+      event_type: "task_created",
+      comment: `Task created: ${title}`,
+      performed_by: user.id,
+      performed_by_system: false,
+      metadata: { task_id: task.id, task_title: title },
+    });
+
+    // Create relationship in item_relationships
+    await supabase.from("item_relationships").insert({
+      source_type: "decision",
+      source_id: decisionId,
+      target_type: "task",
+      target_id: task.id,
+      relationship_type: "spawned",
+      description: "Task created from decision",
+      created_by: user.id,
+    });
+
+    return NextResponse.json({
+      task,
+      message: "Task created successfully from decision",
+    }, { status: 201 });
+  } catch (error) {
+    console.error("Create task from decision error:", error);
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+  }
+}

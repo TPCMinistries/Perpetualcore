@@ -91,6 +91,20 @@ interface Comment {
   parent_comment_id?: string;
 }
 
+interface DecisionTask {
+  id: string;
+  title: string;
+  description?: string;
+  status: string;
+  priority: string;
+  due_date?: string;
+  assigned_to?: string;
+  assigned_to_name?: string;
+  assigned_to_email?: string;
+  created_at: string;
+  completed_at?: string;
+}
+
 interface HistoryEvent {
   id: string;
   event_type: string;
@@ -132,6 +146,18 @@ export function DecisionDetailPanel({
   const [showLinkItemDialog, setShowLinkItemDialog] = useState(false);
   const [showNotifyDialog, setShowNotifyDialog] = useState(false);
   const [showCreateProjectDialog, setShowCreateProjectDialog] = useState(false);
+  const [showCreateTaskDialog, setShowCreateTaskDialog] = useState(false);
+
+  // Tasks state
+  const [tasks, setTasks] = useState<DecisionTask[]>([]);
+
+  // Task form state
+  const [newTaskTitle, setNewTaskTitle] = useState("");
+  const [newTaskDescription, setNewTaskDescription] = useState("");
+  const [newTaskPriority, setNewTaskPriority] = useState("medium");
+  const [newTaskDueDate, setNewTaskDueDate] = useState("");
+  const [newTaskAssignee, setNewTaskAssignee] = useState("");
+  const [creatingTask, setCreatingTask] = useState(false);
 
   // Form states
   const [decisionOutcome, setDecisionOutcome] = useState("");
@@ -151,17 +177,36 @@ export function DecisionDetailPanel({
   const [users, setUsers] = useState<{ id: string; full_name: string; email: string; avatar_url?: string }[]>([]);
   const [contacts, setContacts] = useState<{ id: string; full_name: string; email?: string; company?: string }[]>([]);
 
+  // Link item dialog state
+  const [linkSearchQuery, setLinkSearchQuery] = useState("");
+  const [linkSearchResults, setLinkSearchResults] = useState<{ type: string; id: string; title: string; status?: string }[]>([]);
+  const [linkSearchLoading, setLinkSearchLoading] = useState(false);
+  const [selectedLinkItem, setSelectedLinkItem] = useState<{ type: string; id: string; title: string } | null>(null);
+  const [linkRelationType, setLinkRelationType] = useState("relates_to");
+
+  // Add stakeholder dialog state
+  const [stakeholderType, setStakeholderType] = useState<"user" | "contact">("user");
+  const [selectedStakeholderId, setSelectedStakeholderId] = useState("");
+  const [stakeholderRole, setStakeholderRole] = useState("stakeholder");
+  const [stakeholderNotes, setStakeholderNotes] = useState("");
+
+  // Notify dialog state
+  const [notifyMessage, setNotifyMessage] = useState("");
+  const [notifySendEmail, setNotifySendEmail] = useState(false);
+  const [selectedNotifyRecipients, setSelectedNotifyRecipients] = useState<string[]>([]);
+
   // Fetch decision details
   const fetchDecisionDetails = useCallback(async () => {
     if (!decision?.id) return;
     setLoading(true);
 
     try {
-      const [stakeholdersRes, relatedRes, commentsRes, historyRes] = await Promise.all([
+      const [stakeholdersRes, relatedRes, commentsRes, historyRes, tasksRes] = await Promise.all([
         fetch(`/api/decisions/${decision.id}/stakeholders`),
         fetch(`/api/decisions/${decision.id}/related`),
         fetch(`/api/decisions/${decision.id}/comments`),
         fetch(`/api/decisions/${decision.id}/history`),
+        fetch(`/api/decisions/${decision.id}/tasks`),
       ]);
 
       if (stakeholdersRes.ok) {
@@ -179,6 +224,10 @@ export function DecisionDetailPanel({
       if (historyRes.ok) {
         const data = await historyRes.json();
         setHistory(data.events || []);
+      }
+      if (tasksRes.ok) {
+        const data = await tasksRes.json();
+        setTasks(data.tasks || []);
       }
     } catch (error) {
       console.error("Error fetching decision details:", error);
@@ -369,21 +418,67 @@ export function DecisionDetailPanel({
     }
   };
 
-  const handleSendNotification = async (recipientIds: string[], message: string, sendEmail: boolean) => {
+  // Handle creating a task from this decision
+  const handleCreateTask = async () => {
+    if (!newTaskTitle.trim()) {
+      toast.error("Please enter a task title");
+      return;
+    }
+    setCreatingTask(true);
+    try {
+      const response = await fetch(`/api/decisions/${decision?.id}/tasks`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          title: newTaskTitle.trim(),
+          description: newTaskDescription.trim() || null,
+          priority: newTaskPriority,
+          due_date: newTaskDueDate || null,
+          assigned_to: newTaskAssignee || null,
+        }),
+      });
+      if (response.ok) {
+        toast.success("Task created!");
+        setShowCreateTaskDialog(false);
+        setNewTaskTitle("");
+        setNewTaskDescription("");
+        setNewTaskPriority("medium");
+        setNewTaskDueDate("");
+        setNewTaskAssignee("");
+        fetchDecisionDetails();
+      } else {
+        const err = await response.json();
+        toast.error(err.error || "Failed to create task");
+      }
+    } catch (error) {
+      toast.error("Error creating task");
+    } finally {
+      setCreatingTask(false);
+    }
+  };
+
+  const handleSendNotification = async () => {
+    if (selectedNotifyRecipients.length === 0) {
+      toast.error("Please select at least one recipient");
+      return;
+    }
     setProcessing(true);
     try {
       const response = await fetch(`/api/decisions/${decision?.id}/notify`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          recipient_ids: recipientIds,
-          message,
-          send_email: sendEmail,
+          recipient_ids: selectedNotifyRecipients,
+          message: notifyMessage,
+          send_email: notifySendEmail,
         }),
       });
       if (response.ok) {
         toast.success("Notifications sent!");
         setShowNotifyDialog(false);
+        setNotifyMessage("");
+        setSelectedNotifyRecipients([]);
+        setNotifySendEmail(false);
       } else {
         toast.error("Failed to send notifications");
       }
@@ -391,6 +486,155 @@ export function DecisionDetailPanel({
       toast.error("Error sending notifications");
     } finally {
       setProcessing(false);
+    }
+  };
+
+  // Search for items to link
+  const handleLinkSearch = async (query: string) => {
+    setLinkSearchQuery(query);
+    if (query.length < 2) {
+      setLinkSearchResults([]);
+      return;
+    }
+    setLinkSearchLoading(true);
+    try {
+      // Search opportunities
+      const [opportunitiesRes, projectsRes, decisionsRes] = await Promise.all([
+        fetch(`/api/opportunities?search=${encodeURIComponent(query)}&limit=5`),
+        fetch(`/api/projects?search=${encodeURIComponent(query)}&limit=5`),
+        fetch(`/api/decisions?search=${encodeURIComponent(query)}&limit=5`),
+      ]);
+
+      const results: { type: string; id: string; title: string; status?: string }[] = [];
+
+      if (opportunitiesRes.ok) {
+        const data = await opportunitiesRes.json();
+        (data.opportunities || []).forEach((opp: any) => {
+          if (opp.id !== decision?.id) {
+            results.push({ type: "opportunity", id: opp.id, title: opp.title, status: opp.final_decision });
+          }
+        });
+      }
+      if (projectsRes.ok) {
+        const data = await projectsRes.json();
+        (data.projects || []).forEach((proj: any) => {
+          results.push({ type: "project", id: proj.id, title: proj.name, status: proj.status });
+        });
+      }
+      if (decisionsRes.ok) {
+        const data = await decisionsRes.json();
+        (data.decisions || []).forEach((dec: any) => {
+          if (dec.id !== decision?.id) {
+            results.push({ type: "decision", id: dec.id, title: dec.title, status: dec.status });
+          }
+        });
+      }
+
+      setLinkSearchResults(results);
+    } catch (error) {
+      console.error("Error searching items:", error);
+    } finally {
+      setLinkSearchLoading(false);
+    }
+  };
+
+  // Create link to item
+  const handleCreateLink = async () => {
+    if (!selectedLinkItem) {
+      toast.error("Please select an item to link");
+      return;
+    }
+    setProcessing(true);
+    try {
+      const response = await fetch(`/api/decisions/${decision?.id}/related`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          target_type: selectedLinkItem.type,
+          target_id: selectedLinkItem.id,
+          relationship_type: linkRelationType,
+        }),
+      });
+      if (response.ok) {
+        toast.success("Item linked!");
+        setShowLinkItemDialog(false);
+        setSelectedLinkItem(null);
+        setLinkSearchQuery("");
+        setLinkSearchResults([]);
+        setLinkRelationType("relates_to");
+        fetchDecisionDetails();
+      } else {
+        const err = await response.json();
+        toast.error(err.error || "Failed to link item");
+      }
+    } catch (error) {
+      toast.error("Error linking item");
+    } finally {
+      setProcessing(false);
+    }
+  };
+
+  // Add stakeholder
+  const handleAddStakeholder = async () => {
+    if (!selectedStakeholderId) {
+      toast.error("Please select a person");
+      return;
+    }
+    setProcessing(true);
+    try {
+      const payload: any = {
+        role: stakeholderRole,
+        notes: stakeholderNotes,
+        notify_on_updates: true,
+        notify_on_decision: true,
+      };
+
+      if (stakeholderType === "user") {
+        payload.user_id = selectedStakeholderId;
+      } else {
+        payload.contact_id = selectedStakeholderId;
+      }
+
+      const response = await fetch(`/api/decisions/${decision?.id}/stakeholders`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+      if (response.ok) {
+        toast.success("Stakeholder added!");
+        setShowAddStakeholderDialog(false);
+        setSelectedStakeholderId("");
+        setStakeholderRole("stakeholder");
+        setStakeholderNotes("");
+        fetchDecisionDetails();
+      } else {
+        const err = await response.json();
+        toast.error(err.error || "Failed to add stakeholder");
+      }
+    } catch (error) {
+      toast.error("Error adding stakeholder");
+    } finally {
+      setProcessing(false);
+    }
+  };
+
+  // Remove relationship
+  const handleRemoveRelationship = async (relationshipId: string) => {
+    try {
+      const response = await fetch(`/api/decisions/${decision?.id}/related`, {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ relationship_id: relationshipId }),
+      });
+      if (response.ok) {
+        toast.success("Link removed");
+        fetchDecisionDetails();
+      } else {
+        toast.error("Failed to remove link");
+      }
+    } catch (error) {
+      toast.error("Error removing link");
     }
   };
 
@@ -509,10 +753,19 @@ export function DecisionDetailPanel({
 
           {/* Tabs */}
           <Tabs value={activeTab} onValueChange={setActiveTab} className="mt-4">
-            <TabsList className="grid grid-cols-5 w-full">
+            <TabsList className="grid grid-cols-6 w-full">
               <TabsTrigger value="details" className="text-xs">
                 <FileCheck className="h-3 w-3 mr-1" />
                 Details
+              </TabsTrigger>
+              <TabsTrigger value="tasks" className="text-xs">
+                <CheckCircle2 className="h-3 w-3 mr-1" />
+                Tasks
+                {tasks.length > 0 && (
+                  <Badge variant="secondary" className="ml-1 h-4 px-1 text-[10px]">
+                    {tasks.length}
+                  </Badge>
+                )}
               </TabsTrigger>
               <TabsTrigger value="stakeholders" className="text-xs">
                 <Users className="h-3 w-3 mr-1" />
@@ -685,6 +938,85 @@ export function DecisionDetailPanel({
                   )}
                 </div>
               </div>
+            </TabsContent>
+
+            {/* Tasks Tab */}
+            <TabsContent value="tasks" className="mt-4 space-y-4">
+              <div className="flex items-center justify-between">
+                <h4 className="text-sm font-medium">Tasks ({tasks.length})</h4>
+                <Button size="sm" onClick={() => setShowCreateTaskDialog(true)}>
+                  <Plus className="h-3 w-3 mr-1" />
+                  Create Task
+                </Button>
+              </div>
+
+              {tasks.length === 0 ? (
+                <div className="text-center py-8 text-muted-foreground">
+                  <CheckCircle2 className="h-12 w-12 mx-auto mb-2 opacity-50" />
+                  <p className="text-sm">No tasks created yet</p>
+                  <p className="text-xs mt-1">Create tasks to track action items from this decision</p>
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  {tasks.map((task) => (
+                    <Card key={task.id} className="p-3">
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="flex items-start gap-3">
+                          <div className={cn(
+                            "h-5 w-5 rounded-full border-2 flex items-center justify-center mt-0.5",
+                            task.status === "completed" ? "bg-green-500 border-green-500" : "border-gray-300"
+                          )}>
+                            {task.status === "completed" && (
+                              <CheckCircle2 className="h-3 w-3 text-white" />
+                            )}
+                          </div>
+                          <div>
+                            <p className={cn(
+                              "font-medium text-sm",
+                              task.status === "completed" && "line-through text-muted-foreground"
+                            )}>
+                              {task.title}
+                            </p>
+                            {task.description && (
+                              <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
+                                {task.description}
+                              </p>
+                            )}
+                            <div className="flex items-center gap-3 mt-2 text-xs text-muted-foreground">
+                              {task.assigned_to_name && (
+                                <span className="flex items-center gap-1">
+                                  <Users className="h-3 w-3" />
+                                  {task.assigned_to_name}
+                                </span>
+                              )}
+                              {task.due_date && (
+                                <span className="flex items-center gap-1">
+                                  <Calendar className="h-3 w-3" />
+                                  {new Date(task.due_date).toLocaleDateString()}
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Badge variant="outline" className={cn(
+                            "text-xs",
+                            task.priority === "urgent" && "border-red-500 text-red-600",
+                            task.priority === "high" && "border-orange-500 text-orange-600",
+                            task.priority === "medium" && "border-yellow-500 text-yellow-600",
+                            task.priority === "low" && "border-green-500 text-green-600"
+                          )}>
+                            {task.priority}
+                          </Badge>
+                          <Badge variant="secondary" className="text-xs">
+                            {task.status}
+                          </Badge>
+                        </div>
+                      </div>
+                    </Card>
+                  ))}
+                </div>
+              )}
             </TabsContent>
 
             {/* Stakeholders Tab */}
@@ -1070,6 +1402,392 @@ export function DecisionDetailPanel({
             <Button onClick={handleCreateProject} disabled={processing}>
               {processing ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Briefcase className="h-4 w-4 mr-2" />}
               Create Project
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Create Task Dialog */}
+      <Dialog open={showCreateTaskDialog} onOpenChange={setShowCreateTaskDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <CheckCircle2 className="h-5 w-5 text-green-600" />
+              Create Task from Decision
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div>
+              <label className="text-sm font-medium mb-1.5 block">Task Title *</label>
+              <input
+                type="text"
+                placeholder="Task title"
+                value={newTaskTitle}
+                onChange={(e) => setNewTaskTitle(e.target.value)}
+                className="w-full px-3 py-2 rounded-lg border bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-green-500"
+              />
+            </div>
+            <div>
+              <label className="text-sm font-medium mb-1.5 block">Description</label>
+              <textarea
+                placeholder="Task description..."
+                value={newTaskDescription}
+                onChange={(e) => setNewTaskDescription(e.target.value)}
+                rows={3}
+                className="w-full px-3 py-2 rounded-lg border bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-green-500"
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="text-sm font-medium mb-1.5 block">Priority</label>
+                <Select value={newTaskPriority} onValueChange={setNewTaskPriority}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="low">Low</SelectItem>
+                    <SelectItem value="medium">Medium</SelectItem>
+                    <SelectItem value="high">High</SelectItem>
+                    <SelectItem value="urgent">Urgent</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <label className="text-sm font-medium mb-1.5 block">Due Date</label>
+                <input
+                  type="date"
+                  value={newTaskDueDate}
+                  onChange={(e) => setNewTaskDueDate(e.target.value)}
+                  min={new Date().toISOString().split("T")[0]}
+                  className="w-full px-3 py-2 rounded-lg border bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-green-500"
+                />
+              </div>
+            </div>
+            <div>
+              <label className="text-sm font-medium mb-1.5 block">Assign To</label>
+              <Select value={newTaskAssignee} onValueChange={setNewTaskAssignee}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select assignee (optional)" />
+                </SelectTrigger>
+                <SelectContent>
+                  {users.map((user) => (
+                    <SelectItem key={user.id} value={user.id}>
+                      {user.full_name || user.email}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowCreateTaskDialog(false)}>Cancel</Button>
+            <Button onClick={handleCreateTask} disabled={creatingTask} className="bg-green-600 hover:bg-green-700">
+              {creatingTask ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <CheckCircle2 className="h-4 w-4 mr-2" />}
+              Create Task
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Link Item Dialog */}
+      <Dialog open={showLinkItemDialog} onOpenChange={setShowLinkItemDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Link2 className="h-5 w-5 text-blue-600" />
+              Link Related Item
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div>
+              <label className="text-sm font-medium mb-1.5 block">Search for items</label>
+              <div className="relative">
+                <input
+                  type="text"
+                  placeholder="Search opportunities, projects, or decisions..."
+                  value={linkSearchQuery}
+                  onChange={(e) => handleLinkSearch(e.target.value)}
+                  className="w-full px-3 py-2 rounded-lg border bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+                {linkSearchLoading && (
+                  <Loader2 className="absolute right-3 top-2.5 h-4 w-4 animate-spin text-muted-foreground" />
+                )}
+              </div>
+            </div>
+
+            {/* Search Results */}
+            {linkSearchResults.length > 0 && (
+              <div className="max-h-48 overflow-y-auto space-y-1 border rounded-lg p-2">
+                {linkSearchResults.map((item) => (
+                  <button
+                    key={`${item.type}-${item.id}`}
+                    onClick={() => setSelectedLinkItem(item)}
+                    className={cn(
+                      "w-full text-left p-2 rounded-lg flex items-center gap-2 transition-colors",
+                      selectedLinkItem?.id === item.id
+                        ? "bg-blue-100 dark:bg-blue-900/30 border-blue-300"
+                        : "hover:bg-muted"
+                    )}
+                  >
+                    {item.type === "opportunity" && <TrendingUp className="h-4 w-4 text-green-500" />}
+                    {item.type === "project" && <Briefcase className="h-4 w-4 text-blue-500" />}
+                    {item.type === "decision" && <FileCheck className="h-4 w-4 text-purple-500" />}
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium truncate">{item.title}</p>
+                      <p className="text-xs text-muted-foreground capitalize">{item.type}</p>
+                    </div>
+                    {item.status && (
+                      <Badge variant="outline" className="text-xs capitalize">
+                        {item.status}
+                      </Badge>
+                    )}
+                  </button>
+                ))}
+              </div>
+            )}
+
+            {/* Selected Item */}
+            {selectedLinkItem && (
+              <div className="p-3 rounded-lg bg-blue-50 dark:bg-blue-900/20 border border-blue-200">
+                <p className="text-sm font-medium">Selected: {selectedLinkItem.title}</p>
+                <p className="text-xs text-muted-foreground capitalize">{selectedLinkItem.type}</p>
+              </div>
+            )}
+
+            {/* Relationship Type */}
+            <div>
+              <label className="text-sm font-medium mb-1.5 block">Relationship Type</label>
+              <Select value={linkRelationType} onValueChange={setLinkRelationType}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="relates_to">Related to</SelectItem>
+                  <SelectItem value="decides_on">Decides on</SelectItem>
+                  <SelectItem value="depends_on">Depends on</SelectItem>
+                  <SelectItem value="blocks">Blocks</SelectItem>
+                  <SelectItem value="informs">Informs</SelectItem>
+                  <SelectItem value="parent_of">Parent of</SelectItem>
+                  <SelectItem value="child_of">Child of</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => {
+              setShowLinkItemDialog(false);
+              setSelectedLinkItem(null);
+              setLinkSearchQuery("");
+              setLinkSearchResults([]);
+            }}>
+              Cancel
+            </Button>
+            <Button onClick={handleCreateLink} disabled={processing || !selectedLinkItem}>
+              {processing ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Link2 className="h-4 w-4 mr-2" />}
+              Link Item
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Add Stakeholder Dialog */}
+      <Dialog open={showAddStakeholderDialog} onOpenChange={setShowAddStakeholderDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <UserPlus className="h-5 w-5 text-blue-600" />
+              Add Stakeholder
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            {/* Type Toggle */}
+            <div className="flex items-center gap-2 p-1 rounded-lg bg-muted">
+              <button
+                onClick={() => { setStakeholderType("user"); setSelectedStakeholderId(""); }}
+                className={cn(
+                  "flex-1 px-3 py-1.5 rounded-md text-sm font-medium transition-colors",
+                  stakeholderType === "user"
+                    ? "bg-white dark:bg-slate-800 shadow-sm"
+                    : "text-muted-foreground hover:text-foreground"
+                )}
+              >
+                Team Member
+              </button>
+              <button
+                onClick={() => { setStakeholderType("contact"); setSelectedStakeholderId(""); }}
+                className={cn(
+                  "flex-1 px-3 py-1.5 rounded-md text-sm font-medium transition-colors",
+                  stakeholderType === "contact"
+                    ? "bg-white dark:bg-slate-800 shadow-sm"
+                    : "text-muted-foreground hover:text-foreground"
+                )}
+              >
+                External Contact
+              </button>
+            </div>
+
+            {/* Person Select */}
+            <div>
+              <label className="text-sm font-medium mb-1.5 block">
+                {stakeholderType === "user" ? "Select Team Member *" : "Select Contact *"}
+              </label>
+              <Select value={selectedStakeholderId} onValueChange={setSelectedStakeholderId}>
+                <SelectTrigger>
+                  <SelectValue placeholder={stakeholderType === "user" ? "Choose a team member" : "Choose a contact"} />
+                </SelectTrigger>
+                <SelectContent>
+                  {stakeholderType === "user" ? (
+                    users.map((user) => (
+                      <SelectItem key={user.id} value={user.id}>
+                        {user.full_name || user.email}
+                      </SelectItem>
+                    ))
+                  ) : (
+                    contacts.map((contact) => (
+                      <SelectItem key={contact.id} value={contact.id}>
+                        {contact.full_name} {contact.company && `(${contact.company})`}
+                      </SelectItem>
+                    ))
+                  )}
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Role */}
+            <div>
+              <label className="text-sm font-medium mb-1.5 block">Role</label>
+              <Select value={stakeholderRole} onValueChange={setStakeholderRole}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="owner">Owner</SelectItem>
+                  <SelectItem value="decision_maker">Decision Maker</SelectItem>
+                  <SelectItem value="stakeholder">Stakeholder</SelectItem>
+                  <SelectItem value="reviewer">Reviewer</SelectItem>
+                  <SelectItem value="informed">Informed</SelectItem>
+                  <SelectItem value="contributor">Contributor</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Notes */}
+            <div>
+              <label className="text-sm font-medium mb-1.5 block">Notes (optional)</label>
+              <textarea
+                placeholder="Any additional context..."
+                value={stakeholderNotes}
+                onChange={(e) => setStakeholderNotes(e.target.value)}
+                rows={2}
+                className="w-full px-3 py-2 rounded-lg border bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowAddStakeholderDialog(false)}>Cancel</Button>
+            <Button onClick={handleAddStakeholder} disabled={processing || !selectedStakeholderId}>
+              {processing ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <UserPlus className="h-4 w-4 mr-2" />}
+              Add Stakeholder
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Notify Dialog */}
+      <Dialog open={showNotifyDialog} onOpenChange={setShowNotifyDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Bell className="h-5 w-5 text-blue-600" />
+              Notify Stakeholders
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            {/* Recipients */}
+            <div>
+              <label className="text-sm font-medium mb-1.5 block">Select Recipients *</label>
+              <div className="max-h-48 overflow-y-auto space-y-1 border rounded-lg p-2">
+                {stakeholders.length === 0 ? (
+                  <p className="text-sm text-muted-foreground text-center py-4">
+                    No stakeholders added yet. Add stakeholders first.
+                  </p>
+                ) : (
+                  <>
+                    {/* Quick select all */}
+                    <button
+                      onClick={() => {
+                        const userIds = stakeholders
+                          .filter(s => s.stakeholder_type === "user")
+                          .map(s => s.stakeholder_id);
+                        setSelectedNotifyRecipients(
+                          selectedNotifyRecipients.length === userIds.length ? [] : userIds
+                        );
+                      }}
+                      className="w-full text-left p-2 rounded-lg text-sm font-medium text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20"
+                    >
+                      {selectedNotifyRecipients.length === stakeholders.filter(s => s.stakeholder_type === "user").length
+                        ? "Deselect All"
+                        : "Select All Team Members"}
+                    </button>
+                    {stakeholders.filter(s => s.stakeholder_type === "user").map((stakeholder) => (
+                      <label
+                        key={stakeholder.id}
+                        className="flex items-center gap-3 p-2 rounded-lg hover:bg-muted cursor-pointer"
+                      >
+                        <input
+                          type="checkbox"
+                          checked={selectedNotifyRecipients.includes(stakeholder.stakeholder_id)}
+                          onChange={(e) => {
+                            if (e.target.checked) {
+                              setSelectedNotifyRecipients([...selectedNotifyRecipients, stakeholder.stakeholder_id]);
+                            } else {
+                              setSelectedNotifyRecipients(selectedNotifyRecipients.filter(id => id !== stakeholder.stakeholder_id));
+                            }
+                          }}
+                          className="rounded border-gray-300"
+                        />
+                        <div className="flex-1">
+                          <p className="text-sm font-medium">{stakeholder.stakeholder_name}</p>
+                          <p className="text-xs text-muted-foreground capitalize">{stakeholder.role}</p>
+                        </div>
+                      </label>
+                    ))}
+                  </>
+                )}
+              </div>
+            </div>
+
+            {/* Message */}
+            <div>
+              <label className="text-sm font-medium mb-1.5 block">Message (optional)</label>
+              <textarea
+                placeholder="Add a custom message..."
+                value={notifyMessage}
+                onChange={(e) => setNotifyMessage(e.target.value)}
+                rows={3}
+                className="w-full px-3 py-2 rounded-lg border bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+
+            {/* Email Option */}
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={notifySendEmail}
+                onChange={(e) => setNotifySendEmail(e.target.checked)}
+                className="rounded border-gray-300"
+              />
+              <span className="text-sm">Also send email notification</span>
+            </label>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowNotifyDialog(false)}>Cancel</Button>
+            <Button
+              onClick={handleSendNotification}
+              disabled={processing || selectedNotifyRecipients.length === 0}
+            >
+              {processing ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Send className="h-4 w-4 mr-2" />}
+              Send Notifications
             </Button>
           </DialogFooter>
         </DialogContent>

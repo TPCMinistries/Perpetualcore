@@ -31,6 +31,8 @@ export async function GET(request: NextRequest) {
     const priority = searchParams.get("priority") as Priority | null;
     const source_type = searchParams.get("source_type");
     const search = searchParams.get("search");
+    const team_id = searchParams.get("team_id");
+    const include_org_wide = searchParams.get("include_org_wide") !== "false"; // Default true
     const limit = parseInt(searchParams.get("limit") || "50");
     const offset = parseInt(searchParams.get("offset") || "0");
 
@@ -41,7 +43,8 @@ export async function GET(request: NextRequest) {
         *,
         user:profiles!decisions_user_id_fkey(full_name, avatar_url),
         decided_by_user:profiles!decisions_decided_by_fkey(full_name, avatar_url),
-        delegated_to_user:profiles!decisions_delegated_to_fkey(full_name, avatar_url)
+        delegated_to_user:profiles!decisions_delegated_to_fkey(full_name, avatar_url),
+        team:teams!decisions_team_id_fkey(id, name)
       `,
         { count: "exact" }
       )
@@ -59,6 +62,17 @@ export async function GET(request: NextRequest) {
     }
     if (search) {
       query = query.or(`title.ilike.%${search}%,description.ilike.%${search}%`);
+    }
+
+    // Team filtering
+    if (team_id) {
+      if (include_org_wide) {
+        // Show decisions for this team OR org-wide decisions (no team_id)
+        query = query.or(`team_id.eq.${team_id},team_id.is.null`);
+      } else {
+        // Show only decisions for this specific team
+        query = query.eq("team_id", team_id);
+      }
     }
 
     query = query.range(offset, offset + limit - 1);
@@ -118,6 +132,7 @@ export async function POST(request: NextRequest) {
       .insert({
         organization_id: profile.organization_id,
         user_id: user.id,
+        team_id: body.team_id || null, // Optional team scoping
         title: body.title.trim(),
         description: body.description?.trim() || null,
         context: body.context?.trim() || null,

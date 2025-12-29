@@ -401,6 +401,7 @@ export interface CreateDecisionRequest {
   priority?: Priority;
   due_date?: string;
   tags?: string[];
+  team_id?: string; // Optional team scoping
 }
 
 export interface DecideRequest {

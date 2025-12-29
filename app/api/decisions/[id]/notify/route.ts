@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { sendEmail } from "@/lib/email";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -93,7 +94,8 @@ export async function POST(
       await supabase.from("notifications").insert(generalNotifications);
     }
 
-    // If email is requested, queue emails for sending
+    // If email is requested, send emails directly and queue for backup
+    let emailsSent = 0;
     if (send_email) {
       // Get recipient details
       const { data: recipients } = await supabase
@@ -102,6 +104,94 @@ export async function POST(
         .in("id", recipient_ids);
 
       if (recipients && recipients.length > 0) {
+        const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://perpetualcore.com";
+        const decisionUrl = `${appUrl}/dashboard/command-center?tab=decisions&id=${id}`;
+
+        // Send emails directly using Resend
+        for (const recipient of recipients) {
+          if (!recipient.email) continue;
+
+          const emailHtml = `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>${title}</title>
+</head>
+<body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background-color: #f9fafb;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #f9fafb; padding: 40px 20px;">
+    <tr>
+      <td align="center">
+        <table width="600" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+          <tr>
+            <td style="background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%); padding: 30px; text-align: center;">
+              <h1 style="margin: 0; color: #ffffff; font-size: 24px;">${title}</h1>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding: 30px;">
+              <p style="margin: 0 0 20px; color: #4b5563; font-size: 16px; line-height: 1.6;">
+                Hi ${recipient.full_name || "there"},
+              </p>
+              <p style="margin: 0 0 20px; color: #4b5563; font-size: 16px; line-height: 1.6;">
+                ${notificationMessage}
+              </p>
+              <div style="background-color: #f3f4f6; border-radius: 6px; padding: 20px; margin: 20px 0;">
+                <table width="100%" cellpadding="8" style="font-size: 15px; color: #4b5563;">
+                  <tr>
+                    <td style="font-weight: 600; width: 120px;">Decision:</td>
+                    <td>${decision.title}</td>
+                  </tr>
+                  ${decision.decision_made ? `
+                  <tr>
+                    <td style="font-weight: 600;">Outcome:</td>
+                    <td>${decision.decision_made}</td>
+                  </tr>
+                  ` : ""}
+                  <tr>
+                    <td style="font-weight: 600;">Priority:</td>
+                    <td style="text-transform: capitalize;">${decision.priority || "medium"}</td>
+                  </tr>
+                  ${decision.due_date ? `
+                  <tr>
+                    <td style="font-weight: 600;">Due Date:</td>
+                    <td>${new Date(decision.due_date).toLocaleDateString()}</td>
+                  </tr>
+                  ` : ""}
+                </table>
+              </div>
+              <div style="text-align: center; margin: 30px 0;">
+                <a href="${decisionUrl}" style="display: inline-block; background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%); color: #ffffff; padding: 14px 32px; border-radius: 6px; text-decoration: none; font-weight: 600; font-size: 16px;">View Decision</a>
+              </div>
+              <p style="margin: 30px 0 0; color: #9ca3af; font-size: 14px;">
+                Sent by ${profile.full_name || "a team member"}
+              </p>
+            </td>
+          </tr>
+          <tr>
+            <td style="background-color: #f9fafb; padding: 20px; text-align: center; border-top: 1px solid #e5e7eb;">
+              <p style="margin: 0; color: #9ca3af; font-size: 13px;">
+                © ${new Date().getFullYear()} Perpetual Core. All rights reserved.
+              </p>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>`;
+
+          const result = await sendEmail(recipient.email, title, emailHtml);
+          if (result.success) {
+            emailsSent++;
+          } else {
+            console.error(`Failed to send email to ${recipient.email}:`, result.error);
+          }
+        }
+
+        // Also queue to email_outbox for backup/tracking
         const emails = recipients.map((recipient) => ({
           organization_id: profile.organization_id,
           sent_by: user.id,
@@ -113,7 +203,7 @@ export async function POST(
           body_html: null,
           context_type: "decision",
           context_id: id,
-          status: "pending",
+          status: emailsSent > 0 ? "sent" : "pending",
         }));
 
         const { error: emailError } = await supabase
@@ -131,15 +221,20 @@ export async function POST(
     await supabase.from("decision_events").insert({
       decision_id: id,
       event_type: "reminder_sent",
-      comment: `Notifications sent to ${recipient_ids.length} recipient(s)`,
+      comment: `Notifications sent to ${recipient_ids.length} recipient(s)${emailsSent > 0 ? `, ${emailsSent} email(s) delivered` : ""}`,
       performed_by: user.id,
       performed_by_system: false,
-      metadata: { recipient_count: recipient_ids.length, send_email: send_email || false },
+      metadata: {
+        recipient_count: recipient_ids.length,
+        send_email: send_email || false,
+        emails_sent: emailsSent
+      },
     });
 
     return NextResponse.json({
       success: true,
       notifications_sent: recipient_ids.length,
+      emails_sent: emailsSent,
     });
   } catch (error) {
     console.error("Send notification error:", error);
