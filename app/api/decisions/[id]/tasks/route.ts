@@ -153,26 +153,34 @@ export async function POST(
       return NextResponse.json({ error: "Failed to create task" }, { status: 500 });
     }
 
-    // Record the event on the decision
-    await supabase.from("decision_events").insert({
-      decision_id: decisionId,
-      event_type: "task_created",
-      comment: `Task created: ${title}`,
-      performed_by: user.id,
-      performed_by_system: false,
-      metadata: { task_id: task.id, task_title: title },
-    });
+    // Record the event on the decision (use 'updated' since 'task_created' may not exist)
+    try {
+      await supabase.from("decision_events").insert({
+        decision_id: decisionId,
+        event_type: "updated",
+        comment: `Task created: ${title}`,
+        performed_by: user.id,
+        performed_by_system: false,
+        metadata: { task_id: task.id, task_title: title },
+      });
+    } catch (eventError) {
+      console.warn("Could not record decision event:", eventError);
+    }
 
-    // Create relationship in item_relationships
-    await supabase.from("item_relationships").insert({
-      source_type: "decision",
-      source_id: decisionId,
-      target_type: "task",
-      target_id: task.id,
-      relationship_type: "spawned",
-      description: "Task created from decision",
-      created_by: user.id,
-    });
+    // Create relationship in item_relationships (may not exist in all deployments)
+    try {
+      await supabase.from("item_relationships").insert({
+        source_type: "decision",
+        source_id: decisionId,
+        target_type: "task",
+        target_id: task.id,
+        relationship_type: "spawned",
+        description: "Task created from decision",
+        created_by: user.id,
+      });
+    } catch (relError) {
+      console.warn("Could not create item relationship:", relError);
+    }
 
     return NextResponse.json({
       task,
