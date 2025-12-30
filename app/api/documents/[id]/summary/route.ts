@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { NextRequest } from "next/server";
 import Anthropic from "@anthropic-ai/sdk";
+import OpenAI from "openai";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -8,6 +9,60 @@ export const dynamic = "force-dynamic";
 const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY!,
 });
+
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY!,
+});
+
+/**
+ * Generate summary using Claude (primary)
+ */
+async function generateWithClaude(prompt: string): Promise<{
+  text: string;
+  inputTokens: number;
+  outputTokens: number;
+  provider: string;
+}> {
+  const response = await anthropic.messages.create({
+    model: "claude-3-haiku-20240307",
+    max_tokens: 1024,
+    messages: [{ role: "user", content: prompt }],
+  });
+
+  const text = response.content[0].type === "text" ? response.content[0].text : "";
+
+  return {
+    text,
+    inputTokens: response.usage.input_tokens,
+    outputTokens: response.usage.output_tokens,
+    provider: "claude",
+  };
+}
+
+/**
+ * Generate summary using OpenAI (fallback)
+ */
+async function generateWithOpenAI(prompt: string): Promise<{
+  text: string;
+  inputTokens: number;
+  outputTokens: number;
+  provider: string;
+}> {
+  const response = await openai.chat.completions.create({
+    model: "gpt-4o-mini",
+    max_tokens: 1024,
+    messages: [{ role: "user", content: prompt }],
+  });
+
+  const text = response.choices[0]?.message?.content || "";
+
+  return {
+    text,
+    inputTokens: response.usage?.prompt_tokens || 0,
+    outputTokens: response.usage?.completion_tokens || 0,
+    provider: "openai",
+  };
+}
 
 /**
  * POST /api/documents/[id]/summary
@@ -76,7 +131,7 @@ export async function POST(
 
     console.log(`🤖 Generating summary for document: ${document.title}`);
 
-    // Generate summary using Claude
+    // Build the prompt
     const prompt = `Analyze this document and provide:
 
 1. A concise 3-4 sentence summary
@@ -87,61 +142,91 @@ Document Title: ${document.title}
 Document Content:
 ${document.content.substring(0, 50000)} ${document.content.length > 50000 ? "..." : ""}
 
-Respond in JSON format:
+Respond in JSON format only, no other text:
 {
   "summary": "3-4 sentence summary here...",
   "key_points": ["Point 1", "Point 2", "Point 3", "Point 4"],
   "document_type": "Legal Contract"
 }`;
 
-    const response = await anthropic.messages.create({
-      model: "claude-3-haiku-20240307",
-      max_tokens: 1024,
-      messages: [
-        {
-          role: "user",
-          content: prompt,
-        },
-      ],
-    });
+    // Try Claude first, fallback to OpenAI if credit error
+    let aiResponse;
+    try {
+      console.log("📡 Trying Claude...");
+      aiResponse = await generateWithClaude(prompt);
+      console.log("✅ Claude succeeded");
+    } catch (claudeError: any) {
+      const errorMessage = claudeError?.message || "";
+      const errorType = claudeError?.error?.type || "";
 
-    // Extract the response
-    const responseText = response.content[0].type === "text"
-      ? response.content[0].text
-      : "";
+      // Check if it's a credit/billing error
+      const isCreditError =
+        errorMessage.includes("credit") ||
+        errorMessage.includes("billing") ||
+        errorMessage.includes("balance") ||
+        errorType === "invalid_request_error";
+
+      if (isCreditError) {
+        console.log("⚠️ Claude credit error, falling back to OpenAI...");
+        try {
+          aiResponse = await generateWithOpenAI(prompt);
+          console.log("✅ OpenAI fallback succeeded");
+        } catch (openaiError: any) {
+          console.error("❌ OpenAI fallback also failed:", openaiError);
+          return Response.json({
+            error: `Both AI providers failed. Claude: ${claudeError.message}. OpenAI: ${openaiError.message}`
+          }, { status: 500 });
+        }
+      } else {
+        // Non-credit error from Claude, try OpenAI anyway
+        console.log("⚠️ Claude error (non-credit), trying OpenAI...", claudeError.message);
+        try {
+          aiResponse = await generateWithOpenAI(prompt);
+          console.log("✅ OpenAI fallback succeeded");
+        } catch (openaiError: any) {
+          console.error("❌ Both providers failed");
+          return Response.json({
+            error: `AI generation failed: ${claudeError.message}`
+          }, { status: 500 });
+        }
+      }
+    }
 
     // Parse JSON response
     let summaryData;
     try {
-      // Extract JSON from the response (in case Claude adds extra text)
-      const jsonMatch = responseText.match(/\{[\s\S]*\}/);
+      const jsonMatch = aiResponse.text.match(/\{[\s\S]*\}/);
       if (jsonMatch) {
         summaryData = JSON.parse(jsonMatch[0]);
       } else {
         throw new Error("No JSON found in response");
       }
     } catch (parseError) {
-      console.error("Failed to parse Claude response:", responseText);
+      console.error("Failed to parse AI response:", aiResponse.text);
       return Response.json({ error: "Failed to parse AI response" }, { status: 500 });
     }
 
-    // Calculate tokens and cost
-    // Input tokens + output tokens
-    const inputTokens = response.usage.input_tokens;
-    const outputTokens = response.usage.output_tokens;
+    // Calculate cost based on provider
+    const { inputTokens, outputTokens, provider } = aiResponse;
     const totalTokens = inputTokens + outputTokens;
 
-    // Claude 3.5 Sonnet pricing (as of Jan 2025):
-    // Input: $3 per million tokens
-    // Output: $15 per million tokens
-    const inputCost = (inputTokens / 1_000_000) * 3.0;
-    const outputCost = (outputTokens / 1_000_000) * 15.0;
-    const totalCost = inputCost + outputCost;
+    let totalCost: number;
+    if (provider === "claude") {
+      // Claude Haiku pricing
+      const inputCost = (inputTokens / 1_000_000) * 0.25;
+      const outputCost = (outputTokens / 1_000_000) * 1.25;
+      totalCost = inputCost + outputCost;
+    } else {
+      // GPT-4o-mini pricing
+      const inputCost = (inputTokens / 1_000_000) * 0.15;
+      const outputCost = (outputTokens / 1_000_000) * 0.60;
+      totalCost = inputCost + outputCost;
+    }
 
-    console.log(`📊 Summary generated:
+    console.log(`📊 Summary generated with ${provider}:
     - Input tokens: ${inputTokens}
     - Output tokens: ${outputTokens}
-    - Total cost: $${totalCost.toFixed(4)}
+    - Total cost: $${totalCost.toFixed(6)}
     `);
 
     // Update document with summary
@@ -153,7 +238,7 @@ Respond in JSON format:
         document_type: summaryData.document_type,
         summary_generated_at: new Date().toISOString(),
         summary_tokens_used: totalTokens,
-        summary_cost_usd: totalCost.toFixed(4),
+        summary_cost_usd: totalCost.toFixed(6),
       })
       .eq("id", documentId)
       .select()
@@ -171,9 +256,10 @@ Respond in JSON format:
         key_points: summaryData.key_points,
         document_type: summaryData.document_type,
         tokens_used: totalTokens,
-        cost_usd: totalCost.toFixed(4),
+        cost_usd: totalCost.toFixed(6),
         generated_at: updated.summary_generated_at,
       },
+      provider,
       cached: false,
     });
   } catch (error: any) {
