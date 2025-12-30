@@ -215,7 +215,8 @@ export async function processDocument(
 export async function processAndStoreDocument(
   documentId: string
 ): Promise<void> {
-  const supabase = await createClient();
+  // Use admin client since this runs as background task without user session
+  const supabase = createAdminClient();
 
   try {
     // Get document from database
