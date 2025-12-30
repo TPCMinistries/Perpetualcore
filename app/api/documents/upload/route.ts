@@ -154,23 +154,33 @@ export async function POST(req: NextRequest) {
       }, { status: 500 });
     }
 
-    // Trigger async document processing via separate endpoint
-    // Don't await - let it process in the background
-    fetch(`${req.nextUrl.origin}/api/documents/process`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ documentId: document.id }),
-    }).catch(error => {
-      console.error("Failed to trigger document processing:", error);
-    });
+    // Process document synchronously for reliability
+    // This makes upload slower but ensures processing completes
+    console.log(`🔄 Processing document: ${document.id}`);
+    try {
+      const { processAndStoreDocument } = await import("@/lib/documents/processor");
+      await processAndStoreDocument(document.id);
+      console.log(`✅ Document processed successfully: ${document.id}`);
+    } catch (processError: any) {
+      console.error(`❌ Document processing failed: ${processError.message}`);
+      // Don't fail the upload - document is saved, just not processed
+      // User can click "Reprocess Stuck" later
+    }
 
-    // Return immediately with processing status
+    // Fetch updated document status
+    const { data: updatedDoc } = await supabase
+      .from("documents")
+      .select("status, metadata")
+      .eq("id", document.id)
+      .single();
+
     return Response.json({
       id: document.id,
       title: document.title,
-      status: "processing",
+      status: updatedDoc?.status || "processing",
       file_size: document.file_size,
       created_at: document.created_at,
+      metadata: updatedDoc?.metadata,
     });
   } catch (error) {
     console.error("Upload API error:", error);
