@@ -134,6 +134,7 @@ export default function LibraryPage() {
   const [folderModalOpen, setFolderModalOpen] = useState(false);
   const [createDocModalOpen, setCreateDocModalOpen] = useState(false);
   const [generatingSummary, setGeneratingSummary] = useState<string | null>(null);
+  const [isReprocessing, setIsReprocessing] = useState(false);
 
   // Graph state
   const [graphNodes, setGraphNodes] = useState<GraphNode[]>([]);
@@ -390,6 +391,29 @@ export default function LibraryPage() {
     }
   }
 
+  async function handleReprocessStuck() {
+    setIsReprocessing(true);
+    toast.info("Reprocessing stuck documents...");
+    try {
+      const response = await fetch("/api/documents/process", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ reprocessAll: true }),
+      });
+      const data = await response.json();
+      if (data.success) {
+        toast.success(`Processed ${data.processed} documents`);
+        await fetchDocuments();
+      } else {
+        toast.error(data.error || "Failed to reprocess");
+      }
+    } catch (error) {
+      toast.error("Failed to reprocess documents");
+    } finally {
+      setIsReprocessing(false);
+    }
+  }
+
   function handleOpenChat(doc: Document) {
     setChatDocument({ id: doc.id, title: doc.title });
     setChatModalOpen(true);
@@ -536,6 +560,23 @@ export default function LibraryPage() {
               <div className="h-8 w-px bg-slate-200 dark:bg-slate-700" />
 
               <FileUpload onUploadComplete={handleUploadComplete} variant="button" />
+
+              {/* Show reprocess button if there are stuck documents */}
+              {documents.some(d => d.status === "processing") && (
+                <Button
+                  variant="outline"
+                  onClick={handleReprocessStuck}
+                  disabled={isReprocessing}
+                  className="gap-2 border-amber-300 text-amber-700 hover:bg-amber-50 dark:border-amber-700 dark:text-amber-400"
+                >
+                  {isReprocessing ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <RefreshCw className="h-4 w-4" />
+                  )}
+                  {isReprocessing ? "Processing..." : "Reprocess Stuck"}
+                </Button>
+              )}
 
               <Button
                 onClick={() => setCreateDocModalOpen(true)}
