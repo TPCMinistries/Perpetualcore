@@ -146,11 +146,13 @@ export function FileUpload({
     [files, onUploadComplete, folderId, variant]
   );
 
-  const { getRootProps, getInputProps, isDragActive } = useDropzone({
+  const { getRootProps, getInputProps, isDragActive, open } = useDropzone({
     onDrop,
     maxFiles,
     maxSize,
     accept: acceptedFileTypes,
+    noClick: variant === "button", // Disable auto-click for button variant
+    noKeyboard: variant === "button", // Disable auto-keyboard for button variant
   });
 
   const removeFile = (fileId: string) => {
@@ -166,12 +168,14 @@ export function FileUpload({
   // Button variant - compact button for headers/toolbars
   if (variant === "button") {
     return (
-      <div {...getRootProps()} className="relative">
+      <div className="relative">
         <input {...getInputProps()} />
         <Button
+          type="button"
           variant="outline"
           className="gap-2"
           disabled={isUploading}
+          onClick={open}
         >
           {isUploading ? (
             <Loader2 className="h-4 w-4 animate-spin" />

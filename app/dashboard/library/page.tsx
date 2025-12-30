@@ -982,6 +982,10 @@ export default function LibraryPage() {
         open={previewModalOpen}
         onOpenChange={setPreviewModalOpen}
         document={previewDocument}
+        onChat={(doc) => {
+          setChatDocument({ id: doc.id, title: doc.title });
+          setChatModalOpen(true);
+        }}
       />
 
       <CreateDocumentModal
