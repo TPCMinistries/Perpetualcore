@@ -26,7 +26,7 @@ export async function POST(
     } = await supabase.auth.getUser();
 
     if (!user) {
-      return new Response("Unauthorized", { status: 401 });
+      return Response.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     // Fetch the document
@@ -37,7 +37,7 @@ export async function POST(
       .single();
 
     if (fetchError || !document) {
-      return new Response("Document not found", { status: 404 });
+      return Response.json({ error: "Document not found" }, { status: 404 });
     }
 
     // Check if user owns this document (via organization)
@@ -48,7 +48,14 @@ export async function POST(
       .single();
 
     if (profile?.organization_id !== document.organization_id) {
-      return new Response("Unauthorized", { status: 403 });
+      return Response.json({ error: "Unauthorized" }, { status: 403 });
+    }
+
+    // Check if document has content
+    if (!document.content || document.content.trim().length === 0) {
+      return Response.json({
+        error: "Document has no content. Please reprocess the document first."
+      }, { status: 400 });
     }
 
     // Check if summary already exists
@@ -115,7 +122,7 @@ Respond in JSON format:
       }
     } catch (parseError) {
       console.error("Failed to parse Claude response:", responseText);
-      return new Response("Failed to parse AI response", { status: 500 });
+      return Response.json({ error: "Failed to parse AI response" }, { status: 500 });
     }
 
     // Calculate tokens and cost
@@ -154,7 +161,7 @@ Respond in JSON format:
 
     if (updateError) {
       console.error("Error updating document:", updateError);
-      return new Response("Failed to save summary", { status: 500 });
+      return Response.json({ error: "Failed to save summary" }, { status: 500 });
     }
 
     return Response.json({
@@ -171,9 +178,9 @@ Respond in JSON format:
     });
   } catch (error: any) {
     console.error("Summary generation error:", error);
-    return new Response(`Failed to generate summary: ${error.message}`, {
-      status: 500,
-    });
+    return Response.json({
+      error: `Failed to generate summary: ${error.message}`
+    }, { status: 500 });
   }
 }
 
@@ -194,7 +201,7 @@ export async function DELETE(
     } = await supabase.auth.getUser();
 
     if (!user) {
-      return new Response("Unauthorized", { status: 401 });
+      return Response.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     // Verify ownership
@@ -205,7 +212,7 @@ export async function DELETE(
       .single();
 
     if (!document) {
-      return new Response("Document not found", { status: 404 });
+      return Response.json({ error: "Document not found" }, { status: 404 });
     }
 
     const { data: profile } = await supabase
@@ -215,7 +222,7 @@ export async function DELETE(
       .single();
 
     if (profile?.organization_id !== document.organization_id) {
-      return new Response("Unauthorized", { status: 403 });
+      return Response.json({ error: "Unauthorized" }, { status: 403 });
     }
 
     // Clear summary fields
@@ -231,11 +238,11 @@ export async function DELETE(
       })
       .eq("id", documentId);
 
-    return new Response(null, { status: 204 });
+    return Response.json({ success: true }, { status: 200 });
   } catch (error: any) {
     console.error("Delete summary error:", error);
-    return new Response(`Failed to delete summary: ${error.message}`, {
-      status: 500,
-    });
+    return Response.json({
+      error: `Failed to delete summary: ${error.message}`
+    }, { status: 500 });
   }
 }
