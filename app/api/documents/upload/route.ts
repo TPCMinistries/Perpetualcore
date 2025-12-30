@@ -140,9 +140,18 @@ export async function POST(req: NextRequest) {
 
     if (docError) {
       console.error("Document creation error:", docError);
+      console.error("Error code:", docError.code);
+      console.error("Error message:", docError.message);
+      console.error("Error details:", docError.details);
       // Clean up uploaded file
       await supabase.storage.from("documents").remove([uniqueFilename]);
-      return new Response("Failed to create document record", { status: 500 });
+      // Return detailed error for debugging
+      return Response.json({
+        error: "Failed to create document record",
+        code: docError.code,
+        message: docError.message,
+        hint: docError.code === "42501" ? "RLS policy may be blocking INSERT. Run fix_documents_rls.sql" : docError.hint,
+      }, { status: 500 });
     }
 
     // Trigger async document processing via separate endpoint
