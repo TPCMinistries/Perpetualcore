@@ -1,5 +1,3 @@
-import { get_encoding } from "tiktoken";
-
 export interface TextChunk {
   content: string;
   index: number;
@@ -7,7 +5,16 @@ export interface TextChunk {
 }
 
 /**
+ * Estimate token count using character-based approximation
+ * Average of ~4 characters per token for English text
+ */
+function estimateTokens(text: string): number {
+  return Math.ceil(text.length / 4);
+}
+
+/**
  * Split text into chunks with token limits and overlap
+ * Uses character-based approximation to avoid tiktoken WASM issues in serverless
  * @param text - The text to chunk
  * @param maxTokens - Maximum tokens per chunk (default: 1000)
  * @param overlapTokens - Number of tokens to overlap between chunks (default: 100)
@@ -18,134 +25,68 @@ export async function chunkText(
   maxTokens: number = 1000,
   overlapTokens: number = 100
 ): Promise<TextChunk[]> {
-  // Initialize tiktoken encoder for OpenAI models
-  const encoding = get_encoding("cl100k_base");
+  // Clean and normalize text
+  const cleanedText = text
+    .replace(/\r\n/g, "\n")
+    .replace(/\n{3,}/g, "\n\n")
+    .trim();
 
-  try {
-    // Clean and normalize text
-    const cleanedText = text
-      .replace(/\r\n/g, "\n") // Normalize line endings
-      .replace(/\n{3,}/g, "\n\n") // Replace multiple newlines with double
-      .trim();
+  // Approximate max characters per chunk (4 chars per token)
+  const maxChars = maxTokens * 4;
+  const overlapChars = overlapTokens * 4;
 
-    // Split into sentences (rough approach)
-    const sentences = cleanedText.split(/(?<=[.!?])\s+/);
+  // Split into paragraphs first, then sentences
+  const paragraphs = cleanedText.split(/\n\n+/);
 
-    const chunks: TextChunk[] = [];
-    let currentChunk: string[] = [];
-    let currentTokenCount = 0;
-    let chunkIndex = 0;
+  const chunks: TextChunk[] = [];
+  let currentChunk = "";
+  let chunkIndex = 0;
+
+  for (const paragraph of paragraphs) {
+    // Split paragraph into sentences
+    const sentences = paragraph.split(/(?<=[.!?])\s+/);
 
     for (const sentence of sentences) {
-      const sentenceTokens = encoding.encode(sentence);
-      const sentenceTokenCount = sentenceTokens.length;
-
-      // If single sentence exceeds max tokens, split it further
-      if (sentenceTokenCount > maxTokens) {
-        // Save current chunk if it has content
-        if (currentChunk.length > 0) {
-          chunks.push({
-            content: currentChunk.join(" ").trim(),
-            index: chunkIndex++,
-            tokenCount: currentTokenCount,
-          });
-          currentChunk = [];
-          currentTokenCount = 0;
-        }
-
-        // Split large sentence by words
-        const words = sentence.split(/\s+/);
-        let wordChunk: string[] = [];
-        let wordTokenCount = 0;
-
-        for (const word of words) {
-          const wordTokens = encoding.encode(word + " ");
-          const wordTokenLen = wordTokens.length;
-
-          if (wordTokenCount + wordTokenLen > maxTokens) {
-            chunks.push({
-              content: wordChunk.join(" ").trim(),
-              index: chunkIndex++,
-              tokenCount: wordTokenCount,
-            });
-            wordChunk = [word];
-            wordTokenCount = wordTokenLen;
-          } else {
-            wordChunk.push(word);
-            wordTokenCount += wordTokenLen;
-          }
-        }
-
-        if (wordChunk.length > 0) {
-          chunks.push({
-            content: wordChunk.join(" ").trim(),
-            index: chunkIndex++,
-            tokenCount: wordTokenCount,
-          });
-        }
-
-        continue;
-      }
-
-      // If adding this sentence would exceed max tokens, save current chunk
-      if (currentTokenCount + sentenceTokenCount > maxTokens && currentChunk.length > 0) {
+      // If adding this sentence exceeds limit, save current chunk
+      if (currentChunk.length + sentence.length > maxChars && currentChunk.length > 0) {
         chunks.push({
-          content: currentChunk.join(" ").trim(),
+          content: currentChunk.trim(),
           index: chunkIndex++,
-          tokenCount: currentTokenCount,
+          tokenCount: estimateTokens(currentChunk),
         });
 
-        // Start new chunk with overlap from previous chunk
-        if (overlapTokens > 0 && chunks.length > 0) {
-          const previousChunk = chunks[chunks.length - 1].content;
-          const previousTokens = encoding.encode(previousChunk);
-
-          // Take last N tokens from previous chunk for overlap
-          const overlapStart = Math.max(0, previousTokens.length - overlapTokens);
-          const overlapTokenArray = previousTokens.slice(overlapStart);
-          const overlapText = new TextDecoder().decode(
-            encoding.decode(overlapTokenArray)
-          );
-
-          // Start new chunk with overlap
-          currentChunk = [overlapText];
-          currentTokenCount = overlapTokenArray.length;
+        // Start new chunk with overlap
+        if (overlapChars > 0 && currentChunk.length > overlapChars) {
+          currentChunk = currentChunk.slice(-overlapChars) + " " + sentence;
         } else {
-          currentChunk = [];
-          currentTokenCount = 0;
+          currentChunk = sentence;
         }
+      } else {
+        currentChunk += (currentChunk ? " " : "") + sentence;
       }
-
-      // Add sentence to current chunk
-      currentChunk.push(sentence);
-      currentTokenCount += sentenceTokenCount;
     }
 
-    // Add final chunk if it has content
-    if (currentChunk.length > 0) {
-      chunks.push({
-        content: currentChunk.join(" ").trim(),
-        index: chunkIndex,
-        tokenCount: currentTokenCount,
-      });
+    // Add paragraph break
+    if (currentChunk && !currentChunk.endsWith("\n\n")) {
+      currentChunk += "\n\n";
     }
-
-    return chunks;
-  } finally {
-    // Free the encoding
-    encoding.free();
   }
+
+  // Add final chunk
+  if (currentChunk.trim()) {
+    chunks.push({
+      content: currentChunk.trim(),
+      index: chunkIndex,
+      tokenCount: estimateTokens(currentChunk),
+    });
+  }
+
+  return chunks;
 }
 
 /**
- * Estimate token count for text
+ * Estimate token count for text (character-based approximation)
  */
 export function estimateTokenCount(text: string): number {
-  const encoding = get_encoding("cl100k_base");
-  try {
-    const tokens = encoding.encode(text);
-    return tokens.length;
-  } finally {
-    encoding.free();
-  }
+  return estimateTokens(text);
 }
