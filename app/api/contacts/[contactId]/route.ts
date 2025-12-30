@@ -43,28 +43,41 @@ export async function GET(req: NextRequest, context: RouteContext) {
       return NextResponse.json({ error: "Contact not found" }, { status: 404 });
     }
 
-    // Get interaction count
-    const { count: interactionCount } = await supabase
+    // Get interaction count (handle gracefully if table doesn't exist)
+    let interactionCount = 0;
+    const interactionCountResult = await supabase
       .from("contact_interactions")
       .select("*", { count: "exact", head: true })
       .eq("contact_id", contactId);
+    if (!interactionCountResult.error) {
+      interactionCount = interactionCountResult.count || 0;
+    }
 
-    // Get project count
-    const { count: projectCount } = await supabase
+    // Get project count (handle gracefully if table doesn't exist)
+    let projectCount = 0;
+    const projectCountResult = await supabase
       .from("contact_projects")
       .select("*", { count: "exact", head: true })
       .eq("contact_id", contactId);
+    if (!projectCountResult.error) {
+      projectCount = projectCountResult.count || 0;
+    }
 
-    // Get recent interactions
-    const { data: recentInteractions } = await supabase
+    // Get recent interactions (handle gracefully if table doesn't exist)
+    let recentInteractions: any[] = [];
+    const interactionsResult = await supabase
       .from("contact_interactions")
       .select("*")
       .eq("contact_id", contactId)
       .order("interaction_date", { ascending: false })
       .limit(5);
+    if (!interactionsResult.error) {
+      recentInteractions = interactionsResult.data || [];
+    }
 
-    // Get linked projects
-    const { data: linkedProjects } = await supabase
+    // Get linked projects (handle gracefully if tables don't exist)
+    let linkedProjects: any[] = [];
+    const linkedProjectsResult = await supabase
       .from("contact_projects")
       .select(`
         id,
@@ -79,9 +92,13 @@ export async function GET(req: NextRequest, context: RouteContext) {
         )
       `)
       .eq("contact_id", contactId);
+    if (!linkedProjectsResult.error) {
+      linkedProjects = linkedProjectsResult.data || [];
+    }
 
-    // Get connections
-    const { data: connectionsA } = await supabase
+    // Get connections (handle gracefully if table doesn't exist)
+    let connections: any[] = [];
+    const connectionsAResult = await supabase
       .from("contact_connections")
       .select(`
         id,
@@ -97,7 +114,7 @@ export async function GET(req: NextRequest, context: RouteContext) {
       `)
       .eq("contact_a_id", contactId);
 
-    const { data: connectionsB } = await supabase
+    const connectionsBResult = await supabase
       .from("contact_connections")
       .select(`
         id,
@@ -113,7 +130,13 @@ export async function GET(req: NextRequest, context: RouteContext) {
       `)
       .eq("contact_b_id", contactId);
 
-    const connections = [...(connectionsA || []), ...(connectionsB || [])];
+    if (!connectionsAResult.error && !connectionsBResult.error) {
+      connections = [...(connectionsAResult.data || []), ...(connectionsBResult.data || [])];
+    } else if (!connectionsAResult.error) {
+      connections = connectionsAResult.data || [];
+    } else if (!connectionsBResult.error) {
+      connections = connectionsBResult.data || [];
+    }
 
     return NextResponse.json({
       contact: {
