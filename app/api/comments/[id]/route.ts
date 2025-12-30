@@ -4,7 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 // DELETE /api/comments/[id]
 export async function DELETE(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const supabase = await createClient();
@@ -14,7 +14,7 @@ export async function DELETE(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const commentId = params.id;
+    const { id: commentId } = await params;
 
     // Verify ownership
     const { data: comment } = await supabase
@@ -67,7 +67,7 @@ export async function DELETE(
 // PATCH /api/comments/[id] - Update comment content
 export async function PATCH(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const supabase = await createClient();
@@ -77,7 +77,7 @@ export async function PATCH(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const commentId = params.id;
+    const { id: commentId } = await params;
     const { content } = await request.json();
 
     if (!content || !content.trim()) {

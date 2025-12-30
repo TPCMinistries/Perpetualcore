@@ -5,7 +5,7 @@ const isDev = process.env.NODE_ENV === "development";
 
 export async function DELETE(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const supabase = await createClient();
@@ -15,7 +15,7 @@ export async function DELETE(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const jobId = params.id;
+    const { id: jobId } = await params;
 
     // Verify ownership
     const { data: job } = await supabase

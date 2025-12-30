@@ -4,7 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 // GET /api/chat/conversations/[id] - Get messages for a regular chat conversation
 export async function GET(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const supabase = await createClient();
@@ -17,7 +17,7 @@ export async function GET(
       });
     }
 
-    const conversationId = params.id;
+    const { id: conversationId } = await params;
 
     // Get the conversation to verify ownership
     const { data: conversation, error: convError } = await supabase
@@ -62,7 +62,7 @@ export async function GET(
 // PATCH /api/chat/conversations/[id] - Update conversation (e.g., move to project)
 export async function PATCH(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const supabase = await createClient();
@@ -75,7 +75,7 @@ export async function PATCH(
       });
     }
 
-    const conversationId = params.id;
+    const { id: conversationId } = await params;
     const body = await req.json();
 
     // Verify ownership before updating
@@ -126,7 +126,7 @@ export async function PATCH(
 // DELETE /api/chat/conversations/[id] - Delete a regular chat conversation
 export async function DELETE(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const supabase = await createClient();
@@ -139,7 +139,7 @@ export async function DELETE(
       });
     }
 
-    const conversationId = params.id;
+    const { id: conversationId } = await params;
 
     // Verify ownership before deleting
     const { data: conversation, error: convError } = await supabase

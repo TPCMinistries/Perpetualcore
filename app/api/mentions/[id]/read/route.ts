@@ -4,7 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 // POST /api/mentions/[id]/read - Mark a mention as read
 export async function POST(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const supabase = await createClient();
@@ -14,7 +14,7 @@ export async function POST(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const mentionId = params.id;
+    const { id: mentionId } = await params;
 
     // Verify ownership
     const { data: mention } = await supabase

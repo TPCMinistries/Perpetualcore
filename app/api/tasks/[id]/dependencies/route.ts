@@ -5,7 +5,7 @@ import { createClient } from "@/lib/supabase/server";
 // Get all dependencies for a task
 export async function GET(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const supabase = await createClient();
@@ -15,7 +15,7 @@ export async function GET(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const taskId = params.id;
+    const { id: taskId } = await params;
 
     // Get dependencies with details about dependent tasks
     const { data: dependencies, error: depsError } = await supabase
@@ -53,7 +53,7 @@ export async function GET(
 // Add a dependency to a task
 export async function POST(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const supabase = await createClient();
@@ -63,7 +63,7 @@ export async function POST(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const taskId = params.id;
+    const { id: taskId } = await params;
     const body = await request.json();
     const { depends_on_task_id, dependency_type, is_hard, lag_days } = body;
 

@@ -5,7 +5,7 @@ const isDev = process.env.NODE_ENV === "development";
 
 export async function POST(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const supabase = await createClient();
@@ -15,7 +15,7 @@ export async function POST(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const jobId = params.id;
+    const { id: jobId } = await params;
 
     // Get job details
     const { data: job, error: jobError } = await supabase

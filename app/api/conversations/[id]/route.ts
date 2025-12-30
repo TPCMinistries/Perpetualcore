@@ -4,7 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 // GET /api/conversations/[id] - Get conversation details with messages
 export async function GET(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const supabase = await createClient();
@@ -14,7 +14,7 @@ export async function GET(
       return new Response("Unauthorized", { status: 401 });
     }
 
-    const conversationId = params.id;
+    const { id: conversationId } = await params;
 
     // Check if user is a participant
     const { data: participant } = await supabase

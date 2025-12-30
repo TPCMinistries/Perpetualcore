@@ -9,7 +9,7 @@ const anthropic = new Anthropic({
 // POST /api/conversations/[id]/messages - Send a message in a conversation
 export async function POST(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const supabase = await createClient();
@@ -19,7 +19,7 @@ export async function POST(
       return new Response("Unauthorized", { status: 401 });
     }
 
-    const conversationId = params.id;
+    const { id: conversationId } = await params;
     const { content, context, skipAI } = await req.json();
 
     if (!content) {
@@ -173,7 +173,7 @@ export async function POST(
 // GET /api/conversations/[id]/messages - Get all messages in a conversation
 export async function GET(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const supabase = await createClient();
@@ -186,7 +186,7 @@ export async function GET(
       });
     }
 
-    const conversationId = params.id;
+    const { id: conversationId } = await params;
 
     // Check if user is a participant
     const { data: participant } = await supabase

@@ -4,7 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 // POST /api/comments/[id]/react
 export async function POST(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const supabase = await createClient();
@@ -14,7 +14,7 @@ export async function POST(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const commentId = params.id;
+    const { id: commentId } = await params;
     const { emoji } = await request.json();
 
     if (!emoji) {

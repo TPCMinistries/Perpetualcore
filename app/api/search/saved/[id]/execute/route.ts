@@ -7,7 +7,7 @@ const isDev = process.env.NODE_ENV === "development";
 // Execute a saved search and increment usage counter
 export async function POST(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const supabase = await createClient();
@@ -17,7 +17,7 @@ export async function POST(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const searchId = params.id;
+    const { id: searchId } = await params;
 
     // Get the saved search
     const { data: savedSearch, error: searchError } = await supabase

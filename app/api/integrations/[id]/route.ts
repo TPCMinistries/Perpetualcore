@@ -5,7 +5,7 @@ import { createClient } from "@/lib/supabase/server";
 // Disconnect an integration
 export async function DELETE(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const supabase = await createClient();
@@ -15,7 +15,7 @@ export async function DELETE(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const integrationId = params.id;
+    const { id: integrationId } = await params;
 
     // Verify integration exists and user owns it
     const { data: integration } = await supabase

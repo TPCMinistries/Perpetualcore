@@ -12,7 +12,7 @@ import { rateLimiters, checkRateLimit } from "@/lib/rate-limit";
  * Manually trigger an agent to run immediately
  * POST /api/agents/[id]/run
  */
-export async function POST(request: NextRequest, { params }: { params: { id: string } }) {
+export async function POST(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     // Apply rate limiting - agents are expensive operations
     const rateLimitResponse = await checkRateLimit(request, rateLimiters.strict);
@@ -25,7 +25,7 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const agentId = params.id;
+    const { id: agentId } = await params;
 
     // Get agent details and verify ownership
     const { data: agent, error: agentError } = await supabase

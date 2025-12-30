@@ -4,7 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 // POST /api/inbox/emails/[id]/read
 export async function POST(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const supabase = await createClient();
@@ -15,7 +15,7 @@ export async function POST(
     }
 
     const { read } = await request.json();
-    const emailId = params.id;
+    const { id: emailId } = await params;
 
     // Verify ownership
     const { data: email } = await supabase

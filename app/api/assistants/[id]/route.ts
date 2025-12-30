@@ -5,7 +5,7 @@ const isDev = process.env.NODE_ENV === "development";
 
 export async function GET(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const supabase = await createClient();
@@ -15,7 +15,7 @@ export async function GET(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const assistantId = params.id;
+    const { id: assistantId } = await params;
 
     const { data: assistant, error } = await supabase
       .from("ai_assistants")
@@ -36,7 +36,7 @@ export async function GET(
 
 export async function DELETE(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const supabase = await createClient();
@@ -46,7 +46,7 @@ export async function DELETE(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const assistantId = params.id;
+    const { id: assistantId } = await params;
 
     const { data: assistant } = await supabase
       .from("ai_assistants")

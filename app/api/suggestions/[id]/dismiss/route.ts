@@ -6,7 +6,7 @@ const isDev = process.env.NODE_ENV === "development";
 
 export async function POST(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const supabase = await createClient();
@@ -16,7 +16,7 @@ export async function POST(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const suggestionId = params.id;
+    const { id: suggestionId } = await params;
 
     // Get optional reason from body
     let reason: string | undefined;

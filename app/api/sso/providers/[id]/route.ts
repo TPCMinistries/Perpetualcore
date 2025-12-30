@@ -5,7 +5,7 @@ import { createClient } from "@/lib/supabase/server";
 // Get a specific SSO provider
 export async function GET(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const supabase = await createClient();
@@ -71,7 +71,7 @@ export async function GET(
 // Update an SSO provider
 export async function PATCH(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const supabase = await createClient();
@@ -201,7 +201,7 @@ export async function PATCH(
 // Delete an SSO provider
 export async function DELETE(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const supabase = await createClient();

@@ -13,14 +13,14 @@ export const maxDuration = 300; // 5 minutes max execution time
  */
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     // Apply rate limiting - workflow execution can be expensive
     const rateLimitResponse = await checkRateLimit(request, rateLimiters.strict);
     if (rateLimitResponse) return rateLimitResponse;
 
-    const workflowId = params.id;
+    const { id: workflowId } = await params;
     const supabase = await createClient();
 
     // Authenticate user
@@ -139,10 +139,10 @@ export async function POST(
  */
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const workflowId = params.id;
+    const { id: workflowId } = await params;
     const supabase = await createClient();
 
     // Authenticate user

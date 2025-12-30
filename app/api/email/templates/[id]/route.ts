@@ -4,7 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 // PATCH /api/email/templates/[id]
 export async function PATCH(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const supabase = await createClient();
@@ -14,7 +14,7 @@ export async function PATCH(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const templateId = params.id;
+    const { id: templateId } = await params;
 
     // Verify ownership
     const { data: template } = await supabase
@@ -90,7 +90,7 @@ export async function PATCH(
 // DELETE /api/email/templates/[id]
 export async function DELETE(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const supabase = await createClient();
@@ -100,7 +100,7 @@ export async function DELETE(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const templateId = params.id;
+    const { id: templateId } = await params;
 
     // Verify ownership
     const { data: template } = await supabase

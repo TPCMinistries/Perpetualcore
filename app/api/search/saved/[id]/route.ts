@@ -5,7 +5,7 @@ import { createClient } from "@/lib/supabase/server";
 // Update a saved search
 export async function PATCH(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const supabase = await createClient();
@@ -15,7 +15,7 @@ export async function PATCH(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const searchId = params.id;
+    const { id: searchId } = await params;
 
     // Verify ownership
     const { data: savedSearch } = await supabase
@@ -69,7 +69,7 @@ export async function PATCH(
 // Delete a saved search
 export async function DELETE(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const supabase = await createClient();
@@ -79,7 +79,7 @@ export async function DELETE(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const searchId = params.id;
+    const { id: searchId } = await params;
 
     // Verify ownership
     const { data: savedSearch } = await supabase

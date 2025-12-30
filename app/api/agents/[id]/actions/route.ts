@@ -5,7 +5,7 @@ import { createClient } from "@/lib/supabase/server";
  * Get actions history for a specific agent
  * GET /api/agents/[id]/actions
  */
-export async function GET(request: Request, { params }: { params: { id: string } }) {
+export async function GET(request: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     const supabase = await createClient();
     const { data: { user }, error: userError } = await supabase.auth.getUser();
@@ -14,7 +14,7 @@ export async function GET(request: Request, { params }: { params: { id: string }
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const agentId = params.id;
+    const { id: agentId } = await params;
 
     // Verify agent ownership
     const { data: agent } = await supabase

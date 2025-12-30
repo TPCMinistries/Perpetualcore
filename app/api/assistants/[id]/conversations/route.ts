@@ -5,7 +5,7 @@ const isDev = process.env.NODE_ENV === "development";
 
 export async function GET(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const supabase = await createClient();
@@ -15,7 +15,7 @@ export async function GET(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const assistantId = params.id;
+    const { id: assistantId } = await params;
 
     const { data: conversations, error } = await supabase
       .from("assistant_conversations")
@@ -39,7 +39,7 @@ export async function GET(
 
 export async function POST(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const supabase = await createClient();
@@ -59,7 +59,7 @@ export async function POST(
       return NextResponse.json({ error: "Profile not found" }, { status: 404 });
     }
 
-    const assistantId = params.id;
+    const { id: assistantId } = await params;
     const { title } = await request.json();
 
     const { data: conversation, error: createError } = await supabase
