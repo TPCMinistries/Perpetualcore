@@ -135,6 +135,7 @@ export default function LibraryPage() {
   const [createDocModalOpen, setCreateDocModalOpen] = useState(false);
   const [generatingSummary, setGeneratingSummary] = useState<string | null>(null);
   const [isReprocessing, setIsReprocessing] = useState(false);
+  const [isDeletingDuplicates, setIsDeletingDuplicates] = useState(false);
 
   // Graph state
   const [graphNodes, setGraphNodes] = useState<GraphNode[]>([]);
@@ -414,6 +415,73 @@ export default function LibraryPage() {
     }
   }
 
+  async function handleDeleteDuplicates() {
+    setIsDeletingDuplicates(true);
+    try {
+      // Group documents by title
+      const titleGroups = new Map<string, Document[]>();
+      documents.forEach(doc => {
+        const existing = titleGroups.get(doc.title) || [];
+        existing.push(doc);
+        titleGroups.set(doc.title, existing);
+      });
+
+      // Find duplicates (keep the oldest one, delete the rest)
+      const duplicatesToDelete: string[] = [];
+      titleGroups.forEach((docs, title) => {
+        if (docs.length > 1) {
+          // Sort by created_at ascending, keep the first (oldest)
+          const sorted = docs.sort((a, b) =>
+            new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
+          );
+          // Mark all but the first for deletion
+          sorted.slice(1).forEach(doc => duplicatesToDelete.push(doc.id));
+        }
+      });
+
+      if (duplicatesToDelete.length === 0) {
+        toast.info("No duplicate documents found");
+        setIsDeletingDuplicates(false);
+        return;
+      }
+
+      toast.info(`Deleting ${duplicatesToDelete.length} duplicate documents...`);
+
+      // Delete each duplicate
+      let deleted = 0;
+      for (const docId of duplicatesToDelete) {
+        try {
+          const response = await fetch(`/api/documents?id=${docId}`, {
+            method: "DELETE",
+          });
+          if (response.ok) {
+            deleted++;
+          }
+        } catch (err) {
+          console.error(`Failed to delete ${docId}:`, err);
+        }
+      }
+
+      toast.success(`Deleted ${deleted} duplicate documents`);
+      await fetchDocuments();
+    } catch (error) {
+      toast.error("Failed to delete duplicates");
+    } finally {
+      setIsDeletingDuplicates(false);
+    }
+  }
+
+  // Calculate duplicate count for UI
+  const duplicateCount = (() => {
+    const titleCounts = new Map<string, number>();
+    documents.forEach(doc => {
+      titleCounts.set(doc.title, (titleCounts.get(doc.title) || 0) + 1);
+    });
+    let count = 0;
+    titleCounts.forEach(c => { if (c > 1) count += c - 1; });
+    return count;
+  })();
+
   function handleOpenChat(doc: Document) {
     setChatDocument({ id: doc.id, title: doc.title });
     setChatModalOpen(true);
@@ -575,6 +643,23 @@ export default function LibraryPage() {
                     <RefreshCw className="h-4 w-4" />
                   )}
                   {isReprocessing ? "Processing..." : "Reprocess Stuck"}
+                </Button>
+              )}
+
+              {/* Show delete duplicates button if there are duplicates */}
+              {duplicateCount > 0 && (
+                <Button
+                  variant="outline"
+                  onClick={handleDeleteDuplicates}
+                  disabled={isDeletingDuplicates}
+                  className="gap-2 border-red-300 text-red-700 hover:bg-red-50 dark:border-red-700 dark:text-red-400"
+                >
+                  {isDeletingDuplicates ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <Trash2 className="h-4 w-4" />
+                  )}
+                  {isDeletingDuplicates ? "Deleting..." : `Delete ${duplicateCount} Duplicates`}
                 </Button>
               )}
 
