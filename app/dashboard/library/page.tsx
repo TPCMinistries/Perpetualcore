@@ -444,7 +444,8 @@ export default function LibraryPage() {
       if (!matchesTitle && !matchesSummary && !matchesType) return false;
     }
     if (filterType && doc.document_type !== filterType) return false;
-    return doc.status === "completed";
+    // Show both completed and processing documents
+    return doc.status === "completed" || doc.status === "processing";
   });
 
   const documentTypes = Array.from(

@@ -148,6 +148,14 @@ Your role is to:
       // For non-PDF documents or if PDF file is not available, use extracted text
       console.log(`📝 Using extracted text for: ${document.title}`);
 
+      // Check if document has content
+      if (!document.content && !document.summary) {
+        return new Response(
+          "Document is still processing or has no extractable content. Please try again later.",
+          { status: 400 }
+        );
+      }
+
       // Build the context from document content and summary
       let context = `Document Title: ${document.title}\n\n`;
 
@@ -163,13 +171,14 @@ Your role is to:
         context += `Key Points:\n${document.key_points.map((p: string) => `- ${p}`).join('\n')}\n\n`;
       }
 
-      // Include relevant portions of the document content
-      const maxContentLength = 40000; // Leave room for conversation history
-      const contentPreview = document.content.length > maxContentLength
-        ? document.content.substring(0, maxContentLength) + "\n\n[Content truncated...]"
-        : document.content;
-
-      context += `Full Document Content:\n${contentPreview}`;
+      // Include relevant portions of the document content (if available)
+      if (document.content) {
+        const maxContentLength = 40000; // Leave room for conversation history
+        const contentPreview = document.content.length > maxContentLength
+          ? document.content.substring(0, maxContentLength) + "\n\n[Content truncated...]"
+          : document.content;
+        context += `Full Document Content:\n${contentPreview}`;
+      }
 
       // Add the current question
       messages.push({
