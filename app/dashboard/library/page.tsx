@@ -537,7 +537,8 @@ export default function LibraryPage() {
     }
     if (filterType && doc.document_type !== filterType) return false;
     // Show both completed and processing documents
-    return doc.status === "completed" || doc.status === "processing";
+    // Show all documents including failed ones
+    return doc.status === "completed" || doc.status === "processing" || doc.status === "failed";
   });
 
   const documentTypes = Array.from(

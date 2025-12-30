@@ -29,6 +29,18 @@ export interface ProcessedDocument {
 }
 
 /**
+ * Extract text from PDF using pdf-parse library (fallback)
+ */
+async function extractPdfWithLibrary(buffer: Buffer, fileName: string): Promise<string> {
+  console.log(`📄 Extracting text from PDF using pdf-parse: ${fileName}`);
+  const pdfParse = require("pdf-parse");
+  const data = await pdfParse(buffer);
+  const text = data.text || "";
+  console.log(`✅ PDF extraction complete via pdf-parse: ${text.length} characters`);
+  return text.trim();
+}
+
+/**
  * Extract text from various file types
  */
 export async function extractText(
@@ -38,45 +50,60 @@ export async function extractText(
 ): Promise<string> {
   try {
     if (mimeType === "application/pdf") {
-      console.log(`📄 Extracting text from PDF using Claude API: ${fileName}`);
+      // Try Claude first for better extraction, fallback to pdf-parse
+      try {
+        console.log(`📄 Extracting text from PDF using Claude API: ${fileName}`);
 
-      // Convert buffer to base64 for Claude API
-      const base64Pdf = buffer.toString("base64");
+        // Convert buffer to base64 for Claude API
+        const base64Pdf = buffer.toString("base64");
 
-      // Use Claude API to extract text from PDF
-      const message = await anthropic.messages.create({
-        model: "claude-3-haiku-20240307",
-        max_tokens: 4096,
-        messages: [
-          {
-            role: "user",
-            content: [
-              {
-                type: "document",
-                source: {
-                  type: "base64",
-                  media_type: "application/pdf",
-                  data: base64Pdf,
+        // Use Claude API to extract text from PDF
+        const message = await anthropic.messages.create({
+          model: "claude-3-haiku-20240307",
+          max_tokens: 4096,
+          messages: [
+            {
+              role: "user",
+              content: [
+                {
+                  type: "document",
+                  source: {
+                    type: "base64",
+                    media_type: "application/pdf",
+                    data: base64Pdf,
+                  },
                 },
-              },
-              {
-                type: "text",
-                text: "Please extract ALL the text from this PDF document. Return ONLY the extracted text with no additional commentary, formatting, or explanation. Preserve the original structure and line breaks where meaningful.",
-              },
-            ],
-          },
-        ],
-      });
+                {
+                  type: "text",
+                  text: "Please extract ALL the text from this PDF document. Return ONLY the extracted text with no additional commentary, formatting, or explanation. Preserve the original structure and line breaks where meaningful.",
+                },
+              ],
+            },
+          ],
+        });
 
-      const text = message.content[0].type === "text" ? message.content[0].text : "";
+        const text = message.content[0].type === "text" ? message.content[0].text : "";
 
-      console.log(`✅ PDF extraction complete: ${text.length} characters`);
+        console.log(`✅ PDF extraction complete: ${text.length} characters`);
 
-      if (!text || text.trim().length === 0) {
-        throw new Error("PDF appears to contain no extractable text. It may be image-based or encrypted.");
+        if (!text || text.trim().length === 0) {
+          throw new Error("Claude returned empty text, trying pdf-parse...");
+        }
+
+        return text.trim();
+      } catch (claudeError: any) {
+        console.log(`⚠️ Claude PDF extraction failed: ${claudeError.message}`);
+        console.log(`📄 Falling back to pdf-parse library...`);
+
+        // Fallback to pdf-parse
+        const text = await extractPdfWithLibrary(buffer, fileName);
+
+        if (!text || text.trim().length === 0) {
+          throw new Error("PDF appears to contain no extractable text. It may be image-based or encrypted.");
+        }
+
+        return text;
       }
-
-      return text.trim();
     } else if (
       mimeType ===
       "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
