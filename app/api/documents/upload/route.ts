@@ -1,9 +1,9 @@
 import { createClient } from "@/lib/supabase/server";
-// import { processAndStoreDocument } from "@/lib/documents/processor";
 import { NextRequest } from "next/server";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
+export const maxDuration = 120; // 2 minutes for upload + processing
 
 // File size limits (in bytes)
 const FREE_TIER_FILE_LIMIT = 10 * 1024 * 1024; // 10MB

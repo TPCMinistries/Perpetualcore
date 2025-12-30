@@ -29,7 +29,7 @@ export interface ProcessedDocument {
 }
 
 /**
- * Extract text from PDF using pdf-parse library (fallback)
+ * Extract text from PDF using pdf-parse library (fast, local)
  */
 async function extractPdfWithLibrary(buffer: Buffer, fileName: string): Promise<string> {
   console.log(`📄 Extracting text from PDF using pdf-parse: ${fileName}`);
@@ -50,14 +50,26 @@ export async function extractText(
 ): Promise<string> {
   try {
     if (mimeType === "application/pdf") {
-      // Try Claude first for better extraction, fallback to pdf-parse
-      try {
-        console.log(`📄 Extracting text from PDF using Claude API: ${fileName}`);
+      // Use pdf-parse first (fast, local) - fallback to Claude if empty
+      console.log(`📄 Extracting text from PDF: ${fileName}`);
 
-        // Convert buffer to base64 for Claude API
+      try {
+        const text = await extractPdfWithLibrary(buffer, fileName);
+
+        if (text && text.trim().length > 50) {
+          return text;
+        }
+
+        console.log(`⚠️ pdf-parse returned insufficient text, trying Claude...`);
+      } catch (pdfError: any) {
+        console.log(`⚠️ pdf-parse failed: ${pdfError.message}, trying Claude...`);
+      }
+
+      // Fallback to Claude for complex/image PDFs
+      try {
+        console.log(`📄 Using Claude API for PDF: ${fileName}`);
         const base64Pdf = buffer.toString("base64");
 
-        // Use Claude API to extract text from PDF
         const message = await anthropic.messages.create({
           model: "claude-3-haiku-20240307",
           max_tokens: 4096,
@@ -75,7 +87,7 @@ export async function extractText(
                 },
                 {
                   type: "text",
-                  text: "Please extract ALL the text from this PDF document. Return ONLY the extracted text with no additional commentary, formatting, or explanation. Preserve the original structure and line breaks where meaningful.",
+                  text: "Extract ALL text from this PDF. Return ONLY the text, no commentary.",
                 },
               ],
             },
@@ -83,27 +95,16 @@ export async function extractText(
         });
 
         const text = message.content[0].type === "text" ? message.content[0].text : "";
+        console.log(`✅ Claude PDF extraction: ${text.length} characters`);
 
-        console.log(`✅ PDF extraction complete: ${text.length} characters`);
-
-        if (!text || text.trim().length === 0) {
-          throw new Error("Claude returned empty text, trying pdf-parse...");
+        if (text && text.trim().length > 0) {
+          return text.trim();
         }
-
-        return text.trim();
       } catch (claudeError: any) {
-        console.log(`⚠️ Claude PDF extraction failed: ${claudeError.message}`);
-        console.log(`📄 Falling back to pdf-parse library...`);
-
-        // Fallback to pdf-parse
-        const text = await extractPdfWithLibrary(buffer, fileName);
-
-        if (!text || text.trim().length === 0) {
-          throw new Error("PDF appears to contain no extractable text. It may be image-based or encrypted.");
-        }
-
-        return text;
+        console.log(`⚠️ Claude also failed: ${claudeError.message}`);
       }
+
+      throw new Error("Could not extract text from PDF. It may be image-based or encrypted.");
     } else if (
       mimeType ===
       "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
@@ -296,41 +297,9 @@ export async function processAndStoreDocument(
       })
       .eq("id", documentId);
 
-    // Try to generate embeddings (but don't fail if this doesn't work)
-    let embeddingsGenerated = false;
-    try {
-      const chunkContents = processed.chunks.map((c) => c.content);
-      console.log(`📊 Generating embeddings for ${chunkContents.length} chunks...`);
-      const embeddings = await generateEmbeddings(chunkContents);
-      console.log(`✅ Generated ${embeddings.length} embeddings`);
-
-      // Store chunks with embeddings
-      const chunksToInsert = processed.chunks.map((chunk, index) => ({
-        document_id: documentId,
-        chunk_index: chunk.chunkIndex,
-        content: chunk.content,
-        embedding: embeddings[index],
-      }));
-
-      console.log(`💾 Inserting ${chunksToInsert.length} chunks into database...`);
-      // Use admin client to bypass RLS for background processing
-      const adminClient = createAdminClient();
-      const { data: insertedChunks, error: chunksError } = await adminClient
-        .from("document_chunks")
-        .insert(chunksToInsert)
-        .select();
-
-      if (chunksError) {
-        console.error(`❌ Failed to insert chunks:`, chunksError);
-        console.warn(`⚠️ Continuing without embeddings...`);
-      } else {
-        console.log(`✅ Successfully inserted ${insertedChunks?.length || 0} chunks`);
-        embeddingsGenerated = true;
-      }
-    } catch (embeddingError) {
-      console.error(`❌ Embedding generation failed:`, embeddingError);
-      console.warn(`⚠️ Document will be saved without embeddings (search may not work)`);
-    }
+    // Skip embeddings during upload for speed - can be generated later via background job
+    // This makes uploads much faster
+    console.log(`⏭️ Skipping embeddings generation for faster upload`);
 
     // Update document status to completed
     await supabase
