@@ -6,9 +6,15 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
   Download, FileText, Loader2, Sparkles, MessageSquare,
-  CheckCircle, RefreshCw, FolderPlus, Link2, Calendar,
-  FileIcon, Hash, Briefcase, Users, Brain
+  CheckCircle, RefreshCw, FolderPlus, Calendar,
+  FileIcon, Hash, Briefcase, Brain, Plus, X
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { createClient } from "@/lib/supabase/client";
@@ -37,6 +43,23 @@ interface Document {
   knowledge_spaces?: Array<{ id: string; name: string; emoji?: string }>;
 }
 
+interface Project {
+  id: string;
+  name: string;
+  color?: string;
+}
+
+interface Space {
+  id: string;
+  name: string;
+  emoji?: string;
+}
+
+interface Folder {
+  id: string;
+  name: string;
+}
+
 interface DocumentPreviewModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -55,6 +78,15 @@ export function DocumentPreviewModal({
   const [docData, setDocData] = useState<Document | null>(null);
   const [signedUrl, setSignedUrl] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState("overview");
+
+  // Available items for linking
+  const [availableProjects, setAvailableProjects] = useState<Project[]>([]);
+  const [availableSpaces, setAvailableSpaces] = useState<Space[]>([]);
+  const [availableFolders, setAvailableFolders] = useState<Folder[]>([]);
+  const [linkingProject, setLinkingProject] = useState(false);
+  const [linkingSpace, setLinkingSpace] = useState(false);
+  const [linkingFolder, setLinkingFolder] = useState(false);
+
   const supabase = createClient();
 
   // Fetch full document data when document changes
@@ -121,8 +153,173 @@ export function DocumentPreviewModal({
 
     if (open) {
       fetchDocumentData();
+      fetchAvailableItems();
     }
   }, [document?.id, open]);
+
+  async function fetchAvailableItems() {
+    try {
+      // Fetch projects
+      const projectsRes = await fetch("/api/projects");
+      const projectsData = await projectsRes.json();
+      if (projectsData.projects) {
+        const projectsList = Array.isArray(projectsData.projects)
+          ? projectsData.projects
+          : Object.values(projectsData.projects).flat();
+        setAvailableProjects(projectsList as Project[]);
+      }
+
+      // Fetch spaces
+      const spacesRes = await fetch("/api/spaces");
+      const spacesData = await spacesRes.json();
+      setAvailableSpaces(spacesData.spaces || []);
+
+      // Fetch folders
+      const foldersRes = await fetch("/api/documents/folders");
+      const foldersData = await foldersRes.json();
+      setAvailableFolders(foldersData.folders || []);
+    } catch (err) {
+      console.error("Error fetching available items:", err);
+    }
+  }
+
+  async function handleLinkProject(projectId: string) {
+    if (!document?.id) return;
+    setLinkingProject(true);
+    try {
+      const res = await fetch(`/api/documents/${document.id}/projects`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ project_id: projectId }),
+      });
+      if (res.ok) {
+        const project = availableProjects.find(p => p.id === projectId);
+        if (project) {
+          setDocData(prev => prev ? {
+            ...prev,
+            projects: [...(prev.projects || []), project]
+          } : null);
+        }
+        toast.success("Linked to project");
+      } else {
+        toast.error("Failed to link project");
+      }
+    } catch (err) {
+      toast.error("Failed to link project");
+    } finally {
+      setLinkingProject(false);
+    }
+  }
+
+  async function handleUnlinkProject(projectId: string) {
+    if (!document?.id) return;
+    try {
+      const res = await fetch(`/api/documents/${document.id}/projects?project_id=${projectId}`, {
+        method: "DELETE",
+      });
+      if (res.ok) {
+        setDocData(prev => prev ? {
+          ...prev,
+          projects: (prev.projects || []).filter(p => p.id !== projectId)
+        } : null);
+        toast.success("Removed from project");
+      }
+    } catch (err) {
+      toast.error("Failed to remove from project");
+    }
+  }
+
+  async function handleLinkSpace(spaceId: string) {
+    if (!document?.id) return;
+    setLinkingSpace(true);
+    try {
+      const res = await fetch(`/api/documents/${document.id}/spaces`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ space_id: spaceId }),
+      });
+      if (res.ok) {
+        const space = availableSpaces.find(s => s.id === spaceId);
+        if (space) {
+          setDocData(prev => prev ? {
+            ...prev,
+            knowledge_spaces: [...(prev.knowledge_spaces || []), space]
+          } : null);
+        }
+        toast.success("Added to knowledge space");
+      } else {
+        toast.error("Failed to add to space");
+      }
+    } catch (err) {
+      toast.error("Failed to add to space");
+    } finally {
+      setLinkingSpace(false);
+    }
+  }
+
+  async function handleUnlinkSpace(spaceId: string) {
+    if (!document?.id) return;
+    try {
+      const res = await fetch(`/api/documents/${document.id}/spaces?space_id=${spaceId}`, {
+        method: "DELETE",
+      });
+      if (res.ok) {
+        setDocData(prev => prev ? {
+          ...prev,
+          knowledge_spaces: (prev.knowledge_spaces || []).filter(s => s.id !== spaceId)
+        } : null);
+        toast.success("Removed from space");
+      }
+    } catch (err) {
+      toast.error("Failed to remove from space");
+    }
+  }
+
+  async function handleLinkFolder(folderId: string) {
+    if (!document?.id) return;
+    setLinkingFolder(true);
+    try {
+      const res = await fetch(`/api/documents/${document.id}/folders`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ folder_id: folderId }),
+      });
+      if (res.ok) {
+        const folder = availableFolders.find(f => f.id === folderId);
+        if (folder) {
+          setDocData(prev => prev ? {
+            ...prev,
+            folders: [...(prev.folders || []), folder]
+          } : null);
+        }
+        toast.success("Added to folder");
+      } else {
+        toast.error("Failed to add to folder");
+      }
+    } catch (err) {
+      toast.error("Failed to add to folder");
+    } finally {
+      setLinkingFolder(false);
+    }
+  }
+
+  async function handleUnlinkFolder(folderId: string) {
+    if (!document?.id) return;
+    try {
+      const res = await fetch(`/api/documents/${document.id}/folders?folder_id=${folderId}`, {
+        method: "DELETE",
+      });
+      if (res.ok) {
+        setDocData(prev => prev ? {
+          ...prev,
+          folders: (prev.folders || []).filter(f => f.id !== folderId)
+        } : null);
+        toast.success("Removed from folder");
+      }
+    } catch (err) {
+      toast.error("Failed to remove from folder");
+    }
+  }
 
   async function handleGenerateSummary() {
     if (!document?.id) return;
@@ -140,7 +337,6 @@ export function DocumentPreviewModal({
 
       const result = await response.json();
 
-      // Update local state with new summary
       setDocData(prev => prev ? {
         ...prev,
         summary: result.summary,
@@ -149,7 +345,7 @@ export function DocumentPreviewModal({
         summary_generated_at: new Date().toISOString(),
       } : null);
 
-      toast.success("AI Summary generated successfully!");
+      toast.success("AI Summary generated!");
     } catch (error) {
       console.error("Error generating summary:", error);
       toast.error(error instanceof Error ? error.message : "Failed to generate summary");
@@ -191,6 +387,17 @@ export function DocumentPreviewModal({
 
   const doc = docData || document;
   const hasSummary = !!doc.summary;
+
+  // Filter out already linked items
+  const unlinkedProjects = availableProjects.filter(
+    p => !(doc.projects || []).some(linked => linked.id === p.id)
+  );
+  const unlinkedSpaces = availableSpaces.filter(
+    s => !(doc.knowledge_spaces || []).some(linked => linked.id === s.id)
+  );
+  const unlinkedFolders = availableFolders.filter(
+    f => !(doc.folders || []).some(linked => linked.id === f.id)
+  );
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -327,12 +534,6 @@ export function DocumentPreviewModal({
                               </ul>
                             </div>
                           )}
-
-                          {doc.summary_generated_at && (
-                            <p className="text-xs text-slate-500 mt-4">
-                              Generated {formatDate(doc.summary_generated_at)}
-                            </p>
-                          )}
                         </div>
                       ) : (
                         <div className="text-center py-8">
@@ -416,9 +617,39 @@ export function DocumentPreviewModal({
                   <div className="p-6 space-y-6">
                     {/* Projects */}
                     <div className="rounded-lg border border-border bg-card p-4">
-                      <div className="flex items-center gap-2 mb-3">
-                        <Briefcase className="h-5 w-5 text-blue-500" />
-                        <h3 className="font-medium">Linked Projects</h3>
+                      <div className="flex items-center justify-between mb-3">
+                        <div className="flex items-center gap-2">
+                          <Briefcase className="h-5 w-5 text-blue-500" />
+                          <h3 className="font-medium">Linked Projects</h3>
+                        </div>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="outline" size="sm" disabled={linkingProject || unlinkedProjects.length === 0}>
+                              {linkingProject ? (
+                                <Loader2 className="h-4 w-4 animate-spin" />
+                              ) : (
+                                <>
+                                  <Plus className="h-4 w-4 mr-1" />
+                                  Add
+                                </>
+                              )}
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            {unlinkedProjects.length === 0 ? (
+                              <DropdownMenuItem disabled>No projects available</DropdownMenuItem>
+                            ) : (
+                              unlinkedProjects.map((project) => (
+                                <DropdownMenuItem
+                                  key={project.id}
+                                  onClick={() => handleLinkProject(project.id)}
+                                >
+                                  {project.name}
+                                </DropdownMenuItem>
+                              ))
+                            )}
+                          </DropdownMenuContent>
+                        </DropdownMenu>
                       </div>
                       {doc.projects && doc.projects.length > 0 ? (
                         <div className="flex flex-wrap gap-2">
@@ -426,9 +657,16 @@ export function DocumentPreviewModal({
                             <Badge
                               key={project.id}
                               variant="secondary"
+                              className="flex items-center gap-1 pr-1"
                               style={{ backgroundColor: project.color ? `${project.color}20` : undefined }}
                             >
                               {project.name}
+                              <button
+                                onClick={() => handleUnlinkProject(project.id)}
+                                className="ml-1 hover:bg-red-100 dark:hover:bg-red-900/30 rounded p-0.5"
+                              >
+                                <X className="h-3 w-3" />
+                              </button>
                             </Badge>
                           ))}
                         </div>
@@ -441,15 +679,51 @@ export function DocumentPreviewModal({
 
                     {/* Knowledge Spaces */}
                     <div className="rounded-lg border border-border bg-card p-4">
-                      <div className="flex items-center gap-2 mb-3">
-                        <Brain className="h-5 w-5 text-purple-500" />
-                        <h3 className="font-medium">Knowledge Spaces</h3>
+                      <div className="flex items-center justify-between mb-3">
+                        <div className="flex items-center gap-2">
+                          <Brain className="h-5 w-5 text-purple-500" />
+                          <h3 className="font-medium">Knowledge Spaces</h3>
+                        </div>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="outline" size="sm" disabled={linkingSpace || unlinkedSpaces.length === 0}>
+                              {linkingSpace ? (
+                                <Loader2 className="h-4 w-4 animate-spin" />
+                              ) : (
+                                <>
+                                  <Plus className="h-4 w-4 mr-1" />
+                                  Add
+                                </>
+                              )}
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            {unlinkedSpaces.length === 0 ? (
+                              <DropdownMenuItem disabled>No spaces available</DropdownMenuItem>
+                            ) : (
+                              unlinkedSpaces.map((space) => (
+                                <DropdownMenuItem
+                                  key={space.id}
+                                  onClick={() => handleLinkSpace(space.id)}
+                                >
+                                  {space.emoji} {space.name}
+                                </DropdownMenuItem>
+                              ))
+                            )}
+                          </DropdownMenuContent>
+                        </DropdownMenu>
                       </div>
                       {doc.knowledge_spaces && doc.knowledge_spaces.length > 0 ? (
                         <div className="flex flex-wrap gap-2">
                           {doc.knowledge_spaces.map((space) => (
-                            <Badge key={space.id} variant="secondary">
+                            <Badge key={space.id} variant="secondary" className="flex items-center gap-1 pr-1">
                               {space.emoji} {space.name}
+                              <button
+                                onClick={() => handleUnlinkSpace(space.id)}
+                                className="ml-1 hover:bg-red-100 dark:hover:bg-red-900/30 rounded p-0.5"
+                              >
+                                <X className="h-3 w-3" />
+                              </button>
                             </Badge>
                           ))}
                         </div>
@@ -462,15 +736,51 @@ export function DocumentPreviewModal({
 
                     {/* Folders */}
                     <div className="rounded-lg border border-border bg-card p-4">
-                      <div className="flex items-center gap-2 mb-3">
-                        <FolderPlus className="h-5 w-5 text-amber-500" />
-                        <h3 className="font-medium">Folders</h3>
+                      <div className="flex items-center justify-between mb-3">
+                        <div className="flex items-center gap-2">
+                          <FolderPlus className="h-5 w-5 text-amber-500" />
+                          <h3 className="font-medium">Folders</h3>
+                        </div>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="outline" size="sm" disabled={linkingFolder || unlinkedFolders.length === 0}>
+                              {linkingFolder ? (
+                                <Loader2 className="h-4 w-4 animate-spin" />
+                              ) : (
+                                <>
+                                  <Plus className="h-4 w-4 mr-1" />
+                                  Add
+                                </>
+                              )}
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            {unlinkedFolders.length === 0 ? (
+                              <DropdownMenuItem disabled>No folders available</DropdownMenuItem>
+                            ) : (
+                              unlinkedFolders.map((folder) => (
+                                <DropdownMenuItem
+                                  key={folder.id}
+                                  onClick={() => handleLinkFolder(folder.id)}
+                                >
+                                  {folder.name}
+                                </DropdownMenuItem>
+                              ))
+                            )}
+                          </DropdownMenuContent>
+                        </DropdownMenu>
                       </div>
                       {doc.folders && doc.folders.length > 0 ? (
                         <div className="flex flex-wrap gap-2">
                           {doc.folders.map((folder) => (
-                            <Badge key={folder.id} variant="secondary">
+                            <Badge key={folder.id} variant="secondary" className="flex items-center gap-1 pr-1">
                               {folder.name}
+                              <button
+                                onClick={() => handleUnlinkFolder(folder.id)}
+                                className="ml-1 hover:bg-red-100 dark:hover:bg-red-900/30 rounded p-0.5"
+                              >
+                                <X className="h-3 w-3" />
+                              </button>
                             </Badge>
                           ))}
                         </div>
@@ -479,12 +789,6 @@ export function DocumentPreviewModal({
                           Not in any folders
                         </p>
                       )}
-                    </div>
-
-                    <div className="text-center pt-4">
-                      <p className="text-sm text-muted-foreground mb-3">
-                        Link this document to projects, teams, and spaces from the document list
-                      </p>
                     </div>
                   </div>
                 </ScrollArea>
