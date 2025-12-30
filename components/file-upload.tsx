@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useState } from "react";
+import { useCallback, useState, useRef } from "react";
 import { useDropzone } from "react-dropzone";
 import { Upload, File, X, Loader2, CheckCircle2 } from "lucide-react";
 import { Card } from "@/components/ui/card";
@@ -41,6 +41,7 @@ export function FileUpload({
 }: FileUploadProps) {
   const [files, setFiles] = useState<UploadedFile[]>([]);
   const [isUploading, setIsUploading] = useState(false);
+  const buttonInputRef = useRef<HTMLInputElement>(null);
 
   const onDrop = useCallback(
     async (acceptedFiles: File[]) => {
@@ -165,13 +166,34 @@ export function FileUpload({
 
   // Button variant - compact button for headers/toolbars
   if (variant === "button") {
+    const handleButtonClick = () => {
+      buttonInputRef.current?.click();
+    };
+
+    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+      const selectedFiles = e.target.files;
+      if (selectedFiles && selectedFiles.length > 0) {
+        onDrop(Array.from(selectedFiles));
+      }
+      // Reset input so same file can be selected again
+      e.target.value = "";
+    };
+
     return (
-      <div {...getRootProps()} className="relative">
-        <input {...getInputProps()} />
+      <div className="relative">
+        <input
+          ref={buttonInputRef}
+          type="file"
+          multiple
+          accept=".pdf,.docx,.txt,.md,.csv"
+          onChange={handleInputChange}
+          className="hidden"
+        />
         <Button
           variant="outline"
           className="gap-2"
           disabled={isUploading}
+          onClick={handleButtonClick}
         >
           {isUploading ? (
             <Loader2 className="h-4 w-4 animate-spin" />
