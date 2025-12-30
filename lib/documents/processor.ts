@@ -268,37 +268,41 @@ export async function processAndStoreDocument(
       })
       .eq("id", documentId);
 
-    // Generate embeddings for all chunks
-    const chunkContents = processed.chunks.map((c) => c.content);
-    console.log(`📊 Generating embeddings for ${chunkContents.length} chunks...`);
-    const embeddings = await generateEmbeddings(chunkContents);
-    console.log(`✅ Generated ${embeddings.length} embeddings`);
+    // Try to generate embeddings (but don't fail if this doesn't work)
+    let embeddingsGenerated = false;
+    try {
+      const chunkContents = processed.chunks.map((c) => c.content);
+      console.log(`📊 Generating embeddings for ${chunkContents.length} chunks...`);
+      const embeddings = await generateEmbeddings(chunkContents);
+      console.log(`✅ Generated ${embeddings.length} embeddings`);
 
-    // Store chunks with embeddings
-    const chunksToInsert = processed.chunks.map((chunk, index) => ({
-      document_id: documentId,
-      chunk_index: chunk.chunkIndex,
-      content: chunk.content,
-      embedding: embeddings[index],
-    }));
+      // Store chunks with embeddings
+      const chunksToInsert = processed.chunks.map((chunk, index) => ({
+        document_id: documentId,
+        chunk_index: chunk.chunkIndex,
+        content: chunk.content,
+        embedding: embeddings[index],
+      }));
 
-    console.log(`💾 Inserting ${chunksToInsert.length} chunks into database...`);
-    // Use admin client to bypass RLS for background processing
-    const adminClient = createAdminClient();
-    const { data: insertedChunks, error: chunksError } = await adminClient
-      .from("document_chunks")
-      .insert(chunksToInsert)
-      .select();
+      console.log(`💾 Inserting ${chunksToInsert.length} chunks into database...`);
+      // Use admin client to bypass RLS for background processing
+      const adminClient = createAdminClient();
+      const { data: insertedChunks, error: chunksError } = await adminClient
+        .from("document_chunks")
+        .insert(chunksToInsert)
+        .select();
 
-    if (chunksError) {
-      console.error(`❌ Failed to insert chunks:`, chunksError);
-      console.error(`❌ Error code:`, chunksError.code);
-      console.error(`❌ Error details:`, chunksError.details);
-      console.error(`❌ Error hint:`, chunksError.hint);
-      throw new Error(`Failed to store chunks: ${chunksError.message}`);
+      if (chunksError) {
+        console.error(`❌ Failed to insert chunks:`, chunksError);
+        console.warn(`⚠️ Continuing without embeddings...`);
+      } else {
+        console.log(`✅ Successfully inserted ${insertedChunks?.length || 0} chunks`);
+        embeddingsGenerated = true;
+      }
+    } catch (embeddingError) {
+      console.error(`❌ Embedding generation failed:`, embeddingError);
+      console.warn(`⚠️ Document will be saved without embeddings (search may not work)`);
     }
-
-    console.log(`✅ Successfully inserted ${insertedChunks?.length || 0} chunks`);
 
     // Update document status to completed
     await supabase

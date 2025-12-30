@@ -74,7 +74,7 @@ export async function GET(req: NextRequest) {
         )
       `)
       .eq("organization_id", profile.organization_id)
-      .eq("status", "completed"); // Only show successfully uploaded documents
+      .in("status", ["completed", "processing"]); // Show completed and processing documents
 
     // Apply folder filter if provided (check if document is in the folder via junction table)
     if (folderId && folderId !== "null") {
