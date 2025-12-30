@@ -5,7 +5,7 @@ import { createClient } from "@/lib/supabase/server";
 // Delete a tag
 export async function DELETE(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const supabase = await createClient();
@@ -26,7 +26,7 @@ export async function DELETE(
       return NextResponse.json({ error: "Profile not found" }, { status: 404 });
     }
 
-    const tagId = params.id;
+    const tagId = documentId;
 
     // Verify tag exists and belongs to organization
     const { data: tag } = await supabase

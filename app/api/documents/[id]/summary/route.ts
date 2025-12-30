@@ -15,9 +15,10 @@ const anthropic = new Anthropic({
  */
 export async function POST(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id: documentId } = await params;
     const supabase = await createClient();
 
     const {
@@ -27,8 +28,6 @@ export async function POST(
     if (!user) {
       return new Response("Unauthorized", { status: 401 });
     }
-
-    const documentId = params.id;
 
     // Fetch the document
     const { data: document, error: fetchError } = await supabase
@@ -184,9 +183,10 @@ Respond in JSON format:
  */
 export async function DELETE(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id: documentId } = await params;
     const supabase = await createClient();
 
     const {
@@ -196,8 +196,6 @@ export async function DELETE(
     if (!user) {
       return new Response("Unauthorized", { status: 401 });
     }
-
-    const documentId = params.id;
 
     // Verify ownership
     const { data: document } = await supabase

@@ -10,7 +10,7 @@ export const dynamic = "force-dynamic";
  */
 export async function GET(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const supabase = await createClient();
@@ -23,7 +23,7 @@ export async function GET(
       return new Response("Unauthorized", { status: 401 });
     }
 
-    const documentId = params.id;
+    const { id: documentId } = await params;
 
     // Verify document exists and user has access
     const { data: document, error: fetchError } = await supabase

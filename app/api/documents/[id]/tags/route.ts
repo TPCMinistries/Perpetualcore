@@ -5,7 +5,7 @@ import { createClient } from "@/lib/supabase/server";
 // Get all tags for a specific document
 export async function GET(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const supabase = await createClient();
@@ -15,7 +15,7 @@ export async function GET(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const documentId = params.id;
+    const { id: documentId } = await params;
 
     // Verify document exists and user has access
     const { data: document } = await supabase
@@ -62,7 +62,7 @@ export async function GET(
 // Add a tag to a document
 export async function POST(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const supabase = await createClient();
@@ -72,7 +72,7 @@ export async function POST(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const documentId = params.id;
+    const { id: documentId } = await params;
     const body = await request.json();
     const { tag_id } = body;
 

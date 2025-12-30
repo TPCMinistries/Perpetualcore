@@ -10,7 +10,7 @@ export const dynamic = "force-dynamic";
  */
 export async function POST(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const supabase = await createClient();
@@ -23,7 +23,7 @@ export async function POST(
       return new Response("Unauthorized", { status: 401 });
     }
 
-    const documentId = params.id;
+    const { id: documentId } = await params;
     const body = await req.json();
     const {
       share_with_user_ids,

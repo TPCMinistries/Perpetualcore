@@ -5,7 +5,7 @@ import { createClient } from "@/lib/supabase/server";
 // Update a folder
 export async function PATCH(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const supabase = await createClient();
@@ -15,7 +15,7 @@ export async function PATCH(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const folderId = params.id;
+    const folderId = documentId;
     const body = await request.json();
     const { name, description, parent_folder_id, color, icon } = body;
 
@@ -124,7 +124,7 @@ export async function PATCH(
 // Delete a folder (moves documents to parent or root)
 export async function DELETE(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const supabase = await createClient();
@@ -134,7 +134,7 @@ export async function DELETE(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const folderId = params.id;
+    const folderId = documentId;
 
     // Get folder details and verify ownership
     const { data: folder } = await supabase

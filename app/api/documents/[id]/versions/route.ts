@@ -4,7 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 // GET /api/documents/[id]/versions
 export async function GET(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const supabase = await createClient();
@@ -14,7 +14,7 @@ export async function GET(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const documentId = params.id;
+    const { id: documentId } = await params;
 
     // Fetch versions with user info
     const { data: versions, error: versionsError } = await supabase
@@ -50,7 +50,7 @@ export async function GET(
 // POST /api/documents/[id]/versions - Create a new version
 export async function POST(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const supabase = await createClient();
@@ -73,7 +73,7 @@ export async function POST(
       );
     }
 
-    const documentId = params.id;
+    const { id: documentId } = await params;
     const body = await request.json();
     const { title, content, change_summary } = body;
 

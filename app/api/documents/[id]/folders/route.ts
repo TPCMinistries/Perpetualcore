@@ -6,7 +6,7 @@ export const dynamic = "force-dynamic";
 
 export async function POST(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const supabase = await createClient();
@@ -17,7 +17,7 @@ export async function POST(
     }
 
     const { folder_id } = await req.json();
-    const documentId = params.id;
+    const { id: documentId } = await params;
 
     if (!folder_id) {
       return new Response("Folder ID is required", { status: 400 });
@@ -72,7 +72,7 @@ export async function POST(
 
 export async function DELETE(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const supabase = await createClient();
@@ -83,7 +83,7 @@ export async function DELETE(
     }
 
     const { folder_id } = await req.json();
-    const documentId = params.id;
+    const { id: documentId } = await params;
 
     if (!folder_id) {
       return new Response("Folder ID is required", { status: 400 });

@@ -15,7 +15,7 @@ const anthropic = new Anthropic({
  */
 export async function POST(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const supabase = await createClient();
@@ -28,7 +28,7 @@ export async function POST(
       return new Response("Unauthorized", { status: 401 });
     }
 
-    const documentId = params.id;
+    const { id: documentId } = await params;
 
     // Fetch the document
     const { data: document, error: fetchError } = await supabase
