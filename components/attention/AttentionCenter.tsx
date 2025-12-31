@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -25,6 +26,7 @@ import {
   RefreshCw,
   Inbox,
   CheckCircle2,
+  Sparkles,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -167,9 +169,19 @@ export function AttentionCenter({ initialFilter = "all" }: AttentionCenterProps)
   const groupedItems = groupByPriority(sortedItems);
 
   return (
-    <div className="space-y-4">
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.4 }}
+      className="space-y-4"
+    >
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <motion.div
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4 }}
+        className="flex items-center justify-between"
+      >
         <div className="flex items-center gap-3">
           <div className="relative flex-1 min-w-[300px]">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -181,68 +193,112 @@ export function AttentionCenter({ initialFilter = "all" }: AttentionCenterProps)
             />
           </div>
         </div>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => fetchItems(true)}
-          disabled={refreshing}
-        >
-          <RefreshCw className={`h-4 w-4 mr-2 ${refreshing ? "animate-spin" : ""}`} />
-          Refresh
-        </Button>
-      </div>
+        <div className="flex items-center gap-2">
+          <Button variant="outline" size="sm" className="gap-2">
+            <Sparkles className="h-4 w-4" />
+            AI Prioritize
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => fetchItems(true)}
+            disabled={refreshing}
+          >
+            <RefreshCw className={`h-4 w-4 mr-2 ${refreshing ? "animate-spin" : ""}`} />
+            Refresh
+          </Button>
+        </div>
+      </motion.div>
 
       {/* Filters */}
-      <AttentionFilters
-        filterType={filterType}
-        filterUrgency={filterUrgency}
-        sortBy={sortBy}
-        viewMode={viewMode}
-        counts={counts}
-        onFilterTypeChange={setFilterType}
-        onFilterUrgencyChange={setFilterUrgency}
-        onSortChange={setSortBy}
-        onViewModeChange={setViewMode}
-      />
+      <motion.div
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.1 }}
+      >
+        <AttentionFilters
+          filterType={filterType}
+          filterUrgency={filterUrgency}
+          sortBy={sortBy}
+          viewMode={viewMode}
+          counts={counts}
+          onFilterTypeChange={setFilterType}
+          onFilterUrgencyChange={setFilterUrgency}
+          onSortChange={setSortBy}
+          onViewModeChange={setViewMode}
+        />
+      </motion.div>
 
       {/* Bulk Action Bar */}
-      <BulkActionBar
-        selectedCount={selectedIds.size}
-        onMarkDone={() => handleBulkAction("resolve")}
-        onArchive={() => handleBulkAction("archive")}
-        onStar={() => handleBulkAction("star")}
-        onSnooze={() => handleBulkAction("snooze")}
-        onDelete={() => handleBulkAction("delete")}
-        onClearSelection={clearSelection}
-      />
+      <AnimatePresence>
+        {selectedIds.size > 0 && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={{ duration: 0.2 }}
+          >
+            <BulkActionBar
+              selectedCount={selectedIds.size}
+              onMarkDone={() => handleBulkAction("resolve")}
+              onArchive={() => handleBulkAction("archive")}
+              onStar={() => handleBulkAction("star")}
+              onSnooze={() => handleBulkAction("snooze")}
+              onDelete={() => handleBulkAction("delete")}
+              onClearSelection={clearSelection}
+            />
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Content */}
-      <Card className="divide-y divide-border/50">
-        {loading ? (
-          <div className="p-4 space-y-3">
-            {[...Array(5)].map((_, i) => (
-              <div key={i} className="flex items-start gap-3 p-3">
-                <Skeleton className="h-8 w-8 rounded-lg" />
-                <div className="flex-1 space-y-2">
-                  <Skeleton className="h-4 w-3/4" />
-                  <Skeleton className="h-3 w-1/2" />
-                </div>
-              </div>
-            ))}
-          </div>
-        ) : sortedItems.length === 0 ? (
-          <div className="p-12 text-center">
-            <div className="mx-auto w-20 h-20 mb-4 rounded-full bg-green-50 dark:bg-green-950/30 flex items-center justify-center">
-              <CheckCircle2 className="h-10 w-10 text-green-500" />
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.2 }}
+      >
+        <Card className="divide-y divide-border/50 overflow-hidden">
+          {loading ? (
+            <div className="p-4 space-y-3">
+              {[...Array(5)].map((_, i) => (
+                <motion.div
+                  key={i}
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: i * 0.1 }}
+                  className="flex items-start gap-3 p-3"
+                >
+                  <Skeleton className="h-8 w-8 rounded-lg" />
+                  <div className="flex-1 space-y-2">
+                    <Skeleton className="h-4 w-3/4" />
+                    <Skeleton className="h-3 w-1/2" />
+                  </div>
+                </motion.div>
+              ))}
             </div>
-            <h3 className="text-lg font-semibold mb-2">All caught up!</h3>
-            <p className="text-sm text-muted-foreground">
-              {searchQuery
-                ? "No items match your search"
-                : "You have no items requiring attention"}
-            </p>
-          </div>
-        ) : viewMode === "grouped" ? (
+          ) : sortedItems.length === 0 ? (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.3 }}
+              className="p-12 text-center"
+            >
+              <motion.div
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{ type: "spring", stiffness: 200, damping: 15 }}
+                className="mx-auto w-20 h-20 mb-4 rounded-full bg-green-50 dark:bg-green-950/30 flex items-center justify-center"
+              >
+                <CheckCircle2 className="h-10 w-10 text-green-500" />
+              </motion.div>
+              <h3 className="text-lg font-semibold mb-2">All caught up!</h3>
+              <p className="text-sm text-muted-foreground">
+                {searchQuery
+                  ? "No items match your search"
+                  : "You have no items requiring attention"}
+              </p>
+            </motion.div>
+          ) : viewMode === "grouped" ? (
           // Grouped View
           <div className="divide-y divide-border">
             {groupedItems.critical.length > 0 && (
@@ -324,18 +380,29 @@ export function AttentionCenter({ initialFilter = "all" }: AttentionCenterProps)
           </div>
         ) : (
           // List View
-          sortedItems.map((item) => (
-            <AttentionItemComponent
-              key={item.id}
-              item={item}
-              isSelected={selectedIds.has(item.id)}
-              onSelect={() => toggleSelect(item.id)}
-              onResolve={() => handleResolve(item.id)}
-              onArchive={() => handleArchive(item.id)}
-            />
-          ))
+          <AnimatePresence mode="popLayout">
+            {sortedItems.map((item, index) => (
+              <motion.div
+                key={item.id}
+                layout
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: 20 }}
+                transition={{ delay: index * 0.03 }}
+              >
+                <AttentionItemComponent
+                  item={item}
+                  isSelected={selectedIds.has(item.id)}
+                  onSelect={() => toggleSelect(item.id)}
+                  onResolve={() => handleResolve(item.id)}
+                  onArchive={() => handleArchive(item.id)}
+                />
+              </motion.div>
+            ))}
+          </AnimatePresence>
         )}
-      </Card>
-    </div>
+        </Card>
+      </motion.div>
+    </motion.div>
   );
 }
