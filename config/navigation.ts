@@ -41,6 +41,12 @@ import {
   Target,
   Church,
   Heart,
+  // New icons for redesign
+  LayoutDashboard,
+  Workflow,
+  Boxes,
+  Link2,
+  Plug,
 } from "lucide-react";
 import { UserExperienceLevel, AdaptiveNavConfig } from "@/types/user-experience";
 
@@ -541,4 +547,282 @@ export function getNavigationStats() {
       0
     ),
   };
+}
+
+// ============================================
+// NEW STREAMLINED NAVIGATION (UX V2)
+// ============================================
+
+/**
+ * Streamlined 5-section navigation structure
+ * Designed for "living digitally" - intuitive, action-oriented
+ */
+export const NAVIGATION_CONFIG_V2: NavigationSection[] = [
+  // CORE - Always visible, most essential features
+  {
+    section: "", // No header for core items
+    color: "text-slate-600 dark:text-slate-400",
+    bgColor: "bg-slate-50 dark:bg-slate-950/30",
+    items: [
+      {
+        name: "Home",
+        href: "/dashboard/home",
+        icon: LayoutDashboard,
+        adaptiveConfig: {
+          visibleFor: ["beginner", "intermediate", "advanced"],
+          complexity: "essential",
+          isCore: true,
+          helpText: "Your daily briefing - priorities, insights, and what needs attention",
+        },
+      },
+      {
+        name: "Inbox",
+        href: "/dashboard/inbox",
+        icon: Inbox,
+        adaptiveConfig: {
+          visibleFor: ["beginner", "intermediate", "advanced"],
+          complexity: "essential",
+          isCore: true,
+          helpText: "Everything needing your attention - tasks, emails, notifications, bot results",
+        },
+      },
+      {
+        name: "Search",
+        href: "/dashboard/search",
+        icon: Search,
+        adaptiveConfig: {
+          visibleFor: ["beginner", "intermediate", "advanced"],
+          complexity: "essential",
+          isCore: true,
+          helpText: "AI-powered search across all your documents, conversations, and data",
+        },
+      },
+    ],
+  },
+
+  // WORK - Core productivity
+  {
+    section: "Work",
+    color: "text-slate-600 dark:text-slate-400",
+    bgColor: "bg-slate-50 dark:bg-slate-950/30",
+    collapsible: true,
+    defaultCollapsed: false,
+    items: [
+      {
+        name: "Projects",
+        href: "/dashboard/projects",
+        icon: FolderKanban,
+        adaptiveConfig: {
+          visibleFor: ["beginner", "intermediate", "advanced"],
+          complexity: "essential",
+          isCore: true,
+          helpText: "Project workspaces with Kanban boards, team files, chat, and milestones",
+        },
+      },
+      {
+        name: "Tasks",
+        href: "/dashboard/tasks",
+        icon: CheckSquare,
+        adaptiveConfig: {
+          visibleFor: ["beginner", "intermediate", "advanced"],
+          complexity: "standard",
+          helpText: "Intelligent task management with AI extraction and prioritization",
+        },
+      },
+      {
+        name: "Documents",
+        href: "/dashboard/library",
+        icon: BookOpen,
+        adaptiveConfig: {
+          visibleFor: ["beginner", "intermediate", "advanced"],
+          complexity: "essential",
+          helpText: "Unified document library with AI-powered organization",
+        },
+      },
+      {
+        name: "Contacts",
+        href: "/dashboard/contacts",
+        icon: Contact,
+        adaptiveConfig: {
+          visibleFor: ["beginner", "intermediate", "advanced"],
+          complexity: "essential",
+          isCore: true,
+          helpText: "Your network - relationships, interactions, and opportunities",
+        },
+      },
+      {
+        name: "Calendar",
+        href: "/dashboard/calendar",
+        icon: Calendar,
+        adaptiveConfig: {
+          visibleFor: ["beginner", "intermediate", "advanced"],
+          complexity: "standard",
+          helpText: "Meetings, scheduling, and intelligent briefings",
+        },
+      },
+    ],
+  },
+
+  // AUTOMATE - All automation consolidated
+  {
+    section: "Automate",
+    color: "text-slate-600 dark:text-slate-400",
+    bgColor: "bg-slate-50 dark:bg-slate-950/30",
+    collapsible: true,
+    defaultCollapsed: false,
+    items: [
+      {
+        name: "Automation Hub",
+        href: "/dashboard/automation",
+        icon: Workflow,
+        adaptiveConfig: {
+          visibleFor: ["beginner", "intermediate", "advanced"],
+          complexity: "standard",
+          badge: "new",
+          helpText: "All your automations in one place - bots, workflows, n8n, scheduled jobs",
+        },
+      },
+      {
+        name: "AI Agents",
+        href: "/dashboard/agents",
+        icon: Bot,
+        adaptiveConfig: {
+          visibleFor: ["beginner", "intermediate", "advanced"],
+          complexity: "standard",
+          helpText: "Autonomous AI agents that work independently on complex tasks",
+        },
+      },
+      {
+        name: "Triggers",
+        href: "/dashboard/automation/triggers",
+        icon: Zap,
+        adaptiveConfig: {
+          visibleFor: ["intermediate", "advanced"],
+          complexity: "standard",
+          helpText: "Webhooks, schedules, and event triggers for your automations",
+        },
+      },
+    ],
+  },
+
+  // GROW - Sales and growth
+  {
+    section: "Grow",
+    color: "text-slate-600 dark:text-slate-400",
+    bgColor: "bg-slate-50 dark:bg-slate-950/30",
+    collapsible: true,
+    defaultCollapsed: false,
+    items: [
+      {
+        name: "Leads",
+        href: "/dashboard/leads",
+        icon: Target,
+        adaptiveConfig: {
+          visibleFor: ["beginner", "intermediate", "advanced"],
+          complexity: "standard",
+          helpText: "Sales pipeline and potential customer tracking",
+        },
+      },
+      {
+        name: "Outreach",
+        href: "/dashboard/outreach",
+        icon: Send,
+        adaptiveConfig: {
+          visibleFor: ["beginner", "intermediate", "advanced"],
+          complexity: "standard",
+          helpText: "Email sequences and automated outreach campaigns",
+        },
+      },
+      {
+        name: "Analytics",
+        href: "/dashboard/analytics",
+        icon: BarChart3,
+        adaptiveConfig: {
+          visibleFor: ["beginner", "intermediate", "advanced"],
+          complexity: "standard",
+          helpText: "Productivity metrics, ROI tracking, and insights",
+        },
+      },
+    ],
+  },
+
+  // SETTINGS - Configuration and admin
+  {
+    section: "Settings",
+    color: "text-slate-600 dark:text-slate-400",
+    bgColor: "bg-slate-50 dark:bg-slate-950/30",
+    collapsible: true,
+    defaultCollapsed: true,
+    items: [
+      {
+        name: "Preferences",
+        href: "/dashboard/settings",
+        icon: Settings,
+        adaptiveConfig: {
+          visibleFor: ["beginner", "intermediate", "advanced"],
+          complexity: "essential",
+          helpText: "Configure preferences, notifications, and account settings",
+        },
+      },
+      {
+        name: "Team",
+        href: "/dashboard/team",
+        icon: Users,
+        adaptiveConfig: {
+          visibleFor: ["beginner", "intermediate", "advanced"],
+          complexity: "standard",
+          helpText: "Manage team members and access permissions",
+        },
+      },
+      {
+        name: "Integrations",
+        href: "/dashboard/integrations",
+        icon: Plug,
+        adaptiveConfig: {
+          visibleFor: ["intermediate", "advanced"],
+          complexity: "standard",
+          helpText: "Connect external services and apps",
+        },
+      },
+      {
+        name: "Developer",
+        href: "/dashboard/developer",
+        icon: Code,
+        adaptiveConfig: {
+          visibleFor: ["advanced"],
+          complexity: "developer",
+          helpText: "API keys, webhooks, and developer tools",
+        },
+      },
+    ],
+  },
+];
+
+/**
+ * Get filtered navigation V2 based on user experience level
+ */
+export function getFilteredNavigationV2(
+  userLevel: UserExperienceLevel
+): NavigationSection[] {
+  return NAVIGATION_CONFIG_V2.map((section) => {
+    // Check if entire section should be hidden
+    if (section.visibleFor && !section.visibleFor.includes(userLevel)) {
+      return null;
+    }
+
+    // Filter items within the section
+    const filteredItems = section.items.filter((item) =>
+      item.adaptiveConfig.visibleFor.includes(userLevel)
+    );
+
+    // Only return section if it has visible items
+    if (filteredItems.length === 0) {
+      return null;
+    }
+
+    return {
+      ...section,
+      items: filteredItems,
+    };
+  }).filter(Boolean) as NavigationSection[];
 }

@@ -1,6 +1,20 @@
 import { createClient } from "@/lib/supabase/server";
 import { AIModel } from "@/types";
 import { UserTier } from "./model-selector";
+import {
+  trackAITokens,
+  trackPremiumModelTokens,
+  MeterUsageResult,
+} from "@/lib/billing/metering";
+import {
+  checkOverageAllowed,
+  OverageCheckResult,
+} from "@/lib/billing/overage";
+import {
+  calculateCost,
+  isModelAvailableForTier,
+} from "@/lib/billing/model-pricing";
+import { sendAlertNotifications } from "@/lib/billing/alerts";
 
 export interface QuotaCheckResult {
   allowed: boolean;
@@ -13,6 +27,10 @@ export interface QuotaCheckResult {
   dailyRemaining?: number;
   monthlyRemaining?: number;
   model?: string;
+  // New fields for overage
+  isOverage?: boolean;
+  overageAllowed?: boolean;
+  estimatedCost?: number;
 }
 
 export interface UserQuota {
@@ -96,6 +114,7 @@ export async function checkQuota(
 
 /**
  * Record usage after a request completes
+ * Enhanced with billing system integration for metered billing
  */
 export async function recordUsage(
   userId: string,
@@ -107,11 +126,18 @@ export async function recordUsage(
     conversationId?: string;
     taskType?: 'code' | 'writing' | 'analysis' | 'general';
   }
-): Promise<void> {
+): Promise<{
+  recorded: boolean;
+  meterResult?: MeterUsageResult;
+  isOverage?: boolean;
+  overageCost?: number;
+}> {
   const supabase = await createClient();
+  const totalTokens = inputTokens + outputTokens;
 
-  console.log(`[QuotaManager] Recording usage for user ${userId}: ${inputTokens + outputTokens} tokens, $${cost.toFixed(4)}`);
+  console.log(`[QuotaManager] Recording usage for user ${userId}: ${totalTokens} tokens, $${cost.toFixed(4)}`);
 
+  // Record in user_ai_usage (existing system)
   const { error } = await supabase.rpc('record_ai_usage', {
     p_user_id: userId,
     p_model: model,
@@ -124,10 +150,81 @@ export async function recordUsage(
 
   if (error) {
     console.error('[QuotaManager] Error recording usage:', error);
-    // Don't throw - this shouldn't break the user's request
-  } else {
-    console.log(`[QuotaManager] ✅ Usage recorded successfully`);
   }
+
+  // Get user's organization for metering
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('organization_id')
+    .eq('id', userId)
+    .single();
+
+  if (!profile?.organization_id) {
+    return { recorded: !error };
+  }
+
+  // Track in billing meters
+  let meterResult: MeterUsageResult | null = null;
+  try {
+    // Track general AI tokens
+    meterResult = await trackAITokens(profile.organization_id, totalTokens);
+
+    // Track premium model tokens separately if applicable
+    const isPremiumModel = ['claude-opus-4', 'gpt-4o', 'o1-preview'].includes(model);
+    if (isPremiumModel) {
+      await trackPremiumModelTokens(profile.organization_id, totalTokens);
+    }
+
+    // Check and send alerts if approaching/exceeding quota
+    await sendAlertNotifications(profile.organization_id);
+
+    console.log(`[QuotaManager] ✅ Usage recorded successfully (${meterResult?.isOverage ? 'OVERAGE' : 'within quota'})`);
+  } catch (meterError) {
+    console.error('[QuotaManager] Error tracking in billing meters:', meterError);
+  }
+
+  return {
+    recorded: !error,
+    meterResult: meterResult || undefined,
+    isOverage: meterResult?.isOverage,
+    overageCost: meterResult?.overageCost,
+  };
+}
+
+/**
+ * Record usage with automatic cost calculation
+ */
+export async function recordUsageWithCost(
+  userId: string,
+  model: AIModel,
+  inputTokens: number,
+  outputTokens: number,
+  options?: {
+    conversationId?: string;
+    taskType?: 'code' | 'writing' | 'analysis' | 'general';
+  }
+): Promise<{
+  recorded: boolean;
+  cost: number;
+  isOverage?: boolean;
+  overageCost?: number;
+}> {
+  // Calculate cost using model pricing
+  const costCalc = await calculateCost(model, inputTokens, outputTokens);
+
+  const result = await recordUsage(
+    userId,
+    model,
+    inputTokens,
+    outputTokens,
+    costCalc.totalCost,
+    options
+  );
+
+  return {
+    ...result,
+    cost: costCalc.totalCost,
+  };
 }
 
 /**
@@ -180,6 +277,97 @@ export function getDowngradedModel(
   }
 
   return requestedModel;
+}
+
+/**
+ * Enhanced quota check with overage support
+ * Returns whether request is allowed, even if in overage (if plan allows)
+ */
+export async function checkQuotaWithOverage(
+  userId: string,
+  estimatedTokens: number,
+  model: AIModel
+): Promise<QuotaCheckResult & { overageStatus?: OverageCheckResult }> {
+  const supabase = await createClient();
+
+  // First, do standard quota check
+  const quotaResult = await checkQuota(userId, estimatedTokens, model);
+
+  // Get user's organization
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('organization_id')
+    .eq('id', userId)
+    .single();
+
+  if (!profile?.organization_id) {
+    return quotaResult;
+  }
+
+  // Check if overage is allowed for this org
+  const overageStatus = await checkOverageAllowed(profile.organization_id);
+
+  // If standard quota allows, return as-is
+  if (quotaResult.allowed) {
+    return {
+      ...quotaResult,
+      isOverage: false,
+      overageAllowed: overageStatus.allowed,
+      overageStatus,
+    };
+  }
+
+  // Quota exceeded - check if overage is allowed
+  if (overageStatus.allowed) {
+    // Calculate estimated cost for this request
+    const costCalc = await calculateCost(model, estimatedTokens, 0);
+
+    return {
+      ...quotaResult,
+      allowed: true, // Allow with overage
+      reason: 'Quota exceeded - overage charges will apply',
+      isOverage: true,
+      overageAllowed: true,
+      estimatedCost: costCalc.totalCost,
+      overageStatus,
+    };
+  }
+
+  // Overage not allowed - deny
+  return {
+    ...quotaResult,
+    allowed: false,
+    reason: quotaResult.reason || 'Quota exceeded and overage not available on your plan',
+    isOverage: true,
+    overageAllowed: false,
+    overageStatus,
+  };
+}
+
+/**
+ * Check if a model is available for user's tier
+ */
+export async function checkModelAccess(
+  userId: string,
+  model: AIModel
+): Promise<{ allowed: boolean; reason?: string; tier?: string }> {
+  const quota = await getUserQuota(userId);
+
+  if (!quota) {
+    return { allowed: false, reason: 'Could not verify user quota' };
+  }
+
+  const modelAvailable = await isModelAvailableForTier(model, quota.tier);
+
+  if (!modelAvailable) {
+    return {
+      allowed: false,
+      reason: `Model ${model} is not available on the ${quota.tier} tier`,
+      tier: quota.tier,
+    };
+  }
+
+  return { allowed: true, tier: quota.tier };
 }
 
 /**

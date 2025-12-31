@@ -7,9 +7,12 @@ import { ThemeToggle } from "../theme-toggle";
 import { NotificationBell } from "../notifications/NotificationBell";
 import { RoleSwitcher } from "../profile/RoleSwitcher";
 import { SkipLink } from "../ui/accessibility";
+import { WorkspaceProvider, useWorkspace } from "../workspaces/WorkspaceProvider";
+import { AIAssistantProvider, FloatingAIAssistant, AIAssistantTrigger } from "../ai-assistant";
 import Link from "next/link";
 import { Button } from "../ui/button";
-import { PanelLeft, PanelLeftClose } from "lucide-react";
+import { Badge } from "../ui/badge";
+import { PanelLeft, PanelLeftClose, Sparkles } from "lucide-react";
 
 function DashboardLayoutInner({
   children,
@@ -98,8 +101,15 @@ export function DashboardLayoutClient({
   profile: any;
 }) {
   return (
-    <SidebarProvider>
-      <DashboardLayoutInner profile={profile}>{children}</DashboardLayoutInner>
-    </SidebarProvider>
+    <WorkspaceProvider>
+      <AIAssistantProvider>
+        <SidebarProvider>
+          <DashboardLayoutInner profile={profile}>{children}</DashboardLayoutInner>
+          {/* Floating AI Assistant */}
+          <FloatingAIAssistant />
+          <AIAssistantTrigger />
+        </SidebarProvider>
+      </AIAssistantProvider>
+    </WorkspaceProvider>
   );
 }

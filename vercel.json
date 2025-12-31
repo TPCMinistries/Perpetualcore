@@ -30,6 +30,14 @@
     {
       "path": "/api/cron/billing-sync",
       "schedule": "0 2 * * *"
+    },
+    {
+      "path": "/api/cron/process-webhooks",
+      "schedule": "* * * * *"
+    },
+    {
+      "path": "/api/cron/sync-usage",
+      "schedule": "0 * * * *"
     }
   ]
 }
