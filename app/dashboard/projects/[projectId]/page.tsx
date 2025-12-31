@@ -70,6 +70,7 @@ import { toast } from "sonner";
 import { ProjectAssistant } from "@/components/projects/ProjectAssistant";
 import { AITaskRunner } from "@/components/tasks/AITaskRunner";
 import { SuggestedContacts } from "@/components/contacts/SuggestedContacts";
+import { RelatedItems } from "@/components/cross-linking/RelatedItems";
 
 interface Task {
   id: string;
@@ -1082,6 +1083,23 @@ export default function ProjectWorkspacePage() {
                   projectName={project.name}
                   compact
                 />
+
+                {/* Related Contacts & Documents */}
+                <Card>
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-base">Linked Items</CardTitle>
+                  </CardHeader>
+                  <CardContent className="pt-0">
+                    <RelatedItems
+                      sourceType="project"
+                      sourceId={projectId}
+                      excludeTypes={["task", "project"]}
+                      compact
+                      showHeader={false}
+                      maxItems={8}
+                    />
+                  </CardContent>
+                </Card>
               </div>
             </div>
 

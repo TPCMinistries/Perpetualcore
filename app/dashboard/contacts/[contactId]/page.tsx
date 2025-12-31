@@ -69,6 +69,7 @@ import {
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { format, formatDistanceToNow } from "date-fns";
+import { RelatedItems } from "@/components/cross-linking/RelatedItems";
 
 interface PageProps {
   params: Promise<{ contactId: string }>;
@@ -504,6 +505,23 @@ export default function ContactDetailPage({ params }: PageProps) {
                     <span>{format(new Date(contact.next_followup_date), "MMM d, yyyy")}</span>
                   </div>
                 )}
+              </CardContent>
+            </Card>
+
+            {/* Related Tasks & Emails */}
+            <Card className="md:col-span-2">
+              <CardHeader>
+                <CardTitle className="text-lg">Related Items</CardTitle>
+                <CardDescription>Tasks, emails, and documents linked to this contact</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <RelatedItems
+                  sourceType="contact"
+                  sourceId={contactId}
+                  excludeTypes={["contact", "project"]}
+                  showHeader={false}
+                  maxItems={6}
+                />
               </CardContent>
             </Card>
 

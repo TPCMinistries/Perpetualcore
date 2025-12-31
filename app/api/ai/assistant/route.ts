@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { getChatCompletion, ChatMessage } from "@/lib/ai/router";
+import { AIModel } from "@/types";
 
 interface AIRequest {
   message: string;
@@ -13,6 +15,7 @@ interface AIRequest {
     role: "user" | "assistant";
     content: string;
   }>;
+  model?: AIModel;
 }
 
 export async function POST(request: NextRequest) {
@@ -25,19 +28,27 @@ export async function POST(request: NextRequest) {
     }
 
     const body: AIRequest = await request.json();
-    const { message, context, history } = body;
+    const { message, context, history, model = "auto" } = body;
 
-    // Build the prompt with context
-    const systemPrompt = buildSystemPrompt(context);
-    const messages = [
+    // Build the system prompt with context
+    const systemPrompt = buildSystemPrompt(context, user.email || "User");
+
+    // Build messages for the AI
+    const messages: ChatMessage[] = [
       { role: "system", content: systemPrompt },
-      ...history.map((m) => ({ role: m.role, content: m.content })),
+      ...history.map((m) => ({
+        role: m.role as "user" | "assistant",
+        content: m.content,
+      })),
       { role: "user", content: message },
     ];
 
-    // Call your AI provider (OpenAI, Anthropic, etc.)
-    // This is a placeholder - replace with your actual AI integration
-    const aiResponse = await callAI(messages);
+    // Call the AI router with the selected model
+    const { response: aiResponse, usage } = await getChatCompletion(
+      model,
+      messages,
+      "pro" // Assume pro tier for assistant users
+    );
 
     // Parse any actions from the response
     const actions = parseActions(aiResponse);
@@ -48,38 +59,71 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       response: aiResponse,
       actions,
+      usage,
     });
   } catch (error) {
     console.error("AI Assistant error:", error);
+
+    // Return a helpful error message
+    const errorMessage = error instanceof Error ? error.message : "Unknown error";
+
+    // If it's an API key issue, provide a specific message
+    if (errorMessage.includes("not initialized") || errorMessage.includes("API key")) {
+      return NextResponse.json({
+        response: "I'm currently unavailable because the AI service isn't configured. Please contact your administrator to set up the AI integration.",
+        actions: [],
+        error: "AI service not configured",
+      });
+    }
+
     return NextResponse.json(
-      { error: "Failed to process request" },
+      { error: "Failed to process request", details: errorMessage },
       { status: 500 }
     );
   }
 }
 
-function buildSystemPrompt(context: any): string {
-  const basePrompt = `You are an AI assistant integrated into a productivity platform called Perpetual Core. You help users with tasks, answer questions, and can take actions within the platform.
+function buildSystemPrompt(context: any, userEmail: string): string {
+  const currentDate = new Date().toLocaleDateString("en-US", {
+    weekday: "long",
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
+
+  const basePrompt = `You are an AI assistant integrated into Perpetual Core, a productivity and knowledge management platform. You help users with tasks, answer questions, and can suggest actions within the platform.
+
+Current Date: ${currentDate}
+User: ${userEmail}
 
 Current Context:
 - Page: ${context.route}
 - Page Type: ${context.pageType}
-- Selected Items: ${context.selectedItems.length > 0 ? JSON.stringify(context.selectedItems) : "None"}
-- Page Data: ${Object.keys(context.pageData).length > 0 ? JSON.stringify(context.pageData) : "None"}
+${context.selectedItems.length > 0 ? `- Selected Items: ${JSON.stringify(context.selectedItems, null, 2)}` : ""}
+${Object.keys(context.pageData).length > 0 ? `- Page Data: ${JSON.stringify(context.pageData, null, 2)}` : ""}
+
+Your Capabilities:
+1. Answer questions about the platform and its features
+2. Help with tasks, projects, contacts, and documents
+3. Provide insights and suggestions based on context
+4. Draft communications (emails, messages)
+5. Summarize content
+6. Prioritize and organize work
 
 Guidelines:
-1. Be concise and helpful
-2. Use the context to provide relevant suggestions
-3. When appropriate, suggest actions the user can take
-4. If you need to perform an action, indicate it clearly
-5. Stay focused on what the user is currently working on
+- Be concise and helpful
+- Use the current context to provide relevant suggestions
+- When you can perform an action, format it as [ACTION: action_type action_details]
+- If you need more information, ask clarifying questions
+- Stay focused on what the user is currently working on
+- Don't mention that you're an AI or apologize unnecessarily
 
-Available Actions (you can suggest these):
-- Navigate to another page
-- Search for something
-- Create a new item (task, document, etc.)
-- Summarize content
-- Draft communications
+Available Actions (format: [ACTION: type details]):
+- [ACTION: navigate /dashboard/path] - Navigate to another page
+- [ACTION: create_task "Task title"] - Create a new task
+- [ACTION: create_project "Project name"] - Create a new project
+- [ACTION: search "query"] - Search the platform
+- [ACTION: send_email to@email.com "Subject"] - Draft an email
 `;
 
   // Add page-specific context
@@ -89,31 +133,64 @@ You are helping with email and messages. You can:
 - Summarize unread messages
 - Help draft replies
 - Categorize and prioritize messages
-- Find specific messages`,
+- Find specific messages
+- Suggest follow-ups based on email content`,
+
     documents: `
 You are helping with documents. You can:
 - Summarize document content
 - Extract key information
 - Find similar documents
-- Suggest improvements`,
+- Answer questions about document content
+- Suggest document organization`,
+
     tasks: `
 You are helping with task management. You can:
 - Help prioritize tasks
 - Break down tasks into subtasks
-- Estimate time for tasks
-- Suggest next actions`,
+- Estimate effort for tasks
+- Suggest next actions
+- Identify blocked or overdue items`,
+
+    projects: `
+You are helping with project management. You can:
+- Provide project status summaries
+- Suggest next milestones
+- Identify blockers or risks
+- Help with project planning
+- Review project progress`,
+
     automation: `
 You are helping with automations. You can:
 - Explain automation results
-- Debug failures
+- Debug automation failures
 - Suggest optimizations
-- Help create new automations`,
+- Help design new automations
+- Analyze automation performance`,
+
     contacts: `
-You are helping with contacts. You can:
+You are helping with contacts and relationships. You can:
 - Show interaction history
 - Draft communications
 - Suggest follow-ups
-- Find related contacts`,
+- Find related contacts
+- Provide relationship insights`,
+
+    home: `
+You are on the main dashboard. You can:
+- Provide a daily briefing
+- Highlight important items
+- Suggest what to focus on
+- Answer general questions
+- Navigate to any feature`,
+
+    analytics: `
+You are helping with analytics and insights. You can:
+- Explain metrics and trends
+- Identify areas for improvement
+- Compare performance over time
+- Generate reports
+- Suggest data-driven actions`,
   };
 
   if (pageContexts[context.pageType]) {
@@ -123,48 +200,70 @@ You are helping with contacts. You can:
   return basePrompt;
 }
 
-async function callAI(messages: any[]): Promise<string> {
-  // Placeholder - replace with your actual AI provider integration
-  // Example with OpenAI:
-  // const response = await openai.chat.completions.create({
-  //   model: "gpt-4",
-  //   messages,
-  // });
-  // return response.choices[0].message.content;
-
-  // For now, return a helpful placeholder response
-  const lastUserMessage = messages[messages.length - 1].content;
-
-  // Simple pattern matching for demo
-  if (lastUserMessage.toLowerCase().includes("summarize")) {
-    return "I can help summarize content for you. To do this effectively, I would need access to the specific content you'd like summarized. Could you select the items or navigate to the content you'd like me to analyze?";
-  }
-
-  if (lastUserMessage.toLowerCase().includes("help") || lastUserMessage.toLowerCase().includes("what can")) {
-    return "I'm here to help! Based on your current page, I can assist with:\n\n• Answering questions about your data\n• Helping draft communications\n• Suggesting next actions\n• Searching for specific items\n• Explaining features\n\nJust let me know what you'd like to do!";
-  }
-
-  if (lastUserMessage.toLowerCase().includes("prioritize")) {
-    return "To help prioritize effectively, I look at:\n\n1. Due dates and deadlines\n2. Importance and impact\n3. Dependencies on other tasks\n4. Your past patterns\n\nWould you like me to analyze your current tasks and suggest a priority order?";
-  }
-
-  return "I understand. How can I help you with that? Feel free to provide more details or ask me to perform a specific action.";
-}
-
 function parseActions(response: string): any[] {
-  // Parse any action indicators from the AI response
-  // This is a simplified version - you might use a more sophisticated parsing
   const actions: any[] = [];
 
-  // Look for action patterns like [ACTION: navigate to /dashboard/tasks]
-  const actionPattern = /\[ACTION:\s*(.*?)\]/g;
+  // Look for action patterns like [ACTION: type details]
+  const actionPattern = /\[ACTION:\s*(\w+)\s+(.+?)\]/g;
   let match;
 
   while ((match = actionPattern.exec(response)) !== null) {
-    const actionText = match[1];
-    if (actionText.startsWith("navigate to")) {
-      const url = actionText.replace("navigate to", "").trim();
-      actions.push({ type: "navigate", payload: { url } });
+    const actionType = match[1];
+    const actionDetails = match[2].trim();
+
+    switch (actionType) {
+      case "navigate":
+        actions.push({
+          type: "navigate",
+          payload: { url: actionDetails },
+          label: `Go to ${actionDetails}`,
+        });
+        break;
+
+      case "create_task":
+        const taskTitle = actionDetails.replace(/^["']|["']$/g, "");
+        actions.push({
+          type: "create_task",
+          payload: { title: taskTitle },
+          label: `Create task: ${taskTitle}`,
+        });
+        break;
+
+      case "create_project":
+        const projectName = actionDetails.replace(/^["']|["']$/g, "");
+        actions.push({
+          type: "create_project",
+          payload: { name: projectName },
+          label: `Create project: ${projectName}`,
+        });
+        break;
+
+      case "search":
+        const query = actionDetails.replace(/^["']|["']$/g, "");
+        actions.push({
+          type: "search",
+          payload: { query },
+          label: `Search: ${query}`,
+        });
+        break;
+
+      case "send_email":
+        const emailMatch = actionDetails.match(/(\S+@\S+)\s+["'](.+?)["']/);
+        if (emailMatch) {
+          actions.push({
+            type: "send_email",
+            payload: { to: emailMatch[1], subject: emailMatch[2] },
+            label: `Draft email to ${emailMatch[1]}`,
+          });
+        }
+        break;
+
+      default:
+        actions.push({
+          type: actionType,
+          payload: { raw: actionDetails },
+          label: `${actionType}: ${actionDetails}`,
+        });
     }
   }
 
@@ -179,15 +278,41 @@ async function saveConversation(
   aiResponse: string
 ) {
   try {
-    await supabase.from("ai_assistant_conversations").insert({
-      user_id: userId,
-      context_type: context.pageType,
-      context_id: context.route,
-      messages: [
-        { role: "user", content: userMessage, timestamp: new Date().toISOString() },
-        { role: "assistant", content: aiResponse, timestamp: new Date().toISOString() },
-      ],
-    });
+    // Try to find existing conversation for this context
+    const { data: existing } = await supabase
+      .from("ai_assistant_conversations")
+      .select("id, messages")
+      .eq("user_id", userId)
+      .eq("context_type", context.pageType)
+      .eq("context_id", context.route)
+      .order("updated_at", { ascending: false })
+      .limit(1)
+      .single();
+
+    const newMessages = [
+      { role: "user", content: userMessage, timestamp: new Date().toISOString() },
+      { role: "assistant", content: aiResponse, timestamp: new Date().toISOString() },
+    ];
+
+    if (existing) {
+      // Append to existing conversation (keep last 20 messages)
+      const updatedMessages = [...(existing.messages || []), ...newMessages].slice(-20);
+      await supabase
+        .from("ai_assistant_conversations")
+        .update({
+          messages: updatedMessages,
+          updated_at: new Date().toISOString(),
+        })
+        .eq("id", existing.id);
+    } else {
+      // Create new conversation
+      await supabase.from("ai_assistant_conversations").insert({
+        user_id: userId,
+        context_type: context.pageType,
+        context_id: context.route,
+        messages: newMessages,
+      });
+    }
   } catch (error) {
     console.error("Failed to save conversation:", error);
     // Non-critical, don't throw

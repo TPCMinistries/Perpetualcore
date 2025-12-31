@@ -209,18 +209,96 @@ function getPageType(pathname: string): string {
   return "general";
 }
 
-async function executeAction(action: { type: string; payload: any }) {
-  switch (action.type) {
-    case "navigate":
-      window.location.href = action.payload.url;
-      break;
-    case "copy":
-      await navigator.clipboard.writeText(action.payload.text);
-      break;
-    case "openModal":
-      window.dispatchEvent(new CustomEvent("ai-action", { detail: action }));
-      break;
-    default:
-      console.log("Unknown action:", action);
+async function executeAction(action: { type: string; payload: any; label?: string }) {
+  try {
+    switch (action.type) {
+      case "navigate":
+        // Use router for SPA navigation
+        window.location.href = action.payload.url;
+        break;
+
+      case "create_task":
+        // Create a new task via API
+        const taskRes = await fetch("/api/tasks", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            title: action.payload.title,
+            description: action.payload.description || "",
+            priority: action.payload.priority || "medium",
+          }),
+        });
+        if (taskRes.ok) {
+          const { task } = await taskRes.json();
+          // Dispatch success event for toast notification
+          window.dispatchEvent(
+            new CustomEvent("ai-action-success", {
+              detail: { message: `Task created: ${task.title}`, action },
+            })
+          );
+        }
+        break;
+
+      case "create_project":
+        // Create a new project via API
+        const projectRes = await fetch("/api/projects", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            name: action.payload.name,
+            description: action.payload.description || "",
+          }),
+        });
+        if (projectRes.ok) {
+          const { project } = await projectRes.json();
+          window.dispatchEvent(
+            new CustomEvent("ai-action-success", {
+              detail: { message: `Project created: ${project.name}`, action },
+            })
+          );
+        }
+        break;
+
+      case "search":
+        // Navigate to search with query
+        window.location.href = `/dashboard/search?q=${encodeURIComponent(action.payload.query)}`;
+        break;
+
+      case "send_email":
+        // Navigate to compose email with pre-filled data
+        const emailParams = new URLSearchParams({
+          to: action.payload.to || "",
+          subject: action.payload.subject || "",
+        });
+        window.location.href = `/dashboard/inbox/compose?${emailParams.toString()}`;
+        break;
+
+      case "copy":
+        await navigator.clipboard.writeText(action.payload.text);
+        window.dispatchEvent(
+          new CustomEvent("ai-action-success", {
+            detail: { message: "Copied to clipboard", action },
+          })
+        );
+        break;
+
+      case "openModal":
+        window.dispatchEvent(new CustomEvent("ai-action", { detail: action }));
+        break;
+
+      default:
+        console.log("Unknown action:", action);
+        // Dispatch event for custom handling
+        window.dispatchEvent(
+          new CustomEvent("ai-action", { detail: action })
+        );
+    }
+  } catch (error) {
+    console.error("Failed to execute action:", error);
+    window.dispatchEvent(
+      new CustomEvent("ai-action-error", {
+        detail: { message: `Failed: ${action.label || action.type}`, error },
+      })
+    );
   }
 }

@@ -64,6 +64,7 @@ import {
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { AICompanion } from "@/components/tasks/AICompanion";
+import { RelatedItems } from "@/components/cross-linking/RelatedItems";
 
 interface Task {
   id: string;
@@ -869,6 +870,22 @@ export default function TaskDetailPage() {
             </div>
           </div>
         )}
+
+        {/* Related Items Section */}
+        <div className="bg-white dark:bg-slate-800/50 rounded-2xl border border-slate-200 dark:border-slate-700/50 p-6 mb-6">
+          <h2 className="text-lg font-semibold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
+            <span className="h-8 w-8 rounded-lg bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center">
+              <span className="text-white text-sm">🔗</span>
+            </span>
+            Related Items
+          </h2>
+          <RelatedItems
+            sourceType="task"
+            sourceId={taskId}
+            excludeTypes={["task"]}
+            showHeader={false}
+          />
+        </div>
 
         {/* Bottom Actions */}
         <div className="flex items-center justify-between">
