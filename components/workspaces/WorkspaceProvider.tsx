@@ -1,6 +1,7 @@
 "use client";
 
 import { createContext, useContext, useState, useEffect, useCallback } from "react";
+import { createClient } from "@/lib/supabase/client";
 import {
   WorkspaceConfig,
   WorkspaceId,
@@ -14,11 +15,12 @@ interface WorkspaceContextType {
   setWorkspace: (id: WorkspaceId) => void;
   availableWorkspaces: WorkspaceConfig[];
   customWorkspaces: WorkspaceConfig[];
-  addCustomWorkspace: (workspace: WorkspaceConfig) => void;
-  removeCustomWorkspace: (id: string) => void;
+  addCustomWorkspace: (workspace: Omit<WorkspaceConfig, "id">) => Promise<void>;
+  removeCustomWorkspace: (id: string) => Promise<void>;
   isItemVisible: (itemName: string) => boolean;
   isSectionVisible: (sectionName: string) => boolean;
   isSectionPrioritized: (sectionName: string) => boolean;
+  isLoading: boolean;
 }
 
 const WorkspaceContext = createContext<WorkspaceContextType>({
@@ -26,43 +28,85 @@ const WorkspaceContext = createContext<WorkspaceContextType>({
   setWorkspace: () => {},
   availableWorkspaces: BUILT_IN_WORKSPACES,
   customWorkspaces: [],
-  addCustomWorkspace: () => {},
-  removeCustomWorkspace: () => {},
+  addCustomWorkspace: async () => {},
+  removeCustomWorkspace: async () => {},
   isItemVisible: () => true,
   isSectionVisible: () => true,
   isSectionPrioritized: () => false,
+  isLoading: true,
 });
 
 export const useWorkspace = () => useContext(WorkspaceContext);
 
 const STORAGE_KEY = "ai-os-workspace";
-const CUSTOM_WORKSPACES_KEY = "ai-os-custom-workspaces";
 
 export function WorkspaceProvider({ children }: { children: React.ReactNode }) {
   const [currentWorkspace, setCurrentWorkspace] = useState<WorkspaceConfig>(
     getDefaultWorkspace()
   );
   const [customWorkspaces, setCustomWorkspaces] = useState<WorkspaceConfig[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [userId, setUserId] = useState<string | null>(null);
 
-  // Load workspace from localStorage on mount
+  // Load workspaces from database and localStorage
   useEffect(() => {
-    const savedId = localStorage.getItem(STORAGE_KEY);
-    if (savedId) {
-      const workspace = getWorkspaceById(savedId as WorkspaceId);
-      if (workspace) {
-        setCurrentWorkspace(workspace);
-      }
-    }
-
-    // Load custom workspaces
-    const savedCustom = localStorage.getItem(CUSTOM_WORKSPACES_KEY);
-    if (savedCustom) {
+    const loadWorkspaces = async () => {
       try {
-        setCustomWorkspaces(JSON.parse(savedCustom));
-      } catch (e) {
-        console.error("Failed to parse custom workspaces:", e);
+        const supabase = createClient();
+        const { data: { user } } = await supabase.auth.getUser();
+
+        if (user) {
+          setUserId(user.id);
+
+          // Load user's custom workspaces from database
+          const { data: dbWorkspaces } = await supabase
+            .from("user_workspaces")
+            .select("*")
+            .eq("user_id", user.id);
+
+          if (dbWorkspaces && dbWorkspaces.length > 0) {
+            const customWs = dbWorkspaces.map((ws) => ({
+              id: ws.id,
+              name: ws.name,
+              icon: ws.config?.icon || "📁",
+              description: ws.config?.description || "",
+              ...ws.config,
+              isCustom: true,
+            }));
+            setCustomWorkspaces(customWs);
+
+            // Find and set default workspace
+            const defaultWs = dbWorkspaces.find((ws) => ws.is_default);
+            if (defaultWs) {
+              const wsConfig = {
+                id: defaultWs.id,
+                name: defaultWs.name,
+                icon: defaultWs.config?.icon || "📁",
+                description: defaultWs.config?.description || "",
+                ...defaultWs.config,
+                isCustom: true,
+              };
+              setCurrentWorkspace(wsConfig);
+            }
+          }
+        }
+
+        // Also check localStorage for last used workspace
+        const savedId = localStorage.getItem(STORAGE_KEY);
+        if (savedId) {
+          const builtInWs = getWorkspaceById(savedId as WorkspaceId);
+          if (builtInWs) {
+            setCurrentWorkspace(builtInWs);
+          }
+        }
+      } catch (error) {
+        console.error("Failed to load workspaces:", error);
+      } finally {
+        setIsLoading(false);
       }
-    }
+    };
+
+    loadWorkspaces();
   }, []);
 
   const setWorkspace = useCallback((id: WorkspaceId) => {
@@ -82,26 +126,76 @@ export function WorkspaceProvider({ children }: { children: React.ReactNode }) {
     }
   }, [customWorkspaces]);
 
-  const addCustomWorkspace = useCallback((workspace: WorkspaceConfig) => {
-    const newWorkspace = { ...workspace, isCustom: true };
-    setCustomWorkspaces((prev) => {
-      const updated = [...prev, newWorkspace];
-      localStorage.setItem(CUSTOM_WORKSPACES_KEY, JSON.stringify(updated));
-      return updated;
-    });
-  }, []);
+  const addCustomWorkspace = useCallback(async (workspace: Omit<WorkspaceConfig, "id">) => {
+    if (!userId) return;
 
-  const removeCustomWorkspace = useCallback((id: string) => {
-    setCustomWorkspaces((prev) => {
-      const updated = prev.filter((w) => w.id !== id);
-      localStorage.setItem(CUSTOM_WORKSPACES_KEY, JSON.stringify(updated));
-      return updated;
-    });
-    // If removing current workspace, switch to default
-    if (currentWorkspace.id === id) {
-      setWorkspace("default");
+    try {
+      const supabase = createClient();
+      const { data, error } = await supabase
+        .from("user_workspaces")
+        .insert({
+          user_id: userId,
+          name: workspace.name,
+          config: {
+            icon: workspace.icon,
+            description: workspace.description,
+            prioritizeSections: workspace.prioritizeSections,
+            hideSections: workspace.hideSections,
+            showOnlyItems: workspace.showOnlyItems,
+            hideItems: workspace.hideItems,
+            silentNotifications: workspace.silentNotifications,
+            aiMode: workspace.aiMode,
+            quickActions: workspace.quickActions,
+            accentColor: workspace.accentColor,
+          },
+          is_default: false,
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      if (data) {
+        const newWorkspace: WorkspaceConfig = {
+          id: data.id,
+          name: data.name,
+          icon: data.config?.icon || "📁",
+          description: data.config?.description || "",
+          ...data.config,
+          isCustom: true,
+        };
+        setCustomWorkspaces((prev) => [...prev, newWorkspace]);
+      }
+    } catch (error) {
+      console.error("Failed to create workspace:", error);
+      throw error;
     }
-  }, [currentWorkspace.id, setWorkspace]);
+  }, [userId]);
+
+  const removeCustomWorkspace = useCallback(async (id: string) => {
+    if (!userId) return;
+
+    try {
+      const supabase = createClient();
+      const { error } = await supabase
+        .from("user_workspaces")
+        .delete()
+        .eq("id", id)
+        .eq("user_id", userId);
+
+      if (error) throw error;
+
+      setCustomWorkspaces((prev) => prev.filter((w) => w.id !== id));
+
+      // If removing current workspace, switch to default
+      if (currentWorkspace.id === id) {
+        setWorkspace("default");
+      }
+    } catch (error) {
+      console.error("Failed to delete workspace:", error);
+      throw error;
+    }
+  }, [userId, currentWorkspace.id, setWorkspace]);
 
   // Check if a navigation item should be visible in current workspace
   const isItemVisible = useCallback(
@@ -167,6 +261,7 @@ export function WorkspaceProvider({ children }: { children: React.ReactNode }) {
         isItemVisible,
         isSectionVisible,
         isSectionPrioritized,
+        isLoading,
       }}
     >
       {children}

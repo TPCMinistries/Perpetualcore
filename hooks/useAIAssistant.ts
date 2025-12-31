@@ -8,6 +8,11 @@ export interface AIContext {
   pageType: string;
   selectedItems: any[];
   pageData: Record<string, any>;
+  workspace?: {
+    id: string;
+    name: string;
+    aiMode?: string;
+  };
 }
 
 export interface AIMessage {
@@ -63,6 +68,30 @@ export function useAIAssistant() {
   const setPageData = useCallback((data: Record<string, any>) => {
     setContext((prev) => ({ ...prev, pageData: { ...prev.pageData, ...data } }));
   }, []);
+
+  // Update workspace context
+  const setWorkspaceContext = useCallback((workspace: { id: string; name: string; aiMode?: string }) => {
+    setContext((prev) => ({ ...prev, workspace }));
+  }, []);
+
+  // Listen for workspace changes
+  useEffect(() => {
+    const handleWorkspaceChange = (event: CustomEvent) => {
+      const { workspace } = event.detail;
+      if (workspace) {
+        setWorkspaceContext({
+          id: workspace.id,
+          name: workspace.name,
+          aiMode: workspace.aiMode,
+        });
+      }
+    };
+
+    window.addEventListener("workspaceChanged" as any, handleWorkspaceChange);
+    return () => {
+      window.removeEventListener("workspaceChanged" as any, handleWorkspaceChange);
+    };
+  }, [setWorkspaceContext]);
 
   // Send message to AI
   const sendMessage = useCallback(

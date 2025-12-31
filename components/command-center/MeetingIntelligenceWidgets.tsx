@@ -428,7 +428,7 @@ export function RecentAutomationsWidget() {
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => router.push("/dashboard/automation-center")}
+            onClick={() => router.push("/dashboard/automation")}
             className="text-violet-600 text-xs"
           >
             View all <ChevronRight className="h-3 w-3 ml-1" />
@@ -453,7 +453,7 @@ export function RecentAutomationsWidget() {
               return (
                 <div
                   key={log.id}
-                  onClick={() => router.push("/dashboard/automation-center")}
+                  onClick={() => router.push("/dashboard/automation")}
                   className="flex items-center gap-3 p-2 rounded-lg hover:bg-muted/50 transition-colors cursor-pointer"
                 >
                   <div className={cn("h-2 w-2 rounded-full flex-shrink-0", config.color)} />

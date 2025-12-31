@@ -10,6 +10,11 @@ interface AIRequest {
     pageType: string;
     selectedItems: any[];
     pageData: Record<string, any>;
+    workspace?: {
+      id: string;
+      name: string;
+      aiMode?: string;
+    };
   };
   history: Array<{
     role: "user" | "assistant";
@@ -91,16 +96,21 @@ function buildSystemPrompt(context: any, userEmail: string): string {
     day: "numeric",
   });
 
+  // Get workspace-specific mode instructions
+  const workspaceModeInstructions = getWorkspaceModeInstructions(context.workspace?.aiMode);
+
   const basePrompt = `You are an AI assistant integrated into Perpetual Core, a productivity and knowledge management platform. You help users with tasks, answer questions, and can suggest actions within the platform.
 
 Current Date: ${currentDate}
 User: ${userEmail}
+${context.workspace ? `Workspace: ${context.workspace.name} (${context.workspace.aiMode || "default"} mode)` : ""}
 
 Current Context:
 - Page: ${context.route}
 - Page Type: ${context.pageType}
 ${context.selectedItems.length > 0 ? `- Selected Items: ${JSON.stringify(context.selectedItems, null, 2)}` : ""}
 ${Object.keys(context.pageData).length > 0 ? `- Page Data: ${JSON.stringify(context.pageData, null, 2)}` : ""}
+${workspaceModeInstructions ? `\nWorkspace Mode Instructions:\n${workspaceModeInstructions}` : ""}
 
 Your Capabilities:
 1. Answer questions about the platform and its features
@@ -268,6 +278,42 @@ function parseActions(response: string): any[] {
   }
 
   return actions;
+}
+
+function getWorkspaceModeInstructions(aiMode?: string): string {
+  switch (aiMode) {
+    case "sales":
+      return `You are in SALES MODE. Focus on:
+- Lead qualification and scoring
+- Pipeline management and deal progression
+- Outreach and follow-up strategies
+- CRM best practices
+- Meeting scheduling and preparation
+- Objection handling techniques
+Be proactive about suggesting sales actions like logging calls, scheduling follow-ups, and tracking deals.`;
+
+    case "research":
+      return `You are in RESEARCH MODE. Focus on:
+- Deep analysis and synthesis of information
+- Finding connections between documents and ideas
+- Summarizing and extracting key insights
+- Citation and source tracking
+- Note organization and knowledge management
+- Exploring topics in depth
+Be thorough and academic in your responses, cite sources when available.`;
+
+    case "creative":
+      return `You are in CREATIVE MODE. Focus on:
+- Brainstorming and ideation
+- Content creation and drafting
+- Visual thinking and concept development
+- Storytelling and narrative structure
+- Innovation and out-of-the-box solutions
+Be imaginative and encouraging, help explore multiple creative directions.`;
+
+    default:
+      return "";
+  }
 }
 
 async function saveConversation(
