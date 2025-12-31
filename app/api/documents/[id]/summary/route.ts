@@ -129,8 +129,6 @@ export async function POST(
       });
     }
 
-    console.log(`🤖 Generating summary for document: ${document.title}`);
-
     // Build the prompt
     const prompt = `Analyze this document and provide:
 
@@ -149,46 +147,19 @@ Respond in JSON format only, no other text:
   "document_type": "Legal Contract"
 }`;
 
-    // Try Claude first, fallback to OpenAI if credit error
+    // Try Claude first, fallback to OpenAI if error
     let aiResponse;
     try {
-      console.log("📡 Trying Claude...");
       aiResponse = await generateWithClaude(prompt);
-      console.log("✅ Claude succeeded");
     } catch (claudeError: any) {
-      const errorMessage = claudeError?.message || "";
-      const errorType = claudeError?.error?.type || "";
-
-      // Check if it's a credit/billing error
-      const isCreditError =
-        errorMessage.includes("credit") ||
-        errorMessage.includes("billing") ||
-        errorMessage.includes("balance") ||
-        errorType === "invalid_request_error";
-
-      if (isCreditError) {
-        console.log("⚠️ Claude credit error, falling back to OpenAI...");
-        try {
-          aiResponse = await generateWithOpenAI(prompt);
-          console.log("✅ OpenAI fallback succeeded");
-        } catch (openaiError: any) {
-          console.error("❌ OpenAI fallback also failed:", openaiError);
-          return Response.json({
-            error: `Both AI providers failed. Claude: ${claudeError.message}. OpenAI: ${openaiError.message}`
-          }, { status: 500 });
-        }
-      } else {
-        // Non-credit error from Claude, try OpenAI anyway
-        console.log("⚠️ Claude error (non-credit), trying OpenAI...", claudeError.message);
-        try {
-          aiResponse = await generateWithOpenAI(prompt);
-          console.log("✅ OpenAI fallback succeeded");
-        } catch (openaiError: any) {
-          console.error("❌ Both providers failed");
-          return Response.json({
-            error: `AI generation failed: ${claudeError.message}`
-          }, { status: 500 });
-        }
+      // Fallback to OpenAI on any Claude error
+      try {
+        aiResponse = await generateWithOpenAI(prompt);
+      } catch (openaiError: any) {
+        console.error("Both AI providers failed:", { claude: claudeError.message, openai: openaiError.message });
+        return Response.json({
+          error: `AI generation failed: ${claudeError.message}`
+        }, { status: 500 });
       }
     }
 
@@ -222,12 +193,6 @@ Respond in JSON format only, no other text:
       const outputCost = (outputTokens / 1_000_000) * 0.60;
       totalCost = inputCost + outputCost;
     }
-
-    console.log(`📊 Summary generated with ${provider}:
-    - Input tokens: ${inputTokens}
-    - Output tokens: ${outputTokens}
-    - Total cost: $${totalCost.toFixed(6)}
-    `);
 
     // Update document with summary
     const { data: updated, error: updateError } = await supabase

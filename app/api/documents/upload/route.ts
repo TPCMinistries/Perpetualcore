@@ -140,31 +140,22 @@ export async function POST(req: NextRequest) {
 
     if (docError) {
       console.error("Document creation error:", docError);
-      console.error("Error code:", docError.code);
-      console.error("Error message:", docError.message);
-      console.error("Error details:", docError.details);
-      // Clean up uploaded file
       await supabase.storage.from("documents").remove([uniqueFilename]);
-      // Return detailed error for debugging
       return Response.json({
         error: "Failed to create document record",
         code: docError.code,
         message: docError.message,
-        hint: docError.code === "42501" ? "RLS policy may be blocking INSERT. Run fix_documents_rls.sql" : docError.hint,
+        hint: docError.code === "42501" ? "RLS policy may be blocking INSERT" : docError.hint,
       }, { status: 500 });
     }
 
     // Process document synchronously for reliability
-    // This makes upload slower but ensures processing completes
-    console.log(`🔄 Processing document: ${document.id}`);
     try {
       const { processAndStoreDocument } = await import("@/lib/documents/processor");
       await processAndStoreDocument(document.id);
-      console.log(`✅ Document processed successfully: ${document.id}`);
     } catch (processError: any) {
-      console.error(`❌ Document processing failed: ${processError.message}`);
+      console.error(`Document processing failed for ${document.id}:`, processError.message);
       // Don't fail the upload - document is saved, just not processed
-      // User can click "Reprocess Stuck" later
     }
 
     // Fetch updated document status

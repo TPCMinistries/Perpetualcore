@@ -10,6 +10,10 @@ import {
   ExceptionQueue,
   ExceptionDetail,
   DecisionDetailPanel,
+  TodaysMeetingsWidget,
+  OpenPromisesWidget,
+  RecentAutomationsWidget,
+  MeetingIntelligenceQuickAction,
 } from "@/components/command-center";
 import {
   Exception,
@@ -519,6 +523,7 @@ function ExecutiveDashboard({ activeTab, onTabChange }: ExecutiveDashboardProps)
         <DecisionInbox
           navigationTarget={navigationTarget?.type === "decision" ? navigationTarget.id : null}
           onNavigationHandled={clearNavigationTarget}
+          onNavigate={handleNavigateToItem}
         />
       )}
       {activeTab === "projects" && (
@@ -886,8 +891,20 @@ function DailyCommandView({ onNavigate }: DailyCommandViewProps) {
               </CardContent>
             </Card>
           )}
+
+          {/* Today's Meetings Widget */}
+          <TodaysMeetingsWidget />
+
+          {/* Open Promises Widget */}
+          <OpenPromisesWidget />
+
+          {/* Recent Automations Widget */}
+          <RecentAutomationsWidget />
         </div>
       </div>
+
+      {/* Meeting Intelligence Quick Action */}
+      <MeetingIntelligenceQuickAction />
 
       {/* Quick Stats Row */}
       <div className="grid grid-cols-4 gap-4">
@@ -1022,7 +1039,7 @@ function DailyCommandView({ onNavigate }: DailyCommandViewProps) {
                       </h4>
                       <div className="space-y-2">
                         {deadlines7Days.map((item) => (
-                          <DeadlineRow key={item.id} item={item} urgent />
+                          <DeadlineRow key={item.id} item={item} urgent onNavigate={onNavigate} />
                         ))}
                       </div>
                     </div>
@@ -1037,7 +1054,7 @@ function DailyCommandView({ onNavigate }: DailyCommandViewProps) {
                       </h4>
                       <div className="space-y-2">
                         {deadlines30Days.slice(0, 5).map((item) => (
-                          <DeadlineRow key={item.id} item={item} />
+                          <DeadlineRow key={item.id} item={item} onNavigate={onNavigate} />
                         ))}
                         {deadlines30Days.length > 5 && (
                           <p className="text-sm text-muted-foreground text-center pt-2">
@@ -1163,7 +1180,13 @@ function DailyCommandView({ onNavigate }: DailyCommandViewProps) {
 }
 
 // Helper component for deadline rows
-function DeadlineRow({ item, urgent = false }: { item: DeadlineItem; urgent?: boolean }) {
+interface DeadlineRowProps {
+  item: DeadlineItem;
+  urgent?: boolean;
+  onNavigate?: (target: { type: "decision" | "project" | "opportunity"; id: string }) => void;
+}
+
+function DeadlineRow({ item, urgent = false, onNavigate }: DeadlineRowProps) {
   const priorityColors: Record<string, string> = {
     urgent: "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400",
     high: "bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400",
@@ -1180,11 +1203,23 @@ function DeadlineRow({ item, urgent = false }: { item: DeadlineItem; urgent?: bo
 
   const Icon = typeIcons[item.source_type] || Activity;
 
+  const handleClick = () => {
+    if (onNavigate && item.source_type && item.source_id) {
+      onNavigate({
+        type: item.source_type as "decision" | "project" | "opportunity",
+        id: item.source_id
+      });
+    }
+  };
+
   return (
-    <div className={cn(
-      "flex items-center gap-3 p-3 rounded-lg border transition-colors hover:bg-muted/50 cursor-pointer",
-      urgent && item.days_until_due <= 2 && "border-red-200 dark:border-red-800/50"
-    )}>
+    <div
+      onClick={handleClick}
+      className={cn(
+        "flex items-center gap-3 p-3 rounded-lg border transition-colors hover:bg-muted/50 cursor-pointer group",
+        urgent && item.days_until_due <= 2 && "border-red-200 dark:border-red-800/50"
+      )}
+    >
       <Icon className="h-4 w-4 text-muted-foreground flex-shrink-0" />
       <div className="flex-1 min-w-0">
         <p className="font-medium text-sm truncate">{item.title}</p>
@@ -1198,6 +1233,7 @@ function DeadlineRow({ item, urgent = false }: { item: DeadlineItem; urgent?: bo
       <Badge variant="secondary" className={cn("text-xs", priorityColors[item.priority])}>
         {item.priority}
       </Badge>
+      <ChevronRight className="h-4 w-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
     </div>
   );
 }
@@ -1209,9 +1245,10 @@ function DeadlineRow({ item, urgent = false }: { item: DeadlineItem; urgent?: bo
 interface DecisionInboxProps {
   navigationTarget?: string | null;
   onNavigationHandled?: () => void;
+  onNavigate?: (target: { type: "decision" | "project" | "opportunity"; id: string }) => void;
 }
 
-function DecisionInbox({ navigationTarget, onNavigationHandled }: DecisionInboxProps) {
+function DecisionInbox({ navigationTarget, onNavigationHandled, onNavigate }: DecisionInboxProps) {
   const [loading, setLoading] = useState(true);
   const [decisions, setDecisions] = useState<any[]>([]);
   const [filter, setFilter] = useState<"pending" | "decided" | "delegated" | "deferred" | "all">("pending");
@@ -2263,6 +2300,7 @@ Examples:
         open={!!selectedDecision}
         onClose={() => setSelectedDecision(null)}
         onUpdate={() => fetchDecisions()}
+        onNavigate={onNavigate}
       />
     </div>
   );
@@ -2990,7 +3028,18 @@ function OpportunityDetailPanel({
     due_date: "",
   });
 
-  // Fetch related items on opportunity change
+  // Stakeholder management state
+  const [stakeholders, setStakeholders] = useState<any[]>([]);
+  const [showAddStakeholderDialog, setShowAddStakeholderDialog] = useState(false);
+  const [stakeholderType, setStakeholderType] = useState<"user" | "contact">("user");
+  const [selectedStakeholderId, setSelectedStakeholderId] = useState("");
+  const [stakeholderRole, setStakeholderRole] = useState("stakeholder");
+  const [stakeholderNotes, setStakeholderNotes] = useState("");
+  const [addingStakeholder, setAddingStakeholder] = useState(false);
+  const [users, setUsers] = useState<any[]>([]);
+  const [contacts, setContacts] = useState<any[]>([]);
+
+  // Fetch related items and stakeholders on opportunity change
   useEffect(() => {
     const fetchRelatedItems = async () => {
       try {
@@ -3003,10 +3052,115 @@ function OpportunityDetailPanel({
         console.error("Error fetching related items:", error);
       }
     };
+
+    const fetchStakeholders = async () => {
+      try {
+        const response = await fetch(`/api/opportunities/${opportunity.id}/stakeholders`);
+        if (response.ok) {
+          const data = await response.json();
+          setStakeholders(data.stakeholders || []);
+        }
+      } catch (error) {
+        console.error("Error fetching stakeholders:", error);
+      }
+    };
+
     if (opportunity?.id) {
       fetchRelatedItems();
+      fetchStakeholders();
     }
   }, [opportunity?.id]);
+
+  // Fetch users and contacts for stakeholder selection
+  useEffect(() => {
+    const fetchUsersAndContacts = async () => {
+      try {
+        const [usersRes, contactsRes] = await Promise.all([
+          fetch("/api/users"),
+          fetch("/api/contacts?limit=100"),
+        ]);
+        if (usersRes.ok) {
+          const data = await usersRes.json();
+          setUsers(data.users || []);
+        }
+        if (contactsRes.ok) {
+          const data = await contactsRes.json();
+          setContacts(data.contacts || []);
+        }
+      } catch (error) {
+        console.error("Error fetching users/contacts:", error);
+      }
+    };
+    fetchUsersAndContacts();
+  }, []);
+
+  // Handle adding a stakeholder
+  const handleAddStakeholder = async () => {
+    if (!selectedStakeholderId) {
+      toast.error("Please select a person");
+      return;
+    }
+    setAddingStakeholder(true);
+    try {
+      const payload: any = {
+        role: stakeholderRole,
+        notes: stakeholderNotes,
+        notify_on_updates: true,
+        notify_on_decision: true,
+      };
+      if (stakeholderType === "user") {
+        payload.user_id = selectedStakeholderId;
+      } else {
+        payload.contact_id = selectedStakeholderId;
+      }
+
+      const response = await fetch(`/api/opportunities/${opportunity.id}/stakeholders`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+      if (response.ok) {
+        toast.success("Stakeholder added!");
+        setShowAddStakeholderDialog(false);
+        setSelectedStakeholderId("");
+        setStakeholderRole("stakeholder");
+        setStakeholderNotes("");
+        // Refresh stakeholders
+        const refreshRes = await fetch(`/api/opportunities/${opportunity.id}/stakeholders`);
+        if (refreshRes.ok) {
+          const data = await refreshRes.json();
+          setStakeholders(data.stakeholders || []);
+        }
+      } else {
+        const err = await response.json();
+        toast.error(err.error || "Failed to add stakeholder");
+      }
+    } catch (error) {
+      toast.error("Error adding stakeholder");
+    } finally {
+      setAddingStakeholder(false);
+    }
+  };
+
+  // Handle removing a stakeholder
+  const handleRemoveStakeholder = async (stakeholderId: string) => {
+    try {
+      const response = await fetch(`/api/opportunities/${opportunity.id}/stakeholders`, {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ stakeholder_id: stakeholderId }),
+      });
+      if (response.ok) {
+        toast.success("Stakeholder removed");
+        setStakeholders(stakeholders.filter(s => s.id !== stakeholderId));
+      } else {
+        toast.error("Failed to remove stakeholder");
+      }
+    } catch (error) {
+      toast.error("Error removing stakeholder");
+    }
+  };
 
   // Check if opportunity has a linked decision
   const linkedDecision = relatedItems.find(
@@ -3391,6 +3545,63 @@ function OpportunityDetailPanel({
             </div>
           </div>
         )}
+
+        {/* Stakeholders Section */}
+        <div className="border rounded-xl p-4 space-y-3">
+          <div className="flex items-center justify-between">
+            <h4 className="font-medium flex items-center gap-2">
+              <Users className="h-4 w-4" />
+              Stakeholders ({stakeholders.length})
+            </h4>
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => setShowAddStakeholderDialog(true)}
+            >
+              <UserPlus className="h-3 w-3 mr-1" />
+              Add
+            </Button>
+          </div>
+          {stakeholders.length === 0 ? (
+            <p className="text-sm text-muted-foreground text-center py-4">
+              No stakeholders added yet
+            </p>
+          ) : (
+            <div className="space-y-2">
+              {stakeholders.map((stakeholder) => (
+                <div
+                  key={stakeholder.id}
+                  className="flex items-center justify-between p-2 rounded-lg bg-slate-50 dark:bg-slate-800/50"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="h-8 w-8 rounded-full bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center text-white text-sm font-medium">
+                      {stakeholder.stakeholder_name?.charAt(0) || "?"}
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium">{stakeholder.stakeholder_name}</p>
+                      <div className="flex items-center gap-2">
+                        <Badge variant="outline" className="text-xs capitalize">
+                          {stakeholder.role?.replace("_", " ")}
+                        </Badge>
+                        {stakeholder.stakeholder_type === "contact" && (
+                          <Badge variant="secondary" className="text-xs">External</Badge>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    onClick={() => handleRemoveStakeholder(stakeholder.id)}
+                    className="h-7 w-7 p-0 text-muted-foreground hover:text-red-600"
+                  >
+                    <X className="h-3 w-3" />
+                  </Button>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
       </CardContent>
 
       {/* Create Decision Dialog */}
@@ -3455,6 +3666,110 @@ function OpportunityDetailPanel({
             <Button onClick={handleCreateDecision} disabled={creatingDecision}>
               {creatingDecision && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
               Create Decision
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Add Stakeholder Dialog */}
+      <Dialog open={showAddStakeholderDialog} onOpenChange={setShowAddStakeholderDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <UserPlus className="h-5 w-5 text-blue-600" />
+              Add Stakeholder
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            {/* Type Toggle */}
+            <div className="flex items-center gap-2 p-1 rounded-lg bg-muted">
+              <button
+                onClick={() => { setStakeholderType("user"); setSelectedStakeholderId(""); }}
+                className={cn(
+                  "flex-1 px-3 py-1.5 rounded-md text-sm font-medium transition-colors",
+                  stakeholderType === "user"
+                    ? "bg-white dark:bg-slate-800 shadow-sm"
+                    : "text-muted-foreground hover:text-foreground"
+                )}
+              >
+                Team Member
+              </button>
+              <button
+                onClick={() => { setStakeholderType("contact"); setSelectedStakeholderId(""); }}
+                className={cn(
+                  "flex-1 px-3 py-1.5 rounded-md text-sm font-medium transition-colors",
+                  stakeholderType === "contact"
+                    ? "bg-white dark:bg-slate-800 shadow-sm"
+                    : "text-muted-foreground hover:text-foreground"
+                )}
+              >
+                External Contact
+              </button>
+            </div>
+
+            {/* Person Select */}
+            <div>
+              <label className="text-sm font-medium mb-1.5 block">
+                {stakeholderType === "user" ? "Select Team Member *" : "Select Contact *"}
+              </label>
+              <Select value={selectedStakeholderId} onValueChange={setSelectedStakeholderId}>
+                <SelectTrigger>
+                  <SelectValue placeholder={stakeholderType === "user" ? "Choose a team member" : "Choose a contact"} />
+                </SelectTrigger>
+                <SelectContent>
+                  {stakeholderType === "user" ? (
+                    users.map((user) => (
+                      <SelectItem key={user.id} value={user.id}>
+                        {user.full_name || user.email}
+                      </SelectItem>
+                    ))
+                  ) : (
+                    contacts.map((contact) => (
+                      <SelectItem key={contact.id} value={contact.id}>
+                        {contact.full_name} {contact.company && `(${contact.company})`}
+                      </SelectItem>
+                    ))
+                  )}
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Role */}
+            <div>
+              <label className="text-sm font-medium mb-1.5 block">Role</label>
+              <Select value={stakeholderRole} onValueChange={setStakeholderRole}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="owner">Owner</SelectItem>
+                  <SelectItem value="decision_maker">Decision Maker</SelectItem>
+                  <SelectItem value="stakeholder">Stakeholder</SelectItem>
+                  <SelectItem value="reviewer">Reviewer</SelectItem>
+                  <SelectItem value="informed">Informed</SelectItem>
+                  <SelectItem value="contributor">Contributor</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Notes */}
+            <div>
+              <label className="text-sm font-medium mb-1.5 block">Notes (optional)</label>
+              <Textarea
+                placeholder="Any additional context..."
+                value={stakeholderNotes}
+                onChange={(e) => setStakeholderNotes(e.target.value)}
+                rows={2}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowAddStakeholderDialog(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleAddStakeholder} disabled={addingStakeholder || !selectedStakeholderId}>
+              {addingStakeholder && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+              Add Stakeholder
             </Button>
           </DialogFooter>
         </DialogContent>

@@ -75,6 +75,7 @@ export function DocumentPreviewModal({
 }: DocumentPreviewModalProps) {
   const [loading, setLoading] = useState(false);
   const [generatingSummary, setGeneratingSummary] = useState(false);
+  const [reprocessing, setReprocessing] = useState(false);
   const [docData, setDocData] = useState<Document | null>(null);
   const [signedUrl, setSignedUrl] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState("overview");
@@ -321,6 +322,42 @@ export function DocumentPreviewModal({
     }
   }
 
+  async function handleReprocess() {
+    if (!document?.id) return;
+
+    setReprocessing(true);
+    try {
+      const response = await fetch("/api/documents/process", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ documentId: document.id }),
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || "Failed to reprocess document");
+      }
+
+      // Refetch document data
+      const { data, error } = await supabase
+        .from("documents")
+        .select("*")
+        .eq("id", document.id)
+        .single();
+
+      if (!error && data) {
+        setDocData(prev => prev ? { ...prev, ...data } : data);
+      }
+
+      toast.success("Document reprocessed successfully!");
+    } catch (error) {
+      console.error("Error reprocessing document:", error);
+      toast.error(error instanceof Error ? error.message : "Failed to reprocess document");
+    } finally {
+      setReprocessing(false);
+    }
+  }
+
   async function handleGenerateSummary() {
     if (!document?.id) return;
 
@@ -337,12 +374,15 @@ export function DocumentPreviewModal({
 
       const result = await response.json();
 
+      // API returns { summary: { summary, key_points, document_type } }
+      const summaryData = result.summary || result;
+
       setDocData(prev => prev ? {
         ...prev,
-        summary: result.summary,
-        key_points: result.key_points,
-        document_type: result.document_type,
-        summary_generated_at: new Date().toISOString(),
+        summary: summaryData.summary,
+        key_points: summaryData.key_points,
+        document_type: summaryData.document_type,
+        summary_generated_at: summaryData.generated_at || new Date().toISOString(),
       } : null);
 
       toast.success("AI Summary generated!");
@@ -426,11 +466,33 @@ export function DocumentPreviewModal({
               </div>
             </DialogTitle>
             <div className="flex items-center gap-2">
+              {/* Show Reprocess button if document has no content */}
+              {(!doc.content || !doc.metadata?.wordCount) && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleReprocess}
+                  disabled={reprocessing}
+                  className="border-amber-300 text-amber-700 hover:bg-amber-50 dark:border-amber-700 dark:text-amber-400"
+                >
+                  {reprocessing ? (
+                    <>
+                      <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                      Processing...
+                    </>
+                  ) : (
+                    <>
+                      <RefreshCw className="h-4 w-4 mr-2" />
+                      Reprocess
+                    </>
+                  )}
+                </Button>
+              )}
               <Button
                 variant="outline"
                 size="sm"
                 onClick={handleChat}
-                disabled={!onChat || doc.status === "processing"}
+                disabled={!onChat || doc.status === "processing" || !doc.content}
               >
                 <MessageSquare className="h-4 w-4 mr-2" />
                 Chat
@@ -587,11 +649,11 @@ export function DocumentPreviewModal({
                 <ScrollArea className="h-full">
                   <div className="p-6">
                     {doc.content ? (
-                      <div className="bg-background rounded-lg p-8 max-w-4xl mx-auto shadow-sm border border-border">
-                        <div className="prose prose-sm dark:prose-invert max-w-none">
-                          <pre className="whitespace-pre-wrap font-sans text-sm leading-relaxed text-foreground">
+                      <div className="bg-white dark:bg-slate-900 rounded-xl p-8 max-w-4xl mx-auto shadow-sm border border-slate-200 dark:border-slate-700">
+                        <div className="prose prose-slate dark:prose-invert max-w-none prose-headings:font-semibold prose-p:text-slate-600 dark:prose-p:text-slate-300 prose-p:leading-relaxed">
+                          <div className="whitespace-pre-wrap font-sans text-[15px] leading-7 text-slate-700 dark:text-slate-300">
                             {doc.content}
-                          </pre>
+                          </div>
                         </div>
                       </div>
                     ) : (

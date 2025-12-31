@@ -1,39 +1,35 @@
 "use client";
 
-import { useEffect, useState, useMemo } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import {
   Plus,
   Search,
+  Loader2,
+  Users,
   Star,
-  StarOff,
-  MoreHorizontal,
-  Archive,
+  Building2,
   Mail,
   Phone,
-  MessageSquare,
-  Building2,
-  MapPin,
-  Clock,
+  Linkedin,
+  Twitter,
+  MoreVertical,
+  Sparkles,
+  Heart,
+  UserPlus,
   Filter,
   Grid3X3,
   List,
-  Users,
-  Bell,
-  Sparkles,
+  ArrowUpDown,
+  Clock,
+  AlertCircle,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import {
   Select,
   SelectContent,
@@ -41,621 +37,697 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
-  Contact,
-  ContactType,
-  RelationshipStrength,
-  RELATIONSHIP_STRENGTH_CONFIG,
-  CONTACT_TYPE_CONFIG,
-} from "@/types/contacts";
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
-import { toast } from "sonner";
-import { formatDistanceToNow } from "date-fns";
-import { ReachOutButton } from "@/components/contacts/ReachOutButton";
-import { ContactFormFull } from "@/components/contacts/ContactFormFull";
 
-type ViewMode = "grid" | "list";
+interface Contact {
+  id: string;
+  first_name: string;
+  last_name?: string;
+  full_name: string;
+  email?: string;
+  phone?: string;
+  avatar_url?: string;
+  company?: string;
+  job_title?: string;
+  contact_type: string;
+  relationship_strength: number;
+  relationship_status: string;
+  lead_status?: string;
+  linkedin_url?: string;
+  twitter_url?: string;
+  ai_enriched: boolean;
+  is_favorite: boolean;
+  tags: string[];
+  last_contacted_at?: string;
+  next_followup_date?: string;
+  created_at: string;
+}
+
+interface Stats {
+  total: number;
+  favorites: number;
+  byType: Record<string, number>;
+  byStatus: Record<string, number>;
+  avgRelationshipStrength: number;
+  needsFollowup: number;
+}
+
+const contactTypeOptions = [
+  { value: "contact", label: "Contact" },
+  { value: "investor", label: "Investor" },
+  { value: "partner", label: "Partner" },
+  { value: "customer", label: "Customer" },
+  { value: "vendor", label: "Vendor" },
+  { value: "mentor", label: "Mentor" },
+  { value: "advisor", label: "Advisor" },
+  { value: "team", label: "Team Member" },
+  { value: "prospect", label: "Prospect" },
+  { value: "lead", label: "Lead" },
+];
+
+const typeColors: Record<string, string> = {
+  investor: "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400",
+  partner: "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400",
+  customer: "bg-violet-100 text-violet-700 dark:bg-violet-900/30 dark:text-violet-400",
+  vendor: "bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400",
+  mentor: "bg-pink-100 text-pink-700 dark:bg-pink-900/30 dark:text-pink-400",
+  advisor: "bg-cyan-100 text-cyan-700 dark:bg-cyan-900/30 dark:text-cyan-400",
+  team: "bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400",
+  prospect: "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400",
+  lead: "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400",
+  contact: "bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300",
+};
 
 export default function ContactsPage() {
   const router = useRouter();
   const [contacts, setContacts] = useState<Contact[]>([]);
+  const [stats, setStats] = useState<Stats | null>(null);
   const [loading, setLoading] = useState(true);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [viewMode, setViewMode] = useState<ViewMode>("grid");
-  const [createDialogOpen, setCreateDialogOpen] = useState(false);
+  const [search, setSearch] = useState("");
+  const [typeFilter, setTypeFilter] = useState<string>("all");
+  const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
+  const [showCreateDialog, setShowCreateDialog] = useState(false);
+  const [creating, setCreating] = useState(false);
 
-  // Filters
-  const [typeFilter, setTypeFilter] = useState<ContactType | "all">("all");
-  const [strengthFilter, setStrengthFilter] = useState<RelationshipStrength | "all">("all");
-  const [showFavoritesOnly, setShowFavoritesOnly] = useState(false);
-  const [showNeedsFollowup, setShowNeedsFollowup] = useState(false);
+  // Create form state
+  const [newContact, setNewContact] = useState({
+    first_name: "",
+    last_name: "",
+    email: "",
+    phone: "",
+    company: "",
+    job_title: "",
+    contact_type: "contact",
+    linkedin_url: "",
+    enrich_now: false,
+  });
 
-  // Fetch contacts
   useEffect(() => {
     fetchContacts();
-  }, []);
+  }, [search, typeFilter]);
 
   const fetchContacts = async () => {
     try {
-      const response = await fetch("/api/contacts");
-      const data = await response.json();
-      if (data.contacts) {
-        setContacts(data.contacts);
+      let url = "/api/contacts?limit=100";
+      if (search) url += `&search=${encodeURIComponent(search)}`;
+      if (typeFilter !== "all") url += `&type=${typeFilter}`;
+
+      const response = await fetch(url);
+      if (response.ok) {
+        const data = await response.json();
+        setContacts(data.contacts || []);
+        setStats(data.stats);
       }
     } catch (error) {
-      console.error("Error fetching contacts:", error);
-      toast.error("Failed to load contacts");
+      console.error("Failed to fetch contacts:", error);
     } finally {
       setLoading(false);
     }
   };
 
-  // Filter contacts
-  const filteredContacts = useMemo(() => {
-    return contacts.filter((contact) => {
-      // Search filter
-      if (searchQuery) {
-        const query = searchQuery.toLowerCase();
-        const matchesSearch =
-          contact.full_name.toLowerCase().includes(query) ||
-          contact.email?.toLowerCase().includes(query) ||
-          contact.company?.toLowerCase().includes(query) ||
-          contact.job_title?.toLowerCase().includes(query) ||
-          contact.tags?.some((tag) => tag.toLowerCase().includes(query));
-        if (!matchesSearch) return false;
+  const createContact = async () => {
+    if (!newContact.first_name.trim()) return;
+
+    setCreating(true);
+    try {
+      const response = await fetch("/api/contacts", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(newContact),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setShowCreateDialog(false);
+        setNewContact({
+          first_name: "",
+          last_name: "",
+          email: "",
+          phone: "",
+          company: "",
+          job_title: "",
+          contact_type: "contact",
+          linkedin_url: "",
+          enrich_now: false,
+        });
+        router.push(`/dashboard/contacts/${data.contact.id}`);
       }
-
-      // Type filter
-      if (typeFilter !== "all" && contact.contact_type !== typeFilter) {
-        return false;
-      }
-
-      // Strength filter
-      if (strengthFilter !== "all" && contact.relationship_strength !== strengthFilter) {
-        return false;
-      }
-
-      // Favorites filter
-      if (showFavoritesOnly && !contact.is_favorite) {
-        return false;
-      }
-
-      // Needs follow-up filter
-      if (showNeedsFollowup) {
-        const relationshipDays: Record<string, number> = {
-          inner_circle: 14,
-          close: 30,
-          connected: 60,
-          acquaintance: 90,
-          new: 7,
-        };
-        const daysSinceContact = contact.last_interaction_at
-          ? Math.floor((Date.now() - new Date(contact.last_interaction_at).getTime()) / (1000 * 60 * 60 * 24))
-          : 999;
-        const expectedDays = relationshipDays[contact.relationship_strength] || 30;
-        if (daysSinceContact < expectedDays) {
-          return false;
-        }
-      }
-
-      return true;
-    });
-  }, [contacts, searchQuery, typeFilter, strengthFilter, showFavoritesOnly, showNeedsFollowup]);
-
-  const handleContactCreated = (newContact: Contact) => {
-    setContacts([newContact, ...contacts]);
+    } catch (error) {
+      console.error("Failed to create contact:", error);
+    } finally {
+      setCreating(false);
+    }
   };
 
-  const handleToggleFavorite = async (contact: Contact) => {
+  const toggleFavorite = async (contact: Contact, e: React.MouseEvent) => {
+    e.stopPropagation();
     try {
-      const response = await fetch(`/api/contacts/${contact.id}`, {
-        method: "PUT",
+      await fetch(`/api/contacts/${contact.id}`, {
+        method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ is_favorite: !contact.is_favorite }),
       });
-
-      if (response.ok) {
-        setContacts(
-          contacts.map((c) =>
-            c.id === contact.id ? { ...c, is_favorite: !c.is_favorite } : c
-          )
-        );
-        toast.success(contact.is_favorite ? "Removed from favorites" : "Added to favorites");
-      }
+      fetchContacts();
     } catch (error) {
-      console.error("Error toggling favorite:", error);
+      console.error("Failed to toggle favorite:", error);
     }
   };
 
-  const handleArchiveContact = async (contactId: string) => {
-    try {
-      const response = await fetch(`/api/contacts/${contactId}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ is_archived: true }),
-      });
-
-      if (response.ok) {
-        setContacts(contacts.filter((c) => c.id !== contactId));
-        toast.success("Contact archived");
-      }
-    } catch (error) {
-      console.error("Error archiving contact:", error);
-    }
+  const getInitials = (contact: Contact) => {
+    const first = contact.first_name?.[0] || "";
+    const last = contact.last_name?.[0] || "";
+    return (first + last).toUpperCase() || "?";
   };
 
-  const getInitials = (name: string) => {
-    return name
-      .split(" ")
-      .map((n) => n[0])
-      .join("")
-      .toUpperCase()
-      .slice(0, 2);
+  const getRelationshipColor = (strength: number) => {
+    if (strength >= 80) return "text-emerald-500";
+    if (strength >= 60) return "text-green-500";
+    if (strength >= 40) return "text-yellow-500";
+    if (strength >= 20) return "text-orange-500";
+    return "text-red-500";
   };
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
+      <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white dark:from-slate-950 dark:to-slate-900 flex items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-violet-500" />
       </div>
     );
   }
 
   return (
-    <div className="container mx-auto p-6 max-w-7xl">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
-        <div>
-          <h1 className="text-3xl font-bold">Contacts</h1>
-          <p className="text-muted-foreground mt-1">
-            Your network - {contacts.length} connections
-          </p>
-        </div>
-        <Button onClick={() => setCreateDialogOpen(true)}>
-          <Plus className="h-4 w-4 mr-2" />
-          Add Contact
-        </Button>
-
-        <ContactFormFull
-          open={createDialogOpen}
-          onOpenChange={setCreateDialogOpen}
-          onSuccess={handleContactCreated}
-        />
-      </div>
-
-      {/* Filters */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 mb-6">
-        <div className="relative flex-1 max-w-md">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input
-            placeholder="Search contacts..."
-            className="pl-9"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-          />
-        </div>
-
-        <div className="flex items-center gap-2 flex-wrap">
-          <Select
-            value={typeFilter}
-            onValueChange={(value) => setTypeFilter(value as ContactType | "all")}
-          >
-            <SelectTrigger className="w-[140px]">
-              <SelectValue placeholder="Type" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Types</SelectItem>
-              {Object.entries(CONTACT_TYPE_CONFIG).map(([key, config]) => (
-                <SelectItem key={key} value={key}>
-                  {config.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-
-          <Select
-            value={strengthFilter}
-            onValueChange={(value) => setStrengthFilter(value as RelationshipStrength | "all")}
-          >
-            <SelectTrigger className="w-[160px]">
-              <SelectValue placeholder="Relationship" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Relationships</SelectItem>
-              {Object.entries(RELATIONSHIP_STRENGTH_CONFIG).map(([key, config]) => (
-                <SelectItem key={key} value={key}>
-                  {config.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-
-          <Button
-            variant={showFavoritesOnly ? "default" : "outline"}
-            size="icon"
-            onClick={() => setShowFavoritesOnly(!showFavoritesOnly)}
-            title="Show favorites only"
-          >
-            <Star className={cn("h-4 w-4", showFavoritesOnly && "fill-current")} />
-          </Button>
-
-          <Button
-            variant={showNeedsFollowup ? "default" : "outline"}
-            size="sm"
-            onClick={() => setShowNeedsFollowup(!showNeedsFollowup)}
-            className={cn(
-              "gap-1.5",
-              showNeedsFollowup && "bg-amber-500 hover:bg-amber-600 text-white"
-            )}
-          >
-            <Bell className="h-4 w-4" />
-            <span className="hidden sm:inline">Follow-up</span>
-          </Button>
-
-          <div className="border-l h-6 mx-2" />
-
-          <Tabs value={viewMode} onValueChange={(v) => setViewMode(v as ViewMode)}>
-            <TabsList className="h-9">
-              <TabsTrigger value="grid" className="px-2">
-                <Grid3X3 className="h-4 w-4" />
-              </TabsTrigger>
-              <TabsTrigger value="list" className="px-2">
-                <List className="h-4 w-4" />
-              </TabsTrigger>
-            </TabsList>
-          </Tabs>
-        </div>
-      </div>
-
-      {/* Empty State */}
-      {filteredContacts.length === 0 && (
-        <div className="text-center py-16">
-          <Users className="h-12 w-12 mx-auto text-muted-foreground/50" />
-          <h3 className="mt-4 text-lg font-medium">
-            {contacts.length === 0 ? "No contacts yet" : "No contacts match your filters"}
-          </h3>
-          <p className="text-muted-foreground mt-1">
-            {contacts.length === 0
-              ? "Add your first contact to start building your network."
-              : "Try adjusting your filters or search query."}
-          </p>
-          {contacts.length === 0 && (
-            <Button className="mt-4" onClick={() => setCreateDialogOpen(true)}>
-              <Plus className="h-4 w-4 mr-2" />
+    <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white dark:from-slate-950 dark:to-slate-900">
+      <div className="max-w-7xl mx-auto px-6 py-8">
+        {/* Header */}
+        <div className="mb-8">
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-3xl font-bold text-slate-900 dark:text-white">
+                Contacts
+              </h1>
+              <p className="text-slate-600 dark:text-slate-400 mt-1">
+                Manage your network with AI-powered insights
+              </p>
+            </div>
+            <Button
+              onClick={() => setShowCreateDialog(true)}
+              className="bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-700 hover:to-purple-700 text-white border-0"
+            >
+              <UserPlus className="h-4 w-4 mr-2" />
               Add Contact
             </Button>
-          )}
-        </div>
-      )}
-
-      {/* Grid View */}
-      {viewMode === "grid" && filteredContacts.length > 0 && (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-          {filteredContacts.map((contact) => (
-            <ContactCard
-              key={contact.id}
-              contact={contact}
-              onClick={() => router.push(`/dashboard/contacts/${contact.id}`)}
-              onToggleFavorite={() => handleToggleFavorite(contact)}
-              onArchive={() => handleArchiveContact(contact.id)}
-            />
-          ))}
-        </div>
-      )}
-
-      {/* List View */}
-      {viewMode === "list" && filteredContacts.length > 0 && (
-        <div className="space-y-2">
-          {filteredContacts.map((contact) => (
-            <ContactListItem
-              key={contact.id}
-              contact={contact}
-              onClick={() => router.push(`/dashboard/contacts/${contact.id}`)}
-              onToggleFavorite={() => handleToggleFavorite(contact)}
-              onArchive={() => handleArchiveContact(contact.id)}
-            />
-          ))}
-        </div>
-      )}
-    </div>
-  );
-}
-
-// Contact Card Component
-function ContactCard({
-  contact,
-  onClick,
-  onToggleFavorite,
-  onArchive,
-}: {
-  contact: Contact;
-  onClick: () => void;
-  onToggleFavorite: () => void;
-  onArchive: () => void;
-}) {
-  const strengthConfig = RELATIONSHIP_STRENGTH_CONFIG[contact.relationship_strength];
-
-  const getInitials = (name: string) => {
-    return name
-      .split(" ")
-      .map((n) => n[0])
-      .join("")
-      .toUpperCase()
-      .slice(0, 2);
-  };
-
-  return (
-    <Card
-      className="group cursor-pointer hover:shadow-md transition-all border-l-4 relative"
-      style={{ borderLeftColor: strengthConfig.color.replace("text-", "").includes("-") ? `var(--${strengthConfig.color.replace("text-", "")})` : undefined }}
-      onClick={onClick}
-    >
-      <CardContent className="p-4 pb-12">
-        <div className="flex items-start gap-3">
-          <Avatar className="h-12 w-12">
-            <AvatarImage src={contact.avatar_url || undefined} />
-            <AvatarFallback className={cn(strengthConfig.bgColor, strengthConfig.color)}>
-              {getInitials(contact.full_name)}
-            </AvatarFallback>
-          </Avatar>
-
-          <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-2">
-              <h3 className="font-medium truncate">{contact.full_name}</h3>
-              {contact.is_favorite && (
-                <Star className="h-3.5 w-3.5 text-amber-500 fill-amber-500 flex-shrink-0" />
-              )}
-            </div>
-
-            {(contact.job_title || contact.company) && (
-              <p className="text-sm text-muted-foreground truncate">
-                {contact.job_title}
-                {contact.job_title && contact.company && " at "}
-                {contact.company}
-              </p>
-            )}
-
-            <div className="flex items-center gap-2 mt-2">
-              <Badge
-                variant="secondary"
-                className={cn("text-xs", strengthConfig.bgColor, strengthConfig.color)}
-              >
-                {strengthConfig.label}
-              </Badge>
-            </div>
-
-            {contact.last_interaction_at && (
-              <p className="text-xs text-muted-foreground mt-2 flex items-center gap-1">
-                <Clock className="h-3 w-3" />
-                {formatDistanceToNow(new Date(contact.last_interaction_at), {
-                  addSuffix: true,
-                })}
-              </p>
-            )}
           </div>
+        </div>
 
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity"
-              >
-                <MoreHorizontal className="h-4 w-4" />
+        {/* Stats */}
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
+          <Card className="border-0 shadow-md bg-white dark:bg-slate-800/50">
+            <CardContent className="p-4">
+              <div className="flex items-center gap-3">
+                <div className="h-10 w-10 rounded-xl bg-violet-100 dark:bg-violet-900/30 flex items-center justify-center">
+                  <Users className="h-5 w-5 text-violet-600 dark:text-violet-400" />
+                </div>
+                <div>
+                  <p className="text-2xl font-bold text-slate-900 dark:text-white">
+                    {stats?.total || 0}
+                  </p>
+                  <p className="text-xs text-slate-500">Total Contacts</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="border-0 shadow-md bg-white dark:bg-slate-800/50">
+            <CardContent className="p-4">
+              <div className="flex items-center gap-3">
+                <div className="h-10 w-10 rounded-xl bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center">
+                  <Star className="h-5 w-5 text-amber-600 dark:text-amber-400" />
+                </div>
+                <div>
+                  <p className="text-2xl font-bold text-slate-900 dark:text-white">
+                    {stats?.favorites || 0}
+                  </p>
+                  <p className="text-xs text-slate-500">Favorites</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="border-0 shadow-md bg-white dark:bg-slate-800/50">
+            <CardContent className="p-4">
+              <div className="flex items-center gap-3">
+                <div className="h-10 w-10 rounded-xl bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center">
+                  <Heart className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
+                </div>
+                <div>
+                  <p className="text-2xl font-bold text-slate-900 dark:text-white">
+                    {stats?.avgRelationshipStrength || 0}%
+                  </p>
+                  <p className="text-xs text-slate-500">Avg Strength</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="border-0 shadow-md bg-white dark:bg-slate-800/50">
+            <CardContent className="p-4">
+              <div className="flex items-center gap-3">
+                <div className="h-10 w-10 rounded-xl bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
+                  <Building2 className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                </div>
+                <div>
+                  <p className="text-2xl font-bold text-slate-900 dark:text-white">
+                    {stats?.byType?.investor || 0}
+                  </p>
+                  <p className="text-xs text-slate-500">Investors</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="border-0 shadow-md bg-white dark:bg-slate-800/50">
+            <CardContent className="p-4">
+              <div className="flex items-center gap-3">
+                <div className="h-10 w-10 rounded-xl bg-red-100 dark:bg-red-900/30 flex items-center justify-center">
+                  <AlertCircle className="h-5 w-5 text-red-600 dark:text-red-400" />
+                </div>
+                <div>
+                  <p className="text-2xl font-bold text-slate-900 dark:text-white">
+                    {stats?.needsFollowup || 0}
+                  </p>
+                  <p className="text-xs text-slate-500">Need Follow-up</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Filters */}
+        <Card className="mb-6 border-0 shadow-md bg-white dark:bg-slate-800/50">
+          <CardContent className="p-4">
+            <div className="flex items-center gap-4">
+              <div className="flex-1 relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                <Input
+                  placeholder="Search contacts..."
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  className="pl-9"
+                />
+              </div>
+
+              <Select value={typeFilter} onValueChange={setTypeFilter}>
+                <SelectTrigger className="w-[160px]">
+                  <Filter className="h-4 w-4 mr-2" />
+                  <SelectValue placeholder="All Types" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Types</SelectItem>
+                  {contactTypeOptions.map((opt) => (
+                    <SelectItem key={opt.value} value={opt.value}>
+                      {opt.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+
+              <div className="flex items-center border rounded-lg p-1 bg-slate-100 dark:bg-slate-800">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className={cn(
+                    "h-8 px-3",
+                    viewMode === "grid" && "bg-white dark:bg-slate-700 shadow-sm"
+                  )}
+                  onClick={() => setViewMode("grid")}
+                >
+                  <Grid3X3 className="h-4 w-4" />
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className={cn(
+                    "h-8 px-3",
+                    viewMode === "list" && "bg-white dark:bg-slate-700 shadow-sm"
+                  )}
+                  onClick={() => setViewMode("list")}
+                >
+                  <List className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Contacts Grid/List */}
+        {contacts.length === 0 ? (
+          <Card className="border-0 shadow-md bg-white dark:bg-slate-800/50">
+            <CardContent className="p-12 text-center">
+              <Users className="h-12 w-12 mx-auto text-slate-300 dark:text-slate-600 mb-4" />
+              <h3 className="text-lg font-medium text-slate-900 dark:text-white mb-2">
+                No contacts yet
+              </h3>
+              <p className="text-slate-500 dark:text-slate-400 mb-4">
+                Start building your network by adding your first contact
+              </p>
+              <Button onClick={() => setShowCreateDialog(true)}>
+                <UserPlus className="h-4 w-4 mr-2" />
+                Add Contact
               </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" onClick={(e) => e.stopPropagation()}>
-              <DropdownMenuItem onClick={onToggleFavorite}>
-                {contact.is_favorite ? (
-                  <>
-                    <StarOff className="h-4 w-4 mr-2" />
-                    Remove from favorites
-                  </>
-                ) : (
-                  <>
-                    <Star className="h-4 w-4 mr-2" />
-                    Add to favorites
-                  </>
-                )}
-              </DropdownMenuItem>
-              {contact.email && (
-                <DropdownMenuItem onClick={() => window.open(`mailto:${contact.email}`)}>
-                  <Mail className="h-4 w-4 mr-2" />
-                  Send email
-                </DropdownMenuItem>
-              )}
-              {contact.phone && (
-                <DropdownMenuItem onClick={() => window.open(`tel:${contact.phone}`)}>
-                  <Phone className="h-4 w-4 mr-2" />
-                  Call
-                </DropdownMenuItem>
-              )}
-              <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={onArchive} className="text-destructive">
-                <Archive className="h-4 w-4 mr-2" />
-                Archive
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
-
-        {/* Reach Out Button - shows on hover */}
-        <div
-          className="absolute bottom-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity"
-          onClick={(e) => e.stopPropagation()}
-        >
-          <ReachOutButton
-            contactId={contact.id}
-            contactName={contact.full_name}
-            contactEmail={contact.email}
-            variant="outline"
-            size="sm"
-          />
-        </div>
-
-        {contact.tags && contact.tags.length > 0 && (
-          <div className="flex flex-wrap gap-1 mt-3">
-            {contact.tags.slice(0, 3).map((tag) => (
-              <span
-                key={tag}
-                className="text-xs px-2 py-0.5 rounded-full bg-muted text-muted-foreground"
+            </CardContent>
+          </Card>
+        ) : viewMode === "grid" ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {contacts.map((contact) => (
+              <Card
+                key={contact.id}
+                className="border-0 shadow-md bg-white dark:bg-slate-800/50 hover:shadow-lg transition-shadow cursor-pointer group"
+                onClick={() => router.push(`/dashboard/contacts/${contact.id}`)}
               >
-                {tag}
-              </span>
+                <CardContent className="p-4">
+                  <div className="flex items-start gap-3">
+                    <Avatar className="h-12 w-12">
+                      <AvatarImage src={contact.avatar_url} />
+                      <AvatarFallback className="bg-gradient-to-br from-violet-500 to-purple-600 text-white">
+                        {getInitials(contact)}
+                      </AvatarFallback>
+                    </Avatar>
+
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2">
+                        <h3 className="font-semibold text-slate-900 dark:text-white truncate">
+                          {contact.full_name}
+                        </h3>
+                        {contact.ai_enriched && (
+                          <Sparkles className="h-3.5 w-3.5 text-amber-500 flex-shrink-0" />
+                        )}
+                      </div>
+                      {contact.job_title && (
+                        <p className="text-sm text-slate-500 dark:text-slate-400 truncate">
+                          {contact.job_title}
+                        </p>
+                      )}
+                      {contact.company && (
+                        <p className="text-sm text-slate-400 dark:text-slate-500 truncate flex items-center gap-1">
+                          <Building2 className="h-3 w-3" />
+                          {contact.company}
+                        </p>
+                      )}
+                    </div>
+
+                    <button
+                      onClick={(e) => toggleFavorite(contact, e)}
+                      className="p-1 hover:bg-slate-100 dark:hover:bg-slate-700 rounded transition-colors"
+                    >
+                      <Star
+                        className={cn(
+                          "h-4 w-4",
+                          contact.is_favorite
+                            ? "fill-amber-400 text-amber-400"
+                            : "text-slate-300 dark:text-slate-600"
+                        )}
+                      />
+                    </button>
+                  </div>
+
+                  <div className="mt-4 flex items-center justify-between">
+                    <Badge className={cn("text-xs", typeColors[contact.contact_type] || typeColors.contact)}>
+                      {contact.contact_type}
+                    </Badge>
+
+                    <div className="flex items-center gap-2 text-xs text-slate-500">
+                      <span className={getRelationshipColor(contact.relationship_strength)}>
+                        {contact.relationship_strength}%
+                      </span>
+                      <div className="w-12 h-1.5 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
+                        <div
+                          className={cn(
+                            "h-full rounded-full",
+                            contact.relationship_strength >= 80 ? "bg-emerald-500" :
+                            contact.relationship_strength >= 60 ? "bg-green-500" :
+                            contact.relationship_strength >= 40 ? "bg-yellow-500" :
+                            contact.relationship_strength >= 20 ? "bg-orange-500" : "bg-red-500"
+                          )}
+                          style={{ width: `${contact.relationship_strength}%` }}
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="mt-3 flex items-center gap-2">
+                    {contact.email && (
+                      <a
+                        href={`mailto:${contact.email}`}
+                        onClick={(e) => e.stopPropagation()}
+                        className="p-1.5 rounded-lg bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors"
+                      >
+                        <Mail className="h-3.5 w-3.5 text-slate-600 dark:text-slate-400" />
+                      </a>
+                    )}
+                    {contact.phone && (
+                      <a
+                        href={`tel:${contact.phone}`}
+                        onClick={(e) => e.stopPropagation()}
+                        className="p-1.5 rounded-lg bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors"
+                      >
+                        <Phone className="h-3.5 w-3.5 text-slate-600 dark:text-slate-400" />
+                      </a>
+                    )}
+                    {contact.linkedin_url && (
+                      <a
+                        href={contact.linkedin_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        onClick={(e) => e.stopPropagation()}
+                        className="p-1.5 rounded-lg bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors"
+                      >
+                        <Linkedin className="h-3.5 w-3.5 text-slate-600 dark:text-slate-400" />
+                      </a>
+                    )}
+                    {contact.twitter_url && (
+                      <a
+                        href={contact.twitter_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        onClick={(e) => e.stopPropagation()}
+                        className="p-1.5 rounded-lg bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors"
+                      >
+                        <Twitter className="h-3.5 w-3.5 text-slate-600 dark:text-slate-400" />
+                      </a>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
             ))}
-            {contact.tags.length > 3 && (
-              <span className="text-xs px-2 py-0.5 text-muted-foreground">
-                +{contact.tags.length - 3}
-              </span>
-            )}
           </div>
+        ) : (
+          <Card className="border-0 shadow-md bg-white dark:bg-slate-800/50 overflow-hidden">
+            <div className="divide-y divide-slate-200 dark:divide-slate-700">
+              {contacts.map((contact) => (
+                <div
+                  key={contact.id}
+                  className="p-4 hover:bg-slate-50 dark:hover:bg-slate-700/50 cursor-pointer transition-colors flex items-center gap-4"
+                  onClick={() => router.push(`/dashboard/contacts/${contact.id}`)}
+                >
+                  <Avatar className="h-10 w-10">
+                    <AvatarImage src={contact.avatar_url} />
+                    <AvatarFallback className="bg-gradient-to-br from-violet-500 to-purple-600 text-white text-sm">
+                      {getInitials(contact)}
+                    </AvatarFallback>
+                  </Avatar>
+
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2">
+                      <span className="font-medium text-slate-900 dark:text-white">
+                        {contact.full_name}
+                      </span>
+                      {contact.ai_enriched && (
+                        <Sparkles className="h-3.5 w-3.5 text-amber-500" />
+                      )}
+                      <Badge className={cn("text-xs", typeColors[contact.contact_type] || typeColors.contact)}>
+                        {contact.contact_type}
+                      </Badge>
+                    </div>
+                    <p className="text-sm text-slate-500 dark:text-slate-400">
+                      {[contact.job_title, contact.company].filter(Boolean).join(" at ")}
+                    </p>
+                  </div>
+
+                  <div className="flex items-center gap-4">
+                    {contact.email && (
+                      <span className="text-sm text-slate-500 dark:text-slate-400 hidden lg:block">
+                        {contact.email}
+                      </span>
+                    )}
+
+                    <div className="flex items-center gap-1 text-sm">
+                      <span className={getRelationshipColor(contact.relationship_strength)}>
+                        {contact.relationship_strength}%
+                      </span>
+                    </div>
+
+                    <button
+                      onClick={(e) => toggleFavorite(contact, e)}
+                      className="p-1"
+                    >
+                      <Star
+                        className={cn(
+                          "h-4 w-4",
+                          contact.is_favorite
+                            ? "fill-amber-400 text-amber-400"
+                            : "text-slate-300 dark:text-slate-600"
+                        )}
+                      />
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </Card>
         )}
-      </CardContent>
-    </Card>
-  );
-}
-
-// Contact List Item Component
-function ContactListItem({
-  contact,
-  onClick,
-  onToggleFavorite,
-  onArchive,
-}: {
-  contact: Contact;
-  onClick: () => void;
-  onToggleFavorite: () => void;
-  onArchive: () => void;
-}) {
-  const strengthConfig = RELATIONSHIP_STRENGTH_CONFIG[contact.relationship_strength];
-
-  const getInitials = (name: string) => {
-    return name
-      .split(" ")
-      .map((n) => n[0])
-      .join("")
-      .toUpperCase()
-      .slice(0, 2);
-  };
-
-  return (
-    <div
-      className="group flex items-center gap-4 p-4 rounded-lg border hover:bg-muted/50 cursor-pointer transition-colors"
-      onClick={onClick}
-    >
-      <Avatar className="h-10 w-10">
-        <AvatarImage src={contact.avatar_url || undefined} />
-        <AvatarFallback className={cn(strengthConfig.bgColor, strengthConfig.color)}>
-          {getInitials(contact.full_name)}
-        </AvatarFallback>
-      </Avatar>
-
-      <div className="flex-1 min-w-0 grid grid-cols-1 sm:grid-cols-4 gap-2 sm:gap-4 items-center">
-        <div className="sm:col-span-2">
-          <div className="flex items-center gap-2">
-            <span className="font-medium truncate">{contact.full_name}</span>
-            {contact.is_favorite && (
-              <Star className="h-3.5 w-3.5 text-amber-500 fill-amber-500 flex-shrink-0" />
-            )}
-          </div>
-          {(contact.job_title || contact.company) && (
-            <p className="text-sm text-muted-foreground truncate">
-              {contact.job_title}
-              {contact.job_title && contact.company && " at "}
-              {contact.company}
-            </p>
-          )}
-        </div>
-
-        <div className="hidden sm:flex items-center gap-2">
-          <Badge
-            variant="secondary"
-            className={cn("text-xs", strengthConfig.bgColor, strengthConfig.color)}
-          >
-            {strengthConfig.label}
-          </Badge>
-        </div>
-
-        <div className="hidden sm:block text-sm text-muted-foreground">
-          {contact.last_interaction_at ? (
-            <span className="flex items-center gap-1">
-              <Clock className="h-3 w-3" />
-              {formatDistanceToNow(new Date(contact.last_interaction_at), {
-                addSuffix: true,
-              })}
-            </span>
-          ) : (
-            <span className="text-muted-foreground/50">No interactions</span>
-          )}
-        </div>
       </div>
 
-      <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
-        <div className="hidden sm:block">
-          <ReachOutButton
-            contactId={contact.id}
-            contactName={contact.full_name}
-            contactEmail={contact.email}
-            variant="icon"
-            showLabel={false}
-          />
-        </div>
+      {/* Create Dialog */}
+      <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Add New Contact</DialogTitle>
+          </DialogHeader>
 
-        {contact.email && (
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-8 w-8 hidden sm:flex"
-            onClick={(e) => {
-              e.stopPropagation();
-              window.open(`mailto:${contact.email}`);
-            }}
-          >
-            <Mail className="h-4 w-4" />
-          </Button>
-        )}
+          <div className="space-y-4 py-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>First Name *</Label>
+                <Input
+                  value={newContact.first_name}
+                  onChange={(e) => setNewContact({ ...newContact, first_name: e.target.value })}
+                  placeholder="John"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Last Name</Label>
+                <Input
+                  value={newContact.last_name}
+                  onChange={(e) => setNewContact({ ...newContact, last_name: e.target.value })}
+                  placeholder="Doe"
+                />
+              </div>
+            </div>
 
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
-            <Button variant="ghost" size="icon" className="h-8 w-8">
-              <MoreHorizontal className="h-4 w-4" />
+            <div className="space-y-2">
+              <Label>Email</Label>
+              <Input
+                type="email"
+                value={newContact.email}
+                onChange={(e) => setNewContact({ ...newContact, email: e.target.value })}
+                placeholder="john@example.com"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label>Phone</Label>
+              <Input
+                value={newContact.phone}
+                onChange={(e) => setNewContact({ ...newContact, phone: e.target.value })}
+                placeholder="+1 (555) 123-4567"
+              />
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Company</Label>
+                <Input
+                  value={newContact.company}
+                  onChange={(e) => setNewContact({ ...newContact, company: e.target.value })}
+                  placeholder="Acme Inc."
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Job Title</Label>
+                <Input
+                  value={newContact.job_title}
+                  onChange={(e) => setNewContact({ ...newContact, job_title: e.target.value })}
+                  placeholder="CEO"
+                />
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label>Contact Type</Label>
+              <Select
+                value={newContact.contact_type}
+                onValueChange={(v) => setNewContact({ ...newContact, contact_type: v })}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {contactTypeOptions.map((opt) => (
+                    <SelectItem key={opt.value} value={opt.value}>
+                      {opt.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label>LinkedIn URL</Label>
+              <Input
+                value={newContact.linkedin_url}
+                onChange={(e) => setNewContact({ ...newContact, linkedin_url: e.target.value })}
+                placeholder="https://linkedin.com/in/johndoe"
+              />
+            </div>
+
+            <div className="flex items-center gap-2 p-3 rounded-lg bg-violet-50 dark:bg-violet-900/20 border border-violet-200 dark:border-violet-800">
+              <input
+                type="checkbox"
+                id="enrich"
+                checked={newContact.enrich_now}
+                onChange={(e) => setNewContact({ ...newContact, enrich_now: e.target.checked })}
+                className="rounded border-violet-300"
+              />
+              <label htmlFor="enrich" className="text-sm text-violet-700 dark:text-violet-300 flex items-center gap-2">
+                <Sparkles className="h-4 w-4" />
+                Enrich with AI (uses Perplexity to find more info)
+              </label>
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowCreateDialog(false)}>
+              Cancel
             </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" onClick={(e) => e.stopPropagation()}>
-            <DropdownMenuItem onClick={onToggleFavorite}>
-              {contact.is_favorite ? (
-                <>
-                  <StarOff className="h-4 w-4 mr-2" />
-                  Remove from favorites
-                </>
+            <Button
+              onClick={createContact}
+              disabled={!newContact.first_name.trim() || creating}
+              className="bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-700 hover:to-purple-700 text-white border-0"
+            >
+              {creating ? (
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
               ) : (
-                <>
-                  <Star className="h-4 w-4 mr-2" />
-                  Add to favorites
-                </>
+                <UserPlus className="h-4 w-4 mr-2" />
               )}
-            </DropdownMenuItem>
-            {contact.email && (
-              <DropdownMenuItem onClick={() => window.open(`mailto:${contact.email}`)}>
-                <Mail className="h-4 w-4 mr-2" />
-                Send email
-              </DropdownMenuItem>
-            )}
-            {contact.phone && (
-              <DropdownMenuItem onClick={() => window.open(`tel:${contact.phone}`)}>
-                <Phone className="h-4 w-4 mr-2" />
-                Call
-              </DropdownMenuItem>
-            )}
-            <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={onArchive} className="text-destructive">
-              <Archive className="h-4 w-4 mr-2" />
-              Archive
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      </div>
+              Add Contact
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

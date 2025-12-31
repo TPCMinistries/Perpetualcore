@@ -121,6 +121,7 @@ interface DecisionDetailPanelProps {
   open: boolean;
   onClose: () => void;
   onUpdate: () => void;
+  onNavigate?: (target: { type: "decision" | "project" | "opportunity"; id: string }) => void;
 }
 
 export function DecisionDetailPanel({
@@ -128,6 +129,7 @@ export function DecisionDetailPanel({
   open,
   onClose,
   onUpdate,
+  onNavigate,
 }: DecisionDetailPanelProps) {
   const [activeTab, setActiveTab] = useState("details");
   const [loading, setLoading] = useState(false);
@@ -1110,7 +1112,19 @@ export function DecisionDetailPanel({
               ) : (
                 <div className="space-y-2">
                   {relatedItems.map((item) => (
-                    <Card key={item.relationship_id} className="p-3 cursor-pointer hover:bg-muted/50">
+                    <Card
+                      key={item.relationship_id}
+                      className="p-3 cursor-pointer hover:bg-muted/50 transition-colors"
+                      onClick={() => {
+                        if (onNavigate) {
+                          onClose();
+                          onNavigate({
+                            type: item.related_type as "decision" | "project" | "opportunity",
+                            id: item.related_id
+                          });
+                        }
+                      }}
+                    >
                       <div className="flex items-center gap-3">
                         {item.related_type === "project" && (
                           <Briefcase className="h-5 w-5 text-blue-500" />
@@ -1134,6 +1148,7 @@ export function DecisionDetailPanel({
                             {item.related_status}
                           </Badge>
                         )}
+                        <ChevronRight className="h-4 w-4 text-muted-foreground" />
                       </div>
                     </Card>
                   ))}

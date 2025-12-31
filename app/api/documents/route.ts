@@ -32,7 +32,6 @@ export async function GET(req: NextRequest) {
       .single();
 
     if (!profile || !profile.organization_id) {
-      console.log("No organization found for user");
       return Response.json({
         success: true,
         documents: [],
@@ -74,7 +73,7 @@ export async function GET(req: NextRequest) {
         )
       `)
       .eq("organization_id", profile.organization_id)
-      .in("status", ["completed", "processing"]); // Show completed and processing documents
+      .in("status", ["completed", "processing", "failed"]); // Show all document statuses
 
     // Apply folder filter if provided (check if document is in the folder via junction table)
     if (folderId && folderId !== "null") {
@@ -95,9 +94,8 @@ export async function GET(req: NextRequest) {
       });
     }
 
-    // Return empty array if no documents (don't fall back to mock)
+    // Return empty array if no documents
     if (!rawDocuments || rawDocuments.length === 0) {
-      console.log("No documents found in database");
       return Response.json({
         success: true,
         documents: [],

@@ -13,7 +13,6 @@ export async function POST(req: NextRequest) {
 
     // Handle reprocess all stuck documents
     if (reprocessAll) {
-      console.log(`🔄 Reprocessing all stuck documents...`);
       const supabase = createAdminClient();
 
       const { data: stuckDocs, error } = await supabase
@@ -26,17 +25,13 @@ export async function POST(req: NextRequest) {
         return Response.json({ success: false, error: error.message }, { status: 500 });
       }
 
-      console.log(`📋 Found ${stuckDocs?.length || 0} stuck documents`);
-
       const results = [];
       for (const doc of stuckDocs || []) {
         try {
-          console.log(`🔄 Processing: ${doc.title} (${doc.id})`);
           await processAndStoreDocument(doc.id);
           results.push({ id: doc.id, title: doc.title, success: true });
-          console.log(`✅ Completed: ${doc.title}`);
         } catch (err) {
-          console.error(`❌ Failed: ${doc.title}`, err);
+          console.error(`Processing failed for ${doc.id}:`, err);
           results.push({ id: doc.id, title: doc.title, success: false, error: String(err) });
         }
       }
@@ -49,12 +44,7 @@ export async function POST(req: NextRequest) {
       return new Response("Document ID required", { status: 400 });
     }
 
-    console.log(`🔄 Starting processing for document ${documentId}`);
-
-    // Process document
     await processAndStoreDocument(documentId);
-
-    console.log(`✅ Document ${documentId} processed successfully`);
 
     return Response.json({ success: true, documentId });
   } catch (error) {

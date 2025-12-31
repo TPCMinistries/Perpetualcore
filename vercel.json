@@ -1,4 +1,15 @@
 {
+  "functions": {
+    "app/api/documents/upload/route.ts": {
+      "maxDuration": 120
+    },
+    "app/api/documents/process/route.ts": {
+      "maxDuration": 120
+    },
+    "app/api/documents/[id]/summary/route.ts": {
+      "maxDuration": 60
+    }
+  },
   "crons": [
     {
       "path": "/api/cron/process-sequences",

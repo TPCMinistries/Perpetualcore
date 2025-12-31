@@ -14,9 +14,9 @@ export async function POST(request: Request) {
 
     // Get user profile for organization
     const { data: profile } = await supabase
-      .from("user_profiles")
+      .from("profiles")
       .select("organization_id")
-      .eq("user_id", user.id)
+      .eq("id", user.id)
       .single();
 
     if (!profile) {
@@ -42,17 +42,17 @@ export async function POST(request: Request) {
       .from("documents")
       .insert({
         user_id: user.id,
-        organization_id: profile.organization_id,
+        organization_id: profile.organization_id || user.id, // Fallback to user.id if no org
         title,
-        file_type: "text/html",
+        file_type: "text/plain",
         file_size: new Blob([content]).size,
         status: "completed",
-        content_text: plainText,
-        content_html: content,
+        content: plainText, // Use 'content' column (not content_text)
         metadata: {
           wordCount,
           charCount,
-          isRichText: true,
+          isRichText: content.includes("<"),
+          originalHtml: content.includes("<") ? content : null,
         },
       })
       .select()
