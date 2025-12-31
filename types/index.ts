@@ -409,7 +409,7 @@ export interface UsageLog {
   created_at: string;
 }
 
-export type AIModel = 'auto' | 'claude-opus-4' | 'claude-sonnet-4' | 'gpt-4o' | 'gpt-4o-mini' | 'gemini-2.0-flash-exp' | 'deepseek-chat' | 'gamma';
+export type AIModel = 'auto' | 'claude-opus-4' | 'claude-sonnet-4' | 'gpt-4o' | 'gpt-4o-mini' | 'o1' | 'o1-mini' | 'gemini-2.0-flash-exp' | 'deepseek-chat' | 'perplexity' | 'perplexity-fast' | 'gamma';
 
 export interface AIModelConfig {
   id: AIModel;

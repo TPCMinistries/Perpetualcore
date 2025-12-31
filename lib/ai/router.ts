@@ -149,10 +149,14 @@ async function* streamFromModel(
     yield* streamClaude(messages, model, tools);
   } else if (model === "gpt-4o" || model === "gpt-4o-mini") {
     yield* streamOpenAI(messages, model, tools);
+  } else if (model === "o1" || model === "o1-mini") {
+    yield* streamO1(messages, model);
   } else if (model === "deepseek-chat") {
     yield* streamDeepSeek(messages, tools);
   } else if (model === "gemini-2.0-flash-exp") {
     yield* streamGemini(messages);
+  } else if (model === "perplexity" || model === "perplexity-fast") {
+    yield* streamPerplexity(messages, model);
   } else if (model === "gamma") {
     yield* streamGamma(messages);
   } else {
@@ -177,8 +181,8 @@ async function* streamClaude(
   const anthropicModel = model === "claude-opus-4"
     ? "claude-opus-4-20250514"
     : model === "claude-sonnet-4"
-    ? "claude-sonnet-3-5-20241022" // Actual Sonnet 3.5
-    : "claude-3-haiku-20240307"; // Default to Haiku
+    ? "claude-sonnet-4-20250514" // Claude Sonnet 4 (latest)
+    : "claude-3-5-haiku-20241022"; // Default to 3.5 Haiku
 
   const client = getAnthropic();
   if (!client) {
@@ -503,6 +507,116 @@ async function* streamGamma(
   }
 
   yield { content: "", done: true };
+}
+
+// OpenAI o1 reasoning models (non-streaming, reasoning models don't support streaming)
+async function* streamO1(
+  messages: ChatMessage[],
+  model: string
+): AsyncGenerator<StreamChunk> {
+  const client = getOpenAI();
+  if (!client) {
+    throw new Error("OpenAI client not initialized");
+  }
+
+  // o1 models use a different API format - no system messages, no streaming
+  const filteredMessages = messages
+    .filter((m) => m.role !== "system")
+    .map((m) => ({
+      role: m.role as "user" | "assistant",
+      content: m.content,
+    }));
+
+  // Add system context as a user message prefix if exists
+  const systemMessage = messages.find((m) => m.role === "system");
+  if (systemMessage && filteredMessages.length > 0 && filteredMessages[0].role === "user") {
+    filteredMessages[0].content = `Context: ${systemMessage.content}\n\n${filteredMessages[0].content}`;
+  }
+
+  const apiModel = model === "o1" ? "o1-2024-12-17" : "o1-mini-2024-09-12";
+
+  const response = await client.chat.completions.create({
+    model: apiModel,
+    messages: filteredMessages,
+    // o1 doesn't support max_tokens, uses max_completion_tokens
+  });
+
+  const content = response.choices[0]?.message?.content || "";
+
+  // Simulate streaming by chunking the response
+  const chunkSize = 20;
+  for (let i = 0; i < content.length; i += chunkSize) {
+    yield {
+      content: content.slice(i, i + chunkSize),
+      done: false,
+    };
+    await new Promise((resolve) => setTimeout(resolve, 10));
+  }
+
+  const usage: UsageMetadata = {
+    inputTokens: response.usage?.prompt_tokens || 0,
+    outputTokens: response.usage?.completion_tokens || 0,
+  };
+
+  yield { content: "", done: true, usage };
+}
+
+// Perplexity client (uses OpenAI-compatible API with web search)
+let perplexity: OpenAI | null = null;
+function getPerplexity() {
+  if (!perplexity && process.env.PERPLEXITY_API_KEY) {
+    perplexity = new OpenAI({
+      apiKey: process.env.PERPLEXITY_API_KEY,
+      baseURL: "https://api.perplexity.ai",
+    });
+  }
+  return perplexity;
+}
+
+async function* streamPerplexity(
+  messages: ChatMessage[],
+  model: string
+): AsyncGenerator<StreamChunk> {
+  const client = getPerplexity();
+  if (!client) {
+    throw new Error("Perplexity client not initialized - add PERPLEXITY_API_KEY to environment");
+  }
+
+  // Map to Perplexity model names
+  const perplexityModel = model === "perplexity"
+    ? "llama-3.1-sonar-large-128k-online"  // Best quality with web search
+    : "llama-3.1-sonar-small-128k-online"; // Faster, lower cost
+
+  const stream = await client.chat.completions.create({
+    model: perplexityModel,
+    messages: messages.map((m) => ({
+      role: m.role,
+      content: m.content,
+    })),
+    stream: true,
+  });
+
+  let usage: UsageMetadata | undefined;
+
+  for await (const chunk of stream) {
+    const content = chunk.choices[0]?.delta?.content || "";
+    if (content) {
+      yield {
+        content,
+        done: false,
+      };
+    }
+
+    // Perplexity includes usage in chunks
+    if ((chunk as any).usage) {
+      usage = {
+        inputTokens: (chunk as any).usage.prompt_tokens || 0,
+        outputTokens: (chunk as any).usage.completion_tokens || 0,
+      };
+    }
+  }
+
+  yield { content: "", done: true, usage };
 }
 
 // Non-streaming version for simpler use cases

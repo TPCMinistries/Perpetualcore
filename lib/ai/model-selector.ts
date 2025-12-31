@@ -16,14 +16,18 @@ export interface ModelCosts {
   outputCostPer1M: number; // dollars
 }
 
-// Actual pricing as of latest API documentation
+// Actual pricing as of Dec 2024 API documentation
 export const MODEL_COSTS: Record<AIModel, ModelCosts> = {
   'claude-opus-4': { inputCostPer1M: 15.0, outputCostPer1M: 75.0 },
   'claude-sonnet-4': { inputCostPer1M: 3.0, outputCostPer1M: 15.0 },
   'gpt-4o': { inputCostPer1M: 2.50, outputCostPer1M: 10.0 },
   'gpt-4o-mini': { inputCostPer1M: 0.15, outputCostPer1M: 0.60 },
+  'o1': { inputCostPer1M: 15.0, outputCostPer1M: 60.0 }, // OpenAI reasoning model
+  'o1-mini': { inputCostPer1M: 3.0, outputCostPer1M: 12.0 }, // Smaller reasoning model
   'gemini-2.0-flash-exp': { inputCostPer1M: 0.0, outputCostPer1M: 0.0 }, // Free during preview
   'deepseek-chat': { inputCostPer1M: 0.14, outputCostPer1M: 0.28 }, // DeepSeek V3 pricing
+  'perplexity': { inputCostPer1M: 1.0, outputCostPer1M: 1.0 }, // Sonar Large with web search
+  'perplexity-fast': { inputCostPer1M: 0.2, outputCostPer1M: 0.2 }, // Sonar Small, faster
   'gamma': { inputCostPer1M: 0.0, outputCostPer1M: 0.0 }, // Separate pricing model
   'auto': { inputCostPer1M: 0.0, outputCostPer1M: 0.0 }, // Dynamic
 };
@@ -61,6 +65,8 @@ export function selectBestModel(
 
   const isPresentationTask = /\b(presentation|slides|deck|powerpoint)\b/.test(lastMessage);
 
+  const requiresWebSearch = /\b(search|latest|current|today|news|recent|2024|2025|look up|find out|what is happening)\b/.test(lastMessage);
+
   const hasComplexContext = messages.length > 10 || messageLength > 5000;
 
   console.log(`[ModelSelector] Task analysis:`, {
@@ -72,6 +78,7 @@ export function selectBestModel(
     isAnalysisTask,
     requiresReasoning,
     isPresentationTask,
+    requiresWebSearch,
     hasComplexContext,
     hasTools: context.hasTools,
   });
@@ -82,6 +89,12 @@ export function selectBestModel(
   if (isPresentationTask) {
     console.log(`[ModelSelector] Selected 'gamma' for presentation task`);
     return 'gamma';
+  }
+
+  // Web search tasks -> Perplexity (has live internet access)
+  if (requiresWebSearch) {
+    console.log(`[ModelSelector] Selected 'perplexity' for web search task`);
+    return 'perplexity';
   }
 
   // Free tier -> Always use most cost-effective models
@@ -163,8 +176,12 @@ export function getFallbackChain(primaryModel: AIModel): AIModel[] {
     'claude-sonnet-4': ['claude-sonnet-4', 'gpt-4o-mini', 'gemini-2.0-flash-exp'],
     'gpt-4o': ['gpt-4o', 'gpt-4o-mini', 'claude-sonnet-4', 'gemini-2.0-flash-exp'],
     'gpt-4o-mini': ['gpt-4o-mini', 'gemini-2.0-flash-exp', 'claude-sonnet-4'],
+    'o1': ['o1', 'o1-mini', 'claude-opus-4', 'gpt-4o'], // Reasoning model chain
+    'o1-mini': ['o1-mini', 'gpt-4o', 'claude-sonnet-4'], // Smaller reasoning chain
     'gemini-2.0-flash-exp': ['gemini-2.0-flash-exp', 'gpt-4o-mini', 'claude-sonnet-4'],
-    'deepseek-chat': ['deepseek-chat', 'gpt-4o-mini', 'claude-sonnet-4'], // DeepSeek fallback chain
+    'deepseek-chat': ['deepseek-chat', 'gpt-4o-mini', 'claude-sonnet-4'],
+    'perplexity': ['perplexity', 'perplexity-fast', 'gpt-4o'], // Web search chain
+    'perplexity-fast': ['perplexity-fast', 'perplexity', 'gpt-4o-mini'],
     'gamma': ['gamma'], // No fallback for specialized presentation tool
     'auto': ['gpt-4o-mini'], // Should never hit this (auto resolved earlier)
   };
@@ -181,8 +198,12 @@ export function isModelAvailable(model: AIModel): boolean {
     'claude-sonnet-4': process.env.ANTHROPIC_API_KEY,
     'gpt-4o': process.env.OPENAI_API_KEY,
     'gpt-4o-mini': process.env.OPENAI_API_KEY,
+    'o1': process.env.OPENAI_API_KEY,
+    'o1-mini': process.env.OPENAI_API_KEY,
     'gemini-2.0-flash-exp': process.env.GOOGLE_AI_API_KEY,
     'deepseek-chat': process.env.DEEPSEEK_API_KEY,
+    'perplexity': process.env.PERPLEXITY_API_KEY,
+    'perplexity-fast': process.env.PERPLEXITY_API_KEY,
     'gamma': process.env.GAMMA_API_KEY,
   };
 
@@ -243,7 +264,7 @@ export function getModelInfo(model: AIModel): {
       icon: '🧠',
     },
     'claude-sonnet-4': {
-      name: 'Claude Sonnet 3.5',
+      name: 'Claude Sonnet 4',
       provider: 'Anthropic',
       description: 'Balanced model, excellent for code and analysis',
       icon: '⚡',
@@ -260,6 +281,18 @@ export function getModelInfo(model: AIModel): {
       description: 'Fast and cost-effective for most tasks',
       icon: '⚡',
     },
+    'o1': {
+      name: 'o1',
+      provider: 'OpenAI',
+      description: 'Advanced reasoning model for complex problems',
+      icon: '🔬',
+    },
+    'o1-mini': {
+      name: 'o1 Mini',
+      provider: 'OpenAI',
+      description: 'Faster reasoning model, great for STEM',
+      icon: '🔬',
+    },
     'gemini-2.0-flash-exp': {
       name: 'Gemini 2.0 Flash',
       provider: 'Google',
@@ -271,6 +304,18 @@ export function getModelInfo(model: AIModel): {
       provider: 'DeepSeek',
       description: 'Excellent for code and math, very cost-effective',
       icon: '🧠',
+    },
+    'perplexity': {
+      name: 'Perplexity Sonar',
+      provider: 'Perplexity',
+      description: 'AI with live web search, always up-to-date',
+      icon: '🌐',
+    },
+    'perplexity-fast': {
+      name: 'Perplexity Fast',
+      provider: 'Perplexity',
+      description: 'Quick web search, lower cost',
+      icon: '🌐',
     },
     'gamma': {
       name: 'Gamma',
