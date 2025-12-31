@@ -43,14 +43,14 @@ export function selectBestModel(userMessage: string): ModelSelection {
     };
   }
 
-  // Real-time web search: GPT-4o ($0.005/1k)
-  if (msg.match(/latest|current|today|now|recent|breaking|news|what'?s happening|live|real-time/i)) {
+  // Real-time web search: Perplexity (has live internet access)
+  if (msg.match(/latest|current|today|now|recent|breaking|news|what'?s happening|live|real-time|search|look up|find out|2024|2025/i)) {
     return {
-      model: "gpt-4o",
-      reason: "Web search for real-time information",
-      provider: "openai",
-      displayName: AI_MODELS["gpt-4o"].name,
-      icon: AI_MODELS["gpt-4o"].icon,
+      model: "perplexity",
+      reason: "Live web search for real-time information",
+      provider: "perplexity",
+      displayName: AI_MODELS["perplexity"]?.name || "Perplexity Sonar",
+      icon: AI_MODELS["perplexity"]?.icon || "🌐",
     };
   }
 
