@@ -267,7 +267,9 @@ export default function ContactDetailPage({ params }: PageProps) {
     return null;
   }
 
-  const strengthConfig = RELATIONSHIP_STRENGTH_CONFIG[contact.relationship_strength];
+  // Fallback to 'new' if relationship_strength is invalid or missing
+  const strengthConfig = RELATIONSHIP_STRENGTH_CONFIG[contact.relationship_strength]
+    || RELATIONSHIP_STRENGTH_CONFIG['new'];
 
   return (
     <div className="container mx-auto p-6 max-w-5xl">
