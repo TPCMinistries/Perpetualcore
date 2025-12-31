@@ -37,6 +37,10 @@ import {
   UsersRound,
   Radar,
   Contact,
+  Lightbulb,
+  Target,
+  Church,
+  Heart,
 } from "lucide-react";
 import { UserExperienceLevel, AdaptiveNavConfig } from "@/types/user-experience";
 
@@ -163,6 +167,16 @@ export const NAVIGATION_CONFIG: NavigationSection[] = [
         },
       },
       {
+        name: "Ideas",
+        href: "/dashboard/ideas",
+        icon: Lightbulb,
+        adaptiveConfig: {
+          visibleFor: ["beginner", "intermediate", "advanced"],
+          complexity: "standard",
+          helpText: "Quick capture ideas, develop them, and track implementation",
+        },
+      },
+      {
         name: "Meetings",
         href: "/dashboard/calendar",
         icon: Calendar,
@@ -234,6 +248,70 @@ export const NAVIGATION_CONFIG: NavigationSection[] = [
           visibleFor: ["beginner", "intermediate", "advanced"],
           complexity: "standard",
           helpText: "Automate repetitive tasks with intelligent workflow automation",
+        },
+      },
+    ],
+  },
+
+  // GROWTH - Sales and outreach tools
+  {
+    section: "Growth",
+    color: "text-slate-600 dark:text-slate-400",
+    bgColor: "bg-slate-50 dark:bg-slate-950/30",
+    collapsible: true,
+    defaultCollapsed: false,
+    visibleFor: ["beginner", "intermediate", "advanced"],
+    items: [
+      {
+        name: "Leads",
+        href: "/dashboard/leads",
+        icon: Target,
+        adaptiveConfig: {
+          visibleFor: ["beginner", "intermediate", "advanced"],
+          complexity: "standard",
+          helpText: "Manage your sales pipeline and track potential customers",
+        },
+      },
+      {
+        name: "Outreach",
+        href: "/dashboard/outreach",
+        icon: Send,
+        adaptiveConfig: {
+          visibleFor: ["beginner", "intermediate", "advanced"],
+          complexity: "standard",
+          helpText: "Email sequences and automated outreach campaigns",
+        },
+      },
+    ],
+  },
+
+  // MINISTRY - Church and coaching tools
+  {
+    section: "Ministry",
+    color: "text-slate-600 dark:text-slate-400",
+    bgColor: "bg-slate-50 dark:bg-slate-950/30",
+    collapsible: true,
+    defaultCollapsed: false,
+    visibleFor: ["beginner", "intermediate", "advanced"],
+    items: [
+      {
+        name: "Ministry",
+        href: "/dashboard/ministry",
+        icon: Church,
+        adaptiveConfig: {
+          visibleFor: ["beginner", "intermediate", "advanced"],
+          complexity: "standard",
+          helpText: "Events, prayer requests, and discipleship tracking",
+        },
+      },
+      {
+        name: "Coaching",
+        href: "/dashboard/coaching",
+        icon: GraduationCap,
+        adaptiveConfig: {
+          visibleFor: ["beginner", "intermediate", "advanced"],
+          complexity: "standard",
+          helpText: "Client management and coaching session tracking",
         },
       },
     ],
