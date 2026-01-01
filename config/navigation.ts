@@ -48,6 +48,7 @@ import {
   Link2,
   Plug,
   Database,
+  Sheet,
 } from "lucide-react";
 import { UserExperienceLevel, AdaptiveNavConfig } from "@/types/user-experience";
 
@@ -661,6 +662,28 @@ export const NAVIGATION_CONFIG_V2: NavigationSection[] = [
           helpText: "Meetings, scheduling, and intelligent briefings",
         },
       },
+      {
+        name: "Google Sheets",
+        href: "/dashboard/integrations",
+        icon: Sheet,
+        adaptiveConfig: {
+          visibleFor: ["beginner", "intermediate", "advanced"],
+          complexity: "standard",
+          badge: "new",
+          helpText: "Import and export data to/from Google Sheets",
+        },
+      },
+      {
+        name: "Data Explorer",
+        href: "/dashboard/data-explorer",
+        icon: Database,
+        adaptiveConfig: {
+          visibleFor: ["beginner", "intermediate", "advanced"],
+          complexity: "standard",
+          badge: "new",
+          helpText: "Browse and manage your database tables with a spreadsheet-like interface",
+        },
+      },
     ],
   },
 
@@ -793,17 +816,6 @@ export const NAVIGATION_CONFIG_V2: NavigationSection[] = [
           visibleFor: ["advanced"],
           complexity: "developer",
           helpText: "API keys, webhooks, and developer tools",
-        },
-      },
-      {
-        name: "Data Explorer",
-        href: "/dashboard/data-explorer",
-        icon: Database,
-        adaptiveConfig: {
-          visibleFor: ["advanced"],
-          complexity: "developer",
-          badge: "new",
-          helpText: "Browse and manage your database tables with a spreadsheet-like interface",
         },
       },
     ],
