@@ -5,8 +5,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
-import { Check, X, ExternalLink, Settings, AlertCircle } from "lucide-react";
+import { Check, X, ExternalLink, Settings, AlertCircle, FileSpreadsheet } from "lucide-react";
 import { EmptyState } from "@/components/ui/empty-state";
+import { GoogleSheetsConnect } from "@/components/integrations/GoogleSheetsConnect";
 
 interface IntegrationConfig {
   provider: string;
@@ -161,6 +162,22 @@ export default function IntegrationsPage() {
               Connect your favorite tools and services to automate workflows
             </p>
           </div>
+        </div>
+      </div>
+
+      {/* Spreadsheet Integrations */}
+      <div className="space-y-4">
+        <div>
+          <div className="flex items-center gap-2">
+            <FileSpreadsheet className="h-5 w-5 text-green-600" />
+            <h2 className="text-xl font-semibold">Spreadsheet Integrations</h2>
+          </div>
+          <p className="text-sm text-muted-foreground mt-1">
+            Import and export data to/from spreadsheet applications
+          </p>
+        </div>
+        <div className="grid gap-4 md:grid-cols-2">
+          <GoogleSheetsConnect />
         </div>
       </div>
 
