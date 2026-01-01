@@ -47,6 +47,7 @@ import {
   Boxes,
   Link2,
   Plug,
+  Database,
 } from "lucide-react";
 import { UserExperienceLevel, AdaptiveNavConfig } from "@/types/user-experience";
 
@@ -792,6 +793,17 @@ export const NAVIGATION_CONFIG_V2: NavigationSection[] = [
           visibleFor: ["advanced"],
           complexity: "developer",
           helpText: "API keys, webhooks, and developer tools",
+        },
+      },
+      {
+        name: "Data Explorer",
+        href: "/dashboard/data-explorer",
+        icon: Database,
+        adaptiveConfig: {
+          visibleFor: ["advanced"],
+          complexity: "developer",
+          badge: "new",
+          helpText: "Browse and manage your database tables with a spreadsheet-like interface",
         },
       },
     ],
