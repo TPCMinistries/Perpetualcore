@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { rateLimiters } from "@/lib/rate-limit";
 import { UpdateContactInput } from "@/types/contacts";
+import { logActivity } from "@/lib/activity-logger";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -208,6 +209,21 @@ export async function PUT(req: NextRequest, context: RouteContext) {
       return NextResponse.json({ error: "Contact not found" }, { status: 404 });
     }
 
+    // Log activity for contact update
+    const contactName = `${contact.first_name}${contact.last_name ? " " + contact.last_name : ""}`;
+    const action = (cleanedUpdates as any).is_archived ? "archived" : "updated";
+    await logActivity({
+      supabase,
+      userId: user.id,
+      action,
+      entityType: "contact",
+      entityId: contact.id,
+      entityName: contactName,
+      metadata: {
+        changes: Object.keys(cleanedUpdates),
+      },
+    });
+
     return NextResponse.json({ contact });
   } catch (error) {
     console.error("Contact PUT error:", error);
@@ -236,10 +252,10 @@ export async function DELETE(req: NextRequest, context: RouteContext) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    // Verify ownership before delete
+    // Verify ownership before delete and get contact name
     const { data: existing } = await supabase
       .from("contacts")
-      .select("id")
+      .select("id, first_name, last_name")
       .eq("id", contactId)
       .eq("user_id", user.id)
       .single();
@@ -247,6 +263,9 @@ export async function DELETE(req: NextRequest, context: RouteContext) {
     if (!existing) {
       return NextResponse.json({ error: "Contact not found" }, { status: 404 });
     }
+
+    // Store contact name before deletion
+    const contactName = `${existing.first_name}${existing.last_name ? " " + existing.last_name : ""}`;
 
     const { error } = await supabase
       .from("contacts")
@@ -258,6 +277,16 @@ export async function DELETE(req: NextRequest, context: RouteContext) {
       console.error("Contact delete error:", error);
       return NextResponse.json({ error: "Failed to delete contact" }, { status: 500 });
     }
+
+    // Log activity for contact deletion
+    await logActivity({
+      supabase,
+      userId: user.id,
+      action: "deleted",
+      entityType: "contact",
+      entityId: contactId,
+      entityName: contactName,
+    });
 
     return NextResponse.json({ success: true });
   } catch (error) {

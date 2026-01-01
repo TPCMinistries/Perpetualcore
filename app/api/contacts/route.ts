@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { NextRequest } from "next/server";
+import { logActivity } from "@/lib/activity-logger";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -237,6 +238,22 @@ export async function POST(req: NextRequest) {
       console.error("Failed to create contact:", error);
       return Response.json({ error: error.message }, { status: 500 });
     }
+
+    // Log activity for contact creation
+    const contactName = `${contact.first_name}${contact.last_name ? " " + contact.last_name : ""}`;
+    await logActivity({
+      supabase,
+      userId: user.id,
+      action: "created",
+      entityType: "contact",
+      entityId: contact.id,
+      entityName: contactName,
+      metadata: {
+        contactType: contact.contact_type,
+        company: contact.company,
+        source: contact.source,
+      },
+    });
 
     // If enrich_now is true, send to n8n for AI enrichment
     if (body.enrich_now && (body.email || body.linkedin_url || (body.first_name && body.company))) {

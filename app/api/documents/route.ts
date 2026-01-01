@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { NextRequest } from "next/server";
 import { rateLimiters } from "@/lib/rate-limit";
+import { logActivity } from "@/lib/activity-logger";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -175,6 +176,20 @@ export async function DELETE(req: NextRequest) {
       return new Response("Document ID required", { status: 400 });
     }
 
+    // Get document name before deletion
+    const { data: document } = await supabase
+      .from("documents")
+      .select("id, name, title")
+      .eq("id", documentId)
+      .eq("user_id", user.id)
+      .single();
+
+    if (!document) {
+      return new Response("Document not found", { status: 404 });
+    }
+
+    const documentName = document.title || document.name || "Untitled Document";
+
     // Delete document (chunks will be deleted via cascade)
     const { error } = await supabase
       .from("documents")
@@ -186,6 +201,16 @@ export async function DELETE(req: NextRequest) {
       console.error("Error deleting document:", error);
       throw new Error("Failed to delete document");
     }
+
+    // Log activity for document deletion
+    await logActivity({
+      supabase,
+      userId: user.id,
+      action: "deleted",
+      entityType: "document",
+      entityId: documentId,
+      entityName: documentName,
+    });
 
     return Response.json({
       success: true,

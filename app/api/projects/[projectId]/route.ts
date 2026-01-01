@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { NextRequest, NextResponse } from "next/server";
 import { UpdateProjectRequest } from "@/types/work";
+import { logActivity } from "@/lib/activity-logger";
 
 interface RouteParams {
   params: Promise<{ projectId: string }>;
@@ -174,6 +175,21 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
       );
     }
 
+    // Log activity for project update
+    const action = body.is_archived ? "archived" : body.current_stage ? "updated" : "updated";
+    await logActivity({
+      supabase,
+      userId: user.id,
+      action,
+      entityType: "project",
+      entityId: updatedProject.id,
+      entityName: updatedProject.name,
+      metadata: {
+        changes: Object.keys(updateData),
+        newStage: body.current_stage,
+      },
+    });
+
     return NextResponse.json({ project: updatedProject });
   } catch (error) {
     console.error("Project API error:", error);
@@ -201,7 +217,7 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
     // Check permissions - only owner/admin can delete
     const { data: project } = await supabase
       .from("projects")
-      .select("id, created_by")
+      .select("id, name, created_by")
       .eq("id", projectId)
       .single();
 
@@ -235,6 +251,9 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
       );
     }
 
+    // Store project name before deletion for activity log
+    const projectName = project.name;
+
     const { error } = await supabase
       .from("projects")
       .delete()
@@ -247,6 +266,16 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
         { status: 500 }
       );
     }
+
+    // Log activity for project deletion
+    await logActivity({
+      supabase,
+      userId: user.id,
+      action: "deleted",
+      entityType: "project",
+      entityId: projectId,
+      entityName: projectName,
+    });
 
     return NextResponse.json({ success: true });
   } catch (error) {

@@ -59,6 +59,8 @@ export function AutomationHub({ userId }: AutomationHubProps) {
   const [activeTab, setActiveTab] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [refreshing, setRefreshing] = useState(false);
+  const [n8nConfigured, setN8nConfigured] = useState(false);
+  const [n8nLiveCount, setN8nLiveCount] = useState(0);
 
   const fetchAutomations = async (isRefresh = false) => {
     try {
@@ -70,6 +72,8 @@ export function AutomationHub({ userId }: AutomationHubProps) {
 
       const data = await response.json();
       setAutomations(data.automations || []);
+      setN8nConfigured(data.n8nConfigured || false);
+      setN8nLiveCount(data.n8nLiveCount || 0);
     } catch (error) {
       console.error("Error fetching automations:", error);
       toast.error("Failed to load automations");
@@ -118,7 +122,7 @@ export function AutomationHub({ userId }: AutomationHubProps) {
   return (
     <div className="space-y-6">
       {/* Stats Bar */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
         <div className="p-4 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
           <p className="text-sm text-muted-foreground">Total Automations</p>
           <p className="text-2xl font-semibold">{automations.length}</p>
@@ -136,6 +140,24 @@ export function AutomationHub({ userId }: AutomationHubProps) {
           <p className="text-2xl font-semibold">
             {automations.reduce((sum, a) => sum + (a.metadata?.runsToday || 0), 0)}
           </p>
+        </div>
+        <div className="p-4 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
+          <p className="text-sm text-muted-foreground">n8n Status</p>
+          <div className="flex items-center gap-2">
+            {n8nConfigured ? (
+              <>
+                <span className="h-2 w-2 rounded-full bg-green-500 animate-pulse" />
+                <p className="text-sm font-medium text-green-600">
+                  Connected ({n8nLiveCount} workflows)
+                </p>
+              </>
+            ) : (
+              <>
+                <span className="h-2 w-2 rounded-full bg-gray-400" />
+                <p className="text-sm font-medium text-muted-foreground">Not configured</p>
+              </>
+            )}
+          </div>
         </div>
       </div>
 

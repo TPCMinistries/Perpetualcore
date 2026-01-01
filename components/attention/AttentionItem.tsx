@@ -17,6 +17,7 @@ import {
   Check,
   ArrowRight,
   ExternalLink,
+  Activity,
 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { AttentionItem as AttentionItemType, getPriorityLabel } from "@/lib/attention/priority";
@@ -27,6 +28,7 @@ interface AttentionItemProps {
   item: AttentionItemType;
   isSelected?: boolean;
   isCompact?: boolean;
+  activityCount?: number;
   onSelect?: () => void;
   onResolve?: () => void;
   onStar?: () => void;
@@ -82,6 +84,7 @@ export function AttentionItemComponent({
   item,
   isSelected = false,
   isCompact = false,
+  activityCount = 0,
   onSelect,
   onResolve,
   onStar,
@@ -161,6 +164,14 @@ export function AttentionItemComponent({
                 )}>
                   <Clock className="h-3 w-3" />
                   {formatDistanceToNow(new Date(item.dueAt), { addSuffix: true })}
+                </span>
+              )}
+
+              {/* Activity indicator */}
+              {activityCount > 0 && (
+                <span className="text-xs flex items-center gap-1 text-blue-500">
+                  <Activity className="h-3 w-3" />
+                  {activityCount} update{activityCount > 1 ? "s" : ""}
                 </span>
               )}
             </div>

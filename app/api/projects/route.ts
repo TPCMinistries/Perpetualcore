@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { NextRequest, NextResponse } from "next/server";
 import { CreateProjectRequest, ProjectStage } from "@/types/work";
+import { logActivity } from "@/lib/activity-logger";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -282,6 +283,21 @@ export async function POST(req: NextRequest) {
 
       await supabase.from("project_members").insert(membersData);
     }
+
+    // Log activity for project creation
+    await logActivity({
+      supabase,
+      userId: user.id,
+      action: "created",
+      entityType: "project",
+      entityId: project.id,
+      entityName: project.name,
+      metadata: {
+        stage: project.current_stage,
+        projectType: project.project_type,
+        teamId: project.team_id,
+      },
+    });
 
     return NextResponse.json({ project }, { status: 201 });
   } catch (error) {

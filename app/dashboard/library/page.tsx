@@ -25,6 +25,7 @@ import { FolderModal } from "@/components/documents/FolderModal";
 import { DocumentChatModal } from "@/components/documents/DocumentChatModal";
 import { DocumentPreviewModal } from "@/components/documents/DocumentPreviewModal";
 import { CreateDocumentModal } from "@/components/documents/CreateDocumentModal";
+import { AIDocumentComposer } from "@/components/documents/AIDocumentComposer";
 import { LibraryAssistant } from "@/components/library/LibraryAssistant";
 import { KnowledgeGraph, GraphNode, GraphLink } from "@/components/library/KnowledgeGraph";
 import { Folder as FolderType, Tag as TagType } from "@/types";
@@ -133,6 +134,7 @@ export default function LibraryPage() {
   const [previewDocument, setPreviewDocument] = useState<Document | null>(null);
   const [folderModalOpen, setFolderModalOpen] = useState(false);
   const [createDocModalOpen, setCreateDocModalOpen] = useState(false);
+  const [aiComposerOpen, setAiComposerOpen] = useState(false);
   const [generatingSummary, setGeneratingSummary] = useState<string | null>(null);
   const [isReprocessing, setIsReprocessing] = useState(false);
   const [isDeletingDuplicates, setIsDeletingDuplicates] = useState(false);
@@ -664,13 +666,31 @@ export default function LibraryPage() {
                 </Button>
               )}
 
-              <Button
-                onClick={() => setCreateDocModalOpen(true)}
-                className="bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-700 hover:to-purple-700 text-white shadow-lg shadow-purple-500/25"
-              >
-                <Plus className="h-4 w-4 mr-2" />
-                New Doc
-              </Button>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button className="bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-700 hover:to-purple-700 text-white shadow-lg shadow-purple-500/25">
+                    <Plus className="h-4 w-4 mr-2" />
+                    New Doc
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem onClick={() => setAiComposerOpen(true)} className="gap-2">
+                    <Sparkles className="h-4 w-4 text-violet-500" />
+                    <div>
+                      <div className="font-medium">AI Composer</div>
+                      <div className="text-xs text-slate-500">Collaborate with AI to write</div>
+                    </div>
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={() => setCreateDocModalOpen(true)} className="gap-2">
+                    <FileText className="h-4 w-4" />
+                    <div>
+                      <div className="font-medium">Quick Document</div>
+                      <div className="text-xs text-slate-500">Simple text editor</div>
+                    </div>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
           </div>
         </div>
@@ -1121,6 +1141,15 @@ export default function LibraryPage() {
         onOpenChange={setCreateDocModalOpen}
         onSuccess={() => {
           setCreateDocModalOpen(false);
+          fetchAll();
+        }}
+      />
+
+      <AIDocumentComposer
+        open={aiComposerOpen}
+        onOpenChange={setAiComposerOpen}
+        onSuccess={() => {
+          setAiComposerOpen(false);
           fetchAll();
         }}
       />

@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { NextRequest } from "next/server";
+import { logActivity } from "@/lib/activity-logger";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -164,6 +165,20 @@ export async function POST(req: NextRequest) {
       .select("status, metadata")
       .eq("id", document.id)
       .single();
+
+    // Log activity for document upload
+    await logActivity({
+      supabase,
+      userId: user.id,
+      action: "uploaded",
+      entityType: "document",
+      entityId: document.id,
+      entityName: document.title,
+      metadata: {
+        fileType: file.type,
+        fileSize: file.size,
+      },
+    });
 
     return Response.json({
       id: document.id,
