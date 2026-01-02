@@ -335,7 +335,7 @@ export async function GET() {
       },
       update_contact: {
         description: "Update an existing contact",
-        data: { contact_id: "uuid", ...contactFields },
+        data: { contact_id: "uuid", first_name: "string?", last_name: "string?", email: "string?", phone: "string?", company: "string?" },
       },
 
       // Leads
@@ -345,7 +345,7 @@ export async function GET() {
       },
       update_lead: {
         description: "Update an existing lead",
-        data: { lead_id: "uuid", ...leadFields },
+        data: { lead_id: "uuid", name: "string?", email: "string?", company: "string?", status: "string?", score: "number?" },
       },
 
       // Notifications
@@ -380,6 +380,3 @@ export async function GET() {
     },
   });
 }
-
-const contactFields = "first_name, last_name, email, phone, company, title, notes";
-const leadFields = "name, email, company, source, status, score";
