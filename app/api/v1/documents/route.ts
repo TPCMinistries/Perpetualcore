@@ -23,7 +23,7 @@ async function handleGet(req: NextRequest, context: APIContext): Promise<Respons
 
   let query = supabase
     .from("documents")
-    .select("id, filename, mime_type, size, status, chunk_count, created_at, updated_at", { count: "exact" })
+    .select("id, title, file_type, file_size, status, created_at, updated_at", { count: "exact" })
     .eq("organization_id", context.organizationId)
     .order("created_at", { ascending: false })
     .range(offset, offset + limit - 1);
@@ -33,7 +33,7 @@ async function handleGet(req: NextRequest, context: APIContext): Promise<Respons
   }
 
   if (search) {
-    query = query.ilike("filename", `%${search}%`);
+    query = query.ilike("title", `%${search}%`);
   }
 
   const { data: documents, error, count } = await query;
@@ -65,17 +65,16 @@ async function handlePost(req: NextRequest, context: APIContext): Promise<Respon
 
     // Support both n8n format and standard format
     // n8n format: { title: "string", content: "string", type: "document|transcript|notes", source: "n8n|telegram|manual" }
-    // Standard format: { filename: "string", content: "string", mime_type: "string" }
-    const filename = body.filename || body.title;
+    // Standard format: { title: "string", content: "string", file_type: "string" }
+    const title = body.title || body.filename;
     const content = body.content;
-    const mime_type = body.mime_type || (body.type === "transcript" ? "text/plain" : "text/markdown");
+    const fileType = body.file_type || body.type || "document";
     const source = body.source || "api";
-    const documentType = body.type || "document";
     const isN8nFormat = !!body.title;
 
-    if (!filename) {
+    if (!title) {
       return NextResponse.json(
-        { error: "filename or title is required" },
+        { error: "title is required" },
         { status: 400 }
       );
     }
@@ -87,24 +86,8 @@ async function handlePost(req: NextRequest, context: APIContext): Promise<Respon
       );
     }
 
-    // Determine if content is base64 or plain text
-    let fileContent: string;
-    let fileSize: number;
-
-    if (content.startsWith("data:")) {
-      // Data URL format
-      const base64Part = content.split(",")[1];
-      fileContent = base64Part;
-      fileSize = Math.ceil((base64Part.length * 3) / 4);
-    } else if (/^[A-Za-z0-9+/=]+$/.test(content)) {
-      // Pure base64
-      fileContent = content;
-      fileSize = Math.ceil((content.length * 3) / 4);
-    } else {
-      // Plain text
-      fileContent = Buffer.from(content).toString("base64");
-      fileSize = content.length;
-    }
+    // Calculate content size
+    const fileSize = content.length;
 
     // Create document record
     const { data: document, error } = await supabase
@@ -112,13 +95,13 @@ async function handlePost(req: NextRequest, context: APIContext): Promise<Respon
       .insert({
         organization_id: context.organizationId,
         user_id: context.userId,
-        filename,
-        mime_type: mime_type,
-        size: fileSize,
+        title,
+        content,
+        file_type: fileType,
+        file_size: fileSize,
         status: "pending",
-        raw_content: Buffer.from(fileContent, "base64").toString("utf-8"),
         source: source,
-        document_type: documentType,
+        doc_type: fileType,
       })
       .select()
       .single();
@@ -134,16 +117,9 @@ async function handlePost(req: NextRequest, context: APIContext): Promise<Respon
     // Dispatch webhook
     webhookEvents.documentUploaded(context.organizationId, {
       documentId: document.id,
-      filename: document.filename,
-      mimeType: document.mime_type,
-      size: document.size,
-    }).catch(() => {});
-
-    // Trigger async processing (non-blocking)
-    fetch(`${process.env.NEXT_PUBLIC_APP_URL || ""}/api/documents/process`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ documentId: document.id }),
+      title: document.title,
+      fileType: document.file_type,
+      size: document.file_size,
     }).catch(() => {});
 
     // Return n8n-compatible format when n8n format was used
@@ -161,12 +137,12 @@ async function handlePost(req: NextRequest, context: APIContext): Promise<Respon
     return NextResponse.json(
       {
         id: document.id,
-        filename: document.filename,
-        mime_type: document.mime_type,
-        size: document.size,
+        title: document.title,
+        file_type: document.file_type,
+        file_size: document.file_size,
         status: document.status,
         created_at: document.created_at,
-        message: "Document uploaded and queued for processing",
+        message: "Document created successfully",
       },
       { status: 201 }
     );
