@@ -2,28 +2,61 @@
 
 import { useState, useRef, useEffect } from "react";
 import { toast } from "sonner";
+import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Card } from "@/components/ui/card";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Send, Loader2, Bot, User, Paperclip, X, FileText, Image as ImageIcon, Mic, MicOff, Copy, Check, Download, FileSpreadsheet, Presentation, File, Phone, PhoneOff, Menu, MessageSquare, Brain, Building2, Sparkles, Library, Command, Zap, ThumbsUp, ThumbsDown } from "lucide-react";
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
+  Send,
+  Loader2,
+  Bot,
+  User,
+  Paperclip,
+  X,
+  FileText,
+  Image as ImageIcon,
+  Mic,
+  MicOff,
+  Copy,
+  Check,
+  Download,
+  FileSpreadsheet,
+  Presentation,
+  File,
+  MoreHorizontal,
+  Sparkles,
+  Brain,
+  Code2,
+  Lightbulb,
+  Search,
+  MessageSquare,
+  Zap,
+  ChevronDown,
+  Library,
+  PenLine,
+  ThumbsUp,
+  ThumbsDown,
+  Volume2,
+  Settings2,
+  History,
+  Plus,
+  BookOpen,
+  Target,
+  Coffee,
+} from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { AIModel } from "@/types";
 import { AI_MODELS, DEFAULT_MODEL } from "@/lib/ai/config";
 import { ConversationSidebar } from "@/components/conversation-sidebar";
 import { MarkdownMessage } from "@/components/markdown-message";
 import { VoiceConversation } from "@/components/voice-conversation-fallback";
-import PromptCommandPalette from "@/components/chat/PromptCommandPalette";
-import PromptLibrary from "@/components/chat/PromptLibrary";
-import QuickActionsToolbar from "@/components/chat/QuickActionsToolbar";
-import { type PromptTemplate } from "@/lib/prompts/templates";
+import { cn } from "@/lib/utils";
 
 interface FileAttachment {
   file: File;
@@ -35,9 +68,63 @@ interface Message {
   role: "user" | "assistant";
   content: string;
   attachments?: FileAttachment[];
-  id?: string; // Message ID from database for feedback
+  id?: string;
   feedback?: "helpful" | "not_helpful" | null;
 }
+
+// Conversation modes with distinct personalities
+const CONVERSATION_MODES = [
+  {
+    id: "auto",
+    name: "Auto",
+    icon: Sparkles,
+    color: "from-violet-500 to-purple-600",
+    bgColor: "bg-violet-50 dark:bg-violet-950/30",
+    borderColor: "border-violet-200 dark:border-violet-800",
+    description: "AI picks the best approach",
+    systemPrompt: "",
+  },
+  {
+    id: "creative",
+    name: "Creative",
+    icon: Lightbulb,
+    color: "from-amber-500 to-orange-600",
+    bgColor: "bg-amber-50 dark:bg-amber-950/30",
+    borderColor: "border-amber-200 dark:border-amber-800",
+    description: "Brainstorm & ideate freely",
+    systemPrompt: "Be creative, think outside the box, suggest bold ideas.",
+  },
+  {
+    id: "research",
+    name: "Research",
+    icon: Search,
+    color: "from-blue-500 to-cyan-600",
+    bgColor: "bg-blue-50 dark:bg-blue-950/30",
+    borderColor: "border-blue-200 dark:border-blue-800",
+    description: "Deep analysis & facts",
+    systemPrompt: "Be thorough, cite sources when possible, provide detailed analysis.",
+  },
+  {
+    id: "code",
+    name: "Code",
+    icon: Code2,
+    color: "from-emerald-500 to-teal-600",
+    bgColor: "bg-emerald-50 dark:bg-emerald-950/30",
+    borderColor: "border-emerald-200 dark:border-emerald-800",
+    description: "Technical & programming",
+    systemPrompt: "Focus on clean code, best practices, and clear explanations.",
+  },
+  {
+    id: "writing",
+    name: "Writing",
+    icon: PenLine,
+    color: "from-pink-500 to-rose-600",
+    bgColor: "bg-pink-50 dark:bg-pink-950/30",
+    borderColor: "border-pink-200 dark:border-pink-800",
+    description: "Polish & craft content",
+    systemPrompt: "Help craft compelling, well-structured content with attention to tone and style.",
+  },
+];
 
 export default function ChatPage() {
   const [messages, setMessages] = useState<Message[]>([]);
@@ -45,6 +132,7 @@ export default function ChatPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [selectedModel, setSelectedModel] = useState<AIModel>(DEFAULT_MODEL);
   const [conversationId, setConversationId] = useState<string | undefined>();
+  const [selectedMode, setSelectedMode] = useState(CONVERSATION_MODES[0]);
   const [currentModel, setCurrentModel] = useState<{
     name: string;
     reason: string;
@@ -60,22 +148,17 @@ export default function ChatPage() {
   const [isRecording, setIsRecording] = useState(false);
   const [recognition, setRecognition] = useState<any>(null);
   const [copiedMessageIndex, setCopiedMessageIndex] = useState<number | null>(null);
-  const [exportingAs, setExportingAs] = useState<string | null>(null);
   const [isVoiceMode, setIsVoiceMode] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [showThinking, setShowThinking] = useState(false);
   const [libraryStats, setLibraryStats] = useState<{
     docCount: number;
     spacesCount: number;
   } | null>(null);
+  const [recentTopics, setRecentTopics] = useState<string[]>([]);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
-
-  // Prompt menu state
-  const [commandPaletteOpen, setCommandPaletteOpen] = useState(false);
-  const [promptLibraryOpen, setPromptLibraryOpen] = useState(false);
-  const [quickActionsVisible, setQuickActionsVisible] = useState(false);
-  const [selectedText, setSelectedText] = useState("");
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -99,40 +182,27 @@ export default function ChatPage() {
         recognitionInstance.lang = "en-US";
 
         recognitionInstance.onresult = (event: any) => {
-          let interimTranscript = "";
           let finalTranscript = "";
-
           for (let i = event.resultIndex; i < event.results.length; i++) {
-            const transcript = event.results[i][0].transcript;
             if (event.results[i].isFinal) {
-              finalTranscript += transcript + " ";
-            } else {
-              interimTranscript += transcript;
+              finalTranscript += event.results[i][0].transcript + " ";
             }
           }
-
           if (finalTranscript) {
             setInput((prev) => prev + finalTranscript);
           }
         };
 
-        recognitionInstance.onerror = (event: any) => {
-          console.error("Speech recognition error:", event.error);
-          setIsRecording(false);
-        };
-
-        recognitionInstance.onend = () => {
-          setIsRecording(false);
-        };
-
+        recognitionInstance.onerror = () => setIsRecording(false);
+        recognitionInstance.onend = () => setIsRecording(false);
         setRecognition(recognitionInstance);
       }
     }
   }, []);
 
-  // Fetch library stats to show full context access
+  // Fetch library stats and recent topics
   useEffect(() => {
-    async function fetchLibraryStats() {
+    async function fetchUserContext() {
       try {
         const supabase = createClient();
         const { data: { user } } = await supabase.auth.getUser();
@@ -146,6 +216,7 @@ export default function ChatPage() {
 
         if (!profile?.organization_id) return;
 
+        // Fetch library stats
         const [docs, spaces] = await Promise.all([
           supabase
             .from("documents")
@@ -163,98 +234,52 @@ export default function ChatPage() {
           docCount: docs.count || 0,
           spacesCount: spaces.count || 0,
         });
+
+        // Fetch recent conversation topics for personalized suggestions
+        const { data: recentConvos } = await supabase
+          .from("conversations")
+          .select("title")
+          .eq("user_id", user.id)
+          .order("updated_at", { ascending: false })
+          .limit(5);
+
+        if (recentConvos) {
+          setRecentTopics(recentConvos.map(c => c.title).filter(Boolean));
+        }
       } catch (error) {
-        console.error("Error fetching library stats:", error);
+        console.error("Error fetching context:", error);
       }
     }
 
-    fetchLibraryStats();
+    fetchUserContext();
   }, []);
 
-  // Auto-resize textarea when input changes
+  // Check for voice mode query param
   useEffect(() => {
-    const textarea = textareaRef.current;
-    if (textarea) {
-      textarea.style.height = '36px';
-      textarea.style.height = textarea.scrollHeight + 'px';
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("mode") === "voice") {
+      setIsVoiceMode(true);
     }
-  }, [input]);
-
-  // Command Palette keyboard shortcut (Cmd/Ctrl + K)
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if ((e.metaKey || e.ctrlKey) && e.key === "k") {
-        e.preventDefault();
-        setCommandPaletteOpen(true);
-      }
-    };
-
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
   }, []);
-
-  // Handle prompt template selection
-  const handlePromptSelect = (template: PromptTemplate) => {
-    let promptText = template.prompt;
-
-    // Fill in variables if present
-    if (template.variables && template.variables.length > 0) {
-      // For now, just insert placeholders
-      template.variables.forEach((variable) => {
-        promptText = promptText.replace(`{${variable}}`, `[${variable.toUpperCase()}]`);
-      });
-    }
-
-    setInput(promptText);
-    // Focus on textarea after inserting prompt
-    setTimeout(() => {
-      const textarea = document.querySelector('textarea');
-      textarea?.focus();
-    }, 100);
-  };
-
-  // Handle quick action
-  const handleQuickAction = (actionId: string, prompt: string) => {
-    setInput(prompt);
-    setQuickActionsVisible(false);
-    setTimeout(() => {
-      const textarea = document.querySelector('textarea');
-      textarea?.focus();
-    }, 100);
-  };
 
   const handleFileSelect = async (files: FileList | null) => {
     if (!files || files.length === 0) return;
 
     const newAttachments: FileAttachment[] = [];
-
     for (let i = 0; i < files.length; i++) {
       const file = files[i];
-
-      // Check file type
       const isImage = file.type.startsWith("image/");
-      const isDocument = [
-        "application/pdf",
-        "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-        "text/plain",
-        "text/csv",
-      ].includes(file.type);
+      const isDocument = ["application/pdf", "application/vnd.openxmlformats-officedocument.wordprocessingml.document", "text/plain", "text/csv"].includes(file.type);
 
       if (!isImage && !isDocument) {
         toast.error(`Unsupported file type: ${file.name}`);
         continue;
       }
 
-      // Create preview for images
-      let preview: string | undefined;
-      if (isImage) {
-        preview = URL.createObjectURL(file);
-      }
-
       newAttachments.push({
         file,
         type: isImage ? "image" : "document",
-        preview,
+        preview: isImage ? URL.createObjectURL(file) : undefined,
       });
     }
 
@@ -264,56 +289,22 @@ export default function ChatPage() {
   const removeAttachment = (index: number) => {
     setAttachments((prev) => {
       const updated = [...prev];
-      // Revoke object URL for images
-      if (updated[index].preview) {
-        URL.revokeObjectURL(updated[index].preview!);
-      }
+      if (updated[index].preview) URL.revokeObjectURL(updated[index].preview!);
       updated.splice(index, 1);
       return updated;
     });
   };
 
-  const handleDragOver = (e: React.DragEvent) => {
-    e.preventDefault();
-    setIsDragging(true);
-  };
-
-  const handleDragLeave = (e: React.DragEvent) => {
-    e.preventDefault();
-    setIsDragging(false);
-  };
-
-  const handleDrop = (e: React.DragEvent) => {
-    e.preventDefault();
-    setIsDragging(false);
-    handleFileSelect(e.dataTransfer.files);
-  };
-
   const loadConversation = async (id: string) => {
     try {
-      // Fetch messages directly from the messages table for this conversation
       const response = await fetch(`/api/chat/conversations/${id}`);
       if (response.ok) {
         const data = await response.json();
-        setMessages(
-          data.messages.map((m: any) => ({
-            role: m.role,
-            content: m.content,
-          }))
-        );
+        setMessages(data.messages.map((m: any) => ({ role: m.role, content: m.content })));
         setConversationId(id);
-      } else {
-        throw new Error("Failed to fetch conversation");
       }
     } catch (error) {
-      console.error("Failed to load conversation:", error);
       toast.error("Failed to load conversation");
-    }
-  };
-
-  const handleConversationSelect = (id: string | undefined) => {
-    if (id) {
-      loadConversation(id);
     }
   };
 
@@ -328,15 +319,12 @@ export default function ChatPage() {
 
   const toggleVoiceRecording = () => {
     if (!recognition) {
-      alert(
-        "Speech recognition is not supported in your browser. Please use Chrome, Edge, or Safari."
-      );
+      toast.error("Speech recognition not supported in your browser");
       return;
     }
 
     if (isRecording) {
       recognition.stop();
-      setIsRecording(false);
     } else {
       try {
         recognition.start();
@@ -348,127 +336,71 @@ export default function ChatPage() {
   };
 
   const copyToClipboard = async (text: string, index: number) => {
-    try {
-      await navigator.clipboard.writeText(text);
-      setCopiedMessageIndex(index);
-      toast.success("Copied to clipboard!");
-      setTimeout(() => setCopiedMessageIndex(null), 2000);
-    } catch (error) {
-      console.error("Failed to copy:", error);
-      toast.error("Failed to copy to clipboard");
-    }
+    await navigator.clipboard.writeText(text);
+    setCopiedMessageIndex(index);
+    toast.success("Copied!");
+    setTimeout(() => setCopiedMessageIndex(null), 2000);
   };
 
   const submitFeedback = async (messageId: string | undefined, helpful: boolean, index: number) => {
-    if (!messageId) {
-      toast.error("Cannot submit feedback for this message");
-      return;
-    }
+    if (!messageId) return;
 
     try {
-      const response = await fetch("/api/chat/feedback", {
+      await fetch("/api/chat/feedback", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ messageId, helpful }),
       });
 
-      if (!response.ok) {
-        throw new Error("Failed to submit feedback");
-      }
-
-      // Update local state to show feedback was recorded
       setMessages((prev) => {
         const updated = [...prev];
-        updated[index] = {
-          ...updated[index],
-          feedback: helpful ? "helpful" : "not_helpful",
-        };
+        updated[index] = { ...updated[index], feedback: helpful ? "helpful" : "not_helpful" };
         return updated;
       });
 
       toast.success(helpful ? "Thanks for the feedback!" : "Thanks, we'll improve!");
     } catch (error) {
-      console.error("Feedback error:", error);
       toast.error("Failed to submit feedback");
     }
   };
 
-  const exportConversation = async (type: "powerpoint" | "pdf" | "excel" | "word") => {
+  const exportConversation = async (type: "pdf" | "word") => {
     if (messages.length === 0) {
       toast.error("No conversation to export");
       return;
     }
 
-    setExportingAs(type);
-
     try {
-      let payload: any = {
-        type,
-        title: `AI Conversation - ${new Date().toLocaleDateString()}`,
-      };
-
-      if (type === "powerpoint") {
-        // Convert messages to slides
-        payload.slides = messages.map((msg, idx) => ({
-          title: msg.role === "user" ? `Question ${Math.floor(idx / 2) + 1}` : `Response ${Math.floor(idx / 2) + 1}`,
-          content: [msg.content.substring(0, 500) + (msg.content.length > 500 ? "..." : "")]
-        }));
-      } else if (type === "pdf") {
-        // Convert messages to PDF content
-        payload.content = messages
-          .map((msg) => `${msg.role.toUpperCase()}:\n${msg.content}`)
-          .join("\n\n---\n\n");
-      } else if (type === "excel") {
-        // Convert messages to Excel data
-        payload.data = messages.map((msg, idx) => ({
-          "#": idx + 1,
-          Role: msg.role === "user" ? "User" : "Assistant",
-          Message: msg.content.substring(0, 100) + (msg.content.length > 100 ? "..." : ""),
-          "Full Content": msg.content,
-        }));
-      } else if (type === "word") {
-        // Convert messages to Word content
-        payload.content = messages
-          .map((msg) => `${msg.role.toUpperCase()}:\n${msg.content}`)
-          .join("\n\n---\n\n");
-      }
-
       const response = await fetch("/api/generate-document", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(payload),
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          type,
+          title: `AI Conversation - ${new Date().toLocaleDateString()}`,
+          content: messages.map((msg) => `${msg.role.toUpperCase()}:\n${msg.content}`).join("\n\n---\n\n"),
+        }),
       });
 
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || "Failed to generate document");
-      }
+      if (!response.ok) throw new Error("Failed to export");
 
-      // Download the file
       const blob = await response.blob();
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = `conversation-${new Date().getTime()}.${type === "powerpoint" ? "pptx" : type === "pdf" ? "pdf" : type === "word" ? "docx" : "xlsx"}`;
+      a.download = `conversation-${Date.now()}.${type === "pdf" ? "pdf" : "docx"}`;
       document.body.appendChild(a);
       a.click();
       window.URL.revokeObjectURL(url);
       document.body.removeChild(a);
 
-      toast.success(`${type.toUpperCase()} exported successfully!`);
-    } catch (error: any) {
-      console.error("Error exporting conversation:", error);
-      toast.error(`Error: ${error.message}`);
-    } finally {
-      setExportingAs(null);
+      toast.success("Exported successfully!");
+    } catch (error) {
+      toast.error("Export failed");
     }
   };
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-
     if ((!input.trim() && attachments.length === 0) || isLoading) return;
 
     const userMessage: Message = {
@@ -483,18 +415,13 @@ export default function ChatPage() {
     setInput("");
     setAttachments([]);
     setIsLoading(true);
-    setRagInfo(null); // Reset RAG indicator for new message
+    setShowThinking(true);
+    setRagInfo(null);
 
     try {
-      // Process attachments for API
       const processedAttachments = await Promise.all(
         currentAttachments.map(async (att) => {
-          return new Promise<{
-            name: string;
-            type: string;
-            data: string;
-            mimeType: string;
-          }>((resolve) => {
+          return new Promise<{ name: string; type: string; data: string; mimeType: string }>((resolve) => {
             const reader = new FileReader();
             reader.onload = () => {
               resolve({
@@ -509,13 +436,16 @@ export default function ChatPage() {
         })
       );
 
+      // Add mode context to the message
+      const messageWithContext = selectedMode.systemPrompt
+        ? `[Context: ${selectedMode.systemPrompt}]\n\n${currentInput}`
+        : currentInput;
+
       const response = await fetch("/api/chat", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          messages: [...messages.map(m => ({ role: m.role, content: m.content })), { role: "user", content: currentInput || "Sent files" }],
+          messages: [...messages.map(m => ({ role: m.role, content: m.content })), { role: "user", content: messageWithContext }],
           model: selectedModel,
           conversationId,
           attachments: processedAttachments.length > 0 ? processedAttachments : undefined,
@@ -524,24 +454,15 @@ export default function ChatPage() {
 
       if (!response.ok) {
         const errorText = await response.text();
-        let errorMessage = "Failed to get response";
-        try {
-          const errorData = JSON.parse(errorText);
-          errorMessage = errorData.error || errorData.message || errorMessage;
-        } catch {
-          errorMessage = errorText || `HTTP ${response.status}: ${response.statusText}`;
-        }
-        throw new Error(errorMessage);
+        throw new Error(errorText || "Failed to get response");
       }
 
       const reader = response.body?.getReader();
       const decoder = new TextDecoder();
-
       let assistantMessage = "";
-      setMessages((prev) => [
-        ...prev,
-        { role: "assistant", content: "" },
-      ]);
+
+      setMessages((prev) => [...prev, { role: "assistant", content: "" }]);
+      setShowThinking(false);
 
       while (true) {
         const { done, value } = (await reader?.read()) || {};
@@ -554,29 +475,13 @@ export default function ChatPage() {
           try {
             const data = JSON.parse(line);
 
-            if (data.modelUsed) {
-              setCurrentModel(data.modelUsed);
-            }
-
-            if (data.ragUsed) {
-              setRagInfo({
-                used: true,
-                documentsCount: data.documentsCount || 0,
-              });
-            }
-
-            if (data.conversationId && !conversationId) {
-              setConversationId(data.conversationId);
-            }
-
-            // Capture messageId for feedback when stream is done
+            if (data.modelUsed) setCurrentModel(data.modelUsed);
+            if (data.ragUsed) setRagInfo({ used: true, documentsCount: data.documentsCount || 0 });
+            if (data.conversationId && !conversationId) setConversationId(data.conversationId);
             if (data.messageId) {
               setMessages((prev) => {
                 const newMessages = [...prev];
-                newMessages[newMessages.length - 1] = {
-                  ...newMessages[newMessages.length - 1],
-                  id: data.messageId,
-                };
+                newMessages[newMessages.length - 1] = { ...newMessages[newMessages.length - 1], id: data.messageId };
                 return newMessages;
               });
             }
@@ -588,460 +493,466 @@ export default function ChatPage() {
                 newMessages[newMessages.length - 1] = {
                   role: "assistant",
                   content: assistantMessage,
-                  id: newMessages[newMessages.length - 1].id, // Preserve messageId if set
+                  id: newMessages[newMessages.length - 1].id,
                 };
                 return newMessages;
               });
             }
           } catch (err) {
-            console.error("Error parsing chunk:", err);
+            // Skip parse errors
           }
         }
       }
     } catch (error: any) {
-      console.error("Chat error:", error);
-      const errorMessage = error?.message || "Unknown error occurred";
-      
-      // Show detailed error to user
-      toast.error(`Chat error: ${errorMessage}`);
-      
-      setMessages((prev) => [
-        ...prev,
-        {
-          role: "assistant",
-          content: `❌ **Error:** ${errorMessage}\n\nPlease check:\n- Server logs for details\n- Browser console (F12)\n- Network tab for request/response\n\nIf this persists, try:\n- Refreshing the page\n- Trying a different model\n- Checking your API keys`,
-        },
-      ]);
+      toast.error(`Error: ${error?.message || "Unknown error"}`);
+      setMessages((prev) => [...prev, { role: "assistant", content: `❌ Error: ${error?.message || "Something went wrong"}` }]);
     } finally {
       setIsLoading(false);
+      setShowThinking(false);
     }
   }
 
-  return (
-    <div className="flex h-[calc(100vh-6rem)] relative">
-      {/* Collapsible Sidebar */}
-      {isSidebarOpen && (
-        <div className="w-64 border-r border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 flex-shrink-0">
-          <ConversationSidebar
-            mode="personal"
-            currentConversationId={conversationId}
-            onConversationSelect={handleConversationSelect}
-            onNewConversation={handleNewConversation}
-          />
-        </div>
-      )}
+  // Personalized suggestion cards based on mode and recent activity
+  const getSuggestionCards = () => {
+    const baseCards = [
+      { icon: "🎯", title: "Help me plan", prompt: "Help me create a plan for" },
+      { icon: "✍️", title: "Write something", prompt: "Help me write" },
+      { icon: "🔍", title: "Research a topic", prompt: "Research and explain" },
+      { icon: "💡", title: "Brainstorm ideas", prompt: "Brainstorm creative ideas for" },
+    ];
 
-      {/* Main Chat Area - Centered Layout */}
-      <div className="flex flex-col flex-1 min-w-0 max-w-full">
-          {/* Minimal Header - Claude-like */}
-          <div className="border-b border-slate-200/50 dark:border-slate-800/50 bg-white/80 dark:bg-slate-950/80 backdrop-blur-sm sticky top-0 z-10">
-            <div className="max-w-3xl mx-auto px-6 py-3 flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-                  className="h-9 px-3 border-slate-300 dark:border-slate-700"
-                  title="View past conversations"
-                >
-                  <MessageSquare className="h-4 w-4 mr-2" />
-                  <span className="text-sm">History</span>
-                </Button>
-                <div className="h-6 w-px bg-slate-300 dark:bg-slate-700" />
-                <div className="flex items-center gap-2">
-                  <span className="text-xs text-slate-600 dark:text-slate-400 font-medium">Model:</span>
-                  <Select
-                    value={selectedModel}
-                    onValueChange={(value) => setSelectedModel(value as AIModel)}
-                    disabled={messages.length > 0 || isVoiceMode}
-                  >
-                    <SelectTrigger className="border border-slate-300 dark:border-slate-700 h-9 px-3 text-sm font-medium bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800 min-w-[180px]">
-                      <SelectValue placeholder="Select model" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {Object.values(AI_MODELS).map((model) => (
-                        <SelectItem key={model.id} value={model.id}>
-                          <div className="flex items-center gap-2">
-                            <span>{model.icon}</span>
-                            <span>{model.name}</span>
-                          </div>
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
+    if (selectedMode.id === "code") {
+      return [
+        { icon: "🐛", title: "Debug code", prompt: "Help me debug this code:" },
+        { icon: "📝", title: "Write a function", prompt: "Write a function that" },
+        { icon: "🔧", title: "Refactor code", prompt: "Help me refactor this code to be cleaner:" },
+        { icon: "📚", title: "Explain concept", prompt: "Explain this programming concept:" },
+      ];
+    }
 
-              {/* Right actions */}
-              <div className="flex items-center gap-2">
-                {messages.length > 0 && (
-                  <div className="flex items-center gap-1 border-r border-slate-300 dark:border-slate-700 pr-2 mr-1">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => exportConversation("powerpoint")}
-                      disabled={exportingAs !== null}
-                      className="h-8 px-2 text-xs"
-                      title="Export as PowerPoint"
-                    >
-                      <Presentation className="h-3.5 w-3.5 mr-1.5" />
-                      PPT
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => exportConversation("pdf")}
-                      disabled={exportingAs !== null}
-                      className="h-8 px-2 text-xs"
-                      title="Export as PDF"
-                    >
-                      <FileText className="h-3.5 w-3.5 mr-1.5" />
-                      PDF
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => exportConversation("word")}
-                      disabled={exportingAs !== null}
-                      className="h-8 px-2 text-xs"
-                      title="Export as Word"
-                    >
-                      <File className="h-3.5 w-3.5 mr-1.5" />
-                      Word
-                    </Button>
-                  </div>
-                )}
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={handleNewConversation}
-                  className="h-9 text-sm px-3"
-                >
-                  New chat
-                </Button>
-              </div>
-            </div>
-          </div>
+    if (selectedMode.id === "creative") {
+      return [
+        { icon: "🎨", title: "Creative concept", prompt: "Create a unique concept for" },
+        { icon: "📖", title: "Story idea", prompt: "Help me develop a story about" },
+        { icon: "🎬", title: "Content ideas", prompt: "Generate creative content ideas for" },
+        { icon: "🌟", title: "Brand name", prompt: "Brainstorm brand names for" },
+      ];
+    }
 
-      {/* Library Context Banner */}
-      {libraryStats && (
-        <div className="bg-gradient-to-r from-purple-50 to-blue-50 dark:from-purple-950/20 dark:to-blue-950/20 border-b border-purple-100 dark:border-purple-900/30">
-          <div className="max-w-3xl mx-auto px-6 py-3">
-            <div className="flex items-center gap-3 text-sm">
-              <Brain className="h-4 w-4 text-purple-600 dark:text-purple-400 flex-shrink-0" />
-              <span className="text-slate-700 dark:text-slate-300">
-                Your AI assistant has access to your <strong>entire library</strong>
-              </span>
-              <div className="flex items-center gap-3 ml-auto text-xs text-slate-600 dark:text-slate-400">
-                <div className="flex items-center gap-1.5">
-                  <FileText className="h-3.5 w-3.5" />
-                  <span className="font-medium">{libraryStats.docCount} documents</span>
-                </div>
-                <div className="flex items-center gap-1.5">
-                  <Building2 className="h-3.5 w-3.5" />
-                  <span className="font-medium">{libraryStats.spacesCount} spaces</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+    if (selectedMode.id === "writing") {
+      return [
+        { icon: "📧", title: "Draft email", prompt: "Write a professional email about" },
+        { icon: "📝", title: "Blog post", prompt: "Write a blog post about" },
+        { icon: "🎯", title: "Marketing copy", prompt: "Write compelling marketing copy for" },
+        { icon: "📋", title: "Summary", prompt: "Summarize and improve this text:" },
+      ];
+    }
 
-      {/* Voice Mode or Text Mode */}
-      {isVoiceMode ? (
-        <div className="flex-1 overflow-hidden">
-          <VoiceConversation onClose={() => setIsVoiceMode(false)} />
-        </div>
-      ) : (
-        <>
-      {/* Messages - Centered like Claude */}
-      <div className="flex-1 overflow-y-auto">
-        <div className="max-w-3xl mx-auto px-6">
-        {messages.length === 0 ? (
-          <div className="flex flex-col items-center justify-center min-h-[50vh] text-center py-8">
-            <div className="w-full space-y-6">
-              {/* Hero Section - Clean */}
-              <div className="py-8">
-                <div className="h-16 w-16 rounded-full bg-gradient-to-br from-purple-500 to-blue-600 flex items-center justify-center mx-auto mb-6">
-                  <Bot className="h-8 w-8 text-white" />
-                </div>
-                <h2 className="text-3xl font-semibold mb-3 text-slate-900 dark:text-slate-100">
-                  What can I help you with today?
-                </h2>
-                <p className="text-slate-600 dark:text-slate-400 text-base mb-2">
-                  {selectedModel === "auto"
-                    ? "I'll automatically select the best AI model for your question"
-                    : `Powered by ${AI_MODELS[selectedModel].name}`}
-                </p>
-                {selectedModel === "auto" && (
-                  <p className="text-sm text-slate-500 dark:text-slate-500">
-                    GPT-4o Mini • Claude • GPT-4o • Gemini • Gamma
-                  </p>
-                )}
-              </div>
+    return baseCards;
+  };
 
-              {/* Quick Start Suggestions - Minimal Cards */}
-              <div className="grid md:grid-cols-2 gap-3 mb-6">
-                {[
-                  {
-                    icon: "💡",
-                    title: "Brainstorm ideas",
-                    prompt: "Help me brainstorm creative ideas for",
-                  },
-                  {
-                    icon: "📝",
-                    title: "Write content",
-                    prompt: "Help me write professional content about",
-                  },
-                  {
-                    icon: "🔍",
-                    title: "Analyze data",
-                    prompt: "Help me analyze and understand",
-                  },
-                  {
-                    icon: "📊",
-                    title: "Create presentation",
-                    prompt: "Help me create a presentation about",
-                  }
-                ].map((suggestion, idx) => (
-                  <button
-                    key={idx}
-                    onClick={() => setInput(suggestion.prompt + " ")}
-                    className="group border border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 rounded-lg p-5 text-left transition-all bg-white dark:bg-slate-900"
-                  >
-                    <div className="text-2xl mb-3">{suggestion.icon}</div>
-                    <h3 className="font-medium text-base mb-1 text-slate-900 dark:text-slate-100 group-hover:text-slate-700 dark:group-hover:text-slate-300 transition-colors">
-                      {suggestion.title}
-                    </h3>
-                    <p className="text-sm text-slate-600 dark:text-slate-400">
-                      Click to start with a template
-                    </p>
-                  </button>
-                ))}
-              </div>
-
-            </div>
-          </div>
-        ) : (
-          <div className="space-y-6 py-6">
-            {messages.map((message, index) => (
-              <div key={index} className="group">
-                <div className="flex gap-4 max-w-full">
-                  {message.role === "assistant" && (
-                    <div className="flex-shrink-0">
-                      <div className="h-7 w-7 rounded-md bg-gradient-to-br from-purple-500 to-blue-600 flex items-center justify-center">
-                        <Bot className="h-4 w-4 text-white" />
-                      </div>
-                    </div>
-                  )}
-                  {message.role === "user" && (
-                    <div className="flex-shrink-0">
-                      <div className="h-7 w-7 rounded-md bg-slate-900 dark:bg-slate-700 flex items-center justify-center">
-                        <User className="h-4 w-4 text-white" />
-                      </div>
-                    </div>
-                  )}
-                  <div className="relative flex-1 min-w-0">
-                    <div className="prose prose-slate dark:prose-invert max-w-none">
-                    {message.attachments && message.attachments.length > 0 && (
-                      <div className="mb-2 flex flex-wrap gap-2">
-                        {message.attachments.map((attachment, attIndex) => (
-                          <div
-                            key={attIndex}
-                            className="flex items-center gap-2 bg-slate-200 dark:bg-slate-700 rounded p-2"
-                          >
-                            {attachment.type === "image" && attachment.preview ? (
-                              <img
-                                src={attachment.preview}
-                                alt={attachment.file.name}
-                                className="h-12 w-12 object-cover rounded"
-                              />
-                            ) : attachment.type === "image" ? (
-                              <ImageIcon className="h-6 w-6" />
-                            ) : (
-                              <FileText className="h-6 w-6" />
-                            )}
-                            <div className="text-xs">
-                              <p className="font-medium truncate max-w-[120px]">
-                                {attachment.file.name}
-                              </p>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                      {message.role === "assistant" ? (
-                        <MarkdownMessage content={message.content} />
-                      ) : (
-                        <div className="whitespace-pre-wrap break-words text-slate-900 dark:text-slate-100">
-                          {message.content}
-                        </div>
-                      )}
-                      {/* Model/RAG indicators */}
-                      {message.role === "assistant" && index === messages.length - 1 && (
-                        <div className="flex items-center gap-2 mt-3 text-xs text-slate-500">
-                          {currentModel && (
-                            <span className="inline-flex items-center gap-1">
-                              {currentModel.icon} {currentModel.name}
-                            </span>
-                          )}
-                          {ragInfo && ragInfo.used && (
-                            <span className="inline-flex items-center gap-1">
-                              <FileText className="h-3 w-3" />
-                              {ragInfo.documentsCount} {ragInfo.documentsCount === 1 ? 'source' : 'sources'}
-                            </span>
-                          )}
-                        </div>
-                      )}
-                    </div>
-                    {message.role === "assistant" && message.content && (
-                      <div className="absolute top-0 right-0 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                        {/* Feedback buttons */}
-                        {message.id && !message.feedback && (
-                          <>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => submitFeedback(message.id, true, index)}
-                              className="h-6 w-6 p-0 hover:bg-emerald-100 dark:hover:bg-emerald-900/30"
-                              title="This was helpful"
-                            >
-                              <ThumbsUp className="h-3.5 w-3.5 text-slate-500 hover:text-emerald-600" />
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => submitFeedback(message.id, false, index)}
-                              className="h-6 w-6 p-0 hover:bg-red-100 dark:hover:bg-red-900/30"
-                              title="This wasn't helpful"
-                            >
-                              <ThumbsDown className="h-3.5 w-3.5 text-slate-500 hover:text-red-600" />
-                            </Button>
-                          </>
-                        )}
-                        {/* Show feedback status if already given */}
-                        {message.feedback && (
-                          <span className="text-xs px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400">
-                            {message.feedback === "helpful" ? "👍 Thanks!" : "👎 Noted"}
-                          </span>
-                        )}
-                        {/* Copy button */}
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => copyToClipboard(message.content, index)}
-                          className="h-6 w-6 p-0 hover:bg-slate-100 dark:hover:bg-slate-800"
-                          title="Copy to clipboard"
-                        >
-                          {copiedMessageIndex === index ? (
-                            <Check className="h-3.5 w-3.5 text-emerald-600" />
-                          ) : (
-                            <Copy className="h-3.5 w-3.5" />
-                          )}
-                        </Button>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </div>
-            ))}
-            <div ref={messagesEndRef} />
-          </div>
-        )}
-        </div>
+  if (isVoiceMode) {
+    return (
+      <div className="h-[calc(100vh-6rem)]">
+        <VoiceConversation onClose={() => setIsVoiceMode(false)} />
       </div>
+    );
+  }
 
-      {/* Input Area - Centered like Claude */}
-      <div className="border-t border-slate-200/50 dark:border-slate-800/50 bg-white/80 dark:bg-slate-950/80 backdrop-blur-sm">
-        <div className="max-w-3xl mx-auto px-6 py-4">
-          {/* Prompt Menu Buttons */}
-          <div className="flex items-center gap-2 mb-3">
+  return (
+    <div className="flex h-[calc(100vh-6rem)] bg-gradient-to-b from-slate-50 to-white dark:from-slate-950 dark:to-slate-900">
+      {/* Sidebar */}
+      <AnimatePresence>
+        {isSidebarOpen && (
+          <motion.div
+            initial={{ width: 0, opacity: 0 }}
+            animate={{ width: 280, opacity: 1 }}
+            exit={{ width: 0, opacity: 0 }}
+            className="border-r border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 overflow-hidden"
+          >
+            <ConversationSidebar
+              mode="personal"
+              currentConversationId={conversationId}
+              onConversationSelect={(id) => id && loadConversation(id)}
+              onNewConversation={handleNewConversation}
+            />
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Main Chat Area */}
+      <div className="flex-1 flex flex-col min-w-0">
+        {/* Minimal Header */}
+        <div className="flex items-center justify-between px-4 py-3 border-b border-slate-200/50 dark:border-slate-800/50 bg-white/80 dark:bg-slate-950/80 backdrop-blur-sm">
+          <div className="flex items-center gap-2">
             <Button
-              variant="outline"
+              variant="ghost"
               size="sm"
-              onClick={() => setCommandPaletteOpen(true)}
-              className="gap-2"
+              onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+              className="h-8 w-8 p-0"
             >
-              <Command className="h-4 w-4" />
-              <span className="hidden sm:inline">Quick Prompts</span>
-              <kbd className="hidden md:inline-flex h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium opacity-100">
-                <span className="text-xs">⌘</span>K
-              </kbd>
+              <History className="h-4 w-4" />
             </Button>
             <Button
-              variant="outline"
+              variant="ghost"
               size="sm"
-              onClick={() => setPromptLibraryOpen(true)}
-              className="gap-2"
+              onClick={handleNewConversation}
+              className="h-8 gap-1.5 text-sm"
             >
-              <Library className="h-4 w-4" />
-              <span className="hidden sm:inline">Browse Library</span>
+              <Plus className="h-4 w-4" />
+              New
             </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setQuickActionsVisible(!quickActionsVisible)}
-              className="gap-2"
-            >
-              <Zap className="h-4 w-4" />
-              <span className="hidden sm:inline">Quick Actions</span>
-            </Button>
-            <div className="flex-1" />
-            <div className="flex items-center gap-1 text-xs text-muted-foreground">
-              <Sparkles className="h-3 w-3" />
-              <span className="hidden md:inline">AI-Powered Prompts</span>
-            </div>
           </div>
 
-          {/* Attachments Preview */}
-          {attachments.length > 0 && (
-            <div className="mb-3 flex flex-wrap gap-2">
-              {attachments.map((attachment, index) => (
-                <div
-                  key={index}
-                  className="relative group bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg p-2 flex items-center gap-2"
-                >
-                  {attachment.type === "image" && attachment.preview ? (
-                    <img
-                      src={attachment.preview}
-                      alt={attachment.file.name}
-                      className="h-12 w-12 object-cover rounded"
-                    />
-                  ) : (
-                    <FileText className="h-5 w-5 text-slate-600 dark:text-slate-400" />
+          {/* Mode + Model Selector */}
+          <div className="flex items-center gap-2">
+            {/* Conversation Mode Chips */}
+            <div className="hidden md:flex items-center gap-1 p-1 rounded-lg bg-slate-100 dark:bg-slate-800/50">
+              {CONVERSATION_MODES.map((mode) => (
+                <button
+                  key={mode.id}
+                  onClick={() => setSelectedMode(mode)}
+                  className={cn(
+                    "flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm font-medium transition-all",
+                    selectedMode.id === mode.id
+                      ? `bg-white dark:bg-slate-700 shadow-sm text-slate-900 dark:text-white`
+                      : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
                   )}
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium truncate text-slate-900 dark:text-slate-100">
-                      {attachment.file.name}
-                    </p>
-                    <p className="text-xs text-slate-500">
-                      {(attachment.file.size / 1024).toFixed(1)} KB
-                    </p>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => removeAttachment(index)}
-                    className="h-5 w-5 bg-red-500 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-600"
-                  >
-                    <X className="h-3 w-3" />
-                  </button>
-                </div>
+                >
+                  <mode.icon className="h-3.5 w-3.5" />
+                  {mode.name}
+                </button>
               ))}
             </div>
-          )}
 
-          {/* Input Box */}
-          <div
-            onDragOver={handleDragOver}
-            onDragLeave={handleDragLeave}
-            onDrop={handleDrop}
-            className={`rounded-2xl border transition-all shadow-sm ${
-              isDragging
-                ? "border-slate-400 dark:border-slate-600 bg-slate-50 dark:bg-slate-800 shadow-lg"
-                : "border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 hover:border-slate-400 dark:hover:border-slate-600"
-            }`}
-          >
-            <form onSubmit={handleSubmit} className="flex gap-2 items-end p-2">
+            {/* Mobile Mode Dropdown */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild className="md:hidden">
+                <Button variant="outline" size="sm" className="gap-2">
+                  <selectedMode.icon className="h-4 w-4" />
+                  {selectedMode.name}
+                  <ChevronDown className="h-3 w-3" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent>
+                {CONVERSATION_MODES.map((mode) => (
+                  <DropdownMenuItem key={mode.id} onClick={() => setSelectedMode(mode)}>
+                    <mode.icon className="h-4 w-4 mr-2" />
+                    {mode.name}
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+
+          {/* Right Actions */}
+          <div className="flex items-center gap-1">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setIsVoiceMode(true)}
+              className="h-8 w-8 p-0"
+              title="Voice mode"
+            >
+              <Volume2 className="h-4 w-4" />
+            </Button>
+
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                  <MoreHorizontal className="h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem onClick={() => exportConversation("pdf")} disabled={messages.length === 0}>
+                  <FileText className="h-4 w-4 mr-2" />
+                  Export as PDF
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => exportConversation("word")} disabled={messages.length === 0}>
+                  <File className="h-4 w-4 mr-2" />
+                  Export as Word
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem>
+                  <Settings2 className="h-4 w-4 mr-2" />
+                  Chat settings
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+        </div>
+
+        {/* Messages Area */}
+        <div className="flex-1 overflow-y-auto">
+          <div className="max-w-3xl mx-auto px-4 md:px-6">
+            {messages.length === 0 ? (
+              /* Empty State - Inspiring Hero */
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="flex flex-col items-center justify-center min-h-[60vh] py-12"
+              >
+                {/* Animated Logo */}
+                <motion.div
+                  initial={{ scale: 0.8 }}
+                  animate={{ scale: 1 }}
+                  transition={{ type: "spring", stiffness: 200 }}
+                  className={cn(
+                    "h-20 w-20 rounded-2xl bg-gradient-to-br flex items-center justify-center mb-6 shadow-lg",
+                    selectedMode.color
+                  )}
+                >
+                  <selectedMode.icon className="h-10 w-10 text-white" />
+                </motion.div>
+
+                <motion.h1
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 0.1 }}
+                  className="text-3xl md:text-4xl font-bold text-center mb-3 text-slate-900 dark:text-white"
+                >
+                  {selectedMode.id === "auto" ? "What can I help you with?" : `Let's ${selectedMode.name.toLowerCase()}`}
+                </motion.h1>
+
+                <motion.p
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 0.2 }}
+                  className="text-slate-600 dark:text-slate-400 text-center mb-2 max-w-md"
+                >
+                  {selectedMode.description}
+                </motion.p>
+
+                {/* Library Context */}
+                {libraryStats && libraryStats.docCount > 0 && (
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: 0.3 }}
+                    className="flex items-center gap-2 text-sm text-slate-500 dark:text-slate-500 mb-8"
+                  >
+                    <Brain className="h-4 w-4" />
+                    <span>Connected to {libraryStats.docCount} documents in your library</span>
+                  </motion.div>
+                )}
+
+                {/* Suggestion Cards */}
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.4 }}
+                  className="grid grid-cols-2 gap-3 w-full max-w-xl"
+                >
+                  {getSuggestionCards().map((card, idx) => (
+                    <motion.button
+                      key={idx}
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.4 + idx * 0.05 }}
+                      onClick={() => setInput(card.prompt + " ")}
+                      className={cn(
+                        "group p-4 rounded-xl border text-left transition-all hover:shadow-md",
+                        selectedMode.bgColor,
+                        selectedMode.borderColor,
+                        "hover:scale-[1.02]"
+                      )}
+                    >
+                      <span className="text-2xl mb-2 block">{card.icon}</span>
+                      <span className="font-medium text-slate-900 dark:text-white block mb-1">
+                        {card.title}
+                      </span>
+                      <span className="text-xs text-slate-500 dark:text-slate-400">
+                        Click to start
+                      </span>
+                    </motion.button>
+                  ))}
+                </motion.div>
+
+                {/* Recent Topics */}
+                {recentTopics.length > 0 && (
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: 0.6 }}
+                    className="mt-8 text-center"
+                  >
+                    <p className="text-xs text-slate-400 mb-2">Continue where you left off</p>
+                    <div className="flex flex-wrap gap-2 justify-center">
+                      {recentTopics.slice(0, 3).map((topic, idx) => (
+                        <button
+                          key={idx}
+                          onClick={() => setInput(`Continue our conversation about ${topic}`)}
+                          className="px-3 py-1.5 rounded-full bg-slate-100 dark:bg-slate-800 text-sm text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"
+                        >
+                          {topic.length > 30 ? topic.slice(0, 30) + "..." : topic}
+                        </button>
+                      ))}
+                    </div>
+                  </motion.div>
+                )}
+              </motion.div>
+            ) : (
+              /* Messages */
+              <div className="space-y-6 py-6">
+                {messages.map((message, index) => (
+                  <motion.div
+                    key={index}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="group"
+                  >
+                    <div className="flex gap-4">
+                      <div className="flex-shrink-0">
+                        {message.role === "assistant" ? (
+                          <div className={cn("h-8 w-8 rounded-lg bg-gradient-to-br flex items-center justify-center", selectedMode.color)}>
+                            <Bot className="h-4 w-4 text-white" />
+                          </div>
+                        ) : (
+                          <div className="h-8 w-8 rounded-lg bg-slate-900 dark:bg-slate-700 flex items-center justify-center">
+                            <User className="h-4 w-4 text-white" />
+                          </div>
+                        )}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        {/* Attachments */}
+                        {message.attachments && message.attachments.length > 0 && (
+                          <div className="mb-2 flex flex-wrap gap-2">
+                            {message.attachments.map((att, attIdx) => (
+                              <div key={attIdx} className="flex items-center gap-2 bg-slate-100 dark:bg-slate-800 rounded-lg p-2">
+                                {att.type === "image" && att.preview ? (
+                                  <img src={att.preview} alt={att.file.name} className="h-10 w-10 object-cover rounded" />
+                                ) : (
+                                  <FileText className="h-5 w-5 text-slate-500" />
+                                )}
+                                <span className="text-xs truncate max-w-[100px]">{att.file.name}</span>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+
+                        {/* Content */}
+                        <div className="prose prose-slate dark:prose-invert max-w-none">
+                          {message.role === "assistant" ? (
+                            <MarkdownMessage content={message.content} />
+                          ) : (
+                            <p className="whitespace-pre-wrap text-slate-900 dark:text-white">{message.content}</p>
+                          )}
+                        </div>
+
+                        {/* Model/Source indicator */}
+                        {message.role === "assistant" && index === messages.length - 1 && currentModel && (
+                          <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            className="flex items-center gap-3 mt-3 text-xs text-slate-500"
+                          >
+                            <span className="flex items-center gap-1">
+                              {currentModel.icon} {currentModel.name}
+                            </span>
+                            {ragInfo?.used && (
+                              <span className="flex items-center gap-1">
+                                <BookOpen className="h-3 w-3" />
+                                {ragInfo.documentsCount} sources
+                              </span>
+                            )}
+                          </motion.div>
+                        )}
+
+                        {/* Actions */}
+                        {message.role === "assistant" && message.content && (
+                          <div className="flex items-center gap-1 mt-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                            {message.id && !message.feedback && (
+                              <>
+                                <Button variant="ghost" size="sm" onClick={() => submitFeedback(message.id, true, index)} className="h-7 w-7 p-0">
+                                  <ThumbsUp className="h-3.5 w-3.5" />
+                                </Button>
+                                <Button variant="ghost" size="sm" onClick={() => submitFeedback(message.id, false, index)} className="h-7 w-7 p-0">
+                                  <ThumbsDown className="h-3.5 w-3.5" />
+                                </Button>
+                              </>
+                            )}
+                            {message.feedback && (
+                              <span className="text-xs text-slate-400">{message.feedback === "helpful" ? "👍" : "👎"}</span>
+                            )}
+                            <Button variant="ghost" size="sm" onClick={() => copyToClipboard(message.content, index)} className="h-7 w-7 p-0">
+                              {copiedMessageIndex === index ? <Check className="h-3.5 w-3.5 text-green-500" /> : <Copy className="h-3.5 w-3.5" />}
+                            </Button>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </motion.div>
+                ))}
+
+                {/* Thinking indicator */}
+                <AnimatePresence>
+                  {showThinking && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0 }}
+                      className="flex gap-4"
+                    >
+                      <div className={cn("h-8 w-8 rounded-lg bg-gradient-to-br flex items-center justify-center", selectedMode.color)}>
+                        <Loader2 className="h-4 w-4 text-white animate-spin" />
+                      </div>
+                      <div className="flex items-center gap-2 text-sm text-slate-500">
+                        <span>Thinking</span>
+                        <motion.span
+                          animate={{ opacity: [0.4, 1, 0.4] }}
+                          transition={{ duration: 1.5, repeat: Infinity }}
+                        >
+                          ...
+                        </motion.span>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+
+                <div ref={messagesEndRef} />
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Input Area */}
+        <div className="border-t border-slate-200/50 dark:border-slate-800/50 bg-white/80 dark:bg-slate-950/80 backdrop-blur-sm">
+          <div className="max-w-3xl mx-auto px-4 md:px-6 py-4">
+            {/* Attachments Preview */}
+            {attachments.length > 0 && (
+              <div className="mb-3 flex flex-wrap gap-2">
+                {attachments.map((att, idx) => (
+                  <div key={idx} className="relative group bg-slate-100 dark:bg-slate-800 rounded-lg p-2 flex items-center gap-2">
+                    {att.type === "image" && att.preview ? (
+                      <img src={att.preview} alt={att.file.name} className="h-10 w-10 object-cover rounded" />
+                    ) : (
+                      <FileText className="h-5 w-5 text-slate-500" />
+                    )}
+                    <span className="text-sm truncate max-w-[120px]">{att.file.name}</span>
+                    <button
+                      onClick={() => removeAttachment(idx)}
+                      className="h-5 w-5 bg-red-500 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100"
+                    >
+                      <X className="h-3 w-3" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* Input Box */}
+            <form
+              onSubmit={handleSubmit}
+              onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
+              onDragLeave={() => setIsDragging(false)}
+              onDrop={(e) => { e.preventDefault(); setIsDragging(false); handleFileSelect(e.dataTransfer.files); }}
+              className={cn(
+                "flex items-end gap-2 p-2 rounded-2xl border transition-all",
+                isDragging
+                  ? "border-violet-400 bg-violet-50 dark:bg-violet-950/20"
+                  : "border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 hover:border-slate-400 dark:hover:border-slate-600"
+              )}
+            >
               <input
                 ref={fileInputRef}
                 type="file"
@@ -1050,83 +961,70 @@ export default function ChatPage() {
                 onChange={(e) => handleFileSelect(e.target.files)}
                 className="hidden"
               />
+
               <Button
                 type="button"
                 variant="ghost"
                 size="icon"
                 onClick={() => fileInputRef.current?.click()}
                 disabled={isLoading}
-                title="Attach files"
-                className="h-9 w-9 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-100 dark:hover:bg-slate-800"
+                className="h-9 w-9 text-slate-500 hover:text-slate-900 dark:hover:text-white"
               >
                 <Paperclip className="h-4 w-4" />
               </Button>
+
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                onClick={toggleVoiceRecording}
+                disabled={isLoading}
+                className={cn("h-9 w-9", isRecording ? "text-red-500 animate-pulse" : "text-slate-500 hover:text-slate-900 dark:hover:text-white")}
+              >
+                {isRecording ? <MicOff className="h-4 w-4" /> : <Mic className="h-4 w-4" />}
+              </Button>
+
               <Textarea
                 ref={textareaRef}
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
-                placeholder={
-                  isRecording
-                    ? "Listening..."
-                    : isDragging
-                    ? "Drop files here..."
-                    : "Ask me anything... (or use ⌘K for prompts)"
-                }
+                placeholder={isRecording ? "Listening..." : isDragging ? "Drop files here..." : "Message..."}
                 disabled={isLoading}
-                className="flex-1 min-h-[36px] max-h-[200px] resize-none border-0 focus-visible:ring-0 bg-transparent text-slate-900 dark:text-slate-100 placeholder:text-slate-500 dark:placeholder:text-slate-500 px-2 text-[15px]"
+                className="flex-1 min-h-[36px] max-h-[200px] resize-none border-0 focus-visible:ring-0 bg-transparent px-2"
                 rows={1}
                 onInput={(e) => {
                   const target = e.target as HTMLTextAreaElement;
-                  target.style.height = '36px';
-                  target.style.height = target.scrollHeight + 'px';
+                  target.style.height = "36px";
+                  target.style.height = target.scrollHeight + "px";
                 }}
                 onKeyDown={(e) => {
-                  if (e.key === 'Enter' && !e.shiftKey) {
+                  if (e.key === "Enter" && !e.shiftKey) {
                     e.preventDefault();
-                    const form = e.currentTarget.form;
-                    if (form) {
-                      form.requestSubmit();
-                    }
+                    e.currentTarget.form?.requestSubmit();
                   }
                 }}
               />
+
               <Button
                 type="submit"
                 disabled={isLoading || (!input.trim() && attachments.length === 0)}
-                className="h-9 w-9 p-0 rounded-lg bg-slate-900 dark:bg-slate-100 hover:bg-slate-800 dark:hover:bg-slate-200 text-white dark:text-slate-900 disabled:opacity-50"
+                className={cn(
+                  "h-9 w-9 p-0 rounded-xl transition-all",
+                  input.trim() || attachments.length > 0
+                    ? `bg-gradient-to-r ${selectedMode.color} text-white hover:opacity-90`
+                    : "bg-slate-200 dark:bg-slate-700 text-slate-400"
+                )}
                 size="icon"
               >
-                {isLoading ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                ) : (
-                  <Send className="h-4 w-4" />
-                )}
+                {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
               </Button>
             </form>
+
+            <p className="text-xs text-center text-slate-400 mt-2">
+              Press Enter to send, Shift+Enter for new line
+            </p>
           </div>
         </div>
-      </div>
-      </>
-      )}
-
-      {/* Prompt Menu Components */}
-      <PromptCommandPalette
-        open={commandPaletteOpen}
-        onOpenChange={setCommandPaletteOpen}
-        onSelectPrompt={handlePromptSelect}
-      />
-
-      <PromptLibrary
-        open={promptLibraryOpen}
-        onOpenChange={setPromptLibraryOpen}
-        onSelectPrompt={handlePromptSelect}
-      />
-
-      <QuickActionsToolbar
-        visible={quickActionsVisible}
-        onAction={handleQuickAction}
-        selectedText={selectedText}
-      />
       </div>
     </div>
   );
