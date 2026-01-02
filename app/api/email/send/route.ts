@@ -35,6 +35,8 @@ export async function POST(request: Request) {
       body_html,
       scheduled_at,
       in_reply_to,
+      email_account_id,
+      send_via = "auto", // "auto", "resend", "n8n"
     } = body;
 
     if (!to_emails || to_emails.length === 0) {
@@ -51,17 +53,51 @@ export async function POST(request: Request) {
       );
     }
 
-    // Get user's default email account
-    const { data: emailAccount } = await supabase
+    // Get user's email account (first one available, or specified by ID)
+
+    let emailAccountQuery = supabase
       .from("email_accounts")
       .select("*")
-      .eq("user_id", user.id)
-      .eq("is_default", true)
-      .single();
+      .eq("user_id", user.id);
+
+    if (email_account_id) {
+      emailAccountQuery = emailAccountQuery.eq("id", email_account_id);
+    }
+
+    const { data: emailAccount } = await emailAccountQuery.limit(1).single();
 
     // Determine if this is scheduled or immediate send
     const isScheduled = scheduled_at && new Date(scheduled_at) > new Date();
     const status = isScheduled ? "scheduled" : "draft"; // Will be sent by background job
+
+    // If no email account, create a default one for outbound emails
+    let accountId = emailAccount?.id;
+    if (!accountId) {
+      const { data: newAccount, error: accountError } = await supabase
+        .from("email_accounts")
+        .insert({
+          user_id: user.id,
+          organization_id: profile.organization_id,
+          provider: "resend",
+          provider_account_id: profile.email,
+          email_address: profile.email,
+          sync_enabled: false,
+        })
+        .select("id")
+        .single();
+
+      if (accountError) {
+        console.error("Failed to create email account:", accountError);
+        return NextResponse.json(
+          { error: "Failed to create email account" },
+          { status: 500 }
+        );
+      }
+      accountId = newAccount.id;
+    }
+
+    // Generate unique message ID for outbound emails
+    const messageId = `${Date.now()}-${crypto.randomUUID()}@perpetualcore.com`;
 
     // Create email record
     const { data: email, error: createError } = await supabase
@@ -69,20 +105,22 @@ export async function POST(request: Request) {
       .insert({
         organization_id: profile.organization_id,
         user_id: user.id,
-        email_account_id: emailAccount?.id || null,
+        email_account_id: accountId,
+        provider_message_id: messageId,
+        provider: emailAccount?.provider || "resend",
         direction: "outbound",
         status,
-        from_address: emailAccount?.email_address || profile.email,
+        from_email: emailAccount?.email_address || profile.email,
         from_name: profile.full_name,
-        to_addresses: to_emails,
-        cc_addresses: cc_emails,
-        bcc_addresses: bcc_emails,
+        to_emails: to_emails,
+        cc_emails: cc_emails,
+        bcc_emails: bcc_emails,
         subject,
         body_text,
         body_html,
         scheduled_at: isScheduled ? scheduled_at : null,
+        sent_at: null,
         in_reply_to: in_reply_to || null,
-        provider: emailAccount?.provider || "custom_smtp",
       })
       .select()
       .single();
@@ -95,11 +133,79 @@ export async function POST(request: Request) {
       );
     }
 
-    // Send email via Resend if not scheduled
+    // Send email via Resend or n8n if not scheduled
     if (!isScheduled) {
-      // Initialize Resend if API key is available
+      const n8nWebhookUrl = process.env.N8N_EMAIL_WEBHOOK_URL;
       const resendApiKey = process.env.RESEND_API_KEY;
+      const useN8n = send_via === "n8n" || (send_via === "auto" && emailAccount?.provider === "gmail" && n8nWebhookUrl);
 
+      // Try n8n first for Gmail accounts
+      if (useN8n && n8nWebhookUrl) {
+        try {
+          const n8nResponse = await fetch(n8nWebhookUrl, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              ...(process.env.N8N_WEBHOOK_SECRET && {
+                Authorization: `Bearer ${process.env.N8N_WEBHOOK_SECRET}`,
+              }),
+            },
+            body: JSON.stringify({
+              to_emails,
+              cc_emails,
+              bcc_emails,
+              subject,
+              body_text,
+              body_html,
+              from_email: emailAccount?.email_address || profile.email,
+              from_name: profile.full_name,
+              in_reply_to,
+            }),
+          });
+
+          if (n8nResponse.ok) {
+            const n8nResult = await n8nResponse.json();
+            await supabase
+              .from("emails")
+              .update({
+                status: "sent",
+                sent_at: new Date().toISOString(),
+                provider_message_id: n8nResult.message_id || messageId,
+                provider_thread_id: n8nResult.thread_id,
+              })
+              .eq("id", email.id);
+
+            // Log activity
+            try {
+              await supabase.from("activity_feed").insert({
+                organization_id: profile.organization_id,
+                user_id: user.id,
+                action_type: "email_sent",
+                entity_type: "email",
+                entity_id: email.id,
+                title: `Email sent: ${subject}`,
+                description: `To: ${to_emails.join(", ")}`,
+                metadata: { to: to_emails, via: "n8n" },
+              });
+            } catch (e) {
+              console.error("Failed to log activity:", e);
+            }
+
+            return NextResponse.json({
+              email: { ...email, status: "sent" },
+              message: "Email sent via Gmail (n8n)",
+            }, { status: 201 });
+          } else {
+            console.error("n8n send failed:", await n8nResponse.text());
+            // Fall through to Resend
+          }
+        } catch (n8nError: any) {
+          console.error("n8n error:", n8nError);
+          // Fall through to Resend
+        }
+      }
+
+      // Initialize Resend if API key is available
       if (resendApiKey) {
         const resend = new Resend(resendApiKey);
         const fromAddress = process.env.EMAIL_FROM_ADDRESS || process.env.RESEND_FROM_EMAIL || "noreply@perpetualcore.com";
