@@ -41,6 +41,9 @@ import {
   Target,
   Church,
   Heart,
+  PenSquare,
+  Mic,
+  MessagesSquare,
   // New icons for redesign
   LayoutDashboard,
   Workflow,
@@ -102,6 +105,26 @@ export const NAVIGATION_CONFIG: NavigationSection[] = [
         },
       },
       {
+        name: "Search",
+        href: "/dashboard/search",
+        icon: Search,
+        adaptiveConfig: {
+          visibleFor: ["beginner", "intermediate", "advanced"],
+          complexity: "essential",
+          isCore: true,
+          helpText: "AI-powered search across all your documents and conversations",
+        },
+      },
+    ],
+  },
+
+  // CHAT - All chat options in one section
+  {
+    section: "Chat",
+    color: "text-slate-600 dark:text-slate-400",
+    bgColor: "bg-slate-50 dark:bg-slate-950/30",
+    items: [
+      {
         name: "AI Chat",
         href: "/dashboard/chat",
         icon: MessageSquare,
@@ -113,14 +136,33 @@ export const NAVIGATION_CONFIG: NavigationSection[] = [
         },
       },
       {
-        name: "Search",
-        href: "/dashboard/search",
-        icon: Search,
+        name: "Executive Suite",
+        href: "/dashboard/assistants",
+        icon: Users,
         adaptiveConfig: {
           visibleFor: ["beginner", "intermediate", "advanced"],
-          complexity: "essential",
-          isCore: true,
-          helpText: "AI-powered search across all your documents and conversations",
+          complexity: "standard",
+          helpText: "15 specialist AI advisors - CEO, CFO, Legal, HR, Sales, Marketing, and more",
+        },
+      },
+      {
+        name: "Voice Chat",
+        href: "/dashboard/chat?mode=voice",
+        icon: Mic,
+        adaptiveConfig: {
+          visibleFor: ["beginner", "intermediate", "advanced"],
+          complexity: "standard",
+          helpText: "Hands-free voice conversations with AI",
+        },
+      },
+      {
+        name: "Chat History",
+        href: "/dashboard/conversations",
+        icon: MessagesSquare,
+        adaptiveConfig: {
+          visibleFor: ["beginner", "intermediate", "advanced"],
+          complexity: "standard",
+          helpText: "Browse and continue past conversations",
         },
       },
     ],
@@ -185,6 +227,36 @@ export const NAVIGATION_CONFIG: NavigationSection[] = [
         },
       },
       {
+        name: "Content Studio",
+        href: "/dashboard/content",
+        icon: PenSquare,
+        adaptiveConfig: {
+          visibleFor: ["beginner", "intermediate", "advanced"],
+          complexity: "standard",
+          helpText: "Create, schedule, and publish content across all platforms",
+        },
+      },
+      {
+        name: "Expenses",
+        href: "/dashboard/expenses",
+        icon: DollarSign,
+        adaptiveConfig: {
+          visibleFor: ["beginner", "intermediate", "advanced"],
+          complexity: "standard",
+          helpText: "Track expenses from Telegram and manual entries with charts",
+        },
+      },
+      {
+        name: "Reminders",
+        href: "/dashboard/reminders",
+        icon: Bell,
+        adaptiveConfig: {
+          visibleFor: ["beginner", "intermediate", "advanced"],
+          complexity: "standard",
+          helpText: "View and manage reminders created via Telegram or manually",
+        },
+      },
+      {
         name: "Meetings",
         href: "/dashboard/calendar",
         icon: Calendar,
@@ -226,16 +298,6 @@ export const NAVIGATION_CONFIG: NavigationSection[] = [
           complexity: "standard",
           badge: "new",
           helpText: "Monitor system health and handle issues that need attention",
-        },
-      },
-      {
-        name: "Executive Suite",
-        href: "/dashboard/assistants",
-        icon: Users,
-        adaptiveConfig: {
-          visibleFor: ["beginner", "intermediate", "advanced"],
-          complexity: "standard",
-          helpText: "Build your AI executive team - 15 specialist advisors including CEO, CFO, Legal, HR, Sales, Marketing, Social Media, and more",
         },
       },
       {
@@ -602,6 +664,58 @@ export const NAVIGATION_CONFIG_V2: NavigationSection[] = [
     ],
   },
 
+  // CHAT - All chat options in one section
+  {
+    section: "Chat",
+    color: "text-slate-600 dark:text-slate-400",
+    bgColor: "bg-slate-50 dark:bg-slate-950/30",
+    collapsible: true,
+    defaultCollapsed: false,
+    items: [
+      {
+        name: "AI Chat",
+        href: "/dashboard/chat",
+        icon: MessageSquare,
+        adaptiveConfig: {
+          visibleFor: ["beginner", "intermediate", "advanced"],
+          complexity: "essential",
+          isCore: true,
+          helpText: "Talk to multiple AI models - auto-selects the best one for your task",
+        },
+      },
+      {
+        name: "Executive Suite",
+        href: "/dashboard/assistants",
+        icon: Users,
+        adaptiveConfig: {
+          visibleFor: ["beginner", "intermediate", "advanced"],
+          complexity: "standard",
+          helpText: "15 specialist AI advisors - CEO, CFO, Legal, HR, Sales, Marketing, and more",
+        },
+      },
+      {
+        name: "Voice Chat",
+        href: "/dashboard/chat?mode=voice",
+        icon: Mic,
+        adaptiveConfig: {
+          visibleFor: ["beginner", "intermediate", "advanced"],
+          complexity: "standard",
+          helpText: "Hands-free voice conversations with AI",
+        },
+      },
+      {
+        name: "Chat History",
+        href: "/dashboard/conversations",
+        icon: MessagesSquare,
+        adaptiveConfig: {
+          visibleFor: ["beginner", "intermediate", "advanced"],
+          complexity: "standard",
+          helpText: "Browse and continue past conversations",
+        },
+      },
+    ],
+  },
+
   // WORK - Core productivity
   {
     section: "Work",
@@ -660,6 +774,46 @@ export const NAVIGATION_CONFIG_V2: NavigationSection[] = [
           visibleFor: ["beginner", "intermediate", "advanced"],
           complexity: "standard",
           helpText: "Meetings, scheduling, and intelligent briefings",
+        },
+      },
+      {
+        name: "Ideas",
+        href: "/dashboard/ideas",
+        icon: Lightbulb,
+        adaptiveConfig: {
+          visibleFor: ["beginner", "intermediate", "advanced"],
+          complexity: "standard",
+          helpText: "Quick capture ideas, develop them, and track implementation",
+        },
+      },
+      {
+        name: "Content Studio",
+        href: "/dashboard/content",
+        icon: PenSquare,
+        adaptiveConfig: {
+          visibleFor: ["beginner", "intermediate", "advanced"],
+          complexity: "standard",
+          helpText: "Create, schedule, and publish content across all platforms",
+        },
+      },
+      {
+        name: "Expenses",
+        href: "/dashboard/expenses",
+        icon: DollarSign,
+        adaptiveConfig: {
+          visibleFor: ["beginner", "intermediate", "advanced"],
+          complexity: "standard",
+          helpText: "Track expenses from Telegram and manual entries with charts",
+        },
+      },
+      {
+        name: "Reminders",
+        href: "/dashboard/reminders",
+        icon: Bell,
+        adaptiveConfig: {
+          visibleFor: ["beginner", "intermediate", "advanced"],
+          complexity: "standard",
+          helpText: "View and manage reminders created via Telegram or manually",
         },
       },
       {

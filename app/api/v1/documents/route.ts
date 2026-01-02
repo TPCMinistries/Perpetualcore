@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { withApiAuth, APIContext } from "@/lib/api";
-import { createClient } from "@/lib/supabase/server";
+import { createClient, createAdminClient } from "@/lib/supabase/server";
 import { webhookEvents } from "@/lib/webhooks";
 
 export const runtime = "nodejs";
@@ -58,7 +58,8 @@ async function handleGet(req: NextRequest, context: APIContext): Promise<Respons
 }
 
 async function handlePost(req: NextRequest, context: APIContext): Promise<Response> {
-  const supabase = await createClient();
+  // Use admin client to bypass RLS - we've already validated the API key
+  const supabase = createAdminClient();
 
   try {
     const body = await req.json();

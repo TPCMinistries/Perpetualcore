@@ -92,8 +92,10 @@ export default function ContentEditorPage({ params }: { params: Promise<{ id: st
   const [saving, setSaving] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [showSchedule, setShowSchedule] = useState(false);
+  const [showApprove, setShowApprove] = useState(false);
   const [scheduleDate, setScheduleDate] = useState("");
   const [copied, setCopied] = useState(false);
+  const [approving, setApproving] = useState(false);
 
   // Form state
   const [formData, setFormData] = useState({
@@ -200,6 +202,34 @@ export default function ContentEditorPage({ params }: { params: Promise<{ id: st
     }
   };
 
+  const approveAndPost = async (postNow: boolean = false) => {
+    setApproving(true);
+    try {
+      // First save current changes
+      await saveContent();
+
+      // Then trigger approval webhook
+      const response = await fetch("/api/webhooks/content-approved", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          contentId: id,
+          platforms: [content?.platform || "linkedin"],
+          postNow,
+        }),
+      });
+
+      if (response.ok) {
+        setShowApprove(false);
+        fetchContent();
+      }
+    } catch (error) {
+      console.error("Failed to approve content:", error);
+    } finally {
+      setApproving(false);
+    }
+  };
+
   const copyToClipboard = async () => {
     const fullContent = [
       formData.hook,
@@ -288,6 +318,15 @@ export default function ContentEditorPage({ params }: { params: Promise<{ id: st
               >
                 <Calendar className="h-4 w-4 mr-2" />
                 Schedule
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setShowApprove(true)}
+                className="border-green-200 dark:border-green-800 text-green-600 dark:text-green-400 hover:bg-green-50 dark:hover:bg-green-900/20"
+              >
+                <Send className="h-4 w-4 mr-2" />
+                Approve & Post
               </Button>
               <Button
                 onClick={saveContent}
@@ -495,6 +534,53 @@ export default function ContentEditorPage({ params }: { params: Promise<{ id: st
             </Button>
             <Button variant="destructive" onClick={deleteContent}>
               Delete
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Approve & Post Dialog */}
+      <Dialog open={showApprove} onOpenChange={setShowApprove}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Approve & Post Content</DialogTitle>
+          </DialogHeader>
+          <div className="py-4 space-y-4">
+            <p className="text-slate-600 dark:text-slate-400">
+              This will save your content, mark it as approved, and trigger the automated posting workflow.
+            </p>
+            <div className="p-4 rounded-lg bg-slate-50 dark:bg-slate-800/50 space-y-2">
+              <p className="text-sm font-medium">{formData.title || content.title}</p>
+              <div className="flex items-center gap-2">
+                <Badge variant="secondary" className="text-xs capitalize">
+                  {content.platform}
+                </Badge>
+                <Badge variant="secondary" className="text-xs capitalize">
+                  {content.content_type?.replace("_", " ")}
+                </Badge>
+              </div>
+            </div>
+          </div>
+          <DialogFooter className="flex-col sm:flex-row gap-2">
+            <Button variant="outline" onClick={() => setShowApprove(false)} disabled={approving}>
+              Cancel
+            </Button>
+            <Button
+              variant="outline"
+              onClick={() => approveAndPost(false)}
+              disabled={approving}
+              className="border-green-200 dark:border-green-800 text-green-600 dark:text-green-400"
+            >
+              {approving ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Check className="h-4 w-4 mr-2" />}
+              Approve Only
+            </Button>
+            <Button
+              onClick={() => approveAndPost(true)}
+              disabled={approving}
+              className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white border-0"
+            >
+              {approving ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Send className="h-4 w-4 mr-2" />}
+              Approve & Post Now
             </Button>
           </DialogFooter>
         </DialogContent>

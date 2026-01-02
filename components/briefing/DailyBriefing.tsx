@@ -9,6 +9,7 @@ import { QuickMorningActions } from "./QuickMorningActions";
 import { AIInsights } from "./AIInsights";
 import { UpcomingMeetings } from "./UpcomingMeetings";
 import { ActivityFeedWidget } from "@/components/activity/ActivityFeedWidget";
+import { TelegramActivityWidget } from "./TelegramActivityWidget";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Loader2, RefreshCw, Sun, Coffee, Moon } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -248,6 +249,13 @@ export function DailyBriefing({ userId }: DailyBriefingProps) {
             transition={{ delay: 0.5 }}
           >
             <AIInsights insights={data.insights} />
+          </motion.div>
+          <motion.div
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.55 }}
+          >
+            <TelegramActivityWidget limit={5} compact />
           </motion.div>
           <motion.div
             initial={{ opacity: 0, x: 20 }}
