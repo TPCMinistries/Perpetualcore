@@ -62,18 +62,27 @@ async function handlePost(req: NextRequest, context: APIContext): Promise<Respon
 
   try {
     const body = await req.json();
-    const { filename, content, mime_type } = body;
+
+    // Support both n8n format and standard format
+    // n8n format: { title: "string", content: "string", type: "document|transcript|notes", source: "n8n|telegram|manual" }
+    // Standard format: { filename: "string", content: "string", mime_type: "string" }
+    const filename = body.filename || body.title;
+    const content = body.content;
+    const mime_type = body.mime_type || (body.type === "transcript" ? "text/plain" : "text/markdown");
+    const source = body.source || "api";
+    const documentType = body.type || "document";
+    const isN8nFormat = !!body.title;
 
     if (!filename) {
       return NextResponse.json(
-        { error: "filename is required" },
+        { error: "filename or title is required" },
         { status: 400 }
       );
     }
 
     if (!content) {
       return NextResponse.json(
-        { error: "content is required (base64 encoded or plain text)" },
+        { error: "content is required" },
         { status: 400 }
       );
     }
@@ -104,10 +113,12 @@ async function handlePost(req: NextRequest, context: APIContext): Promise<Respon
         organization_id: context.organizationId,
         user_id: context.userId,
         filename,
-        mime_type: mime_type || "text/plain",
+        mime_type: mime_type,
         size: fileSize,
         status: "pending",
         raw_content: Buffer.from(fileContent, "base64").toString("utf-8"),
+        source: source,
+        document_type: documentType,
       })
       .select()
       .single();
@@ -135,6 +146,18 @@ async function handlePost(req: NextRequest, context: APIContext): Promise<Respon
       body: JSON.stringify({ documentId: document.id }),
     }).catch(() => {});
 
+    // Return n8n-compatible format when n8n format was used
+    if (isN8nFormat) {
+      return NextResponse.json(
+        {
+          id: document.id,
+          success: true,
+        },
+        { status: 201 }
+      );
+    }
+
+    // Standard format response
     return NextResponse.json(
       {
         id: document.id,

@@ -27,24 +27,29 @@ export const dynamic = "force-dynamic";
 async function handleChat(req: NextRequest, context: APIContext): Promise<Response> {
   try {
     const body = await req.json();
-    const {
-      messages,
-      model: requestedModel = "auto",
-      stream = false,
-      use_rag = true,
-      conversation_id,
-    }: {
-      messages: ChatMessage[];
-      model?: string;
-      stream?: boolean;
-      use_rag?: boolean;
-      conversation_id?: string;
-    } = body;
+
+    // Support both n8n simple format and standard format
+    // n8n format: { message: "string", conversationId?: "uuid", userId?: "uuid" }
+    // Standard format: { messages: [...], model?: "string", stream?: false, ... }
+    let messages: ChatMessage[];
+    let requestedModel = body.model || "auto";
+    let stream = body.stream ?? false;
+    let use_rag = body.use_rag ?? true;
+    let conversation_id = body.conversation_id || body.conversationId;
+    const isSimpleFormat = typeof body.message === "string";
+
+    if (isSimpleFormat) {
+      // n8n simple format - convert to messages array
+      messages = [{ role: "user", content: body.message }];
+    } else {
+      // Standard format
+      messages = body.messages;
+    }
 
     // Validate messages
     if (!messages || !Array.isArray(messages) || messages.length === 0) {
       return NextResponse.json(
-        { error: "messages is required and must be a non-empty array" },
+        { error: "messages array or message string is required" },
         { status: 400 }
       );
     }
@@ -222,6 +227,22 @@ async function handleChat(req: NextRequest, context: APIContext): Promise<Respon
         role: "assistant",
       }).catch(() => {});
 
+      // Return n8n-compatible format when simple format was used
+      if (isSimpleFormat) {
+        return NextResponse.json(
+          {
+            response: fullResponse,
+            conversationId: conversation_id || context.requestId,
+          },
+          {
+            headers: {
+              "X-Request-ID": context.requestId,
+            },
+          }
+        );
+      }
+
+      // Standard format response
       return NextResponse.json(
         {
           id: context.requestId,

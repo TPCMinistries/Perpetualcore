@@ -48,12 +48,17 @@ async function handleSearch(req: NextRequest, context: APIContext): Promise<Resp
       Math.max(0, Math.min(threshold, 1)) // Threshold between 0 and 1
     );
 
-    // Format results
+    // Format results - n8n expects: { id, title, content }
+    // Standard format: { document_id, filename, chunk_index, content, similarity }
     const formattedResults = results.map((r: any) => ({
-      document_id: r.document_id,
-      filename: r.filename,
-      chunk_index: r.chunk_index,
+      // n8n compatible fields
+      id: r.document_id,
+      title: r.filename || r.document_title,
       content: r.content,
+      // Additional standard fields
+      document_id: r.document_id,
+      filename: r.filename || r.document_title,
+      chunk_index: r.chunk_index,
       similarity: r.similarity,
     }));
 
