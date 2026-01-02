@@ -98,25 +98,37 @@ export function ConversationSidebar({
         ? "/api/chat/conversations"  // Personal AI chats
         : "/api/conversations";       // Team conversations
 
-      const [conversationsRes, projectsRes, spacesRes] = await Promise.all([
-        fetch(conversationsEndpoint),
-        fetch("/api/projects"),
-        fetch("/api/spaces"),
-      ]);
-
-      if (conversationsRes.ok) {
-        const convData = await conversationsRes.json();
-        setConversations(convData.conversations || convData || []);
+      // Fetch conversations - this is the main one
+      try {
+        const conversationsRes = await fetch(conversationsEndpoint);
+        if (conversationsRes.ok) {
+          const convData = await conversationsRes.json();
+          setConversations(convData.conversations || convData || []);
+        }
+      } catch (e) {
+        console.error("Failed to fetch conversations:", e);
       }
 
-      if (projectsRes.ok) {
-        const projData = await projectsRes.json();
-        setProjects(projData);
+      // Fetch projects - optional, don't crash if fails
+      try {
+        const projectsRes = await fetch("/api/projects");
+        if (projectsRes.ok) {
+          const projData = await projectsRes.json();
+          setProjects(Array.isArray(projData) ? projData : projData.projects || []);
+        }
+      } catch (e) {
+        console.error("Failed to fetch projects:", e);
       }
 
-      if (spacesRes.ok) {
-        const spacesData = await spacesRes.json();
-        setSpaces(spacesData.spaces || []);
+      // Fetch spaces - optional, don't crash if fails
+      try {
+        const spacesRes = await fetch("/api/spaces");
+        if (spacesRes.ok) {
+          const spacesData = await spacesRes.json();
+          setSpaces(spacesData.spaces || []);
+        }
+      } catch (e) {
+        console.error("Failed to fetch spaces:", e);
       }
     } catch (error) {
       console.error("Failed to fetch data:", error);
@@ -659,7 +671,7 @@ export function ConversationSidebar({
                                   ))}
                                 <DropdownMenuSeparator />
                                 <DropdownMenuItem
-                                  onClick={() => deleteConversation(conv.id)}
+                                  onClick={() => openDeleteDialog(conv.id)}
                                   className="text-destructive focus:text-destructive"
                                 >
                                   <Trash2 className="h-3 w-3 mr-2" />

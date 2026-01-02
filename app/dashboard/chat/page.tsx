@@ -562,23 +562,20 @@ export default function ChatPage() {
   return (
     <div className="flex h-[calc(100vh-6rem)] bg-gradient-to-b from-slate-50 to-white dark:from-slate-950 dark:to-slate-900">
       {/* Sidebar */}
-      <AnimatePresence>
-        {isSidebarOpen && (
-          <motion.div
-            initial={{ width: 0, opacity: 0 }}
-            animate={{ width: 280, opacity: 1 }}
-            exit={{ width: 0, opacity: 0 }}
-            className="border-r border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 overflow-hidden"
-          >
-            <ConversationSidebar
-              mode="personal"
-              currentConversationId={conversationId}
-              onConversationSelect={(id) => id && loadConversation(id)}
-              onNewConversation={handleNewConversation}
-            />
-          </motion.div>
-        )}
-      </AnimatePresence>
+      {isSidebarOpen && (
+        <motion.div
+          initial={{ opacity: 0, x: -20 }}
+          animate={{ opacity: 1, x: 0 }}
+          className="w-72 border-r border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 flex-shrink-0"
+        >
+          <ConversationSidebar
+            mode="personal"
+            currentConversationId={conversationId}
+            onConversationSelect={(id) => id && loadConversation(id)}
+            onNewConversation={handleNewConversation}
+          />
+        </motion.div>
+      )}
 
       {/* Main Chat Area */}
       <div className="flex-1 flex flex-col min-w-0">
