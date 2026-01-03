@@ -736,6 +736,17 @@ export const NAVIGATION_CONFIG_V2: NavigationSection[] = [
         },
       },
       {
+        name: "Teams",
+        href: "/dashboard/teams",
+        icon: UsersRound,
+        adaptiveConfig: {
+          visibleFor: ["beginner", "intermediate", "advanced"],
+          complexity: "essential",
+          isCore: true,
+          helpText: "BOS 2.0 Centaur teams - AI-first departments with lifecycle workflows",
+        },
+      },
+      {
         name: "Tasks",
         href: "/dashboard/tasks",
         icon: CheckSquare,
