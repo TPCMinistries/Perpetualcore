@@ -14,12 +14,15 @@ const WEBHOOK_SECRET = process.env.N8N_WEBHOOK_SECRET || process.env.WEBHOOK_SEC
 // n8n sends emails here from Gmail/Outlook
 export async function POST(request: Request) {
   try {
-    // Verify webhook secret
+    // Verify webhook secret - support multiple auth formats
     const authHeader = request.headers.get("authorization");
-    const providedSecret = authHeader?.replace("Bearer ", "");
+    const apiKeyHeader = request.headers.get("x-api-key");
+
+    // Accept Bearer token, X-API-Key header, or no auth if secret not configured
+    const providedSecret = authHeader?.replace("Bearer ", "") || apiKeyHeader;
 
     if (WEBHOOK_SECRET && providedSecret !== WEBHOOK_SECRET) {
-      console.error("Invalid webhook secret");
+      console.error("Invalid webhook secret provided:", providedSecret ? "***" : "none");
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
