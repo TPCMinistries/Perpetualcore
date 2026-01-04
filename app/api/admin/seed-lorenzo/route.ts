@@ -544,7 +544,8 @@ export async function POST(req: NextRequest) {
 
           results.created.projects++;
 
-          // Create tasks with proper entity/project links
+          // Create tasks linked via entity_id and tags
+          // Note: We use tags to link to entity_projects since project_id references team projects
           for (const taskData of projectData.tasks) {
             const { error: taskError } = await supabase
               .from("tasks")
@@ -556,7 +557,8 @@ export async function POST(req: NextRequest) {
                 status: "todo",
                 assigned_to: user.id,
                 entity_id: entity.id,
-                project_id: project.id,
+                // Store project ID in source_reference for reliable linking
+                source_reference: `entity_project:${project.id}`,
                 tags: [entity.name, project.name],
               });
 

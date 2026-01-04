@@ -159,6 +159,7 @@ export async function getUserTasks(
     teamId?: string;
     entityId?: string;
     brandId?: string;
+    sourceReference?: string;
   }
 ) {
   const supabase = await createClient();
@@ -191,6 +192,10 @@ export async function getUserTasks(
 
   if (filters?.brandId) {
     query = query.eq("brand_id", filters.brandId);
+  }
+
+  if (filters?.sourceReference) {
+    query = query.eq("source_reference", filters.sourceReference);
   }
 
   if (filters?.dueBefore) {

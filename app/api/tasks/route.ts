@@ -37,8 +37,9 @@ export async function GET(req: NextRequest) {
     const teamId = searchParams.get("team_id") || undefined;
     const entityId = searchParams.get("entity_id") || undefined;
     const brandId = searchParams.get("brand_id") || undefined;
+    const sourceReference = searchParams.get("source_reference") || undefined;
 
-    const tasks = await getUserTasks(user.id, { status, priority, projectId, teamId, entityId, brandId });
+    const tasks = await getUserTasks(user.id, { status, priority, projectId, teamId, entityId, brandId, sourceReference });
 
     return NextResponse.json({ tasks, count: tasks.length });
   } catch (error) {
@@ -140,6 +141,11 @@ export async function POST(req: NextRequest) {
     // Add tags if provided
     if (body.tags && body.tags.length > 0) {
       taskData.tags = body.tags;
+    }
+
+    // Add source_reference for linking to entity_projects
+    if (body.source_reference) {
+      taskData.source_reference = body.source_reference;
     }
 
     const { data: task, error } = await supabase
