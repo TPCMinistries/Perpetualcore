@@ -1,5 +1,6 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -25,13 +26,15 @@ interface OvernightSummaryProps {
 }
 
 export function OvernightSummary({ summary }: OvernightSummaryProps) {
+  const router = useRouter();
+
   const stats = [
-    { label: "New Emails", value: summary.newEmails, icon: Mail, color: "text-blue-500" },
-    { label: "New Tasks", value: summary.newTasks, icon: CheckSquare, color: "text-green-500" },
-    { label: "Automations Run", value: summary.completedAutomations, icon: Zap, color: "text-violet-500" },
-    { label: "Failed", value: summary.failedAutomations, icon: AlertCircle, color: "text-red-500", showIfZero: false },
-    { label: "Mentions", value: summary.newMentions, icon: AtSign, color: "text-amber-500" },
-    { label: "New Contacts", value: summary.newContacts, icon: UserPlus, color: "text-cyan-500" },
+    { label: "New Emails", value: summary.newEmails, icon: Mail, color: "text-blue-500", href: "/dashboard/inbox" },
+    { label: "New Tasks", value: summary.newTasks, icon: CheckSquare, color: "text-green-500", href: "/dashboard/tasks" },
+    { label: "Automations Run", value: summary.completedAutomations, icon: Zap, color: "text-violet-500", href: "/dashboard/automations" },
+    { label: "Failed", value: summary.failedAutomations, icon: AlertCircle, color: "text-red-500", showIfZero: false, href: "/dashboard/automations" },
+    { label: "Mentions", value: summary.newMentions, icon: AtSign, color: "text-amber-500", href: "/dashboard/inbox" },
+    { label: "New Contacts", value: summary.newContacts, icon: UserPlus, color: "text-cyan-500", href: "/dashboard/contacts" },
   ].filter(stat => stat.showIfZero !== false || stat.value > 0);
 
   const hasActivity = stats.some(s => s.value > 0) || summary.highlights.length > 0;
@@ -56,7 +59,10 @@ export function OvernightSummary({ summary }: OvernightSummaryProps) {
               {stats.map((stat) => (
                 <div
                   key={stat.label}
-                  className="flex flex-col items-center p-3 rounded-lg bg-slate-50 dark:bg-slate-800/50"
+                  onClick={() => stat.value > 0 && router.push(stat.href)}
+                  className={`flex flex-col items-center p-3 rounded-lg bg-slate-50 dark:bg-slate-800/50 transition-colors ${
+                    stat.value > 0 ? "cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-700/50" : ""
+                  }`}
                 >
                   <stat.icon className={`h-5 w-5 ${stat.color} mb-1`} />
                   <span className="text-2xl font-semibold">{stat.value}</span>

@@ -47,6 +47,14 @@ interface Assistant {
   total_messages: number;
   is_public: boolean;
   created_at: string;
+  team_id?: string;
+  advisor_type?: "standalone" | "dedicated" | "consulting";
+  team?: {
+    id: string;
+    name: string;
+    emoji?: string;
+    color?: string;
+  };
 }
 
 interface Stats {
@@ -84,6 +92,7 @@ export default function AssistantsPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [filterRole, setFilterRole] = useState("all");
   const [filterStatus, setFilterStatus] = useState("all");
+  const [filterType, setFilterType] = useState("all"); // all, team, standalone
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
 
   useEffect(() => {
@@ -198,8 +207,11 @@ export default function AssistantsPage() {
     const matchesStatus = filterStatus === "all" ||
                          (filterStatus === "active" && assistant.enabled) ||
                          (filterStatus === "inactive" && !assistant.enabled);
+    const matchesType = filterType === "all" ||
+                       (filterType === "team" && assistant.team_id) ||
+                       (filterType === "standalone" && !assistant.team_id);
 
-    return matchesSearch && matchesRole && matchesStatus;
+    return matchesSearch && matchesRole && matchesStatus && matchesType;
   });
 
   if (loading) {
@@ -229,10 +241,10 @@ export default function AssistantsPage() {
               </div>
               <div>
                 <h1 className="text-3xl font-semibold text-slate-900 dark:text-slate-100">
-                  Executive Suite
+                  AI Advisors
                 </h1>
                 <p className="text-slate-600 dark:text-slate-400 mt-1 max-w-2xl">
-                  Build your AI executive team with 15 specialist advisors across strategy, sales, marketing, operations, legal, HR, and more.
+                  Your AI advisor team - 15 specialist advisors across strategy, sales, marketing, operations, legal, HR, and team-dedicated advisors.
                 </p>
               </div>
             </div>
@@ -364,6 +376,17 @@ export default function AssistantsPage() {
                   </SelectContent>
                 </Select>
 
+                <Select value={filterType} onValueChange={setFilterType}>
+                  <SelectTrigger className="w-[150px] border-slate-200 dark:border-slate-800">
+                    <SelectValue placeholder="Type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Advisors</SelectItem>
+                    <SelectItem value="team">Team Advisors</SelectItem>
+                    <SelectItem value="standalone">Standalone</SelectItem>
+                  </SelectContent>
+                </Select>
+
                 <div className="flex gap-1 border border-slate-200 dark:border-slate-800 rounded-md p-1">
                   <Button
                     variant={viewMode === "grid" ? "default" : "ghost"}
@@ -461,6 +484,17 @@ export default function AssistantsPage() {
                         <Badge variant="outline" className="border-0 bg-slate-50 dark:bg-slate-800 text-slate-600 dark:text-slate-400">
                           Disabled
                         </Badge>
+                      )}
+                      {assistant.team && (
+                        <Link href={`/dashboard/teams/${assistant.team.id}`}>
+                          <Badge
+                            className="bg-violet-50 dark:bg-violet-950/30 text-violet-700 dark:text-violet-400 border-0 cursor-pointer hover:bg-violet-100 dark:hover:bg-violet-900/40"
+                          >
+                            <Users className="h-3 w-3 mr-1" />
+                            {assistant.team.emoji && <span className="mr-1">{assistant.team.emoji}</span>}
+                            {assistant.team.name}
+                          </Badge>
+                        </Link>
                       )}
                     </div>
                   </CardHeader>

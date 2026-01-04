@@ -1,9 +1,10 @@
 import { Resend } from "resend";
 
-// Only throw error in production; in development, allow graceful degradation
+// Allow graceful degradation if RESEND_API_KEY is not set
 const resendApiKey = process.env.RESEND_API_KEY;
-if (!resendApiKey && process.env.NODE_ENV === "production") {
-  throw new Error("RESEND_API_KEY is not defined in environment variables");
+// Don't throw during build - only warn
+if (!resendApiKey) {
+  console.warn("RESEND_API_KEY is not defined - email functionality will be disabled");
 }
 
 export const resend = resendApiKey ? new Resend(resendApiKey) : null;

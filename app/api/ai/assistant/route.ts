@@ -15,6 +15,16 @@ interface AIRequest {
       name: string;
       aiMode?: string;
     };
+    entity?: {
+      id: string;
+      name: string;
+      type?: string;
+      description?: string;
+    };
+    brand?: {
+      id: string;
+      name: string;
+    };
   };
   history: Array<{
     role: "user" | "assistant";
@@ -99,11 +109,16 @@ function buildSystemPrompt(context: any, userEmail: string): string {
   // Get workspace-specific mode instructions
   const workspaceModeInstructions = getWorkspaceModeInstructions(context.workspace?.aiMode);
 
+  // Build entity context string
+  const entityContext = context.entity
+    ? `\nActive Entity: ${context.entity.name}${context.entity.type ? ` (${context.entity.type})` : ""}${context.entity.description ? `\nEntity Description: ${context.entity.description}` : ""}${context.brand ? `\nActive Brand: ${context.brand.name}` : ""}`
+    : "";
+
   const basePrompt = `You are an AI assistant integrated into Perpetual Core, a productivity and knowledge management platform. You help users with tasks, answer questions, and can suggest actions within the platform.
 
 Current Date: ${currentDate}
 User: ${userEmail}
-${context.workspace ? `Workspace: ${context.workspace.name} (${context.workspace.aiMode || "default"} mode)` : ""}
+${context.workspace ? `Workspace: ${context.workspace.name} (${context.workspace.aiMode || "default"} mode)` : ""}${entityContext}
 
 Current Context:
 - Page: ${context.route}
@@ -111,6 +126,7 @@ Current Context:
 ${context.selectedItems.length > 0 ? `- Selected Items: ${JSON.stringify(context.selectedItems, null, 2)}` : ""}
 ${Object.keys(context.pageData).length > 0 ? `- Page Data: ${JSON.stringify(context.pageData, null, 2)}` : ""}
 ${workspaceModeInstructions ? `\nWorkspace Mode Instructions:\n${workspaceModeInstructions}` : ""}
+${context.entity ? `\nEntity Context Instructions:\nYou are currently working within the "${context.entity.name}" entity context. All tasks, projects, content, and operations should be scoped to this entity. When creating items or making suggestions, consider the entity's focus area and description.` : ""}
 
 Your Capabilities:
 1. Answer questions about the platform and its features

@@ -47,40 +47,14 @@ export default async function HomePage() {
     .eq("id", user.id)
     .single();
 
-  const greeting = getGreeting();
   const firstName = profile?.full_name?.split(" ")[0] || "there";
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="space-y-1">
-        <h1 className="text-2xl font-semibold text-slate-900 dark:text-slate-100">
-          {greeting}, {firstName}
-        </h1>
-        <p className="text-muted-foreground">
-          {getDateString()} &middot; Here&apos;s what needs your attention today
-        </p>
-      </div>
-
-      {/* Daily Briefing Content */}
+      {/* Daily Briefing Content - handles greeting with client-side time */}
       <Suspense fallback={<BriefingSkeleton />}>
-        <DailyBriefing userId={user.id} />
+        <DailyBriefing userId={user.id} userName={firstName} />
       </Suspense>
     </div>
   );
-}
-
-function getGreeting(): string {
-  const hour = new Date().getHours();
-  if (hour < 12) return "Good morning";
-  if (hour < 17) return "Good afternoon";
-  return "Good evening";
-}
-
-function getDateString(): string {
-  return new Date().toLocaleDateString("en-US", {
-    weekday: "long",
-    month: "long",
-    day: "numeric",
-  });
 }

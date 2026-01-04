@@ -20,6 +20,8 @@ import {
   FileText,
   ArrowRight,
   MoreHorizontal,
+  Building2,
+  Users,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -40,6 +42,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { TasksPageSkeleton } from "@/components/ui/skeletons";
 import { AITaskRunner } from "@/components/tasks/AITaskRunner";
+import { useCurrentEntityIds, useEntityContext } from "@/components/entities/EntityProvider";
 
 interface ExecutionLogEntry {
   event: string;
@@ -76,6 +79,8 @@ interface Task {
 
 export default function TasksPage() {
   const router = useRouter();
+  const { currentEntity } = useEntityContext();
+  const { entityId, brandId } = useCurrentEntityIds();
   const [tasks, setTasks] = useState<Task[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<"all" | "todo" | "completed">("all");
@@ -90,13 +95,20 @@ export default function TasksPage() {
 
   useEffect(() => {
     fetchTasks();
-  }, [filter]);
+  }, [filter, entityId, brandId]);
 
   const fetchTasks = async () => {
     try {
       const params = new URLSearchParams();
       if (filter !== "all") {
         params.append("status", filter);
+      }
+      // Filter by current entity context
+      if (entityId) {
+        params.append("entity_id", entityId);
+      }
+      if (brandId) {
+        params.append("brand_id", brandId);
       }
 
       const response = await fetch(`/api/tasks?${params}`);
@@ -123,6 +135,8 @@ export default function TasksPage() {
           description: newTask.description,
           priority: newTask.priority,
           dueDate: newTask.dueDate || null,
+          entityId: entityId || undefined,
+          brandId: brandId || undefined,
         }),
       });
 
@@ -244,7 +258,22 @@ export default function TasksPage() {
                 <CheckSquare className="h-7 w-7 text-white" />
               </div>
               <div>
-                <h1 className="text-3xl font-bold text-slate-900 dark:text-white">Tasks</h1>
+                <div className="flex items-center gap-3">
+                  <h1 className="text-3xl font-bold text-slate-900 dark:text-white">Tasks</h1>
+                  <span className="inline-flex items-center gap-1.5 text-xs font-medium text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-500/10 px-2.5 py-1 rounded-full">
+                    {currentEntity ? (
+                      <>
+                        <Building2 className="h-3 w-3" />
+                        {currentEntity.name}
+                      </>
+                    ) : (
+                      <>
+                        <Users className="h-3 w-3" />
+                        All Entities
+                      </>
+                    )}
+                  </span>
+                </div>
                 <p className="text-slate-500 dark:text-slate-400 mt-0.5">
                   {todoTasks.length} active · {completedTasks.length} completed
                 </p>

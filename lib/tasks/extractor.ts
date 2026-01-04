@@ -157,6 +157,8 @@ export async function getUserTasks(
     dueBefore?: string;
     projectId?: string;
     teamId?: string;
+    entityId?: string;
+    brandId?: string;
   }
 ) {
   const supabase = await createClient();
@@ -181,6 +183,14 @@ export async function getUserTasks(
 
   if (filters?.teamId) {
     query = query.eq("team_id", filters.teamId);
+  }
+
+  if (filters?.entityId) {
+    query = query.eq("entity_id", filters.entityId);
+  }
+
+  if (filters?.brandId) {
+    query = query.eq("brand_id", filters.brandId);
   }
 
   if (filters?.dueBefore) {

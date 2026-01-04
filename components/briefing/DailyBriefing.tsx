@@ -8,6 +8,7 @@ import { AutomationResults } from "./AutomationResults";
 import { QuickMorningActions } from "./QuickMorningActions";
 import { AIInsights } from "./AIInsights";
 import { UpcomingMeetings } from "./UpcomingMeetings";
+import { AICommandBar } from "./AICommandBar";
 import { ActivityFeedWidget } from "@/components/activity/ActivityFeedWidget";
 import { TelegramActivityWidget } from "./TelegramActivityWidget";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -66,9 +67,10 @@ export interface BriefingData {
 
 interface DailyBriefingProps {
   userId: string;
+  userName?: string;
 }
 
-export function DailyBriefing({ userId }: DailyBriefingProps) {
+export function DailyBriefing({ userId, userName = "there" }: DailyBriefingProps) {
   const [data, setData] = useState<BriefingData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -79,7 +81,10 @@ export function DailyBriefing({ userId }: DailyBriefingProps) {
       if (isRefresh) setRefreshing(true);
       else setLoading(true);
 
-      const response = await fetch("/api/briefing");
+      // Use POST for refresh to force cache invalidation, GET for initial load
+      const response = await fetch("/api/briefing", {
+        method: isRefresh ? "POST" : "GET",
+      });
       if (!response.ok) throw new Error("Failed to fetch briefing");
 
       const briefingData = await response.json();
@@ -177,7 +182,7 @@ export function DailyBriefing({ userId }: DailyBriefingProps) {
             <p className="text-sm text-muted-foreground">
               {new Date().toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" })}
             </p>
-            <h2 className="text-2xl font-bold">{greeting.text}</h2>
+            <h2 className="text-2xl font-bold">{greeting.text}, {userName}</h2>
           </motion.div>
         </div>
         <motion.div
@@ -198,11 +203,20 @@ export function DailyBriefing({ userId }: DailyBriefingProps) {
         </motion.div>
       </motion.div>
 
+      {/* AI Command Bar - Primary interaction point */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.15 }}
+      >
+        <AICommandBar />
+      </motion.div>
+
       {/* Quick Morning Actions */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.2 }}
+        transition={{ delay: 0.25 }}
       >
         <QuickMorningActions actions={data.quickActions} />
       </motion.div>

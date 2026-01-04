@@ -56,7 +56,7 @@ export function TodaysPriorities({ priorities }: TodaysPrioritiesProps) {
               AI Ranked
             </Badge>
           </CardTitle>
-          <Link href="/dashboard/inbox">
+          <Link href="/dashboard/tasks">
             <Button variant="ghost" size="sm">
               View All
               <ArrowRight className="h-4 w-4 ml-1" />

@@ -3,6 +3,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { BriefingData } from "@/components/briefing/DailyBriefing";
 import { isN8nConfigured } from "@/lib/n8n";
+import { generateProactiveInsights, ProactiveInsight } from "@/lib/ai/proactive-insights";
 
 const N8N_API_URL = process.env.N8N_API_URL;
 const N8N_API_KEY = process.env.N8N_API_KEY;
@@ -143,15 +144,29 @@ async function getTodaysPriorities(supabase: any, userId: string) {
   const tomorrow = new Date(today);
   tomorrow.setDate(tomorrow.getDate() + 1);
 
-  // Get tasks due today or overdue
-  const { data: tasks } = await supabase
+  // Get active tasks - prioritize by due date and priority level
+  // First get high priority or due soon, then fall back to any active tasks
+  let { data: tasks } = await supabase
     .from("tasks")
     .select("id, title, due_date, priority, ai_priority_score")
     .eq("user_id", userId)
-    .eq("status", "pending")
+    .in("status", ["todo", "in_progress", "pending"])
     .or(`due_date.lte.${tomorrow.toISOString()},priority.eq.high`)
     .order("ai_priority_score", { ascending: false })
     .limit(10);
+
+  // If no urgent/high priority tasks, show any active tasks
+  if (!tasks || tasks.length === 0) {
+    const { data: allTasks } = await supabase
+      .from("tasks")
+      .select("id, title, due_date, priority, ai_priority_score")
+      .eq("user_id", userId)
+      .in("status", ["todo", "in_progress", "pending"])
+      .order("priority", { ascending: true }) // high < medium < low alphabetically
+      .order("created_at", { ascending: false })
+      .limit(10);
+    tasks = allTasks;
+  }
 
   // Get meetings today
   const { data: meetings } = await supabase
@@ -319,7 +334,27 @@ async function getUpcomingMeetings(supabase: any, userId: string) {
 }
 
 async function getAIInsights(supabase: any, userId: string) {
-  const { data: insights } = await supabase
+  // Get user's profile for organization_id
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("organization_id")
+    .eq("id", userId)
+    .single();
+
+  const organizationId = profile?.organization_id;
+
+  // Get proactive insights from our new system
+  let proactiveInsights: ProactiveInsight[] = [];
+  if (organizationId) {
+    try {
+      proactiveInsights = await generateProactiveInsights(supabase, userId, organizationId);
+    } catch (error) {
+      console.error("Error generating proactive insights:", error);
+    }
+  }
+
+  // Also get any stored insights from database
+  const { data: storedInsights } = await supabase
     .from("ai_insights")
     .select("id, type, title, description, action_url")
     .eq("user_id", userId)
@@ -327,13 +362,49 @@ async function getAIInsights(supabase: any, userId: string) {
     .order("created_at", { ascending: false })
     .limit(5);
 
-  return (insights || []).map((i: any) => ({
+  // Map proactive insights to the briefing format
+  const mappedProactive = proactiveInsights.map((i) => ({
+    id: i.id,
+    type: mapInsightType(i.type, i.priority),
+    title: i.title,
+    description: i.description,
+    actionUrl: i.action?.href,
+  }));
+
+  // Map stored insights
+  const mappedStored = (storedInsights || []).map((i: any) => ({
     id: i.id,
     type: i.type,
     title: i.title,
     description: i.description,
     actionUrl: i.action_url,
   }));
+
+  // Combine and deduplicate, prioritizing proactive insights
+  const combined = [...mappedProactive, ...mappedStored];
+  return combined.slice(0, 8); // Return top 8 insights
+}
+
+// Map our insight types to the briefing display types
+function mapInsightType(type: string, priority: string): "pattern" | "suggestion" | "warning" {
+  // High priority items should be warnings
+  if (priority === "high") return "warning";
+
+  // Map specific types
+  switch (type) {
+    case "cold_leads":
+    case "overdue_tasks":
+    case "stale_projects":
+      return "warning";
+    case "opportunity":
+    case "achievement":
+      return "pattern";
+    case "meeting_prep":
+    case "suggestion":
+    case "reminder":
+    default:
+      return "suggestion";
+  }
 }
 
 function generateQuickActions(

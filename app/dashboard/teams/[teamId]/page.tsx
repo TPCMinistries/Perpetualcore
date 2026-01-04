@@ -78,6 +78,9 @@ import {
   WorkflowStage,
 } from "@/types/work";
 import { TeamAssistant } from "@/components/teams/TeamAssistant";
+import { AdvisorCard } from "@/components/teams/AdvisorCard";
+import { AttachAdvisorDialog } from "@/components/teams/AttachAdvisorDialog";
+import { ConsultingAdvisorCard } from "@/components/teams/ConsultingAdvisorCard";
 import { WorkflowStageCards } from "@/components/teams/WorkflowPipeline";
 import { WorkItemKanban, WorkItemForm } from "@/components/work-items";
 import { WorkItem, getItemTypeForTeam, getItemTypeLabel } from "@/types/work";
@@ -135,6 +138,11 @@ export default function TeamDetailPage() {
   const [selectedWorkItem, setSelectedWorkItem] = useState<WorkItem | undefined>();
   const [workItemCounts, setWorkItemCounts] = useState<Record<string, number>>({});
 
+  // Consulting advisors state
+  const [consultingAdvisors, setConsultingAdvisors] = useState<any[]>([]);
+  const [attachAdvisorOpen, setAttachAdvisorOpen] = useState(false);
+  const [removingAdvisorId, setRemovingAdvisorId] = useState<string | null>(null);
+
   // UI state
   const [addMemberOpen, setAddMemberOpen] = useState(false);
   const [editSettingsOpen, setEditSettingsOpen] = useState(false);
@@ -186,6 +194,13 @@ export default function TeamDetailPage() {
   useEffect(() => {
     if (team && (team as any).workflow_stages?.length > 0) {
       fetchWorkItemCounts();
+    }
+  }, [team, teamId]);
+
+  // Fetch consulting advisors
+  useEffect(() => {
+    if (team) {
+      fetchConsultingAdvisors();
     }
   }, [team, teamId]);
 
@@ -264,6 +279,41 @@ export default function TeamDetailPage() {
       }
     } catch (error) {
       console.error("Error fetching work item counts:", error);
+    }
+  };
+
+  const fetchConsultingAdvisors = async () => {
+    try {
+      const response = await fetch(`/api/teams/${teamId}/advisors`);
+      if (response.ok) {
+        const data = await response.json();
+        setConsultingAdvisors(data.advisors || []);
+      }
+    } catch (error) {
+      console.error("Error fetching consulting advisors:", error);
+    }
+  };
+
+  const removeConsultingAdvisor = async (advisorId: string) => {
+    setRemovingAdvisorId(advisorId);
+    try {
+      const response = await fetch(
+        `/api/teams/${teamId}/advisors?advisorId=${advisorId}`,
+        { method: "DELETE" }
+      );
+
+      if (response.ok) {
+        setConsultingAdvisors((prev) => prev.filter((a) => a.id !== advisorId));
+        toast.success("Advisor removed from team");
+      } else {
+        const error = await response.json();
+        toast.error(error.error || "Failed to remove advisor");
+      }
+    } catch (error) {
+      console.error("Error removing advisor:", error);
+      toast.error("Failed to remove advisor");
+    } finally {
+      setRemovingAdvisorId(null);
     }
   };
 
@@ -660,14 +710,69 @@ export default function TeamDetailPage() {
                   </Card>
                 )}
 
-                {/* Team AI Assistant */}
-                <TeamAssistant
-                  teamId={teamId}
-                  teamName={team.name}
-                  teamType={team.team_type}
-                  personality={team.ai_context?.personality}
-                  className="h-[400px]"
-                />
+                {/* Dedicated AI Advisor (for BOS 2.0 teams with advisors) */}
+                {(team as any).primary_advisor_id && (
+                  <AdvisorCard
+                    advisorId={(team as any).primary_advisor_id}
+                    teamId={teamId}
+                    teamName={team.name}
+                    onChat={() => setActiveTab("conversations")}
+                  />
+                )}
+
+                {/* Team AI Assistant (fallback for teams without dedicated advisor) */}
+                {!(team as any).primary_advisor_id && (
+                  <TeamAssistant
+                    teamId={teamId}
+                    teamName={team.name}
+                    teamType={team.team_type}
+                    personality={team.ai_context?.personality}
+                    className="h-[400px]"
+                  />
+                )}
+
+                {/* Consulting Advisors Section */}
+                <Card>
+                  <CardHeader className="flex flex-row items-center justify-between pb-3">
+                    <div>
+                      <CardTitle className="text-base">Consulting Advisors</CardTitle>
+                      <CardDescription className="text-xs">
+                        Standalone advisors attached to help this team
+                      </CardDescription>
+                    </div>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => setAttachAdvisorOpen(true)}
+                    >
+                      <Plus className="h-4 w-4 mr-1" />
+                      Add Advisor
+                    </Button>
+                  </CardHeader>
+                  <CardContent>
+                    {consultingAdvisors.length === 0 ? (
+                      <div className="text-center py-6 text-muted-foreground">
+                        <Users className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                        <p className="text-sm">No consulting advisors attached</p>
+                        <p className="text-xs mt-1">
+                          Add advisors from the Executive Suite to consult with this team
+                        </p>
+                      </div>
+                    ) : (
+                      <div className="space-y-2">
+                        {consultingAdvisors.map((advisor) => (
+                          <ConsultingAdvisorCard
+                            key={advisor.id}
+                            advisor={advisor}
+                            onChat={() => router.push(`/dashboard/assistants/${advisor.id}/chat`)}
+                            onRemove={() => removeConsultingAdvisor(advisor.id)}
+                            removing={removingAdvisorId === advisor.id}
+                          />
+                        ))}
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
 
                 {/* Recent Members */}
                 <Card>
@@ -1374,6 +1479,19 @@ export default function TeamDetailPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Attach Advisor Dialog */}
+      <AttachAdvisorDialog
+        open={attachAdvisorOpen}
+        onOpenChange={setAttachAdvisorOpen}
+        teamId={teamId}
+        teamName={team.name}
+        existingAdvisorIds={[
+          ...((team as any).primary_advisor_id ? [(team as any).primary_advisor_id] : []),
+          ...consultingAdvisors.map((a) => a.id),
+        ]}
+        onSuccess={fetchConsultingAdvisors}
+      />
     </div>
   );
 }

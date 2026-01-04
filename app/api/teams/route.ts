@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
-import { Team, CreateTeamRequest, TeamWithMembers } from "@/types/work";
+import { Team, CreateTeamRequest, TeamWithMembers, BOS_2_TEAM_TEMPLATES, TRADITIONAL_TEAM_TEMPLATES } from "@/types/work";
+import { createTeamAdvisor } from "@/lib/teams/create-team-advisor";
 
 // GET /api/teams - List all teams for the organization
 export async function GET(request: NextRequest) {
@@ -222,7 +223,31 @@ export async function POST(request: NextRequest) {
       can_manage_projects: true,
     });
 
-    return NextResponse.json({ team }, { status: 201 });
+    // Auto-create a dedicated AI advisor for BOS 2.0 teams
+    let advisor = null;
+    const templateId = (body as any).template_id;
+    if (templateId) {
+      const allTemplates = [...(BOS_2_TEAM_TEMPLATES || []), ...(TRADITIONAL_TEAM_TEMPLATES || [])];
+      const template = allTemplates.find((t) => t.id === templateId);
+
+      if (template && template.ai_context) {
+        const { advisor: createdAdvisor, error: advisorError } = await createTeamAdvisor(
+          supabase,
+          team,
+          template,
+          user.id
+        );
+
+        if (advisorError) {
+          console.error("Warning: Failed to create team advisor:", advisorError);
+          // Don't fail team creation - advisor is optional
+        } else {
+          advisor = createdAdvisor;
+        }
+      }
+    }
+
+    return NextResponse.json({ team, advisor }, { status: 201 });
   } catch (error) {
     console.error("Teams API error:", error);
     return NextResponse.json(

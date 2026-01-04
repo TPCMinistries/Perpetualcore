@@ -35,8 +35,10 @@ export async function GET(req: NextRequest) {
     const priority = searchParams.get("priority") || undefined;
     const projectId = searchParams.get("project_id") || undefined;
     const teamId = searchParams.get("team_id") || undefined;
+    const entityId = searchParams.get("entity_id") || undefined;
+    const brandId = searchParams.get("brand_id") || undefined;
 
-    const tasks = await getUserTasks(user.id, { status, priority, projectId, teamId });
+    const tasks = await getUserTasks(user.id, { status, priority, projectId, teamId, entityId, brandId });
 
     return NextResponse.json({ tasks, count: tasks.length });
   } catch (error) {
@@ -123,6 +125,16 @@ export async function POST(req: NextRequest) {
     // Add team_id if provided
     if (body.teamId) {
       taskData.team_id = body.teamId;
+    }
+
+    // Add entity_id if provided (multi-entity architecture)
+    if (body.entityId) {
+      taskData.entity_id = body.entityId;
+    }
+
+    // Add brand_id if provided (multi-entity architecture)
+    if (body.brandId) {
+      taskData.brand_id = body.brandId;
     }
 
     // Add tags if provided

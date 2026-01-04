@@ -22,7 +22,15 @@ export async function GET() {
 
     const { data: assistants, error } = await supabase
       .from("ai_assistants")
-      .select("*")
+      .select(`
+        *,
+        team:teams!ai_assistants_team_id_fkey (
+          id,
+          name,
+          emoji,
+          color
+        )
+      `)
       .eq("organization_id", profile.organization_id)
       .order("created_at", { ascending: false });
 

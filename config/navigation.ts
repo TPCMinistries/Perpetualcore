@@ -44,6 +44,7 @@ import {
   PenSquare,
   Mic,
   MessagesSquare,
+  Palette,
   // New icons for redesign
   LayoutDashboard,
   Workflow,
@@ -136,13 +137,13 @@ export const NAVIGATION_CONFIG: NavigationSection[] = [
         },
       },
       {
-        name: "Executive Suite",
+        name: "AI Advisors",
         href: "/dashboard/assistants",
         icon: Users,
         adaptiveConfig: {
           visibleFor: ["beginner", "intermediate", "advanced"],
           complexity: "standard",
-          helpText: "15 specialist AI advisors - CEO, CFO, Legal, HR, Sales, Marketing, and more",
+          helpText: "Your AI advisor team - standalone specialists and team-attached advisors",
         },
       },
       {
@@ -163,6 +164,17 @@ export const NAVIGATION_CONFIG: NavigationSection[] = [
           visibleFor: ["beginner", "intermediate", "advanced"],
           complexity: "standard",
           helpText: "Browse and continue past conversations",
+        },
+      },
+      {
+        name: "Brain Dump",
+        href: "/dashboard/onboarding/brain-dump",
+        icon: Brain,
+        adaptiveConfig: {
+          visibleFor: ["beginner", "intermediate", "advanced"],
+          complexity: "essential",
+          badge: "new",
+          helpText: "AI organizes your thoughts into entities, projects, and tasks",
         },
       },
     ],
@@ -193,7 +205,7 @@ export const NAVIGATION_CONFIG: NavigationSection[] = [
           visibleFor: ["beginner", "intermediate", "advanced"],
           complexity: "essential",
           isCore: true,
-          helpText: "Manage departments and project teams with context-aware AI",
+          helpText: "Departments with embedded AI advisors and workflow engines",
         },
       },
       {
@@ -234,6 +246,17 @@ export const NAVIGATION_CONFIG: NavigationSection[] = [
           visibleFor: ["beginner", "intermediate", "advanced"],
           complexity: "standard",
           helpText: "Create, schedule, and publish content across all platforms",
+        },
+      },
+      {
+        name: "Brands",
+        href: "/dashboard/brands",
+        icon: Palette,
+        adaptiveConfig: {
+          visibleFor: ["beginner", "intermediate", "advanced"],
+          complexity: "standard",
+          badge: "new",
+          helpText: "Manage brand identities, voice settings, and content guidelines",
         },
       },
       {
@@ -684,13 +707,13 @@ export const NAVIGATION_CONFIG_V2: NavigationSection[] = [
         },
       },
       {
-        name: "Executive Suite",
+        name: "AI Advisors",
         href: "/dashboard/assistants",
         icon: Users,
         adaptiveConfig: {
           visibleFor: ["beginner", "intermediate", "advanced"],
           complexity: "standard",
-          helpText: "15 specialist AI advisors - CEO, CFO, Legal, HR, Sales, Marketing, and more",
+          helpText: "Your AI advisor team - standalone specialists and team-attached advisors",
         },
       },
       {
@@ -711,6 +734,17 @@ export const NAVIGATION_CONFIG_V2: NavigationSection[] = [
           visibleFor: ["beginner", "intermediate", "advanced"],
           complexity: "standard",
           helpText: "Browse and continue past conversations",
+        },
+      },
+      {
+        name: "Brain Dump",
+        href: "/dashboard/onboarding/brain-dump",
+        icon: Brain,
+        adaptiveConfig: {
+          visibleFor: ["beginner", "intermediate", "advanced"],
+          complexity: "essential",
+          badge: "new",
+          helpText: "AI organizes your thoughts into entities, projects, and tasks",
         },
       },
     ],
@@ -743,7 +777,7 @@ export const NAVIGATION_CONFIG_V2: NavigationSection[] = [
           visibleFor: ["beginner", "intermediate", "advanced"],
           complexity: "essential",
           isCore: true,
-          helpText: "BOS 2.0 Centaur teams - AI-first departments with lifecycle workflows",
+          helpText: "Departments with embedded AI advisors and workflow engines",
         },
       },
       {
@@ -808,6 +842,17 @@ export const NAVIGATION_CONFIG_V2: NavigationSection[] = [
         },
       },
       {
+        name: "Brands",
+        href: "/dashboard/brands",
+        icon: Palette,
+        adaptiveConfig: {
+          visibleFor: ["beginner", "intermediate", "advanced"],
+          complexity: "standard",
+          badge: "new",
+          helpText: "Manage brand identities, voice settings, and content guidelines",
+        },
+      },
+      {
         name: "Expenses",
         href: "/dashboard/expenses",
         icon: DollarSign,
@@ -825,28 +870,6 @@ export const NAVIGATION_CONFIG_V2: NavigationSection[] = [
           visibleFor: ["beginner", "intermediate", "advanced"],
           complexity: "standard",
           helpText: "View and manage reminders created via Telegram or manually",
-        },
-      },
-      {
-        name: "Google Sheets",
-        href: "/dashboard/integrations",
-        icon: Sheet,
-        adaptiveConfig: {
-          visibleFor: ["beginner", "intermediate", "advanced"],
-          complexity: "standard",
-          badge: "new",
-          helpText: "Import and export data to/from Google Sheets",
-        },
-      },
-      {
-        name: "Data Explorer",
-        href: "/dashboard/data-explorer",
-        icon: Database,
-        adaptiveConfig: {
-          visibleFor: ["beginner", "intermediate", "advanced"],
-          complexity: "standard",
-          badge: "new",
-          helpText: "Browse and manage your database tables with a spreadsheet-like interface",
         },
       },
     ],

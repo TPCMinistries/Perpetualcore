@@ -35,6 +35,8 @@ export async function GET(req: NextRequest) {
     const stage = searchParams.get("stage") as ProjectStage | null;
     const status = searchParams.get("status"); // planning, active, on_hold, completed, cancelled
     const teamId = searchParams.get("team_id");
+    const entityId = searchParams.get("entity_id");
+    const brandId = searchParams.get("brand_id");
     const includeArchived = searchParams.get("archived") === "true";
     const withMembers = searchParams.get("members") === "true";
     const groupByStage = searchParams.get("group_by_stage") === "true";
@@ -82,6 +84,15 @@ export async function GET(req: NextRequest) {
 
     if (sourceDecisionId) {
       query = query.eq("source_decision_id", sourceDecisionId);
+    }
+
+    // Entity architecture filtering
+    if (entityId) {
+      query = query.eq("entity_id", entityId);
+    }
+
+    if (brandId) {
+      query = query.eq("brand_id", brandId);
     }
 
     if (!includeArchived) {

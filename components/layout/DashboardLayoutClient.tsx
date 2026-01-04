@@ -9,6 +9,9 @@ import { RoleSwitcher } from "../profile/RoleSwitcher";
 import { SkipLink } from "../ui/accessibility";
 import { WorkspaceProvider, useWorkspace } from "../workspaces/WorkspaceProvider";
 import { AIAssistantProvider, FloatingAIAssistant, AIAssistantTrigger } from "../ai-assistant";
+import { AIContextButton } from "../ai/AIContextButton";
+import { EntityProvider } from "../entities/EntityProvider";
+import { EntitySwitcherCompact } from "../entities/EntitySwitcher";
 import Link from "next/link";
 import { Button } from "../ui/button";
 import { Badge } from "../ui/badge";
@@ -77,6 +80,11 @@ function DashboardLayoutInner({
               </kbd>
               <span className="text-sm text-slate-600 dark:text-slate-400">Quick search</span>
             </div>
+
+            {/* Entity Switcher */}
+            <div className="hidden md:block border-l border-slate-200 dark:border-slate-700 pl-3 ml-2">
+              <EntitySwitcherCompact />
+            </div>
           </div>
           <div className="flex items-center gap-2" role="group" aria-label="User actions">
             <RoleSwitcher currentRole={profile?.user_role} />
@@ -101,15 +109,19 @@ export function DashboardLayoutClient({
   profile: any;
 }) {
   return (
-    <WorkspaceProvider>
-      <AIAssistantProvider>
-        <SidebarProvider>
-          <DashboardLayoutInner profile={profile}>{children}</DashboardLayoutInner>
-          {/* Floating AI Assistant */}
-          <FloatingAIAssistant />
-          <AIAssistantTrigger />
-        </SidebarProvider>
-      </AIAssistantProvider>
-    </WorkspaceProvider>
+    <EntityProvider>
+      <WorkspaceProvider>
+        <AIAssistantProvider>
+          <SidebarProvider>
+            <DashboardLayoutInner profile={profile}>{children}</DashboardLayoutInner>
+            {/* Floating AI Assistant */}
+            <FloatingAIAssistant />
+            <AIAssistantTrigger />
+            {/* Contextual AI Button - ⌘K */}
+            <AIContextButton floating position="bottom-right" />
+          </SidebarProvider>
+        </AIAssistantProvider>
+      </WorkspaceProvider>
+    </EntityProvider>
   );
 }

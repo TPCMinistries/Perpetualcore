@@ -13,6 +13,16 @@ export interface AIContext {
     name: string;
     aiMode?: string;
   };
+  entity?: {
+    id: string;
+    name: string;
+    type?: string;
+    description?: string;
+  };
+  brand?: {
+    id: string;
+    name: string;
+  };
 }
 
 export interface AIMessage {
@@ -92,6 +102,48 @@ export function useAIAssistant() {
       window.removeEventListener("workspaceChanged" as any, handleWorkspaceChange);
     };
   }, [setWorkspaceContext]);
+
+  // Listen for entity changes
+  useEffect(() => {
+    const handleEntityChange = (event: CustomEvent) => {
+      const { entity } = event.detail;
+      if (entity) {
+        setContext((prev) => ({
+          ...prev,
+          entity: {
+            id: entity.id,
+            name: entity.name,
+            type: entity.entity_type?.name,
+            description: entity.description,
+          },
+        }));
+      } else {
+        setContext((prev) => ({ ...prev, entity: undefined }));
+      }
+    };
+
+    const handleBrandChange = (event: CustomEvent) => {
+      const { brand } = event.detail;
+      if (brand) {
+        setContext((prev) => ({
+          ...prev,
+          brand: {
+            id: brand.id,
+            name: brand.name,
+          },
+        }));
+      } else {
+        setContext((prev) => ({ ...prev, brand: undefined }));
+      }
+    };
+
+    window.addEventListener("entity-switch" as any, handleEntityChange);
+    window.addEventListener("brand-switch" as any, handleBrandChange);
+    return () => {
+      window.removeEventListener("entity-switch" as any, handleEntityChange);
+      window.removeEventListener("brand-switch" as any, handleBrandChange);
+    };
+  }, []);
 
   // Send message to AI
   const sendMessage = useCallback(

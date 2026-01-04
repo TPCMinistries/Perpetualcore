@@ -11,6 +11,7 @@ import { loadUserPreferences, applyPreferencesToPrompt } from "@/lib/intelligenc
 import { getIntelligenceSummary } from "@/lib/intelligence";
 import { rateLimiters, checkRateLimit } from "@/lib/rate-limit";
 import { loadTeamContext, loadUserTeamContext, buildTeamSystemPrompt, LoadedTeamContext } from "@/lib/intelligence/team-context";
+import { buildMemoryContext, extractMemoriesFromConversation } from "@/lib/ai/memory";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -562,6 +563,17 @@ Or, you can copy and paste the text content directly into this chat.`;
     } catch (error) {
       if (isDev) console.error("⚠️ Intelligence loading error (non-fatal):", error);
       // Continue without intelligence - this should not block chat
+    }
+
+    // Load and inject AI memory context (persistent knowledge about the user)
+    try {
+      const memoryContext = await buildMemoryContext(supabase, user.id);
+      if (memoryContext) {
+        if (isDev) console.log("🧠 Injecting AI memory context");
+        systemPrompt += "\n\n" + memoryContext;
+      }
+    } catch (error) {
+      if (isDev) console.error("⚠️ Memory loading error (non-fatal):", error);
     }
 
     // Load and apply team context if user has an active team context set

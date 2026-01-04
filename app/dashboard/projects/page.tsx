@@ -69,6 +69,7 @@ import {
 } from "@/types/work";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
+import { useCurrentEntityIds, useEntityContext } from "@/components/entities/EntityProvider";
 
 // Dynamic stage type from API
 interface DynamicStage {
@@ -87,6 +88,8 @@ type ViewMode = "kanban" | "list";
 
 export default function ProjectsPage() {
   const router = useRouter();
+  const { currentEntity } = useEntityContext();
+  const { entityId, brandId } = useCurrentEntityIds();
   const [projects, setProjects] = useState<Record<ProjectStage, Project[]>>({
     ideation: [],
     planning: [],
@@ -250,20 +253,61 @@ export default function ProjectsPage() {
     Promise.all([fetchStages(), fetchProjects(), fetchTeams()]).finally(() =>
       setLoading(false)
     );
-  }, [filterTeam, fetchStages]);
+  }, [filterTeam, fetchStages, entityId, brandId]);
 
   const fetchProjects = async () => {
     try {
       const params = new URLSearchParams({ group_by_stage: "true" });
-      if (filterTeam && filterTeam !== "all") {
-        params.set("team_id", filterTeam);
-      }
 
-      const response = await fetch(`/api/projects?${params}`);
-      const data = await response.json();
+      // Use entity-projects API when entity context exists (including "All Entities")
+      // entityId can be null for "All Entities" view, but currentEntity check tells us if we're in entity mode
+      const useEntityProjects = true; // Always use entity_projects for this multi-entity app
 
-      if (data.grouped && data.projects) {
-        setProjects(data.projects);
+      if (useEntityProjects) {
+        // Entity architecture - use entity_projects table
+        if (entityId) {
+          params.set("entity_id", entityId);
+        }
+        if (brandId) {
+          params.set("brand_id", brandId);
+        }
+
+        const response = await fetch(`/api/entity-projects?${params}`);
+        const data = await response.json();
+
+        if (data.grouped && data.projects) {
+          setProjects(data.projects);
+        } else if (data.projects && Array.isArray(data.projects)) {
+          // Non-grouped response - organize by stage
+          const grouped: Record<ProjectStage, Project[]> = {
+            ideation: [],
+            planning: [],
+            in_progress: [],
+            review: [],
+            complete: [],
+          };
+          for (const project of data.projects) {
+            const stage = (project.current_stage || "planning") as ProjectStage;
+            if (grouped[stage]) {
+              grouped[stage].push(project);
+            } else {
+              grouped.planning.push(project);
+            }
+          }
+          setProjects(grouped);
+        }
+      } else {
+        // Team-based projects - use projects table
+        if (filterTeam && filterTeam !== "all") {
+          params.set("team_id", filterTeam);
+        }
+
+        const response = await fetch(`/api/projects?${params}`);
+        const data = await response.json();
+
+        if (data.grouped && data.projects) {
+          setProjects(data.projects);
+        }
       }
     } catch (error) {
       console.error("Error fetching projects:", error);
@@ -285,39 +329,37 @@ export default function ProjectsPage() {
   const handleCreateProject = async () => {
     if (!newProjectName.trim()) return;
 
+    // Require entity selection for entity-projects
+    if (!entityId) {
+      toast.error("Please select an entity first to create a project");
+      return;
+    }
+
     setCreating(true);
     try {
-      const response = await fetch("/api/projects", {
+      const response = await fetch("/api/entity-projects", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           name: newProjectName,
           description: newProjectDescription,
-          team_id: newProjectTeams.length > 0 ? newProjectTeams[0] : undefined, // Primary team
-          team_ids: newProjectTeams.length > 0 ? newProjectTeams : undefined, // All teams
-          emoji: newProjectEmoji,
-          color: newProjectColor,
+          entity_id: entityId,
+          brand_id: brandId || undefined,
           priority: newProjectPriority,
-          start_date: newProjectStartDate || undefined,
-          target_date: newProjectTargetDate || undefined,
-          project_type: newProjectType,
-          client_name: newProjectClient || undefined,
-          tags: newProjectTags.length > 0 ? newProjectTags : undefined,
-          // Advanced setup fields
-          budget: newProjectBudget ? parseFloat(newProjectBudget) : undefined,
-          location: newProjectLocation || undefined,
-          expected_participants: newProjectVolunteers ? parseInt(newProjectVolunteers) : undefined,
-          milestones: newProjectMilestones.length > 0 ? newProjectMilestones : undefined,
-          initial_members: newProjectMembers.length > 0 ? newProjectMembers : undefined,
+          tags: newProjectTags.length > 0 ? newProjectTags : [newProjectEmoji],
         }),
       });
 
       if (response.ok) {
         const data = await response.json();
-        // Add to ideation column
+        // Add to planning column (entity_projects default stage)
+        const newProject = {
+          ...data.project,
+          current_stage: data.project.stage?.name || "planning",
+        };
         setProjects((prev) => ({
           ...prev,
-          ideation: [...prev.ideation, data.project],
+          planning: [...prev.planning, newProject],
         }));
         setCreateDialogOpen(false);
         resetForm();
@@ -700,7 +742,22 @@ Respond ONLY with valid JSON, no other text.`
       {/* Header */}
       <div className="flex items-center justify-between p-6 border-b">
         <div>
-          <h1 className="text-3xl font-bold">Projects</h1>
+          <div className="flex items-center gap-3">
+            <h1 className="text-3xl font-bold">Projects</h1>
+            <Badge variant="outline" className="gap-1">
+              {currentEntity ? (
+                <>
+                  <Building2 className="h-3 w-3" />
+                  {currentEntity.name}
+                </>
+              ) : (
+                <>
+                  <Users className="h-3 w-3" />
+                  All Entities
+                </>
+              )}
+            </Badge>
+          </div>
           <p className="text-muted-foreground mt-1">
             {totalCount} project{totalCount !== 1 ? "s" : ""} across all stages
           </p>
