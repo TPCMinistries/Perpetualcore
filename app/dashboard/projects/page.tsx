@@ -1711,14 +1711,20 @@ function KanbanColumn({
         {(projects || []).map((project) => (
           <div
             key={project.id}
-            draggable
-            onDragStart={(e) => onDragStart(e, project.id)}
-            onDragEnd={onDragEnd}
             className={cn(
-              "cursor-grab active:cursor-grabbing",
+              "relative group/drag",
               draggedProject === project.id && "opacity-50"
             )}
           >
+            {/* Drag handle - only this part is draggable */}
+            <div
+              draggable
+              onDragStart={(e) => onDragStart(e, project.id)}
+              onDragEnd={onDragEnd}
+              className="absolute left-0 top-0 bottom-0 w-6 flex items-center justify-center cursor-grab active:cursor-grabbing opacity-0 group-hover/drag:opacity-100 transition-opacity z-10 hover:bg-muted/50 rounded-l-lg"
+            >
+              <GripVertical className="h-4 w-4 text-muted-foreground" />
+            </div>
             <ProjectCard
               project={project}
               column={column}
