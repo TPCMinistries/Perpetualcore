@@ -111,9 +111,6 @@ export default function ProjectsPage() {
   const [newStageColor, setNewStageColor] = useState("#6366f1");
   const [addingStage, setAddingStage] = useState(false);
 
-  // Drag & drop state
-  const [draggedProject, setDraggedProject] = useState<string | null>(null);
-  const [dragOverColumn, setDragOverColumn] = useState<ProjectStage | null>(null);
 
   // Form state
   const [newProjectName, setNewProjectName] = useState("");
@@ -680,54 +677,6 @@ Respond ONLY with valid JSON, no other text.`
       console.error("Error deleting stage:", error);
       toast.error("Failed to delete stage");
     }
-  };
-
-  // Drag & drop handlers
-  const handleDragStart = (e: React.DragEvent, projectId: string) => {
-    setDraggedProject(projectId);
-    e.dataTransfer.effectAllowed = "move";
-    e.dataTransfer.setData("text/plain", projectId);
-  };
-
-  const handleDragOver = (e: React.DragEvent, stage: ProjectStage) => {
-    e.preventDefault();
-    e.dataTransfer.dropEffect = "move";
-    setDragOverColumn(stage);
-  };
-
-  const handleDragLeave = () => {
-    setDragOverColumn(null);
-  };
-
-  const handleDrop = (e: React.DragEvent, destStage: ProjectStage) => {
-    e.preventDefault();
-    setDragOverColumn(null);
-
-    const projectId = e.dataTransfer.getData("text/plain") || draggedProject;
-    if (!projectId) return;
-
-    // Find source stage
-    let sourceStage: ProjectStage | null = null;
-    for (const stage of Object.keys(projects) as ProjectStage[]) {
-      if (projects[stage].find((p) => p.id === projectId)) {
-        sourceStage = stage;
-        break;
-      }
-    }
-
-    if (!sourceStage || sourceStage === destStage) {
-      setDraggedProject(null);
-      return;
-    }
-
-    // Move project
-    handleMoveProject(projectId, sourceStage, destStage);
-    setDraggedProject(null);
-  };
-
-  const handleDragEnd = () => {
-    setDraggedProject(null);
-    setDragOverColumn(null);
   };
 
   const allProjects = Object.values(projects).flat();
@@ -1600,13 +1549,6 @@ Respond ONLY with valid JSON, no other text.`
                 onArchiveProject={(id) =>
                   handleArchiveProject(id, stage.slug as ProjectStage)
                 }
-                draggedProject={draggedProject}
-                dragOverColumn={dragOverColumn}
-                onDragStart={handleDragStart}
-                onDragOver={handleDragOver}
-                onDragLeave={handleDragLeave}
-                onDrop={handleDrop}
-                onDragEnd={handleDragEnd}
               />
             ))}
           </div>
@@ -1653,13 +1595,6 @@ function KanbanColumn({
   onProjectClick,
   onMoveProject,
   onArchiveProject,
-  draggedProject,
-  dragOverColumn,
-  onDragStart,
-  onDragOver,
-  onDragLeave,
-  onDrop,
-  onDragEnd,
 }: {
   column: (typeof KANBAN_COLUMNS)[0];
   projects: Project[];
@@ -1671,15 +1606,7 @@ function KanbanColumn({
     to: ProjectStage
   ) => void;
   onArchiveProject: (id: string) => void;
-  draggedProject: string | null;
-  dragOverColumn: ProjectStage | null;
-  onDragStart: (e: React.DragEvent, projectId: string) => void;
-  onDragOver: (e: React.DragEvent, stage: ProjectStage) => void;
-  onDragLeave: () => void;
-  onDrop: (e: React.DragEvent, stage: ProjectStage) => void;
-  onDragEnd: () => void;
 }) {
-  const isOver = dragOverColumn === column.id;
 
   return (
     <div className="flex flex-col w-80 shrink-0">
@@ -1699,43 +1626,19 @@ function KanbanColumn({
       </div>
 
       {/* Column Content */}
-      <div
-        className={cn(
-          "flex-1 overflow-y-auto bg-muted/30 rounded-b-lg p-2 space-y-2 min-h-[200px] transition-colors",
-          isOver && "bg-accent/50 ring-2 ring-primary/50"
-        )}
-        onDragOver={(e) => onDragOver(e, column.id)}
-        onDragLeave={onDragLeave}
-        onDrop={(e) => onDrop(e, column.id)}
-      >
+      <div className="flex-1 overflow-y-auto bg-muted/30 rounded-b-lg p-2 space-y-2 min-h-[200px]">
         {(projects || []).map((project) => (
-          <div
+          <ProjectCard
             key={project.id}
-            className={cn(
-              "relative group/drag",
-              draggedProject === project.id && "opacity-50"
-            )}
-          >
-            {/* Drag handle - only this part is draggable */}
-            <div
-              draggable
-              onDragStart={(e) => onDragStart(e, project.id)}
-              onDragEnd={onDragEnd}
-              className="absolute left-0 top-0 bottom-0 w-6 flex items-center justify-center cursor-grab active:cursor-grabbing opacity-0 group-hover/drag:opacity-100 transition-opacity z-10 hover:bg-muted/50 rounded-l-lg"
-            >
-              <GripVertical className="h-4 w-4 text-muted-foreground" />
-            </div>
-            <ProjectCard
-              project={project}
-              column={column}
-              allStages={allStages}
-              onClick={() => onProjectClick(project.id)}
-              onMove={(toStage) =>
-                onMoveProject(project.id, column.id, toStage)
-              }
-              onArchive={() => onArchiveProject(project.id)}
-            />
-          </div>
+            project={project}
+            column={column}
+            allStages={allStages}
+            onClick={() => onProjectClick(project.id)}
+            onMove={(toStage) =>
+              onMoveProject(project.id, column.id, toStage)
+            }
+            onArchive={() => onArchiveProject(project.id)}
+          />
         ))}
         {(!projects || projects.length === 0) && (
           <div className="text-center py-8 text-muted-foreground text-sm">

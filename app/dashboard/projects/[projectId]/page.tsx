@@ -76,7 +76,7 @@ export default function ProjectDetailPage() {
 
   const fetchProject = async () => {
     try {
-      const response = await fetch(\`/api/entity-projects/\${projectId}\`);
+      const response = await fetch(`/api/entity-projects/${projectId}`);
       if (response.ok) {
         const data = await response.json();
         setProject(data.project);
@@ -88,7 +88,7 @@ export default function ProjectDetailPage() {
 
   const fetchTasks = async () => {
     try {
-      const response = await fetch(\`/api/tasks?source_reference=entity_project:\${projectId}\`);
+      const response = await fetch(`/api/tasks?source_reference=entity_project:${projectId}`);
       if (response.ok) {
         const data = await response.json();
         setTasks(data.tasks || []);
@@ -112,7 +112,7 @@ export default function ProjectDetailPage() {
           title: newTaskTitle,
           priority: newTaskPriority,
           entityId: project.entity?.id,
-          source_reference: \`entity_project:\${projectId}\`,
+          source_reference: `entity_project:${projectId}`,
           tags: [project.entity?.name, project.name].filter(Boolean),
         }),
       });
@@ -134,7 +134,7 @@ export default function ProjectDetailPage() {
   const toggleTaskStatus = async (task: Task) => {
     const newStatus = task.status === "done" ? "todo" : "done";
     try {
-      const response = await fetch(\`/api/tasks/\${task.id}\`, {
+      const response = await fetch(`/api/tasks/${task.id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ status: newStatus }),
@@ -150,7 +150,7 @@ export default function ProjectDetailPage() {
 
   const deleteTask = async (taskId: string) => {
     try {
-      const response = await fetch(\`/api/tasks/\${taskId}\`, { method: "DELETE" });
+      const response = await fetch(`/api/tasks/${taskId}`, { method: "DELETE" });
       if (response.ok) {
         setTasks(tasks.filter(t => t.id !== taskId));
         toast.success("Task deleted");
@@ -214,7 +214,7 @@ export default function ProjectDetailPage() {
               </div>
             )}
             <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
-              <Flag className={\`h-4 w-4 \${priorityColors[project.priority]}\`} />
+              <Flag className={`h-4 w-4 ${priorityColors[project.priority]}`} />
               {project.priority} priority
             </div>
           </div>
@@ -279,7 +279,7 @@ export default function ProjectDetailPage() {
                   <div className="flex-1 min-w-0">
                     <p className="font-medium truncate">{task.title}</p>
                   </div>
-                  <Flag className={\`h-4 w-4 \${priorityColors[task.priority]} flex-shrink-0\`} />
+                  <Flag className={`h-4 w-4 ${priorityColors[task.priority]} flex-shrink-0`} />
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                       <Button variant="ghost" size="icon" className="opacity-0 group-hover:opacity-100">
