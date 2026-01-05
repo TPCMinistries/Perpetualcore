@@ -80,11 +80,15 @@ export async function PATCH(
       };
       const dbStageName = stageNameMap[body.stage] || body.stage;
 
-      const { data: stageData } = await supabase
+      const { data: stageData, error: stageError } = await supabase
         .from("lookup_project_stages")
         .select("id")
         .eq("name", dbStageName)
         .single();
+
+      if (stageError) {
+        console.error("Stage lookup error:", stageError, "Looking for:", dbStageName);
+      }
 
       if (stageData) {
         updates.current_stage_id = stageData.id;
@@ -106,7 +110,8 @@ export async function PATCH(
       .single();
 
     if (error) {
-      return NextResponse.json({ error: "Failed to update project" }, { status: 500 });
+      console.error("Project update error:", error, "Updates:", updates, "ProjectId:", params.projectId);
+      return NextResponse.json({ error: "Failed to update project", details: error.message }, { status: 500 });
     }
 
     return NextResponse.json({ project });
