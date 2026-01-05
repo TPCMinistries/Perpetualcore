@@ -69,6 +69,8 @@ export async function PATCH(
     // Handle stage name to stage_id conversion for kanban drag-and-drop
     if (body.stage !== undefined && body.current_stage_id === undefined) {
       // Map frontend stage names to database stage names
+      // Frontend: ideation, planning, in_progress, review, complete
+      // Database: ideation, planning, research, drafting, review, active, submitted, awarded, complete, cancelled, on_hold
       const stageNameMap: Record<string, string> = {
         ideation: "ideation",
         planning: "planning",
