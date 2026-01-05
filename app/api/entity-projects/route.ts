@@ -75,21 +75,38 @@ export async function GET(req: NextRequest) {
     }));
 
     // Optionally group by stage for Kanban view
-    if (groupByStage && stages) {
-      const grouped: Record<string, any[]> = {};
+    if (groupByStage) {
+      // Use standard stage keys that match the ProjectStage type
+      const grouped: Record<string, any[]> = {
+        ideation: [],
+        planning: [],
+        in_progress: [],
+        review: [],
+        complete: [],
+      };
 
-      // Initialize all stages
-      for (const stage of stages) {
-        grouped[stage.name] = [];
-      }
+      // Map database stage names to standard keys
+      const stageMapping: Record<string, string> = {
+        ideation: "ideation",
+        planning: "planning",
+        research: "planning",
+        drafting: "planning",
+        active: "in_progress",
+        in_progress: "in_progress",
+        review: "review",
+        submitted: "review",
+        awarded: "review",
+        complete: "complete",
+        completed: "complete",
+        cancelled: "complete",
+        on_hold: "planning",
+      };
 
       // Group projects
       for (const project of transformedProjects) {
         const stageName = project.current_stage || "planning";
-        if (!grouped[stageName]) {
-          grouped[stageName] = [];
-        }
-        grouped[stageName].push(project);
+        const mappedStage = stageMapping[stageName] || "planning";
+        grouped[mappedStage].push(project);
       }
 
       return NextResponse.json({
