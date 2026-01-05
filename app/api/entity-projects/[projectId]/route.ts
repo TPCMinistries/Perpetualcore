@@ -7,9 +7,10 @@ export const dynamic = "force-dynamic";
 // GET - Fetch single entity project
 export async function GET(
   req: NextRequest,
-  { params }: { params: { projectId: string } }
+  context: { params: Promise<{ projectId: string }> }
 ) {
   try {
+    const { projectId } = await context.params;
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
 
@@ -24,7 +25,7 @@ export async function GET(
         entity:entities(id, name),
         stage:lookup_project_stages(id, name, color)
       `)
-      .eq("id", params.projectId)
+      .eq("id", projectId)
       .eq("owner_id", user.id)
       .single();
 
@@ -47,9 +48,10 @@ export async function GET(
 // PATCH - Update entity project
 export async function PATCH(
   req: NextRequest,
-  { params }: { params: { projectId: string } }
+  context: { params: Promise<{ projectId: string }> }
 ) {
   try {
+    const { projectId } = await context.params;
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
 
@@ -100,7 +102,7 @@ export async function PATCH(
     const { data: project, error } = await supabase
       .from("entity_projects")
       .update(updates)
-      .eq("id", params.projectId)
+      .eq("id", projectId)
       .eq("owner_id", user.id)
       .select(`
         *,
@@ -110,7 +112,7 @@ export async function PATCH(
       .single();
 
     if (error) {
-      console.error("Project update error:", error, "Updates:", updates, "ProjectId:", params.projectId);
+      console.error("Project update error:", error, "Updates:", updates, "ProjectId:", projectId);
       return NextResponse.json({ error: "Failed to update project", details: error.message }, { status: 500 });
     }
 
@@ -124,9 +126,10 @@ export async function PATCH(
 // DELETE - Delete entity project
 export async function DELETE(
   req: NextRequest,
-  { params }: { params: { projectId: string } }
+  context: { params: Promise<{ projectId: string }> }
 ) {
   try {
+    const { projectId } = await context.params;
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
 
@@ -137,7 +140,7 @@ export async function DELETE(
     const { error } = await supabase
       .from("entity_projects")
       .delete()
-      .eq("id", params.projectId)
+      .eq("id", projectId)
       .eq("owner_id", user.id);
 
     if (error) {
