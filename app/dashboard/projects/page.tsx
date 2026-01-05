@@ -391,15 +391,19 @@ export default function ProjectsPage() {
       [toStage]: [...prev[toStage], { ...project, current_stage: toStage }],
     }));
 
-    // API call
+    // API call - use entity-projects endpoint
     try {
-      await fetch(`/api/projects/${projectId}/stage`, {
-        method: "PUT",
+      const response = await fetch(`/api/entity-projects/${projectId}`, {
+        method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ stage: toStage }),
       });
+      if (!response.ok) {
+        throw new Error("Failed to move project");
+      }
     } catch (error) {
       console.error("Error moving project:", error);
+      toast.error("Failed to move project");
       // Revert on error
       fetchProjects();
     }

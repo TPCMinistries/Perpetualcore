@@ -66,6 +66,29 @@ export async function PATCH(
     if (body.current_stage_id !== undefined) updates.current_stage_id = body.current_stage_id;
     if (body.tags !== undefined) updates.tags = body.tags;
 
+    // Handle stage name to stage_id conversion for kanban drag-and-drop
+    if (body.stage !== undefined && body.current_stage_id === undefined) {
+      // Map frontend stage names to database stage names
+      const stageNameMap: Record<string, string> = {
+        ideation: "ideation",
+        planning: "planning",
+        in_progress: "active",
+        review: "review",
+        complete: "complete",
+      };
+      const dbStageName = stageNameMap[body.stage] || body.stage;
+
+      const { data: stageData } = await supabase
+        .from("lookup_project_stages")
+        .select("id")
+        .eq("name", dbStageName)
+        .single();
+
+      if (stageData) {
+        updates.current_stage_id = stageData.id;
+      }
+    }
+
     updates.updated_at = new Date().toISOString();
 
     const { data: project, error } = await supabase
