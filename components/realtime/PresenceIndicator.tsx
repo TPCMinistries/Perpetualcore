@@ -72,12 +72,12 @@ export function PresenceIndicator({
 
     const { data: presenceData } = await supabase
       .from("document_presence")
-      .select(\`
+      .select(`
         id,
         user_id,
         last_seen,
         profiles!inner(id, full_name, avatar_url)
-      \`)
+      `)
       .eq("document_id", documentId)
       .gte("last_seen", fiveMinutesAgo);
 
@@ -125,14 +125,14 @@ export function PresenceIndicator({
     const supabase = supabaseRef.current;
 
     const channel = supabase
-      .channel(\`presence:\${documentId}\`)
+      .channel(`presence:${documentId}`)
       .on(
         "postgres_changes",
         {
           event: "*",
           schema: "public",
           table: "document_presence",
-          filter: \`document_id=eq.\${documentId}\`,
+          filter: `document_id=eq.${documentId}`,
         },
         () => {
           fetchPresence();

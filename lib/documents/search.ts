@@ -52,14 +52,18 @@ export async function searchDocuments(
     }
 
     // Perform vector similarity search
-    // Using RPC function for pgvector cosine similarity
+    // Using RPC function for pgvector cosine similarity (8-parameter version)
     const { data: chunks, error } = await supabase.rpc(
       "search_document_chunks",
       {
         query_embedding: queryEmbedding,
         org_id: profile.organization_id,
+        requesting_user_id: userId,
         match_threshold: similarityThreshold,
         match_count: topK,
+        search_scope: 'all',
+        conversation_id: null,
+        space_id: null,
       }
     );
 

@@ -148,9 +148,44 @@ function getHeader(headers: any[], name: string): string | null {
 }
 
 /**
- * AI triage: Analyze email and assign priority/category
+ * Extract attachment metadata from email payload
  */
-async function triageEmail(email: {
+interface AttachmentMetadata {
+  attachmentId: string;
+  filename: string;
+  mimeType: string;
+  size: number;
+}
+
+function extractAttachments(payload: any): AttachmentMetadata[] {
+  const attachments: AttachmentMetadata[] = [];
+
+  function processPart(part: any) {
+    if (part.filename && part.filename.length > 0 && part.body?.attachmentId) {
+      attachments.push({
+        attachmentId: part.body.attachmentId,
+        filename: part.filename,
+        mimeType: part.mimeType || "application/octet-stream",
+        size: part.body.size || 0,
+      });
+    }
+    if (part.parts) {
+      part.parts.forEach(processPart);
+    }
+  }
+
+  if (payload?.parts) {
+    payload.parts.forEach(processPart);
+  }
+
+  return attachments;
+}
+
+/**
+ * AI triage: Analyze email and assign priority/category
+ * Exported for on-demand triage when user opens an email
+ */
+export async function triageEmail(email: {
   subject: string;
   from: string;
   body: string;
@@ -211,32 +246,120 @@ Respond with JSON only.`;
 }
 
 /**
+ * Check if sender is blocked
+ */
+async function isSenderBlocked(
+  supabase: any,
+  userId: string,
+  fromEmail: string
+): Promise<boolean> {
+  const senderEmail = fromEmail.toLowerCase();
+  const senderDomain = senderEmail.split("@")[1] || "";
+
+  // Check blocked emails
+  const { data: blockedEmail } = await supabase
+    .from("blocked_senders")
+    .select("id")
+    .eq("user_id", userId)
+    .eq("block_type", "email")
+    .ilike("value", senderEmail)
+    .single();
+
+  if (blockedEmail) {
+    // Increment block count
+    await supabase
+      .from("blocked_senders")
+      .update({ blocked_count: supabase.raw("blocked_count + 1") })
+      .eq("id", blockedEmail.id);
+    return true;
+  }
+
+  // Check blocked domains
+  const { data: blockedDomain } = await supabase
+    .from("blocked_senders")
+    .select("id")
+    .eq("user_id", userId)
+    .eq("block_type", "domain")
+    .ilike("value", senderDomain)
+    .single();
+
+  if (blockedDomain) {
+    await supabase
+      .from("blocked_senders")
+      .update({ blocked_count: supabase.raw("blocked_count + 1") })
+      .eq("id", blockedDomain.id);
+    return true;
+  }
+
+  return false;
+}
+
+/**
  * Sync Gmail messages
+ * @param accountId - Optional specific account ID to sync. If not provided, syncs the first Gmail account.
  */
 export async function syncGmailMessages(
   userId: string,
   organizationId: string,
-  maxResults: number = 50
-): Promise<{ success: boolean; emailsCount: number; error?: string }> {
+  maxResults: number = 50,
+  accountId?: string
+): Promise<{ success: boolean; emailsCount: number; skippedSpam: number; skippedFiltered: number; error?: string }> {
   try {
     const supabase = await createClient();
 
-    // Get account
-    const { data: account } = await supabase
+    // Get account - either specific one or first available
+    let query = supabase
       .from("email_accounts")
       .select("*")
       .eq("user_id", userId)
-      .eq("provider", "gmail")
-      .single();
+      .eq("provider", "gmail");
+
+    if (accountId) {
+      query = query.eq("id", accountId);
+    }
+
+    const { data: account } = await query.single();
 
     if (!account) {
-      return { success: false, emailsCount: 0, error: "No Gmail account found" };
+      return { success: false, emailsCount: 0, skippedSpam: 0, skippedFiltered: 0, error: "No Gmail account found" };
+    }
+
+    // Get user's filter preferences
+    interface FilterPreferences {
+      skip_promotions?: boolean;
+      skip_social?: boolean;
+      skip_updates?: boolean;
+      skip_forums?: boolean;
+      trusted_only?: boolean;
+    }
+    let filterPrefs: FilterPreferences = {};
+    try {
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("email_filter_preferences")
+        .eq("id", userId)
+        .single();
+      filterPrefs = profile?.email_filter_preferences || {};
+    } catch (e) {
+      // Column might not exist yet
+    }
+
+    // Get trusted contacts (for trusted_only mode)
+    let trustedEmails: Set<string> = new Set();
+    if (filterPrefs.trusted_only) {
+      const { data: contacts } = await supabase
+        .from("contacts")
+        .select("email")
+        .eq("user_id", userId)
+        .eq("is_archived", false)
+        .not("email", "is", null);
+      trustedEmails = new Set((contacts || []).map((c: any) => c.email?.toLowerCase()).filter(Boolean));
     }
 
     // Refresh token if needed
     const accessToken = await refreshTokenIfNeeded(account);
     if (!accessToken) {
-      return { success: false, emailsCount: 0, error: "Failed to refresh token" };
+      return { success: false, emailsCount: 0, skippedSpam: 0, skippedFiltered: 0, error: "Failed to refresh token" };
     }
 
     oauth2Client.setCredentials({
@@ -255,6 +378,8 @@ export async function syncGmailMessages(
 
     const messages = listResponse.data.messages || [];
     let syncedCount = 0;
+    let skippedSpam = 0;
+    let skippedFiltered = 0;
 
     for (const message of messages) {
       if (!message.id) continue;
@@ -277,12 +402,23 @@ export async function syncGmailMessages(
       const messageId = getHeader(headers, "Message-ID");
       const inReplyTo = getHeader(headers, "In-Reply-To");
 
-      // AI triage
-      const triage = await triageEmail({
-        subject,
-        from,
-        body: text || html,
-      });
+      // Extract sender email
+      const senderEmail = from.match(/<(.+?)>/)?.[1] || from;
+
+      // Check if sender is blocked - skip these emails entirely
+      try {
+        const isBlocked = await isSenderBlocked(supabase, userId, senderEmail);
+        if (isBlocked) {
+          console.log(`[Sync] Skipping blocked sender: ${senderEmail}`);
+          skippedSpam++;
+          continue;
+        }
+      } catch (e) {
+        // Table might not exist yet, continue without filtering
+      }
+
+      // Skip AI triage during sync - will be done on-demand when user opens email
+      // This reduces costs by ~90% since most emails are never opened
 
       // Parse labels/category
       const labels = fullMessage.data.labelIds || [];
@@ -292,10 +428,31 @@ export async function syncGmailMessages(
       else if (labels.includes("CATEGORY_UPDATES")) category = "updates";
       else if (labels.includes("CATEGORY_FORUMS")) category = "forums";
 
-      // Check for attachments
-      const hasAttachments = fullMessage.data.payload?.parts?.some(
-        (part) => part.filename && part.filename.length > 0
-      );
+      // Check filter preferences - skip based on category
+      if (
+        (category === "promotions" && filterPrefs.skip_promotions) ||
+        (category === "social" && filterPrefs.skip_social) ||
+        (category === "updates" && filterPrefs.skip_updates) ||
+        (category === "forums" && filterPrefs.skip_forums)
+      ) {
+        console.log(`[Sync] Skipping ${category} email: ${subject}`);
+        skippedFiltered++;
+        continue;
+      }
+
+      // Check trusted_only mode - only sync from contacts
+      if (filterPrefs.trusted_only && trustedEmails.size > 0) {
+        const senderLower = senderEmail.toLowerCase();
+        if (!trustedEmails.has(senderLower)) {
+          console.log(`[Sync] Skipping non-contact sender: ${senderEmail}`);
+          skippedFiltered++;
+          continue;
+        }
+      }
+
+      // Extract attachment metadata
+      const attachments = extractAttachments(fullMessage.data.payload);
+      const hasAttachments = attachments.length > 0;
 
       const emailData = {
         email_account_id: account.id,
@@ -319,20 +476,41 @@ export async function syncGmailMessages(
         is_important: labels.includes("IMPORTANT"),
         sent_at: date ? new Date(date).toISOString() : new Date().toISOString(),
         has_attachments: hasAttachments || false,
-        ai_priority_score: triage.priority_score,
-        ai_category: triage.category,
-        ai_summary: triage.summary,
-        ai_sentiment: triage.sentiment,
-        requires_response: triage.requires_response,
+        ai_priority_score: null, // Set on-demand when user opens email
+        ai_category: null,
+        ai_summary: null,
+        ai_sentiment: null,
+        requires_response: null,
+        ai_triaged_at: null, // Track when triage was performed
         in_reply_to: inReplyTo,
         raw_headers: headers,
       };
 
-      const { error } = await supabase.from("emails").upsert(emailData, {
+      const { data: savedEmail, error } = await supabase.from("emails").upsert(emailData, {
         onConflict: "email_account_id,provider_message_id",
-      });
+      }).select("id").single();
 
-      if (!error) syncedCount++;
+      if (!error && savedEmail) {
+        syncedCount++;
+
+        // Save attachment metadata if any
+        if (attachments.length > 0) {
+          const attachmentRecords = attachments.map((att) => ({
+            email_id: savedEmail.id,
+            organization_id: organizationId,
+            user_id: userId,
+            provider_attachment_id: att.attachmentId,
+            message_id: message.id,
+            filename: att.filename,
+            mime_type: att.mimeType,
+            size_bytes: att.size,
+          }));
+
+          await supabase.from("email_attachments").upsert(attachmentRecords, {
+            onConflict: "email_id,provider_attachment_id",
+          });
+        }
+      }
     }
 
     // Update sync timestamp
@@ -341,12 +519,77 @@ export async function syncGmailMessages(
       .update({ last_sync_at: new Date().toISOString() })
       .eq("id", account.id);
 
-    return { success: true, emailsCount: syncedCount };
+    return { success: true, emailsCount: syncedCount, skippedSpam, skippedFiltered };
   } catch (error) {
     console.error("Error syncing Gmail:", error);
     return {
       success: false,
       emailsCount: 0,
+      skippedSpam: 0,
+      skippedFiltered: 0,
+      error: error instanceof Error ? error.message : "Unknown error",
+    };
+  }
+}
+
+/**
+ * Download attachment from Gmail on demand
+ */
+export async function downloadGmailAttachment(
+  userId: string,
+  messageId: string,
+  attachmentId: string
+): Promise<{ success: boolean; data?: Buffer; filename?: string; mimeType?: string; error?: string }> {
+  try {
+    const supabase = await createClient();
+
+    // Get Gmail account
+    const { data: account } = await supabase
+      .from("email_accounts")
+      .select("*")
+      .eq("user_id", userId)
+      .eq("provider", "gmail")
+      .single();
+
+    if (!account) {
+      return { success: false, error: "No Gmail account found" };
+    }
+
+    // Refresh token if needed
+    const accessToken = await refreshTokenIfNeeded(account);
+    if (!accessToken) {
+      return { success: false, error: "Failed to refresh token" };
+    }
+
+    oauth2Client.setCredentials({
+      access_token: accessToken,
+      refresh_token: account.refresh_token,
+    });
+
+    const gmail = google.gmail({ version: "v1", auth: oauth2Client });
+
+    // Download attachment
+    const attachment = await gmail.users.messages.attachments.get({
+      userId: "me",
+      messageId,
+      id: attachmentId,
+    });
+
+    if (!attachment.data.data) {
+      return { success: false, error: "Attachment data not found" };
+    }
+
+    // Decode base64url data
+    const data = Buffer.from(attachment.data.data, "base64url");
+
+    return {
+      success: true,
+      data,
+    };
+  } catch (error) {
+    console.error("Error downloading attachment:", error);
+    return {
+      success: false,
       error: error instanceof Error ? error.message : "Unknown error",
     };
   }

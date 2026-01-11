@@ -351,6 +351,7 @@ export async function POST(req: NextRequest) {
       model: selectedModel,
       conversationId,
       attachments,
+      mentionedContactIds,
     }: {
       messages: ChatMessage[];
       model: AIModel;
@@ -361,6 +362,7 @@ export async function POST(req: NextRequest) {
         data: string;
         mimeType: string;
       }>;
+      mentionedContactIds?: string[];
     } = await req.json();
 
     // Determine which model to use
@@ -574,6 +576,228 @@ Or, you can copy and paste the text content directly into this chat.`;
       }
     } catch (error) {
       if (isDev) console.error("⚠️ Memory loading error (non-fatal):", error);
+    }
+
+    // Check if message context suggests contact-related topics for proactive suggestions
+    const contactRelatedKeywords = /\b(contact|reach out|follow up|email|call|meeting|connect|introduce|network|relationship|client|prospect|lead|customer|partner|investor|advisor|mentor|colleague|coworker|vendor|supplier|recruiter|hire|hiring|talent)\b/i;
+    const shouldSuggestContacts = contactRelatedKeywords.test(userMessage) && !mentionedContactIds?.length;
+
+    // Proactively fetch relevant contacts if the message context suggests it
+    if (shouldSuggestContacts) {
+      try {
+        if (isDev) console.log("🔍 Checking for proactively relevant contacts...");
+
+        // Get contacts needing follow-up
+        const { data: followupContacts } = await supabase
+          .from("contacts")
+          .select("first_name, last_name, company, job_title, next_followup_date")
+          .eq("user_id", user.id)
+          .eq("is_archived", false)
+          .lte("next_followup_date", new Date().toISOString().split("T")[0])
+          .order("next_followup_date", { ascending: true })
+          .limit(3);
+
+        // Get inner circle contacts not contacted recently
+        const thirtyDaysAgo = new Date();
+        thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
+        const { data: dormantInnerCircle } = await supabase
+          .from("contacts")
+          .select("first_name, last_name, company, job_title, last_contacted_at")
+          .eq("user_id", user.id)
+          .eq("is_archived", false)
+          .gte("relationship_strength", 80)
+          .lt("last_contacted_at", thirtyDaysAgo.toISOString())
+          .order("last_contacted_at", { ascending: true })
+          .limit(3);
+
+        const suggestions: string[] = [];
+
+        if (followupContacts && followupContacts.length > 0) {
+          const names = followupContacts.map((c: any) =>
+            `${c.first_name}${c.last_name ? ' ' + c.last_name : ''}${c.company ? ` (${c.company})` : ''}`
+          ).join(", ");
+          suggestions.push(`Contacts with overdue follow-ups: ${names}`);
+        }
+
+        if (dormantInnerCircle && dormantInnerCircle.length > 0) {
+          const names = dormantInnerCircle.map((c: any) =>
+            `${c.first_name}${c.last_name ? ' ' + c.last_name : ''}${c.company ? ` (${c.company})` : ''}`
+          ).join(", ");
+          suggestions.push(`Inner circle contacts you haven't reached out to in 30+ days: ${names}`);
+        }
+
+        if (suggestions.length > 0) {
+          const proactiveContext = `
+--- PROACTIVE CONTACT SUGGESTIONS ---
+Based on your relationship data, here are contacts that might be relevant:
+${suggestions.map(s => `• ${s}`).join('\n')}
+
+You can use the search_contacts tool to find more specific contacts, or suggest these to the user if relevant to their query.
+---`;
+          systemPrompt += "\n\n" + proactiveContext;
+          if (isDev) console.log("✅ Added proactive contact suggestions");
+        }
+      } catch (error) {
+        if (isDev) console.error("⚠️ Proactive contact suggestions error (non-fatal):", error);
+      }
+    }
+
+    // Load and inject mentioned contact context
+    let mentionedContactsData: any[] = [];
+    if (mentionedContactIds && mentionedContactIds.length > 0) {
+      try {
+        if (isDev) console.log("👤 Loading mentioned contacts:", mentionedContactIds);
+        const { data: contacts, error: contactsError } = await supabase
+          .from("contacts")
+          .select(`
+            id,
+            first_name,
+            last_name,
+            email,
+            phone,
+            company,
+            job_title,
+            department,
+            industry,
+            city,
+            state,
+            country,
+            relationship_strength,
+            relationship_status,
+            lead_status,
+            lead_score,
+            linkedin_url,
+            twitter_url,
+            bio,
+            notes,
+            tags,
+            preferred_contact_method,
+            last_contacted_at,
+            next_followup_date,
+            first_contact_date
+          `)
+          .eq("user_id", user.id)
+          .in("id", mentionedContactIds);
+
+        if (!contactsError && contacts && contacts.length > 0) {
+          mentionedContactsData = contacts;
+
+          // Build contact context string
+          const contactContextParts = contacts.map((contact: any) => {
+            const fullName = `${contact.first_name}${contact.last_name ? ' ' + contact.last_name : ''}`;
+            const parts = [`**${fullName}**`];
+
+            if (contact.job_title && contact.company) {
+              parts.push(`Role: ${contact.job_title} at ${contact.company}`);
+            } else if (contact.job_title) {
+              parts.push(`Role: ${contact.job_title}`);
+            } else if (contact.company) {
+              parts.push(`Company: ${contact.company}`);
+            }
+
+            if (contact.industry) {
+              parts.push(`Industry: ${contact.industry}`);
+            }
+
+            if (contact.email) {
+              parts.push(`Email: ${contact.email}`);
+            }
+
+            if (contact.phone) {
+              parts.push(`Phone: ${contact.phone}`);
+            }
+
+            if (contact.city || contact.state || contact.country) {
+              const location = [contact.city, contact.state, contact.country].filter(Boolean).join(", ");
+              parts.push(`Location: ${location}`);
+            }
+
+            // Relationship info
+            if (contact.relationship_strength !== null && contact.relationship_strength !== undefined) {
+              let strengthLabel = "New";
+              if (contact.relationship_strength >= 80) strengthLabel = "Inner Circle";
+              else if (contact.relationship_strength >= 60) strengthLabel = "Close";
+              else if (contact.relationship_strength >= 40) strengthLabel = "Connected";
+              else if (contact.relationship_strength >= 20) strengthLabel = "Acquaintance";
+              parts.push(`Relationship: ${strengthLabel} (${contact.relationship_strength}/100)`);
+            }
+
+            if (contact.relationship_status) {
+              parts.push(`Status: ${contact.relationship_status}`);
+            }
+
+            if (contact.lead_status) {
+              parts.push(`Lead Status: ${contact.lead_status} (Score: ${contact.lead_score || 0})`);
+            }
+
+            // Social links
+            const socialLinks = [];
+            if (contact.linkedin_url) socialLinks.push("LinkedIn");
+            if (contact.twitter_url) socialLinks.push("Twitter");
+            if (socialLinks.length > 0) {
+              parts.push(`Social: ${socialLinks.join(", ")}`);
+            }
+
+            // Communication preferences
+            if (contact.preferred_contact_method) {
+              parts.push(`Preferred Contact: ${contact.preferred_contact_method}`);
+            }
+
+            // Dates
+            if (contact.last_contacted_at) {
+              const lastContact = new Date(contact.last_contacted_at);
+              const daysSince = Math.floor((Date.now() - lastContact.getTime()) / (1000 * 60 * 60 * 24));
+              parts.push(`Last Contact: ${daysSince} days ago`);
+            }
+
+            if (contact.next_followup_date) {
+              const followup = new Date(contact.next_followup_date);
+              const daysUntil = Math.floor((followup.getTime() - Date.now()) / (1000 * 60 * 60 * 24));
+              if (daysUntil < 0) {
+                parts.push(`⚠️ Follow-up Overdue: ${Math.abs(daysUntil)} days`);
+              } else if (daysUntil === 0) {
+                parts.push(`📅 Follow-up Due Today`);
+              } else {
+                parts.push(`Next Follow-up: in ${daysUntil} days`);
+              }
+            }
+
+            if (contact.tags && contact.tags.length > 0) {
+              parts.push(`Tags: ${contact.tags.join(", ")}`);
+            }
+
+            if (contact.bio) {
+              parts.push(`Bio: ${contact.bio.substring(0, 200)}${contact.bio.length > 200 ? '...' : ''}`);
+            }
+
+            if (contact.notes) {
+              parts.push(`Notes: ${contact.notes.substring(0, 300)}${contact.notes.length > 300 ? '...' : ''}`);
+            }
+
+            return parts.join("\n");
+          });
+
+          const contactContext = `
+--- MENTIONED CONTACTS CONTEXT ---
+The user has mentioned the following contacts in their message. Use this information to provide personalized, context-aware responses about these people:
+
+${contactContextParts.join("\n\n---\n\n")}
+
+When discussing these contacts:
+• Reference their role, company, and relationship to provide relevant advice
+• Consider their lead status for sales-related queries
+• Suggest follow-up actions if they're overdue
+• Use their preferred contact method when suggesting outreach
+• Consider their location for timezone-appropriate suggestions
+---`;
+
+          systemPrompt += "\n\n" + contactContext;
+          if (isDev) console.log(`✅ Injected context for ${contacts.length} mentioned contact(s)`);
+        }
+      } catch (error) {
+        if (isDev) console.error("⚠️ Contact context loading error (non-fatal):", error);
+      }
     }
 
     // Load and apply team context if user has an active team context set

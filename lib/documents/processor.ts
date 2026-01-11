@@ -8,9 +8,10 @@ const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY!,
 });
 
-const anthropic = new Anthropic({
-  apiKey: process.env.ANTHROPIC_API_KEY!,
-});
+// Only create Anthropic client if API key is available
+const anthropic = process.env.ANTHROPIC_API_KEY
+  ? new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
+  : null;
 
 export interface DocumentChunk {
   content: string;
@@ -61,9 +62,14 @@ async function extractPdfWithPdfJs(buffer: Buffer, fileName: string): Promise<st
  */
 async function extractPdfWithPdfParse(buffer: Buffer, fileName: string): Promise<string | null> {
   try {
+    // Use dynamic import with specific version handling
     const pdfParse = (await import("pdf-parse")).default;
-    const data = await pdfParse(buffer, { max: 0 });
-    const text = data.text || "";
+    // Wrap in try-catch with timeout
+    const data = await Promise.race([
+      pdfParse(buffer, { max: 0 }),
+      new Promise((_, reject) => setTimeout(() => reject(new Error("PDF parse timeout")), 30000))
+    ]) as any;
+    const text = data?.text || "";
 
     if (text.trim().length > 50) {
       return text.trim();
@@ -71,6 +77,41 @@ async function extractPdfWithPdfParse(buffer: Buffer, fileName: string): Promise
     return null;
   } catch (error: any) {
     console.error(`pdf-parse failed for ${fileName}:`, error.message);
+    return null;
+  }
+}
+
+/**
+ * Simple text extraction for basic PDFs - extracts visible text strings
+ */
+async function extractPdfBasic(buffer: Buffer, fileName: string): Promise<string | null> {
+  try {
+    // Simple regex-based extraction of text from PDF buffer
+    const content = buffer.toString("latin1");
+    const textMatches: string[] = [];
+
+    // Look for text between BT and ET markers (PDF text objects)
+    const btEtRegex = /BT[\s\S]*?ET/g;
+    let match;
+    while ((match = btEtRegex.exec(content)) !== null) {
+      // Extract strings in parentheses or hex strings
+      const textOps = match[0];
+      const stringRegex = /\(([^)]+)\)|<([0-9A-Fa-f]+)>/g;
+      let strMatch;
+      while ((strMatch = stringRegex.exec(textOps)) !== null) {
+        if (strMatch[1]) {
+          textMatches.push(strMatch[1]);
+        }
+      }
+    }
+
+    const text = textMatches.join(" ").replace(/\\n/g, "\n").replace(/\\r/g, "");
+    if (text.trim().length > 50) {
+      return text.trim();
+    }
+    return null;
+  } catch (error: any) {
+    console.error(`Basic PDF extraction failed for ${fileName}:`, error.message);
     return null;
   }
 }
@@ -85,11 +126,28 @@ export async function extractText(
 ): Promise<string> {
   try {
     if (mimeType === "application/pdf") {
-      // Use Claude's native PDF understanding - most reliable for serverless
-      const base64Pdf = buffer.toString("base64");
+      // Try local extraction methods first (faster, no API cost)
+      const pdfJsText = await extractPdfWithPdfJs(buffer, fileName);
+      if (pdfJsText) {
+        return pdfJsText;
+      }
 
-      try {
-        const message = await anthropic.messages.create({
+      const pdfParseText = await extractPdfWithPdfParse(buffer, fileName);
+      if (pdfParseText) {
+        return pdfParseText;
+      }
+
+      // Try basic regex-based extraction
+      const basicText = await extractPdfBasic(buffer, fileName);
+      if (basicText) {
+        return basicText;
+      }
+
+      // Fallback to Claude's native PDF understanding if API key available
+      if (anthropic) {
+        const base64Pdf = buffer.toString("base64");
+        try {
+          const message = await anthropic.messages.create({
           model: "claude-sonnet-4-20250514",
           max_tokens: 8192,
           messages: [
@@ -113,23 +171,13 @@ export async function extractText(
           ],
         });
 
-        const text = message.content[0].type === "text" ? message.content[0].text : "";
-        if (text && text.trim().length > 0) {
-          return text.trim();
+          const text = message.content[0].type === "text" ? message.content[0].text : "";
+          if (text && text.trim().length > 0) {
+            return text.trim();
+          }
+        } catch (claudeError: any) {
+          console.error(`Claude PDF extraction failed for ${fileName}:`, claudeError.message);
         }
-      } catch (claudeError: any) {
-        console.error(`Claude PDF extraction failed for ${fileName}:`, claudeError.message);
-      }
-
-      // Fallback to local PDF extraction
-      const pdfJsText = await extractPdfWithPdfJs(buffer, fileName);
-      if (pdfJsText) {
-        return pdfJsText;
-      }
-
-      const pdfParseText = await extractPdfWithPdfParse(buffer, fileName);
-      if (pdfParseText) {
-        return pdfParseText;
       }
 
       throw new Error(`Could not extract text from PDF "${fileName}". The PDF may be image-based, encrypted, or corrupted.`);
@@ -149,39 +197,41 @@ export async function extractText(
         console.error(`Mammoth failed for ${fileName}:`, mammothError.message);
       }
 
-      // Fallback to Claude API for problematic DOCX files
-      const base64Doc = buffer.toString("base64");
+      // Fallback to Claude API for problematic DOCX files (if API key available)
+      if (anthropic) {
+        const base64Doc = buffer.toString("base64");
 
-      const message = await anthropic.messages.create({
-        model: "claude-3-haiku-20240307",
-        max_tokens: 4096,
-        messages: [
-          {
-            role: "user",
-            content: [
-              {
-                type: "document",
-                source: {
-                  type: "base64",
-                  media_type: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-                  data: base64Doc,
+        const message = await anthropic.messages.create({
+          model: "claude-3-haiku-20240307",
+          max_tokens: 4096,
+          messages: [
+            {
+              role: "user",
+              content: [
+                {
+                  type: "document",
+                  source: {
+                    type: "base64",
+                    media_type: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                    data: base64Doc,
+                  },
                 },
-              },
-              {
-                type: "text",
-                text: "Please extract ALL the text from this Word document. Return ONLY the extracted text with no additional commentary, formatting, or explanation. Preserve the original structure and line breaks where meaningful.",
-              },
-            ],
-          },
-        ],
-      });
+                {
+                  type: "text",
+                  text: "Please extract ALL the text from this Word document. Return ONLY the extracted text with no additional commentary, formatting, or explanation. Preserve the original structure and line breaks where meaningful.",
+                },
+              ],
+            },
+          ],
+        });
 
-      const text = message.content[0].type === "text" ? message.content[0].text : "";
-      if (!text || text.trim().length === 0) {
-        throw new Error("Document appears to contain no extractable text.");
+        const text = message.content[0].type === "text" ? message.content[0].text : "";
+        if (text && text.trim().length > 0) {
+          return text.trim();
+        }
       }
 
-      return text.trim();
+      throw new Error("Document appears to contain no extractable text.");
     } else if (
       mimeType === "text/plain" ||
       mimeType === "text/markdown" ||

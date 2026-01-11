@@ -17,7 +17,7 @@ export async function GET(req: NextRequest) {
     if (error) {
       return NextResponse.redirect(
         new URL(
-          `/dashboard/email?error=${encodeURIComponent(error)}`,
+          `/dashboard/inbox?error=${encodeURIComponent(error)}`,
           req.url
         )
       );
@@ -25,7 +25,7 @@ export async function GET(req: NextRequest) {
 
     if (!code || !state) {
       return NextResponse.redirect(
-        new URL("/dashboard/email?error=missing_params", req.url)
+        new URL("/dashboard/inbox?error=missing_params", req.url)
       );
     }
 
@@ -38,7 +38,7 @@ export async function GET(req: NextRequest) {
 
     if (!user || user.id !== state) {
       return NextResponse.redirect(
-        new URL("/dashboard/email?error=unauthorized", req.url)
+        new URL("/dashboard/inbox?error=unauthorized", req.url)
       );
     }
 
@@ -51,7 +51,7 @@ export async function GET(req: NextRequest) {
 
     if (!profile) {
       return NextResponse.redirect(
-        new URL("/dashboard/email?error=no_profile", req.url)
+        new URL("/dashboard/inbox?error=no_profile", req.url)
       );
     }
 
@@ -61,20 +61,20 @@ export async function GET(req: NextRequest) {
     if (!result.success) {
       return NextResponse.redirect(
         new URL(
-          `/dashboard/email?error=${encodeURIComponent(result.error || "unknown")}`,
+          `/dashboard/inbox?error=${encodeURIComponent(result.error || "unknown")}`,
           req.url
         )
       );
     }
 
-    // Success - redirect to email page
+    // Success - redirect to inbox page
     return NextResponse.redirect(
-      new URL("/dashboard/email?success=connected", req.url)
+      new URL("/dashboard/inbox?gmail=connected", req.url)
     );
   } catch (error) {
     console.error("Gmail callback error:", error);
     return NextResponse.redirect(
-      new URL("/dashboard/email?error=callback_failed", req.url)
+      new URL("/dashboard/inbox?error=callback_failed", req.url)
     );
   }
 }

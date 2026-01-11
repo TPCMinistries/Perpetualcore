@@ -61,14 +61,18 @@ export async function executeSearchDocuments(
     const queryEmbedding = embeddingResponse.data[0].embedding;
 
     // Search for similar document chunks using pgvector
-    // Function: search_document_chunks(query_embedding, org_id, match_threshold, match_count)
+    // Function: search_document_chunks with 8 parameters for context-aware search
     const { data: chunks, error } = await supabase.rpc(
       "search_document_chunks",
       {
         query_embedding: queryEmbedding,
         org_id: context.organizationId,
+        requesting_user_id: context.userId,
         match_threshold: 0.3,
         match_count: limit,
+        search_scope: 'all',
+        conversation_id: null,
+        space_id: null,
       }
     );
 

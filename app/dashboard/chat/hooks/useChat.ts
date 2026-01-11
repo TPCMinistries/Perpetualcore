@@ -313,7 +313,7 @@ export function useChat() {
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent, mentionedContacts?: Array<{ id: string; full_name: string }>) => {
     e.preventDefault();
 
     if ((!input.trim() && attachments.length === 0) || isLoading) return;
@@ -327,6 +327,7 @@ export function useChat() {
     setMessages((prev) => [...prev, userMessage]);
     const currentInput = input;
     const currentAttachments = [...attachments];
+    const currentMentionedContactIds = mentionedContacts?.map(c => c.id) || [];
     setInput("");
     setAttachments([]);
     setIsLoading(true);
@@ -365,6 +366,7 @@ export function useChat() {
           model: selectedModel,
           conversationId,
           attachments: processedAttachments.length > 0 ? processedAttachments : undefined,
+          mentionedContactIds: currentMentionedContactIds.length > 0 ? currentMentionedContactIds : undefined,
         }),
       });
 

@@ -47,6 +47,7 @@ interface Message {
   to_addresses?: string[];
   subject?: string;
   body_text: string;
+  body_html?: string;
   snippet?: string;
   is_read: boolean;
   is_starred: boolean;
@@ -59,6 +60,9 @@ interface Message {
   ai_priority_score?: number;
   ai_category?: string;
   ai_sentiment?: string;
+  ai_summary?: string;
+  requires_response?: boolean;
+  ai_triaged_at?: string;
   labels?: string[];
   has_attachments?: boolean;
 }
@@ -72,7 +76,9 @@ export function UnifiedInbox() {
   const [filterStatus, setFilterStatus] = useState("all"); // all, unread, starred, archived
   const [sortBy, setSortBy] = useState("date"); // date, priority, sender
   const [showComposer, setShowComposer] = useState(false);
+  const [composerMode, setComposerMode] = useState<"new" | "reply" | "ai-reply">("new");
   const [syncing, setSyncing] = useState(false);
+  const [triaging, setTriaging] = useState(false);
   const [viewDensity, setViewDensity] = useState<"compact" | "comfortable">("comfortable");
   const [selectedMessages, setSelectedMessages] = useState<Set<string>>(new Set());
   const [hoveredMessage, setHoveredMessage] = useState<string | null>(null);
@@ -96,8 +102,29 @@ export function UnifiedInbox() {
 
       const allMessages: Message[] = [
         ...(emailsData.emails || []).map((e: any) => ({
-          ...e,
+          id: e.id,
           type: "email" as const,
+          from_address: e.from_email,
+          from_name: e.from_name,
+          to_addresses: e.to_emails,
+          subject: e.subject,
+          body_text: e.body_text || "",
+          body_html: e.body_html || "",
+          snippet: e.snippet,
+          is_read: e.is_read || false,
+          is_starred: e.is_starred || false,
+          is_archived: e.is_archived || false,
+          sent_at: e.sent_at,
+          created_at: e.created_at,
+          direction: "inbound" as const,
+          ai_priority_score: e.ai_priority_score,
+          ai_category: e.ai_category,
+          ai_sentiment: e.ai_sentiment,
+          ai_summary: e.ai_summary,
+          requires_response: e.requires_response,
+          ai_triaged_at: e.ai_triaged_at,
+          labels: e.labels,
+          has_attachments: e.has_attachments,
         })),
         ...(whatsappData.messages || []).map((m: any) => ({
           ...m,
@@ -170,6 +197,62 @@ export function UnifiedInbox() {
       toast.error("Failed to sync");
     } finally {
       setSyncing(false);
+    }
+  }
+
+  // On-demand AI triage - only runs when user opens an email
+  // This saves ~90% on AI costs vs triaging all emails during sync
+  async function triageEmailOnDemand(message: Message) {
+    // Only triage emails, not WhatsApp
+    if (message.type !== "email") return;
+
+    // Skip if already triaged (either has timestamp or has AI data from old sync)
+    if (message.ai_triaged_at || message.ai_summary || message.ai_priority_score !== null) return;
+
+    setTriaging(true);
+    try {
+      const response = await fetch(`/api/inbox/emails/${message.id}/triage`, {
+        method: "POST",
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+
+        // Update the selected message with triage results
+        setSelectedMessage((prev) => {
+          if (!prev || prev.id !== message.id) return prev;
+          return {
+            ...prev,
+            ai_priority_score: data.triage.priority_score,
+            ai_category: data.triage.category,
+            ai_summary: data.triage.summary,
+            ai_sentiment: data.triage.sentiment,
+            requires_response: data.triage.requires_response,
+            ai_triaged_at: new Date().toISOString(),
+          };
+        });
+
+        // Also update in the messages list
+        setMessages((prev) =>
+          prev.map((m) =>
+            m.id === message.id && m.type === "email"
+              ? {
+                  ...m,
+                  ai_priority_score: data.triage.priority_score,
+                  ai_category: data.triage.category,
+                  ai_summary: data.triage.summary,
+                  ai_sentiment: data.triage.sentiment,
+                  requires_response: data.triage.requires_response,
+                  ai_triaged_at: new Date().toISOString(),
+                }
+              : m
+          )
+        );
+      }
+    } catch (error) {
+      console.error("Error triaging email:", error);
+    } finally {
+      setTriaging(false);
     }
   }
 
@@ -562,6 +645,8 @@ export function UnifiedInbox() {
                           if (!message.is_read) {
                             toggleRead(message);
                           }
+                          // Trigger on-demand AI triage when email is opened
+                          triageEmailOnDemand(message);
                         }}
                       >
                         <div className="flex items-start justify-between gap-2">
@@ -759,18 +844,105 @@ export function UnifiedInbox() {
               </div>
             </div>
 
+            {/* AI Insights Panel - Shows when triaging or has AI data */}
+            {selectedMessage.type === "email" && (triaging || selectedMessage.ai_triaged_at || selectedMessage.ai_summary || selectedMessage.ai_priority_score !== null) && (
+              <div className="px-6 py-3 bg-gradient-to-r from-violet-50 to-blue-50 dark:from-violet-950/30 dark:to-blue-950/30 border-b">
+                <div className="flex items-start gap-4">
+                  <div className="flex items-center gap-2 text-violet-600 dark:text-violet-400">
+                    {triaging ? (
+                      <RefreshCw className="w-4 h-4 animate-spin" />
+                    ) : (
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                      </svg>
+                    )}
+                    <span className="text-xs font-medium">
+                      {triaging ? "Analyzing with AI..." : "AI Insights"}
+                    </span>
+                  </div>
+                  {!triaging && (
+                    <div className="flex-1 flex flex-wrap gap-4 text-sm">
+                      {selectedMessage.ai_summary && (
+                        <div className="flex-1 min-w-[200px]">
+                          <span className="text-muted-foreground text-xs">Summary:</span>
+                          <p className="text-slate-700 dark:text-slate-300">{selectedMessage.ai_summary}</p>
+                        </div>
+                      )}
+                      <div className="flex gap-3">
+                        {selectedMessage.ai_priority_score !== undefined && selectedMessage.ai_priority_score !== null && (
+                          <div className="text-center">
+                            <span className="text-muted-foreground text-xs block">Priority</span>
+                            <span className={`font-semibold ${
+                              selectedMessage.ai_priority_score > 0.7 ? 'text-red-600' :
+                              selectedMessage.ai_priority_score > 0.4 ? 'text-yellow-600' :
+                              'text-green-600'
+                            }`}>
+                              {Math.round(selectedMessage.ai_priority_score * 100)}%
+                            </span>
+                          </div>
+                        )}
+                        {selectedMessage.ai_sentiment && (
+                          <div className="text-center">
+                            <span className="text-muted-foreground text-xs block">Sentiment</span>
+                            <span className={`font-medium capitalize ${
+                              selectedMessage.ai_sentiment === 'positive' ? 'text-green-600' :
+                              selectedMessage.ai_sentiment === 'negative' ? 'text-red-600' :
+                              'text-slate-600'
+                            }`}>
+                              {selectedMessage.ai_sentiment}
+                            </span>
+                          </div>
+                        )}
+                        {selectedMessage.requires_response && (
+                          <div className="text-center">
+                            <span className="text-muted-foreground text-xs block">Action</span>
+                            <Badge variant="outline" className="text-xs border-orange-300 text-orange-600">
+                              Needs Reply
+                            </Badge>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
             {/* Message Body */}
             <div className="flex-1 overflow-y-auto p-6">
               <div className="prose dark:prose-invert max-w-none">
-                <div className="whitespace-pre-wrap">{selectedMessage.body_text}</div>
+                {selectedMessage.body_html ? (
+                  <div
+                    dangerouslySetInnerHTML={{ __html: selectedMessage.body_html }}
+                    className="email-content"
+                  />
+                ) : (
+                  <div className="whitespace-pre-wrap">{selectedMessage.body_text || selectedMessage.snippet || "No content"}</div>
+                )}
               </div>
             </div>
 
             {/* Reply Actions */}
             <div className="p-4 border-t flex gap-2">
-              <Button onClick={() => setShowComposer(true)}>
-                <Send className="mr-2 h-4 w-4" />
+              <Button onClick={() => {
+                setComposerMode("reply");
+                setShowComposer(true);
+              }}>
+                <Reply className="mr-2 h-4 w-4" />
                 Reply
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setComposerMode("ai-reply");
+                  setShowComposer(true);
+                }}
+                className="border-violet-300 text-violet-700 hover:bg-violet-50 dark:border-violet-700 dark:text-violet-400 dark:hover:bg-violet-950"
+              >
+                <svg className="mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                </svg>
+                AI Reply
               </Button>
               <Button variant="outline">Forward</Button>
             </div>
@@ -786,7 +958,10 @@ export function UnifiedInbox() {
                 Select a message from the list to view its contents
               </p>
               <Button
-                onClick={() => setShowComposer(true)}
+                onClick={() => {
+                  setComposerMode("new");
+                  setShowComposer(true);
+                }}
                 className="bg-slate-900 dark:bg-slate-100 hover:bg-slate-800 dark:hover:bg-slate-200 text-white dark:text-slate-900"
               >
                 <Send className="mr-2 h-4 w-4" />
@@ -803,15 +978,39 @@ export function UnifiedInbox() {
           <div className="w-full max-w-4xl max-h-[90vh] overflow-y-auto">
             <EmailComposer
               inReplyTo={
-                selectedMessage?.type === "email"
+                (composerMode === "reply" || composerMode === "ai-reply") && selectedMessage?.type === "email"
                   ? selectedMessage.id
                   : undefined
               }
+              initialTo={
+                (composerMode === "reply" || composerMode === "ai-reply") && selectedMessage
+                  ? selectedMessage.from_address || ""
+                  : ""
+              }
+              initialSubject={
+                (composerMode === "reply" || composerMode === "ai-reply") && selectedMessage?.subject
+                  ? `Re: ${selectedMessage.subject.replace(/^Re:\s*/i, "")}`
+                  : ""
+              }
+              initialAiPrompt={
+                composerMode === "ai-reply" && selectedMessage
+                  ? `Write a professional reply to this email. The sender is ${selectedMessage.from_name || selectedMessage.from_address}. Be helpful and concise.`
+                  : ""
+              }
+              replyContext={
+                composerMode === "ai-reply" && selectedMessage
+                  ? `Original email from ${selectedMessage.from_name || selectedMessage.from_address}:\nSubject: ${selectedMessage.subject}\n\n${selectedMessage.body_text}`
+                  : ""
+              }
               onSent={() => {
                 setShowComposer(false);
+                setComposerMode("new");
                 fetchMessages();
               }}
-              onClose={() => setShowComposer(false)}
+              onClose={() => {
+                setShowComposer(false);
+                setComposerMode("new");
+              }}
             />
           </div>
         </div>

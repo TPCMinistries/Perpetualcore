@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { Resend } from "resend";
 
+export const runtime = "nodejs";
+
 // POST /api/email/send
 export async function POST(request: Request) {
   try {
@@ -25,19 +27,34 @@ export async function POST(request: Request) {
       );
     }
 
-    const body = await request.json();
-    const {
-      to_emails,
-      cc_emails = [],
-      bcc_emails = [],
-      subject,
-      body_text,
-      body_html,
-      scheduled_at,
-      in_reply_to,
-      email_account_id,
-      send_via = "auto", // "auto", "resend", "n8n"
-    } = body;
+    // Parse FormData (supports attachments)
+    const formData = await request.formData();
+
+    const to_emails = JSON.parse(formData.get("to_emails") as string || "[]");
+    const cc_emails = JSON.parse(formData.get("cc_emails") as string || "[]");
+    const bcc_emails = JSON.parse(formData.get("bcc_emails") as string || "[]");
+    const subject = formData.get("subject") as string || "";
+    const body_text = formData.get("body_text") as string || "";
+    const body_html = formData.get("body_html") as string | null;
+    const scheduled_at = formData.get("scheduled_at") as string | null;
+    const in_reply_to = formData.get("in_reply_to") as string | null;
+    const email_account_id = formData.get("email_account_id") as string | null;
+    const send_via = (formData.get("send_via") as string) || "auto";
+
+    // Get attachments
+    const attachmentFiles = formData.getAll("attachments") as File[];
+    const attachments: { filename: string; content: Buffer; contentType: string }[] = [];
+
+    for (const file of attachmentFiles) {
+      if (file.size > 0) {
+        const buffer = Buffer.from(await file.arrayBuffer());
+        attachments.push({
+          filename: file.name,
+          content: buffer,
+          contentType: file.type || "application/octet-stream",
+        });
+      }
+    }
 
     if (!to_emails || to_emails.length === 0) {
       return NextResponse.json(
@@ -221,6 +238,7 @@ export async function POST(request: Request) {
             html: body_html || `<pre style="font-family: sans-serif;">${body_text}</pre>`,
             text: body_text,
             replyTo: emailAccount?.email_address || profile.email,
+            attachments: attachments.length > 0 ? attachments : undefined,
           });
 
           if (resendError) {

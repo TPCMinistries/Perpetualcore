@@ -39,14 +39,10 @@ export async function GET(req: NextRequest) {
     const limit = parseInt(searchParams.get("limit") || "50");
     const offset = parseInt(searchParams.get("offset") || "0");
 
+    // Simple query without joins - related items fetched separately if needed
     let query = supabase
       .from("ideas")
-      .select(`
-        *,
-        linked_project:projects(id, name, status),
-        linked_decision:decisions(id, title, status),
-        linked_opportunity:opportunities(id, name, status)
-      `, { count: "exact" })
+      .select("*", { count: "exact" })
       .eq("user_id", user.id)
       .order(sort, { ascending: order === "asc" })
       .range(offset, offset + limit - 1);

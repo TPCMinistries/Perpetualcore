@@ -159,6 +159,8 @@ export async function POST(request: Request) {
       "comment",
       "file",
       "folder",
+      "entity_project",
+      "project",
     ];
 
     if (!validEntityTypes.includes(entity_type)) {

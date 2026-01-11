@@ -1,8 +1,14 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
+import {
+  useContactMention,
+  MentionDropdown,
+  MentionedContactsPills,
+  MentionedContact,
+} from "@/components/mentions/ContactMention";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import {
@@ -159,6 +165,45 @@ export default function ChatPage() {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  // Contact mention support
+  const {
+    mentionedContacts,
+    setMentionedContacts,
+    showMentionDropdown,
+    mentionPosition,
+    contacts: mentionContacts,
+    loading: mentionLoading,
+    selectedIndex: mentionSelectedIndex,
+    handleInputChange: handleMentionInputChange,
+    handleMentionSelect,
+    handleKeyDown: handleMentionKeyDown,
+  } = useContactMention();
+
+  const handleInputChangeWithMention = useCallback(
+    (value: string) => {
+      setInput(value);
+      const cursorPos = textareaRef.current?.selectionStart || value.length;
+      handleMentionInputChange(value, cursorPos, textareaRef);
+    },
+    [handleMentionInputChange]
+  );
+
+  const handleSelectContact = useCallback(
+    (contact: MentionedContact) => {
+      const cursorPos = textareaRef.current?.selectionStart || input.length;
+      handleMentionSelect(contact, input, cursorPos, setInput);
+      setTimeout(() => textareaRef.current?.focus(), 0);
+    },
+    [handleMentionSelect, input]
+  );
+
+  const handleRemoveMentionedContact = useCallback(
+    (id: string) => {
+      setMentionedContacts((prev) => prev.filter((c) => c.id !== id));
+    },
+    [setMentionedContacts]
+  );
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -412,8 +457,10 @@ export default function ChatPage() {
     setMessages((prev) => [...prev, userMessage]);
     const currentInput = input;
     const currentAttachments = [...attachments];
+    const currentMentionedContactIds = mentionedContacts.map(c => c.id);
     setInput("");
     setAttachments([]);
+    setMentionedContacts([]);
     setIsLoading(true);
     setShowThinking(true);
     setRagInfo(null);
@@ -449,6 +496,7 @@ export default function ChatPage() {
           model: selectedModel,
           conversationId,
           attachments: processedAttachments.length > 0 ? processedAttachments : undefined,
+          mentionedContactIds: currentMentionedContactIds.length > 0 ? currentMentionedContactIds : undefined,
         }),
       });
 
@@ -937,27 +985,45 @@ export default function ChatPage() {
               </div>
             )}
 
+            {/* Mentioned Contacts Pills */}
+            <MentionedContactsPills
+              contacts={mentionedContacts}
+              onRemove={handleRemoveMentionedContact}
+            />
+
             {/* Input Box */}
-            <form
-              onSubmit={handleSubmit}
-              onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
-              onDragLeave={() => setIsDragging(false)}
-              onDrop={(e) => { e.preventDefault(); setIsDragging(false); handleFileSelect(e.dataTransfer.files); }}
-              className={cn(
-                "flex items-end gap-2 p-2 rounded-2xl border transition-all",
-                isDragging
-                  ? "border-violet-400 bg-violet-50 dark:bg-violet-950/20"
-                  : "border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 hover:border-slate-400 dark:hover:border-slate-600"
+            <div className="relative">
+              {/* Mention Dropdown */}
+              {showMentionDropdown && (
+                <MentionDropdown
+                  contacts={mentionContacts}
+                  loading={mentionLoading}
+                  selectedIndex={mentionSelectedIndex}
+                  onSelect={handleSelectContact}
+                  position={mentionPosition}
+                />
               )}
-            >
-              <input
-                ref={fileInputRef}
-                type="file"
-                multiple
-                accept=".pdf,.docx,.txt,.csv,image/*"
-                onChange={(e) => handleFileSelect(e.target.files)}
-                className="hidden"
-              />
+
+              <form
+                onSubmit={handleSubmit}
+                onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
+                onDragLeave={() => setIsDragging(false)}
+                onDrop={(e) => { e.preventDefault(); setIsDragging(false); handleFileSelect(e.dataTransfer.files); }}
+                className={cn(
+                  "flex items-end gap-2 p-2 rounded-2xl border transition-all",
+                  isDragging
+                    ? "border-violet-400 bg-violet-50 dark:bg-violet-950/20"
+                    : "border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 hover:border-slate-400 dark:hover:border-slate-600"
+                )}
+              >
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  multiple
+                  accept=".pdf,.docx,.txt,.csv,image/*"
+                  onChange={(e) => handleFileSelect(e.target.files)}
+                  className="hidden"
+                />
 
               <Button
                 type="button"
@@ -984,8 +1050,8 @@ export default function ChatPage() {
               <Textarea
                 ref={textareaRef}
                 value={input}
-                onChange={(e) => setInput(e.target.value)}
-                placeholder={isRecording ? "Listening..." : isDragging ? "Drop files here..." : "Message..."}
+                onChange={(e) => handleInputChangeWithMention(e.target.value)}
+                placeholder={isRecording ? "Listening..." : isDragging ? "Drop files here..." : "Message... (@ to mention contacts)"}
                 disabled={isLoading}
                 className="flex-1 min-h-[36px] max-h-[200px] resize-none border-0 focus-visible:ring-0 bg-transparent px-2"
                 rows={1}
@@ -995,6 +1061,12 @@ export default function ChatPage() {
                   target.style.height = target.scrollHeight + "px";
                 }}
                 onKeyDown={(e) => {
+                  // Handle mention navigation first
+                  const cursorPos = textareaRef.current?.selectionStart || input.length;
+                  if (handleMentionKeyDown(e, input, cursorPos, setInput)) {
+                    return; // Mention handled the key
+                  }
+                  // Default Enter behavior
                   if (e.key === "Enter" && !e.shiftKey) {
                     e.preventDefault();
                     e.currentTarget.form?.requestSubmit();
@@ -1015,10 +1087,11 @@ export default function ChatPage() {
               >
                 {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
               </Button>
-            </form>
+              </form>
+            </div>
 
             <p className="text-xs text-center text-slate-400 mt-2">
-              Press Enter to send, Shift+Enter for new line
+              Press Enter to send, Shift+Enter for new line. Type @ to mention contacts.
             </p>
           </div>
         </div>

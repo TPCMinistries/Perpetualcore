@@ -1,10 +1,16 @@
 "use client";
 
-import { RefObject } from "react";
+import { RefObject, useState, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { Paperclip, X, FileText, Send, Loader2, Command, Library, Zap, Sparkles } from "lucide-react";
+import { Paperclip, X, FileText, Send, Loader2, Command, Library, Zap, Sparkles, Users } from "lucide-react";
 import { FileAttachment } from "../hooks/useChat";
+import {
+  useContactMention,
+  MentionDropdown,
+  MentionedContactsPills,
+  MentionedContact,
+} from "@/components/mentions/ContactMention";
 
 interface ChatInputProps {
   input: string;
@@ -15,7 +21,7 @@ interface ChatInputProps {
   isRecording: boolean;
   textareaRef: RefObject<HTMLTextAreaElement>;
   fileInputRef: RefObject<HTMLInputElement>;
-  onSubmit: (e: React.FormEvent) => void;
+  onSubmit: (e: React.FormEvent, mentionedContacts?: MentionedContact[]) => void;
   onFileSelect: (files: FileList | null) => void;
   onRemoveAttachment: (index: number) => void;
   onDragOver: (e: React.DragEvent) => void;
@@ -25,6 +31,8 @@ interface ChatInputProps {
   onOpenPromptLibrary: () => void;
   onToggleQuickActions: () => void;
 }
+
+export { MentionedContact };
 
 export function ChatInput({
   input,
@@ -45,6 +53,56 @@ export function ChatInput({
   onOpenPromptLibrary,
   onToggleQuickActions,
 }: ChatInputProps) {
+  // Contact mention support
+  const {
+    mentionedContacts,
+    setMentionedContacts,
+    showMentionDropdown,
+    mentionPosition,
+    contacts,
+    loading,
+    selectedIndex,
+    handleInputChange: handleMentionInputChange,
+    handleMentionSelect,
+    handleKeyDown: handleMentionKeyDown,
+  } = useContactMention();
+
+  const handleInputChangeWithMention = useCallback(
+    (value: string) => {
+      onInputChange(value);
+      const cursorPos = textareaRef.current?.selectionStart || value.length;
+      handleMentionInputChange(value, cursorPos, textareaRef);
+    },
+    [onInputChange, handleMentionInputChange, textareaRef]
+  );
+
+  const handleSelectContact = useCallback(
+    (contact: MentionedContact) => {
+      const cursorPos = textareaRef.current?.selectionStart || input.length;
+      handleMentionSelect(contact, input, cursorPos, onInputChange);
+      // Focus back on textarea
+      setTimeout(() => textareaRef.current?.focus(), 0);
+    },
+    [handleMentionSelect, input, onInputChange, textareaRef]
+  );
+
+  const handleRemoveMentionedContact = useCallback(
+    (id: string) => {
+      setMentionedContacts((prev) => prev.filter((c) => c.id !== id));
+    },
+    [setMentionedContacts]
+  );
+
+  const handleFormSubmit = useCallback(
+    (e: React.FormEvent) => {
+      e.preventDefault();
+      onSubmit(e, mentionedContacts);
+      // Clear mentioned contacts after submit
+      setMentionedContacts([]);
+    },
+    [onSubmit, mentionedContacts, setMentionedContacts]
+  );
+
   return (
     <div className="border-t border-slate-200/50 dark:border-slate-800/50 bg-white/80 dark:bg-slate-950/80 backdrop-blur-sm">
       <div className="max-w-3xl mx-auto px-6 py-4">
@@ -124,18 +182,35 @@ export function ChatInput({
           </div>
         )}
 
+        {/* Mentioned Contacts Pills */}
+        <MentionedContactsPills
+          contacts={mentionedContacts}
+          onRemove={handleRemoveMentionedContact}
+        />
+
         {/* Input Box */}
         <div
           onDragOver={onDragOver}
           onDragLeave={onDragLeave}
           onDrop={onDrop}
-          className={`rounded-2xl border transition-all shadow-sm ${
+          className={`relative rounded-2xl border transition-all shadow-sm ${
             isDragging
               ? "border-slate-400 dark:border-slate-600 bg-slate-50 dark:bg-slate-800 shadow-lg"
               : "border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 hover:border-slate-400 dark:hover:border-slate-600"
           }`}
         >
-          <form onSubmit={onSubmit} className="flex gap-2 items-end p-2">
+          {/* Mention Dropdown */}
+          {showMentionDropdown && (
+            <MentionDropdown
+              contacts={contacts}
+              loading={loading}
+              selectedIndex={selectedIndex}
+              onSelect={handleSelectContact}
+              position={mentionPosition}
+            />
+          )}
+
+          <form onSubmit={handleFormSubmit} className="flex gap-2 items-end p-2">
             <input
               ref={fileInputRef}
               type="file"
@@ -158,13 +233,13 @@ export function ChatInput({
             <Textarea
               ref={textareaRef}
               value={input}
-              onChange={(e) => onInputChange(e.target.value)}
+              onChange={(e) => handleInputChangeWithMention(e.target.value)}
               placeholder={
                 isRecording
                   ? "Listening..."
                   : isDragging
                   ? "Drop files here..."
-                  : "Ask me anything... (or use ⌘K for prompts)"
+                  : "Ask anything... Type @ to mention a contact"
               }
               disabled={isLoading}
               className="flex-1 min-h-[36px] max-h-[200px] resize-none border-0 focus-visible:ring-0 bg-transparent text-slate-900 dark:text-slate-100 placeholder:text-slate-500 dark:placeholder:text-slate-500 px-2 text-[15px]"
@@ -175,6 +250,12 @@ export function ChatInput({
                 target.style.height = target.scrollHeight + 'px';
               }}
               onKeyDown={(e) => {
+                // Handle mention navigation first
+                const cursorPos = textareaRef.current?.selectionStart || input.length;
+                if (handleMentionKeyDown(e, input, cursorPos, onInputChange)) {
+                  return; // Mention handled the key
+                }
+                // Default Enter behavior
                 if (e.key === 'Enter' && !e.shiftKey) {
                   e.preventDefault();
                   const form = e.currentTarget.form;

@@ -95,6 +95,27 @@ export async function GET(req: NextRequest) {
       query = query.eq("is_favorite", true);
     }
 
+    // Relationship strength filter - supports both text values and numeric ranges
+    const relationshipStrength = searchParams.get("relationship_strength");
+    if (relationshipStrength) {
+      // Map text values to numeric ranges for backward compatibility
+      const strengthRanges: Record<string, [number, number]> = {
+        'inner_circle': [80, 100],
+        'close': [60, 79],
+        'connected': [40, 59],
+        'acquaintance': [20, 39],
+        'new': [0, 19],
+      };
+
+      if (strengthRanges[relationshipStrength]) {
+        const [min, max] = strengthRanges[relationshipStrength];
+        query = query.gte("relationship_strength", min).lte("relationship_strength", max);
+      } else {
+        // Try exact match for text column
+        query = query.eq("relationship_strength", relationshipStrength);
+      }
+    }
+
     const { data: contacts, count, error } = await query;
 
     if (error) {
@@ -298,6 +319,118 @@ export async function POST(req: NextRequest) {
 
   } catch (error: any) {
     console.error("POST /api/contacts error:", error);
+    return Response.json({ error: error.message }, { status: 500 });
+  }
+}
+
+/**
+ * DELETE /api/contacts
+ * Delete all contacts for the authenticated user
+ *
+ * Query params:
+ * - confirm: must be "true" to proceed (safety check)
+ * - ids: comma-separated list of specific contact IDs to delete (optional)
+ */
+export async function DELETE(req: NextRequest) {
+  try {
+    const supabase = await createClient();
+
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user) {
+      return Response.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const { searchParams } = new URL(req.url);
+    const confirm = searchParams.get("confirm");
+    const ids = searchParams.get("ids");
+
+    // Safety check - require explicit confirmation
+    if (confirm !== "true") {
+      return Response.json(
+        { error: "Deletion requires confirm=true parameter" },
+        { status: 400 }
+      );
+    }
+
+    let deletedCount = 0;
+
+    if (ids) {
+      // Delete specific contacts by IDs
+      const idList = ids.split(",").map((id) => id.trim());
+
+      const { data, error } = await supabase
+        .from("contacts")
+        .delete()
+        .eq("user_id", user.id)
+        .in("id", idList)
+        .select("id");
+
+      if (error) {
+        console.error("Failed to delete contacts:", error);
+        return Response.json({ error: error.message }, { status: 500 });
+      }
+
+      deletedCount = data?.length || 0;
+
+      // Log activity
+      await logActivity({
+        supabase,
+        userId: user.id,
+        action: "deleted",
+        entityType: "contact",
+        entityId: "bulk",
+        entityName: `${deletedCount} contacts`,
+        metadata: {
+          contactIds: idList,
+          operation: "bulk_delete",
+        },
+      });
+    } else {
+      // Delete ALL contacts for this user
+      // First count how many we're about to delete
+      const { count } = await supabase
+        .from("contacts")
+        .select("*", { count: "exact", head: true })
+        .eq("user_id", user.id);
+
+      const { error } = await supabase
+        .from("contacts")
+        .delete()
+        .eq("user_id", user.id);
+
+      if (error) {
+        console.error("Failed to delete all contacts:", error);
+        return Response.json({ error: error.message }, { status: 500 });
+      }
+
+      deletedCount = count || 0;
+
+      // Log activity
+      await logActivity({
+        supabase,
+        userId: user.id,
+        action: "deleted",
+        entityType: "contact",
+        entityId: "all",
+        entityName: `All ${deletedCount} contacts`,
+        metadata: {
+          operation: "clear_all",
+          count: deletedCount,
+        },
+      });
+    }
+
+    return Response.json({
+      success: true,
+      message: `Deleted ${deletedCount} contact${deletedCount !== 1 ? "s" : ""}`,
+      deletedCount,
+    });
+
+  } catch (error: any) {
+    console.error("DELETE /api/contacts error:", error);
     return Response.json({ error: error.message }, { status: 500 });
   }
 }

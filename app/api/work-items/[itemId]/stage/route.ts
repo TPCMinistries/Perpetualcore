@@ -155,6 +155,31 @@ export async function PUT(
     // Get stage names for response
     const oldStage = workflowStages.find((s) => s.id === oldStageId);
 
+    // Trigger n8n webhook for stage change (fire and forget)
+    try {
+      const webhookUrl = `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/api/webhooks/work-item-stage`;
+      fetch(webhookUrl, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          work_item_id: itemId,
+          team_id: existingItem.team_id,
+          from_stage: oldStage?.name || oldStageId,
+          to_stage: newStage?.name || body.new_stage_id,
+          from_stage_id: oldStageId,
+          to_stage_id: body.new_stage_id,
+          item_title: existingItem.title,
+          item_type: existingItem.item_type,
+          priority: existingItem.priority,
+          assigned_to: existingItem.assigned_to,
+          custom_fields: existingItem.custom_fields,
+          trigger_source: "manual",
+        }),
+      }).catch(err => console.error("[Stage] Webhook fire failed:", err));
+    } catch (webhookError) {
+      console.error("[Stage] Webhook preparation failed:", webhookError);
+    }
+
     return NextResponse.json({
       item: updatedItem,
       transition: {

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useParams, useRouter } from "next/navigation";
 import {
   ArrowLeft,
@@ -26,6 +26,10 @@ import {
   Clock,
   Sparkles,
   ListTodo,
+  Link2,
+  ExternalLink,
+  Eye,
+  Download,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -122,7 +126,12 @@ interface Document {
   title: string;
   file_type?: string;
   file_url?: string;
+  file_size?: number;
+  status?: string;
+  summary?: string;
+  key_points?: string[];
   created_at: string;
+  added_at?: string;
 }
 
 interface Conversation {
@@ -184,6 +193,12 @@ export default function ProjectDetailPage() {
   const [addingTask, setAddingTask] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [linkDocumentOpen, setLinkDocumentOpen] = useState(false);
+  const [availableDocuments, setAvailableDocuments] = useState<Document[]>([]);
+  const [loadingDocuments, setLoadingDocuments] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
 
   // Fetch project data
   useEffect(() => {
@@ -195,13 +210,16 @@ export default function ProjectDetailPage() {
 
   // Lazy load tab data
   useEffect(() => {
-    if (activeTab === "files" && documents.length === 0) {
+    if (activeTab === "files") {
       fetchDocuments();
+    }
+    if (activeTab === "team") {
+      fetchMembers();
     }
     if (activeTab === "chat" && conversations.length === 0) {
       fetchConversations();
     }
-    if (activeTab === "activity" && activities.length === 0) {
+    if (activeTab === "activity") {
       fetchActivities();
     }
   }, [activeTab]);
@@ -236,21 +254,52 @@ export default function ProjectDetailPage() {
   };
 
   const fetchDocuments = async () => {
-    // TODO: Implement when documents API is ready
-    setDocuments([]);
+    try {
+      const response = await fetch(`/api/entity-projects/${projectId}/documents`);
+      if (response.ok) {
+        const data = await response.json();
+        setDocuments(data.documents || []);
+      }
+    } catch (error) {
+      console.error("Error fetching documents:", error);
+    }
+  };
+
+  const fetchMembers = async () => {
+    try {
+      const response = await fetch(`/api/entity-projects/${projectId}/members`);
+      if (response.ok) {
+        const data = await response.json();
+        setMembers(data.members || []);
+      }
+    } catch (error) {
+      console.error("Error fetching members:", error);
+    }
   };
 
   const fetchConversations = async () => {
-    // TODO: Implement when project conversations API is ready
+    // Conversations will use the existing chat system
     setConversations([]);
   };
 
   const fetchActivities = async () => {
     try {
-      const response = await fetch(`/api/activity?entity_type=project&entity_id=${projectId}&limit=20`);
+      // Fetch activities for this entity_project directly
+      const response = await fetch(`/api/activity?entityType=entity_project&entityId=${projectId}&limit=50`);
       if (response.ok) {
         const data = await response.json();
         setActivities(data.activities || []);
+      } else {
+        // Fallback: fetch task activities and filter by source_reference
+        const taskResponse = await fetch(`/api/activity?entityType=task&limit=50`);
+        if (taskResponse.ok) {
+          const data = await taskResponse.json();
+          const projectActivities = (data.activities || []).filter(
+            (a: any) => a.metadata?.project_id === projectId ||
+                        a.metadata?.source_reference === `entity_project:${projectId}`
+          );
+          setActivities(projectActivities);
+        }
       }
     } catch (error) {
       console.error("Error fetching activities:", error);
@@ -269,7 +318,6 @@ export default function ProjectDetailPage() {
           title: newTaskTitle.trim(),
           description: newTaskDescription.trim() || undefined,
           priority: newTaskPriority,
-          entityId: project.entity?.id,
           source_reference: `entity_project:${projectId}`,
           tags: [project.entity?.name, project.name].filter(Boolean),
         }),
@@ -340,6 +388,117 @@ export default function ProjectDetailPage() {
       toast.error("Failed to delete project");
     } finally {
       setDeleteDialogOpen(false);
+    }
+  };
+
+  const fetchAvailableDocuments = async () => {
+    setLoadingDocuments(true);
+    try {
+      const response = await fetch("/api/documents?limit=50");
+      if (response.ok) {
+        const data = await response.json();
+        // Filter out documents already linked to this project
+        const linkedIds = new Set(documents.map(d => d.id));
+        const available = (data.documents || []).filter((d: Document) => !linkedIds.has(d.id));
+        setAvailableDocuments(available);
+      }
+    } catch (error) {
+      console.error("Error fetching documents:", error);
+    } finally {
+      setLoadingDocuments(false);
+    }
+  };
+
+  const handleLinkDocument = async (documentId: string) => {
+    try {
+      const response = await fetch(`/api/entity-projects/${projectId}/documents`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ document_id: documentId }),
+      });
+
+      if (response.ok) {
+        toast.success("Document linked to project!");
+        fetchDocuments();
+        setLinkDocumentOpen(false);
+        // Remove from available list
+        setAvailableDocuments(prev => prev.filter(d => d.id !== documentId));
+      } else {
+        const error = await response.json();
+        toast.error(error.error || "Failed to link document");
+      }
+    } catch (error) {
+      console.error("Error linking document:", error);
+      toast.error("Failed to link document");
+    }
+  };
+
+  const handleUnlinkDocument = async (documentId: string) => {
+    try {
+      const response = await fetch(`/api/entity-projects/${projectId}/documents?document_id=${documentId}`, {
+        method: "DELETE",
+      });
+
+      if (response.ok) {
+        toast.success("Document unlinked from project");
+        setDocuments(prev => prev.filter(d => d.id !== documentId));
+      } else {
+        toast.error("Failed to unlink document");
+      }
+    } catch (error) {
+      console.error("Error unlinking document:", error);
+      toast.error("Failed to unlink document");
+    }
+  };
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploading(true);
+    try {
+      // First upload the file to create a document
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append("title", file.name);
+
+      const uploadResponse = await fetch("/api/documents/upload", {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!uploadResponse.ok) {
+        throw new Error("Failed to upload file");
+      }
+
+      const uploadResult = await uploadResponse.json();
+      const documentId = uploadResult.id || uploadResult.document?.id;
+
+      if (!documentId) {
+        throw new Error("No document ID returned");
+      }
+
+      // Then link the document to this project
+      const linkResponse = await fetch(`/api/entity-projects/${projectId}/documents`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ document_id: documentId }),
+      });
+
+      if (linkResponse.ok) {
+        toast.success("File uploaded!");
+        fetchDocuments();
+      } else {
+        toast.error("Failed to link file to project");
+      }
+    } catch (error) {
+      console.error("Error uploading file:", error);
+      toast.error("Failed to upload file");
+    } finally {
+      setUploading(false);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
     }
   };
 
@@ -812,39 +971,137 @@ export default function ProjectDetailPage() {
             <Card>
               <CardHeader className="flex flex-row items-center justify-between">
                 <div>
-                  <CardTitle>Files</CardTitle>
+                  <CardTitle>Project Documents</CardTitle>
                   <CardDescription>
-                    Documents and files for this project
+                    Documents linked to this project (included in AI context)
                   </CardDescription>
                 </div>
-                <Button>
-                  <Upload className="h-4 w-4 mr-2" />
-                  Upload File
-                </Button>
+                <div className="flex gap-2">
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      setLinkDocumentOpen(true);
+                      fetchAvailableDocuments();
+                    }}
+                  >
+                    <Link2 className="h-4 w-4 mr-2" />
+                    Link Existing
+                  </Button>
+                  <Button onClick={() => fileInputRef.current?.click()} disabled={uploading}>
+                    {uploading ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Upload className="h-4 w-4 mr-2" />}
+                    {uploading ? "Uploading..." : "Upload New"}
+                  </Button>
+                </div>
               </CardHeader>
               <CardContent>
+                <input
+                  type="file"
+                  ref={fileInputRef}
+                  onChange={handleFileUpload}
+                  className="hidden"
+                  accept=".pdf,.doc,.docx,.txt,.png,.jpg,.jpeg,.gif,.xlsx,.xls,.csv"
+                />
                 {documents.length === 0 ? (
                   <div className="text-center py-12">
                     <FolderOpen className="h-12 w-12 text-muted-foreground/50 mx-auto mb-4" />
-                    <h3 className="text-lg font-medium mb-2">No files yet</h3>
+                    <h3 className="text-lg font-medium mb-2">No documents yet</h3>
                     <p className="text-muted-foreground mb-4">
-                      Upload documents, images, or other files for this project
+                      Upload new documents or link existing ones from your library
                     </p>
-                    <Button>
-                      <Upload className="h-4 w-4 mr-2" />
-                      Upload File
-                    </Button>
+                    <div className="flex gap-2 justify-center">
+                      <Button
+                        variant="outline"
+                        onClick={() => {
+                          setLinkDocumentOpen(true);
+                          fetchAvailableDocuments();
+                        }}
+                      >
+                        <Link2 className="h-4 w-4 mr-2" />
+                        Link Existing
+                      </Button>
+                      <Button onClick={() => fileInputRef.current?.click()} disabled={uploading}>
+                        <Upload className="h-4 w-4 mr-2" />
+                        Upload New
+                      </Button>
+                    </div>
                   </div>
                 ) : (
-                  <div className="space-y-2">
+                  <div className="space-y-3">
                     {documents.map((doc) => (
-                      <div key={doc.id} className="flex items-center gap-3 p-3 rounded-lg border">
-                        <FileText className="h-8 w-8 text-blue-500" />
-                        <div className="flex-1">
-                          <p className="font-medium">{doc.title}</p>
-                          <p className="text-sm text-muted-foreground">
-                            {new Date(doc.created_at).toLocaleDateString()}
-                          </p>
+                      <div
+                        key={doc.id}
+                        className="flex items-start gap-4 p-4 rounded-lg border hover:bg-muted/50 transition-colors group"
+                      >
+                        <div className="flex-shrink-0 w-10 h-10 rounded-lg bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
+                          <FileText className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2">
+                            <p className="font-medium truncate">{doc.title}</p>
+                            {doc.status === "processing" && (
+                              <Badge variant="secondary" className="text-xs">
+                                <Loader2 className="h-3 w-3 mr-1 animate-spin" />
+                                Processing
+                              </Badge>
+                            )}
+                            {doc.status === "completed" && doc.summary && (
+                              <Badge variant="secondary" className="text-xs bg-green-100 text-green-700">
+                                <CheckCircle2 className="h-3 w-3 mr-1" />
+                                Analyzed
+                              </Badge>
+                            )}
+                          </div>
+                          <div className="flex items-center gap-2 text-sm text-muted-foreground mt-1">
+                            <span>{doc.file_type?.toUpperCase() || "FILE"}</span>
+                            {doc.file_size && (
+                              <>
+                                <span>•</span>
+                                <span>{(doc.file_size / 1024).toFixed(0)} KB</span>
+                              </>
+                            )}
+                            <span>•</span>
+                            <span>{new Date(doc.added_at || doc.created_at).toLocaleDateString()}</span>
+                          </div>
+                          {doc.summary && (
+                            <p className="text-sm text-muted-foreground mt-2 line-clamp-2">
+                              {doc.summary}
+                            </p>
+                          )}
+                        </div>
+                        <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => router.push(`/dashboard/documents/${doc.id}`)}
+                            title="View document"
+                          >
+                            <Eye className="h-4 w-4" />
+                          </Button>
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button variant="ghost" size="icon">
+                                <MoreHorizontal className="h-4 w-4" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                              <DropdownMenuItem onClick={() => router.push(`/dashboard/documents/${doc.id}`)}>
+                                <Eye className="h-4 w-4 mr-2" />
+                                View Details
+                              </DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => router.push(`/dashboard/library`)}>
+                                <ExternalLink className="h-4 w-4 mr-2" />
+                                Open in Library
+                              </DropdownMenuItem>
+                              <DropdownMenuSeparator />
+                              <DropdownMenuItem
+                                className="text-destructive"
+                                onClick={() => handleUnlinkDocument(doc.id)}
+                              >
+                                <Trash2 className="h-4 w-4 mr-2" />
+                                Unlink from Project
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
                         </div>
                       </div>
                     ))}
@@ -1045,6 +1302,82 @@ export default function ProjectDetailPage() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Link Document Dialog */}
+      <Dialog open={linkDocumentOpen} onOpenChange={setLinkDocumentOpen}>
+        <DialogContent className="max-w-2xl max-h-[80vh]">
+          <DialogHeader>
+            <DialogTitle>Link Existing Document</DialogTitle>
+            <DialogDescription>
+              Select documents from your library to link to this project
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <Input
+              placeholder="Search documents..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+            <ScrollArea className="h-[400px] pr-4">
+              {loadingDocuments ? (
+                <div className="flex items-center justify-center py-8">
+                  <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+                </div>
+              ) : availableDocuments.length === 0 ? (
+                <div className="text-center py-8">
+                  <FileText className="h-12 w-12 text-muted-foreground/50 mx-auto mb-4" />
+                  <p className="text-muted-foreground">No documents available to link</p>
+                  <Button
+                    variant="link"
+                    onClick={() => {
+                      setLinkDocumentOpen(false);
+                      router.push("/dashboard/library");
+                    }}
+                  >
+                    Go to Document Library
+                  </Button>
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  {availableDocuments
+                    .filter(doc =>
+                      !searchQuery ||
+                      doc.title.toLowerCase().includes(searchQuery.toLowerCase())
+                    )
+                    .map((doc) => (
+                      <div
+                        key={doc.id}
+                        className="flex items-center gap-3 p-3 rounded-lg border hover:bg-muted/50 cursor-pointer transition-colors"
+                        onClick={() => handleLinkDocument(doc.id)}
+                      >
+                        <div className="w-10 h-10 rounded-lg bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center flex-shrink-0">
+                          <FileText className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="font-medium truncate">{doc.title}</p>
+                          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                            <span>{doc.file_type?.toUpperCase() || "FILE"}</span>
+                            <span>•</span>
+                            <span>{new Date(doc.created_at).toLocaleDateString()}</span>
+                          </div>
+                          {doc.summary && (
+                            <p className="text-xs text-muted-foreground mt-1 line-clamp-1">
+                              {doc.summary}
+                            </p>
+                          )}
+                        </div>
+                        <Button variant="ghost" size="sm">
+                          <Plus className="h-4 w-4 mr-1" />
+                          Link
+                        </Button>
+                      </div>
+                    ))}
+                </div>
+              )}
+            </ScrollArea>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

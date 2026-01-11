@@ -54,6 +54,11 @@ Respond ONLY with valid JSON in this exact format:
       userPrompt += `\n\nThis is a reply to the following email:\nFrom: ${context.replyTo.from}\nSubject: ${context.replyTo.subject}\nContent: ${context.replyTo.body?.slice(0, 500) || ""}`;
     }
 
+    // Support original_email context from AI Reply feature
+    if (context.original_email) {
+      userPrompt += `\n\nThis is a reply to the following email:\n${context.original_email.slice(0, 1500)}`;
+    }
+
     // Call the real AI router
     const response = await getChatCompletion("gpt-4o-mini", [
       { role: "system", content: systemPrompt },

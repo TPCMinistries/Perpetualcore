@@ -663,17 +663,6 @@ export const NAVIGATION_CONFIG_V2: NavigationSection[] = [
         },
       },
       {
-        name: "Inbox",
-        href: "/dashboard/inbox",
-        icon: Inbox,
-        adaptiveConfig: {
-          visibleFor: ["beginner", "intermediate", "advanced"],
-          complexity: "essential",
-          isCore: true,
-          helpText: "Everything needing your attention - tasks, emails, notifications, bot results",
-        },
-      },
-      {
         name: "Search",
         href: "/dashboard/search",
         icon: Search,
@@ -682,6 +671,39 @@ export const NAVIGATION_CONFIG_V2: NavigationSection[] = [
           complexity: "essential",
           isCore: true,
           helpText: "AI-powered search across all your documents, conversations, and data",
+        },
+      },
+    ],
+  },
+
+  // COMMUNICATION - Email and Contacts together
+  {
+    section: "Communication",
+    color: "text-slate-600 dark:text-slate-400",
+    bgColor: "bg-slate-50 dark:bg-slate-950/30",
+    collapsible: true,
+    defaultCollapsed: false,
+    items: [
+      {
+        name: "Email",
+        href: "/dashboard/inbox",
+        icon: Mail,
+        adaptiveConfig: {
+          visibleFor: ["beginner", "intermediate", "advanced"],
+          complexity: "essential",
+          isCore: true,
+          helpText: "Your emails, drafts, and notifications in one place",
+        },
+      },
+      {
+        name: "Contacts",
+        href: "/dashboard/contacts",
+        icon: Contact,
+        adaptiveConfig: {
+          visibleFor: ["beginner", "intermediate", "advanced"],
+          complexity: "essential",
+          isCore: true,
+          helpText: "Your network - relationships, interactions, and opportunities",
         },
       },
     ],
@@ -798,17 +820,6 @@ export const NAVIGATION_CONFIG_V2: NavigationSection[] = [
           visibleFor: ["beginner", "intermediate", "advanced"],
           complexity: "essential",
           helpText: "Unified document library with AI-powered organization",
-        },
-      },
-      {
-        name: "Contacts",
-        href: "/dashboard/contacts",
-        icon: Contact,
-        adaptiveConfig: {
-          visibleFor: ["beginner", "intermediate", "advanced"],
-          complexity: "essential",
-          isCore: true,
-          helpText: "Your network - relationships, interactions, and opportunities",
         },
       },
       {

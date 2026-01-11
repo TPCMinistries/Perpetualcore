@@ -15,13 +15,19 @@ import {
   searchConversations,
   SearchConversationsInput,
 } from "./search-conversations";
+import {
+  searchContactsTool,
+  executeSearchContacts,
+  SearchContactsInput,
+} from "./search-contacts";
 
 // Registry of all available tools
 export const AVAILABLE_TOOLS: Tool[] = [
   webSearchTool,
   createTaskTool,
   searchDocumentsTool,
-  searchConversationsTool, // NEW: Search conversation history
+  searchConversationsTool, // Search conversation history
+  searchContactsTool,      // Search contacts for relationship management
   // More tools will be added here
 ];
 
@@ -57,6 +63,10 @@ export async function executeToolCall(
           response += `   ${conv.messageRole === "user" ? "User" : "Assistant"}: ${conv.snippet}\n\n`;
         });
         return response;
+      }
+
+      case "search_contacts": {
+        return await executeSearchContacts(params as SearchContactsInput, context);
       }
 
       // Add more tool cases here as they're implemented

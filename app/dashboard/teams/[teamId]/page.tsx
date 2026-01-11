@@ -102,6 +102,18 @@ interface Conversation {
   created_at: string;
 }
 
+interface ActivityItem {
+  id: string;
+  action_type: string;
+  entity_type: string;
+  entity_id: string;
+  entity_name: string;
+  actor_name: string;
+  actor_avatar?: string;
+  created_at: string;
+  metadata?: Record<string, any>;
+}
+
 // Role icons
 const roleIcons: Record<TeamMemberRole, React.ReactNode> = {
   lead: <Crown className="h-3 w-3" />,
@@ -131,6 +143,8 @@ export default function TeamDetailPage() {
   const [projects, setProjects] = useState<Project[]>([]);
   const [documents, setDocuments] = useState<Document[]>([]);
   const [conversations, setConversations] = useState<Conversation[]>([]);
+  const [activities, setActivities] = useState<ActivityItem[]>([]);
+  const [loadingActivities, setLoadingActivities] = useState(false);
 
   // Work items state (for BOS 2.0 teams)
   const [workItemFormOpen, setWorkItemFormOpen] = useState(false);
@@ -155,6 +169,17 @@ export default function TeamDetailPage() {
   const [newProjectDescription, setNewProjectDescription] = useState("");
   const [creatingProject, setCreatingProject] = useState(false);
   const [kanbanRefreshKey, setKanbanRefreshKey] = useState(0);
+
+  // Document assignment state
+  const [assignDocumentOpen, setAssignDocumentOpen] = useState(false);
+  const [availableDocuments, setAvailableDocuments] = useState<Document[]>([]);
+  const [loadingDocuments, setLoadingDocuments] = useState(false);
+  const [assigningDocument, setAssigningDocument] = useState(false);
+
+  // Document upload state
+  const [uploadDocumentOpen, setUploadDocumentOpen] = useState(false);
+  const [uploadingDocument, setUploadingDocument] = useState(false);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
   // Form state for settings
   const [editForm, setEditForm] = useState({
@@ -187,6 +212,9 @@ export default function TeamDetailPage() {
     }
     if (activeTab === "conversations" && conversations.length === 0) {
       fetchConversations();
+    }
+    if (activeTab === "activity" && activities.length === 0) {
+      fetchActivities();
     }
   }, [activeTab]);
 
@@ -236,10 +264,16 @@ export default function TeamDetailPage() {
 
   const fetchProjects = async () => {
     try {
+      console.log("Fetching projects for team:", teamId);
       const response = await fetch(`/api/projects?team_id=${teamId}`);
       if (response.ok) {
         const data = await response.json();
+        console.log("Projects response:", data);
         setProjects(data.projects || []);
+        // Update team project count to match actual count
+        if (team) {
+          setTeam(prev => prev ? { ...prev, project_count: (data.projects || []).length } : null);
+        }
       }
     } catch (error) {
       console.error("Error fetching projects:", error);
@@ -267,6 +301,21 @@ export default function TeamDetailPage() {
       }
     } catch (error) {
       console.error("Error fetching conversations:", error);
+    }
+  };
+
+  const fetchActivities = async () => {
+    setLoadingActivities(true);
+    try {
+      const response = await fetch(`/api/teams/${teamId}/activity?limit=50`);
+      if (response.ok) {
+        const data = await response.json();
+        setActivities(data.activities || []);
+      }
+    } catch (error) {
+      console.error("Error fetching activities:", error);
+    } finally {
+      setLoadingActivities(false);
     }
   };
 
@@ -326,6 +375,117 @@ export default function TeamDetailPage() {
       }
     } catch (error) {
       console.error("Error fetching org members:", error);
+    }
+  };
+
+  // Fetch documents available to assign (not assigned to any team)
+  const fetchAvailableDocuments = async () => {
+    setLoadingDocuments(true);
+    try {
+      const response = await fetch("/api/documents");
+      if (response.ok) {
+        const data = await response.json();
+        // Filter to only show documents not assigned to this team
+        const available = (data.documents || []).filter(
+          (doc: Document) => !(doc as any).team_id || (doc as any).team_id !== teamId
+        );
+        setAvailableDocuments(available);
+      }
+    } catch (error) {
+      console.error("Error fetching documents:", error);
+    } finally {
+      setLoadingDocuments(false);
+    }
+  };
+
+  // Assign a document to this team
+  const handleAssignDocument = async (documentId: string) => {
+    console.log("Assigning document:", documentId, "to team:", teamId);
+    setAssigningDocument(true);
+    try {
+      const response = await fetch(`/api/teams/${teamId}/documents`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ document_id: documentId }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        // Add to team documents
+        setDocuments((prev) => [...prev, data.document]);
+        // Remove from available list
+        setAvailableDocuments((prev) => prev.filter((d) => d.id !== documentId));
+        toast.success("Document assigned to team");
+      } else {
+        const error = await response.json();
+        toast.error(error.error || "Failed to assign document");
+      }
+    } catch (error) {
+      console.error("Error assigning document:", error);
+      toast.error("Failed to assign document");
+    } finally {
+      setAssigningDocument(false);
+    }
+  };
+
+  // Upload document directly to team
+  const handleUploadDocument = async () => {
+    if (!selectedFile) return;
+
+    setUploadingDocument(true);
+    try {
+      const formData = new FormData();
+      formData.append("file", selectedFile);
+      formData.append("team_id", teamId);
+
+      const response = await fetch("/api/documents/upload", {
+        method: "POST",
+        body: formData,
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        // Add to team documents
+        setDocuments((prev) => [...prev, {
+          id: data.id,
+          title: data.title,
+          file_type: selectedFile.type,
+          file_size: data.file_size,
+          updated_at: data.created_at,
+          created_at: data.created_at,
+        } as Document]);
+        toast.success("Document uploaded and assigned to team");
+        setUploadDocumentOpen(false);
+        setSelectedFile(null);
+      } else {
+        const errorText = await response.text();
+        toast.error(errorText || "Failed to upload document");
+      }
+    } catch (error) {
+      console.error("Error uploading document:", error);
+      toast.error("Failed to upload document");
+    } finally {
+      setUploadingDocument(false);
+    }
+  };
+
+  // Remove document from team
+  const handleRemoveDocument = async (documentId: string) => {
+    try {
+      const response = await fetch(
+        `/api/teams/${teamId}/documents?documentId=${documentId}`,
+        { method: "DELETE" }
+      );
+
+      if (response.ok) {
+        setDocuments((prev) => prev.filter((d) => d.id !== documentId));
+        toast.success("Document removed from team");
+      } else {
+        toast.error("Failed to remove document");
+      }
+    } catch (error) {
+      console.error("Error removing document:", error);
+      toast.error("Failed to remove document");
     }
   };
 
@@ -1042,26 +1202,50 @@ export default function TeamDetailPage() {
                     Documents shared with this team (included in AI context)
                   </CardDescription>
                 </div>
-                <Button onClick={() => router.push("/dashboard/library")}>
-                  <Plus className="h-4 w-4 mr-2" />
-                  Upload Document
-                </Button>
+                <div className="flex gap-2">
+                  <Button
+                    onClick={() => setUploadDocumentOpen(true)}
+                  >
+                    <Plus className="h-4 w-4 mr-2" />
+                    Upload New
+                  </Button>
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      fetchAvailableDocuments();
+                      setAssignDocumentOpen(true);
+                    }}
+                  >
+                    <FileText className="h-4 w-4 mr-2" />
+                    Assign Existing
+                  </Button>
+                </div>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
                   {documents.map((doc) => (
                     <div
                       key={doc.id}
-                      className="flex items-center gap-4 p-4 rounded-lg border cursor-pointer hover:bg-muted/50 transition-colors"
-                      onClick={() => router.push(`/dashboard/documents/${doc.id}`)}
+                      className="flex items-center gap-4 p-4 rounded-lg border hover:bg-muted/50 transition-colors"
                     >
                       <FileText className="h-10 w-10 text-muted-foreground" />
-                      <div className="flex-1 min-w-0">
+                      <div
+                        className="flex-1 min-w-0 cursor-pointer"
+                        onClick={() => router.push(`/dashboard/documents/${doc.id}`)}
+                      >
                         <p className="font-medium">{doc.title}</p>
                         <p className="text-sm text-muted-foreground">
                           {doc.file_type?.toUpperCase()} • Updated {new Date(doc.updated_at).toLocaleDateString()}
                         </p>
                       </div>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => handleRemoveDocument(doc.id)}
+                        title="Remove from team"
+                      >
+                        <Trash2 className="h-4 w-4 text-muted-foreground hover:text-destructive" />
+                      </Button>
                     </div>
                   ))}
                   {documents.length === 0 && (
@@ -1071,55 +1255,15 @@ export default function TeamDetailPage() {
                       <p className="text-sm mt-2">
                         Documents assigned to this team will be included in AI context
                       </p>
-                    </div>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          {/* Conversations Tab */}
-          <TabsContent value="conversations">
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between">
-                <div>
-                  <CardTitle>Team Conversations</CardTitle>
-                  <CardDescription>
-                    AI conversations using this team's context
-                  </CardDescription>
-                </div>
-                <Button onClick={handleCreateConversation}>
-                  <Plus className="h-4 w-4 mr-2" />
-                  New Conversation
-                </Button>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  {conversations.map((conv) => (
-                    <div
-                      key={conv.id}
-                      className="flex items-center gap-4 p-4 rounded-lg border cursor-pointer hover:bg-muted/50 transition-colors"
-                      onClick={() => router.push(`/dashboard/chat?conversation=${conv.id}`)}
-                    >
-                      <MessageSquare className="h-10 w-10 text-muted-foreground" />
-                      <div className="flex-1 min-w-0">
-                        <p className="font-medium">{conv.title || "Untitled Conversation"}</p>
-                        <p className="text-sm text-muted-foreground">
-                          {conv.message_count || 0} messages • {new Date(conv.last_message_at || conv.created_at).toLocaleDateString()}
-                        </p>
-                      </div>
-                    </div>
-                  ))}
-                  {conversations.length === 0 && (
-                    <div className="text-center py-8 text-muted-foreground">
-                      <MessageSquare className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                      <p>No conversations yet</p>
                       <Button
                         variant="outline"
                         className="mt-4"
-                        onClick={handleCreateConversation}
+                        onClick={() => {
+                          fetchAvailableDocuments();
+                          setAssignDocumentOpen(true);
+                        }}
                       >
-                        Start First Conversation
+                        Assign Documents
                       </Button>
                     </div>
                   )}
@@ -1128,20 +1272,148 @@ export default function TeamDetailPage() {
             </Card>
           </TabsContent>
 
+          {/* Conversations Tab - Embedded Chat */}
+          <TabsContent value="conversations">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              {/* Conversation History */}
+              <Card className="lg:col-span-1">
+                <CardHeader className="pb-3">
+                  <div className="flex items-center justify-between">
+                    <CardTitle className="text-base">History</CardTitle>
+                    <Button size="sm" variant="ghost" onClick={handleCreateConversation}>
+                      <Plus className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </CardHeader>
+                <CardContent className="p-2">
+                  <div className="space-y-1 max-h-[500px] overflow-y-auto">
+                    {conversations.map((conv) => (
+                      <div
+                        key={conv.id}
+                        className="flex items-center gap-3 p-3 rounded-lg cursor-pointer hover:bg-muted/50 transition-colors"
+                        onClick={() => router.push(`/dashboard/chat?conversation=${conv.id}`)}
+                      >
+                        <MessageSquare className="h-5 w-5 text-muted-foreground flex-shrink-0" />
+                        <div className="flex-1 min-w-0">
+                          <p className="font-medium text-sm truncate">{conv.title || "Untitled"}</p>
+                          <p className="text-xs text-muted-foreground">
+                            {new Date(conv.last_message_at || conv.created_at).toLocaleDateString()}
+                          </p>
+                        </div>
+                      </div>
+                    ))}
+                    {conversations.length === 0 && (
+                      <p className="text-sm text-muted-foreground text-center py-4">
+                        No past conversations
+                      </p>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Embedded Team Chat */}
+              <Card className="lg:col-span-2">
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-base flex items-center gap-2">
+                    <Sparkles className="h-4 w-4" />
+                    Chat with {team.name} AI
+                  </CardTitle>
+                  <CardDescription>
+                    AI assistant using this team's context and documents
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="p-0">
+                  <div className="h-[500px]">
+                    <TeamAssistant
+                      teamId={teamId}
+                      teamName={team.name}
+                      teamEmoji={team.emoji}
+                      personality={(team as any).ai_context?.personality}
+                    />
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+
           {/* Activity Tab */}
           <TabsContent value="activity">
             <Card>
-              <CardHeader>
-                <CardTitle>Team Activity</CardTitle>
-                <CardDescription>
-                  Recent activity across the team
-                </CardDescription>
+              <CardHeader className="flex flex-row items-center justify-between">
+                <div>
+                  <CardTitle>Team Activity</CardTitle>
+                  <CardDescription>
+                    Recent activity across the team
+                  </CardDescription>
+                </div>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={fetchActivities}
+                  disabled={loadingActivities}
+                >
+                  {loadingActivities ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    "Refresh"
+                  )}
+                </Button>
               </CardHeader>
               <CardContent>
-                <div className="text-center py-8 text-muted-foreground">
-                  <Activity className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                  <p>Activity tracking coming soon</p>
-                </div>
+                {loadingActivities && activities.length === 0 ? (
+                  <div className="flex items-center justify-center py-8">
+                    <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+                  </div>
+                ) : activities.length === 0 ? (
+                  <div className="text-center py-8 text-muted-foreground">
+                    <Activity className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                    <p>No activity yet</p>
+                    <p className="text-sm mt-2">Activity will appear here as team members create projects, documents, and work items</p>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {activities.map((activity) => (
+                      <div
+                        key={activity.id}
+                        className="flex items-start gap-4 p-4 rounded-lg border hover:bg-muted/30 transition-colors"
+                      >
+                        <Avatar className="h-9 w-9">
+                          <AvatarImage src={activity.actor_avatar} />
+                          <AvatarFallback>
+                            {activity.actor_name?.charAt(0) || "?"}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm">
+                            <span className="font-medium">{activity.actor_name}</span>
+                            {" "}
+                            <span className="text-muted-foreground">
+                              {activity.action_type === "joined" ? "joined" :
+                               activity.action_type === "created" ? "created" :
+                               activity.action_type === "updated" ? "updated" :
+                               activity.action_type === "assigned" ? "assigned" :
+                               activity.action_type}
+                            </span>
+                            {" "}
+                            <span className="text-muted-foreground">
+                              {activity.entity_type === "work_item" ? "item" :
+                               activity.entity_type === "team" ? "team" :
+                               activity.entity_type}
+                            </span>
+                            {" "}
+                            <span className="font-medium">{activity.entity_name}</span>
+                          </p>
+                          <p className="text-xs text-muted-foreground mt-1">
+                            {new Date(activity.created_at).toLocaleString()}
+                          </p>
+                        </div>
+                        <Badge variant="outline" className="text-xs capitalize">
+                          {activity.entity_type === "work_item" ? "item" : activity.entity_type}
+                        </Badge>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </CardContent>
             </Card>
           </TabsContent>
@@ -1492,6 +1764,157 @@ export default function TeamDetailPage() {
         ]}
         onSuccess={fetchConsultingAdvisors}
       />
+
+      {/* Assign Document Dialog */}
+      <Dialog open={assignDocumentOpen} onOpenChange={setAssignDocumentOpen}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Assign Document to Team</DialogTitle>
+            <DialogDescription>
+              Select a document from your library to assign to {team.name}. Documents assigned to this team will be included in AI context.
+            </DialogDescription>
+          </DialogHeader>
+          <ScrollArea className="max-h-[400px]">
+            <div className="space-y-2 py-4 pr-4">
+              {loadingDocuments ? (
+                <div className="flex items-center justify-center py-8">
+                  <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+                </div>
+              ) : availableDocuments.length === 0 ? (
+                <div className="text-center py-8 text-muted-foreground">
+                  <FileText className="h-10 w-10 mx-auto mb-3 opacity-50" />
+                  <p className="text-sm">No documents available</p>
+                  <p className="text-xs mt-1">
+                    Upload documents to your library first
+                  </p>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="mt-4"
+                    onClick={() => {
+                      setAssignDocumentOpen(false);
+                      router.push("/dashboard/library");
+                    }}
+                  >
+                    Go to Library
+                  </Button>
+                </div>
+              ) : (
+                availableDocuments.map((doc) => (
+                  <div
+                    key={doc.id}
+                    className="flex items-center gap-3 p-3 rounded-lg border hover:bg-muted/50 transition-colors"
+                  >
+                    <FileText className="h-8 w-8 text-muted-foreground flex-shrink-0" />
+                    <div className="flex-1 min-w-0">
+                      <p className="font-medium text-sm truncate">{doc.title}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {doc.file_type?.toUpperCase()} • {new Date(doc.updated_at).toLocaleDateString()}
+                      </p>
+                    </div>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="flex-shrink-0"
+                      onClick={() => handleAssignDocument(doc.id)}
+                      disabled={assigningDocument}
+                    >
+                      {assigningDocument ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : (
+                        "Assign"
+                      )}
+                    </Button>
+                  </div>
+                ))
+              )}
+            </div>
+          </ScrollArea>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setAssignDocumentOpen(false)}>
+              Done
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Upload Document Dialog */}
+      <Dialog open={uploadDocumentOpen} onOpenChange={setUploadDocumentOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Upload Document to Team</DialogTitle>
+            <DialogDescription>
+              Upload a document directly to {team.name}. Supported: PDF, DOCX, TXT, MD, CSV
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div
+              className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors ${
+                selectedFile ? "border-primary bg-primary/5" : "border-muted-foreground/25 hover:border-muted-foreground/50"
+              }`}
+            >
+              {selectedFile ? (
+                <div className="space-y-2">
+                  <FileText className="h-10 w-10 mx-auto text-primary" />
+                  <p className="font-medium">{selectedFile.name}</p>
+                  <p className="text-sm text-muted-foreground">
+                    {(selectedFile.size / 1024 / 1024).toFixed(2)} MB
+                  </p>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setSelectedFile(null)}
+                  >
+                    Remove
+                  </Button>
+                </div>
+              ) : (
+                <label className="cursor-pointer">
+                  <input
+                    type="file"
+                    className="hidden"
+                    accept=".pdf,.docx,.txt,.md,.csv"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) setSelectedFile(file);
+                    }}
+                  />
+                  <div className="space-y-2">
+                    <Plus className="h-10 w-10 mx-auto text-muted-foreground" />
+                    <p className="text-sm text-muted-foreground">
+                      Click to select a file or drag and drop
+                    </p>
+                  </div>
+                </label>
+              )}
+            </div>
+          </div>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => {
+                setUploadDocumentOpen(false);
+                setSelectedFile(null);
+              }}
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={handleUploadDocument}
+              disabled={!selectedFile || uploadingDocument}
+            >
+              {uploadingDocument ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                  Uploading...
+                </>
+              ) : (
+                "Upload"
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

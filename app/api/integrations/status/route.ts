@@ -15,6 +15,16 @@ export async function GET() {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
+    // Check for user's connected accounts - get ALL Gmail accounts
+    const { data: emailAccounts } = await supabase
+      .from("email_accounts")
+      .select("id, provider, email_address, created_at")
+      .eq("user_id", user.id)
+      .order("created_at", { ascending: true });
+
+    const gmailAccounts = emailAccounts?.filter((a) => a.provider === "gmail") || [];
+    const gmailAccount = gmailAccounts[0]; // For backwards compatibility
+
     // Check which integrations are configured via environment variables
     const integrations = [
       {
@@ -32,15 +42,20 @@ export async function GET() {
       },
       {
         id: "gmail",
+        provider: "gmail",
         name: "Gmail",
         description: "Send and receive emails through your Gmail account",
         icon: "Mail",
         color: "text-red-500",
-        connected: !!(
-          process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET
-        ),
+        connected: gmailAccounts.length > 0,
+        email: gmailAccount?.email_address || null,
+        accounts: gmailAccounts.map(a => ({
+          id: a.id,
+          email: a.email_address,
+          connectedAt: a.created_at,
+        })),
         oauth: true,
-        setupUrl: "/api/integrations/google/auth",
+        setupUrl: "/api/email/gmail/connect",
         env_vars: ["GOOGLE_CLIENT_ID", "GOOGLE_CLIENT_SECRET"],
       },
       {

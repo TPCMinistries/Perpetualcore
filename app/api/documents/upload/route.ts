@@ -60,6 +60,8 @@ export async function POST(req: NextRequest) {
     // Parse multipart form data
     const formData = await req.formData();
     const file = formData.get("file") as File;
+    const teamId = formData.get("team_id") as string | null;
+    const projectId = formData.get("project_id") as string | null;
 
     if (!file) {
       return new Response("No file provided", { status: 400 });
@@ -135,6 +137,8 @@ export async function POST(req: NextRequest) {
         file_type: file.type,
         file_size: file.size,
         status: "processing",
+        team_id: teamId || null,
+        project_id: projectId || null,
       })
       .select()
       .single();

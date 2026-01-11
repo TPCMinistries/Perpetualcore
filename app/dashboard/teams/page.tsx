@@ -392,10 +392,15 @@ function TeamCard({
   const templateId = (team as any).template_id;
   const isBOS2 = templateId?.includes("-engine") || templateId?.includes("training") || templateId?.includes("research") || templateId?.includes("technology") || templateId?.includes("opportunities") || workflowStages?.length > 0;
 
+  const handleClick = () => {
+    console.log("Team card clicked:", team.id, team.name);
+    onClick();
+  };
+
   return (
     <Card
       className="hover:shadow-md transition-shadow cursor-pointer group"
-      onClick={onClick}
+      onClick={handleClick}
     >
       <CardHeader className="pb-2">
         <div className="flex items-start justify-between">
