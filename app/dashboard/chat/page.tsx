@@ -16,6 +16,9 @@ import {
 import { ChatInput, MentionedContact } from "./components/ChatInput";
 import { VoiceConversation } from "@/components/voice-conversation-fallback";
 import { createClient } from "@/lib/supabase/client";
+import PromptCommandPalette from "@/components/chat/PromptCommandPalette";
+import PromptLibrary from "@/components/chat/PromptLibrary";
+import { type PromptTemplate } from "@/lib/prompts/templates";
 
 export default function ChatPage() {
   // Core state
@@ -44,6 +47,10 @@ export default function ChatPage() {
   const [attachments, setAttachments] = useState<FileAttachment[]>([]);
   const [isDragging, setIsDragging] = useState(false);
   const [userName, setUserName] = useState<string>();
+
+  // Prompt dialogs state
+  const [showCommandPalette, setShowCommandPalette] = useState(false);
+  const [showPromptLibrary, setShowPromptLibrary] = useState(false);
 
   // Refs
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -114,6 +121,24 @@ export default function ChatPage() {
     setInput(prompt);
     textareaRef.current?.focus();
   };
+
+  // Handle selecting a prompt from command palette or library
+  const handleSelectPrompt = (template: PromptTemplate) => {
+    setInput(template.prompt);
+    textareaRef.current?.focus();
+  };
+
+  // Keyboard shortcut for command palette (Cmd+K)
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === "k") {
+        e.preventDefault();
+        setShowCommandPalette(true);
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, []);
 
   const handleSubmit = async (
     e: React.FormEvent,
@@ -382,11 +407,25 @@ export default function ChatPage() {
           onDragOver={handleDragOver}
           onDragLeave={handleDragLeave}
           onDrop={handleDrop}
-          onOpenCommandPalette={() => {}}
-          onOpenPromptLibrary={() => {}}
-          onToggleQuickActions={() => {}}
+          onOpenCommandPalette={() => setShowCommandPalette(true)}
+          onOpenPromptLibrary={() => setShowPromptLibrary(true)}
+          onToggleQuickActions={() => setShowCommandPalette(true)}
         />
       </div>
+
+      {/* Prompt Command Palette */}
+      <PromptCommandPalette
+        open={showCommandPalette}
+        onOpenChange={setShowCommandPalette}
+        onSelectPrompt={handleSelectPrompt}
+      />
+
+      {/* Prompt Library */}
+      <PromptLibrary
+        open={showPromptLibrary}
+        onOpenChange={setShowPromptLibrary}
+        onSelectPrompt={handleSelectPrompt}
+      />
     </ChatLayout>
   );
 }
