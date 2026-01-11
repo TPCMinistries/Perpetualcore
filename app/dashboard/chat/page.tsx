@@ -27,6 +27,7 @@ export default function ChatPage() {
 
   // Advisor & model state
   const [currentAdvisor, setCurrentAdvisor] = useState<Advisor>(DEFAULT_ADVISOR);
+  const [selectedModel, setSelectedModel] = useState("auto");
   const [currentModel, setCurrentModel] = useState<{
     name: string;
     reason: string;
@@ -176,7 +177,7 @@ export default function ChatPage() {
             ...messages.map((m) => ({ role: m.role, content: m.content })),
             { role: "user", content: messageWithContext },
           ],
-          model: "auto",
+          model: selectedModel,
           conversationId,
           attachments:
             processedAttachments.length > 0 ? processedAttachments : undefined,
@@ -337,6 +338,8 @@ export default function ChatPage() {
           onAdvisorChange={setCurrentAdvisor}
           onVoiceToggle={() => setIsVoiceMode(true)}
           isVoiceMode={isVoiceMode}
+          selectedModel={selectedModel}
+          onModelChange={setSelectedModel}
           currentModel={currentModel}
           ragInfo={ragInfo}
         />
