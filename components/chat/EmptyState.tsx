@@ -10,7 +10,10 @@ import {
   Calendar,
   CheckSquare,
   MessageSquare,
-  Clock,
+  ChevronDown,
+  ChevronUp,
+  Eye,
+  EyeOff,
 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 
@@ -65,6 +68,7 @@ export function EmptyState({
 }: EmptyStateProps) {
   const [activity, setActivity] = useState<RecentActivity | null>(null);
   const [loading, setLoading] = useState(true);
+  const [showConversations, setShowConversations] = useState(true);
 
   useEffect(() => {
     fetchActivity();
@@ -214,34 +218,57 @@ export function EmptyState({
             transition={{ delay: 0.2 }}
             className="mt-auto"
           >
-            <div className="bg-gradient-to-b from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800/50 rounded-xl p-4 border border-slate-200 dark:border-slate-700">
-              <div className="text-xs font-medium text-slate-600 dark:text-slate-300 mb-3 flex items-center gap-2">
-                <MessageSquare className="h-4 w-4 text-violet-500" />
-                Continue a conversation
-              </div>
-              <div className="space-y-1">
-                {recentConversations.map((conv: any) => (
-                  <button
-                    key={conv.id}
-                    onClick={() => onSelectConversation?.(conv.id)}
-                    className="w-full text-left px-3 py-2.5 rounded-lg bg-white dark:bg-slate-800 hover:bg-violet-50 dark:hover:bg-violet-900/20 border border-slate-200 dark:border-slate-600 hover:border-violet-300 dark:hover:border-violet-700 transition-all group shadow-sm"
-                  >
-                    <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-full bg-violet-100 dark:bg-violet-900/30 flex items-center justify-center flex-shrink-0">
-                        <MessageSquare className="h-4 w-4 text-violet-600 dark:text-violet-400" />
+            <div className="bg-gradient-to-b from-violet-50 to-slate-50 dark:from-violet-950/30 dark:to-slate-900 rounded-xl border border-violet-200 dark:border-violet-800/50 overflow-hidden">
+              {/* Header with toggle */}
+              <button
+                onClick={() => setShowConversations(!showConversations)}
+                className="w-full px-4 py-3 flex items-center justify-between bg-violet-100/50 dark:bg-violet-900/20 hover:bg-violet-100 dark:hover:bg-violet-900/30 transition-colors"
+              >
+                <div className="flex items-center gap-2">
+                  <MessageSquare className="h-4 w-4 text-violet-600 dark:text-violet-400" />
+                  <span className="text-sm font-medium text-violet-900 dark:text-violet-100">
+                    Recent conversations
+                  </span>
+                  <span className="text-xs text-violet-600 dark:text-violet-400 bg-violet-200 dark:bg-violet-800 px-1.5 py-0.5 rounded-full">
+                    {recentConversations.length}
+                  </span>
+                </div>
+                <div className="flex items-center gap-2 text-violet-600 dark:text-violet-400">
+                  <span className="text-xs">{showConversations ? "Hide" : "Show"}</span>
+                  {showConversations ? (
+                    <ChevronUp className="h-4 w-4" />
+                  ) : (
+                    <ChevronDown className="h-4 w-4" />
+                  )}
+                </div>
+              </button>
+
+              {/* Conversation list */}
+              {showConversations && (
+                <div className="p-2 space-y-1">
+                  {recentConversations.map((conv: any) => (
+                    <button
+                      key={conv.id}
+                      onClick={() => onSelectConversation?.(conv.id)}
+                      className="w-full text-left px-3 py-2.5 rounded-lg bg-white dark:bg-slate-800 hover:bg-violet-50 dark:hover:bg-violet-900/20 border border-slate-200 dark:border-slate-700 hover:border-violet-300 dark:hover:border-violet-600 transition-all shadow-sm"
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 rounded-full bg-violet-100 dark:bg-violet-900/40 flex items-center justify-center flex-shrink-0">
+                          <MessageSquare className="h-4 w-4 text-violet-600 dark:text-violet-400" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <span className="text-sm font-medium text-slate-800 dark:text-slate-200 truncate block">
+                            {conv.title || "New conversation"}
+                          </span>
+                          <span className="text-xs text-slate-500 dark:text-slate-400">
+                            {formatTime(conv.updated_at)}
+                          </span>
+                        </div>
                       </div>
-                      <div className="flex-1 min-w-0">
-                        <span className="text-sm font-medium text-slate-800 dark:text-slate-200 truncate block">
-                          {conv.title || "New conversation"}
-                        </span>
-                        <span className="text-xs text-slate-500 dark:text-slate-400">
-                          {formatTime(conv.updated_at)}
-                        </span>
-                      </div>
-                    </div>
-                  </button>
-                ))}
-              </div>
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
           </motion.div>
         )}
