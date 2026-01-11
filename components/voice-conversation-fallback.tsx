@@ -1,30 +1,13 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Mic, Volume2, Loader2, Phone, PhoneOff } from "lucide-react";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 
 interface VoiceConversationProps {
   onClose?: () => void;
 }
-
-// Available OpenAI voices
-const VOICES = [
-  { id: "alloy", name: "Alloy", description: "Neutral and balanced" },
-  { id: "echo", name: "Echo", description: "Warm and engaging" },
-  { id: "fable", name: "Fable", description: "Expressive and dynamic" },
-  { id: "onyx", name: "Onyx", description: "Deep and authoritative" },
-  { id: "nova", name: "Nova", description: "Energetic and bright" },
-  { id: "shimmer", name: "Shimmer", description: "Soft and pleasant" },
-];
 
 type ConversationState = "idle" | "listening" | "processing" | "speaking";
 
@@ -32,8 +15,8 @@ export function VoiceConversation({ onClose }: VoiceConversationProps) {
   const [state, setState] = useState<ConversationState>("idle");
   const [transcript, setTranscript] = useState<string[]>([]);
   const [error, setError] = useState<string | null>(null);
-  const [selectedVoice, setSelectedVoice] = useState("alloy");
   const [isRecording, setIsRecording] = useState(false);
+  const selectedVoice = "nova"; // Fixed voice - friendly and clear
 
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
@@ -273,30 +256,6 @@ export function VoiceConversation({ onClose }: VoiceConversationProps) {
           </div>
         </div>
 
-        {state === "idle" && (
-          <div className="flex items-center gap-3 mb-4">
-            <label className="text-sm font-medium text-slate-700 dark:text-slate-300">Voice:</label>
-            <Select
-              value={selectedVoice}
-              onValueChange={setSelectedVoice}
-              disabled={state !== "idle"}
-            >
-              <SelectTrigger className="w-64">
-                <SelectValue placeholder="Select voice" />
-              </SelectTrigger>
-              <SelectContent>
-                {VOICES.map((voice) => (
-                  <SelectItem key={voice.id} value={voice.id}>
-                    <div>
-                      <div className="font-medium">{voice.name}</div>
-                      <div className="text-xs text-muted-foreground">{voice.description}</div>
-                    </div>
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-        )}
       </div>
 
       {/* Transcript */}
