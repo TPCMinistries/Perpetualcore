@@ -344,7 +344,6 @@ export default function ChatPage() {
     return (
       <VoiceConversation
         onClose={() => setIsVoiceMode(false)}
-        conversationId={conversationId}
       />
     );
   }
