@@ -9,15 +9,16 @@ import {
   FileText,
   Calendar,
   CheckSquare,
+  MessageSquare,
   Clock,
-  ArrowRight,
-  File,
 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 
 interface EmptyStateProps {
   onSuggestionClick: (prompt: string) => void;
   userName?: string;
+  conversations?: any[];
+  onSelectConversation?: (id: string) => void;
 }
 
 interface RecentDocument {
@@ -56,7 +57,12 @@ const QUICK_PROMPTS = [
   { icon: "📊", text: "Analyze", prompt: "Help me analyze" },
 ];
 
-export function EmptyState({ onSuggestionClick, userName }: EmptyStateProps) {
+export function EmptyState({
+  onSuggestionClick,
+  userName,
+  conversations,
+  onSelectConversation,
+}: EmptyStateProps) {
   const [activity, setActivity] = useState<RecentActivity | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -110,100 +116,129 @@ export function EmptyState({ onSuggestionClick, userName }: EmptyStateProps) {
 
   // Combine all activity items into a single list
   const activityItems: { type: string; item: any }[] = [];
-
   activity?.meetings?.slice(0, 2).forEach(m => activityItems.push({ type: 'meeting', item: m }));
   activity?.tasks?.slice(0, 2).forEach(t => activityItems.push({ type: 'task', item: t }));
   activity?.documents?.slice(0, 2).forEach(d => activityItems.push({ type: 'document', item: d }));
 
+  const recentConversations = conversations?.slice(0, 5) || [];
+
   return (
-    <div className="flex-1 flex flex-col justify-center px-4 py-4 max-w-3xl mx-auto w-full">
-      {/* Compact Header */}
-      <motion.div
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="text-center mb-4"
-      >
-        <h1 className="text-lg font-semibold text-slate-900 dark:text-slate-100">
-          {userName ? `Hey ${userName}, what can I help with?` : "What can I help with?"}
-        </h1>
-      </motion.div>
+    <div className="flex-1 flex flex-col px-4 py-6 overflow-auto">
+      <div className="max-w-2xl mx-auto w-full flex-1 flex flex-col">
+        {/* Header - with some top spacing */}
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="text-center mb-6 mt-8"
+        >
+          <h1 className="text-xl font-semibold text-slate-900 dark:text-slate-100 mb-1">
+            {userName ? `Hey ${userName}, what can I help with?` : "What can I help with?"}
+          </h1>
+          <p className="text-sm text-slate-500 dark:text-slate-400">
+            Start a new conversation or continue where you left off
+          </p>
+        </motion.div>
 
-      {/* Quick Prompts - Inline */}
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 0.1 }}
-        className="flex flex-wrap justify-center gap-2 mb-4"
-      >
-        {QUICK_PROMPTS.map((prompt, idx) => (
-          <Button
-            key={idx}
-            variant="outline"
-            size="sm"
-            onClick={() => onSuggestionClick(prompt.prompt)}
-            className="text-xs gap-1 h-8 hover:bg-violet-50 hover:border-violet-300 dark:hover:bg-violet-900/20"
-          >
-            <span>{prompt.icon}</span>
-            {prompt.text}
-          </Button>
-        ))}
-      </motion.div>
-
-      {/* Activity - Compact horizontal list */}
-      {!loading && activityItems.length > 0 && (
+        {/* Quick Prompts */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          transition={{ delay: 0.2 }}
-          className="mb-4"
+          transition={{ delay: 0.1 }}
+          className="flex flex-wrap justify-center gap-2 mb-6"
         >
-          <div className="text-xs text-slate-500 dark:text-slate-400 mb-2 text-center">
-            Or pick from your activity:
-          </div>
-          <div className="flex flex-wrap justify-center gap-2">
-            {activityItems.slice(0, 6).map((item, idx) => (
-              <button
-                key={idx}
-                onClick={() => {
-                  if (item.type === 'meeting') {
-                    onSuggestionClick(`Help me prepare for my meeting "${item.item.title}"`);
-                  } else if (item.type === 'task') {
-                    onSuggestionClick(`Help me with my task: "${item.item.title}"`);
-                  } else {
-                    onSuggestionClick(`Summarize my document "${item.item.title}"`);
-                  }
-                }}
-                className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors text-xs max-w-[200px]"
-              >
-                {item.type === 'meeting' && <Calendar className="h-3 w-3 text-blue-500 flex-shrink-0" />}
-                {item.type === 'task' && <CheckSquare className="h-3 w-3 text-amber-500 flex-shrink-0" />}
-                {item.type === 'document' && <FileText className="h-3 w-3 text-violet-500 flex-shrink-0" />}
-                <span className="truncate text-slate-700 dark:text-slate-300">
-                  {item.item.title}
-                </span>
-                {item.type === 'meeting' && (
-                  <span className="text-slate-400 flex-shrink-0">
-                    {formatMeetingTime(item.item.start_time)}
+          {QUICK_PROMPTS.map((prompt, idx) => (
+            <Button
+              key={idx}
+              variant="outline"
+              size="sm"
+              onClick={() => onSuggestionClick(prompt.prompt)}
+              className="text-xs gap-1.5 h-9 hover:bg-violet-50 hover:border-violet-300 dark:hover:bg-violet-900/20"
+            >
+              <span>{prompt.icon}</span>
+              {prompt.text}
+            </Button>
+          ))}
+        </motion.div>
+
+        {/* Activity Items */}
+        {!loading && activityItems.length > 0 && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.15 }}
+            className="mb-6"
+          >
+            <div className="text-xs text-slate-500 dark:text-slate-400 mb-2 text-center">
+              From your activity:
+            </div>
+            <div className="flex flex-wrap justify-center gap-2">
+              {activityItems.slice(0, 6).map((item, idx) => (
+                <button
+                  key={idx}
+                  onClick={() => {
+                    if (item.type === 'meeting') {
+                      onSuggestionClick(`Help me prepare for my meeting "${item.item.title}"`);
+                    } else if (item.type === 'task') {
+                      onSuggestionClick(`Help me with my task: "${item.item.title}"`);
+                    } else {
+                      onSuggestionClick(`Summarize my document "${item.item.title}"`);
+                    }
+                  }}
+                  className="flex items-center gap-2 px-3 py-2 rounded-lg bg-slate-50 dark:bg-slate-800/50 hover:bg-slate-100 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-700 transition-colors text-xs"
+                >
+                  {item.type === 'meeting' && <Calendar className="h-3.5 w-3.5 text-blue-500 flex-shrink-0" />}
+                  {item.type === 'task' && <CheckSquare className="h-3.5 w-3.5 text-amber-500 flex-shrink-0" />}
+                  {item.type === 'document' && <FileText className="h-3.5 w-3.5 text-violet-500 flex-shrink-0" />}
+                  <span className="text-slate-700 dark:text-slate-300 max-w-[150px] truncate">
+                    {item.item.title}
                   </span>
-                )}
-                {item.type === 'task' && item.item.priority && ['urgent', 'high'].includes(item.item.priority) && (
-                  <Badge variant="secondary" className={`text-[9px] px-1 py-0 ${getPriorityColor(item.item.priority)}`}>
-                    {item.item.priority}
-                  </Badge>
-                )}
-              </button>
+                </button>
+              ))}
+            </div>
+          </motion.div>
+        )}
+
+        {loading && (
+          <div className="flex justify-center gap-2 mb-6">
+            {[1, 2, 3].map(i => (
+              <Skeleton key={i} className="h-9 w-36 rounded-lg" />
             ))}
           </div>
-        </motion.div>
-      )}
+        )}
 
-      {loading && (
-        <div className="flex justify-center gap-2 mb-4">
-          {[1, 2, 3].map(i => (
-            <Skeleton key={i} className="h-8 w-32 rounded-full" />
-          ))}
-        </div>
-      )}
+        {/* Recent Conversations */}
+        {recentConversations.length > 0 && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.2 }}
+            className="mt-auto pt-6 border-t border-slate-200 dark:border-slate-800"
+          >
+            <div className="text-xs text-slate-500 dark:text-slate-400 mb-3 flex items-center gap-2">
+              <MessageSquare className="h-3.5 w-3.5" />
+              Recent conversations
+            </div>
+            <div className="space-y-1">
+              {recentConversations.map((conv: any) => (
+                <button
+                  key={conv.id}
+                  onClick={() => onSelectConversation?.(conv.id)}
+                  className="w-full text-left px-3 py-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors group"
+                >
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-slate-700 dark:text-slate-300 truncate flex-1">
+                      {conv.title || "New conversation"}
+                    </span>
+                    <span className="text-xs text-slate-400 ml-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                      {formatTime(conv.updated_at)}
+                    </span>
+                  </div>
+                </button>
+              ))}
+            </div>
+          </motion.div>
+        )}
+      </div>
     </div>
   );
 }

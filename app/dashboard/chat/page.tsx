@@ -349,6 +349,8 @@ export default function ChatPage() {
           <EmptyState
             onSuggestionClick={handleSuggestionClick}
             userName={userName}
+            conversations={conversations}
+            onSelectConversation={handleSelectConversation}
           />
         ) : (
           <ChatMessages
