@@ -4,6 +4,7 @@ export { CalendarHeader } from "./CalendarHeader";
 export { CalendarViewContainer } from "./CalendarViewContainer";
 export { CalendarCell } from "./CalendarCell";
 export { CalendarEvent } from "./CalendarEvent";
+export { EventDetailPanel } from "./EventDetailPanel";
 
 // Views
 export { MonthView } from "./views/MonthView";

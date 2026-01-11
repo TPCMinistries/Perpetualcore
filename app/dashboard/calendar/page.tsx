@@ -1,9 +1,10 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import { CalendarPageProvider, useCalendarPage } from "@/components/calendar/CalendarPageProvider";
 import { CalendarHeader } from "@/components/calendar/CalendarHeader";
 import { CalendarViewContainer } from "@/components/calendar/CalendarViewContainer";
+import { EventDetailPanel } from "@/components/calendar/EventDetailPanel";
 import { useUnifiedCalendar, useCalendarStatus } from "@/lib/calendar/use-calendar";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -11,7 +12,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { Calendar as CalendarIcon, Loader2 } from "lucide-react";
 
 function CalendarContent() {
-  const { state } = useCalendarPage();
+  const { state, closeEventDetail } = useCalendarPage();
   const { data: status, isLoading: statusLoading } = useCalendarStatus();
 
   const {
@@ -19,6 +20,12 @@ function CalendarContent() {
     isLoading: eventsLoading,
     error,
   } = useUnifiedCalendar(state.currentDate, state.filters);
+
+  // Find the selected event from events list
+  const selectedEvent = useMemo(() => {
+    if (!state.selectedEventId || !events) return null;
+    return events.find((e) => e.id === state.selectedEventId) || null;
+  }, [state.selectedEventId, events]);
 
   // Handle keyboard shortcuts
   useEffect(() => {
@@ -133,6 +140,11 @@ function CalendarContent() {
       <CalendarViewContainer
         events={events || []}
         isLoading={eventsLoading}
+      />
+      {/* Event Detail Panel */}
+      <EventDetailPanel
+        event={selectedEvent}
+        onClose={closeEventDetail}
       />
     </div>
   );
