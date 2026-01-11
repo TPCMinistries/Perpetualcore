@@ -68,7 +68,7 @@ export function EmptyState({
 }: EmptyStateProps) {
   const [activity, setActivity] = useState<RecentActivity | null>(null);
   const [loading, setLoading] = useState(true);
-  const [showConversations, setShowConversations] = useState(true);
+  const [showConversations, setShowConversations] = useState(false); // Collapsed by default
 
   useEffect(() => {
     fetchActivity();
@@ -124,7 +124,7 @@ export function EmptyState({
   activity?.tasks?.slice(0, 2).forEach(t => activityItems.push({ type: 'task', item: t }));
   activity?.documents?.slice(0, 2).forEach(d => activityItems.push({ type: 'document', item: d }));
 
-  const recentConversations = conversations?.slice(0, 5) || [];
+  const recentConversations = conversations?.slice(0, 3) || []; // Show max 3 to keep compact
 
   return (
     <div className="flex-1 flex flex-col px-4 py-6 overflow-auto">
@@ -243,27 +243,22 @@ export function EmptyState({
                 </div>
               </button>
 
-              {/* Conversation list */}
+              {/* Conversation list - compact */}
               {showConversations && (
                 <div className="p-2 space-y-1">
                   {recentConversations.map((conv: any) => (
                     <button
                       key={conv.id}
                       onClick={() => onSelectConversation?.(conv.id)}
-                      className="w-full text-left px-3 py-2.5 rounded-lg bg-white dark:bg-slate-800 hover:bg-violet-50 dark:hover:bg-violet-900/20 border border-slate-200 dark:border-slate-700 hover:border-violet-300 dark:hover:border-violet-600 transition-all shadow-sm"
+                      className="w-full text-left px-3 py-2 rounded-lg hover:bg-violet-50 dark:hover:bg-violet-900/20 transition-colors"
                     >
-                      <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-full bg-violet-100 dark:bg-violet-900/40 flex items-center justify-center flex-shrink-0">
-                          <MessageSquare className="h-4 w-4 text-violet-600 dark:text-violet-400" />
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <span className="text-sm font-medium text-slate-800 dark:text-slate-200 truncate block">
-                            {conv.title || "New conversation"}
-                          </span>
-                          <span className="text-xs text-slate-500 dark:text-slate-400">
-                            {formatTime(conv.updated_at)}
-                          </span>
-                        </div>
+                      <div className="flex items-center justify-between gap-2">
+                        <span className="text-sm text-slate-700 dark:text-slate-300 truncate">
+                          {conv.title || "New conversation"}
+                        </span>
+                        <span className="text-xs text-slate-400 dark:text-slate-500 flex-shrink-0">
+                          {formatTime(conv.updated_at)}
+                        </span>
                       </div>
                     </button>
                   ))}
