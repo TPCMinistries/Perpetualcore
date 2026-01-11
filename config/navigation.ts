@@ -676,7 +676,7 @@ export const NAVIGATION_CONFIG_V2: NavigationSection[] = [
     ],
   },
 
-  // COMMUNICATION - Email and Contacts together
+  // COMMUNICATION - Email, Contacts, Calendar together
   {
     section: "Communication",
     color: "text-slate-600 dark:text-slate-400",
@@ -693,6 +693,17 @@ export const NAVIGATION_CONFIG_V2: NavigationSection[] = [
           complexity: "essential",
           isCore: true,
           helpText: "Your emails, drafts, and notifications in one place",
+        },
+      },
+      {
+        name: "Calendar",
+        href: "/dashboard/calendar",
+        icon: Calendar,
+        adaptiveConfig: {
+          visibleFor: ["beginner", "intermediate", "advanced"],
+          complexity: "essential",
+          isCore: true,
+          helpText: "Meetings, scheduling, and calendar sync with Google",
         },
       },
       {
@@ -820,16 +831,6 @@ export const NAVIGATION_CONFIG_V2: NavigationSection[] = [
           visibleFor: ["beginner", "intermediate", "advanced"],
           complexity: "essential",
           helpText: "Unified document library with AI-powered organization",
-        },
-      },
-      {
-        name: "Calendar",
-        href: "/dashboard/calendar",
-        icon: Calendar,
-        adaptiveConfig: {
-          visibleFor: ["beginner", "intermediate", "advanced"],
-          complexity: "standard",
-          helpText: "Meetings, scheduling, and intelligent briefings",
         },
       },
       {
