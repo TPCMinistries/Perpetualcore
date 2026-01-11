@@ -32,7 +32,7 @@ interface ChatInputProps {
   onToggleQuickActions: () => void;
 }
 
-export { MentionedContact };
+export type { MentionedContact };
 
 export function ChatInput({
   input,
