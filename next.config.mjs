@@ -58,6 +58,11 @@ const withPWA = withPWAInit({
       },
     },
     {
+      // Exclude voice API from caching - audio streams don't cache well
+      urlPattern: /^https:\/\/.*\/api\/voice\/.*/i,
+      handler: 'NetworkOnly',
+    },
+    {
       urlPattern: /^https:\/\/.*\/api\/.*/i,
       handler: 'NetworkFirst',
       options: {
