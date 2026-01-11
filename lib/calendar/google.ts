@@ -2,10 +2,16 @@ import { google } from "googleapis";
 import { createClient } from "@/lib/supabase/server";
 
 // Initialize Google Calendar API
+const CALENDAR_REDIRECT_URI =
+  process.env.GOOGLE_REDIRECT_URI ||
+  (process.env.NEXT_PUBLIC_APP_URL
+    ? `${process.env.NEXT_PUBLIC_APP_URL}/api/calendar/google/callback`
+    : "https://perpetualcore.com/api/calendar/google/callback");
+
 const oauth2Client = new google.auth.OAuth2(
   process.env.GOOGLE_CLIENT_ID!,
   process.env.GOOGLE_CLIENT_SECRET!,
-  process.env.GOOGLE_REDIRECT_URI || `${process.env.NEXT_PUBLIC_APP_URL}/api/calendar/google/callback`
+  CALENDAR_REDIRECT_URI
 );
 
 /**
