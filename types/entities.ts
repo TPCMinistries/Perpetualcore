@@ -125,6 +125,10 @@ export interface EntityWithStats extends Entity {
   project_count: number;
 }
 
+// Type aliases for "Space" terminology (UI-facing name for Entity)
+export type Space = Entity;
+export type SpaceWithStats = EntityWithStats;
+
 // =====================================================
 // BRANDS (Under Entities)
 // =====================================================

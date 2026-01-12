@@ -76,7 +76,7 @@ export function EntitySwitcher({ compact = false, showBrandSelector = false }: E
       <Link href="/dashboard/entities/new">
         <Button variant="outline" size="sm" className="gap-2">
           <Plus className="h-4 w-4" />
-          <span className="hidden sm:inline">Create Entity</span>
+          <span className="hidden sm:inline">Create Space</span>
         </Button>
       </Link>
     );
@@ -84,7 +84,7 @@ export function EntitySwitcher({ compact = false, showBrandSelector = false }: E
 
   const currentIcon = currentEntity?.entity_type?.name
     ? entityTypeIcons[currentEntity.entity_type.name] || <Globe className="h-4 w-4" />
-    : <Users className="h-4 w-4" />;  // "All Entities" icon when no entity selected
+    : <Users className="h-4 w-4" />;  // "All Spaces" icon when no space selected
 
   // Get total counts across all entities
   const totalProjects = entities.reduce((sum, e) => sum + (e.project_count || 0), 0);
@@ -96,16 +96,16 @@ export function EntitySwitcher({ compact = false, showBrandSelector = false }: E
         <DropdownMenuTrigger asChild>
           <Button variant="ghost" size="sm" className="gap-1.5 h-8 max-w-[180px]">
             {currentIcon}
-            <span className="truncate text-xs">{currentEntity?.name || "All Entities"}</span>
+            <span className="truncate text-xs">{currentEntity?.name || "All Spaces"}</span>
             <ChevronDown className="h-3 w-3 opacity-50 flex-shrink-0" />
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="start" className="w-64">
           <DropdownMenuLabel className="text-xs text-muted-foreground">
-            Switch Entity
+            Switch Space
           </DropdownMenuLabel>
           <DropdownMenuSeparator />
-          {/* All Entities option */}
+          {/* All Spaces option */}
           <DropdownMenuItem
             onClick={() => switchEntity(null)}
             className="flex items-center gap-3 py-2"
@@ -114,9 +114,9 @@ export function EntitySwitcher({ compact = false, showBrandSelector = false }: E
               <Users className="h-4 w-4" />
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium truncate">All Entities</p>
+              <p className="text-sm font-medium truncate">All Spaces</p>
               <p className="text-xs text-muted-foreground">
-                {entities.length} entities · {totalProjects} projects
+                {entities.length} spaces · {totalProjects} projects
               </p>
             </div>
             {!currentEntity && (
@@ -139,7 +139,7 @@ export function EntitySwitcher({ compact = false, showBrandSelector = false }: E
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-medium truncate">{entity.name}</p>
                   <p className="text-xs text-muted-foreground">
-                    {entity.brand_count} brands · {entity.project_count} projects
+                    {entity.project_count} projects
                   </p>
                 </div>
                 {currentEntity?.id === entity.id && (
@@ -152,13 +152,13 @@ export function EntitySwitcher({ compact = false, showBrandSelector = false }: E
           <DropdownMenuItem asChild>
             <Link href="/dashboard/entities/new" className="flex items-center gap-2">
               <Plus className="h-4 w-4" />
-              Create New Entity
+              Create New Space
             </Link>
           </DropdownMenuItem>
           <DropdownMenuItem asChild>
             <Link href="/dashboard/entities" className="flex items-center gap-2">
               <Settings className="h-4 w-4" />
-              Manage Entities
+              Manage Spaces
             </Link>
           </DropdownMenuItem>
         </DropdownMenuContent>
@@ -169,10 +169,10 @@ export function EntitySwitcher({ compact = false, showBrandSelector = false }: E
   // Full-width version
   return (
     <div className="space-y-3">
-      {/* Entity Selector */}
+      {/* Space Selector */}
       <div className="bg-muted/50 rounded-lg p-3">
         <div className="flex items-center justify-between mb-2">
-          <span className="text-xs font-medium text-muted-foreground">Current Entity</span>
+          <span className="text-xs font-medium text-muted-foreground">Current Space</span>
           <Link href="/dashboard/entities">
             <Button variant="ghost" size="sm" className="h-6 text-xs">
               <Settings className="h-3 w-3 mr-1" />
@@ -192,15 +192,15 @@ export function EntitySwitcher({ compact = false, showBrandSelector = false }: E
                   {currentIcon}
                 </div>
                 <div className="text-left">
-                  <p className="font-medium">{currentEntity?.name || "All Entities"}</p>
+                  <p className="font-medium">{currentEntity?.name || "All Spaces"}</p>
                   {currentEntity ? (
                     <p className="text-xs text-muted-foreground">
-                      {currentEntity.entity_type?.name || "Entity"} ·{" "}
-                      {currentEntity.brand_count} brands
+                      {currentEntity.entity_type?.name || "Space"} ·{" "}
+                      {currentEntity.project_count || 0} projects
                     </p>
                   ) : (
                     <p className="text-xs text-muted-foreground">
-                      {entities.length} entities · {totalProjects} projects
+                      {entities.length} spaces · {totalProjects} projects
                     </p>
                   )}
                 </div>
@@ -209,9 +209,9 @@ export function EntitySwitcher({ compact = false, showBrandSelector = false }: E
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent className="w-[var(--radix-dropdown-menu-trigger-width)]">
-            <DropdownMenuLabel>Your Entities</DropdownMenuLabel>
+            <DropdownMenuLabel>Your Spaces</DropdownMenuLabel>
             <DropdownMenuSeparator />
-            {/* All Entities option */}
+            {/* All Spaces option */}
             <DropdownMenuItem
               onClick={() => switchEntity(null)}
               className="flex items-center gap-3 py-3"
@@ -221,13 +221,13 @@ export function EntitySwitcher({ compact = false, showBrandSelector = false }: E
               </div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2">
-                  <p className="font-medium truncate">All Entities</p>
+                  <p className="font-medium truncate">All Spaces</p>
                   {!currentEntity && (
                     <Check className="h-4 w-4 text-primary" />
                   )}
                 </div>
                 <p className="text-xs text-muted-foreground">
-                  {entities.length} entities · {totalProjects} projects
+                  {entities.length} spaces · {totalProjects} projects
                 </p>
               </div>
             </DropdownMenuItem>
@@ -252,7 +252,7 @@ export function EntitySwitcher({ compact = false, showBrandSelector = false }: E
                       )}
                     </div>
                     <p className="text-xs text-muted-foreground">
-                      {entity.brand_count} brands · {entity.project_count} projects
+                      {entity.project_count} projects
                     </p>
                   </div>
                 </DropdownMenuItem>
@@ -262,7 +262,7 @@ export function EntitySwitcher({ compact = false, showBrandSelector = false }: E
             <DropdownMenuItem asChild>
               <Link href="/dashboard/entities/new">
                 <Plus className="h-4 w-4 mr-2" />
-                Create New Entity
+                Create New Space
               </Link>
             </DropdownMenuItem>
           </DropdownMenuContent>

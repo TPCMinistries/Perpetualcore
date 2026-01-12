@@ -53,7 +53,7 @@ export default function EntitiesPage() {
   const [deleting, setDeleting] = useState<string | null>(null);
 
   const handleDelete = async (entityId: string) => {
-    if (!confirm("Are you sure you want to delete this entity? This will also delete all associated brands and projects.")) {
+    if (!confirm("Are you sure you want to delete this space? This will also delete all associated projects.")) {
       return;
     }
 
@@ -87,43 +87,30 @@ export default function EntitiesPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-slate-900 dark:text-white">
-            Entities
+            Spaces
           </h1>
           <p className="text-muted-foreground mt-1">
-            Manage your companies, organizations, and personal brands
+            Manage your businesses, ventures, and projects
           </p>
         </div>
         <Link href="/dashboard/entities/new">
           <Button className="gap-2">
             <Plus className="h-4 w-4" />
-            New Entity
+            New Space
           </Button>
         </Link>
       </div>
 
       {/* Stats Cards */}
-      <div className="grid gap-4 md:grid-cols-4">
+      <div className="grid gap-4 md:grid-cols-3">
         <Card>
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-muted-foreground">Total Entities</p>
+                <p className="text-sm text-muted-foreground">Total Spaces</p>
                 <p className="text-2xl font-bold">{entities.length}</p>
               </div>
               <Building2 className="h-8 w-8 text-muted-foreground/50" />
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="pt-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-muted-foreground">Total Brands</p>
-                <p className="text-2xl font-bold">
-                  {entities.reduce((sum, e) => sum + (e.brand_count || 0), 0)}
-                </p>
-              </div>
-              <FolderKanban className="h-8 w-8 text-muted-foreground/50" />
             </div>
           </CardContent>
         </Card>
@@ -144,9 +131,9 @@ export default function EntitiesPage() {
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-muted-foreground">Current</p>
+                <p className="text-sm text-muted-foreground">Current Space</p>
                 <p className="text-lg font-medium truncate max-w-[120px]">
-                  {currentEntity?.name || "None"}
+                  {currentEntity?.name || "All Spaces"}
                 </p>
               </div>
               <Globe className="h-8 w-8 text-muted-foreground/50" />
@@ -155,19 +142,19 @@ export default function EntitiesPage() {
         </Card>
       </div>
 
-      {/* Entities Grid */}
+      {/* Spaces Grid */}
       {entities.length === 0 ? (
         <Card>
           <CardContent className="flex flex-col items-center justify-center py-12">
             <Building2 className="h-12 w-12 text-muted-foreground/50 mb-4" />
-            <h3 className="text-lg font-medium mb-2">No entities yet</h3>
+            <h3 className="text-lg font-medium mb-2">No spaces yet</h3>
             <p className="text-muted-foreground text-center mb-4">
-              Create your first entity to start organizing your brands and projects
+              Create your first space to start organizing your projects and work
             </p>
             <Link href="/dashboard/entities/new">
               <Button>
                 <Plus className="h-4 w-4 mr-2" />
-                Create Entity
+                Create Space
               </Button>
             </Link>
           </CardContent>
@@ -201,7 +188,7 @@ export default function EntitiesPage() {
                     <div className="flex-1 min-w-0">
                       <CardTitle className="text-lg truncate">{entity.name}</CardTitle>
                       <CardDescription className="truncate">
-                        {entity.entity_type?.name || "Entity"}
+                        {entity.entity_type?.name || "Space"}
                         {entity.primary_focus?.name && ` • ${entity.primary_focus.name}`}
                       </CardDescription>
                     </div>
@@ -248,10 +235,6 @@ export default function EntitiesPage() {
                     </p>
                   )}
                   <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                    <div className="flex items-center gap-1">
-                      <FolderKanban className="h-4 w-4" />
-                      <span>{entity.brand_count || 0} brands</span>
-                    </div>
                     <div className="flex items-center gap-1">
                       <Sparkles className="h-4 w-4" />
                       <span>{entity.project_count || 0} projects</span>

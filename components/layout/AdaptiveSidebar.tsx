@@ -97,16 +97,6 @@ export function AdaptiveSidebar({ profile, isCollapsed }: AdaptiveSidebarProps) 
         <WorkspaceSwitcher collapsed={isCollapsed} />
       </div>
 
-      {/* Organization (only when expanded) */}
-      {profile?.organization && !isCollapsed && (
-        <div className="border-b border-slate-200 dark:border-slate-800 px-6 py-3 bg-slate-50 dark:bg-slate-800/50">
-          <p className="text-xs font-medium text-slate-500 dark:text-slate-400">Organization</p>
-          <p className="text-sm font-medium truncate text-slate-900 dark:text-slate-100">
-            {profile.organization.name}
-          </p>
-        </div>
-      )}
-
       {/* Experience Level Toggle (only when expanded) */}
       {!isCollapsed && (
         <div className="px-3 py-3 border-b border-slate-200 dark:border-slate-800">

@@ -95,7 +95,7 @@ export default function NewEntityPage() {
     e.preventDefault();
 
     if (!formData.name.trim()) {
-      alert("Entity name is required");
+      alert("Space name is required");
       return;
     }
 
@@ -121,11 +121,11 @@ export default function NewEntityPage() {
         router.push("/dashboard/entities");
       } else {
         const error = await response.json();
-        alert(error.error || "Failed to create entity");
+        alert(error.error || "Failed to create space");
       }
     } catch (error) {
-      console.error("Error creating entity:", error);
-      alert("Failed to create entity");
+      console.error("Error creating space:", error);
+      alert("Failed to create space");
     } finally {
       setIsSubmitting(false);
     }
@@ -142,10 +142,10 @@ export default function NewEntityPage() {
         </Link>
         <div>
           <h1 className="text-2xl font-bold text-slate-900 dark:text-white">
-            Create Entity
+            Create Space
           </h1>
           <p className="text-muted-foreground">
-            Add a new company, organization, or personal brand
+            Add a new business, venture, or project space
           </p>
         </div>
       </div>
@@ -154,9 +154,9 @@ export default function NewEntityPage() {
       <form onSubmit={handleSubmit}>
         <Card>
           <CardHeader>
-            <CardTitle>Entity Details</CardTitle>
+            <CardTitle>Space Details</CardTitle>
             <CardDescription>
-              Basic information about your entity
+              Basic information about your space
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
@@ -300,7 +300,7 @@ export default function NewEntityPage() {
             ) : (
               <>
                 <Check className="h-4 w-4 mr-2" />
-                Create Entity
+                Create Space
               </>
             )}
           </Button>

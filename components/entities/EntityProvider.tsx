@@ -35,18 +35,17 @@ export function EntityProvider({ children }: EntityProviderProps) {
       const data = await response.json();
       setEntities(data.entities || []);
 
-      // Restore last selected entity from localStorage
+      // Restore last selected entity from localStorage (if explicitly saved)
+      // Default: "All Spaces" (null) - shows all data unfiltered
       const savedEntityId = localStorage.getItem("perpetual-current-entity");
       if (savedEntityId && data.entities?.length > 0) {
         const saved = data.entities.find((e: EntityWithStats) => e.id === savedEntityId);
         if (saved) {
           setCurrentEntity(saved);
-        } else if (data.entities.length > 0) {
-          setCurrentEntity(data.entities[0]);
         }
-      } else if (data.entities?.length > 0) {
-        setCurrentEntity(data.entities[0]);
+        // If saved entity no longer exists, stay at "All Spaces" (null)
       }
+      // No else - default to null (All Spaces)
     } catch (err) {
       console.error("Error fetching entities:", err);
       setError(err instanceof Error ? err.message : "Failed to load entities");

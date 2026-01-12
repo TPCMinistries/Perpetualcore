@@ -79,7 +79,7 @@ export async function GET(request: NextRequest) {
     authUrl.searchParams.set("scope", scopes.join(" "));
     authUrl.searchParams.set("state", state);
     authUrl.searchParams.set("access_type", "offline");
-    authUrl.searchParams.set("prompt", "consent"); // Force consent to get refresh token
+    authUrl.searchParams.set("prompt", "select_account consent"); // Force account selection AND consent to get refresh token
 
     return NextResponse.redirect(authUrl.toString());
   } catch (error) {
