@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { LogOut, ChevronDown, ChevronRight, Sparkles } from "lucide-react";
 import { ExperienceLevelToggle, useExperienceLevel } from "@/components/experience-level/ExperienceLevelToggle";
+import { DashboardModeToggle } from "@/components/dashboard/DashboardModeToggle";
 import { getFilteredNavigationV2, NavigationSection } from "@/config/navigation";
 import { UserExperienceLevel } from "@/types/user-experience";
 import { useWorkspace } from "@/components/workspaces/WorkspaceProvider";
@@ -97,9 +98,10 @@ export function AdaptiveSidebar({ profile, isCollapsed }: AdaptiveSidebarProps) 
         <WorkspaceSwitcher collapsed={isCollapsed} />
       </div>
 
-      {/* Experience Level Toggle (only when expanded) */}
+      {/* Experience Level & Dashboard Mode Toggle (only when expanded) */}
       {!isCollapsed && (
-        <div className="px-3 py-3 border-b border-slate-200 dark:border-slate-800">
+        <div className="px-3 py-3 border-b border-slate-200 dark:border-slate-800 space-y-2">
+          <DashboardModeToggle className="w-full justify-between" />
           <ExperienceLevelToggle />
         </div>
       )}
