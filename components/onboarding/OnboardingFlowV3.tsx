@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { X, ArrowRight, Brain, Upload, Users, Sparkles, Check, Rocket, Zap, BookOpen, Code, Briefcase, GraduationCap, Palette, TrendingUp, MessageSquare, Loader2, Wand2 } from "lucide-react";
+import { X, ArrowRight, Brain, Upload, Users, Sparkles, Check, Rocket, Zap, BookOpen, Code, Briefcase, GraduationCap, Palette, TrendingUp, MessageSquare, Loader2, Wand2, LayoutGrid, Bot } from "lucide-react";
+import { DashboardMode } from "@/types/user-experience";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
@@ -29,6 +30,7 @@ interface UserContext {
   teamContext: string;
   contentTypes: string[];
   aiExperience: string;
+  dashboardMode: DashboardMode; // Simple (AI Employees) or Full
 }
 
 const STEPS = [
@@ -55,6 +57,7 @@ export function OnboardingFlowV3({ userProfile }: OnboardingFlowV3Props) {
     teamContext: "",
     contentTypes: [],
     aiExperience: "beginner",
+    dashboardMode: "full", // Default to full mode
   });
 
   useEffect(() => {
@@ -109,6 +112,21 @@ export function OnboardingFlowV3({ userProfile }: OnboardingFlowV3Props) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(userContext),
       });
+
+      // Save dashboard mode preference
+      localStorage.setItem("perpetual-dashboard-mode", userContext.dashboardMode);
+      window.dispatchEvent(
+        new CustomEvent("dashboardModeChanged", { detail: { mode: userContext.dashboardMode } })
+      );
+
+      // If simple mode selected, seed AI employees
+      if (userContext.dashboardMode === "simple") {
+        try {
+          await fetch("/api/assistants/seed-employees", { method: "POST" });
+        } catch (seedError) {
+          console.error("Failed to seed AI employees:", seedError);
+        }
+      }
 
       localStorage.setItem("onboarding-completed-v3", "true");
       await fetch("/api/onboarding", {
@@ -172,7 +190,12 @@ export function OnboardingFlowV3({ userProfile }: OnboardingFlowV3Props) {
 
         <div className="min-h-[300px] md:min-h-[400px] flex flex-col justify-center">
           {currentStep === 0 && (
-            <WelcomeStep onNext={handleNext} isLoading={isLoading} />
+            <WelcomeStep
+              onNext={handleNext}
+              isLoading={isLoading}
+              userContext={userContext}
+              setUserContext={setUserContext}
+            />
           )}
           {currentStep === 1 && (
             <PersonalInfoStep
@@ -219,54 +242,118 @@ export function OnboardingFlowV3({ userProfile }: OnboardingFlowV3Props) {
   );
 }
 
-function WelcomeStep({ onNext, isLoading }: { onNext: () => void; isLoading: boolean }) {
+function WelcomeStep({
+  onNext,
+  isLoading,
+  userContext,
+  setUserContext,
+}: {
+  onNext: () => void;
+  isLoading: boolean;
+  userContext: UserContext;
+  setUserContext: (ctx: UserContext) => void;
+}) {
+  const [selectedMode, setSelectedMode] = useState<DashboardMode | null>(null);
+
+  const handleModeSelect = (mode: DashboardMode) => {
+    setSelectedMode(mode);
+    setUserContext({ ...userContext, dashboardMode: mode });
+  };
+
   return (
-    <div className="text-center space-y-6 py-8">
-      <div className="inline-flex h-24 w-24 rounded-full bg-gradient-to-br from-purple-500 via-blue-500 to-indigo-600 items-center justify-center mb-4 shadow-lg">
-        <Brain className="h-12 w-12 text-white animate-pulse" />
+    <div className="text-center space-y-6 py-4">
+      <div className="inline-flex h-20 w-20 rounded-full bg-gradient-to-br from-purple-500 via-blue-500 to-indigo-600 items-center justify-center mb-2 shadow-lg">
+        <Brain className="h-10 w-10 text-white animate-pulse" />
       </div>
       <div>
-        <h1 className="text-4xl font-bold mb-3 bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
-          Welcome to Your AI Brain!
+        <h1 className="text-3xl font-bold mb-2 bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
+          Welcome to Perpetual Core!
         </h1>
-        <p className="text-xl text-slate-600 dark:text-slate-300 mb-2">
-          You just got an <span className="font-semibold text-slate-900 dark:text-white">infinite memory</span>
-        </p>
-        <p className="text-slate-500 dark:text-slate-400 max-w-md mx-auto">
-          Before we start, let's personalize your experience so your AI brain understands you better
+        <p className="text-lg text-slate-600 dark:text-slate-300">
+          How would you like to get started?
         </p>
       </div>
 
-      <div className="bg-gradient-to-br from-purple-50 to-blue-50 dark:from-purple-950/20 dark:to-blue-950/20 rounded-xl p-6 max-w-xl mx-auto border border-purple-200 dark:border-purple-800">
-        <p className="text-sm text-slate-700 dark:text-slate-300 mb-3 font-medium">
-          ✨ We'll ask a few quick questions to:
-        </p>
-        <div className="text-left space-y-2 text-sm text-slate-600 dark:text-slate-400">
-          <div className="flex items-start gap-2">
-            <Check className="h-4 w-4 text-purple-600 dark:text-purple-400 mt-0.5 flex-shrink-0" />
-            <span>Tailor AI responses to your field and experience</span>
+      {/* Mode Selection */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-2xl mx-auto mt-6">
+        {/* Simple Mode */}
+        <button
+          onClick={() => handleModeSelect("simple")}
+          className={`relative p-6 rounded-xl border-2 text-left transition-all ${
+            selectedMode === "simple"
+              ? "border-violet-500 bg-violet-50 dark:bg-violet-950/30 ring-2 ring-violet-500/20"
+              : "border-slate-200 dark:border-slate-700 hover:border-violet-300 hover:bg-violet-50/50 dark:hover:bg-violet-950/20"
+          }`}
+        >
+          {selectedMode === "simple" && (
+            <div className="absolute top-3 right-3">
+              <Check className="h-5 w-5 text-violet-600" />
+            </div>
+          )}
+          <div className="flex items-center gap-3 mb-3">
+            <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center">
+              <Bot className="h-6 w-6 text-white" />
+            </div>
+            <div>
+              <h3 className="font-semibold text-lg">Simple Mode</h3>
+              <p className="text-sm text-violet-600 dark:text-violet-400">Recommended for new users</p>
+            </div>
           </div>
-          <div className="flex items-start gap-2">
-            <Check className="h-4 w-4 text-purple-600 dark:text-purple-400 mt-0.5 flex-shrink-0" />
-            <span>Show you the most relevant features first</span>
+          <p className="text-sm text-slate-600 dark:text-slate-400 mb-3">
+            Meet your AI team of 6 employees who handle tasks for you automatically.
+          </p>
+          <div className="flex flex-wrap gap-2">
+            <span className="text-xs px-2 py-1 rounded-full bg-violet-100 dark:bg-violet-900/50 text-violet-700 dark:text-violet-300">Atlas - Exec Assistant</span>
+            <span className="text-xs px-2 py-1 rounded-full bg-violet-100 dark:bg-violet-900/50 text-violet-700 dark:text-violet-300">Echo - Social</span>
+            <span className="text-xs px-2 py-1 rounded-full bg-violet-100 dark:bg-violet-900/50 text-violet-700 dark:text-violet-300">+4 more</span>
           </div>
-          <div className="flex items-start gap-2">
-            <Check className="h-4 w-4 text-purple-600 dark:text-purple-400 mt-0.5 flex-shrink-0" />
-            <span>Personalize your entire experience</span>
+        </button>
+
+        {/* Full Mode */}
+        <button
+          onClick={() => handleModeSelect("full")}
+          className={`relative p-6 rounded-xl border-2 text-left transition-all ${
+            selectedMode === "full"
+              ? "border-blue-500 bg-blue-50 dark:bg-blue-950/30 ring-2 ring-blue-500/20"
+              : "border-slate-200 dark:border-slate-700 hover:border-blue-300 hover:bg-blue-50/50 dark:hover:bg-blue-950/20"
+          }`}
+        >
+          {selectedMode === "full" && (
+            <div className="absolute top-3 right-3">
+              <Check className="h-5 w-5 text-blue-600" />
+            </div>
+          )}
+          <div className="flex items-center gap-3 mb-3">
+            <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center">
+              <LayoutGrid className="h-6 w-6 text-white" />
+            </div>
+            <div>
+              <h3 className="font-semibold text-lg">Full Mode</h3>
+              <p className="text-sm text-blue-600 dark:text-blue-400">For power users</p>
+            </div>
           </div>
-        </div>
+          <p className="text-sm text-slate-600 dark:text-slate-400 mb-3">
+            Full access to all features: projects, teams, workflows, and advanced AI tools.
+          </p>
+          <div className="flex flex-wrap gap-2">
+            <span className="text-xs px-2 py-1 rounded-full bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300">Projects</span>
+            <span className="text-xs px-2 py-1 rounded-full bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300">Workflows</span>
+            <span className="text-xs px-2 py-1 rounded-full bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300">AI Chat</span>
+            <span className="text-xs px-2 py-1 rounded-full bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300">+more</span>
+          </div>
+        </button>
       </div>
 
       <Button
         onClick={onNext}
-        disabled={isLoading}
+        disabled={isLoading || !selectedMode}
         size="lg"
         className="mt-6 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
       >
-        Let's Personalize Your Experience <ArrowRight className="ml-2 h-5 w-5" />
+        Continue <ArrowRight className="ml-2 h-5 w-5" />
       </Button>
 
-      <p className="text-xs text-slate-500 dark:text-slate-400">Takes less than 60 seconds</p>
+      <p className="text-xs text-slate-500 dark:text-slate-400">You can change this anytime in Settings</p>
     </div>
   );
 }

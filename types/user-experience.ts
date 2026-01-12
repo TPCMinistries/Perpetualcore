@@ -5,6 +5,29 @@
 
 export type UserExperienceLevel = "beginner" | "intermediate" | "advanced";
 
+/**
+ * Dashboard Mode Types
+ * Controls whether to show simple AI Employees view or full dashboard
+ */
+export type DashboardMode = "simple" | "full";
+
+export const DASHBOARD_MODES: Record<
+  DashboardMode,
+  {
+    label: string;
+    description: string;
+  }
+> = {
+  simple: {
+    label: "Simple Mode",
+    description: "AI Employees dashboard - clean, focused, task-oriented",
+  },
+  full: {
+    label: "Full Mode",
+    description: "Complete dashboard with all features and tools",
+  },
+};
+
 export type FeatureComplexity = "essential" | "standard" | "advanced" | "developer";
 
 export interface AdaptiveNavConfig {

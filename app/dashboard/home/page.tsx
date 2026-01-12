@@ -1,7 +1,7 @@
 import { Suspense } from "react";
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
-import { DailyBriefing } from "@/components/briefing/DailyBriefing";
+import { DashboardContent } from "@/components/dashboard/DashboardContent";
 import { Skeleton } from "@/components/ui/skeleton";
 
 export const metadata = {
@@ -51,9 +51,9 @@ export default async function HomePage() {
 
   return (
     <div className="space-y-6">
-      {/* Daily Briefing Content - handles greeting with client-side time */}
+      {/* Dashboard Content - automatically switches between Simple and Full modes */}
       <Suspense fallback={<BriefingSkeleton />}>
-        <DailyBriefing userId={user.id} userName={firstName} />
+        <DashboardContent userId={user.id} userName={firstName} />
       </Suspense>
     </div>
   );

@@ -25,7 +25,10 @@ import {
   Zap,
   Layout,
   Sparkles,
+  Users,
+  LayoutGrid,
 } from "lucide-react";
+import { DashboardMode, DASHBOARD_MODES } from "@/types/user-experience";
 import { useTheme } from "next-themes";
 
 interface AppearanceSettings {
@@ -37,6 +40,7 @@ interface AppearanceSettings {
   compactMode: boolean;
   showAvatars: boolean;
   sidebarCollapsed: boolean;
+  dashboardMode: DashboardMode;
 }
 
 export default function AppearanceSettingsPage() {
@@ -51,6 +55,7 @@ export default function AppearanceSettingsPage() {
     compactMode: false,
     showAvatars: true,
     sidebarCollapsed: false,
+    dashboardMode: "full",
   });
 
   useEffect(() => {
@@ -60,9 +65,11 @@ export default function AppearanceSettingsPage() {
   async function loadSettings() {
     try {
       const saved = localStorage.getItem("appearance_settings");
+      const dashboardMode = localStorage.getItem("perpetual-dashboard-mode") as DashboardMode || "full";
+
       if (saved) {
         const parsed = JSON.parse(saved);
-        setSettings(parsed);
+        setSettings({ ...parsed, dashboardMode });
 
         // Apply theme
         if (parsed.theme) {
@@ -74,6 +81,9 @@ export default function AppearanceSettingsPage() {
 
         // Apply accent color
         document.documentElement.setAttribute("data-accent", parsed.accentColor || "blue");
+      } else {
+        // Load dashboard mode even if no appearance settings
+        setSettings(prev => ({ ...prev, dashboardMode }));
       }
     } catch (error) {
       console.error("Error loading appearance settings:", error);
@@ -83,8 +93,15 @@ export default function AppearanceSettingsPage() {
   async function handleSave() {
     setSaving(true);
     try {
-      // Save to localStorage
-      localStorage.setItem("appearance_settings", JSON.stringify(settings));
+      // Save to localStorage (excluding dashboardMode which has its own key)
+      const { dashboardMode, ...appearanceOnly } = settings;
+      localStorage.setItem("appearance_settings", JSON.stringify(appearanceOnly));
+
+      // Save dashboard mode separately and emit event
+      localStorage.setItem("perpetual-dashboard-mode", dashboardMode);
+      window.dispatchEvent(
+        new CustomEvent("dashboardModeChanged", { detail: { mode: dashboardMode } })
+      );
 
       // Apply theme
       setTheme(settings.theme);
@@ -327,6 +344,50 @@ export default function AppearanceSettingsPage() {
               onCheckedChange={(checked) => updateSetting("sidebarCollapsed", checked)}
             />
           </div>
+        </CardContent>
+      </Card>
+
+      {/* Dashboard Mode */}
+      <Card className="border-2 border-violet-200 dark:border-violet-800">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Users className="h-5 w-5 text-violet-600" />
+            Dashboard Mode
+          </CardTitle>
+          <CardDescription>
+            Choose between a simple AI Employees view or the full dashboard
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <RadioGroup
+            value={settings.dashboardMode}
+            onValueChange={(value: DashboardMode) => updateSetting("dashboardMode", value)}
+            className="grid grid-cols-2 gap-4"
+          >
+            <Label
+              htmlFor="mode-simple"
+              className="flex flex-col items-center justify-between rounded-lg border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground cursor-pointer [&:has([data-state=checked])]:border-violet-500"
+            >
+              <RadioGroupItem value="simple" id="mode-simple" className="sr-only" />
+              <Users className="mb-3 h-8 w-8 text-violet-600" />
+              <span className="font-medium">Simple Mode</span>
+              <span className="text-xs text-muted-foreground text-center mt-1">
+                AI Employees dashboard - clean, focused
+              </span>
+            </Label>
+
+            <Label
+              htmlFor="mode-full"
+              className="flex flex-col items-center justify-between rounded-lg border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground cursor-pointer [&:has([data-state=checked])]:border-violet-500"
+            >
+              <RadioGroupItem value="full" id="mode-full" className="sr-only" />
+              <LayoutGrid className="mb-3 h-8 w-8 text-violet-600" />
+              <span className="font-medium">Full Mode</span>
+              <span className="text-xs text-muted-foreground text-center mt-1">
+                Complete dashboard with all features
+              </span>
+            </Label>
+          </RadioGroup>
         </CardContent>
       </Card>
 
