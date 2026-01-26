@@ -12,9 +12,15 @@ import { extractInsightsFromConversation, extractUserPreferences } from './insig
 import { generateSuggestions, getPendingSuggestions } from './suggestion-engine';
 import { buildKnowledgeGraphFromConversations } from './knowledge-graph';
 import { recognizePatterns } from './insight-extractor';
+import { extractCommitmentsFromConversation } from '@/lib/ai/commitment-extractor';
 
 /**
  * Process a conversation and extract intelligence
+ * This runs after every chat message and extracts:
+ * - Insights about the user
+ * - User preferences
+ * - Commitments and follow-ups (for proactive nudges)
+ * - Knowledge graph relationships
  */
 export async function processConversationForIntelligence(
   conversationId: string,
@@ -22,10 +28,14 @@ export async function processConversationForIntelligence(
   userId: string
 ): Promise<void> {
   try {
-    // Extract insights and preferences in parallel
+    // Extract insights, preferences, and commitments in parallel
     await Promise.all([
       extractInsightsFromConversation(conversationId, organizationId, userId),
       extractUserPreferences(conversationId, organizationId, userId),
+      // Extract commitments for proactive nudging
+      extractCommitmentsFromConversation(conversationId, userId, organizationId).catch(
+        (err) => console.error("Commitment extraction error:", err)
+      ),
     ]);
 
     // Build knowledge graph (async, don't wait)
