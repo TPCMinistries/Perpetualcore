@@ -214,12 +214,14 @@ function isQuietHours(start?: number, end?: number): boolean {
   const now = new Date();
   const hour = now.getHours();
 
-  if (start < end) {
-    // Normal range (e.g., 22 to 7)
-    return hour >= start || hour < end;
-  } else {
-    // Overnight range
+  if (start <= end) {
+    // Same-day range (e.g., 9 to 17 = work hours, or 22 to 23)
+    // Quiet if hour is within this range
     return hour >= start && hour < end;
+  } else {
+    // Overnight range (e.g., 22 to 7 = sleep hours)
+    // Quiet if hour >= start OR hour < end
+    return hour >= start || hour < end;
   }
 }
 

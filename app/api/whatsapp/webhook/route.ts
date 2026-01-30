@@ -1,8 +1,54 @@
 import { NextRequest, NextResponse } from "next/server";
 import { processIncomingWhatsAppMessage } from "@/lib/whatsapp/twilio";
+import crypto from "crypto";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
+
+/**
+ * Verify Twilio request signature
+ * https://www.twilio.com/docs/usage/security#validating-requests
+ */
+function verifyTwilioSignature(
+  signature: string | null,
+  url: string,
+  params: Record<string, string>
+): boolean {
+  const authToken = process.env.TWILIO_AUTH_TOKEN;
+
+  // Skip validation in development or if auth token not configured
+  if (!authToken || process.env.NODE_ENV === "development") {
+    console.warn("⚠️ Skipping Twilio signature validation (dev mode or no auth token)");
+    return true;
+  }
+
+  if (!signature) {
+    console.error("❌ Missing Twilio signature header");
+    return false;
+  }
+
+  // Sort parameters alphabetically and concatenate
+  const sortedParams = Object.keys(params)
+    .sort()
+    .reduce((acc, key) => acc + key + params[key], "");
+
+  const dataToSign = url + sortedParams;
+  const expectedSignature = crypto
+    .createHmac("sha1", authToken)
+    .update(Buffer.from(dataToSign, "utf-8"))
+    .digest("base64");
+
+  const isValid = crypto.timingSafeEqual(
+    Buffer.from(signature),
+    Buffer.from(expectedSignature)
+  );
+
+  if (!isValid) {
+    console.error("❌ Invalid Twilio signature");
+  }
+
+  return isValid;
+}
 
 /**
  * POST - Twilio WhatsApp webhook handler
@@ -14,18 +60,35 @@ export const dynamic = "force-dynamic";
  */
 export async function POST(req: NextRequest) {
   try {
+    // Get Twilio signature from headers
+    const twilioSignature = req.headers.get("x-twilio-signature");
+    const url = req.url;
+
     const formData = await req.formData();
 
-    const from = formData.get("From") as string;
-    const to = formData.get("To") as string;
-    const body = formData.get("Body") as string;
-    const messageSid = formData.get("MessageSid") as string;
-    const numMedia = parseInt(formData.get("NumMedia") as string) || 0;
+    // Convert formData to params object for signature verification
+    const params: Record<string, string> = {};
+    formData.forEach((value, key) => {
+      params[key] = value.toString();
+    });
+
+    // Verify the request is actually from Twilio
+    if (!verifyTwilioSignature(twilioSignature, url, params)) {
+      console.error("🚨 Unauthorized WhatsApp webhook request - invalid signature");
+      return new NextResponse("Unauthorized", { status: 403 });
+    }
+
+    // Use params from verification step
+    const from = params.From || "";
+    const to = params.To || "";
+    const body = params.Body || "";
+    const messageSid = params.MessageSid || "";
+    const numMedia = parseInt(params.NumMedia || "0") || 0;
 
     // Get media URL if present
     let mediaUrl: string | undefined;
     if (numMedia > 0) {
-      mediaUrl = formData.get("MediaUrl0") as string;
+      mediaUrl = params.MediaUrl0;
     }
 
     console.log("📱 Incoming WhatsApp message:", {
