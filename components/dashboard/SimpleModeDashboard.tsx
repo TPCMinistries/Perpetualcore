@@ -16,6 +16,7 @@ import {
   Settings2,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { ExternalTasksWidget } from "@/components/briefing/ExternalTasksWidget";
 
 interface AIEmployee {
   id: string;
@@ -359,6 +360,9 @@ export function SimpleModeDashboard({ userName, userId }: SimpleModeDashboardPro
           ))}
         </div>
       </div>
+
+      {/* External Tasks (Todoist, Linear) */}
+      <ExternalTasksWidget limit={5} compact />
 
       {/* Quick Actions */}
       <Card>

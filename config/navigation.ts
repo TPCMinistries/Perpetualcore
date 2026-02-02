@@ -1029,6 +1029,17 @@ export const NAVIGATION_CONFIG_V2: NavigationSection[] = [
         },
       },
       {
+        name: "AI Skills",
+        href: "/dashboard/settings/skills",
+        icon: Boxes,
+        adaptiveConfig: {
+          visibleFor: ["beginner", "intermediate", "advanced"],
+          complexity: "standard",
+          badge: "new",
+          helpText: "Extend your AI with skills like Gmail, Calendar, Todoist, Linear, and more",
+        },
+      },
+      {
         name: "Developer",
         href: "/dashboard/developer",
         icon: Code,

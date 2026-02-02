@@ -6,7 +6,7 @@ import { selectBestModel, isAutoMode } from "@/lib/ai/model-router";
 import { AI_MODELS } from "@/lib/ai/config";
 import { searchDocuments, buildRAGContext, shouldUseRAG } from "@/lib/documents/rag";
 import { calculateCost } from "@/lib/ai/cost-calculator";
-import { AVAILABLE_TOOLS, executeToolCall } from "@/lib/ai/tools/registry";
+import { AVAILABLE_TOOLS, executeToolCall, getAvailableToolsForUser } from "@/lib/ai/tools/registry";
 import { loadUserPreferences, applyPreferencesToPrompt } from "@/lib/intelligence/preference-loader";
 import { getIntelligenceSummary } from "@/lib/intelligence";
 import { rateLimiters, checkRateLimit } from "@/lib/rate-limit";
@@ -578,6 +578,61 @@ Or, you can copy and paste the text content directly into this chat.`;
       if (isDev) console.error("⚠️ Memory loading error (non-fatal):", error);
     }
 
+    // Proactive skill suggestions - detect skill-related queries and suggest enabling skills
+    const skillKeywordMap: Record<string, { keywords: RegExp; skillId: string; skillName: string; settingsPath: string }> = {
+      todoist: {
+        keywords: /\b(todoist|todo|task list|my tasks|task management|create task|add task|tasks for today|to-do)\b/i,
+        skillId: "todoist",
+        skillName: "Todoist",
+        settingsPath: "/dashboard/settings/skills",
+      },
+      linear: {
+        keywords: /\b(linear|issues?|tickets?|sprint|backlog|engineering tasks?|dev tasks?|bug tracking)\b/i,
+        skillId: "linear",
+        skillName: "Linear",
+        settingsPath: "/dashboard/settings/skills",
+      },
+      gmail: {
+        keywords: /\b(gmail|emails?|inbox|draft email|send email|compose email|email search|unread emails?)\b/i,
+        skillId: "gmail",
+        skillName: "Gmail",
+        settingsPath: "/dashboard/settings/skills",
+      },
+      google_calendar: {
+        keywords: /\b(calendar|schedule|meetings?|events?|free time|availability|book meeting|create event)\b/i,
+        skillId: "google_calendar",
+        skillName: "Google Calendar",
+        settingsPath: "/dashboard/settings/skills",
+      },
+    };
+
+    // Check which skills are relevant to the query but not enabled
+    const enabledSkillIds = new Set(Object.keys(skillMap));
+    const suggestedSkills: string[] = [];
+
+    for (const [key, config] of Object.entries(skillKeywordMap)) {
+      if (config.keywords.test(userMessage) && !enabledSkillIds.has(config.skillId)) {
+        suggestedSkills.push(config.skillName);
+      }
+    }
+
+    // Add proactive skill suggestion to system prompt
+    if (suggestedSkills.length > 0) {
+      const skillSuggestionContext = `
+--- PROACTIVE SKILL SUGGESTIONS ---
+The user's query relates to services they haven't connected yet. If the query requires these services, politely mention they can enable these skills:
+
+${suggestedSkills.map(s => `• **${s}** - Enable at Settings → AI Skills`).join("\n")}
+
+Example response when user asks about Todoist tasks but doesn't have it connected:
+"I'd be happy to help with your tasks! To access your Todoist tasks directly, you can enable the Todoist skill in Settings → AI Skills. Once connected, I'll be able to show, create, and manage your tasks."
+
+Only mention this if the user is specifically asking for something these skills would provide.
+---`;
+      systemPrompt += "\n\n" + skillSuggestionContext;
+      if (isDev) console.log(`💡 Added skill suggestions: ${suggestedSkills.join(", ")}`);
+    }
+
     // Check if message context suggests contact-related topics for proactive suggestions
     const contactRelatedKeywords = /\b(contact|reach out|follow up|email|call|meeting|connect|introduce|network|relationship|client|prospect|lead|customer|partner|investor|advisor|mentor|colleague|coworker|vendor|supplier|recruiter|hire|hiring|talent)\b/i;
     const shouldSuggestContacts = contactRelatedKeywords.test(userMessage) && !mentionedContactIds?.length;
@@ -933,6 +988,19 @@ When discussing these contacts:
       });
     }
 
+    // Load user's skill tools (core tools + enabled skill tools)
+    let availableTools = AVAILABLE_TOOLS;
+    let skillMap: Record<string, string> = {};
+    try {
+      const userTools = await getAvailableToolsForUser(user.id, organizationId);
+      availableTools = userTools.tools;
+      skillMap = userTools.skillMap;
+      if (isDev) console.log(`🛠️ Loaded ${availableTools.length} tools (${Object.keys(skillMap).length} from skills)`);
+    } catch (error) {
+      if (isDev) console.error("⚠️ Error loading skill tools (non-fatal):", error);
+      // Continue with core tools only
+    }
+
     // Create streaming response
     const encoder = new TextEncoder();
     const stream = new ReadableStream({
@@ -991,11 +1059,11 @@ When discussing these contacts:
             let toolCallsToExecute: ToolCall[] = [];
             let usage: UsageMetadata | undefined;
 
-            // Stream AI response with tools
+            // Stream AI response with tools (core + user's enabled skills)
             for await (const chunk of streamChatCompletion(
               model,
               conversationMessages,
-              AVAILABLE_TOOLS // Pass available tools
+              availableTools // Pass core tools + user's skill tools
             )) {
               // Handle fallback events
               if ((chunk as any).fallback) {
@@ -1065,11 +1133,16 @@ When discussing these contacts:
 
               try {
                 const params = JSON.parse(toolCall.arguments);
-                const result = await executeToolCall(toolCall.name, params, {
-                  userId: user.id,
-                  organizationId: organizationId,
-                  conversationId: convId,
-                });
+                const result = await executeToolCall(
+                  toolCall.name,
+                  params,
+                  {
+                    userId: user.id,
+                    organizationId: organizationId,
+                    conversationId: convId,
+                  },
+                  skillMap // Pass skill map for routing skill tool calls
+                );
 
                 toolResults.push(result);
 

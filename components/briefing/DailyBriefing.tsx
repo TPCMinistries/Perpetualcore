@@ -11,6 +11,7 @@ import { UpcomingMeetings } from "./UpcomingMeetings";
 import { AICommandBar } from "./AICommandBar";
 import { ActivityFeedWidget } from "@/components/activity/ActivityFeedWidget";
 import { TelegramActivityWidget } from "./TelegramActivityWidget";
+import { ExternalTasksWidget } from "./ExternalTasksWidget";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Loader2, RefreshCw, Sun, Coffee, Moon } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -249,6 +250,13 @@ export function DailyBriefing({ userId, userName = "there" }: DailyBriefingProps
             transition={{ delay: 0.3 }}
           >
             <UpcomingMeetings meetings={data.meetings} />
+          </motion.div>
+          <motion.div
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.35 }}
+          >
+            <ExternalTasksWidget limit={5} compact />
           </motion.div>
           <motion.div
             initial={{ opacity: 0, x: 20 }}
