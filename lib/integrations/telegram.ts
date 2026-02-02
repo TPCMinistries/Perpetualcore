@@ -142,7 +142,18 @@ export async function getUserFromTelegramChatId(
     .eq("telegram_chat_id", String(chatId))
     .single();
 
-  if (error || !profile) {
+  if (error) {
+    console.error("Telegram user lookup error:", {
+      chatId: String(chatId),
+      error: error.message,
+      code: error.code,
+      hasServiceKey: !!process.env.SUPABASE_SERVICE_ROLE_KEY,
+    });
+    return null;
+  }
+
+  if (!profile) {
+    console.log("No profile found for telegram_chat_id:", String(chatId));
     return null;
   }
 
@@ -260,10 +271,9 @@ Or send me your account email and I'll help you set it up!`;
   await supabase.from("telegram_interactions").insert({
     id: interactionId,
     user_id: userId,
-    telegram_chat_id: String(chatId),
-    telegram_user_id: String(telegramUser.id),
-    message_text: userText,
-    message_type: message.voice ? "voice" : message.photo ? "photo" : "text",
+    chat_id: String(chatId),
+    message: userText,
+    intent: message.voice ? "voice" : message.photo ? "photo" : "text",
     created_at: new Date().toISOString(),
   });
 
@@ -313,9 +323,9 @@ Or send me your account email and I'll help you set it up!`;
     await supabase
       .from("telegram_interactions")
       .update({
-        ai_response: response,
-        processing_time_ms: Date.now() - message.date * 1000,
-        detected_intent: detectIntent(userText),
+        response: response,
+        response_time_ms: Date.now() - message.date * 1000,
+        intent: detectIntent(userText),
       })
       .eq("id", interactionId);
 
@@ -332,7 +342,7 @@ Or send me your account email and I'll help you set it up!`;
     await supabase
       .from("telegram_interactions")
       .update({
-        error_message: error.message,
+        response: `Error: ${error.message}`,
       })
       .eq("id", interactionId);
 
