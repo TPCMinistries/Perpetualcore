@@ -9,15 +9,9 @@ import {
   Filter,
   MoreHorizontal,
   Trash2,
-  ArrowRight,
   Loader2,
-  Calendar,
   Clock,
-  CheckCircle2,
-  XCircle,
   Edit,
-  Eye,
-  Send,
   Sparkles,
   Linkedin,
   Twitter,
@@ -29,9 +23,12 @@ import {
   LayoutGrid,
   List,
   CalendarDays,
+  FileEdit,
+  Send,
+  CheckCircle,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
@@ -58,8 +55,11 @@ import {
   DialogTrigger,
   DialogFooter,
 } from "@/components/ui/dialog";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn } from "@/lib/utils";
+import { motion } from "framer-motion";
+import { DashboardPageWrapper, DashboardHeader } from "@/components/ui/dashboard-header";
+import { StatCard, StatCardGrid } from "@/components/ui/stat-card";
+import { FilterPills } from "@/components/ui/filter-pills";
 
 interface Content {
   id: string;
@@ -92,14 +92,52 @@ const platformIcons: Record<string, any> = {
   other: FileText,
 };
 
-const statusConfig: Record<string, { label: string; bg: string; text: string }> = {
-  idea: { label: "Idea", bg: "bg-slate-100 dark:bg-slate-800", text: "text-slate-600 dark:text-slate-400" },
-  draft: { label: "Draft", bg: "bg-amber-50 dark:bg-amber-900/20", text: "text-amber-600 dark:text-amber-400" },
-  review: { label: "Review", bg: "bg-blue-50 dark:bg-blue-900/20", text: "text-blue-600 dark:text-blue-400" },
-  approved: { label: "Approved", bg: "bg-emerald-50 dark:bg-emerald-900/20", text: "text-emerald-600 dark:text-emerald-400" },
-  scheduled: { label: "Scheduled", bg: "bg-violet-50 dark:bg-violet-900/20", text: "text-violet-600 dark:text-violet-400" },
-  published: { label: "Published", bg: "bg-green-50 dark:bg-green-900/20", text: "text-green-600 dark:text-green-400" },
-  failed: { label: "Failed", bg: "bg-red-50 dark:bg-red-900/20", text: "text-red-600 dark:text-red-400" },
+const statusConfig: Record<
+  string,
+  { label: string; bg: string; text: string; border: string }
+> = {
+  idea: {
+    label: "Idea",
+    bg: "bg-slate-100 dark:bg-slate-800",
+    text: "text-slate-600 dark:text-slate-400",
+    border: "border-slate-200 dark:border-slate-700",
+  },
+  draft: {
+    label: "Draft",
+    bg: "bg-amber-100 dark:bg-amber-900/30",
+    text: "text-amber-700 dark:text-amber-400",
+    border: "border-amber-200 dark:border-amber-800",
+  },
+  review: {
+    label: "Review",
+    bg: "bg-blue-100 dark:bg-blue-900/30",
+    text: "text-blue-700 dark:text-blue-400",
+    border: "border-blue-200 dark:border-blue-800",
+  },
+  approved: {
+    label: "Approved",
+    bg: "bg-emerald-100 dark:bg-emerald-900/30",
+    text: "text-emerald-700 dark:text-emerald-400",
+    border: "border-emerald-200 dark:border-emerald-800",
+  },
+  scheduled: {
+    label: "Scheduled",
+    bg: "bg-violet-100 dark:bg-violet-900/30",
+    text: "text-violet-700 dark:text-violet-400",
+    border: "border-violet-200 dark:border-violet-800",
+  },
+  published: {
+    label: "Published",
+    bg: "bg-green-100 dark:bg-green-900/30",
+    text: "text-green-700 dark:text-green-400",
+    border: "border-green-200 dark:border-green-800",
+  },
+  failed: {
+    label: "Failed",
+    bg: "bg-rose-100 dark:bg-rose-900/30",
+    text: "text-rose-700 dark:text-rose-400",
+    border: "border-rose-200 dark:border-rose-800",
+  },
 };
 
 const contentTypeLabels: Record<string, string> = {
@@ -115,6 +153,15 @@ const contentTypeLabels: Record<string, string> = {
   podcast_outline: "Podcast",
   press_release: "Press Release",
   case_study: "Case Study",
+};
+
+const cardVariants = {
+  hidden: { opacity: 0, y: 20 },
+  visible: (i: number) => ({
+    opacity: 1,
+    y: 0,
+    transition: { delay: i * 0.05, duration: 0.4, ease: "easeOut" },
+  }),
 };
 
 export default function ContentPage() {
@@ -193,7 +240,6 @@ export default function ContentPage() {
         });
         setShowNewContent(false);
         fetchContent();
-        // Navigate to editor
         router.push(`/dashboard/content/${data.content.id}`);
       }
     } catch (error) {
@@ -247,44 +293,99 @@ export default function ContentPage() {
       : true
   );
 
-  // Group by status for kanban-style view
-  const groupedContent = {
-    draft: filteredContent.filter(c => c.status === "draft" || c.status === "idea"),
-    review: filteredContent.filter(c => c.status === "review" || c.status === "approved"),
-    scheduled: filteredContent.filter(c => c.status === "scheduled"),
-    published: filteredContent.filter(c => c.status === "published"),
-  };
+  // Status filter options
+  const statusFilters = [
+    { id: "all", label: "All Content" },
+    { id: "draft", label: "Drafts" },
+    { id: "review", label: "In Review" },
+    { id: "scheduled", label: "Scheduled" },
+    { id: "published", label: "Published" },
+  ];
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white dark:from-slate-950 dark:to-slate-900 flex items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-violet-500" />
-      </div>
+      <DashboardPageWrapper>
+        <div className="space-y-6">
+          {/* Header Skeleton */}
+          <div className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-8">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-4">
+                <div className="h-14 w-14 rounded-xl bg-slate-200 dark:bg-slate-700 animate-pulse" />
+                <div className="space-y-2">
+                  <div className="h-8 w-48 bg-slate-200 dark:bg-slate-700 rounded animate-pulse" />
+                  <div className="h-4 w-64 bg-slate-100 dark:bg-slate-800 rounded animate-pulse" />
+                </div>
+              </div>
+              <div className="flex gap-2">
+                <div className="h-10 w-28 bg-slate-200 dark:bg-slate-700 rounded-lg animate-pulse" />
+                <div className="h-10 w-36 bg-violet-200 dark:bg-violet-900/50 rounded-lg animate-pulse" />
+              </div>
+            </div>
+          </div>
+          {/* Stats Skeleton */}
+          <div className="grid gap-4 md:grid-cols-5">
+            {[...Array(5)].map((_, i) => (
+              <Card
+                key={i}
+                className="border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900"
+              >
+                <CardContent className="p-5">
+                  <div className="space-y-2">
+                    <div className="h-4 w-16 bg-slate-200 dark:bg-slate-700 rounded animate-pulse" />
+                    <div className="h-8 w-12 bg-slate-100 dark:bg-slate-800 rounded animate-pulse" />
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+          {/* Cards Skeleton */}
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+            {[...Array(6)].map((_, i) => (
+              <Card
+                key={i}
+                className="border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900"
+              >
+                <CardContent className="p-5">
+                  <div className="space-y-3">
+                    <div className="flex items-center gap-2">
+                      <div className="h-8 w-8 rounded-lg bg-slate-200 dark:bg-slate-700 animate-pulse" />
+                      <div className="h-5 w-16 bg-slate-100 dark:bg-slate-800 rounded animate-pulse" />
+                    </div>
+                    <div className="h-5 w-full bg-slate-200 dark:bg-slate-700 rounded animate-pulse" />
+                    <div className="h-4 w-3/4 bg-slate-100 dark:bg-slate-800 rounded animate-pulse" />
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+      </DashboardPageWrapper>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white dark:from-slate-950 dark:to-slate-900">
-      <div className="max-w-7xl mx-auto px-6 py-8">
+    <DashboardPageWrapper>
+      <div className="space-y-6">
         {/* Header */}
-        <div className="mb-8">
-          <div className="flex items-center justify-between mb-6">
-            <div className="flex items-center gap-4">
-              <div className="h-14 w-14 rounded-2xl bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center shadow-lg shadow-violet-500/25">
-                <PenSquare className="h-7 w-7 text-white" />
-              </div>
-              <div>
-                <h1 className="text-3xl font-bold text-slate-900 dark:text-white">Content Studio</h1>
-                <p className="text-slate-500 dark:text-slate-400 mt-0.5">
-                  Create, schedule, and publish content
-                </p>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-3">
+        <DashboardHeader
+          title="Content Studio"
+          subtitle="Create, schedule, and publish content across platforms"
+          icon={PenSquare}
+          iconColor="violet"
+          stats={
+            stats
+              ? [
+                  { label: "total", value: stats.total },
+                  { label: "scheduled", value: stats.scheduled },
+                ]
+              : undefined
+          }
+          actions={
+            <>
               <Button
                 variant="outline"
                 onClick={() => router.push("/dashboard/content/calendar")}
+                className="border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800"
               >
                 <CalendarDays className="h-4 w-4 mr-2" />
                 Calendar
@@ -292,14 +393,19 @@ export default function ContentPage() {
 
               <Dialog open={showNewContent} onOpenChange={setShowNewContent}>
                 <DialogTrigger asChild>
-                  <Button className="h-11 px-5 bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-700 hover:to-purple-700 text-white shadow-lg shadow-violet-500/25 border-0">
+                  <Button className="bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-700 hover:to-purple-700 text-white shadow-lg shadow-violet-500/25">
                     <Plus className="h-4 w-4 mr-2" />
                     Create Content
                   </Button>
                 </DialogTrigger>
                 <DialogContent className="max-w-lg">
                   <DialogHeader>
-                    <DialogTitle>Create New Content</DialogTitle>
+                    <DialogTitle className="flex items-center gap-2">
+                      <div className="p-2 rounded-lg bg-violet-100 dark:bg-violet-900/30">
+                        <PenSquare className="h-4 w-4 text-violet-600 dark:text-violet-400" />
+                      </div>
+                      Create New Content
+                    </DialogTitle>
                   </DialogHeader>
                   <div className="space-y-4 py-4">
                     <div className="space-y-2">
@@ -307,7 +413,10 @@ export default function ContentPage() {
                       <Input
                         placeholder="e.g., Q4 Product Launch Announcement"
                         value={newContent.title}
-                        onChange={(e) => setNewContent({ ...newContent, title: e.target.value })}
+                        onChange={(e) =>
+                          setNewContent({ ...newContent, title: e.target.value })
+                        }
+                        className="border-slate-200 dark:border-slate-700"
                       />
                     </div>
                     <div className="grid grid-cols-2 gap-4">
@@ -315,18 +424,26 @@ export default function ContentPage() {
                         <Label>Content Type</Label>
                         <Select
                           value={newContent.content_type}
-                          onValueChange={(value) => setNewContent({ ...newContent, content_type: value })}
+                          onValueChange={(value) =>
+                            setNewContent({ ...newContent, content_type: value })
+                          }
                         >
-                          <SelectTrigger>
+                          <SelectTrigger className="border-slate-200 dark:border-slate-700">
                             <SelectValue />
                           </SelectTrigger>
                           <SelectContent>
                             <SelectItem value="social">Social Post</SelectItem>
-                            <SelectItem value="linkedin_post">LinkedIn Post</SelectItem>
-                            <SelectItem value="twitter_thread">Twitter Thread</SelectItem>
+                            <SelectItem value="linkedin_post">
+                              LinkedIn Post
+                            </SelectItem>
+                            <SelectItem value="twitter_thread">
+                              Twitter Thread
+                            </SelectItem>
                             <SelectItem value="blog">Blog Post</SelectItem>
                             <SelectItem value="newsletter">Newsletter</SelectItem>
-                            <SelectItem value="video_script">Video Script</SelectItem>
+                            <SelectItem value="video_script">
+                              Video Script
+                            </SelectItem>
                             <SelectItem value="email">Email</SelectItem>
                           </SelectContent>
                         </Select>
@@ -335,9 +452,11 @@ export default function ContentPage() {
                         <Label>Platform</Label>
                         <Select
                           value={newContent.platform}
-                          onValueChange={(value) => setNewContent({ ...newContent, platform: value })}
+                          onValueChange={(value) =>
+                            setNewContent({ ...newContent, platform: value })
+                          }
                         >
-                          <SelectTrigger>
+                          <SelectTrigger className="border-slate-200 dark:border-slate-700">
                             <SelectValue />
                           </SelectTrigger>
                           <SelectContent>
@@ -352,23 +471,33 @@ export default function ContentPage() {
                       </div>
                     </div>
                     <div className="space-y-2">
-                      <Label>AI Prompt (optional - for AI generation)</Label>
+                      <Label>AI Prompt (optional)</Label>
                       <Textarea
-                        placeholder="Describe what you want to create. E.g., Write a LinkedIn post about our new AI feature that helps users save time..."
+                        placeholder="Describe what you want to create. E.g., Write a LinkedIn post about our new AI feature..."
                         value={newContent.ai_prompt}
-                        onChange={(e) => setNewContent({ ...newContent, ai_prompt: e.target.value })}
+                        onChange={(e) =>
+                          setNewContent({
+                            ...newContent,
+                            ai_prompt: e.target.value,
+                          })
+                        }
                         rows={4}
+                        className="border-slate-200 dark:border-slate-700"
                       />
                     </div>
                   </div>
                   <DialogFooter>
-                    <Button variant="outline" onClick={() => setShowNewContent(false)}>
+                    <Button
+                      variant="outline"
+                      onClick={() => setShowNewContent(false)}
+                      className="border-slate-200 dark:border-slate-700"
+                    >
                       Cancel
                     </Button>
                     <Button
                       onClick={createContent}
                       disabled={submitting || !newContent.title.trim()}
-                      className="bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-700 hover:to-purple-700 text-white border-0"
+                      className="bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-700 hover:to-purple-700 text-white"
                     >
                       {submitting ? (
                         <>
@@ -387,112 +516,184 @@ export default function ContentPage() {
                   </DialogFooter>
                 </DialogContent>
               </Dialog>
-            </div>
-          </div>
+            </>
+          }
+        />
 
-          {/* Stats Row */}
-          {stats && (
-            <div className="grid grid-cols-5 gap-4 mb-6">
-              <Card className="border-0 shadow-sm bg-white dark:bg-slate-800/50">
-                <CardContent className="p-4">
-                  <p className="text-sm text-slate-500 dark:text-slate-400">Total</p>
-                  <p className="text-2xl font-bold text-slate-900 dark:text-white">{stats.total}</p>
-                </CardContent>
-              </Card>
-              <Card className="border-0 shadow-sm bg-amber-50 dark:bg-amber-900/20">
-                <CardContent className="p-4">
-                  <p className="text-sm text-amber-600 dark:text-amber-400">Drafts</p>
-                  <p className="text-2xl font-bold text-amber-700 dark:text-amber-300">{stats.draft}</p>
-                </CardContent>
-              </Card>
-              <Card className="border-0 shadow-sm bg-blue-50 dark:bg-blue-900/20">
-                <CardContent className="p-4">
-                  <p className="text-sm text-blue-600 dark:text-blue-400">In Review</p>
-                  <p className="text-2xl font-bold text-blue-700 dark:text-blue-300">{stats.review}</p>
-                </CardContent>
-              </Card>
-              <Card className="border-0 shadow-sm bg-violet-50 dark:bg-violet-900/20">
-                <CardContent className="p-4">
-                  <p className="text-sm text-violet-600 dark:text-violet-400">Scheduled</p>
-                  <p className="text-2xl font-bold text-violet-700 dark:text-violet-300">{stats.scheduled}</p>
-                </CardContent>
-              </Card>
-              <Card className="border-0 shadow-sm bg-green-50 dark:bg-green-900/20">
-                <CardContent className="p-4">
-                  <p className="text-sm text-green-600 dark:text-green-400">Published</p>
-                  <p className="text-2xl font-bold text-green-700 dark:text-green-300">{stats.published}</p>
-                </CardContent>
-              </Card>
-            </div>
-          )}
+        {/* Stats Cards */}
+        {stats && (
+          <motion.div
+            className="grid gap-4 grid-cols-2 md:grid-cols-5"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4 }}
+          >
+            <Card className="border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900">
+              <CardContent className="p-5">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 rounded-lg bg-slate-100 dark:bg-slate-800">
+                    <FileText className="h-4 w-4 text-slate-600 dark:text-slate-400" />
+                  </div>
+                  <div>
+                    <p className="text-sm text-slate-500 dark:text-slate-400">
+                      Total
+                    </p>
+                    <p className="text-2xl font-bold text-slate-900 dark:text-white">
+                      {stats.total}
+                    </p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+            <Card className="border-amber-200 dark:border-amber-800/50 bg-amber-50/50 dark:bg-amber-900/20">
+              <CardContent className="p-5">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 rounded-lg bg-amber-100 dark:bg-amber-900/30">
+                    <FileEdit className="h-4 w-4 text-amber-600 dark:text-amber-400" />
+                  </div>
+                  <div>
+                    <p className="text-sm text-amber-600 dark:text-amber-400">
+                      Drafts
+                    </p>
+                    <p className="text-2xl font-bold text-amber-700 dark:text-amber-300">
+                      {stats.draft}
+                    </p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+            <Card className="border-blue-200 dark:border-blue-800/50 bg-blue-50/50 dark:bg-blue-900/20">
+              <CardContent className="p-5">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 rounded-lg bg-blue-100 dark:bg-blue-900/30">
+                    <Edit className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                  </div>
+                  <div>
+                    <p className="text-sm text-blue-600 dark:text-blue-400">
+                      In Review
+                    </p>
+                    <p className="text-2xl font-bold text-blue-700 dark:text-blue-300">
+                      {stats.review}
+                    </p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+            <Card className="border-violet-200 dark:border-violet-800/50 bg-violet-50/50 dark:bg-violet-900/20">
+              <CardContent className="p-5">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 rounded-lg bg-violet-100 dark:bg-violet-900/30">
+                    <Clock className="h-4 w-4 text-violet-600 dark:text-violet-400" />
+                  </div>
+                  <div>
+                    <p className="text-sm text-violet-600 dark:text-violet-400">
+                      Scheduled
+                    </p>
+                    <p className="text-2xl font-bold text-violet-700 dark:text-violet-300">
+                      {stats.scheduled}
+                    </p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+            <Card className="border-emerald-200 dark:border-emerald-800/50 bg-emerald-50/50 dark:bg-emerald-900/20">
+              <CardContent className="p-5">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 rounded-lg bg-emerald-100 dark:bg-emerald-900/30">
+                    <CheckCircle className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
+                  </div>
+                  <div>
+                    <p className="text-sm text-emerald-600 dark:text-emerald-400">
+                      Published
+                    </p>
+                    <p className="text-2xl font-bold text-emerald-700 dark:text-emerald-300">
+                      {stats.published}
+                    </p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </motion.div>
+        )}
 
-          {/* Filters */}
-          <div className="flex items-center gap-4">
-            <div className="relative flex-1 max-w-md">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
-              <Input
-                placeholder="Search content..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10 bg-white dark:bg-slate-800/50"
-              />
-            </div>
-            <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger className="w-[140px] bg-white dark:bg-slate-800/50">
-                <Filter className="h-4 w-4 mr-2 text-slate-400" />
-                <SelectValue placeholder="Status" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All statuses</SelectItem>
-                <SelectItem value="draft">Draft</SelectItem>
-                <SelectItem value="review">Review</SelectItem>
-                <SelectItem value="scheduled">Scheduled</SelectItem>
-                <SelectItem value="published">Published</SelectItem>
-              </SelectContent>
-            </Select>
-            <Select value={platformFilter} onValueChange={setPlatformFilter}>
-              <SelectTrigger className="w-[140px] bg-white dark:bg-slate-800/50">
-                <SelectValue placeholder="Platform" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All platforms</SelectItem>
-                <SelectItem value="linkedin">LinkedIn</SelectItem>
-                <SelectItem value="twitter">Twitter</SelectItem>
-                <SelectItem value="instagram">Instagram</SelectItem>
-                <SelectItem value="youtube">YouTube</SelectItem>
-                <SelectItem value="website">Website</SelectItem>
-              </SelectContent>
-            </Select>
-            <div className="flex items-center gap-1 p-1 rounded-lg bg-slate-100 dark:bg-slate-800">
-              <button
-                onClick={() => setViewMode("grid")}
-                className={cn(
-                  "p-2 rounded",
-                  viewMode === "grid"
-                    ? "bg-white dark:bg-slate-700 shadow-sm"
-                    : "text-slate-500 hover:text-slate-700"
-                )}
-              >
-                <LayoutGrid className="h-4 w-4" />
-              </button>
-              <button
-                onClick={() => setViewMode("list")}
-                className={cn(
-                  "p-2 rounded",
-                  viewMode === "list"
-                    ? "bg-white dark:bg-slate-700 shadow-sm"
-                    : "text-slate-500 hover:text-slate-700"
-                )}
-              >
-                <List className="h-4 w-4" />
-              </button>
-            </div>
-          </div>
-        </div>
+        {/* Search and Filters */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, delay: 0.1 }}
+        >
+          <Card className="border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900">
+            <CardContent className="p-4">
+              <div className="flex flex-col lg:flex-row gap-4">
+                {/* Search */}
+                <div className="relative flex-1 max-w-md">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                  <Input
+                    placeholder="Search content..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="pl-10 border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800"
+                  />
+                </div>
+
+                {/* Status Filter Pills */}
+                <FilterPills
+                  filters={statusFilters}
+                  activeFilter={statusFilter}
+                  onFilterChange={setStatusFilter}
+                />
+
+                {/* Platform & View Toggle */}
+                <div className="flex gap-2">
+                  <Select
+                    value={platformFilter}
+                    onValueChange={setPlatformFilter}
+                  >
+                    <SelectTrigger className="w-[140px] border-slate-200 dark:border-slate-700">
+                      <SelectValue placeholder="Platform" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Platforms</SelectItem>
+                      <SelectItem value="linkedin">LinkedIn</SelectItem>
+                      <SelectItem value="twitter">Twitter</SelectItem>
+                      <SelectItem value="instagram">Instagram</SelectItem>
+                      <SelectItem value="youtube">YouTube</SelectItem>
+                      <SelectItem value="website">Website</SelectItem>
+                    </SelectContent>
+                  </Select>
+
+                  <div className="flex border border-slate-200 dark:border-slate-700 rounded-lg overflow-hidden">
+                    <Button
+                      variant={viewMode === "grid" ? "secondary" : "ghost"}
+                      size="sm"
+                      onClick={() => setViewMode("grid")}
+                      className="rounded-none"
+                    >
+                      <LayoutGrid className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      variant={viewMode === "list" ? "secondary" : "ghost"}
+                      size="sm"
+                      onClick={() => setViewMode("list")}
+                      className="rounded-none"
+                    >
+                      <List className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </motion.div>
 
         {/* Content List */}
         {filteredContent.length === 0 ? (
-          <div className="text-center py-16">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.4 }}
+            className="text-center py-16"
+          >
             <div className="h-20 w-20 rounded-2xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center mx-auto mb-6">
               <PenSquare className="h-10 w-10 text-slate-400 dark:text-slate-500" />
             </div>
@@ -504,129 +705,179 @@ export default function ContentPage() {
             </p>
             <Button
               onClick={() => setShowNewContent(true)}
-              variant="outline"
-              className="border-slate-200 dark:border-slate-700"
+              className="bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-700 hover:to-purple-700 text-white"
             >
               <Plus className="h-4 w-4 mr-2" />
               Create Content
             </Button>
-          </div>
+          </motion.div>
         ) : viewMode === "grid" ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {filteredContent.map((item) => {
+            {filteredContent.map((item, idx) => {
               const statusConf = statusConfig[item.status] || statusConfig.draft;
-              const PlatformIcon = platformIcons[item.platform || "other"] || Globe;
+              const PlatformIcon =
+                platformIcons[item.platform || "other"] || Globe;
 
               return (
-                <Card
+                <motion.div
                   key={item.id}
-                  onClick={() => router.push(`/dashboard/content/${item.id}`)}
-                  className="border-0 shadow-lg shadow-slate-200/50 dark:shadow-none bg-white dark:bg-slate-800/50 hover:shadow-xl transition-all cursor-pointer group"
+                  custom={idx}
+                  variants={cardVariants}
+                  initial="hidden"
+                  animate="visible"
                 >
-                  <CardContent className="p-5">
-                    <div className="flex items-start justify-between mb-3">
-                      <div className="flex items-center gap-2">
-                        <div className="h-8 w-8 rounded-lg bg-slate-100 dark:bg-slate-700 flex items-center justify-center">
-                          <PlatformIcon className="h-4 w-4 text-slate-600 dark:text-slate-400" />
-                        </div>
-                        <Badge className={cn("text-xs", statusConf.bg, statusConf.text, "border-0")}>
-                          {statusConf.label}
-                        </Badge>
-                      </div>
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
-                          <Button variant="ghost" size="sm" className="h-8 w-8 p-0 opacity-0 group-hover:opacity-100">
-                            <MoreHorizontal className="h-4 w-4 text-slate-400" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuItem onClick={(e) => { e.stopPropagation(); router.push(`/dashboard/content/${item.id}`); }}>
-                            <Edit className="h-4 w-4 mr-2" />
-                            Edit
-                          </DropdownMenuItem>
-                          <DropdownMenuSeparator />
-                          <DropdownMenuItem
-                            onClick={(e) => { e.stopPropagation(); deleteContent(item.id); }}
-                            className="text-red-600 dark:text-red-400"
+                  <Card
+                    onClick={() => router.push(`/dashboard/content/${item.id}`)}
+                    className="border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 hover:shadow-lg hover:border-violet-300 dark:hover:border-violet-700 transition-all cursor-pointer group"
+                  >
+                    <CardContent className="p-5">
+                      <div className="flex items-start justify-between mb-3">
+                        <div className="flex items-center gap-2">
+                          <div className="h-8 w-8 rounded-lg bg-slate-100 dark:bg-slate-800 flex items-center justify-center">
+                            <PlatformIcon className="h-4 w-4 text-slate-600 dark:text-slate-400" />
+                          </div>
+                          <Badge
+                            className={cn(
+                              "text-xs border",
+                              statusConf.bg,
+                              statusConf.text,
+                              statusConf.border
+                            )}
                           >
-                            <Trash2 className="h-4 w-4 mr-2" />
-                            Delete
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </div>
-
-                    <h3 className="font-semibold text-slate-900 dark:text-white mb-2 line-clamp-2 group-hover:text-violet-600 dark:group-hover:text-violet-400 transition-colors">
-                      {item.title}
-                    </h3>
-
-                    {item.draft_content && (
-                      <p className="text-sm text-slate-500 dark:text-slate-400 line-clamp-2 mb-3">
-                        {item.draft_content}
-                      </p>
-                    )}
-
-                    <div className="flex items-center justify-between text-xs text-slate-500 dark:text-slate-400">
-                      <span>{contentTypeLabels[item.content_type] || item.content_type}</span>
-                      <div className="flex items-center gap-2">
-                        {item.ai_generated && (
-                          <Sparkles className="h-3 w-3 text-amber-500" />
-                        )}
-                        {item.scheduled_for ? (
-                          <span className="flex items-center gap-1">
-                            <Clock className="h-3 w-3" />
-                            {formatScheduledDate(item.scheduled_for)}
-                          </span>
-                        ) : (
-                          <span>{formatDate(item.created_at)}</span>
-                        )}
+                            {statusConf.label}
+                          </Badge>
+                        </div>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger
+                            asChild
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="h-8 w-8 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
+                            >
+                              <MoreHorizontal className="h-4 w-4 text-slate-400" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuItem
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                router.push(`/dashboard/content/${item.id}`);
+                              }}
+                            >
+                              <Edit className="h-4 w-4 mr-2" />
+                              Edit
+                            </DropdownMenuItem>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                deleteContent(item.id);
+                              }}
+                              className="text-rose-600 dark:text-rose-400"
+                            >
+                              <Trash2 className="h-4 w-4 mr-2" />
+                              Delete
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
                       </div>
-                    </div>
-                  </CardContent>
-                </Card>
+
+                      <h3 className="font-semibold text-slate-900 dark:text-white mb-2 line-clamp-2 group-hover:text-violet-600 dark:group-hover:text-violet-400 transition-colors">
+                        {item.title}
+                      </h3>
+
+                      {item.draft_content && (
+                        <p className="text-sm text-slate-500 dark:text-slate-400 line-clamp-2 mb-3">
+                          {item.draft_content}
+                        </p>
+                      )}
+
+                      <div className="flex items-center justify-between text-xs text-slate-500 dark:text-slate-400">
+                        <span>
+                          {contentTypeLabels[item.content_type] ||
+                            item.content_type}
+                        </span>
+                        <div className="flex items-center gap-2">
+                          {item.ai_generated && (
+                            <Sparkles className="h-3 w-3 text-amber-500" />
+                          )}
+                          {item.scheduled_for ? (
+                            <span className="flex items-center gap-1">
+                              <Clock className="h-3 w-3" />
+                              {formatScheduledDate(item.scheduled_for)}
+                            </span>
+                          ) : (
+                            <span>{formatDate(item.created_at)}</span>
+                          )}
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </motion.div>
               );
             })}
           </div>
         ) : (
           <div className="space-y-2">
-            {filteredContent.map((item) => {
+            {filteredContent.map((item, idx) => {
               const statusConf = statusConfig[item.status] || statusConfig.draft;
-              const PlatformIcon = platformIcons[item.platform || "other"] || Globe;
+              const PlatformIcon =
+                platformIcons[item.platform || "other"] || Globe;
 
               return (
-                <Card
+                <motion.div
                   key={item.id}
-                  onClick={() => router.push(`/dashboard/content/${item.id}`)}
-                  className="border-0 shadow-sm bg-white dark:bg-slate-800/50 hover:shadow-md transition-all cursor-pointer group"
+                  custom={idx}
+                  variants={cardVariants}
+                  initial="hidden"
+                  animate="visible"
                 >
-                  <CardContent className="p-4">
-                    <div className="flex items-center gap-4">
-                      <div className="h-10 w-10 rounded-lg bg-slate-100 dark:bg-slate-700 flex items-center justify-center flex-shrink-0">
-                        <PlatformIcon className="h-5 w-5 text-slate-600 dark:text-slate-400" />
+                  <Card
+                    onClick={() => router.push(`/dashboard/content/${item.id}`)}
+                    className="border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 hover:shadow-md hover:border-violet-300 dark:hover:border-violet-700 transition-all cursor-pointer group"
+                  >
+                    <CardContent className="p-4">
+                      <div className="flex items-center gap-4">
+                        <div className="h-10 w-10 rounded-lg bg-slate-100 dark:bg-slate-800 flex items-center justify-center flex-shrink-0">
+                          <PlatformIcon className="h-5 w-5 text-slate-600 dark:text-slate-400" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <h3 className="font-medium text-slate-900 dark:text-white truncate group-hover:text-violet-600 dark:group-hover:text-violet-400 transition-colors">
+                            {item.title}
+                          </h3>
+                          <p className="text-sm text-slate-500 dark:text-slate-400">
+                            {contentTypeLabels[item.content_type] ||
+                              item.content_type}
+                          </p>
+                        </div>
+                        <Badge
+                          className={cn(
+                            "text-xs border",
+                            statusConf.bg,
+                            statusConf.text,
+                            statusConf.border
+                          )}
+                        >
+                          {statusConf.label}
+                        </Badge>
+                        {item.ai_generated && (
+                          <Sparkles className="h-4 w-4 text-amber-500" />
+                        )}
+                        <span className="text-xs text-slate-500 dark:text-slate-400 whitespace-nowrap">
+                          {formatDate(item.created_at)}
+                        </span>
                       </div>
-                      <div className="flex-1 min-w-0">
-                        <h3 className="font-medium text-slate-900 dark:text-white truncate group-hover:text-violet-600 dark:group-hover:text-violet-400 transition-colors">
-                          {item.title}
-                        </h3>
-                        <p className="text-sm text-slate-500 dark:text-slate-400">
-                          {contentTypeLabels[item.content_type] || item.content_type}
-                        </p>
-                      </div>
-                      <Badge className={cn("text-xs", statusConf.bg, statusConf.text, "border-0")}>
-                        {statusConf.label}
-                      </Badge>
-                      {item.ai_generated && <Sparkles className="h-4 w-4 text-amber-500" />}
-                      <span className="text-xs text-slate-500 dark:text-slate-400 whitespace-nowrap">
-                        {formatDate(item.created_at)}
-                      </span>
-                    </div>
-                  </CardContent>
-                </Card>
+                    </CardContent>
+                  </Card>
+                </motion.div>
               );
             })}
           </div>
         )}
       </div>
-    </div>
+    </DashboardPageWrapper>
   );
 }
