@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { EmptyState } from "@/components/ui/empty-state";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   Select,
   SelectContent,
@@ -25,7 +26,6 @@ import {
   LayoutGrid,
   List as ListIcon,
   Zap,
-  XCircle,
   CheckCircle2,
   Clock,
   TrendingUp,
@@ -34,6 +34,11 @@ import {
 import { toast } from "sonner";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { DashboardPageWrapper, DashboardHeader } from "@/components/ui/dashboard-header";
+import { StatCard, StatCardGrid } from "@/components/ui/stat-card";
+import { FilterPills } from "@/components/ui/filter-pills";
+import { cn } from "@/lib/utils";
+import { motion } from "framer-motion";
 
 interface Assistant {
   id: string;
@@ -64,7 +69,6 @@ interface Stats {
   total_messages: number;
 }
 
-// Role icons mapping
 const roleIcons: { [key: string]: any } = {
   marketing: TrendingUp,
   sales: TrendingUp,
@@ -75,6 +79,21 @@ const roleIcons: { [key: string]: any } = {
   project_management: CheckCircle2,
   data_analysis: TrendingUp,
 };
+
+const cardVariants = {
+  hidden: { opacity: 0, y: 20 },
+  visible: (i: number) => ({
+    opacity: 1,
+    y: 0,
+    transition: {
+      delay: i * 0.05,
+      duration: 0.3,
+      ease: "easeOut",
+    },
+  }),
+};
+
+type StatusFilter = "all" | "active" | "inactive";
 
 export default function AssistantsPage() {
   const router = useRouter();
@@ -88,11 +107,8 @@ export default function AssistantsPage() {
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
 
-  // Filter and view states
   const [searchQuery, setSearchQuery] = useState("");
-  const [filterRole, setFilterRole] = useState("all");
-  const [filterStatus, setFilterStatus] = useState("all");
-  const [filterType, setFilterType] = useState("all"); // all, team, standalone
+  const [filterStatus, setFilterStatus] = useState<StatusFilter>("all");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
 
   useEffect(() => {
@@ -174,405 +190,382 @@ export default function AssistantsPage() {
 
   function getRoleBadge(role: string) {
     const colors: { [key: string]: string } = {
-      marketing: "bg-blue-50 dark:bg-blue-950/30 text-blue-700 dark:text-blue-400 border-0",
-      sales: "bg-emerald-50 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-400 border-0",
-      research: "bg-blue-50 dark:bg-blue-950/30 text-blue-700 dark:text-blue-400 border-0",
-      code_review: "bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-400 border-0",
-      writing: "bg-blue-50 dark:bg-blue-950/30 text-blue-700 dark:text-blue-400 border-0",
-      customer_support: "bg-emerald-50 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-400 border-0",
-      project_management: "bg-blue-50 dark:bg-blue-950/30 text-blue-700 dark:text-blue-400 border-0",
-      data_analysis: "bg-blue-50 dark:bg-blue-950/30 text-blue-700 dark:text-blue-400 border-0",
-      custom: "bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-400 border-0",
+      marketing: "bg-violet-100 dark:bg-violet-900/30 text-violet-700 dark:text-violet-400",
+      sales: "bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400",
+      research: "bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400",
+      code_review: "bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-400",
+      writing: "bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400",
+      customer_support: "bg-cyan-100 dark:bg-cyan-900/30 text-cyan-700 dark:text-cyan-400",
+      project_management: "bg-rose-100 dark:bg-rose-900/30 text-rose-700 dark:text-rose-400",
+      data_analysis: "bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-400",
+      custom: "bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-400",
     };
 
     const RoleIcon = roleIcons[role] || Bot;
 
     return (
-      <Badge variant="outline" className={colors[role] || colors.custom}>
+      <Badge variant="outline" className={cn("border-0", colors[role] || colors.custom)}>
         <RoleIcon className="h-3 w-3 mr-1" />
         {role.replace("_", " ")}
       </Badge>
     );
   }
 
-  function getRoleIcon(role: string) {
-    return roleIcons[role] || Bot;
-  }
-
-  // Filter assistants
   const filteredAssistants = assistants.filter((assistant) => {
     const matchesSearch = assistant.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
                          assistant.description.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesRole = filterRole === "all" || assistant.role === filterRole;
     const matchesStatus = filterStatus === "all" ||
                          (filterStatus === "active" && assistant.enabled) ||
                          (filterStatus === "inactive" && !assistant.enabled);
-    const matchesType = filterType === "all" ||
-                       (filterType === "team" && assistant.team_id) ||
-                       (filterType === "standalone" && !assistant.team_id);
 
-    return matchesSearch && matchesRole && matchesStatus && matchesType;
+    return matchesSearch && matchesStatus;
   });
+
+  const statusOptions = [
+    { key: "all" as StatusFilter, label: "All", count: assistants.length },
+    { key: "active" as StatusFilter, label: "Active", count: stats.active },
+    { key: "inactive" as StatusFilter, label: "Inactive", count: assistants.length - stats.active },
+  ];
 
   if (loading) {
     return (
-      <div className="p-8">
-        <div className="animate-pulse space-y-6">
-          <div className="h-32 bg-slate-100 dark:bg-slate-800 rounded-xl"></div>
+      <DashboardPageWrapper>
+        <div className="space-y-6">
+          <Skeleton className="h-24 w-full rounded-2xl" />
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             {[...Array(4)].map((_, i) => (
-              <div key={i} className="h-32 bg-slate-100 dark:bg-slate-800 rounded-xl"></div>
+              <Skeleton key={i} className="h-28 rounded-xl" />
+            ))}
+          </div>
+          <Skeleton className="h-16 rounded-xl" />
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {[...Array(6)].map((_, i) => (
+              <Skeleton key={i} className="h-64 rounded-xl" />
             ))}
           </div>
         </div>
-      </div>
+      </DashboardPageWrapper>
     );
   }
 
   return (
-    <div className="p-8 space-y-6">
-      {/* Header */}
-      <Card className="border-slate-200 dark:border-slate-800">
-        <CardContent className="p-8">
-          <div className="flex items-start justify-between">
-            <div className="flex items-start gap-4">
-              <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-blue-600 to-blue-700 flex items-center justify-center">
-                <Users className="h-6 w-6 text-white" />
-              </div>
-              <div>
-                <h1 className="text-3xl font-semibold text-slate-900 dark:text-slate-100">
-                  AI Advisors
-                </h1>
-                <p className="text-slate-600 dark:text-slate-400 mt-1 max-w-2xl">
-                  Your AI advisor team - 15 specialist advisors across strategy, sales, marketing, operations, legal, HR, and team-dedicated advisors.
-                </p>
-              </div>
-            </div>
-            <div className="flex flex-col gap-2">
-              <Button
-                onClick={seedStarterAssistants}
-                disabled={actionLoading === "seed" || assistants.length > 0}
-                className="bg-gradient-to-br from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white"
-              >
-                <Sparkles className="mr-2 h-4 w-4" />
-                {actionLoading === "seed" ? "Building Team..." : "Build Executive Team"}
-              </Button>
-              <Button
-                asChild
-                variant="outline"
-                className="border-slate-200 dark:border-slate-800"
-              >
-                <Link href="/dashboard/assistants/browse">
-                  <Plus className="mr-2 h-4 w-4" />
-                  Create Custom
-                </Link>
-              </Button>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+    <DashboardPageWrapper>
+      <DashboardHeader
+        title="AI Advisors"
+        subtitle="Your AI advisor team - specialist advisors across strategy, sales, marketing, operations, and more"
+        icon={Users}
+        iconColor="violet"
+        stats={[
+          { label: "advisors", value: stats.total },
+          { label: "active", value: stats.active },
+          { label: "conversations", value: stats.total_conversations },
+        ]}
+        actions={[
+          {
+            label: "Create Custom",
+            icon: Plus,
+            href: "/dashboard/assistants/browse",
+            variant: "outline",
+          },
+          {
+            label: actionLoading === "seed" ? "Building..." : "Build Team",
+            icon: Sparkles,
+            onClick: seedStarterAssistants,
+            variant: "primary",
+          },
+        ]}
+      />
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <Card className="border-slate-200 dark:border-slate-800">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-slate-600 dark:text-slate-400">Team Members</p>
-                <p className="text-3xl font-semibold text-slate-900 dark:text-slate-100 mt-1">{stats.total}</p>
-              </div>
-              <div className="h-10 w-10 rounded-lg bg-blue-50 dark:bg-blue-950/30 flex items-center justify-center">
-                <Users className="h-5 w-5 text-blue-600 dark:text-blue-400" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+      <motion.div
+        custom={0}
+        initial="hidden"
+        animate="visible"
+        variants={cardVariants}
+      >
+        <StatCardGrid columns={4} className="mb-6">
+          <StatCard
+            label="Team Members"
+            value={stats.total}
+            icon={Users}
+            iconColor="violet"
+            description="AI advisors on your team"
+          />
+          <StatCard
+            label="Active"
+            value={stats.active}
+            icon={CheckCircle2}
+            iconColor="emerald"
+            description="Currently enabled"
+          />
+          <StatCard
+            label="Conversations"
+            value={stats.total_conversations}
+            icon={MessageSquare}
+            iconColor="blue"
+            description="Total chat sessions"
+          />
+          <StatCard
+            label="Messages"
+            value={stats.total_messages}
+            icon={Zap}
+            iconColor="amber"
+            description="Messages exchanged"
+          />
+        </StatCardGrid>
+      </motion.div>
 
-        <Card className="border-slate-200 dark:border-slate-800">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-slate-600 dark:text-slate-400">Active</p>
-                <p className="text-3xl font-semibold text-slate-900 dark:text-slate-100 mt-1">{stats.active}</p>
-              </div>
-              <div className="h-10 w-10 rounded-lg bg-emerald-50 dark:bg-emerald-950/30 flex items-center justify-center">
-                <CheckCircle2 className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="border-slate-200 dark:border-slate-800">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-slate-600 dark:text-slate-400">Conversations</p>
-                <p className="text-3xl font-semibold text-slate-900 dark:text-slate-100 mt-1">{stats.total_conversations}</p>
-              </div>
-              <div className="h-10 w-10 rounded-lg bg-blue-50 dark:bg-blue-950/30 flex items-center justify-center">
-                <MessageSquare className="h-5 w-5 text-blue-600 dark:text-blue-400" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="border-slate-200 dark:border-slate-800">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-slate-600 dark:text-slate-400">Messages</p>
-                <p className="text-3xl font-semibold text-slate-900 dark:text-slate-100 mt-1">{stats.total_messages}</p>
-              </div>
-              <div className="h-10 w-10 rounded-lg bg-slate-50 dark:bg-slate-800 flex items-center justify-center">
-                <Zap className="h-5 w-5 text-slate-600 dark:text-slate-400" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Search and Filters */}
+      {/* Filters */}
       {assistants.length > 0 && (
-        <Card className="border-slate-200 dark:border-slate-800">
-          <CardContent className="p-6">
-            <div className="flex flex-col md:flex-row gap-4">
-              <div className="flex-1">
-                <div className="relative">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-slate-400" />
-                  <Input
-                    placeholder="Search executives..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="pl-9 border-slate-200 dark:border-slate-800"
+        <motion.div
+          custom={1}
+          initial="hidden"
+          animate="visible"
+          variants={cardVariants}
+          className="mb-6"
+        >
+          <Card>
+            <CardContent className="py-4">
+              <div className="flex flex-col md:flex-row items-center gap-4">
+                <div className="flex-1 w-full md:w-auto">
+                  <div className="relative">
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-slate-400" />
+                    <Input
+                      placeholder="Search advisors..."
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      className="pl-10 h-11 bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700"
+                    />
+                  </div>
+                </div>
+                <div className="flex items-center gap-3 w-full md:w-auto justify-between md:justify-end">
+                  <FilterPills
+                    options={statusOptions}
+                    value={filterStatus}
+                    onChange={setFilterStatus}
                   />
+                  <div className="flex gap-1 p-1 bg-slate-100 dark:bg-slate-800 rounded-lg">
+                    <button
+                      onClick={() => setViewMode("grid")}
+                      className={cn(
+                        "p-2 rounded-md transition-colors",
+                        viewMode === "grid"
+                          ? "bg-white dark:bg-slate-700 shadow-sm"
+                          : "text-slate-500 hover:text-slate-700 dark:hover:text-slate-300"
+                      )}
+                    >
+                      <LayoutGrid className="h-4 w-4" />
+                    </button>
+                    <button
+                      onClick={() => setViewMode("list")}
+                      className={cn(
+                        "p-2 rounded-md transition-colors",
+                        viewMode === "list"
+                          ? "bg-white dark:bg-slate-700 shadow-sm"
+                          : "text-slate-500 hover:text-slate-700 dark:hover:text-slate-300"
+                      )}
+                    >
+                      <ListIcon className="h-4 w-4" />
+                    </button>
+                  </div>
                 </div>
               </div>
-              <div className="flex gap-2 flex-wrap">
-                <Select value={filterRole} onValueChange={setFilterRole}>
-                  <SelectTrigger className="w-[150px] border-slate-200 dark:border-slate-800">
-                    <SelectValue placeholder="Role" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Roles</SelectItem>
-                    <SelectItem value="marketing">Marketing</SelectItem>
-                    <SelectItem value="sales">Sales</SelectItem>
-                    <SelectItem value="research">Research</SelectItem>
-                    <SelectItem value="code_review">Code Review</SelectItem>
-                    <SelectItem value="writing">Writing</SelectItem>
-                    <SelectItem value="customer_support">Support</SelectItem>
-                    <SelectItem value="project_management">PM</SelectItem>
-                    <SelectItem value="data_analysis">Analytics</SelectItem>
-                  </SelectContent>
-                </Select>
-
-                <Select value={filterStatus} onValueChange={setFilterStatus}>
-                  <SelectTrigger className="w-[130px] border-slate-200 dark:border-slate-800">
-                    <SelectValue placeholder="Status" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Status</SelectItem>
-                    <SelectItem value="active">Active</SelectItem>
-                    <SelectItem value="inactive">Inactive</SelectItem>
-                  </SelectContent>
-                </Select>
-
-                <Select value={filterType} onValueChange={setFilterType}>
-                  <SelectTrigger className="w-[150px] border-slate-200 dark:border-slate-800">
-                    <SelectValue placeholder="Type" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Advisors</SelectItem>
-                    <SelectItem value="team">Team Advisors</SelectItem>
-                    <SelectItem value="standalone">Standalone</SelectItem>
-                  </SelectContent>
-                </Select>
-
-                <div className="flex gap-1 border border-slate-200 dark:border-slate-800 rounded-md p-1">
-                  <Button
-                    variant={viewMode === "grid" ? "default" : "ghost"}
-                    size="sm"
-                    onClick={() => setViewMode("grid")}
-                    className={viewMode === "grid" ? "bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900" : ""}
-                  >
-                    <LayoutGrid className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    variant={viewMode === "list" ? "default" : "ghost"}
-                    size="sm"
-                    onClick={() => setViewMode("list")}
-                    className={viewMode === "list" ? "bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900" : ""}
-                  >
-                    <ListIcon className="h-4 w-4" />
-                  </Button>
-                </div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
+        </motion.div>
       )}
 
       {/* Assistants Grid/List */}
       {assistants.length === 0 ? (
-        <EmptyState
-          icon={Users}
-          title="Build Your Executive Team"
-          description="Get instant access to 15 executive-level AI specialists—CEO, CFO, Legal, HR, Sales, Marketing, Social Media, Operations, and more."
-          action={{
-            label: actionLoading === "seed" ? "Building Team..." : "Build Executive Team",
-            onClick: seedStarterAssistants,
-          }}
-          secondaryAction={{
-            label: "Create Custom",
-            href: "/dashboard/assistants/browse",
-          }}
-        />
+        <motion.div
+          custom={2}
+          initial="hidden"
+          animate="visible"
+          variants={cardVariants}
+        >
+          <EmptyState
+            icon={Users}
+            title="Build Your Executive Team"
+            description="Get instant access to executive-level AI specialists—CEO, CFO, Legal, HR, Sales, Marketing, Social Media, Operations, and more."
+            action={{
+              label: actionLoading === "seed" ? "Building Team..." : "Build Executive Team",
+              onClick: seedStarterAssistants,
+            }}
+            secondaryAction={{
+              label: "Create Custom",
+              href: "/dashboard/assistants/browse",
+            }}
+          />
+        </motion.div>
       ) : filteredAssistants.length === 0 ? (
-        <Card className="border-slate-200 dark:border-slate-800">
-          <CardContent className="p-12">
-            <div className="text-center">
-              <Search className="h-12 w-12 mx-auto text-slate-400 mb-4" />
-              <h3 className="text-lg font-semibold mb-2 text-slate-900 dark:text-slate-100">No assistants found</h3>
-              <p className="text-sm text-slate-600 dark:text-slate-400">
-                Try adjusting your search or filters
-              </p>
-            </div>
-          </CardContent>
-        </Card>
+        <motion.div
+          custom={2}
+          initial="hidden"
+          animate="visible"
+          variants={cardVariants}
+        >
+          <Card>
+            <CardContent className="py-12">
+              <div className="text-center">
+                <div className="p-4 rounded-2xl bg-slate-100 dark:bg-slate-800 w-fit mx-auto mb-4">
+                  <Search className="h-8 w-8 text-slate-400" />
+                </div>
+                <h3 className="text-lg font-semibold mb-2 text-slate-900 dark:text-white">No advisors found</h3>
+                <p className="text-sm text-slate-500 dark:text-slate-400">
+                  Try adjusting your search or filters
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+        </motion.div>
       ) : (
         <div>
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-semibold text-slate-900 dark:text-slate-100">
-              {filteredAssistants.length} Executive{filteredAssistants.length !== 1 ? "s" : ""} on Your Team
+            <h2 className="text-lg font-semibold text-slate-900 dark:text-white">
+              {filteredAssistants.length} Advisor{filteredAssistants.length !== 1 ? "s" : ""} on Your Team
             </h2>
           </div>
 
           <div className={viewMode === "grid" ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" : "space-y-4"}>
-            {filteredAssistants.map((assistant) => {
-              const RoleIcon = getRoleIcon(assistant.role);
+            {filteredAssistants.map((assistant, i) => {
               const isActive = assistant.enabled;
 
               return (
-                <Card
+                <motion.div
                   key={assistant.id}
-                  className={`border-slate-200 dark:border-slate-800 hover:shadow-md transition-all ${
-                    isActive ? "" : "opacity-60"
-                  }`}
+                  custom={i + 2}
+                  initial="hidden"
+                  animate="visible"
+                  variants={cardVariants}
                 >
-                  <CardHeader className="pb-4">
-                    <div className="flex items-start justify-between mb-3">
-                      <div className="flex items-center gap-3">
-                        <div className="text-4xl">{assistant.avatar_emoji}</div>
-                        <div className="flex-1">
-                          <CardTitle className="text-lg text-slate-900 dark:text-slate-100">
+                  <Card
+                    className={cn(
+                      "hover:shadow-lg transition-all hover:border-violet-300 dark:hover:border-violet-700",
+                      !isActive && "opacity-60"
+                    )}
+                  >
+                    <CardHeader className="pb-3">
+                      <div className="flex items-start gap-3">
+                        <div className="text-4xl p-2 rounded-xl bg-slate-100 dark:bg-slate-800">
+                          {assistant.avatar_emoji}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <CardTitle className="text-lg text-slate-900 dark:text-white">
                             {assistant.name}
                           </CardTitle>
-                          <p className="text-sm text-slate-600 dark:text-slate-400 line-clamp-2 mt-1">
+                          <p className="text-sm text-slate-500 dark:text-slate-400 line-clamp-2 mt-1">
                             {assistant.description}
                           </p>
                         </div>
                       </div>
-                    </div>
+                    </CardHeader>
 
-                    <div className="flex items-center gap-2 flex-wrap">
-                      {getRoleBadge(assistant.role)}
-                      {isActive ? (
-                        <Badge className="bg-emerald-50 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-400 border-0">
-                          <CheckCircle2 className="h-3 w-3 mr-1" />
-                          Active
-                        </Badge>
-                      ) : (
-                        <Badge variant="outline" className="border-0 bg-slate-50 dark:bg-slate-800 text-slate-600 dark:text-slate-400">
-                          Disabled
-                        </Badge>
-                      )}
-                      {assistant.team && (
-                        <Link href={`/dashboard/teams/${assistant.team.id}`}>
-                          <Badge
-                            className="bg-violet-50 dark:bg-violet-950/30 text-violet-700 dark:text-violet-400 border-0 cursor-pointer hover:bg-violet-100 dark:hover:bg-violet-900/40"
-                          >
-                            <Users className="h-3 w-3 mr-1" />
-                            {assistant.team.emoji && <span className="mr-1">{assistant.team.emoji}</span>}
-                            {assistant.team.name}
+                    <CardContent className="space-y-4">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        {getRoleBadge(assistant.role)}
+                        {isActive ? (
+                          <Badge className="bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 border-0">
+                            <CheckCircle2 className="h-3 w-3 mr-1" />
+                            Active
                           </Badge>
-                        </Link>
-                      )}
-                    </div>
-                  </CardHeader>
-
-                  <CardContent className="space-y-4">
-                    {/* Stats */}
-                    {assistant.total_messages > 0 && (
-                      <div className="flex items-center gap-4 text-sm text-slate-600 dark:text-slate-400">
-                        <span className="flex items-center gap-1">
-                          <MessageSquare className="h-3 w-3" />
-                          {assistant.total_conversations}
-                        </span>
-                        <span className="flex items-center gap-1">
-                          <Zap className="h-3 w-3" />
-                          {assistant.total_messages}
-                        </span>
-                        <span className="flex items-center gap-1">
-                          <Clock className="h-3 w-3" />
-                          {new Date(assistant.created_at).toLocaleDateString()}
-                        </span>
+                        ) : (
+                          <Badge variant="outline" className="bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border-0">
+                            Disabled
+                          </Badge>
+                        )}
+                        {assistant.team && (
+                          <Link href={`/dashboard/teams/${assistant.team.id}`}>
+                            <Badge className="bg-violet-100 dark:bg-violet-900/30 text-violet-700 dark:text-violet-400 border-0 cursor-pointer hover:bg-violet-200 dark:hover:bg-violet-900/50">
+                              <Users className="h-3 w-3 mr-1" />
+                              {assistant.team.emoji && <span className="mr-1">{assistant.team.emoji}</span>}
+                              {assistant.team.name}
+                            </Badge>
+                          </Link>
+                        )}
                       </div>
-                    )}
 
-                    {/* Actions */}
-                    <div className="flex items-center gap-2">
-                      <Button
-                        className="flex-1 bg-gradient-to-br from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white"
-                        onClick={() => router.push(`/dashboard/assistants/${assistant.id}/chat`)}
-                      >
-                        <MessageSquare className="mr-2 h-4 w-4" />
-                        Chat
-                      </Button>
+                      {assistant.total_messages > 0 && (
+                        <div className="flex items-center gap-4 text-xs text-slate-500 dark:text-slate-400">
+                          <span className="flex items-center gap-1">
+                            <MessageSquare className="h-3 w-3" />
+                            {assistant.total_conversations} chats
+                          </span>
+                          <span className="flex items-center gap-1">
+                            <Zap className="h-3 w-3" />
+                            {assistant.total_messages} msgs
+                          </span>
+                          <span className="flex items-center gap-1">
+                            <Clock className="h-3 w-3" />
+                            {new Date(assistant.created_at).toLocaleDateString()}
+                          </span>
+                        </div>
+                      )}
 
-                      <Button
-                        variant="outline"
-                        size="icon"
-                        onClick={() => router.push(`/dashboard/assistants/${assistant.id}/settings`)}
-                        className="border-slate-200 dark:border-slate-800"
-                      >
-                        <Settings className="h-4 w-4" />
-                      </Button>
+                      <div className="flex items-center gap-2 pt-2">
+                        <Button
+                          className="flex-1 bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-700 hover:to-purple-700 text-white shadow-lg shadow-violet-500/25"
+                          onClick={() => router.push(`/dashboard/assistants/${assistant.id}/chat`)}
+                        >
+                          <MessageSquare className="mr-2 h-4 w-4" />
+                          Chat
+                        </Button>
 
-                      <Button
-                        variant="outline"
-                        size="icon"
-                        onClick={() => deleteAssistant(assistant.id, assistant.name)}
-                        disabled={actionLoading === assistant.id}
-                        className="border-slate-200 dark:border-slate-800 text-slate-600 hover:text-red-600 dark:text-slate-400 dark:hover:text-red-400"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
+                        <Button
+                          variant="outline"
+                          size="icon"
+                          onClick={() => router.push(`/dashboard/assistants/${assistant.id}/settings`)}
+                          className="h-10 w-10"
+                        >
+                          <Settings className="h-4 w-4" />
+                        </Button>
+
+                        <Button
+                          variant="outline"
+                          size="icon"
+                          onClick={() => deleteAssistant(assistant.id, assistant.name)}
+                          disabled={actionLoading === assistant.id}
+                          className="h-10 w-10 text-slate-500 hover:text-rose-600 hover:border-rose-300 dark:hover:border-rose-700"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </motion.div>
               );
             })}
           </div>
         </div>
       )}
 
-      {/* Professional Disclaimer - Moved to bottom */}
+      {/* Professional Disclaimer */}
       {assistants.length > 0 && (
-        <Card className="border-amber-200 dark:border-amber-800 bg-amber-50 dark:bg-amber-950/20">
-          <CardContent className="p-6">
-            <div className="flex items-start gap-3">
-              <AlertCircle className="h-5 w-5 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" />
-              <div className="flex-1 space-y-2">
-                <h3 className="font-semibold text-amber-900 dark:text-amber-100 text-sm">
-                  Important Professional Disclaimer
-                </h3>
-                <p className="text-xs text-amber-800 dark:text-amber-200 leading-relaxed">
-                  Our AI Executive Suite provides general guidance, strategic insights, and educational information to help you make informed business decisions. However, these AI advisors are not substitutes for licensed professionals. For legal matters, consult a licensed attorney. For HR and employment issues, consult qualified HR professionals and employment attorneys. For financial decisions, tax advice, accounting, or investment planning, consult certified accountants and financial advisors. Always verify critical business decisions with qualified professionals in the relevant field.
-                </p>
+        <motion.div
+          custom={filteredAssistants.length + 3}
+          initial="hidden"
+          animate="visible"
+          variants={cardVariants}
+          className="mt-6"
+        >
+          <Card className="border-amber-200 dark:border-amber-800 bg-amber-50 dark:bg-amber-950/20">
+            <CardContent className="py-4">
+              <div className="flex items-start gap-3">
+                <div className="p-2 rounded-lg bg-amber-100 dark:bg-amber-900/30">
+                  <AlertCircle className="h-4 w-4 text-amber-600 dark:text-amber-400" />
+                </div>
+                <div className="flex-1 space-y-1">
+                  <h3 className="font-semibold text-amber-900 dark:text-amber-100 text-sm">
+                    Professional Disclaimer
+                  </h3>
+                  <p className="text-xs text-amber-800 dark:text-amber-200 leading-relaxed">
+                    Our AI advisors provide general guidance and educational information. They are not substitutes for licensed professionals. For legal, financial, HR, or specialized matters, always consult qualified professionals.
+                  </p>
+                </div>
               </div>
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
+        </motion.div>
       )}
-    </div>
+    </DashboardPageWrapper>
   );
 }
