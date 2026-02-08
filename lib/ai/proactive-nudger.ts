@@ -11,6 +11,7 @@ import {
   NudgeOpportunity,
 } from "./commitment-extractor";
 import { generateProactiveInsights, ProactiveInsight } from "./proactive-insights";
+import { sendSlackMessage, getSlackCredentials, formatBriefingForSlack } from "@/lib/slack/client";
 import OpenAI from "openai";
 
 const openai = new OpenAI({
@@ -25,7 +26,7 @@ const TWILIO_ACCOUNT_SID = process.env.TWILIO_ACCOUNT_SID;
 const TWILIO_AUTH_TOKEN = process.env.TWILIO_AUTH_TOKEN;
 const TWILIO_WHATSAPP_FROM = process.env.TWILIO_WHATSAPP_FROM; // e.g., "whatsapp:+14155238886"
 
-export type NudgeChannel = "telegram" | "whatsapp" | "in_app" | "email";
+export type NudgeChannel = "telegram" | "whatsapp" | "slack" | "in_app" | "email";
 
 export interface NudgeConfig {
   userId: string;
@@ -33,6 +34,7 @@ export interface NudgeConfig {
   preferredChannel: NudgeChannel;
   telegramChatId?: string;
   whatsappNumber?: string;
+  slackChannelId?: string; // Slack channel or DM to send nudges to
   email?: string;
   quietHoursStart?: number; // 0-23
   quietHoursEnd?: number; // 0-23
@@ -118,6 +120,11 @@ export async function runProactiveNudger(config: NudgeConfig): Promise<SentNudge
     case "whatsapp":
       if (config.whatsappNumber && TWILIO_ACCOUNT_SID) {
         sent = await sendWhatsAppMessage(config.whatsappNumber, formattedMessage);
+      }
+      break;
+    case "slack":
+      if (config.slackChannelId) {
+        sent = await sendSlackNudge(config.userId, config.slackChannelId, formattedMessage, nudgesToSend);
       }
       break;
     case "in_app":
@@ -250,7 +257,7 @@ Write a brief, friendly message that:
 - Groups related items naturally
 - Uses emojis sparingly (1-2 max)
 - Ends with a question or call to action
-- Is appropriate for ${channel === "telegram" ? "Telegram" : channel === "whatsapp" ? "WhatsApp" : "a notification"}
+- Is appropriate for ${channel === "telegram" ? "Telegram" : channel === "whatsapp" ? "WhatsApp" : channel === "slack" ? "Slack" : "a notification"}
 - Keeps it under 300 characters for mobile readability
 
 Do NOT use bullet points or numbered lists. Write conversationally.`,
@@ -359,6 +366,109 @@ async function sendWhatsAppMessage(toNumber: string, message: string): Promise<b
 }
 
 /**
+ * Send nudge via Slack
+ */
+async function sendSlackNudge(
+  userId: string,
+  channelId: string,
+  message: string,
+  nudges: NudgeOpportunity[]
+): Promise<boolean> {
+  try {
+    // Get user's Slack credentials
+    const credentials = await getSlackCredentials(userId);
+    if (!credentials) {
+      console.error("No Slack credentials for user:", userId);
+      return false;
+    }
+
+    // Format as Slack blocks for rich display
+    const blocks = formatNudgesAsSlackBlocks(nudges);
+
+    const result = await sendSlackMessage(credentials.accessToken, {
+      channel: channelId,
+      text: message, // Fallback text
+      blocks,
+    });
+
+    return result.ok;
+  } catch (error) {
+    console.error("Slack nudge send error:", error);
+    return false;
+  }
+}
+
+/**
+ * Format nudges as Slack Block Kit blocks
+ */
+function formatNudgesAsSlackBlocks(nudges: NudgeOpportunity[]): any[] {
+  const blocks: any[] = [
+    {
+      type: "header",
+      text: {
+        type: "plain_text",
+        text: "Hey! Quick update from Perpetual Core",
+        emoji: true,
+      },
+    },
+    {
+      type: "divider",
+    },
+  ];
+
+  nudges.forEach((nudge, index) => {
+    const urgencyEmoji = {
+      immediate: ":rotating_light:",
+      today: ":clock3:",
+      this_week: ":calendar:",
+      whenever: ":memo:",
+    }[nudge.urgency];
+
+    blocks.push({
+      type: "section",
+      text: {
+        type: "mrkdwn",
+        text: `${urgencyEmoji} *${nudge.title}*\n${nudge.description}`,
+      },
+    });
+
+    // Add action button if there's a suggested action
+    if (nudge.suggestedAction && nudge.data?.actionHref) {
+      blocks.push({
+        type: "actions",
+        elements: [
+          {
+            type: "button",
+            text: {
+              type: "plain_text",
+              text: nudge.suggestedAction,
+              emoji: true,
+            },
+            url: nudge.data.actionHref.startsWith("http")
+              ? nudge.data.actionHref
+              : `${process.env.NEXT_PUBLIC_APP_URL}${nudge.data.actionHref}`,
+            action_id: `nudge_action_${index}`,
+          },
+        ],
+      });
+    }
+  });
+
+  // Add footer
+  blocks.push({
+    type: "context",
+    elements: [
+      {
+        type: "mrkdwn",
+        text: "_Reply to this message or visit <" + (process.env.NEXT_PUBLIC_APP_URL || "https://perpetualcore.com") + "/dashboard|your dashboard> to take action._",
+      },
+    ],
+  });
+
+  return blocks;
+}
+
+/**
  * Create in-app notification
  */
 async function createInAppNotification(
@@ -399,6 +509,7 @@ export async function getUserNudgeConfig(userId: string): Promise<NudgeConfig | 
       organization_id,
       telegram_chat_id,
       whatsapp_number,
+      slack_channel_id,
       email,
       notification_preferences
     `)
@@ -415,6 +526,7 @@ export async function getUserNudgeConfig(userId: string): Promise<NudgeConfig | 
     preferredChannel: prefs.preferred_channel || "telegram",
     telegramChatId: profile.telegram_chat_id,
     whatsappNumber: profile.whatsapp_number,
+    slackChannelId: profile.slack_channel_id,
     email: profile.email,
     quietHoursStart: prefs.quiet_hours_start,
     quietHoursEnd: prefs.quiet_hours_end,

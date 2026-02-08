@@ -40,7 +40,6 @@ import {
   Loader2,
   Shield,
 } from "lucide-react";
-import { createClient } from "@/lib/supabase/client";
 import { formatDistanceToNow } from "date-fns";
 
 interface ApiKey {
@@ -71,20 +70,15 @@ export default function ApiKeysPage() {
 
   async function loadApiKeys() {
     try {
-      const supabase = createClient();
-      const { data: { user } } = await supabase.auth.getUser();
+      const response = await fetch("/api/developer/api-keys");
 
-      if (!user) return;
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.error || "Failed to fetch API keys");
+      }
 
-      const { data, error } = await supabase
-        .from("api_keys")
-        .select("*")
-        .eq("user_id", user.id)
-        .order("created_at", { ascending: false });
-
-      if (error) throw error;
-
-      setApiKeys(data || []);
+      const data = await response.json();
+      setApiKeys(data.apiKeys || []);
     } catch (error) {
       console.error("Error loading API keys:", error);
       toast.error("Failed to load API keys");

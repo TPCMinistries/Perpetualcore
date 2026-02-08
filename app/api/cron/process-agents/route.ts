@@ -4,6 +4,7 @@ import { processAllDocumentAnalyzerAgents } from "@/lib/agents/document-analyzer
 import { processAllTaskManagerAgents } from "@/lib/agents/task-manager";
 import { processAllCalendarMonitorAgents } from "@/lib/agents/calendar-monitor";
 import { processAllDailyDigestAgents } from "@/lib/agents/daily-digest";
+import { processScheduledBriefings } from "@/lib/briefings/morning-briefing";
 import { createAdminClient } from "@/lib/supabase/server";
 import { logger } from "@/lib/logging";
 
@@ -20,6 +21,7 @@ const AGENT_SCHEDULES: AgentSchedule[] = [
   { agentType: "task_manager", intervalMinutes: 30, lastRunKey: "task_manager_last_run" },
   { agentType: "calendar_monitor", intervalMinutes: 15, lastRunKey: "calendar_monitor_last_run" },
   { agentType: "daily_digest", intervalMinutes: 60, lastRunKey: "daily_digest_last_run" },
+  { agentType: "morning_briefing", intervalMinutes: 15, lastRunKey: "morning_briefing_last_run" },
 ];
 
 // In-memory cache for last run times (resets on cold start, but that's fine)
@@ -169,6 +171,15 @@ export async function GET(request: Request) {
               agents: result.totalAgents,
               processed: result.totalProcessed,
               digestsGenerated: result.digestsGenerated,
+            };
+            break;
+
+          case "morning_briefing":
+            result = await processScheduledBriefings();
+            results.morningBriefing = {
+              processed: result.processed,
+              delivered: result.delivered,
+              failed: result.failed,
             };
             break;
         }

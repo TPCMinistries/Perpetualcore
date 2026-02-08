@@ -54,15 +54,19 @@ export async function POST(req: NextRequest) {
 
     const queryEmbedding = embeddingResponse.data[0].embedding;
 
-    // Use Supabase's vector search to find similar documents
-    // Note: This requires pgvector extension and a function in the database
+    // Use Supabase's vector search to find similar document chunks
+    // Uses search_document_chunks which has SECURITY DEFINER to bypass RLS
     const { data: results, error: searchError } = await supabase.rpc(
-      "search_documents",
+      "search_document_chunks",
       {
         query_embedding: queryEmbedding,
+        org_id: profile.organization_id,
+        requesting_user_id: user.id,
         match_threshold: 0.5,
         match_count: limit,
-        org_id: profile.organization_id,
+        search_scope: 'all',
+        conversation_id: null,
+        space_id: null,
       }
     );
 

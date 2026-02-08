@@ -64,3 +64,23 @@ STRIPE_SECRET_KEY
 - Follow existing component patterns
 - Use shadcn/ui for new UI components
 - Test AI integrations with small payloads first
+
+## ⚠️ CORE SYSTEM WARNING
+
+**Database:** LDC Brain AI (shared hub)
+**Role:** This is the BRAIN of the ecosystem - changes propagate everywhere
+**Risk Level:** HIGH - core infrastructure
+
+**RULES:**
+- `/db-safe` active for all database work
+- Changes here may affect Uplift Ops and other connected projects
+- Test thoroughly before deployment
+- Document all architectural decisions
+- Coordinate with `/ecosystem` for cross-project awareness
+
+## Recommended Skills for This Project
+- `/db-safe` - Always active (core system)
+- `/ecosystem` - CRITICAL (this affects everything)
+- `/design` - SaaS-quality UI/UX
+- `/deploy` - HIGH risk deployments
+- `/content tech` - Product documentation and marketing
