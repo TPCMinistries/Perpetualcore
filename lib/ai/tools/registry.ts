@@ -30,6 +30,60 @@ import {
   executeSkillTool,
 } from "@/lib/skills/registry";
 
+// Code execution tool definition
+const executeCodeTool: Tool = {
+  name: "execute_code",
+  description: "Execute code in a sandboxed environment. Supports Python, JavaScript, TypeScript, Bash, and R. Use this when the user asks you to run code, test something, do calculations, data analysis, or any programming task.",
+  parameters: {
+    type: "object",
+    properties: {
+      language: {
+        type: "string",
+        enum: ["python", "javascript", "typescript", "bash", "r"],
+        description: "Programming language to execute",
+      },
+      code: {
+        type: "string",
+        description: "The code to execute",
+      },
+      timeout: {
+        type: "number",
+        description: "Execution timeout in milliseconds (default 30000, max 300000)",
+      },
+    },
+    required: ["language", "code"],
+  },
+};
+
+// Browser browsing tool definition
+const browseWebTool: Tool = {
+  name: "browse_web",
+  description: "Browse the web using a real browser. Can take screenshots, scrape page content, extract data, generate PDFs, and interact with web pages. Use this when you need to see what a webpage looks like, extract specific content from a URL, or interact with a website.",
+  parameters: {
+    type: "object",
+    properties: {
+      action: {
+        type: "string",
+        enum: ["screenshot", "scrape", "pdf", "extract"],
+        description: "The browser action to perform",
+      },
+      url: {
+        type: "string",
+        description: "The URL to browse",
+      },
+      selector: {
+        type: "string",
+        description: "CSS selector to target specific elements (for scrape/extract)",
+      },
+      javascript: {
+        type: "string",
+        description: "JavaScript to execute on the page (for extract action)",
+      },
+    },
+    required: ["action", "url"],
+  },
+};
+
 // Registry of all core (non-skill) tools
 export const CORE_TOOLS: Tool[] = [
   webSearchTool,
@@ -37,6 +91,8 @@ export const CORE_TOOLS: Tool[] = [
   searchDocumentsTool,
   searchConversationsTool, // Search conversation history
   searchContactsTool,      // Search contacts for relationship management
+  executeCodeTool,         // Sandboxed code execution
+  browseWebTool,           // Browser automation
 ];
 
 // Legacy export for backward compatibility
@@ -149,6 +205,29 @@ export async function executeToolCall(
 
       case "search_contacts": {
         return await executeSearchContacts(params as SearchContactsInput, context);
+      }
+
+      case "execute_code": {
+        // Dynamic import to avoid circular deps
+        const { executeCode } = await import("@/lib/execution");
+        const result = await executeCode(
+          { language: params.language, code: params.code, timeout: params.timeout },
+          context
+        );
+        return result.exitCode === 0
+          ? `Code executed successfully:\n\`\`\`\n${result.stdout}\n\`\`\``
+          : `Code execution ${result.exitCode !== 0 ? "failed" : "completed"}:\nStdout: ${result.stdout}\nStderr: ${result.stderr}`;
+      }
+
+      case "browse_web": {
+        const { executeBrowserAction } = await import("@/lib/browser");
+        const result = await executeBrowserAction(
+          { action: params.action, url: params.url, selector: params.selector, javascript: params.javascript },
+          context
+        );
+        if (!result.success) return `Browser action failed: ${result.error}`;
+        if (params.action === "screenshot") return `Screenshot taken of ${params.url}. Image data available.`;
+        return `Browser ${params.action} result from ${params.url}:\n${typeof result.data === "string" ? result.data : JSON.stringify(result.data)}`;
       }
 
       default:

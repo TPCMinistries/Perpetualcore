@@ -20,6 +20,7 @@
   "dependencies": {
     "@anthropic-ai/sdk": "^0.67.0",
     "@ducanh2912/next-pwa": "^10.2.9",
+    "@e2b/code-interpreter": "^2.3.3",
     "@google/generative-ai": "^0.24.1",
     "@hookform/resolvers": "^5.2.2",
     "@langchain/anthropic": "^1.0.0",
@@ -71,6 +72,7 @@
     "date-fns": "^4.1.0",
     "docx": "^9.5.1",
     "dompurify": "^3.3.0",
+    "e2b": "^2.12.0",
     "exceljs": "^4.4.0",
     "framer-motion": "^12.23.26",
     "googleapis": "^164.0.0",
@@ -87,6 +89,7 @@
     "pdf2json": "^4.0.0",
     "pdfjs-dist": "^5.4.296",
     "pptxgenjs": "^4.0.1",
+    "puppeteer-core": "^24.37.2",
     "qrcode": "^1.5.4",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",

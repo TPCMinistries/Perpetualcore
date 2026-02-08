@@ -553,6 +553,21 @@ Or, you can copy and paste the text content directly into this chat.`;
     // Build model-specific optimized system prompt
     let systemPrompt = buildOptimizedSystemPrompt(model, userMessage);
 
+    // === Agent Identity Injection ===
+    try {
+      const { loadAgentIdentity } = await import("@/lib/agent-workspace/identity-loader");
+      const { buildAgentPersonaPrompt } = await import("@/lib/agent-workspace/context-builder");
+      const agentIdentity = await loadAgentIdentity(user.id);
+      if (agentIdentity && agentIdentity.isActive) {
+        const personaPrompt = buildAgentPersonaPrompt(agentIdentity);
+        systemPrompt = personaPrompt + "\n\n" + systemPrompt;
+        if (isDev) console.log(`🤖 Agent identity "${agentIdentity.name}" injected into system prompt`);
+      }
+    } catch (e) {
+      console.error("Failed to load agent identity:", e);
+      // Non-fatal - continue without persona
+    }
+
     // Helper function to add timeout to promises to prevent hangs
     const withTimeout = <T>(promise: Promise<T>, timeoutMs: number, fallback: T): Promise<T> => {
       return Promise.race([
