@@ -16,6 +16,10 @@ import {
 import { Message } from "./types";
 import { cn } from "@/lib/utils";
 import { useState } from "react";
+import {
+  PlanDelegationCard,
+  parsePlanDelegation,
+} from "./PlanDelegationCard";
 
 interface ChatMessagesProps {
   messages: Message[];
@@ -86,7 +90,20 @@ export function ChatMessages({
                   )}
                 >
                   {message.role === "assistant" ? (
-                    <MarkdownMessage content={message.content} />
+                    <>
+                      <MarkdownMessage content={message.content} />
+                      {(() => {
+                        const delegation = parsePlanDelegation(message.content);
+                        if (!delegation) return null;
+                        return (
+                          <PlanDelegationCard
+                            planId={delegation.planId}
+                            goal={delegation.goal}
+                            stepCount={delegation.stepCount}
+                          />
+                        );
+                      })()}
+                    </>
                   ) : (
                     <p className="whitespace-pre-wrap">{message.content}</p>
                   )}

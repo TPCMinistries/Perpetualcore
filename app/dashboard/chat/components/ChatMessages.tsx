@@ -4,6 +4,10 @@ import { RefObject } from "react";
 import { Button } from "@/components/ui/button";
 import { Bot, User, FileText, Image as ImageIcon, Copy, Check, ThumbsUp, ThumbsDown } from "lucide-react";
 import { MarkdownMessage } from "@/components/markdown-message";
+import {
+  PlanDelegationCard,
+  parsePlanDelegation,
+} from "@/components/chat/PlanDelegationCard";
 import { Message, ModelInfo, RAGInfo } from "../hooks/useChat";
 
 interface ChatMessagesProps {
@@ -74,7 +78,20 @@ export function ChatMessages({
                   </div>
                 )}
                 {message.role === "assistant" ? (
-                  <MarkdownMessage content={message.content} />
+                  <>
+                    <MarkdownMessage content={message.content} />
+                    {(() => {
+                      const delegation = parsePlanDelegation(message.content);
+                      if (!delegation) return null;
+                      return (
+                        <PlanDelegationCard
+                          planId={delegation.planId}
+                          goal={delegation.goal}
+                          stepCount={delegation.stepCount}
+                        />
+                      );
+                    })()}
+                  </>
                 ) : (
                   <div className="whitespace-pre-wrap break-words text-slate-900 dark:text-slate-100">
                     {message.content}

@@ -7,6 +7,7 @@
 
 import { PlanStep, SENSITIVE_TOOLS } from "./types";
 import { trackActivity } from "@/lib/activity-feed/tracker";
+import { notifyUser } from "@/lib/agents/heartbeat/notifier";
 
 /**
  * Check if a step requires user approval.
@@ -41,6 +42,24 @@ export async function requestApproval(
       tool: step.tool,
       args: step.args,
     },
+  });
+
+  // Send push notification (Telegram, Slack, etc.) if configured
+  notifyUser(
+    userId,
+    [
+      {
+        category: "approval",
+        message: `Plan needs approval: ${step.description}`,
+        urgency: "high",
+        suggestedAction: `Approve at /dashboard/agent/plans/${planId}`,
+        relatedItems: [planId, step.id],
+      },
+    ],
+    planId
+  ).catch((err) => {
+    // Non-blocking — don't fail the approval gate if notification fails
+    console.error("[ApprovalGate] Push notification failed:", err);
   });
 
   return true; // Always pause for approval

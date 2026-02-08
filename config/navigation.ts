@@ -344,6 +344,16 @@ export const NAVIGATION_CONFIG: NavigationSection[] = [
         },
       },
       {
+        name: "Agent Plans",
+        href: "/dashboard/agent/plans",
+        icon: Target,
+        adaptiveConfig: {
+          visibleFor: ["beginner", "intermediate", "advanced"],
+          complexity: "standard",
+          helpText: "View and manage multi-step plans your AI agent executes autonomously",
+        },
+      },
+      {
         name: "Workflows",
         href: "/dashboard/workflows",
         icon: Zap,
@@ -934,6 +944,16 @@ export const NAVIGATION_CONFIG_V2: NavigationSection[] = [
           visibleFor: ["beginner", "intermediate", "advanced"],
           complexity: "standard",
           helpText: "Autonomous AI agents that work independently on complex tasks",
+        },
+      },
+      {
+        name: "Agent Plans",
+        href: "/dashboard/agent/plans",
+        icon: Target,
+        adaptiveConfig: {
+          visibleFor: ["beginner", "intermediate", "advanced"],
+          complexity: "standard",
+          helpText: "View and manage multi-step plans your AI agent executes autonomously",
         },
       },
       {
