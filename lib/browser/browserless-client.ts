@@ -143,7 +143,7 @@ async function takeScreenshot(
   action: BrowserAction,
   startTime: number
 ): Promise<BrowserResult> {
-  let screenshotBuffer: Buffer | string;
+  let screenshotBase64: string;
 
   if (action.selector) {
     const element = await page.$(action.selector);
@@ -156,17 +156,17 @@ async function takeScreenshot(
         errorMessage: `Element not found for selector: ${action.selector}`,
       };
     }
-    screenshotBuffer = await element.screenshot({ encoding: "base64" });
+    screenshotBase64 = (await element.screenshot({ encoding: "base64" })) as string;
   } else {
-    screenshotBuffer = await page.screenshot({
+    screenshotBase64 = (await page.screenshot({
       encoding: "base64",
       fullPage: true,
-    });
+    })) as string;
   }
 
   return {
     success: true,
-    data: typeof screenshotBuffer === "string" ? screenshotBuffer : screenshotBuffer.toString("base64"),
+    data: screenshotBase64,
     url: page.url(),
     timing: Date.now() - startTime,
   };
@@ -195,7 +195,7 @@ async function scrapePage(
       };
     }
     textContent = await page.evaluate(
-      (el) => el.innerText || el.textContent || "",
+      (el) => (el as HTMLElement).innerText || el.textContent || "",
       element
     );
   } else {

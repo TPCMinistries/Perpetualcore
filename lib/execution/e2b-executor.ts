@@ -1,17 +1,16 @@
 /**
  * E2B Sandbox Executor
  * Executes code in isolated E2B.dev sandboxes with resource limits.
- * Uses CodeInterpreter for Python and Sandbox for other languages.
+ * Uses @e2b/code-interpreter Sandbox for Python (with rich output) and base Sandbox for other languages.
  *
  * @see https://e2b.dev/docs
  */
 
-import { CodeInterpreter } from "@e2b/code-interpreter";
+import { Sandbox as CodeSandbox } from "@e2b/code-interpreter";
 import { Sandbox } from "e2b";
 import {
   ExecutionRequest,
   ExecutionResult,
-  ExecutionLanguage,
   DEFAULT_TIMEOUT,
   MAX_TIMEOUT,
 } from "./types";
@@ -29,7 +28,7 @@ const LANGUAGE_COMMANDS: Record<string, { command: string; fileExt: string }> = 
 
 /**
  * Execute code in an E2B sandboxed environment.
- * Python code uses the CodeInterpreter for rich output support.
+ * Python code uses the CodeInterpreter sandbox for rich output support.
  * Other languages use the general Sandbox with file-based execution.
  *
  * @param request - The execution request containing language, code, and options
@@ -49,7 +48,7 @@ export async function executeInSandbox(
 }
 
 /**
- * Execute Python code using E2B CodeInterpreter.
+ * Execute Python code using E2B code-interpreter Sandbox.
  * Supports rich outputs including plots, DataFrames, and inline results.
  */
 async function executePython(
@@ -57,15 +56,15 @@ async function executePython(
   timeout: number,
   startTime: number
 ): Promise<ExecutionResult> {
-  let sandbox: CodeInterpreter | null = null;
+  let sandbox: CodeSandbox | null = null;
 
   try {
-    sandbox = await CodeInterpreter.create({
+    sandbox = await CodeSandbox.create({
       apiKey: process.env.E2B_API_KEY,
-      timeout,
+      timeoutMs: timeout,
     });
 
-    const execution = await sandbox.notebook.execCell(request.code, {
+    const execution = await sandbox.runCode(request.code, {
       timeoutMs: timeout,
     });
 
@@ -187,18 +186,18 @@ async function executeGeneral(
   try {
     sandbox = await Sandbox.create({
       apiKey: process.env.E2B_API_KEY,
-      timeout,
+      timeoutMs: timeout,
     });
 
     // Write code to a temp file in the sandbox
     const filename = `/tmp/code.${langConfig.fileExt}`;
-    await sandbox.filesystem.write(filename, request.code);
+    await sandbox.files.write(filename, request.code);
 
     // If stdin is provided, write it to a file and pipe it
     let command = `${langConfig.command} ${filename}`;
     if (request.stdin) {
       const stdinFile = "/tmp/stdin.txt";
-      await sandbox.filesystem.write(stdinFile, request.stdin);
+      await sandbox.files.write(stdinFile, request.stdin);
       command = `${command} < ${stdinFile}`;
     }
 

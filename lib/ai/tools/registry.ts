@@ -84,6 +84,56 @@ const browseWebTool: Tool = {
   },
 };
 
+// Agent plan tools
+const delegateToAgentTool: Tool = {
+  name: "delegate_to_agent",
+  description:
+    "Delegate a complex, multi-step task to an autonomous background agent. Use this when the user's request requires multiple tool calls, background execution, or when you want to avoid blocking the conversation. The agent will decompose the goal into steps, execute them sequentially, and pause for approval on sensitive actions (sending emails, creating events, etc.).",
+  parameters: {
+    type: "object",
+    properties: {
+      goal: {
+        type: "string",
+        description:
+          "The high-level goal to accomplish (e.g., 'Research my top 3 competitors and draft an email summary')",
+      },
+      steps_hint: {
+        type: "string",
+        description:
+          "Optional comma-separated hints about what steps to include (e.g., 'search web for competitor A, search web for competitor B, draft email')",
+      },
+      urgency: {
+        type: "string",
+        enum: ["low", "normal", "high"],
+        description: "How urgently this plan should be executed (default: normal)",
+      },
+    },
+    required: ["goal"],
+  },
+};
+
+const getPlanStatusTool: Tool = {
+  name: "get_plan_status",
+  description:
+    "Check the status of running or completed agent plans. Use this when the user asks about background tasks, what the agent is working on, or to check on a specific plan.",
+  parameters: {
+    type: "object",
+    properties: {
+      plan_id: {
+        type: "string",
+        description:
+          "Specific plan ID to check. If omitted, returns recent plans.",
+      },
+      status_filter: {
+        type: "string",
+        enum: ["running", "paused", "completed", "failed", "cancelled"],
+        description: "Filter plans by status",
+      },
+    },
+    required: [],
+  },
+};
+
 // Registry of all core (non-skill) tools
 export const CORE_TOOLS: Tool[] = [
   webSearchTool,
@@ -93,6 +143,8 @@ export const CORE_TOOLS: Tool[] = [
   searchContactsTool,      // Search contacts for relationship management
   executeCodeTool,         // Sandboxed code execution
   browseWebTool,           // Browser automation
+  delegateToAgentTool,     // Autonomous background agent
+  getPlanStatusTool,       // Check agent plan status
 ];
 
 // Legacy export for backward compatibility
@@ -228,6 +280,40 @@ export async function executeToolCall(
         if (!result.success) return `Browser action failed: ${result.error}`;
         if (params.action === "screenshot") return `Screenshot taken of ${params.url}. Image data available.`;
         return `Browser ${params.action} result from ${params.url}:\n${typeof result.data === "string" ? result.data : JSON.stringify(result.data)}`;
+      }
+
+      case "delegate_to_agent": {
+        const { createAndStartPlan } = await import("@/lib/agents/executor");
+        const stepsHint = params.steps_hint
+          ? params.steps_hint.split(",").map((s: string) => s.trim())
+          : undefined;
+        const plan = await createAndStartPlan(
+          { goal: params.goal, steps_hint: stepsHint, urgency: params.urgency },
+          context
+        );
+        return `Plan created (id: ${plan.id}). ${plan.steps.length} steps queued. I'll execute them in the background and notify you when complete or when approval is needed.`;
+      }
+
+      case "get_plan_status": {
+        const { getPlan, listPlans } = await import(
+          "@/lib/agents/executor/state-manager"
+        );
+        if (params.plan_id) {
+          const plan = await getPlan(params.plan_id);
+          if (!plan) return "Plan not found.";
+          const { generatePlanSummary } = await import(
+            "@/lib/agents/executor/reporter"
+          );
+          return generatePlanSummary(plan);
+        }
+        const plans = await listPlans(context.userId, params.status_filter);
+        if (plans.length === 0) return "No agent plans found.";
+        return plans
+          .map(
+            (p) =>
+              `[${p.status}] "${p.goal}" (${p.steps.filter((s) => s.status === "completed").length}/${p.steps.length} steps) - id: ${p.id}`
+          )
+          .join("\n");
       }
 
       default:

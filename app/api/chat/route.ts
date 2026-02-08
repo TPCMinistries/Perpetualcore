@@ -568,6 +568,19 @@ Or, you can copy and paste the text content directly into this chat.`;
       // Non-fatal - continue without persona
     }
 
+    // === Action Memory Injection (Recent Agent Plans) ===
+    try {
+      const { buildActionMemory } = await import("@/lib/agents/executor/context-loader");
+      const actionMemory = await buildActionMemory(user.id);
+      if (actionMemory) {
+        systemPrompt += "\n" + actionMemory;
+        if (isDev) console.log("🤖 Action memory injected into system prompt");
+      }
+    } catch (e) {
+      console.error("Failed to load action memory:", e);
+      // Non-fatal - continue without action memory
+    }
+
     // Helper function to add timeout to promises to prevent hangs
     const withTimeout = <T>(promise: Promise<T>, timeoutMs: number, fallback: T): Promise<T> => {
       return Promise.race([
@@ -1041,7 +1054,7 @@ When discussing these contacts:
     const stream = new ReadableStream({
       async start(controller) {
         let conversationMessages = [...messagesWithContext];
-        let maxIterations = 5; // Prevent infinite tool calling loops
+        let maxIterations = 8; // Prevent infinite tool calling loops
         let totalUsage: UsageMetadata = { inputTokens: 0, outputTokens: 0 };
         let finalResponse = "";
 
