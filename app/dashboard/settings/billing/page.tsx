@@ -16,11 +16,28 @@ import {
   Building2,
   Sparkles,
   Users,
+  Receipt,
+  Download,
+  ExternalLink,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { ChangePlanDialog } from "@/components/billing/change-plan-dialog";
+
+interface Invoice {
+  id: string;
+  number: string | null;
+  status: string | null;
+  amount: number;
+  currency: string;
+  created: number;
+  periodStart: number;
+  periodEnd: number;
+  invoiceUrl: string | null;
+  invoicePdf: string | null;
+  paid: boolean;
+}
 
 interface Subscription {
   id: string;
@@ -86,6 +103,7 @@ export default function BillingPage() {
   const [subscription, setSubscription] = useState<Subscription | null>(null);
   const [usage, setUsage] = useState<Usage | null>(null);
   const [limits, setLimits] = useState<PlanLimits | null>(null);
+  const [invoices, setInvoices] = useState<Invoice[]>([]);
   const [loading, setLoading] = useState(true);
   const [upgrading, setUpgrading] = useState(false);
   const [billingInterval, setBillingInterval] = useState<"monthly" | "annual">("monthly");
@@ -119,6 +137,13 @@ export default function BillingPage() {
       if (limitsRes.ok) {
         const limitsData = await limitsRes.json();
         setLimits(limitsData.limits);
+      }
+
+      // Fetch invoices
+      const invoiceRes = await fetch("/api/stripe/invoices");
+      if (invoiceRes.ok) {
+        const invoiceData = await invoiceRes.json();
+        setInvoices(invoiceData.invoices || []);
       }
     } catch (error) {
       console.error("Failed to fetch billing data:", error);
@@ -431,6 +456,90 @@ export default function BillingPage() {
           </CardContent>
         </Card>
       </div>
+
+      {/* Invoice History */}
+      {invoices.length > 0 && (
+        <Card className="mb-6">
+          <CardHeader>
+            <CardTitle className="text-lg flex items-center gap-2">
+              <Receipt className="h-5 w-5" />
+              Invoice History
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b text-left">
+                    <th className="pb-3 font-medium text-gray-600">Invoice</th>
+                    <th className="pb-3 font-medium text-gray-600">Date</th>
+                    <th className="pb-3 font-medium text-gray-600">Amount</th>
+                    <th className="pb-3 font-medium text-gray-600">Status</th>
+                    <th className="pb-3 font-medium text-gray-600 text-right">Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {invoices.map((invoice) => (
+                    <tr key={invoice.id} className="border-b last:border-0">
+                      <td className="py-3 font-mono text-xs">
+                        {invoice.number || invoice.id.slice(-8)}
+                      </td>
+                      <td className="py-3 text-gray-600">
+                        {new Date(invoice.created * 1000).toLocaleDateString()}
+                      </td>
+                      <td className="py-3 font-medium">
+                        {new Intl.NumberFormat("en-US", {
+                          style: "currency",
+                          currency: invoice.currency.toUpperCase(),
+                        }).format(invoice.amount / 100)}
+                      </td>
+                      <td className="py-3">
+                        <span
+                          className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${
+                            invoice.paid
+                              ? "bg-green-100 text-green-700"
+                              : invoice.status === "open"
+                              ? "bg-yellow-100 text-yellow-700"
+                              : "bg-gray-100 text-gray-700"
+                          }`}
+                        >
+                          {invoice.paid ? "Paid" : invoice.status || "Unknown"}
+                        </span>
+                      </td>
+                      <td className="py-3 text-right">
+                        <div className="flex items-center justify-end gap-2">
+                          {invoice.invoiceUrl && (
+                            <a
+                              href={invoice.invoiceUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-gray-500 hover:text-gray-700"
+                              title="View invoice"
+                            >
+                              <ExternalLink className="h-4 w-4" />
+                            </a>
+                          )}
+                          {invoice.invoicePdf && (
+                            <a
+                              href={invoice.invoicePdf}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-gray-500 hover:text-gray-700"
+                              title="Download PDF"
+                            >
+                              <Download className="h-4 w-4" />
+                            </a>
+                          )}
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Billing Interval Toggle */}
       <div className="flex justify-center mb-6">

@@ -10,6 +10,7 @@ import { AVAILABLE_TOOLS, executeToolCall, getAvailableToolsForUser } from "@/li
 import { loadUserPreferences, applyPreferencesToPrompt } from "@/lib/intelligence/preference-loader";
 import { getIntelligenceSummary } from "@/lib/intelligence";
 import { rateLimiters, checkRateLimit } from "@/lib/rate-limit";
+import { checkAIUsage, trackAIUsageAfterResponse } from "@/lib/billing/usage-guard";
 import { loadTeamContext, loadUserTeamContext, buildTeamSystemPrompt, LoadedTeamContext } from "@/lib/intelligence/team-context";
 import { buildMemoryContext, extractMemoriesFromConversation } from "@/lib/ai/memory";
 
@@ -422,6 +423,25 @@ export async function POST(req: NextRequest) {
     }
 
     const model = modelSelection.model as AIModel;
+
+    // Check usage limits before processing (prevents free users from burning tokens)
+    const usageCheck = await checkAIUsage(organizationId, model);
+    if (!usageCheck.allowed) {
+      return new Response(
+        JSON.stringify({
+          error: "Usage limit reached",
+          code: usageCheck.code,
+          message: usageCheck.reason,
+          currentPlan: usageCheck.currentPlan,
+          usage: usageCheck.usage,
+          upgrade: usageCheck.upgrade,
+        }),
+        {
+          status: 429,
+          headers: { "Content-Type": "application/json" },
+        }
+      );
+    }
 
     // Process attachments
     let messagesWithContext = messages;
@@ -1011,7 +1031,7 @@ When discussing these contacts:
         let finalResponse = "";
 
         try {
-          // Send model selection info first
+          // Send model selection info first (include usage data for frontend)
           controller.enqueue(
             encoder.encode(
               JSON.stringify({
@@ -1021,6 +1041,14 @@ When discussing these contacts:
                   model: modelSelection.model,
                   icon: modelSelection.icon,
                 },
+                ...(usageCheck.usage && {
+                  usageInfo: {
+                    premiumMessagesUsed: usageCheck.usage.premiumMessagesUsed,
+                    premiumMessagesLimit: usageCheck.usage.premiumMessagesLimit,
+                    percentUsed: usageCheck.usage.percentUsed,
+                    plan: usageCheck.currentPlan,
+                  },
+                }),
               }) + "\n"
             )
           );
@@ -1212,6 +1240,16 @@ When discussing these contacts:
             if (isDev) console.log(
               `💰 Usage tracked: ${cost.totalTokens} tokens, $${cost.totalCost.toFixed(6)} for ${model}`
             );
+          }
+
+          // Track usage against plan limits
+          if (totalUsage.inputTokens > 0 || totalUsage.outputTokens > 0) {
+            trackAIUsageAfterResponse(
+              organizationId,
+              model,
+              totalUsage.inputTokens,
+              totalUsage.outputTokens
+            ).catch((err) => isDev && console.error("Usage tracking error:", err));
           }
 
           // Save assistant message with cost tracking

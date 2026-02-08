@@ -65,6 +65,7 @@ export default function PrivacySettingsPage() {
 
   const [deleteConfirmation, setDeleteConfirmation] = useState("")
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
+  const [isDeleting, setIsDeleting] = useState(false)
 
   const handleSaveCookies = () => {
     toast.success("Cookie preferences saved successfully")
@@ -82,13 +83,39 @@ export default function PrivacySettingsPage() {
     toast.success("Your data export request has been queued. You'll receive an email when ready.")
   }
 
-  const handleDeleteAccount = () => {
-    if (deleteConfirmation === "DELETE") {
-      toast.success("Account deletion initiated. You'll receive a confirmation email.")
+  const handleDeleteAccount = async () => {
+    if (deleteConfirmation !== "DELETE") {
+      toast.error("Please type DELETE to confirm")
+      return
+    }
+
+    setIsDeleting(true)
+    try {
+      const res = await fetch("/api/user/account", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ confirmation: "DELETE" }),
+      })
+
+      const data = await res.json()
+
+      if (!res.ok) {
+        toast.error(data.error || "Failed to delete account")
+        return
+      }
+
+      toast.success("Account deleted successfully. Redirecting...")
       setShowDeleteDialog(false)
       setDeleteConfirmation("")
-    } else {
-      toast.error("Please type DELETE to confirm")
+
+      // Redirect to homepage after short delay
+      setTimeout(() => {
+        window.location.href = "/"
+      }, 2000)
+    } catch {
+      toast.error("Network error. Please try again.")
+    } finally {
+      setIsDeleting(false)
     }
   }
 

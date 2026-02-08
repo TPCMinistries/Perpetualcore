@@ -68,3 +68,10 @@ export {
   type AlertTrigger,
   type AlertNotification,
 } from './alerts';
+
+// Usage Guard (enforcement middleware)
+export {
+  checkAIUsage,
+  trackAIUsageAfterResponse,
+  type UsageGuardResult,
+} from './usage-guard';

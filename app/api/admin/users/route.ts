@@ -1,10 +1,6 @@
-import { NextRequest } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
-import {
-  checkAdminAccess,
-  unauthorizedResponse,
-  forbiddenResponse,
-} from "@/lib/admin/checkAdmin";
+import { requirePermission } from "@/lib/auth/rbac";
 import {
   updateUserRoleSchema,
   validateBody,
@@ -15,15 +11,8 @@ import {
 // GET /api/admin/users - Get all users with their roles (admin only)
 export async function GET(req: NextRequest) {
   try {
-    const { isAdmin, user, error: authError } = await checkAdminAccess();
-
-    if (!user) {
-      return unauthorizedResponse();
-    }
-
-    if (!isAdmin) {
-      return forbiddenResponse();
-    }
+    const auth = await requirePermission("users.read");
+    if (auth.response) return auth.response;
 
     const supabase = await createClient();
 
@@ -54,15 +43,9 @@ export async function GET(req: NextRequest) {
 // PATCH /api/admin/users - Update user role (admin only)
 export async function PATCH(req: NextRequest) {
   try {
-    const { isAdmin, user, error: authError } = await checkAdminAccess();
-
-    if (!user) {
-      return unauthorizedResponse();
-    }
-
-    if (!isAdmin) {
-      return forbiddenResponse();
-    }
+    const auth = await requirePermission("users.manage_roles");
+    if (auth.response) return auth.response;
+    const user = auth.user!;
 
     // Validate input with Zod
     let validatedData;

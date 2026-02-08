@@ -2,8 +2,12 @@ import { createServerClient, type CookieOptions } from '@supabase/ssr';
 import { NextResponse, type NextRequest } from 'next/server';
 
 export async function middleware(request: NextRequest) {
-  // Allow public access to presentation page
-  if (request.nextUrl.pathname === '/presentation') {
+  // Allow public access to specific pages
+  if (
+    request.nextUrl.pathname === '/presentation' ||
+    request.nextUrl.pathname.startsWith('/invite/') ||
+    request.nextUrl.pathname.startsWith('/auth/callback')
+  ) {
     return NextResponse.next();
   }
 
@@ -30,7 +34,7 @@ export async function middleware(request: NextRequest) {
           // Extend cookie lifetime to 30 days for persistent sessions
           const extendedOptions = {
             ...options,
-            maxAge: 60 * 60 * 24 * 30, // 30 days
+            maxAge: 60 * 60 * 24 * 14, // 14 days
             path: '/',
             sameSite: 'lax' as const,
             secure: process.env.NODE_ENV === 'production',

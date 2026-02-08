@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { MeterType } from "./metering";
+import { sendEmail } from "@/lib/email";
 
 export interface OverageAlert {
   id: string;
@@ -195,7 +196,7 @@ async function sendInAppNotification(
 }
 
 /**
- * Send email notification (stub - integrate with email provider)
+ * Send email notification for usage alerts
  */
 async function sendEmailNotification(
   organizationId: string,
@@ -206,18 +207,59 @@ async function sendEmailNotification(
   // Get org admin emails
   const { data: members } = await supabase
     .from('profiles')
-    .select('email')
+    .select('email, full_name')
     .eq('organization_id', organizationId)
     .in('role', ['admin', 'owner']);
 
   if (!members || members.length === 0) return;
 
-  // TODO: Integrate with email provider (Resend, SendGrid, etc.)
-  console.log('[Alerts] Would send email to:', members.map(m => m.email));
-  console.log('[Alerts] Email content:', {
-    subject: `Usage Alert: ${notification.meterType} at ${notification.currentPercentage.toFixed(0)}%`,
-    body: notification.message,
-  });
+  const severityColors = {
+    warning: { bg: '#f59e0b', label: 'Warning' },
+    critical: { bg: '#ef4444', label: 'Critical' },
+    exceeded: { bg: '#dc2626', label: 'Limit Exceeded' },
+  };
+
+  const { bg, label } = severityColors[notification.severity];
+  const billingUrl = `${process.env.NEXT_PUBLIC_APP_URL || 'https://perpetualcore.com'}/dashboard/settings/billing`;
+  const meterLabel = getMeterLabel(notification.meterType);
+
+  const subject = `${label}: ${meterLabel} at ${notification.currentPercentage.toFixed(0)}% - Perpetual Core`;
+
+  const html = `
+<!DOCTYPE html>
+<html>
+<head><meta charset="utf-8"></head>
+<body style="margin:0;padding:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#f9fafb;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="padding:40px 20px;">
+    <tr><td align="center">
+      <table width="600" cellpadding="0" cellspacing="0" style="background:#fff;border-radius:8px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,0.1);">
+        <tr><td style="background:${bg};padding:30px;text-align:center;">
+          <h1 style="margin:0;color:#fff;font-size:24px;">Usage ${label}</h1>
+        </td></tr>
+        <tr><td style="padding:40px 30px;">
+          <p style="margin:0 0 20px;color:#4b5563;font-size:16px;line-height:1.6;">
+            ${notification.message}
+          </p>
+          <div style="background:#f3f4f6;border-radius:6px;padding:20px;margin:20px 0;text-align:center;">
+            <p style="margin:0 0 10px;color:#6b7280;font-size:14px;">Current Usage</p>
+            <p style="margin:0;color:#111827;font-size:36px;font-weight:700;">${notification.currentPercentage.toFixed(0)}%</p>
+            <p style="margin:10px 0 0;color:#6b7280;font-size:14px;">${meterLabel}</p>
+          </div>
+          <div style="text-align:center;margin:30px 0;">
+            <a href="${billingUrl}" style="display:inline-block;background:#111827;color:#fff;padding:12px 24px;border-radius:6px;text-decoration:none;font-weight:600;">View Billing & Usage</a>
+          </div>
+        </td></tr>
+      </table>
+    </td></tr>
+  </table>
+</body>
+</html>`;
+
+  for (const member of members) {
+    if (member.email) {
+      await sendEmail(member.email, subject, html);
+    }
+  }
 }
 
 /**
