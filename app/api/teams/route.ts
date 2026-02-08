@@ -86,10 +86,14 @@ export async function GET(request: NextRequest) {
     }
 
     // Transform data if members were included
+    interface TeamRow {
+      team_members?: Array<{ profiles?: unknown; [key: string]: unknown }>;
+      [key: string]: unknown;
+    }
     const transformedTeams = withMembers
-      ? teams.map((team: any) => ({
+      ? (teams as TeamRow[]).map((team) => ({
           ...team,
-          members: team.team_members?.map((m: any) => ({
+          members: team.team_members?.map((m) => ({
             ...m,
             user: m.profiles,
           })),

@@ -18,7 +18,7 @@ export interface ProjectContext {
     total: number;
     completed: number;
   };
-  aiContext?: Record<string, any>;
+  aiContext?: Record<string, unknown>;
 }
 
 /**
@@ -74,9 +74,9 @@ export async function loadProjectContext(projectId: string): Promise<ProjectCont
       projectName: project.name,
       projectDescription: project.description,
       currentStage: project.current_stage,
-      teamName: (project.team as any)?.name,
-      teamEmoji: (project.team as any)?.emoji,
-      milestones: ((project.milestones as any[]) || []).map((m) => ({
+      teamName: (project.team as { name?: string; emoji?: string } | null)?.name,
+      teamEmoji: (project.team as { name?: string; emoji?: string } | null)?.emoji,
+      milestones: ((project.milestones as Array<{ name: string; stage: string; due_date?: string; completed_at?: string }>) || []).map((m) => ({
         name: m.name,
         stage: m.stage,
         dueDate: m.due_date,

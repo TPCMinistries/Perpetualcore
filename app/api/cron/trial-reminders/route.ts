@@ -52,8 +52,9 @@ export async function GET(request: Request) {
       .gt("trial_end", oneDayFromNow.toISOString());
 
     for (const trial of threeDayTrials || []) {
-      const email = (trial.organizations as any)?.owner_email;
-      const orgName = (trial.organizations as any)?.name || "your account";
+      const org = trial.organizations as { owner_email?: string; name?: string } | null;
+      const email = org?.owner_email;
+      const orgName = org?.name || "your account";
       if (!email) continue;
 
       // Check if we already sent this reminder
@@ -95,8 +96,9 @@ export async function GET(request: Request) {
       .lte("trial_end", oneDayFromNow.toISOString());
 
     for (const trial of oneDayTrials || []) {
-      const email = (trial.organizations as any)?.owner_email;
-      const orgName = (trial.organizations as any)?.name || "your account";
+      const org = trial.organizations as { owner_email?: string; name?: string } | null;
+      const email = org?.owner_email;
+      const orgName = org?.name || "your account";
       if (!email) continue;
 
       const { data: existingReminder } = await supabase
@@ -135,8 +137,9 @@ export async function GET(request: Request) {
       .lt("trial_end", now.toISOString());
 
     for (const trial of expiredTrials || []) {
-      const email = (trial.organizations as any)?.owner_email;
-      const orgName = (trial.organizations as any)?.name || "your account";
+      const org = trial.organizations as { owner_email?: string; name?: string } | null;
+      const email = org?.owner_email;
+      const orgName = org?.name || "your account";
 
       // Downgrade to free
       await supabase

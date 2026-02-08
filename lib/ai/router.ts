@@ -64,6 +64,10 @@ export interface StreamChunk {
   done: boolean;
   usage?: UsageMetadata;
   tool_calls?: ToolCall[];
+  fallback?: boolean;
+  from?: string;
+  to?: string;
+  reason?: string;
 }
 
 /**
@@ -111,12 +115,13 @@ export async function* streamChatCompletion(
       console.log(`[Router] ✅ Successfully streamed from ${attemptModel}`);
       return;
 
-    } catch (error: any) {
-      console.error(`[Router] ❌ ${attemptModel} failed:`, error.message);
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      console.error(`[Router] ❌ ${attemptModel} failed:`, errorMessage);
 
       // If this was the last model in the chain, throw the error
       if (i === fallbackChain.length - 1) {
-        throw new Error(`All models in fallback chain failed. Last error: ${error.message}`);
+        throw new Error(`All models in fallback chain failed. Last error: ${errorMessage}`);
       }
 
       // Otherwise, emit fallback notification and continue to next model
@@ -125,11 +130,13 @@ export async function* streamChatCompletion(
 
       // Yield fallback event for UI to display
       yield {
+        content: "",
+        done: false,
         fallback: true,
         from: attemptModel,
         to: nextModel,
-        reason: error.message,
-      } as any;
+        reason: errorMessage,
+      };
     }
   }
 
@@ -193,7 +200,7 @@ async function* streamClaude(
     model: anthropicModel,
     max_tokens: 8192,
     system: systemMessage?.content,
-    messages: conversationMessages as any,
+    messages: conversationMessages as Anthropic.Messages.MessageParam[],
     tools: tools ? formatToolsForClaude(tools) : undefined,
   });
 
@@ -211,10 +218,10 @@ async function* streamClaude(
       };
     } else if (
       chunk.type === "content_block_start" &&
-      (chunk.content_block as any).type === "tool_use"
+      chunk.content_block.type === "tool_use"
     ) {
       // Claude signals tool use at block start
-      const toolUse = chunk.content_block as any;
+      const toolUse = chunk.content_block;
       toolCalls.push({
         id: toolUse.id,
         name: toolUse.name,
@@ -222,7 +229,7 @@ async function* streamClaude(
       });
     } else if (chunk.type === "message_start") {
       // Extract usage from message_start event
-      const message = chunk.message as any;
+      const message = chunk.message;
       if (message.usage) {
         usage = {
           inputTokens: message.usage.input_tokens || 0,
@@ -231,10 +238,9 @@ async function* streamClaude(
       }
     } else if (chunk.type === "message_delta") {
       // Update usage from message_delta event (for output tokens)
-      const delta = chunk as any;
-      if (delta.usage) {
+      if (chunk.usage) {
         if (!usage) usage = { inputTokens: 0, outputTokens: 0 };
-        usage.outputTokens = delta.usage.output_tokens || usage.outputTokens;
+        usage.outputTokens = chunk.usage.output_tokens || usage.outputTokens;
       }
     }
   }
@@ -607,11 +613,12 @@ async function* streamPerplexity(
       };
     }
 
-    // Perplexity includes usage in chunks
-    if ((chunk as any).usage) {
+    // Perplexity includes usage in chunks (OpenAI-compatible format)
+    const chunkWithUsage = chunk as typeof chunk & { usage?: { prompt_tokens?: number; completion_tokens?: number } };
+    if (chunkWithUsage.usage) {
       usage = {
-        inputTokens: (chunk as any).usage.prompt_tokens || 0,
-        outputTokens: (chunk as any).usage.completion_tokens || 0,
+        inputTokens: chunkWithUsage.usage.prompt_tokens || 0,
+        outputTokens: chunkWithUsage.usage.completion_tokens || 0,
       };
     }
   }

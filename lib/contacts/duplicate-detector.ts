@@ -142,21 +142,24 @@ export function mergeContacts(
 
   const arrayFields = ['tags', 'skills', 'interests', 'can_help_with', 'looking_for'];
 
+  const existingRecord = existing as Record<string, unknown>;
+  const mergedRecord = merged as Record<string, unknown>;
+
   for (const [key, importedValue] of Object.entries(imported)) {
     if (importedValue === undefined || importedValue === null || importedValue === '') {
       continue;
     }
 
-    const existingValue = (existing as any)[key];
+    const existingValue = existingRecord[key];
 
     // Handle array fields
     if (arrayFields.includes(key)) {
       if (strategy === 'merge_arrays') {
         const existingArray = Array.isArray(existingValue) ? existingValue : [];
         const importedArray = Array.isArray(importedValue) ? importedValue : [];
-        (merged as any)[key] = [...new Set([...existingArray, ...importedArray])];
+        mergedRecord[key] = [...new Set([...existingArray, ...importedArray])];
       } else if (strategy === 'prefer_imported') {
-        (merged as any)[key] = importedValue;
+        mergedRecord[key] = importedValue;
       }
       // prefer_existing keeps the existing value (no change)
       continue;
@@ -164,16 +167,16 @@ export function mergeContacts(
 
     // Handle other fields
     if (strategy === 'prefer_imported') {
-      (merged as any)[key] = importedValue;
+      mergedRecord[key] = importedValue;
     } else if (strategy === 'prefer_existing') {
       // Only use imported if existing is empty
       if (!existingValue) {
-        (merged as any)[key] = importedValue;
+        mergedRecord[key] = importedValue;
       }
     } else {
       // Default: prefer non-empty, imported wins ties
       if (!existingValue) {
-        (merged as any)[key] = importedValue;
+        mergedRecord[key] = importedValue;
       }
     }
   }
