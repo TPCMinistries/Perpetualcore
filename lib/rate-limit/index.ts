@@ -44,13 +44,17 @@ interface RateLimitResult {
 }
 
 // Initialize Redis client if env vars are set
-const redis =
-  process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN
-    ? new Redis({
-        url: process.env.UPSTASH_REDIS_REST_URL,
-        token: process.env.UPSTASH_REDIS_REST_TOKEN,
-      })
-    : null;
+let redis: Redis | null = null;
+try {
+  if (process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN) {
+    redis = new Redis({
+      url: process.env.UPSTASH_REDIS_REST_URL.trim(),
+      token: process.env.UPSTASH_REDIS_REST_TOKEN.trim(),
+    });
+  }
+} catch (error) {
+  console.warn("[RateLimit] Failed to initialize Redis, falling back to in-memory:", error);
+}
 
 const useRedis = !!redis;
 
