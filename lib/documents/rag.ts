@@ -1,4 +1,4 @@
-import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/server";
 import OpenAI from "openai";
 
 const openai = new OpenAI({
@@ -49,8 +49,9 @@ export async function searchDocuments(
     console.log("🔍 [RAG] Embedding generated. Length:", queryEmbedding.length, "dimensions");
     console.log("🔍 [RAG] First 5 values:", queryEmbedding.slice(0, 5));
 
-    // Query Supabase for similar chunks using pgvector
-    const supabase = await createClient();
+    // Use admin client to bypass PostgREST auth issues in streaming/async contexts
+    // The chat route already verifies auth and passes userId/organizationId as parameters
+    const supabase = createAdminClient();
 
     console.log("🔍 [RAG] Calling enhanced search_document_chunks with params:");
     console.log("  - org_id:", organizationId);
@@ -64,8 +65,9 @@ export async function searchDocuments(
 
     // Enhanced RAG function with 8 parameters for context-aware search
     // Supports visibility filtering, team spaces, and conversation context
+    // Pass embedding as JSON string for reliable PostgREST -> pgvector casting
     const { data, error } = await supabase.rpc("search_document_chunks", {
-      query_embedding: queryEmbedding,
+      query_embedding: JSON.stringify(queryEmbedding),
       org_id: organizationId,
       requesting_user_id: userId,
       match_threshold: similarityThreshold,

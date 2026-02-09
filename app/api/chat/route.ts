@@ -926,13 +926,13 @@ When discussing these contacts:
 
     // Check if we should use RAG
     let relevantDocs: any[] = [];
-    if (isDev) console.log("🔍 Checking RAG for query:", userMessage);
+    console.log("🔍 [RAG] Checking for query:", userMessage.substring(0, 50));
     const useRAG = shouldUseRAG(userMessage);
-    if (isDev) console.log("🔍 shouldUseRAG returned:", useRAG);
+    console.log("🔍 [RAG] shouldUseRAG returned:", useRAG);
 
     if (useRAG) {
       try {
-        if (isDev) console.log("🔍 Searching documents for org:", organizationId, "user:", user.id);
+        console.log("🔍 [RAG] Searching documents for org:", organizationId, "user:", user.id);
         // Search for relevant documents with enhanced context-aware RAG
         // Lower threshold (0.3) to be more inclusive - let the AI decide what's relevant
         // Use timeout to prevent RAG from blocking chat if vector DB hangs
@@ -949,7 +949,7 @@ When discussing these contacts:
         // Add team filter if team context is active
         if (activeTeamContext) {
           ragOptions.teamId = activeTeamContext.teamId;
-          if (isDev) console.log("🔍 RAG filtered to team:", activeTeamContext.teamName);
+          console.log("🔍 [RAG] Filtered to team:", activeTeamContext.teamName);
         }
 
         relevantDocs = await withTimeout(
@@ -964,24 +964,24 @@ When discussing these contacts:
           5000, // 5 second timeout for RAG
           [] // Return empty array on timeout
         );
-        if (isDev) console.log("🔍 Search results:", relevantDocs.length, "documents found");
+        console.log("🔍 [RAG] Search results:", relevantDocs.length, "documents found");
 
         if (relevantDocs.length > 0) {
-          if (isDev) console.log("✅ RAG: Injecting", relevantDocs.length, "document chunks into context");
+          console.log("✅ [RAG] Injecting", relevantDocs.length, "document chunks into context");
           // Build RAG context
           const ragContext = buildRAGContext(relevantDocs);
 
           // Prepend RAG context to system prompt
           systemPrompt = ragContext + "\n\n" + systemPrompt;
         } else {
-          if (isDev) console.log("⚠️ RAG: No relevant documents found");
+          console.log("⚠️ [RAG] No relevant documents found");
         }
       } catch (error) {
         // Fail gracefully if RAG isn't set up yet
-        if (isDev) console.error("❌ RAG search error:", error);
+        console.error("❌ [RAG] Search error:", error);
       }
     } else {
-      if (isDev) console.log("⏭️ RAG: Skipped (query doesn't match criteria)");
+      console.log("⏭️ [RAG] Skipped (query doesn't match criteria)");
     }
 
     // Inject system prompt
