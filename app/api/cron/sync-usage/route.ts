@@ -1,4 +1,4 @@
-import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/server";
 import { NextRequest } from "next/server";
 import { syncUsageToStripe } from "@/lib/billing/metering";
 import { sendAlertNotifications, resetAlertsForBillingPeriod } from "@/lib/billing/alerts";
@@ -24,7 +24,7 @@ export async function POST(req: NextRequest) {
       return Response.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const supabase = await createClient();
+    const supabase = createAdminClient();
     const results: Array<{
       organizationId: string;
       success: boolean;
@@ -115,7 +115,7 @@ export async function GET(req: NextRequest) {
     return Response.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const supabase = await createClient();
+  const supabase = createAdminClient();
 
   // Get stats on organizations and meters
   const { data: orgCount } = await supabase

@@ -552,10 +552,10 @@ export default function SettingsPage() {
       <div className="max-w-6xl mx-auto p-8 space-y-8">
 
         {/* Premium Header */}
-        <div className="border border-slate-200 dark:border-slate-800 rounded-xl p-8 bg-white dark:bg-slate-900 shadow-lg">
-          <div className="flex items-start justify-between">
+        <div className="border border-slate-200 dark:border-slate-800 rounded-xl p-4 sm:p-8 bg-white dark:bg-slate-900 shadow-lg">
+          <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
             {/* User Profile */}
-            <div className="flex items-start gap-6">
+            <div className="flex items-start gap-4 sm:gap-6">
               {/* Avatar */}
               <div className="relative group">
                 <div className="h-20 w-20 rounded-xl bg-slate-900 dark:bg-slate-100 flex items-center justify-center text-white dark:text-slate-900 text-3xl font-bold shadow-md">
@@ -611,7 +611,7 @@ export default function SettingsPage() {
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
           {/* Premium Tabs */}
           <div className="border border-slate-200 dark:border-slate-800 rounded-xl bg-white dark:bg-slate-900 p-1 shadow-lg">
-            <TabsList className="grid grid-cols-4 gap-1 bg-transparent h-auto p-0">
+            <TabsList className="grid grid-cols-2 sm:grid-cols-4 gap-1 bg-transparent h-auto p-0">
               <TabsTrigger
                 value="account"
                 className="data-[state=active]:bg-slate-900 dark:data-[state=active]:bg-slate-100 data-[state=active]:text-white dark:data-[state=active]:text-slate-900 data-[state=active]:shadow-md px-4 py-2.5 rounded-lg transition-all text-sm font-medium"
@@ -657,7 +657,7 @@ export default function SettingsPage() {
               </div>
 
               <div className="space-y-6">
-                <div className="grid grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                   <div className="space-y-2">
                     <Label htmlFor="fullName" className="text-slate-700 dark:text-slate-300 font-medium">Full Name</Label>
                     <Input
@@ -812,7 +812,7 @@ export default function SettingsPage() {
               </div>
 
               <div className="space-y-6">
-                <div className="grid grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                   <div className="space-y-2">
                     <Label className="text-slate-700 dark:text-slate-300 font-medium">Default Model</Label>
                     <Select value={preferences.defaultModel} onValueChange={(value) => updatePreference({ defaultModel: value })}>
@@ -1256,7 +1256,7 @@ export default function SettingsPage() {
               </div>
 
               <div className="space-y-6">
-                <div className="grid grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                   <div className="space-y-2">
                     <Label className="text-slate-700 dark:text-slate-300 font-medium">Default View</Label>
                     <Select value={preferences.defaultView} onValueChange={(value) => updatePreference({ defaultView: value })}>

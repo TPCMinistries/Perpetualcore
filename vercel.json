@@ -54,6 +54,10 @@
     {
       "path": "/api/cron/refresh-tokens",
       "schedule": "0 */2 * * *"
+    },
+    {
+      "path": "/api/cron/finalize-overages",
+      "schedule": "0 23 * * *"
     }
   ]
 }

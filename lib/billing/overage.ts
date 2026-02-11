@@ -1,5 +1,7 @@
-import { createClient } from "@/lib/supabase/server";
-import { getUsageSummary, MeterType, MeterUsageResult } from "./metering";
+import { createAdminClient } from "@/lib/supabase/server";
+import { stripe } from "@/lib/stripe/client";
+import { getUsageSummary, MeterType, MeterUsageResult, getOrganizationMeters } from "./metering";
+import { logger } from "@/lib/logging";
 
 export type PlanType = 'free' | 'starter' | 'pro' | 'team' | 'business' | 'enterprise';
 
@@ -41,7 +43,7 @@ export interface UsageProjection {
 export async function getPlanOverageConfig(
   plan: PlanType
 ): Promise<PlanOverageConfig | null> {
-  const supabase = await createClient();
+  const supabase = createAdminClient();
 
   const { data, error } = await supabase
     .from('plan_overage_config')
@@ -50,7 +52,7 @@ export async function getPlanOverageConfig(
     .single();
 
   if (error) {
-    console.error('[Overage] Error getting plan config:', error);
+    logger.error('[Overage] Error getting plan config:', { error });
     return null;
   }
 
@@ -63,7 +65,7 @@ export async function getPlanOverageConfig(
 export async function checkOverageAllowed(
   organizationId: string
 ): Promise<OverageCheckResult> {
-  const supabase = await createClient();
+  const supabase = createAdminClient();
 
   // Get org's subscription and plan
   const { data: subscription } = await supabase
@@ -140,7 +142,7 @@ export async function projectUsage(
   organizationId: string,
   meterType: MeterType
 ): Promise<UsageProjection | null> {
-  const supabase = await createClient();
+  const supabase = createAdminClient();
 
   // Get current meter
   const periodStart = new Date();
@@ -196,7 +198,7 @@ export async function getOverageBreakdown(organizationId: string): Promise<{
   totalOverageCost: number;
   planConfig: PlanOverageConfig | null;
 }> {
-  const supabase = await createClient();
+  const supabase = createAdminClient();
 
   // Get subscription plan
   const { data: subscription } = await supabase
@@ -246,7 +248,7 @@ export async function estimateAdditionalCost(
   remainingIncluded: number;
   additionalOverage: number;
 }> {
-  const supabase = await createClient();
+  const supabase = createAdminClient();
 
   // Get current meter
   const periodStart = new Date();
@@ -287,5 +289,109 @@ export async function estimateAdditionalCost(
     wouldTriggerOverage,
     remainingIncluded,
     additionalOverage,
+  };
+}
+
+const METER_LABELS: Record<MeterType, string> = {
+  ai_tokens: "AI Token",
+  api_calls: "API Call",
+  storage_gb: "Storage",
+  premium_models: "Premium Model",
+  agents: "Agent Run",
+};
+
+/**
+ * Finalize overages for all organizations at end of billing period.
+ * Creates Stripe invoice items for any overage charges.
+ */
+export async function finalizeOverages(): Promise<{
+  processed: number;
+  invoiceItemsCreated: number;
+  totalOverageUSD: number;
+  errors: string[];
+}> {
+  const supabase = createAdminClient();
+  const errors: string[] = [];
+  let invoiceItemsCreated = 0;
+  let totalOverageUSD = 0;
+
+  // Get all orgs with active paid subscriptions
+  const { data: subscriptions, error } = await supabase
+    .from("subscriptions")
+    .select("organization_id, stripe_customer_id, stripe_subscription_id, plan")
+    .eq("status", "active")
+    .not("stripe_subscription_id", "is", null)
+    .neq("plan", "free");
+
+  if (error) {
+    logger.error("[Overage] Error fetching subscriptions:", { error });
+    return { processed: 0, invoiceItemsCreated: 0, totalOverageUSD: 0, errors: [error.message] };
+  }
+
+  for (const sub of subscriptions || []) {
+    if (!sub.stripe_customer_id) continue;
+
+    try {
+      // Get plan overage config
+      const config = await getPlanOverageConfig(sub.plan as PlanType);
+      if (!config?.overage_allowed) continue;
+
+      // Get all meters for this org
+      const meters = await getOrganizationMeters(sub.organization_id);
+
+      for (const meter of meters) {
+        if (meter.overage_units <= 0 || meter.overage_cost <= 0) continue;
+
+        const amountCents = Math.round(meter.overage_cost * 100);
+        if (amountCents <= 0) continue;
+
+        // Check overage cap
+        if (config.max_overage_usd !== null && totalOverageUSD > config.max_overage_usd) {
+          continue;
+        }
+
+        const label = METER_LABELS[meter.meter_type] || meter.meter_type;
+        const description = `${label} Overage: ${meter.overage_units.toLocaleString()} units @ $${meter.overage_price_per_unit}/unit`;
+
+        try {
+          await stripe.invoiceItems.create({
+            customer: sub.stripe_customer_id,
+            amount: amountCents,
+            currency: "usd",
+            description,
+            metadata: {
+              organization_id: sub.organization_id,
+              meter_type: meter.meter_type,
+              overage_units: String(meter.overage_units),
+              billing_period_start: meter.billing_period_start,
+              billing_period_end: meter.billing_period_end,
+            },
+          });
+
+          invoiceItemsCreated++;
+          totalOverageUSD += meter.overage_cost;
+
+          logger.info("[Overage] Invoice item created", {
+            org: sub.organization_id,
+            meter: meter.meter_type,
+            amount: meter.overage_cost,
+          });
+        } catch (stripeErr) {
+          const msg = stripeErr instanceof Error ? stripeErr.message : "Unknown Stripe error";
+          errors.push(`Stripe invoice item failed for ${sub.organization_id}/${meter.meter_type}: ${msg}`);
+          logger.error("[Overage] Stripe invoice item error:", { error: stripeErr });
+        }
+      }
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : "Unknown error";
+      errors.push(`Error processing org ${sub.organization_id}: ${msg}`);
+    }
+  }
+
+  return {
+    processed: subscriptions?.length || 0,
+    invoiceItemsCreated,
+    totalOverageUSD,
+    errors,
   };
 }

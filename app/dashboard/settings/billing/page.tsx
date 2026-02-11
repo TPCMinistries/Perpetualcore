@@ -41,7 +41,7 @@ interface Invoice {
 
 interface Subscription {
   id: string;
-  plan: "free" | "pro" | "business" | "enterprise";
+  plan: "free" | "starter" | "pro" | "team" | "business" | "enterprise";
   status: string;
   current_period_end: string;
   cancel_at_period_end: boolean;
@@ -68,36 +68,139 @@ interface PlanLimits {
   sso_enabled: boolean;
 }
 
-const PLAN_INFO = {
+const PLAN_INFO: Record<string, {
+  name: string;
+  price: number;
+  annualPrice: number;
+  icon: typeof Sparkles;
+  color: string;
+  bgColor: string;
+}> = {
   free: {
     name: "Free",
     price: 0,
+    annualPrice: 0,
     icon: Sparkles,
     color: "text-gray-600",
     bgColor: "bg-gray-50",
   },
+  starter: {
+    name: "Starter",
+    price: 49,
+    annualPrice: 470,
+    icon: Zap,
+    color: "text-emerald-600",
+    bgColor: "bg-emerald-50",
+  },
   pro: {
     name: "Pro",
-    price: 49,
+    price: 99,
+    annualPrice: 950,
     icon: Zap,
     color: "text-blue-600",
     bgColor: "bg-blue-50",
   },
+  team: {
+    name: "Team",
+    price: 499,
+    annualPrice: 4790,
+    icon: Users,
+    color: "text-indigo-600",
+    bgColor: "bg-indigo-50",
+  },
   business: {
     name: "Business",
-    price: 149,
+    price: 1999,
+    annualPrice: 19190,
     icon: Crown,
     color: "text-purple-600",
     bgColor: "bg-purple-50",
   },
   enterprise: {
     name: "Enterprise",
-    price: 499,
+    price: 9999,
+    annualPrice: 95990,
     icon: Building2,
     color: "text-gray-800",
     bgColor: "bg-gray-100",
   },
 };
+
+function PlanCard({
+  plan,
+  name,
+  price,
+  subtitle,
+  features,
+  popular,
+  currentPlan,
+  onUpgrade,
+  onChangePlan,
+  upgrading,
+}: {
+  plan: string;
+  name: string;
+  price: string;
+  subtitle: string;
+  features: { included: boolean; text: string }[];
+  popular?: boolean;
+  currentPlan: string;
+  onUpgrade: (plan: string) => void;
+  onChangePlan: (plan: string) => void;
+  upgrading: boolean;
+}) {
+  const isCurrent = currentPlan === plan;
+  const isDowngrade = getOrderIndex(plan) < getOrderIndex(currentPlan);
+  const isUpgrade = getOrderIndex(plan) > getOrderIndex(currentPlan);
+
+  return (
+    <div className={`border${popular ? "-2 border-blue-600" : ""} rounded-lg p-6 relative`}>
+      {popular && (
+        <div className="absolute top-0 right-0 bg-blue-600 text-white text-xs px-3 py-1 rounded-bl-lg rounded-tr-lg">
+          Popular
+        </div>
+      )}
+      <div className="mb-4">
+        <h3 className="text-xl font-bold">{name}</h3>
+        <div className="text-3xl font-bold mt-2">{price}</div>
+        <div className="text-sm text-gray-600">{subtitle}</div>
+      </div>
+      <ul className="space-y-3 mb-6">
+        {features.map((f) => (
+          <li key={f.text} className="flex items-start gap-2">
+            {f.included ? (
+              <Check className="h-5 w-5 text-green-600 mt-0.5 flex-shrink-0" />
+            ) : (
+              <X className="h-5 w-5 text-gray-400 mt-0.5 flex-shrink-0" />
+            )}
+            <span className={`text-sm ${f.included ? "" : "text-gray-600"}`}>{f.text}</span>
+          </li>
+        ))}
+      </ul>
+      {isCurrent ? (
+        <Button disabled className="w-full">Current Plan</Button>
+      ) : currentPlan === "free" && isUpgrade ? (
+        <Button onClick={() => onUpgrade(plan)} disabled={upgrading} className="w-full">
+          {upgrading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+          Upgrade to {name}
+        </Button>
+      ) : isDowngrade ? (
+        <Button onClick={() => onChangePlan(plan)} variant="outline" className="w-full">
+          Downgrade to {name}
+        </Button>
+      ) : (
+        <Button onClick={() => onChangePlan(plan)} className="w-full">
+          {isUpgrade ? `Upgrade to ${name}` : `Switch to ${name}`}
+        </Button>
+      )}
+    </div>
+  );
+}
+
+const PLAN_ORDER = ["free", "starter", "pro", "team", "business", "enterprise"];
+function getOrderIndex(plan: string) {
+  return PLAN_ORDER.indexOf(plan);
+}
 
 export default function BillingPage() {
   const [subscription, setSubscription] = useState<Subscription | null>(null);
@@ -152,7 +255,7 @@ export default function BillingPage() {
     }
   };
 
-  const handleUpgrade = async (plan: "pro" | "business") => {
+  const handleUpgrade = async (plan: string) => {
     try {
       setUpgrading(true);
       const response = await fetch("/api/stripe/checkout", {
@@ -166,10 +269,9 @@ export default function BillingPage() {
       if (data.url) {
         window.location.href = data.url;
       } else {
-        toast.error("Failed to create checkout session");
+        toast.error(data.error || "Failed to create checkout session");
       }
-    } catch (error) {
-      console.error("Upgrade error:", error);
+    } catch {
       toast.error("Failed to start upgrade process");
     } finally {
       setUpgrading(false);
@@ -209,28 +311,22 @@ export default function BillingPage() {
     return Math.min((current / limit) * 100, 100);
   };
 
-  const getPriceDisplay = (plan: keyof typeof PLAN_INFO) => {
-    if (plan === "free") return "$0";
-    if (plan === "enterprise") return "Starting at $499";
+  const getPriceDisplay = (plan: string) => {
+    const info = PLAN_INFO[plan];
+    if (!info || plan === "free") return "$0";
+    if (plan === "enterprise") return "Custom";
 
-    const planInfo = PLAN_INFO[plan];
     if (billingInterval === "annual") {
-      const annualPrice =
-        plan === "pro" ? 470 :
-        plan === "business" ? 1430 : planInfo.price;
-      const monthlyEquivalent = (annualPrice / 12).toFixed(0);
+      const monthlyEquivalent = Math.round(info.annualPrice / 12);
       return `$${monthlyEquivalent}/mo`;
     }
-    return `$${planInfo.price}/mo`;
+    return `$${info.price}/mo`;
   };
 
-  const getAnnualSavings = (plan: "pro" | "business") => {
-    const prices = {
-      pro: { monthly: 49, annual: 470 },
-      business: { monthly: 149, annual: 1430 },
-    };
-    const annualizedMonthly = prices[plan].monthly * 12;
-    return annualizedMonthly - prices[plan].annual;
+  const getAnnualSavings = (plan: string) => {
+    const info = PLAN_INFO[plan];
+    if (!info || !info.annualPrice) return 0;
+    return (info.price * 12) - info.annualPrice;
   };
 
   if (loading) {
@@ -247,7 +343,7 @@ export default function BillingPage() {
   const PlanIcon = PLAN_INFO[currentPlan].icon;
 
   return (
-    <div className="p-8 max-w-7xl mx-auto">
+    <div className="p-4 sm:p-8 max-w-7xl mx-auto">
       {/* Header */}
       <div className="mb-6">
         <h1 className="text-3xl font-bold">Billing & Usage</h1>
@@ -259,7 +355,7 @@ export default function BillingPage() {
       {/* Current Plan */}
       <Card className="mb-6">
         <CardContent className="p-6">
-          <div className="flex items-start justify-between">
+          <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
             <div className="flex items-start gap-4">
               <div
                 className={`p-3 rounded-lg ${PLAN_INFO[currentPlan].bgColor}`}
@@ -310,25 +406,20 @@ export default function BillingPage() {
 
             <div className="flex gap-2">
               {currentPlan === "free" && (
-                <>
-                  <Button
-                    onClick={() => handleUpgrade("pro")}
-                    disabled={upgrading}
-                  >
-                    {upgrading ? (
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    ) : (
-                      <Zap className="mr-2 h-4 w-4" />
-                    )}
-                    Upgrade to Pro
-                  </Button>
-                </>
+                <Button
+                  onClick={() => handleUpgrade("starter")}
+                  disabled={upgrading}
+                >
+                  {upgrading ? (
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  ) : (
+                    <Zap className="mr-2 h-4 w-4" />
+                  )}
+                  Upgrade
+                </Button>
               )}
-              {(currentPlan === "pro" || currentPlan === "business" || currentPlan === "enterprise") && (
+              {currentPlan !== "free" && (
                 <>
-                  <Button onClick={() => handleChangePlan("free")} variant="outline">
-                    Downgrade to Free
-                  </Button>
                   <Button onClick={handleManageBilling} variant="outline">
                     <CreditCard className="mr-2 h-4 w-4" />
                     Manage Billing
@@ -574,205 +665,135 @@ export default function BillingPage() {
           <CardTitle>Compare Plans</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {/* Free Plan */}
-            <div className="border rounded-lg p-6">
-              <div className="mb-4">
-                <h3 className="text-xl font-bold">Free</h3>
-                <div className="text-3xl font-bold mt-2">$0</div>
-                <div className="text-sm text-gray-600">forever</div>
-              </div>
-              <ul className="space-y-3 mb-6">
-                <li className="flex items-start gap-2">
-                  <Check className="h-5 w-5 text-green-600 mt-0.5 flex-shrink-0" />
-                  <span className="text-sm">50 AI messages/month</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <Check className="h-5 w-5 text-green-600 mt-0.5 flex-shrink-0" />
-                  <span className="text-sm">Gemini model only</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <Check className="h-5 w-5 text-green-600 mt-0.5 flex-shrink-0" />
-                  <span className="text-sm">5 documents</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <Check className="h-5 w-5 text-green-600 mt-0.5 flex-shrink-0" />
-                  <span className="text-sm">1 GB storage</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <X className="h-5 w-5 text-gray-400 mt-0.5 flex-shrink-0" />
-                  <span className="text-sm text-gray-600">Advanced AI models</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <X className="h-5 w-5 text-gray-400 mt-0.5 flex-shrink-0" />
-                  <span className="text-sm text-gray-600">Email & Calendar</span>
-                </li>
-              </ul>
-              {currentPlan === "free" && (
-                <Button disabled className="w-full">
-                  Current Plan
-                </Button>
-              )}
-            </div>
+            <PlanCard
+              plan="free"
+              name="Free"
+              price="$0"
+              subtitle="forever"
+              features={[
+                { included: true, text: "Unlimited Gemini messages" },
+                { included: true, text: "5 documents" },
+                { included: true, text: "1 GB storage" },
+                { included: false, text: "Advanced AI models" },
+                { included: false, text: "Email & Calendar" },
+                { included: false, text: "Workflows" },
+              ]}
+              currentPlan={currentPlan}
+              onUpgrade={handleUpgrade}
+              onChangePlan={handleChangePlan}
+              upgrading={upgrading}
+            />
+
+            {/* Starter Plan */}
+            <PlanCard
+              plan="starter"
+              name="Starter"
+              price={getPriceDisplay("starter")}
+              subtitle={billingInterval === "annual" ? `$${getAnnualSavings("starter")} saved/year` : "per month"}
+              features={[
+                { included: true, text: "Unlimited GPT-4o Mini" },
+                { included: true, text: "100 premium model messages" },
+                { included: true, text: "Unlimited documents" },
+                { included: true, text: "10 GB storage" },
+                { included: true, text: "Email & Calendar" },
+                { included: true, text: "Workflows" },
+              ]}
+              currentPlan={currentPlan}
+              onUpgrade={handleUpgrade}
+              onChangePlan={handleChangePlan}
+              upgrading={upgrading}
+            />
 
             {/* Pro Plan */}
-            <div className="border-2 border-blue-600 rounded-lg p-6 relative">
-              <div className="absolute top-0 right-0 bg-blue-600 text-white text-xs px-3 py-1 rounded-bl-lg rounded-tr-lg">
-                Popular
-              </div>
-              <div className="mb-4">
-                <h3 className="text-xl font-bold">Pro</h3>
-                <div className="text-3xl font-bold mt-2">{getPriceDisplay("pro")}</div>
-                <div className="text-sm text-gray-600">
-                  {billingInterval === "annual" && `$${getAnnualSavings("pro")} saved/year`}
-                  {billingInterval === "monthly" && "per month"}
-                </div>
-              </div>
-              <ul className="space-y-3 mb-6">
-                <li className="flex items-start gap-2">
-                  <Check className="h-5 w-5 text-green-600 mt-0.5 flex-shrink-0" />
-                  <span className="text-sm">1,000 AI messages/month</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <Check className="h-5 w-5 text-green-600 mt-0.5 flex-shrink-0" />
-                  <span className="text-sm">All AI models (GPT-4, Claude, Gemini)</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <Check className="h-5 w-5 text-green-600 mt-0.5 flex-shrink-0" />
-                  <span className="text-sm">$0.05 per message overage</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <Check className="h-5 w-5 text-green-600 mt-0.5 flex-shrink-0" />
-                  <span className="text-sm">Unlimited documents</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <Check className="h-5 w-5 text-green-600 mt-0.5 flex-shrink-0" />
-                  <span className="text-sm">10 GB storage</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <Check className="h-5 w-5 text-green-600 mt-0.5 flex-shrink-0" />
-                  <span className="text-sm">Email & Calendar integration</span>
-                </li>
-              </ul>
-              {currentPlan === "pro" ? (
-                <Button disabled className="w-full">
-                  Current Plan
-                </Button>
-              ) : currentPlan === "free" ? (
-                <Button
-                  onClick={() => handleUpgrade("pro")}
-                  disabled={upgrading}
-                  className="w-full"
-                >
-                  Upgrade to Pro
-                </Button>
-              ) : (
-                <Button
-                  onClick={() => handleChangePlan("pro")}
-                  className="w-full"
-                >
-                  Change to Pro
-                </Button>
-              )}
-            </div>
+            <PlanCard
+              plan="pro"
+              name="Pro"
+              price={getPriceDisplay("pro")}
+              subtitle={billingInterval === "annual" ? `$${getAnnualSavings("pro")} saved/year` : "per month"}
+              popular
+              features={[
+                { included: true, text: "Unlimited all AI models" },
+                { included: true, text: "50 GB storage" },
+                { included: true, text: "API access" },
+                { included: true, text: "25 custom skills" },
+                { included: true, text: "Priority support (4hr)" },
+                { included: false, text: "Team collaboration" },
+              ]}
+              currentPlan={currentPlan}
+              onUpgrade={handleUpgrade}
+              onChangePlan={handleChangePlan}
+              upgrading={upgrading}
+            />
+
+            {/* Team Plan */}
+            <PlanCard
+              plan="team"
+              name="Team"
+              price={getPriceDisplay("team")}
+              subtitle={billingInterval === "annual" ? `$${getAnnualSavings("team")} saved/year` : "per month"}
+              features={[
+                { included: true, text: "Everything in Pro" },
+                { included: true, text: "Up to 10 team members" },
+                { included: true, text: "Unlimited storage" },
+                { included: true, text: "Slack integration" },
+                { included: true, text: "Unlimited custom skills" },
+                { included: true, text: "Dedicated success manager" },
+              ]}
+              currentPlan={currentPlan}
+              onUpgrade={handleUpgrade}
+              onChangePlan={handleChangePlan}
+              upgrading={upgrading}
+            />
 
             {/* Business Plan */}
-            <div className="border rounded-lg p-6">
-              <div className="mb-4">
-                <h3 className="text-xl font-bold">Business</h3>
-                <div className="text-3xl font-bold mt-2">{getPriceDisplay("business")}</div>
-                <div className="text-sm text-gray-600">
-                  {billingInterval === "annual" && `$${getAnnualSavings("business")} saved/year`}
-                  {billingInterval === "monthly" && "per month"}
-                </div>
-              </div>
-              <ul className="space-y-3 mb-6">
-                <li className="flex items-start gap-2">
-                  <Check className="h-5 w-5 text-green-600 mt-0.5 flex-shrink-0" />
-                  <span className="text-sm">4,000 AI messages/month</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <Check className="h-5 w-5 text-green-600 mt-0.5 flex-shrink-0" />
-                  <span className="text-sm">$0.04 per message overage</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <Check className="h-5 w-5 text-green-600 mt-0.5 flex-shrink-0" />
-                  <span className="text-sm">Everything in Pro</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <Check className="h-5 w-5 text-green-600 mt-0.5 flex-shrink-0" />
-                  <span className="text-sm">50 GB storage</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <Check className="h-5 w-5 text-green-600 mt-0.5 flex-shrink-0" />
-                  <span className="text-sm">Team collaboration (5 users)</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <Check className="h-5 w-5 text-green-600 mt-0.5 flex-shrink-0" />
-                  <span className="text-sm">Priority support</span>
-                </li>
-              </ul>
-              {currentPlan === "business" ? (
-                <Button disabled className="w-full">
-                  Current Plan
-                </Button>
-              ) : currentPlan === "free" ? (
-                <Button
-                  onClick={() => handleUpgrade("business")}
-                  disabled={upgrading}
-                  className="w-full"
-                >
-                  Upgrade to Business
-                </Button>
-              ) : (
-                <Button
-                  onClick={() => handleChangePlan("business")}
-                  className="w-full"
-                >
-                  Change to Business
-                </Button>
-              )}
-            </div>
+            <PlanCard
+              plan="business"
+              name="Business"
+              price={getPriceDisplay("business")}
+              subtitle={billingInterval === "annual" ? `$${getAnnualSavings("business")} saved/year` : "per month"}
+              features={[
+                { included: true, text: "Everything in Team" },
+                { included: true, text: "Up to 50 team members" },
+                { included: true, text: "SSO & custom training" },
+                { included: true, text: "WhatsApp integration" },
+                { included: true, text: "99.9% SLA" },
+                { included: true, text: "Priority phone support (2hr)" },
+              ]}
+              currentPlan={currentPlan}
+              onUpgrade={handleUpgrade}
+              onChangePlan={handleChangePlan}
+              upgrading={upgrading}
+            />
 
             {/* Enterprise Plan */}
             <div className="border rounded-lg p-6">
               <div className="mb-4">
                 <h3 className="text-xl font-bold">Enterprise</h3>
-                <div className="text-3xl font-bold mt-2">{getPriceDisplay("enterprise")}</div>
-                <div className="text-sm text-gray-600">per month</div>
+                <div className="text-3xl font-bold mt-2">Custom</div>
+                <div className="text-sm text-gray-600">contact sales</div>
               </div>
               <ul className="space-y-3 mb-6">
-                <li className="flex items-start gap-2">
-                  <Check className="h-5 w-5 text-green-600 mt-0.5 flex-shrink-0" />
-                  <span className="text-sm">20,000+ AI messages</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <Check className="h-5 w-5 text-green-600 mt-0.5 flex-shrink-0" />
-                  <span className="text-sm">$0.03 per message overage</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <Check className="h-5 w-5 text-green-600 mt-0.5 flex-shrink-0" />
-                  <span className="text-sm">Everything in Business</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <Check className="h-5 w-5 text-green-600 mt-0.5 flex-shrink-0" />
-                  <span className="text-sm">Unlimited team members</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <Check className="h-5 w-5 text-green-600 mt-0.5 flex-shrink-0" />
-                  <span className="text-sm">SOC 2, HIPAA compliance</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <Check className="h-5 w-5 text-green-600 mt-0.5 flex-shrink-0" />
-                  <span className="text-sm">Dedicated success manager</span>
-                </li>
+                {[
+                  "Everything in Business",
+                  "250+ team members",
+                  "White-label & on-premise",
+                  "SOC 2, HIPAA compliance",
+                  "99.95% SLA",
+                  "24/7 dedicated support",
+                ].map((text) => (
+                  <li key={text} className="flex items-start gap-2">
+                    <Check className="h-5 w-5 text-green-600 mt-0.5 flex-shrink-0" />
+                    <span className="text-sm">{text}</span>
+                  </li>
+                ))}
               </ul>
-              <Button className="w-full" variant="outline">
-                Contact Sales
+              <Button className="w-full" variant="outline" asChild>
+                <a href="mailto:enterprise@perpetualcore.com">Contact Sales</a>
               </Button>
             </div>
           </div>
-
         </CardContent>
       </Card>
 

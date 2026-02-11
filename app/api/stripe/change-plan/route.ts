@@ -1,17 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
-import Stripe from "stripe";
-
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: "2024-12-18.acacia",
-});
-
-const PRICE_IDS = {
-  pro_monthly: process.env.NEXT_PUBLIC_STRIPE_PRICE_PRO_MONTHLY!,
-  pro_yearly: process.env.NEXT_PUBLIC_STRIPE_PRICE_PRO_YEARLY!,
-  team_monthly: process.env.NEXT_PUBLIC_STRIPE_PRICE_TEAM_MONTHLY!,
-  team_yearly: process.env.NEXT_PUBLIC_STRIPE_PRICE_TEAM_YEARLY!,
-};
+import { stripe, STRIPE_PLANS, PlanType } from "@/lib/stripe/client";
 
 export async function POST(request: Request) {
   try {
@@ -30,6 +19,14 @@ export async function POST(request: Request) {
     if (!newPlan || !interval) {
       return NextResponse.json(
         { error: "Missing newPlan or interval" },
+        { status: 400 }
+      );
+    }
+
+    // Validate plan
+    if (!STRIPE_PLANS[newPlan as PlanType]) {
+      return NextResponse.json(
+        { error: "Invalid plan" },
         { status: 400 }
       );
     }
@@ -62,30 +59,11 @@ export async function POST(request: Request) {
       );
     }
 
-    // Determine the new price ID
-    const priceKey = `${newPlan}_${interval}` as keyof typeof PRICE_IDS;
-    const newPriceId = PRICE_IDS[priceKey];
-
-    if (!newPriceId) {
-      return NextResponse.json(
-        { error: "Invalid plan or interval" },
-        { status: 400 }
-      );
-    }
-
-    // Get the current Stripe subscription
-    const stripeSubscription = await stripe.subscriptions.retrieve(
-      subscription.stripe_subscription_id
-    );
-
     // Handle downgrade to free plan
     if (newPlan === "free") {
-      // Cancel subscription at period end
       const updated = await stripe.subscriptions.update(
         subscription.stripe_subscription_id,
-        {
-          cancel_at_period_end: true,
-        }
+        { cancel_at_period_end: true }
       );
 
       return NextResponse.json({
@@ -97,8 +75,26 @@ export async function POST(request: Request) {
       });
     }
 
+    // Get the new price ID from centralized config
+    const planConfig = STRIPE_PLANS[newPlan as PlanType];
+    const newPriceId = interval === "annual"
+      ? planConfig.priceAnnualId
+      : planConfig.priceMonthlyId;
+
+    if (!newPriceId) {
+      return NextResponse.json(
+        { error: `Price not configured for ${newPlan} plan (${interval})` },
+        { status: 400 }
+      );
+    }
+
+    // Get the current Stripe subscription
+    const stripeSubscription = await stripe.subscriptions.retrieve(
+      subscription.stripe_subscription_id
+    );
+
     // Update the subscription
-    const updateParams: Stripe.SubscriptionUpdateParams = {
+    const updateParams: Parameters<typeof stripe.subscriptions.update>[1] = {
       items: [
         {
           id: stripeSubscription.items.data[0].id,
@@ -112,30 +108,31 @@ export async function POST(request: Request) {
       },
     };
 
-    // Determine proration behavior
     if (changeAt === "period_end") {
-      // Change at end of current billing period (no immediate charge/credit)
-      updateParams.proration_behavior = "none";
-      updateParams.billing_cycle_anchor = "unchanged";
+      updateParams!.proration_behavior = "none";
+      updateParams!.billing_cycle_anchor = "unchanged";
     } else {
-      // Immediate change with proration (default)
-      updateParams.proration_behavior = "create_prorations";
-      updateParams.billing_cycle_anchor = "now";
+      updateParams!.proration_behavior = "create_prorations";
+      updateParams!.billing_cycle_anchor = "now";
     }
 
     const updatedSubscription = await stripe.subscriptions.update(
       subscription.stripe_subscription_id,
-      updateParams
+      updateParams!
     );
 
-    // Calculate proration amount
+    // Calculate proration amount for immediate changes
     let prorationAmount = 0;
     if (changeAt !== "period_end") {
-      const upcomingInvoice = await stripe.invoices.retrieveUpcoming({
-        customer: subscription.stripe_customer_id!,
-        subscription: subscription.stripe_subscription_id,
-      });
-      prorationAmount = upcomingInvoice.amount_due / 100; // Convert from cents to dollars
+      try {
+        const upcomingInvoice = await stripe.invoices.retrieveUpcoming({
+          customer: subscription.stripe_customer_id!,
+          subscription: subscription.stripe_subscription_id,
+        });
+        prorationAmount = upcomingInvoice.amount_due / 100;
+      } catch {
+        // Proration calculation may fail if invoice is being generated
+      }
     }
 
     return NextResponse.json({
@@ -152,11 +149,8 @@ export async function POST(request: Request) {
           ? new Date(updatedSubscription.current_period_end * 1000).toISOString()
           : new Date().toISOString(),
     });
-  } catch (error: any) {
-    console.error("Change plan error:", error);
-    return NextResponse.json(
-      { error: error.message || "Failed to change plan" },
-      { status: 500 }
-    );
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : "Failed to change plan";
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }
