@@ -1,5 +1,26 @@
 import { createServerClient, type CookieOptions } from '@supabase/ssr';
 import { NextResponse, type NextRequest } from 'next/server';
+import { Ratelimit } from '@upstash/ratelimit';
+import { Redis } from '@upstash/redis';
+
+// Blanket API rate limiter — 200 requests per minute per IP
+// Individual routes can enforce stricter limits on top of this
+let apiRateLimiter: Ratelimit | null = null;
+try {
+  if (process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN) {
+    apiRateLimiter = new Ratelimit({
+      redis: new Redis({
+        url: process.env.UPSTASH_REDIS_REST_URL.trim(),
+        token: process.env.UPSTASH_REDIS_REST_TOKEN.trim(),
+      }),
+      limiter: Ratelimit.fixedWindow(200, '60 s'),
+      prefix: 'mw:api',
+      analytics: true,
+    });
+  }
+} catch {
+  // Silently fall back to no rate limiting if Redis is unavailable
+}
 
 export async function middleware(request: NextRequest) {
   // Allow public access to specific pages
@@ -11,8 +32,32 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
-  // Skip middleware for API routes to prevent recursion
+  // Rate limit API routes, then pass through (skip cron + webhook routes)
   if (request.nextUrl.pathname.startsWith('/api/')) {
+    if (
+      apiRateLimiter &&
+      !request.nextUrl.pathname.startsWith('/api/cron/') &&
+      !request.nextUrl.pathname.startsWith('/api/webhooks/')
+    ) {
+      const ip = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim()
+        || request.headers.get('x-real-ip')
+        || 'unknown';
+      const result = await apiRateLimiter.limit(`mw:${ip}`);
+      if (!result.success) {
+        const reset = Math.ceil((result.reset - Date.now()) / 1000);
+        return NextResponse.json(
+          { error: 'Too many requests', retryAfter: reset },
+          {
+            status: 429,
+            headers: {
+              'Retry-After': reset.toString(),
+              'X-RateLimit-Limit': result.limit.toString(),
+              'X-RateLimit-Remaining': '0',
+            },
+          }
+        );
+      }
+    }
     return NextResponse.next();
   }
 

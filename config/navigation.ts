@@ -968,7 +968,7 @@ export const NAVIGATION_CONFIG_V2: NavigationSection[] = [
       },
       {
         name: "Triggers",
-        href: "/dashboard/automation/triggers",
+        href: "/dashboard/automation",
         icon: Zap,
         adaptiveConfig: {
           visibleFor: ["intermediate", "advanced"],
