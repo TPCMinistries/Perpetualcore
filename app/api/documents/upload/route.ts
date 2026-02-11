@@ -1,15 +1,16 @@
 import { createClient } from "@/lib/supabase/server";
 import { NextRequest } from "next/server";
 import { logActivity } from "@/lib/activity-logger";
+import { PLAN_LIMITS, PlanType } from "@/lib/stripe/client";
+import { enforceStorageLimit, enforceDocumentLimit } from "@/lib/billing/enforcement";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 export const maxDuration = 120; // 2 minutes for upload + processing
 
-// File size limits (in bytes)
-const FREE_TIER_FILE_LIMIT = 10 * 1024 * 1024; // 10MB
-const PAID_TIER_FILE_LIMIT = 50 * 1024 * 1024; // 50MB
-const FREE_TIER_TOTAL_LIMIT = 100 * 1024 * 1024; // 100MB total
+// Per-file size limits (in bytes)
+const FREE_TIER_FILE_LIMIT = 10 * 1024 * 1024; // 10MB per file
+const PAID_TIER_FILE_LIMIT = 50 * 1024 * 1024; // 50MB per file
 
 // Supported file types
 const SUPPORTED_TYPES = [
@@ -75,34 +76,46 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Check file size based on plan
-    const fileLimit =
-      plan === "free" ? FREE_TIER_FILE_LIMIT : PAID_TIER_FILE_LIMIT;
+    // Check per-file size limit based on plan
+    const fileLimit = plan === "free" ? FREE_TIER_FILE_LIMIT : PAID_TIER_FILE_LIMIT;
     if (file.size > fileLimit) {
-      return new Response(
-        `File too large. Maximum size for ${plan} plan: ${
-          fileLimit / 1024 / 1024
-        }MB`,
+      return Response.json(
+        {
+          error: `File too large. Maximum size for ${plan} plan: ${fileLimit / 1024 / 1024}MB`,
+          code: "FILE_TOO_LARGE",
+        },
         { status: 400 }
       );
     }
 
-    // For free tier, check total storage used
-    if (plan === "free") {
-      const { data: documents } = await supabase
-        .from("documents")
-        .select("file_size")
-        .eq("organization_id", organizationId);
+    // Check document count limit (free = 5, starter+ = unlimited)
+    const docLimit = await enforceDocumentLimit(organizationId);
+    if (!docLimit.allowed) {
+      return Response.json(
+        {
+          error: docLimit.message,
+          code: "DOCUMENT_LIMIT",
+          current: docLimit.current,
+          limit: docLimit.limit,
+          plan: docLimit.plan,
+        },
+        { status: 403 }
+      );
+    }
 
-      const totalStorage =
-        documents?.reduce((sum, doc) => sum + (doc.file_size || 0), 0) || 0;
-
-      if (totalStorage + file.size > FREE_TIER_TOTAL_LIMIT) {
-        return new Response(
-          `Storage limit exceeded. Free tier allows 100MB total storage. Consider upgrading to Pro.`,
-          { status: 400 }
-        );
-      }
+    // Check total storage limit using plan-aware enforcement
+    const storageLimit = await enforceStorageLimit(organizationId, file.size);
+    if (!storageLimit.allowed) {
+      return Response.json(
+        {
+          error: storageLimit.message,
+          code: "STORAGE_LIMIT",
+          current: storageLimit.current,
+          limit: storageLimit.limit,
+          plan: storageLimit.plan,
+        },
+        { status: 403 }
+      );
     }
 
     // Generate unique filename

@@ -98,11 +98,11 @@ export async function GET(request: Request) {
               newStatus = "canceled";
               shouldUpdate = true;
 
-              // Downgrade to free
+              // Downgrade to free plan but mark status as canceled
               await supabase
                 .from("subscriptions")
                 .update({
-                  status: "active",
+                  status: "canceled",
                   plan: "free",
                   stripe_subscription_id: null,
                   cancel_at_period_end: false,
@@ -142,7 +142,7 @@ export async function GET(request: Request) {
             await supabase
               .from("subscriptions")
               .update({
-                status: "active",
+                status: "canceled",
                 plan: "free",
                 stripe_subscription_id: null,
               })
@@ -183,7 +183,7 @@ export async function GET(request: Request) {
           await supabase
             .from("subscriptions")
             .update({
-              status: "active",
+              status: "canceled",
               plan: "free",
               stripe_subscription_id: null,
               cancel_at_period_end: false,

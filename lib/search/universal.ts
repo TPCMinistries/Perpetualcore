@@ -1,4 +1,5 @@
-import { createClient } from "@/lib/supabase/server";
+import { createClient, createAdminClient } from "@/lib/supabase/server";
+import { searchDocuments as ragSearch } from "@/lib/documents/rag";
 
 export interface SearchResult {
   id: string;
@@ -83,7 +84,10 @@ async function searchConversations(
 }
 
 /**
- * Search documents
+ * Search documents using hybrid approach:
+ * 1. Vector/semantic search via RAG for content relevance
+ * 2. Title/filename text match as fallback
+ * Results are merged and deduplicated by document ID.
  */
 async function searchDocuments(
   query: string,
@@ -91,34 +95,71 @@ async function searchDocuments(
   organizationId: string
 ): Promise<SearchResult[]> {
   try {
-    const supabase = await createClient();
+    // Run vector search and text search in parallel
+    const [ragResults, textResults] = await Promise.all([
+      // Vector search via RAG (uses createAdminClient internally)
+      ragSearch(query, organizationId, userId, 10, 0.5).catch((err) => {
+        console.error("RAG search failed, falling back to text:", err);
+        return [];
+      }),
+      // Text search fallback for title/filename matches
+      (async () => {
+        const supabase = createAdminClient();
+        const { data } = await supabase
+          .from("documents")
+          .select("id, title, file_name, file_type, file_size, chunk_count, created_at, uploaded_by")
+          .eq("organization_id", organizationId)
+          .or(`title.ilike.%${query}%,file_name.ilike.%${query}%`)
+          .eq("status", "completed")
+          .limit(10);
+        return data || [];
+      })(),
+    ]);
 
-    // Search in document titles and metadata
-    const { data: documents } = await supabase
-      .from("documents")
-      .select("*")
-      .eq("organization_id", organizationId)
-      .or(`title.ilike.%${query}%,file_name.ilike.%${query}%`)
-      .eq("status", "completed")
-      .limit(20);
+    const seen = new Set<string>();
+    const results: SearchResult[] = [];
 
-    if (!documents) return [];
+    // Add RAG results first (higher relevance)
+    for (const doc of ragResults) {
+      if (seen.has(doc.documentId)) continue;
+      seen.add(doc.documentId);
+      results.push({
+        id: doc.documentId,
+        type: "document",
+        title: doc.documentTitle,
+        content: doc.chunkContent,
+        snippet: doc.chunkContent.substring(0, 200),
+        score: doc.similarity,
+        metadata: {
+          date: undefined,
+          author: undefined,
+        },
+        url: `/dashboard/documents?doc=${doc.documentId}`,
+      });
+    }
 
-    return documents.map((doc: any) => ({
-      id: doc.id,
-      type: "document" as const,
-      title: doc.title,
-      content: doc.file_name,
-      snippet: `${doc.file_type} • ${doc.chunk_count || 0} chunks • ${(doc.file_size / 1024).toFixed(1)}KB`,
-      score: 1.0,
-      metadata: {
-        date: doc.created_at,
-        author: doc.uploaded_by,
-        fileType: doc.file_type,
-        size: doc.file_size,
-      },
-      url: `/dashboard/documents?doc=${doc.id}`,
-    }));
+    // Add text match results that weren't already in RAG results
+    for (const doc of textResults) {
+      if (seen.has(doc.id)) continue;
+      seen.add(doc.id);
+      results.push({
+        id: doc.id,
+        type: "document",
+        title: doc.title,
+        content: doc.file_name,
+        snippet: `${doc.file_type} • ${doc.chunk_count || 0} chunks • ${(doc.file_size / 1024).toFixed(1)}KB`,
+        score: 0.5, // Lower score for text-only matches
+        metadata: {
+          date: doc.created_at,
+          author: doc.uploaded_by,
+          fileType: doc.file_type,
+          size: doc.file_size,
+        },
+        url: `/dashboard/documents?doc=${doc.id}`,
+      });
+    }
+
+    return results;
   } catch (error) {
     console.error("Error searching documents:", error);
     return [];

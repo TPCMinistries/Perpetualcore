@@ -11,13 +11,15 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   FileText, Trash2, Upload, FolderIcon, FolderPlus, Sparkles,
   Search, Filter, X, MessageSquare, LayoutGrid, List,
   BookOpen, TrendingUp, BarChart3, Tag, Calendar, Building2,
   Briefcase, Brain, Loader2, Eye, Network, FolderOpen, Plus,
   Settings, RefreshCw, ChevronRight, MoreHorizontal, Clock,
-  Layers, Zap, ArrowRight, PanelRightOpen, PanelRightClose
+  Layers, Zap, ArrowRight, PanelRightOpen, PanelRightClose,
+  AlertTriangle, ChevronDown, ChevronUp
 } from "lucide-react";
 import { EmptyState } from "@/components/ui/empty-state";
 import { DocumentGridSkeleton } from "@/components/ui/skeletons";
@@ -27,6 +29,8 @@ import { DocumentPreviewModal } from "@/components/documents/DocumentPreviewModa
 import { CreateDocumentModal } from "@/components/documents/CreateDocumentModal";
 import { AIDocumentComposer } from "@/components/documents/AIDocumentComposer";
 import { LibraryAssistant } from "@/components/library/LibraryAssistant";
+import { BulkActionBar } from "@/components/documents/BulkActionBar";
+import { StorageUsageBar } from "@/components/documents/StorageUsageBar";
 import { KnowledgeGraph, GraphNode, GraphLink } from "@/components/library/KnowledgeGraph";
 import { Folder as FolderType, Tag as TagType } from "@/types";
 import { createClient } from "@/lib/supabase/client";
@@ -138,6 +142,11 @@ export default function LibraryPage() {
   const [generatingSummary, setGeneratingSummary] = useState<string | null>(null);
   const [isReprocessing, setIsReprocessing] = useState(false);
   const [isDeletingDuplicates, setIsDeletingDuplicates] = useState(false);
+  const [retryingDocId, setRetryingDocId] = useState<string | null>(null);
+  const [expandedErrorId, setExpandedErrorId] = useState<string | null>(null);
+  const [selectedDocIds, setSelectedDocIds] = useState<Set<string>>(new Set());
+  const [storageUsed, setStorageUsed] = useState(0);
+  const [storageLimitGB, setStorageLimitGB] = useState(1);
 
   // Graph state
   const [graphNodes, setGraphNodes] = useState<GraphNode[]>([]);
@@ -236,7 +245,7 @@ export default function LibraryPage() {
 
       const { data: docs } = await supabase
         .from("documents")
-        .select("id, document_type, summary, created_at")
+        .select("id, document_type, summary, created_at, file_size")
         .eq("user_id", profile.user.id)
         .eq("status", "completed");
 
@@ -254,6 +263,10 @@ export default function LibraryPage() {
           if (doc.summary) withSummaries++;
           if (new Date(doc.created_at) > thirtyDaysAgo) recentCount++;
         });
+
+        // Calculate total storage used
+        const totalBytes = docs.reduce((sum, doc) => sum + (doc.file_size || 0), 0);
+        setStorageUsed(totalBytes);
 
         setStats({
           total: docs.length,
@@ -471,6 +484,40 @@ export default function LibraryPage() {
     } finally {
       setIsDeletingDuplicates(false);
     }
+  }
+
+  async function handleRetryProcessing(documentId: string) {
+    setRetryingDocId(documentId);
+    try {
+      const response = await fetch("/api/documents/process", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ documentId }),
+      });
+      const data = await response.json();
+      if (data.success) {
+        toast.success("Document reprocessed successfully");
+        await fetchDocuments();
+      } else {
+        toast.error(data.error || "Failed to reprocess document");
+      }
+    } catch (error) {
+      toast.error("Failed to reprocess document");
+    } finally {
+      setRetryingDocId(null);
+    }
+  }
+
+  function toggleDocSelection(docId: string) {
+    setSelectedDocIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(docId)) {
+        next.delete(docId);
+      } else {
+        next.add(docId);
+      }
+      return next;
+    });
   }
 
   // Calculate duplicate count for UI
@@ -806,6 +853,12 @@ export default function LibraryPage() {
                   </motion.div>
                 </motion.div>
 
+                {/* Storage Usage */}
+                <StorageUsageBar
+                  usedBytes={storageUsed}
+                  limitGB={storageLimitGB}
+                />
+
                 {/* Search & Filters */}
                 <div className="flex items-center gap-4">
                   <div className="relative flex-1">
@@ -990,9 +1043,30 @@ export default function LibraryPage() {
                           onClick={() => handleOpenPreview(doc)}
                         >
                         <div className="flex items-start gap-5">
+                          {/* Selection Checkbox */}
+                          <div className="flex-shrink-0 pt-1" onClick={(e) => e.stopPropagation()}>
+                            <Checkbox
+                              checked={selectedDocIds.has(doc.id)}
+                              onCheckedChange={() => toggleDocSelection(doc.id)}
+                            />
+                          </div>
+
                           {/* Icon */}
-                          <div className="h-12 w-12 rounded-xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center flex-shrink-0 group-hover:bg-violet-100 dark:group-hover:bg-violet-900/30 transition-colors">
-                            <FileText className="h-6 w-6 text-slate-500 dark:text-slate-400 group-hover:text-violet-600 dark:group-hover:text-violet-400 transition-colors" />
+                          <div className={cn(
+                            "h-12 w-12 rounded-xl flex items-center justify-center flex-shrink-0 transition-colors",
+                            doc.status === "failed"
+                              ? "bg-red-100 dark:bg-red-900/30"
+                              : doc.status === "processing"
+                              ? "bg-amber-100 dark:bg-amber-900/30"
+                              : "bg-slate-100 dark:bg-slate-800 group-hover:bg-violet-100 dark:group-hover:bg-violet-900/30"
+                          )}>
+                            {doc.status === "failed" ? (
+                              <AlertTriangle className="h-6 w-6 text-red-500 dark:text-red-400" />
+                            ) : doc.status === "processing" ? (
+                              <Loader2 className="h-6 w-6 text-amber-500 dark:text-amber-400 animate-spin" />
+                            ) : (
+                              <FileText className="h-6 w-6 text-slate-500 dark:text-slate-400 group-hover:text-violet-600 dark:group-hover:text-violet-400 transition-colors" />
+                            )}
                           </div>
 
                           {/* Content */}
@@ -1014,23 +1088,54 @@ export default function LibraryPage() {
                                       {doc.document_type}
                                     </Badge>
                                   )}
+                                  {doc.status === "failed" && (
+                                    <Badge variant="destructive" className="text-xs">
+                                      Failed
+                                    </Badge>
+                                  )}
+                                  {doc.status === "processing" && (
+                                    <Badge className="text-xs bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400">
+                                      Processing
+                                    </Badge>
+                                  )}
                                 </div>
                               </div>
 
                               {/* Actions */}
                               <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    handleOpenChat(doc);
-                                  }}
-                                  className="text-slate-500 hover:text-violet-600 dark:hover:text-violet-400"
-                                >
-                                  <MessageSquare className="h-4 w-4 mr-1" />
-                                  Chat
-                                </Button>
+                                {doc.status === "failed" && (
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      handleRetryProcessing(doc.id);
+                                    }}
+                                    disabled={retryingDocId === doc.id}
+                                    className="text-amber-600 hover:text-amber-700 dark:text-amber-400"
+                                  >
+                                    {retryingDocId === doc.id ? (
+                                      <Loader2 className="h-4 w-4 mr-1 animate-spin" />
+                                    ) : (
+                                      <RefreshCw className="h-4 w-4 mr-1" />
+                                    )}
+                                    Retry
+                                  </Button>
+                                )}
+                                {doc.status === "completed" && (
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      handleOpenChat(doc);
+                                    }}
+                                    className="text-slate-500 hover:text-violet-600 dark:hover:text-violet-400"
+                                  >
+                                    <MessageSquare className="h-4 w-4 mr-1" />
+                                    Chat
+                                  </Button>
+                                )}
                                 <DropdownMenu>
                                   <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
                                     <Button variant="ghost" size="icon" className="h-8 w-8">
@@ -1042,10 +1147,18 @@ export default function LibraryPage() {
                                       <Eye className="h-4 w-4 mr-2" />
                                       Preview
                                     </DropdownMenuItem>
-                                    <DropdownMenuItem onClick={() => handleGenerateSummary(doc.id)}>
-                                      <Sparkles className="h-4 w-4 mr-2" />
-                                      Generate Summary
-                                    </DropdownMenuItem>
+                                    {doc.status === "completed" && (
+                                      <DropdownMenuItem onClick={() => handleGenerateSummary(doc.id)}>
+                                        <Sparkles className="h-4 w-4 mr-2" />
+                                        Generate Summary
+                                      </DropdownMenuItem>
+                                    )}
+                                    {doc.status === "failed" && (
+                                      <DropdownMenuItem onClick={() => handleRetryProcessing(doc.id)}>
+                                        <RefreshCw className="h-4 w-4 mr-2" />
+                                        Retry Processing
+                                      </DropdownMenuItem>
+                                    )}
                                     <DropdownMenuSeparator />
                                     <DropdownMenuItem
                                       onClick={() => handleDelete(doc.id)}
@@ -1059,8 +1172,33 @@ export default function LibraryPage() {
                               </div>
                             </div>
 
+                            {/* Error details for failed documents */}
+                            {doc.status === "failed" && doc.error_message && (
+                              <div className="mt-2">
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setExpandedErrorId(expandedErrorId === doc.id ? null : doc.id);
+                                  }}
+                                  className="flex items-center gap-1 text-xs text-red-600 dark:text-red-400 hover:underline"
+                                >
+                                  {expandedErrorId === doc.id ? (
+                                    <ChevronUp className="h-3 w-3" />
+                                  ) : (
+                                    <ChevronDown className="h-3 w-3" />
+                                  )}
+                                  {expandedErrorId === doc.id ? "Hide error details" : "Show error details"}
+                                </button>
+                                {expandedErrorId === doc.id && (
+                                  <p className="mt-1 text-xs text-red-600/80 dark:text-red-400/80 bg-red-50 dark:bg-red-950/30 p-2 rounded-md font-mono">
+                                    {doc.error_message}
+                                  </p>
+                                )}
+                              </div>
+                            )}
+
                             {/* Summary Preview */}
-                            {doc.summary && (
+                            {doc.summary && doc.status === "completed" && (
                               <p className="mt-3 text-sm text-slate-600 dark:text-slate-400 line-clamp-2">
                                 {doc.summary}
                               </p>
@@ -1108,6 +1246,17 @@ export default function LibraryPage() {
           )}
         </AnimatePresence>
       </div>
+
+      {/* Bulk Action Bar */}
+      <BulkActionBar
+        selectedCount={selectedDocIds.size}
+        selectedIds={Array.from(selectedDocIds)}
+        onClearSelection={() => setSelectedDocIds(new Set())}
+        onDeleteComplete={() => {
+          setSelectedDocIds(new Set());
+          fetchAll();
+        }}
+      />
 
       {/* Modals */}
       <FolderModal

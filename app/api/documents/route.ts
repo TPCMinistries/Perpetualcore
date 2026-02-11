@@ -169,6 +169,47 @@ export async function DELETE(req: NextRequest) {
       return new Response("Unauthorized", { status: 401 });
     }
 
+    // Support bulk delete via JSON body with ids array
+    const contentType = req.headers.get("content-type");
+    if (contentType?.includes("application/json")) {
+      const body = await req.json();
+      const ids: string[] = body.ids;
+
+      if (!ids || !Array.isArray(ids) || ids.length === 0) {
+        return Response.json({ error: "ids array required" }, { status: 400 });
+      }
+
+      // Cap bulk deletes at 50
+      const toDelete = ids.slice(0, 50);
+      let deleted = 0;
+
+      for (const docId of toDelete) {
+        const { error } = await supabase
+          .from("documents")
+          .delete()
+          .eq("id", docId)
+          .eq("user_id", user.id);
+
+        if (!error) deleted++;
+      }
+
+      await logActivity({
+        supabase,
+        userId: user.id,
+        action: "deleted",
+        entityType: "document",
+        entityId: toDelete[0],
+        entityName: `${deleted} documents (bulk)`,
+      });
+
+      return Response.json({
+        success: true,
+        deleted,
+        message: `Deleted ${deleted} document(s)`,
+      });
+    }
+
+    // Single delete via query param (backward compatible)
     const { searchParams } = new URL(req.url);
     const documentId = searchParams.get("id");
 

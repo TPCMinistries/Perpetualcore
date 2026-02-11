@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { getAuthorizationUrl, INTEGRATION_CONFIGS, isIntegrationConfigured } from "@/lib/integrations/config";
 import { IntegrationProvider } from "@/types";
+import { gateFeature } from "@/lib/features/gate";
 
 // GET /api/integrations
 // Get all integrations for the user's organization
@@ -88,6 +89,24 @@ export async function POST(request: Request) {
         { error: "Invalid provider" },
         { status: 400 }
       );
+    }
+
+    // Gate integration features based on provider
+    const integrationFeatureMap: Record<string, string> = {
+      slack: "slack_integration",
+      google_calendar: "calendar_integration",
+      gmail: "email_integration",
+      whatsapp: "whatsapp",
+    };
+    const featureSlug = integrationFeatureMap[provider];
+    if (featureSlug) {
+      const gate = await gateFeature(featureSlug);
+      if (!gate.allowed) {
+        return NextResponse.json(
+          { error: gate.reason, code: "FEATURE_GATED", upgrade: gate.upgrade },
+          { status: 403 }
+        );
+      }
     }
 
     if (!isIntegrationConfigured(provider)) {

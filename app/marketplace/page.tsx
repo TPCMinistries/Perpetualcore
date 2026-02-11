@@ -7,7 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { Search, Star, TrendingUp, Zap, Bot, Workflow, DollarSign, Users } from "lucide-react";
+import { Search, Star, TrendingUp, Zap, Bot, Workflow, DollarSign, Users, Plug } from "lucide-react";
 import { MarketplacePageSkeleton } from "@/components/ui/skeletons";
 
 interface MarketplaceItem {
@@ -30,21 +30,39 @@ interface MarketplaceItem {
   creator?: { name: string; verified: boolean };
 }
 
+interface SkillItem {
+  id: string;
+  name: string;
+  description: string;
+  category: string;
+  icon: string;
+  color: string;
+  tags: string[];
+  tier: string;
+  isBuiltIn: boolean;
+  enabled?: boolean;
+}
+
 export default function MarketplacePage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [filter, setFilter] = useState("all");
   const [sortBy, setSortBy] = useState("popular");
   const [marketplaceItems, setMarketplaceItems] = useState<MarketplaceItem[]>([]);
+  const [skills, setSkills] = useState<SkillItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState({
     totalAgents: 0,
     totalWorkflows: 0,
-    totalCustomers: 0,
+    totalSkills: 0,
     totalPaidToCreators: 0,
   });
 
   useEffect(() => {
-    fetchMarketplaceItems();
+    if (filter === "skills") {
+      fetchSkills();
+    } else {
+      fetchMarketplaceItems();
+    }
   }, [filter]);
 
   async function fetchMarketplaceItems() {
@@ -69,15 +87,29 @@ export default function MarketplacePage() {
         // Calculate stats
         const agents = data.items?.filter((i: MarketplaceItem) => i.type === "agent").length || 0;
         const workflows = data.items?.filter((i: MarketplaceItem) => i.type === "workflow").length || 0;
-        setStats({
+        setStats((prev) => ({
+          ...prev,
           totalAgents: agents,
           totalWorkflows: workflows,
-          totalCustomers: 0, // Would come from a separate stats endpoint
-          totalPaidToCreators: 0,
-        });
+        }));
       }
     } catch (error) {
       console.error("Error fetching marketplace items:", error);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function fetchSkills() {
+    setLoading(true);
+    try {
+      const response = await fetch("/api/skills");
+      if (response.ok) {
+        const data = await response.json();
+        setSkills(data.skills || []);
+      }
+    } catch (error) {
+      console.error("Error fetching skills:", error);
     } finally {
       setLoading(false);
     }
@@ -181,8 +213,8 @@ export default function MarketplacePage() {
               <div className="text-sm text-muted-foreground">Workflows</div>
             </div>
             <div>
-              <div className="text-3xl font-bold text-primary mb-2">{marketplaceItems.length}</div>
-              <div className="text-sm text-muted-foreground">Total Listings</div>
+              <div className="text-3xl font-bold text-primary mb-2">{skills.length || 12}</div>
+              <div className="text-sm text-muted-foreground">Skills</div>
             </div>
             <div>
               <div className="text-3xl font-bold text-primary mb-2">70%</div>
@@ -205,6 +237,7 @@ export default function MarketplacePage() {
                   <SelectItem value="all">All Items</SelectItem>
                   <SelectItem value="agents">AI Agents</SelectItem>
                   <SelectItem value="workflows">Workflows</SelectItem>
+                  <SelectItem value="skills">Skills</SelectItem>
                 </SelectContent>
               </Select>
 
@@ -229,7 +262,7 @@ export default function MarketplacePage() {
         </div>
       </section>
 
-      {/* Marketplace Items Grid */}
+      {/* Content Grid */}
       <section className="container mx-auto px-4 py-12">
         {loading ? (
           <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
@@ -248,6 +281,72 @@ export default function MarketplacePage() {
               </Card>
             ))}
           </div>
+        ) : filter === "skills" ? (
+          /* Skills Grid */
+          skills.length === 0 ? (
+            <div className="text-center py-12">
+              <Plug className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+              <h3 className="text-lg font-medium mb-2">No skills available</h3>
+              <p className="text-muted-foreground mb-4">
+                Skills extend your AI with integrations and capabilities.
+              </p>
+            </div>
+          ) : (
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {skills
+                .filter((skill) => {
+                  if (!searchQuery) return true;
+                  const q = searchQuery.toLowerCase();
+                  return (
+                    skill.name.toLowerCase().includes(q) ||
+                    skill.description.toLowerCase().includes(q) ||
+                    skill.tags?.some((t) => t.toLowerCase().includes(q))
+                  );
+                })
+                .map((skill) => (
+                <Link key={skill.id} href="/dashboard/settings/skills">
+                  <Card className="h-full hover:shadow-lg transition-shadow cursor-pointer">
+                    <CardHeader>
+                      <div className="flex items-start justify-between mb-3">
+                        <div
+                          className="h-12 w-12 rounded-lg flex items-center justify-center text-2xl"
+                          style={{ backgroundColor: `${skill.color}20` }}
+                        >
+                          {skill.icon}
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Badge variant="secondary">{skill.category}</Badge>
+                          {skill.isBuiltIn && (
+                            <Badge variant="outline" className="text-xs">Built-in</Badge>
+                          )}
+                        </div>
+                      </div>
+                      <CardTitle className="line-clamp-1">{skill.name}</CardTitle>
+                      <CardDescription className="line-clamp-2">{skill.description}</CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="flex flex-wrap gap-2">
+                        {(skill.tags || []).slice(0, 3).map((tag) => (
+                          <Badge key={tag} variant="outline" className="text-xs">
+                            {tag}
+                          </Badge>
+                        ))}
+                      </div>
+
+                      <div className="flex items-center justify-between pt-4 border-t">
+                        <div className="text-sm text-muted-foreground">
+                          {skill.tier === "free" ? "Free" : `${skill.tier} plan`}
+                        </div>
+                        <Button size="sm">
+                          {skill.enabled ? "Manage" : "Install"}
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </Link>
+              ))}
+            </div>
+          )
         ) : filteredItems.length === 0 ? (
           <div className="text-center py-12">
             <Bot className="h-12 w-12 mx-auto text-muted-foreground mb-4" />

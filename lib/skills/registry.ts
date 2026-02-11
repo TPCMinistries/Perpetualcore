@@ -22,6 +22,10 @@ import { googleCalendarSkill } from "./builtin/google-calendar";
 import { gmailSkill } from "./builtin/gmail";
 import { todoistSkill } from "./builtin/todoist";
 import { linearSkill } from "./builtin/linear";
+// Batch 3 Skills
+import { slackSkill } from "./builtin/slack";
+import { zoomSkill } from "./builtin/zoom";
+import { dropboxSkill } from "./builtin/dropbox";
 
 // Registry of all available skills
 const skillRegistry: Map<string, Skill> = new Map();
@@ -41,6 +45,10 @@ const BUILT_IN_SKILLS: Skill[] = [
   gmailSkill,
   todoistSkill,
   linearSkill,
+  // Batch 3 Skills
+  slackSkill,
+  zoomSkill,
+  dropboxSkill,
 ];
 
 /**

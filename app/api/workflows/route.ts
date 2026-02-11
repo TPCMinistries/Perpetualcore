@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { gateFeature } from "@/lib/features/gate";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -92,6 +93,15 @@ export async function POST(request: NextRequest) {
 
     if (!profile?.organization_id) {
       return NextResponse.json({ error: "Profile not found" }, { status: 404 });
+    }
+
+    // Gate: workflows feature
+    const gate = await gateFeature("workflows", profile.organization_id);
+    if (!gate.allowed) {
+      return NextResponse.json(
+        { error: gate.reason, code: "FEATURE_GATED", upgrade: gate.upgrade },
+        { status: 403 }
+      );
     }
 
     const body = await request.json();

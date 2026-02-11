@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { gateFeature } from "@/lib/features/gate";
 
 export async function GET() {
   try {
@@ -55,6 +56,15 @@ export async function POST(request: Request) {
 
     if (!profile) {
       return NextResponse.json({ error: "Profile not found" }, { status: 404 });
+    }
+
+    // Gate: ai_agents feature
+    const gate = await gateFeature("ai_agents", profile.organization_id);
+    if (!gate.allowed) {
+      return NextResponse.json(
+        { error: gate.reason, code: "FEATURE_GATED", upgrade: gate.upgrade },
+        { status: 403 }
+      );
     }
 
     const body = await request.json();

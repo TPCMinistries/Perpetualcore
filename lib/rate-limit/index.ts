@@ -243,6 +243,56 @@ export async function checkRateLimit(
   return null;
 }
 
+/**
+ * Create a plan-aware rate limiter.
+ * Maps plan names to different rate limits.
+ */
+export function createPlanAwareRateLimiter(config: {
+  prefix: string;
+  interval: number;
+  limits: Record<string, number>;
+  defaultLimit: number;
+}) {
+  const { prefix, interval, limits, defaultLimit } = config;
+
+  // Pre-create rate limiters for each plan tier
+  const planLimiters = new Map<number, ReturnType<typeof createRateLimiter>>();
+
+  function getLimiterForPlan(plan: string): ReturnType<typeof createRateLimiter> {
+    const limit = limits[plan] ?? defaultLimit;
+    if (!planLimiters.has(limit)) {
+      planLimiters.set(limit, createRateLimiter({ interval, limit, prefix: `${prefix}:${limit}` }));
+    }
+    return planLimiters.get(limit)!;
+  }
+
+  return {
+    async check(req: NextRequest, plan: string, userId?: string): Promise<RateLimitResult> {
+      const limiter = getLimiterForPlan(plan);
+      return limiter.check(req, userId);
+    },
+  };
+}
+
+// Plan-aware rate limiters
+export const planRateLimiters = {
+  /** Chat API - plan-aware limits */
+  chat: createPlanAwareRateLimiter({
+    prefix: "chat-plan",
+    interval: 60,
+    limits: { free: 10, starter: 30, pro: 60, team: 120, business: 300, enterprise: 1000 },
+    defaultLimit: 10,
+  }),
+
+  /** Search API - plan-aware limits */
+  search: createPlanAwareRateLimiter({
+    prefix: "search-plan",
+    interval: 60,
+    limits: { free: 20, starter: 60, pro: 120, team: 300, business: 600, enterprise: 1000 },
+    defaultLimit: 20,
+  }),
+};
+
 /** Whether Redis-backed rate limiting is active */
 export const isRedisRateLimiting = useRedis;
 

@@ -1,5 +1,5 @@
 import { processAndStoreDocument } from "@/lib/documents/processor";
-import { createAdminClient } from "@/lib/supabase/server";
+import { createClient, createAdminClient } from "@/lib/supabase/server";
 import { NextRequest } from "next/server";
 
 export const runtime = "nodejs";
@@ -8,17 +8,42 @@ export const maxDuration = 300; // 5 minutes for processing
 
 export async function POST(req: NextRequest) {
   try {
+    // Auth check - verify user is authenticated
+    const supabaseAuth = await createClient();
+    const { data: { user } } = await supabaseAuth.auth.getUser();
+    if (!user) {
+      return Response.json({ success: false, error: "Unauthorized" }, { status: 401 });
+    }
+
+    // Get user's organization for ownership verification
+    const { data: profile } = await supabaseAuth
+      .from("profiles")
+      .select("organization_id")
+      .eq("id", user.id)
+      .single();
+
+    const organizationId = profile?.organization_id;
+
     const body = await req.json();
     const { documentId, reprocessAll } = body;
 
+    const supabase = createAdminClient();
+
     // Handle reprocess all stuck documents
     if (reprocessAll) {
-      const supabase = createAdminClient();
-
-      const { data: stuckDocs, error } = await supabase
+      let query = supabase
         .from("documents")
         .select("id, title")
-        .eq("status", "processing");
+        .in("status", ["processing", "failed"]);
+
+      // Scope to user's org if available
+      if (organizationId) {
+        query = query.eq("organization_id", organizationId);
+      } else {
+        query = query.eq("user_id", user.id);
+      }
+
+      const { data: stuckDocs, error } = await query;
 
       if (error) {
         console.error("Failed to fetch stuck documents:", error);
@@ -41,7 +66,24 @@ export async function POST(req: NextRequest) {
 
     // Handle single document processing
     if (!documentId) {
-      return new Response("Document ID required", { status: 400 });
+      return Response.json({ success: false, error: "Document ID required" }, { status: 400 });
+    }
+
+    // Verify the user owns this document
+    let ownershipQuery = supabase
+      .from("documents")
+      .select("id")
+      .eq("id", documentId);
+
+    if (organizationId) {
+      ownershipQuery = ownershipQuery.eq("organization_id", organizationId);
+    } else {
+      ownershipQuery = ownershipQuery.eq("user_id", user.id);
+    }
+
+    const { data: ownedDoc } = await ownershipQuery.single();
+    if (!ownedDoc) {
+      return Response.json({ success: false, error: "Document not found" }, { status: 404 });
     }
 
     await processAndStoreDocument(documentId);
