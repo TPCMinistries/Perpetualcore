@@ -12,10 +12,26 @@ import {
   Star,
 } from "lucide-react";
 import { notFound } from "next/navigation";
+import { Metadata } from "next";
 
 interface PageProps {
   params: {
     industry: string;
+  };
+}
+
+export async function generateMetadata({
+  params,
+}: PageProps): Promise<Metadata> {
+  const config = INDUSTRY_CONFIGS[params.industry as IndustryType];
+  if (!config) return {};
+  return {
+    title: `${config.name} AI Solutions - Perpetual Core`,
+    description: config.subheadline,
+    openGraph: {
+      title: `${config.name} AI Solutions | Perpetual Core`,
+      description: config.subheadline,
+    },
   };
 }
 

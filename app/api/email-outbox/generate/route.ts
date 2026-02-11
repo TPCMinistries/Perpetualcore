@@ -1,18 +1,21 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { gateFeature } from "@/lib/features/gate";
+import Anthropic from "@anthropic-ai/sdk";
+import { rateLimiters, checkRateLimit } from "@/lib/rate-limit";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-const N8N_WEBHOOK_URL = "https://upliftcommunities.app.n8n.cloud/webhook/draft-email";
-
 /**
  * POST /api/email-outbox/generate
- * Trigger workflow to generate an AI email draft
+ * Generate an AI email draft using Claude
  */
 export async function POST(request: NextRequest) {
   try {
+    const rateLimitResponse = await checkRateLimit(request, rateLimiters.imageGen);
+    if (rateLimitResponse) return rateLimitResponse;
+
     const supabase = await createClient();
     const {
       data: { user },
@@ -26,7 +29,7 @@ export async function POST(request: NextRequest) {
     // Feature gate: email integration
     const { data: genProfile } = await supabase
       .from("profiles")
-      .select("organization_id")
+      .select("organization_id, full_name")
       .eq("id", user.id)
       .single();
     if (genProfile?.organization_id) {
@@ -44,7 +47,7 @@ export async function POST(request: NextRequest) {
       recipient_email,
       email_type = "follow_up",
       context = "",
-      meeting_id
+      meeting_id,
     } = body;
 
     if (!recipient_email) {
@@ -54,34 +57,72 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Call the n8n webhook to generate the email draft
-    const n8nResponse = await fetch(N8N_WEBHOOK_URL, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        recipient_email,
-        email_type,
-        context,
-        meeting_id,
-        user_id: user.id,
-      }),
+    // Gather meeting context if provided
+    let meetingContext = "";
+    if (meeting_id) {
+      const { data: meeting } = await supabase
+        .from("meetings")
+        .select("title, notes, meeting_type, start_time")
+        .eq("id", meeting_id)
+        .eq("user_id", user.id)
+        .single();
+      if (meeting) {
+        meetingContext = `\nMeeting: "${meeting.title}" (${meeting.meeting_type}, ${meeting.start_time})\nNotes: ${meeting.notes || "None"}`;
+      }
+    }
+
+    // Generate email draft with Claude
+    const anthropic = new Anthropic({
+      apiKey: process.env.ANTHROPIC_API_KEY,
     });
 
-    if (!n8nResponse.ok) {
-      const errorText = await n8nResponse.text();
-      console.error("n8n webhook error:", errorText);
+    const emailTypePrompts: Record<string, string> = {
+      follow_up: "a professional follow-up email",
+      introduction: "an introduction email",
+      thank_you: "a thank-you email",
+      meeting_request: "a meeting request email",
+      proposal: "a proposal or pitch email",
+      reminder: "a friendly reminder email",
+    };
+
+    const typeDescription = emailTypePrompts[email_type] || "a professional email";
+    const senderName = genProfile?.full_name || "the sender";
+
+    const response = await anthropic.messages.create({
+      model: "claude-sonnet-4-5-20250929",
+      max_tokens: 1024,
+      messages: [
+        {
+          role: "user",
+          content: `Write ${typeDescription} from ${senderName} to ${recipient_email}.
+
+${context ? `Context: ${context}` : ""}${meetingContext}
+
+Return ONLY a JSON object with these fields:
+- "subject": A concise email subject line
+- "body": The full email body text (professional, concise, no markdown)
+- "to": The recipient email address
+
+No markdown, no explanation, just valid JSON.`,
+        },
+      ],
+    });
+
+    const aiText =
+      response.content[0].type === "text" ? response.content[0].text : "";
+
+    let result;
+    try {
+      result = JSON.parse(aiText);
+    } catch {
+      console.error("Failed to parse AI email response:", aiText);
       return NextResponse.json(
-        { error: "Failed to generate email draft" },
+        { error: "AI generation returned invalid format" },
         { status: 500 }
       );
     }
 
-    const result = await n8nResponse.json();
-
-    // Save the draft to our local Supabase database
-    // (n8n's Supabase connection points to a different database)
+    // Save the draft to database
     const { data: savedEmail, error: saveError } = await supabase
       .from("email_outbox")
       .insert({
@@ -97,8 +138,7 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (saveError) {
-      console.error("Failed to save draft to database:", saveError);
-      // Still return the generated content even if save fails
+      console.error("Failed to save draft:", saveError);
       return NextResponse.json({
         success: true,
         message: "Email draft generated (not saved)",
