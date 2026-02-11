@@ -780,6 +780,16 @@ export const NAVIGATION_CONFIG_V2: NavigationSection[] = [
         },
       },
       {
+        name: "Voice Memos",
+        href: "/dashboard/voice-memos",
+        icon: Headphones,
+        adaptiveConfig: {
+          visibleFor: ["beginner", "intermediate", "advanced"],
+          complexity: "standard",
+          helpText: "Record, transcribe, and AI-analyze voice memos",
+        },
+      },
+      {
         name: "Chat History",
         href: "/dashboard/conversations",
         icon: MessagesSquare,

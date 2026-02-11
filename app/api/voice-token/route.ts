@@ -1,16 +1,17 @@
 import { createClient } from "@/lib/supabase/server";
 import { NextRequest } from "next/server";
+import { rateLimiters, checkRateLimit } from "@/lib/rate-limit";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-const isDev = process.env.NODE_ENV === "development";
-
 export async function POST(req: NextRequest) {
   try {
+    const rateLimitResponse = await checkRateLimit(req, rateLimiters.imageGen);
+    if (rateLimitResponse) return rateLimitResponse;
+
     const supabase = await createClient();
 
-    // Get authenticated user
     const {
       data: { user },
     } = await supabase.auth.getUser();
@@ -19,10 +20,9 @@ export async function POST(req: NextRequest) {
       return new Response("Unauthorized", { status: 401 });
     }
 
-    // Get user's profile to verify organization
     const { data: profile, error: profileError } = await supabase
       .from("profiles")
-      .select("*")
+      .select("organization_id")
       .eq("id", user.id)
       .single();
 
@@ -30,28 +30,45 @@ export async function POST(req: NextRequest) {
       return new Response("Profile not found", { status: 400 });
     }
 
-    // Get voice selection from request body (default to "alloy")
     const body = await req.json().catch(() => ({}));
     const voice = body.voice || "alloy";
 
-    // Check if API key is available
     const apiKey = process.env.OPENAI_API_KEY;
     if (!apiKey) {
-      if (isDev) console.error("OPENAI_API_KEY is not set in environment variables");
-      return new Response("Server configuration error: OpenAI API key not found", { status: 500 });
+      return new Response("Voice service not configured", { status: 500 });
     }
 
-    if (isDev) console.log("Creating Realtime API session with API key:", apiKey.substring(0, 10) + "...");
+    // Create an ephemeral token via OpenAI Realtime API sessions endpoint
+    const sessionResponse = await fetch(
+      "https://api.openai.com/v1/realtime/sessions",
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${apiKey}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          model: "gpt-4o-realtime-preview",
+          voice: voice,
+        }),
+      }
+    );
 
-    // For the Realtime API, we just return the API key directly
-    // The client will use it to connect via WebSocket
-    // Note: In production, you'd want to use ephemeral tokens, but for now this works
+    if (!sessionResponse.ok) {
+      const errText = await sessionResponse.text();
+      console.error("OpenAI Realtime session error:", errText);
+      return new Response("Failed to create voice session", { status: 502 });
+    }
+
+    const session = await sessionResponse.json();
+
     return Response.json({
-      client_secret: apiKey,
+      client_secret: session.client_secret?.value || session.client_secret,
       voice: voice,
+      expires_at: session.client_secret?.expires_at,
     });
   } catch (error) {
-    if (isDev) console.error("Voice token error:", error);
+    console.error("Voice token error:", error);
     return new Response("Internal server error", { status: 500 });
   }
 }
