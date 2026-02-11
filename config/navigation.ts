@@ -45,6 +45,7 @@ import {
   Mic,
   MessagesSquare,
   Palette,
+  AudioLines,
   // New icons for redesign
   LayoutDashboard,
   Workflow,
@@ -53,6 +54,7 @@ import {
   Plug,
   Database,
   Sheet,
+  Globe2,
 } from "lucide-react";
 import { UserExperienceLevel, AdaptiveNavConfig } from "@/types/user-experience";
 
@@ -440,6 +442,17 @@ export const NAVIGATION_CONFIG: NavigationSection[] = [
     visibleFor: ["beginner", "intermediate", "advanced"],
     items: [
       {
+        name: "Ecosystem",
+        href: "/dashboard/ecosystem",
+        icon: Globe2,
+        adaptiveConfig: {
+          visibleFor: ["beginner", "intermediate", "advanced"],
+          complexity: "standard",
+          badge: "new",
+          helpText: "Monitor all 13 projects — databases, deployments, and health across the ecosystem",
+        },
+      },
+      {
         name: "Intelligence",
         href: "/dashboard/intelligence",
         icon: Brain,
@@ -693,6 +706,18 @@ export const NAVIGATION_CONFIG_V2: NavigationSection[] = [
           helpText: "AI-powered search across all your documents, conversations, and data",
         },
       },
+      {
+        name: "Ecosystem",
+        href: "/dashboard/ecosystem",
+        icon: Globe2,
+        adaptiveConfig: {
+          visibleFor: ["beginner", "intermediate", "advanced"],
+          complexity: "essential",
+          isCore: true,
+          badge: "new",
+          helpText: "Monitor all 13 projects — databases, deployments, and health",
+        },
+      },
     ],
   },
 
@@ -787,6 +812,17 @@ export const NAVIGATION_CONFIG_V2: NavigationSection[] = [
           visibleFor: ["beginner", "intermediate", "advanced"],
           complexity: "standard",
           helpText: "Record, transcribe, and AI-analyze voice memos",
+        },
+      },
+      {
+        name: "Voice Intelligence",
+        href: "/dashboard/voice-intel",
+        icon: AudioLines,
+        adaptiveConfig: {
+          visibleFor: ["beginner", "intermediate", "advanced"],
+          complexity: "standard",
+          badge: "new",
+          helpText: "Brain-classified voice memos with action queue — red/yellow/green tiers",
         },
       },
       {
