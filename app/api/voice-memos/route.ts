@@ -137,6 +137,7 @@ export async function POST(req: NextRequest) {
         title: title || `Voice Memo ${new Date().toLocaleString()}`,
         audio_url: uploadData.path,
         duration_seconds: durationSeconds,
+        source: "manual",
         processing_status: "pending",
         recorded_at: new Date().toISOString(),
       })
@@ -184,21 +185,30 @@ async function transcribeAndProcess(
       .update({ processing_status: "processing" })
       .eq("id", memoId);
 
-    // Transcribe with Whisper
+    // Transcribe with Whisper (plain text + SRT for timestamps)
     const OpenAI = (await import("openai")).default;
     const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
-    const transcription = await openai.audio.transcriptions.create({
-      file: audioFile,
-      model: "whisper-1",
-      language: "en",
-    });
+    const [transcription, srtTranscription] = await Promise.all([
+      openai.audio.transcriptions.create({
+        file: audioFile,
+        model: "whisper-1",
+        language: "en",
+      }),
+      openai.audio.transcriptions.create({
+        file: audioFile,
+        model: "whisper-1",
+        language: "en",
+        response_format: "srt",
+      }).catch(() => null),
+    ]);
 
-    // Update with transcript
+    // Update with transcript + SRT
     await supabase
       .from("voice_memos")
       .update({
         transcript: transcription.text,
+        srt_transcript: typeof srtTranscription === "string" ? srtTranscription : null,
         processing_status: "completed",
       })
       .eq("id", memoId);

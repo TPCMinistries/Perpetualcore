@@ -58,6 +58,14 @@
     {
       "path": "/api/cron/finalize-overages",
       "schedule": "0 23 * * *"
+    },
+    {
+      "path": "/api/cron/voice-intel-digest",
+      "schedule": "0 12 * * *"
+    },
+    {
+      "path": "/api/cron/voice-intel-patterns",
+      "schedule": "0 */6 * * *"
     }
   ]
 }
