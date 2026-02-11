@@ -132,3 +132,41 @@ export async function enforceTeamMemberLimit(
 
   return { allowed: true, current, limit, plan };
 }
+
+/**
+ * Check if a user can create more custom skills
+ */
+export async function enforceCustomSkillLimit(
+  userId: string,
+  organizationId?: string
+): Promise<EnforcementResult> {
+  const plan = organizationId
+    ? await getOrgPlan(organizationId)
+    : "free" as PlanType;
+  const limit = PLAN_LIMITS[plan]?.customSkills ?? 1;
+
+  // -1 means unlimited
+  if (limit === -1) {
+    return { allowed: true, current: 0, limit: -1, plan };
+  }
+
+  const supabase = createAdminClient();
+  const { count } = await supabase
+    .from("custom_skills")
+    .select("id", { count: "exact", head: true })
+    .eq("creator_id", userId);
+
+  const current = count || 0;
+
+  if (current >= limit) {
+    return {
+      allowed: false,
+      current,
+      limit,
+      plan,
+      message: `Custom skill limit reached (${current}/${limit}). Your ${plan} plan allows ${limit} custom skills. Upgrade for more.`,
+    };
+  }
+
+  return { allowed: true, current, limit, plan };
+}

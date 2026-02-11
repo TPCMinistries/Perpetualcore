@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -27,6 +28,9 @@ import {
   RefreshCw,
   Sparkles,
   Zap,
+  Plus,
+  Pencil,
+  Puzzle,
   Key,
   Cloud,
   Calendar,
@@ -222,9 +226,11 @@ interface ConfigDialogState {
 }
 
 export default function SkillsSettingsPage() {
+  const router = useRouter();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [skillStatuses, setSkillStatuses] = useState<Record<string, SkillStatus>>({});
+  const [customSkills, setCustomSkills] = useState<any[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [configDialog, setConfigDialog] = useState<ConfigDialogState>({ open: false, skill: null });
@@ -232,9 +238,10 @@ export default function SkillsSettingsPage() {
   const [showApiKey, setShowApiKey] = useState(false);
   const [testingConnection, setTestingConnection] = useState(false);
 
-  // Load skill statuses on mount
+  // Load skill statuses + custom skills on mount
   useEffect(() => {
     loadSkillStatuses();
+    loadCustomSkills();
   }, []);
 
   async function loadSkillStatuses() {
@@ -297,6 +304,18 @@ export default function SkillsSettingsPage() {
       toast.error("Failed to load skills");
     } finally {
       setLoading(false);
+    }
+  }
+
+  async function loadCustomSkills() {
+    try {
+      const res = await fetch("/api/skills/custom?mine=true");
+      if (res.ok) {
+        const data = await res.json();
+        setCustomSkills(data.skills || []);
+      }
+    } catch (error) {
+      console.error("Failed to load custom skills:", error);
     }
   }
 
@@ -499,6 +518,10 @@ export default function SkillsSettingsPage() {
               <RefreshCw className="h-4 w-4 mr-2" />
               Refresh
             </Button>
+            <Button onClick={() => router.push("/dashboard/settings/skills/create")}>
+              <Plus className="h-4 w-4 mr-2" />
+              Create Custom Skill
+            </Button>
           </div>
         </CardContent>
       </Card>
@@ -619,6 +642,55 @@ export default function SkillsSettingsPage() {
             </p>
           </CardContent>
         </Card>
+      )}
+
+      {/* Custom Skills Section */}
+      {customSkills.length > 0 && (
+        <div className="space-y-4">
+          <div className="flex items-center gap-2">
+            <Puzzle className="h-5 w-5 text-purple-500" />
+            <h2 className="text-xl font-semibold">Your Custom Skills</h2>
+            <Badge variant="secondary">{customSkills.length}</Badge>
+          </div>
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+            {customSkills.map((skill) => (
+              <Card key={skill.id} className="hover:shadow-lg transition-all duration-300">
+                <CardContent className="pt-6">
+                  <div className="flex items-start gap-4 mb-4">
+                    <div className="h-12 w-12 rounded-xl bg-purple-50 dark:bg-purple-950/30 flex items-center justify-center">
+                      <Puzzle className="h-6 w-6 text-purple-500" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-1">
+                        <h3 className="font-semibold truncate">{skill.name}</h3>
+                        <Badge variant="outline" className="text-xs">
+                          {skill.visibility}
+                        </Badge>
+                      </div>
+                      <p className="text-sm text-muted-foreground line-clamp-2">
+                        {skill.description || "No description"}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-center justify-between pt-4 border-t">
+                    <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                      <span>{skill.tools?.length || 0} tools</span>
+                      <span>·</span>
+                      <span>{skill.auth_type}</span>
+                    </div>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => router.push(`/dashboard/settings/skills/${skill.id}/edit`)}
+                    >
+                      <Pencil className="h-3 w-3 mr-1" /> Edit
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
       )}
 
       {/* Configuration Dialog */}

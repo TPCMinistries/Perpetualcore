@@ -7,6 +7,7 @@
 
 import { Skill, UserSkillConfig, ToolContext, ToolResult } from "./types";
 import { createAdminClient } from "@/lib/supabase/server";
+import { loadCustomSkillsForUser, loadCustomSkillById } from "./custom/loader";
 
 // Built-in skills are imported directly
 import { weatherSkill } from "./builtin/weather";
@@ -116,13 +117,17 @@ export async function enableSkill(
   skillId: string,
   config?: Record<string, any>
 ): Promise<{ success: boolean; error?: string }> {
-  const skill = getSkill(skillId);
+  // Check built-in or custom skill exists
+  let skill: Skill | undefined | null = getSkill(skillId);
+  if (!skill && skillId.startsWith("custom_")) {
+    skill = await loadCustomSkillById(skillId);
+  }
   if (!skill) {
     return { success: false, error: "Skill not found" };
   }
 
-  // Check requirements
-  if (skill.requiredEnvVars) {
+  // Check requirements (built-in skills only)
+  if (skill.isBuiltIn && skill.requiredEnvVars) {
     for (const envVar of skill.requiredEnvVars) {
       if (!process.env[envVar]) {
         return { success: false, error: `Missing required environment variable: ${envVar}` };
@@ -205,7 +210,16 @@ export async function executeSkillTool(
   params: any,
   context: ToolContext
 ): Promise<ToolResult> {
-  const skill = getSkill(skillId);
+  // Resolve skill: built-in from registry, or custom from DB
+  let skill: Skill | undefined | null;
+  const isCustom = skillId.startsWith("custom_");
+
+  if (isCustom) {
+    skill = await loadCustomSkillById(skillId);
+  } else {
+    skill = getSkill(skillId);
+  }
+
   if (!skill) {
     return { success: false, error: "Skill not found" };
   }
@@ -262,6 +276,7 @@ export async function getUserTools(userId: string, organizationId: string): Prom
   const tools: any[] = [];
   const skillMap: Record<string, string> = {}; // toolName -> skillId
 
+  // Load built-in skill tools
   for (const userSkill of userSkills) {
     const skill = getSkill(userSkill.skillId);
     if (!skill) continue;
@@ -281,22 +296,69 @@ export async function getUserTools(userId: string, organizationId: string): Prom
     }
   }
 
+  // Load custom skill tools
+  try {
+    const customSkills = await loadCustomSkillsForUser(userId, organizationId);
+
+    // Only include custom skills the user has enabled
+    const enabledCustomIds = new Set(
+      userSkills
+        .filter((us) => us.skillId.startsWith("custom_"))
+        .map((us) => us.skillId)
+    );
+
+    for (const skill of customSkills) {
+      // Include if: user enabled it, or it's the user's own skill (auto-enabled)
+      const isOwn = skill.author === userId;
+      if (!isOwn && !enabledCustomIds.has(skill.id)) continue;
+
+      for (const tool of skill.tools) {
+        const toolKey = `${skill.id}_${tool.name}`;
+        tools.push({
+          type: "function",
+          function: {
+            name: toolKey,
+            description: `[${skill.name}] ${tool.description}`,
+            parameters: tool.parameters,
+          },
+        });
+
+        skillMap[toolKey] = skill.id;
+      }
+    }
+  } catch (error) {
+    console.error("[Skills] Error loading custom skills:", error);
+  }
+
   return { tools, skillMap };
 }
 
 /**
  * Build system prompt additions from enabled skills
  */
-export async function getSkillSystemPrompt(userId: string): Promise<string> {
+export async function getSkillSystemPrompt(userId: string, organizationId?: string): Promise<string> {
   const userSkills = await getUserSkills(userId);
 
   const skillPrompts: string[] = [];
 
+  // Built-in skill prompts
   for (const userSkill of userSkills) {
     const skill = getSkill(userSkill.skillId);
     if (!skill?.systemPrompt) continue;
 
     skillPrompts.push(`## ${skill.name}\n${skill.systemPrompt}`);
+  }
+
+  // Custom skill prompts
+  try {
+    const customSkills = await loadCustomSkillsForUser(userId, organizationId);
+    for (const skill of customSkills) {
+      if (skill.systemPrompt) {
+        skillPrompts.push(`## ${skill.name} (Custom)\n${skill.systemPrompt}`);
+      }
+    }
+  } catch (error) {
+    console.error("[Skills] Error loading custom skill prompts:", error);
   }
 
   if (skillPrompts.length === 0) {

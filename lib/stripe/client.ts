@@ -81,6 +81,7 @@ export const PLAN_LIMITS = {
     storageGB: 1,
     teamMembers: 1,
     automations: 5,
+    customSkills: 1,
     features: {
       geminiUnlimited: true,
       gpt4oMini: false,
@@ -105,6 +106,7 @@ export const PLAN_LIMITS = {
     storageGB: 10,
     teamMembers: 1,
     automations: -1, // Unlimited
+    customSkills: 5,
     features: {
       geminiUnlimited: true,
       gpt4oMini: true,
@@ -129,6 +131,7 @@ export const PLAN_LIMITS = {
     storageGB: 50,
     teamMembers: 1,
     automations: -1,
+    customSkills: 25,
     features: {
       geminiUnlimited: true,
       gpt4oMini: true,
@@ -153,6 +156,7 @@ export const PLAN_LIMITS = {
     storageGB: -1, // Included per member
     teamMembers: 10,
     automations: -1,
+    customSkills: -1, // Unlimited
     features: {
       geminiUnlimited: true,
       gpt4oMini: true,
@@ -177,6 +181,7 @@ export const PLAN_LIMITS = {
     storageGB: -1, // Unlimited
     teamMembers: 50,
     automations: -1,
+    customSkills: -1,
     features: {
       geminiUnlimited: true,
       gpt4oMini: true,
@@ -202,6 +207,7 @@ export const PLAN_LIMITS = {
     storageGB: -1,
     teamMembers: 250,
     automations: -1,
+    customSkills: -1,
     features: {
       geminiUnlimited: true,
       gpt4oMini: true,
@@ -229,6 +235,7 @@ export const PLAN_LIMITS = {
     storageGB: -1,
     teamMembers: -1, // Unlimited
     automations: -1,
+    customSkills: -1,
     features: {
       geminiUnlimited: true,
       gpt4oMini: true,
