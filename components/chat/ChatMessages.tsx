@@ -20,6 +20,7 @@ import {
   PlanDelegationCard,
   parsePlanDelegation,
 } from "./PlanDelegationCard";
+import { ToolCallIndicator } from "./ToolCallIndicator";
 
 interface ChatMessagesProps {
   messages: Message[];
@@ -89,6 +90,9 @@ export function ChatMessages({
                       : "bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-slate-100"
                   )}
                 >
+                  {message.toolActivity && message.toolActivity.length > 0 && (
+                    <ToolCallIndicator activities={message.toolActivity} />
+                  )}
                   {message.role === "assistant" ? (
                     <>
                       <MarkdownMessage content={message.content} />

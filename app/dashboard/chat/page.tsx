@@ -11,6 +11,7 @@ import {
   Advisor,
   Message,
   FileAttachment,
+  ToolActivity,
   DEFAULT_ADVISOR,
 } from "@/components/chat";
 import { ChatInput, MentionedContact } from "./components/ChatInput";
@@ -252,6 +253,53 @@ export default function ChatPage() {
               });
             }
 
+            if (data.tool_status) {
+              const match = data.tool_status.match(/^Calling (\S+)/);
+              if (match) {
+                const toolName = match[1].replace(/\.{3}$/, "");
+                setMessages((prev) => {
+                  const newMessages = [...prev];
+                  const last = newMessages[newMessages.length - 1];
+                  const existing = last.toolActivity || [];
+                  newMessages[newMessages.length - 1] = {
+                    ...last,
+                    toolActivity: [
+                      ...existing,
+                      { name: toolName, status: "running" },
+                    ],
+                  };
+                  return newMessages;
+                });
+              }
+            }
+
+            if (data.tool_result) {
+              const { name, result } = data.tool_result as {
+                name: string;
+                result?: string;
+              };
+              setMessages((prev) => {
+                const newMessages = [...prev];
+                const last = newMessages[newMessages.length - 1];
+                const activities = (last.toolActivity || []).map((a) =>
+                  a.name === name && a.status === "running"
+                    ? {
+                        ...a,
+                        status: (result?.startsWith("Error:")
+                          ? "error"
+                          : "complete") as ToolActivity["status"],
+                        result,
+                      }
+                    : a
+                );
+                newMessages[newMessages.length - 1] = {
+                  ...last,
+                  toolActivity: activities,
+                };
+                return newMessages;
+              });
+            }
+
             if (data.content) {
               assistantMessage += data.content;
               setMessages((prev) => {
@@ -260,6 +308,7 @@ export default function ChatPage() {
                   role: "assistant",
                   content: assistantMessage,
                   id: newMessages[newMessages.length - 1].id,
+                  toolActivity: newMessages[newMessages.length - 1].toolActivity,
                 };
                 return newMessages;
               });

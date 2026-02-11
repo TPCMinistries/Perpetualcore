@@ -1,11 +1,18 @@
 // Chat types for the redesigned AI hub
 
+export interface ToolActivity {
+  name: string;
+  status: "running" | "complete" | "error";
+  result?: string;
+}
+
 export interface Message {
   role: "user" | "assistant";
   content: string;
   attachments?: FileAttachment[];
   id?: string;
   feedback?: "helpful" | "not_helpful" | null;
+  toolActivity?: ToolActivity[];
 }
 
 export interface FileAttachment {
