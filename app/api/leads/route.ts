@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { NextRequest } from "next/server";
+import { gateFeature } from "@/lib/features/gate";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -25,6 +26,22 @@ export async function GET(req: NextRequest) {
 
     if (!user) {
       return Response.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    // Feature gate: CRM pipeline
+    const { data: leadProfile } = await supabase
+      .from("profiles")
+      .select("organization_id")
+      .eq("id", user.id)
+      .single();
+    if (leadProfile?.organization_id) {
+      const gate = await gateFeature("crm_pipeline", leadProfile.organization_id);
+      if (!gate.allowed) {
+        return Response.json(
+          { error: gate.reason, code: "FEATURE_GATED", upgrade: gate.upgrade },
+          { status: 403 }
+        );
+      }
     }
 
     const { searchParams } = new URL(req.url);

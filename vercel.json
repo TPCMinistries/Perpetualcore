@@ -50,6 +50,10 @@
     {
       "path": "/api/cron/sweep-plans",
       "schedule": "*/5 * * * *"
+    },
+    {
+      "path": "/api/cron/refresh-tokens",
+      "schedule": "0 */2 * * *"
     }
   ]
 }

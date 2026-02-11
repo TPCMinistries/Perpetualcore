@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { sendTenantEmail } from "@/lib/email/tenant-email-service";
+import { gateFeature } from "@/lib/features/gate";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -31,6 +32,17 @@ export async function POST(
       .select("organization_id, full_name")
       .eq("id", user.id)
       .single();
+
+    // Feature gate: email integration
+    if (profile?.organization_id) {
+      const gate = await gateFeature("email_integration", profile.organization_id);
+      if (!gate.allowed) {
+        return NextResponse.json(
+          { error: gate.reason, code: "FEATURE_GATED", upgrade: gate.upgrade },
+          { status: 403 }
+        );
+      }
+    }
 
     // Get the email
     const { data: email, error: fetchError } = await supabase

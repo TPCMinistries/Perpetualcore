@@ -1,6 +1,7 @@
 import { processAndStoreDocument } from "@/lib/documents/processor";
 import { createClient, createAdminClient } from "@/lib/supabase/server";
 import { NextRequest } from "next/server";
+import { gateFeature } from "@/lib/features/gate";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -23,6 +24,17 @@ export async function POST(req: NextRequest) {
       .single();
 
     const organizationId = profile?.organization_id;
+
+    // Feature gate: document upload/processing
+    if (organizationId) {
+      const gate = await gateFeature("document_upload", organizationId);
+      if (!gate.allowed) {
+        return Response.json(
+          { success: false, error: gate.reason, code: "FEATURE_GATED", upgrade: gate.upgrade },
+          { status: 403 }
+        );
+      }
+    }
 
     const body = await req.json();
     const { documentId, reprocessAll } = body;

@@ -173,6 +173,26 @@ export const FEATURE_MATRIX: Record<string, FeatureLimit> = {
   },
 
   // ========================================
+  // CRM & SALES
+  // ========================================
+  'crm_pipeline': {
+    free: false,
+    starter: true,
+    pro: true,
+    team: true,
+    business: true,
+    enterprise: true,
+  },
+  'outreach_sequences': {
+    free: false,
+    starter: false,
+    pro: true,
+    team: true,
+    business: true,
+    enterprise: true,
+  },
+
+  // ========================================
   // WORKFLOWS & AUTOMATION
   // ========================================
   'workflows': {
@@ -365,6 +385,11 @@ export const FEATURE_CATEGORIES = {
     name: 'Storage & Documents',
     description: 'Document management and storage',
     features: ['document_storage_gb', 'document_upload'],
+  },
+  crm: {
+    name: 'CRM & Sales',
+    description: 'Lead pipeline and outreach automation',
+    features: ['crm_pipeline', 'outreach_sequences'],
   },
   automation: {
     name: 'Automation',

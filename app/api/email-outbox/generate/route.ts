@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { gateFeature } from "@/lib/features/gate";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -8,7 +9,7 @@ const N8N_WEBHOOK_URL = "https://upliftcommunities.app.n8n.cloud/webhook/draft-e
 
 /**
  * POST /api/email-outbox/generate
- * Trigger n8n workflow to generate an AI email draft
+ * Trigger workflow to generate an AI email draft
  */
 export async function POST(request: NextRequest) {
   try {
@@ -20,6 +21,22 @@ export async function POST(request: NextRequest) {
 
     if (userError || !user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    // Feature gate: email integration
+    const { data: genProfile } = await supabase
+      .from("profiles")
+      .select("organization_id")
+      .eq("id", user.id)
+      .single();
+    if (genProfile?.organization_id) {
+      const gate = await gateFeature("email_integration", genProfile.organization_id);
+      if (!gate.allowed) {
+        return NextResponse.json(
+          { error: gate.reason, code: "FEATURE_GATED", upgrade: gate.upgrade },
+          { status: 403 }
+        );
+      }
     }
 
     const body = await request.json();
