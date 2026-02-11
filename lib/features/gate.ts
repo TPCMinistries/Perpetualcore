@@ -211,7 +211,6 @@ function getRequiredPlanForFeature(featureSlug: string): string {
     'custom_training': 'business',
 
     // Integrations
-    'n8n_integration': 'pro',
     'custom_bots': 'pro',
     'api_access': 'pro',
     'webhooks': 'pro',

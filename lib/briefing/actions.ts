@@ -2,11 +2,7 @@
 
 import { createClient } from "@/lib/supabase/server";
 import { BriefingData } from "@/components/briefing/DailyBriefing";
-import { isN8nConfigured } from "@/lib/n8n";
 import { generateProactiveInsights, ProactiveInsight } from "@/lib/ai/proactive-insights";
-
-const N8N_API_URL = process.env.N8N_API_URL;
-const N8N_API_KEY = process.env.N8N_API_KEY;
 
 /**
  * Fetches all data needed for the daily briefing
@@ -88,32 +84,6 @@ async function getOvernightSummary(supabase: any, userId: string, since: Date) {
   // Get automation stats
   let completedAutomations = automations.data?.filter((a: any) => a.status === "completed").length || 0;
   let failedAutomations = automations.data?.filter((a: any) => a.status === "failed").length || 0;
-
-  // Add n8n execution stats if configured
-  if (isN8nConfigured() && N8N_API_URL && N8N_API_KEY) {
-    try {
-      const execResponse = await fetch(`${N8N_API_URL}/executions?limit=50`, {
-        headers: {
-          "X-N8N-API-KEY": N8N_API_KEY,
-          "Accept": "application/json",
-        },
-      });
-
-      if (execResponse.ok) {
-        const execData = await execResponse.json();
-        const n8nExecutions = (execData.data || []).filter((exec: any) => {
-          // Only count executions since last login
-          const execTime = new Date(exec.startedAt).getTime();
-          return execTime >= since.getTime();
-        });
-
-        completedAutomations += n8nExecutions.filter((e: any) => e.finished && e.status === "success").length;
-        failedAutomations += n8nExecutions.filter((e: any) => e.finished && e.status === "error").length;
-      }
-    } catch (error) {
-      console.error("Failed to fetch n8n stats for overnight summary:", error);
-    }
-  }
 
   // Generate highlights
   const highlights: string[] = [];
@@ -244,69 +214,14 @@ async function getAutomationResults(supabase: any, userId: string) {
     summary: e.summary,
   }));
 
-  // Fetch from live n8n if configured
-  let n8nResults: any[] = [];
-  if (isN8nConfigured() && N8N_API_URL && N8N_API_KEY) {
-    try {
-      // Fetch recent n8n executions
-      const execResponse = await fetch(`${N8N_API_URL}/executions?limit=10`, {
-        headers: {
-          "X-N8N-API-KEY": N8N_API_KEY,
-          "Accept": "application/json",
-        },
-      });
-
-      if (execResponse.ok) {
-        const execData = await execResponse.json();
-        const n8nExecutions = execData.data || [];
-
-        // Fetch workflow names
-        let workflowNames: Record<string, string> = {};
-        try {
-          const wfResponse = await fetch(`${N8N_API_URL}/workflows`, {
-            headers: {
-              "X-N8N-API-KEY": N8N_API_KEY,
-              "Accept": "application/json",
-            },
-          });
-          if (wfResponse.ok) {
-            const wfData = await wfResponse.json();
-            workflowNames = (wfData.data || []).reduce(
-              (acc: Record<string, string>, wf: any) => {
-                acc[wf.id] = wf.name;
-                return acc;
-              },
-              {}
-            );
-          }
-        } catch {}
-
-        n8nResults = n8nExecutions.map((exec: any) => ({
-          id: `n8n-${exec.id}`,
-          name: workflowNames[exec.workflowId] || `n8n Workflow ${exec.workflowId}`,
-          type: "n8n" as const,
-          status: exec.finished
-            ? exec.status === "success" ? "success" : "failed"
-            : "running",
-          completedAt: exec.stoppedAt,
-          summary: exec.status === "error" && exec.data?.resultData?.error
-            ? exec.data.resultData.error.message
-            : undefined,
-        }));
-      }
-    } catch (error) {
-      console.error("Failed to fetch n8n executions for briefing:", error);
-    }
-  }
-
-  // Combine and sort by completion time
-  const allResults = [...dbResults, ...n8nResults].sort((a, b) => {
+  // Sort by completion time
+  dbResults.sort((a: any, b: any) => {
     const aTime = a.completedAt ? new Date(a.completedAt).getTime() : 0;
     const bTime = b.completedAt ? new Date(b.completedAt).getTime() : 0;
     return bTime - aTime;
   });
 
-  return allResults.slice(0, 10);
+  return dbResults.slice(0, 10);
 }
 
 async function getUpcomingMeetings(supabase: any, userId: string) {

@@ -59,14 +59,6 @@ export const FEATURE_MATRIX: Record<string, FeatureLimit> = {
   // ========================================
   // INTEGRATIONS
   // ========================================
-  'n8n_integration': {
-    free: false,
-    starter: false,
-    pro: true,
-    team: true,
-    business: true,
-    enterprise: true,
-  },
   'custom_bots': {
     free: false,
     starter: false,
@@ -362,7 +354,7 @@ export const FEATURE_CATEGORIES = {
   integrations: {
     name: 'Integrations',
     description: 'Connect with external tools and services',
-    features: ['n8n_integration', 'custom_bots', 'api_access', 'webhooks', 'email_integration', 'calendar_integration', 'whatsapp', 'slack_integration'],
+    features: ['custom_bots', 'api_access', 'webhooks', 'email_integration', 'calendar_integration', 'whatsapp', 'slack_integration'],
   },
   team: {
     name: 'Team & Security',
