@@ -7,6 +7,8 @@ import { calculateCost } from "@/lib/ai/cost-calculator";
 import { searchDocuments, buildRAGContext, shouldUseRAG } from "@/lib/documents/rag";
 import { webhookEvents } from "@/lib/webhooks";
 import { AIModel } from "@/types";
+import { checkAIUsage, trackAIUsageAfterResponse } from "@/lib/billing/usage-guard";
+import { trackAPICall } from "@/lib/billing/metering";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -78,6 +80,24 @@ async function handleChat(req: NextRequest, context: APIContext): Promise<Respon
     }
 
     const model = modelSelection.model as AIModel;
+
+    // Track API call for metering
+    trackAPICall(context.organizationId).catch(() => {});
+
+    // Check usage limits (model access + premium quota)
+    const usageCheck = await checkAIUsage(context.organizationId, model);
+    if (!usageCheck.allowed) {
+      return NextResponse.json(
+        {
+          error: "Usage limit reached",
+          code: usageCheck.code,
+          message: usageCheck.reason,
+          current_plan: usageCheck.currentPlan,
+          upgrade: usageCheck.upgrade,
+        },
+        { status: 429 }
+      );
+    }
 
     // Build system prompt
     let systemPrompt = `You are a helpful AI assistant. Be accurate, helpful, and concise.`;
@@ -170,6 +190,14 @@ async function handleChat(req: NextRequest, context: APIContext): Promise<Respon
               )
             );
 
+            // Track usage against plan limits
+            trackAIUsageAfterResponse(
+              context.organizationId,
+              model,
+              usage.inputTokens,
+              usage.outputTokens
+            ).catch(() => {});
+
             // Dispatch webhook
             webhookEvents.chatMessageCreated(context.organizationId, {
               conversationId: conversation_id || "api-direct",
@@ -218,6 +246,14 @@ async function handleChat(req: NextRequest, context: APIContext): Promise<Respon
 
       // Calculate cost
       const cost = calculateCost(model, usage.inputTokens, usage.outputTokens);
+
+      // Track usage against plan limits
+      trackAIUsageAfterResponse(
+        context.organizationId,
+        model,
+        usage.inputTokens,
+        usage.outputTokens
+      ).catch(() => {});
 
       // Dispatch webhook
       webhookEvents.chatMessageCreated(context.organizationId, {

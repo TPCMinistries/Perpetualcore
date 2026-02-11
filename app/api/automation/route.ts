@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { gateFeature } from "@/lib/features/gate";
 
 export async function GET(request: NextRequest) {
   try {
@@ -8,6 +9,22 @@ export async function GET(request: NextRequest) {
 
     if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    // Feature gate: automation/workflows
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("organization_id")
+      .eq("id", user.id)
+      .single();
+    if (profile?.organization_id) {
+      const gate = await gateFeature("workflows", profile.organization_id);
+      if (!gate.allowed) {
+        return NextResponse.json(
+          { error: gate.reason, code: "FEATURE_GATED", upgrade: gate.upgrade },
+          { status: 403 }
+        );
+      }
     }
 
     // Fetch automations from multiple sources

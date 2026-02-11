@@ -1,4 +1,4 @@
-import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/server";
 import { stripe } from "@/lib/stripe/client";
 
 export type MeterType = 'ai_tokens' | 'api_calls' | 'storage_gb' | 'premium_models' | 'agents';
@@ -34,7 +34,7 @@ export async function getOrCreateMeter(
   organizationId: string,
   meterType: MeterType
 ): Promise<UsageMeter | null> {
-  const supabase = await createClient();
+  const supabase = createAdminClient();
 
   const { data, error } = await supabase.rpc('get_or_create_usage_meter', {
     p_org_id: organizationId,
@@ -57,7 +57,7 @@ export async function incrementMeter(
   meterType: MeterType,
   amount: number
 ): Promise<MeterUsageResult | null> {
-  const supabase = await createClient();
+  const supabase = createAdminClient();
 
   const { data, error } = await supabase.rpc('increment_usage_meter', {
     p_org_id: organizationId,
@@ -90,7 +90,7 @@ export async function incrementMeter(
 export async function getOrganizationMeters(
   organizationId: string
 ): Promise<UsageMeter[]> {
-  const supabase = await createClient();
+  const supabase = createAdminClient();
 
   const periodStart = new Date();
   periodStart.setDate(1);
@@ -151,7 +151,7 @@ export async function syncUsageToStripe(organizationId: string): Promise<{
   metersSynced: number;
   errors: string[];
 }> {
-  const supabase = await createClient();
+  const supabase = createAdminClient();
   const errors: string[] = [];
   let metersSynced = 0;
 

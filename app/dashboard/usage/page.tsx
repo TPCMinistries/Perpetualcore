@@ -67,70 +67,71 @@ export default function UsageAnalyticsPage() {
 
   async function loadUsageData() {
     try {
+      // Fetch from billing APIs for accurate plan-aware data
+      const [usageRes, limitsRes] = await Promise.all([
+        fetch("/api/stripe/usage").then(r => r.ok ? r.json() : null).catch(() => null),
+        fetch("/api/stripe/limits").then(r => r.ok ? r.json() : null).catch(() => null),
+      ]);
+
+      // Also fetch document storage from Supabase directly for real-time accuracy
       const supabase = createClient();
       const { data: { user } } = await supabase.auth.getUser();
 
-      if (!user) return;
+      let docsCount = 0;
+      let storageBytes = 0;
+      let totalCost = 0;
 
-      // Fetch usage statistics from messages table
-      // Count total messages as AI interactions
-      const { data: messagesData, error: messagesError } = await supabase
-        .from("messages")
-        .select("id, cost_usd, tokens", { count: "exact" })
-        .eq("user_id", user.id);
+      if (user) {
+        const { data: docs } = await supabase
+          .from("documents")
+          .select("file_size, cost_usd:messages(cost_usd)", { count: "exact" })
+          .eq("user_id", user.id);
 
-      // Count documents
-      const { count: docsCount } = await supabase
-        .from("documents")
-        .select("*", { count: "exact", head: true })
-        .eq("user_id", user.id);
+        docsCount = docs?.length || 0;
+        storageBytes = docs?.reduce((sum: number, d: any) => sum + (d.file_size || 0), 0) || 0;
 
-      // Calculate totals from actual data
-      const totalTokens = messagesData?.reduce((sum, msg) => sum + (msg.tokens || 0), 0) || 0;
-      const totalCost = messagesData?.reduce((sum, msg) => sum + (parseFloat(msg.cost_usd) || 0), 0) || 0;
-      const aiInteractions = messagesData?.length || 0;
+        // Get actual cost from messages
+        const { data: costData } = await supabase
+          .from("messages")
+          .select("cost_usd")
+          .eq("user_id", user.id);
+        totalCost = costData?.reduce((sum: number, m: any) => sum + (parseFloat(m.cost_usd) || 0), 0) || 0;
+      }
+
+      const usage = usageRes || {};
+      const planLimits = limitsRes || {};
+      const storageGB = storageBytes / (1024 * 1024 * 1024);
 
       setStats({
         period: timeRange,
-        api_calls: aiInteractions,
-        tokens_used: totalTokens,
-        storage_used: 0, // GB - would need to calculate from document sizes
-        ai_interactions: aiInteractions,
-        documents_processed: docsCount || 0,
-        workflows_executed: 0, // Would need workflows table
+        api_calls: usage.ai_messages_count || 0,
+        tokens_used: usage.ai_tokens_used || 0,
+        storage_used: storageGB,
+        ai_interactions: usage.ai_messages_count || 0,
+        documents_processed: usage.documents_stored || docsCount,
+        workflows_executed: usage.workflows_executed || 0,
         total_cost: totalCost,
       });
 
-      // Calculate limits based on actual usage
+      // Build limits from actual plan data
+      const aiLimit = planLimits.aiMessages ?? -1;
+      const premiumLimit = planLimits.premiumMessages ?? 0;
+      const storageLimit = planLimits.storageGB ?? 1;
+      const docsLimit = planLimits.documents ?? 5;
+
+      const buildLimit = (name: string, current: number, limit: number, unit: string) => ({
+        name,
+        current,
+        limit: limit === -1 ? current + 1000 : limit, // Show "unlimited" as plenty of headroom
+        unit: limit === -1 ? `${unit} (unlimited)` : unit,
+        percentage: limit === -1 ? Math.min((current / Math.max(current + 1000, 1)) * 100, 50) : Math.min((current / Math.max(limit, 1)) * 100, 100),
+      });
+
       setLimits([
-        {
-          name: "API Calls",
-          current: aiInteractions,
-          limit: 50000,
-          unit: "calls/month",
-          percentage: (aiInteractions / 50000) * 100,
-        },
-        {
-          name: "AI Tokens",
-          current: totalTokens,
-          limit: 10000000,
-          unit: "tokens/month",
-          percentage: (totalTokens / 10000000) * 100,
-        },
-        {
-          name: "Storage",
-          current: 0,
-          limit: 100,
-          unit: "GB",
-          percentage: 0,
-        },
-        {
-          name: "Workflows",
-          current: 0,
-          limit: 1000,
-          unit: "executions/month",
-          percentage: 0,
-        },
+        buildLimit("AI Messages", usage.ai_messages_count || 0, aiLimit, "messages/month"),
+        buildLimit("Premium Messages", usage.premium_messages_count || 0, premiumLimit, "messages/month"),
+        buildLimit("Storage", parseFloat(storageGB.toFixed(2)), storageLimit, "GB"),
+        buildLimit("Documents", usage.documents_stored || docsCount, docsLimit, "documents"),
       ]);
     } catch (error) {
       console.error("Error loading usage data:", error);
@@ -436,11 +437,11 @@ export default function UsageAnalyticsPage() {
                   <Activity className="h-5 w-5 text-blue-600 dark:text-blue-400" />
                 </div>
                 <div>
-                  <p className="font-medium">API Usage</p>
-                  <p className="text-sm text-muted-foreground">12,547 calls @ $0.002/call</p>
+                  <p className="font-medium">AI Messages</p>
+                  <p className="text-sm text-muted-foreground">{formatNumber(stats?.ai_interactions || 0)} interactions</p>
                 </div>
               </div>
-              <p className="text-lg font-semibold">$25.09</p>
+              <p className="text-lg font-semibold">{formatNumber(stats?.ai_interactions || 0)}</p>
             </div>
 
             <div className="flex items-center justify-between p-4 rounded-lg bg-muted/50">
@@ -450,10 +451,10 @@ export default function UsageAnalyticsPage() {
                 </div>
                 <div>
                   <p className="font-medium">AI Tokens</p>
-                  <p className="text-sm text-muted-foreground">2.46M tokens @ $0.03/1K tokens</p>
+                  <p className="text-sm text-muted-foreground">{formatNumber(stats?.tokens_used || 0)} tokens consumed</p>
                 </div>
               </div>
-              <p className="text-lg font-semibold">$73.70</p>
+              <p className="text-lg font-semibold">{formatNumber(stats?.tokens_used || 0)}</p>
             </div>
 
             <div className="flex items-center justify-between p-4 rounded-lg bg-muted/50">
@@ -463,10 +464,10 @@ export default function UsageAnalyticsPage() {
                 </div>
                 <div>
                   <p className="font-medium">Storage</p>
-                  <p className="text-sm text-muted-foreground">4.2 GB @ $0.15/GB</p>
+                  <p className="text-sm text-muted-foreground">{stats?.storage_used.toFixed(2)} GB used</p>
                 </div>
               </div>
-              <p className="text-lg font-semibold">$0.63</p>
+              <p className="text-lg font-semibold">{stats?.storage_used.toFixed(2)} GB</p>
             </div>
 
             <div className="flex items-center justify-between p-4 rounded-lg bg-muted/50">
@@ -475,16 +476,16 @@ export default function UsageAnalyticsPage() {
                   <FileText className="h-5 w-5 text-green-600 dark:text-green-400" />
                 </div>
                 <div>
-                  <p className="font-medium">Document Processing</p>
-                  <p className="text-sm text-muted-foreground">456 documents @ $0.05/doc</p>
+                  <p className="font-medium">Documents</p>
+                  <p className="text-sm text-muted-foreground">{stats?.documents_processed || 0} documents processed</p>
                 </div>
               </div>
-              <p className="text-lg font-semibold">$22.80</p>
+              <p className="text-lg font-semibold">{stats?.documents_processed || 0}</p>
             </div>
 
             <div className="flex items-center justify-between p-4 rounded-lg bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
               <div>
-                <p className="font-semibold text-lg text-slate-900 dark:text-slate-100">Total Cost</p>
+                <p className="font-semibold text-lg text-slate-900 dark:text-slate-100">Estimated Cost</p>
                 <p className="text-sm text-slate-600 dark:text-slate-400">for {timeRange}</p>
               </div>
               <p className="text-2xl font-bold text-slate-900 dark:text-slate-100">

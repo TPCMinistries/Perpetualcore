@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { syncGmailMessages } from "@/lib/email/gmail";
+import { gateFeature } from "@/lib/features/gate";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -28,6 +29,17 @@ export async function POST(req: NextRequest) {
 
     if (!profile) {
       return NextResponse.json({ error: "Profile not found" }, { status: 400 });
+    }
+
+    // Feature gate: email integration
+    if (profile.organization_id) {
+      const gate = await gateFeature("email_integration", profile.organization_id);
+      if (!gate.allowed) {
+        return NextResponse.json(
+          { error: gate.reason, code: "FEATURE_GATED", upgrade: gate.upgrade },
+          { status: 403 }
+        );
+      }
     }
 
     const body = await req.json();

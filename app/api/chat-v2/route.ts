@@ -1,6 +1,8 @@
 import { NextRequest } from "next/server";
-import { createClient } from "@/lib/supabase/server";
+import { createClient, createAdminClient } from "@/lib/supabase/server";
 import OpenAI from "openai";
+import { checkAIUsage, trackAIUsageAfterResponse } from "@/lib/billing/usage-guard";
+import { rateLimiters, checkRateLimit } from "@/lib/rate-limit";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -16,26 +18,46 @@ interface Message {
 
 export async function POST(req: NextRequest) {
   try {
-    console.log("[Chat V2] Request received");
+    // Rate limiting
+    const rateLimitResponse = await checkRateLimit(req, rateLimiters.chat);
+    if (rateLimitResponse) return rateLimitResponse;
 
     // Auth check
     const supabase = await createClient();
     const { data: { user }, error: authError } = await supabase.auth.getUser();
 
     if (authError || !user) {
-      console.error("[Chat V2] Auth error:", authError);
       return new Response(
         JSON.stringify({ error: "Unauthorized" }),
         { status: 401, headers: { "Content-Type": "application/json" } }
       );
     }
 
-    console.log("[Chat V2] User authenticated:", user.id);
+    // Get org for usage check
+    const adminSupabase = createAdminClient();
+    const { data: profile } = await adminSupabase
+      .from("profiles")
+      .select("organization_id")
+      .eq("id", user.id)
+      .single();
+    const organizationId = profile?.organization_id || user.id;
+
+    // Check usage limits (gpt-4o-mini is the model for chat-v2)
+    const usageCheck = await checkAIUsage(organizationId, "gpt-4o-mini");
+    if (!usageCheck.allowed) {
+      return new Response(
+        JSON.stringify({
+          error: "Usage limit reached",
+          code: usageCheck.code,
+          message: usageCheck.reason,
+          upgrade: usageCheck.upgrade,
+        }),
+        { status: 429, headers: { "Content-Type": "application/json" } }
+      );
+    }
 
     const body = await req.json();
     const { messages, conversationId } = body;
-
-    console.log("[Chat V2] Processing", messages?.length, "messages");
 
     // Create or get conversation - PERSONAL CHAT ONLY (no org checks)
     let currentConversationId = conversationId;
@@ -104,6 +126,14 @@ export async function POST(req: NextRequest) {
             role: "assistant",
             content: fullResponse,
           });
+
+          // Track usage (estimate tokens from response length)
+          trackAIUsageAfterResponse(
+            organizationId,
+            "gpt-4o-mini",
+            messages.reduce((sum: number, m: any) => sum + (m.content?.length || 0), 0) / 4,
+            fullResponse.length / 4
+          ).catch(() => {});
 
           controller.enqueue(encoder.encode("data: [DONE]\n\n"));
           controller.close();

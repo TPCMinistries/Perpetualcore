@@ -9,7 +9,7 @@ import { calculateCost } from "@/lib/ai/cost-calculator";
 import { AVAILABLE_TOOLS, executeToolCall, getAvailableToolsForUser } from "@/lib/ai/tools/registry";
 import { loadUserPreferences, applyPreferencesToPrompt } from "@/lib/intelligence/preference-loader";
 import { getIntelligenceSummary } from "@/lib/intelligence";
-import { rateLimiters, checkRateLimit } from "@/lib/rate-limit";
+import { rateLimiters, checkRateLimit, planRateLimiters } from "@/lib/rate-limit";
 import { checkAIUsage, trackAIUsageAfterResponse } from "@/lib/billing/usage-guard";
 import { loadTeamContext, loadUserTeamContext, buildTeamSystemPrompt, LoadedTeamContext } from "@/lib/intelligence/team-context";
 import { buildMemoryContext, extractMemoriesFromConversation } from "@/lib/ai/memory";
@@ -218,7 +218,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Rate limiting - 30 requests per minute for chat API
+    // Basic rate limiting first (hard ceiling for all users)
     const rateLimitResponse = await checkRateLimit(req, rateLimiters.chat);
     if (rateLimitResponse) return rateLimitResponse;
 

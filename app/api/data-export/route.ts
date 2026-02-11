@@ -4,6 +4,7 @@ import { rateLimiters, checkRateLimit } from "@/lib/rate-limit";
 import {
   exportAsJSON,
 } from "@/lib/import-export/export";
+import { gateFeature } from "@/lib/features/gate";
 
 /**
  * POST /api/data-export
@@ -34,6 +35,15 @@ export async function POST(req: NextRequest) {
 
     if (!profile) {
       return NextResponse.json({ error: "Profile not found" }, { status: 400 });
+    }
+
+    // Feature gate: API access (data export is a premium feature)
+    const gate = await gateFeature("api_access", profile.organization_id);
+    if (!gate.allowed) {
+      return NextResponse.json(
+        { error: gate.reason, code: "FEATURE_GATED", upgrade: gate.upgrade },
+        { status: 403 }
+      );
     }
 
     const body = await req.json();

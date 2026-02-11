@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { Resend } from "resend";
+import { gateFeature } from "@/lib/features/gate";
 
 export const runtime = "nodejs";
 
@@ -25,6 +26,17 @@ export async function POST(request: Request) {
         { error: "Profile not found" },
         { status: 404 }
       );
+    }
+
+    // Feature gate: email integration
+    if (profile.organization_id) {
+      const gate = await gateFeature("email_integration", profile.organization_id);
+      if (!gate.allowed) {
+        return NextResponse.json(
+          { error: gate.reason, code: "FEATURE_GATED", upgrade: gate.upgrade },
+          { status: 403 }
+        );
+      }
     }
 
     // Parse FormData (supports attachments)

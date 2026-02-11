@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { sendWhatsAppMessage } from "@/lib/whatsapp/twilio";
+import { gateFeature } from "@/lib/features/gate";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -18,6 +19,22 @@ export async function GET(req: NextRequest) {
 
     if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    // Feature gate: WhatsApp integration
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("organization_id")
+      .eq("id", user.id)
+      .single();
+    if (profile?.organization_id) {
+      const gate = await gateFeature("whatsapp", profile.organization_id);
+      if (!gate.allowed) {
+        return NextResponse.json(
+          { error: gate.reason, code: "FEATURE_GATED", upgrade: gate.upgrade },
+          { status: 403 }
+        );
+      }
     }
 
     const searchParams = req.nextUrl.searchParams;
