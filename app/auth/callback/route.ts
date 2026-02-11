@@ -45,7 +45,7 @@ export async function GET(request: NextRequest) {
 
   // Handle OAuth code exchange (from Supabase's built-in OAuth providers)
   if (code) {
-    const { error: exchangeError } =
+    const { error: exchangeError, data: sessionData } =
       await supabase.auth.exchangeCodeForSession(code);
 
     if (exchangeError) {
@@ -54,6 +54,24 @@ export async function GET(request: NextRequest) {
       redirectTo.searchParams.set("error", "Authentication failed");
       redirectTo.search = redirectTo.searchParams.toString();
       return NextResponse.redirect(redirectTo);
+    }
+
+    // Send welcome email for new OAuth users (created within last 60s)
+    const user = sessionData?.user;
+    if (user) {
+      const createdAt = new Date(user.created_at).getTime();
+      const isNewUser = Date.now() - createdAt < 60_000;
+      if (isNewUser) {
+        const appUrl = process.env.NEXT_PUBLIC_APP_URL || request.nextUrl.origin;
+        fetch(`${appUrl}/api/email/welcome`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            userName: user.user_metadata?.full_name || user.email?.split("@")[0] || "there",
+            userEmail: user.email,
+          }),
+        }).catch((err) => console.error("[AuthCallback] Welcome email failed:", err));
+      }
     }
 
     redirectTo.pathname = next;
@@ -89,6 +107,22 @@ export async function GET(request: NextRequest) {
       redirectTo.pathname = "/auth/update-password";
       redirectTo.search = "";
       return NextResponse.redirect(redirectTo);
+    }
+
+    // Send welcome email for new signups
+    if (type === "signup") {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user?.email) {
+        const appUrl = process.env.NEXT_PUBLIC_APP_URL || request.nextUrl.origin;
+        fetch(`${appUrl}/api/email/welcome`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            userName: user.user_metadata?.full_name || user.email.split("@")[0] || "there",
+            userEmail: user.email,
+          }),
+        }).catch((err) => console.error("[AuthCallback] Welcome email failed:", err));
+      }
     }
 
     redirectTo.pathname = next;

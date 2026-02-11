@@ -1144,3 +1144,60 @@ export async function sendPaymentFailedEmail(data: {
 
   return sendEmail(data.email, "Action Required: Payment Failed", html);
 }
+
+/**
+ * Send subscription canceled email
+ */
+export async function sendSubscriptionCanceledEmail(data: {
+  email: string;
+  name: string;
+  planName: string;
+}): Promise<{ success: boolean; error?: string }> {
+  const resubscribeUrl = `${process.env.NEXT_PUBLIC_APP_URL}/dashboard/settings/billing`;
+
+  const html = `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Subscription Canceled</title>
+</head>
+<body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background-color: #f9fafb;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #f9fafb; padding: 40px 20px;">
+    <tr>
+      <td align="center">
+        <table width="600" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+          <tr>
+            <td style="background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%); padding: 40px 30px; text-align: center;">
+              <h1 style="margin: 0; color: #ffffff; font-size: 28px;">Subscription Canceled</h1>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding: 40px 30px;">
+              <p style="margin: 0 0 20px; color: #4b5563; font-size: 16px; line-height: 1.6;">
+                Hi ${data.name},
+              </p>
+              <p style="margin: 0 0 20px; color: #4b5563; font-size: 16px; line-height: 1.6;">
+                Your <strong>${data.planName}</strong> subscription has been canceled. You've been downgraded to the Free plan.
+              </p>
+              <p style="margin: 0 0 20px; color: #4b5563; font-size: 16px; line-height: 1.6;">
+                If this was a mistake or you'd like to resubscribe, you can upgrade anytime from your billing settings.
+              </p>
+              <div style="text-align: center; margin: 30px 0;">
+                <a href="${resubscribeUrl}" style="display: inline-block; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: #ffffff; padding: 14px 32px; border-radius: 6px; text-decoration: none; font-weight: 600; font-size: 16px;">Resubscribe</a>
+              </div>
+              <p style="margin: 30px 0 0; color: #9ca3af; font-size: 14px; text-align: center;">
+                We'd love to have you back. Reply to this email if you have any questions.
+              </p>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>
+  `;
+
+  return sendEmail(data.email, "Your Perpetual Core Subscription Has Been Canceled", html);
+}

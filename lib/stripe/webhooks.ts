@@ -1,11 +1,12 @@
 import Stripe from "stripe";
 import { stripe } from "./client";
-import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/server";
 import {
   sendTrialEndingEmail,
   sendPaymentReceiptEmail,
   sendPaymentFailedEmail,
   sendMarketplacePurchaseEmail,
+  sendSubscriptionCanceledEmail,
 } from "@/lib/email";
 
 /**
@@ -86,7 +87,7 @@ export async function handleStripeWebhook(
  * Handle subscription created/updated
  */
 async function handleSubscriptionUpdate(subscription: Stripe.Subscription) {
-  const supabase = await createClient();
+  const supabase = createAdminClient();
 
   const organizationId = subscription.metadata.organizationId;
   const userId = subscription.metadata.userId;
@@ -129,7 +130,7 @@ async function handleSubscriptionUpdate(subscription: Stripe.Subscription) {
  * Handle subscription deleted
  */
 async function handleSubscriptionDeleted(subscription: Stripe.Subscription) {
-  const supabase = await createClient();
+  const supabase = createAdminClient();
 
   const organizationId = subscription.metadata.organizationId;
 
@@ -137,6 +138,13 @@ async function handleSubscriptionDeleted(subscription: Stripe.Subscription) {
     // Missing metadata - subscription wasn't created through our app
     return;
   }
+
+  // Get user details before downgrading
+  const { data: sub } = await supabase
+    .from("subscriptions")
+    .select("user_id, plan")
+    .eq("organization_id", organizationId)
+    .single();
 
   // Downgrade to free plan
   await supabase
@@ -150,7 +158,22 @@ async function handleSubscriptionDeleted(subscription: Stripe.Subscription) {
     })
     .eq("organization_id", organizationId);
 
-  // Subscription canceled, downgraded to free
+  // Send cancellation email
+  if (sub?.user_id) {
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("email, full_name")
+      .eq("id", sub.user_id)
+      .single();
+
+    if (profile?.email) {
+      await sendSubscriptionCanceledEmail({
+        email: profile.email,
+        name: profile.full_name || "there",
+        planName: sub.plan || "Pro",
+      });
+    }
+  }
 }
 
 /**
@@ -163,7 +186,7 @@ async function handleTrialWillEnd(subscription: Stripe.Subscription) {
 
   if (!userId) return;
 
-  const supabase = await createClient();
+  const supabase = createAdminClient();
 
   // Get user details
   const { data: profile } = await supabase
@@ -195,7 +218,7 @@ async function handleTrialWillEnd(subscription: Stripe.Subscription) {
  * Handle invoice created/updated
  */
 async function handleInvoiceUpdate(invoice: Stripe.Invoice) {
-  const supabase = await createClient();
+  const supabase = createAdminClient();
 
   const customerId = invoice.customer as string;
 
@@ -239,7 +262,7 @@ async function handleInvoicePaid(invoice: Stripe.Invoice) {
   await handleInvoiceUpdate(invoice);
 
   const customerId = invoice.customer as string;
-  const supabase = await createClient();
+  const supabase = createAdminClient();
 
   const { data: subscription } = await supabase
     .from("subscriptions")
@@ -276,7 +299,7 @@ async function handleInvoicePaymentFailed(invoice: Stripe.Invoice) {
   await handleInvoiceUpdate(invoice);
 
   const customerId = invoice.customer as string;
-  const supabase = await createClient();
+  const supabase = createAdminClient();
 
   const { data: subscription } = await supabase
     .from("subscriptions")
@@ -312,7 +335,7 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
 
   // Handle marketplace purchases
   if (metadata?.type === "marketplace_purchase") {
-    const supabase = await createClient();
+    const supabase = createAdminClient();
 
     const itemId = metadata.item_id;
     const buyerId = metadata.buyer_id;

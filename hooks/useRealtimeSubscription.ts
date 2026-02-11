@@ -5,7 +5,7 @@ import { createClient } from "@/lib/supabase/client";
 import type { RealtimeChannel } from "@supabase/supabase-js";
 
 interface UseRealtimeSubscriptionOptions {
-  table: "comments" | "mentions" | "activity_feed" | "realtime_presence";
+  table: "comments" | "mentions" | "activity_feed" | "realtime_presence" | "notifications";
   filter?: string;
   onInsert?: (payload: any) => void;
   onUpdate?: (payload: any) => void;
@@ -39,7 +39,7 @@ export function useRealtimeSubscription({
   enabled = true,
 }: UseRealtimeSubscriptionOptions) {
   const channelRef = useRef<RealtimeChannel | null>(null);
-  const supabase = await createClient();
+  const supabase = createClient();
 
   useEffect(() => {
     if (!enabled) return;

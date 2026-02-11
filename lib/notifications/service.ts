@@ -1,4 +1,4 @@
-import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/server";
 import { getChatCompletion } from "@/lib/ai/router";
 
 export type NotificationType =
@@ -35,7 +35,7 @@ interface CreateNotificationParams {
  * Create a notification with AI prioritization
  */
 export async function createNotification(params: CreateNotificationParams) {
-  const supabase = await createClient();
+  const supabase = createAdminClient();
 
   // Check user preferences
   const { data: prefs } = await supabase
@@ -233,14 +233,13 @@ async function createSnoozedNotification(
   params: CreateNotificationParams,
   snoozeUntil: Date
 ) {
-  const supabase = await createClient();
+  const supabase = createAdminClient();
 
   await supabase.from("notifications").insert({
     user_id: params.userId,
     organization_id: params.organizationId,
     type: params.type,
     priority: params.priority || "medium",
-    status: "snoozed",
     title: params.title,
     message: params.message,
     action_url: params.actionUrl,
@@ -261,7 +260,7 @@ async function sendEmailNotification(params: CreateNotificationParams) {
     const { sendEmail } = await import("@/lib/email");
     
     // Get user email
-    const supabase = await createClient();
+    const supabase = createAdminClient();
     const { data: profile } = await supabase
       .from("profiles")
       .select("email")
@@ -329,13 +328,13 @@ async function sendEmailNotification(params: CreateNotificationParams) {
  */
 export async function getUnreadNotifications(userId: string) {
   try {
-    const supabase = await createClient();
+    const supabase = createAdminClient();
 
     const { data, error } = await supabase
       .from("notifications")
       .select("*")
       .eq("user_id", userId)
-      .eq("status", "unread")
+      .eq("is_read", false)
       .order("created_at", { ascending: false })
       .limit(50);
 
@@ -361,13 +360,13 @@ export async function getUnreadNotifications(userId: string) {
  */
 export async function getUnreadCount(userId: string): Promise<number> {
   try {
-    const supabase = await createClient();
+    const supabase = createAdminClient();
 
     const { count, error } = await supabase
       .from("notifications")
       .select("*", { count: "exact", head: true })
       .eq("user_id", userId)
-      .eq("status", "unread");
+      .eq("is_read", false);
 
     if (error) {
       // Table doesn't exist yet - return 0 silently
@@ -389,14 +388,11 @@ export async function getUnreadCount(userId: string): Promise<number> {
  * Mark notification as read
  */
 export async function markAsRead(notificationId: string, userId: string) {
-  const supabase = await createClient();
+  const supabase = createAdminClient();
 
   const { error } = await supabase
     .from("notifications")
-    .update({
-      status: "read",
-      read_at: new Date().toISOString()
-    })
+    .update({ is_read: true })
     .eq("id", notificationId)
     .eq("user_id", userId);
 
@@ -407,16 +403,13 @@ export async function markAsRead(notificationId: string, userId: string) {
  * Mark all notifications as read
  */
 export async function markAllAsRead(userId: string) {
-  const supabase = await createClient();
+  const supabase = createAdminClient();
 
   const { count, error } = await supabase
     .from("notifications")
-    .update({
-      status: "read",
-      read_at: new Date().toISOString()
-    })
+    .update({ is_read: true })
     .eq("user_id", userId)
-    .eq("status", "unread")
+    .eq("is_read", false)
     .select("*", { count: "exact", head: true });
 
   return { success: !error, count: count || 0 };
@@ -441,14 +434,11 @@ export async function snoozeNotification(
   const minutes = durationMap[duration];
   const snoozeUntil = new Date(Date.now() + minutes * 60 * 1000);
 
-  const supabase = await createClient();
+  const supabase = createAdminClient();
 
   const { error } = await supabase
     .from("notifications")
-    .update({
-      status: "snoozed",
-      snoozed_until: snoozeUntil.toISOString()
-    })
+    .update({ snoozed_until: snoozeUntil.toISOString() })
     .eq("id", notificationId)
     .eq("user_id", userId);
 

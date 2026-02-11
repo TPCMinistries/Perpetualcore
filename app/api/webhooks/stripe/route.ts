@@ -1,6 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@/lib/supabase/server";
-import { sendMarketplacePurchaseEmail } from "@/lib/email";
+import { createAdminClient } from "@/lib/supabase/server";
+import {
+  sendMarketplacePurchaseEmail,
+  sendPaymentReceiptEmail,
+  sendPaymentFailedEmail,
+  sendSubscriptionCanceledEmail,
+} from "@/lib/email";
 import Stripe from "stripe";
 
 export const runtime = "nodejs";
@@ -75,7 +80,7 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  const supabase = await createClient();
+  const supabase = createAdminClient();
 
   // Idempotency check: Skip if we've already processed this event
   if (await isEventProcessed(supabase, event.id)) {
@@ -391,6 +396,28 @@ async function handleSubscriptionDeleted(
     throw error;
   }
 
+  // Send cancellation email
+  const customerId = subscription.customer as string;
+  try {
+    const customer = await stripe.customers.retrieve(customerId);
+    const customerEmail = (customer as Stripe.Customer).email;
+    if (customerEmail) {
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("full_name")
+        .eq("email", customerEmail)
+        .single();
+
+      await sendSubscriptionCanceledEmail({
+        email: customerEmail,
+        name: profile?.full_name || "there",
+        planName: subscription.metadata?.plan || "Pro",
+      });
+    }
+  } catch (emailErr) {
+    console.error("Failed to send canceled email:", emailErr);
+  }
+
   // If this is a marketplace subscription, mark referral as churned
   const { data: purchase } = await supabase
     .from("marketplace_purchases")
@@ -448,6 +475,27 @@ async function handleInvoicePaymentSucceeded(
     });
   }
 
+  // Send payment receipt email
+  if (subscription) {
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("email, full_name")
+      .eq("organization_id", subscription.organization_id)
+      .limit(1)
+      .single();
+
+    if (profile?.email) {
+      sendPaymentReceiptEmail({
+        email: profile.email,
+        name: profile.full_name || "there",
+        amount: invoice.amount_paid,
+        currency: invoice.currency,
+        invoiceUrl: invoice.hosted_invoice_url || undefined,
+        invoicePdf: invoice.invoice_pdf || undefined,
+      }).catch((err) => console.error("Failed to send receipt email:", err));
+    }
+  }
+
   // Check for partner referrals
   const { data: referral } = await supabase
     .from("partner_referrals")
@@ -496,12 +544,37 @@ async function handleInvoicePaymentFailed(
   }
 
   // Mark subscription as past_due
+  const { data: sub } = await supabase
+    .from("subscriptions")
+    .select("organization_id")
+    .eq("stripe_subscription_id", subscriptionId)
+    .single();
+
   await supabase
     .from("subscriptions")
     .update({
       status: "past_due",
     })
     .eq("stripe_subscription_id", subscriptionId);
+
+  // Send payment failed email
+  if (sub) {
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("email, full_name")
+      .eq("organization_id", sub.organization_id)
+      .limit(1)
+      .single();
+
+    if (profile?.email) {
+      sendPaymentFailedEmail({
+        email: profile.email,
+        name: profile.full_name || "there",
+        amount: invoice.amount_due,
+        currency: invoice.currency,
+      }).catch((err) => console.error("Failed to send payment failed email:", err));
+    }
+  }
 
   console.log("Invoice payment failed:", invoice.id);
 }
