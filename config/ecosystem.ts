@@ -9,6 +9,7 @@ export type ProjectTier = "CORE" | "MAIN" | "ANCILLARY";
 export interface VercelProjectConfig {
   projectId: string;
   teamId: string;
+  teamSlug: string;
   projectName: string; // Vercel project name for URLs
 }
 
@@ -45,7 +46,7 @@ export const ECOSYSTEM_PROJECTS: EcosystemProject[] = [
     stripeIntegrated: true,
     cronJobs: 11,
     status: "active",
-    vercel: { projectId: "prj_x43EVdICsTFvzabfeqvMbY345s6Z", teamId: "team_aqtYqMLkpMhGBxJ0oiBUxDW6", projectName: "ai-os-platform" },
+    vercel: { projectId: "prj_x43EVdICsTFvzabfeqvMbY345s6Z", teamId: "team_aqtYqMLkpMhGBxJ0oiBUxDW6", teamSlug: "gdi-727dc440", projectName: "ai-os-platform" },
   },
   {
     id: "uplift-ops",
@@ -60,7 +61,7 @@ export const ECOSYSTEM_PROJECTS: EcosystemProject[] = [
     stripeIntegrated: false,
     cronJobs: 0,
     status: "active",
-    vercel: { projectId: "prj_AFlH72y5JKqg72K8BAED9qE3KvTN", teamId: "team_QC77u3MLDVxFLID7hCuF8EOy", projectName: "uplift-ops" },
+    vercel: { projectId: "prj_AFlH72y5JKqg72K8BAED9qE3KvTN", teamId: "team_QC77u3MLDVxFLID7hCuF8EOy", teamSlug: "the-gdi", projectName: "uplift-ops" },
   },
 
   // ━━━ MAIN ━━━
@@ -78,7 +79,7 @@ export const ECOSYSTEM_PROJECTS: EcosystemProject[] = [
     stripeIntegrated: true,
     cronJobs: 3,
     status: "active",
-    vercel: { projectId: "prj_qRt3DR3ZCPmbfpepaZon4A8cI1qr", teamId: "team_QC77u3MLDVxFLID7hCuF8EOy", projectName: "iha-academy" },
+    vercel: { projectId: "prj_qRt3DR3ZCPmbfpepaZon4A8cI1qr", teamId: "team_QC77u3MLDVxFLID7hCuF8EOy", teamSlug: "the-gdi", projectName: "iha-academy" },
   },
   {
     id: "uplift-workforce",
@@ -94,7 +95,7 @@ export const ECOSYSTEM_PROJECTS: EcosystemProject[] = [
     stripeIntegrated: false,
     cronJobs: 13,
     status: "active",
-    vercel: { projectId: "prj_3jtWUChn1M8ujCjkQbVvC9Usq7ZW", teamId: "team_QC77u3MLDVxFLID7hCuF8EOy", projectName: "uplift-medical-workforce" },
+    vercel: { projectId: "prj_3jtWUChn1M8ujCjkQbVvC9Usq7ZW", teamId: "team_QC77u3MLDVxFLID7hCuF8EOy", teamSlug: "the-gdi", projectName: "uplift-medical-workforce" },
   },
   {
     id: "lorenzodc-site",
@@ -110,7 +111,7 @@ export const ECOSYSTEM_PROJECTS: EcosystemProject[] = [
     stripeIntegrated: true,
     cronJobs: 1,
     status: "active",
-    vercel: { projectId: "prj_P5tssdYVoHH5CxFZSpOJB3fEHYGY", teamId: "team_aqtYqMLkpMhGBxJ0oiBUxDW6", projectName: "lorenzodc-personal-site" },
+    vercel: { projectId: "prj_P5tssdYVoHH5CxFZSpOJB3fEHYGY", teamId: "team_aqtYqMLkpMhGBxJ0oiBUxDW6", teamSlug: "gdi-727dc440", projectName: "lorenzodc-personal-site" },
   },
   {
     id: "uplift-communities",
@@ -170,7 +171,7 @@ export const ECOSYSTEM_PROJECTS: EcosystemProject[] = [
     stripeIntegrated: true,
     cronJobs: 0,
     status: "active",
-    vercel: { projectId: "prj_ooDSG4LKzETByzRj4NNo3gCs2O4a", teamId: "team_QC77u3MLDVxFLID7hCuF8EOy", projectName: "tpc-ministries-platform" },
+    vercel: { projectId: "prj_ooDSG4LKzETByzRj4NNo3gCs2O4a", teamId: "team_QC77u3MLDVxFLID7hCuF8EOy", teamSlug: "the-gdi", projectName: "tpc-ministries-platform" },
   },
   {
     id: "streams-of-grace",
@@ -186,7 +187,7 @@ export const ECOSYSTEM_PROJECTS: EcosystemProject[] = [
     stripeIntegrated: true,
     cronJobs: 3,
     status: "active",
-    vercel: { projectId: "prj_qFxDjviDHruNrMqHwaqHXdRr8CDx", teamId: "team_aqtYqMLkpMhGBxJ0oiBUxDW6", projectName: "streams-of-grace" },
+    vercel: { projectId: "prj_qFxDjviDHruNrMqHwaqHXdRr8CDx", teamId: "team_aqtYqMLkpMhGBxJ0oiBUxDW6", teamSlug: "gdi-727dc440", projectName: "streams-of-grace" },
   },
   {
     id: "boardroom-prayer",
