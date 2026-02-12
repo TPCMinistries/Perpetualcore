@@ -82,6 +82,30 @@ interface Stats {
   published: number;
 }
 
+interface ContentVariation {
+  content: string;
+  hook?: string;
+  callToAction?: string;
+  hashtags?: string[];
+  characterCount: number;
+  platform?: string;
+}
+
+interface BrandOption {
+  id: string;
+  name: string;
+  entity_name?: string;
+}
+
+const PLATFORM_CHAR_LIMITS: Record<string, number> = {
+  twitter: 280,
+  linkedin: 3000,
+  instagram: 2200,
+  youtube: 5000,
+  website: 0,
+  email: 0,
+};
+
 const platformIcons: Record<string, any> = {
   linkedin: Linkedin,
   twitter: Twitter,
@@ -175,6 +199,11 @@ export default function ContentPage() {
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [showNewContent, setShowNewContent] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [generatedVariations, setGeneratedVariations] = useState<ContentVariation[]>([]);
+  const [selectedVariation, setSelectedVariation] = useState<number | null>(null);
+  const [brands, setBrands] = useState<BrandOption[]>([]);
+  const [generationModel, setGenerationModel] = useState<string>("");
+  const [generationCost, setGenerationCost] = useState<number>(0);
 
   const [newContent, setNewContent] = useState({
     title: "",
@@ -182,11 +211,36 @@ export default function ContentPage() {
     platform: "linkedin",
     ai_prompt: "",
     generate_now: true,
+    tone: "professional",
+    length: "medium",
+    brand_id: "",
   });
 
   useEffect(() => {
     fetchContent();
   }, [statusFilter, platformFilter]);
+
+  useEffect(() => {
+    fetchBrands();
+  }, []);
+
+  const fetchBrands = async () => {
+    try {
+      const response = await fetch("/api/entities/brands");
+      if (response.ok) {
+        const data = await response.json();
+        setBrands(
+          (data.brands || []).map((b: any) => ({
+            id: b.id,
+            name: b.name,
+            entity_name: b.entity?.name,
+          }))
+        );
+      }
+    } catch {
+      // Brands are optional, don't block on failure
+    }
+  };
 
   const fetchContent = async () => {
     try {
@@ -216,7 +270,39 @@ export default function ContentPage() {
     if (!newContent.title.trim()) return;
 
     setSubmitting(true);
+    setGeneratedVariations([]);
+    setSelectedVariation(null);
+    setGenerationModel("");
+    setGenerationCost(0);
+
     try {
+      if (newContent.ai_prompt && newContent.generate_now) {
+        // Use the new generation API directly
+        const genResponse = await fetch("/api/content/generate", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            prompt: newContent.ai_prompt,
+            content_type: newContent.content_type,
+            platform: newContent.platform,
+            brand_id: newContent.brand_id || undefined,
+            tone: newContent.tone,
+            length: newContent.length,
+          }),
+        });
+
+        if (genResponse.ok) {
+          const genData = await genResponse.json();
+          setGeneratedVariations(genData.variations || []);
+          setGenerationModel(genData.model || "");
+          setGenerationCost(genData.cost || 0);
+          setSelectedVariation(0);
+          setSubmitting(false);
+          return; // Don't close dialog — show variations
+        }
+      }
+
+      // No AI prompt or generation failed — create as draft
       const response = await fetch("/api/content", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -225,20 +311,13 @@ export default function ContentPage() {
           content_type: newContent.content_type,
           platform: newContent.platform,
           ai_prompt: newContent.ai_prompt || null,
-          generate_now: newContent.generate_now && !!newContent.ai_prompt,
+          generate_now: false,
         }),
       });
 
       if (response.ok) {
         const data = await response.json();
-        setNewContent({
-          title: "",
-          content_type: "social",
-          platform: "linkedin",
-          ai_prompt: "",
-          generate_now: true,
-        });
-        setShowNewContent(false);
+        resetCreateDialog();
         fetchContent();
         router.push(`/dashboard/content/${data.content.id}`);
       }
@@ -247,6 +326,92 @@ export default function ContentPage() {
     } finally {
       setSubmitting(false);
     }
+  };
+
+  const saveSelectedVariation = async () => {
+    if (selectedVariation === null || !generatedVariations[selectedVariation]) return;
+
+    setSubmitting(true);
+    try {
+      const variation = generatedVariations[selectedVariation];
+      const response = await fetch("/api/content", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          title: newContent.title,
+          content_type: newContent.content_type,
+          platform: newContent.platform,
+          draft_content: variation.content,
+          hook: variation.hook || null,
+          call_to_action: variation.callToAction || null,
+          hashtags: variation.hashtags || [],
+          ai_prompt: newContent.ai_prompt,
+          ai_generated: true,
+          status: "draft",
+        }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        resetCreateDialog();
+        fetchContent();
+        router.push(`/dashboard/content/${data.content.id}`);
+      }
+    } catch (error) {
+      console.error("Failed to save variation:", error);
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const regenerateContent = async () => {
+    setSubmitting(true);
+    setGeneratedVariations([]);
+    setSelectedVariation(null);
+    try {
+      const genResponse = await fetch("/api/content/generate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          prompt: newContent.ai_prompt,
+          content_type: newContent.content_type,
+          platform: newContent.platform,
+          brand_id: newContent.brand_id || undefined,
+          tone: newContent.tone,
+          length: newContent.length,
+        }),
+      });
+
+      if (genResponse.ok) {
+        const genData = await genResponse.json();
+        setGeneratedVariations(genData.variations || []);
+        setGenerationModel(genData.model || "");
+        setGenerationCost(genData.cost || 0);
+        setSelectedVariation(0);
+      }
+    } catch (error) {
+      console.error("Failed to regenerate:", error);
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const resetCreateDialog = () => {
+    setNewContent({
+      title: "",
+      content_type: "social",
+      platform: "linkedin",
+      ai_prompt: "",
+      generate_now: true,
+      tone: "professional",
+      length: "medium",
+      brand_id: "",
+    });
+    setGeneratedVariations([]);
+    setSelectedVariation(null);
+    setGenerationModel("");
+    setGenerationCost(0);
+    setShowNewContent(false);
   };
 
   const deleteContent = async (contentId: string) => {
@@ -391,129 +556,299 @@ export default function ContentPage() {
                 Calendar
               </Button>
 
-              <Dialog open={showNewContent} onOpenChange={setShowNewContent}>
+              <Dialog open={showNewContent} onOpenChange={(open) => {
+                if (!open) resetCreateDialog();
+                else setShowNewContent(true);
+              }}>
                 <DialogTrigger asChild>
                   <Button className="bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-700 hover:to-purple-700 text-white shadow-lg shadow-violet-500/25">
                     <Plus className="h-4 w-4 mr-2" />
                     Create Content
                   </Button>
                 </DialogTrigger>
-                <DialogContent className="max-w-lg">
+                <DialogContent className={cn("max-w-lg", generatedVariations.length > 0 && "max-w-3xl")}>
                   <DialogHeader>
                     <DialogTitle className="flex items-center gap-2">
                       <div className="p-2 rounded-lg bg-violet-100 dark:bg-violet-900/30">
                         <PenSquare className="h-4 w-4 text-violet-600 dark:text-violet-400" />
                       </div>
-                      Create New Content
+                      {generatedVariations.length > 0 ? "Choose a Variation" : "Create New Content"}
                     </DialogTitle>
                   </DialogHeader>
-                  <div className="space-y-4 py-4">
-                    <div className="space-y-2">
-                      <Label>Title</Label>
-                      <Input
-                        placeholder="e.g., Q4 Product Launch Announcement"
-                        value={newContent.title}
-                        onChange={(e) =>
-                          setNewContent({ ...newContent, title: e.target.value })
-                        }
-                        className="border-slate-200 dark:border-slate-700"
-                      />
-                    </div>
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="space-y-2">
-                        <Label>Content Type</Label>
-                        <Select
-                          value={newContent.content_type}
-                          onValueChange={(value) =>
-                            setNewContent({ ...newContent, content_type: value })
-                          }
+
+                  {generatedVariations.length > 0 ? (
+                    /* Variations Display */
+                    <div className="space-y-4 py-4">
+                      <div className="flex items-center justify-between text-sm text-slate-500 dark:text-slate-400">
+                        <span>
+                          Generated by <strong>{generationModel}</strong>
+                          {generationCost > 0 && ` ($${generationCost.toFixed(4)})`}
+                        </span>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={regenerateContent}
+                          disabled={submitting}
+                          className="border-slate-200 dark:border-slate-700"
                         >
-                          <SelectTrigger className="border-slate-200 dark:border-slate-700">
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="social">Social Post</SelectItem>
-                            <SelectItem value="linkedin_post">
-                              LinkedIn Post
-                            </SelectItem>
-                            <SelectItem value="twitter_thread">
-                              Twitter Thread
-                            </SelectItem>
-                            <SelectItem value="blog">Blog Post</SelectItem>
-                            <SelectItem value="newsletter">Newsletter</SelectItem>
-                            <SelectItem value="video_script">
-                              Video Script
-                            </SelectItem>
-                            <SelectItem value="email">Email</SelectItem>
-                          </SelectContent>
-                        </Select>
+                          {submitting ? (
+                            <Loader2 className="h-3 w-3 mr-1 animate-spin" />
+                          ) : (
+                            <Sparkles className="h-3 w-3 mr-1" />
+                          )}
+                          Regenerate
+                        </Button>
                       </div>
-                      <div className="space-y-2">
-                        <Label>Platform</Label>
-                        <Select
-                          value={newContent.platform}
-                          onValueChange={(value) =>
-                            setNewContent({ ...newContent, platform: value })
-                          }
+
+                      <div className="grid gap-3">
+                        {generatedVariations.map((variation, idx) => {
+                          const charLimit = PLATFORM_CHAR_LIMITS[newContent.platform] || 0;
+                          const isOverLimit = charLimit > 0 && variation.characterCount > charLimit;
+
+                          return (
+                            <div
+                              key={idx}
+                              onClick={() => setSelectedVariation(idx)}
+                              className={cn(
+                                "rounded-lg border p-4 cursor-pointer transition-all",
+                                selectedVariation === idx
+                                  ? "border-violet-500 bg-violet-50/50 dark:bg-violet-900/20 ring-1 ring-violet-500"
+                                  : "border-slate-200 dark:border-slate-700 hover:border-violet-300 dark:hover:border-violet-600"
+                              )}
+                            >
+                              <div className="flex items-center justify-between mb-2">
+                                <span className="text-xs font-medium text-slate-500 dark:text-slate-400">
+                                  Variation {idx + 1}
+                                </span>
+                                <span
+                                  className={cn(
+                                    "text-xs",
+                                    isOverLimit
+                                      ? "text-rose-500 font-medium"
+                                      : "text-slate-400"
+                                  )}
+                                >
+                                  {variation.characterCount}
+                                  {charLimit > 0 && ` / ${charLimit}`} chars
+                                </span>
+                              </div>
+                              <p className="text-sm text-slate-800 dark:text-slate-200 whitespace-pre-wrap line-clamp-6">
+                                {variation.content}
+                              </p>
+                              {(variation.hashtags?.length ?? 0) > 0 && (
+                                <div className="flex flex-wrap gap-1 mt-2">
+                                  {variation.hashtags!.map((tag, i) => (
+                                    <span
+                                      key={i}
+                                      className="text-xs text-violet-600 dark:text-violet-400"
+                                    >
+                                      #{tag}
+                                    </span>
+                                  ))}
+                                </div>
+                              )}
+                            </div>
+                          );
+                        })}
+                      </div>
+
+                      <DialogFooter>
+                        <Button
+                          variant="outline"
+                          onClick={resetCreateDialog}
+                          className="border-slate-200 dark:border-slate-700"
                         >
-                          <SelectTrigger className="border-slate-200 dark:border-slate-700">
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="linkedin">LinkedIn</SelectItem>
-                            <SelectItem value="twitter">Twitter/X</SelectItem>
-                            <SelectItem value="instagram">Instagram</SelectItem>
-                            <SelectItem value="youtube">YouTube</SelectItem>
-                            <SelectItem value="website">Website</SelectItem>
-                            <SelectItem value="email">Email</SelectItem>
-                          </SelectContent>
-                        </Select>
+                          Cancel
+                        </Button>
+                        <Button
+                          onClick={saveSelectedVariation}
+                          disabled={submitting || selectedVariation === null}
+                          className="bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-700 hover:to-purple-700 text-white"
+                        >
+                          {submitting ? (
+                            <>
+                              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                              Saving...
+                            </>
+                          ) : (
+                            <>
+                              <CheckCircle className="h-4 w-4 mr-2" />
+                              Use This Variation
+                            </>
+                          )}
+                        </Button>
+                      </DialogFooter>
+                    </div>
+                  ) : (
+                    /* Create Form */
+                    <>
+                      <div className="space-y-4 py-4">
+                        <div className="space-y-2">
+                          <Label>Title</Label>
+                          <Input
+                            placeholder="e.g., Q4 Product Launch Announcement"
+                            value={newContent.title}
+                            onChange={(e) =>
+                              setNewContent({ ...newContent, title: e.target.value })
+                            }
+                            className="border-slate-200 dark:border-slate-700"
+                          />
+                        </div>
+                        <div className="grid grid-cols-2 gap-4">
+                          <div className="space-y-2">
+                            <Label>Content Type</Label>
+                            <Select
+                              value={newContent.content_type}
+                              onValueChange={(value) =>
+                                setNewContent({ ...newContent, content_type: value })
+                              }
+                            >
+                              <SelectTrigger className="border-slate-200 dark:border-slate-700">
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="social">Social Post</SelectItem>
+                                <SelectItem value="linkedin_post">LinkedIn Post</SelectItem>
+                                <SelectItem value="twitter_thread">Twitter Thread</SelectItem>
+                                <SelectItem value="blog">Blog Post</SelectItem>
+                                <SelectItem value="newsletter">Newsletter</SelectItem>
+                                <SelectItem value="video_script">Video Script</SelectItem>
+                                <SelectItem value="email">Email</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          <div className="space-y-2">
+                            <Label>Platform</Label>
+                            <Select
+                              value={newContent.platform}
+                              onValueChange={(value) =>
+                                setNewContent({ ...newContent, platform: value })
+                              }
+                            >
+                              <SelectTrigger className="border-slate-200 dark:border-slate-700">
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="linkedin">LinkedIn</SelectItem>
+                                <SelectItem value="twitter">Twitter/X</SelectItem>
+                                <SelectItem value="instagram">Instagram</SelectItem>
+                                <SelectItem value="youtube">YouTube</SelectItem>
+                                <SelectItem value="website">Website</SelectItem>
+                                <SelectItem value="email">Email</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        </div>
+                        <div className="grid grid-cols-2 gap-4">
+                          <div className="space-y-2">
+                            <Label>Tone</Label>
+                            <Select
+                              value={newContent.tone}
+                              onValueChange={(value) =>
+                                setNewContent({ ...newContent, tone: value })
+                              }
+                            >
+                              <SelectTrigger className="border-slate-200 dark:border-slate-700">
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="professional">Professional</SelectItem>
+                                <SelectItem value="casual">Casual</SelectItem>
+                                <SelectItem value="bold">Bold</SelectItem>
+                                <SelectItem value="thought-leader">Thought Leader</SelectItem>
+                                <SelectItem value="pastoral">Pastoral</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          <div className="space-y-2">
+                            <Label>Length</Label>
+                            <Select
+                              value={newContent.length}
+                              onValueChange={(value) =>
+                                setNewContent({ ...newContent, length: value })
+                              }
+                            >
+                              <SelectTrigger className="border-slate-200 dark:border-slate-700">
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="short">Short</SelectItem>
+                                <SelectItem value="medium">Medium</SelectItem>
+                                <SelectItem value="long">Long</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        </div>
+                        {brands.length > 0 && (
+                          <div className="space-y-2">
+                            <Label>Brand (optional)</Label>
+                            <Select
+                              value={newContent.brand_id}
+                              onValueChange={(value) =>
+                                setNewContent({ ...newContent, brand_id: value })
+                              }
+                            >
+                              <SelectTrigger className="border-slate-200 dark:border-slate-700">
+                                <SelectValue placeholder="Select a brand for voice matching" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="">No brand</SelectItem>
+                                {brands.map((brand) => (
+                                  <SelectItem key={brand.id} value={brand.id}>
+                                    {brand.name}
+                                    {brand.entity_name && ` (${brand.entity_name})`}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        )}
+                        <div className="space-y-2">
+                          <Label>AI Prompt (optional)</Label>
+                          <Textarea
+                            placeholder="Describe what you want to create. E.g., Write a LinkedIn post about our new AI feature..."
+                            value={newContent.ai_prompt}
+                            onChange={(e) =>
+                              setNewContent({
+                                ...newContent,
+                                ai_prompt: e.target.value,
+                              })
+                            }
+                            rows={4}
+                            className="border-slate-200 dark:border-slate-700"
+                          />
+                        </div>
                       </div>
-                    </div>
-                    <div className="space-y-2">
-                      <Label>AI Prompt (optional)</Label>
-                      <Textarea
-                        placeholder="Describe what you want to create. E.g., Write a LinkedIn post about our new AI feature..."
-                        value={newContent.ai_prompt}
-                        onChange={(e) =>
-                          setNewContent({
-                            ...newContent,
-                            ai_prompt: e.target.value,
-                          })
-                        }
-                        rows={4}
-                        className="border-slate-200 dark:border-slate-700"
-                      />
-                    </div>
-                  </div>
-                  <DialogFooter>
-                    <Button
-                      variant="outline"
-                      onClick={() => setShowNewContent(false)}
-                      className="border-slate-200 dark:border-slate-700"
-                    >
-                      Cancel
-                    </Button>
-                    <Button
-                      onClick={createContent}
-                      disabled={submitting || !newContent.title.trim()}
-                      className="bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-700 hover:to-purple-700 text-white"
-                    >
-                      {submitting ? (
-                        <>
-                          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                          Creating...
-                        </>
-                      ) : newContent.ai_prompt ? (
-                        <>
-                          <Sparkles className="h-4 w-4 mr-2" />
-                          Create & Generate
-                        </>
-                      ) : (
-                        "Create Draft"
-                      )}
-                    </Button>
-                  </DialogFooter>
+                      <DialogFooter>
+                        <Button
+                          variant="outline"
+                          onClick={resetCreateDialog}
+                          className="border-slate-200 dark:border-slate-700"
+                        >
+                          Cancel
+                        </Button>
+                        <Button
+                          onClick={createContent}
+                          disabled={submitting || !newContent.title.trim()}
+                          className="bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-700 hover:to-purple-700 text-white"
+                        >
+                          {submitting ? (
+                            <>
+                              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                              Generating...
+                            </>
+                          ) : newContent.ai_prompt ? (
+                            <>
+                              <Sparkles className="h-4 w-4 mr-2" />
+                              Create & Generate
+                            </>
+                          ) : (
+                            "Create Draft"
+                          )}
+                        </Button>
+                      </DialogFooter>
+                    </>
+                  )}
                 </DialogContent>
               </Dialog>
             </>

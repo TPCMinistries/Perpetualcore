@@ -302,43 +302,55 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ error: error.message }, { status: 500 });
       }
 
-      // If generate_now is true, send to n8n for AI generation
+      // If generate_now is true, generate content directly via AI engine
       if (body.generate_now && body.ai_prompt) {
-        const n8nWebhookUrl = process.env.N8N_CONTENT_GENERATOR_WEBHOOK;
+        try {
+          const { generateContent } = await import("@/lib/content/generator");
 
-        if (n8nWebhookUrl) {
-          await supabase
-            .from("content_queue")
-            .update({ status: "draft", ai_generated: false })
-            .eq("id", content.id);
-
-          const n8nPayload = {
-            content_id: content.id,
-            user_id: user.id,
-            content_type: body.content_type,
-            platform: body.platform,
-            title: body.title,
-            ai_prompt: body.ai_prompt,
+          const genResult = await generateContent({
+            prompt: body.ai_prompt,
+            contentType: body.content_type,
+            platform: body.platform || undefined,
+            brandId: body.brand_id || undefined,
             tone: body.tone || "professional",
             length: body.length || "medium",
-            callback_url: `${process.env.NEXT_PUBLIC_APP_URL}/api/webhooks/content-generated`,
-          };
-
-          fetch(n8nWebhookUrl, {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              "x-webhook-secret": process.env.N8N_WEBHOOK_SECRET || "",
-            },
-            body: JSON.stringify(n8nPayload),
-          }).catch((err) => {
-            console.error("Failed to send to n8n:", err);
+            referenceContent: body.reference_content || undefined,
+            variations: body.variations || 3,
+            model: body.model || undefined,
           });
+
+          // Update the content_queue record with the first variation
+          if (genResult.variations.length > 0) {
+            const firstVariation = genResult.variations[0];
+            await supabase
+              .from("content_queue")
+              .update({
+                draft_content: firstVariation.content,
+                hook: firstVariation.hook || null,
+                call_to_action: firstVariation.callToAction || null,
+                hashtags: firstVariation.hashtags || [],
+                ai_generated: true,
+                status: "draft",
+              })
+              .eq("id", content.id);
+          }
 
           return NextResponse.json({
             success: true,
             content,
-            message: "Content created and sent for AI generation",
+            variations: genResult.variations,
+            model: genResult.model,
+            cost: genResult.cost,
+            message: "Content created and generated",
+          });
+        } catch (genError: any) {
+          console.error("AI generation failed:", genError);
+          // Content was still created, just without AI generation
+          return NextResponse.json({
+            success: true,
+            content,
+            message: "Content created but AI generation failed. You can regenerate later.",
+            generationError: genError.message,
           });
         }
       }
