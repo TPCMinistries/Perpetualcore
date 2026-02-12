@@ -7,16 +7,37 @@ export const dynamic = "force-dynamic";
 export const maxDuration = 120;
 
 /**
+ * Resolve user ID from either cookie auth or API key (for Zapier/external)
+ */
+async function resolveUserId(req: NextRequest): Promise<string | null> {
+  // Check for API key auth (Zapier, external integrations)
+  const authHeader = req.headers.get("authorization") || "";
+  if (authHeader.startsWith("Bearer ")) {
+    const token = authHeader.slice(7).trim();
+    const apiKey = process.env.VOICE_INTEL_API_KEY;
+    if (apiKey && token === apiKey) {
+      // API key auth — use LORENZO_USER_ID
+      return process.env.LORENZO_USER_ID || null;
+    }
+  }
+
+  // Fall back to cookie-based auth
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  return user?.id || null;
+}
+
+/**
  * POST - Upload a transcript directly (paste or .txt file) and classify it
+ * Supports cookie auth (dashboard) or Bearer token (Zapier/external)
  */
 export async function POST(req: NextRequest) {
   try {
-    const supabase = await createClient();
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
+    const userId = await resolveUserId(req);
 
-    if (!user) {
+    if (!userId) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
@@ -60,7 +81,7 @@ export async function POST(req: NextRequest) {
     const { data: memo, error: insertError } = await adminSupabase
       .from("voice_memos")
       .insert({
-        user_id: user.id,
+        user_id: userId,
         title: memoTitle,
         transcript: transcript.trim(),
         source: "transcript_paste",
@@ -82,7 +103,7 @@ export async function POST(req: NextRequest) {
     // Run Brain classification immediately
     const result = await classifyVoiceMemo(
       memo.id,
-      user.id,
+      userId,
       transcript.trim(),
       memoTitle
     );

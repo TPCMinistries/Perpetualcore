@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
-import { Loader2, Brain, TrendingUp, Users, Building2 } from "lucide-react";
+import { useState, useEffect, useCallback, useRef } from "react";
+import { Loader2, Brain, TrendingUp, Users, Building2, FileText, Send, CheckCircle2 } from "lucide-react";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { ActionQueueHeader } from "@/components/voice-intel/ActionQueueHeader";
 import { ActionTierColumn } from "@/components/voice-intel/ActionTierColumn";
@@ -40,6 +40,53 @@ export default function VoiceIntelPage() {
   >({});
   const [patternsLoading, setPatternsLoading] = useState(false);
   const [entitiesLoading, setEntitiesLoading] = useState(false);
+
+  // Paste transcript state
+  const [pasteText, setPasteText] = useState("");
+  const [pasteTitle, setPasteTitle] = useState("");
+  const [pasteLoading, setPasteLoading] = useState(false);
+  const [pasteResult, setPasteResult] = useState<{
+    success: boolean;
+    actionsCreated: number;
+  } | null>(null);
+  const [pasteExpanded, setPasteExpanded] = useState(false);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  const handlePasteSubmit = async () => {
+    if (!pasteText.trim() || pasteLoading) return;
+    setPasteLoading(true);
+    setPasteResult(null);
+    try {
+      const res = await fetch("/api/voice-intel/upload-transcript", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          transcript: pasteText.trim(),
+          title: pasteTitle.trim() || undefined,
+        }),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        const actionsCreated = data.actions?.length || 0;
+        setPasteResult({ success: true, actionsCreated });
+        setPasteText("");
+        setPasteTitle("");
+        // Refresh action queue
+        fetchActions();
+        // Auto-hide success after 5s
+        setTimeout(() => setPasteResult(null), 5000);
+      } else {
+        const err = await res.json();
+        console.error("Paste transcript error:", err);
+        setPasteResult({ success: false, actionsCreated: 0 });
+      }
+    } catch (err) {
+      console.error("Paste transcript error:", err);
+      setPasteResult({ success: false, actionsCreated: 0 });
+    } finally {
+      setPasteLoading(false);
+    }
+  };
 
   const fetchActions = useCallback(async () => {
     try {
@@ -209,6 +256,104 @@ export default function VoiceIntelPage() {
         totalTodayCount={totalTodayCount}
         totalInsights={totalInsights}
       />
+
+      {/* Paste Transcript Section */}
+      <div className="rounded-lg border border-slate-200 bg-white shadow-sm">
+        <button
+          onClick={() => {
+            setPasteExpanded(!pasteExpanded);
+            if (!pasteExpanded) {
+              setTimeout(() => textareaRef.current?.focus(), 100);
+            }
+          }}
+          className="flex w-full items-center justify-between px-4 py-3 text-left hover:bg-slate-50 transition-colors"
+        >
+          <div className="flex items-center gap-2">
+            <FileText className="h-4 w-4 text-indigo-500" />
+            <span className="text-sm font-medium text-slate-900">
+              Paste Transcript
+            </span>
+            <span className="text-xs text-slate-400">
+              Copy from Plaud app and paste here
+            </span>
+          </div>
+          <svg
+            className={`h-4 w-4 text-slate-400 transition-transform ${
+              pasteExpanded ? "rotate-180" : ""
+            }`}
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+          </svg>
+        </button>
+
+        {pasteExpanded && (
+          <div className="border-t border-slate-100 px-4 py-4 space-y-3">
+            <input
+              type="text"
+              placeholder="Title (optional) — e.g. 'Meeting with Dr. Silber'"
+              value={pasteTitle}
+              onChange={(e) => setPasteTitle(e.target.value)}
+              className="w-full rounded-md border border-slate-200 bg-slate-50 px-3 py-2 text-sm placeholder:text-slate-400 focus:border-indigo-300 focus:outline-none focus:ring-1 focus:ring-indigo-300"
+            />
+            <textarea
+              ref={textareaRef}
+              placeholder="Paste your transcript here..."
+              value={pasteText}
+              onChange={(e) => setPasteText(e.target.value)}
+              rows={6}
+              className="w-full rounded-md border border-slate-200 bg-slate-50 px-3 py-2 text-sm placeholder:text-slate-400 focus:border-indigo-300 focus:outline-none focus:ring-1 focus:ring-indigo-300 resize-y"
+            />
+            <div className="flex items-center justify-between">
+              <div className="text-xs text-slate-400">
+                {pasteText.length > 0 && (
+                  <span>{pasteText.trim().split(/\s+/).length} words</span>
+                )}
+              </div>
+              <div className="flex items-center gap-3">
+                {pasteResult && (
+                  <span
+                    className={`text-xs font-medium ${
+                      pasteResult.success
+                        ? "text-emerald-600"
+                        : "text-red-600"
+                    }`}
+                  >
+                    {pasteResult.success ? (
+                      <span className="flex items-center gap-1">
+                        <CheckCircle2 className="h-3.5 w-3.5" />
+                        Classified — {pasteResult.actionsCreated} action
+                        {pasteResult.actionsCreated !== 1 ? "s" : ""} created
+                      </span>
+                    ) : (
+                      "Failed to process. Try again."
+                    )}
+                  </span>
+                )}
+                <button
+                  onClick={handlePasteSubmit}
+                  disabled={!pasteText.trim() || pasteLoading}
+                  className="inline-flex items-center gap-2 rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                >
+                  {pasteLoading ? (
+                    <>
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      Classifying...
+                    </>
+                  ) : (
+                    <>
+                      <Send className="h-4 w-4" />
+                      Process with Brain
+                    </>
+                  )}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
 
       <Tabs defaultValue="actions" onValueChange={handleTabChange}>
         <TabsList>
