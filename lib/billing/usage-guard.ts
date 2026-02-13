@@ -164,7 +164,6 @@ function isPremium(model: AIModel): boolean {
     "claude-sonnet-4",
     "gpt-4o",
     "gpt-4-turbo",
-    "deepseek-chat",
   ];
   return premiumModels.includes(model);
 }
@@ -175,10 +174,12 @@ function isPremium(model: AIModel): boolean {
 function getRequiredPlanForModel(model: AIModel): string {
   const modelPlanMap: Record<string, string> = {
     "gemini-2.0-flash-exp": "free",
-    "gpt-4o-mini": "starter",
-    "deepseek-chat": "starter",
+    "deepseek-chat": "free",
+    "gpt-4o-mini": "free",
+    "perplexity-fast": "starter",
     "gpt-4o": "starter",
     "claude-sonnet-4": "starter",
+    "perplexity": "pro",
     "claude-opus-4": "starter",
   };
   return modelPlanMap[model] || "starter";

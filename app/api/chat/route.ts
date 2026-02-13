@@ -422,11 +422,51 @@ export async function POST(req: NextRequest) {
       };
     }
 
-    const model = modelSelection.model as AIModel;
+    let model = modelSelection.model as AIModel;
 
     // Check usage limits before processing (prevents free users from burning tokens)
-    const usageCheck = await checkAIUsage(organizationId, model);
-    if (!usageCheck.allowed) {
+    let usageCheck = await checkAIUsage(organizationId, model);
+
+    // If model is restricted, try fallback models before hard-failing
+    if (!usageCheck.allowed && usageCheck.code === "MODEL_RESTRICTED") {
+      const fallbackModels: AIModel[] = ["gpt-4o-mini", "gemini-2.0-flash-exp"];
+      let fallbackFound = false;
+
+      for (const fallback of fallbackModels) {
+        if (fallback === model) continue;
+        const fallbackCheck = await checkAIUsage(organizationId, fallback);
+        if (fallbackCheck.allowed) {
+          model = fallback;
+          modelSelection = {
+            model: fallback,
+            provider: AI_MODELS[fallback]?.provider || "openai",
+            reason: `Fallback from ${modelSelection.displayName} (restricted)`,
+            displayName: AI_MODELS[fallback]?.name || fallback,
+            icon: AI_MODELS[fallback]?.icon || "Bot",
+          };
+          usageCheck = fallbackCheck;
+          fallbackFound = true;
+          break;
+        }
+      }
+
+      if (!fallbackFound) {
+        return new Response(
+          JSON.stringify({
+            error: "Usage limit reached",
+            code: usageCheck.code,
+            message: usageCheck.reason,
+            currentPlan: usageCheck.currentPlan,
+            usage: usageCheck.usage,
+            upgrade: usageCheck.upgrade,
+          }),
+          {
+            status: 429,
+            headers: { "Content-Type": "application/json" },
+          }
+        );
+      }
+    } else if (!usageCheck.allowed) {
       return new Response(
         JSON.stringify({
           error: "Usage limit reached",
@@ -653,6 +693,10 @@ Or, you can copy and paste the text content directly into this chat.`;
         settingsPath: "/dashboard/settings/skills",
       },
     };
+
+    // Declare skillMap early so it's available for skill suggestions below
+    // (populated later by getAvailableToolsForUser, default empty for now)
+    let skillMap: Record<string, string> = {};
 
     // Check which skills are relevant to the query but not enabled
     const enabledSkillIds = new Set(Object.keys(skillMap));
@@ -1038,7 +1082,6 @@ When discussing these contacts:
 
     // Load user's skill tools (core tools + enabled skill tools)
     let availableTools = AVAILABLE_TOOLS;
-    let skillMap: Record<string, string> = {};
     try {
       const userTools = await getAvailableToolsForUser(user.id, organizationId);
       availableTools = userTools.tools;
@@ -1333,8 +1376,8 @@ When discussing these contacts:
       },
     });
   } catch (error: any) {
-    if (isDev) console.error("❌ Chat API error:", error);
-    if (isDev) console.error("Error stack:", error?.stack);
+    console.error("❌ Chat API error:", error?.message);
+    console.error("Error stack:", error?.stack);
     return new Response(
       JSON.stringify({ 
         error: "Internal server error", 

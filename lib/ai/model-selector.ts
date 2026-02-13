@@ -1,5 +1,5 @@
 import { AIModel } from "@/types";
-import { ChatMessage } from "./router";
+import type { ChatMessage } from "./router";
 
 export type UserTier = 'free' | 'pro' | 'business' | 'enterprise';
 

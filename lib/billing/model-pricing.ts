@@ -1,4 +1,4 @@
-import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/server";
 
 export interface ModelPricing {
   id: string;
@@ -34,7 +34,7 @@ const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
  * Get all model pricing
  */
 export async function getAllModelPricing(): Promise<ModelPricing[]> {
-  const supabase = await createClient();
+  const supabase = createAdminClient();
 
   const { data, error } = await supabase
     .from('ai_model_pricing')
@@ -115,7 +115,7 @@ export async function calculateCostDB(
   inputTokens: number,
   outputTokens: number
 ): Promise<number> {
-  const supabase = await createClient();
+  const supabase = createAdminClient();
 
   const { data, error } = await supabase.rpc('calculate_model_cost', {
     p_model_id: modelId,
