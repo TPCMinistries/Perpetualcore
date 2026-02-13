@@ -26,6 +26,10 @@ import {
   FileEdit,
   Send,
   CheckCircle,
+  BookTemplate,
+  ChevronLeft,
+  Paperclip,
+  Zap,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -60,6 +64,14 @@ import { motion } from "framer-motion";
 import { DashboardPageWrapper, DashboardHeader } from "@/components/ui/dashboard-header";
 import { StatCard, StatCardGrid } from "@/components/ui/stat-card";
 import { FilterPills } from "@/components/ui/filter-pills";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  CONTENT_TEMPLATES,
+  getTemplateCategories,
+  getTemplate,
+  fillTemplate,
+  type ContentTemplate,
+} from "@/lib/content/templates";
 
 interface Content {
   id: string;
@@ -204,6 +216,13 @@ export default function ContentPage() {
   const [brands, setBrands] = useState<BrandOption[]>([]);
   const [generationModel, setGenerationModel] = useState<string>("");
   const [generationCost, setGenerationCost] = useState<number>(0);
+  const [streamingText, setStreamingText] = useState<string>("");
+  const [isStreaming, setIsStreaming] = useState(false);
+  const [selectedTemplate, setSelectedTemplate] = useState<ContentTemplate | null>(null);
+  const [templateValues, setTemplateValues] = useState<Record<string, string>>({});
+  const [dialogView, setDialogView] = useState<"form" | "templates" | "variations">("form");
+  const [referenceContent, setReferenceContent] = useState<string>("");
+  const abortControllerRef = { current: null as AbortController | null };
 
   const [newContent, setNewContent] = useState({
     title: "",
@@ -266,43 +285,110 @@ export default function ContentPage() {
     }
   };
 
-  const createContent = async () => {
-    if (!newContent.title.trim()) return;
-
+  const streamGenerate = async (prompt: string) => {
+    setIsStreaming(true);
+    setStreamingText("");
     setSubmitting(true);
     setGeneratedVariations([]);
     setSelectedVariation(null);
-    setGenerationModel("");
-    setGenerationCost(0);
+    setDialogView("variations");
+
+    const controller = new AbortController();
+    abortControllerRef.current = controller;
 
     try {
-      if (newContent.ai_prompt && newContent.generate_now) {
-        // Use the new generation API directly
-        const genResponse = await fetch("/api/content/generate", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            prompt: newContent.ai_prompt,
-            content_type: newContent.content_type,
-            platform: newContent.platform,
-            brand_id: newContent.brand_id || undefined,
-            tone: newContent.tone,
-            length: newContent.length,
-          }),
-        });
+      const response = await fetch("/api/content/generate/stream", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          prompt,
+          content_type: newContent.content_type,
+          platform: newContent.platform,
+          brand_id: newContent.brand_id || undefined,
+          tone: newContent.tone,
+          length: newContent.length,
+          reference_content: referenceContent || undefined,
+        }),
+        signal: controller.signal,
+      });
 
-        if (genResponse.ok) {
-          const genData = await genResponse.json();
-          setGeneratedVariations(genData.variations || []);
-          setGenerationModel(genData.model || "");
-          setGenerationCost(genData.cost || 0);
-          setSelectedVariation(0);
-          setSubmitting(false);
-          return; // Don't close dialog — show variations
-        }
+      if (!response.ok) {
+        throw new Error("Stream request failed");
       }
 
-      // No AI prompt or generation failed — create as draft
+      const reader = response.body?.getReader();
+      if (!reader) throw new Error("No stream reader");
+
+      const decoder = new TextDecoder();
+      let buffer = "";
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split("\n\n");
+        buffer = lines.pop() || "";
+
+        for (const line of lines) {
+          if (!line.startsWith("data: ")) continue;
+          try {
+            const data = JSON.parse(line.slice(6));
+
+            if (data.type === "start") {
+              setGenerationModel(data.model || "");
+            } else if (data.type === "chunk") {
+              setStreamingText((prev) => prev + data.content);
+            } else if (data.type === "done") {
+              setIsStreaming(false);
+              setStreamingText("");
+              if (data.variations?.length > 0) {
+                setGeneratedVariations(data.variations);
+                setSelectedVariation(0);
+              } else {
+                // Fallback: use full text as single variation
+                setGeneratedVariations([
+                  {
+                    content: data.fullText || "",
+                    characterCount: (data.fullText || "").length,
+                  },
+                ]);
+                setSelectedVariation(0);
+              }
+              setGenerationModel(data.model || "");
+            } else if (data.type === "error") {
+              console.error("Stream error:", data.message);
+              setIsStreaming(false);
+            }
+          } catch {
+            // Skip malformed SSE lines
+          }
+        }
+      }
+    } catch (error: any) {
+      if (error.name !== "AbortError") {
+        console.error("Streaming failed:", error);
+      }
+      setIsStreaming(false);
+    } finally {
+      setSubmitting(false);
+      abortControllerRef.current = null;
+    }
+  };
+
+  const createContent = async () => {
+    if (!newContent.title.trim()) return;
+
+    const prompt = newContent.ai_prompt.trim();
+
+    if (prompt && newContent.generate_now) {
+      await streamGenerate(prompt);
+      return;
+    }
+
+    // No AI prompt — create as draft directly
+    setSubmitting(true);
+    try {
       const response = await fetch("/api/content", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -365,38 +451,34 @@ export default function ContentPage() {
   };
 
   const regenerateContent = async () => {
-    setSubmitting(true);
-    setGeneratedVariations([]);
-    setSelectedVariation(null);
-    try {
-      const genResponse = await fetch("/api/content/generate", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          prompt: newContent.ai_prompt,
-          content_type: newContent.content_type,
-          platform: newContent.platform,
-          brand_id: newContent.brand_id || undefined,
-          tone: newContent.tone,
-          length: newContent.length,
-        }),
-      });
+    await streamGenerate(newContent.ai_prompt);
+  };
 
-      if (genResponse.ok) {
-        const genData = await genResponse.json();
-        setGeneratedVariations(genData.variations || []);
-        setGenerationModel(genData.model || "");
-        setGenerationCost(genData.cost || 0);
-        setSelectedVariation(0);
-      }
-    } catch (error) {
-      console.error("Failed to regenerate:", error);
-    } finally {
-      setSubmitting(false);
-    }
+  const applyTemplate = (template: ContentTemplate) => {
+    setSelectedTemplate(template);
+    setTemplateValues({});
+    setNewContent((prev) => ({
+      ...prev,
+      content_type: template.contentType,
+      platform: template.platform || prev.platform,
+      tone: template.tone,
+      length: template.length,
+      title: prev.title || template.name,
+    }));
+    setDialogView("form");
+  };
+
+  const generateFromTemplate = () => {
+    if (!selectedTemplate) return;
+    const prompt = fillTemplate(selectedTemplate, templateValues);
+    setNewContent((prev) => ({ ...prev, ai_prompt: prompt }));
+    streamGenerate(prompt);
   };
 
   const resetCreateDialog = () => {
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
     setNewContent({
       title: "",
       content_type: "social",
@@ -411,6 +493,12 @@ export default function ContentPage() {
     setSelectedVariation(null);
     setGenerationModel("");
     setGenerationCost(0);
+    setStreamingText("");
+    setIsStreaming(false);
+    setSelectedTemplate(null);
+    setTemplateValues({});
+    setDialogView("form");
+    setReferenceContent("");
     setShowNewContent(false);
   };
 
@@ -566,146 +654,257 @@ export default function ContentPage() {
                     Create Content
                   </Button>
                 </DialogTrigger>
-                <DialogContent className={cn("max-w-lg", generatedVariations.length > 0 && "max-w-3xl")}>
+                <DialogContent className={cn(
+                  "max-w-lg",
+                  dialogView === "templates" && "max-w-2xl",
+                  dialogView === "variations" && "max-w-3xl"
+                )}>
                   <DialogHeader>
                     <DialogTitle className="flex items-center gap-2">
+                      {dialogView !== "form" && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-7 w-7 p-0 mr-1"
+                          onClick={() => {
+                            if (dialogView === "templates") setDialogView("form");
+                            else if (dialogView === "variations" && !isStreaming) setDialogView("form");
+                          }}
+                        >
+                          <ChevronLeft className="h-4 w-4" />
+                        </Button>
+                      )}
                       <div className="p-2 rounded-lg bg-violet-100 dark:bg-violet-900/30">
                         <PenSquare className="h-4 w-4 text-violet-600 dark:text-violet-400" />
                       </div>
-                      {generatedVariations.length > 0 ? "Choose a Variation" : "Create New Content"}
+                      {dialogView === "templates" && "Choose a Template"}
+                      {dialogView === "form" && (selectedTemplate ? `Template: ${selectedTemplate.name}` : "Create New Content")}
+                      {dialogView === "variations" && (isStreaming ? "Generating..." : "Choose a Variation")}
                     </DialogTitle>
                   </DialogHeader>
 
-                  {generatedVariations.length > 0 ? (
-                    /* Variations Display */
+                  {/* ========== TEMPLATES VIEW ========== */}
+                  {dialogView === "templates" && (
+                    <div className="py-4">
+                      <Tabs defaultValue="social">
+                        <TabsList className="mb-4 flex-wrap h-auto gap-1">
+                          {getTemplateCategories().map((cat) => (
+                            <TabsTrigger key={cat.id} value={cat.id} className="text-xs">
+                              {cat.label} ({cat.count})
+                            </TabsTrigger>
+                          ))}
+                        </TabsList>
+                        {getTemplateCategories().map((cat) => (
+                          <TabsContent key={cat.id} value={cat.id} className="space-y-2">
+                            {CONTENT_TEMPLATES.filter((t) => t.category === cat.id).map((template) => (
+                              <div
+                                key={template.id}
+                                onClick={() => applyTemplate(template)}
+                                className="rounded-lg border border-slate-200 dark:border-slate-700 p-4 cursor-pointer hover:border-violet-300 dark:hover:border-violet-600 hover:bg-violet-50/50 dark:hover:bg-violet-900/10 transition-all"
+                              >
+                                <div className="flex items-center gap-3">
+                                  <div className="h-9 w-9 rounded-lg bg-slate-100 dark:bg-slate-800 flex items-center justify-center flex-shrink-0">
+                                    <Zap className="h-4 w-4 text-violet-600 dark:text-violet-400" />
+                                  </div>
+                                  <div className="flex-1 min-w-0">
+                                    <h4 className="font-medium text-sm text-slate-900 dark:text-white">
+                                      {template.name}
+                                    </h4>
+                                    <p className="text-xs text-slate-500 dark:text-slate-400 line-clamp-1">
+                                      {template.description}
+                                    </p>
+                                  </div>
+                                  <Badge className="text-[10px] border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-500 dark:text-slate-400">
+                                    {template.tone}
+                                  </Badge>
+                                </div>
+                              </div>
+                            ))}
+                          </TabsContent>
+                        ))}
+                      </Tabs>
+                    </div>
+                  )}
+
+                  {/* ========== VARIATIONS / STREAMING VIEW ========== */}
+                  {dialogView === "variations" && (
                     <div className="space-y-4 py-4">
-                      <div className="flex items-center justify-between text-sm text-slate-500 dark:text-slate-400">
-                        <span>
-                          Generated by <strong>{generationModel}</strong>
-                          {generationCost > 0 && ` ($${generationCost.toFixed(4)})`}
-                        </span>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={regenerateContent}
-                          disabled={submitting}
-                          className="border-slate-200 dark:border-slate-700"
-                        >
-                          {submitting ? (
-                            <Loader2 className="h-3 w-3 mr-1 animate-spin" />
-                          ) : (
-                            <Sparkles className="h-3 w-3 mr-1" />
-                          )}
-                          Regenerate
-                        </Button>
-                      </div>
+                      {/* Streaming preview */}
+                      {isStreaming && (
+                        <div className="rounded-lg border border-violet-200 dark:border-violet-800 bg-violet-50/50 dark:bg-violet-900/10 p-4">
+                          <div className="flex items-center gap-2 mb-3">
+                            <Loader2 className="h-4 w-4 animate-spin text-violet-500" />
+                            <span className="text-sm font-medium text-violet-600 dark:text-violet-400">
+                              Writing with {generationModel}...
+                            </span>
+                          </div>
+                          <p className="text-sm text-slate-700 dark:text-slate-300 whitespace-pre-wrap max-h-64 overflow-y-auto">
+                            {streamingText}
+                            <span className="inline-block w-1.5 h-4 bg-violet-500 animate-pulse ml-0.5 align-middle" />
+                          </p>
+                        </div>
+                      )}
 
-                      <div className="grid gap-3">
-                        {generatedVariations.map((variation, idx) => {
-                          const charLimit = PLATFORM_CHAR_LIMITS[newContent.platform] || 0;
-                          const isOverLimit = charLimit > 0 && variation.characterCount > charLimit;
-
-                          return (
-                            <div
-                              key={idx}
-                              onClick={() => setSelectedVariation(idx)}
-                              className={cn(
-                                "rounded-lg border p-4 cursor-pointer transition-all",
-                                selectedVariation === idx
-                                  ? "border-violet-500 bg-violet-50/50 dark:bg-violet-900/20 ring-1 ring-violet-500"
-                                  : "border-slate-200 dark:border-slate-700 hover:border-violet-300 dark:hover:border-violet-600"
-                              )}
+                      {/* Completed variations */}
+                      {!isStreaming && generatedVariations.length > 0 && (
+                        <>
+                          <div className="flex items-center justify-between text-sm text-slate-500 dark:text-slate-400">
+                            <span>
+                              Generated by <strong>{generationModel}</strong>
+                            </span>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={regenerateContent}
+                              disabled={submitting}
+                              className="border-slate-200 dark:border-slate-700"
                             >
-                              <div className="flex items-center justify-between mb-2">
-                                <span className="text-xs font-medium text-slate-500 dark:text-slate-400">
-                                  Variation {idx + 1}
-                                </span>
-                                <span
+                              <Sparkles className="h-3 w-3 mr-1" />
+                              Regenerate
+                            </Button>
+                          </div>
+
+                          <div className="grid gap-3 max-h-[50vh] overflow-y-auto">
+                            {generatedVariations.map((variation, idx) => {
+                              const charLimit = PLATFORM_CHAR_LIMITS[newContent.platform] || 0;
+                              const isOverLimit = charLimit > 0 && variation.characterCount > charLimit;
+
+                              return (
+                                <div
+                                  key={idx}
+                                  onClick={() => setSelectedVariation(idx)}
                                   className={cn(
-                                    "text-xs",
-                                    isOverLimit
-                                      ? "text-rose-500 font-medium"
-                                      : "text-slate-400"
+                                    "rounded-lg border p-4 cursor-pointer transition-all",
+                                    selectedVariation === idx
+                                      ? "border-violet-500 bg-violet-50/50 dark:bg-violet-900/20 ring-1 ring-violet-500"
+                                      : "border-slate-200 dark:border-slate-700 hover:border-violet-300 dark:hover:border-violet-600"
                                   )}
                                 >
-                                  {variation.characterCount}
-                                  {charLimit > 0 && ` / ${charLimit}`} chars
-                                </span>
-                              </div>
-                              <p className="text-sm text-slate-800 dark:text-slate-200 whitespace-pre-wrap line-clamp-6">
-                                {variation.content}
-                              </p>
-                              {(variation.hashtags?.length ?? 0) > 0 && (
-                                <div className="flex flex-wrap gap-1 mt-2">
-                                  {variation.hashtags!.map((tag, i) => (
-                                    <span
-                                      key={i}
-                                      className="text-xs text-violet-600 dark:text-violet-400"
-                                    >
-                                      #{tag}
+                                  <div className="flex items-center justify-between mb-2">
+                                    <span className="text-xs font-medium text-slate-500 dark:text-slate-400">
+                                      Variation {idx + 1}
                                     </span>
-                                  ))}
+                                    <span
+                                      className={cn(
+                                        "text-xs",
+                                        isOverLimit ? "text-rose-500 font-medium" : "text-slate-400"
+                                      )}
+                                    >
+                                      {variation.characterCount}
+                                      {charLimit > 0 && ` / ${charLimit}`} chars
+                                    </span>
+                                  </div>
+                                  <p className="text-sm text-slate-800 dark:text-slate-200 whitespace-pre-wrap">
+                                    {variation.content}
+                                  </p>
+                                  {(variation.hashtags?.length ?? 0) > 0 && (
+                                    <div className="flex flex-wrap gap-1 mt-2">
+                                      {variation.hashtags!.map((tag, i) => (
+                                        <span key={i} className="text-xs text-violet-600 dark:text-violet-400">
+                                          #{tag}
+                                        </span>
+                                      ))}
+                                    </div>
+                                  )}
                                 </div>
-                              )}
-                            </div>
-                          );
-                        })}
-                      </div>
+                              );
+                            })}
+                          </div>
 
-                      <DialogFooter>
-                        <Button
-                          variant="outline"
-                          onClick={resetCreateDialog}
-                          className="border-slate-200 dark:border-slate-700"
-                        >
-                          Cancel
-                        </Button>
-                        <Button
-                          onClick={saveSelectedVariation}
-                          disabled={submitting || selectedVariation === null}
-                          className="bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-700 hover:to-purple-700 text-white"
-                        >
-                          {submitting ? (
-                            <>
-                              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                              Saving...
-                            </>
-                          ) : (
-                            <>
-                              <CheckCircle className="h-4 w-4 mr-2" />
-                              Use This Variation
-                            </>
-                          )}
-                        </Button>
-                      </DialogFooter>
+                          <DialogFooter>
+                            <Button variant="outline" onClick={resetCreateDialog} className="border-slate-200 dark:border-slate-700">
+                              Cancel
+                            </Button>
+                            <Button
+                              onClick={saveSelectedVariation}
+                              disabled={submitting || selectedVariation === null}
+                              className="bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-700 hover:to-purple-700 text-white"
+                            >
+                              {submitting ? (
+                                <><Loader2 className="h-4 w-4 mr-2 animate-spin" />Saving...</>
+                              ) : (
+                                <><CheckCircle className="h-4 w-4 mr-2" />Use This Variation</>
+                              )}
+                            </Button>
+                          </DialogFooter>
+                        </>
+                      )}
                     </div>
-                  ) : (
-                    /* Create Form */
+                  )}
+
+                  {/* ========== FORM VIEW ========== */}
+                  {dialogView === "form" && (
                     <>
                       <div className="space-y-4 py-4">
+                        {/* Template banner */}
+                        {!selectedTemplate && (
+                          <div
+                            onClick={() => setDialogView("templates")}
+                            className="rounded-lg border border-dashed border-violet-300 dark:border-violet-700 p-3 cursor-pointer hover:bg-violet-50/50 dark:hover:bg-violet-900/10 transition-colors"
+                          >
+                            <div className="flex items-center gap-3 text-sm">
+                              <Zap className="h-4 w-4 text-violet-500" />
+                              <span className="text-slate-600 dark:text-slate-400">
+                                Start from a <strong className="text-violet-600 dark:text-violet-400">template</strong> — 10 pre-built prompts for social, blog, email & more
+                              </span>
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Template fields */}
+                        {selectedTemplate && (
+                          <div className="rounded-lg border border-violet-200 dark:border-violet-800 bg-violet-50/30 dark:bg-violet-900/10 p-4 space-y-3">
+                            <div className="flex items-center justify-between">
+                              <span className="text-sm font-medium text-violet-600 dark:text-violet-400">
+                                {selectedTemplate.name}
+                              </span>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="h-6 text-xs text-slate-400"
+                                onClick={() => { setSelectedTemplate(null); setTemplateValues({}); }}
+                              >
+                                Clear template
+                              </Button>
+                            </div>
+                            {selectedTemplate.fields.map((field) => (
+                              <div key={field.key} className="space-y-1">
+                                <Label className="text-xs">{field.label}{field.required && " *"}</Label>
+                                {field.type === "textarea" ? (
+                                  <Textarea
+                                    placeholder={field.placeholder}
+                                    value={templateValues[field.key] || ""}
+                                    onChange={(e) => setTemplateValues((prev) => ({ ...prev, [field.key]: e.target.value }))}
+                                    rows={2}
+                                    className="border-slate-200 dark:border-slate-700 text-sm"
+                                  />
+                                ) : (
+                                  <Input
+                                    placeholder={field.placeholder}
+                                    value={templateValues[field.key] || ""}
+                                    onChange={(e) => setTemplateValues((prev) => ({ ...prev, [field.key]: e.target.value }))}
+                                    className="border-slate-200 dark:border-slate-700 text-sm"
+                                  />
+                                )}
+                              </div>
+                            ))}
+                          </div>
+                        )}
+
                         <div className="space-y-2">
                           <Label>Title</Label>
                           <Input
                             placeholder="e.g., Q4 Product Launch Announcement"
                             value={newContent.title}
-                            onChange={(e) =>
-                              setNewContent({ ...newContent, title: e.target.value })
-                            }
+                            onChange={(e) => setNewContent({ ...newContent, title: e.target.value })}
                             className="border-slate-200 dark:border-slate-700"
                           />
                         </div>
                         <div className="grid grid-cols-2 gap-4">
                           <div className="space-y-2">
                             <Label>Content Type</Label>
-                            <Select
-                              value={newContent.content_type}
-                              onValueChange={(value) =>
-                                setNewContent({ ...newContent, content_type: value })
-                              }
-                            >
-                              <SelectTrigger className="border-slate-200 dark:border-slate-700">
-                                <SelectValue />
-                              </SelectTrigger>
+                            <Select value={newContent.content_type} onValueChange={(value) => setNewContent({ ...newContent, content_type: value })}>
+                              <SelectTrigger className="border-slate-200 dark:border-slate-700"><SelectValue /></SelectTrigger>
                               <SelectContent>
                                 <SelectItem value="social">Social Post</SelectItem>
                                 <SelectItem value="linkedin_post">LinkedIn Post</SelectItem>
@@ -714,20 +913,14 @@ export default function ContentPage() {
                                 <SelectItem value="newsletter">Newsletter</SelectItem>
                                 <SelectItem value="video_script">Video Script</SelectItem>
                                 <SelectItem value="email">Email</SelectItem>
+                                <SelectItem value="case_study">Case Study</SelectItem>
                               </SelectContent>
                             </Select>
                           </div>
                           <div className="space-y-2">
                             <Label>Platform</Label>
-                            <Select
-                              value={newContent.platform}
-                              onValueChange={(value) =>
-                                setNewContent({ ...newContent, platform: value })
-                              }
-                            >
-                              <SelectTrigger className="border-slate-200 dark:border-slate-700">
-                                <SelectValue />
-                              </SelectTrigger>
+                            <Select value={newContent.platform} onValueChange={(value) => setNewContent({ ...newContent, platform: value })}>
+                              <SelectTrigger className="border-slate-200 dark:border-slate-700"><SelectValue /></SelectTrigger>
                               <SelectContent>
                                 <SelectItem value="linkedin">LinkedIn</SelectItem>
                                 <SelectItem value="twitter">Twitter/X</SelectItem>
@@ -742,15 +935,8 @@ export default function ContentPage() {
                         <div className="grid grid-cols-2 gap-4">
                           <div className="space-y-2">
                             <Label>Tone</Label>
-                            <Select
-                              value={newContent.tone}
-                              onValueChange={(value) =>
-                                setNewContent({ ...newContent, tone: value })
-                              }
-                            >
-                              <SelectTrigger className="border-slate-200 dark:border-slate-700">
-                                <SelectValue />
-                              </SelectTrigger>
+                            <Select value={newContent.tone} onValueChange={(value) => setNewContent({ ...newContent, tone: value })}>
+                              <SelectTrigger className="border-slate-200 dark:border-slate-700"><SelectValue /></SelectTrigger>
                               <SelectContent>
                                 <SelectItem value="professional">Professional</SelectItem>
                                 <SelectItem value="casual">Casual</SelectItem>
@@ -762,15 +948,8 @@ export default function ContentPage() {
                           </div>
                           <div className="space-y-2">
                             <Label>Length</Label>
-                            <Select
-                              value={newContent.length}
-                              onValueChange={(value) =>
-                                setNewContent({ ...newContent, length: value })
-                              }
-                            >
-                              <SelectTrigger className="border-slate-200 dark:border-slate-700">
-                                <SelectValue />
-                              </SelectTrigger>
+                            <Select value={newContent.length} onValueChange={(value) => setNewContent({ ...newContent, length: value })}>
+                              <SelectTrigger className="border-slate-200 dark:border-slate-700"><SelectValue /></SelectTrigger>
                               <SelectContent>
                                 <SelectItem value="short">Short</SelectItem>
                                 <SelectItem value="medium">Medium</SelectItem>
@@ -782,12 +961,7 @@ export default function ContentPage() {
                         {brands.length > 0 && (
                           <div className="space-y-2">
                             <Label>Brand (optional)</Label>
-                            <Select
-                              value={newContent.brand_id}
-                              onValueChange={(value) =>
-                                setNewContent({ ...newContent, brand_id: value })
-                              }
-                            >
+                            <Select value={newContent.brand_id} onValueChange={(value) => setNewContent({ ...newContent, brand_id: value })}>
                               <SelectTrigger className="border-slate-200 dark:border-slate-700">
                                 <SelectValue placeholder="Select a brand for voice matching" />
                               </SelectTrigger>
@@ -795,57 +969,75 @@ export default function ContentPage() {
                                 <SelectItem value="">No brand</SelectItem>
                                 {brands.map((brand) => (
                                   <SelectItem key={brand.id} value={brand.id}>
-                                    {brand.name}
-                                    {brand.entity_name && ` (${brand.entity_name})`}
+                                    {brand.name}{brand.entity_name && ` (${brand.entity_name})`}
                                   </SelectItem>
                                 ))}
                               </SelectContent>
                             </Select>
                           </div>
                         )}
+
+                        {/* AI Prompt — hidden when using template */}
+                        {!selectedTemplate && (
+                          <div className="space-y-2">
+                            <Label>AI Prompt</Label>
+                            <Textarea
+                              placeholder="Describe what you want to create. E.g., Write a LinkedIn post about our new AI feature..."
+                              value={newContent.ai_prompt}
+                              onChange={(e) => setNewContent({ ...newContent, ai_prompt: e.target.value })}
+                              rows={4}
+                              className="border-slate-200 dark:border-slate-700"
+                            />
+                          </div>
+                        )}
+
+                        {/* Reference Content */}
                         <div className="space-y-2">
-                          <Label>AI Prompt (optional)</Label>
+                          <Label className="flex items-center gap-1.5">
+                            <Paperclip className="h-3.5 w-3.5" />
+                            Reference Content (optional)
+                          </Label>
                           <Textarea
-                            placeholder="Describe what you want to create. E.g., Write a LinkedIn post about our new AI feature..."
-                            value={newContent.ai_prompt}
-                            onChange={(e) =>
-                              setNewContent({
-                                ...newContent,
-                                ai_prompt: e.target.value,
-                              })
-                            }
-                            rows={4}
-                            className="border-slate-200 dark:border-slate-700"
+                            placeholder="Paste a voice memo transcript, meeting notes, article, or any context the AI should reference..."
+                            value={referenceContent}
+                            onChange={(e) => setReferenceContent(e.target.value)}
+                            rows={3}
+                            className="border-slate-200 dark:border-slate-700 text-sm"
                           />
                         </div>
                       </div>
+
                       <DialogFooter>
-                        <Button
-                          variant="outline"
-                          onClick={resetCreateDialog}
-                          className="border-slate-200 dark:border-slate-700"
-                        >
+                        <Button variant="outline" onClick={resetCreateDialog} className="border-slate-200 dark:border-slate-700">
                           Cancel
                         </Button>
-                        <Button
-                          onClick={createContent}
-                          disabled={submitting || !newContent.title.trim()}
-                          className="bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-700 hover:to-purple-700 text-white"
-                        >
-                          {submitting ? (
-                            <>
-                              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                              Generating...
-                            </>
-                          ) : newContent.ai_prompt ? (
-                            <>
-                              <Sparkles className="h-4 w-4 mr-2" />
-                              Create & Generate
-                            </>
-                          ) : (
-                            "Create Draft"
-                          )}
-                        </Button>
+                        {selectedTemplate ? (
+                          <Button
+                            onClick={generateFromTemplate}
+                            disabled={submitting || !newContent.title.trim() || !selectedTemplate.fields.filter((f) => f.required).every((f) => templateValues[f.key]?.trim())}
+                            className="bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-700 hover:to-purple-700 text-white"
+                          >
+                            {submitting ? (
+                              <><Loader2 className="h-4 w-4 mr-2 animate-spin" />Generating...</>
+                            ) : (
+                              <><Sparkles className="h-4 w-4 mr-2" />Generate from Template</>
+                            )}
+                          </Button>
+                        ) : (
+                          <Button
+                            onClick={createContent}
+                            disabled={submitting || !newContent.title.trim()}
+                            className="bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-700 hover:to-purple-700 text-white"
+                          >
+                            {submitting ? (
+                              <><Loader2 className="h-4 w-4 mr-2 animate-spin" />Generating...</>
+                            ) : newContent.ai_prompt ? (
+                              <><Sparkles className="h-4 w-4 mr-2" />Create & Generate</>
+                            ) : (
+                              "Create Draft"
+                            )}
+                          </Button>
+                        )}
                       </DialogFooter>
                     </>
                   )}
