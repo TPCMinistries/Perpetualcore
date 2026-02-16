@@ -53,6 +53,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
+import { DashboardPageWrapper, DashboardHeader } from "@/components/ui/dashboard-header";
 import { toast } from "sonner";
 
 interface Reminder {
@@ -298,28 +299,19 @@ export default function RemindersPage() {
   );
 
   return (
-    <div className="flex flex-col h-full">
-      {/* Header */}
-      <div className="flex items-center justify-between p-6 border-b">
-        <div className="flex items-center gap-4">
-          <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-purple-500 to-indigo-600 flex items-center justify-center shadow-lg">
-            <Bell className="h-6 w-6 text-white" />
-          </div>
-          <div>
-            <h1 className="text-2xl font-semibold">Reminders</h1>
-            <p className="text-muted-foreground">
-              Never miss important tasks and events
-            </p>
-          </div>
-        </div>
-        <Button onClick={() => setShowAddDialog(true)}>
-          <Plus className="h-4 w-4 mr-2" />
-          New Reminder
-        </Button>
-      </div>
+    <DashboardPageWrapper>
+      <DashboardHeader
+        title="Reminders"
+        subtitle="Never miss important tasks and events"
+        icon={Bell}
+        iconColor="indigo"
+        actions={[
+          { label: "New Reminder", icon: Plus, onClick: () => setShowAddDialog(true), variant: "primary" },
+        ]}
+      />
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-5 gap-4 p-6">
+      <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
         <Card className={cn(
           "cursor-pointer transition-all hover:shadow-md",
           stats?.overdue && stats.overdue > 0 && "ring-2 ring-red-500"
@@ -561,7 +553,7 @@ export default function RemindersPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </div>
+    </DashboardPageWrapper>
   );
 }
 

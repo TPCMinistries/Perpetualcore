@@ -6,8 +6,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Input } from "@/components/ui/input";
-import { Workflow, Plus, Search, Play, Pause, Trash2, Edit, Eye, Clock, CheckCircle2, XCircle, Zap } from "lucide-react";
+import { Workflow, Plus, Search, Play, Pause, Trash2, Edit, Eye, Clock, CheckCircle2, XCircle, Zap, PenTool } from "lucide-react";
 import { StaggeredGrid, StaggeredGridItem } from "@/components/ui/page-wrapper";
+import { DashboardPageWrapper, DashboardHeader } from "@/components/ui/dashboard-header";
 import { WorkflowsPageSkeleton } from "@/components/ui/skeletons";
 import { toast } from "sonner";
 import Link from "next/link";
@@ -88,7 +89,7 @@ export default function WorkflowsPage() {
     setTogglingId(id);
     try {
       const response = await fetch(`/api/workflows/${id}`, {
-        method: "PUT",
+        method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ enabled: !currentState }),
       });
@@ -170,50 +171,28 @@ export default function WorkflowsPage() {
   }
 
   return (
-    <div className="space-y-8">
-      {/* Header Section */}
-      <div className="border border-slate-200 dark:border-slate-800 rounded-xl p-8 bg-white dark:bg-slate-900">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <div className="h-12 w-12 rounded-lg bg-slate-900 dark:bg-slate-100 flex items-center justify-center">
-              <Workflow className="h-6 w-6 text-white dark:text-slate-900" />
-            </div>
-            <div>
-              <h1 className="text-3xl font-semibold text-slate-900 dark:text-slate-100">
-                Workflows
-              </h1>
-              <p className="text-slate-600 dark:text-slate-400 text-sm mt-1">
-                Multi-step automation recipes that orchestrate complex processes
-              </p>
-            </div>
-          </div>
-          <div className="flex gap-2">
-            <Button variant="outline" asChild className="border-slate-200 dark:border-slate-800">
-              <Link href="/dashboard/workflows/templates">
-                <Zap className="mr-2 h-4 w-4" />
-                Browse Templates
-              </Link>
-            </Button>
-            <Button asChild className="bg-slate-900 dark:bg-slate-100 hover:bg-slate-800 dark:hover:bg-slate-200 text-white dark:text-slate-900">
-              <Link href="/dashboard/workflows/new">
-                <Plus className="mr-2 h-4 w-4" />
-                Create Workflow
-              </Link>
-            </Button>
-          </div>
-        </div>
-
-        {/* Search Bar */}
-        <div className="relative max-w-md mt-6">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+    <DashboardPageWrapper>
+      <DashboardHeader
+        title="Workflows"
+        subtitle="Multi-step automation recipes that orchestrate complex processes"
+        icon={Workflow}
+        iconColor="violet"
+        actions={[
+          { label: "Browse Templates", icon: Zap, href: "/dashboard/workflows/templates", variant: "outline" },
+          { label: "Visual Builder", icon: PenTool, href: "/dashboard/workflows/new/builder", variant: "outline" },
+          { label: "Create Workflow", icon: Plus, href: "/dashboard/workflows/new", variant: "primary" },
+        ]}
+      >
+        <div className="relative max-w-md mt-4">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
             placeholder="Search workflows..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-10 border-slate-200 dark:border-slate-800"
+            className="pl-10"
           />
         </div>
-      </div>
+      </DashboardHeader>
 
       {/* Category Filter */}
       <div className="flex gap-2 overflow-x-auto pb-2">
@@ -353,6 +332,6 @@ export default function WorkflowsPage() {
           ))}
         </StaggeredGrid>
       )}
-    </div>
+    </DashboardPageWrapper>
   );
 }
