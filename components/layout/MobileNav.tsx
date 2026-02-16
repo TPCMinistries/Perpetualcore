@@ -1,16 +1,17 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { Settings, LogOut, Menu, ChevronDown, ChevronRight } from "lucide-react";
+import { LogOut, Menu, ChevronDown, ChevronRight } from "lucide-react";
 import { signOut } from "@/lib/auth/actions";
 import { cn } from "@/lib/utils";
-import { getFilteredNavigation, NavigationSection } from "@/config/navigation";
+import { getFilteredNavigationV2, NavigationSection } from "@/config/navigation";
 import { useExperienceLevel } from "@/components/experience-level/ExperienceLevelToggle";
 import { ExperienceLevelToggle } from "@/components/experience-level/ExperienceLevelToggle";
+import { useWorkspace } from "@/components/workspaces/WorkspaceProvider";
 
 interface MobileNavProps {
   userProfile: {
@@ -26,11 +27,12 @@ export function MobileNav({ userProfile }: MobileNavProps) {
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
   const experienceLevel = useExperienceLevel();
+  const { isItemVisible, isSectionVisible, isSectionPrioritized } = useWorkspace();
   const [navigation, setNavigation] = useState<NavigationSection[]>([]);
   const [collapsedSections, setCollapsedSections] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
-    const filteredNav = getFilteredNavigation(experienceLevel);
+    const filteredNav = getFilteredNavigationV2(experienceLevel);
     setNavigation(filteredNav);
 
     const initialCollapsed: Record<string, boolean> = {};
@@ -41,6 +43,24 @@ export function MobileNav({ userProfile }: MobileNavProps) {
     });
     setCollapsedSections(initialCollapsed);
   }, [experienceLevel]);
+
+  // Apply workspace filtering on top of experience-level filtering
+  const sortedNavigation = useMemo(() => {
+    const filtered = navigation
+      .filter(section => isSectionVisible(section.section))
+      .map(section => ({
+        ...section,
+        items: section.items.filter(item => isItemVisible(item.name)),
+        isPrioritized: isSectionPrioritized(section.section),
+      }))
+      .filter(section => section.items.length > 0);
+
+    return [...filtered].sort((a, b) => {
+      if (a.isPrioritized && !b.isPrioritized) return -1;
+      if (!a.isPrioritized && b.isPrioritized) return 1;
+      return 0;
+    });
+  }, [navigation, isItemVisible, isSectionVisible, isSectionPrioritized]);
 
   const toggleSection = (sectionName: string) => {
     setCollapsedSections(prev => ({
@@ -74,7 +94,7 @@ export function MobileNav({ userProfile }: MobileNavProps) {
           {/* Logo/Brand */}
           <div className="px-6 py-5">
             <Link
-              href="/dashboard"
+              href="/dashboard/home"
               className="flex items-center space-x-3 group"
               onClick={() => setOpen(false)}
             >
@@ -107,7 +127,7 @@ export function MobileNav({ userProfile }: MobileNavProps) {
 
           {/* Navigation */}
           <nav className="flex-1 px-3 py-4 overflow-y-auto">
-            {navigation.map((group, groupIndex) => {
+            {sortedNavigation.map((group, groupIndex) => {
               const isSectionCollapsed = group.collapsible && collapsedSections[group.section];
 
               return (

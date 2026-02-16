@@ -809,7 +809,7 @@ export const NAVIGATION_CONFIG_V2: NavigationSection[] = [
         href: "/dashboard/voice-memos",
         icon: Headphones,
         adaptiveConfig: {
-          visibleFor: ["beginner", "intermediate", "advanced"],
+          visibleFor: ["intermediate", "advanced"],
           complexity: "standard",
           helpText: "Record, transcribe, and AI-analyze voice memos",
         },
@@ -819,7 +819,7 @@ export const NAVIGATION_CONFIG_V2: NavigationSection[] = [
         href: "/dashboard/voice-intel",
         icon: AudioLines,
         adaptiveConfig: {
-          visibleFor: ["beginner", "intermediate", "advanced"],
+          visibleFor: ["advanced"],
           complexity: "standard",
           badge: "new",
           helpText: "Brain-classified voice memos with action queue — red/yellow/green tiers",
@@ -934,7 +934,7 @@ export const NAVIGATION_CONFIG_V2: NavigationSection[] = [
         href: "/dashboard/brands",
         icon: Palette,
         adaptiveConfig: {
-          visibleFor: ["beginner", "intermediate", "advanced"],
+          visibleFor: ["intermediate", "advanced"],
           complexity: "standard",
           badge: "new",
           helpText: "Manage brand identities, voice settings, and content guidelines",
@@ -945,7 +945,7 @@ export const NAVIGATION_CONFIG_V2: NavigationSection[] = [
         href: "/dashboard/expenses",
         icon: DollarSign,
         adaptiveConfig: {
-          visibleFor: ["beginner", "intermediate", "advanced"],
+          visibleFor: ["intermediate", "advanced"],
           complexity: "standard",
           helpText: "Track expenses from Telegram and manual entries with charts",
         },
@@ -955,7 +955,7 @@ export const NAVIGATION_CONFIG_V2: NavigationSection[] = [
         href: "/dashboard/reminders",
         icon: Bell,
         adaptiveConfig: {
-          visibleFor: ["beginner", "intermediate", "advanced"],
+          visibleFor: ["intermediate", "advanced"],
           complexity: "standard",
           helpText: "View and manage reminders created via Telegram or manually",
         },
@@ -997,7 +997,7 @@ export const NAVIGATION_CONFIG_V2: NavigationSection[] = [
         href: "/dashboard/agent/plans",
         icon: Target,
         adaptiveConfig: {
-          visibleFor: ["beginner", "intermediate", "advanced"],
+          visibleFor: ["advanced"],
           complexity: "standard",
           helpText: "View and manage multi-step plans your AI agent executes autonomously",
         },
@@ -1007,7 +1007,7 @@ export const NAVIGATION_CONFIG_V2: NavigationSection[] = [
         href: "/dashboard/automation",
         icon: Zap,
         adaptiveConfig: {
-          visibleFor: ["intermediate", "advanced"],
+          visibleFor: ["advanced"],
           complexity: "standard",
           helpText: "Webhooks, schedules, and event triggers for your automations",
         },

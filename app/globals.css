@@ -26,6 +26,11 @@
     --ring: 256 67% 55%;
     --radius: 0.75rem;
 
+    /* Sidebar */
+    --sidebar-bg: 260 30% 10%;
+    --sidebar-hover: 256 30% 18%;
+    --sidebar-active: 256 67% 55%;
+
     /* Glow tokens */
     --glow-primary: 256 67% 55% / 0.25;
     --shadow-colored: 256 67% 55% / 0.12;
@@ -57,6 +62,11 @@
     --border: 256 15% 18%;
     --input: 256 15% 18%;
     --ring: 256 80% 68%;
+
+    /* Sidebar - dark */
+    --sidebar-bg: 260 30% 6%;
+    --sidebar-hover: 256 25% 15%;
+    --sidebar-active: 256 80% 68%;
 
     /* Glow tokens - dark */
     --glow-primary: 256 80% 68% / 0.35;
