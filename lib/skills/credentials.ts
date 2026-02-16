@@ -41,12 +41,13 @@ const PROVIDER_ENV_VARS: Record<string, string> = {
 
 /**
  * Resolve credential for a provider with cascade:
- * User BYOK → Org BYOK → System Env
+ * User BYOK → Team BYOK → Org BYOK → System Env
  */
 export async function resolveCredential(
   provider: string,
   userId: string,
-  organizationId?: string
+  organizationId?: string,
+  teamId?: string
 ): Promise<CredentialInfo | null> {
   const supabase = createAdminClient();
 
@@ -82,7 +83,31 @@ export async function resolveCredential(
     }
   }
 
-  // 2. Check organization's shared BYOK credential
+  // 2. Check team's shared credential
+  if (teamId) {
+    const { data: teamCred } = await supabase
+      .from("team_credentials")
+      .select("credential_value")
+      .eq("team_id", teamId)
+      .eq("skill_id", provider)
+      .eq("credential_key", "api_key")
+      .single();
+
+    if (teamCred?.credential_value) {
+      try {
+        const decryptedKey = decryptSecret(teamCred.credential_value);
+        return {
+          source: "organization",
+          provider,
+          key: decryptedKey,
+        };
+      } catch (error) {
+        console.error(`Failed to decrypt team credential for ${provider}:`, error);
+      }
+    }
+  }
+
+  // 3. Check organization's shared BYOK credential
   if (organizationId) {
     const { data: orgCred } = await supabase
       .from("skill_credentials")
@@ -115,7 +140,7 @@ export async function resolveCredential(
     }
   }
 
-  // 3. Fallback to system environment variable
+  // 4. Fallback to system environment variable
   const envVarName = PROVIDER_ENV_VARS[provider];
   if (envVarName) {
     const systemKey = process.env[envVarName];

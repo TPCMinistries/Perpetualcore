@@ -1,19 +1,10 @@
-import twilio from "twilio";
 import { createClient } from "@/lib/supabase/server";
 import { getChatCompletion } from "@/lib/ai/router";
+import { getTwilioClient, TWILIO_WHATSAPP_NUMBER } from "@/lib/twilio/client";
 
 const accountSid = process.env.TWILIO_ACCOUNT_SID;
 const authToken = process.env.TWILIO_AUTH_TOKEN;
-const twilioPhoneNumber = process.env.TWILIO_WHATSAPP_NUMBER; // e.g., "whatsapp:+14155238886"
-
-// Lazy initialization to avoid build-time errors
-let twilioClient: ReturnType<typeof twilio> | null = null;
-function getTwilioClient() {
-  if (!twilioClient && accountSid && authToken) {
-    twilioClient = twilio(accountSid, authToken);
-  }
-  return twilioClient;
-}
+const twilioPhoneNumber = TWILIO_WHATSAPP_NUMBER; // e.g., "whatsapp:+14155238886"
 
 /**
  * Send WhatsApp message via Twilio

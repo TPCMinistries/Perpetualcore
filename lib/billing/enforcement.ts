@@ -389,3 +389,144 @@ export async function enforceA2UIAccess(
 
   return { allowed: true, current: 0, limit: 0, plan };
 }
+
+// ============================================================
+// Phase 2: Skills Platform Gates
+// ============================================================
+
+/**
+ * Check if a user can perform more browser automation actions today
+ */
+export async function enforceBrowserAutomationLimit(
+  userId: string,
+  organizationId?: string
+): Promise<EnforcementResult> {
+  const plan = organizationId
+    ? await getOrgPlan(organizationId)
+    : "free" as PlanType;
+  const limit = PLAN_LIMITS[plan]?.browserAutomation ?? 0;
+
+  if (limit === -1) {
+    return { allowed: true, current: 0, limit: -1, plan };
+  }
+
+  if (limit === 0) {
+    return {
+      allowed: false,
+      current: 0,
+      limit: 0,
+      plan,
+      message: `Browser automation is not available on the ${plan} plan. Upgrade to Starter or above.`,
+    };
+  }
+
+  const supabase = createAdminClient();
+
+  // Count today's browser actions
+  const todayStart = new Date();
+  todayStart.setUTCHours(0, 0, 0, 0);
+
+  const { count } = await supabase
+    .from("skill_executions")
+    .select("id", { count: "exact", head: true })
+    .eq("user_id", userId)
+    .like("skill_id", "browser%")
+    .gte("created_at", todayStart.toISOString());
+
+  const current = count || 0;
+
+  if (current >= limit) {
+    return {
+      allowed: false,
+      current,
+      limit,
+      plan,
+      message: `Daily browser automation limit reached (${current}/${limit}). Resets at midnight UTC.`,
+    };
+  }
+
+  return { allowed: true, current, limit, plan };
+}
+
+/**
+ * Check if a user can make more voice calls this month
+ */
+export async function enforceVoiceCallLimit(
+  userId: string,
+  organizationId?: string
+): Promise<EnforcementResult> {
+  const plan = organizationId
+    ? await getOrgPlan(organizationId)
+    : "free" as PlanType;
+  const limit = PLAN_LIMITS[plan]?.voiceCalls ?? 0;
+
+  if (limit === -1) {
+    return { allowed: true, current: 0, limit: -1, plan };
+  }
+
+  if (limit === 0) {
+    return {
+      allowed: false,
+      current: 0,
+      limit: 0,
+      plan,
+      message: `Voice calls are not available on the ${plan} plan. Upgrade to Pro or above.`,
+    };
+  }
+
+  const supabase = createAdminClient();
+
+  // Count this month's calls
+  const monthStart = new Date();
+  monthStart.setUTCDate(1);
+  monthStart.setUTCHours(0, 0, 0, 0);
+
+  const { count } = await supabase
+    .from("voice_calls")
+    .select("id", { count: "exact", head: true })
+    .eq("user_id", userId)
+    .gte("created_at", monthStart.toISOString());
+
+  const current = count || 0;
+
+  if (current >= limit) {
+    return {
+      allowed: false,
+      current,
+      limit,
+      plan,
+      message: `Monthly voice call limit reached (${current}/${limit}). Resets on the 1st.`,
+    };
+  }
+
+  return { allowed: true, current, limit, plan };
+}
+
+/**
+ * Check if a user has access to advanced/premium skills (Notion, GitHub, Trello full SDK)
+ */
+export async function enforceAdvancedSkillAccess(
+  userId: string,
+  skillId: string,
+  organizationId?: string
+): Promise<EnforcementResult> {
+  const advancedSkills = ["notion", "github", "trello", "browser", "voice-call"];
+  if (!advancedSkills.includes(skillId)) {
+    return { allowed: true, current: 0, limit: 0, plan: "any" };
+  }
+
+  const plan = organizationId
+    ? await getOrgPlan(organizationId)
+    : "free" as PlanType;
+  const hasAdvanced = PLAN_LIMITS[plan]?.advancedSkills ?? false;
+
+  return {
+    allowed: hasAdvanced,
+    current: hasAdvanced ? 1 : 0,
+    limit: hasAdvanced ? 1 : 0,
+    plan,
+    message: hasAdvanced
+      ? undefined
+      : `Advanced skills (${skillId}) require Starter plan or above. Upgrade to unlock full SDK integrations.`,
+  };
+}

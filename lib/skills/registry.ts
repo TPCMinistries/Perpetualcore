@@ -27,6 +27,9 @@ import { linearSkill } from "./builtin/linear";
 import { slackSkill } from "./builtin/slack";
 import { zoomSkill } from "./builtin/zoom";
 import { dropboxSkill } from "./builtin/dropbox";
+// Batch 4 Skills - Browser & Voice
+import { browserSkill } from "./builtin/browser";
+import { voiceCallSkill } from "./builtin/voice-call";
 
 // Registry of all available skills
 const skillRegistry: Map<string, Skill> = new Map();
@@ -50,6 +53,9 @@ const BUILT_IN_SKILLS: Skill[] = [
   slackSkill,
   zoomSkill,
   dropboxSkill,
+  // Batch 4 Skills - Browser & Voice
+  browserSkill,
+  voiceCallSkill,
 ];
 
 /**

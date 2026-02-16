@@ -1,248 +1,18 @@
 /**
- * Notion Skill
+ * Notion Skill (SDK Upgrade)
  *
- * Interact with Notion workspaces - pages, databases, and blocks.
- * Requires Notion integration to be connected.
+ * Full Notion integration using @notionhq/client SDK.
+ * Supports pages, databases, and blocks.
  */
 
+import { Client } from "@notionhq/client";
 import { Skill, ToolContext, ToolResult } from "../types";
+import { resolveCredential } from "../credentials";
 
-const NOTION_API = "https://api.notion.com/v1";
-const NOTION_VERSION = "2022-06-28";
-
-async function getNotionHeaders(context: ToolContext): Promise<Headers | null> {
-  // Get user's Notion token from their integration
-  // In production, this would fetch from user_integrations table
-  const token = process.env.NOTION_API_KEY;
-  if (!token) return null;
-
-  return new Headers({
-    Authorization: `Bearer ${token}`,
-    "Content-Type": "application/json",
-    "Notion-Version": NOTION_VERSION,
-  });
-}
-
-async function searchPages(
-  params: { query: string; limit?: number },
-  context: ToolContext
-): Promise<ToolResult> {
-  const headers = await getNotionHeaders(context);
-  if (!headers) {
-    return { success: false, error: "Notion not connected. Please connect Notion in integrations." };
-  }
-
-  try {
-    const response = await fetch(`${NOTION_API}/search`, {
-      method: "POST",
-      headers,
-      body: JSON.stringify({
-        query: params.query,
-        page_size: params.limit || 10,
-        filter: { property: "object", value: "page" },
-      }),
-    });
-
-    if (!response.ok) {
-      const error = await response.json();
-      return { success: false, error: error.message || "Notion API error" };
-    }
-
-    const data = await response.json();
-    const pages = data.results.map((page: any) => ({
-      id: page.id,
-      title: page.properties?.title?.title?.[0]?.plain_text ||
-             page.properties?.Name?.title?.[0]?.plain_text ||
-             "Untitled",
-      url: page.url,
-      lastEdited: page.last_edited_time,
-      createdBy: page.created_by?.id,
-    }));
-
-    return {
-      success: true,
-      data: { query: params.query, pages },
-      display: {
-        type: "table",
-        content: {
-          headers: ["Title", "Last Edited", "URL"],
-          rows: pages.slice(0, 5).map((p: any) => [
-            p.title,
-            new Date(p.lastEdited).toLocaleDateString(),
-            p.url,
-          ]),
-        },
-      },
-    };
-  } catch (error: any) {
-    return { success: false, error: error.message };
-  }
-}
-
-async function createPage(
-  params: { parentId: string; title: string; content?: string },
-  context: ToolContext
-): Promise<ToolResult> {
-  const headers = await getNotionHeaders(context);
-  if (!headers) {
-    return { success: false, error: "Notion not connected" };
-  }
-
-  try {
-    const children: any[] = [];
-
-    if (params.content) {
-      // Split content into paragraphs
-      const paragraphs = params.content.split("\n\n");
-      for (const para of paragraphs) {
-        if (para.trim()) {
-          children.push({
-            object: "block",
-            type: "paragraph",
-            paragraph: {
-              rich_text: [{ type: "text", text: { content: para.trim() } }],
-            },
-          });
-        }
-      }
-    }
-
-    const response = await fetch(`${NOTION_API}/pages`, {
-      method: "POST",
-      headers,
-      body: JSON.stringify({
-        parent: { page_id: params.parentId },
-        properties: {
-          title: {
-            title: [{ type: "text", text: { content: params.title } }],
-          },
-        },
-        children: children.length > 0 ? children : undefined,
-      }),
-    });
-
-    if (!response.ok) {
-      const error = await response.json();
-      return { success: false, error: error.message || "Failed to create page" };
-    }
-
-    const page = await response.json();
-
-    return {
-      success: true,
-      data: {
-        id: page.id,
-        title: params.title,
-        url: page.url,
-      },
-      display: {
-        type: "card",
-        content: {
-          title: `Created: ${params.title}`,
-          description: `Page created successfully`,
-          fields: [{ label: "URL", value: page.url }],
-        },
-      },
-    };
-  } catch (error: any) {
-    return { success: false, error: error.message };
-  }
-}
-
-async function listDatabases(
-  params: { limit?: number },
-  context: ToolContext
-): Promise<ToolResult> {
-  const headers = await getNotionHeaders(context);
-  if (!headers) {
-    return { success: false, error: "Notion not connected" };
-  }
-
-  try {
-    const response = await fetch(`${NOTION_API}/search`, {
-      method: "POST",
-      headers,
-      body: JSON.stringify({
-        page_size: params.limit || 10,
-        filter: { property: "object", value: "database" },
-      }),
-    });
-
-    if (!response.ok) {
-      return { success: false, error: "Failed to list databases" };
-    }
-
-    const data = await response.json();
-    const databases = data.results.map((db: any) => ({
-      id: db.id,
-      title: db.title?.[0]?.plain_text || "Untitled Database",
-      url: db.url,
-      properties: Object.keys(db.properties || {}),
-    }));
-
-    return {
-      success: true,
-      data: { databases },
-      display: {
-        type: "table",
-        content: {
-          headers: ["Database", "Properties", "URL"],
-          rows: databases.map((db: any) => [
-            db.title,
-            db.properties.slice(0, 3).join(", "),
-            db.url,
-          ]),
-        },
-      },
-    };
-  } catch (error: any) {
-    return { success: false, error: error.message };
-  }
-}
-
-async function queryDatabase(
-  params: { databaseId: string; filter?: any; limit?: number },
-  context: ToolContext
-): Promise<ToolResult> {
-  const headers = await getNotionHeaders(context);
-  if (!headers) {
-    return { success: false, error: "Notion not connected" };
-  }
-
-  try {
-    const response = await fetch(`${NOTION_API}/databases/${params.databaseId}/query`, {
-      method: "POST",
-      headers,
-      body: JSON.stringify({
-        page_size: params.limit || 10,
-        filter: params.filter,
-      }),
-    });
-
-    if (!response.ok) {
-      return { success: false, error: "Failed to query database" };
-    }
-
-    const data = await response.json();
-    const rows = data.results.map((row: any) => {
-      const props: Record<string, any> = {};
-      for (const [key, value] of Object.entries(row.properties)) {
-        props[key] = extractPropertyValue(value);
-      }
-      return { id: row.id, url: row.url, properties: props };
-    });
-
-    return {
-      success: true,
-      data: { databaseId: params.databaseId, rows },
-      display: {
-        type: "text",
-        content: `Found ${rows.length} rows in database`,
-      },
-    };
-  } catch (error: any) {
-    return { success: false, error: error.message };
-  }
+async function getClient(context: ToolContext): Promise<Client | null> {
+  const cred = await resolveCredential("notion", context.userId, context.organizationId);
+  if (!cred) return null;
+  return new Client({ auth: cred.key });
 }
 
 function extractPropertyValue(prop: any): any {
@@ -266,16 +36,314 @@ function extractPropertyValue(prop: any): any {
       return prop.url || "";
     case "email":
       return prop.email || "";
+    case "status":
+      return prop.status?.name || "";
+    case "people":
+      return prop.people?.map((p: any) => p.name || p.id) || [];
     default:
       return null;
   }
 }
 
+// --- Tool Functions ---
+
+async function searchPages(
+  params: { query: string; limit?: number },
+  context: ToolContext
+): Promise<ToolResult> {
+  const client = await getClient(context);
+  if (!client) {
+    return { success: false, error: "Notion not connected. Please connect Notion in Settings > Skills." };
+  }
+
+  try {
+    const response = await client.search({
+      query: params.query,
+      page_size: params.limit || 10,
+      filter: { property: "object", value: "page" },
+    });
+
+    const pages = response.results.map((page: any) => ({
+      id: page.id,
+      title:
+        page.properties?.title?.title?.[0]?.plain_text ||
+        page.properties?.Name?.title?.[0]?.plain_text ||
+        "Untitled",
+      url: page.url,
+      lastEdited: page.last_edited_time,
+    }));
+
+    return {
+      success: true,
+      data: { query: params.query, pages },
+      display: {
+        type: "table",
+        content: {
+          headers: ["Title", "Last Edited", "URL"],
+          rows: pages.slice(0, 10).map((p: any) => [
+            p.title,
+            new Date(p.lastEdited).toLocaleDateString(),
+            p.url,
+          ]),
+        },
+      },
+    };
+  } catch (error: any) {
+    return { success: false, error: error.message };
+  }
+}
+
+async function createPage(
+  params: { parentId: string; title: string; content?: string },
+  context: ToolContext
+): Promise<ToolResult> {
+  const client = await getClient(context);
+  if (!client) {
+    return { success: false, error: "Notion not connected." };
+  }
+
+  try {
+    const children: any[] = [];
+
+    if (params.content) {
+      const paragraphs = params.content.split("\n\n");
+      for (const para of paragraphs) {
+        if (para.trim()) {
+          children.push({
+            object: "block",
+            type: "paragraph",
+            paragraph: {
+              rich_text: [{ type: "text", text: { content: para.trim() } }],
+            },
+          });
+        }
+      }
+    }
+
+    const page = await client.pages.create({
+      parent: { page_id: params.parentId },
+      properties: {
+        title: {
+          title: [{ type: "text", text: { content: params.title } }],
+        },
+      },
+      children: children.length > 0 ? children : undefined,
+    } as any);
+
+    return {
+      success: true,
+      data: { id: page.id, title: params.title, url: (page as any).url },
+      display: {
+        type: "card",
+        content: {
+          title: `Created: ${params.title}`,
+          description: "Page created successfully",
+          fields: [{ label: "URL", value: (page as any).url }],
+        },
+      },
+    };
+  } catch (error: any) {
+    return { success: false, error: error.message };
+  }
+}
+
+async function updatePage(
+  params: { pageId: string; properties: Record<string, any> },
+  context: ToolContext
+): Promise<ToolResult> {
+  const client = await getClient(context);
+  if (!client) {
+    return { success: false, error: "Notion not connected." };
+  }
+
+  try {
+    const page = await client.pages.update({
+      page_id: params.pageId,
+      properties: params.properties,
+    });
+
+    return {
+      success: true,
+      data: { id: page.id, url: (page as any).url },
+      display: {
+        type: "text",
+        content: `Page ${params.pageId} updated successfully.`,
+      },
+    };
+  } catch (error: any) {
+    return { success: false, error: error.message };
+  }
+}
+
+async function queryDatabase(
+  params: { databaseId: string; filter?: any; sorts?: any[]; limit?: number },
+  context: ToolContext
+): Promise<ToolResult> {
+  const client = await getClient(context);
+  if (!client) {
+    return { success: false, error: "Notion not connected." };
+  }
+
+  try {
+    const queryParams: any = {
+      database_id: params.databaseId,
+      page_size: params.limit || 10,
+    };
+    if (params.filter) queryParams.filter = params.filter;
+    if (params.sorts) queryParams.sorts = params.sorts;
+
+    const response = await client.databases.query(queryParams);
+
+    const rows = response.results.map((row: any) => {
+      const props: Record<string, any> = {};
+      for (const [key, value] of Object.entries(row.properties)) {
+        props[key] = extractPropertyValue(value);
+      }
+      return { id: row.id, url: row.url, properties: props };
+    });
+
+    return {
+      success: true,
+      data: { databaseId: params.databaseId, rows, hasMore: response.has_more },
+      display: {
+        type: "table",
+        content: {
+          headers: ["ID", "Properties"],
+          rows: rows.slice(0, 10).map((r: any) => [
+            r.id.substring(0, 8),
+            Object.entries(r.properties)
+              .map(([k, v]) => `${k}: ${v}`)
+              .join(", ")
+              .substring(0, 80),
+          ]),
+        },
+      },
+    };
+  } catch (error: any) {
+    return { success: false, error: error.message };
+  }
+}
+
+async function createDatabase(
+  params: {
+    parentPageId: string;
+    title: string;
+    properties: Record<string, any>;
+  },
+  context: ToolContext
+): Promise<ToolResult> {
+  const client = await getClient(context);
+  if (!client) {
+    return { success: false, error: "Notion not connected." };
+  }
+
+  try {
+    const db = await client.databases.create({
+      parent: { page_id: params.parentPageId, type: "page_id" },
+      title: [{ type: "text", text: { content: params.title } }],
+      properties: params.properties,
+    });
+
+    return {
+      success: true,
+      data: { id: db.id, title: params.title, url: (db as any).url },
+      display: {
+        type: "card",
+        content: {
+          title: `Database Created: ${params.title}`,
+          description: `Properties: ${Object.keys(params.properties).join(", ")}`,
+          fields: [{ label: "URL", value: (db as any).url }],
+        },
+      },
+    };
+  } catch (error: any) {
+    return { success: false, error: error.message };
+  }
+}
+
+async function addBlock(
+  params: { pageId: string; blocks: any[] },
+  context: ToolContext
+): Promise<ToolResult> {
+  const client = await getClient(context);
+  if (!client) {
+    return { success: false, error: "Notion not connected." };
+  }
+
+  try {
+    const response = await client.blocks.children.append({
+      block_id: params.pageId,
+      children: params.blocks,
+    });
+
+    return {
+      success: true,
+      data: { pageId: params.pageId, blocksAdded: response.results.length },
+      display: {
+        type: "text",
+        content: `Added ${response.results.length} block(s) to page.`,
+      },
+    };
+  } catch (error: any) {
+    return { success: false, error: error.message };
+  }
+}
+
+async function getPage(
+  params: { pageId: string },
+  context: ToolContext
+): Promise<ToolResult> {
+  const client = await getClient(context);
+  if (!client) {
+    return { success: false, error: "Notion not connected." };
+  }
+
+  try {
+    const [page, blocks] = await Promise.all([
+      client.pages.retrieve({ page_id: params.pageId }),
+      client.blocks.children.list({ block_id: params.pageId, page_size: 100 }),
+    ]);
+
+    const properties: Record<string, any> = {};
+    for (const [key, value] of Object.entries((page as any).properties || {})) {
+      properties[key] = extractPropertyValue(value);
+    }
+
+    const content = blocks.results.map((block: any) => {
+      const type = block.type;
+      const data = block[type];
+      if (data?.rich_text) {
+        return data.rich_text.map((t: any) => t.plain_text).join("");
+      }
+      return `[${type}]`;
+    });
+
+    return {
+      success: true,
+      data: {
+        id: (page as any).id,
+        url: (page as any).url,
+        properties,
+        content,
+        lastEdited: (page as any).last_edited_time,
+      },
+      display: {
+        type: "markdown",
+        content: content.join("\n\n") || "*(empty page)*",
+      },
+    };
+  } catch (error: any) {
+    return { success: false, error: error.message };
+  }
+}
+
+// --- Skill Export ---
+
 export const notionSkill: Skill = {
   id: "notion",
   name: "Notion",
-  description: "Search, create, and manage Notion pages and databases",
-  version: "1.0.0",
+  description: "Search, create, and manage Notion pages, databases, and blocks",
+  version: "2.0.0",
   author: "Perpetual Core",
 
   category: "productivity",
@@ -287,7 +355,6 @@ export const notionSkill: Skill = {
   tier: "free",
   isBuiltIn: true,
 
-  requiredEnvVars: ["NOTION_API_KEY"],
   requiredIntegrations: ["notion"],
 
   tools: [
@@ -297,14 +364,8 @@ export const notionSkill: Skill = {
       parameters: {
         type: "object",
         properties: {
-          query: {
-            type: "string",
-            description: "Search query",
-          },
-          limit: {
-            type: "number",
-            description: "Max results (default 10)",
-          },
+          query: { type: "string", description: "Search query" },
+          limit: { type: "number", description: "Max results (default 10)" },
         },
         required: ["query"],
       },
@@ -312,65 +373,94 @@ export const notionSkill: Skill = {
     },
     {
       name: "create_page",
-      description: "Create a new page in Notion",
+      description: "Create a new page in Notion under a parent page",
       parameters: {
         type: "object",
         properties: {
-          parentId: {
-            type: "string",
-            description: "Parent page ID to create under",
-          },
-          title: {
-            type: "string",
-            description: "Page title",
-          },
-          content: {
-            type: "string",
-            description: "Initial page content (paragraphs separated by blank lines)",
-          },
+          parentId: { type: "string", description: "Parent page ID" },
+          title: { type: "string", description: "Page title" },
+          content: { type: "string", description: "Initial content (paragraphs separated by blank lines)" },
         },
         required: ["parentId", "title"],
       },
       execute: createPage,
     },
     {
-      name: "list_databases",
-      description: "List all databases in the workspace",
+      name: "update_page",
+      description: "Update properties on a Notion page",
       parameters: {
         type: "object",
         properties: {
-          limit: {
-            type: "number",
-            description: "Max results (default 10)",
-          },
+          pageId: { type: "string", description: "Page ID to update" },
+          properties: { type: "object", description: "Notion property values to set" },
         },
+        required: ["pageId", "properties"],
       },
-      execute: listDatabases,
+      execute: updatePage,
     },
     {
       name: "query_database",
-      description: "Query a Notion database",
+      description: "Query a Notion database with optional filters and sorts",
       parameters: {
         type: "object",
         properties: {
-          databaseId: {
-            type: "string",
-            description: "Database ID to query",
-          },
-          limit: {
-            type: "number",
-            description: "Max results (default 10)",
-          },
+          databaseId: { type: "string", description: "Database ID to query" },
+          filter: { type: "object", description: "Notion filter object (optional)" },
+          sorts: { type: "array", description: "Array of sort objects (optional)" },
+          limit: { type: "number", description: "Max results (default 10)" },
         },
         required: ["databaseId"],
       },
       execute: queryDatabase,
     },
+    {
+      name: "create_database",
+      description: "Create a new database in a parent page",
+      parameters: {
+        type: "object",
+        properties: {
+          parentPageId: { type: "string", description: "Parent page ID" },
+          title: { type: "string", description: "Database title" },
+          properties: { type: "object", description: "Database property schema (Notion format)" },
+        },
+        required: ["parentPageId", "title", "properties"],
+      },
+      execute: createDatabase,
+    },
+    {
+      name: "add_block",
+      description: "Append blocks (paragraphs, headings, lists, etc.) to a page",
+      parameters: {
+        type: "object",
+        properties: {
+          pageId: { type: "string", description: "Page ID to append blocks to" },
+          blocks: { type: "array", description: "Array of Notion block objects" },
+        },
+        required: ["pageId", "blocks"],
+      },
+      execute: addBlock,
+    },
+    {
+      name: "get_page",
+      description: "Get full page content including properties and blocks",
+      parameters: {
+        type: "object",
+        properties: {
+          pageId: { type: "string", description: "Page ID to retrieve" },
+        },
+        required: ["pageId"],
+      },
+      execute: getPage,
+    },
   ],
 
-  systemPrompt: `You have access to Notion. When users ask about:
-- Finding pages: Use search_pages
-- Creating content: Use create_page (need parent page ID)
-- Viewing databases: Use list_databases, then query_database
-Always confirm before creating new pages.`,
+  systemPrompt: `You have access to Notion via the official SDK. Available actions:
+- search_pages: Find pages by title/content
+- create_page: Create page under a parent (need parent page ID)
+- update_page: Modify page properties
+- query_database: Query database with filters/sorts
+- create_database: Create new database in a page
+- add_block: Append content blocks to a page
+- get_page: Read full page content
+Always confirm before creating or modifying content.`,
 };

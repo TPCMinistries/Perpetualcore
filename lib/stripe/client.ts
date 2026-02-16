@@ -87,6 +87,10 @@ export const PLAN_LIMITS = {
     agentWorkspaces: 0,
     marketplaceSkills: 3,
     proactiveBehaviors: 0,
+    // Phase 2: Skills Platform
+    browserAutomation: 0, // daily quota
+    voiceCalls: 0, // monthly
+    advancedSkills: false, // notion/github/trello full tools
     features: {
       geminiUnlimited: true,
       gpt4oMini: false,
@@ -120,6 +124,10 @@ export const PLAN_LIMITS = {
     agentWorkspaces: 1,
     marketplaceSkills: 10,
     proactiveBehaviors: 3,
+    // Phase 2: Skills Platform
+    browserAutomation: 5, // 5 daily
+    voiceCalls: 0,
+    advancedSkills: true,
     features: {
       geminiUnlimited: true,
       gpt4oMini: true,
@@ -153,6 +161,10 @@ export const PLAN_LIMITS = {
     agentWorkspaces: 5,
     marketplaceSkills: -1, // Unlimited
     proactiveBehaviors: -1, // Unlimited
+    // Phase 2: Skills Platform
+    browserAutomation: 50, // 50 daily
+    voiceCalls: 20, // 20 monthly
+    advancedSkills: true,
     features: {
       geminiUnlimited: true,
       gpt4oMini: true,
@@ -186,6 +198,10 @@ export const PLAN_LIMITS = {
     agentWorkspaces: -1, // Unlimited
     marketplaceSkills: -1,
     proactiveBehaviors: -1,
+    // Phase 2: Skills Platform
+    browserAutomation: -1, // unlimited
+    voiceCalls: 100, // 100 monthly
+    advancedSkills: true,
     features: {
       geminiUnlimited: true,
       gpt4oMini: true,
@@ -219,6 +235,10 @@ export const PLAN_LIMITS = {
     agentWorkspaces: -1,
     marketplaceSkills: -1,
     proactiveBehaviors: -1,
+    // Phase 2: Skills Platform
+    browserAutomation: -1,
+    voiceCalls: -1, // unlimited
+    advancedSkills: true,
     features: {
       geminiUnlimited: true,
       gpt4oMini: true,
@@ -253,6 +273,10 @@ export const PLAN_LIMITS = {
     agentWorkspaces: -1,
     marketplaceSkills: -1,
     proactiveBehaviors: -1,
+    // Phase 2: Skills Platform
+    browserAutomation: -1,
+    voiceCalls: -1,
+    advancedSkills: true,
     features: {
       geminiUnlimited: true,
       gpt4oMini: true,
@@ -289,6 +313,10 @@ export const PLAN_LIMITS = {
     agentWorkspaces: -1,
     marketplaceSkills: -1,
     proactiveBehaviors: -1,
+    // Phase 2: Skills Platform
+    browserAutomation: -1,
+    voiceCalls: -1,
+    advancedSkills: true,
     features: {
       geminiUnlimited: true,
       gpt4oMini: true,

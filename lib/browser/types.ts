@@ -117,3 +117,48 @@ export const BLOCKED_IP_PATTERNS = [
  * Blocked URL schemes to prevent access to non-HTTP resources.
  */
 export const BLOCKED_SCHEMES = ["file:", "ftp:", "data:", "javascript:", "about:", "chrome:"];
+
+/**
+ * Form field definition for automated form filling.
+ */
+export interface FormField {
+  /** CSS selector targeting the input element */
+  selector: string;
+  /** Value to fill into the field */
+  value: string;
+  /** Type of form input (default: "text") */
+  type?: "text" | "select" | "checkbox" | "radio" | "file";
+}
+
+/**
+ * A single step in a multi-step browser automation flow.
+ */
+export interface MultiStepAction {
+  /** The type of action to perform */
+  action: "navigate" | "fill" | "click" | "extract" | "wait" | "screenshot";
+  /** Target URL for navigate actions */
+  url?: string;
+  /** CSS selector for click/extract/screenshot actions */
+  selector?: string;
+  /** Value for fill actions (single field) */
+  value?: string;
+  /** Multiple form fields for fill actions */
+  fields?: FormField[];
+  /** Milliseconds to wait for wait actions */
+  waitMs?: number;
+  /** JavaScript code for extract actions */
+  javascript?: string;
+}
+
+/**
+ * Cookie data for session persistence across browser actions.
+ */
+export interface CookieData {
+  name: string;
+  value: string;
+  domain: string;
+  path?: string;
+  expires?: number;
+  httpOnly?: boolean;
+  secure?: boolean;
+}
