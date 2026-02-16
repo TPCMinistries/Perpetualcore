@@ -159,7 +159,7 @@ export function IdentityForm({ identity, onSave, onDelete, saving }: IdentityFor
       >
         {/* Identity */}
         <Card>
-          <CardHeader className="border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/30">
+          <CardHeader className="border-b border-border bg-muted/50">
             <div className="flex items-center gap-2">
               <Bot className="h-5 w-5 text-indigo-500" />
               <CardTitle className="text-base">Identity</CardTitle>
@@ -171,7 +171,7 @@ export function IdentityForm({ identity, onSave, onDelete, saving }: IdentityFor
           <CardContent className="pt-6 space-y-4">
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-2">
-                <Label htmlFor="agent-name" className="text-slate-700 dark:text-slate-300">
+                <Label htmlFor="agent-name" className="text-foreground">
                   Agent Name <span className="text-rose-500">*</span>
                 </Label>
                 <Input
@@ -179,15 +179,15 @@ export function IdentityForm({ identity, onSave, onDelete, saving }: IdentityFor
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   placeholder="Atlas"
-                  className="h-11 bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700 focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
+                  className="h-11 bg-card border-border focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
                 />
-                <p className="text-xs text-slate-500 dark:text-slate-400">
+                <p className="text-xs text-muted-foreground">
                   e.g., Atlas, Jarvis, Friday, Nova
                 </p>
               </div>
 
               <div className="space-y-2">
-                <Label className="text-slate-700 dark:text-slate-300">
+                <Label className="text-foreground">
                   Status
                 </Label>
                 <div className="flex items-center gap-3 h-11">
@@ -195,7 +195,7 @@ export function IdentityForm({ identity, onSave, onDelete, saving }: IdentityFor
                     checked={isActive}
                     onCheckedChange={setIsActive}
                   />
-                  <span className="text-sm text-slate-600 dark:text-slate-400">
+                  <span className="text-sm text-muted-foreground">
                     {isActive ? "Active - persona applied to all chats" : "Inactive - using default AI"}
                   </span>
                 </div>
@@ -203,7 +203,7 @@ export function IdentityForm({ identity, onSave, onDelete, saving }: IdentityFor
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="persona" className="text-slate-700 dark:text-slate-300">
+              <Label htmlFor="persona" className="text-foreground">
                 Persona Description
               </Label>
               <Textarea
@@ -212,9 +212,9 @@ export function IdentityForm({ identity, onSave, onDelete, saving }: IdentityFor
                 onChange={(e) => setPersona(e.target.value)}
                 placeholder="A helpful AI assistant that specializes in productivity and business strategy"
                 rows={3}
-                className="bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700 focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 resize-none"
+                className="bg-card border-border focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 resize-none"
               />
-              <p className="text-xs text-slate-500 dark:text-slate-400">
+              <p className="text-xs text-muted-foreground">
                 Describe what your agent is and what it specializes in
               </p>
             </div>
@@ -223,7 +223,7 @@ export function IdentityForm({ identity, onSave, onDelete, saving }: IdentityFor
 
         {/* Communication Style */}
         <Card>
-          <CardHeader className="border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/30">
+          <CardHeader className="border-b border-border bg-muted/50">
             <div className="flex items-center gap-2">
               <MessageSquare className="h-5 w-5 text-blue-500" />
               <CardTitle className="text-base">Communication Style</CardTitle>
@@ -235,9 +235,9 @@ export function IdentityForm({ identity, onSave, onDelete, saving }: IdentityFor
           <CardContent className="pt-6 space-y-4">
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-2">
-                <Label className="text-slate-700 dark:text-slate-300">Tone</Label>
+                <Label className="text-foreground">Tone</Label>
                 <Select value={tone} onValueChange={(v) => setTone(v as CommunicationStyle["tone"])}>
-                  <SelectTrigger className="h-11 bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700">
+                  <SelectTrigger className="h-11 bg-card border-border">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -251,9 +251,9 @@ export function IdentityForm({ identity, onSave, onDelete, saving }: IdentityFor
               </div>
 
               <div className="space-y-2">
-                <Label className="text-slate-700 dark:text-slate-300">Verbosity</Label>
+                <Label className="text-foreground">Verbosity</Label>
                 <Select value={verbosity} onValueChange={(v) => setVerbosity(v as CommunicationStyle["verbosity"])}>
-                  <SelectTrigger className="h-11 bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700">
+                  <SelectTrigger className="h-11 bg-card border-border">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -268,7 +268,7 @@ export function IdentityForm({ identity, onSave, onDelete, saving }: IdentityFor
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="personality" className="text-slate-700 dark:text-slate-300">
+              <Label htmlFor="personality" className="text-foreground">
                 Personality
               </Label>
               <Textarea
@@ -277,13 +277,13 @@ export function IdentityForm({ identity, onSave, onDelete, saving }: IdentityFor
                 onChange={(e) => setPersonality(e.target.value)}
                 placeholder="Helpful, knowledgeable, and proactive"
                 rows={2}
-                className="bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700 focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 resize-none"
+                className="bg-card border-border focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 resize-none"
               />
             </div>
 
             <div className="flex items-center gap-3">
               <Switch checked={useEmoji} onCheckedChange={setUseEmoji} />
-              <Label className="text-slate-700 dark:text-slate-300 cursor-pointer">
+              <Label className="text-foreground cursor-pointer">
                 Allow emoji in responses
               </Label>
             </div>
@@ -292,7 +292,7 @@ export function IdentityForm({ identity, onSave, onDelete, saving }: IdentityFor
 
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-2">
-                <Label htmlFor="greeting" className="text-slate-700 dark:text-slate-300">
+                <Label htmlFor="greeting" className="text-foreground">
                   Greeting
                 </Label>
                 <Input
@@ -300,12 +300,12 @@ export function IdentityForm({ identity, onSave, onDelete, saving }: IdentityFor
                   value={greeting}
                   onChange={(e) => setGreeting(e.target.value)}
                   placeholder="Hello! How can I help you today?"
-                  className="h-11 bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700 focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
+                  className="h-11 bg-card border-border focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
                 />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="signoff" className="text-slate-700 dark:text-slate-300">
+                <Label htmlFor="signoff" className="text-foreground">
                   Sign-off
                 </Label>
                 <Input
@@ -313,7 +313,7 @@ export function IdentityForm({ identity, onSave, onDelete, saving }: IdentityFor
                   value={signoff}
                   onChange={(e) => setSignoff(e.target.value)}
                   placeholder="(Optional) e.g., Stay sharp!"
-                  className="h-11 bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700 focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
+                  className="h-11 bg-card border-border focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
                 />
               </div>
             </div>
@@ -322,7 +322,7 @@ export function IdentityForm({ identity, onSave, onDelete, saving }: IdentityFor
 
         {/* Boundaries */}
         <Card>
-          <CardHeader className="border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/30">
+          <CardHeader className="border-b border-border bg-muted/50">
             <div className="flex items-center gap-2">
               <Shield className="h-5 w-5 text-amber-500" />
               <CardTitle className="text-base">Boundaries</CardTitle>
@@ -338,15 +338,15 @@ export function IdentityForm({ identity, onSave, onDelete, saving }: IdentityFor
                 onChange={(e) => setBoundariesText(e.target.value)}
                 placeholder={"Share personal information\nMake financial decisions on my behalf\nUse offensive language"}
                 rows={4}
-                className="bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700 focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 resize-none font-mono text-sm"
+                className="bg-card border-border focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 resize-none font-mono text-sm"
               />
-              <p className="text-xs text-slate-500 dark:text-slate-400">
+              <p className="text-xs text-muted-foreground">
                 One boundary per line. These will be included as strict instructions.
               </p>
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="system-override" className="text-slate-700 dark:text-slate-300">
+              <Label htmlFor="system-override" className="text-foreground">
                 Custom System Prompt (Advanced)
               </Label>
               <Textarea
@@ -355,9 +355,9 @@ export function IdentityForm({ identity, onSave, onDelete, saving }: IdentityFor
                 onChange={(e) => setSystemPromptOverride(e.target.value)}
                 placeholder="Additional instructions appended to the system prompt..."
                 rows={3}
-                className="bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700 focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 resize-none font-mono text-sm"
+                className="bg-card border-border focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 resize-none font-mono text-sm"
               />
-              <p className="text-xs text-slate-500 dark:text-slate-400">
+              <p className="text-xs text-muted-foreground">
                 Advanced: raw text added to the system prompt. Use with caution.
               </p>
             </div>
@@ -371,7 +371,7 @@ export function IdentityForm({ identity, onSave, onDelete, saving }: IdentityFor
               <>
                 {showDeleteConfirm ? (
                   <div className="flex items-center gap-2">
-                    <span className="text-sm text-slate-500 dark:text-slate-400">
+                    <span className="text-sm text-muted-foreground">
                       Are you sure?
                     </span>
                     <Button
@@ -433,7 +433,7 @@ export function IdentityForm({ identity, onSave, onDelete, saving }: IdentityFor
         className="space-y-6"
       >
         <Card>
-          <CardHeader className="border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/30">
+          <CardHeader className="border-b border-border bg-muted/50">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <Eye className="h-5 w-5 text-emerald-500" />
@@ -453,7 +453,7 @@ export function IdentityForm({ identity, onSave, onDelete, saving }: IdentityFor
           </CardHeader>
           {showPreview && (
             <CardContent className="pt-4">
-              <pre className="text-xs text-slate-600 dark:text-slate-400 whitespace-pre-wrap font-mono bg-slate-50 dark:bg-slate-900 rounded-lg p-4 max-h-[600px] overflow-y-auto border border-slate-200 dark:border-slate-700">
+              <pre className="text-xs text-muted-foreground whitespace-pre-wrap font-mono bg-muted rounded-lg p-4 max-h-[600px] overflow-y-auto border border-border">
                 {previewPrompt}
               </pre>
             </CardContent>
@@ -462,29 +462,29 @@ export function IdentityForm({ identity, onSave, onDelete, saving }: IdentityFor
 
         {/* Quick Info */}
         <Card>
-          <CardHeader className="border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/30">
+          <CardHeader className="border-b border-border bg-muted/50">
             <CardTitle className="text-base">How It Works</CardTitle>
           </CardHeader>
           <CardContent className="pt-4">
-            <div className="space-y-3 text-sm text-slate-600 dark:text-slate-400">
+            <div className="space-y-3 text-sm text-muted-foreground">
               <p>
                 Your agent persona is prepended to every chat interaction, shaping how the AI responds.
               </p>
               <ul className="space-y-2 list-disc list-inside">
                 <li>
-                  <strong className="text-slate-900 dark:text-white">Name:</strong> How the AI refers to itself
+                  <strong className="text-foreground">Name:</strong> How the AI refers to itself
                 </li>
                 <li>
-                  <strong className="text-slate-900 dark:text-white">Tone:</strong> Controls formality and style
+                  <strong className="text-foreground">Tone:</strong> Controls formality and style
                 </li>
                 <li>
-                  <strong className="text-slate-900 dark:text-white">Verbosity:</strong> How detailed responses are
+                  <strong className="text-foreground">Verbosity:</strong> How detailed responses are
                 </li>
                 <li>
-                  <strong className="text-slate-900 dark:text-white">Boundaries:</strong> Strict rules the AI follows
+                  <strong className="text-foreground">Boundaries:</strong> Strict rules the AI follows
                 </li>
               </ul>
-              <p className="text-xs text-slate-500 dark:text-slate-500">
+              <p className="text-xs text-muted-foreground">
                 Changes take effect on your next conversation. Cached for 5 minutes.
               </p>
             </div>

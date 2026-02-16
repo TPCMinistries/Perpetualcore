@@ -102,10 +102,10 @@ export function DocumentTimeline({
       <div className={cn("space-y-2", className)}>
         {isLoading ? (
           <div className="flex items-center justify-center py-4">
-            <Loader2 className="h-5 w-5 animate-spin text-slate-400" />
+            <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
           </div>
         ) : events.length === 0 ? (
-          <p className="text-sm text-slate-500 text-center py-4">No timeline events found</p>
+          <p className="text-sm text-muted-foreground text-center py-4">No timeline events found</p>
         ) : (
           displayedEvents.slice(0, 5).map((event, i) => {
             const config = eventTypeConfig[event.eventType] || eventTypeConfig.other;
@@ -116,9 +116,9 @@ export function DocumentTimeline({
                   <Icon className="h-3.5 w-3.5" />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-slate-700 dark:text-slate-300 truncate">{event.title}</p>
+                  <p className="text-foreground truncate">{event.title}</p>
                 </div>
-                <span className="text-xs text-slate-400 flex-shrink-0">
+                <span className="text-xs text-muted-foreground flex-shrink-0">
                   {formatDate(event.date)}
                 </span>
               </div>
@@ -134,14 +134,14 @@ export function DocumentTimeline({
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <Calendar className="h-5 w-5 text-slate-500" />
-          <h3 className="font-semibold text-slate-900 dark:text-white">Timeline</h3>
-          <span className="text-sm text-slate-400">({events.length} events)</span>
+          <Calendar className="h-5 w-5 text-muted-foreground" />
+          <h3 className="font-semibold text-foreground">Timeline</h3>
+          <span className="text-sm text-muted-foreground">({events.length} events)</span>
         </div>
         {pastEvents.length > 0 && (
           <button
             onClick={() => setShowPast(!showPast)}
-            className="text-xs text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 flex items-center gap-1"
+            className="text-xs text-muted-foreground hover:text-foreground flex items-center gap-1"
           >
             {showPast ? (
               <>
@@ -161,20 +161,20 @@ export function DocumentTimeline({
       {/* Timeline */}
       {isLoading ? (
         <div className="flex items-center justify-center py-12">
-          <Loader2 className="h-6 w-6 animate-spin text-slate-400" />
+          <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
         </div>
       ) : events.length === 0 ? (
         <div className="text-center py-12">
-          <Calendar className="h-10 w-10 text-slate-300 dark:text-slate-600 mx-auto mb-3" />
-          <p className="text-sm text-slate-500 dark:text-slate-400">No timeline events found</p>
-          <p className="text-xs text-slate-400 dark:text-slate-500 mt-1">
+          <Calendar className="h-10 w-10 text-muted-foreground/50 mx-auto mb-3" />
+          <p className="text-sm text-muted-foreground">No timeline events found</p>
+          <p className="text-xs text-muted-foreground mt-1">
             Extract intelligence to find dates and events
           </p>
         </div>
       ) : (
         <div className="relative">
           {/* Timeline line */}
-          <div className="absolute left-[15px] top-0 bottom-0 w-0.5 bg-slate-200 dark:bg-slate-700" />
+          <div className="absolute left-[15px] top-0 bottom-0 w-0.5 bg-muted" />
 
           <AnimatePresence>
             {displayedEvents.map((event, index) => {
@@ -202,11 +202,11 @@ export function DocumentTimeline({
                   </div>
 
                   {/* Event card */}
-                  <div className="bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 p-4 hover:shadow-md transition-shadow">
+                  <div className="bg-card rounded-lg border border-border p-4 hover:shadow-md transition-shadow">
                     <div className="flex items-start justify-between gap-3">
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 flex-wrap">
-                          <h4 className="font-medium text-slate-900 dark:text-white">
+                          <h4 className="font-medium text-foreground">
                             {event.title}
                           </h4>
                           <span className={cn(
@@ -218,26 +218,26 @@ export function DocumentTimeline({
                         </div>
 
                         {event.description && (
-                          <p className="text-sm text-slate-600 dark:text-slate-400 mt-1">
+                          <p className="text-sm text-muted-foreground mt-1">
                             {event.description}
                           </p>
                         )}
 
                         {event.sourceText && (
-                          <p className="text-xs text-slate-400 mt-2 italic border-l-2 border-slate-200 dark:border-slate-600 pl-2">
+                          <p className="text-xs text-muted-foreground mt-2 italic border-l-2 border-border pl-2">
                             "{event.sourceText}"
                           </p>
                         )}
                       </div>
 
                       <div className="text-right flex-shrink-0">
-                        <p className="text-sm font-medium text-slate-900 dark:text-white">
+                        <p className="text-sm font-medium text-foreground">
                           {formatDate(event.date)}
                         </p>
                         {relativeDate && (
                           <p className={cn(
                             "text-xs mt-0.5",
-                            event.isPast ? "text-slate-400" : "text-violet-500"
+                            event.isPast ? "text-muted-foreground" : "text-violet-500"
                           )}>
                             {relativeDate}
                           </p>
@@ -247,13 +247,13 @@ export function DocumentTimeline({
 
                     {/* Confidence indicator */}
                     <div className="mt-3 flex items-center gap-2">
-                      <div className="flex-1 h-1.5 bg-slate-100 dark:bg-slate-700 rounded-full overflow-hidden">
+                      <div className="flex-1 h-1.5 bg-muted rounded-full overflow-hidden">
                         <div
                           className="h-full bg-violet-500 rounded-full"
                           style={{ width: `${event.confidence * 100}%` }}
                         />
                       </div>
-                      <span className="text-xs text-slate-400">
+                      <span className="text-xs text-muted-foreground">
                         {Math.round(event.confidence * 100)}% confidence
                       </span>
                     </div>

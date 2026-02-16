@@ -156,10 +156,10 @@ export function ActionItemsList({
       <div className={cn("space-y-2", className)}>
         {isLoading ? (
           <div className="flex items-center justify-center py-4">
-            <Loader2 className="h-5 w-5 animate-spin text-slate-400" />
+            <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
           </div>
         ) : items.length === 0 ? (
-          <p className="text-sm text-slate-500 text-center py-4">No action items found</p>
+          <p className="text-sm text-muted-foreground text-center py-4">No action items found</p>
         ) : (
           displayedItems.slice(0, 5).map((item, i) => {
             const config = priorityConfig[item.priority];
@@ -168,7 +168,7 @@ export function ActionItemsList({
             return (
               <div
                 key={i}
-                className="flex items-center gap-3 text-sm cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800 p-2 rounded-lg transition-colors"
+                className="flex items-center gap-3 text-sm cursor-pointer hover:bg-accent p-2 rounded-lg transition-colors"
                 onClick={() => onItemClick?.(item)}
               >
                 <button
@@ -178,7 +178,7 @@ export function ActionItemsList({
                   }}
                   className={cn(
                     "flex-shrink-0 transition-colors",
-                    item.status === "completed" ? "text-green-500" : "text-slate-400 hover:text-green-500"
+                    item.status === "completed" ? "text-green-500" : "text-muted-foreground hover:text-green-500"
                   )}
                 >
                   {item.status === "completed" ? (
@@ -189,7 +189,7 @@ export function ActionItemsList({
                 </button>
                 <div className="flex-1 min-w-0">
                   <p className={cn(
-                    "text-slate-700 dark:text-slate-300 truncate",
+                    "text-foreground truncate",
                     item.status === "completed" && "line-through opacity-60"
                   )}>
                     {item.title}
@@ -197,7 +197,7 @@ export function ActionItemsList({
                 </div>
                 <span className={cn(
                   "text-xs flex-shrink-0",
-                  isOverdue ? "text-red-500" : "text-slate-400"
+                  isOverdue ? "text-red-500" : "text-muted-foreground"
                 )}>
                   {dueDateText}
                 </span>
@@ -214,16 +214,16 @@ export function ActionItemsList({
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <CheckCircle2 className="h-5 w-5 text-slate-500" />
-          <h3 className="font-semibold text-slate-900 dark:text-white">Action Items</h3>
-          <span className="text-sm text-slate-400">
+          <CheckCircle2 className="h-5 w-5 text-muted-foreground" />
+          <h3 className="font-semibold text-foreground">Action Items</h3>
+          <span className="text-sm text-muted-foreground">
             ({pendingItems.length} pending)
           </span>
         </div>
         {completedItems.length > 0 && (
           <button
             onClick={() => setShowCompleted(!showCompleted)}
-            className="text-xs text-slate-500 hover:text-slate-700 dark:hover:text-slate-300"
+            className="text-xs text-muted-foreground hover:text-foreground"
           >
             {showCompleted ? "Hide" : "Show"} completed ({completedItems.length})
           </button>
@@ -233,13 +233,13 @@ export function ActionItemsList({
       {/* Items List */}
       {isLoading ? (
         <div className="flex items-center justify-center py-12">
-          <Loader2 className="h-6 w-6 animate-spin text-slate-400" />
+          <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
         </div>
       ) : items.length === 0 ? (
         <div className="text-center py-12">
-          <CheckCircle2 className="h-10 w-10 text-slate-300 dark:text-slate-600 mx-auto mb-3" />
-          <p className="text-sm text-slate-500 dark:text-slate-400">No action items found</p>
-          <p className="text-xs text-slate-400 dark:text-slate-500 mt-1">
+          <CheckCircle2 className="h-10 w-10 text-muted-foreground/50 mx-auto mb-3" />
+          <p className="text-sm text-muted-foreground">No action items found</p>
+          <p className="text-xs text-muted-foreground mt-1">
             Extract intelligence to find tasks and action items
           </p>
         </div>
@@ -259,11 +259,11 @@ export function ActionItemsList({
                   exit={{ opacity: 0, y: -10 }}
                   transition={{ delay: index * 0.03 }}
                   className={cn(
-                    "bg-white dark:bg-slate-800 rounded-lg border p-4 transition-all cursor-pointer",
+                    "bg-card rounded-lg border p-4 transition-all cursor-pointer",
                     "hover:shadow-md",
                     item.status === "completed"
-                      ? "opacity-60 border-slate-200 dark:border-slate-700"
-                      : config.color.split(" ").find(c => c.startsWith("border")) || "border-slate-200 dark:border-slate-700"
+                      ? "opacity-60 border-border"
+                      : config.color.split(" ").find(c => c.startsWith("border")) || "border-border"
                   )}
                   onClick={() => onItemClick?.(item)}
                 >
@@ -276,7 +276,7 @@ export function ActionItemsList({
                       }}
                       className={cn(
                         "mt-0.5 flex-shrink-0 transition-colors",
-                        item.status === "completed" ? "text-green-500" : "text-slate-400 hover:text-green-500"
+                        item.status === "completed" ? "text-green-500" : "text-muted-foreground hover:text-green-500"
                       )}
                     >
                       {item.status === "completed" ? (
@@ -291,14 +291,14 @@ export function ActionItemsList({
                       <div className="flex items-start justify-between gap-3">
                         <div className="flex-1 min-w-0">
                           <h4 className={cn(
-                            "font-medium text-slate-900 dark:text-white",
+                            "font-medium text-foreground",
                             item.status === "completed" && "line-through"
                           )}>
                             {item.title}
                           </h4>
 
                           {item.description && (
-                            <p className="text-sm text-slate-600 dark:text-slate-400 mt-1">
+                            <p className="text-sm text-muted-foreground mt-1">
                               {item.description}
                             </p>
                           )}
@@ -315,7 +315,7 @@ export function ActionItemsList({
 
                             {/* Assignee */}
                             {item.assigneeName && (
-                              <span className="text-xs text-slate-500 flex items-center gap-1">
+                              <span className="text-xs text-muted-foreground flex items-center gap-1">
                                 <User className="h-3 w-3" />
                                 {item.assigneeName}
                               </span>
@@ -324,7 +324,7 @@ export function ActionItemsList({
                             {/* Due date */}
                             <span className={cn(
                               "text-xs flex items-center gap-1",
-                              isOverdue ? "text-red-500 font-medium" : isDueSoon ? "text-amber-500" : "text-slate-500"
+                              isOverdue ? "text-red-500 font-medium" : isDueSoon ? "text-amber-500" : "text-muted-foreground"
                             )}>
                               <Calendar className="h-3 w-3" />
                               {dueDateText}
@@ -333,7 +333,7 @@ export function ActionItemsList({
 
                           {/* Source document */}
                           {item.documentTitle && (
-                            <div className="mt-2 flex items-center gap-1 text-xs text-slate-400">
+                            <div className="mt-2 flex items-center gap-1 text-xs text-muted-foreground">
                               <FileText className="h-3 w-3" />
                               {item.documentTitle}
                             </div>
@@ -341,7 +341,7 @@ export function ActionItemsList({
 
                           {/* Source text */}
                           {item.sourceText && (
-                            <p className="mt-2 text-xs text-slate-400 italic border-l-2 border-slate-200 dark:border-slate-600 pl-2">
+                            <p className="mt-2 text-xs text-muted-foreground italic border-l-2 border-border pl-2">
                               "{item.sourceText}"
                             </p>
                           )}
@@ -349,19 +349,19 @@ export function ActionItemsList({
 
                         {/* Arrow for clickable */}
                         {onItemClick && (
-                          <ChevronRight className="h-4 w-4 text-slate-400 flex-shrink-0" />
+                          <ChevronRight className="h-4 w-4 text-muted-foreground flex-shrink-0" />
                         )}
                       </div>
 
                       {/* Confidence indicator */}
                       <div className="mt-3 flex items-center gap-2">
-                        <div className="flex-1 h-1 bg-slate-100 dark:bg-slate-700 rounded-full overflow-hidden">
+                        <div className="flex-1 h-1 bg-muted rounded-full overflow-hidden">
                           <div
                             className="h-full bg-violet-500 rounded-full"
                             style={{ width: `${item.confidence * 100}%` }}
                           />
                         </div>
-                        <span className="text-xs text-slate-400">
+                        <span className="text-xs text-muted-foreground">
                           {Math.round(item.confidence * 100)}%
                         </span>
                       </div>

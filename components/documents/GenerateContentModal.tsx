@@ -287,7 +287,7 @@ export function GenerateContentModal({
       <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <Sparkles className="h-5 w-5 text-slate-700 dark:text-slate-300" />
+            <Sparkles className="h-5 w-5 text-foreground" />
             Generate Content
           </DialogTitle>
           <DialogDescription>
@@ -306,8 +306,8 @@ export function GenerateContentModal({
                   onClick={() => setContentType(type.id)}
                   className={`p-4 rounded-lg border-2 transition-all text-left ${
                     contentType === type.id
-                      ? "border-slate-900 dark:border-slate-100 bg-slate-50 dark:bg-slate-900"
-                      : "border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600"
+                      ? "border-foreground bg-muted"
+                      : "border-border hover:border-border/80"
                   }`}
                 >
                   <div className="flex items-start gap-3">
@@ -315,10 +315,10 @@ export function GenerateContentModal({
                       <type.icon className={`h-5 w-5 ${type.color}`} />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <h4 className="font-semibold text-sm text-slate-900 dark:text-slate-100">
+                      <h4 className="font-semibold text-sm text-foreground">
                         {type.label}
                       </h4>
-                      <p className="text-xs text-slate-600 dark:text-slate-400 mt-0.5">
+                      <p className="text-xs text-muted-foreground mt-0.5">
                         {type.description}
                       </p>
                     </div>
@@ -405,11 +405,11 @@ export function GenerateContentModal({
 
           {/* AI Generated Content Preview */}
           {aiGeneratedContent && contentType !== "image" && (
-            <div className="bg-slate-50 dark:bg-slate-900 rounded-lg p-4 space-y-2">
-              <Label className="text-sm font-medium text-slate-700 dark:text-slate-300">
+            <div className="bg-muted rounded-lg p-4 space-y-2">
+              <Label className="text-sm font-medium text-foreground">
                 AI Generated Content Preview
               </Label>
-              <div className="text-sm text-slate-600 dark:text-slate-400 max-h-40 overflow-y-auto whitespace-pre-wrap">
+              <div className="text-sm text-muted-foreground max-h-40 overflow-y-auto whitespace-pre-wrap">
                 {aiGeneratedContent.substring(0, 500)}
                 {aiGeneratedContent.length > 500 && "..."}
               </div>
@@ -442,7 +442,7 @@ export function GenerateContentModal({
             <Button
               onClick={handleDownload}
               disabled={generating || (contentType !== "image" && !title.trim()) || !prompt.trim()}
-              className="flex-1 bg-slate-900 dark:bg-slate-100 hover:bg-slate-800 dark:hover:bg-slate-200 text-white dark:text-slate-900"
+              className="flex-1 bg-foreground hover:bg-foreground/90 text-background"
             >
               {generating ? (
                 <>
@@ -459,8 +459,8 @@ export function GenerateContentModal({
           </div>
 
           {/* Help Text */}
-          <div className="bg-slate-100 dark:bg-slate-800 rounded-lg p-3">
-            <p className="text-xs text-slate-700 dark:text-slate-300">
+          <div className="bg-muted rounded-lg p-3">
+            <p className="text-xs text-foreground">
               {contentType === "image" ? (
                 <>
                   <strong>Tip:</strong> DALL-E 3 creates high-quality images. Standard quality costs ~$0.04, HD costs ~$0.08 per image.

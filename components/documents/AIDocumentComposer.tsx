@@ -433,16 +433,16 @@ export function AIDocumentComposer({
         )}
       >
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b bg-slate-50 dark:bg-slate-900">
+        <div className="flex items-center justify-between px-6 py-4 border-b bg-muted">
           <div className="flex items-center gap-3">
             <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-violet-600 to-purple-600 flex items-center justify-center">
               <Sparkles className="h-5 w-5 text-white" />
             </div>
             <div>
-              <h2 className="text-lg font-semibold text-slate-900 dark:text-white">
+              <h2 className="text-lg font-semibold text-foreground">
                 AI Document Composer
               </h2>
-              <p className="text-sm text-slate-500">
+              <p className="text-sm text-muted-foreground">
                 Collaborate with AI to create your document
               </p>
             </div>
@@ -473,7 +473,7 @@ export function AIDocumentComposer({
         {/* Main Content - Split Pane */}
         <div className="flex flex-1 overflow-hidden">
           {/* Left: AI Chat Panel */}
-          <div className="w-[400px] flex flex-col border-r bg-white dark:bg-slate-950">
+          <div className="w-[400px] flex flex-col border-r bg-card">
             {/* Chat Messages */}
             <ScrollArea className="flex-1 p-4">
               <div className="space-y-4">
@@ -492,20 +492,20 @@ export function AIDocumentComposer({
                         "h-8 w-8 rounded-full flex items-center justify-center flex-shrink-0",
                         message.role === "assistant"
                           ? "bg-gradient-to-br from-violet-600 to-purple-600"
-                          : "bg-slate-200 dark:bg-slate-700"
+                          : "bg-muted"
                       )}
                     >
                       {message.role === "assistant" ? (
                         <Brain className="h-4 w-4 text-white" />
                       ) : (
-                        <MessageSquare className="h-4 w-4 text-slate-600 dark:text-slate-300" />
+                        <MessageSquare className="h-4 w-4 text-muted-foreground" />
                       )}
                     </div>
                     <div
                       className={cn(
                         "flex-1 rounded-2xl px-4 py-3 text-sm",
                         message.role === "assistant"
-                          ? "bg-slate-100 dark:bg-slate-800"
+                          ? "bg-muted"
                           : "bg-violet-600 text-white"
                       )}
                     >
@@ -519,7 +519,7 @@ export function AIDocumentComposer({
                         }}
                       />
                       {message.role === "assistant" && message.id !== "welcome" && (
-                        <div className="flex items-center gap-2 mt-3 pt-2 border-t border-slate-200 dark:border-slate-700">
+                        <div className="flex items-center gap-2 mt-3 pt-2 border-t border-border">
                           <Button
                             variant="ghost"
                             size="sm"
@@ -556,8 +556,8 @@ export function AIDocumentComposer({
                     <div className="h-8 w-8 rounded-full bg-gradient-to-br from-violet-600 to-purple-600 flex items-center justify-center">
                       <Loader2 className="h-4 w-4 text-white animate-spin" />
                     </div>
-                    <div className="bg-slate-100 dark:bg-slate-800 rounded-2xl px-4 py-3">
-                      <div className="flex items-center gap-2 text-sm text-slate-500">
+                    <div className="bg-muted rounded-2xl px-4 py-3">
+                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
                         <span>Thinking</span>
                         <span className="animate-pulse">...</span>
                       </div>
@@ -571,7 +571,7 @@ export function AIDocumentComposer({
             {/* Quick Prompts */}
             {messages.length < 3 && (
               <div className="px-4 pb-2">
-                <p className="text-xs text-slate-500 mb-2">Quick prompts:</p>
+                <p className="text-xs text-muted-foreground mb-2">Quick prompts:</p>
                 <div className="flex flex-wrap gap-2">
                   {quickPrompts.map((qp) => (
                     <Button
@@ -589,7 +589,7 @@ export function AIDocumentComposer({
             )}
 
             {/* Chat Input */}
-            <div className="p-4 border-t bg-slate-50 dark:bg-slate-900">
+            <div className="p-4 border-t bg-muted">
               <form
                 onSubmit={(e) => {
                   e.preventDefault();
@@ -617,7 +617,7 @@ export function AIDocumentComposer({
           </div>
 
           {/* Right: Document Editor */}
-          <div className="flex-1 flex flex-col bg-white dark:bg-slate-950">
+          <div className="flex-1 flex flex-col bg-card">
             {/* Document Title */}
             <div className="px-6 py-4 border-b">
               <Input
@@ -629,7 +629,7 @@ export function AIDocumentComposer({
             </div>
 
             {/* Editor Toolbar */}
-            <div className="px-6 py-2 border-b bg-slate-50 dark:bg-slate-900 flex items-center gap-1 flex-wrap">
+            <div className="px-6 py-2 border-b bg-muted flex items-center gap-1 flex-wrap">
               <TooltipProvider>
                 <div className="flex items-center gap-1">
                   <Tooltip>
@@ -748,7 +748,7 @@ export function AIDocumentComposer({
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end" className="w-56">
-                    <div className="px-2 py-1.5 text-xs font-medium text-slate-500">
+                    <div className="px-2 py-1.5 text-xs font-medium text-muted-foreground">
                       Select text first, then choose an action
                     </div>
                     <DropdownMenuSeparator />
@@ -762,7 +762,7 @@ export function AIDocumentComposer({
                         <action.icon className="h-4 w-4" />
                         <div className="flex-1">
                           <div className="font-medium">{action.label}</div>
-                          <div className="text-xs text-slate-500">{action.description}</div>
+                          <div className="text-xs text-muted-foreground">{action.description}</div>
                         </div>
                       </DropdownMenuItem>
                     ))}
@@ -792,14 +792,14 @@ export function AIDocumentComposer({
                   initial={{ opacity: 0, scale: 0.9, y: 10 }}
                   animate={{ opacity: 1, scale: 1, y: 0 }}
                   exit={{ opacity: 0, scale: 0.9, y: 10 }}
-                  className="fixed z-50 bg-white dark:bg-slate-800 rounded-xl shadow-xl border p-2 flex items-center gap-1"
+                  className="fixed z-50 bg-card rounded-xl shadow-xl border p-2 flex items-center gap-1"
                   style={{
                     top: selectionRect.bottom + 8,
                     left: Math.max(8, Math.min(selectionRect.left, window.innerWidth - 400)),
                   }}
                 >
                   {processingAction ? (
-                    <div className="flex items-center gap-2 px-3 py-1 text-sm text-slate-600 dark:text-slate-300">
+                    <div className="flex items-center gap-2 px-3 py-1 text-sm text-muted-foreground">
                       <Loader2 className="h-4 w-4 animate-spin" />
                       Processing...
                     </div>
@@ -847,8 +847,8 @@ export function AIDocumentComposer({
             </AnimatePresence>
 
             {/* Footer */}
-            <div className="px-6 py-4 border-t bg-slate-50 dark:bg-slate-900 flex items-center justify-between">
-              <div className="text-sm text-slate-500">
+            <div className="px-6 py-4 border-t bg-muted flex items-center justify-between">
+              <div className="text-sm text-muted-foreground">
                 {(editorRef.current?.innerText || "").split(/\s+/).filter(Boolean).length} words
               </div>
               <div className="flex items-center gap-2">
