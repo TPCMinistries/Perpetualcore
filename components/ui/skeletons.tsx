@@ -25,7 +25,7 @@ export function Skeleton({
  */
 export function PageHeaderSkeleton({ showActions = true }: { showActions?: boolean }) {
   return (
-    <div className="border border-slate-200 dark:border-slate-800 rounded-xl p-8 bg-white dark:bg-slate-900">
+    <div className="border border-border rounded-xl p-8 bg-card">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
           <Skeleton className="h-12 w-12 rounded-lg" />
@@ -51,7 +51,7 @@ export function PageHeaderSkeleton({ showActions = true }: { showActions?: boole
  */
 export function StatCardSkeleton() {
   return (
-    <Card className="border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6">
+    <Card className="border-border bg-card p-6">
       <div className="flex items-center justify-between">
         <div className="space-y-2">
           <Skeleton className="h-4 w-24" />
@@ -83,7 +83,7 @@ export function StatsGridSkeleton({ count = 4 }: { count?: number }) {
  */
 export function CardSkeleton({ className }: { className?: string }) {
   return (
-    <Card className={cn("p-4 border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900", className)}>
+    <Card className={cn("p-4 border-border bg-card", className)}>
       <div className="flex items-start gap-3">
         <Skeleton className="h-12 w-12 rounded-lg flex-shrink-0" />
         <div className="flex-1 space-y-2">
@@ -123,7 +123,7 @@ export function CardGridSkeleton({ count = 6, columns = 3 }: { count?: number; c
  */
 export function TableRowSkeleton() {
   return (
-    <div className="flex items-center gap-4 py-4 px-4 border-b border-slate-200 dark:border-slate-800">
+    <div className="flex items-center gap-4 py-4 px-4 border-b border-border">
       <Skeleton className="h-10 w-10 rounded-full flex-shrink-0" />
       <div className="flex-1 space-y-2">
         <Skeleton className="h-4 w-1/4" />
@@ -140,9 +140,9 @@ export function TableRowSkeleton() {
  */
 export function TableSkeleton({ rows = 5 }: { rows?: number }) {
   return (
-    <div className="border border-slate-200 dark:border-slate-800 rounded-lg overflow-hidden">
+    <div className="border border-border rounded-lg overflow-hidden">
       {/* Header */}
-      <div className="flex items-center gap-4 py-3 px-4 bg-slate-50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-800">
+      <div className="flex items-center gap-4 py-3 px-4 bg-muted border-b border-border">
         <Skeleton className="h-4 w-10" />
         <Skeleton className="h-4 w-32" />
         <Skeleton className="h-4 w-24 ml-auto" />
@@ -163,7 +163,7 @@ export function TableSkeleton({ rows = 5 }: { rows?: number }) {
  */
 export function TaskItemSkeleton() {
   return (
-    <Card className="border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900">
+    <Card className="border-border bg-card">
       <CardContent className="p-4">
         <div className="flex items-start gap-4">
           <Skeleton className="h-6 w-6 rounded-full flex-shrink-0" />
@@ -203,7 +203,7 @@ export function TaskListSkeleton({ count = 5 }: { count?: number }) {
  */
 export function AgentCardSkeleton() {
   return (
-    <Card className="p-6 border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900">
+    <Card className="p-6 border-border bg-card">
       <div className="flex items-start justify-between">
         <div className="flex items-start gap-4 flex-1">
           <Skeleton className="h-14 w-14 rounded-xl flex-shrink-0" />
@@ -240,7 +240,7 @@ export function AgentCardSkeleton() {
  */
 export function WorkflowCardSkeleton() {
   return (
-    <Card className="border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 flex flex-col">
+    <Card className="border-border bg-card flex flex-col">
       <CardHeader>
         <div className="flex items-start justify-between mb-2">
           <Skeleton className="h-10 w-10" />
@@ -311,7 +311,7 @@ export function ChatSkeleton({ messages = 4 }: { messages?: number }) {
  */
 export function DocumentCardSkeleton() {
   return (
-    <Card className="p-4 border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900">
+    <Card className="p-4 border-border bg-card">
       <div className="flex items-start gap-3">
         <Skeleton className="h-10 w-10 rounded-lg flex-shrink-0" />
         <div className="flex-1 space-y-2">
@@ -347,7 +347,7 @@ export function DocumentGridSkeleton({ count = 6 }: { count?: number }) {
  */
 export function SearchResultSkeleton() {
   return (
-    <div className="flex items-start gap-4 py-4 border-b border-slate-200 dark:border-slate-800">
+    <div className="flex items-start gap-4 py-4 border-b border-border">
       <Skeleton className="h-5 w-5 flex-shrink-0 mt-1" />
       <div className="flex-1 space-y-2">
         <Skeleton className="h-5 w-2/3" />
@@ -381,7 +381,7 @@ export function SearchResultsListSkeleton({ count = 5 }: { count?: number }) {
  */
 export function SettingsSectionSkeleton() {
   return (
-    <Card className="border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900">
+    <Card className="border-border bg-card">
       <CardHeader>
         <Skeleton className="h-6 w-32" />
         <Skeleton className="h-4 w-48 mt-1" />
@@ -434,11 +434,11 @@ export function DashboardSkeleton() {
       <PageHeaderSkeleton />
       <StatsGridSkeleton />
       <div className="grid gap-6 lg:grid-cols-2">
-        <Card className="p-6 border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900">
+        <Card className="p-6 border-border bg-card">
           <Skeleton className="h-6 w-32 mb-4" />
           <Skeleton className="h-64 w-full" />
         </Card>
-        <Card className="p-6 border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900">
+        <Card className="p-6 border-border bg-card">
           <Skeleton className="h-6 w-40 mb-4" />
           <div className="space-y-4">
             {Array.from({ length: 4 }).map((_, i) => (
@@ -495,7 +495,7 @@ export function AgentsPageSkeleton() {
     <div className="space-y-6">
       <PageHeaderSkeleton />
       <StatsGridSkeleton />
-      <Card className="p-4 border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900">
+      <Card className="p-4 border-border bg-card">
         <div className="flex gap-4">
           <Skeleton className="h-10 flex-1" />
           <Skeleton className="h-10 w-40" />
@@ -556,7 +556,7 @@ export function LibraryPageSkeleton() {
 export function ChatPageSkeleton() {
   return (
     <div className="flex flex-col h-full">
-      <div className="flex items-center gap-3 p-4 border-b border-slate-200 dark:border-slate-800">
+      <div className="flex items-center gap-3 p-4 border-b border-border">
         <Skeleton className="h-10 w-10 rounded-full" />
         <div className="space-y-1">
           <Skeleton className="h-5 w-32" />
@@ -566,7 +566,7 @@ export function ChatPageSkeleton() {
       <div className="flex-1 p-4 overflow-hidden">
         <ChatSkeleton />
       </div>
-      <div className="p-4 border-t border-slate-200 dark:border-slate-800">
+      <div className="p-4 border-t border-border">
         <div className="flex gap-2">
           <Skeleton className="h-12 flex-1 rounded-lg" />
           <Skeleton className="h-12 w-12 rounded-lg" />
@@ -581,7 +581,7 @@ export function ChatPageSkeleton() {
  */
 export function MarketplaceCardSkeleton() {
   return (
-    <Card className="overflow-hidden border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900">
+    <Card className="overflow-hidden border-border bg-card">
       <Skeleton className="h-40 w-full" />
       <CardContent className="p-4 space-y-3">
         <Skeleton className="h-5 w-3/4" />
@@ -624,7 +624,7 @@ export function MarketplacePageSkeleton() {
 export function InlineSpinner({ className }: { className?: string }) {
   return (
     <div className={cn("flex items-center justify-center", className)}>
-      <div className="animate-spin rounded-full h-5 w-5 border-2 border-slate-200 dark:border-slate-700 border-t-slate-900 dark:border-t-slate-100" />
+      <div className="animate-spin rounded-full h-5 w-5 border-2 border-border border-t-foreground" />
     </div>
   );
 }
@@ -636,8 +636,8 @@ export function InlineSpinner({ className }: { className?: string }) {
 export function ContentSpinner({ text }: { text?: string }) {
   return (
     <div className="flex flex-col items-center justify-center py-12">
-      <div className="animate-spin rounded-full h-8 w-8 border-2 border-slate-200 dark:border-slate-700 border-t-slate-900 dark:border-t-slate-100 mb-3" />
-      {text && <p className="text-sm text-slate-600 dark:text-slate-400">{text}</p>}
+      <div className="animate-spin rounded-full h-8 w-8 border-2 border-border border-t-foreground mb-3" />
+      {text && <p className="text-sm text-muted-foreground">{text}</p>}
     </div>
   );
 }

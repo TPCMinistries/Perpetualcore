@@ -32,7 +32,7 @@ const iconColors = {
 const trendColors = {
   up: "text-emerald-600 dark:text-emerald-400",
   down: "text-rose-600 dark:text-rose-400",
-  neutral: "text-slate-500 dark:text-slate-400",
+  neutral: "text-muted-foreground",
 };
 
 export function StatCard({
@@ -52,10 +52,10 @@ export function StatCard({
             <Icon className="h-5 w-5" />
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-2xl font-bold text-slate-900 dark:text-white truncate">
+            <p className="text-2xl font-bold text-foreground truncate">
               {value}
             </p>
-            <p className="text-sm text-slate-500 dark:text-slate-400 truncate">
+            <p className="text-sm text-muted-foreground truncate">
               {label}
             </p>
           </div>
@@ -68,7 +68,7 @@ export function StatCard({
           )}
         </div>
         {description && (
-          <p className="mt-3 text-xs text-slate-500 dark:text-slate-400">
+          <p className="mt-3 text-xs text-muted-foreground">
             {description}
           </p>
         )}
@@ -123,10 +123,10 @@ export function MiniStat({
         <Icon className="h-3.5 w-3.5" />
       </div>
       <div>
-        <p className="text-sm font-semibold text-slate-900 dark:text-white">
+        <p className="text-sm font-semibold text-foreground">
           {value}
         </p>
-        <p className="text-xs text-slate-500 dark:text-slate-400">{label}</p>
+        <p className="text-xs text-muted-foreground">{label}</p>
       </div>
     </div>
   );

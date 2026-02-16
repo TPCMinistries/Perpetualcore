@@ -198,7 +198,7 @@ export function ProgressRing({
           fill="none"
           stroke="currentColor"
           strokeWidth={strokeWidth}
-          className="text-slate-200 dark:text-slate-700"
+          className="text-muted-foreground/30"
         />
         <motion.circle
           cx={size / 2}
@@ -208,7 +208,7 @@ export function ProgressRing({
           stroke="currentColor"
           strokeWidth={strokeWidth}
           strokeLinecap="round"
-          className="text-slate-900 dark:text-white"
+          className="text-foreground"
           initial={{ strokeDashoffset: circumference }}
           animate={{ strokeDashoffset: offset }}
           transition={{ duration: 0.5, ease: "easeOut" }}

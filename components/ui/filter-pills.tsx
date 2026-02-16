@@ -24,7 +24,7 @@ export function FilterPills<T extends string>({
   return (
     <div
       className={cn(
-        "flex gap-2 p-1 bg-slate-100 dark:bg-slate-800/50 rounded-xl w-fit",
+        "flex gap-2 p-1 bg-muted rounded-xl w-fit",
         className
       )}
     >
@@ -35,8 +35,8 @@ export function FilterPills<T extends string>({
           className={cn(
             "px-4 py-2 text-sm font-medium rounded-lg transition-all",
             value === option.key
-              ? "bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-sm"
-              : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
+              ? "bg-card text-foreground shadow-sm"
+              : "text-muted-foreground hover:text-foreground"
           )}
         >
           {option.label}
@@ -45,8 +45,8 @@ export function FilterPills<T extends string>({
               className={cn(
                 "ml-2 text-xs",
                 value === option.key
-                  ? "text-slate-500 dark:text-slate-400"
-                  : "text-slate-400 dark:text-slate-500"
+                  ? "text-muted-foreground"
+                  : "text-muted-foreground"
               )}
             >
               {option.count}
@@ -75,7 +75,7 @@ export function TabFilter<T extends string>({
   className,
 }: TabFilterProps<T>) {
   return (
-    <div className={cn("border-b border-slate-200 dark:border-slate-800", className)}>
+    <div className={cn("border-b border-border", className)}>
       <div className="flex gap-1">
         {options.map((option) => (
           <button
@@ -85,7 +85,7 @@ export function TabFilter<T extends string>({
               "px-4 py-3 text-sm font-medium transition-colors relative",
               value === option.key
                 ? "text-violet-600 dark:text-violet-400"
-                : "text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
+                : "text-muted-foreground hover:text-foreground"
             )}
           >
             {option.label}
@@ -95,7 +95,7 @@ export function TabFilter<T extends string>({
                   "ml-2 text-xs px-1.5 py-0.5 rounded-full",
                   value === option.key
                     ? "bg-violet-100 dark:bg-violet-900/30 text-violet-600 dark:text-violet-400"
-                    : "bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400"
+                    : "bg-muted text-muted-foreground"
                 )}
               >
                 {option.count}

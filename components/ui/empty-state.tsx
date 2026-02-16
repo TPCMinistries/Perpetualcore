@@ -59,7 +59,7 @@ export function EmptyState({
     <Card
       className={cn(
         styles.card,
-        "text-center border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900",
+        "text-center border-border bg-card",
         className
       )}
       role="status"
@@ -67,17 +67,17 @@ export function EmptyState({
     >
       <div
         className={cn(
-          "mx-auto rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center",
+          "mx-auto rounded-full bg-muted flex items-center justify-center",
           styles.iconContainer
         )}
         aria-hidden="true"
       >
-        <Icon className={cn("text-slate-600 dark:text-slate-400", styles.icon)} />
+        <Icon className={cn("text-muted-foreground", styles.icon)} />
       </div>
-      <h3 className={cn("text-slate-900 dark:text-slate-100", styles.title)}>
+      <h3 className={cn("text-foreground", styles.title)}>
         {title}
       </h3>
-      <p className={cn("text-slate-600 dark:text-slate-400 max-w-md mx-auto", styles.description)}>
+      <p className={cn("text-muted-foreground max-w-md mx-auto", styles.description)}>
         {description}
       </p>
       {action && (
@@ -111,9 +111,9 @@ interface SearchEmptyStateProps {
 export function SearchEmptyState({ query, onClear }: SearchEmptyStateProps) {
   return (
     <div className="text-center py-12" role="status" aria-live="polite">
-      <div className="mx-auto w-12 h-12 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center mb-4">
+      <div className="mx-auto w-12 h-12 rounded-full bg-muted flex items-center justify-center mb-4">
         <svg
-          className="h-6 w-6 text-slate-600 dark:text-slate-400"
+          className="h-6 w-6 text-muted-foreground"
           fill="none"
           viewBox="0 0 24 24"
           stroke="currentColor"
@@ -127,10 +127,10 @@ export function SearchEmptyState({ query, onClear }: SearchEmptyStateProps) {
           />
         </svg>
       </div>
-      <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100 mb-2">
+      <h3 className="text-lg font-semibold text-foreground mb-2">
         No results found
       </h3>
-      <p className="text-slate-600 dark:text-slate-400 mb-4 max-w-md mx-auto">
+      <p className="text-muted-foreground mb-4 max-w-md mx-auto">
         We couldn&apos;t find anything matching &quot;{query}&quot;. Try adjusting your search or filters.
       </p>
       {onClear && (
@@ -174,10 +174,10 @@ export function ErrorEmptyState({
           />
         </svg>
       </div>
-      <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100 mb-2">
+      <h3 className="text-lg font-semibold text-foreground mb-2">
         {title}
       </h3>
-      <p className="text-slate-600 dark:text-slate-400 mb-4 max-w-md mx-auto">
+      <p className="text-muted-foreground mb-4 max-w-md mx-auto">
         {message}
       </p>
       {onRetry && (
@@ -202,9 +202,9 @@ export function LoadingEmptyState({
   return (
     <div className="text-center py-12" role="status" aria-live="polite">
       <div className="mx-auto w-12 h-12 flex items-center justify-center mb-4">
-        <div className="animate-spin rounded-full h-8 w-8 border-2 border-slate-200 dark:border-slate-700 border-t-slate-900 dark:border-t-slate-100" />
+        <div className="animate-spin rounded-full h-8 w-8 border-2 border-border border-t-foreground" />
       </div>
-      <p className="text-slate-600 dark:text-slate-400">
+      <p className="text-muted-foreground">
         {message}
       </p>
     </div>
