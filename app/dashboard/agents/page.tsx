@@ -46,6 +46,7 @@ import { motion } from "framer-motion";
 import { DashboardPageWrapper, DashboardHeader } from "@/components/ui/dashboard-header";
 import { StatCard, StatCardGrid } from "@/components/ui/stat-card";
 import { FilterPills } from "@/components/ui/filter-pills";
+import { StaggeredGrid, StaggeredGridItem } from "@/components/ui/page-wrapper";
 
 interface Agent {
   id: string;
@@ -623,7 +624,7 @@ export default function AgentsPage() {
               </h2>
             </div>
 
-            <div
+            <StaggeredGrid
               className={
                 viewMode === "grid"
                   ? "grid gap-4 md:grid-cols-2"
@@ -635,13 +636,7 @@ export default function AgentsPage() {
                 const AgentIcon = getAgentIcon(agent.agent_type);
 
                 return (
-                  <motion.div
-                    key={agent.id}
-                    custom={idx}
-                    variants={cardVariants}
-                    initial="hidden"
-                    animate="visible"
-                  >
+                  <StaggeredGridItem key={agent.id}>
                     <Card
                       className={`border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 transition-all hover:shadow-lg ${
                         agent.enabled
@@ -796,10 +791,10 @@ export default function AgentsPage() {
                         </div>
                       </CardContent>
                     </Card>
-                  </motion.div>
+                  </StaggeredGridItem>
                 );
               })}
-            </div>
+            </StaggeredGrid>
           </div>
         )}
       </div>

@@ -51,6 +51,7 @@ import { motion } from "framer-motion";
 import { DashboardPageWrapper, DashboardHeader } from "@/components/ui/dashboard-header";
 import { StatCard, StatCardGrid } from "@/components/ui/stat-card";
 import { FilterPills } from "@/components/ui/filter-pills";
+import { StaggeredGrid, StaggeredGridItem } from "@/components/ui/page-wrapper";
 
 interface ExecutionLogEntry {
   event: string;
@@ -541,18 +542,14 @@ export default function TasksPage() {
             )}
           </motion.div>
         ) : (
-          <div className="space-y-3">
+          <StaggeredGrid className="space-y-3">
             {displayTasks.map((task, idx) => {
               const dueInfo = formatDate(task.due_date);
               const priority = priorityConfig[task.priority] || priorityConfig.medium;
 
               return (
-                <motion.div
-                  key={task.id}
-                  custom={idx}
-                  variants={cardVariants}
-                  initial="hidden"
-                  animate="visible"
+                <StaggeredGridItem key={task.id}>
+                <div
                   onClick={() => router.push(`/dashboard/tasks/${task.id}`)}
                   className={`group relative bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 hover:border-violet-300 dark:hover:border-violet-700 hover:shadow-lg transition-all cursor-pointer ${
                     task.status === "done" || task.status === "completed"
@@ -763,10 +760,11 @@ export default function TasksPage() {
                       </div>
                     </div>
                   </div>
-                </motion.div>
+                </div>
+                </StaggeredGridItem>
               );
             })}
-          </div>
+          </StaggeredGrid>
         )}
       </div>
     </DashboardPageWrapper>

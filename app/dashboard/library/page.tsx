@@ -37,6 +37,7 @@ import { createClient } from "@/lib/supabase/client";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { glassClasses, glowClasses, motionVariants, staggerContainer, staggerItem } from "@/lib/design/library-theme";
+import { StaggeredGrid, StaggeredGridItem } from "@/components/ui/page-wrapper";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -1021,19 +1022,9 @@ export default function LibraryPage() {
                     </div>
                   </Card>
                 ) : (
-                  <motion.div
-                    className="space-y-4"
-                    variants={staggerContainer}
-                    initial="hidden"
-                    animate="show"
-                  >
+                  <StaggeredGrid className="space-y-4">
                     {filteredDocuments.map((doc, index) => (
-                      <motion.div
-                        key={doc.id}
-                        variants={staggerItem}
-                        whileHover={{ scale: 1.01, y: -2 }}
-                        transition={{ type: "spring", stiffness: 400, damping: 25 }}
-                      >
+                      <StaggeredGridItem key={doc.id}>
                         <Card
                           className={cn(
                             "p-6 group cursor-pointer transition-all duration-300",
@@ -1206,9 +1197,9 @@ export default function LibraryPage() {
                           </div>
                         </div>
                       </Card>
-                      </motion.div>
+                      </StaggeredGridItem>
                     ))}
-                  </motion.div>
+                  </StaggeredGrid>
                 )}
               </motion.div>
             )}

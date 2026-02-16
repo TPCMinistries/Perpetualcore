@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Input } from "@/components/ui/input";
 import { Workflow, Plus, Search, Play, Pause, Trash2, Edit, Eye, Clock, CheckCircle2, XCircle, Zap } from "lucide-react";
+import { StaggeredGrid, StaggeredGridItem } from "@/components/ui/page-wrapper";
 import { WorkflowsPageSkeleton } from "@/components/ui/skeletons";
 import { toast } from "sonner";
 import Link from "next/link";
@@ -259,10 +260,10 @@ export default function WorkflowsPage() {
           )}
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <StaggeredGrid className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredWorkflows.map((workflow) => (
+            <StaggeredGridItem key={workflow.id}>
             <Card
-              key={workflow.id}
               className="border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 hover:border-slate-300 dark:hover:border-slate-700 transition-colors flex flex-col"
             >
               <CardHeader>
@@ -348,8 +349,9 @@ export default function WorkflowsPage() {
                 </div>
               </CardContent>
             </Card>
+            </StaggeredGridItem>
           ))}
-        </div>
+        </StaggeredGrid>
       )}
     </div>
   );

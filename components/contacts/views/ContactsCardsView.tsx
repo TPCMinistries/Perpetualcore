@@ -25,6 +25,7 @@ import {
   StickyNote,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { StaggeredGrid, StaggeredGridItem } from "@/components/ui/page-wrapper";
 import {
   Contact,
   RelationshipStrength,
@@ -122,15 +123,15 @@ export function ContactsCardsView({
   }
 
   return (
-    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+    <StaggeredGrid className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
       {contacts.map((contact) => {
         const strength = contact.relationship_strength as RelationshipStrength;
         const config = RELATIONSHIP_STRENGTH_CONFIG[strength];
         const isSelected = state.selectedIds.has(contact.id);
 
         return (
+          <StaggeredGridItem key={contact.id}>
           <div
-            key={contact.id}
             onClick={(e) => handleCardClick(contact, e)}
             className={cn(
               "group relative rounded-xl border bg-card p-4 cursor-pointer transition-all",
@@ -282,8 +283,9 @@ export function ContactsCardsView({
               )}
             </div>
           </div>
+          </StaggeredGridItem>
         );
       })}
-    </div>
+    </StaggeredGrid>
   );
 }
