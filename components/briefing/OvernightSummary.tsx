@@ -60,8 +60,8 @@ export function OvernightSummary({ summary }: OvernightSummaryProps) {
                 <div
                   key={stat.label}
                   onClick={() => stat.value > 0 && router.push(stat.href)}
-                  className={`flex flex-col items-center p-3 rounded-lg bg-slate-50 dark:bg-slate-800/50 transition-colors ${
-                    stat.value > 0 ? "cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-700/50" : ""
+                  className={`flex flex-col items-center p-3 rounded-lg bg-muted/50 transition-colors ${
+                    stat.value > 0 ? "cursor-pointer hover:bg-muted" : ""
                   }`}
                 >
                   <stat.icon className={`h-5 w-5 ${stat.color} mb-1`} />

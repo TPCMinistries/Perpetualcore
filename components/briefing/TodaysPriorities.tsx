@@ -87,7 +87,7 @@ export function TodaysPriorities({ priorities }: TodaysPrioritiesProps) {
                 >
                   <div className={`flex items-start gap-3 p-3 rounded-lg ${config.bg} hover:opacity-90 transition-opacity`}>
                     {/* Rank Number */}
-                    <div className="flex-shrink-0 w-6 h-6 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center">
+                    <div className="flex-shrink-0 w-6 h-6 rounded-full bg-muted flex items-center justify-center">
                       <span className="text-xs font-semibold">{index + 1}</span>
                     </div>
 

@@ -92,7 +92,7 @@ export function UpcomingMeetings({ meetings }: UpcomingMeetingsProps) {
               return (
                 <div
                   key={meeting.id}
-                  className="p-3 rounded-lg bg-slate-50 dark:bg-slate-800/50"
+                  className="p-3 rounded-lg bg-muted/50"
                 >
                   <div className="flex items-start justify-between gap-2">
                     <div className="flex-1 min-w-0">
@@ -117,7 +117,7 @@ export function UpcomingMeetings({ meetings }: UpcomingMeetingsProps) {
                       <Users className="h-3 w-3 text-muted-foreground" />
                       <div className="flex -space-x-2">
                         {meeting.attendees.slice(0, 3).map((attendee, i) => (
-                          <Avatar key={i} className="h-5 w-5 border-2 border-white dark:border-slate-800">
+                          <Avatar key={i} className="h-5 w-5 border-2 border-background">
                             <AvatarFallback className="text-[10px]">
                               {getInitials(attendee)}
                             </AvatarFallback>
@@ -134,7 +134,7 @@ export function UpcomingMeetings({ meetings }: UpcomingMeetingsProps) {
 
                   {/* AI Prep */}
                   {meeting.aiPrep && (
-                    <div className="mt-2 pt-2 border-t border-slate-200 dark:border-slate-700">
+                    <div className="mt-2 pt-2 border-t border-border">
                       <div className="flex items-start gap-1.5">
                         <Sparkles className="h-3 w-3 text-violet-500 mt-0.5 flex-shrink-0" />
                         <p className="text-xs text-muted-foreground line-clamp-2">

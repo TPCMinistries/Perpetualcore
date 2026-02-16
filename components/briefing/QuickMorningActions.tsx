@@ -68,7 +68,7 @@ export function QuickMorningActions({ actions }: QuickMorningActionsProps) {
             <Icon className="h-4 w-4" />
             {action.label}
             {action.count !== undefined && action.count > 0 && (
-              <span className="ml-1 px-1.5 py-0.5 text-xs bg-slate-200 dark:bg-slate-700 rounded-full">
+              <span className="ml-1 px-1.5 py-0.5 text-xs bg-muted rounded-full">
                 {action.count}
               </span>
             )}
