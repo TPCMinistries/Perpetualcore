@@ -3,7 +3,8 @@
 import { useEffect, useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Users as UsersIcon, Shield, Eye, User } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Users as UsersIcon, Shield, Eye, User, Search, CheckCircle, XCircle } from "lucide-react";
 import { toast } from "sonner";
 
 interface User {
@@ -11,6 +12,8 @@ interface User {
   email: string;
   full_name: string | null;
   role: string;
+  organization_id: string | null;
+  mfa_enabled?: boolean;
   created_at: string;
   updated_at: string;
 }
@@ -20,6 +23,7 @@ export default function AdminUsersPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [updatingUserId, setUpdatingUserId] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
 
   useEffect(() => {
     loadUsers();
@@ -153,6 +157,17 @@ export default function AdminUsersPage() {
         </div>
       </div>
 
+      {/* Search */}
+      <div className="relative max-w-sm">
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+        <Input
+          placeholder="Search by name or email..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className="pl-9"
+        />
+      </div>
+
       {/* Role Legend */}
       <Card>
         <CardHeader>
@@ -200,30 +215,52 @@ export default function AdminUsersPage() {
         <CardContent>
           <div className="space-y-2">
             <div className="grid grid-cols-12 gap-4 text-sm font-medium text-muted-foreground border-b pb-2">
-              <div className="col-span-5">User</div>
-              <div className="col-span-3">Role</div>
+              <div className="col-span-4">User</div>
+              <div className="col-span-2">Role</div>
+              <div className="col-span-2">MFA</div>
               <div className="col-span-4">Joined</div>
             </div>
-            {users.map((user) => (
+            {users
+              .filter((u) => {
+                if (!searchQuery) return true;
+                const q = searchQuery.toLowerCase();
+                return (
+                  u.email.toLowerCase().includes(q) ||
+                  (u.full_name?.toLowerCase().includes(q) ?? false)
+                );
+              })
+              .map((user) => (
               <div
                 key={user.id}
                 className="grid grid-cols-12 gap-4 text-sm py-3 border-b last:border-b-0 items-center"
               >
-                <div className="col-span-5">
+                <div className="col-span-4">
                   <div className="font-medium">{user.full_name || "Unknown"}</div>
                   <div className="text-xs text-muted-foreground">{user.email}</div>
                 </div>
-                <div className="col-span-3">
+                <div className="col-span-2">
                   <select
                     value={user.role || "member"}
                     onChange={(e) => updateUserRole(user.id, e.target.value)}
                     disabled={updatingUserId === user.id}
                     className="px-2 py-1 border border-input bg-background rounded-md text-sm disabled:opacity-50"
                   >
+                    <option value="owner">Owner</option>
                     <option value="admin">Admin</option>
                     <option value="member">Member</option>
                     <option value="viewer">Viewer</option>
                   </select>
+                </div>
+                <div className="col-span-2">
+                  {user.mfa_enabled ? (
+                    <span className="flex items-center gap-1 text-green-600">
+                      <CheckCircle className="h-3.5 w-3.5" /> Enabled
+                    </span>
+                  ) : (
+                    <span className="flex items-center gap-1 text-gray-400">
+                      <XCircle className="h-3.5 w-3.5" /> Off
+                    </span>
+                  )}
                 </div>
                 <div className="col-span-4 text-muted-foreground">
                   {new Date(user.created_at).toLocaleDateString("en-US", {

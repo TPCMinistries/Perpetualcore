@@ -2,6 +2,7 @@ import { createServerClient, type CookieOptions } from '@supabase/ssr';
 import { NextResponse, type NextRequest } from 'next/server';
 import { Ratelimit } from '@upstash/ratelimit';
 import { Redis } from '@upstash/redis';
+import { isIPAllowed, getOrgIdForUser } from '@/lib/compliance/ip-check';
 
 // Blanket API rate limiter — 200 requests per minute per IP
 // Individual routes can enforce stricter limits on top of this
@@ -123,7 +124,45 @@ export async function middleware(request: NextRequest) {
   );
 
   // Refresh session if expired
-  await supabase.auth.getUser();
+  const { data: { user } } = await supabase.auth.getUser();
+
+  // IP Whitelist + Session Duration checks for authenticated users
+  if (user) {
+    try {
+      const orgId = await getOrgIdForUser(user.id);
+      if (orgId) {
+        const ip = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim()
+          || request.headers.get('x-real-ip')
+          || 'unknown';
+        const { allowed } = await isIPAllowed(ip, orgId);
+        if (!allowed) {
+          return NextResponse.json(
+            { error: 'Access denied: IP not whitelisted' },
+            { status: 403 }
+          );
+        }
+
+        // Session duration enforcement
+        const sessionCreatedAt = user.last_sign_in_at || user.created_at;
+        if (sessionCreatedAt) {
+          const sessionAge = Date.now() - new Date(sessionCreatedAt).getTime();
+          const sessionAgeHours = sessionAge / (1000 * 60 * 60);
+          // Default max session: 24 hours. Enterprise orgs can configure via session_policies table.
+          // We check a generous limit here; fine-grained control is in the session_policies API.
+          if (sessionAgeHours > 720) { // 30 days hard cap
+            await supabase.auth.signOut();
+            const redirectUrl = request.nextUrl.clone();
+            redirectUrl.pathname = '/login';
+            redirectUrl.searchParams.set('error', 'Session expired. Please sign in again.');
+            redirectUrl.search = redirectUrl.searchParams.toString();
+            return NextResponse.redirect(redirectUrl);
+          }
+        }
+      }
+    } catch {
+      // Fail open on IP/session check errors to avoid lockout
+    }
+  }
 
   return response;
 }

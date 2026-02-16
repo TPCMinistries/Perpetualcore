@@ -12,7 +12,8 @@ import {
   Circle,
   Clock,
   AlertCircle,
-  Loader2
+  Loader2,
+  PenTool,
 } from "lucide-react";
 import { toast } from "sonner";
 import Link from "next/link";
@@ -279,6 +280,18 @@ export default function WorkflowDetailPage() {
                 </div>
               </div>
             </div>
+            <div className="flex gap-2">
+            <Button
+              size="lg"
+              variant="outline"
+              asChild
+              className="border-slate-200 dark:border-slate-800"
+            >
+              <Link href={`/dashboard/workflows/${workflowId}/builder`}>
+                <PenTool className="mr-2 h-4 w-4" />
+                Open Builder
+              </Link>
+            </Button>
             <Button
               size="lg"
               onClick={executeWorkflow}
@@ -297,6 +310,7 @@ export default function WorkflowDetailPage() {
                 </>
               )}
             </Button>
+            </div>
           </div>
         </CardHeader>
       </Card>

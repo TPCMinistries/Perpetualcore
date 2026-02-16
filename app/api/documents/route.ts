@@ -2,6 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { NextRequest } from "next/server";
 import { rateLimiters } from "@/lib/rate-limit";
 import { logActivity } from "@/lib/activity-logger";
+import { logAudit } from "@/lib/audit/logger";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -202,6 +203,15 @@ export async function DELETE(req: NextRequest) {
         entityName: `${deleted} documents (bulk)`,
       });
 
+      logAudit({
+        event: "DOCUMENT_DELETED",
+        user_id: user.id,
+        user_email: user.email ?? undefined,
+        resource_type: "document",
+        description: `Bulk deleted ${deleted} document(s)`,
+        details: { deleted_count: deleted, document_ids: toDelete },
+      });
+
       return Response.json({
         success: true,
         deleted,
@@ -251,6 +261,15 @@ export async function DELETE(req: NextRequest) {
       entityType: "document",
       entityId: documentId,
       entityName: documentName,
+    });
+
+    logAudit({
+      event: "DOCUMENT_DELETED",
+      user_id: user.id,
+      user_email: user.email ?? undefined,
+      resource_type: "document",
+      resource_id: documentId,
+      resource_name: documentName,
     });
 
     return Response.json({

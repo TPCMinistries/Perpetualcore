@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import crypto from "crypto";
 import { sendApiKeyCreatedEmail } from "@/lib/email";
+import { logAudit } from "@/lib/audit/logger";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -134,6 +135,17 @@ export async function POST(req: NextRequest) {
       console.error("Failed to send API key email:", err);
     });
 
+    logAudit({
+      event: "API_KEY_CREATED",
+      user_id: user.id,
+      user_email: user.email ?? undefined,
+      resource_type: "api_key",
+      resource_id: newKey.id,
+      resource_name: name,
+      description: `Created API key "${name}"`,
+      details: { expires_at: expiresAt?.toISOString() || null },
+    });
+
     // Return the full API key only once - it won't be retrievable again
     return NextResponse.json({
       apiKey: {
@@ -188,6 +200,15 @@ export async function DELETE(req: NextRequest) {
         { status: 500 }
       );
     }
+
+    logAudit({
+      event: "API_KEY_REVOKED",
+      user_id: user.id,
+      user_email: user.email ?? undefined,
+      resource_type: "api_key",
+      resource_id: keyId,
+      description: `Revoked API key ${keyId}`,
+    });
 
     return NextResponse.json({ message: "API key revoked successfully" });
   } catch (error: any) {

@@ -102,7 +102,7 @@ export default function AdminOverviewPage() {
       </div>
 
       {/* Quick Nav */}
-      <div className="flex gap-2 text-sm">
+      <div className="flex flex-wrap gap-2 text-sm">
         <Link
           href="/dashboard/admin/overview"
           className="px-3 py-1.5 bg-slate-900 text-white rounded-lg font-medium"
@@ -120,6 +120,36 @@ export default function AdminOverviewPage() {
           className="px-3 py-1.5 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200"
         >
           Users
+        </Link>
+        <Link
+          href="/dashboard/admin/organizations"
+          className="px-3 py-1.5 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200"
+        >
+          Organizations
+        </Link>
+        <Link
+          href="/dashboard/admin/compliance"
+          className="px-3 py-1.5 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200"
+        >
+          Compliance
+        </Link>
+        <Link
+          href="/dashboard/admin/sso"
+          className="px-3 py-1.5 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200"
+        >
+          SSO
+        </Link>
+        <Link
+          href="/dashboard/admin/sessions"
+          className="px-3 py-1.5 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200"
+        >
+          Sessions
+        </Link>
+        <Link
+          href="/dashboard/audit-logs"
+          className="px-3 py-1.5 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200"
+        >
+          Audit Logs
         </Link>
       </div>
 
