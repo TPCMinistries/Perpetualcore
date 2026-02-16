@@ -172,18 +172,18 @@ export function OnboardingFlowV3({ userProfile }: OnboardingFlowV3Props) {
 
   return (
     <div className="fixed inset-0 bg-black/60 backdrop-blur-md z-50 flex items-center justify-center p-4 overflow-y-auto">
-      <Card className="w-full max-w-3xl bg-white dark:bg-slate-900 p-8 relative shadow-2xl border-slate-200 dark:border-slate-800 my-auto max-h-[90vh] overflow-y-auto">
+      <Card className="w-full max-w-3xl bg-card p-8 relative shadow-2xl border-border my-auto max-h-[90vh] overflow-y-auto">
         <button
           onClick={handleSkip}
-          className="absolute top-4 right-4 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors z-10"
+          className="absolute top-4 right-4 text-muted-foreground hover:text-foreground transition-colors z-10"
           disabled={isLoading}
         >
           <X className="h-5 w-5" />
         </button>
 
         <div className="mb-6 md:mb-8">
-          <Progress value={progress} className="h-2 bg-slate-100 dark:bg-slate-800" />
-          <p className="text-xs text-slate-500 dark:text-slate-400 mt-2 text-center">
+          <Progress value={progress} className="h-2 bg-muted" />
+          <p className="text-xs text-muted-foreground mt-2 text-center">
             Step {currentStep + 1} of {STEPS.length}
           </p>
         </div>
@@ -269,7 +269,7 @@ function WelcomeStep({
         <h1 className="text-3xl font-bold mb-2 bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
           Welcome to Perpetual Core!
         </h1>
-        <p className="text-lg text-slate-600 dark:text-slate-300">
+        <p className="text-lg text-muted-foreground">
           How would you like to get started?
         </p>
       </div>
@@ -282,7 +282,7 @@ function WelcomeStep({
           className={`relative p-6 rounded-xl border-2 text-left transition-all ${
             selectedMode === "simple"
               ? "border-violet-500 bg-violet-50 dark:bg-violet-950/30 ring-2 ring-violet-500/20"
-              : "border-slate-200 dark:border-slate-700 hover:border-violet-300 hover:bg-violet-50/50 dark:hover:bg-violet-950/20"
+              : "border-border hover:border-violet-300 hover:bg-violet-50/50 dark:hover:bg-violet-950/20"
           }`}
         >
           {selectedMode === "simple" && (
@@ -299,7 +299,7 @@ function WelcomeStep({
               <p className="text-sm text-violet-600 dark:text-violet-400">Recommended for new users</p>
             </div>
           </div>
-          <p className="text-sm text-slate-600 dark:text-slate-400 mb-3">
+          <p className="text-sm text-muted-foreground mb-3">
             Meet your AI team of 6 employees who handle tasks for you automatically.
           </p>
           <div className="flex flex-wrap gap-2">
@@ -315,7 +315,7 @@ function WelcomeStep({
           className={`relative p-6 rounded-xl border-2 text-left transition-all ${
             selectedMode === "full"
               ? "border-blue-500 bg-blue-50 dark:bg-blue-950/30 ring-2 ring-blue-500/20"
-              : "border-slate-200 dark:border-slate-700 hover:border-blue-300 hover:bg-blue-50/50 dark:hover:bg-blue-950/20"
+              : "border-border hover:border-blue-300 hover:bg-blue-50/50 dark:hover:bg-blue-950/20"
           }`}
         >
           {selectedMode === "full" && (
@@ -332,7 +332,7 @@ function WelcomeStep({
               <p className="text-sm text-blue-600 dark:text-blue-400">For power users</p>
             </div>
           </div>
-          <p className="text-sm text-slate-600 dark:text-slate-400 mb-3">
+          <p className="text-sm text-muted-foreground mb-3">
             Full access to all features: projects, teams, workflows, and advanced AI tools.
           </p>
           <div className="flex flex-wrap gap-2">
@@ -353,7 +353,7 @@ function WelcomeStep({
         Continue <ArrowRight className="ml-2 h-5 w-5" />
       </Button>
 
-      <p className="text-xs text-slate-500 dark:text-slate-400">You can change this anytime in Settings</p>
+      <p className="text-xs text-muted-foreground">You can change this anytime in Settings</p>
     </div>
   );
 }
@@ -436,10 +436,10 @@ function PersonalInfoStep({
   return (
     <div className="space-y-6 py-4">
       <div className="text-center">
-        <h2 className="text-3xl font-bold mb-2 text-slate-900 dark:text-white">
+        <h2 className="text-3xl font-bold mb-2 text-foreground">
           Tell us about yourself
         </h2>
-        <p className="text-slate-600 dark:text-slate-300">
+        <p className="text-muted-foreground">
           This helps us personalize your AI brain
         </p>
       </div>
@@ -469,14 +469,14 @@ function PersonalInfoStep({
                   className={`p-4 rounded-xl border-2 transition-all text-left ${
                     userContext.userRole === role.id
                       ? "border-purple-500 dark:border-purple-400 bg-purple-50 dark:bg-purple-950/30 shadow-md"
-                      : "border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600 bg-white dark:bg-slate-800"
+                      : "border-border hover:border-border/80 bg-card"
                   }`}
                 >
                   <div className={`h-10 w-10 rounded-lg bg-gradient-to-br ${role.color} flex items-center justify-center mb-2`}>
                     <role.icon className="h-5 w-5 text-white" />
                   </div>
-                  <h3 className="font-semibold text-sm text-slate-900 dark:text-white">{role.label}</h3>
-                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">{role.description}</p>
+                  <h3 className="font-semibold text-sm text-foreground">{role.label}</h3>
+                  <p className="text-xs text-muted-foreground mt-0.5">{role.description}</p>
                 </button>
               ))}
             </div>
@@ -487,15 +487,15 @@ function PersonalInfoStep({
               className={`w-full mt-3 p-4 rounded-xl border-2 border-dashed transition-all text-left flex items-center gap-4 ${
                 userContext.userRole === "custom"
                   ? "border-purple-500 dark:border-purple-400 bg-purple-50 dark:bg-purple-950/30"
-                  : "border-slate-300 dark:border-slate-600 hover:border-purple-400 dark:hover:border-purple-500 bg-white dark:bg-slate-800"
+                  : "border-border hover:border-purple-400 dark:hover:border-purple-500 bg-card"
               }`}
             >
               <div className="h-10 w-10 rounded-lg bg-gradient-to-br from-purple-500 to-blue-500 flex items-center justify-center">
                 <Wand2 className="h-5 w-5 text-white" />
               </div>
               <div>
-                <h3 className="font-semibold text-sm text-slate-900 dark:text-white">Something else? Tell us!</h3>
-                <p className="text-xs text-slate-500 dark:text-slate-400">AI will personalize your experience</p>
+                <h3 className="font-semibold text-sm text-foreground">Something else? Tell us!</h3>
+                <p className="text-xs text-muted-foreground">AI will personalize your experience</p>
               </div>
             </button>
           </div>
@@ -509,7 +509,7 @@ function PersonalInfoStep({
                 onChange={(e) => setCustomDescription(e.target.value)}
                 className="min-h-[120px] text-base"
               />
-              <p className="text-xs text-slate-500 dark:text-slate-400 mt-2">
+              <p className="text-xs text-muted-foreground mt-2">
                 The more detail you provide, the better we can personalize your experience
               </p>
             </div>
@@ -662,10 +662,10 @@ function GoalsStep({
   return (
     <div className="space-y-6 py-4">
       <div className="text-center">
-        <h2 className="text-3xl font-bold mb-2 text-slate-900 dark:text-white">
+        <h2 className="text-3xl font-bold mb-2 text-foreground">
           What are your goals?
         </h2>
-        <p className="text-slate-600 dark:text-slate-300">
+        <p className="text-muted-foreground">
           Select all that apply - we'll prioritize features for you
         </p>
         {userContext.primaryGoals && userContext.primaryGoals.length > 0 && (
@@ -685,21 +685,21 @@ function GoalsStep({
               className={`w-full p-5 rounded-xl border-2 transition-all text-left flex items-center gap-4 ${
                 isSelected
                   ? "border-purple-500 dark:border-purple-400 bg-purple-50 dark:bg-purple-950/30 shadow-md"
-                  : "border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600 bg-white dark:bg-slate-800"
+                  : "border-border hover:border-border/80 bg-card"
               }`}
             >
               <div className={`h-10 w-10 rounded-full flex items-center justify-center flex-shrink-0 ${
                 isSelected
                   ? "bg-gradient-to-br from-purple-500 to-blue-500"
-                  : "bg-slate-100 dark:bg-slate-700"
+                  : "bg-muted"
               }`}>
                 {isSelected ? (
                   <Check className="h-5 w-5 text-white" />
                 ) : (
-                  <Zap className="h-5 w-5 text-slate-600 dark:text-slate-300" />
+                  <Zap className="h-5 w-5 text-muted-foreground" />
                 )}
               </div>
-              <span className="font-medium text-slate-900 dark:text-white">{goal.label}</span>
+              <span className="font-medium text-foreground">{goal.label}</span>
             </button>
           );
         })}
@@ -767,10 +767,10 @@ function CustomizeStep({
   return (
     <div className="space-y-6 py-4">
       <div className="text-center">
-        <h2 className="text-3xl font-bold mb-2 text-slate-900 dark:text-white">
+        <h2 className="text-3xl font-bold mb-2 text-foreground">
           Customize your experience
         </h2>
-        <p className="text-slate-600 dark:text-slate-300">
+        <p className="text-muted-foreground">
           Tell us what you'll work with
         </p>
       </div>
@@ -788,17 +788,17 @@ function CustomizeStep({
                 disabled={type.available === false}
                 className={`p-3 rounded-lg border-2 transition-all text-left flex items-center gap-3 relative ${
                   type.available === false
-                    ? "border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/50 opacity-60 cursor-not-allowed"
+                    ? "border-border bg-muted/50 opacity-60 cursor-not-allowed"
                     : userContext.contentTypes.includes(type.id)
                     ? "border-purple-500 dark:border-purple-400 bg-purple-50 dark:bg-purple-950/30"
-                    : "border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600 bg-white dark:bg-slate-800"
+                    : "border-border hover:border-border/80 bg-card"
                 }`}
               >
                 <span className="text-2xl">{type.icon}</span>
                 <div className="flex-1">
-                  <span className="text-sm font-medium text-slate-900 dark:text-white">{type.label}</span>
+                  <span className="text-sm font-medium text-foreground">{type.label}</span>
                   {type.comingSoon && (
-                    <span className="block text-xs text-slate-500 dark:text-slate-400 mt-0.5">Coming soon</span>
+                    <span className="block text-xs text-muted-foreground mt-0.5">Coming soon</span>
                   )}
                 </div>
                 {userContext.contentTypes.includes(type.id) && (
@@ -819,13 +819,13 @@ function CustomizeStep({
                 className={`w-full p-4 rounded-lg border-2 transition-all text-left ${
                   userContext.teamContext === context.id
                     ? "border-purple-500 dark:border-purple-400 bg-purple-50 dark:bg-purple-950/30"
-                    : "border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600 bg-white dark:bg-slate-800"
+                    : "border-border hover:border-border/80 bg-card"
                 }`}
               >
                 <div className="flex items-center justify-between">
                   <div>
-                    <h3 className="font-semibold text-slate-900 dark:text-white">{context.label}</h3>
-                    <p className="text-xs text-slate-600 dark:text-slate-400">{context.description}</p>
+                    <h3 className="font-semibold text-foreground">{context.label}</h3>
+                    <p className="text-xs text-muted-foreground">{context.description}</p>
                   </div>
                   {userContext.teamContext === context.id && (
                     <Check className="h-5 w-5 text-purple-600 dark:text-purple-400" />
@@ -904,10 +904,10 @@ function FirstActionStep({
   return (
     <div className="text-center space-y-6 py-4">
       <div>
-        <h2 className="text-3xl font-bold mb-3 text-slate-900 dark:text-white">
+        <h2 className="text-3xl font-bold mb-3 text-foreground">
           Ready, {userContext.preferredName}! 🎯
         </h2>
-        <p className="text-slate-600 dark:text-slate-300 max-w-lg mx-auto">
+        <p className="text-muted-foreground max-w-lg mx-auto">
           Let's get you started with your first action
         </p>
       </div>
@@ -939,16 +939,16 @@ function FirstActionStep({
           </div>
         </Card>
 
-        <Card className="p-6 border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800">
+        <Card className="p-6 border-border bg-card">
           <div className="flex items-start gap-4">
-            <div className="h-12 w-12 rounded-xl bg-slate-100 dark:bg-slate-700 flex items-center justify-center flex-shrink-0">
-              <actions.secondary.icon className="h-6 w-6 text-slate-600 dark:text-slate-300" />
+            <div className="h-12 w-12 rounded-xl bg-muted flex items-center justify-center flex-shrink-0">
+              <actions.secondary.icon className="h-6 w-6 text-muted-foreground" />
             </div>
             <div className="flex-1 text-left">
-              <h3 className="font-semibold text-lg mb-1 text-slate-900 dark:text-white">
+              <h3 className="font-semibold text-lg mb-1 text-foreground">
                 {actions.secondary.title}
               </h3>
-              <p className="text-slate-600 dark:text-slate-400 text-sm mb-3">{actions.secondary.description}</p>
+              <p className="text-muted-foreground text-sm mb-3">{actions.secondary.description}</p>
               <Button variant="outline" onClick={() => onActionClick(actions.secondary.action)} disabled={isLoading}>
                 <actions.secondary.icon className="mr-2 h-4 w-4" />
                 Start Here Instead
@@ -958,7 +958,7 @@ function FirstActionStep({
         </Card>
       </div>
 
-      <Button variant="ghost" onClick={onSkipToEnd} disabled={isLoading} className="text-slate-500">
+      <Button variant="ghost" onClick={onSkipToEnd} disabled={isLoading} className="text-muted-foreground">
         I'll explore on my own
       </Button>
     </div>
@@ -981,16 +981,16 @@ function CompleteStep({
       </div>
 
       <div>
-        <h2 className="text-4xl font-bold mb-3 text-slate-900 dark:text-white">
+        <h2 className="text-4xl font-bold mb-3 text-foreground">
           Perfect, {userContext.preferredName}! 🎉
         </h2>
-        <p className="text-xl text-slate-600 dark:text-slate-300 mb-2">
+        <p className="text-xl text-muted-foreground mb-2">
           Your AI brain is personalized and ready
         </p>
       </div>
 
       <Card className="p-6 max-w-xl mx-auto bg-gradient-to-br from-purple-50 to-blue-50 dark:from-purple-950/30 dark:to-blue-950/30 border-purple-200 dark:border-purple-800">
-        <h3 className="font-semibold text-lg mb-4 text-slate-900 dark:text-white">
+        <h3 className="font-semibold text-lg mb-4 text-foreground">
           Your personalized experience includes:
         </h3>
         <div className="space-y-3 text-left">
@@ -998,7 +998,7 @@ function CompleteStep({
             <div className="h-6 w-6 rounded-full bg-purple-500 flex items-center justify-center flex-shrink-0 mt-0.5">
               <Check className="h-4 w-4 text-white" />
             </div>
-            <p className="text-sm text-slate-700 dark:text-slate-300">
+            <p className="text-sm text-foreground">
               AI responses tailored for <strong>{userContext.userRole?.replace(/_/g, " ")}</strong>
             </p>
           </div>
@@ -1006,7 +1006,7 @@ function CompleteStep({
             <div className="h-6 w-6 rounded-full bg-blue-500 flex items-center justify-center flex-shrink-0 mt-0.5">
               <Check className="h-4 w-4 text-white" />
             </div>
-            <p className="text-sm text-slate-700 dark:text-slate-300">
+            <p className="text-sm text-foreground">
               Features optimized for <strong>{userContext.primaryGoal?.replace(/_/g, " ")}</strong>
             </p>
           </div>
@@ -1014,7 +1014,7 @@ function CompleteStep({
             <div className="h-6 w-6 rounded-full bg-indigo-500 flex items-center justify-center flex-shrink-0 mt-0.5">
               <Check className="h-4 w-4 text-white" />
             </div>
-            <p className="text-sm text-slate-700 dark:text-slate-300">
+            <p className="text-sm text-foreground">
               Ready to work with <strong>{userContext.contentTypes.join(", ")}</strong>
             </p>
           </div>
@@ -1031,7 +1031,7 @@ function CompleteStep({
         Start Using My AI Brain
       </Button>
 
-      <p className="text-xs text-slate-500 dark:text-slate-400">
+      <p className="text-xs text-muted-foreground">
         You can update your preferences anytime in Settings
       </p>
     </div>

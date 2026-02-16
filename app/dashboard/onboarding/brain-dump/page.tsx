@@ -300,7 +300,7 @@ export default function BrainDumpPage() {
             <Brain className="h-8 w-8 text-white" />
           </div>
         </div>
-        <h1 className="text-3xl font-bold text-slate-900 dark:text-white">
+        <h1 className="text-3xl font-bold text-foreground">
           AI Brain Dump
         </h1>
         <p className="text-muted-foreground max-w-lg mx-auto">
@@ -318,7 +318,7 @@ export default function BrainDumpPage() {
                   ? "bg-violet-600"
                   : ["input", "processing", "preview", "creating", "complete"].indexOf(step) > i
                   ? "bg-violet-400"
-                  : "bg-slate-200 dark:bg-slate-700"
+                  : "bg-muted"
               }`}
             />
             {i < 4 && (
@@ -326,7 +326,7 @@ export default function BrainDumpPage() {
                 className={`w-8 h-0.5 ${
                   ["input", "processing", "preview", "creating", "complete"].indexOf(step) > i
                     ? "bg-violet-400"
-                    : "bg-slate-200 dark:bg-slate-700"
+                    : "bg-muted"
                 }`}
               />
             )}
@@ -483,7 +483,7 @@ export default function BrainDumpPage() {
 
                 return (
                 <Card key={entityKey} className={`overflow-hidden ${(entity as any).isLinked ? "border-green-500 bg-green-50/30 dark:bg-green-950/20" : ""}`}>
-                  <div className="p-4 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
+                  <div className="p-4 hover:bg-accent transition-colors">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-3 flex-1">
                         <button onClick={() => toggleEntity(entity.name)} className="p-1">
@@ -519,7 +519,7 @@ export default function BrainDumpPage() {
                               <h4 className="font-medium">{entity.name}</h4>
                               <button
                                 onClick={(e) => { e.stopPropagation(); startEdit(`${entityKey}-name`, entity.name); }}
-                                className="opacity-0 group-hover:opacity-100 transition-opacity p-1 hover:bg-slate-200 dark:hover:bg-slate-700 rounded"
+                                className="opacity-0 group-hover:opacity-100 transition-opacity p-1 hover:bg-accent rounded"
                               >
                                 <Pencil className="h-3 w-3 text-muted-foreground" />
                               </button>
@@ -563,14 +563,14 @@ export default function BrainDumpPage() {
                         initial={{ height: 0, opacity: 0 }}
                         animate={{ height: "auto", opacity: 1 }}
                         exit={{ height: 0, opacity: 0 }}
-                        className="border-t bg-slate-50/50 dark:bg-slate-900/50"
+                        className="border-t bg-muted/50"
                       >
                         <div className="p-4 space-y-3">
                           {entity.projects.map((project, projectIdx) => {
                             const projectKey = `entity-${entityIdx}-project-${projectIdx}`;
                             return (
-                              <div key={projectKey} className="border rounded-lg bg-white dark:bg-slate-800">
-                                <div className="p-3 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors">
+                              <div key={projectKey} className="border rounded-lg bg-card">
+                                <div className="p-3 hover:bg-accent transition-colors">
                                   <div className="flex items-center justify-between">
                                     <div className="flex items-center gap-2 flex-1">
                                       <button onClick={() => toggleProject(projectKey)} className="p-0.5">
@@ -605,7 +605,7 @@ export default function BrainDumpPage() {
                                           <span className="font-medium text-sm">{project.name}</span>
                                           <button
                                             onClick={(e) => { e.stopPropagation(); startEdit(`${projectKey}-name`, project.name); }}
-                                            className="opacity-0 group-hover:opacity-100 transition-opacity p-0.5 hover:bg-slate-200 dark:hover:bg-slate-700 rounded"
+                                            className="opacity-0 group-hover:opacity-100 transition-opacity p-0.5 hover:bg-accent rounded"
                                           >
                                             <Pencil className="h-3 w-3 text-muted-foreground" />
                                           </button>
@@ -681,7 +681,7 @@ export default function BrainDumpPage() {
                                                   )}
                                                   <button
                                                     onClick={() => startEdit(`${taskKey}-title`, task.title)}
-                                                    className="opacity-0 group-hover:opacity-100 transition-opacity p-0.5 hover:bg-slate-200 dark:hover:bg-slate-700 rounded"
+                                                    className="opacity-0 group-hover:opacity-100 transition-opacity p-0.5 hover:bg-accent rounded"
                                                   >
                                                     <Pencil className="h-3 w-3 text-muted-foreground" />
                                                   </button>

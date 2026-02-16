@@ -71,7 +71,7 @@ export function ActionDetailSheet({
           {/* Classification triple */}
           {action.related_entity && (
             <div>
-              <p className="text-xs font-medium text-slate-500 mb-1.5">
+              <p className="text-xs font-medium text-muted-foreground mb-1.5">
                 Classification
               </p>
               <ClassificationBadge
@@ -85,10 +85,10 @@ export function ActionDetailSheet({
           {/* Description */}
           {action.description && (
             <div>
-              <p className="text-xs font-medium text-slate-500 mb-1.5">
+              <p className="text-xs font-medium text-muted-foreground mb-1.5">
                 Description
               </p>
-              <p className="text-sm text-slate-700 dark:text-slate-300">
+              <p className="text-sm text-foreground">
                 {action.description}
               </p>
             </div>
@@ -96,13 +96,13 @@ export function ActionDetailSheet({
 
           {/* Status */}
           <div>
-            <p className="text-xs font-medium text-slate-500 mb-1.5">Status</p>
+            <p className="text-xs font-medium text-muted-foreground mb-1.5">Status</p>
             <Badge variant="outline">{action.status}</Badge>
           </div>
 
           {/* Tier */}
           <div>
-            <p className="text-xs font-medium text-slate-500 mb-1.5">Tier</p>
+            <p className="text-xs font-medium text-muted-foreground mb-1.5">Tier</p>
             <Badge
               variant="outline"
               className={
@@ -119,7 +119,7 @@ export function ActionDetailSheet({
 
           {/* Action type */}
           <div>
-            <p className="text-xs font-medium text-slate-500 mb-1.5">
+            <p className="text-xs font-medium text-muted-foreground mb-1.5">
               Action Type
             </p>
             <Badge variant="secondary">{action.action_type}</Badge>
@@ -128,7 +128,7 @@ export function ActionDetailSheet({
           {/* People */}
           {action.related_people && action.related_people.length > 0 && (
             <div>
-              <p className="text-xs font-medium text-slate-500 mb-1.5">
+              <p className="text-xs font-medium text-muted-foreground mb-1.5">
                 People
               </p>
               <PeopleList people={action.related_people} />
@@ -139,10 +139,10 @@ export function ActionDetailSheet({
           {action.delivery_payload &&
             Object.keys(action.delivery_payload).length > 0 && (
               <div>
-                <p className="text-xs font-medium text-slate-500 mb-1.5">
+                <p className="text-xs font-medium text-muted-foreground mb-1.5">
                   Delivery Payload
                 </p>
-                <pre className="text-xs bg-slate-50 dark:bg-slate-900 rounded-md p-3 overflow-x-auto max-h-48">
+                <pre className="text-xs bg-muted rounded-md p-3 overflow-x-auto max-h-48">
                   {JSON.stringify(action.delivery_payload, null, 2)}
                 </pre>
               </div>
@@ -161,7 +161,7 @@ export function ActionDetailSheet({
           )}
 
           {/* Timestamps */}
-          <div className="text-xs text-slate-400 space-y-1">
+          <div className="text-xs text-muted-foreground space-y-1">
             <p>Created: {new Date(action.created_at).toLocaleString()}</p>
             {action.approved_at && (
               <p>Approved: {new Date(action.approved_at).toLocaleString()}</p>

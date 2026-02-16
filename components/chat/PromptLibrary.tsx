@@ -74,13 +74,13 @@ export default function PromptLibrary({
               <DialogTitle className="text-2xl font-bold mb-2">
                 Prompt Library
               </DialogTitle>
-              <p className="text-sm text-slate-600 dark:text-slate-400">
+              <p className="text-sm text-muted-foreground">
                 Discover powerful prompts to supercharge your workflow
               </p>
             </div>
             <div className="flex items-center gap-2">
               <Sparkles className="h-5 w-5 text-yellow-500" />
-              <span className="text-sm font-medium text-slate-600 dark:text-slate-400">
+              <span className="text-sm font-medium text-muted-foreground">
                 {filteredPrompts.length} prompts
               </span>
             </div>
@@ -88,7 +88,7 @@ export default function PromptLibrary({
 
           {/* Search */}
           <div className="relative mt-4">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
               placeholder="Search by name, description, or tags..."
               value={search}
@@ -138,7 +138,7 @@ export default function PromptLibrary({
             <div className="mb-8">
               <div className="flex items-center gap-2 mb-4">
                 <Star className="h-4 w-4 text-yellow-500" fill="currentColor" />
-                <h3 className="font-semibold text-slate-900 dark:text-white">
+                <h3 className="font-semibold text-foreground">
                   Featured Prompts
                 </h3>
               </div>
@@ -149,7 +149,7 @@ export default function PromptLibrary({
                     <button
                       key={template.id}
                       onClick={() => handleSelect(template)}
-                      className="group relative overflow-hidden rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 text-left transition-all hover:shadow-lg hover:scale-105 hover:border-slate-300 dark:hover:border-slate-700"
+                      className="group relative overflow-hidden rounded-xl border border-border bg-card p-6 text-left transition-all hover:shadow-lg hover:scale-105 hover:border-border/80"
                     >
                       {/* Gradient Accent */}
                       <div
@@ -169,10 +169,10 @@ export default function PromptLibrary({
                           <Icon className="h-6 w-6 text-white" />
                         </div>
                         <div className="flex-1">
-                          <h4 className="font-semibold text-slate-900 dark:text-white mb-1">
+                          <h4 className="font-semibold text-foreground mb-1">
                             {template.title}
                           </h4>
-                          <p className="text-xs text-slate-600 dark:text-slate-400 line-clamp-2">
+                          <p className="text-xs text-muted-foreground line-clamp-2">
                             {template.description}
                           </p>
                         </div>
@@ -183,7 +183,7 @@ export default function PromptLibrary({
                           <Badge
                             key={tag}
                             variant="outline"
-                            className="text-xs border-slate-300 dark:border-slate-700"
+                            className="text-xs border-border"
                           >
                             {tag}
                           </Badge>
@@ -199,18 +199,18 @@ export default function PromptLibrary({
           {/* All Prompts */}
           <div>
             {!search && featuredPrompts.length > 0 && (
-              <h3 className="font-semibold text-slate-900 dark:text-white mb-4">
+              <h3 className="font-semibold text-foreground mb-4">
                 All Prompts
               </h3>
             )}
 
             {filteredPrompts.length === 0 ? (
               <div className="text-center py-16">
-                <Search className="h-16 w-16 mx-auto text-slate-300 dark:text-slate-700 mb-4" />
-                <h3 className="font-semibold text-slate-900 dark:text-white mb-2">
+                <Search className="h-16 w-16 mx-auto text-muted-foreground/30 mb-4" />
+                <h3 className="font-semibold text-foreground mb-2">
                   No prompts found
                 </h3>
-                <p className="text-sm text-slate-600 dark:text-slate-400">
+                <p className="text-sm text-muted-foreground">
                   Try adjusting your search or category filter
                 </p>
               </div>
@@ -226,15 +226,15 @@ export default function PromptLibrary({
                     <button
                       key={template.id}
                       onClick={() => handleSelect(template)}
-                      className="group relative overflow-hidden rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-5 text-left transition-all hover:shadow-md hover:border-slate-300 dark:hover:border-slate-700"
+                      className="group relative overflow-hidden rounded-xl border border-border bg-card p-5 text-left transition-all hover:shadow-md hover:border-border/80"
                     >
                       <div className="flex items-start gap-3 mb-3">
-                        <div className="h-10 w-10 rounded-lg bg-slate-100 dark:bg-slate-800 flex items-center justify-center flex-shrink-0">
-                          <Icon className="h-5 w-5 text-slate-700 dark:text-slate-300" />
+                        <div className="h-10 w-10 rounded-lg bg-muted flex items-center justify-center flex-shrink-0">
+                          <Icon className="h-5 w-5 text-foreground" />
                         </div>
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2 mb-1">
-                            <h4 className="font-semibold text-sm text-slate-900 dark:text-white truncate">
+                            <h4 className="font-semibold text-sm text-foreground truncate">
                               {template.title}
                             </h4>
                             {template.featured && (
@@ -244,7 +244,7 @@ export default function PromptLibrary({
                               />
                             )}
                           </div>
-                          <p className="text-xs text-slate-600 dark:text-slate-400 line-clamp-2 mb-2">
+                          <p className="text-xs text-muted-foreground line-clamp-2 mb-2">
                             {template.description}
                           </p>
                         </div>
@@ -253,7 +253,7 @@ export default function PromptLibrary({
                       <div className="flex flex-wrap gap-1.5">
                         <Badge
                           variant="outline"
-                          className="text-xs bg-slate-100 dark:bg-slate-800 border-slate-300 dark:border-slate-700"
+                          className="text-xs bg-muted border-border"
                         >
                           {category?.name}
                         </Badge>
@@ -261,7 +261,7 @@ export default function PromptLibrary({
                           <Badge
                             key={tag}
                             variant="outline"
-                            className="text-xs border-slate-300 dark:border-slate-700"
+                            className="text-xs border-border"
                           >
                             {tag}
                           </Badge>
