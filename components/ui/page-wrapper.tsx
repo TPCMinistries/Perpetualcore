@@ -39,10 +39,10 @@ export function PageHeader({
       initial={{ opacity: 0, y: -20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5, ease: [0.25, 0.46, 0.45, 0.94] }}
-      className={`relative overflow-hidden border border-slate-200 dark:border-slate-800 rounded-2xl p-8 bg-gradient-to-br from-white via-slate-50 to-white dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 ${className}`}
+      className={`relative overflow-hidden border rounded-2xl p-8 bg-white/80 dark:bg-white/[0.04] backdrop-blur-sm ${className}`}
     >
       {/* Background decoration */}
-      <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-br from-blue-500/10 to-purple-500/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
+      <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-br from-violet-500/10 to-cyan-500/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
 
       <div className="relative flex items-center justify-between">
         <div className="flex items-center gap-4">
@@ -51,7 +51,7 @@ export function PageHeader({
               initial={{ scale: 0, rotate: -180 }}
               animate={{ scale: 1, rotate: 0 }}
               transition={{ type: "spring", stiffness: 200, damping: 15, delay: 0.2 }}
-              className="h-14 w-14 rounded-xl bg-gradient-to-br from-slate-900 to-slate-700 dark:from-slate-100 dark:to-slate-300 flex items-center justify-center shadow-lg"
+              className="h-12 w-12 rounded-xl bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center shadow-glow-sm"
             >
               {icon}
             </motion.div>
@@ -61,7 +61,7 @@ export function PageHeader({
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.3 }}
-              className="text-3xl font-bold text-slate-900 dark:text-slate-100"
+              className="text-2xl font-semibold text-foreground"
             >
               {title}
             </motion.h1>
@@ -70,7 +70,7 @@ export function PageHeader({
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: 0.4 }}
-                className="text-slate-600 dark:text-slate-400 mt-1"
+                className="text-muted-foreground mt-1"
               >
                 {description}
               </motion.p>

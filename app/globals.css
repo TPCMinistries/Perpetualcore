@@ -4,51 +4,68 @@
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
+    --background: 40 20% 98%;
     --foreground: 222.2 84% 4.9%;
     --card: 0 0% 100%;
     --card-foreground: 222.2 84% 4.9%;
     --popover: 0 0% 100%;
     --popover-foreground: 222.2 84% 4.9%;
-    /* Vibrant Indigo - distinctive, memorable, AI-forward */
-    --primary: 243 75% 59%;
+    /* Blue-violet primary */
+    --primary: 256 67% 55%;
     --primary-foreground: 0 0% 100%;
     --secondary: 210 40% 96.1%;
     --secondary-foreground: 222.2 47.4% 11.2%;
-    --muted: 210 40% 96.1%;
+    --muted: 256 20% 95%;
     --muted-foreground: 215.4 16.3% 46.9%;
-    --accent: 210 40% 96.1%;
+    --accent: 256 40% 96%;
     --accent-foreground: 222.2 47.4% 11.2%;
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 40% 98%;
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    /* Ring matches primary for focus states */
-    --ring: 243 75% 59%;
-    --radius: 0.5rem;
+    --border: 220 20% 91%;
+    --input: 220 20% 91%;
+    --ring: 256 67% 55%;
+    --radius: 0.75rem;
+
+    /* Glow tokens */
+    --glow-primary: 256 67% 55% / 0.25;
+    --shadow-colored: 256 67% 55% / 0.12;
+
+    /* Gradient text colors */
+    --gradient-from: 256 67% 55%;
+    --gradient-via: 220 80% 55%;
+    --gradient-to: 190 80% 50%;
   }
 
   .dark {
-    --background: 222.2 84% 4.9%;
+    --background: 260 30% 6%;
     --foreground: 210 40% 98%;
-    --card: 222.2 84% 4.9%;
+    --card: 260 25% 9%;
     --card-foreground: 210 40% 98%;
-    --popover: 222.2 84% 4.9%;
+    --popover: 260 25% 9%;
     --popover-foreground: 210 40% 98%;
-    /* Brighter, more electric in dark mode */
-    --primary: 250 95% 70%;
-    --primary-foreground: 222.2 47.4% 11.2%;
-    --secondary: 217.2 32.6% 17.5%;
+    /* Luminous violet in dark mode */
+    --primary: 256 80% 68%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 256 20% 15%;
     --secondary-foreground: 210 40% 98%;
-    --muted: 217.2 32.6% 17.5%;
+    --muted: 256 15% 15%;
     --muted-foreground: 215 20.2% 65.1%;
-    --accent: 217.2 32.6% 17.5%;
+    --accent: 256 30% 18%;
     --accent-foreground: 210 40% 98%;
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 210 40% 98%;
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 250 95% 70%;
+    --border: 256 15% 18%;
+    --input: 256 15% 18%;
+    --ring: 256 80% 68%;
+
+    /* Glow tokens - dark */
+    --glow-primary: 256 80% 68% / 0.35;
+    --shadow-colored: 256 80% 68% / 0.15;
+
+    /* Gradient text colors - brighter for dark */
+    --gradient-from: 256 80% 72%;
+    --gradient-via: 220 80% 65%;
+    --gradient-to: 190 80% 60%;
   }
 }
 
@@ -68,4 +85,35 @@
   .animation-delay-4000 {
     animation-delay: 4s;
   }
+  .animation-delay-6000 {
+    animation-delay: 6s;
+  }
+}
+
+/* Shadow utilities — outside @layer so they work as plain classes */
+.shadow-soft {
+  box-shadow: 0 2px 8px -2px rgba(0, 0, 0, 0.05),
+              0 4px 16px -4px rgba(0, 0, 0, 0.05);
+}
+.shadow-soft-lg {
+  box-shadow: 0 4px 12px -2px rgba(0, 0, 0, 0.06),
+              0 8px 32px -8px rgba(0, 0, 0, 0.08);
+}
+
+/* Colored glow */
+.shadow-glow {
+  box-shadow: 0 0 24px hsl(var(--glow-primary)),
+              0 0 48px hsl(var(--shadow-colored));
+}
+.shadow-glow-sm {
+  box-shadow: 0 0 16px hsl(var(--glow-primary)),
+              0 2px 8px hsl(var(--shadow-colored));
+}
+
+/* Gradient text — uses CSS variables so it auto-switches in dark mode */
+.text-gradient {
+  background: linear-gradient(135deg, hsl(var(--gradient-from)), hsl(var(--gradient-via)), hsl(var(--gradient-to)));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }

@@ -2,16 +2,61 @@
 
 export function AnimatedBackground() {
   return (
-    <div className="fixed inset-0 -z-10 overflow-hidden bg-gradient-to-br from-slate-50 via-white to-slate-100 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950">
-      {/* Animated gradient mesh */}
-      <div className="absolute inset-0 opacity-20 dark:opacity-30">
-        <div className="absolute top-0 -left-4 w-96 h-96 bg-purple-500 rounded-full mix-blend-multiply dark:mix-blend-screen filter blur-3xl animate-blob" />
-        <div className="absolute top-0 -right-4 w-96 h-96 bg-blue-500 rounded-full mix-blend-multiply dark:mix-blend-screen filter blur-3xl animate-blob animation-delay-2000" />
-        <div className="absolute -bottom-8 left-20 w-96 h-96 bg-pink-500 rounded-full mix-blend-multiply dark:mix-blend-screen filter blur-3xl animate-blob animation-delay-4000" />
+    <div className="fixed inset-0 -z-10 overflow-hidden bg-background">
+      {/* Visible color mesh — these need to be seen through glass panels */}
+      <div className="absolute inset-0">
+        {/* Large violet wash - top right */}
+        <div
+          className="absolute -top-[20%] -right-[10%] w-[70%] h-[70%] rounded-full animate-float-slow"
+          style={{
+            background: "radial-gradient(circle, hsl(256 70% 80% / 0.25) 0%, transparent 65%)",
+          }}
+        />
+        {/* Warm peach wash - left center */}
+        <div
+          className="absolute top-[10%] -left-[15%] w-[60%] h-[60%] rounded-full animate-float animation-delay-2000"
+          style={{
+            background: "radial-gradient(circle, hsl(25 90% 80% / 0.2) 0%, transparent 65%)",
+          }}
+        />
+        {/* Cyan accent - bottom right */}
+        <div
+          className="absolute -bottom-[10%] right-[5%] w-[50%] h-[50%] rounded-full animate-float-slower animation-delay-4000"
+          style={{
+            background: "radial-gradient(circle, hsl(190 70% 75% / 0.18) 0%, transparent 65%)",
+          }}
+        />
+        {/* Soft pink - bottom left */}
+        <div
+          className="absolute bottom-[5%] -left-[10%] w-[45%] h-[45%] rounded-full animate-float-slow animation-delay-6000"
+          style={{
+            background: "radial-gradient(circle, hsl(330 60% 80% / 0.15) 0%, transparent 65%)",
+          }}
+        />
       </div>
 
-      {/* Subtle grid pattern */}
-      <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808008_1px,transparent_1px),linear-gradient(to_bottom,#80808008_1px,transparent_1px)] dark:bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px]" />
+      {/* Dark mode: stronger violet center glow + deep blue mesh */}
+      <div className="absolute inset-0 hidden dark:block">
+        {/* Override light orbs with dark-appropriate ones */}
+        <div
+          className="absolute -top-[20%] -right-[10%] w-[70%] h-[70%] rounded-full animate-float-slow"
+          style={{
+            background: "radial-gradient(circle, hsl(256 80% 50% / 0.2) 0%, transparent 60%)",
+          }}
+        />
+        <div
+          className="absolute top-[20%] -left-[10%] w-[55%] h-[55%] rounded-full animate-float animation-delay-2000"
+          style={{
+            background: "radial-gradient(circle, hsl(220 80% 45% / 0.15) 0%, transparent 60%)",
+          }}
+        />
+        <div
+          className="absolute top-[30%] left-[30%] w-[50%] h-[50%] rounded-full"
+          style={{
+            background: "radial-gradient(circle, hsl(256 80% 60% / 0.08) 0%, transparent 50%)",
+          }}
+        />
+      </div>
     </div>
   );
 }

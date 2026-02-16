@@ -20,7 +20,7 @@ export default async function DashboardLayout({
   const profile = await getUserProfile();
 
   return (
-    <div className="flex h-screen overflow-hidden bg-slate-50 dark:bg-slate-950">
+    <div className="flex h-screen overflow-hidden bg-background">
       {/* Animated Background */}
       <AnimatedBackground />
 

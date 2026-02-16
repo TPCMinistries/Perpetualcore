@@ -4,7 +4,6 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { LogOut, ChevronDown, ChevronRight, Sparkles } from "lucide-react";
 import { ExperienceLevelToggle, useExperienceLevel } from "@/components/experience-level/ExperienceLevelToggle";
 import { DashboardModeToggle } from "@/components/dashboard/DashboardModeToggle";
@@ -32,12 +31,9 @@ export function AdaptiveSidebar({ profile, isCollapsed }: AdaptiveSidebarProps) 
   const { currentWorkspace, isItemVisible, isSectionVisible, isSectionPrioritized } = useWorkspace();
 
   useEffect(() => {
-    // Update navigation when experience level changes
-    // Use the new V2 navigation config
     const filteredNav = getFilteredNavigationV2(experienceLevel);
     setNavigation(filteredNav);
 
-    // Initialize collapsed sections based on defaultCollapsed
     const initialCollapsed: Record<string, boolean> = {};
     filteredNav.forEach(section => {
       if (section.collapsible) {
@@ -61,7 +57,6 @@ export function AdaptiveSidebar({ profile, isCollapsed }: AdaptiveSidebarProps) 
     return pathname === href || pathname.startsWith(href + "/");
   };
 
-  // Filter navigation based on workspace
   const filteredNavigation = navigation
     .filter(section => isSectionVisible(section.section))
     .map(section => ({
@@ -71,7 +66,6 @@ export function AdaptiveSidebar({ profile, isCollapsed }: AdaptiveSidebarProps) 
     }))
     .filter(section => section.items.length > 0);
 
-  // Sort to show prioritized sections first
   const sortedNavigation = [...filteredNavigation].sort((a, b) => {
     if (a.isPrioritized && !b.isPrioritized) return -1;
     if (!a.isPrioritized && b.isPrioritized) return 1;
@@ -79,35 +73,41 @@ export function AdaptiveSidebar({ profile, isCollapsed }: AdaptiveSidebarProps) 
   });
 
   return (
-    <div className="flex h-full flex-col overflow-hidden bg-white dark:bg-slate-900">
+    <div className="flex h-full flex-col overflow-hidden bg-gradient-to-b from-[#1e1535] via-[#1a1040] to-[#150e2e] text-white">
       {/* Logo/Brand */}
-      <div className={`border-b border-slate-200 dark:border-slate-800 py-4 ${isCollapsed ? "px-2" : "px-6"}`}>
-        <Link href="/dashboard/home" className={`flex items-center ${isCollapsed ? "justify-center" : "space-x-2"}`}>
-          <div className="h-8 w-8 rounded-lg bg-slate-900 dark:bg-slate-100 flex items-center justify-center font-bold text-white dark:text-slate-900">
+      <div className={`py-5 ${isCollapsed ? "px-2" : "px-5"}`}>
+        <Link href="/dashboard/home" className={`flex items-center ${isCollapsed ? "justify-center" : "space-x-3"}`}>
+          <div className="h-9 w-9 rounded-xl bg-gradient-to-br from-violet-500 via-blue-500 to-cyan-400 flex items-center justify-center font-bold text-white text-sm shadow-glow-sm flex-shrink-0">
             AI
           </div>
-          {!isCollapsed && <span className="text-lg font-semibold text-slate-900 dark:text-slate-100">Perpetual Core</span>}
+          {!isCollapsed && (
+            <span className="text-[15px] font-semibold text-gradient">
+              Perpetual Core
+            </span>
+          )}
         </Link>
       </div>
 
       {/* Workspace Switcher */}
       <div className={cn(
-        "border-b border-slate-200 dark:border-slate-800",
-        isCollapsed ? "px-2 py-2" : "px-3 py-3"
+        isCollapsed ? "px-2 py-2" : "px-3 py-2"
       )}>
         <WorkspaceSwitcher collapsed={isCollapsed} />
       </div>
 
-      {/* Experience Level & Dashboard Mode Toggle (only when expanded) */}
+      {/* Experience Level & Dashboard Mode Toggle */}
       {!isCollapsed && (
-        <div className="px-3 py-3 border-b border-slate-200 dark:border-slate-800 space-y-2">
+        <div className="px-3 py-2 space-y-2">
           <DashboardModeToggle className="w-full justify-between" />
           <ExperienceLevelToggle />
         </div>
       )}
 
+      {/* Divider */}
+      <div className="mx-4 h-px bg-white/[0.06]" />
+
       {/* Navigation */}
-      <nav className={`flex-1 py-4 overflow-y-auto ${isCollapsed ? "px-1" : "px-3"}`}>
+      <nav className={`flex-1 py-3 overflow-y-auto scrollbar-thin ${isCollapsed ? "px-1.5" : "px-2.5"}`}>
         {sortedNavigation.map((group, groupIndex) => {
           const isSectionCollapsed = group.collapsible && collapsedSections[group.section];
 
@@ -115,43 +115,43 @@ export function AdaptiveSidebar({ profile, isCollapsed }: AdaptiveSidebarProps) 
             <div
               key={group.section || `section-${groupIndex}`}
               className={cn(
-                groupIndex > 0 ? "mt-6 pt-5 border-t border-slate-200/60 dark:border-slate-800/60" : "",
+                groupIndex > 0 ? "mt-5 pt-3" : "",
                 group.isPrioritized && "relative"
               )}
             >
               {/* Prioritized indicator */}
               {group.isPrioritized && !isCollapsed && (
-                <div className="absolute -left-1 top-0 bottom-0 w-0.5 bg-gradient-to-b from-violet-500 to-purple-500 rounded-full" />
+                <div className="absolute -left-0.5 top-0 bottom-0 w-0.5 bg-gradient-to-b from-violet-400 to-violet-400/30 rounded-full" />
               )}
 
               {/* Section Header */}
               {!isCollapsed && group.section && (
-                <div className="px-3 mb-2">
+                <div className="px-3 mb-1.5">
                   {group.collapsible ? (
                     <button
                       onClick={() => toggleSection(group.section)}
-                      className="flex items-center justify-between w-full text-left group hover:text-slate-900 dark:hover:text-slate-100 transition-colors"
+                      className="flex items-center justify-between w-full text-left group"
                     >
                       <h3 className={cn(
-                        "text-xs font-semibold uppercase tracking-wider transition-colors",
+                        "text-[11px] font-medium uppercase tracking-widest transition-colors",
                         group.isPrioritized
-                          ? "text-violet-600 dark:text-violet-400"
-                          : "text-slate-500 dark:text-slate-400 group-hover:text-slate-900 dark:group-hover:text-slate-100"
+                          ? "text-violet-400"
+                          : "text-white/30 group-hover:text-white/50"
                       )}>
                         {group.section}
                       </h3>
                       {isSectionCollapsed ? (
-                        <ChevronRight className="h-3.5 w-3.5 text-slate-400 group-hover:text-slate-600 dark:group-hover:text-slate-300 transition-colors" />
+                        <ChevronRight className="h-3 w-3 text-white/20 group-hover:text-white/40 transition-colors" />
                       ) : (
-                        <ChevronDown className="h-3.5 w-3.5 text-slate-400 group-hover:text-slate-600 dark:group-hover:text-slate-300 transition-colors" />
+                        <ChevronDown className="h-3 w-3 text-white/20 group-hover:text-white/40 transition-colors" />
                       )}
                     </button>
                   ) : (
                     <h3 className={cn(
-                      "text-xs font-semibold uppercase tracking-wider",
+                      "text-[11px] font-medium uppercase tracking-widest",
                       group.isPrioritized
-                        ? "text-violet-600 dark:text-violet-400"
-                        : "text-slate-500 dark:text-slate-400"
+                        ? "text-violet-400"
+                        : "text-white/30"
                     )}>
                       {group.section}
                     </h3>
@@ -159,16 +159,15 @@ export function AdaptiveSidebar({ profile, isCollapsed }: AdaptiveSidebarProps) 
                 </div>
               )}
 
-              {/* Section Items with smooth collapse animation */}
+              {/* Section Items */}
               <div
-                className={`space-y-1 overflow-hidden transition-all duration-300 ease-in-out ${
+                className={`space-y-0.5 overflow-hidden transition-all duration-300 ease-in-out ${
                   isSectionCollapsed && !isCollapsed ? "max-h-0 opacity-0" : "max-h-[2000px] opacity-100"
                 }`}
               >
                 {group.items.map((item) => {
                   const active = isActive(item.href);
 
-                  // Hide Admin Panel for non-super-admins
                   if (item.name === "Admin Panel" && !profile?.is_super_admin) {
                     return null;
                   }
@@ -178,35 +177,31 @@ export function AdaptiveSidebar({ profile, isCollapsed }: AdaptiveSidebarProps) 
                       key={item.name}
                       href={item.href}
                       className={cn(
-                        "relative flex items-center rounded-lg py-2.5 text-sm font-medium transition-all group",
+                        "relative flex items-center rounded-xl py-2 text-[13px] font-medium transition-all duration-200 group",
                         isCollapsed ? "justify-center px-2" : "justify-between px-3",
                         active
-                          ? "bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-slate-100"
-                          : "text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800/50 hover:text-slate-900 dark:hover:text-slate-100"
+                          ? "bg-gradient-to-r from-violet-600/90 to-violet-500/80 text-white shadow-glow-sm"
+                          : "text-white/50 hover:text-white/90 hover:bg-white/[0.06]"
                       )}
                       title={item.adaptiveConfig.helpText}
                     >
-                      {/* Active indicator - Linear style left border */}
-                      {active && !isCollapsed && (
-                        <div className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-5 bg-slate-900 dark:bg-slate-100 rounded-r" />
-                      )}
-
-                      <div className={`flex items-center ${isCollapsed ? "" : "space-x-3 ml-2"}`}>
-                        <item.icon className="h-5 w-5 flex-shrink-0" />
+                      <div className={`flex items-center ${isCollapsed ? "" : "space-x-2.5"}`}>
+                        <item.icon className={cn(
+                          "h-[17px] w-[17px] flex-shrink-0 transition-colors",
+                          active ? "text-white" : "text-white/40 group-hover:text-white/70"
+                        )} />
                         {!isCollapsed && <span>{item.name}</span>}
                       </div>
 
                       {/* Badge */}
                       {!isCollapsed && item.adaptiveConfig.badge && (
-                        <Badge
-                          variant={
-                            item.adaptiveConfig.badge === "beta"
-                              ? "secondary"
-                              : item.adaptiveConfig.badge === "new"
-                              ? "default"
-                              : "outline"
-                          }
-                          className="text-xs border-slate-200 dark:border-slate-700"
+                        <span
+                          className={cn(
+                            "text-[10px] font-medium px-1.5 py-0.5 rounded-md",
+                            active
+                              ? "bg-white/20 text-white"
+                              : "bg-violet-500/20 text-violet-300"
+                          )}
                         >
                           {item.adaptiveConfig.badge === "coming-soon"
                             ? "Soon"
@@ -215,7 +210,7 @@ export function AdaptiveSidebar({ profile, isCollapsed }: AdaptiveSidebarProps) 
                             : item.adaptiveConfig.badge === "new"
                             ? "New"
                             : "Pro"}
-                        </Badge>
+                        </span>
                       )}
                     </Link>
                   );
@@ -226,12 +221,12 @@ export function AdaptiveSidebar({ profile, isCollapsed }: AdaptiveSidebarProps) 
         })}
       </nav>
 
-      {/* Current Workspace Quick Info (when expanded) */}
+      {/* Current Workspace Quick Info */}
       {!isCollapsed && currentWorkspace.id !== "default" && (
-        <div className="px-3 py-2 border-t border-slate-200 dark:border-slate-800">
-          <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-slate-50 dark:bg-slate-800/50">
-            <Sparkles className="h-4 w-4 text-violet-500" />
-            <span className="text-xs text-muted-foreground">
+        <div className="px-3 py-2">
+          <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-white/[0.04]">
+            <Sparkles className="h-4 w-4 text-violet-400" />
+            <span className="text-xs text-white/40">
               {currentWorkspace.name} active
             </span>
           </div>
@@ -239,11 +234,12 @@ export function AdaptiveSidebar({ profile, isCollapsed }: AdaptiveSidebarProps) 
       )}
 
       {/* Sign Out */}
-      <div className={`border-t border-slate-200 dark:border-slate-800 ${isCollapsed ? "p-2" : "p-4"}`}>
+      <div className={`${isCollapsed ? "p-2" : "p-3"}`}>
+        <div className="mx-2 h-px bg-white/[0.06] mb-3" />
         <form action="/api/auth/sign-out" method="POST">
           <Button
             variant="ghost"
-            className={`w-full text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-50 dark:hover:bg-slate-800/50 ${
+            className={`w-full rounded-xl text-white/40 hover:text-white/80 hover:bg-white/[0.06] ${
               isCollapsed ? "justify-center px-2" : "justify-start"
             }`}
             type="submit"

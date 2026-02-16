@@ -14,8 +14,7 @@ import { EntityProvider } from "../entities/EntityProvider";
 import { EntitySwitcherCompact } from "../entities/EntitySwitcher";
 import Link from "next/link";
 import { Button } from "../ui/button";
-import { Badge } from "../ui/badge";
-import { PanelLeft, PanelLeftClose, Sparkles } from "lucide-react";
+import { PanelLeft, PanelLeftClose } from "lucide-react";
 
 function DashboardLayoutInner({
   children,
@@ -33,9 +32,12 @@ function DashboardLayoutInner({
 
       {/* Sidebar */}
       <aside
-        className={`hidden md:flex md:flex-col flex-shrink-0 relative z-10 bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 transition-all duration-300 ${
+        className={`hidden md:flex md:flex-col flex-shrink-0 relative z-10 transition-all duration-300 ${
           isCollapsed ? "md:w-16" : "md:w-64"
         }`}
+        style={{
+          boxShadow: "2px 0 20px -2px rgba(0, 0, 0, 0.15), 4px 0 40px -4px rgba(139, 92, 246, 0.06)",
+        }}
         aria-label="Main navigation"
       >
         <AdaptiveSidebar profile={profile} isCollapsed={isCollapsed} />
@@ -43,15 +45,15 @@ function DashboardLayoutInner({
 
       {/* Main Content */}
       <main id="main-content" className="flex-1 overflow-y-auto relative z-10" role="main">
-        {/* Header Bar */}
-        <header className="sticky top-0 z-20 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 px-4 sm:px-6 py-3 flex items-center justify-between shadow-sm" role="banner">
+        {/* Header Bar - Glass effect */}
+        <header className="sticky top-0 z-20 bg-white/60 dark:bg-[#150e2e]/70 backdrop-blur-2xl px-4 sm:px-6 py-3 flex items-center justify-between border-b border-black/[0.04] dark:border-white/[0.06]" role="banner">
           <div className="flex items-center gap-3">
             {/* Sidebar Toggle - Desktop */}
             <Button
               variant="ghost"
               size="icon"
               onClick={toggleSidebar}
-              className="hidden md:flex h-8 w-8 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100"
+              className="hidden md:flex h-8 w-8 text-muted-foreground hover:text-foreground"
               aria-label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
               aria-expanded={!isCollapsed}
             >
@@ -65,24 +67,26 @@ function DashboardLayoutInner({
             {/* Mobile Menu Button */}
             {profile && <MobileNav userProfile={profile} />}
 
-            {/* Brand on Mobile */}
+            {/* Brand on Mobile - Gradient logo */}
             <Link href="/dashboard" className="md:hidden flex items-center space-x-2 group">
-              <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-slate-900 to-slate-700 dark:from-slate-100 dark:to-slate-300 flex items-center justify-center text-white dark:text-slate-900 font-bold text-sm shadow-sm">
+              <div className="h-8 w-8 rounded-xl bg-gradient-to-br from-violet-500 via-blue-500 to-cyan-500 flex items-center justify-center text-white font-bold text-sm shadow-glow-sm">
                 AI
               </div>
-              <span className="font-bold text-slate-900 dark:text-slate-100 text-sm group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">Perpetual Core</span>
+              <span className="font-semibold text-gradient text-sm">Perpetual Core</span>
             </Link>
 
-            {/* Quick Search Hint - Desktop Only */}
+            {/* Quick Search Hint - Spotlight style */}
             <div className="hidden lg:flex items-center gap-2">
-              <kbd className="h-6 select-none items-center gap-1 rounded border border-slate-200 dark:border-slate-700 bg-slate-100 dark:bg-slate-800 px-2 font-mono text-xs font-medium text-slate-600 dark:text-slate-400 hidden sm:inline-flex">
-                <span>⌘K</span>
-              </kbd>
-              <span className="text-sm text-slate-600 dark:text-slate-400">Quick search</span>
+              <div className="flex items-center gap-2 rounded-xl bg-muted/60 backdrop-blur-sm px-3 py-1.5">
+                <kbd className="select-none font-mono text-xs font-medium text-muted-foreground">
+                  <span>⌘K</span>
+                </kbd>
+                <span className="text-sm text-muted-foreground">Search</span>
+              </div>
             </div>
 
             {/* Entity Switcher */}
-            <div className="hidden md:block border-l border-slate-200 dark:border-slate-700 pl-3 ml-2">
+            <div className="hidden md:block border-l border-border/40 pl-3 ml-2">
               <EntitySwitcherCompact />
             </div>
           </div>
@@ -93,7 +97,7 @@ function DashboardLayoutInner({
           </div>
         </header>
 
-        <div className="px-3 py-6 sm:px-4 md:px-6 max-w-7xl mx-auto">
+        <div className="px-4 py-6 sm:px-6 md:px-8 max-w-7xl mx-auto">
           {children}
         </div>
       </main>

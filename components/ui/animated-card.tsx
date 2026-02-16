@@ -31,13 +31,13 @@ export function AnimatedCard({
       }}
       whileHover={hover ? {
         y: -4,
-        boxShadow: "0 20px 40px rgba(0,0,0,0.1)",
+        boxShadow: "0 20px 50px rgba(139,92,246,0.08), 0 8px 24px rgba(0,0,0,0.08)",
         transition: { duration: 0.2 }
       } : undefined}
       whileTap={onClick ? { scale: 0.98 } : undefined}
       onClick={onClick}
       className={cn(
-        "rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6",
+        "rounded-2xl border bg-white/80 dark:bg-white/[0.04] backdrop-blur-sm p-6 shadow-soft transition-shadow duration-300",
         onClick && "cursor-pointer",
         className
       )}
@@ -69,7 +69,7 @@ export function AnimatedGlassCard({
         transition: { duration: 0.2 }
       } : undefined}
       className={cn(
-        "rounded-xl border border-white/20 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl p-6",
+        "rounded-2xl border border-white/20 dark:border-white/[0.06] bg-white/70 dark:bg-white/[0.04] backdrop-blur-xl p-6",
         className
       )}
     >
@@ -99,7 +99,7 @@ export function AnimatedStatCard({
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, delay, ease: [0.25, 0.46, 0.45, 0.94] }}
       whileHover={{ y: -4, transition: { duration: 0.2 } }}
-      className="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6"
+      className="rounded-2xl border bg-white/80 dark:bg-white/[0.04] backdrop-blur-sm p-6 shadow-soft"
     >
       <div className="flex items-start justify-between">
         <div>
@@ -133,7 +133,7 @@ export function AnimatedStatCard({
             initial={{ opacity: 0, scale: 0 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ delay: delay + 0.1, type: "spring", stiffness: 300 }}
-            className="p-3 rounded-lg bg-slate-100 dark:bg-slate-800"
+            className="p-3 rounded-lg bg-muted"
           >
             {icon}
           </motion.div>
@@ -169,7 +169,7 @@ export function AnimatedFeatureCard({
       whileTap={onClick ? { scale: 0.98 } : undefined}
       onClick={onClick}
       className={cn(
-        "group rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6",
+        "group rounded-2xl border bg-white/80 dark:bg-white/[0.04] backdrop-blur-sm p-6 shadow-soft",
         onClick && "cursor-pointer"
       )}
     >
@@ -177,7 +177,7 @@ export function AnimatedFeatureCard({
         initial={{ scale: 1 }}
         whileHover={{ scale: 1.1, rotate: 5 }}
         transition={{ type: "spring", stiffness: 300 }}
-        className="inline-flex p-3 rounded-lg bg-slate-100 dark:bg-slate-800 mb-4"
+        className="inline-flex p-3 rounded-lg bg-muted mb-4"
       >
         {icon}
       </motion.div>

@@ -210,29 +210,41 @@ export function EcosystemDashboard() {
     return () => window.removeEventListener("keydown", handler);
   }, [fetchData]);
 
-  if (loading && !data) return <EcosystemSkeleton />;
-
-  if (error && !data) {
+  if (loading && !data) {
     return (
-      <div className="flex items-center justify-center h-[50vh]">
-        <Card className="max-w-md">
-          <CardContent className="pt-6 text-center">
-            <AlertTriangle className="h-12 w-12 text-amber-500 mx-auto mb-4" />
-            <p className="text-lg font-medium">Failed to load ecosystem data</p>
-            <p className="text-sm text-muted-foreground mt-2">{error}</p>
-            <button
-              onClick={fetchData}
-              className="mt-4 px-4 py-2 bg-primary text-primary-foreground rounded-md text-sm hover:bg-primary/90"
-            >
-              Try Again
-            </button>
-          </CardContent>
-        </Card>
+      <div className="p-8">
+        <div className="flex items-center gap-3 mb-6">
+          <div className="h-8 w-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin" />
+          <h1 className="text-2xl font-bold">Loading War Room...</h1>
+        </div>
+        <EcosystemSkeleton />
       </div>
     );
   }
 
-  if (!data) return null;
+  if (error && !data) {
+    return (
+      <div className="p-8">
+        <div className="max-w-md mx-auto">
+          <Card className="border-red-200">
+            <CardContent className="pt-6 text-center">
+              <AlertTriangle className="h-12 w-12 text-red-500 mx-auto mb-4" />
+              <p className="text-lg font-bold text-red-600">War Room Error</p>
+              <p className="text-sm text-muted-foreground mt-2">{error}</p>
+              <button
+                onClick={fetchData}
+                className="mt-4 px-4 py-2 bg-red-600 text-white rounded-md text-sm hover:bg-red-700"
+              >
+                Try Again
+              </button>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    );
+  }
+
+  if (!data) return <div className="p-8 text-lg font-bold">No data received</div>;
 
   const { summary, brainStats, deployments, crossDbStats, projects, databases, versionAlerts, liveData } = data;
   const activeProjects = projects.filter((p) => p.status === "active");

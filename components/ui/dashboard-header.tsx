@@ -2,7 +2,6 @@
 
 import { LucideIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 
 interface DashboardHeaderAction {
@@ -31,20 +30,20 @@ interface DashboardHeaderProps {
 }
 
 const iconColors = {
-  violet: "from-violet-500 to-purple-600 shadow-violet-500/25",
-  blue: "from-blue-500 to-cyan-600 shadow-blue-500/25",
-  green: "from-emerald-500 to-teal-600 shadow-emerald-500/25",
-  amber: "from-amber-500 to-orange-600 shadow-amber-500/25",
-  rose: "from-rose-500 to-pink-600 shadow-rose-500/25",
-  indigo: "from-indigo-500 to-blue-600 shadow-indigo-500/25",
-  slate: "from-slate-600 to-slate-800 shadow-slate-500/25",
+  violet: "from-violet-500 to-purple-600 shadow-violet-500/20",
+  blue: "from-blue-500 to-cyan-600 shadow-blue-500/20",
+  green: "from-emerald-500 to-teal-600 shadow-emerald-500/20",
+  amber: "from-amber-500 to-orange-600 shadow-amber-500/20",
+  rose: "from-rose-500 to-pink-600 shadow-rose-500/20",
+  indigo: "from-indigo-500 to-blue-600 shadow-indigo-500/20",
+  slate: "from-slate-600 to-slate-800 shadow-slate-500/20",
 };
 
 const buttonVariants = {
-  primary: "bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-700 hover:to-purple-700 text-white shadow-lg shadow-violet-500/25 border-0",
-  secondary: "bg-slate-900 hover:bg-slate-800 text-white dark:bg-slate-100 dark:hover:bg-slate-200 dark:text-slate-900",
-  outline: "border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800",
-  ghost: "hover:bg-slate-100 dark:hover:bg-slate-800",
+  primary: "bg-gradient-to-r from-primary to-purple-600 hover:from-primary/90 hover:to-purple-600/90 text-white shadow-lg shadow-primary/20 border-0 rounded-xl",
+  secondary: "bg-foreground hover:bg-foreground/90 text-background rounded-xl",
+  outline: "border hover:bg-accent rounded-xl",
+  ghost: "hover:bg-accent rounded-xl",
 };
 
 export function DashboardHeader({
@@ -64,37 +63,37 @@ export function DashboardHeader({
           {/* Icon Badge */}
           <div
             className={cn(
-              "h-14 w-14 rounded-2xl bg-gradient-to-br flex items-center justify-center shadow-lg",
+              "h-12 w-12 rounded-2xl bg-gradient-to-br flex items-center justify-center shadow-glow-sm",
               iconColors[iconColor]
             )}
           >
-            <Icon className="h-7 w-7 text-white" />
+            <Icon className="h-6 w-6 text-white" />
           </div>
 
           {/* Title & Meta */}
           <div>
             <div className="flex items-center gap-3">
-              <h1 className="text-3xl font-bold text-slate-900 dark:text-white">
+              <h1 className="text-2xl font-semibold text-foreground">
                 {title}
               </h1>
               {badge && (
-                <span className="inline-flex items-center gap-1.5 text-xs font-medium text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-500/10 px-2.5 py-1 rounded-full">
+                <span className="inline-flex items-center gap-1.5 text-xs font-medium text-primary bg-primary/[0.08] px-2.5 py-1 rounded-full">
                   {badge.icon && <badge.icon className="h-3 w-3" />}
                   {badge.label}
                 </span>
               )}
             </div>
             {subtitle && (
-              <p className="text-slate-500 dark:text-slate-400 mt-0.5">
+              <p className="text-muted-foreground mt-0.5">
                 {subtitle}
               </p>
             )}
             {stats && stats.length > 0 && (
-              <p className="text-slate-500 dark:text-slate-400 mt-0.5">
+              <p className="text-muted-foreground mt-0.5">
                 {stats.map((stat, i) => (
                   <span key={stat.label}>
                     {i > 0 && " · "}
-                    <span className="font-medium text-slate-700 dark:text-slate-300">
+                    <span className="font-medium text-foreground">
                       {stat.value}
                     </span>{" "}
                     {stat.label}
@@ -149,7 +148,7 @@ export function DashboardHeader({
 }
 
 /**
- * Page wrapper with consistent gradient background
+ * Page wrapper with consistent background
  */
 export function DashboardPageWrapper({
   children,
@@ -169,7 +168,7 @@ export function DashboardPageWrapper({
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white dark:from-slate-950 dark:to-slate-900">
+    <div className="min-h-screen bg-background">
       <div className={cn(maxWidthClass[maxWidth], "mx-auto px-6 py-8", className)}>
         {children}
       </div>

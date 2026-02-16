@@ -1021,7 +1021,7 @@ export const NAVIGATION_CONFIG_V2: NavigationSection[] = [
     color: "text-slate-600 dark:text-slate-400",
     bgColor: "bg-slate-50 dark:bg-slate-950/30",
     collapsible: true,
-    defaultCollapsed: false,
+    defaultCollapsed: true,
     items: [
       {
         name: "Leads",
