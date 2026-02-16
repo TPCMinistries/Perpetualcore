@@ -12,9 +12,11 @@ import { AIAssistantProvider, FloatingAIAssistant, AIAssistantTrigger } from "..
 import { AIContextButton } from "../ai/AIContextButton";
 import { EntityProvider } from "../entities/EntityProvider";
 import { EntitySwitcherCompact } from "../entities/EntitySwitcher";
+import { KeyboardShortcuts } from "../ui/keyboard-shortcuts";
 import Link from "next/link";
 import { Button } from "../ui/button";
 import { PanelLeft, PanelLeftClose } from "lucide-react";
+import { Breadcrumb } from "../ui/breadcrumb";
 
 function DashboardLayoutInner({
   children,
@@ -98,6 +100,7 @@ function DashboardLayoutInner({
         </header>
 
         <div className="px-4 py-6 sm:px-6 md:px-8 max-w-7xl mx-auto">
+          <Breadcrumb />
           {children}
         </div>
       </main>
@@ -123,6 +126,8 @@ export function DashboardLayoutClient({
             <AIAssistantTrigger />
             {/* Contextual AI Button - ⌘K */}
             <AIContextButton floating position="bottom-right" />
+            {/* Keyboard Shortcuts Overlay - ? */}
+            <KeyboardShortcuts />
           </SidebarProvider>
         </AIAssistantProvider>
       </WorkspaceProvider>

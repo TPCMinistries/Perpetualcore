@@ -5,6 +5,7 @@ import { Toaster } from "sonner";
 import { OnboardingFlowV3 } from "@/components/onboarding/OnboardingFlowV3";
 import { AnimatedBackground } from "@/components/ui/animated-background";
 import { DashboardLayoutClient } from "@/components/layout/DashboardLayoutClient";
+import { VoiceButton } from "@/components/voice/VoiceButton";
 
 export default async function DashboardLayout({
   children,
@@ -37,6 +38,9 @@ export default async function DashboardLayout({
       <DashboardLayoutClient profile={profile}>
         {children}
       </DashboardLayoutClient>
+
+      {/* Floating Voice Button */}
+      <VoiceButton />
     </div>
   );
 }
