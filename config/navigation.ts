@@ -93,8 +93,8 @@ export const NAVIGATION_CONFIG: NavigationSection[] = [
   // FAVORITES - No header, most-used features at top
   {
     section: "", // Empty = no header displayed
-    color: "text-slate-600 dark:text-slate-400",
-    bgColor: "bg-slate-50 dark:bg-slate-950/30",
+    color: "text-muted-foreground",
+    bgColor: "bg-muted/30",
     items: [
       {
         name: "Dashboard",
@@ -124,8 +124,8 @@ export const NAVIGATION_CONFIG: NavigationSection[] = [
   // CHAT - All chat options in one section
   {
     section: "Chat",
-    color: "text-slate-600 dark:text-slate-400",
-    bgColor: "bg-slate-50 dark:bg-slate-950/30",
+    color: "text-muted-foreground",
+    bgColor: "bg-muted/30",
     items: [
       {
         name: "AI Chat",
@@ -195,8 +195,8 @@ export const NAVIGATION_CONFIG: NavigationSection[] = [
   // WORK - Core productivity features (restructured with Projects & Teams first)
   {
     section: "Work",
-    color: "text-slate-600 dark:text-slate-400",
-    bgColor: "bg-slate-50 dark:bg-slate-950/30",
+    color: "text-muted-foreground",
+    bgColor: "bg-muted/30",
     items: [
       {
         name: "Projects",
@@ -318,8 +318,8 @@ export const NAVIGATION_CONFIG: NavigationSection[] = [
   // AI TOOLS - Intelligent automation
   {
     section: "AI Tools",
-    color: "text-slate-600 dark:text-slate-400",
-    bgColor: "bg-slate-50 dark:bg-slate-950/30",
+    color: "text-muted-foreground",
+    bgColor: "bg-muted/30",
     collapsible: true,
     defaultCollapsed: true,
     visibleFor: ["beginner", "intermediate", "advanced"],
@@ -371,8 +371,8 @@ export const NAVIGATION_CONFIG: NavigationSection[] = [
   // GROWTH - Sales and outreach tools
   {
     section: "Growth",
-    color: "text-slate-600 dark:text-slate-400",
-    bgColor: "bg-slate-50 dark:bg-slate-950/30",
+    color: "text-muted-foreground",
+    bgColor: "bg-muted/30",
     collapsible: true,
     defaultCollapsed: false,
     visibleFor: ["beginner", "intermediate", "advanced"],
@@ -403,8 +403,8 @@ export const NAVIGATION_CONFIG: NavigationSection[] = [
   // MINISTRY - Church and coaching tools
   {
     section: "Ministry",
-    color: "text-slate-600 dark:text-slate-400",
-    bgColor: "bg-slate-50 dark:bg-slate-950/30",
+    color: "text-muted-foreground",
+    bgColor: "bg-muted/30",
     collapsible: true,
     defaultCollapsed: false,
     visibleFor: ["beginner", "intermediate", "advanced"],
@@ -435,8 +435,8 @@ export const NAVIGATION_CONFIG: NavigationSection[] = [
   // INSIGHTS - Analytics and monitoring (collapsible, collapsed by default)
   {
     section: "Insights",
-    color: "text-slate-600 dark:text-slate-400",
-    bgColor: "bg-slate-50 dark:bg-slate-950/30",
+    color: "text-muted-foreground",
+    bgColor: "bg-muted/30",
     collapsible: true,
     defaultCollapsed: true,
     visibleFor: ["beginner", "intermediate", "advanced"],
@@ -498,8 +498,8 @@ export const NAVIGATION_CONFIG: NavigationSection[] = [
   // SETTINGS - Bottom of sidebar (collapsible, collapsed by default)
   {
     section: "Settings",
-    color: "text-slate-600 dark:text-slate-400",
-    bgColor: "bg-slate-50 dark:bg-slate-950/30",
+    color: "text-muted-foreground",
+    bgColor: "bg-muted/30",
     collapsible: true,
     defaultCollapsed: true,
     items: [
@@ -560,8 +560,8 @@ export const NAVIGATION_CONFIG: NavigationSection[] = [
   // SECTION 7: DEVELOPER - Collapsible technical tools (advanced only)
   {
     section: "Developer",
-    color: "text-slate-600 dark:text-slate-400",
-    bgColor: "bg-slate-50 dark:bg-slate-950/30",
+    color: "text-muted-foreground",
+    bgColor: "bg-muted/30",
     collapsible: true,
     defaultCollapsed: true,
     visibleFor: ["advanced"],
@@ -681,8 +681,8 @@ export const NAVIGATION_CONFIG_V2: NavigationSection[] = [
   // CORE - Always visible, most essential features
   {
     section: "", // No header for core items
-    color: "text-slate-600 dark:text-slate-400",
-    bgColor: "bg-slate-50 dark:bg-slate-950/30",
+    color: "text-muted-foreground",
+    bgColor: "bg-muted/30",
     items: [
       {
         name: "Home",
@@ -724,8 +724,8 @@ export const NAVIGATION_CONFIG_V2: NavigationSection[] = [
   // COMMUNICATION - Email, Contacts, Calendar together
   {
     section: "Communication",
-    color: "text-slate-600 dark:text-slate-400",
-    bgColor: "bg-slate-50 dark:bg-slate-950/30",
+    color: "text-muted-foreground",
+    bgColor: "bg-muted/30",
     collapsible: true,
     defaultCollapsed: false,
     items: [
@@ -768,8 +768,8 @@ export const NAVIGATION_CONFIG_V2: NavigationSection[] = [
   // CHAT - All chat options in one section
   {
     section: "Chat",
-    color: "text-slate-600 dark:text-slate-400",
-    bgColor: "bg-slate-50 dark:bg-slate-950/30",
+    color: "text-muted-foreground",
+    bgColor: "bg-muted/30",
     collapsible: true,
     defaultCollapsed: false,
     items: [
@@ -862,8 +862,8 @@ export const NAVIGATION_CONFIG_V2: NavigationSection[] = [
   // WORK - Core productivity
   {
     section: "Work",
-    color: "text-slate-600 dark:text-slate-400",
-    bgColor: "bg-slate-50 dark:bg-slate-950/30",
+    color: "text-muted-foreground",
+    bgColor: "bg-muted/30",
     collapsible: true,
     defaultCollapsed: false,
     items: [
@@ -966,8 +966,8 @@ export const NAVIGATION_CONFIG_V2: NavigationSection[] = [
   // AUTOMATE - All automation consolidated
   {
     section: "Automate",
-    color: "text-slate-600 dark:text-slate-400",
-    bgColor: "bg-slate-50 dark:bg-slate-950/30",
+    color: "text-muted-foreground",
+    bgColor: "bg-muted/30",
     collapsible: true,
     defaultCollapsed: false,
     items: [
@@ -1018,8 +1018,8 @@ export const NAVIGATION_CONFIG_V2: NavigationSection[] = [
   // GROW - Sales and growth
   {
     section: "Grow",
-    color: "text-slate-600 dark:text-slate-400",
-    bgColor: "bg-slate-50 dark:bg-slate-950/30",
+    color: "text-muted-foreground",
+    bgColor: "bg-muted/30",
     collapsible: true,
     defaultCollapsed: true,
     items: [
@@ -1059,8 +1059,8 @@ export const NAVIGATION_CONFIG_V2: NavigationSection[] = [
   // SETTINGS - Configuration and admin
   {
     section: "Settings",
-    color: "text-slate-600 dark:text-slate-400",
-    bgColor: "bg-slate-50 dark:bg-slate-950/30",
+    color: "text-muted-foreground",
+    bgColor: "bg-muted/30",
     collapsible: true,
     defaultCollapsed: true,
     items: [
@@ -1113,6 +1113,36 @@ export const NAVIGATION_CONFIG_V2: NavigationSection[] = [
           visibleFor: ["advanced"],
           complexity: "developer",
           helpText: "API keys, webhooks, and developer tools",
+        },
+      },
+      {
+        name: "Entities",
+        href: "/dashboard/entities",
+        icon: Database,
+        adaptiveConfig: {
+          visibleFor: ["advanced"],
+          complexity: "developer",
+          helpText: "Browse and manage entity records across the system",
+        },
+      },
+      {
+        name: "Knowledge",
+        href: "/dashboard/knowledge",
+        icon: BookOpen,
+        adaptiveConfig: {
+          visibleFor: ["advanced"],
+          complexity: "developer",
+          helpText: "Explore the AI knowledge base and embeddings",
+        },
+      },
+      {
+        name: "Data Explorer",
+        href: "/dashboard/data-explorer",
+        icon: Sheet,
+        adaptiveConfig: {
+          visibleFor: ["advanced"],
+          complexity: "developer",
+          helpText: "Query and explore raw data tables",
         },
       },
     ],
