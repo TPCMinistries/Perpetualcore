@@ -1,29 +1,11 @@
 -- Phase 2: Team Workspaces V2
--- Adds invitation system, shared skills, and shared credentials for teams.
+-- Adds team_id to existing invitations, plus shared skills and credentials tables.
 
--- Team invitations
-CREATE TABLE IF NOT EXISTS team_invitations (
-  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-  team_id UUID NOT NULL,
-  email TEXT NOT NULL,
-  role TEXT DEFAULT 'member' CHECK (role IN ('owner', 'admin', 'member', 'viewer')),
-  invited_by UUID REFERENCES auth.users(id),
-  token TEXT UNIQUE NOT NULL,
-  expires_at TIMESTAMPTZ NOT NULL,
-  accepted_at TIMESTAMPTZ,
-  created_at TIMESTAMPTZ DEFAULT NOW()
-);
+-- Add team_id to existing team_invitations table (org-level already has organization_id)
+ALTER TABLE team_invitations ADD COLUMN IF NOT EXISTS team_id UUID;
 
-CREATE INDEX IF NOT EXISTS idx_team_invitations_token ON team_invitations(token) WHERE accepted_at IS NULL;
-CREATE INDEX IF NOT EXISTS idx_team_invitations_email ON team_invitations(email, team_id);
-
-ALTER TABLE team_invitations ENABLE ROW LEVEL SECURITY;
-
-DO $$ BEGIN
-  CREATE POLICY "team_invitations_service_role" ON team_invitations
-    FOR ALL USING (auth.role() = 'service_role');
-EXCEPTION WHEN duplicate_object THEN NULL;
-END $$;
+CREATE INDEX IF NOT EXISTS idx_team_invitations_team_token ON team_invitations(token) WHERE accepted_at IS NULL;
+CREATE INDEX IF NOT EXISTS idx_team_invitations_team_email ON team_invitations(email, team_id) WHERE team_id IS NOT NULL;
 
 -- Shared team skills
 CREATE TABLE IF NOT EXISTS team_skills (
