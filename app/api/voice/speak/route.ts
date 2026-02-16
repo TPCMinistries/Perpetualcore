@@ -1,14 +1,11 @@
 import { createClient } from "@/lib/supabase/server";
 import { NextRequest } from "next/server";
-import OpenAI from "openai";
+import { synthesizeSpeech } from "@/lib/voice/tts-stream";
+import { VoiceId } from "@/lib/voice/constants";
 import { rateLimiters, checkRateLimit } from "@/lib/rate-limit";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
-
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
 
 export async function POST(req: NextRequest) {
   try {
@@ -33,15 +30,8 @@ export async function POST(req: NextRequest) {
       return new Response("No text provided", { status: 400 });
     }
 
-    // Convert text to speech using OpenAI TTS
-    const mp3 = await openai.audio.speech.create({
-      model: "tts-1",
-      voice: voice || "alloy",
-      input: text,
-      speed: 1.0,
-    });
-
-    const buffer = Buffer.from(await mp3.arrayBuffer());
+    // Convert text to speech using shared utility
+    const buffer = await synthesizeSpeech(text, voice as VoiceId);
 
     return new Response(buffer, {
       headers: {

@@ -13,6 +13,9 @@ import { ChannelType, ChannelAdapter, ChannelResponse } from "./types";
 import { TelegramAdapter } from "./telegram-adapter";
 import { SlackAdapter } from "./slack-adapter";
 import { WhatsAppAdapter } from "./whatsapp-adapter";
+import { DiscordAdapter } from "./discord-adapter";
+import { EmailAdapter } from "./email-adapter";
+import { TeamsAdapter } from "./teams-adapter";
 import { routeMessage } from "./router";
 import { formatResponseForChannel } from "./response-formatter";
 import { trackActivity } from "@/lib/activity-feed/tracker";
@@ -22,9 +25,9 @@ const adapters: Record<ChannelType, ChannelAdapter> = {
   telegram: new TelegramAdapter(),
   slack: new SlackAdapter(),
   whatsapp: new WhatsAppAdapter(),
-  // Discord and email adapters are placeholders -- implement when needed
-  discord: new TelegramAdapter(), // Fallback; replace with DiscordAdapter
-  email: new TelegramAdapter(), // Fallback; replace with EmailAdapter
+  discord: new DiscordAdapter(),
+  email: new EmailAdapter(),
+  teams: new TeamsAdapter(),
 };
 
 /**

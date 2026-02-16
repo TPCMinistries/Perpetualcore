@@ -82,6 +82,11 @@ export const PLAN_LIMITS = {
     teamMembers: 1,
     automations: 5,
     customSkills: 1,
+    // OpenClaw competitive features
+    channels: 0, // Web chat only
+    agentWorkspaces: 0,
+    marketplaceSkills: 3,
+    proactiveBehaviors: 0,
     features: {
       geminiUnlimited: true,
       gpt4oMini: false,
@@ -96,6 +101,9 @@ export const PLAN_LIMITS = {
       customTraining: false,
       whiteLabel: false,
       onPremise: false,
+      a2uiBasic: true, // metric, card only
+      a2uiFull: false,
+      voiceMode: false,
       support: "community",
     },
   },
@@ -107,6 +115,11 @@ export const PLAN_LIMITS = {
     teamMembers: 1,
     automations: -1, // Unlimited
     customSkills: 5,
+    // OpenClaw competitive features
+    channels: 2, // Web + 2 external channels
+    agentWorkspaces: 1,
+    marketplaceSkills: 10,
+    proactiveBehaviors: 3,
     features: {
       geminiUnlimited: true,
       gpt4oMini: true,
@@ -121,6 +134,9 @@ export const PLAN_LIMITS = {
       customTraining: false,
       whiteLabel: false,
       onPremise: false,
+      a2uiBasic: true,
+      a2uiFull: true,
+      voiceMode: false,
       support: "priority_email",
     },
   },
@@ -132,6 +148,11 @@ export const PLAN_LIMITS = {
     teamMembers: 1,
     automations: -1,
     customSkills: 25,
+    // OpenClaw competitive features
+    channels: -1, // Unlimited
+    agentWorkspaces: 5,
+    marketplaceSkills: -1, // Unlimited
+    proactiveBehaviors: -1, // Unlimited
     features: {
       geminiUnlimited: true,
       gpt4oMini: true,
@@ -146,6 +167,9 @@ export const PLAN_LIMITS = {
       customTraining: false,
       whiteLabel: false,
       onPremise: false,
+      a2uiBasic: true,
+      a2uiFull: true,
+      voiceMode: true,
       support: "priority_4hr",
     },
   },
@@ -157,6 +181,11 @@ export const PLAN_LIMITS = {
     teamMembers: 10,
     automations: -1,
     customSkills: -1, // Unlimited
+    // OpenClaw competitive features
+    channels: -1,
+    agentWorkspaces: -1, // Unlimited
+    marketplaceSkills: -1,
+    proactiveBehaviors: -1,
     features: {
       geminiUnlimited: true,
       gpt4oMini: true,
@@ -171,6 +200,9 @@ export const PLAN_LIMITS = {
       customTraining: false,
       whiteLabel: false,
       onPremise: false,
+      a2uiBasic: true,
+      a2uiFull: true,
+      voiceMode: true,
       support: "dedicated_success",
     },
   },
@@ -182,6 +214,11 @@ export const PLAN_LIMITS = {
     teamMembers: 50,
     automations: -1,
     customSkills: -1,
+    // OpenClaw competitive features
+    channels: -1,
+    agentWorkspaces: -1,
+    marketplaceSkills: -1,
+    proactiveBehaviors: -1,
     features: {
       geminiUnlimited: true,
       gpt4oMini: true,
@@ -196,6 +233,9 @@ export const PLAN_LIMITS = {
       customTraining: true,
       whiteLabel: false,
       onPremise: false,
+      a2uiBasic: true,
+      a2uiFull: true,
+      voiceMode: true,
       support: "priority_phone_2hr",
       sla: "99.9%",
     },
@@ -208,6 +248,11 @@ export const PLAN_LIMITS = {
     teamMembers: 250,
     automations: -1,
     customSkills: -1,
+    // OpenClaw competitive features
+    channels: -1,
+    agentWorkspaces: -1,
+    marketplaceSkills: -1,
+    proactiveBehaviors: -1,
     features: {
       geminiUnlimited: true,
       gpt4oMini: true,
@@ -222,6 +267,9 @@ export const PLAN_LIMITS = {
       customTraining: true,
       whiteLabel: true,
       onPremise: false,
+      a2uiBasic: true,
+      a2uiFull: true,
+      voiceMode: true,
       support: "24_7_dedicated",
       sla: "99.95%",
       hipaa: true,
@@ -236,6 +284,11 @@ export const PLAN_LIMITS = {
     teamMembers: -1, // Unlimited
     automations: -1,
     customSkills: -1,
+    // OpenClaw competitive features
+    channels: -1,
+    agentWorkspaces: -1,
+    marketplaceSkills: -1,
+    proactiveBehaviors: -1,
     features: {
       geminiUnlimited: true,
       gpt4oMini: true,
@@ -250,6 +303,9 @@ export const PLAN_LIMITS = {
       customTraining: true,
       whiteLabel: true,
       onPremise: true,
+      a2uiBasic: true,
+      a2uiFull: true,
+      voiceMode: true,
       support: "custom",
       sla: "custom",
       hipaa: true,

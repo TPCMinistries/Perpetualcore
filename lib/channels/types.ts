@@ -2,11 +2,11 @@
  * Channel Hub Type Definitions
  *
  * Unified types for multi-channel message processing.
- * Supports Telegram, Slack, WhatsApp, Discord, and Email channels.
+ * Supports Telegram, Slack, WhatsApp, Discord, Email, and Teams channels.
  */
 
 /** Supported channel types */
-export type ChannelType = "telegram" | "slack" | "whatsapp" | "discord" | "email";
+export type ChannelType = "telegram" | "slack" | "whatsapp" | "discord" | "email" | "teams";
 
 /**
  * Unified message format that normalizes incoming messages
@@ -93,6 +93,8 @@ export interface ChannelContext {
   channelType: ChannelType;
   /** User's notification and channel preferences */
   preferences: Record<string, any>;
+  /** The resolved agent workspace ID, if any */
+  workspaceId?: string;
 }
 
 /**

@@ -1,14 +1,28 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { Search, Star, TrendingUp, Zap, Bot, Workflow, DollarSign, Users, Plug } from "lucide-react";
+import {
+  Search,
+  Star,
+  TrendingUp,
+  Zap,
+  Bot,
+  Workflow,
+  DollarSign,
+  Users,
+  Plug,
+  ShieldCheck,
+  Download,
+  Flame,
+} from "lucide-react";
 import { MarketplacePageSkeleton } from "@/components/ui/skeletons";
+import { cn } from "@/lib/utils";
 
 interface MarketplaceItem {
   id: string;
@@ -28,6 +42,13 @@ interface MarketplaceItem {
   reviews?: number;
   sales?: number;
   creator?: { name: string; verified: boolean };
+  // Phase 6 enriched fields
+  install_count?: number;
+  avg_rating?: number;
+  review_count?: number;
+  sales_count?: number;
+  security_verified?: boolean;
+  security_score?: number | null;
 }
 
 interface SkillItem {
@@ -43,11 +64,26 @@ interface SkillItem {
   enabled?: boolean;
 }
 
+const CATEGORIES = [
+  "All",
+  "Legal",
+  "Healthcare",
+  "Real Estate",
+  "Marketing",
+  "Sales",
+  "Finance",
+  "HR",
+  "Customer Support",
+  "Other",
+];
+
 export default function MarketplacePage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [filter, setFilter] = useState("all");
   const [sortBy, setSortBy] = useState("popular");
+  const [selectedCategory, setSelectedCategory] = useState("All");
   const [marketplaceItems, setMarketplaceItems] = useState<MarketplaceItem[]>([]);
+  const [trendingItems, setTrendingItems] = useState<MarketplaceItem[]>([]);
   const [skills, setSkills] = useState<SkillItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState({
@@ -57,41 +93,113 @@ export default function MarketplacePage() {
     totalPaidToCreators: 0,
   });
 
+  // Debounced search
+  const [debouncedQuery, setDebouncedQuery] = useState("");
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedQuery(searchQuery);
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
+
   useEffect(() => {
     if (filter === "skills") {
       fetchSkills();
     } else {
       fetchMarketplaceItems();
     }
-  }, [filter]);
+  }, [filter, debouncedQuery, sortBy, selectedCategory]);
+
+  // Fetch trending items on mount
+  useEffect(() => {
+    fetchTrendingItems();
+  }, []);
+
+  async function fetchTrendingItems() {
+    try {
+      const response = await fetch(
+        "/api/marketplace/search?sort=popular&limit=4"
+      );
+      if (response.ok) {
+        const data = await response.json();
+        setTrendingItems(data.skills || []);
+      }
+    } catch (error) {
+      console.error("Error fetching trending items:", error);
+    }
+  }
 
   async function fetchMarketplaceItems() {
     setLoading(true);
     try {
-      const typeParam = filter === "agents" ? "agent" : filter === "workflows" ? "workflow" : "";
-      const url = `/api/marketplace/items${typeParam ? `?type=${typeParam}` : ""}`;
+      // Use the new search API for enriched results
+      const params = new URLSearchParams();
+      if (debouncedQuery) params.set("q", debouncedQuery);
+      if (selectedCategory !== "All") params.set("category", selectedCategory);
+      params.set("sort", sortBy);
+      params.set("limit", "50");
 
-      const response = await fetch(url);
+      const searchUrl = `/api/marketplace/search?${params.toString()}`;
+      const response = await fetch(searchUrl);
+
       if (response.ok) {
         const data = await response.json();
-        // Add default values for fields that might not exist yet
-        const itemsWithDefaults = (data.items || []).map((item: MarketplaceItem) => ({
+        const items = (data.skills || []).map((item: MarketplaceItem) => ({
           ...item,
-          rating: item.rating || 0,
-          reviews: item.reviews || 0,
-          sales: item.sales || 0,
+          rating: item.avg_rating || item.rating || 0,
+          reviews: item.review_count || item.reviews || 0,
+          sales: item.install_count || item.sales_count || item.sales || 0,
           creator: item.creator || { name: "Creator", verified: false },
         }));
-        setMarketplaceItems(itemsWithDefaults);
+
+        // Apply type filter client-side
+        const typeParam =
+          filter === "agents"
+            ? "agent"
+            : filter === "workflows"
+            ? "workflow"
+            : "";
+        const filtered = typeParam
+          ? items.filter((i: MarketplaceItem) => i.type === typeParam)
+          : items;
+
+        setMarketplaceItems(filtered);
 
         // Calculate stats
-        const agents = data.items?.filter((i: MarketplaceItem) => i.type === "agent").length || 0;
-        const workflows = data.items?.filter((i: MarketplaceItem) => i.type === "workflow").length || 0;
+        const agents =
+          items.filter((i: MarketplaceItem) => i.type === "agent").length || 0;
+        const workflows =
+          items.filter((i: MarketplaceItem) => i.type === "workflow").length ||
+          0;
         setStats((prev) => ({
           ...prev,
           totalAgents: agents,
           totalWorkflows: workflows,
         }));
+      } else {
+        // Fallback to original API
+        const typeParam =
+          filter === "agents"
+            ? "agent"
+            : filter === "workflows"
+            ? "workflow"
+            : "";
+        const url = `/api/marketplace/items${typeParam ? `?type=${typeParam}` : ""}`;
+        const fallbackResponse = await fetch(url);
+        if (fallbackResponse.ok) {
+          const data = await fallbackResponse.json();
+          const itemsWithDefaults = (data.items || []).map(
+            (item: MarketplaceItem) => ({
+              ...item,
+              rating: item.rating || 0,
+              reviews: item.reviews || 0,
+              sales: item.sales || 0,
+              creator: item.creator || { name: "Creator", verified: false },
+            })
+          );
+          setMarketplaceItems(itemsWithDefaults);
+        }
       }
     } catch (error) {
       console.error("Error fetching marketplace items:", error);
@@ -115,34 +223,8 @@ export default function MarketplacePage() {
     }
   }
 
-  // Filter and sort items
-  const filteredItems = marketplaceItems
-    .filter((item) => {
-      if (searchQuery) {
-        const query = searchQuery.toLowerCase();
-        return (
-          item.name.toLowerCase().includes(query) ||
-          item.description.toLowerCase().includes(query) ||
-          item.tags.some((tag) => tag.toLowerCase().includes(query))
-        );
-      }
-      return true;
-    })
-    .sort((a, b) => {
-      switch (sortBy) {
-        case "rating":
-          return (b.rating || 0) - (a.rating || 0);
-        case "newest":
-          return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
-        case "price-low":
-          return a.price - b.price;
-        case "price-high":
-          return b.price - a.price;
-        case "popular":
-        default:
-          return (b.sales || 0) - (a.sales || 0);
-      }
-    });
+  // Items are already filtered/sorted from the API
+  const filteredItems = marketplaceItems;
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white dark:from-gray-900 dark:to-gray-800">
@@ -177,7 +259,8 @@ export default function MarketplacePage() {
               AI Agent & Workflow Marketplace
             </h1>
             <p className="text-xl text-muted-foreground mb-8">
-              Discover and purchase pre-built AI agents and workflows created by the community
+              Discover and purchase pre-built AI agents and workflows created by the community.
+              Every skill is security-verified before listing.
             </p>
 
             {/* Search Bar */}
@@ -185,7 +268,7 @@ export default function MarketplacePage() {
               <div className="relative flex-1">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
-                  placeholder="Search agents, workflows..."
+                  placeholder="Search agents, workflows, skills..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="pl-10"
@@ -224,6 +307,92 @@ export default function MarketplacePage() {
         </div>
       </section>
 
+      {/* Trending / Featured Section */}
+      {filter !== "skills" && trendingItems.length > 0 && !debouncedQuery && (
+        <section className="py-8 border-b">
+          <div className="container mx-auto px-4">
+            <div className="flex items-center gap-2 mb-6">
+              <Flame className="h-5 w-5 text-orange-500" />
+              <h2 className="text-xl font-bold">Trending This Week</h2>
+            </div>
+            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
+              {trendingItems.map((item) => (
+                <Link key={item.id} href={`/marketplace/${item.id}`}>
+                  <Card className="h-full hover:shadow-lg transition-shadow cursor-pointer border-orange-200/50 dark:border-orange-800/30">
+                    <CardHeader className="pb-3">
+                      <div className="flex items-start justify-between mb-2">
+                        <div className="h-10 w-10 rounded-lg bg-orange-50 dark:bg-orange-950/30 flex items-center justify-center">
+                          {item.type === "agent" ? (
+                            <Bot className="h-5 w-5 text-orange-600" />
+                          ) : (
+                            <Workflow className="h-5 w-5 text-orange-600" />
+                          )}
+                        </div>
+                        <div className="flex items-center gap-1.5">
+                          {item.security_verified && (
+                            <ShieldCheck className="h-4 w-4 text-green-600" />
+                          )}
+                          <Badge variant="secondary" className="text-xs">
+                            {item.category}
+                          </Badge>
+                        </div>
+                      </div>
+                      <CardTitle className="text-base line-clamp-1">
+                        {item.name}
+                      </CardTitle>
+                      <CardDescription className="text-xs line-clamp-2">
+                        {item.description}
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent className="pt-0">
+                      <div className="flex items-center justify-between text-xs text-muted-foreground">
+                        <div className="flex items-center gap-3">
+                          <span className="flex items-center gap-1">
+                            <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
+                            {item.avg_rating || 0}
+                          </span>
+                          <span className="flex items-center gap-1">
+                            <Download className="h-3 w-3" />
+                            {(item.install_count || 0).toLocaleString()}
+                          </span>
+                        </div>
+                        <span className="font-semibold text-foreground">
+                          ${item.price}
+                        </span>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </Link>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* Category Filter Chips */}
+      {filter !== "skills" && (
+        <section className="py-4 border-b bg-muted/20">
+          <div className="container mx-auto px-4">
+            <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-hide">
+              {CATEGORIES.map((cat) => (
+                <button
+                  key={cat}
+                  onClick={() => setSelectedCategory(cat)}
+                  className={cn(
+                    "px-4 py-1.5 rounded-full text-sm font-medium whitespace-nowrap transition-colors",
+                    selectedCategory === cat
+                      ? "bg-primary text-primary-foreground"
+                      : "bg-muted/60 text-muted-foreground hover:bg-muted hover:text-foreground"
+                  )}
+                >
+                  {cat}
+                </button>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
       {/* Filters & Sort */}
       <section className="py-8 border-b bg-muted/30">
         <div className="container mx-auto px-4">
@@ -257,6 +426,7 @@ export default function MarketplacePage() {
 
             <div className="text-sm text-muted-foreground">
               Showing {filteredItems.length} items
+              {selectedCategory !== "All" && ` in ${selectedCategory}`}
             </div>
           </div>
         </div>
@@ -374,7 +544,18 @@ export default function MarketplacePage() {
                         <Workflow className="h-6 w-6 text-primary" />
                       )}
                     </div>
-                    <Badge variant="secondary">{item.category}</Badge>
+                    <div className="flex items-center gap-1.5">
+                      {item.security_verified && (
+                        <Badge
+                          variant="outline"
+                          className="text-xs border-green-300 text-green-700 dark:border-green-700 dark:text-green-400 gap-1"
+                        >
+                          <ShieldCheck className="h-3 w-3" />
+                          Verified
+                        </Badge>
+                      )}
+                      <Badge variant="secondary">{item.category}</Badge>
+                    </div>
                   </div>
                   <CardTitle className="line-clamp-1">{item.name}</CardTitle>
                   <CardDescription className="line-clamp-2">{item.description}</CardDescription>
@@ -389,24 +570,34 @@ export default function MarketplacePage() {
                     ))}
                   </div>
 
-                  {/* Stats */}
+                  {/* Stats - install count + rating */}
                   <div className="flex items-center gap-4 text-sm text-muted-foreground">
                     <div className="flex items-center gap-1">
                       <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                      <span className="font-medium">{item.rating}</span>
-                      <span>({item.reviews})</span>
+                      <span className="font-medium">
+                        {item.avg_rating || item.rating || 0}
+                      </span>
+                      <span>({item.review_count || item.reviews || 0})</span>
                     </div>
                     <div className="flex items-center gap-1">
-                      <Users className="h-4 w-4" />
-                      <span>{item.sales.toLocaleString()} sales</span>
+                      <Download className="h-4 w-4" />
+                      <span>
+                        {(
+                          item.install_count ||
+                          item.sales_count ||
+                          item.sales ||
+                          0
+                        ).toLocaleString()}{" "}
+                        installs
+                      </span>
                     </div>
                   </div>
 
                   {/* Creator */}
                   <div className="flex items-center justify-between pt-4 border-t">
                     <div className="text-sm text-muted-foreground">
-                      by {item.creator.name}
-                      {item.creator.verified && (
+                      by {item.creator?.name || "Creator"}
+                      {item.creator?.verified && (
                         <Badge variant="secondary" className="ml-2 text-xs">
                           Verified
                         </Badge>
@@ -442,8 +633,11 @@ export default function MarketplacePage() {
             <h2 className="text-3xl font-bold mb-4">
               Want to Sell Your AI Agents or Workflows?
             </h2>
-            <p className="text-lg text-muted-foreground mb-8">
+            <p className="text-lg text-muted-foreground mb-4">
               Join thousands of creators earning passive income. List your creations and earn 70% of every sale.
+            </p>
+            <p className="text-sm text-muted-foreground mb-8">
+              Every submission goes through our automated security pipeline -- no malware, no exploits, just quality tools.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Button size="lg" asChild>

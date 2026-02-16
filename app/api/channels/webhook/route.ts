@@ -1,7 +1,7 @@
 /**
  * Unified Channel Webhook Endpoint
  *
- * POST /api/channels/webhook?channel=telegram|slack|whatsapp
+ * POST /api/channels/webhook?channel=telegram|slack|whatsapp|discord|email|teams
  *
  * Receives incoming webhooks from all supported messaging channels,
  * verifies signatures, and routes through the unified channel hub.
@@ -33,6 +33,7 @@ export async function POST(request: NextRequest) {
     "whatsapp",
     "discord",
     "email",
+    "teams",
   ];
 
   if (!validChannels.includes(channelParam as ChannelType)) {
@@ -101,6 +102,18 @@ export async function POST(request: NextRequest) {
           }
         );
 
+      case "discord":
+        // Discord expects 200 OK; response sent via REST API
+        return NextResponse.json({ ok: true });
+
+      case "email":
+        // Email webhooks expect 200 OK to acknowledge receipt
+        return NextResponse.json({ ok: true });
+
+      case "teams":
+        // Bot Framework expects 200 OK; response sent via REST API
+        return NextResponse.json({ ok: true });
+
       default:
         return NextResponse.json({ ok: true, response: response.text });
     }
@@ -108,7 +121,7 @@ export async function POST(request: NextRequest) {
     console.error(`[Webhook] Error processing ${channelType} webhook:`, error);
 
     // Still return 200 for most channels to prevent retries
-    if (channelType === "telegram" || channelType === "slack") {
+    if (channelType === "telegram" || channelType === "slack" || channelType === "discord" || channelType === "teams") {
       return NextResponse.json({ ok: false, error: error.message });
     }
 

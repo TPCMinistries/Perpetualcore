@@ -1,5 +1,7 @@
 // Chat types for the redesigned AI hub
 
+import type { A2UIBlock } from "@/lib/a2ui/types";
+
 export interface ToolActivity {
   name: string;
   status: "running" | "complete" | "error";
@@ -13,6 +15,7 @@ export interface Message {
   id?: string;
   feedback?: "helpful" | "not_helpful" | null;
   toolActivity?: ToolActivity[];
+  blocks?: A2UIBlock[];
 }
 
 export interface FileAttachment {

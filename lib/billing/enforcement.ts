@@ -170,3 +170,222 @@ export async function enforceCustomSkillLimit(
 
   return { allowed: true, current, limit, plan };
 }
+
+// ============================================================
+// OpenClaw Competitive Feature Gates
+// ============================================================
+
+/**
+ * Check if a user can connect more external channels
+ */
+export async function enforceChannelLimit(
+  userId: string,
+  organizationId?: string
+): Promise<EnforcementResult> {
+  const plan = organizationId
+    ? await getOrgPlan(organizationId)
+    : "free" as PlanType;
+  const limit = PLAN_LIMITS[plan]?.channels ?? 0;
+
+  if (limit === -1) {
+    return { allowed: true, current: 0, limit: -1, plan };
+  }
+
+  const supabase = createAdminClient();
+  const { count } = await supabase
+    .from("channel_links")
+    .select("id", { count: "exact", head: true })
+    .eq("user_id", userId)
+    .eq("is_active", true);
+
+  const current = count || 0;
+
+  if (current >= limit) {
+    return {
+      allowed: false,
+      current,
+      limit,
+      plan,
+      message: limit === 0
+        ? `External channels are not available on the ${plan} plan. Upgrade to Starter or above.`
+        : `Channel limit reached (${current}/${limit}). Upgrade for more channels.`,
+    };
+  }
+
+  return { allowed: true, current, limit, plan };
+}
+
+/**
+ * Check if a user can create more agent workspaces
+ */
+export async function enforceAgentWorkspaceLimit(
+  userId: string,
+  organizationId?: string
+): Promise<EnforcementResult> {
+  const plan = organizationId
+    ? await getOrgPlan(organizationId)
+    : "free" as PlanType;
+  const limit = PLAN_LIMITS[plan]?.agentWorkspaces ?? 0;
+
+  if (limit === -1) {
+    return { allowed: true, current: 0, limit: -1, plan };
+  }
+
+  const supabase = createAdminClient();
+  const { count } = await supabase
+    .from("agent_workspaces")
+    .select("id", { count: "exact", head: true })
+    .eq("user_id", userId)
+    .eq("is_active", true);
+
+  const current = count || 0;
+
+  if (current >= limit) {
+    return {
+      allowed: false,
+      current,
+      limit,
+      plan,
+      message: limit === 0
+        ? `Agent workspaces are not available on the ${plan} plan. Upgrade to Starter or above.`
+        : `Workspace limit reached (${current}/${limit}). Upgrade for more agent workspaces.`,
+    };
+  }
+
+  return { allowed: true, current, limit, plan };
+}
+
+/**
+ * Check if voice mode is available for the user's plan
+ */
+export async function enforceVoiceModeAccess(
+  organizationId?: string
+): Promise<EnforcementResult> {
+  const plan = organizationId
+    ? await getOrgPlan(organizationId)
+    : "free" as PlanType;
+  const hasVoice = PLAN_LIMITS[plan]?.features?.voiceMode ?? false;
+
+  return {
+    allowed: hasVoice,
+    current: hasVoice ? 1 : 0,
+    limit: hasVoice ? 1 : 0,
+    plan,
+    message: hasVoice
+      ? undefined
+      : `Voice mode is available on Pro plans and above. Upgrade to unlock.`,
+  };
+}
+
+/**
+ * Check if a user can install more marketplace skills
+ */
+export async function enforceMarketplaceSkillLimit(
+  userId: string,
+  organizationId?: string
+): Promise<EnforcementResult> {
+  const plan = organizationId
+    ? await getOrgPlan(organizationId)
+    : "free" as PlanType;
+  const limit = PLAN_LIMITS[plan]?.marketplaceSkills ?? 3;
+
+  if (limit === -1) {
+    return { allowed: true, current: 0, limit: -1, plan };
+  }
+
+  const supabase = createAdminClient();
+  const { count } = await supabase
+    .from("skill_installs")
+    .select("id", { count: "exact", head: true })
+    .eq("user_id", userId)
+    .is("uninstalled_at", null);
+
+  const current = count || 0;
+
+  if (current >= limit) {
+    return {
+      allowed: false,
+      current,
+      limit,
+      plan,
+      message: `Marketplace skill limit reached (${current}/${limit}). Upgrade for more skills.`,
+    };
+  }
+
+  return { allowed: true, current, limit, plan };
+}
+
+/**
+ * Check if a user can create more proactive agent behaviors
+ */
+export async function enforceProactiveBehaviorLimit(
+  userId: string,
+  organizationId?: string
+): Promise<EnforcementResult> {
+  const plan = organizationId
+    ? await getOrgPlan(organizationId)
+    : "free" as PlanType;
+  const limit = PLAN_LIMITS[plan]?.proactiveBehaviors ?? 0;
+
+  if (limit === -1) {
+    return { allowed: true, current: 0, limit: -1, plan };
+  }
+
+  const supabase = createAdminClient();
+  const { count } = await supabase
+    .from("proactive_behaviors")
+    .select("id", { count: "exact", head: true })
+    .eq("user_id", userId)
+    .eq("is_active", true);
+
+  const current = count || 0;
+
+  if (current >= limit) {
+    return {
+      allowed: false,
+      current,
+      limit,
+      plan,
+      message: limit === 0
+        ? `Proactive agent behaviors are not available on the ${plan} plan. Upgrade to Starter or above.`
+        : `Behavior limit reached (${current}/${limit}). Upgrade for more proactive behaviors.`,
+    };
+  }
+
+  return { allowed: true, current, limit, plan };
+}
+
+/**
+ * Check A2UI block access level (basic vs full)
+ */
+export async function enforceA2UIAccess(
+  organizationId?: string,
+  blockType?: string
+): Promise<EnforcementResult> {
+  const plan = organizationId
+    ? await getOrgPlan(organizationId)
+    : "free" as PlanType;
+  const features = PLAN_LIMITS[plan]?.features;
+  const hasBasic = features?.a2uiBasic ?? true;
+  const hasFull = features?.a2uiFull ?? false;
+
+  // Basic blocks available to all plans
+  const basicBlocks = ["metric", "card", "code", "progress"];
+  const isBasicBlock = !blockType || basicBlocks.includes(blockType);
+
+  if (isBasicBlock && hasBasic) {
+    return { allowed: true, current: 0, limit: 0, plan };
+  }
+
+  if (!isBasicBlock && !hasFull) {
+    return {
+      allowed: false,
+      current: 0,
+      limit: 0,
+      plan,
+      message: `Advanced A2UI blocks (charts, tables, forms, kanban) require Starter plan or above.`,
+    };
+  }
+
+  return { allowed: true, current: 0, limit: 0, plan };
+}

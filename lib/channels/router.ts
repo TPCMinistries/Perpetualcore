@@ -5,6 +5,10 @@
  * loads full AI context (intelligence, memory, contacts, RAG),
  * generates an AI response, and persists the conversation.
  *
+ * Phase 3 additions:
+ * - DM Pairing Security: Unknown senders get a 6-digit pairing code
+ * - Agent Workspace Routing: Messages route to isolated agent personas
+ *
  * Replicates the context injection pattern from app/api/chat/route.ts
  * so that channel messages get the same rich, context-aware responses
  * as the web chat interface.
@@ -16,6 +20,8 @@ import { searchDocuments, buildRAGContext } from "@/lib/documents/rag";
 import { buildMemoryContext } from "@/lib/ai/memory";
 import { ChannelMessage, ChannelAdapter, ChannelResponse, ChannelType } from "./types";
 import { trackActivity } from "@/lib/activity-feed/tracker";
+import { resolveWorkspace, buildWorkspaceSystemPrompt } from "@/lib/agent-workspace/workspace-router";
+import { isChannelLinked, generatePairingCode, buildPairingMessage } from "@/lib/channels/pairing";
 
 const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 
@@ -26,16 +32,20 @@ const CHANNEL_ID_COLUMNS: Record<ChannelType, string> = {
   whatsapp: "whatsapp_number",
   discord: "discord_user_id",
   email: "email",
+  teams: "teams_user_id",
 };
 
 /**
  * Route an incoming channel message through the full AI pipeline.
  *
- * 1. Look up user by their channel-specific ID
- * 2. Load full context (intelligence, memory, contacts, RAG)
- * 3. Generate AI response with Claude
- * 4. Save conversation and messages to DB
- * 5. Track in activity feed
+ * Flow:
+ * 1. Check if sender's channel is linked via pairing → isChannelLinked()
+ * 2. If NOT linked: generate pairing code, send pairing message, return early
+ * 3. If linked: look up user, resolve workspace, load context
+ * 4. Build workspace-aware system prompt
+ * 5. Generate AI response with Claude
+ * 6. Save conversation and messages to DB
+ * 7. Track in activity feed
  *
  * @param message - The normalized ChannelMessage
  * @param adapter - The channel adapter for sending responses
@@ -47,31 +57,70 @@ export async function routeMessage(
 ): Promise<ChannelResponse> {
   const supabase = createAdminClient();
 
-  // --- Step 1: Look up user ---
-  const columnName = CHANNEL_ID_COLUMNS[message.channelType];
-  const lookupValue = message.channelUserId;
+  // --- Step 1: Check if channel sender is linked ---
+  const linkResult = await isChannelLinked(
+    message.channelType,
+    message.channelUserId
+  );
+
+  if (!linkResult.linked) {
+    // --- Step 2: Unknown sender → DM Pairing Security ---
+    console.log(
+      `[ChannelRouter] Unknown sender ${message.channelType}:${message.channelUserId}, initiating pairing`
+    );
+
+    try {
+      const code = await generatePairingCode(
+        null,
+        message.channelType,
+        message.channelUserId
+      );
+
+      const pairingText = buildPairingMessage(code);
+
+      return { text: pairingText };
+    } catch (pairingError: any) {
+      console.error("[ChannelRouter] Pairing code generation error:", pairingError);
+
+      // Fall back to the legacy onboarding message if pairing fails
+      return {
+        text: buildOnboardingMessage(message.channelType, message.channelUserId),
+      };
+    }
+  }
+
+  // --- Step 3: Linked sender → look up user profile ---
+  const userId = linkResult.userId!;
 
   const { data: profile, error: profileError } = await supabase
     .from("profiles")
     .select("id, organization_id, full_name, email, notification_preferences")
-    .eq(columnName, String(lookupValue))
+    .eq("id", userId)
     .single();
 
   if (profileError || !profile) {
     console.warn(
-      `[ChannelRouter] No user found for ${message.channelType}:${lookupValue}`
+      `[ChannelRouter] Profile not found for linked user ${userId}`
     );
-
     return {
-      text: buildOnboardingMessage(message.channelType, lookupValue),
+      text: "Sorry, I couldn't load your profile. Please try again or contact support.",
     };
   }
 
-  const userId = profile.id;
   const organizationId = profile.organization_id || userId;
   const userName = profile.full_name || "there";
 
-  // --- Step 2: Load full context (parallel) ---
+  // --- Step 3b: Resolve Agent Workspace ---
+  const workspace = await resolveWorkspace(
+    userId,
+    message.channelType,
+    message.channelUserId
+  ).catch((err) => {
+    console.warn("[ChannelRouter] Workspace resolution error:", err);
+    return null;
+  });
+
+  // --- Step 4: Load full context (parallel) ---
   const [memoryContext, ragResults, intelligenceData, recentConversation] =
     await Promise.all([
       buildMemoryContext(supabase, userId).catch(() => null),
@@ -87,11 +136,16 @@ export async function routeMessage(
   const ragContext =
     ragResults.length > 0 ? buildRAGContext(ragResults) : null;
 
-  // --- Step 3: Build system prompt with all context ---
+  // --- Step 5: Build system prompt with all context ---
   let systemPrompt = buildChannelSystemPrompt(
     userName,
     message.channelType
   );
+
+  // Apply workspace persona if resolved
+  if (workspace) {
+    systemPrompt = buildWorkspaceSystemPrompt(workspace, systemPrompt);
+  }
 
   // Inject intelligence context
   if (intelligenceData) {
@@ -130,7 +184,7 @@ export async function routeMessage(
   // Add the current message
   conversationHistory.push({ role: "user", content: message.text });
 
-  // --- Step 4: Generate AI response ---
+  // --- Step 6: Generate AI response ---
   let responseText: string;
 
   try {
@@ -155,7 +209,7 @@ export async function routeMessage(
     responseText = `Sorry, I ran into an issue processing your message. Please try again in a moment.`;
   }
 
-  // --- Step 5: Save conversation + messages ---
+  // --- Step 7: Save conversation + messages ---
   const conversationId = recentConversation?.id;
 
   if (conversationId) {
@@ -201,6 +255,7 @@ export async function routeMessage(
       metadata: {
         replyToMessageId: message.replyToMessageId,
         timestamp: message.timestamp.toISOString(),
+        workspaceId: workspace?.id || null,
       },
     },
     {
@@ -211,20 +266,24 @@ export async function routeMessage(
       channel_user_id: message.channelUserId,
       direction: "outbound",
       content: responseText,
-      metadata: {},
+      metadata: {
+        workspaceId: workspace?.id || null,
+      },
     },
   ]);
 
-  // --- Step 6: Track in activity feed (fire-and-forget) ---
+  // --- Step 8: Track in activity feed (fire-and-forget) ---
   trackActivity({
     userId,
     eventType: "message_received",
-    title: `Message via ${message.channelType}`,
+    title: `Message via ${message.channelType}${workspace ? ` (${workspace.name})` : ""}`,
     description: message.text.substring(0, 200),
     channel: message.channelType,
     metadata: {
       channelMessageId: message.channelMessageId,
       conversationId,
+      workspaceId: workspace?.id,
+      workspaceName: workspace?.name,
       hasAttachments: !!message.attachments?.length,
     },
   }).catch(() => {});
@@ -232,11 +291,13 @@ export async function routeMessage(
   trackActivity({
     userId,
     eventType: "message_sent",
-    title: `Response via ${message.channelType}`,
+    title: `Response via ${message.channelType}${workspace ? ` (${workspace.name})` : ""}`,
     description: responseText.substring(0, 200),
     channel: message.channelType,
     metadata: {
       conversationId,
+      workspaceId: workspace?.id,
+      workspaceName: workspace?.name,
       responseLength: responseText.length,
     },
   }).catch(() => {});
@@ -256,8 +317,9 @@ function buildChannelSystemPrompt(
     telegram: "Keep responses concise for mobile (under 500 chars when possible). Use markdown sparingly.",
     slack: "Use Slack mrkdwn format. You can use rich formatting. Keep responses professional but friendly.",
     whatsapp: "Keep responses very concise (under 300 chars when possible). Use plain text. No complex formatting.",
-    discord: "You can use standard Markdown. Keep responses focused and helpful.",
+    discord: "You can use standard Markdown. Keep responses focused and helpful. Max 2000 chars per message.",
     email: "You can be more verbose. Use proper formatting with headers and lists.",
+    teams: "You can use standard Markdown. Keep responses professional. Supports headers, bold, italic, code blocks, and lists.",
   };
 
   return `You are an advanced AI assistant with persistent memory and intelligent capabilities, responding via ${channelType}.
@@ -284,6 +346,7 @@ RESPONSE STYLE:
 
 /**
  * Build an onboarding message for unrecognized users.
+ * This is the legacy fallback if pairing code generation fails.
  */
 function buildOnboardingMessage(
   channelType: ChannelType,

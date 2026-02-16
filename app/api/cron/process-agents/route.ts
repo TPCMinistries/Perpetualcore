@@ -7,6 +7,7 @@ import { processAllDailyDigestAgents } from "@/lib/agents/daily-digest";
 import { processScheduledBriefings } from "@/lib/briefings/morning-briefing";
 import { createAdminClient } from "@/lib/supabase/server";
 import { logger } from "@/lib/logging";
+import { processInbox } from "@/lib/agents/inbox/processor";
 
 interface AgentSchedule {
   agentType: string;
@@ -203,6 +204,42 @@ export async function GET(request: Request) {
           durationMs
         );
       }
+    }
+
+    // Process agent inbox items (pending scheduled/queued work)
+    try {
+      logger.info("[Cron] Processing agent inbox items...");
+      const inboxStartTime = Date.now();
+      const inboxResults = await processInbox();
+      const inboxDuration = Date.now() - inboxStartTime;
+
+      const inboxSucceeded = inboxResults.filter((r) => r.success).length;
+      const inboxFailed = inboxResults.filter((r) => !r.success).length;
+
+      results.agentInbox = {
+        total: inboxResults.length,
+        succeeded: inboxSucceeded,
+        failed: inboxFailed,
+        durationMs: inboxDuration,
+      };
+
+      logger.info(
+        `[Cron] Agent inbox processing complete: ${inboxSucceeded} succeeded, ${inboxFailed} failed (${inboxDuration}ms)`
+      );
+
+      // Log inbox execution
+      await logAgentExecution(
+        supabase,
+        "agent_inbox",
+        inboxFailed > 0 && inboxSucceeded === 0 ? "error" : "success",
+        { total: inboxResults.length, succeeded: inboxSucceeded, failed: inboxFailed },
+        inboxDuration
+      );
+    } catch (inboxError) {
+      logger.error("[Cron] Error processing agent inbox", { error: inboxError });
+      results.agentInbox = {
+        error: inboxError instanceof Error ? inboxError.message : "Unknown error",
+      };
     }
 
     logger.info("[Cron] Agent processing cycle complete", { results });

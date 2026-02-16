@@ -14,6 +14,7 @@ import {
   getUserNudgeConfig,
   NudgeConfig
 } from "@/lib/ai/proactive-nudger";
+import { processScheduledBehaviors } from "@/lib/agents/inbox/scheduler";
 import { NextRequest } from "next/server";
 
 export const runtime = "nodejs";
@@ -46,6 +47,20 @@ export async function GET(req: NextRequest) {
   };
 
   try {
+    // Process scheduled proactive behaviors (inbox-based recurring actions)
+    try {
+      const schedulerResults = await processScheduledBehaviors();
+      console.log(
+        `[ProactiveNudges] Scheduled behaviors: ${schedulerResults.processed} processed, ${schedulerResults.queued} queued`
+      );
+    } catch (schedulerError: unknown) {
+      console.error(
+        "[ProactiveNudges] Error processing scheduled behaviors:",
+        schedulerError
+      );
+      // Don't block the rest of the nudges — continue processing
+    }
+
     // Get users with proactive nudges enabled
     // For now, get users who have either telegram_chat_id or whatsapp_number set
     const { data: eligibleUsers, error: userError } = await supabase

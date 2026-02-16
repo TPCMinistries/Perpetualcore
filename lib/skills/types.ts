@@ -83,7 +83,7 @@ export interface ToolResult {
   data?: any;
   error?: string;
   display?: {
-    type: "text" | "markdown" | "table" | "card";
+    type: "text" | "markdown" | "table" | "card" | "chart" | "form" | "card-grid" | "metric" | "metric-row" | "progress" | "code" | "approval" | "checklist" | "kanban" | "calendar" | "image";
     content: any;
   };
 }

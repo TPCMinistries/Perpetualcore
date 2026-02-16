@@ -13,6 +13,7 @@ import { rateLimiters, checkRateLimit, planRateLimiters } from "@/lib/rate-limit
 import { checkAIUsage, trackAIUsageAfterResponse } from "@/lib/billing/usage-guard";
 import { loadTeamContext, loadUserTeamContext, buildTeamSystemPrompt, LoadedTeamContext } from "@/lib/intelligence/team-context";
 import { buildMemoryContext, extractMemoriesFromConversation } from "@/lib/ai/memory";
+import { enhanceToolResult } from "@/lib/a2ui/tool-enhancer";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -592,6 +593,12 @@ Or, you can copy and paste the text content directly into this chat.`;
 
     // Build model-specific optimized system prompt
     let systemPrompt = buildOptimizedSystemPrompt(model, userMessage);
+
+    // Add A2UI rendering instructions
+    systemPrompt += `
+
+A2UI RENDERING:
+You can render rich interactive UI blocks inline in the conversation. When appropriate, structure your tool call results or direct responses to include A2UI blocks. The frontend will render charts, tables, cards, metrics, and other interactive elements automatically from tool results.`;
 
     // === Agent Identity Injection ===
     try {
@@ -1253,6 +1260,17 @@ When discussing these contacts:
                     }) + "\n"
                   )
                 );
+
+                // Check if tool result can be promoted to an A2UI block
+                const a2uiBlock = enhanceToolResult(toolCall.name, result);
+                if (a2uiBlock) {
+                  controller.enqueue(
+                    encoder.encode(
+                      JSON.stringify({ a2ui_block: a2uiBlock }) + "\n"
+                    )
+                  );
+                  if (isDev) console.log(`🎨 A2UI block emitted for ${toolCall.name}: ${a2uiBlock.type}`);
+                }
 
                 if (isDev) console.log(`✅ Tool ${toolCall.name} executed successfully`);
               } catch (error: any) {

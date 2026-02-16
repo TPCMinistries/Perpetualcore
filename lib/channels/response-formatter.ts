@@ -29,6 +29,8 @@ export function formatResponseForChannel(
       return formatForDiscord(response);
     case "email":
       return formatForEmail(response);
+    case "teams":
+      return formatForTeams(response);
     default:
       return response;
   }
@@ -148,6 +150,34 @@ function formatForDiscord(response: ChannelResponse): ChannelResponse {
   // Trim to Discord limit
   if (text.length > 2000 * 5) {
     text = text.substring(0, 2000 * 5 - 80) + "\n\n... (response truncated)";
+  }
+
+  return {
+    ...response,
+    text,
+  };
+}
+
+/**
+ * Format response for Microsoft Teams.
+ * - Standard Markdown supported (bold, italic, code, headers, links, lists)
+ * - Max 28KB per message
+ * - Code blocks preserved with syntax highlighting
+ * - Supports adaptive cards but we use plain text/markdown for simplicity
+ */
+function formatForTeams(response: ChannelResponse): ChannelResponse {
+  let text = response.text;
+
+  // Teams supports standard markdown natively, minimal transformation needed
+
+  // Convert any non-standard markdown links if present
+  // Teams markdown links: [text](url)
+
+  // Ensure headers use standard markdown (Teams supports # syntax)
+
+  // Trim to Teams limit (28KB ~ 28672 chars)
+  if (text.length > 28672) {
+    text = text.substring(0, 28572) + "\n\n... (response truncated)";
   }
 
   return {

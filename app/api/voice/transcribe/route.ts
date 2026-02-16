@@ -1,14 +1,10 @@
 import { createClient } from "@/lib/supabase/server";
 import { NextRequest } from "next/server";
-import OpenAI from "openai";
+import { transcribeAudio } from "@/lib/voice/stt-stream";
 import { rateLimiters, checkRateLimit } from "@/lib/rate-limit";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
-
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
 
 export async function POST(req: NextRequest) {
   try {
@@ -34,15 +30,11 @@ export async function POST(req: NextRequest) {
       return new Response("No audio file provided", { status: 400 });
     }
 
-    // Transcribe using Whisper
-    const transcription = await openai.audio.transcriptions.create({
-      file: audioFile,
-      model: "whisper-1",
-      language: "en",
-    });
+    // Transcribe using Whisper via shared utility
+    const result = await transcribeAudio(audioFile);
 
     return Response.json({
-      text: transcription.text,
+      text: result.text,
     });
   } catch (error) {
     console.error("Transcription error:", error);

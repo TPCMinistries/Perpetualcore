@@ -21,6 +21,7 @@ import {
   parsePlanDelegation,
 } from "./PlanDelegationCard";
 import { ToolCallIndicator } from "./ToolCallIndicator";
+import { A2UIBlockRenderer } from "./a2ui/A2UIBlock";
 
 interface ChatMessagesProps {
   messages: Message[];
@@ -96,6 +97,13 @@ export function ChatMessages({
                   {message.role === "assistant" ? (
                     <>
                       <MarkdownMessage content={message.content} />
+                      {message.blocks && message.blocks.length > 0 && (
+                        <div className="mt-3 space-y-3">
+                          {message.blocks.map((block) => (
+                            <A2UIBlockRenderer key={block.id} block={block} />
+                          ))}
+                        </div>
+                      )}
                       {(() => {
                         const delegation = parsePlanDelegation(message.content);
                         if (!delegation) return null;

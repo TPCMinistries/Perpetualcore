@@ -11,6 +11,7 @@ import {
   Star,
   Download,
   Shield,
+  ShieldCheck,
   Bot,
   Workflow,
   CheckCircle2,
@@ -19,8 +20,11 @@ import {
   Calendar,
   Loader2,
   ArrowLeft,
+  MessageSquare,
+  BarChart3,
 } from "lucide-react";
 import { toast } from "sonner";
+import { cn } from "@/lib/utils";
 
 interface MarketplaceItem {
   id: string;
@@ -55,6 +59,27 @@ interface MarketplaceItem {
   }>;
 }
 
+interface ReviewData {
+  id: string;
+  rating: number;
+  title: string | null;
+  review: string;
+  reviewer_name: string;
+  verified_purchase: boolean;
+  created_at: string;
+}
+
+interface ReviewsResponse {
+  reviews: ReviewData[];
+  avgRating: number;
+  count: number;
+  distribution: Record<number, number>;
+  page: number;
+  limit: number;
+  totalPages: number;
+  currentUserId: string | null;
+}
+
 export default function MarketplaceItemPage() {
   const params = useParams();
   const router = useRouter();
@@ -63,8 +88,23 @@ export default function MarketplaceItemPage() {
   const [isPurchasing, setIsPurchasing] = useState(false);
   const [alreadyPurchased, setAlreadyPurchased] = useState(false);
 
+  // Reviews state
+  const [reviewsData, setReviewsData] = useState<ReviewsResponse | null>(null);
+  const [reviewsLoading, setReviewsLoading] = useState(false);
+  const [showReviewForm, setShowReviewForm] = useState(false);
+  const [reviewRating, setReviewRating] = useState(5);
+  const [reviewText, setReviewText] = useState("");
+  const [submittingReview, setSubmittingReview] = useState(false);
+  const [hoverRating, setHoverRating] = useState(0);
+
+  // Security badge state
+  const [securityVerified, setSecurityVerified] = useState(false);
+  const [securityScore, setSecurityScore] = useState<number | null>(null);
+
   useEffect(() => {
     fetchItem();
+    fetchReviews();
+    fetchSecurityStatus();
   }, [params.id]);
 
   async function fetchItem() {
@@ -81,6 +121,91 @@ export default function MarketplaceItemPage() {
       toast.error("Failed to load item");
     } finally {
       setLoading(false);
+    }
+  }
+
+  async function fetchReviews() {
+    setReviewsLoading(true);
+    try {
+      const response = await fetch(
+        `/api/marketplace/${params.id}/reviews?limit=20`
+      );
+      if (response.ok) {
+        const data = await response.json();
+        setReviewsData(data);
+      }
+    } catch (error) {
+      console.error("Error fetching reviews:", error);
+    } finally {
+      setReviewsLoading(false);
+    }
+  }
+
+  async function fetchSecurityStatus() {
+    try {
+      // Check for security scan via the search endpoint
+      const response = await fetch(
+        `/api/marketplace/search?q=&limit=1`
+      );
+      if (response.ok) {
+        const data = await response.json();
+        const match = (data.skills || []).find(
+          (s: { id: string }) => s.id === params.id
+        );
+        if (match) {
+          setSecurityVerified(!!match.security_verified);
+          setSecurityScore(match.security_score || null);
+        }
+      }
+    } catch {
+      // Non-critical, silently fail
+    }
+  }
+
+  async function handleSubmitReview() {
+    if (!reviewText.trim()) {
+      toast.error("Please write a review");
+      return;
+    }
+
+    setSubmittingReview(true);
+    try {
+      const response = await fetch(
+        `/api/marketplace/${params.id}/reviews`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            rating: reviewRating,
+            review: reviewText.trim(),
+          }),
+        }
+      );
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Failed to submit review");
+      }
+
+      toast.success(
+        data.updated
+          ? "Your review has been updated!"
+          : "Thank you for your review!"
+      );
+
+      // Reset form and refresh reviews
+      setReviewText("");
+      setReviewRating(5);
+      setShowReviewForm(false);
+      fetchReviews();
+      fetchItem(); // Refresh to update rating display
+    } catch (error: unknown) {
+      const message =
+        error instanceof Error ? error.message : "Failed to submit review";
+      toast.error(message);
+    } finally {
+      setSubmittingReview(false);
     }
   }
 
@@ -109,12 +234,26 @@ export default function MarketplaceItemPage() {
         toast.success("Purchase successful! Item added to your account.");
         router.push("/marketplace/my-purchases");
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const message =
+        error instanceof Error ? error.message : "Failed to complete purchase";
       console.error("Purchase error:", error);
-      toast.error(error.message || "Failed to complete purchase");
+      toast.error(message);
     } finally {
       setIsPurchasing(false);
     }
+  };
+
+  // Use reviews from API or fallback to item's embedded reviews
+  const displayReviews = reviewsData?.reviews || [];
+  const displayAvgRating = reviewsData?.avgRating ?? item?.rating ?? 0;
+  const displayReviewCount = reviewsData?.count ?? item?.review_count ?? 0;
+  const distribution = reviewsData?.distribution || {
+    1: 0,
+    2: 0,
+    3: 0,
+    4: 0,
+    5: 0,
   };
 
   if (loading) {
@@ -178,9 +317,23 @@ export default function MarketplaceItemPage() {
                   )}
                 </div>
                 <div className="flex-1">
-                  <div className="flex items-center gap-2 mb-2">
+                  <div className="flex items-center gap-2 mb-2 flex-wrap">
                     <Badge>{item.category}</Badge>
                     <Badge variant="outline">{item.type === "agent" ? "AI Agent" : "Workflow"}</Badge>
+                    {securityVerified && (
+                      <Badge
+                        variant="outline"
+                        className="border-green-300 text-green-700 dark:border-green-700 dark:text-green-400 gap-1"
+                      >
+                        <ShieldCheck className="h-3.5 w-3.5" />
+                        Security Verified
+                        {securityScore !== null && (
+                          <span className="ml-1 font-semibold">
+                            {securityScore}/100
+                          </span>
+                        )}
+                      </Badge>
+                    )}
                   </div>
                   <h1 className="text-3xl font-bold mb-2">{item.name}</h1>
                   <p className="text-lg text-muted-foreground">{item.description}</p>
@@ -188,11 +341,11 @@ export default function MarketplaceItemPage() {
               </div>
 
               {/* Stats */}
-              <div className="flex items-center gap-6 text-sm">
+              <div className="flex items-center gap-6 text-sm flex-wrap">
                 <div className="flex items-center gap-1">
                   <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                  <span className="font-medium">{item.rating || 0}</span>
-                  <span className="text-muted-foreground">({item.review_count} reviews)</span>
+                  <span className="font-medium">{displayAvgRating}</span>
+                  <span className="text-muted-foreground">({displayReviewCount} reviews)</span>
                 </div>
                 <div className="flex items-center gap-1 text-muted-foreground">
                   <Download className="h-4 w-4" />
@@ -284,12 +437,228 @@ export default function MarketplaceItemPage() {
               </div>
             )}
 
-            {/* Reviews */}
-            <div>
-              <h2 className="text-2xl font-bold mb-4">Reviews ({item.review_count})</h2>
-              {item.reviews && item.reviews.length > 0 ? (
+            {/* Security Scan Badge */}
+            {securityVerified && (
+              <div>
+                <h2 className="text-2xl font-bold mb-4">Security</h2>
+                <Card className="border-green-200 dark:border-green-800">
+                  <CardContent className="py-6">
+                    <div className="flex items-center gap-4">
+                      <div className="h-14 w-14 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
+                        <ShieldCheck className="h-7 w-7 text-green-600" />
+                      </div>
+                      <div className="flex-1">
+                        <h3 className="font-semibold text-green-700 dark:text-green-400 mb-1">
+                          Security Verified
+                        </h3>
+                        <p className="text-sm text-muted-foreground">
+                          This skill passed our automated security scan. It has been checked for
+                          credential exposure, dangerous system calls, HTTPS enforcement, and more.
+                        </p>
+                      </div>
+                      {securityScore !== null && (
+                        <div className="text-center">
+                          <div className="text-3xl font-bold text-green-600">
+                            {securityScore}
+                          </div>
+                          <div className="text-xs text-muted-foreground">
+                            / 100
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            )}
+
+            {/* Reviews Section */}
+            <div id="reviews">
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-2xl font-bold">
+                  Reviews ({displayReviewCount})
+                </h2>
+                <Button
+                  variant="outline"
+                  onClick={() => setShowReviewForm(!showReviewForm)}
+                >
+                  <MessageSquare className="mr-2 h-4 w-4" />
+                  Write a Review
+                </Button>
+              </div>
+
+              {/* Rating Summary */}
+              {displayReviewCount > 0 && (
+                <Card className="mb-6">
+                  <CardContent className="py-6">
+                    <div className="flex flex-col sm:flex-row items-center gap-6">
+                      {/* Average rating */}
+                      <div className="text-center">
+                        <div className="text-5xl font-bold mb-1">
+                          {displayAvgRating}
+                        </div>
+                        <div className="flex items-center gap-0.5 mb-1">
+                          {[...Array(5)].map((_, i) => (
+                            <Star
+                              key={i}
+                              className={cn(
+                                "h-5 w-5",
+                                i < Math.round(displayAvgRating)
+                                  ? "fill-yellow-400 text-yellow-400"
+                                  : "text-gray-300"
+                              )}
+                            />
+                          ))}
+                        </div>
+                        <p className="text-sm text-muted-foreground">
+                          {displayReviewCount} review{displayReviewCount !== 1 ? "s" : ""}
+                        </p>
+                      </div>
+
+                      {/* Rating distribution bars */}
+                      <div className="flex-1 w-full space-y-2">
+                        {[5, 4, 3, 2, 1].map((stars) => {
+                          const count = distribution[stars] || 0;
+                          const percentage =
+                            displayReviewCount > 0
+                              ? (count / displayReviewCount) * 100
+                              : 0;
+                          return (
+                            <div
+                              key={stars}
+                              className="flex items-center gap-2 text-sm"
+                            >
+                              <span className="w-12 text-right text-muted-foreground">
+                                {stars} star
+                              </span>
+                              <div className="flex-1 h-2.5 bg-muted rounded-full overflow-hidden">
+                                <div
+                                  className="h-full bg-yellow-400 rounded-full transition-all"
+                                  style={{ width: `${percentage}%` }}
+                                />
+                              </div>
+                              <span className="w-8 text-muted-foreground text-right">
+                                {count}
+                              </span>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+
+              {/* Write a Review Form */}
+              {showReviewForm && (
+                <Card className="mb-6 border-primary/30">
+                  <CardHeader>
+                    <CardTitle className="text-lg">Write Your Review</CardTitle>
+                    <CardDescription>
+                      Share your experience with this{" "}
+                      {item.type === "agent" ? "agent" : "workflow"}
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    {/* Star Rating Selector */}
+                    <div>
+                      <label className="block text-sm font-medium mb-2">
+                        Your Rating
+                      </label>
+                      <div className="flex items-center gap-1">
+                        {[1, 2, 3, 4, 5].map((star) => (
+                          <button
+                            key={star}
+                            type="button"
+                            onClick={() => setReviewRating(star)}
+                            onMouseEnter={() => setHoverRating(star)}
+                            onMouseLeave={() => setHoverRating(0)}
+                            className="p-0.5 transition-transform hover:scale-110"
+                          >
+                            <Star
+                              className={cn(
+                                "h-8 w-8 transition-colors",
+                                (hoverRating || reviewRating) >= star
+                                  ? "fill-yellow-400 text-yellow-400"
+                                  : "text-gray-300"
+                              )}
+                            />
+                          </button>
+                        ))}
+                        <span className="ml-2 text-sm text-muted-foreground">
+                          {reviewRating === 1 && "Poor"}
+                          {reviewRating === 2 && "Fair"}
+                          {reviewRating === 3 && "Good"}
+                          {reviewRating === 4 && "Very Good"}
+                          {reviewRating === 5 && "Excellent"}
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Review Text */}
+                    <div>
+                      <label className="block text-sm font-medium mb-2">
+                        Your Review
+                      </label>
+                      <textarea
+                        value={reviewText}
+                        onChange={(e) => setReviewText(e.target.value)}
+                        placeholder="What did you like or dislike? How has this helped your workflow?"
+                        className="flex min-h-[120px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                        maxLength={2000}
+                      />
+                      <div className="flex justify-between mt-1">
+                        <p className="text-xs text-muted-foreground">
+                          Be specific and helpful to other buyers
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          {reviewText.length}/2000
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="flex gap-3">
+                      <Button
+                        onClick={handleSubmitReview}
+                        disabled={
+                          submittingReview || !reviewText.trim()
+                        }
+                      >
+                        {submittingReview ? (
+                          <>
+                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                            Submitting...
+                          </>
+                        ) : (
+                          "Submit Review"
+                        )}
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        onClick={() => {
+                          setShowReviewForm(false);
+                          setReviewText("");
+                          setReviewRating(5);
+                        }}
+                      >
+                        Cancel
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+
+              {/* Reviews List */}
+              {reviewsLoading ? (
+                <div className="flex items-center justify-center py-8">
+                  <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+                  <span className="ml-2 text-sm text-muted-foreground">
+                    Loading reviews...
+                  </span>
+                </div>
+              ) : displayReviews.length > 0 ? (
                 <div className="space-y-4">
-                  {item.reviews.map((review) => (
+                  {displayReviews.map((review) => (
                     <Card key={review.id}>
                       <CardHeader>
                         <div className="flex items-center justify-between">
@@ -298,15 +667,22 @@ export default function MarketplaceItemPage() {
                               {[...Array(5)].map((_, i) => (
                                 <Star
                                   key={i}
-                                  className={`h-4 w-4 ${
+                                  className={cn(
+                                    "h-4 w-4",
                                     i < review.rating
                                       ? "fill-yellow-400 text-yellow-400"
                                       : "text-gray-300"
-                                  }`}
+                                  )}
                                 />
                               ))}
                             </div>
-                            <span className="font-semibold">{review.reviewer}</span>
+                            <span className="font-semibold">
+                              {review.reviewer_name ||
+                                ("reviewer" in review
+                                  ? (review as unknown as { reviewer: string })
+                                      .reviewer
+                                  : "Anonymous")}
+                            </span>
                             {review.verified_purchase && (
                               <Badge variant="secondary" className="text-xs">
                                 Verified Purchase
@@ -317,19 +693,94 @@ export default function MarketplaceItemPage() {
                             {new Date(review.created_at).toLocaleDateString()}
                           </span>
                         </div>
-                        {review.title && <CardTitle className="text-lg">{review.title}</CardTitle>}
+                        {review.title && (
+                          <CardTitle className="text-lg">
+                            {review.title}
+                          </CardTitle>
+                        )}
                       </CardHeader>
                       <CardContent>
-                        <p className="text-muted-foreground">{review.comment}</p>
+                        <p className="text-muted-foreground">
+                          {review.review ||
+                            ("comment" in review
+                              ? (review as unknown as { comment: string })
+                                  .comment
+                              : "")}
+                        </p>
                       </CardContent>
                     </Card>
                   ))}
+
+                  {/* Fallback to item.reviews if the API didn't return any */}
+                  {displayReviews.length === 0 &&
+                    item.reviews &&
+                    item.reviews.length > 0 &&
+                    item.reviews.map((review) => (
+                      <Card key={review.id}>
+                        <CardHeader>
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                              <div className="flex">
+                                {[...Array(5)].map((_, i) => (
+                                  <Star
+                                    key={i}
+                                    className={cn(
+                                      "h-4 w-4",
+                                      i < review.rating
+                                        ? "fill-yellow-400 text-yellow-400"
+                                        : "text-gray-300"
+                                    )}
+                                  />
+                                ))}
+                              </div>
+                              <span className="font-semibold">
+                                {review.reviewer}
+                              </span>
+                              {review.verified_purchase && (
+                                <Badge
+                                  variant="secondary"
+                                  className="text-xs"
+                                >
+                                  Verified Purchase
+                                </Badge>
+                              )}
+                            </div>
+                            <span className="text-sm text-muted-foreground">
+                              {new Date(
+                                review.created_at
+                              ).toLocaleDateString()}
+                            </span>
+                          </div>
+                          {review.title && (
+                            <CardTitle className="text-lg">
+                              {review.title}
+                            </CardTitle>
+                          )}
+                        </CardHeader>
+                        <CardContent>
+                          <p className="text-muted-foreground">
+                            {review.comment}
+                          </p>
+                        </CardContent>
+                      </Card>
+                    ))}
                 </div>
               ) : (
                 <Card>
                   <CardContent className="py-8 text-center">
                     <Star className="h-8 w-8 mx-auto text-muted-foreground mb-2" />
-                    <p className="text-muted-foreground">No reviews yet. Be the first to review!</p>
+                    <p className="text-muted-foreground mb-3">
+                      No reviews yet. Be the first to review!
+                    </p>
+                    {!showReviewForm && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setShowReviewForm(true)}
+                      >
+                        Write a Review
+                      </Button>
+                    )}
                   </CardContent>
                 </Card>
               )}
@@ -402,10 +853,33 @@ export default function MarketplaceItemPage() {
                       <CheckCircle2 className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
                       <span>Email support included</span>
                     </div>
+                    {securityVerified && (
+                      <div className="flex items-start gap-2">
+                        <ShieldCheck className="h-4 w-4 text-green-600 mt-0.5 flex-shrink-0" />
+                        <span className="text-green-700 dark:text-green-400">
+                          Security verified
+                        </span>
+                      </div>
+                    )}
                     <div className="flex items-start gap-2">
                       <CheckCircle2 className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
                       <span>Commercial license</span>
                     </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Install Count Card */}
+              <Card>
+                <CardContent className="py-4">
+                  <div className="flex items-center justify-between text-sm">
+                    <div className="flex items-center gap-2 text-muted-foreground">
+                      <Download className="h-4 w-4" />
+                      <span>Total Installs</span>
+                    </div>
+                    <span className="font-bold text-lg">
+                      {item.total_sales.toLocaleString()}
+                    </span>
                   </div>
                 </CardContent>
               </Card>

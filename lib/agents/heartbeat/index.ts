@@ -24,6 +24,7 @@ import { checkTasks } from "./checkers/task-checker";
 import { checkContacts } from "./checkers/contact-checker";
 import { analyzeCheckResults } from "./reasoner";
 import { notifyUser } from "./notifier";
+import { queueItem } from "@/lib/agents/inbox/processor";
 
 /**
  * Run the heartbeat agent for a single user.
@@ -157,6 +158,30 @@ export async function runHeartbeat(
         notificationChannel,
       },
     }).catch(() => {});
+
+    // Queue significant heartbeat findings into the agent inbox for further processing
+    if (hasActionableInsights && insights.length > 0) {
+      queueItem(userId, "cron", {
+        type: "heartbeat_results",
+        heartbeat_run_id: runId,
+        results: checkResults.map((r) => ({
+          type: r.type,
+          summary: r.summary,
+          urgency: r.urgency,
+          itemCount: r.items.length,
+        })),
+        insights: insights.map((i) => ({
+          category: i.category,
+          message: i.message,
+          urgency: i.urgency,
+          suggestedAction: i.suggestedAction,
+        })),
+      }, {
+        priority: urgentItems > 0 ? "high" : "normal",
+      }).catch((err) => {
+        console.error("[Heartbeat] Failed to queue inbox item:", err);
+      });
+    }
 
     console.log(
       `[Heartbeat] Completed for user ${userId}: ${totalItems} items, ${insights.length} insights`
