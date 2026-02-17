@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { logAudit, extractRequestContext } from "@/lib/audit/logger";
 
 /**
  * GET /auth/callback
@@ -56,9 +57,19 @@ export async function GET(request: NextRequest) {
       return NextResponse.redirect(redirectTo);
     }
 
-    // Send welcome email for new OAuth users (created within last 60s)
+    // Log successful login
     const user = sessionData?.user;
     if (user) {
+      const ctx = extractRequestContext(request);
+      logAudit({
+        event: "AUTH_LOGIN",
+        user_id: user.id,
+        user_email: user.email ?? undefined,
+        description: "User logged in via OAuth",
+        ...ctx,
+      });
+
+      // Send welcome email for new OAuth users (created within last 60s)
       const createdAt = new Date(user.created_at).getTime();
       const isNewUser = Date.now() - createdAt < 60_000;
       if (isNewUser) {

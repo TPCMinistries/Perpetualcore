@@ -7,6 +7,7 @@ import {
   mapOAuthAttributes,
 } from "@/lib/sso/oauth";
 import { cookies } from "next/headers";
+import { logAudit } from "@/lib/audit/logger";
 
 // GET /api/sso/oauth/callback?code=xxx&state=xxx
 // Handle OAuth callback from provider
@@ -114,6 +115,15 @@ export async function GET(request: Request) {
         "Token exchange failed",
         error.message
       );
+      logAudit({
+        event: "AUTH_SSO_LOGIN_FAILED",
+        resource_type: "sso_provider",
+        resource_id: providerId,
+        description: `OAuth token exchange failed: ${error.message}`,
+        organization_id: provider.organization_id,
+        status: "failure",
+        error_message: error.message,
+      });
       return NextResponse.redirect(
         `${process.env.NEXT_PUBLIC_APP_URL}/login?error=Authentication+failed`
       );
@@ -292,6 +302,18 @@ export async function GET(request: Request) {
       mappedProfile.email,
       true
     );
+
+    // Audit log: OAuth SSO login success
+    logAudit({
+      event: "AUTH_SSO_LOGIN",
+      resource_type: "sso_provider",
+      resource_id: providerId,
+      resource_name: provider.provider_name,
+      description: `OAuth SSO login successful for ${mappedProfile.email}`,
+      user_id: userId,
+      user_email: mappedProfile.email,
+      organization_id: provider.organization_id,
+    });
 
     // Sign in user with Supabase Auth using admin API to generate session
     // This creates a magic link token that will auto-sign-in the user

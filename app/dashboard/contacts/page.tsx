@@ -54,6 +54,7 @@ import { BulkActionsDialog } from "@/components/contacts/BulkActionsDialog";
 import { useContacts, useDeleteContacts, exportContactsToCSV } from "@/lib/contacts/use-contacts";
 import { useContactsKeyboard } from "@/hooks/useContactsKeyboard";
 import { Contact } from "@/types/contacts";
+import { DashboardPageWrapper, DashboardHeader } from "@/components/ui/dashboard-header";
 import { toast } from "sonner";
 
 const contactTypeOptions = [
@@ -237,34 +238,29 @@ function ContactsPageContent() {
 
   if (isLoading && !data) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white dark:from-slate-950 dark:to-slate-900 flex items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-violet-500" />
-      </div>
+      <DashboardPageWrapper>
+        <div className="flex items-center justify-center h-64">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        </div>
+      </DashboardPageWrapper>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-violet-50/30 dark:from-slate-950 dark:via-slate-900 dark:to-violet-950/20">
-      <div className="max-w-7xl mx-auto px-6 py-8">
-        {/* Header */}
-        <div className="mb-8">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <div className="h-12 w-12 rounded-2xl bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center shadow-lg shadow-violet-500/30 ring-4 ring-violet-500/10">
-                <Users className="h-6 w-6 text-white" />
-              </div>
-              <div>
-                <h1 className="text-2xl font-bold text-slate-900 dark:text-white">
-                  Contacts
-                </h1>
-                <p className="text-sm text-slate-500 dark:text-slate-400">
-                  Manage your network with AI-powered relationship intelligence
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
+    <DashboardPageWrapper>
+      <DashboardHeader
+        title="Contacts"
+        subtitle="Manage your network with AI-powered relationship intelligence"
+        icon={Users}
+        iconColor="blue"
+        stats={stats ? [
+          { label: "total", value: stats.total || 0 },
+          { label: "favorites", value: stats.favorites || 0 },
+          { label: "need follow-up", value: stats.needsFollowup || 0 },
+        ] : undefined}
+      />
 
+      <div>
         {/* Stats */}
         <div className="grid grid-cols-2 md:grid-cols-5 gap-3 mb-8">
           <StatCard
@@ -526,7 +522,7 @@ function ContactsPageContent() {
         onSearch={handleAdvancedSearch}
         currentFilters={advancedFilters}
       />
-    </div>
+    </DashboardPageWrapper>
   );
 }
 

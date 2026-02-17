@@ -3,6 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { getAuthorizationUrl, INTEGRATION_CONFIGS, isIntegrationConfigured } from "@/lib/integrations/config";
 import { IntegrationProvider } from "@/types";
 import { gateFeature } from "@/lib/features/gate";
+import { logAudit } from "@/lib/audit/logger";
 
 // GET /api/integrations
 // Get all integrations for the user's organization
@@ -130,6 +131,15 @@ export async function POST(request: Request) {
 
     // Get authorization URL
     const authUrl = getAuthorizationUrl(provider, state);
+
+    logAudit({
+      event: "INTEGRATION_CONNECTED",
+      user_id: user.id,
+      user_email: user.email ?? undefined,
+      resource_type: "integration",
+      resource_name: provider,
+      description: `Initiated ${provider} integration connection`,
+    });
 
     return NextResponse.json({ authUrl });
   } catch (error: any) {
