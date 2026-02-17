@@ -32,6 +32,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { EmptyState } from "@/components/ui/empty-state";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -1519,17 +1520,15 @@ Respond ONLY with valid JSON, no other text.`
         <div className="flex-1 overflow-y-auto p-6">
           <div className="space-y-2">
             {allProjects.length === 0 ? (
-              <div className="text-center py-12">
-                <FolderKanban className="h-12 w-12 text-muted-foreground/50 mx-auto mb-4" />
-                <h3 className="text-lg font-medium mb-2">No projects yet</h3>
-                <p className="text-muted-foreground mb-4">
-                  Create your first project to get started
-                </p>
-                <Button onClick={() => setCreateDialogOpen(true)}>
-                  <Plus className="h-4 w-4 mr-2" />
-                  Create Project
-                </Button>
-              </div>
+              <EmptyState
+                icon={FolderKanban}
+                title="No projects yet"
+                description="Create your first project to get started"
+                action={{
+                  label: "Create Project",
+                  onClick: () => setCreateDialogOpen(true),
+                }}
+              />
             ) : (
               allProjects.map((project) => (
                 <ProjectListItem

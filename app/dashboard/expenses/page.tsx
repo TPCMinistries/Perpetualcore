@@ -28,6 +28,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { EmptyState } from "@/components/ui/empty-state";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -440,17 +441,15 @@ export default function ExpensesPage() {
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
           </div>
         ) : filteredExpenses.length === 0 ? (
-          <Card className="p-12 text-center">
-            <DollarSign className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-            <h3 className="text-lg font-medium mb-2">No expenses yet</h3>
-            <p className="text-muted-foreground mb-4">
-              Log expenses via Telegram or add them manually
-            </p>
-            <Button onClick={() => setShowAddDialog(true)}>
-              <Plus className="h-4 w-4 mr-2" />
-              Add First Expense
-            </Button>
-          </Card>
+          <EmptyState
+            icon={DollarSign}
+            title="No expenses yet"
+            description="Log expenses via Telegram or add them manually"
+            action={{
+              label: "Add First Expense",
+              onClick: () => setShowAddDialog(true),
+            }}
+          />
         ) : (
           <div className="space-y-2">
             {filteredExpenses.map((expense) => {
