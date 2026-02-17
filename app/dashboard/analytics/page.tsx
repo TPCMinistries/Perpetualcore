@@ -216,14 +216,14 @@ export default function AnalyticsPage() {
         transition={{ delay: 0.2 }}
       >
         <Card className="mb-8 overflow-hidden">
-          <CardHeader className="border-b border-slate-100 dark:border-slate-800">
+          <CardHeader className="border-b border-border">
             <CardTitle className="flex items-center gap-3">
               <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center shadow-lg shadow-violet-500/25">
                 <TrendingUp className="h-5 w-5 text-white" />
               </div>
               <div>
-                <span className="text-lg font-semibold text-slate-900 dark:text-white">Activity Over Time</span>
-                <p className="text-sm font-normal text-slate-500 dark:text-slate-400">
+                <span className="text-lg font-semibold text-foreground">Activity Over Time</span>
+                <p className="text-sm font-normal text-muted-foreground">
                   Messages, tasks, and documents
                 </p>
               </div>
@@ -277,7 +277,7 @@ export default function AnalyticsPage() {
 
                     {/* Date label (show every 7th day) */}
                     {index % 7 === 0 && (
-                      <div className="text-[10px] text-slate-500 dark:text-slate-400 mt-1 transform rotate-45 origin-left font-medium">
+                      <div className="text-[10px] text-muted-foreground mt-1 transform rotate-45 origin-left font-medium">
                         {new Date(day.date).toLocaleDateString("en-US", {
                           month: "short",
                           day: "numeric",
@@ -300,14 +300,14 @@ export default function AnalyticsPage() {
           transition={{ delay: 0.3 }}
         >
           <Card className="h-full">
-            <CardHeader className="border-b border-slate-100 dark:border-slate-800">
+            <CardHeader className="border-b border-border">
               <CardTitle className="flex items-center gap-3">
                 <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center shadow-lg shadow-amber-500/25">
                   <Zap className="h-5 w-5 text-white" />
                 </div>
                 <div>
-                  <span className="text-lg font-semibold text-slate-900 dark:text-white">AI Usage</span>
-                  <p className="text-sm font-normal text-slate-500 dark:text-slate-400">
+                  <span className="text-lg font-semibold text-foreground">AI Usage</span>
+                  <p className="text-sm font-normal text-muted-foreground">
                     Your AI interactions
                   </p>
                 </div>
@@ -315,49 +315,49 @@ export default function AnalyticsPage() {
             </CardHeader>
             <CardContent className="pt-4">
               <div className="space-y-3">
-                <div className="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-800/50 rounded-xl">
+                <div className="flex items-center justify-between p-3 bg-muted/50 rounded-xl">
                   <div className="flex items-center gap-3">
                     <div className="h-8 w-8 rounded-lg bg-violet-100 dark:bg-violet-900/30 flex items-center justify-center">
                       <MessageSquare className="h-4 w-4 text-violet-600 dark:text-violet-400" />
                     </div>
-                    <span className="text-sm font-medium text-slate-700 dark:text-slate-300">Chat Messages</span>
+                    <span className="text-sm font-medium text-foreground">Chat Messages</span>
                   </div>
-                  <span className="font-semibold text-slate-900 dark:text-white">{data.ai.totalAIMessages}</span>
+                  <span className="font-semibold text-foreground">{data.ai.totalAIMessages}</span>
                 </div>
 
-                <div className="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-800/50 rounded-xl">
+                <div className="flex items-center justify-between p-3 bg-muted/50 rounded-xl">
                   <div className="flex items-center gap-3">
                     <div className="h-8 w-8 rounded-lg bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center">
                       <MessageCircle className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
                     </div>
-                    <span className="text-sm font-medium text-slate-700 dark:text-slate-300">WhatsApp Replies</span>
+                    <span className="text-sm font-medium text-foreground">WhatsApp Replies</span>
                   </div>
-                  <span className="font-semibold text-slate-900 dark:text-white">{data.ai.aiWhatsAppMessages}</span>
+                  <span className="font-semibold text-foreground">{data.ai.aiWhatsAppMessages}</span>
                 </div>
 
-                <div className="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-800/50 rounded-xl">
+                <div className="flex items-center justify-between p-3 bg-muted/50 rounded-xl">
                   <div className="flex items-center gap-3">
                     <div className="h-8 w-8 rounded-lg bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
                       <Mail className="h-4 w-4 text-blue-600 dark:text-blue-400" />
                     </div>
-                    <span className="text-sm font-medium text-slate-700 dark:text-slate-300">Email AI Actions</span>
+                    <span className="text-sm font-medium text-foreground">Email AI Actions</span>
                   </div>
-                  <span className="font-semibold text-slate-900 dark:text-white">{data.ai.emailAIActions}</span>
+                  <span className="font-semibold text-foreground">{data.ai.emailAIActions}</span>
                 </div>
 
-                <div className="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-800/50 rounded-xl">
+                <div className="flex items-center justify-between p-3 bg-muted/50 rounded-xl">
                   <div className="flex items-center gap-3">
                     <div className="h-8 w-8 rounded-lg bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center">
                       <Sparkles className="h-4 w-4 text-amber-600 dark:text-amber-400" />
                     </div>
-                    <span className="text-sm font-medium text-slate-700 dark:text-slate-300">AI Notifications</span>
+                    <span className="text-sm font-medium text-foreground">AI Notifications</span>
                   </div>
-                  <span className="font-semibold text-slate-900 dark:text-white">{data.ai.aiNotifications}</span>
+                  <span className="font-semibold text-foreground">{data.ai.aiNotifications}</span>
                 </div>
 
                 <div className="mt-4 p-4 bg-gradient-to-r from-violet-500/10 to-purple-500/10 dark:from-violet-500/20 dark:to-purple-500/20 rounded-xl border border-violet-200 dark:border-violet-800">
                   <div className="flex items-center justify-between">
-                    <span className="font-semibold text-slate-900 dark:text-white">Total AI Interactions</span>
+                    <span className="font-semibold text-foreground">Total AI Interactions</span>
                     <span className="text-2xl font-bold bg-gradient-to-r from-violet-600 to-purple-600 bg-clip-text text-transparent">
                       {data.ai.totalAIInteractions}
                     </span>
@@ -375,14 +375,14 @@ export default function AnalyticsPage() {
           transition={{ delay: 0.3 }}
         >
           <Card className="h-full">
-            <CardHeader className="border-b border-slate-100 dark:border-slate-800">
+            <CardHeader className="border-b border-border">
               <CardTitle className="flex items-center gap-3">
                 <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center shadow-lg shadow-emerald-500/25">
                   <Target className="h-5 w-5 text-white" />
                 </div>
                 <div>
-                  <span className="text-lg font-semibold text-slate-900 dark:text-white">Productivity</span>
-                  <p className="text-sm font-normal text-slate-500 dark:text-slate-400">
+                  <span className="text-lg font-semibold text-foreground">Productivity</span>
+                  <p className="text-sm font-normal text-muted-foreground">
                     Your performance metrics
                   </p>
                 </div>
@@ -390,16 +390,16 @@ export default function AnalyticsPage() {
             </CardHeader>
             <CardContent className="pt-4">
               <div className="space-y-3">
-                <div className="p-4 bg-slate-50 dark:bg-slate-800/50 rounded-xl">
+                <div className="p-4 bg-muted/50 rounded-xl">
                   <div className="flex items-center justify-between mb-2">
-                    <span className="text-sm font-medium text-slate-700 dark:text-slate-300">
+                    <span className="text-sm font-medium text-foreground">
                       Task Completion Rate
                     </span>
                     <span className="font-semibold text-emerald-600 dark:text-emerald-400">
                       {data.productivity.taskCompletionRate}%
                     </span>
                   </div>
-                  <div className="w-full bg-slate-200 dark:bg-slate-700 rounded-full h-2.5 overflow-hidden">
+                  <div className="w-full bg-muted rounded-full h-2.5 overflow-hidden">
                     <motion.div
                       initial={{ width: 0 }}
                       animate={{ width: `${data.productivity.taskCompletionRate}%` }}
@@ -409,26 +409,26 @@ export default function AnalyticsPage() {
                   </div>
                 </div>
 
-                <div className="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-800/50 rounded-xl">
+                <div className="flex items-center justify-between p-3 bg-muted/50 rounded-xl">
                   <div className="flex items-center gap-3">
                     <div className="h-8 w-8 rounded-lg bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
                       <Clock className="h-4 w-4 text-blue-600 dark:text-blue-400" />
                     </div>
-                    <span className="text-sm font-medium text-slate-700 dark:text-slate-300">Avg Response Time</span>
+                    <span className="text-sm font-medium text-foreground">Avg Response Time</span>
                   </div>
-                  <span className="font-semibold text-slate-900 dark:text-white">
+                  <span className="font-semibold text-foreground">
                     {formatTime(data.productivity.avgResponseTimeMs)}
                   </span>
                 </div>
 
-                <div className="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-800/50 rounded-xl">
+                <div className="flex items-center justify-between p-3 bg-muted/50 rounded-xl">
                   <div className="flex items-center gap-3">
                     <div className="h-8 w-8 rounded-lg bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center">
                       <Activity className="h-4 w-4 text-indigo-600 dark:text-indigo-400" />
                     </div>
-                    <span className="text-sm font-medium text-slate-700 dark:text-slate-300">Most Active Hour</span>
+                    <span className="text-sm font-medium text-foreground">Most Active Hour</span>
                   </div>
-                  <span className="font-semibold text-slate-900 dark:text-white">
+                  <span className="font-semibold text-foreground">
                     {data.productivity.mostActiveHour}:00
                   </span>
                 </div>
@@ -437,7 +437,7 @@ export default function AnalyticsPage() {
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       <Flame className="h-5 w-5 text-amber-600 dark:text-amber-400" />
-                      <span className="font-semibold text-slate-900 dark:text-white">Current Streak</span>
+                      <span className="font-semibold text-foreground">Current Streak</span>
                     </div>
                     <span className="text-2xl font-bold text-amber-600 dark:text-amber-400">
                       {data.productivity.currentStreak} days
@@ -458,14 +458,14 @@ export default function AnalyticsPage() {
           transition={{ delay: 0.4 }}
         >
           <Card>
-            <CardHeader className="border-b border-slate-100 dark:border-slate-800">
+            <CardHeader className="border-b border-border">
               <CardTitle className="flex items-center gap-3">
                 <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center shadow-lg shadow-green-500/25">
                   <CheckCheck className="h-5 w-5 text-white" />
                 </div>
                 <div>
-                  <span className="text-lg font-semibold text-slate-900 dark:text-white">Integrations</span>
-                  <p className="text-sm font-normal text-slate-500 dark:text-slate-400">
+                  <span className="text-lg font-semibold text-foreground">Integrations</span>
+                  <p className="text-sm font-normal text-muted-foreground">
                     Connected services
                   </p>
                 </div>
@@ -482,15 +482,15 @@ export default function AnalyticsPage() {
                   return (
                     <div
                       key={integration.key}
-                      className="flex items-center justify-between p-4 bg-slate-50 dark:bg-slate-800/50 rounded-xl"
+                      className="flex items-center justify-between p-4 bg-muted/50 rounded-xl"
                     >
                       <div className="flex items-center gap-3">
                         <div className={`h-10 w-10 rounded-xl bg-${integration.color}-100 dark:bg-${integration.color}-900/30 flex items-center justify-center`}>
                           <integration.icon className={`h-5 w-5 text-${integration.color}-600 dark:text-${integration.color}-400`} />
                         </div>
                         <div>
-                          <p className="font-semibold text-slate-900 dark:text-white">{integration.label}</p>
-                          <p className="text-xs text-slate-500 dark:text-slate-400">
+                          <p className="font-semibold text-foreground">{integration.label}</p>
+                          <p className="text-xs text-muted-foreground">
                             {integrationData.count} account{integrationData.count !== 1 ? "s" : ""}
                           </p>
                         </div>
@@ -500,7 +500,7 @@ export default function AnalyticsPage() {
                           <CheckCircle2 className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
                         </div>
                       ) : (
-                        <div className="h-8 w-8 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center">
+                        <div className="h-8 w-8 rounded-full bg-muted flex items-center justify-center">
                           <XCircle className="h-5 w-5 text-slate-400" />
                         </div>
                       )}
@@ -519,14 +519,14 @@ export default function AnalyticsPage() {
           transition={{ delay: 0.4 }}
         >
           <Card>
-            <CardHeader className="border-b border-slate-100 dark:border-slate-800">
+            <CardHeader className="border-b border-border">
               <CardTitle className="flex items-center gap-3">
                 <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-slate-600 to-slate-800 flex items-center justify-center shadow-lg shadow-slate-500/25">
                   <TrendingUp className="h-5 w-5 text-white" />
                 </div>
                 <div>
-                  <span className="text-lg font-semibold text-slate-900 dark:text-white">Additional Metrics</span>
-                  <p className="text-sm font-normal text-slate-500 dark:text-slate-400">
+                  <span className="text-lg font-semibold text-foreground">Additional Metrics</span>
+                  <p className="text-sm font-normal text-muted-foreground">
                     Other activity stats
                   </p>
                 </div>
@@ -534,26 +534,26 @@ export default function AnalyticsPage() {
             </CardHeader>
             <CardContent className="pt-4">
               <div className="space-y-3">
-                <div className="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-800/50 rounded-xl">
-                  <span className="text-sm font-medium text-slate-700 dark:text-slate-300">Total Emails</span>
-                  <span className="font-semibold text-slate-900 dark:text-white">{data.overview.emails}</span>
+                <div className="flex items-center justify-between p-3 bg-muted/50 rounded-xl">
+                  <span className="text-sm font-medium text-foreground">Total Emails</span>
+                  <span className="font-semibold text-foreground">{data.overview.emails}</span>
                 </div>
 
-                <div className="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-800/50 rounded-xl">
-                  <span className="text-sm font-medium text-slate-700 dark:text-slate-300">WhatsApp Messages</span>
-                  <span className="font-semibold text-slate-900 dark:text-white">
+                <div className="flex items-center justify-between p-3 bg-muted/50 rounded-xl">
+                  <span className="text-sm font-medium text-foreground">WhatsApp Messages</span>
+                  <span className="font-semibold text-foreground">
                     {data.overview.whatsappMessages}
                   </span>
                 </div>
 
-                <div className="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-800/50 rounded-xl">
-                  <span className="text-sm font-medium text-slate-700 dark:text-slate-300">Notifications</span>
-                  <span className="font-semibold text-slate-900 dark:text-white">{data.overview.notifications}</span>
+                <div className="flex items-center justify-between p-3 bg-muted/50 rounded-xl">
+                  <span className="text-sm font-medium text-foreground">Notifications</span>
+                  <span className="font-semibold text-foreground">{data.overview.notifications}</span>
                 </div>
 
                 <div className="mt-4 p-4 bg-gradient-to-r from-blue-500/10 to-cyan-500/10 dark:from-blue-500/20 dark:to-cyan-500/20 rounded-xl border border-blue-200 dark:border-blue-800">
                   <div className="flex items-center justify-between">
-                    <span className="font-semibold text-slate-900 dark:text-white">Storage Used</span>
+                    <span className="font-semibold text-foreground">Storage Used</span>
                     <span className="text-xl font-bold text-blue-600 dark:text-blue-400">
                       {formatBytes(data.overview.storageBytes)}
                     </span>

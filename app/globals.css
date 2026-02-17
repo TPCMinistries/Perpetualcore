@@ -98,6 +98,32 @@
   .animation-delay-6000 {
     animation-delay: 6s;
   }
+
+  /* ── Typography Scale ── */
+  .typo-page-title {
+    @apply text-2xl font-semibold text-foreground;
+  }
+  .typo-section-title {
+    @apply text-xl font-semibold text-foreground;
+  }
+  .typo-card-title {
+    @apply text-lg font-semibold text-foreground;
+  }
+  .typo-label {
+    @apply text-sm font-medium text-foreground;
+  }
+  .typo-body {
+    @apply text-sm text-muted-foreground;
+  }
+  .typo-caption {
+    @apply text-xs text-muted-foreground;
+  }
+  .typo-stat {
+    @apply text-2xl font-bold text-foreground;
+  }
+  .typo-badge {
+    @apply text-xs font-medium;
+  }
 }
 
 /* Shadow utilities — outside @layer so they work as plain classes */

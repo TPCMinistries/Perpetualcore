@@ -217,14 +217,14 @@ export default function SearchPage() {
     <div className="p-4 md:p-8">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
-        <div className="border border-slate-200 dark:border-slate-800 rounded-xl p-8 mb-6 bg-white dark:bg-slate-900">
+        <div className="border border-border rounded-xl p-8 mb-6 bg-background">
           <div className="flex items-center gap-4 mb-6">
             <div className="h-12 w-12 rounded-lg bg-slate-900 dark:bg-slate-100 flex items-center justify-center">
               <Search className="h-6 w-6 text-white dark:text-slate-900" />
             </div>
             <div>
-              <h1 className="text-3xl font-semibold text-slate-900 dark:text-slate-100">Universal Search</h1>
-              <p className="text-slate-600 dark:text-slate-400">
+              <h1 className="text-3xl font-semibold text-foreground">Universal Search</h1>
+              <p className="text-muted-foreground">
                 Search across all your conversations, documents, tasks, calendar, and emails
               </p>
             </div>
@@ -240,7 +240,7 @@ export default function SearchPage() {
                   placeholder="Search everything..."
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
-                  className="pl-12 pr-4 h-12 text-base bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700"
+                  className="pl-12 pr-4 h-12 text-base bg-muted border-border"
                   autoFocus
                 />
               </div>
@@ -257,7 +257,7 @@ export default function SearchPage() {
                 variant="outline"
                 size="lg"
                 onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}
-                className="h-12 border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800"
+                className="h-12 border-border hover:bg-muted"
               >
                 <SlidersHorizontal className="h-4 w-4 mr-2" />
                 {showAdvancedFilters ? "Hide" : "Filters"}
@@ -267,7 +267,7 @@ export default function SearchPage() {
                 variant="outline"
                 size="lg"
                 onClick={() => setShowSavedSearches(!showSavedSearches)}
-                className="h-12 border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800"
+                className="h-12 border-border hover:bg-muted"
               >
                 <Filter className="h-4 w-4 mr-2" />
                 Saved
@@ -304,8 +304,8 @@ export default function SearchPage() {
 
             {/* Results count */}
             {counts.total > 0 && (
-              <div className="mb-6 flex items-center gap-6 text-sm text-slate-600 dark:text-slate-400">
-                <span className="font-medium text-slate-900 dark:text-slate-100">
+              <div className="mb-6 flex items-center gap-6 text-sm text-muted-foreground">
+                <span className="font-medium text-foreground">
                   {counts.total} {counts.total === 1 ? "result" : "results"}
                 </span>
                 <div className="flex items-center gap-4">
@@ -346,53 +346,53 @@ export default function SearchPage() {
             {/* Results */}
             {loading ? (
               <div className="flex items-center justify-center h-64">
-                <div className="border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 rounded-xl p-12">
+                <div className="border border-border bg-background rounded-xl p-12">
                   <div className="h-12 w-12 rounded-lg bg-slate-900 dark:bg-slate-100 flex items-center justify-center mx-auto mb-4">
                     <Search className="h-6 w-6 text-white dark:text-slate-900 animate-pulse" />
                   </div>
-                  <p className="text-slate-900 dark:text-slate-100 font-medium">Searching...</p>
+                  <p className="text-foreground font-medium">Searching...</p>
                 </div>
               </div>
             ) : results.length === 0 && query ? (
-              <div className="border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 rounded-xl p-12 text-center">
-                <div className="h-16 w-16 rounded-lg bg-slate-100 dark:bg-slate-800 flex items-center justify-center mx-auto mb-6">
-                  <Search className="h-8 w-8 text-slate-600 dark:text-slate-400" />
+              <div className="border border-border bg-background rounded-xl p-12 text-center">
+                <div className="h-16 w-16 rounded-lg bg-muted flex items-center justify-center mx-auto mb-6">
+                  <Search className="h-8 w-8 text-muted-foreground" />
                 </div>
-                <h3 className="text-xl font-semibold text-slate-900 dark:text-slate-100 mb-3">
+                <h3 className="text-xl font-semibold text-foreground mb-3">
                   No results found
                 </h3>
-                <p className="text-slate-600 dark:text-slate-400 mb-2">
-                  No results found for <span className="font-semibold text-slate-900 dark:text-slate-100">"{query}"</span>
+                <p className="text-muted-foreground mb-2">
+                  No results found for <span className="font-semibold text-foreground">"{query}"</span>
                 </p>
-                <p className="text-sm text-slate-600 dark:text-slate-400">
+                <p className="text-sm text-muted-foreground">
                   Try different keywords or check your filters
                 </p>
               </div>
             ) : results.length === 0 ? (
-              <div className="border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 rounded-xl p-12 text-center">
-                <div className="h-16 w-16 rounded-lg bg-slate-100 dark:bg-slate-800 flex items-center justify-center mx-auto mb-6">
-                  <Search className="h-8 w-8 text-slate-600 dark:text-slate-400" />
+              <div className="border border-border bg-background rounded-xl p-12 text-center">
+                <div className="h-16 w-16 rounded-lg bg-muted flex items-center justify-center mx-auto mb-6">
+                  <Search className="h-8 w-8 text-muted-foreground" />
                 </div>
-                <h3 className="text-xl font-semibold text-slate-900 dark:text-slate-100 mb-3">
+                <h3 className="text-xl font-semibold text-foreground mb-3">
                   Universal Search
                 </h3>
-                <p className="text-slate-600 dark:text-slate-400 mb-6">
+                <p className="text-muted-foreground mb-6">
                   Start typing to search across all your content
                 </p>
-                <div className="flex flex-wrap justify-center gap-2 text-sm text-slate-600 dark:text-slate-400">
-                  <span className="inline-flex items-center gap-1 px-3 py-1.5 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg">
+                <div className="flex flex-wrap justify-center gap-2 text-sm text-muted-foreground">
+                  <span className="inline-flex items-center gap-1 px-3 py-1.5 bg-muted border border-border rounded-lg">
                     <MessageSquare className="h-3 w-3" /> Conversations
                   </span>
-                  <span className="inline-flex items-center gap-1 px-3 py-1.5 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg">
+                  <span className="inline-flex items-center gap-1 px-3 py-1.5 bg-muted border border-border rounded-lg">
                     <FileText className="h-3 w-3" /> Documents
                   </span>
-                  <span className="inline-flex items-center gap-1 px-3 py-1.5 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg">
+                  <span className="inline-flex items-center gap-1 px-3 py-1.5 bg-muted border border-border rounded-lg">
                     <CheckSquare className="h-3 w-3" /> Tasks
                   </span>
-                  <span className="inline-flex items-center gap-1 px-3 py-1.5 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg">
+                  <span className="inline-flex items-center gap-1 px-3 py-1.5 bg-muted border border-border rounded-lg">
                     <Calendar className="h-3 w-3" /> Calendar
                   </span>
-                  <span className="inline-flex items-center gap-1 px-3 py-1.5 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg">
+                  <span className="inline-flex items-center gap-1 px-3 py-1.5 bg-muted border border-border rounded-lg">
                     <Mail className="h-3 w-3" /> Emails
                   </span>
                 </div>
@@ -402,7 +402,7 @@ export default function SearchPage() {
                 {results.map((result) => (
                   <Card
                     key={`${result.type}-${result.id}`}
-                    className="border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 hover:border-slate-300 dark:hover:border-slate-600 hover:shadow-md transition-all cursor-pointer"
+                    className="border-border bg-background hover:border-border hover:shadow-md transition-all cursor-pointer"
                     onClick={() => router.push(result.url)}
                   >
                     <CardContent className="p-5">
@@ -417,58 +417,58 @@ export default function SearchPage() {
                             <span className="font-medium capitalize">{result.type}</span>
                           </span>
                           {result.metadata.aiExtracted && (
-                            <span className="inline-flex items-center gap-1 text-xs px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400">
+                            <span className="inline-flex items-center gap-1 text-xs px-2.5 py-1 rounded-lg bg-muted border border-border text-muted-foreground">
                               <Sparkles className="h-3 w-3" />
                               AI
                             </span>
                           )}
                         </div>
                         {result.metadata.date && (
-                          <span className="text-xs text-slate-600 dark:text-slate-400 flex items-center gap-1">
+                          <span className="text-xs text-muted-foreground flex items-center gap-1">
                             <Clock className="h-3 w-3" />
                             {formatDate(result.metadata.date)}
                           </span>
                         )}
                       </div>
 
-                      <h3 className="font-semibold text-lg mb-2 text-slate-900 dark:text-slate-100">
+                      <h3 className="font-semibold text-lg mb-2 text-foreground">
                         {result.title}
                       </h3>
 
-                      <p className="text-sm text-slate-600 dark:text-slate-400 mb-4 line-clamp-2">
+                      <p className="text-sm text-muted-foreground mb-4 line-clamp-2">
                         {result.snippet}
                       </p>
 
-                      <div className="flex items-center gap-3 text-xs text-slate-600 dark:text-slate-400 flex-wrap">
+                      <div className="flex items-center gap-3 text-xs text-muted-foreground flex-wrap">
                         {result.metadata.author && (
-                          <span className="flex items-center gap-1 bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded-lg">
+                          <span className="flex items-center gap-1 bg-muted px-2 py-1 rounded-lg">
                             <User className="h-3 w-3" />
                             {result.metadata.author}
                           </span>
                         )}
                         {result.metadata.from && (
-                          <span className="flex items-center gap-1 bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded-lg">
+                          <span className="flex items-center gap-1 bg-muted px-2 py-1 rounded-lg">
                             <Mail className="h-3 w-3" />
                             {result.metadata.from}
                           </span>
                         )}
                         {result.metadata.location && (
-                          <span className="flex items-center gap-1 bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded-lg">
+                          <span className="flex items-center gap-1 bg-muted px-2 py-1 rounded-lg">
                             <MapPin className="h-3 w-3" />
                             {result.metadata.location}
                           </span>
                         )}
                         {result.metadata.status && (
-                          <span className="inline-flex items-center gap-1 px-2 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
+                          <span className="inline-flex items-center gap-1 px-2 py-1 rounded-lg bg-muted border border-border">
                             {result.metadata.status}
                           </span>
                         )}
                         {result.metadata.priority && (
-                          <span className="inline-flex items-center gap-1 px-2 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
+                          <span className="inline-flex items-center gap-1 px-2 py-1 rounded-lg bg-muted border border-border">
                             {result.metadata.priority} priority
                           </span>
                         )}
-                        <span className="ml-auto flex items-center gap-1 text-slate-900 dark:text-slate-100 font-medium">
+                        <span className="ml-auto flex items-center gap-1 text-foreground font-medium">
                           View
                           <ArrowRight className="h-3 w-3" />
                         </span>

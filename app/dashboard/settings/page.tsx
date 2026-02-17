@@ -552,7 +552,7 @@ export default function SettingsPage() {
       <div className="max-w-6xl mx-auto p-8 space-y-8">
 
         {/* Premium Header */}
-        <div className="border border-slate-200 dark:border-slate-800 rounded-xl p-4 sm:p-8 bg-white dark:bg-slate-900 shadow-lg">
+        <div className="border border-border rounded-xl p-4 sm:p-8 bg-background shadow-lg">
           <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
             {/* User Profile */}
             <div className="flex items-start gap-4 sm:gap-6">
@@ -570,7 +570,7 @@ export default function SettingsPage() {
               {/* Profile Info */}
               <div>
                 <div className="flex items-center gap-3 mb-2">
-                  <h1 className="text-2xl font-semibold text-slate-900 dark:text-white">
+                  <h1 className="text-2xl font-semibold text-foreground">
                     {profile.fullName || "User"}
                   </h1>
                   <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 text-xs font-medium">
@@ -578,11 +578,11 @@ export default function SettingsPage() {
                     {badge.label}
                   </div>
                 </div>
-                <p className="text-slate-600 dark:text-slate-400 text-sm mb-1 flex items-center gap-2">
+                <p className="text-muted-foreground text-sm mb-1 flex items-center gap-2">
                   <Mail className="h-3.5 w-3.5" />
                   {profile.email}
                 </p>
-                <p className="text-xs text-slate-500 dark:text-slate-500">
+                <p className="text-xs text-muted-foreground">
                   Member since {profile.memberSince}
                 </p>
               </div>
@@ -594,7 +594,7 @@ export default function SettingsPage() {
                 onClick={handleRestartOnboarding}
                 disabled={isResetting}
                 variant="outline"
-                className="border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/50"
+                className="border-border hover:bg-muted/50"
               >
                 {isResetting ? (
                   <Loader2 className="h-4 w-4 mr-2 animate-spin" />
@@ -610,7 +610,7 @@ export default function SettingsPage() {
         {/* Tabbed Settings Interface */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
           {/* Premium Tabs */}
-          <div className="border border-slate-200 dark:border-slate-800 rounded-xl bg-white dark:bg-slate-900 p-1 shadow-lg">
+          <div className="border border-border rounded-xl bg-background p-1 shadow-lg">
             <TabsList className="grid grid-cols-2 sm:grid-cols-4 gap-1 bg-transparent h-auto p-0">
               <TabsTrigger
                 value="account"
@@ -645,36 +645,36 @@ export default function SettingsPage() {
 
           {/* Account Tab */}
           <TabsContent value="account" className="space-y-6">
-            <Card className="border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-xl p-8">
+            <Card className="border-border bg-background shadow-xl p-8">
               <div className="flex items-center gap-3 mb-6">
                 <div className="h-10 w-10 rounded-lg bg-slate-900 dark:bg-slate-100 flex items-center justify-center">
                   <User className="h-5 w-5 text-white dark:text-slate-900" />
                 </div>
                 <div>
-                  <h2 className="text-xl font-semibold text-slate-900 dark:text-white">Profile Information</h2>
-                  <p className="text-sm text-slate-600 dark:text-slate-400">Update your personal details</p>
+                  <h2 className="text-xl font-semibold text-foreground">Profile Information</h2>
+                  <p className="text-sm text-muted-foreground">Update your personal details</p>
                 </div>
               </div>
 
               <div className="space-y-6">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                   <div className="space-y-2">
-                    <Label htmlFor="fullName" className="text-slate-700 dark:text-slate-300 font-medium">Full Name</Label>
+                    <Label htmlFor="fullName" className="text-foreground font-medium">Full Name</Label>
                     <Input
                       id="fullName"
                       value={profile.fullName}
                       onChange={(e) => setProfile({ ...profile, fullName: e.target.value })}
-                      className="border-slate-300 dark:border-slate-700 focus:border-violet-500 dark:focus:border-violet-500"
+                      className="border-border focus:border-violet-500 dark:focus:border-violet-500"
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="email" className="text-slate-700 dark:text-slate-300 font-medium">Email Address</Label>
+                    <Label htmlFor="email" className="text-foreground font-medium">Email Address</Label>
                     <Input
                       id="email"
                       type="email"
                       value={profile.email}
                       disabled
-                      className="border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800"
+                      className="border-border bg-muted"
                     />
                   </div>
                 </div>
@@ -701,20 +701,20 @@ export default function SettingsPage() {
               </div>
             </Card>
 
-            <Card className="border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-xl p-8">
+            <Card className="border-border bg-background shadow-xl p-8">
               <div className="flex items-center gap-3 mb-6">
                 <div className="h-10 w-10 rounded-lg bg-slate-900 dark:bg-slate-100 flex items-center justify-center">
                   <Lock className="h-5 w-5 text-white dark:text-slate-900" />
                 </div>
                 <div>
-                  <h2 className="text-xl font-semibold text-slate-900 dark:text-white">Password & Authentication</h2>
-                  <p className="text-sm text-slate-600 dark:text-slate-400">Manage your password and security settings</p>
+                  <h2 className="text-xl font-semibold text-foreground">Password & Authentication</h2>
+                  <p className="text-sm text-muted-foreground">Manage your password and security settings</p>
                 </div>
               </div>
 
               <Button
                 variant="outline"
-                className="border-slate-300 dark:border-slate-700"
+                className="border-border"
                 onClick={() => setPasswordDialogOpen(true)}
               >
                 <Key className="h-4 w-4 mr-2" />
@@ -726,31 +726,31 @@ export default function SettingsPage() {
           {/* Preferences Tab */}
           <TabsContent value="preferences" className="space-y-6">
             {/* Appearance Section */}
-            <Card className="border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-xl p-8">
+            <Card className="border-border bg-background shadow-xl p-8">
               <div className="flex items-center gap-3 mb-6">
                 <div className="h-10 w-10 rounded-lg bg-slate-900 dark:bg-slate-100 flex items-center justify-center">
                   <Palette className="h-5 w-5 text-white dark:text-slate-900" />
                 </div>
                 <div>
-                  <h2 className="text-xl font-semibold text-slate-900 dark:text-white">Appearance</h2>
-                  <p className="text-sm text-slate-600 dark:text-slate-400">Customize how Perpetual Core looks</p>
+                  <h2 className="text-xl font-semibold text-foreground">Appearance</h2>
+                  <p className="text-sm text-muted-foreground">Customize how Perpetual Core looks</p>
                 </div>
               </div>
 
               <div className="space-y-6">
                 <div>
-                  <Label className="text-slate-700 dark:text-slate-300 font-medium mb-3 block">Theme</Label>
+                  <Label className="text-foreground font-medium mb-3 block">Theme</Label>
                   <div className="grid grid-cols-3 gap-4">
                     <button
                       onClick={() => handleThemeChange("light")}
                       className={`p-6 rounded-xl border-2 transition-all ${
                         theme === "light"
                           ? "border-blue-500 bg-blue-50 dark:bg-blue-950/30 shadow-lg"
-                          : "border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700"
+                          : "border-border hover:border-border"
                       }`}
                     >
                       <Sun className={`h-8 w-8 mx-auto mb-3 ${theme === "light" ? "text-blue-500" : "text-slate-400"}`} />
-                      <p className={`font-medium text-center ${theme === "light" ? "text-blue-700 dark:text-blue-400" : "text-slate-600 dark:text-slate-400"}`}>
+                      <p className={`font-medium text-center ${theme === "light" ? "text-blue-700 dark:text-blue-400" : "text-muted-foreground"}`}>
                         Light
                       </p>
                     </button>
@@ -759,11 +759,11 @@ export default function SettingsPage() {
                       className={`p-6 rounded-xl border-2 transition-all ${
                         theme === "dark"
                           ? "border-blue-500 bg-blue-50 dark:bg-blue-950/30 shadow-lg"
-                          : "border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700"
+                          : "border-border hover:border-border"
                       }`}
                     >
                       <Moon className={`h-8 w-8 mx-auto mb-3 ${theme === "dark" ? "text-blue-500" : "text-slate-400"}`} />
-                      <p className={`font-medium text-center ${theme === "dark" ? "text-blue-700 dark:text-blue-400" : "text-slate-600 dark:text-slate-400"}`}>
+                      <p className={`font-medium text-center ${theme === "dark" ? "text-blue-700 dark:text-blue-400" : "text-muted-foreground"}`}>
                         Dark
                       </p>
                     </button>
@@ -772,21 +772,21 @@ export default function SettingsPage() {
                       className={`p-6 rounded-xl border-2 transition-all ${
                         theme === "system"
                           ? "border-blue-500 bg-blue-50 dark:bg-blue-950/30 shadow-lg"
-                          : "border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700"
+                          : "border-border hover:border-border"
                       }`}
                     >
                       <Monitor className={`h-8 w-8 mx-auto mb-3 ${theme === "system" ? "text-blue-500" : "text-slate-400"}`} />
-                      <p className={`font-medium text-center ${theme === "system" ? "text-blue-700 dark:text-blue-400" : "text-slate-600 dark:text-slate-400"}`}>
+                      <p className={`font-medium text-center ${theme === "system" ? "text-blue-700 dark:text-blue-400" : "text-muted-foreground"}`}>
                         System
                       </p>
                     </button>
                   </div>
                 </div>
 
-                <div className="flex items-center justify-between p-4 rounded-lg border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
+                <div className="flex items-center justify-between p-4 rounded-lg border border-border hover:bg-muted/50 transition-colors">
                   <div>
-                    <p className="font-medium text-slate-900 dark:text-white">Compact Mode</p>
-                    <p className="text-sm text-slate-600 dark:text-slate-400">Reduce spacing for denser interface</p>
+                    <p className="font-medium text-foreground">Compact Mode</p>
+                    <p className="text-sm text-muted-foreground">Reduce spacing for denser interface</p>
                   </div>
                   <Switch
                     checked={preferences.compactMode}
@@ -800,21 +800,21 @@ export default function SettingsPage() {
             </Card>
 
             {/* AI Settings */}
-            <Card className="border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-xl p-8">
+            <Card className="border-border bg-background shadow-xl p-8">
               <div className="flex items-center gap-3 mb-6">
                 <div className="h-10 w-10 rounded-lg bg-slate-900 dark:bg-slate-100 flex items-center justify-center">
                   <Bot className="h-5 w-5 text-white dark:text-slate-900" />
                 </div>
                 <div>
-                  <h2 className="text-xl font-semibold text-slate-900 dark:text-white">AI Settings</h2>
-                  <p className="text-sm text-slate-600 dark:text-slate-400">Configure AI behavior and defaults</p>
+                  <h2 className="text-xl font-semibold text-foreground">AI Settings</h2>
+                  <p className="text-sm text-muted-foreground">Configure AI behavior and defaults</p>
                 </div>
               </div>
 
               <div className="space-y-6">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                   <div className="space-y-2">
-                    <Label className="text-slate-700 dark:text-slate-300 font-medium">Default Model</Label>
+                    <Label className="text-foreground font-medium">Default Model</Label>
                     <Select value={preferences.defaultModel} onValueChange={(value) => updatePreference({ defaultModel: value })}>
                       <SelectTrigger>
                         <SelectValue />
@@ -830,7 +830,7 @@ export default function SettingsPage() {
                   </div>
 
                   <div className="space-y-2">
-                    <Label className="text-slate-700 dark:text-slate-300 font-medium">Context Window</Label>
+                    <Label className="text-foreground font-medium">Context Window</Label>
                     <Select value={preferences.contextWindow} onValueChange={(value) => updatePreference({ contextWindow: value })}>
                       <SelectTrigger>
                         <SelectValue />
@@ -848,8 +848,8 @@ export default function SettingsPage() {
 
                 <div className="space-y-3">
                   <div className="flex items-center justify-between">
-                    <Label className="text-slate-700 dark:text-slate-300 font-medium">Temperature: {preferences.temperature.toFixed(1)}</Label>
-                    <span className="text-xs text-slate-500 dark:text-slate-400">
+                    <Label className="text-foreground font-medium">Temperature: {preferences.temperature.toFixed(1)}</Label>
+                    <span className="text-xs text-muted-foreground">
                       {preferences.temperature < 0.3 ? "Focused" : preferences.temperature < 0.7 ? "Balanced" : "Creative"}
                     </span>
                   </div>
@@ -861,15 +861,15 @@ export default function SettingsPage() {
                     step={0.1}
                     className="w-full"
                   />
-                  <p className="text-xs text-slate-500 dark:text-slate-400">Lower values make output more focused and deterministic</p>
+                  <p className="text-xs text-muted-foreground">Lower values make output more focused and deterministic</p>
                 </div>
 
-                <div className="flex items-center justify-between p-4 rounded-lg border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
+                <div className="flex items-center justify-between p-4 rounded-lg border border-border hover:bg-muted/50 transition-colors">
                   <div className="flex items-center gap-3">
                     <Database className="h-5 w-5 text-purple-500" />
                     <div>
-                      <p className="font-medium text-slate-900 dark:text-white">Enable RAG (Retrieval)</p>
-                      <p className="text-sm text-slate-600 dark:text-slate-400">Search uploaded documents for relevant context</p>
+                      <p className="font-medium text-foreground">Enable RAG (Retrieval)</p>
+                      <p className="text-sm text-muted-foreground">Search uploaded documents for relevant context</p>
                     </div>
                   </div>
                   <Switch
@@ -878,12 +878,12 @@ export default function SettingsPage() {
                   />
                 </div>
 
-                <div className="flex items-center justify-between p-4 rounded-lg border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
+                <div className="flex items-center justify-between p-4 rounded-lg border border-border hover:bg-muted/50 transition-colors">
                   <div className="flex items-center gap-3">
                     <Wifi className="h-5 w-5 text-blue-500" />
                     <div>
-                      <p className="font-medium text-slate-900 dark:text-white">Stream Responses</p>
-                      <p className="text-sm text-slate-600 dark:text-slate-400">Show AI responses as they're generated</p>
+                      <p className="font-medium text-foreground">Stream Responses</p>
+                      <p className="text-sm text-muted-foreground">Show AI responses as they're generated</p>
                     </div>
                   </div>
                   <Switch
@@ -895,24 +895,24 @@ export default function SettingsPage() {
             </Card>
 
             {/* Notifications Section */}
-            <Card className="border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-xl p-8">
+            <Card className="border-border bg-background shadow-xl p-8">
               <div className="flex items-center gap-3 mb-6">
                 <div className="h-10 w-10 rounded-lg bg-slate-900 dark:bg-slate-100 flex items-center justify-center">
                   <Bell className="h-5 w-5 text-white dark:text-slate-900" />
                 </div>
                 <div>
-                  <h2 className="text-xl font-semibold text-slate-900 dark:text-white">Notifications</h2>
-                  <p className="text-sm text-slate-600 dark:text-slate-400">Control how you receive updates</p>
+                  <h2 className="text-xl font-semibold text-foreground">Notifications</h2>
+                  <p className="text-sm text-muted-foreground">Control how you receive updates</p>
                 </div>
               </div>
 
               <div className="space-y-4">
-                <div className="flex items-center justify-between p-4 rounded-lg border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
+                <div className="flex items-center justify-between p-4 rounded-lg border border-border hover:bg-muted/50 transition-colors">
                   <div className="flex items-center gap-3">
                     <Mail className="h-5 w-5 text-amber-500" />
                     <div>
-                      <p className="font-medium text-slate-900 dark:text-white">Email Notifications</p>
-                      <p className="text-sm text-slate-600 dark:text-slate-400">Receive important updates via email</p>
+                      <p className="font-medium text-foreground">Email Notifications</p>
+                      <p className="text-sm text-muted-foreground">Receive important updates via email</p>
                     </div>
                   </div>
                   <Switch
@@ -921,12 +921,12 @@ export default function SettingsPage() {
                   />
                 </div>
 
-                <div className="flex items-center justify-between p-4 rounded-lg border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
+                <div className="flex items-center justify-between p-4 rounded-lg border border-border hover:bg-muted/50 transition-colors">
                   <div className="flex items-center gap-3">
                     <Laptop className="h-5 w-5 text-blue-500" />
                     <div>
-                      <p className="font-medium text-slate-900 dark:text-white">Desktop Notifications</p>
-                      <p className="text-sm text-slate-600 dark:text-slate-400">Show browser push notifications</p>
+                      <p className="font-medium text-foreground">Desktop Notifications</p>
+                      <p className="text-sm text-muted-foreground">Show browser push notifications</p>
                     </div>
                   </div>
                   <Switch
@@ -935,12 +935,12 @@ export default function SettingsPage() {
                   />
                 </div>
 
-                <div className="flex items-center justify-between p-4 rounded-lg border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
+                <div className="flex items-center justify-between p-4 rounded-lg border border-border hover:bg-muted/50 transition-colors">
                   <div className="flex items-center gap-3">
                     <FileText className="h-5 w-5 text-green-500" />
                     <div>
-                      <p className="font-medium text-slate-900 dark:text-white">Document Updates</p>
-                      <p className="text-sm text-slate-600 dark:text-slate-400">Notify when documents are shared or edited</p>
+                      <p className="font-medium text-foreground">Document Updates</p>
+                      <p className="text-sm text-muted-foreground">Notify when documents are shared or edited</p>
                     </div>
                   </div>
                   <Switch
@@ -949,12 +949,12 @@ export default function SettingsPage() {
                   />
                 </div>
 
-                <div className="flex items-center justify-between p-4 rounded-lg border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
+                <div className="flex items-center justify-between p-4 rounded-lg border border-border hover:bg-muted/50 transition-colors">
                   <div className="flex items-center gap-3">
                     <Users className="h-5 w-5 text-purple-500" />
                     <div>
-                      <p className="font-medium text-slate-900 dark:text-white">Team Activity</p>
-                      <p className="text-sm text-slate-600 dark:text-slate-400">Get notified of team member actions</p>
+                      <p className="font-medium text-foreground">Team Activity</p>
+                      <p className="text-sm text-muted-foreground">Get notified of team member actions</p>
                     </div>
                   </div>
                   <Switch
@@ -963,12 +963,12 @@ export default function SettingsPage() {
                   />
                 </div>
 
-                <div className="flex items-center justify-between p-4 rounded-lg border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
+                <div className="flex items-center justify-between p-4 rounded-lg border border-border hover:bg-muted/50 transition-colors">
                   <div className="flex items-center gap-3">
                     <BarChart3 className="h-5 w-5 text-indigo-500" />
                     <div>
-                      <p className="font-medium text-slate-900 dark:text-white">Weekly Digest</p>
-                      <p className="text-sm text-slate-600 dark:text-slate-400">Summary email every Monday morning</p>
+                      <p className="font-medium text-foreground">Weekly Digest</p>
+                      <p className="text-sm text-muted-foreground">Summary email every Monday morning</p>
                     </div>
                   </div>
                   <Switch
@@ -977,12 +977,12 @@ export default function SettingsPage() {
                   />
                 </div>
 
-                <div className="flex items-center justify-between p-4 rounded-lg border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
+                <div className="flex items-center justify-between p-4 rounded-lg border border-border hover:bg-muted/50 transition-colors">
                   <div className="flex items-center gap-3">
                     {preferences.soundEffects ? <Volume2 className="h-5 w-5 text-pink-500" /> : <VolumeX className="h-5 w-5 text-slate-400" />}
                     <div>
-                      <p className="font-medium text-slate-900 dark:text-white">Sound Effects</p>
-                      <p className="text-sm text-slate-600 dark:text-slate-400">Play audio feedback for actions</p>
+                      <p className="font-medium text-foreground">Sound Effects</p>
+                      <p className="text-sm text-muted-foreground">Play audio feedback for actions</p>
                     </div>
                   </div>
                   <Switch
@@ -994,24 +994,24 @@ export default function SettingsPage() {
             </Card>
 
             {/* Editor Preferences */}
-            <Card className="border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-xl p-8">
+            <Card className="border-border bg-background shadow-xl p-8">
               <div className="flex items-center gap-3 mb-6">
                 <div className="h-10 w-10 rounded-lg bg-slate-900 dark:bg-slate-100 flex items-center justify-center">
                   <Code2 className="h-5 w-5 text-white dark:text-slate-900" />
                 </div>
                 <div>
-                  <h2 className="text-xl font-semibold text-slate-900 dark:text-white">Editor Preferences</h2>
-                  <p className="text-sm text-slate-600 dark:text-slate-400">Customize your editing experience</p>
+                  <h2 className="text-xl font-semibold text-foreground">Editor Preferences</h2>
+                  <p className="text-sm text-muted-foreground">Customize your editing experience</p>
                 </div>
               </div>
 
               <div className="space-y-4">
-                <div className="flex items-center justify-between p-4 rounded-lg border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
+                <div className="flex items-center justify-between p-4 rounded-lg border border-border hover:bg-muted/50 transition-colors">
                   <div className="flex items-center gap-3">
                     <Save className="h-5 w-5 text-green-500" />
                     <div>
-                      <p className="font-medium text-slate-900 dark:text-white">Auto-save</p>
-                      <p className="text-sm text-slate-600 dark:text-slate-400">Automatically save changes every {preferences.autoSaveInterval} seconds</p>
+                      <p className="font-medium text-foreground">Auto-save</p>
+                      <p className="text-sm text-muted-foreground">Automatically save changes every {preferences.autoSaveInterval} seconds</p>
                     </div>
                   </div>
                   <Switch
@@ -1020,12 +1020,12 @@ export default function SettingsPage() {
                   />
                 </div>
 
-                <div className="flex items-center justify-between p-4 rounded-lg border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
+                <div className="flex items-center justify-between p-4 rounded-lg border border-border hover:bg-muted/50 transition-colors">
                   <div className="flex items-center gap-3">
                     <Braces className="h-5 w-5 text-blue-500" />
                     <div>
-                      <p className="font-medium text-slate-900 dark:text-white">Syntax Highlighting</p>
-                      <p className="text-sm text-slate-600 dark:text-slate-400">Colorize code blocks and markdown</p>
+                      <p className="font-medium text-foreground">Syntax Highlighting</p>
+                      <p className="text-sm text-muted-foreground">Colorize code blocks and markdown</p>
                     </div>
                   </div>
                   <Switch
@@ -1034,12 +1034,12 @@ export default function SettingsPage() {
                   />
                 </div>
 
-                <div className="flex items-center justify-between p-4 rounded-lg border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
+                <div className="flex items-center justify-between p-4 rounded-lg border border-border hover:bg-muted/50 transition-colors">
                   <div className="flex items-center gap-3">
                     <AlignLeft className="h-5 w-5 text-purple-500" />
                     <div>
-                      <p className="font-medium text-slate-900 dark:text-white">Line Numbers</p>
-                      <p className="text-sm text-slate-600 dark:text-slate-400">Show line numbers in code editor</p>
+                      <p className="font-medium text-foreground">Line Numbers</p>
+                      <p className="text-sm text-muted-foreground">Show line numbers in code editor</p>
                     </div>
                   </div>
                   <Switch
@@ -1048,12 +1048,12 @@ export default function SettingsPage() {
                   />
                 </div>
 
-                <div className="flex items-center justify-between p-4 rounded-lg border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
+                <div className="flex items-center justify-between p-4 rounded-lg border border-border hover:bg-muted/50 transition-colors">
                   <div className="flex items-center gap-3">
                     <AlignLeft className="h-5 w-5 text-amber-500" />
                     <div>
-                      <p className="font-medium text-slate-900 dark:text-white">Word Wrap</p>
-                      <p className="text-sm text-slate-600 dark:text-slate-400">Wrap long lines instead of scrolling</p>
+                      <p className="font-medium text-foreground">Word Wrap</p>
+                      <p className="text-sm text-muted-foreground">Wrap long lines instead of scrolling</p>
                     </div>
                   </div>
                   <Switch
@@ -1065,22 +1065,22 @@ export default function SettingsPage() {
             </Card>
 
             {/* Privacy & Data */}
-            <Card className="border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-xl p-8">
+            <Card className="border-border bg-background shadow-xl p-8">
               <div className="flex items-center gap-3 mb-6">
                 <div className="h-10 w-10 rounded-lg bg-slate-900 dark:bg-slate-100 flex items-center justify-center">
                   {preferences.analyticsEnabled ? <Eye className="h-5 w-5 text-white dark:text-slate-900" /> : <EyeOff className="h-5 w-5 text-white dark:text-slate-900" />}
                 </div>
                 <div>
-                  <h2 className="text-xl font-semibold text-slate-900 dark:text-white">Privacy & Data</h2>
-                  <p className="text-sm text-slate-600 dark:text-slate-400">Control your data and privacy settings</p>
+                  <h2 className="text-xl font-semibold text-foreground">Privacy & Data</h2>
+                  <p className="text-sm text-muted-foreground">Control your data and privacy settings</p>
                 </div>
               </div>
 
               <div className="space-y-4">
-                <div className="flex items-center justify-between p-4 rounded-lg border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
+                <div className="flex items-center justify-between p-4 rounded-lg border border-border hover:bg-muted/50 transition-colors">
                   <div>
-                    <p className="font-medium text-slate-900 dark:text-white">Analytics</p>
-                    <p className="text-sm text-slate-600 dark:text-slate-400">Help improve the platform with usage data</p>
+                    <p className="font-medium text-foreground">Analytics</p>
+                    <p className="text-sm text-muted-foreground">Help improve the platform with usage data</p>
                   </div>
                   <Switch
                     checked={preferences.analyticsEnabled}
@@ -1088,10 +1088,10 @@ export default function SettingsPage() {
                   />
                 </div>
 
-                <div className="flex items-center justify-between p-4 rounded-lg border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
+                <div className="flex items-center justify-between p-4 rounded-lg border border-border hover:bg-muted/50 transition-colors">
                   <div>
-                    <p className="font-medium text-slate-900 dark:text-white">Usage Tracking</p>
-                    <p className="text-sm text-slate-600 dark:text-slate-400">Track feature usage and interactions</p>
+                    <p className="font-medium text-foreground">Usage Tracking</p>
+                    <p className="text-sm text-muted-foreground">Track feature usage and interactions</p>
                   </div>
                   <Switch
                     checked={preferences.usageTracking}
@@ -1099,10 +1099,10 @@ export default function SettingsPage() {
                   />
                 </div>
 
-                <div className="flex items-center justify-between p-4 rounded-lg border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
+                <div className="flex items-center justify-between p-4 rounded-lg border border-border hover:bg-muted/50 transition-colors">
                   <div>
-                    <p className="font-medium text-slate-900 dark:text-white">Error Reporting</p>
-                    <p className="text-sm text-slate-600 dark:text-slate-400">Automatically report errors to help fix bugs</p>
+                    <p className="font-medium text-foreground">Error Reporting</p>
+                    <p className="text-sm text-muted-foreground">Automatically report errors to help fix bugs</p>
                   </div>
                   <Switch
                     checked={preferences.errorReporting}
@@ -1110,10 +1110,10 @@ export default function SettingsPage() {
                   />
                 </div>
 
-                <div className="flex items-center justify-between p-4 rounded-lg border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
+                <div className="flex items-center justify-between p-4 rounded-lg border border-border hover:bg-muted/50 transition-colors">
                   <div>
-                    <p className="font-medium text-slate-900 dark:text-white">Share Anonymous Data</p>
-                    <p className="text-sm text-slate-600 dark:text-slate-400">Share aggregated insights for research</p>
+                    <p className="font-medium text-foreground">Share Anonymous Data</p>
+                    <p className="text-sm text-muted-foreground">Share aggregated insights for research</p>
                   </div>
                   <Switch
                     checked={preferences.shareAnonymousData}
@@ -1124,20 +1124,20 @@ export default function SettingsPage() {
             </Card>
 
             {/* Accessibility */}
-            <Card className="border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-xl p-8">
+            <Card className="border-border bg-background shadow-xl p-8">
               <div className="flex items-center gap-3 mb-6">
                 <div className="h-10 w-10 rounded-lg bg-slate-900 dark:bg-slate-100 flex items-center justify-center">
                   <Accessibility className="h-5 w-5 text-white dark:text-slate-900" />
                 </div>
                 <div>
-                  <h2 className="text-xl font-semibold text-slate-900 dark:text-white">Accessibility</h2>
-                  <p className="text-sm text-slate-600 dark:text-slate-400">Make the interface work better for you</p>
+                  <h2 className="text-xl font-semibold text-foreground">Accessibility</h2>
+                  <p className="text-sm text-muted-foreground">Make the interface work better for you</p>
                 </div>
               </div>
 
               <div className="space-y-6">
                 <div className="space-y-2">
-                  <Label className="text-slate-700 dark:text-slate-300 font-medium">Font Size</Label>
+                  <Label className="text-foreground font-medium">Font Size</Label>
                   <Select value={preferences.fontSize} onValueChange={(value) => updatePreference({ fontSize: value })}>
                     <SelectTrigger>
                       <SelectValue />
@@ -1151,10 +1151,10 @@ export default function SettingsPage() {
                   </Select>
                 </div>
 
-                <div className="flex items-center justify-between p-4 rounded-lg border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
+                <div className="flex items-center justify-between p-4 rounded-lg border border-border hover:bg-muted/50 transition-colors">
                   <div>
-                    <p className="font-medium text-slate-900 dark:text-white">Reduce Animations</p>
-                    <p className="text-sm text-slate-600 dark:text-slate-400">Minimize motion effects</p>
+                    <p className="font-medium text-foreground">Reduce Animations</p>
+                    <p className="text-sm text-muted-foreground">Minimize motion effects</p>
                   </div>
                   <Switch
                     checked={preferences.reduceAnimations}
@@ -1162,10 +1162,10 @@ export default function SettingsPage() {
                   />
                 </div>
 
-                <div className="flex items-center justify-between p-4 rounded-lg border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
+                <div className="flex items-center justify-between p-4 rounded-lg border border-border hover:bg-muted/50 transition-colors">
                   <div>
-                    <p className="font-medium text-slate-900 dark:text-white">High Contrast</p>
-                    <p className="text-sm text-slate-600 dark:text-slate-400">Increase contrast for better visibility</p>
+                    <p className="font-medium text-foreground">High Contrast</p>
+                    <p className="text-sm text-muted-foreground">Increase contrast for better visibility</p>
                   </div>
                   <Switch
                     checked={preferences.highContrast}
@@ -1173,10 +1173,10 @@ export default function SettingsPage() {
                   />
                 </div>
 
-                <div className="flex items-center justify-between p-4 rounded-lg border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
+                <div className="flex items-center justify-between p-4 rounded-lg border border-border hover:bg-muted/50 transition-colors">
                   <div>
-                    <p className="font-medium text-slate-900 dark:text-white">Screen Reader Optimized</p>
-                    <p className="text-sm text-slate-600 dark:text-slate-400">Enhanced ARIA labels and navigation</p>
+                    <p className="font-medium text-foreground">Screen Reader Optimized</p>
+                    <p className="text-sm text-muted-foreground">Enhanced ARIA labels and navigation</p>
                   </div>
                   <Switch
                     checked={preferences.screenReaderOptimized}
@@ -1187,24 +1187,24 @@ export default function SettingsPage() {
             </Card>
 
             {/* Performance */}
-            <Card className="border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-xl p-8">
+            <Card className="border-border bg-background shadow-xl p-8">
               <div className="flex items-center gap-3 mb-6">
                 <div className="h-10 w-10 rounded-lg bg-slate-900 dark:bg-slate-100 flex items-center justify-center">
                   <Gauge className="h-5 w-5 text-white dark:text-slate-900" />
                 </div>
                 <div>
-                  <h2 className="text-xl font-semibold text-slate-900 dark:text-white">Performance</h2>
-                  <p className="text-sm text-slate-600 dark:text-slate-400">Optimize speed and resource usage</p>
+                  <h2 className="text-xl font-semibold text-foreground">Performance</h2>
+                  <p className="text-sm text-muted-foreground">Optimize speed and resource usage</p>
                 </div>
               </div>
 
               <div className="space-y-4">
-                <div className="flex items-center justify-between p-4 rounded-lg border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
+                <div className="flex items-center justify-between p-4 rounded-lg border border-border hover:bg-muted/50 transition-colors">
                   <div className="flex items-center gap-3">
                     <HardDrive className="h-5 w-5 text-cyan-500" />
                     <div>
-                      <p className="font-medium text-slate-900 dark:text-white">Enable Cache</p>
-                      <p className="text-sm text-slate-600 dark:text-slate-400">Cache data locally for faster loading</p>
+                      <p className="font-medium text-foreground">Enable Cache</p>
+                      <p className="text-sm text-muted-foreground">Cache data locally for faster loading</p>
                     </div>
                   </div>
                   <Switch
@@ -1213,12 +1213,12 @@ export default function SettingsPage() {
                   />
                 </div>
 
-                <div className="flex items-center justify-between p-4 rounded-lg border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
+                <div className="flex items-center justify-between p-4 rounded-lg border border-border hover:bg-muted/50 transition-colors">
                   <div className="flex items-center gap-3">
                     <FileText className="h-5 w-5 text-blue-500" />
                     <div>
-                      <p className="font-medium text-slate-900 dark:text-white">Preload Documents</p>
-                      <p className="text-sm text-slate-600 dark:text-slate-400">Load recently used documents in background</p>
+                      <p className="font-medium text-foreground">Preload Documents</p>
+                      <p className="text-sm text-muted-foreground">Load recently used documents in background</p>
                     </div>
                   </div>
                   <Switch
@@ -1227,12 +1227,12 @@ export default function SettingsPage() {
                   />
                 </div>
 
-                <div className="flex items-center justify-between p-4 rounded-lg border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
+                <div className="flex items-center justify-between p-4 rounded-lg border border-border hover:bg-muted/50 transition-colors">
                   <div className="flex items-center gap-3">
                     <Camera className="h-5 w-5 text-purple-500" />
                     <div>
-                      <p className="font-medium text-slate-900 dark:text-white">Lazy Load Images</p>
-                      <p className="text-sm text-slate-600 dark:text-slate-400">Load images only when visible</p>
+                      <p className="font-medium text-foreground">Lazy Load Images</p>
+                      <p className="text-sm text-muted-foreground">Load images only when visible</p>
                     </div>
                   </div>
                   <Switch
@@ -1244,21 +1244,21 @@ export default function SettingsPage() {
             </Card>
 
             {/* Interface */}
-            <Card className="border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-xl p-8">
+            <Card className="border-border bg-background shadow-xl p-8">
               <div className="flex items-center gap-3 mb-6">
                 <div className="h-10 w-10 rounded-lg bg-slate-900 dark:bg-slate-100 flex items-center justify-center">
                   <Layout className="h-5 w-5 text-white dark:text-slate-900" />
                 </div>
                 <div>
-                  <h2 className="text-xl font-semibold text-slate-900 dark:text-white">Interface</h2>
-                  <p className="text-sm text-slate-600 dark:text-slate-400">Customize layout and navigation</p>
+                  <h2 className="text-xl font-semibold text-foreground">Interface</h2>
+                  <p className="text-sm text-muted-foreground">Customize layout and navigation</p>
                 </div>
               </div>
 
               <div className="space-y-6">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                   <div className="space-y-2">
-                    <Label className="text-slate-700 dark:text-slate-300 font-medium">Default View</Label>
+                    <Label className="text-foreground font-medium">Default View</Label>
                     <Select value={preferences.defaultView} onValueChange={(value) => updatePreference({ defaultView: value })}>
                       <SelectTrigger>
                         <SelectValue />
@@ -1281,7 +1281,7 @@ export default function SettingsPage() {
                   </div>
 
                   <div className="space-y-2">
-                    <Label className="text-slate-700 dark:text-slate-300 font-medium">Sidebar Position</Label>
+                    <Label className="text-foreground font-medium">Sidebar Position</Label>
                     <Select value={preferences.sidebarPosition} onValueChange={(value) => updatePreference({ sidebarPosition: value })}>
                       <SelectTrigger>
                         <SelectValue />
@@ -1294,10 +1294,10 @@ export default function SettingsPage() {
                   </div>
                 </div>
 
-                <div className="flex items-center justify-between p-4 rounded-lg border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
+                <div className="flex items-center justify-between p-4 rounded-lg border border-border hover:bg-muted/50 transition-colors">
                   <div>
-                    <p className="font-medium text-slate-900 dark:text-white">Show Tooltips</p>
-                    <p className="text-sm text-slate-600 dark:text-slate-400">Display helpful hints on hover</p>
+                    <p className="font-medium text-foreground">Show Tooltips</p>
+                    <p className="text-sm text-muted-foreground">Display helpful hints on hover</p>
                   </div>
                   <Switch
                     checked={preferences.showTooltips}
@@ -1331,33 +1331,33 @@ export default function SettingsPage() {
 
           {/* Organization Tab */}
           <TabsContent value="organization" className="space-y-6">
-            <Card className="border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-xl p-8">
+            <Card className="border-border bg-background shadow-xl p-8">
               <div className="flex items-center gap-3 mb-6">
                 <div className="h-10 w-10 rounded-lg bg-slate-900 dark:bg-slate-100 flex items-center justify-center">
                   <Building2 className="h-5 w-5 text-white dark:text-slate-900" />
                 </div>
                 <div>
-                  <h2 className="text-xl font-semibold text-slate-900 dark:text-white">Organization Settings</h2>
-                  <p className="text-sm text-slate-600 dark:text-slate-400">Manage your organization and team</p>
+                  <h2 className="text-xl font-semibold text-foreground">Organization Settings</h2>
+                  <p className="text-sm text-muted-foreground">Manage your organization and team</p>
                 </div>
               </div>
 
               <div className="space-y-6">
                 <div className="grid grid-cols-3 gap-6">
-                  <Card className="border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/50 p-6">
-                    <Users className="h-8 w-8 text-slate-900 dark:text-slate-100 mb-3" />
-                    <p className="text-2xl font-bold text-slate-900 dark:text-white">5</p>
-                    <p className="text-sm text-slate-600 dark:text-slate-400">Team Members</p>
+                  <Card className="border-border bg-muted/50 p-6">
+                    <Users className="h-8 w-8 text-foreground mb-3" />
+                    <p className="text-2xl font-bold text-foreground">5</p>
+                    <p className="text-sm text-muted-foreground">Team Members</p>
                   </Card>
-                  <Card className="border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/50 p-6">
-                    <Globe className="h-8 w-8 text-slate-900 dark:text-slate-100 mb-3" />
-                    <p className="text-2xl font-bold text-slate-900 dark:text-white">3</p>
-                    <p className="text-sm text-slate-600 dark:text-slate-400">Active Spaces</p>
+                  <Card className="border-border bg-muted/50 p-6">
+                    <Globe className="h-8 w-8 text-foreground mb-3" />
+                    <p className="text-2xl font-bold text-foreground">3</p>
+                    <p className="text-sm text-muted-foreground">Active Spaces</p>
                   </Card>
-                  <Card className="border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/50 p-6">
-                    <CreditCard className="h-8 w-8 text-slate-900 dark:text-slate-100 mb-3" />
-                    <p className="text-2xl font-bold text-slate-900 dark:text-white">Pro</p>
-                    <p className="text-sm text-slate-600 dark:text-slate-400">Current Plan</p>
+                  <Card className="border-border bg-muted/50 p-6">
+                    <CreditCard className="h-8 w-8 text-foreground mb-3" />
+                    <p className="text-2xl font-bold text-foreground">Pro</p>
+                    <p className="text-sm text-muted-foreground">Current Plan</p>
                   </Card>
                 </div>
 
@@ -1385,14 +1385,14 @@ export default function SettingsPage() {
 
           {/* Security Tab */}
           <TabsContent value="security" className="space-y-6">
-            <Card className="border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-xl p-8">
+            <Card className="border-border bg-background shadow-xl p-8">
               <div className="flex items-center gap-3 mb-6">
                 <div className="h-10 w-10 rounded-lg bg-slate-900 dark:bg-slate-100 flex items-center justify-center">
                   <Shield className="h-5 w-5 text-white dark:text-slate-900" />
                 </div>
                 <div>
-                  <h2 className="text-xl font-semibold text-slate-900 dark:text-white">Security & Privacy</h2>
-                  <p className="text-sm text-slate-600 dark:text-slate-400">Protect your account and data</p>
+                  <h2 className="text-xl font-semibold text-foreground">Security & Privacy</h2>
+                  <p className="text-sm text-muted-foreground">Protect your account and data</p>
                 </div>
               </div>
 
@@ -1414,12 +1414,12 @@ export default function SettingsPage() {
                     onClick={() => setApiKeysDialogOpen(true)}
                   >
                     <div className="flex items-center gap-4 w-full">
-                      <div className="h-10 w-10 rounded-lg bg-slate-100 dark:bg-slate-800 flex items-center justify-center">
-                        <Key className="h-5 w-5 text-slate-900 dark:text-slate-100" />
+                      <div className="h-10 w-10 rounded-lg bg-muted flex items-center justify-center">
+                        <Key className="h-5 w-5 text-foreground" />
                       </div>
                       <div className="flex-1 text-left">
-                        <p className="font-medium text-slate-900 dark:text-white">API Keys</p>
-                        <p className="text-sm text-slate-600 dark:text-slate-400">Manage your API access tokens</p>
+                        <p className="font-medium text-foreground">API Keys</p>
+                        <p className="text-sm text-muted-foreground">Manage your API access tokens</p>
                       </div>
                     </div>
                   </Button>
@@ -1431,18 +1431,18 @@ export default function SettingsPage() {
                     disabled={isExportingData}
                   >
                     <div className="flex items-center gap-4 w-full">
-                      <div className="h-10 w-10 rounded-lg bg-slate-100 dark:bg-slate-800 flex items-center justify-center">
+                      <div className="h-10 w-10 rounded-lg bg-muted flex items-center justify-center">
                         {isExportingData ? (
-                          <Loader2 className="h-5 w-5 text-slate-900 dark:text-slate-100 animate-spin" />
+                          <Loader2 className="h-5 w-5 text-foreground animate-spin" />
                         ) : (
-                          <Download className="h-5 w-5 text-slate-900 dark:text-slate-100" />
+                          <Download className="h-5 w-5 text-foreground" />
                         )}
                       </div>
                       <div className="flex-1 text-left">
-                        <p className="font-medium text-slate-900 dark:text-white">
+                        <p className="font-medium text-foreground">
                           {isExportingData ? "Exporting..." : "Export Data"}
                         </p>
-                        <p className="text-sm text-slate-600 dark:text-slate-400">Download all your data</p>
+                        <p className="text-sm text-muted-foreground">Download all your data</p>
                       </div>
                     </div>
                   </Button>
@@ -1483,7 +1483,7 @@ export default function SettingsPage() {
                 onChange={(e) => setPasswordForm({ ...passwordForm, confirmPassword: e.target.value })}
               />
             </div>
-            <p className="text-xs text-slate-500 dark:text-slate-400">
+            <p className="text-xs text-muted-foreground">
               Password must be at least 8 characters long
             </p>
           </div>
@@ -1542,7 +1542,7 @@ export default function SettingsPage() {
                   Your new API key (copy it now - you won't see it again):
                 </p>
                 <div className="flex items-center gap-2">
-                  <code className="flex-1 p-2 bg-white dark:bg-slate-800 rounded border text-sm font-mono overflow-hidden text-ellipsis">
+                  <code className="flex-1 p-2 bg-card rounded border text-sm font-mono overflow-hidden text-ellipsis">
                     {newlyCreatedKey}
                   </code>
                   <Button
@@ -1558,7 +1558,7 @@ export default function SettingsPage() {
 
             {/* Create new key form */}
             <div className="space-y-4 p-4 border rounded-lg">
-              <h4 className="font-medium text-slate-900 dark:text-white">Create New API Key</h4>
+              <h4 className="font-medium text-foreground">Create New API Key</h4>
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="keyName">Name</Label>
@@ -1605,9 +1605,9 @@ export default function SettingsPage() {
 
             {/* Existing keys */}
             <div className="space-y-3">
-              <h4 className="font-medium text-slate-900 dark:text-white">Your API Keys</h4>
+              <h4 className="font-medium text-foreground">Your API Keys</h4>
               {apiKeys.length === 0 ? (
-                <p className="text-sm text-slate-500 dark:text-slate-400 text-center py-4">
+                <p className="text-sm text-muted-foreground text-center py-4">
                   No API keys yet. Create one above to get started.
                 </p>
               ) : (
@@ -1618,8 +1618,8 @@ export default function SettingsPage() {
                       className="flex items-center justify-between p-3 border rounded-lg"
                     >
                       <div>
-                        <p className="font-medium text-slate-900 dark:text-white">{key.name}</p>
-                        <p className="text-sm text-slate-500 dark:text-slate-400">
+                        <p className="font-medium text-foreground">{key.name}</p>
+                        <p className="text-sm text-muted-foreground">
                           {key.key_preview} • Created {new Date(key.created_at).toLocaleDateString()}
                           {key.expires_at && ` • Expires ${new Date(key.expires_at).toLocaleDateString()}`}
                         </p>

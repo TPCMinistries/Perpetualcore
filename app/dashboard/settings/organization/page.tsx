@@ -293,7 +293,7 @@ export default function OrganizationSettingsPage() {
         className="mb-6"
       >
         <Card>
-          <CardHeader className="border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/30">
+          <CardHeader className="border-b border-border bg-muted/50">
             <div className="flex items-center gap-3">
               <div className="p-2 rounded-lg bg-violet-100 dark:bg-violet-900/30">
                 <Building2 className="h-4 w-4 text-violet-600 dark:text-violet-400" />
@@ -313,7 +313,7 @@ export default function OrganizationSettingsPage() {
                   <img
                     src={settings.logo_url}
                     alt="Organization logo"
-                    className="h-16 w-16 rounded-xl object-cover border-2 border-slate-200 dark:border-slate-700"
+                    className="h-16 w-16 rounded-xl object-cover border-2 border-border"
                   />
                 ) : (
                   <div className="h-16 w-16 rounded-xl bg-gradient-to-br from-violet-100 to-purple-100 dark:from-violet-900/40 dark:to-purple-900/40 flex items-center justify-center border-2 border-dashed border-violet-300 dark:border-violet-700">
@@ -328,7 +328,7 @@ export default function OrganizationSettingsPage() {
                     disabled={uploadingLogo}
                     className="cursor-pointer h-11"
                   />
-                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                  <p className="text-xs text-muted-foreground mt-1">
                     Recommended: Square image, max 2MB
                   </p>
                 </div>
@@ -337,7 +337,7 @@ export default function OrganizationSettingsPage() {
 
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-2">
-                <Label htmlFor="name" className="text-slate-700 dark:text-slate-300">
+                <Label htmlFor="name" className="text-foreground">
                   Organization Name <span className="text-rose-500">*</span>
                 </Label>
                 <Input
@@ -345,12 +345,12 @@ export default function OrganizationSettingsPage() {
                   value={settings.name}
                   onChange={(e) => updateSetting("name", e.target.value)}
                   placeholder="Acme Corporation"
-                  className="h-11 bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700"
+                  className="h-11 bg-background border-border"
                 />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="slug" className="text-slate-700 dark:text-slate-300">
+                <Label htmlFor="slug" className="text-foreground">
                   Organization Slug <span className="text-rose-500">*</span>
                 </Label>
                 <Input
@@ -358,16 +358,16 @@ export default function OrganizationSettingsPage() {
                   value={settings.slug}
                   onChange={(e) => updateSetting("slug", e.target.value)}
                   placeholder="acme-corp"
-                  className="h-11 bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700"
+                  className="h-11 bg-background border-border"
                 />
-                <p className="text-xs text-slate-500 dark:text-slate-400">
+                <p className="text-xs text-muted-foreground">
                   Used in URLs: perpetualcore.com/{settings.slug || "your-org"}
                 </p>
               </div>
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="description" className="text-slate-700 dark:text-slate-300">
+              <Label htmlFor="description" className="text-foreground">
                 Description
               </Label>
               <Textarea
@@ -376,13 +376,13 @@ export default function OrganizationSettingsPage() {
                 onChange={(e) => updateSetting("description", e.target.value)}
                 placeholder="Tell us about your organization..."
                 rows={3}
-                className="bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700 resize-none"
+                className="bg-background border-border resize-none"
               />
             </div>
 
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-2">
-                <Label htmlFor="website" className="text-slate-700 dark:text-slate-300">
+                <Label htmlFor="website" className="text-foreground">
                   Website
                 </Label>
                 <div className="relative">
@@ -393,20 +393,20 @@ export default function OrganizationSettingsPage() {
                     value={settings.website}
                     onChange={(e) => updateSetting("website", e.target.value)}
                     placeholder="https://acme.com"
-                    className="pl-10 h-11 bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700"
+                    className="pl-10 h-11 bg-background border-border"
                   />
                 </div>
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="industry" className="text-slate-700 dark:text-slate-300">
+                <Label htmlFor="industry" className="text-foreground">
                   Industry
                 </Label>
                 <Select
                   value={settings.industry}
                   onValueChange={(value) => updateSetting("industry", value)}
                 >
-                  <SelectTrigger className="h-11 bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700">
+                  <SelectTrigger className="h-11 bg-background border-border">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -424,14 +424,14 @@ export default function OrganizationSettingsPage() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="company-size" className="text-slate-700 dark:text-slate-300">
+              <Label htmlFor="company-size" className="text-foreground">
                 Company Size
               </Label>
               <Select
                 value={settings.company_size}
                 onValueChange={(value) => updateSetting("company_size", value)}
               >
-                <SelectTrigger className="w-full sm:w-64 h-11 bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700">
+                <SelectTrigger className="w-full sm:w-64 h-11 bg-background border-border">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -457,7 +457,7 @@ export default function OrganizationSettingsPage() {
         className="mb-6"
       >
         <Card>
-          <CardHeader className="border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/30">
+          <CardHeader className="border-b border-border bg-muted/50">
             <div className="flex items-center gap-3">
               <div className="p-2 rounded-lg bg-blue-100 dark:bg-blue-900/30">
                 <Globe className="h-4 w-4 text-blue-600 dark:text-blue-400" />
@@ -470,7 +470,7 @@ export default function OrganizationSettingsPage() {
           </CardHeader>
           <CardContent className="pt-6 space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="domain" className="text-slate-700 dark:text-slate-300">
+              <Label htmlFor="domain" className="text-foreground">
                 Domain
               </Label>
               <div className="flex gap-2">
@@ -479,7 +479,7 @@ export default function OrganizationSettingsPage() {
                   value={settings.domain}
                   onChange={(e) => updateSetting("domain", e.target.value)}
                   placeholder="acme.com"
-                  className="flex-1 h-11 bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700"
+                  className="flex-1 h-11 bg-background border-border"
                 />
                 <Button
                   onClick={handleVerifyDomain}
@@ -539,7 +539,7 @@ export default function OrganizationSettingsPage() {
                     {!settings.domain_verified && (
                       <div className="text-sm text-amber-800 dark:text-amber-200 space-y-2">
                         <p>Add this TXT record to your DNS settings:</p>
-                        <code className="block p-2 bg-white dark:bg-slate-900 rounded-lg border border-amber-200 dark:border-amber-800 text-xs font-mono">
+                        <code className="block p-2 bg-background rounded-lg border border-amber-200 dark:border-amber-800 text-xs font-mono">
                           perpetualcore-verification={settings.slug}-{Math.random().toString(36).substring(7)}
                         </code>
                         <p className="text-xs">DNS changes can take up to 48 hours to propagate.</p>
@@ -562,7 +562,7 @@ export default function OrganizationSettingsPage() {
         className="mb-6"
       >
         <Card>
-          <CardHeader className="border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/30">
+          <CardHeader className="border-b border-border bg-muted/50">
             <div className="flex items-center gap-3">
               <div className="p-2 rounded-lg bg-emerald-100 dark:bg-emerald-900/30">
                 <Users className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
@@ -575,7 +575,7 @@ export default function OrganizationSettingsPage() {
           </CardHeader>
           <CardContent className="pt-6 space-y-6">
             <div className="space-y-2">
-              <Label htmlFor="default-role" className="text-slate-700 dark:text-slate-300">
+              <Label htmlFor="default-role" className="text-foreground">
                 Default Role for New Members
               </Label>
               <Select
@@ -584,7 +584,7 @@ export default function OrganizationSettingsPage() {
                   updateSetting("default_role", value)
                 }
               >
-                <SelectTrigger className="w-full sm:w-64 h-11 bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700">
+                <SelectTrigger className="w-full sm:w-64 h-11 bg-background border-border">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -595,10 +595,10 @@ export default function OrganizationSettingsPage() {
               </Select>
             </div>
 
-            <div className="flex items-center justify-between p-4 rounded-xl bg-slate-50 dark:bg-slate-800/50">
+            <div className="flex items-center justify-between p-4 rounded-xl bg-muted/50">
               <div className="space-y-0.5">
-                <Label className="text-slate-900 dark:text-white">Allow Members to Send Invites</Label>
-                <p className="text-sm text-slate-500 dark:text-slate-400">
+                <Label className="text-foreground">Allow Members to Send Invites</Label>
+                <p className="text-sm text-muted-foreground">
                   Let team members invite others to the organization
                 </p>
               </div>
@@ -620,7 +620,7 @@ export default function OrganizationSettingsPage() {
         className="mb-6"
       >
         <Card>
-          <CardHeader className="border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/30">
+          <CardHeader className="border-b border-border bg-muted/50">
             <div className="flex items-center gap-3">
               <div className="p-2 rounded-lg bg-rose-100 dark:bg-rose-900/30">
                 <Shield className="h-4 w-4 text-rose-600 dark:text-rose-400" />
@@ -632,14 +632,14 @@ export default function OrganizationSettingsPage() {
             </div>
           </CardHeader>
           <CardContent className="pt-6 space-y-4">
-            <div className="flex items-center justify-between p-4 rounded-xl bg-slate-50 dark:bg-slate-800/50">
+            <div className="flex items-center justify-between p-4 rounded-xl bg-muted/50">
               <div className="flex items-center gap-3">
                 <div className="p-2 rounded-lg bg-rose-100 dark:bg-rose-900/30">
                   <Lock className="h-4 w-4 text-rose-600 dark:text-rose-400" />
                 </div>
                 <div>
-                  <Label className="text-slate-900 dark:text-white">Require Two-Factor Authentication</Label>
-                  <p className="text-sm text-slate-500 dark:text-slate-400">
+                  <Label className="text-foreground">Require Two-Factor Authentication</Label>
+                  <p className="text-sm text-muted-foreground">
                     Enforce 2FA for all team members
                   </p>
                 </div>
@@ -651,12 +651,12 @@ export default function OrganizationSettingsPage() {
             </div>
 
             <div className="space-y-2">
-              <Label className="text-slate-700 dark:text-slate-300">Session Timeout</Label>
+              <Label className="text-foreground">Session Timeout</Label>
               <Select
                 value={settings.session_timeout.toString()}
                 onValueChange={(value) => updateSetting("session_timeout", parseInt(value))}
               >
-                <SelectTrigger className="w-full sm:w-64 h-11 bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700">
+                <SelectTrigger className="w-full sm:w-64 h-11 bg-background border-border">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -667,7 +667,7 @@ export default function OrganizationSettingsPage() {
                   <SelectItem value="1440">24 hours</SelectItem>
                 </SelectContent>
               </Select>
-              <p className="text-xs text-slate-500 dark:text-slate-400">
+              <p className="text-xs text-muted-foreground">
                 Users will be logged out after this period of inactivity
               </p>
             </div>
@@ -684,7 +684,7 @@ export default function OrganizationSettingsPage() {
         className="mb-6"
       >
         <Card>
-          <CardHeader className="border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/30">
+          <CardHeader className="border-b border-border bg-muted/50">
             <div className="flex items-center gap-3">
               <div className="p-2 rounded-lg bg-amber-100 dark:bg-amber-900/30">
                 <Settings className="h-4 w-4 text-amber-600 dark:text-amber-400" />
@@ -696,14 +696,14 @@ export default function OrganizationSettingsPage() {
             </div>
           </CardHeader>
           <CardContent className="pt-6 space-y-4">
-            <div className="flex items-center justify-between p-4 rounded-xl bg-slate-50 dark:bg-slate-800/50">
+            <div className="flex items-center justify-between p-4 rounded-xl bg-muted/50">
               <div className="flex items-center gap-3">
                 <div className="p-2 rounded-lg bg-violet-100 dark:bg-violet-900/30">
                   <Key className="h-4 w-4 text-violet-600 dark:text-violet-400" />
                 </div>
                 <div>
-                  <Label className="text-slate-900 dark:text-white">API Access</Label>
-                  <p className="text-sm text-slate-500 dark:text-slate-400">
+                  <Label className="text-foreground">API Access</Label>
+                  <p className="text-sm text-muted-foreground">
                     Allow programmatic access via API keys
                   </p>
                 </div>
@@ -714,14 +714,14 @@ export default function OrganizationSettingsPage() {
               />
             </div>
 
-            <div className="flex items-center justify-between p-4 rounded-xl bg-slate-50 dark:bg-slate-800/50">
+            <div className="flex items-center justify-between p-4 rounded-xl bg-muted/50">
               <div className="flex items-center gap-3">
                 <div className="p-2 rounded-lg bg-blue-100 dark:bg-blue-900/30">
                   <Webhook className="h-4 w-4 text-blue-600 dark:text-blue-400" />
                 </div>
                 <div>
-                  <Label className="text-slate-900 dark:text-white">Webhooks</Label>
-                  <p className="text-sm text-slate-500 dark:text-slate-400">
+                  <Label className="text-foreground">Webhooks</Label>
+                  <p className="text-sm text-muted-foreground">
                     Enable webhook notifications for events
                   </p>
                 </div>
@@ -732,14 +732,14 @@ export default function OrganizationSettingsPage() {
               />
             </div>
 
-            <div className="flex items-center justify-between p-4 rounded-xl bg-slate-50 dark:bg-slate-800/50">
+            <div className="flex items-center justify-between p-4 rounded-xl bg-muted/50">
               <div className="flex items-center gap-3">
                 <div className="p-2 rounded-lg bg-emerald-100 dark:bg-emerald-900/30">
                   <Shield className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
                 </div>
                 <div>
-                  <Label className="text-slate-900 dark:text-white">Single Sign-On (SSO)</Label>
-                  <p className="text-sm text-slate-500 dark:text-slate-400">
+                  <Label className="text-foreground">Single Sign-On (SSO)</Label>
+                  <p className="text-sm text-muted-foreground">
                     Enable SAML/OAuth SSO for enterprise authentication
                   </p>
                 </div>
