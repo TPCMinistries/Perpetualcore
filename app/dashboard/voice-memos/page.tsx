@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { EmptyState } from "@/components/ui/empty-state";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -318,16 +319,14 @@ export default function VoiceMemosPage() {
           <Loader2 className="h-6 w-6 animate-spin text-slate-400" />
         </div>
       ) : memos.length === 0 ? (
-        <Card>
-          <CardContent className="flex flex-col items-center justify-center py-12">
-            <MicOff className="h-12 w-12 text-slate-300 dark:text-slate-600 mb-4" />
-            <p className="text-slate-500">
-              {search
-                ? "No memos match your search"
-                : "No voice memos yet. Record your first one above!"}
-            </p>
-          </CardContent>
-        </Card>
+        <EmptyState
+          icon={MicOff}
+          title={search ? "No matching memos" : "No voice memos yet"}
+          description={search
+            ? "No memos match your search"
+            : "Record your first voice memo above to get started"}
+          size="sm"
+        />
       ) : (
         <div className="space-y-3">
           {memos.map((memo) => (

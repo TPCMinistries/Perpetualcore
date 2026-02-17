@@ -27,6 +27,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { EmptyState } from "@/components/ui/empty-state";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -425,17 +426,15 @@ export default function RemindersPage() {
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
           </div>
         ) : filteredReminders.length === 0 ? (
-          <Card className="p-12 text-center">
-            <Bell className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-            <h3 className="text-lg font-medium mb-2">No reminders</h3>
-            <p className="text-muted-foreground mb-4">
-              Create reminders via Telegram or add them here
-            </p>
-            <Button onClick={() => setShowAddDialog(true)}>
-              <Plus className="h-4 w-4 mr-2" />
-              Create Reminder
-            </Button>
-          </Card>
+          <EmptyState
+            icon={Bell}
+            title="No reminders"
+            description="Create reminders via Telegram or add them here"
+            action={{
+              label: "Create Reminder",
+              onClick: () => setShowAddDialog(true),
+            }}
+          />
         ) : (
           <>
             {/* Overdue Section */}

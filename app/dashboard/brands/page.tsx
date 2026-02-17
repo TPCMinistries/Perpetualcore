@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { EmptyState } from "@/components/ui/empty-state";
 import { Badge } from "@/components/ui/badge";
 import {
   DropdownMenu,
@@ -177,25 +178,17 @@ export default function BrandsPage() {
 
       {/* Brands Grid */}
       {brands.length === 0 ? (
-        <Card>
-          <CardContent className="flex flex-col items-center justify-center py-12">
-            <Palette className="h-12 w-12 text-muted-foreground/50 mb-4" />
-            <h3 className="text-lg font-medium mb-2">No brands yet</h3>
-            <p className="text-muted-foreground text-center mb-4">
-              {currentEntity
-                ? `Create your first brand for ${currentEntity.name}`
-                : "Select an entity first, then create brands for it"}
-            </p>
-            {currentEntity && (
-              <Link href="/dashboard/brands/new">
-                <Button>
-                  <Plus className="h-4 w-4 mr-2" />
-                  Create Brand
-                </Button>
-              </Link>
-            )}
-          </CardContent>
-        </Card>
+        <EmptyState
+          icon={Palette}
+          title="No brands yet"
+          description={currentEntity
+            ? `Create your first brand for ${currentEntity.name}`
+            : "Select an entity first, then create brands for it"}
+          action={currentEntity ? {
+            label: "Create Brand",
+            href: "/dashboard/brands/new",
+          } : undefined}
+        />
       ) : (
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           {brands.map((brand) => {

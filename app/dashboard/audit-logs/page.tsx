@@ -42,6 +42,7 @@ import { motion } from "framer-motion";
 import { DashboardPageWrapper, DashboardHeader } from "@/components/ui/dashboard-header";
 import { StatCard, StatCardGrid } from "@/components/ui/stat-card";
 import AuditLogDetail from "@/components/admin/AuditLogDetail";
+import { EmptyState } from "@/components/ui/empty-state";
 import AuditLogExportDialog from "@/components/admin/AuditLogExportDialog";
 
 const cardVariants = {
@@ -586,17 +587,12 @@ export default function AuditLogsPage() {
                 })}
 
                 {logs.length === 0 && !loading && (
-                  <div className="text-center py-16">
-                    <div className="h-16 w-16 rounded-2xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center mx-auto mb-4">
-                      <FileText className="h-8 w-8 text-slate-400" />
-                    </div>
-                    <h3 className="font-semibold text-slate-900 dark:text-slate-100 mb-2">
-                      No audit logs found
-                    </h3>
-                    <p className="text-sm text-slate-500 dark:text-slate-400">
-                      Try adjusting your filters or check back later
-                    </p>
-                  </div>
+                  <EmptyState
+                    icon={FileText}
+                    title="No audit logs found"
+                    description="Try adjusting your filters or check back later"
+                    size="sm"
+                  />
                 )}
               </div>
 

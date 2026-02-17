@@ -23,6 +23,7 @@ import {
   UserCheck,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { EmptyState } from "@/components/ui/empty-state";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import {
@@ -469,29 +470,16 @@ export default function MeetingsPage() {
 
       {/* Meetings List */}
       {filteredMeetings.length === 0 ? (
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="text-center py-16"
-        >
-          <div className="h-20 w-20 rounded-2xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center mx-auto mb-6">
-            <Video className="h-10 w-10 text-slate-400 dark:text-slate-500" />
-          </div>
-          <h3 className="text-xl font-semibold text-slate-900 dark:text-white mb-2">
-            No meetings yet
-          </h3>
-          <p className="text-slate-500 dark:text-slate-400 mb-6">
-            Add your first meeting transcript for AI analysis
-          </p>
-          <Button
-            onClick={() => setShowNewMeeting(true)}
-            variant="outline"
-            className="border-slate-200 dark:border-slate-700"
-          >
-            <Plus className="h-4 w-4 mr-2" />
-            Add Meeting
-          </Button>
-        </motion.div>
+        <EmptyState
+          icon={Video}
+          title="No meetings yet"
+          description="Add your first meeting transcript for AI analysis"
+          action={{
+            label: "Add Meeting",
+            onClick: () => setShowNewMeeting(true),
+          }}
+          size="lg"
+        />
       ) : (
         <div className="grid gap-4">
           {filteredMeetings.map((meeting, index) => (
