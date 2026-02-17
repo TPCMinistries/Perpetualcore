@@ -256,18 +256,18 @@ export default function AgentsPage() {
       <DashboardPageWrapper>
         <div className="space-y-6">
           {/* Header Skeleton */}
-          <div className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-8">
+          <div className="rounded-2xl border border-border bg-background p-8">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-4">
-                <div className="h-14 w-14 rounded-xl bg-slate-200 dark:bg-slate-700 animate-pulse" />
+                <div className="h-14 w-14 rounded-xl bg-muted animate-pulse" />
                 <div className="space-y-2">
-                  <div className="h-8 w-48 bg-slate-200 dark:bg-slate-700 rounded animate-pulse" />
-                  <div className="h-4 w-72 bg-slate-100 dark:bg-slate-800 rounded animate-pulse" />
+                  <div className="h-8 w-48 bg-muted rounded animate-pulse" />
+                  <div className="h-4 w-72 bg-muted rounded animate-pulse" />
                 </div>
               </div>
               <div className="flex gap-2">
-                <div className="h-10 w-28 bg-slate-200 dark:bg-slate-700 rounded-lg animate-pulse" />
-                <div className="h-10 w-28 bg-slate-200 dark:bg-slate-700 rounded-lg animate-pulse" />
+                <div className="h-10 w-28 bg-muted rounded-lg animate-pulse" />
+                <div className="h-10 w-28 bg-muted rounded-lg animate-pulse" />
                 <div className="h-10 w-32 bg-violet-200 dark:bg-violet-900/50 rounded-lg animate-pulse" />
               </div>
             </div>
@@ -277,15 +277,15 @@ export default function AgentsPage() {
             {[...Array(4)].map((_, i) => (
               <Card
                 key={i}
-                className="border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900"
+                className="border-border bg-background"
               >
                 <CardContent className="p-6">
                   <div className="flex items-center justify-between">
                     <div className="space-y-2">
-                      <div className="h-4 w-20 bg-slate-200 dark:bg-slate-700 rounded animate-pulse" />
-                      <div className="h-8 w-16 bg-slate-100 dark:bg-slate-800 rounded animate-pulse" />
+                      <div className="h-4 w-20 bg-muted rounded animate-pulse" />
+                      <div className="h-8 w-16 bg-muted rounded animate-pulse" />
                     </div>
-                    <div className="h-10 w-10 rounded-lg bg-slate-200 dark:bg-slate-700 animate-pulse" />
+                    <div className="h-10 w-10 rounded-lg bg-muted animate-pulse" />
                   </div>
                 </CardContent>
               </Card>
@@ -296,15 +296,15 @@ export default function AgentsPage() {
             {[...Array(4)].map((_, i) => (
               <Card
                 key={i}
-                className="border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900"
+                className="border-border bg-background"
               >
                 <CardContent className="p-6">
                   <div className="flex items-start gap-4">
-                    <div className="h-14 w-14 rounded-xl bg-slate-200 dark:bg-slate-700 animate-pulse" />
+                    <div className="h-14 w-14 rounded-xl bg-muted animate-pulse" />
                     <div className="flex-1 space-y-3">
-                      <div className="h-6 w-48 bg-slate-200 dark:bg-slate-700 rounded animate-pulse" />
-                      <div className="h-4 w-full bg-slate-100 dark:bg-slate-800 rounded animate-pulse" />
-                      <div className="h-2 w-full bg-slate-100 dark:bg-slate-800 rounded-full animate-pulse" />
+                      <div className="h-6 w-48 bg-muted rounded animate-pulse" />
+                      <div className="h-4 w-full bg-muted rounded animate-pulse" />
+                      <div className="h-2 w-full bg-muted rounded-full animate-pulse" />
                     </div>
                   </div>
                 </CardContent>
@@ -334,7 +334,7 @@ export default function AgentsPage() {
               <Link href="/dashboard/agents/templates">
                 <Button
                   variant="outline"
-                  className="border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800"
+                  className="border-border hover:bg-muted"
                 >
                   <Sparkles className="h-4 w-4 mr-2" />
                   Templates
@@ -343,7 +343,7 @@ export default function AgentsPage() {
               <Link href="/dashboard/agents/activity">
                 <Button
                   variant="outline"
-                  className="border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800"
+                  className="border-border hover:bg-muted"
                 >
                   <Activity className="h-4 w-4 mr-2" />
                   Activity
@@ -413,14 +413,14 @@ export default function AgentsPage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.4, delay: 0.1 }}
           >
-            <Card className="border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 overflow-hidden">
-              <CardHeader className="border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/30 py-4">
+            <Card className="border-border bg-background overflow-hidden">
+              <CardHeader className="border-b border-border bg-muted/50 py-4">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
                     <div className="p-2 rounded-lg bg-violet-100 dark:bg-violet-900/30">
                       <Wand2 className="h-4 w-4 text-violet-600 dark:text-violet-400" />
                     </div>
-                    <CardTitle className="text-base font-semibold text-slate-900 dark:text-slate-100">
+                    <CardTitle className="text-base font-semibold text-foreground">
                       AI-Powered Agent Suggestions
                     </CardTitle>
                   </div>
@@ -455,7 +455,7 @@ export default function AgentsPage() {
                           className="block h-full"
                         >
                           <div
-                            className={`p-4 h-full bg-white dark:bg-slate-900 rounded-xl border ${colors.border} ${colors.hover} transition-all cursor-pointer group hover:shadow-md`}
+                            className={`p-4 h-full bg-background rounded-xl border ${colors.border} ${colors.hover} transition-all cursor-pointer group hover:shadow-md`}
                           >
                             <div className="flex items-start gap-3">
                               <div
@@ -464,10 +464,10 @@ export default function AgentsPage() {
                                 <Icon className={`h-5 w-5 ${colors.text}`} />
                               </div>
                               <div className="flex-1 min-w-0">
-                                <h4 className="font-medium text-sm mb-1 truncate text-slate-900 dark:text-slate-100 group-hover:text-violet-600 dark:group-hover:text-violet-400 transition-colors">
+                                <h4 className="font-medium text-sm mb-1 truncate text-foreground group-hover:text-violet-600 dark:group-hover:text-violet-400 transition-colors">
                                   {suggestion.title}
                                 </h4>
-                                <p className="text-xs text-slate-600 dark:text-slate-400 line-clamp-2">
+                                <p className="text-xs text-muted-foreground line-clamp-2">
                                   {suggestion.description}
                                 </p>
                               </div>
@@ -490,7 +490,7 @@ export default function AgentsPage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.4, delay: 0.2 }}
           >
-            <Card className="border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900">
+            <Card className="border-border bg-background">
               <CardContent className="p-4">
                 <div className="flex flex-col lg:flex-row gap-4">
                   {/* Search */}
@@ -500,7 +500,7 @@ export default function AgentsPage() {
                       placeholder="Search agents by name or description..."
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
-                      className="pl-10 border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800"
+                      className="pl-10 border-border bg-muted"
                     />
                   </div>
 
@@ -515,7 +515,7 @@ export default function AgentsPage() {
                   <div className="flex gap-2">
                     {uniqueTypes.length > 0 && (
                       <Select value={filterType} onValueChange={setFilterType}>
-                        <SelectTrigger className="w-[150px] border-slate-200 dark:border-slate-700">
+                        <SelectTrigger className="w-[150px] border-border">
                           <SelectValue placeholder="Type" />
                         </SelectTrigger>
                         <SelectContent>
@@ -534,7 +534,7 @@ export default function AgentsPage() {
                         value={filterPersonality}
                         onValueChange={setFilterPersonality}
                       >
-                        <SelectTrigger className="w-[150px] border-slate-200 dark:border-slate-700">
+                        <SelectTrigger className="w-[150px] border-border">
                           <SelectValue placeholder="Personality" />
                         </SelectTrigger>
                         <SelectContent>
@@ -548,7 +548,7 @@ export default function AgentsPage() {
                       </Select>
                     )}
 
-                    <div className="flex border border-slate-200 dark:border-slate-700 rounded-lg overflow-hidden">
+                    <div className="flex border border-border rounded-lg overflow-hidden">
                       <Button
                         variant={viewMode === "grid" ? "secondary" : "ghost"}
                         size="sm"
@@ -601,15 +601,15 @@ export default function AgentsPage() {
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.4 }}
           >
-            <Card className="border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-12">
+            <Card className="border-border bg-background p-12">
               <div className="text-center">
-                <div className="h-16 w-16 rounded-2xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center mx-auto mb-4">
+                <div className="h-16 w-16 rounded-2xl bg-muted flex items-center justify-center mx-auto mb-4">
                   <Search className="h-8 w-8 text-slate-400" />
                 </div>
-                <h3 className="text-lg font-semibold mb-2 text-slate-900 dark:text-slate-100">
+                <h3 className="text-lg font-semibold mb-2 text-foreground">
                   No agents found
                 </h3>
-                <p className="text-sm text-slate-500 dark:text-slate-400">
+                <p className="text-sm text-muted-foreground">
                   Try adjusting your search or filters
                 </p>
               </div>
@@ -618,7 +618,7 @@ export default function AgentsPage() {
         ) : (
           <div className="space-y-4">
             <div className="flex items-center justify-between">
-              <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-100">
+              <h2 className="text-lg font-semibold text-foreground">
                 {filteredAgents.length} Agent
                 {filteredAgents.length !== 1 ? "s" : ""}
               </h2>
@@ -638,7 +638,7 @@ export default function AgentsPage() {
                 return (
                   <StaggeredGridItem key={agent.id}>
                     <Card
-                      className={`border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 transition-all hover:shadow-lg ${
+                      className={`border-border bg-background transition-all hover:shadow-lg ${
                         agent.enabled
                           ? "hover:border-violet-300 dark:hover:border-violet-700"
                           : "opacity-70 hover:opacity-100"
@@ -651,7 +651,7 @@ export default function AgentsPage() {
                               className={`h-14 w-14 rounded-xl flex items-center justify-center flex-shrink-0 ${
                                 agent.enabled
                                   ? "bg-gradient-to-br from-violet-100 to-purple-100 dark:from-violet-900/30 dark:to-purple-900/30"
-                                  : "bg-slate-100 dark:bg-slate-800"
+                                  : "bg-muted"
                               }`}
                             >
                               <AgentIcon
@@ -665,7 +665,7 @@ export default function AgentsPage() {
 
                             <div className="flex-1 min-w-0">
                               <div className="flex items-center gap-2 mb-2 flex-wrap">
-                                <h3 className="font-semibold text-lg truncate text-slate-900 dark:text-slate-100">
+                                <h3 className="font-semibold text-lg truncate text-foreground">
                                   {agent.name}
                                 </h3>
                                 {agent.enabled ? (
@@ -676,28 +676,28 @@ export default function AgentsPage() {
                                 ) : (
                                   <Badge
                                     variant="secondary"
-                                    className="bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400"
+                                    className="bg-muted text-muted-foreground"
                                   >
                                     Inactive
                                   </Badge>
                                 )}
                                 <Badge
                                   variant="outline"
-                                  className="capitalize text-xs border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400"
+                                  className="capitalize text-xs border-border text-muted-foreground"
                                 >
                                   {agent.personality}
                                 </Badge>
                               </div>
 
                               {agent.description && (
-                                <p className="text-sm text-slate-600 dark:text-slate-400 mb-4 line-clamp-2">
+                                <p className="text-sm text-muted-foreground mb-4 line-clamp-2">
                                   {agent.description}
                                 </p>
                               )}
 
                               {/* Visual Performance Indicator */}
                               <div className="mb-3">
-                                <div className="flex items-center justify-between text-xs text-slate-600 dark:text-slate-400 mb-1.5">
+                                <div className="flex items-center justify-between text-xs text-muted-foreground mb-1.5">
                                   <span>Performance</span>
                                   <span
                                     className={`font-semibold ${
@@ -711,7 +711,7 @@ export default function AgentsPage() {
                                     {successRate}%
                                   </span>
                                 </div>
-                                <div className="h-2 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
+                                <div className="h-2 bg-muted rounded-full overflow-hidden">
                                   <motion.div
                                     className={`h-full rounded-full ${
                                       successRate >= 90
@@ -730,7 +730,7 @@ export default function AgentsPage() {
                                 </div>
                               </div>
 
-                              <div className="flex flex-wrap items-center gap-4 text-xs text-slate-500 dark:text-slate-500">
+                              <div className="flex flex-wrap items-center gap-4 text-xs text-muted-foreground">
                                 <span className="flex items-center gap-1">
                                   <Zap className="h-3 w-3" />
                                   {agent.total_actions} actions
@@ -762,7 +762,7 @@ export default function AgentsPage() {
                               <Button
                                 size="sm"
                                 variant="outline"
-                                className="border-slate-200 dark:border-slate-700 hover:bg-violet-50 dark:hover:bg-violet-900/20 hover:border-violet-300 dark:hover:border-violet-700"
+                                className="border-border hover:bg-violet-50 dark:hover:bg-violet-900/20 hover:border-violet-300 dark:hover:border-violet-700"
                               >
                                 <Eye className="h-4 w-4 text-violet-600 dark:text-violet-400" />
                               </Button>
@@ -771,7 +771,7 @@ export default function AgentsPage() {
                               size="sm"
                               variant="outline"
                               onClick={() => toggleAgent(agent.id, agent.enabled)}
-                              className="border-slate-200 dark:border-slate-700"
+                              className="border-border"
                             >
                               {agent.enabled ? (
                                 <Pause className="h-4 w-4 text-amber-600 dark:text-amber-400" />
@@ -783,7 +783,7 @@ export default function AgentsPage() {
                               size="sm"
                               variant="outline"
                               onClick={() => deleteAgent(agent.id)}
-                              className="border-slate-200 dark:border-slate-700 hover:bg-rose-50 dark:hover:bg-rose-900/20 hover:border-rose-300 dark:hover:border-rose-700"
+                              className="border-border hover:bg-rose-50 dark:hover:bg-rose-900/20 hover:border-rose-300 dark:hover:border-rose-700"
                             >
                               <Trash2 className="h-4 w-4 text-rose-600 dark:text-rose-400" />
                             </Button>

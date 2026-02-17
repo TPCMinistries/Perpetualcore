@@ -144,7 +144,7 @@ export default async function DashboardPage() {
       case "medium":
         return "bg-amber-100 dark:bg-amber-950/40 text-amber-700 dark:text-amber-400 border-0";
       case "low":
-        return "bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-400 border-0";
+        return "bg-muted text-slate-700 dark:text-slate-400 border-0";
     }
   }
 
@@ -162,17 +162,17 @@ export default async function DashboardPage() {
                 <IconComponent className="h-7 w-7 md:h-7 md:w-7 text-white dark:text-slate-900" />
               </div>
               <div className="flex-1 min-w-0">
-                <h1 className="text-2xl md:text-4xl font-bold tracking-tight text-slate-900 dark:text-slate-100 mb-2">
+                <h1 className="text-2xl md:text-4xl font-bold tracking-tight text-foreground mb-2">
                   {config.headline}
                 </h1>
-                <p className="text-sm md:text-sm text-slate-600 dark:text-slate-400 font-medium">
-                  Welcome back, <span className="text-slate-900 dark:text-slate-100 font-semibold">{profile?.full_name || "User"}</span>
+                <p className="text-sm md:text-sm text-muted-foreground font-medium">
+                  Welcome back, <span className="text-foreground font-semibold">{profile?.full_name || "User"}</span>
                 </p>
               </div>
             </div>
           </div>
 
-          <p className="text-sm md:text-base text-slate-700 dark:text-slate-300 max-w-2xl mb-6 md:mb-8 leading-relaxed">
+          <p className="text-sm md:text-base text-foreground max-w-2xl mb-6 md:mb-8 leading-relaxed">
             {config.welcomeMessage}
           </p>
 
@@ -184,9 +184,9 @@ export default async function DashboardPage() {
       {/* Metrics Grid - Refined */}
       <div>
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-0 mb-6">
-          <h2 className="text-xl md:text-2xl font-semibold tracking-tight text-slate-900 dark:text-slate-100">Your Metrics</h2>
+          <h2 className="text-xl md:text-2xl font-semibold tracking-tight text-foreground">Your Metrics</h2>
           <Link href="/dashboard/analytics" className="w-full sm:w-auto">
-            <Button variant="outline" size="sm" className="w-full sm:w-auto text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 border-slate-200 dark:border-slate-800">
+            <Button variant="outline" size="sm" className="w-full sm:w-auto text-muted-foreground hover:text-slate-900 dark:hover:text-slate-100 border-border">
               <span className="hidden sm:inline">View Full Analytics</span>
               <span className="sm:hidden">Analytics</span>
               <ArrowRight className="ml-2 h-4 w-4" />
@@ -207,12 +207,12 @@ export default async function DashboardPage() {
               // Efficiency/value - emerald green
               "from-emerald-600 to-teal-600": "bg-emerald-50 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-400",
               // Status/neutral - professional gray
-              "from-slate-600 to-slate-700": "bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300",
+              "from-slate-600 to-slate-700": "bg-muted text-foreground",
             };
             const iconColor = iconColors[metric.gradient] || iconColors["from-blue-600 to-blue-700"];
 
             return (
-              <Card key={index} className="border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 transition-all shadow-sm hover:shadow-md bg-white dark:bg-slate-900">
+              <Card key={index} className="border-border hover:border-border transition-all shadow-sm hover:shadow-md bg-background">
                 <CardContent className="p-5 md:pt-6">
                   <div className="flex items-center justify-between mb-3 md:mb-4">
                     <div className={`h-12 w-12 md:h-11 md:w-11 rounded-xl ${iconColor} flex items-center justify-center shadow-sm`}>
@@ -225,13 +225,13 @@ export default async function DashboardPage() {
                       </div>
                     )}
                   </div>
-                  <p className="text-sm md:text-sm text-slate-600 dark:text-slate-400 mb-1.5 font-medium">
+                  <p className="text-sm md:text-sm text-muted-foreground mb-1.5 font-medium">
                     {metric.title}
                   </p>
-                  <p className="text-3xl md:text-3xl font-bold text-slate-900 dark:text-slate-100 mb-1.5 tracking-tight">
+                  <p className="text-3xl md:text-3xl font-bold text-foreground mb-1.5 tracking-tight">
                     {metric.value}
                   </p>
-                  <p className="text-xs text-slate-500 dark:text-slate-500">
+                  <p className="text-xs text-muted-foreground">
                     {metric.description}
                   </p>
                 </CardContent>
@@ -251,8 +251,8 @@ export default async function DashboardPage() {
             <Lightbulb className="h-5 w-5 text-yellow-700 dark:text-yellow-400" />
           </div>
           <div className="min-w-0">
-            <h2 className="text-xl md:text-2xl font-semibold tracking-tight text-slate-900 dark:text-slate-100">Smart Suggestions</h2>
-            <p className="text-xs md:text-sm text-slate-600 dark:text-slate-400">AI-powered recommendations based on your activity</p>
+            <h2 className="text-xl md:text-2xl font-semibold tracking-tight text-foreground">Smart Suggestions</h2>
+            <p className="text-xs md:text-sm text-muted-foreground">AI-powered recommendations based on your activity</p>
           </div>
         </div>
         <SuggestionsWidget />
@@ -262,12 +262,12 @@ export default async function DashboardPage() {
       <div>
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
           <div className="flex items-center gap-3 md:gap-4">
-            <div className="h-10 w-10 rounded-lg bg-slate-100 dark:bg-slate-800 flex items-center justify-center flex-shrink-0">
-              <Brain className="h-5 w-5 text-slate-700 dark:text-slate-300" />
+            <div className="h-10 w-10 rounded-lg bg-muted flex items-center justify-center flex-shrink-0">
+              <Brain className="h-5 w-5 text-foreground" />
             </div>
             <div className="min-w-0">
-              <h2 className="text-xl md:text-2xl font-semibold tracking-tight text-slate-900 dark:text-slate-100">AI Insights</h2>
-              <p className="text-xs md:text-sm text-slate-600 dark:text-slate-400">Personalized recommendations powered by AI</p>
+              <h2 className="text-xl md:text-2xl font-semibold tracking-tight text-foreground">AI Insights</h2>
+              <p className="text-xs md:text-sm text-muted-foreground">Personalized recommendations powered by AI</p>
             </div>
           </div>
           <Badge className="bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 border-0 px-3 py-1.5 text-xs font-medium w-fit">
@@ -285,7 +285,7 @@ export default async function DashboardPage() {
             const impactColors: Record<string, string> = {
               high: "bg-emerald-100 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400 border-0",
               medium: "bg-amber-100 dark:bg-amber-950/40 text-amber-700 dark:text-amber-400 border-0",
-              low: "bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-400 border-0",
+              low: "bg-muted text-slate-700 dark:text-slate-400 border-0",
             };
             const impactColor = impactColors[insight.impact];
 
@@ -298,26 +298,26 @@ export default async function DashboardPage() {
             const iconColor = iconColors[gradient] || iconColors["from-blue-600 to-blue-700"];
 
             const insightContent = (
-              <Card key={index} className="border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 transition-all shadow-sm hover:shadow-lg bg-white dark:bg-slate-900 h-full group cursor-pointer active:scale-[0.98]">
+              <Card key={index} className="border-border hover:border-border transition-all shadow-sm hover:shadow-lg bg-background h-full group cursor-pointer active:scale-[0.98]">
                 <CardContent className="p-5 md:p-6">
                   <div className="flex items-start gap-3 md:gap-4 mb-3 md:mb-4">
                     <div className={`h-12 w-12 md:h-11 md:w-11 rounded-xl ${iconColor} flex items-center justify-center flex-shrink-0 shadow-sm`}>
                       <Icon className="h-5 w-5 md:h-5 md:w-5" />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <h3 className="font-semibold text-base md:text-base text-slate-900 dark:text-slate-100 mb-2 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors leading-snug">{insight.title}</h3>
+                      <h3 className="font-semibold text-base md:text-base text-foreground mb-2 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors leading-snug">{insight.title}</h3>
                       <Badge className={`${impactColor} text-xs font-semibold px-2.5 py-1`}>
                         {insight.impact.toUpperCase()}
                       </Badge>
                     </div>
                   </div>
 
-                  <p className="text-sm md:text-sm text-slate-600 dark:text-slate-400 mb-4 leading-relaxed">
+                  <p className="text-sm md:text-sm text-muted-foreground mb-4 leading-relaxed">
                     {insight.description}
                   </p>
 
-                  <div className="flex items-center justify-between pt-2 border-t border-slate-100 dark:border-slate-800">
-                    <div className="flex items-center gap-1.5 text-xs font-medium text-slate-600 dark:text-slate-400">
+                  <div className="flex items-center justify-between pt-2 border-t border-border">
+                    <div className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
                       <Zap className="h-3.5 w-3.5" />
                       <span>{insight.confidence}% Confidence</span>
                     </div>
@@ -343,14 +343,14 @@ export default async function DashboardPage() {
                 </div>
                 <div className="flex-1">
                   <div className="flex items-center justify-between mb-2">
-                    <h3 className="font-semibold text-base text-slate-900 dark:text-slate-100 group-hover:text-primary transition-colors">
+                    <h3 className="font-semibold text-base text-foreground group-hover:text-primary transition-colors">
                       Intelligence Dashboard
                     </h3>
                     <span className="text-xs font-semibold px-2 py-1 rounded-full bg-primary/10 text-primary border border-primary/20">
                       NEW
                     </span>
                   </div>
-                  <p className="text-sm text-slate-600 dark:text-slate-400 mb-3">
+                  <p className="text-sm text-muted-foreground mb-3">
                     View insights, patterns, preferences, and AI-generated suggestions from your conversations.
                   </p>
                   <div className="flex items-center gap-2 text-xs text-primary font-medium">
@@ -367,8 +367,8 @@ export default async function DashboardPage() {
       {/* Quick Actions - Refined */}
       <div>
         <div className="mb-6">
-          <h2 className="text-xl md:text-2xl font-semibold tracking-tight text-slate-900 dark:text-slate-100">Quick Actions</h2>
-          <p className="text-xs md:text-sm text-slate-600 dark:text-slate-400 mt-1">Jump right into what you need</p>
+          <h2 className="text-xl md:text-2xl font-semibold tracking-tight text-foreground">Quick Actions</h2>
+          <p className="text-xs md:text-sm text-muted-foreground mt-1">Jump right into what you need</p>
         </div>
 
         <div className="grid gap-4 md:grid-cols-3">
@@ -393,18 +393,18 @@ export default async function DashboardPage() {
 
             return (
               <Link key={index} href={action.href}>
-                <Card className="group border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 transition-all cursor-pointer h-full bg-white dark:bg-slate-900">
+                <Card className="group border-border hover:border-border transition-all cursor-pointer h-full bg-background">
                   <CardContent className="p-6">
                     <div className={`h-12 w-12 rounded-lg ${iconColor} flex items-center justify-center mb-4`}>
                       <ActionIcon className="h-6 w-6" />
                     </div>
-                    <h3 className="text-lg font-medium mb-2 text-slate-900 dark:text-slate-100">
+                    <h3 className="text-lg font-medium mb-2 text-foreground">
                       {action.label}
                     </h3>
-                    <p className="text-sm text-slate-600 dark:text-slate-400 mb-4 leading-relaxed">
+                    <p className="text-sm text-muted-foreground mb-4 leading-relaxed">
                       {action.description}
                     </p>
-                    <div className="flex items-center text-sm font-medium text-slate-700 dark:text-slate-300 group-hover:text-slate-900 dark:group-hover:text-slate-100">
+                    <div className="flex items-center text-sm font-medium text-foreground group-hover:text-slate-900 dark:group-hover:text-slate-100">
                       Get started
                       <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
                     </div>
@@ -420,31 +420,31 @@ export default async function DashboardPage() {
       <div>
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-0 mb-6">
           <div>
-            <h2 className="text-xl md:text-2xl font-semibold tracking-tight text-slate-900 dark:text-slate-100">Recent Activity</h2>
-            <p className="text-xs md:text-sm text-slate-600 dark:text-slate-400 mt-1">What's been happening in your workspace</p>
+            <h2 className="text-xl md:text-2xl font-semibold tracking-tight text-foreground">Recent Activity</h2>
+            <p className="text-xs md:text-sm text-muted-foreground mt-1">What's been happening in your workspace</p>
           </div>
           <Link href="/dashboard/activity" className="w-full sm:w-auto">
-            <Button variant="outline" size="sm" className="w-full sm:w-auto text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 border-slate-200 dark:border-slate-800">
+            <Button variant="outline" size="sm" className="w-full sm:w-auto text-muted-foreground hover:text-slate-900 dark:hover:text-slate-100 border-border">
               View All
               <ArrowRight className="ml-2 h-4 w-4" />
             </Button>
           </Link>
         </div>
-        <div className="border border-slate-200 dark:border-slate-800 rounded-xl p-4 sm:p-6 bg-white dark:bg-slate-900">
+        <div className="border border-border rounded-xl p-4 sm:p-6 bg-background">
           <ActivityFeed limit={5} />
         </div>
       </div>
 
       {/* Executive Summary - Refined */}
-      <Card className="border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900">
+      <Card className="border-border bg-background">
         <CardContent className="p-8">
           <div className="flex items-start gap-5">
-            <div className="h-11 w-11 rounded-lg bg-slate-100 dark:bg-slate-800 flex items-center justify-center">
-              <Sparkles className="h-5 w-5 text-slate-700 dark:text-slate-300" />
+            <div className="h-11 w-11 rounded-lg bg-muted flex items-center justify-center">
+              <Sparkles className="h-5 w-5 text-foreground" />
             </div>
             <div className="flex-1">
-              <h4 className="font-medium text-lg text-slate-900 dark:text-slate-100 mb-3">Your Week in Review</h4>
-              <p className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
+              <h4 className="font-medium text-lg text-foreground mb-3">Your Week in Review</h4>
+              <p className="text-sm text-muted-foreground leading-relaxed">
                 Excellent progress this week! Your platform usage is strong with
                 notable increases in AI conversations and document processing. The AI has identified several opportunities to
                 optimize your workflow and save even more time. Keep up the momentum!
