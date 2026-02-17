@@ -207,7 +207,7 @@ export default function NewAgentPage() {
           variant="ghost"
           size="sm"
           onClick={() => router.push("/dashboard/agents")}
-          className="text-slate-600 dark:text-slate-400"
+          className="text-muted-foreground"
         >
           <ArrowLeft className="h-4 w-4 mr-2" />
           Back to Agents
@@ -220,10 +220,10 @@ export default function NewAgentPage() {
             <Sparkles className="h-6 w-6 text-white" />
           </div>
           <div>
-            <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-100">
+            <h1 className="text-3xl font-bold text-foreground">
               Create AI Agent
             </h1>
-            <p className="text-slate-600 dark:text-slate-400">
+            <p className="text-muted-foreground">
               Configure a new proactive AI agent to automate your workflows
             </p>
           </div>
@@ -231,13 +231,13 @@ export default function NewAgentPage() {
       </div>
 
       {/* How AI Agents Work - Info Card */}
-      <Card className="max-w-3xl border-slate-200 dark:border-slate-800 bg-gradient-to-br from-purple-50 to-blue-50 dark:from-purple-950/20 dark:to-blue-950/20">
+      <Card className="max-w-3xl border-border bg-gradient-to-br from-purple-50 to-blue-50 dark:from-purple-950/20 dark:to-blue-950/20">
         <CardHeader>
-          <CardTitle className="text-lg text-slate-900 dark:text-slate-100">
+          <CardTitle className="text-lg text-foreground">
             How AI Agents Work
           </CardTitle>
         </CardHeader>
-        <CardContent className="space-y-3 text-sm text-slate-700 dark:text-slate-300">
+        <CardContent className="space-y-3 text-sm text-foreground">
           <p>
             <strong>Proactive Monitoring:</strong> Your agent runs automatically in the
             background, monitoring its assigned domain (emails, calendar, documents, etc.)
@@ -259,19 +259,19 @@ export default function NewAgentPage() {
 
       {/* Form */}
       <form onSubmit={handleSubmit} className="max-w-3xl">
-        <Card className="border-slate-200 dark:border-slate-800">
+        <Card className="border-border">
           <CardHeader>
-            <CardTitle className="text-slate-900 dark:text-slate-100">
+            <CardTitle className="text-foreground">
               Agent Configuration
             </CardTitle>
-            <CardDescription className="text-slate-600 dark:text-slate-400">
+            <CardDescription className="text-muted-foreground">
               Define the behavior and capabilities of your AI agent
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
             {/* Agent Name */}
             <div className="space-y-2">
-              <Label htmlFor="name" className="text-slate-900 dark:text-slate-100">
+              <Label htmlFor="name" className="text-foreground">
                 Agent Name *
               </Label>
               <Input
@@ -279,14 +279,14 @@ export default function NewAgentPage() {
                 value={formData.name}
                 onChange={(e) => handleChange("name", e.target.value)}
                 placeholder="e.g., My Email Monitor"
-                className="border-slate-300 dark:border-slate-700"
+                className="border-border"
                 required
               />
             </div>
 
             {/* Agent Type */}
             <div className="space-y-2">
-              <Label htmlFor="agent_type" className="text-slate-900 dark:text-slate-100">
+              <Label htmlFor="agent_type" className="text-foreground">
                 Agent Type *
               </Label>
               <Select
@@ -301,7 +301,7 @@ export default function NewAgentPage() {
                 }}
                 required
               >
-                <SelectTrigger className="border-slate-300 dark:border-slate-700">
+                <SelectTrigger className="border-border">
                   <SelectValue placeholder="Select agent type" />
                 </SelectTrigger>
                 <SelectContent>
@@ -324,7 +324,7 @@ export default function NewAgentPage() {
                 </SelectContent>
               </Select>
               {selectedType && (
-                <p className="text-sm text-slate-600 dark:text-slate-400">
+                <p className="text-sm text-muted-foreground">
                   {selectedType.description}
                 </p>
               )}
@@ -338,7 +338,7 @@ export default function NewAgentPage() {
 
             {/* Description */}
             <div className="space-y-2">
-              <Label htmlFor="description" className="text-slate-900 dark:text-slate-100">
+              <Label htmlFor="description" className="text-foreground">
                 Description
               </Label>
               <Textarea
@@ -346,20 +346,20 @@ export default function NewAgentPage() {
                 value={formData.description}
                 onChange={(e) => handleChange("description", e.target.value)}
                 placeholder="Describe what this agent does..."
-                className="border-slate-300 dark:border-slate-700 min-h-[100px]"
+                className="border-border min-h-[100px]"
               />
             </div>
 
             {/* Personality */}
             <div className="space-y-2">
-              <Label htmlFor="personality" className="text-slate-900 dark:text-slate-100">
+              <Label htmlFor="personality" className="text-foreground">
                 Personality
               </Label>
               <Select
                 value={formData.personality}
                 onValueChange={(value) => handleChange("personality", value)}
               >
-                <SelectTrigger className="border-slate-300 dark:border-slate-700">
+                <SelectTrigger className="border-border">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -370,14 +370,14 @@ export default function NewAgentPage() {
                   ))}
                 </SelectContent>
               </Select>
-              <p className="text-sm text-slate-600 dark:text-slate-400">
+              <p className="text-sm text-muted-foreground">
                 The tone and style of communication for this agent
               </p>
             </div>
 
             {/* Custom Instructions */}
             <div className="space-y-2">
-              <Label htmlFor="instructions" className="text-slate-900 dark:text-slate-100">
+              <Label htmlFor="instructions" className="text-foreground">
                 Custom Instructions
               </Label>
               <Textarea
@@ -385,24 +385,24 @@ export default function NewAgentPage() {
                 value={formData.instructions}
                 onChange={(e) => handleChange("instructions", e.target.value)}
                 placeholder="Add any specific instructions or guidelines for this agent..."
-                className="border-slate-300 dark:border-slate-700 min-h-[150px] font-mono text-sm"
+                className="border-border min-h-[150px] font-mono text-sm"
               />
-              <p className="text-sm text-slate-600 dark:text-slate-400">
+              <p className="text-sm text-muted-foreground">
                 Optional: Provide custom instructions to customize the agent's behavior
               </p>
             </div>
 
             {/* Agent-Specific Configuration */}
             {formData.agent_type && AGENT_CONFIG_DEFAULTS[formData.agent_type] && (
-              <Card className="border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/50">
+              <Card className="border-border bg-muted">
                 <CardHeader className="pb-4">
                   <div className="flex items-center gap-2">
                     <Settings2 className="h-5 w-5 text-purple-600" />
-                    <CardTitle className="text-lg text-slate-900 dark:text-slate-100">
+                    <CardTitle className="text-lg text-foreground">
                       {selectedType?.label} Settings
                     </CardTitle>
                   </div>
-                  <CardDescription className="text-slate-600 dark:text-slate-400">
+                  <CardDescription className="text-muted-foreground">
                     Configure specific behaviors for this agent type
                   </CardDescription>
                 </CardHeader>
@@ -412,8 +412,8 @@ export default function NewAgentPage() {
                     <>
                       <div className="flex items-center justify-between">
                         <div className="space-y-0.5">
-                          <Label className="text-slate-900 dark:text-slate-100">Auto-create Tasks</Label>
-                          <p className="text-sm text-slate-600 dark:text-slate-400">
+                          <Label className="text-foreground">Auto-create Tasks</Label>
+                          <p className="text-sm text-muted-foreground">
                             Automatically create tasks from actionable emails
                           </p>
                         </div>
@@ -423,12 +423,12 @@ export default function NewAgentPage() {
                         />
                       </div>
                       <div className="space-y-2">
-                        <Label className="text-slate-900 dark:text-slate-100">Priority Threshold</Label>
+                        <Label className="text-foreground">Priority Threshold</Label>
                         <Select
                           value={formData.configuration.priorityThreshold ?? "medium"}
                           onValueChange={(value) => handleConfigChange("priorityThreshold", value)}
                         >
-                          <SelectTrigger className="border-slate-300 dark:border-slate-700">
+                          <SelectTrigger className="border-border">
                             <SelectValue />
                           </SelectTrigger>
                           <SelectContent>
@@ -437,7 +437,7 @@ export default function NewAgentPage() {
                             <SelectItem value="high">High - Only urgent emails</SelectItem>
                           </SelectContent>
                         </Select>
-                        <p className="text-sm text-slate-600 dark:text-slate-400">
+                        <p className="text-sm text-muted-foreground">
                           Minimum priority level to process emails
                         </p>
                       </div>
@@ -449,7 +449,7 @@ export default function NewAgentPage() {
                     <>
                       <div className="space-y-2">
                         <div className="flex items-center justify-between">
-                          <Label className="text-slate-900 dark:text-slate-100">Hours Ahead to Monitor</Label>
+                          <Label className="text-foreground">Hours Ahead to Monitor</Label>
                           <Badge variant="outline">{formData.configuration.hoursAhead ?? 24}h</Badge>
                         </div>
                         <Slider
@@ -460,14 +460,14 @@ export default function NewAgentPage() {
                           step={6}
                           className="w-full"
                         />
-                        <p className="text-sm text-slate-600 dark:text-slate-400">
+                        <p className="text-sm text-muted-foreground">
                           How far ahead to look for upcoming events
                         </p>
                       </div>
                       <div className="flex items-center justify-between">
                         <div className="space-y-0.5">
-                          <Label className="text-slate-900 dark:text-slate-100">Create Prep Tasks</Label>
-                          <p className="text-sm text-slate-600 dark:text-slate-400">
+                          <Label className="text-foreground">Create Prep Tasks</Label>
+                          <p className="text-sm text-muted-foreground">
                             Auto-create preparation tasks for meetings
                           </p>
                         </div>
@@ -478,8 +478,8 @@ export default function NewAgentPage() {
                       </div>
                       <div className="flex items-center justify-between">
                         <div className="space-y-0.5">
-                          <Label className="text-slate-900 dark:text-slate-100">Notify Conflicts</Label>
-                          <p className="text-sm text-slate-600 dark:text-slate-400">
+                          <Label className="text-foreground">Notify Conflicts</Label>
+                          <p className="text-sm text-muted-foreground">
                             Alert when scheduling conflicts are detected
                           </p>
                         </div>
@@ -490,8 +490,8 @@ export default function NewAgentPage() {
                       </div>
                       <div className="flex items-center justify-between">
                         <div className="space-y-0.5">
-                          <Label className="text-slate-900 dark:text-slate-100">Track RSVP Status</Label>
-                          <p className="text-sm text-slate-600 dark:text-slate-400">
+                          <Label className="text-foreground">Track RSVP Status</Label>
+                          <p className="text-sm text-muted-foreground">
                             Monitor for missing responses to meeting invites
                           </p>
                         </div>
@@ -508,8 +508,8 @@ export default function NewAgentPage() {
                     <>
                       <div className="flex items-center justify-between">
                         <div className="space-y-0.5">
-                          <Label className="text-slate-900 dark:text-slate-100">Auto-tag Documents</Label>
-                          <p className="text-sm text-slate-600 dark:text-slate-400">
+                          <Label className="text-foreground">Auto-tag Documents</Label>
+                          <p className="text-sm text-muted-foreground">
                             Automatically add relevant tags to documents
                           </p>
                         </div>
@@ -520,8 +520,8 @@ export default function NewAgentPage() {
                       </div>
                       <div className="flex items-center justify-between">
                         <div className="space-y-0.5">
-                          <Label className="text-slate-900 dark:text-slate-100">Generate Summaries</Label>
-                          <p className="text-sm text-slate-600 dark:text-slate-400">
+                          <Label className="text-foreground">Generate Summaries</Label>
+                          <p className="text-sm text-muted-foreground">
                             Create AI summaries for analyzed documents
                           </p>
                         </div>
@@ -532,8 +532,8 @@ export default function NewAgentPage() {
                       </div>
                       <div className="flex items-center justify-between">
                         <div className="space-y-0.5">
-                          <Label className="text-slate-900 dark:text-slate-100">Extract Action Items</Label>
-                          <p className="text-sm text-slate-600 dark:text-slate-400">
+                          <Label className="text-foreground">Extract Action Items</Label>
+                          <p className="text-sm text-muted-foreground">
                             Create tasks from action items in documents
                           </p>
                         </div>
@@ -544,7 +544,7 @@ export default function NewAgentPage() {
                       </div>
                       <div className="space-y-2">
                         <div className="flex items-center justify-between">
-                          <Label className="text-slate-900 dark:text-slate-100">Confidence Threshold</Label>
+                          <Label className="text-foreground">Confidence Threshold</Label>
                           <Badge variant="outline">{Math.round((formData.configuration.minConfidenceScore ?? 0.7) * 100)}%</Badge>
                         </div>
                         <Slider
@@ -555,7 +555,7 @@ export default function NewAgentPage() {
                           step={5}
                           className="w-full"
                         />
-                        <p className="text-sm text-slate-600 dark:text-slate-400">
+                        <p className="text-sm text-muted-foreground">
                           Minimum AI confidence to apply tags or extract items
                         </p>
                       </div>
@@ -567,8 +567,8 @@ export default function NewAgentPage() {
                     <>
                       <div className="flex items-center justify-between">
                         <div className="space-y-0.5">
-                          <Label className="text-slate-900 dark:text-slate-100">Auto-prioritize Tasks</Label>
-                          <p className="text-sm text-slate-600 dark:text-slate-400">
+                          <Label className="text-foreground">Auto-prioritize Tasks</Label>
+                          <p className="text-sm text-muted-foreground">
                             Automatically adjust task priorities based on context
                           </p>
                         </div>
@@ -579,8 +579,8 @@ export default function NewAgentPage() {
                       </div>
                       <div className="flex items-center justify-between">
                         <div className="space-y-0.5">
-                          <Label className="text-slate-900 dark:text-slate-100">Flag Overdue Tasks</Label>
-                          <p className="text-sm text-slate-600 dark:text-slate-400">
+                          <Label className="text-foreground">Flag Overdue Tasks</Label>
+                          <p className="text-sm text-muted-foreground">
                             Highlight tasks that are past due date
                           </p>
                         </div>
@@ -591,7 +591,7 @@ export default function NewAgentPage() {
                       </div>
                       <div className="space-y-2">
                         <div className="flex items-center justify-between">
-                          <Label className="text-slate-900 dark:text-slate-100">Overdue Threshold</Label>
+                          <Label className="text-foreground">Overdue Threshold</Label>
                           <Badge variant="outline">{formData.configuration.overdueThresholdHours ?? 24}h</Badge>
                         </div>
                         <Slider
@@ -602,7 +602,7 @@ export default function NewAgentPage() {
                           step={1}
                           className="w-full"
                         />
-                        <p className="text-sm text-slate-600 dark:text-slate-400">
+                        <p className="text-sm text-muted-foreground">
                           Hours after due date before task is flagged overdue
                         </p>
                       </div>
@@ -613,24 +613,24 @@ export default function NewAgentPage() {
                   {formData.agent_type === "daily_digest" && (
                     <>
                       <div className="space-y-2">
-                        <Label className="text-slate-900 dark:text-slate-100">Digest Time</Label>
+                        <Label className="text-foreground">Digest Time</Label>
                         <Input
                           type="time"
                           value={formData.configuration.digestTime ?? "09:00"}
                           onChange={(e) => handleConfigChange("digestTime", e.target.value)}
-                          className="border-slate-300 dark:border-slate-700 w-32"
+                          className="border-border w-32"
                         />
-                        <p className="text-sm text-slate-600 dark:text-slate-400">
+                        <p className="text-sm text-muted-foreground">
                           When to generate and deliver daily digest
                         </p>
                       </div>
                       <div className="space-y-2">
-                        <Label className="text-slate-900 dark:text-slate-100">Delivery Method</Label>
+                        <Label className="text-foreground">Delivery Method</Label>
                         <Select
                           value={formData.configuration.deliveryMethod ?? "in_app"}
                           onValueChange={(value) => handleConfigChange("deliveryMethod", value)}
                         >
-                          <SelectTrigger className="border-slate-300 dark:border-slate-700">
+                          <SelectTrigger className="border-border">
                             <SelectValue />
                           </SelectTrigger>
                           <SelectContent>
@@ -640,32 +640,32 @@ export default function NewAgentPage() {
                           </SelectContent>
                         </Select>
                       </div>
-                      <div className="pt-2 border-t border-slate-200 dark:border-slate-700">
-                        <Label className="text-slate-900 dark:text-slate-100 mb-3 block">Include in Digest</Label>
+                      <div className="pt-2 border-t border-border">
+                        <Label className="text-foreground mb-3 block">Include in Digest</Label>
                         <div className="space-y-3">
                           <div className="flex items-center justify-between">
-                            <Label className="text-sm text-slate-700 dark:text-slate-300 font-normal">Calendar Events</Label>
+                            <Label className="text-sm text-foreground font-normal">Calendar Events</Label>
                             <Switch
                               checked={formData.configuration.includeCalendar ?? true}
                               onCheckedChange={(checked) => handleConfigChange("includeCalendar", checked)}
                             />
                           </div>
                           <div className="flex items-center justify-between">
-                            <Label className="text-sm text-slate-700 dark:text-slate-300 font-normal">Tasks Overview</Label>
+                            <Label className="text-sm text-foreground font-normal">Tasks Overview</Label>
                             <Switch
                               checked={formData.configuration.includeTasks ?? true}
                               onCheckedChange={(checked) => handleConfigChange("includeTasks", checked)}
                             />
                           </div>
                           <div className="flex items-center justify-between">
-                            <Label className="text-sm text-slate-700 dark:text-slate-300 font-normal">Recent Documents</Label>
+                            <Label className="text-sm text-foreground font-normal">Recent Documents</Label>
                             <Switch
                               checked={formData.configuration.includeDocuments ?? true}
                               onCheckedChange={(checked) => handleConfigChange("includeDocuments", checked)}
                             />
                           </div>
                           <div className="flex items-center justify-between">
-                            <Label className="text-sm text-slate-700 dark:text-slate-300 font-normal">AI Insights</Label>
+                            <Label className="text-sm text-foreground font-normal">AI Insights</Label>
                             <Switch
                               checked={formData.configuration.includeInsights ?? true}
                               onCheckedChange={(checked) => handleConfigChange("includeInsights", checked)}
@@ -703,7 +703,7 @@ export default function NewAgentPage() {
                 variant="outline"
                 onClick={() => router.push("/dashboard/agents")}
                 disabled={loading}
-                className="border-slate-300 dark:border-slate-700"
+                className="border-border"
               >
                 Cancel
               </Button>

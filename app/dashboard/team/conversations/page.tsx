@@ -217,13 +217,13 @@ export default function TeamConversationsPage() {
   const getContextTypeColor = (type: string) => {
     switch (type) {
       case "document":
-        return "bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300";
+        return "bg-muted text-foreground";
       case "training":
-        return "bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300";
+        return "bg-muted text-foreground";
       case "project":
-        return "bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300";
+        return "bg-muted text-foreground";
       default:
-        return "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400";
+        return "bg-muted text-muted-foreground";
     }
   };
 
@@ -246,7 +246,7 @@ export default function TeamConversationsPage() {
   if (authLoading) {
     return (
       <div className="flex h-screen items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-slate-700 dark:text-slate-300" />
+        <Loader2 className="h-8 w-8 animate-spin text-foreground" />
       </div>
     );
   }
@@ -254,7 +254,7 @@ export default function TeamConversationsPage() {
   if (!user) {
     return (
       <div className="flex h-screen items-center justify-center">
-        <p className="text-slate-600 dark:text-slate-400">
+        <p className="text-muted-foreground">
           Please log in to view team conversations.
         </p>
       </div>
@@ -268,14 +268,14 @@ export default function TeamConversationsPage() {
         <div className="mb-10">
           <div className="flex items-start justify-between">
             <div className="space-y-3">
-              <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
-                <MessageSquare className="h-4 w-4 text-slate-700 dark:text-slate-300" />
-                <span className="text-sm font-medium text-slate-700 dark:text-slate-300">Team Collaboration</span>
+              <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-muted border border-border">
+                <MessageSquare className="h-4 w-4 text-foreground" />
+                <span className="text-sm font-medium text-foreground">Team Collaboration</span>
               </div>
-              <h1 className="text-4xl font-bold text-slate-900 dark:text-slate-100 tracking-tight">
+              <h1 className="text-4xl font-bold text-foreground tracking-tight">
                 Team Conversations
               </h1>
-              <p className="text-lg text-slate-600 dark:text-slate-400 max-w-2xl">
+              <p className="text-lg text-muted-foreground max-w-2xl">
                 Collaborate with your team using AI-powered conversations. Create channels, share ideas, and work together seamlessly.
               </p>
             </div>
@@ -292,7 +292,7 @@ export default function TeamConversationsPage() {
           {/* Filters */}
           <div className="mt-8 flex flex-wrap gap-3">
             <Select value={filterType} onValueChange={setFilterType}>
-              <SelectTrigger className="w-[200px] h-11 border-slate-300 dark:border-slate-700">
+              <SelectTrigger className="w-[200px] h-11 border-border">
                 <SelectValue placeholder="All types" />
               </SelectTrigger>
               <SelectContent>
@@ -305,7 +305,7 @@ export default function TeamConversationsPage() {
             </Select>
 
             <Select value={filterStatus} onValueChange={setFilterStatus}>
-              <SelectTrigger className="w-[200px] h-11 border-slate-300 dark:border-slate-700">
+              <SelectTrigger className="w-[200px] h-11 border-border">
                 <SelectValue placeholder="Status" />
               </SelectTrigger>
               <SelectContent>
@@ -320,17 +320,17 @@ export default function TeamConversationsPage() {
         {/* Conversations Grid */}
         {loading ? (
           <div className="flex items-center justify-center py-12">
-            <Loader2 className="h-8 w-8 animate-spin text-slate-700 dark:text-slate-300" />
+            <Loader2 className="h-8 w-8 animate-spin text-foreground" />
           </div>
         ) : conversations.length === 0 ? (
-          <div className="rounded-2xl border-2 border-dashed border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 p-16 text-center">
+          <div className="rounded-2xl border-2 border-dashed border-border bg-background p-16 text-center">
             <div className="inline-flex items-center justify-center w-20 h-20 rounded-2xl bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-800 dark:to-slate-900 shadow-sm mb-6">
-              <MessageSquare className="h-10 w-10 text-slate-700 dark:text-slate-300" />
+              <MessageSquare className="h-10 w-10 text-foreground" />
             </div>
-            <h3 className="text-2xl font-bold text-slate-900 dark:text-slate-100">
+            <h3 className="text-2xl font-bold text-foreground">
               No conversations yet
             </h3>
-            <p className="mt-3 text-base text-slate-600 dark:text-slate-400 max-w-md mx-auto">
+            <p className="mt-3 text-base text-muted-foreground max-w-md mx-auto">
               Get started by creating your first team conversation and start collaborating with AI assistance
             </p>
             <Button
@@ -350,28 +350,28 @@ export default function TeamConversationsPage() {
                 onClick={() =>
                   router.push(`/dashboard/team/conversations/${conversation.id}`)
                 }
-                className="group relative rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-7 text-left transition-all hover:border-slate-300 dark:hover:border-slate-700 hover:shadow-xl hover:shadow-slate-200/50 dark:hover:shadow-slate-900/50 hover:-translate-y-0.5"
+                className="group relative rounded-2xl border border-border bg-background p-7 text-left transition-all hover:border-border hover:shadow-xl hover:shadow-slate-200/50 dark:hover:shadow-slate-900/50 hover:-translate-y-0.5"
               >
                 <div className="flex items-start justify-between mb-4">
                   <div className="flex-1 min-w-0">
-                    <h3 className="text-xl font-bold text-slate-900 dark:text-slate-100 group-hover:text-slate-800 dark:group-hover:text-slate-200 truncate mb-2">
+                    <h3 className="text-xl font-bold text-foreground group-hover:text-slate-800 dark:group-hover:text-slate-200 truncate mb-2">
                       {conversation.title}
                     </h3>
                     {conversation.description && (
-                      <p className="text-sm text-slate-600 dark:text-slate-400 line-clamp-2 leading-relaxed">
+                      <p className="text-sm text-muted-foreground line-clamp-2 leading-relaxed">
                         {conversation.description}
                       </p>
                     )}
                   </div>
                   <div className="flex gap-2 ml-3 flex-shrink-0">
                     {conversation.is_private && (
-                      <div className="w-8 h-8 rounded-lg bg-slate-100 dark:bg-slate-800 flex items-center justify-center">
-                        <Lock className="h-4 w-4 text-slate-600 dark:text-slate-400" />
+                      <div className="w-8 h-8 rounded-lg bg-muted flex items-center justify-center">
+                        <Lock className="h-4 w-4 text-muted-foreground" />
                       </div>
                     )}
                     {conversation.is_archived && (
-                      <div className="w-8 h-8 rounded-lg bg-slate-100 dark:bg-slate-800 flex items-center justify-center">
-                        <Archive className="h-4 w-4 text-slate-600 dark:text-slate-400" />
+                      <div className="w-8 h-8 rounded-lg bg-muted flex items-center justify-center">
+                        <Archive className="h-4 w-4 text-muted-foreground" />
                       </div>
                     )}
                   </div>
@@ -391,7 +391,7 @@ export default function TeamConversationsPage() {
                     <Badge
                       key={tag}
                       variant="outline"
-                      className="text-xs font-medium px-3 py-1 border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300"
+                      className="text-xs font-medium px-3 py-1 border-border text-foreground"
                     >
                       <Tag className="mr-1.5 h-3 w-3" />
                       {tag}
@@ -399,22 +399,22 @@ export default function TeamConversationsPage() {
                   ))}
                 </div>
 
-                <div className="flex items-center justify-between pt-4 border-t border-slate-100 dark:border-slate-800">
+                <div className="flex items-center justify-between pt-4 border-t border-border">
                   <div className="flex items-center gap-5">
                     <div className="flex items-center gap-2">
-                      <div className="w-8 h-8 rounded-lg bg-slate-100 dark:bg-slate-800 flex items-center justify-center">
-                        <MessageSquare className="h-4 w-4 text-slate-600 dark:text-slate-400" />
+                      <div className="w-8 h-8 rounded-lg bg-muted flex items-center justify-center">
+                        <MessageSquare className="h-4 w-4 text-muted-foreground" />
                       </div>
-                      <span className="text-sm font-semibold text-slate-900 dark:text-slate-100">{conversation.message_count?.[0]?.count || 0}</span>
+                      <span className="text-sm font-semibold text-foreground">{conversation.message_count?.[0]?.count || 0}</span>
                     </div>
                     <div className="flex items-center gap-2">
-                      <div className="w-8 h-8 rounded-lg bg-slate-100 dark:bg-slate-800 flex items-center justify-center">
-                        <Users className="h-4 w-4 text-slate-600 dark:text-slate-400" />
+                      <div className="w-8 h-8 rounded-lg bg-muted flex items-center justify-center">
+                        <Users className="h-4 w-4 text-muted-foreground" />
                       </div>
-                      <span className="text-sm font-semibold text-slate-900 dark:text-slate-100">{conversation.participant_count?.[0]?.count || 0}</span>
+                      <span className="text-sm font-semibold text-foreground">{conversation.participant_count?.[0]?.count || 0}</span>
                     </div>
                   </div>
-                  <div className="flex items-center gap-1.5 text-xs font-medium text-slate-500 dark:text-slate-500">
+                  <div className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
                     <Clock className="h-3.5 w-3.5" />
                     <span>{formatDate(conversation.last_message_at)}</span>
                   </div>
@@ -428,10 +428,10 @@ export default function TeamConversationsPage() {
       {/* Create Conversation Modal */}
       <Dialog open={createModalOpen} onOpenChange={setCreateModalOpen}>
         <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
-          <DialogHeader className="pb-6 border-b border-slate-100 dark:border-slate-800">
+          <DialogHeader className="pb-6 border-b border-border">
             <div className="flex items-center gap-3 mb-2">
               <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-800 dark:to-slate-900 flex items-center justify-center">
-                <Plus className="h-6 w-6 text-slate-700 dark:text-slate-300" />
+                <Plus className="h-6 w-6 text-foreground" />
               </div>
               <div>
                 <DialogTitle className="text-2xl">Create New Conversation</DialogTitle>
@@ -444,7 +444,7 @@ export default function TeamConversationsPage() {
 
           <div className="space-y-6 py-6">
             <div className="space-y-3">
-              <Label htmlFor="title" className="text-sm font-semibold text-slate-900 dark:text-slate-100">
+              <Label htmlFor="title" className="text-sm font-semibold text-foreground">
                 Conversation Title *
               </Label>
               <Input
@@ -454,12 +454,12 @@ export default function TeamConversationsPage() {
                 onChange={(e) =>
                   setNewConversation({ ...newConversation, title: e.target.value })
                 }
-                className="h-12 text-base border-slate-300 dark:border-slate-700 focus:ring-2 focus:ring-slate-900 dark:focus:ring-slate-100"
+                className="h-12 text-base border-border focus:ring-2 focus:ring-slate-900 dark:focus:ring-slate-100"
               />
             </div>
 
             <div className="space-y-3">
-              <Label htmlFor="description" className="text-sm font-semibold text-slate-900 dark:text-slate-100">
+              <Label htmlFor="description" className="text-sm font-semibold text-foreground">
                 Description
               </Label>
               <Textarea
@@ -473,12 +473,12 @@ export default function TeamConversationsPage() {
                   })
                 }
                 rows={4}
-                className="resize-none text-base border-slate-300 dark:border-slate-700 focus:ring-2 focus:ring-slate-900 dark:focus:ring-slate-100"
+                className="resize-none text-base border-border focus:ring-2 focus:ring-slate-900 dark:focus:ring-slate-100"
               />
             </div>
 
             <div className="space-y-3">
-              <Label htmlFor="context_type" className="text-sm font-semibold text-slate-900 dark:text-slate-100">
+              <Label htmlFor="context_type" className="text-sm font-semibold text-foreground">
                 Conversation Type
               </Label>
               <Select
@@ -487,7 +487,7 @@ export default function TeamConversationsPage() {
                   setNewConversation({ ...newConversation, context_type: value })
                 }
               >
-                <SelectTrigger className="h-12 border-slate-300 dark:border-slate-700">
+                <SelectTrigger className="h-12 border-border">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -532,7 +532,7 @@ export default function TeamConversationsPage() {
             </div>
 
             <div className="space-y-3">
-              <Label htmlFor="tags" className="text-sm font-semibold text-slate-900 dark:text-slate-100">
+              <Label htmlFor="tags" className="text-sm font-semibold text-foreground">
                 Tags
               </Label>
               <Input
@@ -542,11 +542,11 @@ export default function TeamConversationsPage() {
                 onChange={(e) =>
                   setNewConversation({ ...newConversation, tags: e.target.value })
                 }
-                className="h-12 text-base border-slate-300 dark:border-slate-700 focus:ring-2 focus:ring-slate-900 dark:focus:ring-slate-100"
+                className="h-12 text-base border-border focus:ring-2 focus:ring-slate-900 dark:focus:ring-slate-100"
               />
             </div>
 
-            <div className="flex items-start space-x-3 p-4 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
+            <div className="flex items-start space-x-3 p-4 rounded-xl bg-muted border border-border">
               <input
                 type="checkbox"
                 id="is_private"
@@ -560,18 +560,18 @@ export default function TeamConversationsPage() {
                 className="mt-1 h-5 w-5 rounded border-slate-300 text-slate-900 focus:ring-slate-900"
               />
               <div className="flex-1">
-                <Label htmlFor="is_private" className="cursor-pointer font-semibold text-slate-900 dark:text-slate-100 flex items-center gap-2">
+                <Label htmlFor="is_private" className="cursor-pointer font-semibold text-foreground flex items-center gap-2">
                   <Lock className="h-4 w-4" />
                   Private Conversation
                 </Label>
-                <p className="text-sm text-slate-600 dark:text-slate-400 mt-1">
+                <p className="text-sm text-muted-foreground mt-1">
                   Only invited members can view and participate in this conversation
                 </p>
               </div>
             </div>
           </div>
 
-          <div className="flex justify-end gap-3 pt-6 border-t border-slate-100 dark:border-slate-800">
+          <div className="flex justify-end gap-3 pt-6 border-t border-border">
             <Button
               variant="outline"
               size="lg"

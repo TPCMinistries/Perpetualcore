@@ -134,9 +134,9 @@ const statusConfig: Record<
 > = {
   idea: {
     label: "Idea",
-    bg: "bg-slate-100 dark:bg-slate-800",
-    text: "text-slate-600 dark:text-slate-400",
-    border: "border-slate-200 dark:border-slate-700",
+    bg: "bg-muted",
+    text: "text-muted-foreground",
+    border: "border-border",
   },
   draft: {
     label: "Draft",
@@ -560,17 +560,17 @@ export default function ContentPage() {
       <DashboardPageWrapper>
         <div className="space-y-6">
           {/* Header Skeleton */}
-          <div className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-8">
+          <div className="rounded-2xl border border-border bg-background p-8">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-4">
-                <div className="h-14 w-14 rounded-xl bg-slate-200 dark:bg-slate-700 animate-pulse" />
+                <div className="h-14 w-14 rounded-xl bg-muted animate-pulse" />
                 <div className="space-y-2">
-                  <div className="h-8 w-48 bg-slate-200 dark:bg-slate-700 rounded animate-pulse" />
-                  <div className="h-4 w-64 bg-slate-100 dark:bg-slate-800 rounded animate-pulse" />
+                  <div className="h-8 w-48 bg-muted rounded animate-pulse" />
+                  <div className="h-4 w-64 bg-muted rounded animate-pulse" />
                 </div>
               </div>
               <div className="flex gap-2">
-                <div className="h-10 w-28 bg-slate-200 dark:bg-slate-700 rounded-lg animate-pulse" />
+                <div className="h-10 w-28 bg-muted rounded-lg animate-pulse" />
                 <div className="h-10 w-36 bg-violet-200 dark:bg-violet-900/50 rounded-lg animate-pulse" />
               </div>
             </div>
@@ -580,12 +580,12 @@ export default function ContentPage() {
             {[...Array(5)].map((_, i) => (
               <Card
                 key={i}
-                className="border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900"
+                className="border-border bg-background"
               >
                 <CardContent className="p-5">
                   <div className="space-y-2">
-                    <div className="h-4 w-16 bg-slate-200 dark:bg-slate-700 rounded animate-pulse" />
-                    <div className="h-8 w-12 bg-slate-100 dark:bg-slate-800 rounded animate-pulse" />
+                    <div className="h-4 w-16 bg-muted rounded animate-pulse" />
+                    <div className="h-8 w-12 bg-muted rounded animate-pulse" />
                   </div>
                 </CardContent>
               </Card>
@@ -596,16 +596,16 @@ export default function ContentPage() {
             {[...Array(6)].map((_, i) => (
               <Card
                 key={i}
-                className="border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900"
+                className="border-border bg-background"
               >
                 <CardContent className="p-5">
                   <div className="space-y-3">
                     <div className="flex items-center gap-2">
-                      <div className="h-8 w-8 rounded-lg bg-slate-200 dark:bg-slate-700 animate-pulse" />
-                      <div className="h-5 w-16 bg-slate-100 dark:bg-slate-800 rounded animate-pulse" />
+                      <div className="h-8 w-8 rounded-lg bg-muted animate-pulse" />
+                      <div className="h-5 w-16 bg-muted rounded animate-pulse" />
                     </div>
-                    <div className="h-5 w-full bg-slate-200 dark:bg-slate-700 rounded animate-pulse" />
-                    <div className="h-4 w-3/4 bg-slate-100 dark:bg-slate-800 rounded animate-pulse" />
+                    <div className="h-5 w-full bg-muted rounded animate-pulse" />
+                    <div className="h-4 w-3/4 bg-muted rounded animate-pulse" />
                   </div>
                 </CardContent>
               </Card>
@@ -638,7 +638,7 @@ export default function ContentPage() {
               <Button
                 variant="outline"
                 onClick={() => router.push("/dashboard/content/calendar")}
-                className="border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800"
+                className="border-border hover:bg-muted"
               >
                 <CalendarDays className="h-4 w-4 mr-2" />
                 Calendar
@@ -700,21 +700,21 @@ export default function ContentPage() {
                               <div
                                 key={template.id}
                                 onClick={() => applyTemplate(template)}
-                                className="rounded-lg border border-slate-200 dark:border-slate-700 p-4 cursor-pointer hover:border-violet-300 dark:hover:border-violet-600 hover:bg-violet-50/50 dark:hover:bg-violet-900/10 transition-all"
+                                className="rounded-lg border border-border p-4 cursor-pointer hover:border-violet-300 dark:hover:border-violet-600 hover:bg-violet-50/50 dark:hover:bg-violet-900/10 transition-all"
                               >
                                 <div className="flex items-center gap-3">
-                                  <div className="h-9 w-9 rounded-lg bg-slate-100 dark:bg-slate-800 flex items-center justify-center flex-shrink-0">
+                                  <div className="h-9 w-9 rounded-lg bg-muted flex items-center justify-center flex-shrink-0">
                                     <Zap className="h-4 w-4 text-violet-600 dark:text-violet-400" />
                                   </div>
                                   <div className="flex-1 min-w-0">
-                                    <h4 className="font-medium text-sm text-slate-900 dark:text-white">
+                                    <h4 className="font-medium text-sm text-foreground">
                                       {template.name}
                                     </h4>
-                                    <p className="text-xs text-slate-500 dark:text-slate-400 line-clamp-1">
+                                    <p className="text-xs text-muted-foreground line-clamp-1">
                                       {template.description}
                                     </p>
                                   </div>
-                                  <Badge className="text-[10px] border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-500 dark:text-slate-400">
+                                  <Badge className="text-[10px] border border-border bg-muted text-muted-foreground">
                                     {template.tone}
                                   </Badge>
                                 </div>
@@ -738,7 +738,7 @@ export default function ContentPage() {
                               Writing with {generationModel}...
                             </span>
                           </div>
-                          <p className="text-sm text-slate-700 dark:text-slate-300 whitespace-pre-wrap max-h-64 overflow-y-auto">
+                          <p className="text-sm text-foreground whitespace-pre-wrap max-h-64 overflow-y-auto">
                             {streamingText}
                             <span className="inline-block w-1.5 h-4 bg-violet-500 animate-pulse ml-0.5 align-middle" />
                           </p>
@@ -748,7 +748,7 @@ export default function ContentPage() {
                       {/* Completed variations */}
                       {!isStreaming && generatedVariations.length > 0 && (
                         <>
-                          <div className="flex items-center justify-between text-sm text-slate-500 dark:text-slate-400">
+                          <div className="flex items-center justify-between text-sm text-muted-foreground">
                             <span>
                               Generated by <strong>{generationModel}</strong>
                             </span>
@@ -757,7 +757,7 @@ export default function ContentPage() {
                               size="sm"
                               onClick={regenerateContent}
                               disabled={submitting}
-                              className="border-slate-200 dark:border-slate-700"
+                              className="border-border"
                             >
                               <Sparkles className="h-3 w-3 mr-1" />
                               Regenerate
@@ -777,11 +777,11 @@ export default function ContentPage() {
                                     "rounded-lg border p-4 cursor-pointer transition-all",
                                     selectedVariation === idx
                                       ? "border-violet-500 bg-violet-50/50 dark:bg-violet-900/20 ring-1 ring-violet-500"
-                                      : "border-slate-200 dark:border-slate-700 hover:border-violet-300 dark:hover:border-violet-600"
+                                      : "border-border hover:border-violet-300 dark:hover:border-violet-600"
                                   )}
                                 >
                                   <div className="flex items-center justify-between mb-2">
-                                    <span className="text-xs font-medium text-slate-500 dark:text-slate-400">
+                                    <span className="text-xs font-medium text-muted-foreground">
                                       Variation {idx + 1}
                                     </span>
                                     <span
@@ -794,7 +794,7 @@ export default function ContentPage() {
                                       {charLimit > 0 && ` / ${charLimit}`} chars
                                     </span>
                                   </div>
-                                  <p className="text-sm text-slate-800 dark:text-slate-200 whitespace-pre-wrap">
+                                  <p className="text-sm text-foreground whitespace-pre-wrap">
                                     {variation.content}
                                   </p>
                                   {(variation.hashtags?.length ?? 0) > 0 && (
@@ -812,7 +812,7 @@ export default function ContentPage() {
                           </div>
 
                           <DialogFooter>
-                            <Button variant="outline" onClick={resetCreateDialog} className="border-slate-200 dark:border-slate-700">
+                            <Button variant="outline" onClick={resetCreateDialog} className="border-border">
                               Cancel
                             </Button>
                             <Button
@@ -844,7 +844,7 @@ export default function ContentPage() {
                           >
                             <div className="flex items-center gap-3 text-sm">
                               <Zap className="h-4 w-4 text-violet-500" />
-                              <span className="text-slate-600 dark:text-slate-400">
+                              <span className="text-muted-foreground">
                                 Start from a <strong className="text-violet-600 dark:text-violet-400">template</strong> — 10 pre-built prompts for social, blog, email & more
                               </span>
                             </div>
@@ -876,14 +876,14 @@ export default function ContentPage() {
                                     value={templateValues[field.key] || ""}
                                     onChange={(e) => setTemplateValues((prev) => ({ ...prev, [field.key]: e.target.value }))}
                                     rows={2}
-                                    className="border-slate-200 dark:border-slate-700 text-sm"
+                                    className="border-border text-sm"
                                   />
                                 ) : (
                                   <Input
                                     placeholder={field.placeholder}
                                     value={templateValues[field.key] || ""}
                                     onChange={(e) => setTemplateValues((prev) => ({ ...prev, [field.key]: e.target.value }))}
-                                    className="border-slate-200 dark:border-slate-700 text-sm"
+                                    className="border-border text-sm"
                                   />
                                 )}
                               </div>
@@ -897,14 +897,14 @@ export default function ContentPage() {
                             placeholder="e.g., Q4 Product Launch Announcement"
                             value={newContent.title}
                             onChange={(e) => setNewContent({ ...newContent, title: e.target.value })}
-                            className="border-slate-200 dark:border-slate-700"
+                            className="border-border"
                           />
                         </div>
                         <div className="grid grid-cols-2 gap-4">
                           <div className="space-y-2">
                             <Label>Content Type</Label>
                             <Select value={newContent.content_type} onValueChange={(value) => setNewContent({ ...newContent, content_type: value })}>
-                              <SelectTrigger className="border-slate-200 dark:border-slate-700"><SelectValue /></SelectTrigger>
+                              <SelectTrigger className="border-border"><SelectValue /></SelectTrigger>
                               <SelectContent>
                                 <SelectItem value="social">Social Post</SelectItem>
                                 <SelectItem value="linkedin_post">LinkedIn Post</SelectItem>
@@ -920,7 +920,7 @@ export default function ContentPage() {
                           <div className="space-y-2">
                             <Label>Platform</Label>
                             <Select value={newContent.platform} onValueChange={(value) => setNewContent({ ...newContent, platform: value })}>
-                              <SelectTrigger className="border-slate-200 dark:border-slate-700"><SelectValue /></SelectTrigger>
+                              <SelectTrigger className="border-border"><SelectValue /></SelectTrigger>
                               <SelectContent>
                                 <SelectItem value="linkedin">LinkedIn</SelectItem>
                                 <SelectItem value="twitter">Twitter/X</SelectItem>
@@ -936,7 +936,7 @@ export default function ContentPage() {
                           <div className="space-y-2">
                             <Label>Tone</Label>
                             <Select value={newContent.tone} onValueChange={(value) => setNewContent({ ...newContent, tone: value })}>
-                              <SelectTrigger className="border-slate-200 dark:border-slate-700"><SelectValue /></SelectTrigger>
+                              <SelectTrigger className="border-border"><SelectValue /></SelectTrigger>
                               <SelectContent>
                                 <SelectItem value="professional">Professional</SelectItem>
                                 <SelectItem value="casual">Casual</SelectItem>
@@ -949,7 +949,7 @@ export default function ContentPage() {
                           <div className="space-y-2">
                             <Label>Length</Label>
                             <Select value={newContent.length} onValueChange={(value) => setNewContent({ ...newContent, length: value })}>
-                              <SelectTrigger className="border-slate-200 dark:border-slate-700"><SelectValue /></SelectTrigger>
+                              <SelectTrigger className="border-border"><SelectValue /></SelectTrigger>
                               <SelectContent>
                                 <SelectItem value="short">Short</SelectItem>
                                 <SelectItem value="medium">Medium</SelectItem>
@@ -962,7 +962,7 @@ export default function ContentPage() {
                           <div className="space-y-2">
                             <Label>Brand (optional)</Label>
                             <Select value={newContent.brand_id} onValueChange={(value) => setNewContent({ ...newContent, brand_id: value })}>
-                              <SelectTrigger className="border-slate-200 dark:border-slate-700">
+                              <SelectTrigger className="border-border">
                                 <SelectValue placeholder="Select a brand for voice matching" />
                               </SelectTrigger>
                               <SelectContent>
@@ -986,7 +986,7 @@ export default function ContentPage() {
                               value={newContent.ai_prompt}
                               onChange={(e) => setNewContent({ ...newContent, ai_prompt: e.target.value })}
                               rows={4}
-                              className="border-slate-200 dark:border-slate-700"
+                              className="border-border"
                             />
                           </div>
                         )}
@@ -1002,13 +1002,13 @@ export default function ContentPage() {
                             value={referenceContent}
                             onChange={(e) => setReferenceContent(e.target.value)}
                             rows={3}
-                            className="border-slate-200 dark:border-slate-700 text-sm"
+                            className="border-border text-sm"
                           />
                         </div>
                       </div>
 
                       <DialogFooter>
-                        <Button variant="outline" onClick={resetCreateDialog} className="border-slate-200 dark:border-slate-700">
+                        <Button variant="outline" onClick={resetCreateDialog} className="border-border">
                           Cancel
                         </Button>
                         {selectedTemplate ? (
@@ -1055,17 +1055,17 @@ export default function ContentPage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.4 }}
           >
-            <Card className="border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900">
+            <Card className="border-border bg-background">
               <CardContent className="p-5">
                 <div className="flex items-center gap-3">
-                  <div className="p-2 rounded-lg bg-slate-100 dark:bg-slate-800">
-                    <FileText className="h-4 w-4 text-slate-600 dark:text-slate-400" />
+                  <div className="p-2 rounded-lg bg-muted">
+                    <FileText className="h-4 w-4 text-muted-foreground" />
                   </div>
                   <div>
-                    <p className="text-sm text-slate-500 dark:text-slate-400">
+                    <p className="text-sm text-muted-foreground">
                       Total
                     </p>
-                    <p className="text-2xl font-bold text-slate-900 dark:text-white">
+                    <p className="text-2xl font-bold text-foreground">
                       {stats.total}
                     </p>
                   </div>
@@ -1149,7 +1149,7 @@ export default function ContentPage() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4, delay: 0.1 }}
         >
-          <Card className="border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900">
+          <Card className="border-border bg-background">
             <CardContent className="p-4">
               <div className="flex flex-col lg:flex-row gap-4">
                 {/* Search */}
@@ -1159,7 +1159,7 @@ export default function ContentPage() {
                     placeholder="Search content..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="pl-10 border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800"
+                    className="pl-10 border-border bg-muted"
                   />
                 </div>
 
@@ -1176,7 +1176,7 @@ export default function ContentPage() {
                     value={platformFilter}
                     onValueChange={setPlatformFilter}
                   >
-                    <SelectTrigger className="w-[140px] border-slate-200 dark:border-slate-700">
+                    <SelectTrigger className="w-[140px] border-border">
                       <SelectValue placeholder="Platform" />
                     </SelectTrigger>
                     <SelectContent>
@@ -1189,7 +1189,7 @@ export default function ContentPage() {
                     </SelectContent>
                   </Select>
 
-                  <div className="flex border border-slate-200 dark:border-slate-700 rounded-lg overflow-hidden">
+                  <div className="flex border border-border rounded-lg overflow-hidden">
                     <Button
                       variant={viewMode === "grid" ? "secondary" : "ghost"}
                       size="sm"
@@ -1221,13 +1221,13 @@ export default function ContentPage() {
             transition={{ duration: 0.4 }}
             className="text-center py-16"
           >
-            <div className="h-20 w-20 rounded-2xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center mx-auto mb-6">
-              <PenSquare className="h-10 w-10 text-slate-400 dark:text-slate-500" />
+            <div className="h-20 w-20 rounded-2xl bg-muted flex items-center justify-center mx-auto mb-6">
+              <PenSquare className="h-10 w-10 text-muted-foreground" />
             </div>
-            <h3 className="text-xl font-semibold text-slate-900 dark:text-white mb-2">
+            <h3 className="text-xl font-semibold text-foreground mb-2">
               No content yet
             </h3>
-            <p className="text-slate-500 dark:text-slate-400 mb-6">
+            <p className="text-muted-foreground mb-6">
               Create your first piece of content
             </p>
             <Button
@@ -1255,13 +1255,13 @@ export default function ContentPage() {
                 >
                   <Card
                     onClick={() => router.push(`/dashboard/content/${item.id}`)}
-                    className="border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 hover:shadow-lg hover:border-violet-300 dark:hover:border-violet-700 transition-all cursor-pointer group"
+                    className="border-border bg-background hover:shadow-lg hover:border-violet-300 dark:hover:border-violet-700 transition-all cursor-pointer group"
                   >
                     <CardContent className="p-5">
                       <div className="flex items-start justify-between mb-3">
                         <div className="flex items-center gap-2">
-                          <div className="h-8 w-8 rounded-lg bg-slate-100 dark:bg-slate-800 flex items-center justify-center">
-                            <PlatformIcon className="h-4 w-4 text-slate-600 dark:text-slate-400" />
+                          <div className="h-8 w-8 rounded-lg bg-muted flex items-center justify-center">
+                            <PlatformIcon className="h-4 w-4 text-muted-foreground" />
                           </div>
                           <Badge
                             className={cn(
@@ -1312,17 +1312,17 @@ export default function ContentPage() {
                         </DropdownMenu>
                       </div>
 
-                      <h3 className="font-semibold text-slate-900 dark:text-white mb-2 line-clamp-2 group-hover:text-violet-600 dark:group-hover:text-violet-400 transition-colors">
+                      <h3 className="font-semibold text-foreground mb-2 line-clamp-2 group-hover:text-violet-600 dark:group-hover:text-violet-400 transition-colors">
                         {item.title}
                       </h3>
 
                       {item.draft_content && (
-                        <p className="text-sm text-slate-500 dark:text-slate-400 line-clamp-2 mb-3">
+                        <p className="text-sm text-muted-foreground line-clamp-2 mb-3">
                           {item.draft_content}
                         </p>
                       )}
 
-                      <div className="flex items-center justify-between text-xs text-slate-500 dark:text-slate-400">
+                      <div className="flex items-center justify-between text-xs text-muted-foreground">
                         <span>
                           {contentTypeLabels[item.content_type] ||
                             item.content_type}
@@ -1364,18 +1364,18 @@ export default function ContentPage() {
                 >
                   <Card
                     onClick={() => router.push(`/dashboard/content/${item.id}`)}
-                    className="border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 hover:shadow-md hover:border-violet-300 dark:hover:border-violet-700 transition-all cursor-pointer group"
+                    className="border-border bg-background hover:shadow-md hover:border-violet-300 dark:hover:border-violet-700 transition-all cursor-pointer group"
                   >
                     <CardContent className="p-4">
                       <div className="flex items-center gap-4">
-                        <div className="h-10 w-10 rounded-lg bg-slate-100 dark:bg-slate-800 flex items-center justify-center flex-shrink-0">
-                          <PlatformIcon className="h-5 w-5 text-slate-600 dark:text-slate-400" />
+                        <div className="h-10 w-10 rounded-lg bg-muted flex items-center justify-center flex-shrink-0">
+                          <PlatformIcon className="h-5 w-5 text-muted-foreground" />
                         </div>
                         <div className="flex-1 min-w-0">
-                          <h3 className="font-medium text-slate-900 dark:text-white truncate group-hover:text-violet-600 dark:group-hover:text-violet-400 transition-colors">
+                          <h3 className="font-medium text-foreground truncate group-hover:text-violet-600 dark:group-hover:text-violet-400 transition-colors">
                             {item.title}
                           </h3>
-                          <p className="text-sm text-slate-500 dark:text-slate-400">
+                          <p className="text-sm text-muted-foreground">
                             {contentTypeLabels[item.content_type] ||
                               item.content_type}
                           </p>
@@ -1393,7 +1393,7 @@ export default function ContentPage() {
                         {item.ai_generated && (
                           <Sparkles className="h-4 w-4 text-amber-500" />
                         )}
-                        <span className="text-xs text-slate-500 dark:text-slate-400 whitespace-nowrap">
+                        <span className="text-xs text-muted-foreground whitespace-nowrap">
                           {formatDate(item.created_at)}
                         </span>
                       </div>

@@ -254,7 +254,7 @@ export default function CommandCenterPage() {
                 className={cn(
                   "flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all",
                   mode === "executive"
-                    ? "bg-white dark:bg-slate-800 text-orange-600 shadow-sm"
+                    ? "bg-card text-orange-600 shadow-sm"
                     : "text-muted-foreground hover:text-foreground"
                 )}
               >
@@ -266,7 +266,7 @@ export default function CommandCenterPage() {
                 className={cn(
                   "flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all",
                   mode === "system"
-                    ? "bg-white dark:bg-slate-800 text-blue-600 shadow-sm"
+                    ? "bg-card text-blue-600 shadow-sm"
                     : "text-muted-foreground hover:text-foreground"
                 )}
               >
@@ -507,7 +507,7 @@ function ExecutiveDashboard({ activeTab, onTabChange }: ExecutiveDashboardProps)
             className={cn(
               "flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium transition-all",
               activeTab === module.id
-                ? "bg-white dark:bg-slate-800 shadow-sm"
+                ? "bg-card shadow-sm"
                 : "text-muted-foreground hover:text-foreground hover:bg-muted"
             )}
           >
@@ -665,8 +665,8 @@ function DailyCommandView({ onNavigate }: DailyCommandViewProps) {
                 <p className="text-3xl font-bold">{deadlines7Days.length}</p>
                 <p className="text-xs text-muted-foreground">Deadlines approaching</p>
               </div>
-              <div className="h-10 w-10 rounded-xl bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
-                <Clock className="h-5 w-5 text-gray-600" />
+              <div className="h-10 w-10 rounded-xl bg-muted flex items-center justify-center">
+                <Clock className="h-5 w-5 text-muted-foreground" />
               </div>
             </div>
           </CardContent>
@@ -682,7 +682,7 @@ function DailyCommandView({ onNavigate }: DailyCommandViewProps) {
               </div>
               <div className={cn(
                 "h-10 w-10 rounded-xl flex items-center justify-center",
-                taskHealthIssues > 0 ? "bg-amber-100 dark:bg-amber-900/50" : "bg-gray-100 dark:bg-gray-800"
+                taskHealthIssues > 0 ? "bg-amber-100 dark:bg-amber-900/50" : "bg-muted"
               )}>
                 <AlertTriangle className={cn("h-5 w-5", taskHealthIssues > 0 ? "text-amber-600" : "text-gray-600")} />
               </div>
@@ -757,7 +757,7 @@ function DailyCommandView({ onNavigate }: DailyCommandViewProps) {
             <Card>
               <CardHeader className="pb-3">
                 <div className="flex items-center gap-2">
-                  <Clock className="h-5 w-5 text-gray-500" />
+                  <Clock className="h-5 w-5 text-muted-foreground" />
                   <div>
                     <CardTitle className="text-lg">Upcoming Deadlines</CardTitle>
                     <CardDescription>Next 7 days</CardDescription>
@@ -1637,7 +1637,7 @@ function DecisionInbox({ navigationTarget, onNavigationHandled, onNavigate }: De
                 className={cn(
                   "px-3 py-1.5 rounded-md text-sm font-medium transition-colors capitalize",
                   filter === f
-                    ? "bg-white dark:bg-slate-800 shadow-sm"
+                    ? "bg-card shadow-sm"
                     : "text-muted-foreground hover:text-foreground"
                 )}
               >
@@ -1698,7 +1698,7 @@ Examples:
                     value={aiInput}
                     onChange={(e) => setAiInput(e.target.value)}
                     rows={6}
-                    className="w-full px-4 py-3 rounded-xl border-2 border-blue-200 dark:border-blue-800 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-y text-sm min-h-[120px] max-h-[400px] overflow-y-auto"
+                    className="w-full px-4 py-3 rounded-xl border-2 border-blue-200 dark:border-blue-800 bg-background focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-y text-sm min-h-[120px] max-h-[400px] overflow-y-auto"
                   />
                   <div className="absolute bottom-3 right-3 flex items-center gap-2">
                     <input
@@ -1752,7 +1752,7 @@ Examples:
                   </h4>
                   <div className="space-y-4">
                     {aiQuestions.map((q) => (
-                      <div key={q.id} className="p-4 rounded-xl bg-white dark:bg-slate-900 border border-blue-100 dark:border-blue-800">
+                      <div key={q.id} className="p-4 rounded-xl bg-background border border-blue-100 dark:border-blue-800">
                         <p className="font-medium text-sm mb-2">{q.question}</p>
                         {q.context && (
                           <p className="text-xs text-muted-foreground mb-3">{q.context}</p>
@@ -1767,7 +1767,7 @@ Examples:
                                   "px-3 py-1.5 rounded-lg text-sm border transition-colors",
                                   currentAnswers[q.id] === opt
                                     ? "bg-blue-500 text-white border-blue-500"
-                                    : "bg-white dark:bg-slate-800 border-gray-200 dark:border-gray-700 hover:border-blue-300"
+                                    : "bg-card border-border hover:border-blue-300"
                                 )}
                               >
                                 {opt}
@@ -1784,7 +1784,7 @@ Examples:
                                   "px-3 py-1.5 rounded-lg text-sm border transition-colors capitalize",
                                   currentAnswers[q.id] === p
                                     ? "bg-blue-500 text-white border-blue-500"
-                                    : "bg-white dark:bg-slate-800 border-gray-200 dark:border-gray-700 hover:border-blue-300"
+                                    : "bg-card border-border hover:border-blue-300"
                                 )}
                               >
                                 {p}
@@ -1797,7 +1797,7 @@ Examples:
                             placeholder="Your answer..."
                             value={currentAnswers[q.id] || ""}
                             onChange={(e) => setCurrentAnswers(prev => ({ ...prev, [q.id]: e.target.value }))}
-                            className="w-full px-3 py-2 rounded-lg border bg-white dark:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                            className="w-full px-3 py-2 rounded-lg border bg-card focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
                           />
                         )}
                       </div>
@@ -1839,7 +1839,7 @@ Examples:
                     <Lightbulb className="h-4 w-4" />
                     Analysis & Insights
                   </h4>
-                  <div className="p-4 rounded-xl bg-white dark:bg-slate-900 border border-blue-100 dark:border-blue-800 space-y-3">
+                  <div className="p-4 rounded-xl bg-background border border-blue-100 dark:border-blue-800 space-y-3">
                     {aiInsights.summary && (
                       <p className="text-sm">{aiInsights.summary}</p>
                     )}
@@ -1950,7 +1950,7 @@ Examples:
                     {extractedDecisions.map((decision, idx) => (
                       <div
                         key={idx}
-                        className="p-4 rounded-xl bg-white dark:bg-slate-900 border border-blue-100 dark:border-blue-800"
+                        className="p-4 rounded-xl bg-background border border-blue-100 dark:border-blue-800"
                       >
                         <div className="flex items-start justify-between gap-3">
                           <div className="flex-1">
@@ -1969,7 +1969,7 @@ Examples:
                                     decision.priority === "urgent" && "border-red-300 text-red-600",
                                     decision.priority === "high" && "border-orange-300 text-orange-600",
                                     decision.priority === "medium" && "border-blue-300 text-blue-600",
-                                    decision.priority === "low" && "border-gray-300 text-gray-600"
+                                    decision.priority === "low" && "border-gray-300 text-muted-foreground"
                                   )}
                                 >
                                   {decision.priority}
@@ -2009,11 +2009,11 @@ Examples:
 
                         {/* Options with Pros/Cons */}
                         {decision.options && decision.options.length > 0 && (
-                          <div className="mt-3 pt-3 border-t border-gray-100 dark:border-gray-800">
+                          <div className="mt-3 pt-3 border-t border-border">
                             <p className="text-xs font-medium text-muted-foreground mb-2">Options to Consider:</p>
                             <div className="grid gap-2">
                               {decision.options.map((opt: any, optIdx: number) => (
-                                <div key={optIdx} className="p-2 rounded-lg bg-gray-50 dark:bg-slate-800 text-sm">
+                                <div key={optIdx} className="p-2 rounded-lg bg-muted text-sm">
                                   <p className="font-medium text-sm">{opt.title}</p>
                                   {(opt.pros?.length > 0 || opt.cons?.length > 0) && (
                                     <div className="grid grid-cols-2 gap-2 mt-1">
@@ -2073,7 +2073,7 @@ Examples:
                     placeholder="What decision needs to be made?"
                     value={newDecision.title}
                     onChange={(e) => setNewDecision({ ...newDecision, title: e.target.value })}
-                    className="w-full px-3 py-2 rounded-lg border bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-3 py-2 rounded-lg border bg-background focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
                 <div>
@@ -2083,7 +2083,7 @@ Examples:
                     value={newDecision.description}
                     onChange={(e) => setNewDecision({ ...newDecision, description: e.target.value })}
                     rows={3}
-                    className="w-full px-3 py-2 rounded-lg border bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-3 py-2 rounded-lg border bg-background focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
                 <div className="flex items-center gap-4">
@@ -2092,7 +2092,7 @@ Examples:
                     <select
                       value={newDecision.priority}
                       onChange={(e) => setNewDecision({ ...newDecision, priority: e.target.value })}
-                      className="px-3 py-2 rounded-lg border bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="px-3 py-2 rounded-lg border bg-background focus:outline-none focus:ring-2 focus:ring-blue-500"
                     >
                       <option value="low">Low</option>
                       <option value="medium">Medium</option>
@@ -2132,7 +2132,7 @@ Examples:
                 <Users className="h-4 w-4" />
                 Delegate
               </div>
-              <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-400 text-sm font-medium">
+              <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-muted text-gray-700 dark:text-gray-400 text-sm font-medium">
                 <Clock className="h-4 w-4" />
                 Defer
               </div>
@@ -2178,7 +2178,7 @@ Examples:
                     decision.priority === "urgent" && "bg-red-100 dark:bg-red-900/30",
                     decision.priority === "high" && "bg-orange-100 dark:bg-orange-900/30",
                     decision.priority === "medium" && "bg-blue-100 dark:bg-blue-900/30",
-                    decision.priority === "low" && "bg-gray-100 dark:bg-gray-800"
+                    decision.priority === "low" && "bg-muted"
                   )}>
                     <FileCheck className={cn(
                       "h-6 w-6",
@@ -2221,7 +2221,7 @@ Examples:
                         className={cn(
                           decision.status === "decided" && "border-green-500 text-green-600",
                           decision.status === "delegated" && "border-purple-500 text-purple-600",
-                          decision.status === "deferred" && "border-gray-500 text-gray-600",
+                          decision.status === "deferred" && "border-gray-500 text-muted-foreground",
                           decision.status === "pending" && "border-orange-500 text-orange-600"
                         )}
                       >
@@ -2273,7 +2273,7 @@ Examples:
 
                     {/* Deferred Until */}
                     {decision.status === "deferred" && decision.deferred_until && (
-                      <div className="mt-3 p-2 rounded-lg bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700">
+                      <div className="mt-3 p-2 rounded-lg bg-muted/50 border border-border">
                         <p className="text-sm text-gray-700 dark:text-gray-400">
                           <strong>Deferred until:</strong>{" "}
                           {new Date(decision.deferred_until).toLocaleDateString("en-US", {
@@ -2452,7 +2452,7 @@ function PeopleAndTasks() {
                   <input
                     type="text"
                     placeholder="Search tasks..."
-                    className="px-3 py-1.5 text-sm rounded-lg border bg-white dark:bg-slate-900 w-64"
+                    className="px-3 py-1.5 text-sm rounded-lg border bg-background w-64"
                   />
                 </div>
                 <div className="flex items-center gap-2">
@@ -2468,7 +2468,7 @@ function PeopleAndTasks() {
                 {/* Waiting */}
                 <div>
                   <div className="flex items-center gap-2 mb-3">
-                    <Clock className="h-4 w-4 text-gray-500" />
+                    <Clock className="h-4 w-4 text-muted-foreground" />
                     <span className="font-medium text-sm">Waiting</span>
                     <Badge variant="secondary" className="text-xs">{people.reduce((acc, p) => acc + p.pending_tasks, 0)}</Badge>
                   </div>
@@ -2729,7 +2729,7 @@ function OpportunitiesTracker({ onNavigateToDecision, navigationTarget, onNaviga
                     placeholder="e.g., New Partnership with Acme Corp"
                     value={newOpportunity.title}
                     onChange={(e) => setNewOpportunity({ ...newOpportunity, title: e.target.value })}
-                    className="w-full px-3 py-2 rounded-lg border bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                    className="w-full px-3 py-2 rounded-lg border bg-background focus:outline-none focus:ring-2 focus:ring-purple-500"
                   />
                 </div>
 
@@ -2740,7 +2740,7 @@ function OpportunitiesTracker({ onNavigateToDecision, navigationTarget, onNaviga
                     value={newOpportunity.description}
                     onChange={(e) => setNewOpportunity({ ...newOpportunity, description: e.target.value })}
                     rows={3}
-                    className="w-full px-3 py-2 rounded-lg border bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                    className="w-full px-3 py-2 rounded-lg border bg-background focus:outline-none focus:ring-2 focus:ring-purple-500"
                   />
                 </div>
 
@@ -2752,7 +2752,7 @@ function OpportunitiesTracker({ onNavigateToDecision, navigationTarget, onNaviga
                       placeholder="50000"
                       value={newOpportunity.estimated_value}
                       onChange={(e) => setNewOpportunity({ ...newOpportunity, estimated_value: e.target.value })}
-                      className="w-full px-3 py-2 rounded-lg border bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                      className="w-full px-3 py-2 rounded-lg border bg-background focus:outline-none focus:ring-2 focus:ring-purple-500"
                     />
                   </div>
 
@@ -2761,7 +2761,7 @@ function OpportunitiesTracker({ onNavigateToDecision, navigationTarget, onNaviga
                     <select
                       value={newOpportunity.source}
                       onChange={(e) => setNewOpportunity({ ...newOpportunity, source: e.target.value })}
-                      className="w-full px-3 py-2 rounded-lg border bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                      className="w-full px-3 py-2 rounded-lg border bg-background focus:outline-none focus:ring-2 focus:ring-purple-500"
                     >
                       <option value="manual">Manual Entry</option>
                       <option value="inbound">Inbound Lead</option>
@@ -2779,7 +2779,7 @@ function OpportunitiesTracker({ onNavigateToDecision, navigationTarget, onNaviga
                       type="date"
                       value={newOpportunity.due_date}
                       onChange={(e) => setNewOpportunity({ ...newOpportunity, due_date: e.target.value })}
-                      className="w-full px-3 py-2 rounded-lg border bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                      className="w-full px-3 py-2 rounded-lg border bg-background focus:outline-none focus:ring-2 focus:ring-purple-500"
                     />
                   </div>
                 </div>
@@ -2808,8 +2808,8 @@ function OpportunitiesTracker({ onNavigateToDecision, navigationTarget, onNaviga
         <Card>
           <CardContent className="py-5">
             <div className="flex items-center gap-4">
-              <div className="h-12 w-12 rounded-xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center">
-                <TrendingUp className="h-6 w-6 text-slate-600 dark:text-slate-400" />
+              <div className="h-12 w-12 rounded-xl bg-muted flex items-center justify-center">
+                <TrendingUp className="h-6 w-6 text-muted-foreground" />
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">Active Pipeline</p>
@@ -2877,7 +2877,7 @@ function OpportunitiesTracker({ onNavigateToDecision, navigationTarget, onNaviga
                 placeholder="Search opportunities..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-10 pr-4 py-2.5 rounded-lg border bg-white dark:bg-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full pl-10 pr-4 py-2.5 rounded-lg border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
 
@@ -3321,7 +3321,7 @@ function OpportunityDetailPanel({
           </div>
 
           {/* Composite Score */}
-          <div className="flex items-center gap-6 p-4 rounded-lg bg-slate-50 dark:bg-slate-800/50">
+          <div className="flex items-center gap-6 p-4 rounded-lg bg-muted/50">
             <div
               className={cn(
                 "h-20 w-20 rounded-full flex items-center justify-center text-2xl font-bold border-4",
@@ -3348,7 +3348,7 @@ function OpportunityDetailPanel({
           {hasScore && (
             <div className="grid grid-cols-3 gap-4">
               {/* Hurdle Rate - with Pass/Fail badge */}
-              <div className="p-4 rounded-lg border bg-white dark:bg-slate-900">
+              <div className="p-4 rounded-lg border bg-background">
                 <p className="text-sm text-muted-foreground mb-2">Hurdle Rate</p>
                 <div className="flex items-center justify-between">
                   <span className="text-2xl font-bold">
@@ -3370,7 +3370,7 @@ function OpportunityDetailPanel({
               </div>
 
               {/* Brand Alignment - with dots */}
-              <div className="p-4 rounded-lg border bg-white dark:bg-slate-900">
+              <div className="p-4 rounded-lg border bg-background">
                 <p className="text-sm text-muted-foreground mb-2">Brand Alignment</p>
                 <div className="flex items-center justify-between">
                   <span className="text-2xl font-bold">
@@ -3381,7 +3381,7 @@ function OpportunityDetailPanel({
               </div>
 
               {/* Strategic Fit - with dots */}
-              <div className="p-4 rounded-lg border bg-white dark:bg-slate-900">
+              <div className="p-4 rounded-lg border bg-background">
                 <p className="text-sm text-muted-foreground mb-2">Strategic Fit</p>
                 <div className="flex items-center justify-between">
                   <span className="text-2xl font-bold">
@@ -3392,7 +3392,7 @@ function OpportunityDetailPanel({
               </div>
 
               {/* Risk Assessment */}
-              <div className="p-4 rounded-lg border bg-white dark:bg-slate-900">
+              <div className="p-4 rounded-lg border bg-background">
                 <p className="text-sm text-muted-foreground mb-2">Risk Level</p>
                 <div className="flex items-center justify-between">
                   <span className="text-2xl font-bold">
@@ -3420,7 +3420,7 @@ function OpportunityDetailPanel({
               </div>
 
               {/* Resource Demand */}
-              <div className="p-4 rounded-lg border bg-white dark:bg-slate-900">
+              <div className="p-4 rounded-lg border bg-background">
                 <p className="text-sm text-muted-foreground mb-2">Resources</p>
                 <div className="flex items-center justify-between">
                   <span className="text-2xl font-bold">
@@ -3462,7 +3462,7 @@ function OpportunityDetailPanel({
           )}
 
           {opportunity.final_decision && (
-            <div className="flex items-center justify-center p-4 rounded-lg bg-slate-50 dark:bg-slate-800/50">
+            <div className="flex items-center justify-center p-4 rounded-lg bg-muted/50">
               <Badge
                 className={cn(
                   "text-sm py-2 px-6",
@@ -3520,7 +3520,7 @@ function OpportunityDetailPanel({
               {relatedItems.map((item) => (
                 <div
                   key={item.relationship_id}
-                  className="flex items-center justify-between p-2 rounded-lg bg-slate-50 dark:bg-slate-800/50"
+                  className="flex items-center justify-between p-2 rounded-lg bg-muted/50"
                 >
                   <div className="flex items-center gap-2">
                     {item.related_type === "decision" && <FileCheck className="h-4 w-4 text-blue-500" />}
@@ -3571,7 +3571,7 @@ function OpportunityDetailPanel({
               {stakeholders.map((stakeholder) => (
                 <div
                   key={stakeholder.id}
-                  className="flex items-center justify-between p-2 rounded-lg bg-slate-50 dark:bg-slate-800/50"
+                  className="flex items-center justify-between p-2 rounded-lg bg-muted/50"
                 >
                   <div className="flex items-center gap-3">
                     <div className="h-8 w-8 rounded-full bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center text-white text-sm font-medium">
@@ -3688,7 +3688,7 @@ function OpportunityDetailPanel({
                 className={cn(
                   "flex-1 px-3 py-1.5 rounded-md text-sm font-medium transition-colors",
                   stakeholderType === "user"
-                    ? "bg-white dark:bg-slate-800 shadow-sm"
+                    ? "bg-card shadow-sm"
                     : "text-muted-foreground hover:text-foreground"
                 )}
               >
@@ -3699,7 +3699,7 @@ function OpportunityDetailPanel({
                 className={cn(
                   "flex-1 px-3 py-1.5 rounded-md text-sm font-medium transition-colors",
                   stakeholderType === "contact"
-                    ? "bg-white dark:bg-slate-800 shadow-sm"
+                    ? "bg-card shadow-sm"
                     : "text-muted-foreground hover:text-foreground"
                 )}
               >
@@ -3799,7 +3799,7 @@ function ScoreBreakdownRow({
     blue: "bg-blue-100 dark:bg-blue-900/30",
     green: "bg-green-100 dark:bg-green-900/30",
     orange: "bg-orange-100 dark:bg-orange-900/30",
-    gray: "bg-gray-100 dark:bg-gray-800",
+    gray: "bg-muted",
   };
 
   const fillColors = {
@@ -3815,7 +3815,7 @@ function ScoreBreakdownRow({
     blue: "text-blue-600 dark:text-blue-400",
     green: "text-green-600 dark:text-green-400",
     orange: "text-orange-600 dark:text-orange-400",
-    gray: "text-gray-600 dark:text-gray-400",
+    gray: "text-muted-foreground",
   };
 
   return (
@@ -3918,7 +3918,7 @@ function ProjectsModule({ onNavigateToDecision }: ProjectsModuleProps) {
     urgent: "border-red-500 text-red-600",
     high: "border-orange-500 text-orange-600",
     medium: "border-blue-500 text-blue-600",
-    low: "border-gray-500 text-gray-600",
+    low: "border-gray-500 text-muted-foreground",
   };
 
   if (loading) {
@@ -3951,7 +3951,7 @@ function ProjectsModule({ onNavigateToDecision }: ProjectsModuleProps) {
                 className={cn(
                   "px-3 py-1.5 text-sm rounded-md transition-colors capitalize",
                   filter === f
-                    ? "bg-white dark:bg-slate-800 shadow-sm font-medium"
+                    ? "bg-card shadow-sm font-medium"
                     : "text-muted-foreground hover:text-foreground"
                 )}
               >
@@ -3985,7 +3985,7 @@ function ProjectsModule({ onNavigateToDecision }: ProjectsModuleProps) {
                     placeholder="Enter project name"
                     value={newProject.name}
                     onChange={(e) => setNewProject({ ...newProject, name: e.target.value })}
-                    className="w-full px-3 py-2 rounded-lg border bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-cyan-500"
+                    className="w-full px-3 py-2 rounded-lg border bg-background focus:outline-none focus:ring-2 focus:ring-cyan-500"
                   />
                 </div>
                 <div>
@@ -3995,7 +3995,7 @@ function ProjectsModule({ onNavigateToDecision }: ProjectsModuleProps) {
                     value={newProject.description}
                     onChange={(e) => setNewProject({ ...newProject, description: e.target.value })}
                     rows={3}
-                    className="w-full px-3 py-2 rounded-lg border bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-cyan-500"
+                    className="w-full px-3 py-2 rounded-lg border bg-background focus:outline-none focus:ring-2 focus:ring-cyan-500"
                   />
                 </div>
                 <div className="flex items-center gap-4">
@@ -4004,7 +4004,7 @@ function ProjectsModule({ onNavigateToDecision }: ProjectsModuleProps) {
                     <select
                       value={newProject.priority}
                       onChange={(e) => setNewProject({ ...newProject, priority: e.target.value })}
-                      className="px-3 py-2 rounded-lg border bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-cyan-500"
+                      className="px-3 py-2 rounded-lg border bg-background focus:outline-none focus:ring-2 focus:ring-cyan-500"
                     >
                       <option value="low">Low</option>
                       <option value="medium">Medium</option>
@@ -4019,7 +4019,7 @@ function ProjectsModule({ onNavigateToDecision }: ProjectsModuleProps) {
                       value={newProject.target_date}
                       onChange={(e) => setNewProject({ ...newProject, target_date: e.target.value })}
                       min={new Date().toISOString().split("T")[0]}
-                      className="px-3 py-2 rounded-lg border bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-cyan-500"
+                      className="px-3 py-2 rounded-lg border bg-background focus:outline-none focus:ring-2 focus:ring-cyan-500"
                     />
                   </div>
                   <div className="flex-1" />
@@ -4214,7 +4214,7 @@ function NotesAndMemory() {
             <input
               type="text"
               placeholder="Search notes..."
-              className="w-full px-3 py-2 pl-9 text-sm rounded-lg border bg-white dark:bg-slate-900"
+              className="w-full px-3 py-2 pl-9 text-sm rounded-lg border bg-background"
             />
             <Brain className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           </div>
@@ -4283,7 +4283,7 @@ function NotesAndMemory() {
                         {note.context_type === "strategy" && <TrendingUp className="h-3 w-3 text-green-600" />}
                         {note.context_type === "decision_principle" && <CheckCircle2 className="h-3 w-3 text-blue-600" />}
                         {!["vision", "strategy", "decision_principle"].includes(note.context_type) && (
-                          <FileCheck className="h-3 w-3 text-gray-600" />
+                          <FileCheck className="h-3 w-3 text-muted-foreground" />
                         )}
                       </div>
                       <div className="min-w-0">
@@ -4332,7 +4332,7 @@ function NotesAndMemory() {
                   <div className="space-y-4">
                     <div>
                       <label className="text-sm font-medium mb-1 block">Category</label>
-                      <select className="w-full px-3 py-2 rounded-lg border bg-white dark:bg-slate-900">
+                      <select className="w-full px-3 py-2 rounded-lg border bg-background">
                         <option value="vision">Vision</option>
                         <option value="strategy">Strategy</option>
                         <option value="decision_principle">Decision Principle</option>
@@ -4345,7 +4345,7 @@ function NotesAndMemory() {
                       <input
                         type="text"
                         placeholder="Note title..."
-                        className="w-full px-3 py-2 rounded-lg border bg-white dark:bg-slate-900"
+                        className="w-full px-3 py-2 rounded-lg border bg-background"
                       />
                     </div>
                     <div>
@@ -4353,7 +4353,7 @@ function NotesAndMemory() {
                       <textarea
                         placeholder="Write your note..."
                         rows={8}
-                        className="w-full px-3 py-2 rounded-lg border bg-white dark:bg-slate-900"
+                        className="w-full px-3 py-2 rounded-lg border bg-background"
                       />
                     </div>
                     <div className="flex justify-end gap-2">
