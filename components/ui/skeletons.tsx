@@ -636,6 +636,30 @@ export function InlineSpinner({ className }: { className?: string }) {
 }
 
 /**
+ * Chart Skeleton
+ * Placeholder for chart/graph areas
+ */
+export function ChartSkeleton() {
+  return (
+    <Card className="p-6 border-border bg-card">
+      <div className="space-y-3">
+        <Skeleton className="h-5 w-32" />
+        <Skeleton className="h-4 w-48" />
+      </div>
+      <div className="mt-6 flex items-end gap-3 h-40">
+        {Array.from({ length: 7 }).map((_, i) => (
+          <Skeleton
+            key={i}
+            className="flex-1 rounded"
+            style={{ height: `${30 + (i % 3) * 25 + (i % 2) * 15}%` }}
+          />
+        ))}
+      </div>
+    </Card>
+  );
+}
+
+/**
  * Content Loading Spinner
  * Larger centered spinner for content areas
  */

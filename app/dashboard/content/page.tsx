@@ -33,6 +33,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { EmptyState } from "@/components/ui/empty-state";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
@@ -1215,29 +1216,16 @@ export default function ContentPage() {
 
         {/* Content List */}
         {filteredContent.length === 0 ? (
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.4 }}
-            className="text-center py-16"
-          >
-            <div className="h-20 w-20 rounded-2xl bg-muted flex items-center justify-center mx-auto mb-6">
-              <PenSquare className="h-10 w-10 text-muted-foreground" />
-            </div>
-            <h3 className="text-xl font-semibold text-foreground mb-2">
-              No content yet
-            </h3>
-            <p className="text-muted-foreground mb-6">
-              Create your first piece of content
-            </p>
-            <Button
-              onClick={() => setShowNewContent(true)}
-              className="bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-700 hover:to-purple-700 text-white"
-            >
-              <Plus className="h-4 w-4 mr-2" />
-              Create Content
-            </Button>
-          </motion.div>
+          <EmptyState
+            icon={PenSquare}
+            title="No content yet"
+            description="Create your first piece of content"
+            action={{
+              label: "Create Content",
+              onClick: () => setShowNewContent(true),
+            }}
+            size="lg"
+          />
         ) : viewMode === "grid" ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {filteredContent.map((item, idx) => {

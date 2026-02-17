@@ -27,6 +27,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { EmptyState } from "@/components/ui/empty-state";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import {
@@ -514,33 +515,18 @@ export default function TasksPage() {
 
         {/* Task List */}
         {displayTasks.length === 0 ? (
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.4 }}
-            className="text-center py-16"
-          >
-            <div className="h-20 w-20 rounded-2xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center mx-auto mb-6">
-              <CheckCircle2 className="h-10 w-10 text-slate-400 dark:text-slate-500" />
-            </div>
-            <h3 className="text-xl font-semibold text-slate-900 dark:text-white mb-2">
-              {filter === "completed" ? "No completed tasks" : "No tasks yet"}
-            </h3>
-            <p className="text-slate-500 dark:text-slate-400 mb-6">
-              {filter === "completed"
-                ? "Complete some tasks to see them here"
-                : "Create your first task to get started"}
-            </p>
-            {filter !== "completed" && (
-              <Button
-                onClick={() => setShowNewTask(true)}
-                className="bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-700 hover:to-purple-700 text-white"
-              >
-                <Plus className="h-4 w-4 mr-2" />
-                Create Task
-              </Button>
-            )}
-          </motion.div>
+          <EmptyState
+            icon={CheckCircle2}
+            title={filter === "completed" ? "No completed tasks" : "No tasks yet"}
+            description={filter === "completed"
+              ? "Complete some tasks to see them here"
+              : "Create your first task to get started"}
+            action={filter !== "completed" ? {
+              label: "Create Task",
+              onClick: () => setShowNewTask(true),
+            } : undefined}
+            size="lg"
+          />
         ) : (
           <StaggeredGrid className="space-y-3">
             {displayTasks.map((task, idx) => {

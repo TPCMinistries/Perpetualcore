@@ -14,8 +14,10 @@ import { EntityProvider } from "../entities/EntityProvider";
 import { EntitySwitcherCompact } from "../entities/EntitySwitcher";
 import { KeyboardShortcuts } from "../ui/keyboard-shortcuts";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { Button } from "../ui/button";
 import { PanelLeft, PanelLeftClose } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 import { Breadcrumb } from "../ui/breadcrumb";
 
 function DashboardLayoutInner({
@@ -26,6 +28,7 @@ function DashboardLayoutInner({
   profile: any;
 }) {
   const { isCollapsed, toggleSidebar } = useSidebar();
+  const pathname = usePathname();
 
   return (
     <>
@@ -101,7 +104,17 @@ function DashboardLayoutInner({
 
         <div className="px-4 py-6 sm:px-6 md:px-8 max-w-7xl mx-auto">
           <Breadcrumb />
-          {children}
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={pathname}
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -8 }}
+              transition={{ duration: 0.15, ease: "easeOut" }}
+            >
+              {children}
+            </motion.div>
+          </AnimatePresence>
         </div>
       </main>
     </>

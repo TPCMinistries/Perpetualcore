@@ -22,6 +22,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
+import { EmptyState } from "@/components/ui/empty-state";
 import { toast } from "sonner";
 import {
   Plus,
@@ -323,25 +324,16 @@ export default function TeamConversationsPage() {
             <Loader2 className="h-8 w-8 animate-spin text-foreground" />
           </div>
         ) : conversations.length === 0 ? (
-          <div className="rounded-2xl border-2 border-dashed border-border bg-background p-16 text-center">
-            <div className="inline-flex items-center justify-center w-20 h-20 rounded-2xl bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-800 dark:to-slate-900 shadow-sm mb-6">
-              <MessageSquare className="h-10 w-10 text-foreground" />
-            </div>
-            <h3 className="text-2xl font-bold text-foreground">
-              No conversations yet
-            </h3>
-            <p className="mt-3 text-base text-muted-foreground max-w-md mx-auto">
-              Get started by creating your first team conversation and start collaborating with AI assistance
-            </p>
-            <Button
-              onClick={() => setCreateModalOpen(true)}
-              size="lg"
-              className="mt-6 bg-slate-900 dark:bg-slate-100 hover:bg-slate-800 dark:hover:bg-slate-200 text-white dark:text-slate-900 shadow-lg"
-            >
-              <Plus className="mr-2 h-5 w-5" />
-              Create Conversation
-            </Button>
-          </div>
+          <EmptyState
+            icon={MessageSquare}
+            title="No conversations yet"
+            description="Get started by creating your first team conversation and start collaborating with AI assistance"
+            action={{
+              label: "Create Conversation",
+              onClick: () => setCreateModalOpen(true),
+            }}
+            size="lg"
+          />
         ) : (
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {conversations.map((conversation) => (

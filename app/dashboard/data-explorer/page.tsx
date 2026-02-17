@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { EmptyState } from "@/components/ui/empty-state";
 import { Skeleton } from "@/components/ui/skeleton";
 import { TableViewer } from "@/components/data-explorer/TableViewer";
 import {
@@ -200,12 +201,12 @@ export default function DataExplorerPage() {
       </div>
 
       {tables.length === 0 && (
-        <Card>
-          <CardContent className="py-12 text-center">
-            <Database className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-            <p className="text-muted-foreground">No accessible tables found</p>
-          </CardContent>
-        </Card>
+        <EmptyState
+          icon={Database}
+          title="No accessible tables"
+          description="No accessible tables found in the database"
+          size="sm"
+        />
       )}
 
       {/* Features */}
