@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { AddTeamMemberRequest } from "@/types/work";
+import { logAudit } from "@/lib/audit/logger";
 
 interface RouteParams {
   params: Promise<{ teamId: string }>;
@@ -206,6 +207,16 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
       profiles: undefined,
     };
 
+    logAudit({
+      event: "TEAM_MEMBER_ADDED",
+      user_id: user.id,
+      user_email: user.email ?? undefined,
+      resource_type: "team",
+      resource_id: teamId,
+      description: `Added member ${body.user_id} to team`,
+      details: { added_user_id: body.user_id, role: body.role || "member" },
+    });
+
     return NextResponse.json({ member: transformedMember }, { status: 201 });
   } catch (error) {
     console.error("Team members API error:", error);
@@ -311,6 +322,16 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
         { status: 500 }
       );
     }
+
+    logAudit({
+      event: "TEAM_MEMBER_REMOVED",
+      user_id: user.id,
+      user_email: user.email ?? undefined,
+      resource_type: "team",
+      resource_id: teamId,
+      description: `Removed member ${userId} from team`,
+      details: { removed_user_id: userId },
+    });
 
     return NextResponse.json({ success: true });
   } catch (error) {

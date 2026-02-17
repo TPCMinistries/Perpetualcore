@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { SSOProvider } from "@/types";
+import { logAudit, extractRequestContext } from "@/lib/audit/logger";
 
 // GET /api/sso/providers
 // Get all SSO providers for the user's organization
@@ -200,6 +201,20 @@ export async function POST(request: Request) {
         { status: 500 }
       );
     }
+
+    // Audit log: SSO provider created
+    const reqCtx = extractRequestContext(request);
+    logAudit({
+      event: "SSO_PROVIDER_CREATED",
+      resource_type: "sso_provider",
+      resource_id: provider.id,
+      resource_name: provider.provider_name,
+      description: `SSO provider "${provider.provider_name}" (${provider.provider_type}) created`,
+      user_id: user.id,
+      organization_id: profile.organization_id,
+      ip_address: reqCtx.ip_address || undefined,
+      user_agent: reqCtx.user_agent || undefined,
+    });
 
     return NextResponse.json({ provider }, { status: 201 });
   } catch (error) {

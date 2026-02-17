@@ -13,7 +13,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { ArrowLeft, Save, Sparkles } from "lucide-react";
+import { ArrowLeft, Save, Sparkles, PenTool } from "lucide-react";
 import { toast } from "sonner";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -207,15 +207,21 @@ export default function NewWorkflowPage() {
               </Select>
             </div>
 
-            {/* Info Box */}
+            {/* Visual Builder CTA */}
             <div className="bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
               <div className="flex gap-2">
-                <Sparkles className="h-5 w-5 text-blue-600 dark:text-blue-400 mt-0.5 flex-shrink-0" />
+                <PenTool className="h-5 w-5 text-blue-600 dark:text-blue-400 mt-0.5 flex-shrink-0" />
                 <div className="text-sm text-blue-900 dark:text-blue-100">
-                  <p className="font-medium mb-1">Coming Soon: Visual Workflow Builder</p>
-                  <p className="text-blue-700 dark:text-blue-300">
-                    For now, workflows are created with basic settings. A drag-and-drop visual builder with AI assistants, conditions, and transformations is coming in the next update!
+                  <p className="font-medium mb-1">Prefer a visual approach?</p>
+                  <p className="text-blue-700 dark:text-blue-300 mb-3">
+                    Use the drag-and-drop Visual Workflow Builder to design workflows with AI assistants, conditions, and more.
                   </p>
+                  <Button variant="outline" size="sm" asChild className="bg-white dark:bg-slate-900">
+                    <Link href="/dashboard/workflows/new/builder">
+                      <PenTool className="mr-2 h-3 w-3" />
+                      Use Visual Builder
+                    </Link>
+                  </Button>
                 </div>
               </div>
             </div>

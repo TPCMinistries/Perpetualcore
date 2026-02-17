@@ -41,6 +41,8 @@ import { formatDistanceToNow } from "date-fns";
 import { motion } from "framer-motion";
 import { DashboardPageWrapper, DashboardHeader } from "@/components/ui/dashboard-header";
 import { StatCard, StatCardGrid } from "@/components/ui/stat-card";
+import AuditLogDetail from "@/components/admin/AuditLogDetail";
+import AuditLogExportDialog from "@/components/admin/AuditLogExportDialog";
 
 const cardVariants = {
   hidden: { opacity: 0, y: 20 },
@@ -132,6 +134,13 @@ export default function AuditLogsPage() {
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [totalRecords, setTotalRecords] = useState(0);
+
+  // Detail sheet
+  const [selectedLogId, setSelectedLogId] = useState<string | null>(null);
+  const [detailOpen, setDetailOpen] = useState(false);
+
+  // Export dialog
+  const [exportOpen, setExportOpen] = useState(false);
 
   // Filters
   const [filters, setFilters] = useState({
@@ -311,6 +320,7 @@ export default function AuditLogsPage() {
             <Button
               variant="outline"
               className="border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800"
+              onClick={() => setExportOpen(true)}
             >
               <Download className="h-4 w-4 mr-2" />
               Export
@@ -512,7 +522,11 @@ export default function AuditLogsPage() {
                       variants={cardVariants}
                       initial="hidden"
                       animate="visible"
-                      className="flex items-start justify-between p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 hover:border-violet-300 dark:hover:border-violet-700 hover:shadow-md transition-all"
+                      className="flex items-start justify-between p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 hover:border-violet-300 dark:hover:border-violet-700 hover:shadow-md transition-all cursor-pointer"
+                      onClick={() => {
+                        setSelectedLogId(log.id);
+                        setDetailOpen(true);
+                      }}
                     >
                       <div className="flex items-start gap-4 flex-1">
                         <div
@@ -620,6 +634,19 @@ export default function AuditLogsPage() {
           </Card>
         </motion.div>
       </div>
+
+      {/* Detail Sheet */}
+      <AuditLogDetail
+        logId={selectedLogId}
+        open={detailOpen}
+        onOpenChange={setDetailOpen}
+      />
+
+      {/* Export Dialog */}
+      <AuditLogExportDialog
+        open={exportOpen}
+        onOpenChange={setExportOpen}
+      />
     </DashboardPageWrapper>
   );
 }

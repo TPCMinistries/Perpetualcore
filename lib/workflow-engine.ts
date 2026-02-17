@@ -3,7 +3,7 @@
  * Handles the execution of workflow nodes and manages execution state
  */
 
-import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/server";
 
 // Node types
 export type NodeType = "input" | "assistant" | "condition" | "output" | "custom";
@@ -69,7 +69,7 @@ export class WorkflowExecutionEngine {
    * Initialize the Supabase client
    */
   async init() {
-    this.supabase = createClient();
+    this.supabase = createAdminClient();
   }
 
   /**

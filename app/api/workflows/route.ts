@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { gateFeature } from "@/lib/features/gate";
+import { logAudit, extractRequestContext } from "@/lib/audit/logger";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -164,6 +165,20 @@ export async function POST(request: NextRequest) {
         { status: 500 }
       );
     }
+
+    // Audit log: workflow created
+    const reqCtx = extractRequestContext(request);
+    logAudit({
+      event: "WORKFLOW_CREATED",
+      resource_type: "workflow",
+      resource_id: workflow.id,
+      resource_name: workflow.name,
+      description: `Workflow "${workflow.name}" created`,
+      user_id: user.id,
+      organization_id: profile.organization_id,
+      ip_address: reqCtx.ip_address || undefined,
+      user_agent: reqCtx.user_agent || undefined,
+    });
 
     return NextResponse.json({
       message: "Workflow created successfully",

@@ -26,6 +26,7 @@ import {
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
 import { useEntityContext, useCurrentEntityIds } from "@/components/entities/EntityProvider";
+import { DashboardPageWrapper, DashboardHeader } from "@/components/ui/dashboard-header";
 import { Brand } from "@/types/entities";
 
 export default function BrandsPage() {
@@ -107,32 +108,18 @@ export default function BrandsPage() {
   }
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <div className="flex items-center gap-3">
-            <h1 className="text-2xl font-bold text-slate-900 dark:text-white">
-              Brands
-            </h1>
-            {currentEntity && (
-              <Badge variant="outline" className="gap-1">
-                <Building2 className="h-3 w-3" />
-                {currentEntity.name}
-              </Badge>
-            )}
-          </div>
-          <p className="text-muted-foreground mt-1">
-            Manage your brand identities and content strategies
-          </p>
-        </div>
-        <Link href="/dashboard/brands/new">
-          <Button className="gap-2">
-            <Plus className="h-4 w-4" />
-            New Brand
-          </Button>
-        </Link>
-      </div>
+    <DashboardPageWrapper>
+      <DashboardHeader
+        title="Brands"
+        subtitle="Manage your brand identities and content strategies"
+        icon={Palette}
+        iconColor="rose"
+        badge={currentEntity ? { label: currentEntity.name, icon: Building2 } : undefined}
+        stats={brands.length > 0 ? [{ label: "brands", value: brands.length }] : undefined}
+        actions={[
+          { label: "New Brand", icon: Plus, href: "/dashboard/brands/new", variant: "primary" },
+        ]}
+      />
 
       {/* Stats Cards */}
       <div className="grid gap-4 md:grid-cols-4">
@@ -309,6 +296,6 @@ export default function BrandsPage() {
           })}
         </div>
       )}
-    </div>
+    </DashboardPageWrapper>
   );
 }

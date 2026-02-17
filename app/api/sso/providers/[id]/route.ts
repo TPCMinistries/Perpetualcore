@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { logAudit, extractRequestContext } from "@/lib/audit/logger";
 
 // GET /api/sso/providers/[id]
 // Get a specific SSO provider
@@ -187,6 +188,21 @@ export async function PATCH(
       );
     }
 
+    // Audit log: SSO provider updated
+    const reqCtxPatch = extractRequestContext(request);
+    logAudit({
+      event: "SSO_PROVIDER_UPDATED",
+      resource_type: "sso_provider",
+      resource_id: provider.id,
+      resource_name: provider.provider_name,
+      description: `SSO provider "${provider.provider_name}" updated`,
+      details: { updated_fields: Object.keys(updates) },
+      user_id: user.id,
+      organization_id: profile.organization_id,
+      ip_address: reqCtxPatch.ip_address || undefined,
+      user_agent: reqCtxPatch.user_agent || undefined,
+    });
+
     return NextResponse.json({ provider });
   } catch (error) {
     console.error("SSO provider PATCH error:", error);
@@ -269,6 +285,19 @@ export async function DELETE(
         { status: 500 }
       );
     }
+
+    // Audit log: SSO provider deleted
+    const reqCtxDel = extractRequestContext(request);
+    logAudit({
+      event: "SSO_PROVIDER_DELETED",
+      resource_type: "sso_provider",
+      resource_id: existingProvider.id,
+      description: `SSO provider deleted`,
+      user_id: user.id,
+      organization_id: profile.organization_id,
+      ip_address: reqCtxDel.ip_address || undefined,
+      user_agent: reqCtxDel.user_agent || undefined,
+    });
 
     return NextResponse.json({ success: true });
   } catch (error) {

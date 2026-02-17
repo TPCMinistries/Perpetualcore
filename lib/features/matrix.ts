@@ -117,6 +117,50 @@ export const FEATURE_MATRIX: Record<string, FeatureLimit> = {
   },
 
   // ========================================
+  // COMPLIANCE & SECURITY
+  // ========================================
+  'ip_whitelist': {
+    free: false,
+    starter: false,
+    pro: false,
+    team: false,
+    business: true,
+    enterprise: true,
+  },
+  'session_management': {
+    free: false,
+    starter: false,
+    pro: false,
+    team: true,
+    business: true,
+    enterprise: true,
+  },
+  'compliance_dashboard': {
+    free: false,
+    starter: false,
+    pro: false,
+    team: false,
+    business: true,
+    enterprise: true,
+  },
+  'data_retention_policies': {
+    free: false,
+    starter: false,
+    pro: false,
+    team: false,
+    business: true,
+    enterprise: true,
+  },
+  'mfa_enforcement': {
+    free: false,
+    starter: false,
+    pro: false,
+    team: true,
+    business: true,
+    enterprise: true,
+  },
+
+  // ========================================
   // TEAM FEATURES
   // ========================================
   'team_members': {
@@ -379,7 +423,12 @@ export const FEATURE_CATEGORIES = {
   team: {
     name: 'Team & Security',
     description: 'Team management and security features',
-    features: ['team_members', 'sso_saml', 'rbac', 'audit_logs'],
+    features: ['team_members', 'sso_saml', 'rbac', 'audit_logs', 'session_management', 'mfa_enforcement'],
+  },
+  compliance: {
+    name: 'Compliance & Security',
+    description: 'Enterprise compliance and security controls',
+    features: ['ip_whitelist', 'compliance_dashboard', 'data_retention_policies'],
   },
   storage: {
     name: 'Storage & Documents',

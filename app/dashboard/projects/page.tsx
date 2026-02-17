@@ -46,7 +46,6 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -69,6 +68,7 @@ import {
 } from "@/types/work";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
+import { DashboardPageWrapper, DashboardHeader } from "@/components/ui/dashboard-header";
 import { useCurrentEntityIds, useEntityContext } from "@/components/entities/EntityProvider";
 
 // Dynamic stage type from API
@@ -691,32 +691,19 @@ Respond ONLY with valid JSON, no other text.`
   }
 
   return (
-    <div className="h-full flex flex-col">
-      {/* Header */}
-      <div className="flex items-center justify-between p-6 border-b">
-        <div>
-          <div className="flex items-center gap-3">
-            <h1 className="text-3xl font-bold">Projects</h1>
-            <Badge variant="outline" className="gap-1">
-              {currentEntity ? (
-                <>
-                  <Building2 className="h-3 w-3" />
-                  {currentEntity.name}
-                </>
-              ) : (
-                <>
-                  <Users className="h-3 w-3" />
-                  All Entities
-                </>
-              )}
-            </Badge>
-          </div>
-          <p className="text-muted-foreground mt-1">
-            {totalCount} project{totalCount !== 1 ? "s" : ""} across all stages
-          </p>
-        </div>
-        <div className="flex items-center gap-3">
-          {/* Team Filter */}
+    <DashboardPageWrapper>
+      <DashboardHeader
+        title="Projects"
+        subtitle={`${totalCount} project${totalCount !== 1 ? "s" : ""} across all stages`}
+        icon={FolderKanban}
+        iconColor="amber"
+        badge={currentEntity ? { label: currentEntity.name, icon: Building2 } : { label: "All Entities", icon: Users }}
+        actions={[
+          { label: "Pipeline", icon: Settings, onClick: () => setStageSettingsOpen(true), variant: "outline" },
+          { label: "New Project", icon: Plus, onClick: () => setCreateDialogOpen(true), variant: "primary" },
+        ]}
+      >
+        <div className="flex items-center gap-3 mt-4">
           <Select value={filterTeam} onValueChange={setFilterTeam}>
             <SelectTrigger className="w-[180px]">
               <Filter className="h-4 w-4 mr-2" />
@@ -731,46 +718,22 @@ Respond ONLY with valid JSON, no other text.`
               ))}
             </SelectContent>
           </Select>
-
-          {/* View Toggle */}
           <div className="flex items-center border rounded-lg p-1">
-            <Button
-              variant={viewMode === "kanban" ? "secondary" : "ghost"}
-              size="sm"
-              onClick={() => setViewMode("kanban")}
-            >
+            <Button variant={viewMode === "kanban" ? "secondary" : "ghost"} size="sm" onClick={() => setViewMode("kanban")}>
               <LayoutGrid className="h-4 w-4" />
             </Button>
-            <Button
-              variant={viewMode === "list" ? "secondary" : "ghost"}
-              size="sm"
-              onClick={() => setViewMode("list")}
-            >
+            <Button variant={viewMode === "list" ? "secondary" : "ghost"} size="sm" onClick={() => setViewMode("list")}>
               <List className="h-4 w-4" />
             </Button>
           </div>
+        </div>
+      </DashboardHeader>
 
-          {/* Pipeline Settings */}
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setStageSettingsOpen(true)}
-          >
-            <Settings className="h-4 w-4 mr-2" />
-            Pipeline
-          </Button>
-
-          {/* Create Button */}
-          <Dialog open={createDialogOpen} onOpenChange={(open) => {
-            setCreateDialogOpen(open);
-            if (!open) resetForm();
-          }}>
-            <DialogTrigger asChild>
-              <Button className="bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-700 hover:to-purple-700 text-white border-0">
-                <Plus className="h-4 w-4 mr-2" />
-                New Project
-              </Button>
-            </DialogTrigger>
+      {/* Create Project Dialog */}
+      <Dialog open={createDialogOpen} onOpenChange={(open) => {
+        setCreateDialogOpen(open);
+        if (!open) resetForm();
+      }}>
             <DialogContent className="max-w-2xl">
               <DialogHeader>
                 <div className="flex items-center gap-3">
@@ -1446,8 +1409,6 @@ Respond ONLY with valid JSON, no other text.`
               </DialogFooter>
             </DialogContent>
           </Dialog>
-        </div>
-      </div>
 
       {/* Pipeline Settings Dialog */}
       <Dialog open={stageSettingsOpen} onOpenChange={setStageSettingsOpen}>
@@ -1583,7 +1544,7 @@ Respond ONLY with valid JSON, no other text.`
           </div>
         </div>
       )}
-    </div>
+    </DashboardPageWrapper>
   );
 }
 

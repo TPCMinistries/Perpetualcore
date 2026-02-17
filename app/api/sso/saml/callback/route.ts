@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { validateSAMLResponse, mapSAMLAttributes } from "@/lib/sso/saml";
+import { logAudit } from "@/lib/audit/logger";
 
 // POST /api/sso/saml/callback
 // Handle SAML assertion response from IdP
@@ -68,6 +69,15 @@ export async function POST(request: Request) {
         "SAML validation failed",
         error.message
       );
+      logAudit({
+        event: "AUTH_SSO_LOGIN_FAILED",
+        resource_type: "sso_provider",
+        resource_id: providerId,
+        description: `SAML validation failed: ${error.message}`,
+        organization_id: provider.organization_id,
+        status: "failure",
+        error_message: error.message,
+      });
       return NextResponse.json(
         { error: "SAML validation failed", details: error.message },
         { status: 400 }
@@ -204,6 +214,18 @@ export async function POST(request: Request) {
 
     // Log successful attempt
     await logLoginAttempt(supabase, providerId, userId, mappedProfile.email, true);
+
+    // Audit log: SSO login success
+    logAudit({
+      event: "AUTH_SSO_LOGIN",
+      resource_type: "sso_provider",
+      resource_id: providerId,
+      resource_name: provider.provider_name,
+      description: `SAML SSO login successful for ${mappedProfile.email}`,
+      user_id: userId,
+      user_email: mappedProfile.email,
+      organization_id: provider.organization_id,
+    });
 
     // Sign in user with Supabase Auth
     const { error: signInError } = await supabase.auth.signInWithPassword({

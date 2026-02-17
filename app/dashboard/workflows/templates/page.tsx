@@ -5,10 +5,11 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { EmptyState } from "@/components/ui/empty-state";
-import { Workflow, ArrowLeft, Star, Sparkles, CheckCircle } from "lucide-react";
+import { Workflow, ArrowLeft, Star, Sparkles, CheckCircle, PenTool } from "lucide-react";
 import { toast } from "sonner";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { WORKFLOW_TEMPLATES } from "@/lib/workflows/templates";
 
 interface WorkflowTemplate {
   id: string;
@@ -26,6 +27,7 @@ export default function WorkflowTemplatesPage() {
   const [templates, setTemplates] = useState<WorkflowTemplate[]>([]);
   const [loading, setLoading] = useState(true);
   const [installingId, setInstallingId] = useState<string | null>(null);
+  const [creatingBuilderId, setCreatingBuilderId] = useState<string | null>(null);
 
   useEffect(() => {
     fetchTemplates();
@@ -67,6 +69,47 @@ export default function WorkflowTemplatesPage() {
       toast.error("An error occurred");
     } finally {
       setInstallingId(null);
+    }
+  }
+
+  async function useBuilderTemplate(templateId: string, templateName: string) {
+    setCreatingBuilderId(templateId);
+    try {
+      const template = WORKFLOW_TEMPLATES.find((t) => t.id === templateId);
+      if (!template) {
+        toast.error("Template not found");
+        return;
+      }
+
+      const response = await fetch("/api/workflows", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: template.name,
+          description: template.description,
+          icon: "⚡",
+          category: template.category,
+          trigger_type: "manual",
+          nodes: template.nodes.map((n, i) => ({
+            ...n,
+            position: { x: 250, y: i * 150 },
+          })),
+          edges: template.edges,
+        }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        toast.success(`Created "${templateName}" - opening in builder`);
+        router.push(`/dashboard/workflows/${data.workflow.id}/builder`);
+      } else {
+        const errorData = await response.json();
+        toast.error(errorData.error || "Failed to create workflow");
+      }
+    } catch (error) {
+      toast.error("An error occurred");
+    } finally {
+      setCreatingBuilderId(null);
     }
   }
 
@@ -114,12 +157,65 @@ export default function WorkflowTemplatesPage() {
         </div>
       </div>
 
-      {/* Templates Grid */}
+      {/* Visual Builder Templates */}
+      <div className="space-y-4">
+        <div className="flex items-center gap-2">
+          <PenTool className="h-5 w-5 text-slate-700 dark:text-slate-300" />
+          <h2 className="text-xl font-semibold text-slate-900 dark:text-slate-100">Visual Builder Templates</h2>
+        </div>
+        <p className="text-sm text-muted-foreground">
+          Pre-built workflows ready to customize in the drag-and-drop builder
+        </p>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {WORKFLOW_TEMPLATES.map((template) => (
+            <Card
+              key={template.id}
+              className="hover:shadow-xl transition-all duration-200 hover:scale-[1.02] flex flex-col border-2 hover:border-primary/50"
+            >
+              <CardHeader>
+                <div className="flex items-start justify-between mb-3">
+                  <Badge variant="outline" className="bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
+                    {template.category}
+                  </Badge>
+                  <Badge variant="outline" className="text-xs">
+                    {template.nodes.length} nodes
+                  </Badge>
+                </div>
+                <CardTitle className="text-xl">{template.name}</CardTitle>
+                <p className="text-sm text-muted-foreground">
+                  {template.description}
+                </p>
+              </CardHeader>
+              <CardContent className="flex-1 flex flex-col">
+                <Button
+                  className="w-full mt-auto bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700"
+                  onClick={() => useBuilderTemplate(template.id, template.name)}
+                  disabled={creatingBuilderId === template.id}
+                >
+                  {creatingBuilderId === template.id ? (
+                    <>
+                      <Sparkles className="mr-2 h-4 w-4 animate-pulse" />
+                      Creating...
+                    </>
+                  ) : (
+                    <>
+                      <PenTool className="mr-2 h-4 w-4" />
+                      Open in Builder
+                    </>
+                  )}
+                </Button>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      </div>
+
+      {/* API Templates Grid */}
       {templates.length === 0 ? (
         <EmptyState
           icon={Workflow}
-          title="No templates available"
-          description="Check back later for workflow templates"
+          title="No additional templates available"
+          description="More templates coming soon"
         />
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

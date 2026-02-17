@@ -1167,3 +1167,64 @@ export interface AccessibleDocument extends Document {
   can_edit_shared: boolean | null;
   shared_by_name: string | null;
 }
+
+// ===========================================
+// Enterprise Compliance Types
+// ===========================================
+
+export interface IPWhitelistEntry {
+  id: string;
+  organization_id: string;
+  ip_range: string;
+  label: string;
+  description: string | null;
+  created_by: string | null;
+  enabled: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface SessionPolicy {
+  id: string;
+  organization_id: string;
+  max_session_duration_hours: number;
+  idle_timeout_minutes: number;
+  enforce_mfa: boolean;
+  max_concurrent_sessions: number;
+  require_re_auth_for_sensitive: boolean;
+  allowed_auth_methods: string[];
+  created_at: string;
+  updated_at: string;
+}
+
+export type ComplianceAttestationType = 'hipaa_baa' | 'soc2_type2' | 'pen_test' | 'gdpr_dpa' | 'iso27001' | 'custom';
+export type ComplianceAttestationStatus = 'not_started' | 'in_progress' | 'completed' | 'expired' | 'needs_renewal';
+
+export interface ComplianceAttestation {
+  id: string;
+  organization_id: string;
+  attestation_type: ComplianceAttestationType;
+  title: string;
+  description: string | null;
+  status: ComplianceAttestationStatus;
+  evidence_url: string | null;
+  issued_at: string | null;
+  expires_at: string | null;
+  reviewed_by: string | null;
+  reviewed_at: string | null;
+  metadata: Json;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface DataRetentionPolicy {
+  id: string;
+  organization_id: string;
+  resource_type: 'audit_logs' | 'conversations' | 'documents' | 'voice_memos' | 'analytics';
+  retention_days: number;
+  auto_delete: boolean;
+  archive_before_delete: boolean;
+  last_cleanup_at: string | null;
+  created_at: string;
+  updated_at: string;
+}

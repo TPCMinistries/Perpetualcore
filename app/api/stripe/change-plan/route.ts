@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { stripe, STRIPE_PLANS, PlanType } from "@/lib/stripe/client";
+import { logAudit, extractRequestContext } from "@/lib/audit/logger";
 
 export async function POST(request: Request) {
   try {
@@ -134,6 +135,18 @@ export async function POST(request: Request) {
         // Proration calculation may fail if invoice is being generated
       }
     }
+
+    const ctx = extractRequestContext(request);
+    logAudit({
+      event: "PLAN_CHANGED",
+      user_id: user.id,
+      user_email: user.email ?? undefined,
+      organization_id: profile.organization_id,
+      resource_type: "subscription",
+      description: `Plan changed to ${newPlan} (${interval})`,
+      details: { new_plan: newPlan, interval, change_at: changeAt, proration_amount: prorationAmount },
+      ...ctx,
+    });
 
     return NextResponse.json({
       success: true,

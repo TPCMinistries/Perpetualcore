@@ -52,6 +52,7 @@ import {
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
+import { DashboardPageWrapper, DashboardHeader } from "@/components/ui/dashboard-header";
 import { toast } from "sonner";
 
 interface Expense {
@@ -261,28 +262,19 @@ export default function ExpensesPage() {
   const maxCategoryValue = categoryData.length > 0 ? Math.max(...categoryData.map((d) => d[1])) : 0;
 
   return (
-    <div className="flex flex-col h-full">
-      {/* Header */}
-      <div className="flex items-center justify-between p-6 border-b">
-        <div className="flex items-center gap-4">
-          <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center shadow-lg">
-            <DollarSign className="h-6 w-6 text-white" />
-          </div>
-          <div>
-            <h1 className="text-2xl font-semibold">Expense Tracker</h1>
-            <p className="text-muted-foreground">
-              Track expenses from Telegram and manual entries
-            </p>
-          </div>
-        </div>
-        <Button onClick={() => setShowAddDialog(true)}>
-          <Plus className="h-4 w-4 mr-2" />
-          Add Expense
-        </Button>
-      </div>
+    <DashboardPageWrapper>
+      <DashboardHeader
+        title="Expense Tracker"
+        subtitle="Track expenses from Telegram and manual entries"
+        icon={DollarSign}
+        iconColor="green"
+        actions={[
+          { label: "Add Expense", icon: Plus, onClick: () => setShowAddDialog(true), variant: "primary" },
+        ]}
+      />
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 p-6">
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
@@ -621,6 +613,6 @@ export default function ExpensesPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </div>
+    </DashboardPageWrapper>
   );
 }
