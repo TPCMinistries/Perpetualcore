@@ -66,7 +66,7 @@ export default function JobHistoryPage() {
       case "timeout":
         return <AlertCircle className="h-5 w-5 text-orange-600" />;
       default:
-        return <Clock className="h-5 w-5 text-gray-600" />;
+        return <Clock className="h-5 w-5 text-muted-foreground" />;
     }
   }
 
@@ -76,7 +76,7 @@ export default function JobHistoryPage() {
       failed: "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200",
       running: "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200",
       timeout: "bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200",
-      pending: "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200",
+      pending: "bg-muted text-foreground dark:bg-muted dark:text-foreground",
     };
 
     return (

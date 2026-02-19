@@ -19,6 +19,7 @@ import {
   X,
   MessageSquare,
 } from "lucide-react";
+import { useConfirm } from "@/components/ui/confirm-dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -86,17 +87,18 @@ const CATEGORY_CONFIG: Record<string, { label: string; color: string; icon: stri
   health: { label: "Health", color: "bg-red-100 text-red-700", icon: "🏥" },
   shopping: { label: "Shopping", color: "bg-indigo-100 text-indigo-700", icon: "🛒" },
   travel: { label: "Travel", color: "bg-teal-100 text-teal-700", icon: "✈️" },
-  other: { label: "Other", color: "bg-gray-100 text-gray-700", icon: "📦" },
+  other: { label: "Other", color: "bg-muted text-foreground", icon: "📦" },
 };
 
 const SOURCE_BADGES: Record<string, { label: string; color: string }> = {
   telegram: { label: "Telegram", color: "bg-blue-500 text-white" },
-  manual: { label: "Manual", color: "bg-gray-200 text-gray-700" },
+  manual: { label: "Manual", color: "bg-muted text-foreground" },
   n8n: { label: "n8n", color: "bg-orange-500 text-white" },
   import: { label: "Import", color: "bg-purple-500 text-white" },
 };
 
 export default function ExpensesPage() {
+  const { confirm } = useConfirm();
   const [expenses, setExpenses] = useState<Expense[]>([]);
   const [stats, setStats] = useState<Stats | null>(null);
   const [loading, setLoading] = useState(true);
@@ -208,7 +210,7 @@ export default function ExpensesPage() {
   };
 
   const handleDeleteExpense = async (id: string) => {
-    if (!confirm("Delete this expense?")) return;
+    if (!(await confirm("Delete this expense?"))) return;
 
     try {
       const res = await fetch(`/api/expenses?id=${id}`, { method: "DELETE" });

@@ -60,6 +60,7 @@ import {
   ExternalLink,
   Ban,
 } from "lucide-react";
+import { useConfirm } from "@/components/ui/confirm-dialog";
 import { toast } from "sonner";
 import { formatDistanceToNow } from "date-fns";
 import { EmailComposer } from "@/components/email/EmailComposer";
@@ -137,6 +138,7 @@ interface ContactInfo {
 
 export default function InboxPage() {
   // Account state
+  const { confirm } = useConfirm();
   const [accounts, setAccounts] = useState<GmailAccount[]>([]);
   const [selectedAccountId, setSelectedAccountId] = useState<string | "all">("all");
   const [loadingAccounts, setLoadingAccounts] = useState(true);
@@ -323,7 +325,7 @@ export default function InboxPage() {
   }
 
   async function disconnectAccount(accountId: string) {
-    if (!confirm("Disconnect this Gmail account?")) return;
+    if (!(await confirm("Disconnect this Gmail account?"))) return;
 
     try {
       await fetch("/api/email/gmail/disconnect", {
@@ -423,7 +425,7 @@ export default function InboxPage() {
   }
 
   async function deleteEmail(email: Email) {
-    if (!confirm("Move this email to trash?")) return;
+    if (!(await confirm("Move this email to trash?"))) return;
     try {
       await fetch(`/api/inbox/emails/${email.id}`, { method: "DELETE" });
       setEmails(prev => prev.filter(e => e.id !== email.id));
@@ -440,7 +442,7 @@ export default function InboxPage() {
     const senderEmail = email.from_email;
     const senderDomain = senderEmail.split("@")[1];
 
-    const blockType = confirm(
+    const blockType = await confirm(
       `Block all emails from ${senderDomain}? (OK = block domain, Cancel = block this email only)`
     ) ? "domain" : "email";
 

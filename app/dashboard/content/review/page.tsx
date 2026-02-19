@@ -66,7 +66,7 @@ const statusConfig: Record<ContentStatus, { label: string; color: string; icon: 
   scheduled: { label: "Scheduled", color: "bg-violet-100 text-violet-700 dark:bg-violet-900/30 dark:text-violet-400", icon: Calendar },
   published: { label: "Published", color: "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400", icon: Send },
   failed: { label: "Failed", color: "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400", icon: XCircle },
-  archived: { label: "Archived", color: "bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-400", icon: FileText },
+  archived: { label: "Archived", color: "bg-muted text-foreground dark:bg-muted dark:text-muted-foreground", icon: FileText },
 };
 
 export default function ContentReviewPage() {

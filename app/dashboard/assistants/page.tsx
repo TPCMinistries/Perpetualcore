@@ -31,6 +31,7 @@ import {
   TrendingUp,
   AlertCircle,
 } from "lucide-react";
+import { useConfirm } from "@/components/ui/confirm-dialog";
 import { toast } from "sonner";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -39,6 +40,7 @@ import { StatCard, StatCardGrid } from "@/components/ui/stat-card";
 import { FilterPills } from "@/components/ui/filter-pills";
 import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
+import { cardVariants } from "@/lib/design/animations";
 
 interface Assistant {
   id: string;
@@ -80,23 +82,12 @@ const roleIcons: { [key: string]: any } = {
   data_analysis: TrendingUp,
 };
 
-const cardVariants = {
-  hidden: { opacity: 0, y: 20 },
-  visible: (i: number) => ({
-    opacity: 1,
-    y: 0,
-    transition: {
-      delay: i * 0.05,
-      duration: 0.3,
-      ease: "easeOut",
-    },
-  }),
-};
 
 type StatusFilter = "all" | "active" | "inactive";
 
 export default function AssistantsPage() {
   const router = useRouter();
+  const { confirm } = useConfirm();
   const [assistants, setAssistants] = useState<Assistant[]>([]);
   const [stats, setStats] = useState<Stats>({
     total: 0,
@@ -145,7 +136,7 @@ export default function AssistantsPage() {
   }
 
   async function deleteAssistant(assistantId: string, name: string) {
-    if (!confirm(`Delete "${name}"? All conversations will be deleted.`)) return;
+    if (!(await confirm(`Delete "${name}"? All conversations will be deleted.`))) return;
 
     setActionLoading(assistantId);
     try {

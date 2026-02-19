@@ -15,6 +15,7 @@ import {
   Sparkles,
   Building2,
 } from "lucide-react";
+import { useConfirm } from "@/components/ui/confirm-dialog";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
@@ -34,6 +35,7 @@ export default function BrandsPage() {
   const router = useRouter();
   const { currentEntity, switchBrand, currentBrand } = useEntityContext();
   const { entityId } = useCurrentEntityIds();
+  const { confirm } = useConfirm();
   const [brands, setBrands] = useState<Brand[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [deleting, setDeleting] = useState<string | null>(null);
@@ -63,7 +65,7 @@ export default function BrandsPage() {
   };
 
   const handleDelete = async (brandId: string) => {
-    if (!confirm("Are you sure you want to delete this brand? This will also archive all associated content.")) {
+    if (!(await confirm("Are you sure you want to delete this brand? This will also archive all associated content."))) {
       return;
     }
 

@@ -67,7 +67,7 @@ export default function OrgDetailPage() {
 
   if (!data) {
     return (
-      <div className="p-8 text-center text-gray-500">
+      <div className="p-8 text-center text-muted-foreground">
         Organization not found or you don&apos;t have access.
       </div>
     );
@@ -87,7 +87,7 @@ export default function OrgDetailPage() {
           </div>
           <div>
             <h1 className="text-3xl font-bold">{org.name}</h1>
-            <p className="text-gray-500">/{org.slug}</p>
+            <p className="text-muted-foreground">/{org.slug}</p>
           </div>
         </div>
       </div>
@@ -95,7 +95,7 @@ export default function OrgDetailPage() {
       <div className="flex gap-2 text-sm">
         <Link
           href="/dashboard/admin/organizations"
-          className="px-3 py-1.5 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200"
+          className="px-3 py-1.5 bg-muted text-foreground rounded-lg hover:bg-muted"
         >
           &larr; All Organizations
         </Link>
@@ -137,7 +137,7 @@ export default function OrgDetailPage() {
             </CardHeader>
             <CardContent>
               {sso_providers.length === 0 ? (
-                <p className="text-sm text-gray-500">No SSO configured</p>
+                <p className="text-sm text-muted-foreground">No SSO configured</p>
               ) : (
                 <div className="space-y-2">
                   {sso_providers.map((provider) => (
@@ -163,7 +163,7 @@ export default function OrgDetailPage() {
             </CardHeader>
             <CardContent>
               {attestations.length === 0 ? (
-                <p className="text-sm text-gray-500">No attestations on file</p>
+                <p className="text-sm text-muted-foreground">No attestations on file</p>
               ) : (
                 <div className="space-y-2">
                   {attestations.map((att) => (
@@ -186,9 +186,9 @@ export default function OrgDetailPage() {
 
           {/* Quick Info */}
           <Card>
-            <CardContent className="p-4 text-sm text-gray-500 space-y-1">
+            <CardContent className="p-4 text-sm text-muted-foreground space-y-1">
               <p>Created: {new Date(org.created_at).toLocaleDateString()}</p>
-              <p>Org ID: <code className="text-xs bg-gray-100 px-1 rounded">{org.id}</code></p>
+              <p>Org ID: <code className="text-xs bg-muted px-1 rounded">{org.id}</code></p>
             </CardContent>
           </Card>
         </div>

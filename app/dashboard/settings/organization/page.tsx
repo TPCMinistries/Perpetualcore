@@ -35,6 +35,7 @@ import { Badge } from "@/components/ui/badge";
 import { DashboardPageWrapper, DashboardHeader } from "@/components/ui/dashboard-header";
 import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
+import { cardVariants } from "@/lib/design/animations";
 
 interface OrganizationSettings {
   name: string;
@@ -57,18 +58,6 @@ interface OrganizationSettings {
   secondary_color: string;
 }
 
-const cardVariants = {
-  hidden: { opacity: 0, y: 20 },
-  visible: (i: number) => ({
-    opacity: 1,
-    y: 0,
-    transition: {
-      delay: i * 0.1,
-      duration: 0.4,
-      ease: "easeOut",
-    },
-  }),
-};
 
 export default function OrganizationSettingsPage() {
   const [loading, setLoading] = useState(true);

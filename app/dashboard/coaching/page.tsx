@@ -130,7 +130,7 @@ const COACHING_TYPES: Record<string, { label: string; color: string }> = {
 };
 
 const STATUS_CONFIG: Record<string, { label: string; color: string }> = {
-  prospect: { label: "Prospect", color: "bg-gray-100 text-gray-700" },
+  prospect: { label: "Prospect", color: "bg-muted text-foreground" },
   active: { label: "Active", color: "bg-green-100 text-green-700" },
   paused: { label: "Paused", color: "bg-yellow-100 text-yellow-700" },
   completed: { label: "Completed", color: "bg-blue-100 text-blue-700" },

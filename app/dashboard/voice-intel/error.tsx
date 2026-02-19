@@ -22,7 +22,7 @@ export default function SectionError({
           <AlertTriangle className="h-6 w-6 text-amber-600" />
         </div>
         <h2 className="text-lg font-semibold mb-2">Failed to load Voice Intelligence</h2>
-        <p className="text-sm text-gray-600 mb-4">
+        <p className="text-sm text-muted-foreground mb-4">
           Something went wrong. Try refreshing this section.
         </p>
         <Button onClick={reset} size="sm" className="gap-2">

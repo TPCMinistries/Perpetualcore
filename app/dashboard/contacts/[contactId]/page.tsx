@@ -1589,7 +1589,7 @@ export default function ContactDetailPage() {
                         className={cn(
                           conn.strength === "close" && "border-green-500 text-green-600",
                           conn.strength === "known" && "border-blue-500 text-blue-600",
-                          conn.strength === "acquaintance" && "border-gray-400 text-gray-500"
+                          conn.strength === "acquaintance" && "border-gray-400 text-muted-foreground"
                         )}
                       >
                         {conn.strength}

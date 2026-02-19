@@ -141,7 +141,7 @@ export default function SupportPage() {
       open: { icon: AlertCircle, className: "bg-blue-50 border-blue-300 text-blue-700" },
       in_progress: { icon: Clock, className: "bg-yellow-50 border-yellow-300 text-yellow-700" },
       resolved: { icon: CheckCircle2, className: "bg-green-50 border-green-300 text-green-700" },
-      closed: { icon: XCircle, className: "bg-gray-50 border-gray-300 text-gray-700" },
+      closed: { icon: XCircle, className: "bg-muted border-border text-foreground" },
     };
     const config = variants[status as keyof typeof variants] || variants.open;
     const Icon = config.icon;
@@ -156,7 +156,7 @@ export default function SupportPage() {
 
   function getPriorityBadge(priority: string) {
     const colors = {
-      low: "bg-gray-50 border-gray-300 text-gray-700",
+      low: "bg-muted border-border text-foreground",
       medium: "bg-blue-50 border-blue-300 text-blue-700",
       high: "bg-orange-50 border-orange-300 text-orange-700",
       urgent: "bg-red-50 border-red-300 text-red-700",

@@ -277,7 +277,7 @@ export default function TeamSettingsPage() {
       owner: { icon: Crown, className: "bg-purple-50 border-purple-300 text-purple-700 dark:bg-purple-950/30 dark:border-purple-800 dark:text-purple-400" },
       admin: { icon: Shield, className: "bg-blue-50 border-blue-300 text-blue-700 dark:bg-blue-950/30 dark:border-blue-800 dark:text-blue-400" },
       member: { icon: Users, className: "bg-green-50 border-green-300 text-green-700 dark:bg-green-950/30 dark:border-green-800 dark:text-green-400" },
-      viewer: { icon: Activity, className: "bg-gray-50 border-gray-300 text-gray-700 dark:bg-gray-950/30 dark:border-gray-800 dark:text-gray-400" },
+      viewer: { icon: Activity, className: "bg-muted border-border text-foreground dark:bg-muted dark:border-border dark:text-muted-foreground" },
     };
     const config = variants[role as keyof typeof variants] || variants.member;
     const Icon = config.icon;
@@ -560,7 +560,7 @@ export default function TeamSettingsPage() {
 
             <div className="p-4 rounded-lg border">
               <div className="flex items-center gap-2 mb-2">
-                <Activity className="h-5 w-5 text-gray-600" />
+                <Activity className="h-5 w-5 text-muted-foreground" />
                 <h3 className="font-semibold">Viewer</h3>
               </div>
               <p className="text-sm text-muted-foreground">

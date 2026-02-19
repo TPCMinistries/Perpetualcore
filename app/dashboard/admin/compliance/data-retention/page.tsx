@@ -111,7 +111,7 @@ export default function DataRetentionPage() {
     <div className="p-4 sm:p-8 max-w-7xl mx-auto space-y-6">
       <div>
         <h1 className="text-3xl font-bold">Data Retention Policies</h1>
-        <p className="text-gray-600 mt-1">
+        <p className="text-muted-foreground mt-1">
           Configure how long data is retained and when it&apos;s automatically cleaned up
         </p>
       </div>
@@ -119,7 +119,7 @@ export default function DataRetentionPage() {
       <div className="flex gap-2 text-sm">
         <Link
           href="/dashboard/admin/compliance"
-          className="px-3 py-1.5 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200"
+          className="px-3 py-1.5 bg-muted text-foreground rounded-lg hover:bg-muted"
         >
           &larr; Compliance Overview
         </Link>
@@ -140,7 +140,7 @@ export default function DataRetentionPage() {
                     </div>
                     <div>
                       <h3 className="font-medium">{label}</h3>
-                      <p className="text-xs text-gray-500">{description}</p>
+                      <p className="text-xs text-muted-foreground">{description}</p>
                     </div>
                   </div>
 

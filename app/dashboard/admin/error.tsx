@@ -20,7 +20,7 @@ export default function AdminError({
       <div className="text-center max-w-md">
         <AlertTriangle className="h-12 w-12 text-amber-500 mx-auto mb-4" />
         <h2 className="text-xl font-semibold mb-2">Admin Dashboard Error</h2>
-        <p className="text-gray-600 text-sm mb-4">
+        <p className="text-muted-foreground text-sm mb-4">
           Something went wrong loading the admin dashboard. This may be a permissions issue.
         </p>
         <Button onClick={reset}>Try Again</Button>

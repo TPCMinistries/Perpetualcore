@@ -153,7 +153,7 @@ export default function SuggestionsPage() {
       case "medium":
         return "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200";
       default:
-        return "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200";
+        return "bg-muted text-foreground dark:bg-muted dark:text-foreground";
     }
   }
 
@@ -170,7 +170,7 @@ export default function SuggestionsPage() {
     };
 
     return (
-      <Badge variant="outline" className={colors[category] || "bg-gray-100"}>
+      <Badge variant="outline" className={colors[category] || "bg-muted"}>
         {category}
       </Badge>
     );
@@ -254,9 +254,9 @@ export default function SuggestionsPage() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-muted-foreground">Dismissed</p>
-                <p className="text-2xl font-bold text-gray-600">{stats.dismissed}</p>
+                <p className="text-2xl font-bold text-muted-foreground">{stats.dismissed}</p>
               </div>
-              <X className="h-8 w-8 text-gray-600" />
+              <X className="h-8 w-8 text-muted-foreground" />
             </div>
           </CardContent>
         </Card>

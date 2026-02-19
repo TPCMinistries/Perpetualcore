@@ -10,9 +10,11 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { Shield, Plus, Edit, Trash2, Users, Lock } from "lucide-react";
+import { useConfirm } from "@/components/ui/confirm-dialog";
 import { Role, Permission } from "@/types";
 
 export default function RolesSettingsPage() {
+  const { confirm } = useConfirm();
   const [roles, setRoles] = useState<Role[]>([]);
   const [permissions, setPermissions] = useState<Permission[]>([]);
   const [groupedPermissions, setGroupedPermissions] = useState<Record<string, any>>({});
@@ -74,7 +76,7 @@ export default function RolesSettingsPage() {
   }
 
   async function handleDelete(roleId: string) {
-    if (!confirm("Are you sure you want to delete this role?")) {
+    if (!(await confirm("Are you sure you want to delete this role?"))) {
       return;
     }
 
