@@ -11,33 +11,33 @@ interface OrganizationSectionProps {
 
 export function OrganizationSection({ onManageTeam, onViewBilling }: OrganizationSectionProps) {
   return (
-    <Card className="border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-xl p-8">
+    <Card className="border-border dark:border-border bg-card shadow-xl p-8">
       <div className="flex items-center gap-3 mb-6">
-        <div className="h-10 w-10 rounded-lg bg-slate-900 dark:bg-slate-100 flex items-center justify-center">
-          <Building2 className="h-5 w-5 text-white dark:text-slate-900" />
+        <div className="h-10 w-10 rounded-lg bg-slate-900 dark:bg-muted flex items-center justify-center">
+          <Building2 className="h-5 w-5 text-white dark:text-foreground" />
         </div>
         <div>
-          <h2 className="text-xl font-semibold text-slate-900 dark:text-white">Organization Settings</h2>
-          <p className="text-sm text-slate-600 dark:text-slate-400">Manage your organization and team</p>
+          <h2 className="text-xl font-semibold text-foreground dark:text-white">Organization Settings</h2>
+          <p className="text-sm text-muted-foreground dark:text-muted-foreground">Manage your organization and team</p>
         </div>
       </div>
 
       <div className="space-y-6">
         <div className="grid grid-cols-3 gap-6">
-          <Card className="border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/50 p-6">
-            <Users className="h-8 w-8 text-slate-900 dark:text-slate-100 mb-3" />
-            <p className="text-2xl font-bold text-slate-900 dark:text-white">5</p>
-            <p className="text-sm text-slate-600 dark:text-slate-400">Team Members</p>
+          <Card className="border-border dark:border-border bg-muted dark:bg-card/50 p-6">
+            <Users className="h-8 w-8 text-foreground dark:text-foreground mb-3" />
+            <p className="text-2xl font-bold text-foreground dark:text-white">5</p>
+            <p className="text-sm text-muted-foreground dark:text-muted-foreground">Team Members</p>
           </Card>
-          <Card className="border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/50 p-6">
-            <Globe className="h-8 w-8 text-slate-900 dark:text-slate-100 mb-3" />
-            <p className="text-2xl font-bold text-slate-900 dark:text-white">3</p>
-            <p className="text-sm text-slate-600 dark:text-slate-400">Active Spaces</p>
+          <Card className="border-border dark:border-border bg-muted dark:bg-card/50 p-6">
+            <Globe className="h-8 w-8 text-foreground dark:text-foreground mb-3" />
+            <p className="text-2xl font-bold text-foreground dark:text-white">3</p>
+            <p className="text-sm text-muted-foreground dark:text-muted-foreground">Active Spaces</p>
           </Card>
-          <Card className="border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/50 p-6">
-            <CreditCard className="h-8 w-8 text-slate-900 dark:text-slate-100 mb-3" />
-            <p className="text-2xl font-bold text-slate-900 dark:text-white">Pro</p>
-            <p className="text-sm text-slate-600 dark:text-slate-400">Current Plan</p>
+          <Card className="border-border dark:border-border bg-muted dark:bg-card/50 p-6">
+            <CreditCard className="h-8 w-8 text-foreground dark:text-foreground mb-3" />
+            <p className="text-2xl font-bold text-foreground dark:text-white">Pro</p>
+            <p className="text-sm text-muted-foreground dark:text-muted-foreground">Current Plan</p>
           </Card>
         </div>
 

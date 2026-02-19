@@ -59,7 +59,7 @@ interface ContentWithBrand extends ContentItem {
 }
 
 const statusConfig: Record<ContentStatus, { label: string; color: string; icon: any }> = {
-  draft: { label: "Draft", color: "bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300", icon: Edit },
+  draft: { label: "Draft", color: "bg-muted text-foreground dark:bg-card dark:text-muted-foreground", icon: Edit },
   pending_review: { label: "Pending Review", color: "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400", icon: Clock },
   changes_requested: { label: "Changes Requested", color: "bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400", icon: MessageSquare },
   approved: { label: "Approved", color: "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400", icon: CheckCircle2 },
@@ -178,7 +178,7 @@ export default function ContentReviewPage() {
           </Link>
           <div>
             <div className="flex items-center gap-3">
-              <h1 className="text-2xl font-bold text-slate-900 dark:text-white">
+              <h1 className="text-2xl font-bold text-foreground dark:text-white">
                 Content Review
               </h1>
               {currentEntity && (
@@ -338,7 +338,7 @@ export default function ContentReviewPage() {
                 {selectedContent.media_urls && selectedContent.media_urls.length > 0 && (
                   <div className="mt-3 flex gap-2">
                     {selectedContent.media_urls.map((url, i) => (
-                      <div key={i} className="w-16 h-16 bg-slate-200 dark:bg-slate-700 rounded-lg overflow-hidden">
+                      <div key={i} className="w-16 h-16 bg-muted dark:bg-muted rounded-lg overflow-hidden">
                         <img src={url} alt="" className="w-full h-full object-cover" />
                       </div>
                     ))}

@@ -21,24 +21,24 @@ interface NotificationSettingsProps {
 
 export function NotificationSettings({ preferences, onUpdatePreference }: NotificationSettingsProps) {
   return (
-    <Card className="border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-xl p-8">
+    <Card className="border-border dark:border-border bg-card shadow-xl p-8">
       <div className="flex items-center gap-3 mb-6">
-        <div className="h-10 w-10 rounded-lg bg-slate-900 dark:bg-slate-100 flex items-center justify-center">
-          <Bell className="h-5 w-5 text-white dark:text-slate-900" />
+        <div className="h-10 w-10 rounded-lg bg-slate-900 dark:bg-muted flex items-center justify-center">
+          <Bell className="h-5 w-5 text-white dark:text-foreground" />
         </div>
         <div>
-          <h2 className="text-xl font-semibold text-slate-900 dark:text-white">Notifications</h2>
-          <p className="text-sm text-slate-600 dark:text-slate-400">Control how you receive updates</p>
+          <h2 className="text-xl font-semibold text-foreground dark:text-white">Notifications</h2>
+          <p className="text-sm text-muted-foreground dark:text-muted-foreground">Control how you receive updates</p>
         </div>
       </div>
 
       <div className="space-y-4">
-        <div className="flex items-center justify-between p-4 rounded-lg border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
+        <div className="flex items-center justify-between p-4 rounded-lg border border-border dark:border-border hover:bg-muted dark:hover:bg-muted/50 transition-colors">
           <div className="flex items-center gap-3">
             <Mail className="h-5 w-5 text-amber-500" />
             <div>
-              <p className="font-medium text-slate-900 dark:text-white">Email Notifications</p>
-              <p className="text-sm text-slate-600 dark:text-slate-400">Receive important updates via email</p>
+              <p className="font-medium text-foreground dark:text-white">Email Notifications</p>
+              <p className="text-sm text-muted-foreground dark:text-muted-foreground">Receive important updates via email</p>
             </div>
           </div>
           <Switch
@@ -47,12 +47,12 @@ export function NotificationSettings({ preferences, onUpdatePreference }: Notifi
           />
         </div>
 
-        <div className="flex items-center justify-between p-4 rounded-lg border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
+        <div className="flex items-center justify-between p-4 rounded-lg border border-border dark:border-border hover:bg-muted dark:hover:bg-muted/50 transition-colors">
           <div className="flex items-center gap-3">
             <Laptop className="h-5 w-5 text-blue-500" />
             <div>
-              <p className="font-medium text-slate-900 dark:text-white">Desktop Notifications</p>
-              <p className="text-sm text-slate-600 dark:text-slate-400">Show browser push notifications</p>
+              <p className="font-medium text-foreground dark:text-white">Desktop Notifications</p>
+              <p className="text-sm text-muted-foreground dark:text-muted-foreground">Show browser push notifications</p>
             </div>
           </div>
           <Switch
@@ -61,12 +61,12 @@ export function NotificationSettings({ preferences, onUpdatePreference }: Notifi
           />
         </div>
 
-        <div className="flex items-center justify-between p-4 rounded-lg border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
+        <div className="flex items-center justify-between p-4 rounded-lg border border-border dark:border-border hover:bg-muted dark:hover:bg-muted/50 transition-colors">
           <div className="flex items-center gap-3">
             <FileText className="h-5 w-5 text-green-500" />
             <div>
-              <p className="font-medium text-slate-900 dark:text-white">Document Updates</p>
-              <p className="text-sm text-slate-600 dark:text-slate-400">Notify when documents are shared or edited</p>
+              <p className="font-medium text-foreground dark:text-white">Document Updates</p>
+              <p className="text-sm text-muted-foreground dark:text-muted-foreground">Notify when documents are shared or edited</p>
             </div>
           </div>
           <Switch
@@ -75,12 +75,12 @@ export function NotificationSettings({ preferences, onUpdatePreference }: Notifi
           />
         </div>
 
-        <div className="flex items-center justify-between p-4 rounded-lg border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
+        <div className="flex items-center justify-between p-4 rounded-lg border border-border dark:border-border hover:bg-muted dark:hover:bg-muted/50 transition-colors">
           <div className="flex items-center gap-3">
             <Users className="h-5 w-5 text-purple-500" />
             <div>
-              <p className="font-medium text-slate-900 dark:text-white">Team Activity</p>
-              <p className="text-sm text-slate-600 dark:text-slate-400">Get notified of team member actions</p>
+              <p className="font-medium text-foreground dark:text-white">Team Activity</p>
+              <p className="text-sm text-muted-foreground dark:text-muted-foreground">Get notified of team member actions</p>
             </div>
           </div>
           <Switch
@@ -89,12 +89,12 @@ export function NotificationSettings({ preferences, onUpdatePreference }: Notifi
           />
         </div>
 
-        <div className="flex items-center justify-between p-4 rounded-lg border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
+        <div className="flex items-center justify-between p-4 rounded-lg border border-border dark:border-border hover:bg-muted dark:hover:bg-muted/50 transition-colors">
           <div className="flex items-center gap-3">
             <BarChart3 className="h-5 w-5 text-indigo-500" />
             <div>
-              <p className="font-medium text-slate-900 dark:text-white">Weekly Digest</p>
-              <p className="text-sm text-slate-600 dark:text-slate-400">Summary email every Monday morning</p>
+              <p className="font-medium text-foreground dark:text-white">Weekly Digest</p>
+              <p className="text-sm text-muted-foreground dark:text-muted-foreground">Summary email every Monday morning</p>
             </div>
           </div>
           <Switch
@@ -103,12 +103,12 @@ export function NotificationSettings({ preferences, onUpdatePreference }: Notifi
           />
         </div>
 
-        <div className="flex items-center justify-between p-4 rounded-lg border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
+        <div className="flex items-center justify-between p-4 rounded-lg border border-border dark:border-border hover:bg-muted dark:hover:bg-muted/50 transition-colors">
           <div className="flex items-center gap-3">
-            {preferences.soundEffects ? <Volume2 className="h-5 w-5 text-pink-500" /> : <VolumeX className="h-5 w-5 text-slate-400" />}
+            {preferences.soundEffects ? <Volume2 className="h-5 w-5 text-pink-500" /> : <VolumeX className="h-5 w-5 text-muted-foreground" />}
             <div>
-              <p className="font-medium text-slate-900 dark:text-white">Sound Effects</p>
-              <p className="text-sm text-slate-600 dark:text-slate-400">Play audio feedback for actions</p>
+              <p className="font-medium text-foreground dark:text-white">Sound Effects</p>
+              <p className="text-sm text-muted-foreground dark:text-muted-foreground">Play audio feedback for actions</p>
             </div>
           </div>
           <Switch

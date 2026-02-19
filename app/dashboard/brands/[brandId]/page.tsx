@@ -226,7 +226,7 @@ export default function BrandDetailPage({ params }: PageProps) {
               {brand.name.charAt(0).toUpperCase()}
             </div>
             <div>
-              <h1 className="text-2xl font-bold text-slate-900 dark:text-white">
+              <h1 className="text-2xl font-bold text-foreground dark:text-white">
                 {brand.name}
               </h1>
               <div className="flex items-center gap-2 mt-1">

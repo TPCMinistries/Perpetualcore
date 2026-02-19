@@ -184,8 +184,8 @@ export default function AdminOverviewPage() {
           value={`${summary.churn_rate.toFixed(1)}%`}
           subtitle="last 30 days"
           icon={summary.churn_rate > 5 ? AlertTriangle : Users}
-          iconColor={summary.churn_rate > 5 ? "text-amber-600" : "text-slate-600"}
-          iconBg={summary.churn_rate > 5 ? "bg-amber-50" : "bg-slate-50"}
+          iconColor={summary.churn_rate > 5 ? "text-amber-600" : "text-muted-foreground"}
+          iconBg={summary.churn_rate > 5 ? "bg-amber-50" : "bg-muted"}
         />
       </div>
 

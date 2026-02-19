@@ -614,7 +614,7 @@ export default function ChatPage() {
         <motion.div
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
-          className="w-72 border-r border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 flex-shrink-0"
+          className="w-72 border-r border-border dark:border-border bg-card dark:bg-background flex-shrink-0"
         >
           <ConversationSidebar
             mode="personal"
@@ -628,7 +628,7 @@ export default function ChatPage() {
       {/* Main Chat Area */}
       <div className="flex-1 flex flex-col min-w-0">
         {/* Minimal Header */}
-        <div className="flex items-center justify-between px-4 py-3 border-b border-slate-200/50 dark:border-slate-800/50 bg-white/80 dark:bg-slate-950/80 backdrop-blur-sm">
+        <div className="flex items-center justify-between px-4 py-3 border-b border-border/50 dark:border-border/50 bg-card/80 dark:bg-background/80 backdrop-blur-sm">
           <div className="flex items-center gap-2">
             <Button
               variant="ghost"
@@ -652,7 +652,7 @@ export default function ChatPage() {
           {/* Mode + Model Selector */}
           <div className="flex items-center gap-2">
             {/* Conversation Mode Chips */}
-            <div className="hidden md:flex items-center gap-1 p-1 rounded-lg bg-slate-100 dark:bg-slate-800/50">
+            <div className="hidden md:flex items-center gap-1 p-1 rounded-lg bg-muted dark:bg-card/50">
               {CONVERSATION_MODES.map((mode) => (
                 <button
                   key={mode.id}
@@ -660,8 +660,8 @@ export default function ChatPage() {
                   className={cn(
                     "flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm font-medium transition-all",
                     selectedMode.id === mode.id
-                      ? `bg-white dark:bg-slate-700 shadow-sm text-slate-900 dark:text-white`
-                      : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
+                      ? `bg-white dark:bg-muted shadow-sm text-foreground dark:text-white`
+                      : "text-muted-foreground dark:text-muted-foreground hover:text-foreground dark:hover:text-white"
                   )}
                 >
                   <mode.icon className="h-3.5 w-3.5" />
@@ -754,7 +754,7 @@ export default function ChatPage() {
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   transition={{ delay: 0.1 }}
-                  className="text-3xl md:text-4xl font-bold text-center mb-3 text-slate-900 dark:text-white"
+                  className="text-3xl md:text-4xl font-bold text-center mb-3 text-foreground dark:text-white"
                 >
                   {selectedMode.id === "auto" ? "What can I help you with?" : `Let's ${selectedMode.name.toLowerCase()}`}
                 </motion.h1>
@@ -763,7 +763,7 @@ export default function ChatPage() {
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   transition={{ delay: 0.2 }}
-                  className="text-slate-600 dark:text-slate-400 text-center mb-2 max-w-md"
+                  className="text-muted-foreground dark:text-muted-foreground text-center mb-2 max-w-md"
                 >
                   {selectedMode.description}
                 </motion.p>
@@ -774,7 +774,7 @@ export default function ChatPage() {
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     transition={{ delay: 0.3 }}
-                    className="flex items-center gap-2 text-sm text-slate-500 dark:text-slate-500 mb-8"
+                    className="flex items-center gap-2 text-sm text-muted-foreground dark:text-muted-foreground mb-8"
                   >
                     <Brain className="h-4 w-4" />
                     <span>Connected to {libraryStats.docCount} documents in your library</span>
@@ -803,10 +803,10 @@ export default function ChatPage() {
                       )}
                     >
                       <span className="text-2xl mb-2 block">{card.icon}</span>
-                      <span className="font-medium text-slate-900 dark:text-white block mb-1">
+                      <span className="font-medium text-foreground dark:text-white block mb-1">
                         {card.title}
                       </span>
-                      <span className="text-xs text-slate-500 dark:text-slate-400">
+                      <span className="text-xs text-muted-foreground dark:text-muted-foreground">
                         Click to start
                       </span>
                     </motion.button>
@@ -821,13 +821,13 @@ export default function ChatPage() {
                     transition={{ delay: 0.6 }}
                     className="mt-8 text-center"
                   >
-                    <p className="text-xs text-slate-400 mb-2">Continue where you left off</p>
+                    <p className="text-xs text-muted-foreground mb-2">Continue where you left off</p>
                     <div className="flex flex-wrap gap-2 justify-center">
                       {recentTopics.slice(0, 3).map((topic, idx) => (
                         <button
                           key={idx}
                           onClick={() => setInput(`Continue our conversation about ${topic}`)}
-                          className="px-3 py-1.5 rounded-full bg-slate-100 dark:bg-slate-800 text-sm text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"
+                          className="px-3 py-1.5 rounded-full bg-muted dark:bg-card text-sm text-muted-foreground dark:text-muted-foreground hover:bg-muted dark:hover:bg-muted transition-colors"
                         >
                           {topic.length > 30 ? topic.slice(0, 30) + "..." : topic}
                         </button>
@@ -853,7 +853,7 @@ export default function ChatPage() {
                             <Bot className="h-4 w-4 text-white" />
                           </div>
                         ) : (
-                          <div className="h-8 w-8 rounded-lg bg-slate-900 dark:bg-slate-700 flex items-center justify-center">
+                          <div className="h-8 w-8 rounded-lg bg-slate-900 dark:bg-muted flex items-center justify-center">
                             <User className="h-4 w-4 text-white" />
                           </div>
                         )}
@@ -863,11 +863,11 @@ export default function ChatPage() {
                         {message.attachments && message.attachments.length > 0 && (
                           <div className="mb-2 flex flex-wrap gap-2">
                             {message.attachments.map((att, attIdx) => (
-                              <div key={attIdx} className="flex items-center gap-2 bg-slate-100 dark:bg-slate-800 rounded-lg p-2">
+                              <div key={attIdx} className="flex items-center gap-2 bg-muted dark:bg-card rounded-lg p-2">
                                 {att.type === "image" && att.preview ? (
                                   <img src={att.preview} alt={att.file.name} className="h-10 w-10 object-cover rounded" />
                                 ) : (
-                                  <FileText className="h-5 w-5 text-slate-500" />
+                                  <FileText className="h-5 w-5 text-muted-foreground" />
                                 )}
                                 <span className="text-xs truncate max-w-[100px]">{att.file.name}</span>
                               </div>
@@ -880,7 +880,7 @@ export default function ChatPage() {
                           {message.role === "assistant" ? (
                             <MarkdownMessage content={message.content} />
                           ) : (
-                            <p className="whitespace-pre-wrap text-slate-900 dark:text-white">{message.content}</p>
+                            <p className="whitespace-pre-wrap text-foreground dark:text-white">{message.content}</p>
                           )}
                         </div>
 
@@ -889,7 +889,7 @@ export default function ChatPage() {
                           <motion.div
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
-                            className="flex items-center gap-3 mt-3 text-xs text-slate-500"
+                            className="flex items-center gap-3 mt-3 text-xs text-muted-foreground"
                           >
                             <span className="flex items-center gap-1">
                               {currentModel.icon} {currentModel.name}
@@ -917,7 +917,7 @@ export default function ChatPage() {
                               </>
                             )}
                             {message.feedback && (
-                              <span className="text-xs text-slate-400">{message.feedback === "helpful" ? "👍" : "👎"}</span>
+                              <span className="text-xs text-muted-foreground">{message.feedback === "helpful" ? "👍" : "👎"}</span>
                             )}
                             <Button variant="ghost" size="sm" onClick={() => copyToClipboard(message.content, index)} className="h-7 w-7 p-0">
                               {copiedMessageIndex === index ? <Check className="h-3.5 w-3.5 text-green-500" /> : <Copy className="h-3.5 w-3.5" />}
@@ -941,7 +941,7 @@ export default function ChatPage() {
                       <div className={cn("h-8 w-8 rounded-lg bg-gradient-to-br flex items-center justify-center", selectedMode.color)}>
                         <Loader2 className="h-4 w-4 text-white animate-spin" />
                       </div>
-                      <div className="flex items-center gap-2 text-sm text-slate-500">
+                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
                         <span>Thinking</span>
                         <motion.span
                           animate={{ opacity: [0.4, 1, 0.4] }}
@@ -961,17 +961,17 @@ export default function ChatPage() {
         </div>
 
         {/* Input Area */}
-        <div className="border-t border-slate-200/50 dark:border-slate-800/50 bg-white/80 dark:bg-slate-950/80 backdrop-blur-sm">
+        <div className="border-t border-border/50 dark:border-border/50 bg-card/80 dark:bg-background/80 backdrop-blur-sm">
           <div className="max-w-3xl mx-auto px-4 md:px-6 py-4">
             {/* Attachments Preview */}
             {attachments.length > 0 && (
               <div className="mb-3 flex flex-wrap gap-2">
                 {attachments.map((att, idx) => (
-                  <div key={idx} className="relative group bg-slate-100 dark:bg-slate-800 rounded-lg p-2 flex items-center gap-2">
+                  <div key={idx} className="relative group bg-muted dark:bg-card rounded-lg p-2 flex items-center gap-2">
                     {att.type === "image" && att.preview ? (
                       <img src={att.preview} alt={att.file.name} className="h-10 w-10 object-cover rounded" />
                     ) : (
-                      <FileText className="h-5 w-5 text-slate-500" />
+                      <FileText className="h-5 w-5 text-muted-foreground" />
                     )}
                     <span className="text-sm truncate max-w-[120px]">{att.file.name}</span>
                     <button
@@ -1013,7 +1013,7 @@ export default function ChatPage() {
                   "flex items-end gap-2 p-2 rounded-2xl border transition-all",
                   isDragging
                     ? "border-violet-400 bg-violet-50 dark:bg-violet-950/20"
-                    : "border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 hover:border-slate-400 dark:hover:border-slate-600"
+                    : "border-border dark:border-border bg-card hover:border-border dark:hover:border-border"
                 )}
               >
                 <input
@@ -1031,7 +1031,7 @@ export default function ChatPage() {
                 size="icon"
                 onClick={() => fileInputRef.current?.click()}
                 disabled={isLoading}
-                className="h-9 w-9 text-slate-500 hover:text-slate-900 dark:hover:text-white"
+                className="h-9 w-9 text-muted-foreground hover:text-foreground dark:hover:text-white"
               >
                 <Paperclip className="h-4 w-4" />
               </Button>
@@ -1042,7 +1042,7 @@ export default function ChatPage() {
                 size="icon"
                 onClick={toggleVoiceRecording}
                 disabled={isLoading}
-                className={cn("h-9 w-9", isRecording ? "text-red-500 animate-pulse" : "text-slate-500 hover:text-slate-900 dark:hover:text-white")}
+                className={cn("h-9 w-9", isRecording ? "text-red-500 animate-pulse" : "text-muted-foreground hover:text-foreground dark:hover:text-white")}
               >
                 {isRecording ? <MicOff className="h-4 w-4" /> : <Mic className="h-4 w-4" />}
               </Button>
@@ -1081,7 +1081,7 @@ export default function ChatPage() {
                   "h-9 w-9 p-0 rounded-xl transition-all",
                   input.trim() || attachments.length > 0
                     ? `bg-gradient-to-r ${selectedMode.color} text-white hover:opacity-90`
-                    : "bg-slate-200 dark:bg-slate-700 text-slate-400"
+                    : "bg-muted dark:bg-muted text-muted-foreground"
                 )}
                 size="icon"
               >
@@ -1090,7 +1090,7 @@ export default function ChatPage() {
               </form>
             </div>
 
-            <p className="text-xs text-center text-slate-400 mt-2">
+            <p className="text-xs text-center text-muted-foreground mt-2">
               Press Enter to send, Shift+Enter for new line. Type @ to mention contacts.
             </p>
           </div>

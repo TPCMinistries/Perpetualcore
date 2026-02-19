@@ -179,12 +179,12 @@ export default function DataExplorerPage() {
           return (
             <Card
               key={table.name}
-              className="cursor-pointer transition-all hover:shadow-md hover:border-slate-400 dark:hover:border-slate-600"
+              className="cursor-pointer transition-all hover:shadow-md hover:border-border dark:hover:border-border"
               onClick={() => setSelectedTable(table)}
             >
               <CardHeader className="pb-3">
                 <div className="flex items-center gap-3">
-                  <div className="p-2 bg-slate-100 dark:bg-slate-800 rounded-lg">
+                  <div className="p-2 bg-muted dark:bg-card rounded-lg">
                     <Icon className="h-5 w-5" />
                   </div>
                   <div>

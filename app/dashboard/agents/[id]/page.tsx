@@ -215,7 +215,7 @@ export default function AgentDetailPage({ params }: { params: { id: string } }) 
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <Loader2 className="h-8 w-8 animate-spin text-slate-400" />
+        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
       </div>
     );
   }
@@ -223,7 +223,7 @@ export default function AgentDetailPage({ params }: { params: { id: string } }) 
   if (!agent) {
     return (
       <div className="text-center py-12">
-        <p className="text-slate-600 dark:text-slate-400">Agent not found</p>
+        <p className="text-muted-foreground dark:text-muted-foreground">Agent not found</p>
         <Button asChild className="mt-4">
           <Link href="/dashboard/agents">Back to Agents</Link>
         </Button>
@@ -239,7 +239,7 @@ export default function AgentDetailPage({ params }: { params: { id: string } }) 
           variant="ghost"
           size="sm"
           onClick={() => router.push("/dashboard/agents")}
-          className="text-slate-600 dark:text-slate-400"
+          className="text-muted-foreground dark:text-muted-foreground"
         >
           <ArrowLeft className="h-4 w-4 mr-2" />
           Back to Agents
@@ -247,7 +247,7 @@ export default function AgentDetailPage({ params }: { params: { id: string } }) 
       </div>
 
       {/* Agent Info Card */}
-      <Card className="border-slate-200 dark:border-slate-800">
+      <Card className="border-border dark:border-border">
         <CardHeader>
           <div className="flex items-start justify-between">
             <div className="flex items-start gap-4">
@@ -256,7 +256,7 @@ export default function AgentDetailPage({ params }: { params: { id: string } }) 
               </div>
               <div>
                 <div className="flex items-center gap-3 mb-2">
-                  <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100">
+                  <h1 className="text-2xl font-bold text-foreground dark:text-foreground">
                     {agent.name}
                   </h1>
                   <Badge
@@ -264,7 +264,7 @@ export default function AgentDetailPage({ params }: { params: { id: string } }) 
                     className={
                       agent.enabled
                         ? "bg-green-100 dark:bg-green-950 text-green-700 dark:text-green-300"
-                        : "bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300"
+                        : "bg-muted dark:bg-card text-foreground dark:text-muted-foreground"
                     }
                   >
                     {agent.enabled ? "Active" : "Paused"}
@@ -273,10 +273,10 @@ export default function AgentDetailPage({ params }: { params: { id: string } }) 
                     {formatActionType(agent.agent_type)}
                   </Badge>
                 </div>
-                <p className="text-slate-600 dark:text-slate-400 mb-2">
+                <p className="text-muted-foreground dark:text-muted-foreground mb-2">
                   {agent.description || "No description provided"}
                 </p>
-                <div className="flex items-center gap-4 text-sm text-slate-600 dark:text-slate-400">
+                <div className="flex items-center gap-4 text-sm text-muted-foreground dark:text-muted-foreground">
                   <span>Personality: {agent.personality}</span>
                   {agent.last_active_at && (
                     <span>Last active: {formatTimestamp(agent.last_active_at)}</span>
@@ -285,7 +285,7 @@ export default function AgentDetailPage({ params }: { params: { id: string } }) 
               </div>
             </div>
             <div className="flex items-center gap-2">
-              <div className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400">
+              <div className="flex items-center gap-2 text-sm text-muted-foreground dark:text-muted-foreground">
                 <span>{agent.enabled ? "Active" : "Paused"}</span>
                 <Switch checked={agent.enabled} onCheckedChange={toggleAgent} />
               </div>
@@ -312,7 +312,7 @@ export default function AgentDetailPage({ params }: { params: { id: string } }) 
                 variant="outline"
                 size="sm"
                 asChild
-                className="border-slate-300 dark:border-slate-700"
+                className="border-border dark:border-border"
               >
                 <Link href={`/dashboard/agents/${params.id}/settings`}>
                   <SettingsIcon className="h-4 w-4 mr-2" />
@@ -364,15 +364,15 @@ export default function AgentDetailPage({ params }: { params: { id: string } }) 
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <Card className="border-slate-200 dark:border-slate-800">
+        <Card className="border-border dark:border-border">
           <CardContent className="pt-6">
             <div className="flex items-center gap-3">
               <div className="h-10 w-10 rounded-lg bg-blue-100 dark:bg-blue-950 flex items-center justify-center">
                 <Activity className="h-5 w-5 text-blue-600 dark:text-blue-400" />
               </div>
               <div>
-                <p className="text-sm text-slate-600 dark:text-slate-400">Total Actions</p>
-                <p className="text-2xl font-bold text-slate-900 dark:text-slate-100">
+                <p className="text-sm text-muted-foreground dark:text-muted-foreground">Total Actions</p>
+                <p className="text-2xl font-bold text-foreground dark:text-foreground">
                   {agent.total_actions}
                 </p>
               </div>
@@ -380,15 +380,15 @@ export default function AgentDetailPage({ params }: { params: { id: string } }) 
           </CardContent>
         </Card>
 
-        <Card className="border-slate-200 dark:border-slate-800">
+        <Card className="border-border dark:border-border">
           <CardContent className="pt-6">
             <div className="flex items-center gap-3">
               <div className="h-10 w-10 rounded-lg bg-green-100 dark:bg-green-950 flex items-center justify-center">
                 <CheckCircle2 className="h-5 w-5 text-green-600 dark:text-green-400" />
               </div>
               <div>
-                <p className="text-sm text-slate-600 dark:text-slate-400">Successful</p>
-                <p className="text-2xl font-bold text-slate-900 dark:text-slate-100">
+                <p className="text-sm text-muted-foreground dark:text-muted-foreground">Successful</p>
+                <p className="text-2xl font-bold text-foreground dark:text-foreground">
                   {agent.successful_actions}
                 </p>
               </div>
@@ -396,15 +396,15 @@ export default function AgentDetailPage({ params }: { params: { id: string } }) 
           </CardContent>
         </Card>
 
-        <Card className="border-slate-200 dark:border-slate-800">
+        <Card className="border-border dark:border-border">
           <CardContent className="pt-6">
             <div className="flex items-center gap-3">
               <div className="h-10 w-10 rounded-lg bg-red-100 dark:bg-red-950 flex items-center justify-center">
                 <XCircle className="h-5 w-5 text-red-600 dark:text-red-400" />
               </div>
               <div>
-                <p className="text-sm text-slate-600 dark:text-slate-400">Failed</p>
-                <p className="text-2xl font-bold text-slate-900 dark:text-slate-100">
+                <p className="text-sm text-muted-foreground dark:text-muted-foreground">Failed</p>
+                <p className="text-2xl font-bold text-foreground dark:text-foreground">
                   {agent.failed_actions}
                 </p>
               </div>
@@ -412,15 +412,15 @@ export default function AgentDetailPage({ params }: { params: { id: string } }) 
           </CardContent>
         </Card>
 
-        <Card className="border-slate-200 dark:border-slate-800">
+        <Card className="border-border dark:border-border">
           <CardContent className="pt-6">
             <div className="flex items-center gap-3">
               <div className="h-10 w-10 rounded-lg bg-purple-100 dark:bg-purple-950 flex items-center justify-center">
                 <TrendingUp className="h-5 w-5 text-purple-600 dark:text-purple-400" />
               </div>
               <div>
-                <p className="text-sm text-slate-600 dark:text-slate-400">Success Rate</p>
-                <p className="text-2xl font-bold text-slate-900 dark:text-slate-100">
+                <p className="text-sm text-muted-foreground dark:text-muted-foreground">Success Rate</p>
+                <p className="text-2xl font-bold text-foreground dark:text-foreground">
                   {getSuccessRate()}%
                 </p>
               </div>
@@ -430,17 +430,17 @@ export default function AgentDetailPage({ params }: { params: { id: string } }) 
       </div>
 
       {/* Actions Tab */}
-      <Card className="border-slate-200 dark:border-slate-800">
+      <Card className="border-border dark:border-border">
         <CardHeader>
-          <CardTitle className="text-slate-900 dark:text-slate-100">Recent Activity</CardTitle>
+          <CardTitle className="text-foreground dark:text-foreground">Recent Activity</CardTitle>
           <CardDescription>Actions performed by this agent</CardDescription>
         </CardHeader>
         <CardContent>
           {actions.length === 0 ? (
             <div className="text-center py-12">
-              <BarChart3 className="h-12 w-12 text-slate-400 mx-auto mb-4" />
-              <p className="text-slate-600 dark:text-slate-400">No actions yet</p>
-              <p className="text-sm text-slate-500 dark:text-slate-500 mt-2">
+              <BarChart3 className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+              <p className="text-muted-foreground dark:text-muted-foreground">No actions yet</p>
+              <p className="text-sm text-muted-foreground dark:text-muted-foreground mt-2">
                 This agent hasn't performed any actions yet
               </p>
             </div>
@@ -449,12 +449,12 @@ export default function AgentDetailPage({ params }: { params: { id: string } }) 
               {actions.map((action) => (
                 <div
                   key={action.id}
-                  className="flex items-start gap-4 p-4 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900"
+                  className="flex items-start gap-4 p-4 rounded-lg border border-border dark:border-border bg-card"
                 >
                   <div className="text-2xl">{getActionIcon(action.action_type)}</div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-1">
-                      <span className="font-medium text-slate-900 dark:text-slate-100">
+                      <span className="font-medium text-foreground dark:text-foreground">
                         {formatActionType(action.action_type)}
                       </span>
                       <Badge
@@ -469,7 +469,7 @@ export default function AgentDetailPage({ params }: { params: { id: string } }) 
                       >
                         {action.status}
                       </Badge>
-                      <span className="text-xs text-slate-500 dark:text-slate-500">
+                      <span className="text-xs text-muted-foreground dark:text-muted-foreground">
                         {formatTimestamp(action.created_at)}
                       </span>
                     </div>

@@ -135,11 +135,11 @@ export default function PlanDetailPage() {
     return (
       <DashboardPageWrapper maxWidth="5xl">
         <div className="text-center py-16">
-          <Target className="h-12 w-12 mx-auto text-slate-300 dark:text-slate-600 mb-4" />
-          <h3 className="text-lg font-medium text-slate-900 dark:text-white mb-2">
+          <Target className="h-12 w-12 mx-auto text-muted-foreground dark:text-muted-foreground mb-4" />
+          <h3 className="text-lg font-medium text-foreground dark:text-white mb-2">
             Plan not found
           </h3>
-          <p className="text-slate-500 dark:text-slate-400 mb-4">
+          <p className="text-muted-foreground dark:text-muted-foreground mb-4">
             This plan may have been deleted or you don&apos;t have access.
           </p>
           <Button variant="outline" onClick={() => router.push("/dashboard/agent/plans")}>
@@ -163,7 +163,7 @@ export default function PlanDetailPage() {
           variant="ghost"
           size="sm"
           onClick={() => router.push("/dashboard/agent/plans")}
-          className="gap-2 text-slate-500 hover:text-slate-900 dark:hover:text-white"
+          className="gap-2 text-muted-foreground hover:text-foreground dark:hover:text-white"
         >
           <ArrowLeft className="h-4 w-4" />
           All Plans
@@ -188,14 +188,14 @@ export default function PlanDetailPage() {
                   </Button>
                 )}
               </div>
-              <h1 className="text-xl font-semibold text-slate-900 dark:text-white">
+              <h1 className="text-xl font-semibold text-foreground dark:text-white">
                 {plan.goal}
               </h1>
             </div>
           </div>
 
           {/* Meta stats */}
-          <div className="flex flex-wrap items-center gap-4 mt-4 text-sm text-slate-500 dark:text-slate-400">
+          <div className="flex flex-wrap items-center gap-4 mt-4 text-sm text-muted-foreground dark:text-muted-foreground">
             <span className="flex items-center gap-1.5">
               <Clock className="h-4 w-4" />
               Created {getRelativeTime(plan.created_at)}
@@ -243,15 +243,15 @@ export default function PlanDetailPage() {
           <CardContent className="p-6">
             <div className="space-y-3">
               <div className="flex items-center gap-2">
-                <span className="text-xs font-medium px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400">
+                <span className="text-xs font-medium px-1.5 py-0.5 rounded bg-muted dark:bg-card text-muted-foreground dark:text-muted-foreground">
                   {awaitingStep.tool}
                 </span>
               </div>
-              <p className="text-sm text-slate-900 dark:text-white">
+              <p className="text-sm text-foreground dark:text-white">
                 {awaitingStep.description}
               </p>
               {Object.keys(awaitingStep.args).length > 0 && (
-                <pre className="text-xs p-3 rounded-lg bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 overflow-x-auto font-mono text-slate-700 dark:text-slate-300">
+                <pre className="text-xs p-3 rounded-lg bg-muted dark:bg-card border border-border dark:border-border overflow-x-auto font-mono text-foreground dark:text-muted-foreground">
                   {JSON.stringify(awaitingStep.args, null, 2)}
                 </pre>
               )}
@@ -289,7 +289,7 @@ export default function PlanDetailPage() {
 
       {/* Step timeline */}
       <Card>
-        <CardHeader className="border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/30">
+        <CardHeader className="border-b border-border dark:border-border bg-muted/50 dark:bg-card/30">
           <CardTitle className="text-base">Execution Steps</CardTitle>
         </CardHeader>
         <CardContent className="p-6">
@@ -299,7 +299,7 @@ export default function PlanDetailPage() {
               stepResults={plan.step_results || {}}
             />
           ) : (
-            <p className="text-sm text-slate-500 dark:text-slate-400 text-center py-8">
+            <p className="text-sm text-muted-foreground dark:text-muted-foreground text-center py-8">
               No steps yet. Plan is being decomposed...
             </p>
           )}

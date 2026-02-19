@@ -105,7 +105,7 @@ const requestTypeConfig: Record<
   company: { icon: Building, label: "Company", color: "text-indigo-500" },
   industry: { icon: TrendingUp, label: "Industry", color: "text-amber-500" },
   technology: { icon: Lightbulb, label: "Technology", color: "text-purple-500" },
-  custom: { icon: SearchIcon, label: "Custom", color: "text-slate-500" },
+  custom: { icon: SearchIcon, label: "Custom", color: "text-muted-foreground" },
 };
 
 const statusConfig: Record<
@@ -115,8 +115,8 @@ const statusConfig: Record<
   pending: {
     icon: Clock,
     label: "Pending",
-    bg: "bg-slate-100 dark:bg-slate-800",
-    text: "text-slate-600 dark:text-slate-400",
+    bg: "bg-muted dark:bg-card",
+    text: "text-muted-foreground dark:text-muted-foreground",
   },
   queued: {
     icon: Clock,
@@ -145,13 +145,13 @@ const statusConfig: Record<
   cancelled: {
     icon: XCircle,
     label: "Cancelled",
-    bg: "bg-slate-100 dark:bg-slate-800",
-    text: "text-slate-500 dark:text-slate-500",
+    bg: "bg-muted dark:bg-card",
+    text: "text-muted-foreground dark:text-muted-foreground",
   },
 };
 
 const priorityColors: Record<string, string> = {
-  low: "bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400",
+  low: "bg-muted text-muted-foreground dark:bg-card dark:text-muted-foreground",
   medium: "bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400",
   high: "bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400",
   urgent: "bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400",
@@ -497,12 +497,12 @@ export default function ResearchPage() {
       {/* Filters Row */}
       <div className="flex items-center gap-4 mb-6">
         <div className="relative flex-1 max-w-md">
-          <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+          <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
             placeholder="Search research..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-10 bg-white dark:bg-slate-800/50 border-slate-200 dark:border-slate-700"
+            className="pl-10 bg-card/50 border-border dark:border-border"
           />
         </div>
         <FilterPills
@@ -511,7 +511,7 @@ export default function ResearchPage() {
           onFilterChange={setStatusFilter}
         />
         <Select value={typeFilter} onValueChange={setTypeFilter}>
-          <SelectTrigger className="w-[150px] bg-white dark:bg-slate-800/50">
+          <SelectTrigger className="w-[150px] bg-card/50">
             <SelectValue placeholder="Type" />
           </SelectTrigger>
           <SelectContent>
@@ -536,19 +536,19 @@ export default function ResearchPage() {
           animate={{ opacity: 1, y: 0 }}
           className="text-center py-16"
         >
-          <div className="h-20 w-20 rounded-2xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center mx-auto mb-6">
-            <SearchIcon className="h-10 w-10 text-slate-400 dark:text-slate-500" />
+          <div className="h-20 w-20 rounded-2xl bg-muted dark:bg-card flex items-center justify-center mx-auto mb-6">
+            <SearchIcon className="h-10 w-10 text-muted-foreground dark:text-muted-foreground" />
           </div>
-          <h3 className="text-xl font-semibold text-slate-900 dark:text-white mb-2">
+          <h3 className="text-xl font-semibold text-foreground dark:text-white mb-2">
             No research requests yet
           </h3>
-          <p className="text-slate-500 dark:text-slate-400 mb-6">
+          <p className="text-muted-foreground dark:text-muted-foreground mb-6">
             Start your first AI research request
           </p>
           <Button
             onClick={() => setShowNewRequest(true)}
             variant="outline"
-            className="border-slate-200 dark:border-slate-700"
+            className="border-border dark:border-border"
           >
             <Plus className="h-4 w-4 mr-2" />
             New Research
@@ -574,14 +574,14 @@ export default function ResearchPage() {
               >
                 <Card
                   onClick={() => router.push(`/dashboard/research/${request.id}`)}
-                  className="border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 hover:shadow-lg hover:shadow-violet-500/5 hover:border-violet-200 dark:hover:border-violet-800/50 transition-all cursor-pointer group"
+                  className="border-border dark:border-border bg-card hover:shadow-lg hover:shadow-violet-500/5 hover:border-violet-200 dark:hover:border-violet-800/50 transition-all cursor-pointer group"
                 >
                   <CardContent className="p-6">
                     <div className="flex items-start justify-between">
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-3 mb-2">
                           <TypeIcon className={cn("h-5 w-5", typeConf.color)} />
-                          <span className="text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wide">
+                          <span className="text-xs font-medium text-muted-foreground dark:text-muted-foreground uppercase tracking-wide">
                             {typeConf.label}
                           </span>
                           <Badge
@@ -610,19 +610,19 @@ export default function ResearchPage() {
                           </Badge>
                         </div>
 
-                        <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-1 group-hover:text-violet-600 dark:group-hover:text-violet-400 transition-colors">
+                        <h3 className="text-lg font-semibold text-foreground dark:text-white mb-1 group-hover:text-violet-600 dark:group-hover:text-violet-400 transition-colors">
                           {request.subject}
                         </h3>
 
                         {request.context && (
-                          <p className="text-sm text-slate-600 dark:text-slate-400 line-clamp-1 mb-2">
+                          <p className="text-sm text-muted-foreground dark:text-muted-foreground line-clamp-1 mb-2">
                             {request.context}
                           </p>
                         )}
 
                         {request.status === "completed" &&
                           request.executive_summary && (
-                            <p className="text-sm text-slate-600 dark:text-slate-400 line-clamp-2 mb-2 bg-green-50 dark:bg-green-900/20 p-2 rounded-lg border border-green-200 dark:border-green-800/50">
+                            <p className="text-sm text-muted-foreground dark:text-muted-foreground line-clamp-2 mb-2 bg-green-50 dark:bg-green-900/20 p-2 rounded-lg border border-green-200 dark:border-green-800/50">
                               <Sparkles className="h-3 w-3 inline mr-1 text-green-500" />
                               {request.executive_summary}
                             </p>
@@ -630,7 +630,7 @@ export default function ResearchPage() {
 
                         {/* Meta row */}
                         <div className="flex items-center gap-3 mt-3">
-                          <span className="text-xs text-slate-500 dark:text-slate-400">
+                          <span className="text-xs text-muted-foreground dark:text-muted-foreground">
                             {formatDate(request.created_at)}
                           </span>
 
@@ -650,7 +650,7 @@ export default function ResearchPage() {
                           )}
 
                           {request.contacts && (
-                            <span className="inline-flex items-center gap-1 text-xs text-slate-500 dark:text-slate-400">
+                            <span className="inline-flex items-center gap-1 text-xs text-muted-foreground dark:text-muted-foreground">
                               <User className="h-3 w-3" />
                               {request.contacts.name}
                             </span>
@@ -670,7 +670,7 @@ export default function ResearchPage() {
                               size="sm"
                               className="h-8 w-8 p-0"
                             >
-                              <MoreHorizontal className="h-4 w-4 text-slate-400" />
+                              <MoreHorizontal className="h-4 w-4 text-muted-foreground" />
                             </Button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end">

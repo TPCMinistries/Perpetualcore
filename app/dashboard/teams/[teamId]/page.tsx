@@ -264,11 +264,9 @@ export default function TeamDetailPage() {
 
   const fetchProjects = async () => {
     try {
-      console.log("Fetching projects for team:", teamId);
       const response = await fetch(`/api/projects?team_id=${teamId}`);
       if (response.ok) {
         const data = await response.json();
-        console.log("Projects response:", data);
         setProjects(data.projects || []);
         // Update team project count to match actual count
         if (team) {
@@ -400,7 +398,6 @@ export default function TeamDetailPage() {
 
   // Assign a document to this team
   const handleAssignDocument = async (documentId: string) => {
-    console.log("Assigning document:", documentId, "to team:", teamId);
     setAssigningDocument(true);
     try {
       const response = await fetch(`/api/teams/${teamId}/documents`, {

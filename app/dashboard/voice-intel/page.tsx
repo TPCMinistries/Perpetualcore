@@ -244,7 +244,7 @@ export default function VoiceIntelPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-24">
-        <Loader2 className="h-6 w-6 animate-spin text-slate-400" />
+        <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
       </div>
     );
   }
@@ -258,7 +258,7 @@ export default function VoiceIntelPage() {
       />
 
       {/* Paste Transcript Section */}
-      <div className="rounded-lg border border-slate-200 bg-white shadow-sm">
+      <div className="rounded-lg border border-border bg-card shadow-sm">
         <button
           onClick={() => {
             setPasteExpanded(!pasteExpanded);
@@ -266,19 +266,19 @@ export default function VoiceIntelPage() {
               setTimeout(() => textareaRef.current?.focus(), 100);
             }
           }}
-          className="flex w-full items-center justify-between px-4 py-3 text-left hover:bg-slate-50 transition-colors"
+          className="flex w-full items-center justify-between px-4 py-3 text-left hover:bg-muted transition-colors"
         >
           <div className="flex items-center gap-2">
             <FileText className="h-4 w-4 text-indigo-500" />
-            <span className="text-sm font-medium text-slate-900">
+            <span className="text-sm font-medium text-foreground">
               Paste Transcript
             </span>
-            <span className="text-xs text-slate-400">
+            <span className="text-xs text-muted-foreground">
               Copy from Plaud app and paste here
             </span>
           </div>
           <svg
-            className={`h-4 w-4 text-slate-400 transition-transform ${
+            className={`h-4 w-4 text-muted-foreground transition-transform ${
               pasteExpanded ? "rotate-180" : ""
             }`}
             fill="none"
@@ -290,13 +290,13 @@ export default function VoiceIntelPage() {
         </button>
 
         {pasteExpanded && (
-          <div className="border-t border-slate-100 px-4 py-4 space-y-3">
+          <div className="border-t border-border px-4 py-4 space-y-3">
             <input
               type="text"
               placeholder="Title (optional) — e.g. 'Meeting with Dr. Silber'"
               value={pasteTitle}
               onChange={(e) => setPasteTitle(e.target.value)}
-              className="w-full rounded-md border border-slate-200 bg-slate-50 px-3 py-2 text-sm placeholder:text-slate-400 focus:border-indigo-300 focus:outline-none focus:ring-1 focus:ring-indigo-300"
+              className="w-full rounded-md border border-border bg-muted px-3 py-2 text-sm placeholder:text-muted-foreground focus:border-indigo-300 focus:outline-none focus:ring-1 focus:ring-indigo-300"
             />
             <textarea
               ref={textareaRef}
@@ -304,10 +304,10 @@ export default function VoiceIntelPage() {
               value={pasteText}
               onChange={(e) => setPasteText(e.target.value)}
               rows={6}
-              className="w-full rounded-md border border-slate-200 bg-slate-50 px-3 py-2 text-sm placeholder:text-slate-400 focus:border-indigo-300 focus:outline-none focus:ring-1 focus:ring-indigo-300 resize-y"
+              className="w-full rounded-md border border-border bg-muted px-3 py-2 text-sm placeholder:text-muted-foreground focus:border-indigo-300 focus:outline-none focus:ring-1 focus:ring-indigo-300 resize-y"
             />
             <div className="flex items-center justify-between">
-              <div className="text-xs text-slate-400">
+              <div className="text-xs text-muted-foreground">
                 {pasteText.length > 0 && (
                   <span>{pasteText.trim().split(/\s+/).length} words</span>
                 )}
@@ -415,17 +415,17 @@ export default function VoiceIntelPage() {
         <TabsContent value="intelligence" className="space-y-6 mt-4">
           {/* Pattern Insights */}
           <div>
-            <h3 className="text-lg font-semibold text-slate-900 flex items-center gap-2 mb-3">
+            <h3 className="text-lg font-semibold text-foreground flex items-center gap-2 mb-3">
               <TrendingUp className="h-5 w-5 text-indigo-500" />
               Pattern Insights
             </h3>
             {patternsLoading ? (
               <div className="flex items-center justify-center py-12">
-                <Loader2 className="h-5 w-5 animate-spin text-slate-400" />
+                <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
               </div>
             ) : patterns.length === 0 ? (
-              <div className="rounded-lg border border-dashed border-slate-300 bg-slate-50 p-8 text-center">
-                <p className="text-sm text-slate-500">
+              <div className="rounded-lg border border-dashed border-border bg-muted p-8 text-center">
+                <p className="text-sm text-muted-foreground">
                   No patterns detected yet. Record more voice memos to unlock insights.
                 </p>
               </div>
@@ -434,7 +434,7 @@ export default function VoiceIntelPage() {
                 {patterns.map((p, i) => (
                   <div
                     key={i}
-                    className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm"
+                    className="rounded-lg border border-border bg-card p-4 shadow-sm"
                   >
                     <div className="flex items-start gap-2">
                       <span
@@ -449,10 +449,10 @@ export default function VoiceIntelPage() {
                         }`}
                       />
                       <div>
-                        <p className="text-sm font-medium text-slate-900">
+                        <p className="text-sm font-medium text-foreground">
                           {p.title}
                         </p>
-                        <p className="mt-1 text-xs text-slate-500">
+                        <p className="mt-1 text-xs text-muted-foreground">
                           {p.description}
                         </p>
                       </div>
@@ -465,13 +465,13 @@ export default function VoiceIntelPage() {
 
           {/* Entity Breakdown */}
           <div>
-            <h3 className="text-lg font-semibold text-slate-900 flex items-center gap-2 mb-3">
+            <h3 className="text-lg font-semibold text-foreground flex items-center gap-2 mb-3">
               <Building2 className="h-5 w-5 text-violet-500" />
               Entity Breakdown
             </h3>
             {entitiesLoading ? (
               <div className="flex items-center justify-center py-12">
-                <Loader2 className="h-5 w-5 animate-spin text-slate-400" />
+                <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
               </div>
             ) : (
               <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
@@ -480,13 +480,13 @@ export default function VoiceIntelPage() {
                   return (
                     <div
                       key={entity}
-                      className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm"
+                      className="rounded-lg border border-border bg-card p-4 shadow-sm"
                     >
                       <div className="flex items-center justify-between mb-2">
-                        <h4 className="text-sm font-semibold text-slate-900 truncate">
+                        <h4 className="text-sm font-semibold text-foreground truncate">
                           {entity}
                         </h4>
-                        <span className="text-xs text-slate-400">
+                        <span className="text-xs text-muted-foreground">
                           {d?.totalMemos || 0} memos
                         </span>
                       </div>
@@ -497,8 +497,8 @@ export default function VoiceIntelPage() {
                               key={i}
                               className="flex items-center justify-between text-xs"
                             >
-                              <span className="text-slate-600">{a.activity}</span>
-                              <span className="text-slate-400">{a.count}</span>
+                              <span className="text-muted-foreground">{a.activity}</span>
+                              <span className="text-muted-foreground">{a.count}</span>
                             </div>
                           ))}
                           {d.pendingActions > 0 && (
@@ -508,7 +508,7 @@ export default function VoiceIntelPage() {
                           )}
                         </div>
                       ) : (
-                        <p className="text-xs text-slate-400">No activity yet</p>
+                        <p className="text-xs text-muted-foreground">No activity yet</p>
                       )}
                     </div>
                   );
@@ -519,38 +519,38 @@ export default function VoiceIntelPage() {
 
           {/* People Mentioned */}
           <div>
-            <h3 className="text-lg font-semibold text-slate-900 flex items-center gap-2 mb-3">
+            <h3 className="text-lg font-semibold text-foreground flex items-center gap-2 mb-3">
               <Users className="h-5 w-5 text-cyan-500" />
               Top People Mentioned
             </h3>
             {entitiesLoading ? (
               <div className="flex items-center justify-center py-12">
-                <Loader2 className="h-5 w-5 animate-spin text-slate-400" />
+                <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
               </div>
             ) : topPeopleList.length === 0 ? (
-              <div className="rounded-lg border border-dashed border-slate-300 bg-slate-50 p-8 text-center">
-                <p className="text-sm text-slate-500">
+              <div className="rounded-lg border border-dashed border-border bg-muted p-8 text-center">
+                <p className="text-sm text-muted-foreground">
                   No people mentioned yet.
                 </p>
               </div>
             ) : (
-              <div className="rounded-lg border border-slate-200 bg-white shadow-sm">
+              <div className="rounded-lg border border-border bg-card shadow-sm">
                 {topPeopleList.map(([name, count], i) => (
                   <div
                     key={name}
                     className={`flex items-center justify-between px-4 py-3 ${
                       i < topPeopleList.length - 1
-                        ? "border-b border-slate-100"
+                        ? "border-b border-border"
                         : ""
                     }`}
                   >
                     <div className="flex items-center gap-3">
-                      <span className="flex h-6 w-6 items-center justify-center rounded-full bg-slate-100 text-xs font-medium text-slate-600">
+                      <span className="flex h-6 w-6 items-center justify-center rounded-full bg-muted text-xs font-medium text-muted-foreground">
                         {i + 1}
                       </span>
-                      <span className="text-sm text-slate-900">{name}</span>
+                      <span className="text-sm text-foreground">{name}</span>
                     </div>
-                    <span className="text-xs text-slate-400">
+                    <span className="text-xs text-muted-foreground">
                       {count} mention{count !== 1 ? "s" : ""}
                     </span>
                   </div>

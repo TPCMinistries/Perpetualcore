@@ -296,7 +296,7 @@ function ContactsPageContent() {
         </div>
 
         {/* Toolbar */}
-        <div className="mb-6 rounded-2xl bg-white dark:bg-slate-900/50 border border-slate-200/50 dark:border-slate-700/50 shadow-sm p-4">
+        <div className="mb-6 rounded-2xl bg-card/50 border border-border/50 dark:border-border/50 shadow-sm p-4">
           <ContactsToolbar
             onImport={() => setShowImportModal(true)}
             onDiscover={() => setShowDiscoverModal(true)}
@@ -541,7 +541,7 @@ function StatCard({
   trend?: { value: number; positive: boolean };
 }) {
   return (
-    <div className="group relative overflow-hidden rounded-2xl bg-white dark:bg-slate-900/50 border border-slate-200/50 dark:border-slate-700/50 p-4 hover:shadow-lg hover:shadow-slate-200/50 dark:hover:shadow-slate-900/50 transition-all duration-300 hover:-translate-y-0.5">
+    <div className="group relative overflow-hidden rounded-2xl bg-card/50 border border-border/50 dark:border-border/50 p-4 hover:shadow-lg hover:shadow-slate-200/50 dark:hover:shadow-slate-900/50 transition-all duration-300 hover:-translate-y-0.5">
       {/* Gradient accent */}
       <div className={`absolute top-0 right-0 w-24 h-24 bg-gradient-to-br ${gradient} opacity-10 rounded-full -translate-y-8 translate-x-8 group-hover:opacity-20 transition-opacity`} />
 
@@ -551,7 +551,7 @@ function StatCard({
         </div>
         <div className="flex-1 min-w-0">
           <div className="flex items-baseline gap-2">
-            <p className="text-2xl font-bold text-slate-900 dark:text-white tabular-nums">
+            <p className="text-2xl font-bold text-foreground dark:text-white tabular-nums">
               {value}
             </p>
             {trend && (
@@ -560,7 +560,7 @@ function StatCard({
               </span>
             )}
           </div>
-          <p className="text-xs text-slate-500 dark:text-slate-400 font-medium truncate">{label}</p>
+          <p className="text-xs text-muted-foreground dark:text-muted-foreground font-medium truncate">{label}</p>
         </div>
       </div>
     </div>
@@ -583,10 +583,10 @@ function EmptyState({
         <div className="h-20 w-20 mx-auto rounded-full bg-gradient-to-br from-violet-100 to-purple-200 dark:from-violet-900/50 dark:to-purple-800/30 flex items-center justify-center mb-6 shadow-lg shadow-violet-200/50 dark:shadow-violet-900/30">
           <Users className="h-10 w-10 text-violet-600 dark:text-violet-400" />
         </div>
-        <h3 className="text-xl font-semibold text-slate-900 dark:text-white mb-2">
+        <h3 className="text-xl font-semibold text-foreground dark:text-white mb-2">
           Build Your Network
         </h3>
-        <p className="text-slate-500 dark:text-slate-400 mb-6 max-w-sm mx-auto">
+        <p className="text-muted-foreground dark:text-muted-foreground mb-6 max-w-sm mx-auto">
           Start adding contacts to build meaningful relationships with AI-powered insights and tracking
         </p>
         <div className="flex items-center justify-center gap-3">

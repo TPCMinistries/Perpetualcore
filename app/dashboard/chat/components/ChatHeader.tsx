@@ -34,28 +34,28 @@ export function ChatHeader({
   onExport,
 }: ChatHeaderProps) {
   return (
-    <div className="border-b border-slate-200/50 dark:border-slate-800/50 bg-white/80 dark:bg-slate-950/80 backdrop-blur-sm sticky top-0 z-10">
+    <div className="border-b border-border/50 dark:border-border/50 bg-card/80 dark:bg-background/80 backdrop-blur-sm sticky top-0 z-10">
       <div className="max-w-3xl mx-auto px-6 py-3 flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Button
             variant="outline"
             size="sm"
             onClick={onToggleSidebar}
-            className="h-9 px-3 border-slate-300 dark:border-slate-700"
+            className="h-9 px-3 border-border dark:border-border"
             title="View past conversations"
           >
             <MessageSquare className="h-4 w-4 mr-2" />
             <span className="text-sm">History</span>
           </Button>
-          <div className="h-6 w-px bg-slate-300 dark:bg-slate-700" />
+          <div className="h-6 w-px bg-slate-300 dark:bg-muted" />
           <div className="flex items-center gap-2">
-            <span className="text-xs text-slate-600 dark:text-slate-400 font-medium">Model:</span>
+            <span className="text-xs text-muted-foreground dark:text-muted-foreground font-medium">Model:</span>
             <Select
               value={selectedModel}
               onValueChange={(value) => onModelChange(value as AIModel)}
               disabled={hasMessages || isVoiceMode}
             >
-              <SelectTrigger className="border border-slate-300 dark:border-slate-700 h-9 px-3 text-sm font-medium bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800 min-w-[180px]">
+              <SelectTrigger className="border border-border dark:border-border h-9 px-3 text-sm font-medium bg-card hover:bg-muted dark:hover:bg-muted min-w-[180px]">
                 <SelectValue placeholder="Select model" />
               </SelectTrigger>
               <SelectContent>
@@ -74,7 +74,7 @@ export function ChatHeader({
 
         <div className="flex items-center gap-2">
           {hasMessages && (
-            <div className="flex items-center gap-1 border-r border-slate-300 dark:border-slate-700 pr-2 mr-1">
+            <div className="flex items-center gap-1 border-r border-border dark:border-border pr-2 mr-1">
               <Button
                 variant="ghost"
                 size="sm"

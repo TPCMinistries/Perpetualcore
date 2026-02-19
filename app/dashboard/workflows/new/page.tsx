@@ -216,7 +216,7 @@ export default function NewWorkflowPage() {
                   <p className="text-blue-700 dark:text-blue-300 mb-3">
                     Use the drag-and-drop Visual Workflow Builder to design workflows with AI assistants, conditions, and more.
                   </p>
-                  <Button variant="outline" size="sm" asChild className="bg-white dark:bg-slate-900">
+                  <Button variant="outline" size="sm" asChild className="bg-card">
                     <Link href="/dashboard/workflows/new/builder">
                       <PenTool className="mr-2 h-3 w-3" />
                       Use Visual Builder

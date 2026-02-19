@@ -46,36 +46,36 @@ export function ProfileCard({
 
   return (
     <div className="space-y-6">
-      <Card className="border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-xl p-8">
+      <Card className="border-border dark:border-border bg-card shadow-xl p-8">
         <div className="flex items-center gap-3 mb-6">
-          <div className="h-10 w-10 rounded-lg bg-slate-900 dark:bg-slate-100 flex items-center justify-center">
-            <User className="h-5 w-5 text-white dark:text-slate-900" />
+          <div className="h-10 w-10 rounded-lg bg-slate-900 dark:bg-muted flex items-center justify-center">
+            <User className="h-5 w-5 text-white dark:text-foreground" />
           </div>
           <div>
-            <h2 className="text-xl font-semibold text-slate-900 dark:text-white">Profile Information</h2>
-            <p className="text-sm text-slate-600 dark:text-slate-400">Update your personal details</p>
+            <h2 className="text-xl font-semibold text-foreground dark:text-white">Profile Information</h2>
+            <p className="text-sm text-muted-foreground dark:text-muted-foreground">Update your personal details</p>
           </div>
         </div>
 
         <div className="space-y-6">
           <div className="grid grid-cols-2 gap-6">
             <div className="space-y-2">
-              <Label htmlFor="fullName" className="text-slate-700 dark:text-slate-300 font-medium">Full Name</Label>
+              <Label htmlFor="fullName" className="text-foreground dark:text-muted-foreground font-medium">Full Name</Label>
               <Input
                 id="fullName"
                 value={profile.fullName}
                 onChange={(e) => setProfile({ ...profile, fullName: e.target.value })}
-                className="border-slate-300 dark:border-slate-700 focus:border-violet-500 dark:focus:border-violet-500"
+                className="border-border dark:border-border focus:border-violet-500 dark:focus:border-violet-500"
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="email" className="text-slate-700 dark:text-slate-300 font-medium">Email Address</Label>
+              <Label htmlFor="email" className="text-foreground dark:text-muted-foreground font-medium">Email Address</Label>
               <Input
                 id="email"
                 type="email"
                 value={profile.email}
                 disabled
-                className="border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800"
+                className="border-border dark:border-border bg-muted dark:bg-card"
               />
             </div>
           </div>
@@ -84,7 +84,7 @@ export function ProfileCard({
             <Button
               onClick={onSaveProfile}
               disabled={isSaving}
-              className="bg-slate-900 dark:bg-slate-100 hover:bg-slate-800 dark:hover:bg-slate-200 text-white dark:text-slate-900 shadow-lg px-6"
+              className="bg-slate-900 dark:bg-muted hover:bg-slate-800 dark:hover:bg-muted text-white dark:text-foreground shadow-lg px-6"
             >
               {isSaving ? (
                 <>
@@ -102,20 +102,20 @@ export function ProfileCard({
         </div>
       </Card>
 
-      <Card className="border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-xl p-8">
+      <Card className="border-border dark:border-border bg-card shadow-xl p-8">
         <div className="flex items-center gap-3 mb-6">
-          <div className="h-10 w-10 rounded-lg bg-slate-900 dark:bg-slate-100 flex items-center justify-center">
-            <Lock className="h-5 w-5 text-white dark:text-slate-900" />
+          <div className="h-10 w-10 rounded-lg bg-slate-900 dark:bg-muted flex items-center justify-center">
+            <Lock className="h-5 w-5 text-white dark:text-foreground" />
           </div>
           <div>
-            <h2 className="text-xl font-semibold text-slate-900 dark:text-white">Password & Authentication</h2>
-            <p className="text-sm text-slate-600 dark:text-slate-400">Manage your password and security settings</p>
+            <h2 className="text-xl font-semibold text-foreground dark:text-white">Password & Authentication</h2>
+            <p className="text-sm text-muted-foreground dark:text-muted-foreground">Manage your password and security settings</p>
           </div>
         </div>
 
         <Button
           variant="outline"
-          className="border-slate-300 dark:border-slate-700"
+          className="border-border dark:border-border"
           onClick={onOpenPasswordDialog}
         >
           <Key className="h-4 w-4 mr-2" />

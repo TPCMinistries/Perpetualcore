@@ -219,8 +219,8 @@ export default function SearchPage() {
         {/* Header */}
         <div className="border border-border rounded-xl p-8 mb-6 bg-background">
           <div className="flex items-center gap-4 mb-6">
-            <div className="h-12 w-12 rounded-lg bg-slate-900 dark:bg-slate-100 flex items-center justify-center">
-              <Search className="h-6 w-6 text-white dark:text-slate-900" />
+            <div className="h-12 w-12 rounded-lg bg-slate-900 dark:bg-muted flex items-center justify-center">
+              <Search className="h-6 w-6 text-white dark:text-foreground" />
             </div>
             <div>
               <h1 className="text-3xl font-semibold text-foreground">Universal Search</h1>
@@ -234,7 +234,7 @@ export default function SearchPage() {
           <form onSubmit={handleSearch}>
             <div className="flex gap-2">
               <div className="relative flex-1">
-                <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-slate-400" />
+                <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-muted-foreground" />
                 <Input
                   type="text"
                   placeholder="Search everything..."
@@ -248,7 +248,7 @@ export default function SearchPage() {
                 type="submit"
                 size="lg"
                 disabled={loading}
-                className="h-12 px-6 bg-slate-900 dark:bg-slate-100 hover:bg-slate-800 dark:hover:bg-slate-200 text-white dark:text-slate-900"
+                className="h-12 px-6 bg-slate-900 dark:bg-muted hover:bg-slate-800 dark:hover:bg-muted text-white dark:text-foreground"
               >
                 {loading ? "Searching..." : "Search"}
               </Button>
@@ -347,8 +347,8 @@ export default function SearchPage() {
             {loading ? (
               <div className="flex items-center justify-center h-64">
                 <div className="border border-border bg-background rounded-xl p-12">
-                  <div className="h-12 w-12 rounded-lg bg-slate-900 dark:bg-slate-100 flex items-center justify-center mx-auto mb-4">
-                    <Search className="h-6 w-6 text-white dark:text-slate-900 animate-pulse" />
+                  <div className="h-12 w-12 rounded-lg bg-slate-900 dark:bg-muted flex items-center justify-center mx-auto mb-4">
+                    <Search className="h-6 w-6 text-white dark:text-foreground animate-pulse" />
                   </div>
                   <p className="text-foreground font-medium">Searching...</p>
                 </div>

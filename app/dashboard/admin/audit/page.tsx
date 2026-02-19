@@ -75,7 +75,7 @@ export default function CrossOrgAuditPage() {
       <Card>
         <CardHeader>
           <CardTitle className="text-lg flex items-center gap-2">
-            <ScrollText className="h-5 w-5 text-slate-500" />
+            <ScrollText className="h-5 w-5 text-muted-foreground" />
             Audit Events
           </CardTitle>
         </CardHeader>

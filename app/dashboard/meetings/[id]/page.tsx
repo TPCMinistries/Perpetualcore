@@ -92,12 +92,12 @@ const meetingTypeColors: Record<string, string> = {
   "1:1": "bg-amber-500",
   sales: "bg-rose-500",
   support: "bg-cyan-500",
-  other: "bg-slate-500",
+  other: "bg-muted0",
 };
 
 const sentimentConfig: Record<string, { bg: string; text: string; icon: any }> = {
   positive: { bg: "bg-green-50 dark:bg-green-500/10", text: "text-green-600 dark:text-green-400", icon: CheckCircle2 },
-  neutral: { bg: "bg-slate-50 dark:bg-slate-500/10", text: "text-slate-600 dark:text-slate-400", icon: Target },
+  neutral: { bg: "bg-muted dark:bg-muted0/10", text: "text-muted-foreground dark:text-muted-foreground", icon: Target },
   negative: { bg: "bg-red-50 dark:bg-red-500/10", text: "text-red-600 dark:text-red-400", icon: AlertCircle },
   mixed: { bg: "bg-amber-50 dark:bg-amber-500/10", text: "text-amber-600 dark:text-amber-400", icon: Target },
 };
@@ -189,7 +189,7 @@ export default function MeetingDetailPage({ params }: { params: Promise<{ id: st
           <Button
             variant="ghost"
             onClick={() => router.push("/dashboard/meetings")}
-            className="mb-4 -ml-2 text-slate-600 dark:text-slate-400"
+            className="mb-4 -ml-2 text-muted-foreground dark:text-muted-foreground"
           >
             <ArrowLeft className="h-4 w-4 mr-2" />
             Back to Meetings
@@ -203,22 +203,22 @@ export default function MeetingDetailPage({ params }: { params: Promise<{ id: st
               <div>
                 <div className="flex items-center gap-3 mb-2">
                   <div className={`h-2 w-2 rounded-full ${meetingTypeColors[meeting.meeting_type] || meetingTypeColors.other}`} />
-                  <span className="text-sm font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wide">
+                  <span className="text-sm font-medium text-muted-foreground dark:text-muted-foreground uppercase tracking-wide">
                     {meeting.meeting_type}
                   </span>
                   {meeting.source && meeting.source !== "manual" && (
                     <>
-                      <span className="text-slate-400 dark:text-slate-500">•</span>
-                      <span className="text-sm text-slate-500 dark:text-slate-400 capitalize">
+                      <span className="text-muted-foreground dark:text-muted-foreground">•</span>
+                      <span className="text-sm text-muted-foreground dark:text-muted-foreground capitalize">
                         via {meeting.source}
                       </span>
                     </>
                   )}
                 </div>
-                <h1 className="text-3xl font-bold text-slate-900 dark:text-white mb-2">
+                <h1 className="text-3xl font-bold text-foreground dark:text-white mb-2">
                   {meeting.meeting_title}
                 </h1>
-                <div className="flex items-center gap-4 text-sm text-slate-500 dark:text-slate-400">
+                <div className="flex items-center gap-4 text-sm text-muted-foreground dark:text-muted-foreground">
                   <span className="flex items-center gap-1.5">
                     <CalendarIcon className="h-4 w-4" />
                     {formatDate(meeting.meeting_date)}
@@ -288,7 +288,7 @@ export default function MeetingDetailPage({ params }: { params: Promise<{ id: st
           <div className="lg:col-span-2 space-y-6">
             {/* Executive Summary */}
             {meeting.executive_summary && (
-              <Card className="border-0 shadow-lg shadow-slate-200/50 dark:shadow-none bg-white dark:bg-slate-800/50">
+              <Card className="border-0 shadow-lg shadow-slate-200/50 dark:shadow-none bg-card/50">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2 text-lg">
                     <Sparkles className="h-5 w-5 text-amber-500" />
@@ -296,7 +296,7 @@ export default function MeetingDetailPage({ params }: { params: Promise<{ id: st
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-slate-700 dark:text-slate-300 leading-relaxed">
+                  <p className="text-foreground dark:text-muted-foreground leading-relaxed">
                     {meeting.executive_summary}
                   </p>
                 </CardContent>
@@ -305,7 +305,7 @@ export default function MeetingDetailPage({ params }: { params: Promise<{ id: st
 
             {/* Key Topics */}
             {meeting.key_topics && meeting.key_topics.length > 0 && (
-              <Card className="border-0 shadow-lg shadow-slate-200/50 dark:shadow-none bg-white dark:bg-slate-800/50">
+              <Card className="border-0 shadow-lg shadow-slate-200/50 dark:shadow-none bg-card/50">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2 text-lg">
                     <MessageSquare className="h-5 w-5 text-blue-500" />
@@ -317,7 +317,7 @@ export default function MeetingDetailPage({ params }: { params: Promise<{ id: st
                     {meeting.key_topics.map((topic, i) => (
                       <li key={i} className="flex items-start gap-3">
                         <div className="h-2 w-2 rounded-full bg-blue-500 mt-2 flex-shrink-0" />
-                        <span className="text-slate-700 dark:text-slate-300">{topic}</span>
+                        <span className="text-foreground dark:text-muted-foreground">{topic}</span>
                       </li>
                     ))}
                   </ul>
@@ -327,7 +327,7 @@ export default function MeetingDetailPage({ params }: { params: Promise<{ id: st
 
             {/* Decisions Made */}
             {meeting.decisions_made && meeting.decisions_made.length > 0 && (
-              <Card className="border-0 shadow-lg shadow-slate-200/50 dark:shadow-none bg-white dark:bg-slate-800/50">
+              <Card className="border-0 shadow-lg shadow-slate-200/50 dark:shadow-none bg-card/50">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2 text-lg">
                     <Target className="h-5 w-5 text-emerald-500" />
@@ -339,7 +339,7 @@ export default function MeetingDetailPage({ params }: { params: Promise<{ id: st
                     {meeting.decisions_made.map((decision, i) => (
                       <li key={i} className="flex items-start gap-3">
                         <CheckCircle2 className="h-5 w-5 text-emerald-500 mt-0.5 flex-shrink-0" />
-                        <span className="text-slate-700 dark:text-slate-300">{decision}</span>
+                        <span className="text-foreground dark:text-muted-foreground">{decision}</span>
                       </li>
                     ))}
                   </ul>
@@ -349,7 +349,7 @@ export default function MeetingDetailPage({ params }: { params: Promise<{ id: st
 
             {/* Next Steps */}
             {meeting.next_steps && meeting.next_steps.length > 0 && (
-              <Card className="border-0 shadow-lg shadow-slate-200/50 dark:shadow-none bg-white dark:bg-slate-800/50">
+              <Card className="border-0 shadow-lg shadow-slate-200/50 dark:shadow-none bg-card/50">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2 text-lg">
                     <ListChecks className="h-5 w-5 text-violet-500" />
@@ -361,7 +361,7 @@ export default function MeetingDetailPage({ params }: { params: Promise<{ id: st
                     {meeting.next_steps.map((step, i) => (
                       <li key={i} className="flex items-start gap-3">
                         <div className="h-5 w-5 rounded border-2 border-violet-300 dark:border-violet-600 flex-shrink-0" />
-                        <span className="text-slate-700 dark:text-slate-300">{step}</span>
+                        <span className="text-foreground dark:text-muted-foreground">{step}</span>
                       </li>
                     ))}
                   </ul>
@@ -371,7 +371,7 @@ export default function MeetingDetailPage({ params }: { params: Promise<{ id: st
 
             {/* Promises */}
             {meeting.promises && meeting.promises.length > 0 && (
-              <Card className="border-0 shadow-lg shadow-slate-200/50 dark:shadow-none bg-white dark:bg-slate-800/50">
+              <Card className="border-0 shadow-lg shadow-slate-200/50 dark:shadow-none bg-card/50">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2 text-lg">
                     <Handshake className="h-5 w-5 text-rose-500" />
@@ -384,10 +384,10 @@ export default function MeetingDetailPage({ params }: { params: Promise<{ id: st
                       <li
                         key={promise.id}
                         onClick={() => router.push(`/dashboard/promises`)}
-                        className="p-3 rounded-lg bg-slate-50 dark:bg-slate-700/50 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors cursor-pointer"
+                        className="p-3 rounded-lg bg-muted dark:bg-muted/50 hover:bg-muted dark:hover:bg-muted transition-colors cursor-pointer"
                       >
                         <div className="flex items-start justify-between">
-                          <p className="text-slate-700 dark:text-slate-300 flex-1">
+                          <p className="text-foreground dark:text-muted-foreground flex-1">
                             {promise.promise_text}
                           </p>
                           <Badge
@@ -404,7 +404,7 @@ export default function MeetingDetailPage({ params }: { params: Promise<{ id: st
                           </Badge>
                         </div>
                         {promise.due_date && (
-                          <p className="text-xs text-slate-500 dark:text-slate-400 mt-2 flex items-center gap-1.5">
+                          <p className="text-xs text-muted-foreground dark:text-muted-foreground mt-2 flex items-center gap-1.5">
                             <Clock className="h-3 w-3" />
                             Due: {new Date(promise.due_date).toLocaleDateString()}
                           </p>
@@ -418,27 +418,27 @@ export default function MeetingDetailPage({ params }: { params: Promise<{ id: st
 
             {/* Transcript */}
             {meeting.transcript && (
-              <Card className="border-0 shadow-lg shadow-slate-200/50 dark:shadow-none bg-white dark:bg-slate-800/50">
+              <Card className="border-0 shadow-lg shadow-slate-200/50 dark:shadow-none bg-card/50">
                 <CardHeader
                   className="cursor-pointer"
                   onClick={() => setShowTranscript(!showTranscript)}
                 >
                   <CardTitle className="flex items-center justify-between text-lg">
                     <span className="flex items-center gap-2">
-                      <FileText className="h-5 w-5 text-slate-500" />
+                      <FileText className="h-5 w-5 text-muted-foreground" />
                       Transcript
                     </span>
                     {showTranscript ? (
-                      <ChevronUp className="h-5 w-5 text-slate-400" />
+                      <ChevronUp className="h-5 w-5 text-muted-foreground" />
                     ) : (
-                      <ChevronDown className="h-5 w-5 text-slate-400" />
+                      <ChevronDown className="h-5 w-5 text-muted-foreground" />
                     )}
                   </CardTitle>
                 </CardHeader>
                 {showTranscript && (
                   <CardContent>
-                    <div className="p-4 rounded-lg bg-slate-50 dark:bg-slate-900/50 max-h-[500px] overflow-y-auto">
-                      <pre className="text-sm text-slate-700 dark:text-slate-300 whitespace-pre-wrap font-sans">
+                    <div className="p-4 rounded-lg bg-muted dark:bg-card/50 max-h-[500px] overflow-y-auto">
+                      <pre className="text-sm text-foreground dark:text-muted-foreground whitespace-pre-wrap font-sans">
                         {meeting.transcript}
                       </pre>
                     </div>
@@ -453,7 +453,7 @@ export default function MeetingDetailPage({ params }: { params: Promise<{ id: st
             {/* Attendees */}
             {((meeting.attendees_details && meeting.attendees_details.length > 0) ||
               (meeting.attendees && meeting.attendees.length > 0)) && (
-              <Card className="border-0 shadow-lg shadow-slate-200/50 dark:shadow-none bg-white dark:bg-slate-800/50">
+              <Card className="border-0 shadow-lg shadow-slate-200/50 dark:shadow-none bg-card/50">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2 text-lg">
                     <Users className="h-5 w-5 text-blue-500" />
@@ -465,21 +465,21 @@ export default function MeetingDetailPage({ params }: { params: Promise<{ id: st
                     {meeting.attendees_details && meeting.attendees_details.length > 0
                       ? meeting.attendees_details.map((attendee) => (
                           <li key={attendee.id} className="flex items-start gap-3">
-                            <div className="h-8 w-8 rounded-full bg-slate-100 dark:bg-slate-700 flex items-center justify-center flex-shrink-0">
-                              <User className="h-4 w-4 text-slate-500" />
+                            <div className="h-8 w-8 rounded-full bg-muted dark:bg-muted flex items-center justify-center flex-shrink-0">
+                              <User className="h-4 w-4 text-muted-foreground" />
                             </div>
                             <div className="flex-1 min-w-0">
-                              <p className="font-medium text-slate-900 dark:text-white text-sm">
+                              <p className="font-medium text-foreground dark:text-white text-sm">
                                 {attendee.name}
                               </p>
                               {attendee.company && (
-                                <p className="text-xs text-slate-500 dark:text-slate-400 flex items-center gap-1">
+                                <p className="text-xs text-muted-foreground dark:text-muted-foreground flex items-center gap-1">
                                   <Building className="h-3 w-3" />
                                   {attendee.company}
                                 </p>
                               )}
                               {attendee.role_in_meeting && (
-                                <p className="text-xs text-slate-500 dark:text-slate-400">
+                                <p className="text-xs text-muted-foreground dark:text-muted-foreground">
                                   {attendee.role_in_meeting}
                                 </p>
                               )}
@@ -488,10 +488,10 @@ export default function MeetingDetailPage({ params }: { params: Promise<{ id: st
                         ))
                       : meeting.attendees.map((name, i) => (
                           <li key={i} className="flex items-center gap-3">
-                            <div className="h-8 w-8 rounded-full bg-slate-100 dark:bg-slate-700 flex items-center justify-center flex-shrink-0">
-                              <User className="h-4 w-4 text-slate-500" />
+                            <div className="h-8 w-8 rounded-full bg-muted dark:bg-muted flex items-center justify-center flex-shrink-0">
+                              <User className="h-4 w-4 text-muted-foreground" />
                             </div>
-                            <span className="text-sm text-slate-700 dark:text-slate-300">{name}</span>
+                            <span className="text-sm text-foreground dark:text-muted-foreground">{name}</span>
                           </li>
                         ))}
                   </ul>
@@ -501,7 +501,7 @@ export default function MeetingDetailPage({ params }: { params: Promise<{ id: st
 
             {/* Tasks Created */}
             {meeting.tasks && meeting.tasks.length > 0 && (
-              <Card className="border-0 shadow-lg shadow-slate-200/50 dark:shadow-none bg-white dark:bg-slate-800/50">
+              <Card className="border-0 shadow-lg shadow-slate-200/50 dark:shadow-none bg-card/50">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2 text-lg">
                     <ListChecks className="h-5 w-5 text-emerald-500" />
@@ -514,9 +514,9 @@ export default function MeetingDetailPage({ params }: { params: Promise<{ id: st
                       <li
                         key={task.id}
                         onClick={() => router.push(`/dashboard/tasks/${task.id}`)}
-                        className="p-2 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors cursor-pointer"
+                        className="p-2 rounded-lg hover:bg-muted dark:hover:bg-muted/50 transition-colors cursor-pointer"
                       >
-                        <p className="text-sm text-slate-700 dark:text-slate-300 line-clamp-1">
+                        <p className="text-sm text-foreground dark:text-muted-foreground line-clamp-1">
                           {task.title}
                         </p>
                         <div className="flex items-center gap-2 mt-1">
@@ -536,7 +536,7 @@ export default function MeetingDetailPage({ params }: { params: Promise<{ id: st
 
             {/* Project Tags */}
             {meeting.project_tags && meeting.project_tags.length > 0 && (
-              <Card className="border-0 shadow-lg shadow-slate-200/50 dark:shadow-none bg-white dark:bg-slate-800/50">
+              <Card className="border-0 shadow-lg shadow-slate-200/50 dark:shadow-none bg-card/50">
                 <CardHeader>
                   <CardTitle className="text-lg">Project Tags</CardTitle>
                 </CardHeader>
@@ -554,7 +554,7 @@ export default function MeetingDetailPage({ params }: { params: Promise<{ id: st
 
             {/* Follow-up Date */}
             {meeting.suggested_follow_up_date && (
-              <Card className="border-0 shadow-lg shadow-slate-200/50 dark:shadow-none bg-white dark:bg-slate-800/50">
+              <Card className="border-0 shadow-lg shadow-slate-200/50 dark:shadow-none bg-card/50">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2 text-lg">
                     <CalendarIcon className="h-5 w-5 text-amber-500" />
@@ -562,7 +562,7 @@ export default function MeetingDetailPage({ params }: { params: Promise<{ id: st
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-slate-700 dark:text-slate-300">
+                  <p className="text-foreground dark:text-muted-foreground">
                     {new Date(meeting.suggested_follow_up_date).toLocaleDateString("en-US", {
                       weekday: "long",
                       year: "numeric",
@@ -583,7 +583,7 @@ export default function MeetingDetailPage({ params }: { params: Promise<{ id: st
           <DialogHeader>
             <DialogTitle>Delete Meeting</DialogTitle>
           </DialogHeader>
-          <p className="text-slate-600 dark:text-slate-400">
+          <p className="text-muted-foreground dark:text-muted-foreground">
             Are you sure you want to delete this meeting? This action cannot be undone.
           </p>
           <DialogFooter>

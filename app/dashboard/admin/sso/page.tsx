@@ -81,7 +81,7 @@ export default function SSOOverviewPage() {
       <Card>
         <CardHeader>
           <CardTitle className="text-lg flex items-center gap-2">
-            <Key className="h-5 w-5 text-slate-500" />
+            <Key className="h-5 w-5 text-muted-foreground" />
             All SSO Providers
           </CardTitle>
         </CardHeader>
@@ -97,12 +97,12 @@ export default function SSOOverviewPage() {
                 <div
                   key={provider.id}
                   className={`flex items-center justify-between p-4 rounded-lg border ${
-                    provider.enabled ? "bg-white" : "bg-muted opacity-60"
+                    provider.enabled ? "bg-card" : "bg-muted opacity-60"
                   }`}
                 >
                   <div className="flex items-start gap-3">
-                    <div className="p-2 bg-slate-100 rounded-lg">
-                      <Key className="h-4 w-4 text-slate-600" />
+                    <div className="p-2 bg-muted rounded-lg">
+                      <Key className="h-4 w-4 text-muted-foreground" />
                     </div>
                     <div>
                       <div className="flex items-center gap-2">

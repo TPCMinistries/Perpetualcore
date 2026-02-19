@@ -98,7 +98,7 @@ export default function BrandsPage() {
       case "friendly":
         return "bg-pink-100 text-pink-700 dark:bg-pink-900/30 dark:text-pink-400";
       default:
-        return "bg-slate-100 text-slate-700 dark:bg-slate-900/30 dark:text-slate-400";
+        return "bg-muted text-foreground dark:bg-card/30 dark:text-muted-foreground";
     }
   };
 

@@ -162,11 +162,11 @@ export default function NotificationsPage() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="border border-slate-200 dark:border-slate-800 rounded-xl p-8 bg-white dark:bg-slate-900">
+      <div className="border border-border dark:border-border rounded-xl p-8 bg-card">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <div className="h-12 w-12 rounded-lg bg-slate-900 dark:bg-slate-100 flex items-center justify-center relative">
-              <Bell className="h-6 w-6 text-white dark:text-slate-900" />
+            <div className="h-12 w-12 rounded-lg bg-slate-900 dark:bg-muted flex items-center justify-center relative">
+              <Bell className="h-6 w-6 text-white dark:text-foreground" />
               {unreadCount > 0 && (
                 <div className="absolute -top-1 -right-1 h-6 w-6 rounded-full bg-red-500 flex items-center justify-center text-white text-xs font-bold">
                   {unreadCount > 99 ? '99+' : unreadCount}
@@ -174,10 +174,10 @@ export default function NotificationsPage() {
               )}
             </div>
             <div>
-              <h1 className="text-3xl font-semibold text-slate-900 dark:text-slate-100">
+              <h1 className="text-3xl font-semibold text-foreground dark:text-foreground">
                 Notifications
               </h1>
-              <p className="text-slate-600 dark:text-slate-400 mt-1">
+              <p className="text-muted-foreground dark:text-muted-foreground mt-1">
                 {unreadCount > 0
                   ? `${unreadCount} unread notification${unreadCount > 1 ? "s" : ""}`
                   : "You're all caught up!"}
@@ -190,7 +190,7 @@ export default function NotificationsPage() {
                 onClick={markAllAsRead}
                 variant="outline"
                 size="sm"
-                className="border-slate-200 dark:border-slate-800"
+                className="border-border dark:border-border"
               >
                 <CheckCheck className="h-4 w-4 mr-2" />
                 Mark all read
@@ -200,7 +200,7 @@ export default function NotificationsPage() {
               <Button
                 variant="outline"
                 size="sm"
-                className="border-slate-200 dark:border-slate-800"
+                className="border-border dark:border-border"
               >
                 <Settings className="h-4 w-4 mr-2" />
                 Settings
@@ -212,11 +212,11 @@ export default function NotificationsPage() {
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <Card className="p-6 border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900">
+        <Card className="p-6 border-border dark:border-border bg-card">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-slate-600 dark:text-slate-400">Total</p>
-              <p className="text-3xl font-semibold text-slate-900 dark:text-slate-100 mt-1">{notifications.length}</p>
+              <p className="text-sm text-muted-foreground dark:text-muted-foreground">Total</p>
+              <p className="text-3xl font-semibold text-foreground dark:text-foreground mt-1">{notifications.length}</p>
             </div>
             <div className="h-10 w-10 rounded-lg bg-indigo-50 dark:bg-indigo-950/30 flex items-center justify-center">
               <Bell className="h-5 w-5 text-indigo-600 dark:text-indigo-400" />
@@ -224,11 +224,11 @@ export default function NotificationsPage() {
           </div>
         </Card>
 
-        <Card className="p-6 border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900">
+        <Card className="p-6 border-border dark:border-border bg-card">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-slate-600 dark:text-slate-400">Unread</p>
-              <p className="text-3xl font-semibold text-slate-900 dark:text-slate-100 mt-1">{unreadCount}</p>
+              <p className="text-sm text-muted-foreground dark:text-muted-foreground">Unread</p>
+              <p className="text-3xl font-semibold text-foreground dark:text-foreground mt-1">{unreadCount}</p>
             </div>
             <div className="h-10 w-10 rounded-lg bg-blue-50 dark:bg-blue-950/30 flex items-center justify-center">
               <AlertCircle className="h-5 w-5 text-blue-600 dark:text-blue-400" />
@@ -236,11 +236,11 @@ export default function NotificationsPage() {
           </div>
         </Card>
 
-        <Card className="p-6 border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900">
+        <Card className="p-6 border-border dark:border-border bg-card">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-slate-600 dark:text-slate-400">AI Prioritized</p>
-              <p className="text-3xl font-semibold text-slate-900 dark:text-slate-100 mt-1">
+              <p className="text-sm text-muted-foreground dark:text-muted-foreground">AI Prioritized</p>
+              <p className="text-3xl font-semibold text-foreground dark:text-foreground mt-1">
                 {notifications.filter((n) => n.ai_priority_score && n.ai_priority_score > 7).length}
               </p>
             </div>
@@ -250,11 +250,11 @@ export default function NotificationsPage() {
           </div>
         </Card>
 
-        <Card className="p-6 border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900">
+        <Card className="p-6 border-border dark:border-border bg-card">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-slate-600 dark:text-slate-400">Read</p>
-              <p className="text-3xl font-semibold text-slate-900 dark:text-slate-100 mt-1">
+              <p className="text-sm text-muted-foreground dark:text-muted-foreground">Read</p>
+              <p className="text-3xl font-semibold text-foreground dark:text-foreground mt-1">
                 {notifications.filter((n) => n.status === "read").length}
               </p>
             </div>
@@ -271,7 +271,7 @@ export default function NotificationsPage() {
           variant={filter === "all" ? "default" : "outline"}
           size="sm"
           onClick={() => setFilter("all")}
-          className={filter === "all" ? "bg-slate-900 dark:bg-slate-100 hover:bg-slate-800 dark:hover:bg-slate-200 text-white dark:text-slate-900" : "border-slate-200 dark:border-slate-800"}
+          className={filter === "all" ? "bg-slate-900 dark:bg-muted hover:bg-slate-800 dark:hover:bg-muted text-white dark:text-foreground" : "border-border dark:border-border"}
         >
           All
         </Button>
@@ -279,7 +279,7 @@ export default function NotificationsPage() {
           variant={filter === "unread" ? "default" : "outline"}
           size="sm"
           onClick={() => setFilter("unread")}
-          className={filter === "unread" ? "bg-slate-900 dark:bg-slate-100 hover:bg-slate-800 dark:hover:bg-slate-200 text-white dark:text-slate-900" : "border-slate-200 dark:border-slate-800"}
+          className={filter === "unread" ? "bg-slate-900 dark:bg-muted hover:bg-slate-800 dark:hover:bg-muted text-white dark:text-foreground" : "border-border dark:border-border"}
         >
           Unread ({unreadCount})
         </Button>
@@ -287,7 +287,7 @@ export default function NotificationsPage() {
           variant={filter === "read" ? "default" : "outline"}
           size="sm"
           onClick={() => setFilter("read")}
-          className={filter === "read" ? "bg-slate-900 dark:bg-slate-100 hover:bg-slate-800 dark:hover:bg-slate-200 text-white dark:text-slate-900" : "border-slate-200 dark:border-slate-800"}
+          className={filter === "read" ? "bg-slate-900 dark:bg-muted hover:bg-slate-800 dark:hover:bg-muted text-white dark:text-foreground" : "border-border dark:border-border"}
         >
           Read
         </Button>
@@ -296,12 +296,12 @@ export default function NotificationsPage() {
       {/* Notifications List */}
       <div className="space-y-3">
         {notifications.length === 0 ? (
-          <Card className="p-12 text-center border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900">
+          <Card className="p-12 text-center border-border dark:border-border bg-card">
             <div className="h-20 w-20 rounded-2xl bg-indigo-50 dark:bg-indigo-950/30 flex items-center justify-center mx-auto mb-4">
               <Bell className="h-10 w-10 text-indigo-600 dark:text-indigo-400" />
             </div>
-            <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100 mb-2">No notifications</h3>
-            <p className="text-slate-600 dark:text-slate-400">
+            <h3 className="text-lg font-semibold text-foreground dark:text-foreground mb-2">No notifications</h3>
+            <p className="text-muted-foreground dark:text-muted-foreground">
               {filter === "unread"
                 ? "You're all caught up! No unread notifications."
                 : "No notifications to show."}
@@ -316,7 +316,7 @@ export default function NotificationsPage() {
             return (
               <Card
                 key={notification.id}
-                className={`relative p-5 transition-all duration-300 border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 hover:shadow-lg ${
+                className={`relative p-5 transition-all duration-300 border-border dark:border-border bg-card hover:shadow-lg ${
                   isUnread
                     ? "border-l-4 border-l-slate-900 dark:border-l-slate-100"
                     : ""
@@ -333,8 +333,8 @@ export default function NotificationsPage() {
                     <div className="flex items-start justify-between gap-2 mb-2">
                       <h3 className={`font-semibold text-base ${
                         isUnread
-                          ? "text-slate-900 dark:text-slate-100"
-                          : "text-slate-600 dark:text-slate-400"
+                          ? "text-foreground dark:text-foreground"
+                          : "text-muted-foreground dark:text-muted-foreground"
                       }`}>
                         {notification.title}
                       </h3>
@@ -344,7 +344,7 @@ export default function NotificationsPage() {
                             <Zap className="h-3 w-3 text-purple-600 dark:text-purple-400" />
                           </div>
                         )}
-                        <span className="text-xs text-slate-500 dark:text-slate-400 whitespace-nowrap">
+                        <span className="text-xs text-muted-foreground dark:text-muted-foreground whitespace-nowrap">
                           {formatDate(notification.created_at)}
                         </span>
                       </div>
@@ -352,8 +352,8 @@ export default function NotificationsPage() {
 
                     <p className={`text-sm mb-3 ${
                       isUnread
-                        ? "text-slate-700 dark:text-slate-300"
-                        : "text-slate-500 dark:text-slate-400"
+                        ? "text-foreground dark:text-muted-foreground"
+                        : "text-muted-foreground dark:text-muted-foreground"
                     }`}>
                       {notification.message}
                     </p>
@@ -377,7 +377,7 @@ export default function NotificationsPage() {
                         <Link href={notification.action_url}>
                           <Button
                             size="sm"
-                            className="bg-slate-900 dark:bg-slate-100 hover:bg-slate-800 dark:hover:bg-slate-200 text-white dark:text-slate-900"
+                            className="bg-slate-900 dark:bg-muted hover:bg-slate-800 dark:hover:bg-muted text-white dark:text-foreground"
                             onClick={() => isUnread && markAsRead(notification.id)}
                           >
                             {notification.action_label || "View"}
@@ -406,28 +406,28 @@ export default function NotificationsPage() {
                               <Clock className="h-4 w-4 mr-1" />
                               Snooze
                             </Button>
-                            <div className="hidden group-hover:block absolute left-0 top-full mt-1 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg shadow-xl py-1 z-10 min-w-[140px]">
+                            <div className="hidden group-hover:block absolute left-0 top-full mt-1 bg-card border border-border dark:border-border rounded-lg shadow-xl py-1 z-10 min-w-[140px]">
                               <button
                                 onClick={() => snoozeNotification(notification.id, "1h")}
-                                className="block w-full text-left px-4 py-2 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+                                className="block w-full text-left px-4 py-2 text-sm text-foreground dark:text-muted-foreground hover:bg-muted dark:hover:bg-muted transition-colors"
                               >
                                 1 hour
                               </button>
                               <button
                                 onClick={() => snoozeNotification(notification.id, "3h")}
-                                className="block w-full text-left px-4 py-2 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+                                className="block w-full text-left px-4 py-2 text-sm text-foreground dark:text-muted-foreground hover:bg-muted dark:hover:bg-muted transition-colors"
                               >
                                 3 hours
                               </button>
                               <button
                                 onClick={() => snoozeNotification(notification.id, "1d")}
-                                className="block w-full text-left px-4 py-2 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+                                className="block w-full text-left px-4 py-2 text-sm text-foreground dark:text-muted-foreground hover:bg-muted dark:hover:bg-muted transition-colors"
                               >
                                 1 day
                               </button>
                               <button
                                 onClick={() => snoozeNotification(notification.id, "1w")}
-                                className="block w-full text-left px-4 py-2 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+                                className="block w-full text-left px-4 py-2 text-sm text-foreground dark:text-muted-foreground hover:bg-muted dark:hover:bg-muted transition-colors"
                               >
                                 1 week
                               </button>

@@ -153,11 +153,11 @@ export default function AgentPlansPage() {
       {/* Empty state */}
       {plans.length === 0 && (
         <div className="text-center py-16">
-          <Target className="h-12 w-12 mx-auto text-slate-300 dark:text-slate-600 mb-4" />
-          <h3 className="text-lg font-medium text-slate-900 dark:text-white mb-2">
+          <Target className="h-12 w-12 mx-auto text-muted-foreground dark:text-muted-foreground mb-4" />
+          <h3 className="text-lg font-medium text-foreground dark:text-white mb-2">
             No agent plans yet
           </h3>
-          <p className="text-slate-500 dark:text-slate-400">
+          <p className="text-muted-foreground dark:text-muted-foreground">
             Ask your AI to delegate a complex task and it will create a multi-step
             plan that executes autonomously.
           </p>

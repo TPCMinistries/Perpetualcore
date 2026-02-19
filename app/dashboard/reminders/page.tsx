@@ -84,7 +84,7 @@ interface Stats {
 }
 
 const PRIORITY_CONFIG: Record<string, { label: string; color: string; bgColor: string }> = {
-  low: { label: "Low", color: "text-slate-600", bgColor: "bg-slate-100" },
+  low: { label: "Low", color: "text-muted-foreground", bgColor: "bg-muted" },
   medium: { label: "Medium", color: "text-yellow-600", bgColor: "bg-yellow-100" },
   high: { label: "High", color: "text-orange-600", bgColor: "bg-orange-100" },
   urgent: { label: "Urgent", color: "text-red-600", bgColor: "bg-red-100" },

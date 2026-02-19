@@ -63,7 +63,7 @@ interface Suggestion {
 const priorityColors = {
   high: "bg-rose-100 text-rose-700 dark:bg-rose-900/30 dark:text-rose-400",
   medium: "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400",
-  low: "bg-slate-100 text-slate-700 dark:bg-slate-700 dark:text-slate-300",
+  low: "bg-muted text-foreground dark:bg-muted dark:text-muted-foreground",
 };
 
 export default function IntelligenceDashboard() {
@@ -224,7 +224,7 @@ export default function IntelligenceDashboard() {
         className="mb-6"
       >
         <Card>
-          <CardHeader className="border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/30">
+          <CardHeader className="border-b border-border dark:border-border bg-muted/50 dark:bg-card/30">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <div className="p-2 rounded-lg bg-violet-100 dark:bg-violet-900/30">
@@ -245,13 +245,13 @@ export default function IntelligenceDashboard() {
           <CardContent className="pt-6">
             {suggestions.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-12 text-center">
-                <div className="p-4 rounded-2xl bg-slate-100 dark:bg-slate-800 mb-4">
-                  <Sparkles className="h-8 w-8 text-slate-400 dark:text-slate-500" />
+                <div className="p-4 rounded-2xl bg-muted dark:bg-card mb-4">
+                  <Sparkles className="h-8 w-8 text-muted-foreground dark:text-muted-foreground" />
                 </div>
-                <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-2">
+                <h3 className="text-lg font-semibold text-foreground dark:text-white mb-2">
                   No suggestions yet
                 </h3>
-                <p className="text-slate-500 dark:text-slate-400 max-w-md mb-4">
+                <p className="text-muted-foreground dark:text-muted-foreground max-w-md mb-4">
                   Have some conversations to generate intelligent suggestions tailored to your workflow.
                 </p>
                 <Button
@@ -275,22 +275,22 @@ export default function IntelligenceDashboard() {
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: i * 0.05 }}
-                    className="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 hover:border-violet-300 dark:hover:border-violet-700 transition-colors"
+                    className="p-4 rounded-xl bg-muted dark:bg-card/50 border border-border dark:border-border hover:border-violet-300 dark:hover:border-violet-700 transition-colors"
                   >
                     <div className="flex items-start justify-between gap-4">
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 mb-2">
-                          <h4 className="font-semibold text-slate-900 dark:text-white">
+                          <h4 className="font-semibold text-foreground dark:text-white">
                             {suggestion.title}
                           </h4>
                           <Badge className={cn("text-xs", priorityColors[suggestion.priority as keyof typeof priorityColors] || priorityColors.low)}>
                             {suggestion.priority}
                           </Badge>
                         </div>
-                        <p className="text-sm text-slate-600 dark:text-slate-400 mb-3">
+                        <p className="text-sm text-muted-foreground dark:text-muted-foreground mb-3">
                           {suggestion.description}
                         </p>
-                        <div className="flex items-center gap-4 text-xs text-slate-500 dark:text-slate-400">
+                        <div className="flex items-center gap-4 text-xs text-muted-foreground dark:text-muted-foreground">
                           <span className="flex items-center gap-1">
                             <BarChart3 className="h-3 w-3" />
                             {Math.round(suggestion.relevance_score * 100)}% relevant
@@ -316,7 +316,7 @@ export default function IntelligenceDashboard() {
                             size="sm"
                             variant="ghost"
                             onClick={() => updateSuggestionStatus(suggestion.id, "dismissed")}
-                            className="text-slate-500 hover:text-slate-700"
+                            className="text-muted-foreground hover:text-foreground"
                           >
                             <X className="h-4 w-4" />
                           </Button>
@@ -346,7 +346,7 @@ export default function IntelligenceDashboard() {
           variants={cardVariants}
         >
           <Card className="h-full">
-            <CardHeader className="border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/30">
+            <CardHeader className="border-b border-border dark:border-border bg-muted/50 dark:bg-card/30">
               <div className="flex items-center gap-3">
                 <div className="p-2 rounded-lg bg-amber-100 dark:bg-amber-900/30">
                   <Lightbulb className="h-4 w-4 text-amber-600 dark:text-amber-400" />
@@ -365,8 +365,8 @@ export default function IntelligenceDashboard() {
             <CardContent className="pt-6">
               {insights.length === 0 ? (
                 <div className="flex flex-col items-center justify-center py-8 text-center">
-                  <Lightbulb className="h-8 w-8 text-slate-300 dark:text-slate-600 mb-3" />
-                  <p className="text-sm text-slate-500 dark:text-slate-400">
+                  <Lightbulb className="h-8 w-8 text-muted-foreground dark:text-muted-foreground mb-3" />
+                  <p className="text-sm text-muted-foreground dark:text-muted-foreground">
                     No insights yet. Keep chatting!
                   </p>
                 </div>
@@ -380,20 +380,20 @@ export default function IntelligenceDashboard() {
                       transition={{ delay: i * 0.05 }}
                       className="p-3 rounded-lg bg-amber-50 dark:bg-amber-900/10 border border-amber-100 dark:border-amber-900/30"
                     >
-                      <div className="font-medium text-sm text-slate-900 dark:text-white mb-1">
+                      <div className="font-medium text-sm text-foreground dark:text-white mb-1">
                         {insight.title}
                       </div>
-                      <div className="text-xs text-slate-600 dark:text-slate-400 line-clamp-2">
+                      <div className="text-xs text-muted-foreground dark:text-muted-foreground line-clamp-2">
                         {insight.description}
                       </div>
                       <div className="flex items-center gap-2 mt-2">
-                        <div className="h-1.5 flex-1 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
+                        <div className="h-1.5 flex-1 bg-muted dark:bg-muted rounded-full overflow-hidden">
                           <div
                             className="h-full bg-amber-500 rounded-full"
                             style={{ width: `${insight.confidence_score * 100}%` }}
                           />
                         </div>
-                        <span className="text-xs text-slate-500 dark:text-slate-400">
+                        <span className="text-xs text-muted-foreground dark:text-muted-foreground">
                           {Math.round(insight.confidence_score * 100)}%
                         </span>
                       </div>
@@ -413,7 +413,7 @@ export default function IntelligenceDashboard() {
           variants={cardVariants}
         >
           <Card className="h-full">
-            <CardHeader className="border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/30">
+            <CardHeader className="border-b border-border dark:border-border bg-muted/50 dark:bg-card/30">
               <div className="flex items-center gap-3">
                 <div className="p-2 rounded-lg bg-emerald-100 dark:bg-emerald-900/30">
                   <TrendingUp className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
@@ -432,8 +432,8 @@ export default function IntelligenceDashboard() {
             <CardContent className="pt-6">
               {patterns.length === 0 ? (
                 <div className="flex flex-col items-center justify-center py-8 text-center">
-                  <TrendingUp className="h-8 w-8 text-slate-300 dark:text-slate-600 mb-3" />
-                  <p className="text-sm text-slate-500 dark:text-slate-400">
+                  <TrendingUp className="h-8 w-8 text-muted-foreground dark:text-muted-foreground mb-3" />
+                  <p className="text-sm text-muted-foreground dark:text-muted-foreground">
                     No patterns detected yet
                   </p>
                 </div>
@@ -447,13 +447,13 @@ export default function IntelligenceDashboard() {
                       transition={{ delay: i * 0.05 }}
                       className="p-3 rounded-lg bg-emerald-50 dark:bg-emerald-900/10 border border-emerald-100 dark:border-emerald-900/30"
                     >
-                      <div className="font-medium text-sm text-slate-900 dark:text-white mb-1">
+                      <div className="font-medium text-sm text-foreground dark:text-white mb-1">
                         {pattern.pattern_name}
                       </div>
-                      <div className="text-xs text-slate-600 dark:text-slate-400 line-clamp-2">
+                      <div className="text-xs text-muted-foreground dark:text-muted-foreground line-clamp-2">
                         {pattern.pattern_description}
                       </div>
-                      <div className="flex items-center justify-between mt-2 text-xs text-slate-500 dark:text-slate-400">
+                      <div className="flex items-center justify-between mt-2 text-xs text-muted-foreground dark:text-muted-foreground">
                         <span>{pattern.occurrence_count} occurrences</span>
                         <span>{Math.round(pattern.confidence * 100)}% confident</span>
                       </div>
@@ -473,7 +473,7 @@ export default function IntelligenceDashboard() {
           variants={cardVariants}
         >
           <Card className="h-full">
-            <CardHeader className="border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/30">
+            <CardHeader className="border-b border-border dark:border-border bg-muted/50 dark:bg-card/30">
               <div className="flex items-center gap-3">
                 <div className="p-2 rounded-lg bg-blue-100 dark:bg-blue-900/30">
                   <Target className="h-4 w-4 text-blue-600 dark:text-blue-400" />
@@ -492,8 +492,8 @@ export default function IntelligenceDashboard() {
             <CardContent className="pt-6">
               {preferences.length === 0 ? (
                 <div className="flex flex-col items-center justify-center py-8 text-center">
-                  <Target className="h-8 w-8 text-slate-300 dark:text-slate-600 mb-3" />
-                  <p className="text-sm text-slate-500 dark:text-slate-400">
+                  <Target className="h-8 w-8 text-muted-foreground dark:text-muted-foreground mb-3" />
+                  <p className="text-sm text-muted-foreground dark:text-muted-foreground">
                     No preferences learned yet
                   </p>
                 </div>
@@ -511,23 +511,23 @@ export default function IntelligenceDashboard() {
                         <Badge variant="outline" className="text-xs">
                           {pref.preference_type}
                         </Badge>
-                        <span className="font-medium text-sm text-slate-900 dark:text-white">
+                        <span className="font-medium text-sm text-foreground dark:text-white">
                           {pref.preference_key}
                         </span>
                       </div>
-                      <div className="text-xs text-slate-600 dark:text-slate-400 truncate">
+                      <div className="text-xs text-muted-foreground dark:text-muted-foreground truncate">
                         {typeof pref.preference_value === "object"
                           ? JSON.stringify(pref.preference_value)
                           : String(pref.preference_value)}
                       </div>
                       <div className="flex items-center gap-2 mt-2">
-                        <div className="h-1.5 flex-1 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
+                        <div className="h-1.5 flex-1 bg-muted dark:bg-muted rounded-full overflow-hidden">
                           <div
                             className="h-full bg-blue-500 rounded-full"
                             style={{ width: `${pref.confidence * 100}%` }}
                           />
                         </div>
-                        <span className="text-xs text-slate-500 dark:text-slate-400">
+                        <span className="text-xs text-muted-foreground dark:text-muted-foreground">
                           {Math.round(pref.confidence * 100)}%
                         </span>
                       </div>

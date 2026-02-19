@@ -43,7 +43,7 @@ export function ChatMessages({
             )}
             {message.role === "user" && (
               <div className="flex-shrink-0">
-                <div className="h-7 w-7 rounded-md bg-slate-900 dark:bg-slate-700 flex items-center justify-center">
+                <div className="h-7 w-7 rounded-md bg-slate-900 dark:bg-muted flex items-center justify-center">
                   <User className="h-4 w-4 text-white" />
                 </div>
               </div>
@@ -55,7 +55,7 @@ export function ChatMessages({
                     {message.attachments.map((attachment, attIndex) => (
                       <div
                         key={attIndex}
-                        className="flex items-center gap-2 bg-slate-200 dark:bg-slate-700 rounded p-2"
+                        className="flex items-center gap-2 bg-muted dark:bg-muted rounded p-2"
                       >
                         {attachment.type === "image" && attachment.preview ? (
                           <img
@@ -93,13 +93,13 @@ export function ChatMessages({
                     })()}
                   </>
                 ) : (
-                  <div className="whitespace-pre-wrap break-words text-slate-900 dark:text-slate-100">
+                  <div className="whitespace-pre-wrap break-words text-foreground dark:text-foreground">
                     {message.content}
                   </div>
                 )}
                 {/* Model/RAG indicators */}
                 {message.role === "assistant" && index === messages.length - 1 && (
-                  <div className="flex items-center gap-2 mt-3 text-xs text-slate-500">
+                  <div className="flex items-center gap-2 mt-3 text-xs text-muted-foreground">
                     {currentModel && (
                       <span className="inline-flex items-center gap-1">
                         {currentModel.icon} {currentModel.name}
@@ -126,7 +126,7 @@ export function ChatMessages({
                         className="h-6 w-6 p-0 hover:bg-emerald-100 dark:hover:bg-emerald-900/30"
                         title="This was helpful"
                       >
-                        <ThumbsUp className="h-3.5 w-3.5 text-slate-500 hover:text-emerald-600" />
+                        <ThumbsUp className="h-3.5 w-3.5 text-muted-foreground hover:text-emerald-600" />
                       </Button>
                       <Button
                         variant="ghost"
@@ -135,13 +135,13 @@ export function ChatMessages({
                         className="h-6 w-6 p-0 hover:bg-red-100 dark:hover:bg-red-900/30"
                         title="This wasn't helpful"
                       >
-                        <ThumbsDown className="h-3.5 w-3.5 text-slate-500 hover:text-red-600" />
+                        <ThumbsDown className="h-3.5 w-3.5 text-muted-foreground hover:text-red-600" />
                       </Button>
                     </>
                   )}
                   {/* Show feedback status if already given */}
                   {message.feedback && (
-                    <span className="text-xs px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400">
+                    <span className="text-xs px-2 py-0.5 rounded-full bg-muted dark:bg-card text-muted-foreground dark:text-muted-foreground">
                       {message.feedback === "helpful" ? "Thanks!" : "Noted"}
                     </span>
                   )}
@@ -150,7 +150,7 @@ export function ChatMessages({
                     variant="ghost"
                     size="sm"
                     onClick={() => onCopy(message.content, index)}
-                    className="h-6 w-6 p-0 hover:bg-slate-100 dark:hover:bg-slate-800"
+                    className="h-6 w-6 p-0 hover:bg-muted dark:hover:bg-muted"
                     title="Copy to clipboard"
                   >
                     {copiedMessageIndex === index ? (

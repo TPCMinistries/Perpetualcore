@@ -639,7 +639,7 @@ export default function BillingPage() {
             onClick={() => setBillingInterval("monthly")}
             className={`px-4 py-2 rounded-md font-medium transition-all ${
               billingInterval === "monthly"
-                ? "bg-white text-foreground shadow-sm"
+                ? "bg-card text-foreground shadow-sm"
                 : "text-muted-foreground"
             }`}
           >
@@ -649,7 +649,7 @@ export default function BillingPage() {
             onClick={() => setBillingInterval("annual")}
             className={`px-4 py-2 rounded-md font-medium transition-all ${
               billingInterval === "annual"
-                ? "bg-white text-foreground shadow-sm"
+                ? "bg-card text-foreground shadow-sm"
                 : "text-muted-foreground"
             }`}
           >

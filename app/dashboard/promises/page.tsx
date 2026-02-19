@@ -96,7 +96,7 @@ const statusConfig = {
 };
 
 const importanceColors = {
-  low: "bg-slate-100 text-slate-600 dark:bg-slate-700 dark:text-slate-400",
+  low: "bg-muted text-muted-foreground dark:bg-muted dark:text-muted-foreground",
   medium: "bg-blue-100 text-blue-600 dark:bg-blue-500/20 dark:text-blue-400",
   high: "bg-orange-100 text-orange-600 dark:bg-orange-500/20 dark:text-orange-400",
   critical: "bg-red-100 text-red-600 dark:bg-red-500/20 dark:text-red-400",
@@ -260,8 +260,8 @@ export default function PromisesPage() {
                 <Handshake className="h-7 w-7 text-white" />
               </div>
               <div>
-                <h1 className="text-3xl font-bold text-slate-900 dark:text-white">Promises</h1>
-                <p className="text-slate-500 dark:text-slate-400 mt-0.5">
+                <h1 className="text-3xl font-bold text-foreground dark:text-white">Promises</h1>
+                <p className="text-muted-foreground dark:text-muted-foreground mt-0.5">
                   Track commitments made in meetings
                 </p>
               </div>
@@ -398,17 +398,17 @@ export default function PromisesPage() {
           {/* Filters */}
           <div className="flex items-center gap-4">
             <div className="relative flex-1 max-w-md">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
                 placeholder="Search promises..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10 bg-white dark:bg-slate-800/50"
+                className="pl-10 bg-card/50"
               />
             </div>
             <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger className="w-[160px] bg-white dark:bg-slate-800/50">
-                <Filter className="h-4 w-4 mr-2 text-slate-400" />
+              <SelectTrigger className="w-[160px] bg-card/50">
+                <Filter className="h-4 w-4 mr-2 text-muted-foreground" />
                 <SelectValue placeholder="All statuses" />
               </SelectTrigger>
               <SelectContent>
@@ -424,19 +424,19 @@ export default function PromisesPage() {
         {/* Promises List */}
         {filteredPromises.length === 0 ? (
           <div className="text-center py-16">
-            <div className="h-20 w-20 rounded-2xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center mx-auto mb-6">
-              <Handshake className="h-10 w-10 text-slate-400 dark:text-slate-500" />
+            <div className="h-20 w-20 rounded-2xl bg-muted dark:bg-card flex items-center justify-center mx-auto mb-6">
+              <Handshake className="h-10 w-10 text-muted-foreground dark:text-muted-foreground" />
             </div>
-            <h3 className="text-xl font-semibold text-slate-900 dark:text-white mb-2">
+            <h3 className="text-xl font-semibold text-foreground dark:text-white mb-2">
               No promises yet
             </h3>
-            <p className="text-slate-500 dark:text-slate-400 mb-6">
+            <p className="text-muted-foreground dark:text-muted-foreground mb-6">
               Promises from meetings will appear here, or create one manually
             </p>
             <Button
               onClick={() => setShowNewPromise(true)}
               variant="outline"
-              className="border-slate-200 dark:border-slate-700"
+              className="border-border dark:border-border"
             >
               <Plus className="h-4 w-4 mr-2" />
               Add Promise
@@ -452,7 +452,7 @@ export default function PromisesPage() {
               return (
                 <Card
                   key={promise.id}
-                  className={`border-0 shadow-lg shadow-slate-200/50 dark:shadow-none bg-white dark:bg-slate-800/50 hover:shadow-xl transition-all group ${
+                  className={`border-0 shadow-lg shadow-slate-200/50 dark:shadow-none bg-card/50 hover:shadow-xl transition-all group ${
                     promise.status === "fulfilled" ? "opacity-70" : ""
                   }`}
                 >
@@ -474,12 +474,12 @@ export default function PromisesPage() {
 
                       {/* Content */}
                       <div className="flex-1 min-w-0">
-                        <p className={`text-base ${promise.status === "fulfilled" ? "line-through text-slate-400 dark:text-slate-500" : "text-slate-800 dark:text-slate-200"}`}>
+                        <p className={`text-base ${promise.status === "fulfilled" ? "line-through text-muted-foreground dark:text-muted-foreground" : "text-foreground dark:text-foreground"}`}>
                           {promise.promise_text}
                         </p>
 
                         {promise.context && (
-                          <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
+                          <p className="text-sm text-muted-foreground dark:text-muted-foreground mt-1">
                             {promise.context}
                           </p>
                         )}
@@ -503,7 +503,7 @@ export default function PromisesPage() {
                               className={`inline-flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 rounded-full ${
                                 dueStatus.urgent
                                   ? "text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-500/10"
-                                  : "text-slate-600 dark:text-slate-400 bg-slate-100 dark:bg-slate-700/50"
+                                  : "text-muted-foreground dark:text-muted-foreground bg-muted dark:bg-muted/50"
                               }`}
                             >
                               <CalendarIcon className="h-3 w-3" />
@@ -532,7 +532,7 @@ export default function PromisesPage() {
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
                             <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                              <MoreHorizontal className="h-4 w-4 text-slate-400" />
+                              <MoreHorizontal className="h-4 w-4 text-muted-foreground" />
                             </Button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end">

@@ -104,7 +104,7 @@ export function ChatInput({
   );
 
   return (
-    <div className="border-t border-slate-200/50 dark:border-slate-800/50 bg-white/80 dark:bg-slate-950/80 backdrop-blur-sm">
+    <div className="border-t border-border/50 dark:border-border/50 bg-card/80 dark:bg-background/80 backdrop-blur-sm">
       <div className="max-w-3xl mx-auto px-6 py-4">
         {/* Prompt Menu Buttons */}
         <div className="flex items-center gap-2 mb-3">
@@ -151,7 +151,7 @@ export function ChatInput({
             {attachments.map((attachment, index) => (
               <div
                 key={index}
-                className="relative group bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg p-2 flex items-center gap-2"
+                className="relative group bg-muted dark:bg-card border border-border dark:border-border rounded-lg p-2 flex items-center gap-2"
               >
                 {attachment.type === "image" && attachment.preview ? (
                   <img
@@ -160,13 +160,13 @@ export function ChatInput({
                     className="h-12 w-12 object-cover rounded"
                   />
                 ) : (
-                  <FileText className="h-5 w-5 text-slate-600 dark:text-slate-400" />
+                  <FileText className="h-5 w-5 text-muted-foreground dark:text-muted-foreground" />
                 )}
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium truncate text-slate-900 dark:text-slate-100">
+                  <p className="text-sm font-medium truncate text-foreground dark:text-foreground">
                     {attachment.file.name}
                   </p>
-                  <p className="text-xs text-slate-500">
+                  <p className="text-xs text-muted-foreground">
                     {(attachment.file.size / 1024).toFixed(1)} KB
                   </p>
                 </div>
@@ -195,8 +195,8 @@ export function ChatInput({
           onDrop={onDrop}
           className={`relative rounded-2xl border transition-all shadow-sm ${
             isDragging
-              ? "border-slate-400 dark:border-slate-600 bg-slate-50 dark:bg-slate-800 shadow-lg"
-              : "border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 hover:border-slate-400 dark:hover:border-slate-600"
+              ? "border-slate-400 dark:border-border bg-muted dark:bg-card shadow-lg"
+              : "border-border dark:border-border bg-card hover:border-border dark:hover:border-border"
           }`}
         >
           {/* Mention Dropdown */}
@@ -226,7 +226,7 @@ export function ChatInput({
               onClick={() => fileInputRef.current?.click()}
               disabled={isLoading}
               title="Attach files"
-              className="h-9 w-9 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-100 dark:hover:bg-slate-800"
+              className="h-9 w-9 text-muted-foreground dark:text-muted-foreground hover:text-foreground dark:hover:text-slate-100 hover:bg-muted dark:hover:bg-muted"
             >
               <Paperclip className="h-4 w-4" />
             </Button>
@@ -242,7 +242,7 @@ export function ChatInput({
                   : "Ask anything... Type @ to mention a contact"
               }
               disabled={isLoading}
-              className="flex-1 min-h-[36px] max-h-[200px] resize-none border-0 focus-visible:ring-0 bg-transparent text-slate-900 dark:text-slate-100 placeholder:text-slate-500 dark:placeholder:text-slate-500 px-2 text-[15px]"
+              className="flex-1 min-h-[36px] max-h-[200px] resize-none border-0 focus-visible:ring-0 bg-transparent text-foreground dark:text-foreground placeholder:text-muted-foreground dark:placeholder:text-muted-foreground px-2 text-[15px]"
               rows={1}
               onInput={(e) => {
                 const target = e.target as HTMLTextAreaElement;
@@ -268,7 +268,7 @@ export function ChatInput({
             <Button
               type="submit"
               disabled={isLoading || (!input.trim() && attachments.length === 0)}
-              className="h-9 w-9 p-0 rounded-lg bg-slate-900 dark:bg-slate-100 hover:bg-slate-800 dark:hover:bg-slate-200 text-white dark:text-slate-900 disabled:opacity-50"
+              className="h-9 w-9 p-0 rounded-lg bg-slate-900 dark:bg-muted hover:bg-slate-800 dark:hover:bg-muted text-white dark:text-foreground disabled:opacity-50"
               size="icon"
             >
               {isLoading ? (

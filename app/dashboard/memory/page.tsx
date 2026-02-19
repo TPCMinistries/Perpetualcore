@@ -174,13 +174,13 @@ export default function MemoryPage() {
     return (
       <DashboardPageWrapper maxWidth="6xl">
         <div className="text-center py-16">
-          <div className="h-20 w-20 rounded-2xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center mx-auto mb-6">
-            <Brain className="h-10 w-10 text-slate-400 dark:text-slate-500" />
+          <div className="h-20 w-20 rounded-2xl bg-muted dark:bg-card flex items-center justify-center mx-auto mb-6">
+            <Brain className="h-10 w-10 text-muted-foreground dark:text-muted-foreground" />
           </div>
-          <h3 className="text-xl font-semibold text-slate-900 dark:text-white mb-2">
+          <h3 className="text-xl font-semibold text-foreground dark:text-white mb-2">
             Failed to load memory stats
           </h3>
-          <p className="text-slate-500 dark:text-slate-400">
+          <p className="text-muted-foreground dark:text-muted-foreground">
             Please try refreshing the page
           </p>
         </div>
@@ -228,13 +228,13 @@ export default function MemoryPage() {
                 <Database className="h-8 w-8 text-violet-600 dark:text-violet-400" />
               </div>
               <div>
-                <p className="text-sm text-slate-600 dark:text-slate-400">
+                <p className="text-sm text-muted-foreground dark:text-muted-foreground">
                   Total Knowledge
                 </p>
                 <p className="text-4xl font-bold bg-gradient-to-r from-violet-600 to-purple-600 bg-clip-text text-transparent">
                   {totalKnowledge.toLocaleString()}
                 </p>
-                <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                <p className="text-xs text-muted-foreground dark:text-muted-foreground mt-1">
                   pieces of information indexed
                 </p>
               </div>
@@ -249,7 +249,7 @@ export default function MemoryPage() {
                 <Sparkles className="h-6 w-6 text-emerald-600 dark:text-emerald-400" />
               </div>
               <div>
-                <p className="text-sm text-slate-600 dark:text-slate-400">
+                <p className="text-sm text-muted-foreground dark:text-muted-foreground">
                   AI Memories
                 </p>
                 <p className="text-2xl font-bold text-emerald-700 dark:text-emerald-300">
@@ -267,7 +267,7 @@ export default function MemoryPage() {
                 <Lightbulb className="h-6 w-6 text-blue-600 dark:text-blue-400" />
               </div>
               <div>
-                <p className="text-sm text-slate-600 dark:text-slate-400">
+                <p className="text-sm text-muted-foreground dark:text-muted-foreground">
                   Insights
                 </p>
                 <p className="text-2xl font-bold text-blue-700 dark:text-blue-300">
@@ -327,13 +327,13 @@ export default function MemoryPage() {
           animate="visible"
           variants={cardVariants}
         >
-          <Card className="border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 h-full">
-            <CardHeader className="border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/30">
+          <Card className="border-border dark:border-border bg-card h-full">
+            <CardHeader className="border-b border-border dark:border-border bg-muted/50 dark:bg-card/30">
               <CardTitle className="flex items-center gap-3">
                 <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-violet-100 to-purple-100 dark:from-violet-900/50 dark:to-purple-900/50 flex items-center justify-center">
                   <Brain className="h-5 w-5 text-violet-600 dark:text-violet-400" />
                 </div>
-                <span className="text-slate-900 dark:text-slate-100">
+                <span className="text-foreground dark:text-foreground">
                   What AI Remembers
                 </span>
               </CardTitle>
@@ -347,11 +347,11 @@ export default function MemoryPage() {
                       const Icon = MEMORY_TYPE_ICONS[type] || Brain;
                       const colorClass =
                         MEMORY_TYPE_COLORS[type] ||
-                        "bg-slate-100 text-slate-700";
+                        "bg-muted text-foreground";
                       return (
                         <div
                           key={type}
-                          className="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-800/50 rounded-lg border border-slate-200 dark:border-slate-700 hover:border-violet-200 dark:hover:border-violet-800/50 transition-colors"
+                          className="flex items-center justify-between p-3 bg-muted dark:bg-card/50 rounded-lg border border-border dark:border-border hover:border-violet-200 dark:hover:border-violet-800/50 transition-colors"
                         >
                           <div className="flex items-center gap-3">
                             <div
@@ -359,13 +359,13 @@ export default function MemoryPage() {
                             >
                               <Icon className="h-4 w-4" />
                             </div>
-                            <span className="text-sm font-medium text-slate-700 dark:text-slate-300 capitalize">
+                            <span className="text-sm font-medium text-foreground dark:text-muted-foreground capitalize">
                               {type.replace(/_/g, " ")}
                             </span>
                           </div>
                           <Badge
                             variant="secondary"
-                            className="bg-slate-200 dark:bg-slate-700"
+                            className="bg-muted dark:bg-muted"
                           >
                             {count}
                           </Badge>
@@ -375,8 +375,8 @@ export default function MemoryPage() {
                 </div>
               ) : (
                 <div className="text-center py-8">
-                  <Brain className="h-12 w-12 mx-auto text-slate-300 dark:text-slate-600 mb-3" />
-                  <p className="text-slate-500 dark:text-slate-400 mb-4">
+                  <Brain className="h-12 w-12 mx-auto text-muted-foreground dark:text-muted-foreground mb-3" />
+                  <p className="text-muted-foreground dark:text-muted-foreground mb-4">
                     No memories yet. Start chatting to teach your AI!
                   </p>
                   <Link href="/dashboard/chat">
@@ -397,13 +397,13 @@ export default function MemoryPage() {
           animate="visible"
           variants={cardVariants}
         >
-          <Card className="border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 h-full">
-            <CardHeader className="border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/30">
+          <Card className="border-border dark:border-border bg-card h-full">
+            <CardHeader className="border-b border-border dark:border-border bg-muted/50 dark:bg-card/30">
               <CardTitle className="flex items-center gap-3">
                 <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-emerald-100 to-green-100 dark:from-emerald-900/50 dark:to-green-900/50 flex items-center justify-center">
                   <Activity className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
                 </div>
-                <span className="text-slate-900 dark:text-slate-100">
+                <span className="text-foreground dark:text-foreground">
                   Learning Activity
                 </span>
               </CardTitle>
@@ -414,7 +414,7 @@ export default function MemoryPage() {
                   <p className="text-2xl font-bold text-emerald-700 dark:text-emerald-300">
                     {stats.learningLog.todayCount}
                   </p>
-                  <p className="text-sm text-slate-600 dark:text-slate-400">
+                  <p className="text-sm text-muted-foreground dark:text-muted-foreground">
                     Learned today
                   </p>
                 </div>
@@ -422,30 +422,30 @@ export default function MemoryPage() {
                   <p className="text-2xl font-bold text-blue-700 dark:text-blue-300">
                     {stats.learningLog.weekCount}
                   </p>
-                  <p className="text-sm text-slate-600 dark:text-slate-400">
+                  <p className="text-sm text-muted-foreground dark:text-muted-foreground">
                     This week
                   </p>
                 </div>
               </div>
 
               <div className="space-y-2">
-                <p className="text-sm font-medium text-slate-700 dark:text-slate-300 mb-3">
+                <p className="text-sm font-medium text-foreground dark:text-muted-foreground mb-3">
                   Recent Learning
                 </p>
                 {stats.learningLog.recentEvents.length > 0 ? (
                   stats.learningLog.recentEvents.slice(0, 5).map((event, idx) => (
                     <div
                       key={idx}
-                      className="flex items-start gap-3 p-2 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors"
+                      className="flex items-start gap-3 p-2 rounded-lg hover:bg-muted dark:hover:bg-muted/50 transition-colors"
                     >
                       <div className="h-6 w-6 rounded-full bg-violet-100 dark:bg-violet-900/50 flex items-center justify-center flex-shrink-0 mt-0.5">
                         <Sparkles className="h-3 w-3 text-violet-600 dark:text-violet-400" />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm text-slate-700 dark:text-slate-300 truncate">
+                        <p className="text-sm text-foreground dark:text-muted-foreground truncate">
                           {event.content}
                         </p>
-                        <p className="text-xs text-slate-500">
+                        <p className="text-xs text-muted-foreground">
                           {formatEventType(event.type)}{" "}
                           {formatTime(event.created_at)}
                         </p>
@@ -453,7 +453,7 @@ export default function MemoryPage() {
                     </div>
                   ))
                 ) : (
-                  <p className="text-sm text-slate-500 dark:text-slate-400 text-center py-4">
+                  <p className="text-sm text-muted-foreground dark:text-muted-foreground text-center py-4">
                     No recent learning events
                   </p>
                 )}
@@ -470,57 +470,57 @@ export default function MemoryPage() {
         animate="visible"
         variants={cardVariants}
       >
-        <Card className="border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900">
-          <CardHeader className="border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/30">
-            <CardTitle className="text-slate-900 dark:text-slate-100">
+        <Card className="border-border dark:border-border bg-card">
+          <CardHeader className="border-b border-border dark:border-border bg-muted/50 dark:bg-card/30">
+            <CardTitle className="text-foreground dark:text-foreground">
               Grow Your AI Brain
             </CardTitle>
           </CardHeader>
           <CardContent className="pt-6">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <Link href="/dashboard/onboarding/brain-dump" className="block">
-                <div className="p-4 border border-slate-200 dark:border-slate-700 rounded-xl hover:border-violet-300 dark:hover:border-violet-600 hover:bg-violet-50 dark:hover:bg-violet-950/20 transition-all cursor-pointer group">
+                <div className="p-4 border border-border dark:border-border rounded-xl hover:border-violet-300 dark:hover:border-violet-600 hover:bg-violet-50 dark:hover:bg-violet-950/20 transition-all cursor-pointer group">
                   <div className="flex items-center gap-3 mb-2">
                     <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-violet-100 to-purple-100 dark:from-violet-900/50 dark:to-purple-900/50 flex items-center justify-center group-hover:from-violet-200 group-hover:to-purple-200 dark:group-hover:from-violet-800/50 dark:group-hover:to-purple-800/50 transition-colors">
                       <Brain className="h-5 w-5 text-violet-600 dark:text-violet-400" />
                     </div>
-                    <span className="font-medium text-slate-900 dark:text-slate-100">
+                    <span className="font-medium text-foreground dark:text-foreground">
                       Brain Dump
                     </span>
                   </div>
-                  <p className="text-sm text-slate-600 dark:text-slate-400">
+                  <p className="text-sm text-muted-foreground dark:text-muted-foreground">
                     Tell AI about your work, goals, and preferences
                   </p>
                 </div>
               </Link>
 
               <Link href="/dashboard/library" className="block">
-                <div className="p-4 border border-slate-200 dark:border-slate-700 rounded-xl hover:border-blue-300 dark:hover:border-blue-600 hover:bg-blue-50 dark:hover:bg-blue-950/20 transition-all cursor-pointer group">
+                <div className="p-4 border border-border dark:border-border rounded-xl hover:border-blue-300 dark:hover:border-blue-600 hover:bg-blue-50 dark:hover:bg-blue-950/20 transition-all cursor-pointer group">
                   <div className="flex items-center gap-3 mb-2">
                     <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-blue-100 to-cyan-100 dark:from-blue-900/50 dark:to-cyan-900/50 flex items-center justify-center group-hover:from-blue-200 group-hover:to-cyan-200 dark:group-hover:from-blue-800/50 dark:group-hover:to-cyan-800/50 transition-colors">
                       <FileText className="h-5 w-5 text-blue-600 dark:text-blue-400" />
                     </div>
-                    <span className="font-medium text-slate-900 dark:text-slate-100">
+                    <span className="font-medium text-foreground dark:text-foreground">
                       Upload Documents
                     </span>
                   </div>
-                  <p className="text-sm text-slate-600 dark:text-slate-400">
+                  <p className="text-sm text-muted-foreground dark:text-muted-foreground">
                     Add files, PDFs, and documents for AI to learn from
                   </p>
                 </div>
               </Link>
 
               <Link href="/dashboard/chat" className="block">
-                <div className="p-4 border border-slate-200 dark:border-slate-700 rounded-xl hover:border-emerald-300 dark:hover:border-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-950/20 transition-all cursor-pointer group">
+                <div className="p-4 border border-border dark:border-border rounded-xl hover:border-emerald-300 dark:hover:border-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-950/20 transition-all cursor-pointer group">
                   <div className="flex items-center gap-3 mb-2">
                     <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-emerald-100 to-green-100 dark:from-emerald-900/50 dark:to-green-900/50 flex items-center justify-center group-hover:from-emerald-200 group-hover:to-green-200 dark:group-hover:from-emerald-800/50 dark:group-hover:to-green-800/50 transition-colors">
                       <MessageSquare className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
                     </div>
-                    <span className="font-medium text-slate-900 dark:text-slate-100">
+                    <span className="font-medium text-foreground dark:text-foreground">
                       Chat & Learn
                     </span>
                   </div>
-                  <p className="text-sm text-slate-600 dark:text-slate-400">
+                  <p className="text-sm text-muted-foreground dark:text-muted-foreground">
                     AI learns from your conversations automatically
                   </p>
                 </div>

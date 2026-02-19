@@ -317,7 +317,7 @@ export default function TaskDetailPage() {
       case "youtube":
         return "bg-red-600";
       default:
-        return "bg-slate-500";
+        return "bg-muted0";
     }
   };
 
@@ -382,7 +382,7 @@ export default function TaskDetailPage() {
   if (!task) {
     return (
       <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white dark:from-slate-950 dark:to-slate-900 flex flex-col items-center justify-center gap-4">
-        <p className="text-slate-500 dark:text-slate-400">Task not found</p>
+        <p className="text-muted-foreground dark:text-muted-foreground">Task not found</p>
         <Button variant="outline" onClick={() => router.push("/dashboard/tasks")}>
           <ArrowLeft className="h-4 w-4 mr-2" />
           Back to Tasks
@@ -399,14 +399,14 @@ export default function TaskDetailPage() {
         {/* Back Button */}
         <button
           onClick={() => router.push("/dashboard/tasks")}
-          className="inline-flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white mb-6 transition-colors"
+          className="inline-flex items-center gap-2 text-sm text-muted-foreground dark:text-muted-foreground hover:text-foreground dark:hover:text-white mb-6 transition-colors"
         >
           <ArrowLeft className="h-4 w-4" />
           Back to Tasks
         </button>
 
         {/* Task Header Card */}
-        <div className="relative bg-white dark:bg-slate-800/50 rounded-2xl border border-slate-200 dark:border-slate-700/50 p-6 mb-6">
+        <div className="relative bg-card/50 rounded-2xl border border-border dark:border-border/50 p-6 mb-6">
           {/* Priority indicator */}
           <div className={`absolute left-0 top-6 bottom-6 w-1.5 rounded-full ${getPriorityIndicator(task.priority)}`} />
 
@@ -421,15 +421,15 @@ export default function TaskDetailPage() {
                     {task.status === "done" ? (
                       <CheckCircle2 className="h-7 w-7 text-green-500" />
                     ) : (
-                      <Circle className="h-7 w-7 text-slate-300 dark:text-slate-600 group-hover:text-violet-500 transition-colors" />
+                      <Circle className="h-7 w-7 text-muted-foreground dark:text-muted-foreground group-hover:text-violet-500 transition-colors" />
                     )}
                   </button>
                   <h1
                     className={cn(
                       "text-2xl font-bold",
                       task.status === "done"
-                        ? "line-through text-slate-400 dark:text-slate-500"
-                        : "text-slate-900 dark:text-white"
+                        ? "line-through text-muted-foreground dark:text-muted-foreground"
+                        : "text-foreground dark:text-white"
                     )}
                   >
                     {task.title}
@@ -437,7 +437,7 @@ export default function TaskDetailPage() {
                 </div>
 
                 {task.description && (
-                  <p className="text-slate-600 dark:text-slate-400 mb-4 pl-11">
+                  <p className="text-muted-foreground dark:text-muted-foreground mb-4 pl-11">
                     {task.description}
                   </p>
                 )}
@@ -448,7 +448,7 @@ export default function TaskDetailPage() {
                     ${task.priority === "urgent" ? "text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-500/10" :
                       task.priority === "high" ? "text-orange-600 dark:text-orange-400 bg-orange-50 dark:bg-orange-500/10" :
                       task.priority === "medium" ? "text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-500/10" :
-                      "text-slate-600 dark:text-slate-400 bg-slate-100 dark:bg-slate-700/50"
+                      "text-muted-foreground dark:text-muted-foreground bg-muted dark:bg-muted/50"
                     }`}
                   >
                     <Flag className="h-3 w-3" />
@@ -459,7 +459,7 @@ export default function TaskDetailPage() {
                     <span className={`inline-flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-full
                       ${dueInfo.urgent
                         ? "text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-500/10"
-                        : "text-slate-600 dark:text-slate-400 bg-slate-100 dark:bg-slate-700/50"
+                        : "text-muted-foreground dark:text-muted-foreground bg-muted dark:bg-muted/50"
                       }`}
                     >
                       <Calendar className="h-3 w-3" />
@@ -488,7 +488,7 @@ export default function TaskDetailPage() {
                 </div>
 
                 {/* Timestamps */}
-                <div className="flex gap-4 mt-4 pl-11 text-xs text-slate-400 dark:text-slate-500">
+                <div className="flex gap-4 mt-4 pl-11 text-xs text-muted-foreground dark:text-muted-foreground">
                   <span>Created {formatDate(task.created_at)}</span>
                 </div>
               </div>
@@ -517,17 +517,17 @@ export default function TaskDetailPage() {
         </div>
 
         {/* Deliverables Section */}
-        <div className="bg-white dark:bg-slate-800/50 rounded-2xl border border-slate-200 dark:border-slate-700/50 p-6 mb-6">
+        <div className="bg-card/50 rounded-2xl border border-border dark:border-border/50 p-6 mb-6">
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center gap-3">
               <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center">
                 <Sparkles className="h-5 w-5 text-white" />
               </div>
               <div>
-                <h2 className="text-lg font-semibold text-slate-900 dark:text-white">
+                <h2 className="text-lg font-semibold text-foreground dark:text-white">
                   Deliverables
                 </h2>
-                <p className="text-sm text-slate-500 dark:text-slate-400">
+                <p className="text-sm text-muted-foreground dark:text-muted-foreground">
                   {deliverables.length} item{deliverables.length !== 1 ? "s" : ""} generated
                 </p>
               </div>
@@ -549,7 +549,7 @@ export default function TaskDetailPage() {
                     variant="outline"
                     size="sm"
                     disabled={generating || task.status === "done"}
-                    className="border-slate-200 dark:border-slate-700"
+                    className="border-border dark:border-border"
                   >
                     {generating ? (
                       <Loader2 className="h-4 w-4 mr-2 animate-spin" />
@@ -621,13 +621,13 @@ export default function TaskDetailPage() {
 
           {deliverables.length === 0 ? (
             <div className="text-center py-12">
-              <div className="h-16 w-16 rounded-2xl bg-slate-100 dark:bg-slate-700/50 flex items-center justify-center mx-auto mb-4">
-                <Sparkles className="h-8 w-8 text-slate-400 dark:text-slate-500" />
+              <div className="h-16 w-16 rounded-2xl bg-muted dark:bg-muted/50 flex items-center justify-center mx-auto mb-4">
+                <Sparkles className="h-8 w-8 text-muted-foreground dark:text-muted-foreground" />
               </div>
-              <h3 className="text-lg font-medium text-slate-900 dark:text-white mb-2">
+              <h3 className="text-lg font-medium text-foreground dark:text-white mb-2">
                 No deliverables yet
               </h3>
-              <p className="text-slate-500 dark:text-slate-400 mb-6">
+              <p className="text-muted-foreground dark:text-muted-foreground mb-6">
                 Run AI to generate content for this task
               </p>
               <Button
@@ -648,7 +648,7 @@ export default function TaskDetailPage() {
               {deliverables.map((deliverable) => (
                 <div
                   key={deliverable.id}
-                  className="relative bg-slate-50 dark:bg-slate-900/50 rounded-xl border border-slate-200 dark:border-slate-700/50 overflow-hidden"
+                  className="relative bg-muted dark:bg-card/50 rounded-xl border border-border dark:border-border/50 overflow-hidden"
                 >
                   {/* Platform color bar */}
                   {deliverable.platform && (
@@ -661,7 +661,7 @@ export default function TaskDetailPage() {
                       <div className="flex items-center gap-3">
                         <div className={cn(
                           "h-8 w-8 rounded-lg flex items-center justify-center text-white",
-                          deliverable.platform ? getPlatformColor(deliverable.platform) : "bg-slate-500"
+                          deliverable.platform ? getPlatformColor(deliverable.platform) : "bg-muted0"
                         )}>
                           {deliverable.platform
                             ? getPlatformIcon(deliverable.platform)
@@ -669,7 +669,7 @@ export default function TaskDetailPage() {
                           }
                         </div>
                         <div>
-                          <span className="font-medium text-slate-900 dark:text-white">
+                          <span className="font-medium text-foreground dark:text-white">
                             {deliverable.title ||
                               (deliverable.platform
                                 ? PLATFORM_CONFIG[deliverable.platform as keyof typeof PLATFORM_CONFIG]?.label || deliverable.platform
@@ -717,12 +717,12 @@ export default function TaskDetailPage() {
                               onClick={() => copyToClipboard(deliverable.content)}
                               className="h-8 w-8 p-0"
                             >
-                              <Copy className="h-4 w-4 text-slate-400 hover:text-slate-600" />
+                              <Copy className="h-4 w-4 text-muted-foreground hover:text-muted-foreground" />
                             </Button>
                             <DropdownMenu>
                               <DropdownMenuTrigger asChild>
                                 <Button size="sm" variant="ghost" className="h-8 w-8 p-0">
-                                  <MoreHorizontal className="h-4 w-4 text-slate-400" />
+                                  <MoreHorizontal className="h-4 w-4 text-muted-foreground" />
                                 </Button>
                               </DropdownMenuTrigger>
                               <DropdownMenuContent align="end">
@@ -783,30 +783,30 @@ export default function TaskDetailPage() {
                               saveDeliverable(deliverable.id);
                             }
                           }}
-                          className="min-h-[120px] font-mono text-sm bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700"
+                          className="min-h-[120px] font-mono text-sm bg-card border-border dark:border-border"
                           placeholder="Enter content..."
                           autoFocus
                         />
-                        <p className="text-xs text-slate-400 dark:text-slate-500">
-                          Press <kbd className="px-1.5 py-0.5 bg-slate-100 dark:bg-slate-700 rounded text-xs">⌘+Enter</kbd> to save · <kbd className="px-1.5 py-0.5 bg-slate-100 dark:bg-slate-700 rounded text-xs">Esc</kbd> to cancel
+                        <p className="text-xs text-muted-foreground dark:text-muted-foreground">
+                          Press <kbd className="px-1.5 py-0.5 bg-muted dark:bg-muted rounded text-xs">⌘+Enter</kbd> to save · <kbd className="px-1.5 py-0.5 bg-muted dark:bg-muted rounded text-xs">Esc</kbd> to cancel
                         </p>
                       </div>
                     ) : (
                       <div
                         onClick={() => startEditing(deliverable)}
-                        className="bg-white dark:bg-slate-800 rounded-lg p-4 border border-slate-200 dark:border-slate-700 cursor-text hover:border-violet-300 dark:hover:border-violet-500/50 hover:shadow-sm transition-all group/content"
+                        className="bg-card rounded-lg p-4 border border-border dark:border-border cursor-text hover:border-violet-300 dark:hover:border-violet-500/50 hover:shadow-sm transition-all group/content"
                       >
-                        <p className="whitespace-pre-wrap text-sm text-slate-700 dark:text-slate-300">
+                        <p className="whitespace-pre-wrap text-sm text-foreground dark:text-muted-foreground">
                           {deliverable.content}
                         </p>
-                        <p className="text-xs text-slate-400 dark:text-slate-500 mt-2 opacity-0 group-hover/content:opacity-100 transition-opacity">
+                        <p className="text-xs text-muted-foreground dark:text-muted-foreground mt-2 opacity-0 group-hover/content:opacity-100 transition-opacity">
                           Click to edit
                         </p>
                       </div>
                     )}
 
                     {/* Footer */}
-                    <div className="flex items-center justify-between mt-3 text-xs text-slate-400 dark:text-slate-500">
+                    <div className="flex items-center justify-between mt-3 text-xs text-muted-foreground dark:text-muted-foreground">
                       <div className="flex items-center gap-3">
                         <span>v{deliverable.version}</span>
                         <span className="capitalize">{deliverable.status}</span>
@@ -834,25 +834,25 @@ export default function TaskDetailPage() {
 
         {/* Subtasks Section */}
         {subtasks.length > 0 && (
-          <div className="bg-white dark:bg-slate-800/50 rounded-2xl border border-slate-200 dark:border-slate-700/50 p-6 mb-6">
-            <h2 className="text-lg font-semibold text-slate-900 dark:text-white mb-4">
+          <div className="bg-card/50 rounded-2xl border border-border dark:border-border/50 p-6 mb-6">
+            <h2 className="text-lg font-semibold text-foreground dark:text-white mb-4">
               Subtasks ({subtasks.length})
             </h2>
             <div className="space-y-2">
               {subtasks.map((subtask) => (
                 <div
                   key={subtask.id}
-                  className="flex items-center gap-3 p-3 rounded-xl bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700/50 hover:border-violet-300 dark:hover:border-violet-500/50 cursor-pointer transition-all"
+                  className="flex items-center gap-3 p-3 rounded-xl bg-muted dark:bg-card/50 border border-border dark:border-border/50 hover:border-violet-300 dark:hover:border-violet-500/50 cursor-pointer transition-all"
                   onClick={() => router.push(`/dashboard/tasks/${subtask.id}`)}
                 >
                   {subtask.status === "done" ? (
                     <CheckCircle2 className="h-5 w-5 text-green-500 flex-shrink-0" />
                   ) : (
-                    <Circle className="h-5 w-5 text-slate-300 dark:text-slate-600 flex-shrink-0" />
+                    <Circle className="h-5 w-5 text-muted-foreground dark:text-muted-foreground flex-shrink-0" />
                   )}
                   <span className={cn(
                     "flex-1 text-sm",
-                    subtask.status === "done" && "line-through text-slate-400 dark:text-slate-500"
+                    subtask.status === "done" && "line-through text-muted-foreground dark:text-muted-foreground"
                   )}>
                     {subtask.title}
                   </span>
@@ -861,7 +861,7 @@ export default function TaskDetailPage() {
                     subtask.priority === "urgent" ? "text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-500/10" :
                     subtask.priority === "high" ? "text-orange-600 dark:text-orange-400 bg-orange-50 dark:bg-orange-500/10" :
                     subtask.priority === "medium" ? "text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-500/10" :
-                    "text-slate-600 dark:text-slate-400 bg-slate-100 dark:bg-slate-700/50"
+                    "text-muted-foreground dark:text-muted-foreground bg-muted dark:bg-muted/50"
                   )}>
                     {subtask.priority}
                   </span>
@@ -872,8 +872,8 @@ export default function TaskDetailPage() {
         )}
 
         {/* Related Items Section */}
-        <div className="bg-white dark:bg-slate-800/50 rounded-2xl border border-slate-200 dark:border-slate-700/50 p-6 mb-6">
-          <h2 className="text-lg font-semibold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
+        <div className="bg-card/50 rounded-2xl border border-border dark:border-border/50 p-6 mb-6">
+          <h2 className="text-lg font-semibold text-foreground dark:text-white mb-4 flex items-center gap-2">
             <span className="h-8 w-8 rounded-lg bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center">
               <span className="text-white text-sm">🔗</span>
             </span>
@@ -891,7 +891,7 @@ export default function TaskDetailPage() {
         <div className="flex items-center justify-between">
           <button
             onClick={() => router.push("/dashboard/tasks")}
-            className="inline-flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors"
+            className="inline-flex items-center gap-2 text-sm text-muted-foreground dark:text-muted-foreground hover:text-foreground dark:hover:text-white transition-colors"
           >
             <ArrowLeft className="h-4 w-4" />
             Back to Tasks

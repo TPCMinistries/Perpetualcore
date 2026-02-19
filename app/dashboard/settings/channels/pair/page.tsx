@@ -215,7 +215,7 @@ export default function ChannelPairPage() {
           <CardTitle className="text-base">How Pairing Works</CardTitle>
         </CardHeader>
         <CardContent>
-          <ol className="space-y-3 text-sm text-slate-600 dark:text-slate-400">
+          <ol className="space-y-3 text-sm text-muted-foreground dark:text-muted-foreground">
             <li className="flex items-start gap-3">
               <span className="flex-shrink-0 h-6 w-6 rounded-full bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 flex items-center justify-center text-xs font-semibold">
                 1

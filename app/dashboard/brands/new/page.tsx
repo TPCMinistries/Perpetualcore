@@ -129,7 +129,7 @@ export default function NewBrandPage() {
           </Button>
         </Link>
         <div>
-          <h1 className="text-2xl font-bold text-slate-900 dark:text-white">
+          <h1 className="text-2xl font-bold text-foreground dark:text-white">
             New Brand
           </h1>
           <p className="text-muted-foreground">

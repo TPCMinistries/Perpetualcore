@@ -36,7 +36,7 @@ export default async function PremiumDashboardPage() {
               </div>
             </div>
 
-            <Badge className="bg-white text-primary hover:bg-white/90 text-base px-6 py-3 font-semibold">
+            <Badge className="bg-card text-primary hover:bg-card/90 text-base px-6 py-3 font-semibold">
               <Crown className="mr-2 h-5 w-5" />
               $10,000/month Tier
             </Badge>

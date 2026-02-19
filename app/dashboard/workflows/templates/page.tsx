@@ -160,8 +160,8 @@ export default function WorkflowTemplatesPage() {
       {/* Visual Builder Templates */}
       <div className="space-y-4">
         <div className="flex items-center gap-2">
-          <PenTool className="h-5 w-5 text-slate-700 dark:text-slate-300" />
-          <h2 className="text-xl font-semibold text-slate-900 dark:text-slate-100">Visual Builder Templates</h2>
+          <PenTool className="h-5 w-5 text-foreground dark:text-muted-foreground" />
+          <h2 className="text-xl font-semibold text-foreground dark:text-foreground">Visual Builder Templates</h2>
         </div>
         <p className="text-sm text-muted-foreground">
           Pre-built workflows ready to customize in the drag-and-drop builder

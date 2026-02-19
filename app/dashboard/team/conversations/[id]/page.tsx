@@ -372,7 +372,7 @@ export default function ConversationPage() {
   if (authLoading || loading) {
     return (
       <div className="flex h-screen items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-slate-700 dark:text-slate-300" />
+        <Loader2 className="h-8 w-8 animate-spin text-foreground dark:text-muted-foreground" />
       </div>
     );
   }
@@ -380,7 +380,7 @@ export default function ConversationPage() {
   if (!user) {
     return (
       <div className="flex h-screen items-center justify-center">
-        <p className="text-slate-600 dark:text-slate-400">
+        <p className="text-muted-foreground dark:text-muted-foreground">
           Please log in to view this conversation.
         </p>
       </div>
@@ -390,44 +390,44 @@ export default function ConversationPage() {
   if (!conversation) {
     return (
       <div className="flex h-screen items-center justify-center">
-        <p className="text-slate-600 dark:text-slate-400">Conversation not found.</p>
+        <p className="text-muted-foreground dark:text-muted-foreground">Conversation not found.</p>
       </div>
     );
   }
 
   return (
-    <div className="flex h-screen flex-col bg-white dark:bg-slate-950">
+    <div className="flex h-screen flex-col bg-card dark:bg-background">
       {/* Header */}
-      <div className="border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 px-6 py-4">
+      <div className="border-b border-border dark:border-border bg-card dark:bg-background px-6 py-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
             <Button
               variant="ghost"
               size="icon"
               onClick={() => router.push("/dashboard/team/conversations")}
-              className="hover:bg-slate-100 dark:hover:bg-slate-900"
+              className="hover:bg-muted dark:hover:bg-slate-900"
             >
-              <ArrowLeft className="h-5 w-5 text-slate-700 dark:text-slate-300" />
+              <ArrowLeft className="h-5 w-5 text-foreground dark:text-muted-foreground" />
             </Button>
             <div>
               <div className="flex items-center gap-3">
-                <h1 className="text-xl font-semibold text-slate-900 dark:text-slate-100">
+                <h1 className="text-xl font-semibold text-foreground dark:text-foreground">
                   {conversation.title}
                 </h1>
                 {conversation.is_private && (
-                  <Lock className="h-4 w-4 text-slate-500 dark:text-slate-400" />
+                  <Lock className="h-4 w-4 text-muted-foreground dark:text-muted-foreground" />
                 )}
                 {conversation.is_archived && (
                   <Badge
                     variant="secondary"
-                    className="text-xs bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300"
+                    className="text-xs bg-muted dark:bg-card text-foreground dark:text-muted-foreground"
                   >
                     Archived
                   </Badge>
                 )}
               </div>
               {conversation.description && (
-                <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">
+                <p className="mt-1 text-sm text-muted-foreground dark:text-muted-foreground">
                   {conversation.description}
                 </p>
               )}
@@ -435,9 +435,9 @@ export default function ConversationPage() {
           </div>
 
           <div className="flex items-center gap-4">
-            <div className="flex items-center gap-2 px-3 py-1.5 rounded-md bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
-              <Users className="h-4 w-4 text-slate-600 dark:text-slate-400" />
-              <span className="text-sm font-medium text-slate-900 dark:text-slate-100">
+            <div className="flex items-center gap-2 px-3 py-1.5 rounded-md bg-muted dark:bg-card border border-border dark:border-border">
+              <Users className="h-4 w-4 text-muted-foreground dark:text-muted-foreground" />
+              <span className="text-sm font-medium text-foreground dark:text-foreground">
                 {participants.length} {participants.length === 1 ? 'member' : 'members'}
               </span>
             </div>
@@ -447,9 +447,9 @@ export default function ConversationPage() {
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="hover:bg-slate-100 dark:hover:bg-slate-900"
+                  className="hover:bg-muted dark:hover:bg-slate-900"
                 >
-                  <MoreVertical className="h-5 w-5 text-slate-700 dark:text-slate-300" />
+                  <MoreVertical className="h-5 w-5 text-foreground dark:text-muted-foreground" />
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-56">
@@ -478,7 +478,7 @@ export default function ConversationPage() {
               <Badge
                 key={tag}
                 variant="outline"
-                className="text-xs border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300"
+                className="text-xs border-border dark:border-border text-foreground dark:text-muted-foreground"
               >
                 <Tag className="mr-1 h-3 w-3" />
                 {tag}
@@ -494,13 +494,13 @@ export default function ConversationPage() {
           {messages.length === 0 ? (
             <div className="flex h-full flex-col items-center justify-center space-y-6 text-center py-16">
               <div className="rounded-2xl bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800 p-6 shadow-sm">
-                <MessageSquare className="h-12 w-12 text-slate-700 dark:text-slate-300" />
+                <MessageSquare className="h-12 w-12 text-foreground dark:text-muted-foreground" />
               </div>
               <div className="max-w-md">
-                <h2 className="text-2xl font-bold text-slate-900 dark:text-slate-100">
+                <h2 className="text-2xl font-bold text-foreground dark:text-foreground">
                   Start the conversation
                 </h2>
-                <p className="mt-3 text-base text-slate-600 dark:text-slate-400 leading-relaxed">
+                <p className="mt-3 text-base text-muted-foreground dark:text-muted-foreground leading-relaxed">
                   Send your first message to begin collaborating with your team and AI assistant
                 </p>
               </div>
@@ -517,7 +517,7 @@ export default function ConversationPage() {
                 >
                   {message.role !== "user" && (
                     <Avatar className="h-8 w-8 flex-shrink-0">
-                      <AvatarFallback className="bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900">
+                      <AvatarFallback className="bg-slate-900 dark:bg-muted text-white dark:text-foreground">
                         <Bot className="h-4 w-4" />
                       </AvatarFallback>
                     </Avatar>
@@ -527,8 +527,8 @@ export default function ConversationPage() {
                     className={cn(
                       "max-w-[75%] rounded-2xl px-5 py-3.5 shadow-sm",
                       message.role === "user"
-                        ? "bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900"
-                        : "bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-slate-100"
+                        ? "bg-slate-900 dark:bg-muted text-white dark:text-foreground"
+                        : "bg-card border border-border dark:border-border text-foreground dark:text-foreground"
                     )}
                   >
                     {message.role === "user" && message.user_name && (
@@ -543,8 +543,8 @@ export default function ConversationPage() {
                       className={cn(
                         "mt-2 text-xs font-medium opacity-50",
                         message.role === "user"
-                          ? "text-white dark:text-slate-900"
-                          : "text-slate-600 dark:text-slate-400"
+                          ? "text-white dark:text-foreground"
+                          : "text-muted-foreground dark:text-muted-foreground"
                       )}
                     >
                       {new Date(message.created_at).toLocaleTimeString([], {
@@ -556,7 +556,7 @@ export default function ConversationPage() {
 
                   {message.role === "user" && (
                     <Avatar className="h-8 w-8 flex-shrink-0">
-                      <AvatarFallback className="bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-slate-100">
+                      <AvatarFallback className="bg-muted dark:bg-card text-foreground dark:text-foreground">
                         {getUserInitials(message.user_name, message.user_email)}
                       </AvatarFallback>
                     </Avatar>
@@ -566,12 +566,12 @@ export default function ConversationPage() {
               {sending && (
                 <div className="flex gap-4 justify-start">
                   <Avatar className="h-8 w-8 flex-shrink-0">
-                    <AvatarFallback className="bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900">
+                    <AvatarFallback className="bg-slate-900 dark:bg-muted text-white dark:text-foreground">
                       <Bot className="h-4 w-4" />
                     </AvatarFallback>
                   </Avatar>
-                  <div className="rounded-lg bg-slate-100 dark:bg-slate-800 px-4 py-3">
-                    <Loader2 className="h-4 w-4 animate-spin text-slate-600 dark:text-slate-400" />
+                  <div className="rounded-lg bg-muted dark:bg-card px-4 py-3">
+                    <Loader2 className="h-4 w-4 animate-spin text-muted-foreground dark:text-muted-foreground" />
                   </div>
                 </div>
               )}
@@ -582,7 +582,7 @@ export default function ConversationPage() {
       </div>
 
       {/* Input */}
-      <div className="border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 px-6 py-5">
+      <div className="border-t border-border dark:border-border bg-card dark:bg-background px-6 py-5">
         <div className="mx-auto max-w-4xl">
           {canSendMessages ? (
             <div className="space-y-3">
@@ -594,7 +594,7 @@ export default function ConversationPage() {
                     onChange={(e) => setInput(e.target.value)}
                     onKeyDown={handleKeyDown}
                     placeholder="Type your message..."
-                    className="min-h-[60px] max-h-[200px] resize-none rounded-xl border-slate-300 dark:border-slate-700 focus:ring-2 focus:ring-slate-900 dark:focus:ring-slate-100 focus:border-transparent"
+                    className="min-h-[60px] max-h-[200px] resize-none rounded-xl border-border dark:border-border focus:ring-2 focus:ring-slate-900 dark:focus:ring-slate-100 focus:border-transparent"
                     disabled={sending}
                   />
                 </div>
@@ -602,7 +602,7 @@ export default function ConversationPage() {
                   onClick={sendMessage}
                   disabled={!input.trim() || sending}
                   size="icon"
-                  className="h-[60px] w-[60px] rounded-xl bg-slate-900 dark:bg-slate-100 hover:bg-slate-800 dark:hover:bg-slate-200 text-white dark:text-slate-900 shadow-sm disabled:opacity-50"
+                  className="h-[60px] w-[60px] rounded-xl bg-slate-900 dark:bg-muted hover:bg-slate-800 dark:hover:bg-muted text-white dark:text-foreground shadow-sm disabled:opacity-50"
                 >
                   {sending ? (
                     <Loader2 className="h-6 w-6 animate-spin" />
@@ -611,15 +611,15 @@ export default function ConversationPage() {
                   )}
                 </Button>
               </div>
-              <p className="text-xs text-slate-500 dark:text-slate-500 text-center">
-                Press <kbd className="px-1.5 py-0.5 bg-slate-100 dark:bg-slate-800 rounded border border-slate-300 dark:border-slate-700 font-mono">Enter</kbd> to send, <kbd className="px-1.5 py-0.5 bg-slate-100 dark:bg-slate-800 rounded border border-slate-300 dark:border-slate-700 font-mono">Shift + Enter</kbd> for new line
+              <p className="text-xs text-muted-foreground dark:text-muted-foreground text-center">
+                Press <kbd className="px-1.5 py-0.5 bg-muted dark:bg-card rounded border border-border dark:border-border font-mono">Enter</kbd> to send, <kbd className="px-1.5 py-0.5 bg-muted dark:bg-card rounded border border-border dark:border-border font-mono">Shift + Enter</kbd> for new line
               </p>
             </div>
           ) : (
             <div className="text-center py-6">
-              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
-                <Lock className="h-4 w-4 text-slate-500 dark:text-slate-400" />
-                <p className="text-sm font-medium text-slate-700 dark:text-slate-300">
+              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-muted dark:bg-card border border-border dark:border-border">
+                <Lock className="h-4 w-4 text-muted-foreground dark:text-muted-foreground" />
+                <p className="text-sm font-medium text-foreground dark:text-muted-foreground">
                   You don't have permission to send messages in this conversation
                 </p>
               </div>

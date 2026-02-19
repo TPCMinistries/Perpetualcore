@@ -108,8 +108,8 @@ const SKILL_CATALOG = [
     name: "GitHub",
     description: "Interact with repositories, issues, and pull requests",
     icon: Github,
-    color: "text-slate-900 dark:text-white",
-    bgColor: "bg-slate-100 dark:bg-slate-800",
+    color: "text-foreground dark:text-white",
+    bgColor: "bg-muted dark:bg-card",
     category: "development",
     authType: "oauth",
     provider: "github",
@@ -134,8 +134,8 @@ const SKILL_CATALOG = [
     name: "Notion",
     description: "Search and manage Notion pages, databases, and workspaces",
     icon: FileText,
-    color: "text-slate-800 dark:text-slate-200",
-    bgColor: "bg-slate-100 dark:bg-slate-800",
+    color: "text-foreground dark:text-foreground",
+    bgColor: "bg-muted dark:bg-card",
     category: "productivity",
     authType: "api_key",
     provider: "notion",
@@ -555,7 +555,7 @@ export default function SkillsSettingsPage() {
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-1">
-                      <h3 className="font-semibold text-slate-900 dark:text-white truncate">
+                      <h3 className="font-semibold text-foreground dark:text-white truncate">
                         {skill.name}
                       </h3>
                       {status?.hasCredential ? (
@@ -575,13 +575,13 @@ export default function SkillsSettingsPage() {
                         </Badge>
                       ) : null}
                     </div>
-                    <p className="text-sm text-slate-600 dark:text-slate-400 line-clamp-2">
+                    <p className="text-sm text-muted-foreground dark:text-muted-foreground line-clamp-2">
                       {skill.description}
                     </p>
                   </div>
                 </div>
 
-                <div className="flex items-center justify-between pt-4 border-t border-slate-200 dark:border-slate-800">
+                <div className="flex items-center justify-between pt-4 border-t border-border dark:border-border">
                   <div className="flex items-center gap-2">
                     {skill.authType === "api_key" && (
                       <Button
@@ -633,11 +633,11 @@ export default function SkillsSettingsPage() {
       {filteredSkills.length === 0 && (
         <Card>
           <CardContent className="py-12 text-center">
-            <Sparkles className="h-12 w-12 mx-auto text-slate-400 mb-4" />
-            <h3 className="text-lg font-medium text-slate-900 dark:text-white mb-2">
+            <Sparkles className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+            <h3 className="text-lg font-medium text-foreground dark:text-white mb-2">
               No skills found
             </h3>
-            <p className="text-slate-600 dark:text-slate-400">
+            <p className="text-muted-foreground dark:text-muted-foreground">
               Try adjusting your search or filter
             </p>
           </CardContent>
@@ -736,14 +736,14 @@ export default function SkillsSettingsPage() {
                   onClick={() => setShowApiKey(!showApiKey)}
                 >
                   {showApiKey ? (
-                    <EyeOff className="h-4 w-4 text-slate-500" />
+                    <EyeOff className="h-4 w-4 text-muted-foreground" />
                   ) : (
-                    <Eye className="h-4 w-4 text-slate-500" />
+                    <Eye className="h-4 w-4 text-muted-foreground" />
                   )}
                 </Button>
               </div>
               {configDialog.skill?.docsUrl && (
-                <p className="text-xs text-slate-500">
+                <p className="text-xs text-muted-foreground">
                   <a
                     href={configDialog.skill.docsUrl}
                     target="_blank"

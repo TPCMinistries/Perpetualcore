@@ -20,20 +20,20 @@ interface AccessibilitySettingsProps {
 
 export function AccessibilitySettings({ preferences, onUpdatePreference }: AccessibilitySettingsProps) {
   return (
-    <Card className="border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-xl p-8">
+    <Card className="border-border dark:border-border bg-card shadow-xl p-8">
       <div className="flex items-center gap-3 mb-6">
-        <div className="h-10 w-10 rounded-lg bg-slate-900 dark:bg-slate-100 flex items-center justify-center">
-          <Accessibility className="h-5 w-5 text-white dark:text-slate-900" />
+        <div className="h-10 w-10 rounded-lg bg-slate-900 dark:bg-muted flex items-center justify-center">
+          <Accessibility className="h-5 w-5 text-white dark:text-foreground" />
         </div>
         <div>
-          <h2 className="text-xl font-semibold text-slate-900 dark:text-white">Accessibility</h2>
-          <p className="text-sm text-slate-600 dark:text-slate-400">Make the interface work better for you</p>
+          <h2 className="text-xl font-semibold text-foreground dark:text-white">Accessibility</h2>
+          <p className="text-sm text-muted-foreground dark:text-muted-foreground">Make the interface work better for you</p>
         </div>
       </div>
 
       <div className="space-y-6">
         <div className="space-y-2">
-          <Label className="text-slate-700 dark:text-slate-300 font-medium">Font Size</Label>
+          <Label className="text-foreground dark:text-muted-foreground font-medium">Font Size</Label>
           <Select value={preferences.fontSize} onValueChange={(value) => onUpdatePreference({ fontSize: value })}>
             <SelectTrigger>
               <SelectValue />
@@ -47,10 +47,10 @@ export function AccessibilitySettings({ preferences, onUpdatePreference }: Acces
           </Select>
         </div>
 
-        <div className="flex items-center justify-between p-4 rounded-lg border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
+        <div className="flex items-center justify-between p-4 rounded-lg border border-border dark:border-border hover:bg-muted dark:hover:bg-muted/50 transition-colors">
           <div>
-            <p className="font-medium text-slate-900 dark:text-white">Reduce Animations</p>
-            <p className="text-sm text-slate-600 dark:text-slate-400">Minimize motion effects</p>
+            <p className="font-medium text-foreground dark:text-white">Reduce Animations</p>
+            <p className="text-sm text-muted-foreground dark:text-muted-foreground">Minimize motion effects</p>
           </div>
           <Switch
             checked={preferences.reduceAnimations}
@@ -58,10 +58,10 @@ export function AccessibilitySettings({ preferences, onUpdatePreference }: Acces
           />
         </div>
 
-        <div className="flex items-center justify-between p-4 rounded-lg border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
+        <div className="flex items-center justify-between p-4 rounded-lg border border-border dark:border-border hover:bg-muted dark:hover:bg-muted/50 transition-colors">
           <div>
-            <p className="font-medium text-slate-900 dark:text-white">High Contrast</p>
-            <p className="text-sm text-slate-600 dark:text-slate-400">Increase contrast for better visibility</p>
+            <p className="font-medium text-foreground dark:text-white">High Contrast</p>
+            <p className="text-sm text-muted-foreground dark:text-muted-foreground">Increase contrast for better visibility</p>
           </div>
           <Switch
             checked={preferences.highContrast}
@@ -69,10 +69,10 @@ export function AccessibilitySettings({ preferences, onUpdatePreference }: Acces
           />
         </div>
 
-        <div className="flex items-center justify-between p-4 rounded-lg border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
+        <div className="flex items-center justify-between p-4 rounded-lg border border-border dark:border-border hover:bg-muted dark:hover:bg-muted/50 transition-colors">
           <div>
-            <p className="font-medium text-slate-900 dark:text-white">Screen Reader Optimized</p>
-            <p className="text-sm text-slate-600 dark:text-slate-400">Enhanced ARIA labels and navigation</p>
+            <p className="font-medium text-foreground dark:text-white">Screen Reader Optimized</p>
+            <p className="text-sm text-muted-foreground dark:text-muted-foreground">Enhanced ARIA labels and navigation</p>
           </div>
           <Switch
             checked={preferences.screenReaderOptimized}

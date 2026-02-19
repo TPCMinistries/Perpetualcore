@@ -182,7 +182,7 @@ export default function TeachPage() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="border border-slate-200 dark:border-slate-800 rounded-xl p-4 md:p-8 bg-gradient-to-r from-emerald-50 to-teal-50 dark:from-emerald-950/30 dark:to-teal-950/30">
+      <div className="border border-border dark:border-border rounded-xl p-4 md:p-8 bg-gradient-to-r from-emerald-50 to-teal-50 dark:from-emerald-950/30 dark:to-teal-950/30">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div className="flex items-center gap-3 md:gap-4">
             <motion.div
@@ -193,10 +193,10 @@ export default function TeachPage() {
               <Sparkles className="h-6 w-6 md:h-7 md:w-7 text-white" />
             </motion.div>
             <div className="min-w-0">
-              <h1 className="text-2xl md:text-3xl font-semibold text-slate-900 dark:text-slate-100">
+              <h1 className="text-2xl md:text-3xl font-semibold text-foreground dark:text-foreground">
                 Teach Your AI
               </h1>
-              <p className="text-xs md:text-sm text-slate-600 dark:text-slate-400 mt-1">
+              <p className="text-xs md:text-sm text-muted-foreground dark:text-muted-foreground mt-1">
                 The more your AI knows, the better it can help you
               </p>
             </div>
@@ -221,7 +221,7 @@ export default function TeachPage() {
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               whileHover={{ scale: 1.02 }}
-              className="p-6 border border-slate-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-900 hover:border-slate-300 dark:hover:border-slate-600 hover:shadow-md transition-all cursor-pointer group h-full"
+              className="p-6 border border-border dark:border-border rounded-xl bg-card hover:border-border dark:hover:border-border hover:shadow-md transition-all cursor-pointer group h-full"
               onClick={() => !isLink && handleMethodClick(method)}
             >
               <div className="flex items-start gap-4">
@@ -230,12 +230,12 @@ export default function TeachPage() {
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center justify-between">
-                    <h3 className="font-semibold text-slate-900 dark:text-slate-100">
+                    <h3 className="font-semibold text-foreground dark:text-foreground">
                       {method.title}
                     </h3>
-                    <ChevronRight className="h-4 w-4 text-slate-400 group-hover:text-slate-600 dark:group-hover:text-slate-300 transition-colors" />
+                    <ChevronRight className="h-4 w-4 text-muted-foreground group-hover:text-muted-foreground dark:group-hover:text-muted-foreground transition-colors" />
                   </div>
-                  <p className="text-sm text-slate-600 dark:text-slate-400 mt-1">
+                  <p className="text-sm text-muted-foreground dark:text-muted-foreground mt-1">
                     {method.description}
                   </p>
                 </div>
@@ -254,27 +254,27 @@ export default function TeachPage() {
       </div>
 
       {/* Suggested Topics */}
-      <Card className="border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900">
+      <Card className="border-border dark:border-border bg-card">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <div className="h-10 w-10 rounded-lg bg-violet-50 dark:bg-violet-950/30 flex items-center justify-center">
               <Sparkles className="h-5 w-5 text-violet-600 dark:text-violet-400" />
             </div>
-            <span className="text-slate-900 dark:text-slate-100">What to Teach</span>
+            <span className="text-foreground dark:text-foreground">What to Teach</span>
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <p className="text-sm text-slate-600 dark:text-slate-400 mb-4">
+          <p className="text-sm text-muted-foreground dark:text-muted-foreground mb-4">
             Here are some things that help your AI assist you better:
           </p>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
             {SUGGESTED_TOPICS.map((topic, idx) => (
               <div
                 key={idx}
-                className="flex items-center gap-2 p-3 bg-slate-50 dark:bg-slate-800/50 rounded-lg"
+                className="flex items-center gap-2 p-3 bg-muted dark:bg-card/50 rounded-lg"
               >
                 <CheckCircle2 className="h-4 w-4 text-emerald-500 flex-shrink-0" />
-                <span className="text-sm text-slate-700 dark:text-slate-300">{topic}</span>
+                <span className="text-sm text-foreground dark:text-muted-foreground">{topic}</span>
               </div>
             ))}
           </div>
@@ -296,20 +296,20 @@ export default function TeachPage() {
           <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="bg-white dark:bg-slate-900 rounded-xl p-6 w-full max-w-lg border border-slate-200 dark:border-slate-700 shadow-xl"
+            className="bg-card rounded-xl p-6 w-full max-w-lg border border-border dark:border-border shadow-xl"
           >
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100">
+              <h3 className="text-lg font-semibold text-foreground dark:text-foreground">
                 Quick Note
               </h3>
               <button
                 onClick={() => setShowQuickNote(false)}
-                className="p-1 hover:bg-slate-100 dark:hover:bg-slate-800 rounded"
+                className="p-1 hover:bg-muted dark:hover:bg-muted rounded"
               >
-                <X className="h-5 w-5 text-slate-500" />
+                <X className="h-5 w-5 text-muted-foreground" />
               </button>
             </div>
-            <p className="text-sm text-slate-600 dark:text-slate-400 mb-4">
+            <p className="text-sm text-muted-foreground dark:text-muted-foreground mb-4">
               Tell your AI something to remember. For example: "I prefer concise answers" or "My main project is the Q1 marketing campaign"
             </p>
             <Textarea
@@ -348,20 +348,20 @@ export default function TeachPage() {
           <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="bg-white dark:bg-slate-900 rounded-xl p-6 w-full max-w-lg border border-slate-200 dark:border-slate-700 shadow-xl"
+            className="bg-card rounded-xl p-6 w-full max-w-lg border border-border dark:border-border shadow-xl"
           >
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100">
+              <h3 className="text-lg font-semibold text-foreground dark:text-foreground">
                 Import from URL
               </h3>
               <button
                 onClick={() => setShowUrlImport(false)}
-                className="p-1 hover:bg-slate-100 dark:hover:bg-slate-800 rounded"
+                className="p-1 hover:bg-muted dark:hover:bg-muted rounded"
               >
-                <X className="h-5 w-5 text-slate-500" />
+                <X className="h-5 w-5 text-muted-foreground" />
               </button>
             </div>
-            <p className="text-sm text-slate-600 dark:text-slate-400 mb-4">
+            <p className="text-sm text-muted-foreground dark:text-muted-foreground mb-4">
               Enter a URL and AI will extract and learn from its content.
             </p>
             <input
@@ -369,7 +369,7 @@ export default function TeachPage() {
               value={urlToImport}
               onChange={(e) => setUrlToImport(e.target.value)}
               placeholder="https://example.com/article"
-              className="w-full px-3 py-2 border border-slate-200 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 mb-4"
+              className="w-full px-3 py-2 border border-border dark:border-border rounded-lg bg-card text-foreground dark:text-foreground mb-4"
             />
             <div className="flex gap-2 justify-end">
               <Button

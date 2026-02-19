@@ -61,7 +61,7 @@ export default function TeamConversationsPage() {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <div className="h-12 w-12 rounded-full border-4 border-slate-200 border-t-slate-900 dark:border-slate-700 dark:border-t-slate-100 animate-spin mx-auto mb-4"></div>
+          <div className="h-12 w-12 rounded-full border-4 border-border border-t-slate-900 dark:border-border dark:border-t-slate-100 animate-spin mx-auto mb-4"></div>
           <p className="text-muted-foreground">Loading conversations...</p>
         </div>
       </div>
@@ -72,23 +72,23 @@ export default function TeamConversationsPage() {
     <div className="min-h-screen p-8">
       <div className="container mx-auto space-y-6">
         {/* Header */}
-        <div className="border border-slate-200 dark:border-slate-800 rounded-xl p-8 bg-white dark:bg-slate-900">
+        <div className="border border-border dark:border-border rounded-xl p-8 bg-card">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
-              <div className="h-12 w-12 rounded-lg bg-slate-900 dark:bg-slate-100 flex items-center justify-center">
-                <MessageSquare className="h-6 w-6 text-white dark:text-slate-900" />
+              <div className="h-12 w-12 rounded-lg bg-slate-900 dark:bg-muted flex items-center justify-center">
+                <MessageSquare className="h-6 w-6 text-white dark:text-foreground" />
               </div>
               <div>
-                <h1 className="text-3xl font-semibold text-slate-900 dark:text-slate-100">
+                <h1 className="text-3xl font-semibold text-foreground dark:text-foreground">
                   Team Conversations
                 </h1>
-                <p className="text-slate-600 dark:text-slate-400 mt-1">
+                <p className="text-muted-foreground dark:text-muted-foreground mt-1">
                   Collaborate with your team using AI-powered conversations
                 </p>
               </div>
             </div>
             <Link href="/dashboard/conversations/new">
-              <Button className="bg-slate-900 dark:bg-slate-100 hover:bg-slate-800 dark:hover:bg-slate-200 text-white dark:text-slate-900">
+              <Button className="bg-slate-900 dark:bg-muted hover:bg-slate-800 dark:hover:bg-muted text-white dark:text-foreground">
                 <Plus className="h-4 w-4 mr-2" />
                 New Conversation
               </Button>
@@ -98,7 +98,7 @@ export default function TeamConversationsPage() {
 
         {/* Conversations Grid */}
         {conversations.length === 0 ? (
-          <Card className="border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-12">
+          <Card className="border-border dark:border-border bg-card p-12">
             <div className="text-center max-w-2xl mx-auto space-y-6">
               <div className="flex justify-center">
                 <div className="h-20 w-20 rounded-2xl bg-indigo-50 dark:bg-indigo-950/30 flex items-center justify-center">
@@ -106,36 +106,36 @@ export default function TeamConversationsPage() {
                 </div>
               </div>
               <div>
-                <h2 className="text-2xl font-semibold text-slate-900 dark:text-slate-100 mb-2">
+                <h2 className="text-2xl font-semibold text-foreground dark:text-foreground mb-2">
                   Start Your First Team Conversation
                 </h2>
-                <p className="text-slate-600 dark:text-slate-400">
+                <p className="text-muted-foreground dark:text-muted-foreground">
                   Create collaborative AI conversations where your team can work together,
                   share knowledge, and get AI assistance in real-time.
                 </p>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-4">
-                <div className="p-4 rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/50">
+                <div className="p-4 rounded-lg border border-border dark:border-border bg-muted dark:bg-card/50">
                   <Users className="h-8 w-8 text-indigo-600 dark:text-indigo-400 mx-auto mb-3" />
-                  <h3 className="font-semibold text-slate-900 dark:text-slate-100 mb-1">Collaborate</h3>
-                  <p className="text-sm text-slate-600 dark:text-slate-400">
+                  <h3 className="font-semibold text-foreground dark:text-foreground mb-1">Collaborate</h3>
+                  <p className="text-sm text-muted-foreground dark:text-muted-foreground">
                     Work together with team members on projects
                   </p>
                 </div>
 
-                <div className="p-4 rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/50">
+                <div className="p-4 rounded-lg border border-border dark:border-border bg-muted dark:bg-card/50">
                   <Sparkles className="h-8 w-8 text-purple-600 dark:text-purple-400 mx-auto mb-3" />
-                  <h3 className="font-semibold text-slate-900 dark:text-slate-100 mb-1">AI Powered</h3>
-                  <p className="text-sm text-slate-600 dark:text-slate-400">
+                  <h3 className="font-semibold text-foreground dark:text-foreground mb-1">AI Powered</h3>
+                  <p className="text-sm text-muted-foreground dark:text-muted-foreground">
                     Get intelligent responses from Claude AI
                   </p>
                 </div>
 
-                <div className="p-4 rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/50">
+                <div className="p-4 rounded-lg border border-border dark:border-border bg-muted dark:bg-card/50">
                   <FileText className="h-8 w-8 text-blue-600 dark:text-blue-400 mx-auto mb-3" />
-                  <h3 className="font-semibold text-slate-900 dark:text-slate-100 mb-1">Document Context</h3>
-                  <p className="text-sm text-slate-600 dark:text-slate-400">
+                  <h3 className="font-semibold text-foreground dark:text-foreground mb-1">Document Context</h3>
+                  <p className="text-sm text-muted-foreground dark:text-muted-foreground">
                     Link conversations to documents for context
                   </p>
                 </div>
@@ -143,7 +143,7 @@ export default function TeamConversationsPage() {
 
               <div className="pt-4">
                 <Link href="/dashboard/conversations/new">
-                  <Button className="bg-slate-900 dark:bg-slate-100 hover:bg-slate-800 dark:hover:bg-slate-200 text-white dark:text-slate-900">
+                  <Button className="bg-slate-900 dark:bg-muted hover:bg-slate-800 dark:hover:bg-muted text-white dark:text-foreground">
                     <Plus className="h-4 w-4 mr-2" />
                     Create Your First Conversation
                   </Button>
@@ -155,21 +155,21 @@ export default function TeamConversationsPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {conversations.map((conv: any) => (
               <Link key={conv.id} href={`/dashboard/conversations/${conv.id}`}>
-                <Card className="border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 hover:shadow-lg transition-all cursor-pointer hover:scale-105 duration-300">
+                <Card className="border-border dark:border-border bg-card p-6 hover:shadow-lg transition-all cursor-pointer hover:scale-105 duration-300">
                   <div className="space-y-4">
                     {/* Header */}
                     <div className="flex items-start justify-between">
                       <div className="flex-1">
-                        <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100 line-clamp-2">
+                        <h3 className="text-lg font-semibold text-foreground dark:text-foreground line-clamp-2">
                           {conv.title}
                         </h3>
                         {conv.description && (
-                          <p className="text-sm text-slate-600 dark:text-slate-400 line-clamp-2 mt-1">
+                          <p className="text-sm text-muted-foreground dark:text-muted-foreground line-clamp-2 mt-1">
                             {conv.description}
                           </p>
                         )}
                       </div>
-                      <MessageSquare className="h-5 w-5 text-slate-600 dark:text-slate-400 flex-shrink-0 ml-2" />
+                      <MessageSquare className="h-5 w-5 text-muted-foreground dark:text-muted-foreground flex-shrink-0 ml-2" />
                     </div>
 
                     {/* Context Badge */}
@@ -182,11 +182,11 @@ export default function TeamConversationsPage() {
 
                     {/* Stats */}
                     <div className="flex items-center justify-between text-sm">
-                      <div className="flex items-center gap-1 text-slate-600 dark:text-slate-400">
+                      <div className="flex items-center gap-1 text-muted-foreground dark:text-muted-foreground">
                         <MessageSquare className="h-4 w-4" />
                         <span>{conv.message_count || 0} messages</span>
                       </div>
-                      <div className="flex items-center gap-1 text-xs text-slate-600 dark:text-slate-400">
+                      <div className="flex items-center gap-1 text-xs text-muted-foreground dark:text-muted-foreground">
                         <Clock className="h-3 w-3" />
                         {formatDate(conv.last_message_at)}
                       </div>

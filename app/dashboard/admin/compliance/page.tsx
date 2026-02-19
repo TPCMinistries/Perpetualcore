@@ -193,8 +193,8 @@ function QuickAction({
       href={href}
       className="flex items-start gap-3 p-3 rounded-lg hover:bg-muted transition-colors"
     >
-      <div className="p-2 bg-slate-100 rounded-lg flex-shrink-0">
-        <Icon className="h-4 w-4 text-slate-600" />
+      <div className="p-2 bg-muted rounded-lg flex-shrink-0">
+        <Icon className="h-4 w-4 text-muted-foreground" />
       </div>
       <div>
         <div className="font-medium text-sm">{title}</div>

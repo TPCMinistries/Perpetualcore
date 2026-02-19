@@ -54,7 +54,7 @@ const platformColors: Record<string, string> = {
   twitter: "bg-sky-500",
   instagram: "bg-pink-500",
   youtube: "bg-red-500",
-  website: "bg-slate-500",
+  website: "bg-muted0",
   email: "bg-amber-500",
 };
 
@@ -203,10 +203,10 @@ export default function ContentCalendarPage() {
         <div className="mb-6">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-3xl font-bold text-slate-900 dark:text-white">
+              <h1 className="text-3xl font-bold text-foreground dark:text-white">
                 Content Calendar
               </h1>
-              <p className="text-slate-600 dark:text-slate-400 mt-1">
+              <p className="text-muted-foreground dark:text-muted-foreground mt-1">
                 Schedule and visualize your content pipeline
               </p>
             </div>
@@ -230,7 +230,7 @@ export default function ContentCalendarPage() {
         </div>
 
         {/* Calendar Controls */}
-        <Card className="mb-6 border-0 shadow-lg shadow-slate-200/50 dark:shadow-none bg-white dark:bg-slate-800/50">
+        <Card className="mb-6 border-0 shadow-lg shadow-slate-200/50 dark:shadow-none bg-card/50">
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-4">
@@ -242,7 +242,7 @@ export default function ContentCalendarPage() {
                   >
                     <ChevronLeft className="h-4 w-4" />
                   </Button>
-                  <h2 className="text-xl font-semibold text-slate-900 dark:text-white min-w-[200px] text-center">
+                  <h2 className="text-xl font-semibold text-foreground dark:text-white min-w-[200px] text-center">
                     {MONTHS[currentDate.getMonth()]} {currentDate.getFullYear()}
                   </h2>
                   <Button
@@ -280,23 +280,23 @@ export default function ContentCalendarPage() {
 
         {/* Legend */}
         <div className="mb-4 flex items-center gap-6 text-sm">
-          <span className="text-slate-600 dark:text-slate-400 font-medium">Platforms:</span>
+          <span className="text-muted-foreground dark:text-muted-foreground font-medium">Platforms:</span>
           {Object.entries(platformColors).map(([platform, color]) => (
             <div key={platform} className="flex items-center gap-2">
               <div className={cn("w-3 h-3 rounded-full", color)} />
-              <span className="capitalize text-slate-600 dark:text-slate-400">{platform}</span>
+              <span className="capitalize text-muted-foreground dark:text-muted-foreground">{platform}</span>
             </div>
           ))}
         </div>
 
         {/* Calendar Grid */}
-        <Card className="border-0 shadow-lg shadow-slate-200/50 dark:shadow-none bg-white dark:bg-slate-800/50 overflow-hidden">
+        <Card className="border-0 shadow-lg shadow-slate-200/50 dark:shadow-none bg-card/50 overflow-hidden">
           {/* Day Headers */}
-          <div className="grid grid-cols-7 border-b border-slate-200 dark:border-slate-700">
+          <div className="grid grid-cols-7 border-b border-border dark:border-border">
             {DAYS.map(day => (
               <div
                 key={day}
-                className="py-3 text-center text-sm font-medium text-slate-600 dark:text-slate-400 bg-slate-50 dark:bg-slate-800"
+                className="py-3 text-center text-sm font-medium text-muted-foreground dark:text-muted-foreground bg-muted dark:bg-card"
               >
                 {day}
               </div>
@@ -314,8 +314,8 @@ export default function ContentCalendarPage() {
                 <div
                   key={index}
                   className={cn(
-                    "min-h-[120px] border-b border-r border-slate-200 dark:border-slate-700 p-2",
-                    !isCurrentMonthDay && "bg-slate-50/50 dark:bg-slate-900/50",
+                    "min-h-[120px] border-b border-r border-border dark:border-border p-2",
+                    !isCurrentMonthDay && "bg-muted/50 dark:bg-card/50",
                     index % 7 === 6 && "border-r-0"
                   )}
                 >
@@ -324,8 +324,8 @@ export default function ContentCalendarPage() {
                       className={cn(
                         "text-sm font-medium w-7 h-7 flex items-center justify-center rounded-full",
                         isTodayDay && "bg-violet-600 text-white",
-                        !isTodayDay && isCurrentMonthDay && "text-slate-900 dark:text-white",
-                        !isTodayDay && !isCurrentMonthDay && "text-slate-400 dark:text-slate-600"
+                        !isTodayDay && isCurrentMonthDay && "text-foreground dark:text-white",
+                        !isTodayDay && !isCurrentMonthDay && "text-muted-foreground dark:text-muted-foreground"
                       )}
                     >
                       {date.getDate()}
@@ -347,7 +347,7 @@ export default function ContentCalendarPage() {
                           className={cn(
                             "w-full text-left px-2 py-1 rounded text-xs truncate flex items-center gap-1.5",
                             "hover:opacity-80 transition-opacity",
-                            platformColors[item.platform || "website"] || "bg-slate-500",
+                            platformColors[item.platform || "website"] || "bg-muted0",
                             "text-white"
                           )}
                         >
@@ -357,7 +357,7 @@ export default function ContentCalendarPage() {
                       );
                     })}
                     {dayContent.length > 3 && (
-                      <p className="text-xs text-slate-500 dark:text-slate-400 pl-2">
+                      <p className="text-xs text-muted-foreground dark:text-muted-foreground pl-2">
                         +{dayContent.length - 3} more
                       </p>
                     )}
@@ -370,7 +370,7 @@ export default function ContentCalendarPage() {
 
         {/* Upcoming Schedule */}
         <div className="mt-6 grid gap-6 lg:grid-cols-2">
-          <Card className="border-0 shadow-lg shadow-slate-200/50 dark:shadow-none bg-white dark:bg-slate-800/50">
+          <Card className="border-0 shadow-lg shadow-slate-200/50 dark:shadow-none bg-card/50">
             <CardHeader>
               <CardTitle className="text-base flex items-center gap-2">
                 <CalendarIcon className="h-4 w-4 text-violet-500" />
@@ -393,7 +393,7 @@ export default function ContentCalendarPage() {
 
                 if (thisWeekContent.length === 0) {
                   return (
-                    <p className="text-sm text-slate-500 dark:text-slate-400">
+                    <p className="text-sm text-muted-foreground dark:text-muted-foreground">
                       No content scheduled this week
                     </p>
                   );
@@ -408,19 +408,19 @@ export default function ContentCalendarPage() {
                         <button
                           key={item.id}
                           onClick={() => router.push(`/dashboard/content/${item.id}`)}
-                          className="w-full flex items-center gap-3 p-2 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors text-left"
+                          className="w-full flex items-center gap-3 p-2 rounded-lg hover:bg-muted dark:hover:bg-muted/50 transition-colors text-left"
                         >
                           <div className={cn(
                             "h-8 w-8 rounded-lg flex items-center justify-center",
-                            platformColors[item.platform || "website"] || "bg-slate-500"
+                            platformColors[item.platform || "website"] || "bg-muted0"
                           )}>
                             <PlatformIcon className="h-4 w-4 text-white" />
                           </div>
                           <div className="flex-1 min-w-0">
-                            <p className="text-sm font-medium text-slate-900 dark:text-white truncate">
+                            <p className="text-sm font-medium text-foreground dark:text-white truncate">
                               {item.title}
                             </p>
-                            <p className="text-xs text-slate-500 dark:text-slate-400">
+                            <p className="text-xs text-muted-foreground dark:text-muted-foreground">
                               {scheduleDate.toLocaleDateString("en-US", {
                                 weekday: "short",
                                 month: "short",
@@ -448,7 +448,7 @@ export default function ContentCalendarPage() {
             </CardContent>
           </Card>
 
-          <Card className="border-0 shadow-lg shadow-slate-200/50 dark:shadow-none bg-white dark:bg-slate-800/50">
+          <Card className="border-0 shadow-lg shadow-slate-200/50 dark:shadow-none bg-card/50">
             <CardHeader>
               <CardTitle className="text-base flex items-center gap-2">
                 <LayoutGrid className="h-4 w-4 text-amber-500" />
@@ -467,7 +467,7 @@ export default function ContentCalendarPage() {
 
                 if (platforms.length === 0) {
                   return (
-                    <p className="text-sm text-slate-500 dark:text-slate-400">
+                    <p className="text-sm text-muted-foreground dark:text-muted-foreground">
                       No scheduled content this month
                     </p>
                   );
@@ -483,16 +483,16 @@ export default function ContentCalendarPage() {
                         <div key={platform} className="space-y-1">
                           <div className="flex items-center justify-between text-sm">
                             <div className="flex items-center gap-2">
-                              <PlatformIcon className="h-4 w-4 text-slate-500" />
-                              <span className="capitalize text-slate-700 dark:text-slate-300">{platform}</span>
+                              <PlatformIcon className="h-4 w-4 text-muted-foreground" />
+                              <span className="capitalize text-foreground dark:text-muted-foreground">{platform}</span>
                             </div>
-                            <span className="text-slate-500">{count}</span>
+                            <span className="text-muted-foreground">{count}</span>
                           </div>
-                          <div className="h-2 bg-slate-100 dark:bg-slate-700 rounded-full overflow-hidden">
+                          <div className="h-2 bg-muted dark:bg-muted rounded-full overflow-hidden">
                             <div
                               className={cn(
                                 "h-full rounded-full transition-all",
-                                platformColors[platform] || "bg-slate-500"
+                                platformColors[platform] || "bg-muted0"
                               )}
                               style={{ width: `${percentage}%` }}
                             />

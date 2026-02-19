@@ -12,22 +12,22 @@ interface PrivacySettingsProps {
 
 export function PrivacySettings({ preferences, onUpdatePreference }: PrivacySettingsProps) {
   return (
-    <Card className="border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-xl p-8">
+    <Card className="border-border dark:border-border bg-card shadow-xl p-8">
       <div className="flex items-center gap-3 mb-6">
-        <div className="h-10 w-10 rounded-lg bg-slate-900 dark:bg-slate-100 flex items-center justify-center">
-          {preferences.analyticsEnabled ? <Eye className="h-5 w-5 text-white dark:text-slate-900" /> : <EyeOff className="h-5 w-5 text-white dark:text-slate-900" />}
+        <div className="h-10 w-10 rounded-lg bg-slate-900 dark:bg-muted flex items-center justify-center">
+          {preferences.analyticsEnabled ? <Eye className="h-5 w-5 text-white dark:text-foreground" /> : <EyeOff className="h-5 w-5 text-white dark:text-foreground" />}
         </div>
         <div>
-          <h2 className="text-xl font-semibold text-slate-900 dark:text-white">Privacy & Data</h2>
-          <p className="text-sm text-slate-600 dark:text-slate-400">Control your data and privacy settings</p>
+          <h2 className="text-xl font-semibold text-foreground dark:text-white">Privacy & Data</h2>
+          <p className="text-sm text-muted-foreground dark:text-muted-foreground">Control your data and privacy settings</p>
         </div>
       </div>
 
       <div className="space-y-4">
-        <div className="flex items-center justify-between p-4 rounded-lg border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
+        <div className="flex items-center justify-between p-4 rounded-lg border border-border dark:border-border hover:bg-muted dark:hover:bg-muted/50 transition-colors">
           <div>
-            <p className="font-medium text-slate-900 dark:text-white">Analytics</p>
-            <p className="text-sm text-slate-600 dark:text-slate-400">Help improve the platform with usage data</p>
+            <p className="font-medium text-foreground dark:text-white">Analytics</p>
+            <p className="text-sm text-muted-foreground dark:text-muted-foreground">Help improve the platform with usage data</p>
           </div>
           <Switch
             checked={preferences.analyticsEnabled}
@@ -35,10 +35,10 @@ export function PrivacySettings({ preferences, onUpdatePreference }: PrivacySett
           />
         </div>
 
-        <div className="flex items-center justify-between p-4 rounded-lg border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
+        <div className="flex items-center justify-between p-4 rounded-lg border border-border dark:border-border hover:bg-muted dark:hover:bg-muted/50 transition-colors">
           <div>
-            <p className="font-medium text-slate-900 dark:text-white">Usage Tracking</p>
-            <p className="text-sm text-slate-600 dark:text-slate-400">Track feature usage and interactions</p>
+            <p className="font-medium text-foreground dark:text-white">Usage Tracking</p>
+            <p className="text-sm text-muted-foreground dark:text-muted-foreground">Track feature usage and interactions</p>
           </div>
           <Switch
             checked={preferences.usageTracking}
@@ -46,10 +46,10 @@ export function PrivacySettings({ preferences, onUpdatePreference }: PrivacySett
           />
         </div>
 
-        <div className="flex items-center justify-between p-4 rounded-lg border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
+        <div className="flex items-center justify-between p-4 rounded-lg border border-border dark:border-border hover:bg-muted dark:hover:bg-muted/50 transition-colors">
           <div>
-            <p className="font-medium text-slate-900 dark:text-white">Error Reporting</p>
-            <p className="text-sm text-slate-600 dark:text-slate-400">Automatically report errors to help fix bugs</p>
+            <p className="font-medium text-foreground dark:text-white">Error Reporting</p>
+            <p className="text-sm text-muted-foreground dark:text-muted-foreground">Automatically report errors to help fix bugs</p>
           </div>
           <Switch
             checked={preferences.errorReporting}
@@ -57,10 +57,10 @@ export function PrivacySettings({ preferences, onUpdatePreference }: PrivacySett
           />
         </div>
 
-        <div className="flex items-center justify-between p-4 rounded-lg border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
+        <div className="flex items-center justify-between p-4 rounded-lg border border-border dark:border-border hover:bg-muted dark:hover:bg-muted/50 transition-colors">
           <div>
-            <p className="font-medium text-slate-900 dark:text-white">Share Anonymous Data</p>
-            <p className="text-sm text-slate-600 dark:text-slate-400">Share aggregated insights for research</p>
+            <p className="font-medium text-foreground dark:text-white">Share Anonymous Data</p>
+            <p className="text-sm text-muted-foreground dark:text-muted-foreground">Share aggregated insights for research</p>
           </div>
           <Switch
             checked={preferences.shareAnonymousData}

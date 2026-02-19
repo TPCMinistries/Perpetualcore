@@ -92,10 +92,10 @@ function CalendarContent() {
 
   if (statusLoading) {
     return (
-      <div className="flex-1 flex items-center justify-center bg-white dark:bg-slate-900">
+      <div className="flex-1 flex items-center justify-center bg-card">
         <div className="flex flex-col items-center gap-4">
-          <Loader2 className="h-8 w-8 animate-spin text-slate-400" />
-          <p className="text-sm text-slate-500">Loading calendar...</p>
+          <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+          <p className="text-sm text-muted-foreground">Loading calendar...</p>
         </div>
       </div>
     );
@@ -106,16 +106,16 @@ function CalendarContent() {
     return (
       <div className="flex-1 flex flex-col">
         <CalendarHeader onConnectCalendar={connectGoogleCalendar} />
-        <div className="flex-1 flex items-center justify-center p-8 bg-white dark:bg-slate-900">
-          <Card className="max-w-md border-slate-200 dark:border-slate-800">
+        <div className="flex-1 flex items-center justify-center p-8 bg-card">
+          <Card className="max-w-md border-border dark:border-border">
             <CardHeader className="text-center">
               <div className="mx-auto h-16 w-16 rounded-xl bg-blue-50 dark:bg-blue-950/30 flex items-center justify-center mb-4">
                 <CalendarIcon className="h-8 w-8 text-blue-600 dark:text-blue-400" />
               </div>
-              <CardTitle className="text-slate-900 dark:text-slate-100">
+              <CardTitle className="text-foreground dark:text-foreground">
                 Connect Your Calendar
               </CardTitle>
-              <CardDescription className="text-slate-600 dark:text-slate-400">
+              <CardDescription className="text-muted-foreground dark:text-muted-foreground">
                 Connect Google Calendar to see your upcoming events, get meeting
                 briefings, and sync your schedule with AI-powered insights.
               </CardDescription>
@@ -123,7 +123,7 @@ function CalendarContent() {
             <CardContent>
               <Button
                 onClick={connectGoogleCalendar}
-                className="w-full bg-slate-900 dark:bg-slate-100 hover:bg-slate-800 dark:hover:bg-slate-200 text-white dark:text-slate-900"
+                className="w-full bg-slate-900 dark:bg-muted hover:bg-slate-800 dark:hover:bg-muted text-white dark:text-foreground"
               >
                 Connect Google Calendar
               </Button>
