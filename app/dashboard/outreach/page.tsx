@@ -73,7 +73,7 @@ const statusColors: Record<string, { bg: string; text: string }> = {
   active: { bg: "bg-green-100 dark:bg-green-900/30", text: "text-green-600 dark:text-green-400" },
   paused: { bg: "bg-yellow-100 dark:bg-yellow-900/30", text: "text-yellow-600 dark:text-yellow-400" },
   completed: { bg: "bg-blue-100 dark:bg-blue-900/30", text: "text-blue-600 dark:text-blue-400" },
-  archived: { bg: "bg-slate-100 dark:bg-slate-800", text: "text-slate-500" },
+  archived: { bg: "bg-muted dark:bg-card", text: "text-muted-foreground" },
 };
 
 const typeLabels: Record<string, string> = {

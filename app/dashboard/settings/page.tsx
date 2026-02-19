@@ -558,7 +558,7 @@ export default function SettingsPage() {
             <div className="flex items-start gap-4 sm:gap-6">
               {/* Avatar */}
               <div className="relative group">
-                <div className="h-20 w-20 rounded-xl bg-slate-900 dark:bg-slate-100 flex items-center justify-center text-white dark:text-slate-900 text-3xl font-bold shadow-md">
+                <div className="h-20 w-20 rounded-xl bg-slate-900 dark:bg-muted flex items-center justify-center text-white dark:text-foreground text-3xl font-bold shadow-md">
                   {profile.fullName ? profile.fullName.charAt(0).toUpperCase() : "U"}
                 </div>
                 <button className="absolute inset-0 rounded-xl bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
@@ -573,7 +573,7 @@ export default function SettingsPage() {
                   <h1 className="text-2xl font-semibold text-foreground">
                     {profile.fullName || "User"}
                   </h1>
-                  <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 text-xs font-medium">
+                  <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-slate-900 dark:bg-muted text-white dark:text-foreground text-xs font-medium">
                     <BadgeIcon className="h-3 w-3" />
                     {badge.label}
                   </div>
@@ -614,28 +614,28 @@ export default function SettingsPage() {
             <TabsList className="grid grid-cols-2 sm:grid-cols-4 gap-1 bg-transparent h-auto p-0">
               <TabsTrigger
                 value="account"
-                className="data-[state=active]:bg-slate-900 dark:data-[state=active]:bg-slate-100 data-[state=active]:text-white dark:data-[state=active]:text-slate-900 data-[state=active]:shadow-md px-4 py-2.5 rounded-lg transition-all text-sm font-medium"
+                className="data-[state=active]:bg-slate-900 dark:data-[state=active]:bg-muted data-[state=active]:text-white dark:data-[state=active]:text-foreground data-[state=active]:shadow-md px-4 py-2.5 rounded-lg transition-all text-sm font-medium"
               >
                 <User className="h-4 w-4 mr-2" />
                 Account
               </TabsTrigger>
               <TabsTrigger
                 value="preferences"
-                className="data-[state=active]:bg-slate-900 dark:data-[state=active]:bg-slate-100 data-[state=active]:text-white dark:data-[state=active]:text-slate-900 data-[state=active]:shadow-md px-4 py-2.5 rounded-lg transition-all text-sm font-medium"
+                className="data-[state=active]:bg-slate-900 dark:data-[state=active]:bg-muted data-[state=active]:text-white dark:data-[state=active]:text-foreground data-[state=active]:shadow-md px-4 py-2.5 rounded-lg transition-all text-sm font-medium"
               >
                 <Palette className="h-4 w-4 mr-2" />
                 Preferences
               </TabsTrigger>
               <TabsTrigger
                 value="organization"
-                className="data-[state=active]:bg-slate-900 dark:data-[state=active]:bg-slate-100 data-[state=active]:text-white dark:data-[state=active]:text-slate-900 data-[state=active]:shadow-md px-4 py-2.5 rounded-lg transition-all text-sm font-medium"
+                className="data-[state=active]:bg-slate-900 dark:data-[state=active]:bg-muted data-[state=active]:text-white dark:data-[state=active]:text-foreground data-[state=active]:shadow-md px-4 py-2.5 rounded-lg transition-all text-sm font-medium"
               >
                 <Building2 className="h-4 w-4 mr-2" />
                 Organization
               </TabsTrigger>
               <TabsTrigger
                 value="security"
-                className="data-[state=active]:bg-slate-900 dark:data-[state=active]:bg-slate-100 data-[state=active]:text-white dark:data-[state=active]:text-slate-900 data-[state=active]:shadow-md px-4 py-2.5 rounded-lg transition-all text-sm font-medium"
+                className="data-[state=active]:bg-slate-900 dark:data-[state=active]:bg-muted data-[state=active]:text-white dark:data-[state=active]:text-foreground data-[state=active]:shadow-md px-4 py-2.5 rounded-lg transition-all text-sm font-medium"
               >
                 <Shield className="h-4 w-4 mr-2" />
                 Security
@@ -647,8 +647,8 @@ export default function SettingsPage() {
           <TabsContent value="account" className="space-y-6">
             <Card className="border-border bg-background shadow-xl p-8">
               <div className="flex items-center gap-3 mb-6">
-                <div className="h-10 w-10 rounded-lg bg-slate-900 dark:bg-slate-100 flex items-center justify-center">
-                  <User className="h-5 w-5 text-white dark:text-slate-900" />
+                <div className="h-10 w-10 rounded-lg bg-slate-900 dark:bg-muted flex items-center justify-center">
+                  <User className="h-5 w-5 text-white dark:text-foreground" />
                 </div>
                 <div>
                   <h2 className="text-xl font-semibold text-foreground">Profile Information</h2>
@@ -683,7 +683,7 @@ export default function SettingsPage() {
                   <Button
                     onClick={handleSaveProfile}
                     disabled={isSaving}
-                    className="bg-slate-900 dark:bg-slate-100 hover:bg-slate-800 dark:hover:bg-slate-200 text-white dark:text-slate-900 shadow-lg px-6"
+                    className="bg-slate-900 dark:bg-muted hover:bg-slate-800 dark:hover:bg-muted text-white dark:text-foreground shadow-lg px-6"
                   >
                     {isSaving ? (
                       <>
@@ -703,8 +703,8 @@ export default function SettingsPage() {
 
             <Card className="border-border bg-background shadow-xl p-8">
               <div className="flex items-center gap-3 mb-6">
-                <div className="h-10 w-10 rounded-lg bg-slate-900 dark:bg-slate-100 flex items-center justify-center">
-                  <Lock className="h-5 w-5 text-white dark:text-slate-900" />
+                <div className="h-10 w-10 rounded-lg bg-slate-900 dark:bg-muted flex items-center justify-center">
+                  <Lock className="h-5 w-5 text-white dark:text-foreground" />
                 </div>
                 <div>
                   <h2 className="text-xl font-semibold text-foreground">Password & Authentication</h2>
@@ -728,8 +728,8 @@ export default function SettingsPage() {
             {/* Appearance Section */}
             <Card className="border-border bg-background shadow-xl p-8">
               <div className="flex items-center gap-3 mb-6">
-                <div className="h-10 w-10 rounded-lg bg-slate-900 dark:bg-slate-100 flex items-center justify-center">
-                  <Palette className="h-5 w-5 text-white dark:text-slate-900" />
+                <div className="h-10 w-10 rounded-lg bg-slate-900 dark:bg-muted flex items-center justify-center">
+                  <Palette className="h-5 w-5 text-white dark:text-foreground" />
                 </div>
                 <div>
                   <h2 className="text-xl font-semibold text-foreground">Appearance</h2>
@@ -749,7 +749,7 @@ export default function SettingsPage() {
                           : "border-border hover:border-border"
                       }`}
                     >
-                      <Sun className={`h-8 w-8 mx-auto mb-3 ${theme === "light" ? "text-blue-500" : "text-slate-400"}`} />
+                      <Sun className={`h-8 w-8 mx-auto mb-3 ${theme === "light" ? "text-blue-500" : "text-muted-foreground"}`} />
                       <p className={`font-medium text-center ${theme === "light" ? "text-blue-700 dark:text-blue-400" : "text-muted-foreground"}`}>
                         Light
                       </p>
@@ -762,7 +762,7 @@ export default function SettingsPage() {
                           : "border-border hover:border-border"
                       }`}
                     >
-                      <Moon className={`h-8 w-8 mx-auto mb-3 ${theme === "dark" ? "text-blue-500" : "text-slate-400"}`} />
+                      <Moon className={`h-8 w-8 mx-auto mb-3 ${theme === "dark" ? "text-blue-500" : "text-muted-foreground"}`} />
                       <p className={`font-medium text-center ${theme === "dark" ? "text-blue-700 dark:text-blue-400" : "text-muted-foreground"}`}>
                         Dark
                       </p>
@@ -775,7 +775,7 @@ export default function SettingsPage() {
                           : "border-border hover:border-border"
                       }`}
                     >
-                      <Monitor className={`h-8 w-8 mx-auto mb-3 ${theme === "system" ? "text-blue-500" : "text-slate-400"}`} />
+                      <Monitor className={`h-8 w-8 mx-auto mb-3 ${theme === "system" ? "text-blue-500" : "text-muted-foreground"}`} />
                       <p className={`font-medium text-center ${theme === "system" ? "text-blue-700 dark:text-blue-400" : "text-muted-foreground"}`}>
                         System
                       </p>
@@ -802,8 +802,8 @@ export default function SettingsPage() {
             {/* AI Settings */}
             <Card className="border-border bg-background shadow-xl p-8">
               <div className="flex items-center gap-3 mb-6">
-                <div className="h-10 w-10 rounded-lg bg-slate-900 dark:bg-slate-100 flex items-center justify-center">
-                  <Bot className="h-5 w-5 text-white dark:text-slate-900" />
+                <div className="h-10 w-10 rounded-lg bg-slate-900 dark:bg-muted flex items-center justify-center">
+                  <Bot className="h-5 w-5 text-white dark:text-foreground" />
                 </div>
                 <div>
                   <h2 className="text-xl font-semibold text-foreground">AI Settings</h2>
@@ -897,8 +897,8 @@ export default function SettingsPage() {
             {/* Notifications Section */}
             <Card className="border-border bg-background shadow-xl p-8">
               <div className="flex items-center gap-3 mb-6">
-                <div className="h-10 w-10 rounded-lg bg-slate-900 dark:bg-slate-100 flex items-center justify-center">
-                  <Bell className="h-5 w-5 text-white dark:text-slate-900" />
+                <div className="h-10 w-10 rounded-lg bg-slate-900 dark:bg-muted flex items-center justify-center">
+                  <Bell className="h-5 w-5 text-white dark:text-foreground" />
                 </div>
                 <div>
                   <h2 className="text-xl font-semibold text-foreground">Notifications</h2>
@@ -979,7 +979,7 @@ export default function SettingsPage() {
 
                 <div className="flex items-center justify-between p-4 rounded-lg border border-border hover:bg-muted/50 transition-colors">
                   <div className="flex items-center gap-3">
-                    {preferences.soundEffects ? <Volume2 className="h-5 w-5 text-pink-500" /> : <VolumeX className="h-5 w-5 text-slate-400" />}
+                    {preferences.soundEffects ? <Volume2 className="h-5 w-5 text-pink-500" /> : <VolumeX className="h-5 w-5 text-muted-foreground" />}
                     <div>
                       <p className="font-medium text-foreground">Sound Effects</p>
                       <p className="text-sm text-muted-foreground">Play audio feedback for actions</p>
@@ -996,8 +996,8 @@ export default function SettingsPage() {
             {/* Editor Preferences */}
             <Card className="border-border bg-background shadow-xl p-8">
               <div className="flex items-center gap-3 mb-6">
-                <div className="h-10 w-10 rounded-lg bg-slate-900 dark:bg-slate-100 flex items-center justify-center">
-                  <Code2 className="h-5 w-5 text-white dark:text-slate-900" />
+                <div className="h-10 w-10 rounded-lg bg-slate-900 dark:bg-muted flex items-center justify-center">
+                  <Code2 className="h-5 w-5 text-white dark:text-foreground" />
                 </div>
                 <div>
                   <h2 className="text-xl font-semibold text-foreground">Editor Preferences</h2>
@@ -1067,8 +1067,8 @@ export default function SettingsPage() {
             {/* Privacy & Data */}
             <Card className="border-border bg-background shadow-xl p-8">
               <div className="flex items-center gap-3 mb-6">
-                <div className="h-10 w-10 rounded-lg bg-slate-900 dark:bg-slate-100 flex items-center justify-center">
-                  {preferences.analyticsEnabled ? <Eye className="h-5 w-5 text-white dark:text-slate-900" /> : <EyeOff className="h-5 w-5 text-white dark:text-slate-900" />}
+                <div className="h-10 w-10 rounded-lg bg-slate-900 dark:bg-muted flex items-center justify-center">
+                  {preferences.analyticsEnabled ? <Eye className="h-5 w-5 text-white dark:text-foreground" /> : <EyeOff className="h-5 w-5 text-white dark:text-foreground" />}
                 </div>
                 <div>
                   <h2 className="text-xl font-semibold text-foreground">Privacy & Data</h2>
@@ -1126,8 +1126,8 @@ export default function SettingsPage() {
             {/* Accessibility */}
             <Card className="border-border bg-background shadow-xl p-8">
               <div className="flex items-center gap-3 mb-6">
-                <div className="h-10 w-10 rounded-lg bg-slate-900 dark:bg-slate-100 flex items-center justify-center">
-                  <Accessibility className="h-5 w-5 text-white dark:text-slate-900" />
+                <div className="h-10 w-10 rounded-lg bg-slate-900 dark:bg-muted flex items-center justify-center">
+                  <Accessibility className="h-5 w-5 text-white dark:text-foreground" />
                 </div>
                 <div>
                   <h2 className="text-xl font-semibold text-foreground">Accessibility</h2>
@@ -1189,8 +1189,8 @@ export default function SettingsPage() {
             {/* Performance */}
             <Card className="border-border bg-background shadow-xl p-8">
               <div className="flex items-center gap-3 mb-6">
-                <div className="h-10 w-10 rounded-lg bg-slate-900 dark:bg-slate-100 flex items-center justify-center">
-                  <Gauge className="h-5 w-5 text-white dark:text-slate-900" />
+                <div className="h-10 w-10 rounded-lg bg-slate-900 dark:bg-muted flex items-center justify-center">
+                  <Gauge className="h-5 w-5 text-white dark:text-foreground" />
                 </div>
                 <div>
                   <h2 className="text-xl font-semibold text-foreground">Performance</h2>
@@ -1246,8 +1246,8 @@ export default function SettingsPage() {
             {/* Interface */}
             <Card className="border-border bg-background shadow-xl p-8">
               <div className="flex items-center gap-3 mb-6">
-                <div className="h-10 w-10 rounded-lg bg-slate-900 dark:bg-slate-100 flex items-center justify-center">
-                  <Layout className="h-5 w-5 text-white dark:text-slate-900" />
+                <div className="h-10 w-10 rounded-lg bg-slate-900 dark:bg-muted flex items-center justify-center">
+                  <Layout className="h-5 w-5 text-white dark:text-foreground" />
                 </div>
                 <div>
                   <h2 className="text-xl font-semibold text-foreground">Interface</h2>
@@ -1312,7 +1312,7 @@ export default function SettingsPage() {
               <Button
                 onClick={handleSaveAllPreferences}
                 disabled={isSaving}
-                className="bg-slate-900 dark:bg-slate-100 hover:bg-slate-800 dark:hover:bg-slate-200 text-white dark:text-slate-900 shadow-lg px-8"
+                className="bg-slate-900 dark:bg-muted hover:bg-slate-800 dark:hover:bg-muted text-white dark:text-foreground shadow-lg px-8"
               >
                 {isSaving ? (
                   <>
@@ -1333,8 +1333,8 @@ export default function SettingsPage() {
           <TabsContent value="organization" className="space-y-6">
             <Card className="border-border bg-background shadow-xl p-8">
               <div className="flex items-center gap-3 mb-6">
-                <div className="h-10 w-10 rounded-lg bg-slate-900 dark:bg-slate-100 flex items-center justify-center">
-                  <Building2 className="h-5 w-5 text-white dark:text-slate-900" />
+                <div className="h-10 w-10 rounded-lg bg-slate-900 dark:bg-muted flex items-center justify-center">
+                  <Building2 className="h-5 w-5 text-white dark:text-foreground" />
                 </div>
                 <div>
                   <h2 className="text-xl font-semibold text-foreground">Organization Settings</h2>
@@ -1387,8 +1387,8 @@ export default function SettingsPage() {
           <TabsContent value="security" className="space-y-6">
             <Card className="border-border bg-background shadow-xl p-8">
               <div className="flex items-center gap-3 mb-6">
-                <div className="h-10 w-10 rounded-lg bg-slate-900 dark:bg-slate-100 flex items-center justify-center">
-                  <Shield className="h-5 w-5 text-white dark:text-slate-900" />
+                <div className="h-10 w-10 rounded-lg bg-slate-900 dark:bg-muted flex items-center justify-center">
+                  <Shield className="h-5 w-5 text-white dark:text-foreground" />
                 </div>
                 <div>
                   <h2 className="text-xl font-semibold text-foreground">Security & Privacy</h2>
@@ -1500,7 +1500,7 @@ export default function SettingsPage() {
             <Button
               onClick={handleChangePassword}
               disabled={isChangingPassword}
-              className="bg-slate-900 dark:bg-slate-100 hover:bg-slate-800 dark:hover:bg-slate-200 text-white dark:text-slate-900"
+              className="bg-slate-900 dark:bg-muted hover:bg-slate-800 dark:hover:bg-muted text-white dark:text-foreground"
             >
               {isChangingPassword ? (
                 <>

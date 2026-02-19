@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 import Link from "next/link";
 import {
   ArrowLeft,
@@ -95,7 +96,7 @@ export default function NewEntityPage() {
     e.preventDefault();
 
     if (!formData.name.trim()) {
-      alert("Space name is required");
+      toast.error("Space name is required");
       return;
     }
 
@@ -121,11 +122,11 @@ export default function NewEntityPage() {
         router.push("/dashboard/entities");
       } else {
         const error = await response.json();
-        alert(error.error || "Failed to create space");
+        toast.error(error.error || "Failed to create space");
       }
     } catch (error) {
       console.error("Error creating space:", error);
-      alert("Failed to create space");
+      toast.error("Failed to create space");
     } finally {
       setIsSubmitting(false);
     }
@@ -141,7 +142,7 @@ export default function NewEntityPage() {
           </Button>
         </Link>
         <div>
-          <h1 className="text-2xl font-bold text-slate-900 dark:text-white">
+          <h1 className="text-2xl font-bold text-foreground dark:text-white">
             Create Space
           </h1>
           <p className="text-muted-foreground">

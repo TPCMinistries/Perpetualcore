@@ -781,7 +781,7 @@ export default function ContentPage() {
                                     <span
                                       className={cn(
                                         "text-xs",
-                                        isOverLimit ? "text-rose-500 font-medium" : "text-slate-400"
+                                        isOverLimit ? "text-rose-500 font-medium" : "text-muted-foreground"
                                       )}
                                     >
                                       {variation.characterCount}
@@ -855,7 +855,7 @@ export default function ContentPage() {
                               <Button
                                 variant="ghost"
                                 size="sm"
-                                className="h-6 text-xs text-slate-400"
+                                className="h-6 text-xs text-muted-foreground"
                                 onClick={() => { setSelectedTemplate(null); setTemplateValues({}); }}
                               >
                                 Clear template
@@ -1148,7 +1148,7 @@ export default function ContentPage() {
               <div className="flex flex-col lg:flex-row gap-4">
                 {/* Search */}
                 <div className="relative flex-1 max-w-md">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                   <Input
                     placeholder="Search content..."
                     value={searchQuery}
@@ -1265,7 +1265,7 @@ export default function ContentPage() {
                               size="sm"
                               className="h-8 w-8 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
                             >
-                              <MoreHorizontal className="h-4 w-4 text-slate-400" />
+                              <MoreHorizontal className="h-4 w-4 text-muted-foreground" />
                             </Button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end">

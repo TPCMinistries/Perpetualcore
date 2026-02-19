@@ -214,16 +214,16 @@ export default function WhatsAppPage() {
   if (accounts.length === 0 || showConnect) {
     return (
       <div className="space-y-6">
-        <Card className="max-w-2xl mx-auto border-slate-200 dark:border-slate-800 shadow-xl bg-white dark:bg-slate-900">
+        <Card className="max-w-2xl mx-auto border-border dark:border-border shadow-xl bg-card">
           <CardContent className="py-12">
             <div className="text-center mb-8">
               <div className="h-20 w-20 rounded-2xl bg-green-50 dark:bg-green-950/30 flex items-center justify-center shadow-lg mx-auto mb-4">
                 <Smartphone className="h-10 w-10 text-green-600 dark:text-green-400" />
               </div>
-              <h2 className="text-3xl font-semibold mb-2 text-slate-900 dark:text-slate-100">
+              <h2 className="text-3xl font-semibold mb-2 text-foreground dark:text-foreground">
                 Connect WhatsApp
               </h2>
-              <p className="text-slate-600 dark:text-slate-400">
+              <p className="text-muted-foreground dark:text-muted-foreground">
                 Access your AI Brain directly from WhatsApp
               </p>
             </div>
@@ -249,7 +249,7 @@ export default function WhatsAppPage() {
                 <Button
                   onClick={sendVerificationCode}
                   disabled={!phoneNumber || sending}
-                  className="w-full bg-slate-900 dark:bg-slate-100 hover:bg-slate-800 dark:hover:bg-slate-200 text-white dark:text-slate-900"
+                  className="w-full bg-slate-900 dark:bg-muted hover:bg-slate-800 dark:hover:bg-muted text-white dark:text-foreground"
                   size="lg"
                 >
                   {sending ? (
@@ -304,7 +304,7 @@ export default function WhatsAppPage() {
                 <Button
                   onClick={verifyCode}
                   disabled={verificationCode.length !== 6 || sending}
-                  className="w-full bg-slate-900 dark:bg-slate-100 hover:bg-slate-800 dark:hover:bg-slate-200 text-white dark:text-slate-900"
+                  className="w-full bg-slate-900 dark:bg-muted hover:bg-slate-800 dark:hover:bg-muted text-white dark:text-foreground"
                   size="lg"
                 >
                   {sending ? (
@@ -342,27 +342,27 @@ export default function WhatsAppPage() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="border border-slate-200 dark:border-slate-800 rounded-xl p-8 bg-white dark:bg-slate-900">
+      <div className="border border-border dark:border-border rounded-xl p-8 bg-card">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <div className="h-12 w-12 rounded-lg bg-slate-900 dark:bg-slate-100 flex items-center justify-center">
-              <MessageCircle className="h-6 w-6 text-white dark:text-slate-900" />
+            <div className="h-12 w-12 rounded-lg bg-slate-900 dark:bg-muted flex items-center justify-center">
+              <MessageCircle className="h-6 w-6 text-white dark:text-foreground" />
             </div>
             <div>
-              <h1 className="text-3xl font-semibold text-slate-900 dark:text-slate-100">
+              <h1 className="text-3xl font-semibold text-foreground dark:text-foreground">
                 WhatsApp
               </h1>
-              <p className="text-slate-600 dark:text-slate-400 mt-1">
+              <p className="text-muted-foreground dark:text-muted-foreground mt-1">
                 Chat with your AI Brain from anywhere
               </p>
             </div>
           </div>
           <div className="flex items-center gap-2">
             {selectedAccount && (
-              <div className="bg-slate-50 dark:bg-slate-800 rounded-xl p-4 border border-slate-200 dark:border-slate-700">
+              <div className="bg-muted dark:bg-card rounded-xl p-4 border border-border dark:border-border">
                 <div className="flex items-center gap-2 mb-1">
-                  <Phone className="h-4 w-4 text-slate-600 dark:text-slate-400" />
-                  <p className="text-sm font-medium text-slate-900 dark:text-slate-100">{selectedAccount.phone_number}</p>
+                  <Phone className="h-4 w-4 text-muted-foreground dark:text-muted-foreground" />
+                  <p className="text-sm font-medium text-foreground dark:text-foreground">{selectedAccount.phone_number}</p>
                 </div>
                 {selectedAccount.ai_enabled && (
                   <div className="flex items-center gap-1 text-xs text-green-600 dark:text-green-400">
@@ -379,11 +379,11 @@ export default function WhatsAppPage() {
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <Card className="p-6 border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900">
+        <Card className="p-6 border-border dark:border-border bg-card">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-slate-600 dark:text-slate-400">Total Messages</p>
-              <p className="text-3xl font-semibold text-slate-900 dark:text-slate-100 mt-1">{messages.length}</p>
+              <p className="text-sm text-muted-foreground dark:text-muted-foreground">Total Messages</p>
+              <p className="text-3xl font-semibold text-foreground dark:text-foreground mt-1">{messages.length}</p>
             </div>
             <div className="h-10 w-10 rounded-lg bg-green-50 dark:bg-green-950/30 flex items-center justify-center">
               <MessageCircle className="h-5 w-5 text-green-600 dark:text-green-400" />
@@ -391,11 +391,11 @@ export default function WhatsAppPage() {
           </div>
         </Card>
 
-        <Card className="p-6 border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900">
+        <Card className="p-6 border-border dark:border-border bg-card">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-slate-600 dark:text-slate-400">Sent</p>
-              <p className="text-3xl font-semibold text-slate-900 dark:text-slate-100 mt-1">
+              <p className="text-sm text-muted-foreground dark:text-muted-foreground">Sent</p>
+              <p className="text-3xl font-semibold text-foreground dark:text-foreground mt-1">
                 {messages.filter((m) => m.direction === "outbound").length}
               </p>
             </div>
@@ -405,11 +405,11 @@ export default function WhatsAppPage() {
           </div>
         </Card>
 
-        <Card className="p-6 border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900">
+        <Card className="p-6 border-border dark:border-border bg-card">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-slate-600 dark:text-slate-400">AI Responses</p>
-              <p className="text-3xl font-semibold text-slate-900 dark:text-slate-100 mt-1">
+              <p className="text-sm text-muted-foreground dark:text-muted-foreground">AI Responses</p>
+              <p className="text-3xl font-semibold text-foreground dark:text-foreground mt-1">
                 {messages.filter((m) => m.ai_response).length}
               </p>
             </div>
@@ -419,11 +419,11 @@ export default function WhatsAppPage() {
           </div>
         </Card>
 
-        <Card className="p-6 border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900">
+        <Card className="p-6 border-border dark:border-border bg-card">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-slate-600 dark:text-slate-400">Conversations</p>
-              <p className="text-3xl font-semibold text-slate-900 dark:text-slate-100 mt-1">
+              <p className="text-sm text-muted-foreground dark:text-muted-foreground">Conversations</p>
+              <p className="text-3xl font-semibold text-foreground dark:text-foreground mt-1">
                 {new Set(messages.map((m) => m.from_number)).size}
               </p>
             </div>
@@ -435,7 +435,7 @@ export default function WhatsAppPage() {
       </div>
 
       {/* Messages */}
-      <Card className="border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900">
+      <Card className="border-border dark:border-border bg-card">
         <CardContent className="p-4 h-[600px] flex flex-col">
           {/* Messages area */}
           <div className="flex-1 overflow-y-auto mb-4 space-y-4">
@@ -461,8 +461,8 @@ export default function WhatsAppPage() {
                     <div
                       className={`max-w-[70%] rounded-2xl px-4 py-3 shadow-sm ${
                         message.direction === "outbound"
-                          ? "bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900"
-                          : "bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 border border-slate-200 dark:border-slate-700"
+                          ? "bg-slate-900 dark:bg-muted text-white dark:text-foreground"
+                          : "bg-card text-foreground dark:text-foreground border border-border dark:border-border"
                       }`}
                     >
                       <p className="text-sm whitespace-pre-wrap">{message.body}</p>
@@ -504,7 +504,7 @@ export default function WhatsAppPage() {
               onClick={sendMessage}
               disabled={!newMessage.trim() || sending}
               size="lg"
-              className="bg-slate-900 dark:bg-slate-100 hover:bg-slate-800 dark:hover:bg-slate-200 text-white dark:text-slate-900"
+              className="bg-slate-900 dark:bg-muted hover:bg-slate-800 dark:hover:bg-muted text-white dark:text-foreground"
             >
               {sending ? (
                 <Loader2 className="h-4 w-4 animate-spin" />

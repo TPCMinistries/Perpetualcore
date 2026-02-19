@@ -630,7 +630,7 @@ export default function LeadsPage() {
                         <StatusIcon className="h-4 w-4" />
                         <span className="font-medium">{config.label}</span>
                       </div>
-                      <Badge variant="secondary" className="bg-white/50">
+                      <Badge variant="secondary" className="bg-card/50">
                         {statusLeads.length}
                       </Badge>
                     </div>

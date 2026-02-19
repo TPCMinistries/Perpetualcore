@@ -86,16 +86,16 @@ const requestTypeConfig: Record<string, { icon: any; label: string; color: strin
   company: { icon: Building, label: "Company Research", color: "text-indigo-600", bg: "bg-indigo-100 dark:bg-indigo-900/30" },
   industry: { icon: TrendingUp, label: "Industry Analysis", color: "text-amber-600", bg: "bg-amber-100 dark:bg-amber-900/30" },
   technology: { icon: Lightbulb, label: "Technology Research", color: "text-purple-600", bg: "bg-purple-100 dark:bg-purple-900/30" },
-  custom: { icon: SearchIcon, label: "Custom Research", color: "text-slate-600", bg: "bg-slate-100 dark:bg-slate-800" },
+  custom: { icon: SearchIcon, label: "Custom Research", color: "text-muted-foreground", bg: "bg-muted dark:bg-card" },
 };
 
 const statusConfig: Record<string, { icon: any; label: string; bg: string; text: string }> = {
-  pending: { icon: Clock, label: "Pending", bg: "bg-slate-100 dark:bg-slate-800", text: "text-slate-600 dark:text-slate-400" },
+  pending: { icon: Clock, label: "Pending", bg: "bg-muted dark:bg-card", text: "text-muted-foreground dark:text-muted-foreground" },
   queued: { icon: Clock, label: "Queued", bg: "bg-amber-100 dark:bg-amber-900/30", text: "text-amber-600 dark:text-amber-400" },
   researching: { icon: Loader2, label: "Researching", bg: "bg-blue-100 dark:bg-blue-900/30", text: "text-blue-600 dark:text-blue-400" },
   completed: { icon: CheckCircle2, label: "Completed", bg: "bg-green-100 dark:bg-green-900/30", text: "text-green-600 dark:text-green-400" },
   failed: { icon: XCircle, label: "Failed", bg: "bg-red-100 dark:bg-red-900/30", text: "text-red-600 dark:text-red-400" },
-  cancelled: { icon: XCircle, label: "Cancelled", bg: "bg-slate-100 dark:bg-slate-800", text: "text-slate-500" },
+  cancelled: { icon: XCircle, label: "Cancelled", bg: "bg-muted dark:bg-card", text: "text-muted-foreground" },
 };
 
 export default function ResearchDetailPage({ params }: { params: Promise<{ id: string }> }) {
@@ -195,7 +195,7 @@ export default function ResearchDetailPage({ params }: { params: Promise<{ id: s
           <Button
             variant="ghost"
             onClick={() => router.push("/dashboard/research")}
-            className="mb-4 -ml-2 text-slate-600 dark:text-slate-400"
+            className="mb-4 -ml-2 text-muted-foreground dark:text-muted-foreground"
           >
             <ArrowLeft className="h-4 w-4 mr-2" />
             Back to Research Hub
@@ -208,7 +208,7 @@ export default function ResearchDetailPage({ params }: { params: Promise<{ id: s
               </div>
               <div>
                 <div className="flex items-center gap-3 mb-2">
-                  <span className="text-sm font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wide">
+                  <span className="text-sm font-medium text-muted-foreground dark:text-muted-foreground uppercase tracking-wide">
                     {typeConf.label}
                   </span>
                   <Badge className={cn("text-xs", statusConf.bg, statusConf.text, "border-0")}>
@@ -216,10 +216,10 @@ export default function ResearchDetailPage({ params }: { params: Promise<{ id: s
                     {statusConf.label}
                   </Badge>
                 </div>
-                <h1 className="text-3xl font-bold text-slate-900 dark:text-white mb-2">
+                <h1 className="text-3xl font-bold text-foreground dark:text-white mb-2">
                   {request.subject}
                 </h1>
-                <p className="text-sm text-slate-500 dark:text-slate-400">
+                <p className="text-sm text-muted-foreground dark:text-muted-foreground">
                   Requested {formatDate(request.created_at)}
                 </p>
               </div>
@@ -286,7 +286,7 @@ export default function ResearchDetailPage({ params }: { params: Promise<{ id: s
           <div className="lg:col-span-2 space-y-6">
             {/* Executive Summary */}
             {request.executive_summary && (
-              <Card className="border-0 shadow-lg shadow-slate-200/50 dark:shadow-none bg-white dark:bg-slate-800/50">
+              <Card className="border-0 shadow-lg shadow-slate-200/50 dark:shadow-none bg-card/50">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2 text-lg">
                     <Sparkles className="h-5 w-5 text-amber-500" />
@@ -294,7 +294,7 @@ export default function ResearchDetailPage({ params }: { params: Promise<{ id: s
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-slate-700 dark:text-slate-300 leading-relaxed whitespace-pre-wrap">
+                  <p className="text-foreground dark:text-muted-foreground leading-relaxed whitespace-pre-wrap">
                     {request.executive_summary}
                   </p>
                 </CardContent>
@@ -303,7 +303,7 @@ export default function ResearchDetailPage({ params }: { params: Promise<{ id: s
 
             {/* Key Findings */}
             {request.key_findings && request.key_findings.length > 0 && (
-              <Card className="border-0 shadow-lg shadow-slate-200/50 dark:shadow-none bg-white dark:bg-slate-800/50">
+              <Card className="border-0 shadow-lg shadow-slate-200/50 dark:shadow-none bg-card/50">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2 text-lg">
                     <CheckCircle2 className="h-5 w-5 text-green-500" />
@@ -317,7 +317,7 @@ export default function ResearchDetailPage({ params }: { params: Promise<{ id: s
                         <div className="h-6 w-6 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center flex-shrink-0 mt-0.5">
                           <span className="text-xs font-semibold text-green-600 dark:text-green-400">{i + 1}</span>
                         </div>
-                        <span className="text-slate-700 dark:text-slate-300 flex-1">{finding}</span>
+                        <span className="text-foreground dark:text-muted-foreground flex-1">{finding}</span>
                         <Button
                           variant="ghost"
                           size="sm"
@@ -327,7 +327,7 @@ export default function ResearchDetailPage({ params }: { params: Promise<{ id: s
                           {copiedId === `finding-${i}` ? (
                             <Check className="h-3 w-3 text-green-500" />
                           ) : (
-                            <Copy className="h-3 w-3 text-slate-400" />
+                            <Copy className="h-3 w-3 text-muted-foreground" />
                           )}
                         </Button>
                       </li>
@@ -339,7 +339,7 @@ export default function ResearchDetailPage({ params }: { params: Promise<{ id: s
 
             {/* Recommendations */}
             {request.recommendations && request.recommendations.length > 0 && (
-              <Card className="border-0 shadow-lg shadow-slate-200/50 dark:shadow-none bg-white dark:bg-slate-800/50">
+              <Card className="border-0 shadow-lg shadow-slate-200/50 dark:shadow-none bg-card/50">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2 text-lg">
                     <Lightbulb className="h-5 w-5 text-amber-500" />
@@ -351,7 +351,7 @@ export default function ResearchDetailPage({ params }: { params: Promise<{ id: s
                     {request.recommendations.map((rec, i) => (
                       <li key={i} className="flex items-start gap-3">
                         <div className="h-5 w-5 rounded border-2 border-amber-300 dark:border-amber-600 flex-shrink-0 mt-0.5" />
-                        <span className="text-slate-700 dark:text-slate-300">{rec}</span>
+                        <span className="text-foreground dark:text-muted-foreground">{rec}</span>
                       </li>
                     ))}
                   </ul>
@@ -361,7 +361,7 @@ export default function ResearchDetailPage({ params }: { params: Promise<{ id: s
 
             {/* Sources */}
             {request.sources && request.sources.length > 0 && (
-              <Card className="border-0 shadow-lg shadow-slate-200/50 dark:shadow-none bg-white dark:bg-slate-800/50">
+              <Card className="border-0 shadow-lg shadow-slate-200/50 dark:shadow-none bg-card/50">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2 text-lg">
                     <LinkIcon className="h-5 w-5 text-blue-500" />
@@ -371,7 +371,7 @@ export default function ResearchDetailPage({ params }: { params: Promise<{ id: s
                 <CardContent>
                   <ul className="space-y-3">
                     {request.sources.map((source, i) => (
-                      <li key={i} className="p-3 rounded-lg bg-slate-50 dark:bg-slate-700/50">
+                      <li key={i} className="p-3 rounded-lg bg-muted dark:bg-muted/50">
                         <a
                           href={source.url}
                           target="_blank"
@@ -382,7 +382,7 @@ export default function ResearchDetailPage({ params }: { params: Promise<{ id: s
                           <ExternalLink className="h-3 w-3" />
                         </a>
                         {source.snippet && (
-                          <p className="text-sm text-slate-600 dark:text-slate-400 mt-1 line-clamp-2">
+                          <p className="text-sm text-muted-foreground dark:text-muted-foreground mt-1 line-clamp-2">
                             {source.snippet}
                           </p>
                         )}
@@ -400,19 +400,19 @@ export default function ResearchDetailPage({ params }: { params: Promise<{ id: s
 
             {/* Original Request */}
             {request.context && (
-              <Card className="border-0 shadow-lg shadow-slate-200/50 dark:shadow-none bg-white dark:bg-slate-800/50">
+              <Card className="border-0 shadow-lg shadow-slate-200/50 dark:shadow-none bg-card/50">
                 <CardHeader>
                   <CardTitle className="text-lg">Original Request</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-slate-700 dark:text-slate-300 mb-4">{request.context}</p>
+                  <p className="text-foreground dark:text-muted-foreground mb-4">{request.context}</p>
                   {request.specific_questions && request.specific_questions.length > 0 && (
                     <div>
-                      <p className="text-sm font-medium text-slate-500 dark:text-slate-400 mb-2">Specific Questions:</p>
+                      <p className="text-sm font-medium text-muted-foreground dark:text-muted-foreground mb-2">Specific Questions:</p>
                       <ul className="space-y-1">
                         {request.specific_questions.map((q, i) => (
-                          <li key={i} className="text-sm text-slate-600 dark:text-slate-400 flex items-start gap-2">
-                            <span className="text-slate-400">•</span>
+                          <li key={i} className="text-sm text-muted-foreground dark:text-muted-foreground flex items-start gap-2">
+                            <span className="text-muted-foreground">•</span>
                             {q}
                           </li>
                         ))}
@@ -428,14 +428,14 @@ export default function ResearchDetailPage({ params }: { params: Promise<{ id: s
           <div className="space-y-6">
             {/* Confidence Score */}
             {request.confidence_score && (
-              <Card className="border-0 shadow-lg shadow-slate-200/50 dark:shadow-none bg-white dark:bg-slate-800/50">
+              <Card className="border-0 shadow-lg shadow-slate-200/50 dark:shadow-none bg-card/50">
                 <CardContent className="py-6">
                   <div className="text-center">
                     <div className="text-4xl font-bold text-cyan-600 dark:text-cyan-400 mb-1">
                       {Math.round(request.confidence_score * 100)}%
                     </div>
-                    <p className="text-sm text-slate-500 dark:text-slate-400">Confidence Score</p>
-                    <div className="mt-3 h-2 bg-slate-100 dark:bg-slate-700 rounded-full overflow-hidden">
+                    <p className="text-sm text-muted-foreground dark:text-muted-foreground">Confidence Score</p>
+                    <div className="mt-3 h-2 bg-muted dark:bg-muted rounded-full overflow-hidden">
                       <div
                         className="h-full bg-gradient-to-r from-cyan-500 to-blue-500 rounded-full"
                         style={{ width: `${request.confidence_score * 100}%` }}
@@ -448,7 +448,7 @@ export default function ResearchDetailPage({ params }: { params: Promise<{ id: s
 
             {/* Linked Contact */}
             {request.contacts && (
-              <Card className="border-0 shadow-lg shadow-slate-200/50 dark:shadow-none bg-white dark:bg-slate-800/50">
+              <Card className="border-0 shadow-lg shadow-slate-200/50 dark:shadow-none bg-card/50">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2 text-base">
                     <User className="h-4 w-4 text-pink-500" />
@@ -457,13 +457,13 @@ export default function ResearchDetailPage({ params }: { params: Promise<{ id: s
                 </CardHeader>
                 <CardContent>
                   <div className="flex items-center gap-3">
-                    <div className="h-10 w-10 rounded-full bg-slate-100 dark:bg-slate-700 flex items-center justify-center">
-                      <User className="h-5 w-5 text-slate-500" />
+                    <div className="h-10 w-10 rounded-full bg-muted dark:bg-muted flex items-center justify-center">
+                      <User className="h-5 w-5 text-muted-foreground" />
                     </div>
                     <div>
-                      <p className="font-medium text-slate-900 dark:text-white">{request.contacts.name}</p>
+                      <p className="font-medium text-foreground dark:text-white">{request.contacts.name}</p>
                       {request.contacts.company && (
-                        <p className="text-sm text-slate-500 dark:text-slate-400">{request.contacts.company}</p>
+                        <p className="text-sm text-muted-foreground dark:text-muted-foreground">{request.contacts.company}</p>
                       )}
                     </div>
                   </div>
@@ -483,33 +483,33 @@ export default function ResearchDetailPage({ params }: { params: Promise<{ id: s
             )}
 
             {/* Processing Timeline */}
-            <Card className="border-0 shadow-lg shadow-slate-200/50 dark:shadow-none bg-white dark:bg-slate-800/50">
+            <Card className="border-0 shadow-lg shadow-slate-200/50 dark:shadow-none bg-card/50">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-base">
-                  <Clock className="h-4 w-4 text-slate-500" />
+                  <Clock className="h-4 w-4 text-muted-foreground" />
                   Timeline
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-3 text-sm">
                   <div className="flex justify-between">
-                    <span className="text-slate-500 dark:text-slate-400">Requested</span>
-                    <span className="text-slate-700 dark:text-slate-300">
+                    <span className="text-muted-foreground dark:text-muted-foreground">Requested</span>
+                    <span className="text-foreground dark:text-muted-foreground">
                       {new Date(request.created_at).toLocaleString()}
                     </span>
                   </div>
                   {request.processing_started_at && (
                     <div className="flex justify-between">
-                      <span className="text-slate-500 dark:text-slate-400">Started</span>
-                      <span className="text-slate-700 dark:text-slate-300">
+                      <span className="text-muted-foreground dark:text-muted-foreground">Started</span>
+                      <span className="text-foreground dark:text-muted-foreground">
                         {new Date(request.processing_started_at).toLocaleString()}
                       </span>
                     </div>
                   )}
                   {request.processing_completed_at && (
                     <div className="flex justify-between">
-                      <span className="text-slate-500 dark:text-slate-400">Completed</span>
-                      <span className="text-slate-700 dark:text-slate-300">
+                      <span className="text-muted-foreground dark:text-muted-foreground">Completed</span>
+                      <span className="text-foreground dark:text-muted-foreground">
                         {new Date(request.processing_completed_at).toLocaleString()}
                       </span>
                     </div>
@@ -519,16 +519,16 @@ export default function ResearchDetailPage({ params }: { params: Promise<{ id: s
             </Card>
 
             {/* Priority */}
-            <Card className="border-0 shadow-lg shadow-slate-200/50 dark:shadow-none bg-white dark:bg-slate-800/50">
+            <Card className="border-0 shadow-lg shadow-slate-200/50 dark:shadow-none bg-card/50">
               <CardContent className="py-4">
                 <div className="flex items-center justify-between">
-                  <span className="text-sm text-slate-500 dark:text-slate-400">Priority</span>
+                  <span className="text-sm text-muted-foreground dark:text-muted-foreground">Priority</span>
                   <Badge className={cn(
                     "capitalize",
                     request.priority === "urgent" && "bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400",
                     request.priority === "high" && "bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400",
                     request.priority === "medium" && "bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400",
-                    request.priority === "low" && "bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400"
+                    request.priority === "low" && "bg-muted text-muted-foreground dark:bg-card dark:text-muted-foreground"
                   )}>
                     {request.priority}
                   </Badge>
@@ -545,7 +545,7 @@ export default function ResearchDetailPage({ params }: { params: Promise<{ id: s
           <DialogHeader>
             <DialogTitle>Delete Research Request</DialogTitle>
           </DialogHeader>
-          <p className="text-slate-600 dark:text-slate-400">
+          <p className="text-muted-foreground dark:text-muted-foreground">
             Are you sure you want to delete this research request? This action cannot be undone.
           </p>
           <DialogFooter>

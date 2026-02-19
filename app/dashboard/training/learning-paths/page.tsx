@@ -378,7 +378,7 @@ export default function LearningPathsPage() {
           </div>
 
           {/* Overall Progress */}
-          <div className="bg-white/80 dark:bg-card/80 backdrop-blur-sm rounded-xl p-6 border border-purple-200 dark:border-purple-800">
+          <div className="bg-card/80 dark:bg-card/80 backdrop-blur-sm rounded-xl p-6 border border-purple-200 dark:border-purple-800">
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-3">
                 <Trophy className="h-6 w-6 text-yellow-600 dark:text-yellow-400" />
@@ -554,16 +554,16 @@ export default function LearningPathsPage() {
                 Complete learning paths to earn badges and showcase your expertise. Track your journey from beginner to AI automation expert!
               </p>
               <div className="flex gap-3">
-                <div className="h-12 w-12 rounded-full bg-white dark:bg-card border-2 border-yellow-400 flex items-center justify-center">
+                <div className="h-12 w-12 rounded-full bg-card border-2 border-yellow-400 flex items-center justify-center">
                   <Star className="h-6 w-6 text-yellow-500" />
                 </div>
-                <div className="h-12 w-12 rounded-full bg-white dark:bg-card border-2 border-border dark:border-border flex items-center justify-center opacity-40">
+                <div className="h-12 w-12 rounded-full bg-card border-2 border-border dark:border-border flex items-center justify-center opacity-40">
                   <Trophy className="h-6 w-6 text-muted-foreground" />
                 </div>
-                <div className="h-12 w-12 rounded-full bg-white dark:bg-card border-2 border-border dark:border-border flex items-center justify-center opacity-40">
+                <div className="h-12 w-12 rounded-full bg-card border-2 border-border dark:border-border flex items-center justify-center opacity-40">
                   <Target className="h-6 w-6 text-muted-foreground" />
                 </div>
-                <div className="h-12 w-12 rounded-full bg-white dark:bg-card border-2 border-border dark:border-border flex items-center justify-center opacity-40">
+                <div className="h-12 w-12 rounded-full bg-card border-2 border-border dark:border-border flex items-center justify-center opacity-40">
                   <Rocket className="h-6 w-6 text-muted-foreground" />
                 </div>
               </div>

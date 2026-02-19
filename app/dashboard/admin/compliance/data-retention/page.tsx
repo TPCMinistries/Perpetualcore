@@ -135,8 +135,8 @@ export default function DataRetentionPage() {
               <CardContent className="p-6">
                 <div className="flex items-start justify-between gap-4">
                   <div className="flex items-start gap-3">
-                    <div className="p-2 bg-slate-100 rounded-lg">
-                      <Icon className="h-5 w-5 text-slate-600" />
+                    <div className="p-2 bg-muted rounded-lg">
+                      <Icon className="h-5 w-5 text-muted-foreground" />
                     </div>
                     <div>
                       <h3 className="font-medium">{label}</h3>

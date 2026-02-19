@@ -155,14 +155,14 @@ interface ActivityItem {
 }
 
 const priorityColors: Record<string, string> = {
-  low: "bg-slate-500",
+  low: "bg-muted0",
   medium: "bg-blue-500",
   high: "bg-orange-500",
   urgent: "bg-red-500",
 };
 
 const priorityTextColors: Record<string, string> = {
-  low: "text-slate-500",
+  low: "text-muted-foreground",
   medium: "text-blue-500",
   high: "text-orange-500",
   urgent: "text-red-500",
@@ -739,7 +739,7 @@ export default function ProjectDetailPage() {
                               "flex-shrink-0",
                               task.status === "done" || task.status === "completed"
                                 ? "text-green-500"
-                                : "text-slate-400 hover:text-green-500"
+                                : "text-muted-foreground hover:text-green-500"
                             )}
                           >
                             {task.status === "done" || task.status === "completed" ? (
@@ -889,7 +889,7 @@ export default function ProjectDetailPage() {
                         >
                           <button
                             onClick={() => toggleTaskStatus(task)}
-                            className="flex-shrink-0 text-slate-400 hover:text-green-500"
+                            className="flex-shrink-0 text-muted-foreground hover:text-green-500"
                           >
                             <Circle className="h-5 w-5" />
                           </button>
@@ -937,7 +937,7 @@ export default function ProjectDetailPage() {
                           >
                             <button
                               onClick={() => toggleTaskStatus(task)}
-                              className="flex-shrink-0 text-green-500 hover:text-slate-400"
+                              className="flex-shrink-0 text-green-500 hover:text-muted-foreground"
                             >
                               <CheckCircle2 className="h-5 w-5" />
                             </button>

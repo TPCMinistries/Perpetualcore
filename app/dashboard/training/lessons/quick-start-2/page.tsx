@@ -20,28 +20,28 @@ export default function QuickStartLesson2() {
           <div className="bg-purple-50 dark:bg-purple-950/20 border border-purple-200 dark:border-purple-800 rounded-lg p-6">
             <h4 className="font-semibold mb-3">Popular Agent Templates</h4>
             <div className="grid md:grid-cols-2 gap-3">
-              <div className="p-3 bg-white dark:bg-card rounded border">
+              <div className="p-3 bg-card rounded border">
                 <div className="flex items-center gap-2 mb-1">
                   <Bot className="h-4 w-4 text-purple-600" />
                   <span className="font-medium text-sm">Customer Support Agent</span>
                 </div>
                 <p className="text-xs text-muted-foreground">Handles 80% of common customer questions automatically</p>
               </div>
-              <div className="p-3 bg-white dark:bg-card rounded border">
+              <div className="p-3 bg-card rounded border">
                 <div className="flex items-center gap-2 mb-1">
                   <Bot className="h-4 w-4 text-purple-600" />
                   <span className="font-medium text-sm">Email Organizer</span>
                 </div>
                 <p className="text-xs text-muted-foreground">Sorts, labels, and prioritizes your inbox</p>
               </div>
-              <div className="p-3 bg-white dark:bg-card rounded border">
+              <div className="p-3 bg-card rounded border">
                 <div className="flex items-center gap-2 mb-1">
                   <Bot className="h-4 w-4 text-purple-600" />
                   <span className="font-medium text-sm">Meeting Notes Agent</span>
                 </div>
                 <p className="text-xs text-muted-foreground">Summarizes meetings and extracts action items</p>
               </div>
-              <div className="p-3 bg-white dark:bg-card rounded border">
+              <div className="p-3 bg-card rounded border">
                 <div className="flex items-center gap-2 mb-1">
                   <Bot className="h-4 w-4 text-purple-600" />
                   <span className="font-medium text-sm">Content Moderator</span>
@@ -110,7 +110,7 @@ export default function QuickStartLesson2() {
           </p>
 
           <div className="space-y-4">
-            <div className="p-4 bg-white dark:bg-card rounded-lg border">
+            <div className="p-4 bg-card rounded-lg border">
               <div className="flex items-center gap-2 mb-2">
                 <Settings className="h-5 w-5 text-muted-foreground" />
                 <h4 className="font-semibold">Agent Name</h4>
@@ -123,7 +123,7 @@ export default function QuickStartLesson2() {
               </div>
             </div>
 
-            <div className="p-4 bg-white dark:bg-card rounded-lg border">
+            <div className="p-4 bg-card rounded-lg border">
               <div className="flex items-center gap-2 mb-2">
                 <Settings className="h-5 w-5 text-muted-foreground" />
                 <h4 className="font-semibold">Personality</h4>
@@ -136,7 +136,7 @@ export default function QuickStartLesson2() {
               </div>
             </div>
 
-            <div className="p-4 bg-white dark:bg-card rounded-lg border">
+            <div className="p-4 bg-card rounded-lg border">
               <div className="flex items-center gap-2 mb-2">
                 <Settings className="h-5 w-5 text-muted-foreground" />
                 <h4 className="font-semibold">Tools & Capabilities</h4>
@@ -173,19 +173,19 @@ export default function QuickStartLesson2() {
               Try These Test Prompts
             </h4>
             <div className="space-y-3">
-              <div className="p-3 bg-white dark:bg-card rounded border">
+              <div className="p-3 bg-card rounded border">
                 <p className="text-sm font-medium mb-1">Test 1: Basic Question</p>
                 <div className="p-2 bg-muted dark:bg-background rounded">
                   <code className="text-xs">"What are your business hours?"</code>
                 </div>
               </div>
-              <div className="p-3 bg-white dark:bg-card rounded border">
+              <div className="p-3 bg-card rounded border">
                 <p className="text-sm font-medium mb-1">Test 2: Product Inquiry</p>
                 <div className="p-2 bg-muted dark:bg-background rounded">
                   <code className="text-xs">"Tell me about your pricing plans"</code>
                 </div>
               </div>
-              <div className="p-3 bg-white dark:bg-card rounded border">
+              <div className="p-3 bg-card rounded border">
                 <p className="text-sm font-medium mb-1">Test 3: Troubleshooting</p>
                 <div className="p-2 bg-muted dark:bg-background rounded">
                   <code className="text-xs">"I can't log in to my account"</code>
@@ -267,7 +267,7 @@ export default function QuickStartLesson2() {
           <li className="list-disc">Flag important messages for your attention</li>
         </ul>
 
-        <div className="flex items-start gap-3 p-4 bg-white dark:bg-card rounded-lg border">
+        <div className="flex items-start gap-3 p-4 bg-card rounded-lg border">
           <CheckCircle2 className="h-5 w-5 text-green-600 flex-shrink-0 mt-0.5" />
           <div>
             <p className="font-medium text-sm mb-1">Success Criteria</p>

@@ -423,7 +423,7 @@ export default function AgentsPage() {
                     variant="ghost"
                     size="sm"
                     onClick={() => setShowAISuggestions(false)}
-                    className="text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200"
+                    className="text-muted-foreground hover:text-foreground dark:text-muted-foreground dark:hover:text-slate-200"
                   >
                     <XCircle className="h-4 w-4" />
                   </Button>
@@ -490,7 +490,7 @@ export default function AgentsPage() {
                 <div className="flex flex-col lg:flex-row gap-4">
                   {/* Search */}
                   <div className="flex-1 relative">
-                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-slate-400" />
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                     <Input
                       placeholder="Search agents by name or description..."
                       value={searchQuery}
@@ -599,7 +599,7 @@ export default function AgentsPage() {
             <Card className="border-border bg-background p-12">
               <div className="text-center">
                 <div className="h-16 w-16 rounded-2xl bg-muted flex items-center justify-center mx-auto mb-4">
-                  <Search className="h-8 w-8 text-slate-400" />
+                  <Search className="h-8 w-8 text-muted-foreground" />
                 </div>
                 <h3 className="text-lg font-semibold mb-2 text-foreground">
                   No agents found
@@ -653,7 +653,7 @@ export default function AgentsPage() {
                                 className={`h-7 w-7 ${
                                   agent.enabled
                                     ? "text-violet-600 dark:text-violet-400"
-                                    : "text-slate-400 dark:text-slate-600"
+                                    : "text-muted-foreground dark:text-muted-foreground"
                                 }`}
                               />
                             </div>

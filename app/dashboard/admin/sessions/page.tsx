@@ -99,7 +99,7 @@ export default function SessionManagementPage() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between">
             <CardTitle className="text-lg flex items-center gap-2">
-              <Shield className="h-5 w-5 text-slate-500" />
+              <Shield className="h-5 w-5 text-muted-foreground" />
               Session Policy
             </CardTitle>
             <Button size="sm" onClick={saveSessionPolicy} disabled={savingPolicy}>
@@ -186,7 +186,7 @@ export default function SessionManagementPage() {
       <Card>
         <CardHeader>
           <CardTitle className="text-lg flex items-center gap-2">
-            <Users className="h-5 w-5 text-slate-500" />
+            <Users className="h-5 w-5 text-muted-foreground" />
             Active Sessions ({sessions.length})
           </CardTitle>
         </CardHeader>

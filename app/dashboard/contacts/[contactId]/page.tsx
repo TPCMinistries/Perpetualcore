@@ -2173,7 +2173,7 @@ export default function ContactDetailPage() {
                       insights.relationship_health === "good" && "bg-green-100 text-green-700",
                       insights.relationship_health === "needs_attention" && "bg-amber-100 text-amber-700",
                       insights.relationship_health === "at_risk" && "bg-red-100 text-red-700",
-                      insights.relationship_health === "new" && "bg-slate-100 text-slate-700"
+                      insights.relationship_health === "new" && "bg-muted text-foreground"
                     )}
                   >
                     {insights.relationship_health?.replace("_", " ")}

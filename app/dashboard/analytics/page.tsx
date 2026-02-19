@@ -242,7 +242,7 @@ export default function AnalyticsPage() {
                     className="flex-1 flex flex-col items-center gap-1 group relative"
                   >
                     {/* Tooltip */}
-                    <div className="hidden group-hover:block absolute bottom-full mb-2 bg-slate-900 dark:bg-slate-800 text-white text-xs rounded-lg py-2 px-3 whitespace-nowrap z-10 shadow-lg border border-slate-700">
+                    <div className="hidden group-hover:block absolute bottom-full mb-2 bg-slate-900 dark:bg-card text-white text-xs rounded-lg py-2 px-3 whitespace-nowrap z-10 shadow-lg border border-slate-700">
                       <div className="font-semibold mb-1">
                         {new Date(day.date).toLocaleDateString("en-US", {
                           month: "short",
@@ -501,7 +501,7 @@ export default function AnalyticsPage() {
                         </div>
                       ) : (
                         <div className="h-8 w-8 rounded-full bg-muted flex items-center justify-center">
-                          <XCircle className="h-5 w-5 text-slate-400" />
+                          <XCircle className="h-5 w-5 text-muted-foreground" />
                         </div>
                       )}
                     </div>

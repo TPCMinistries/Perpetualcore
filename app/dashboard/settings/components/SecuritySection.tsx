@@ -199,14 +199,14 @@ export function SecuritySection({
 
   return (
     <>
-      <Card className="border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-xl p-8">
+      <Card className="border-border dark:border-border bg-card shadow-xl p-8">
         <div className="flex items-center gap-3 mb-6">
-          <div className="h-10 w-10 rounded-lg bg-slate-900 dark:bg-slate-100 flex items-center justify-center">
-            <Shield className="h-5 w-5 text-white dark:text-slate-900" />
+          <div className="h-10 w-10 rounded-lg bg-slate-900 dark:bg-muted flex items-center justify-center">
+            <Shield className="h-5 w-5 text-white dark:text-foreground" />
           </div>
           <div>
-            <h2 className="text-xl font-semibold text-slate-900 dark:text-white">Security & Privacy</h2>
-            <p className="text-sm text-slate-600 dark:text-slate-400">Protect your account and data</p>
+            <h2 className="text-xl font-semibold text-foreground dark:text-white">Security & Privacy</h2>
+            <p className="text-sm text-muted-foreground dark:text-muted-foreground">Protect your account and data</p>
           </div>
         </div>
 
@@ -228,12 +228,12 @@ export function SecuritySection({
               onClick={() => setApiKeysDialogOpen(true)}
             >
               <div className="flex items-center gap-4 w-full">
-                <div className="h-10 w-10 rounded-lg bg-slate-100 dark:bg-slate-800 flex items-center justify-center">
-                  <Key className="h-5 w-5 text-slate-900 dark:text-slate-100" />
+                <div className="h-10 w-10 rounded-lg bg-muted dark:bg-card flex items-center justify-center">
+                  <Key className="h-5 w-5 text-foreground dark:text-foreground" />
                 </div>
                 <div className="flex-1 text-left">
-                  <p className="font-medium text-slate-900 dark:text-white">API Keys</p>
-                  <p className="text-sm text-slate-600 dark:text-slate-400">Manage your API access tokens</p>
+                  <p className="font-medium text-foreground dark:text-white">API Keys</p>
+                  <p className="text-sm text-muted-foreground dark:text-muted-foreground">Manage your API access tokens</p>
                 </div>
               </div>
             </Button>
@@ -245,18 +245,18 @@ export function SecuritySection({
               disabled={isExportingData}
             >
               <div className="flex items-center gap-4 w-full">
-                <div className="h-10 w-10 rounded-lg bg-slate-100 dark:bg-slate-800 flex items-center justify-center">
+                <div className="h-10 w-10 rounded-lg bg-muted dark:bg-card flex items-center justify-center">
                   {isExportingData ? (
-                    <Loader2 className="h-5 w-5 text-slate-900 dark:text-slate-100 animate-spin" />
+                    <Loader2 className="h-5 w-5 text-foreground dark:text-foreground animate-spin" />
                   ) : (
-                    <Download className="h-5 w-5 text-slate-900 dark:text-slate-100" />
+                    <Download className="h-5 w-5 text-foreground dark:text-foreground" />
                   )}
                 </div>
                 <div className="flex-1 text-left">
-                  <p className="font-medium text-slate-900 dark:text-white">
+                  <p className="font-medium text-foreground dark:text-white">
                     {isExportingData ? "Exporting..." : "Export Data"}
                   </p>
-                  <p className="text-sm text-slate-600 dark:text-slate-400">Download all your data</p>
+                  <p className="text-sm text-muted-foreground dark:text-muted-foreground">Download all your data</p>
                 </div>
               </div>
             </Button>
@@ -294,7 +294,7 @@ export function SecuritySection({
                 onChange={(e) => setPasswordForm({ ...passwordForm, confirmPassword: e.target.value })}
               />
             </div>
-            <p className="text-xs text-slate-500 dark:text-slate-400">
+            <p className="text-xs text-muted-foreground dark:text-muted-foreground">
               Password must be at least 8 characters long
             </p>
           </div>
@@ -311,7 +311,7 @@ export function SecuritySection({
             <Button
               onClick={handleChangePassword}
               disabled={isChangingPassword}
-              className="bg-slate-900 dark:bg-slate-100 hover:bg-slate-800 dark:hover:bg-slate-200 text-white dark:text-slate-900"
+              className="bg-slate-900 dark:bg-muted hover:bg-slate-800 dark:hover:bg-muted text-white dark:text-foreground"
             >
               {isChangingPassword ? (
                 <>
@@ -352,7 +352,7 @@ export function SecuritySection({
                   Your new API key (copy it now - you won't see it again):
                 </p>
                 <div className="flex items-center gap-2">
-                  <code className="flex-1 p-2 bg-white dark:bg-slate-800 rounded border text-sm font-mono overflow-hidden text-ellipsis">
+                  <code className="flex-1 p-2 bg-card rounded border text-sm font-mono overflow-hidden text-ellipsis">
                     {newlyCreatedKey}
                   </code>
                   <Button
@@ -367,7 +367,7 @@ export function SecuritySection({
             )}
 
             <div className="space-y-4 p-4 border rounded-lg">
-              <h4 className="font-medium text-slate-900 dark:text-white">Create New API Key</h4>
+              <h4 className="font-medium text-foreground dark:text-white">Create New API Key</h4>
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="keyName">Name</Label>
@@ -413,9 +413,9 @@ export function SecuritySection({
             </div>
 
             <div className="space-y-3">
-              <h4 className="font-medium text-slate-900 dark:text-white">Your API Keys</h4>
+              <h4 className="font-medium text-foreground dark:text-white">Your API Keys</h4>
               {apiKeys.length === 0 ? (
-                <p className="text-sm text-slate-500 dark:text-slate-400 text-center py-4">
+                <p className="text-sm text-muted-foreground dark:text-muted-foreground text-center py-4">
                   No API keys yet. Create one above to get started.
                 </p>
               ) : (
@@ -426,8 +426,8 @@ export function SecuritySection({
                       className="flex items-center justify-between p-3 border rounded-lg"
                     >
                       <div>
-                        <p className="font-medium text-slate-900 dark:text-white">{key.name}</p>
-                        <p className="text-sm text-slate-500 dark:text-slate-400">
+                        <p className="font-medium text-foreground dark:text-white">{key.name}</p>
+                        <p className="text-sm text-muted-foreground dark:text-muted-foreground">
                           {key.key_preview} • Created {new Date(key.created_at).toLocaleDateString()}
                           {key.expires_at && ` • Expires ${new Date(key.expires_at).toLocaleDateString()}`}
                         </p>

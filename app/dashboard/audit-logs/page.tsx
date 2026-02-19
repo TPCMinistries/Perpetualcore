@@ -73,9 +73,9 @@ const statusConfig: Record<
 
 const severityConfig: Record<string, { bg: string; text: string; border: string }> = {
   debug: {
-    bg: "bg-slate-100 dark:bg-slate-800",
-    text: "text-slate-600 dark:text-slate-400",
-    border: "border-slate-200 dark:border-slate-700",
+    bg: "bg-muted dark:bg-card",
+    text: "text-muted-foreground dark:text-muted-foreground",
+    border: "border-border dark:border-border",
   },
   info: {
     bg: "bg-blue-100 dark:bg-blue-900/30",
@@ -247,16 +247,16 @@ export default function AuditLogsPage() {
       <DashboardPageWrapper>
         <div className="space-y-6">
           {/* Header Skeleton */}
-          <div className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-8">
+          <div className="rounded-2xl border border-border dark:border-border bg-card p-8">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-4">
-                <div className="h-14 w-14 rounded-xl bg-slate-200 dark:bg-slate-700 animate-pulse" />
+                <div className="h-14 w-14 rounded-xl bg-muted dark:bg-muted animate-pulse" />
                 <div className="space-y-2">
-                  <div className="h-8 w-40 bg-slate-200 dark:bg-slate-700 rounded animate-pulse" />
-                  <div className="h-4 w-64 bg-slate-100 dark:bg-slate-800 rounded animate-pulse" />
+                  <div className="h-8 w-40 bg-muted dark:bg-muted rounded animate-pulse" />
+                  <div className="h-4 w-64 bg-muted dark:bg-card rounded animate-pulse" />
                 </div>
               </div>
-              <div className="h-10 w-28 bg-slate-200 dark:bg-slate-700 rounded-lg animate-pulse" />
+              <div className="h-10 w-28 bg-muted dark:bg-muted rounded-lg animate-pulse" />
             </div>
           </div>
           {/* Stats Skeleton */}
@@ -264,25 +264,25 @@ export default function AuditLogsPage() {
             {[...Array(4)].map((_, i) => (
               <Card
                 key={i}
-                className="border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900"
+                className="border-border dark:border-border bg-card"
               >
                 <CardContent className="p-6">
                   <div className="space-y-2">
-                    <div className="h-4 w-20 bg-slate-200 dark:bg-slate-700 rounded animate-pulse" />
-                    <div className="h-8 w-16 bg-slate-100 dark:bg-slate-800 rounded animate-pulse" />
+                    <div className="h-4 w-20 bg-muted dark:bg-muted rounded animate-pulse" />
+                    <div className="h-8 w-16 bg-muted dark:bg-card rounded animate-pulse" />
                   </div>
                 </CardContent>
               </Card>
             ))}
           </div>
           {/* Table Skeleton */}
-          <Card className="border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900">
+          <Card className="border-border dark:border-border bg-card">
             <CardContent className="p-6">
               <div className="space-y-3">
                 {[...Array(5)].map((_, i) => (
                   <div
                     key={i}
-                    className="h-16 bg-slate-100 dark:bg-slate-800 rounded-lg animate-pulse"
+                    className="h-16 bg-muted dark:bg-card rounded-lg animate-pulse"
                   />
                 ))}
               </div>
@@ -313,7 +313,7 @@ export default function AuditLogsPage() {
           actions={
             <Button
               variant="outline"
-              className="border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800"
+              className="border-border dark:border-border hover:bg-muted dark:hover:bg-muted"
               onClick={() => setExportOpen(true)}
             >
               <Download className="h-4 w-4 mr-2" />
@@ -376,13 +376,13 @@ export default function AuditLogsPage() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4, delay: 0.1 }}
         >
-          <Card className="border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 overflow-hidden">
-            <CardHeader className="border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/30 py-4">
+          <Card className="border-border dark:border-border bg-card overflow-hidden">
+            <CardHeader className="border-b border-border dark:border-border bg-muted/50 dark:bg-card/30 py-4">
               <div className="flex items-center gap-3">
                 <div className="p-2 rounded-lg bg-violet-100 dark:bg-violet-900/30">
                   <Filter className="h-4 w-4 text-violet-600 dark:text-violet-400" />
                 </div>
-                <CardTitle className="text-base font-semibold text-slate-900 dark:text-slate-100">
+                <CardTitle className="text-base font-semibold text-foreground dark:text-foreground">
                   Filters
                 </CardTitle>
               </div>
@@ -392,18 +392,18 @@ export default function AuditLogsPage() {
                 <div className="space-y-2">
                   <Label
                     htmlFor="search"
-                    className="text-slate-700 dark:text-slate-300"
+                    className="text-foreground dark:text-muted-foreground"
                   >
                     Search
                   </Label>
                   <div className="relative">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                     <Input
                       id="search"
                       placeholder="Search description, actor..."
                       value={filters.search}
                       onChange={(e) => handleFilterChange("search", e.target.value)}
-                      className="pl-10 border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800"
+                      className="pl-10 border-border dark:border-border bg-muted dark:bg-card"
                     />
                   </div>
                 </div>
@@ -411,7 +411,7 @@ export default function AuditLogsPage() {
                 <div className="space-y-2">
                   <Label
                     htmlFor="event_category"
-                    className="text-slate-700 dark:text-slate-300"
+                    className="text-foreground dark:text-muted-foreground"
                   >
                     Category
                   </Label>
@@ -421,7 +421,7 @@ export default function AuditLogsPage() {
                       handleFilterChange("event_category", value)
                     }
                   >
-                    <SelectTrigger className="border-slate-200 dark:border-slate-700">
+                    <SelectTrigger className="border-border dark:border-border">
                       <SelectValue placeholder="All categories" />
                     </SelectTrigger>
                     <SelectContent>
@@ -443,7 +443,7 @@ export default function AuditLogsPage() {
                 <div className="space-y-2">
                   <Label
                     htmlFor="status"
-                    className="text-slate-700 dark:text-slate-300"
+                    className="text-foreground dark:text-muted-foreground"
                   >
                     Status
                   </Label>
@@ -451,7 +451,7 @@ export default function AuditLogsPage() {
                     value={filters.status}
                     onValueChange={(value) => handleFilterChange("status", value)}
                   >
-                    <SelectTrigger className="border-slate-200 dark:border-slate-700">
+                    <SelectTrigger className="border-border dark:border-border">
                       <SelectValue placeholder="All statuses" />
                     </SelectTrigger>
                     <SelectContent>
@@ -475,7 +475,7 @@ export default function AuditLogsPage() {
                 <Button
                   onClick={clearFilters}
                   variant="outline"
-                  className="border-slate-200 dark:border-slate-700"
+                  className="border-border dark:border-border"
                 >
                   Clear Filters
                 </Button>
@@ -490,14 +490,14 @@ export default function AuditLogsPage() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4, delay: 0.2 }}
         >
-          <Card className="border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 overflow-hidden">
-            <CardHeader className="border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/30">
+          <Card className="border-border dark:border-border bg-card overflow-hidden">
+            <CardHeader className="border-b border-border dark:border-border bg-muted/50 dark:bg-card/30">
               <div className="flex items-center justify-between">
                 <div>
-                  <CardTitle className="text-slate-900 dark:text-slate-100">
+                  <CardTitle className="text-foreground dark:text-foreground">
                     Audit Trail
                   </CardTitle>
-                  <CardDescription className="text-slate-500 dark:text-slate-400">
+                  <CardDescription className="text-muted-foreground dark:text-muted-foreground">
                     Showing {logs.length} of {totalRecords.toLocaleString()} events
                   </CardDescription>
                 </div>
@@ -516,7 +516,7 @@ export default function AuditLogsPage() {
                       variants={cardVariants}
                       initial="hidden"
                       animate="visible"
-                      className="flex items-start justify-between p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 hover:border-violet-300 dark:hover:border-violet-700 hover:shadow-md transition-all cursor-pointer"
+                      className="flex items-start justify-between p-4 rounded-xl border border-border dark:border-border bg-card hover:border-violet-300 dark:hover:border-violet-700 hover:shadow-md transition-all cursor-pointer"
                       onClick={() => {
                         setSelectedLogId(log.id);
                         setDetailOpen(true);
@@ -530,22 +530,22 @@ export default function AuditLogsPage() {
                         </div>
                         <div className="flex-1 space-y-1.5">
                           <div className="flex items-center gap-2 flex-wrap">
-                            <p className="font-medium text-slate-900 dark:text-slate-100">
+                            <p className="font-medium text-foreground dark:text-foreground">
                               {log.description}
                             </p>
                             {getStatusBadge(log.status)}
                             {getSeverityBadge(log.severity)}
                           </div>
-                          <div className="flex items-center gap-3 text-sm text-slate-500 dark:text-slate-400">
+                          <div className="flex items-center gap-3 text-sm text-muted-foreground dark:text-muted-foreground">
                             <span className="flex items-center gap-1">
                               <Users className="h-3 w-3" />
                               {log.actor_email || log.actor_name || "System"}
                             </span>
-                            <span className="text-slate-300 dark:text-slate-600">
+                            <span className="text-muted-foreground dark:text-muted-foreground">
                               |
                             </span>
                             <span className="capitalize">{log.event_action}</span>
-                            <span className="text-slate-300 dark:text-slate-600">
+                            <span className="text-muted-foreground dark:text-muted-foreground">
                               |
                             </span>
                             <span className="capitalize">
@@ -553,7 +553,7 @@ export default function AuditLogsPage() {
                             </span>
                             {log.resource_type && (
                               <>
-                                <span className="text-slate-300 dark:text-slate-600">
+                                <span className="text-muted-foreground dark:text-muted-foreground">
                                   |
                                 </span>
                                 <span className="capitalize">
@@ -568,7 +568,7 @@ export default function AuditLogsPage() {
                             </p>
                           )}
                         </div>
-                        <div className="text-sm text-slate-500 dark:text-slate-400 whitespace-nowrap flex items-center gap-1">
+                        <div className="text-sm text-muted-foreground dark:text-muted-foreground whitespace-nowrap flex items-center gap-1">
                           <Clock className="h-3 w-3" />
                           {formatDistanceToNow(new Date(log.created_at), {
                             addSuffix: true,
@@ -591,8 +591,8 @@ export default function AuditLogsPage() {
 
               {/* Pagination */}
               {totalPages > 1 && (
-                <div className="flex items-center justify-between mt-6 pt-6 border-t border-slate-200 dark:border-slate-800">
-                  <p className="text-sm text-slate-500 dark:text-slate-400">
+                <div className="flex items-center justify-between mt-6 pt-6 border-t border-border dark:border-border">
+                  <p className="text-sm text-muted-foreground dark:text-muted-foreground">
                     Page {page} of {totalPages}
                   </p>
                   <div className="flex gap-2">
@@ -601,7 +601,7 @@ export default function AuditLogsPage() {
                       size="sm"
                       onClick={() => setPage(page - 1)}
                       disabled={page === 1}
-                      className="border-slate-200 dark:border-slate-700"
+                      className="border-border dark:border-border"
                     >
                       <ChevronLeft className="h-4 w-4 mr-1" />
                       Previous
@@ -611,7 +611,7 @@ export default function AuditLogsPage() {
                       size="sm"
                       onClick={() => setPage(page + 1)}
                       disabled={page === totalPages}
-                      className="border-slate-200 dark:border-slate-700"
+                      className="border-border dark:border-border"
                     >
                       Next
                       <ChevronRight className="h-4 w-4 ml-1" />

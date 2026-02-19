@@ -188,24 +188,24 @@ export default function SupportPage() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="border border-slate-200 dark:border-slate-800 rounded-xl p-8 bg-white dark:bg-slate-900">
+      <div className="border border-border dark:border-border rounded-xl p-8 bg-card">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <div className="h-12 w-12 rounded-lg bg-slate-900 dark:bg-slate-100 flex items-center justify-center">
-              <Headphones className="h-6 w-6 text-white dark:text-slate-900" />
+            <div className="h-12 w-12 rounded-lg bg-slate-900 dark:bg-muted flex items-center justify-center">
+              <Headphones className="h-6 w-6 text-white dark:text-foreground" />
             </div>
             <div>
-              <h1 className="text-3xl font-semibold text-slate-900 dark:text-slate-100">
+              <h1 className="text-3xl font-semibold text-foreground dark:text-foreground">
                 Support Center
               </h1>
-              <p className="text-slate-600 dark:text-slate-400 mt-1">
+              <p className="text-muted-foreground dark:text-muted-foreground mt-1">
                 Get help from our support team
               </p>
             </div>
           </div>
           <Dialog open={createDialogOpen} onOpenChange={setCreateDialogOpen}>
             <DialogTrigger asChild>
-              <Button className="bg-slate-900 dark:bg-slate-100 hover:bg-slate-800 dark:hover:bg-slate-200 text-white dark:text-slate-900">
+              <Button className="bg-slate-900 dark:bg-muted hover:bg-slate-800 dark:hover:bg-muted text-white dark:text-foreground">
                 <Plus className="h-4 w-4 mr-2" />
                 New Ticket
               </Button>
@@ -307,18 +307,18 @@ export default function SupportPage() {
 
       {/* Quick Contact Options */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <Card className="hover:shadow-lg transition-shadow border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900">
+        <Card className="hover:shadow-lg transition-shadow border-border dark:border-border bg-card">
           <CardContent className="p-6">
             <div className="flex items-start gap-4">
               <div className="h-12 w-12 rounded-lg bg-blue-50 dark:bg-blue-950/30 flex items-center justify-center flex-shrink-0">
                 <MessageSquare className="h-6 w-6 text-blue-600 dark:text-blue-400" />
               </div>
               <div>
-                <h3 className="font-semibold mb-1 text-slate-900 dark:text-slate-100">Live Chat</h3>
-                <p className="text-sm text-slate-600 dark:text-slate-400 mb-3">
+                <h3 className="font-semibold mb-1 text-foreground dark:text-foreground">Live Chat</h3>
+                <p className="text-sm text-muted-foreground dark:text-muted-foreground mb-3">
                   Chat with our support team in real-time
                 </p>
-                <Button variant="outline" size="sm" className="border-slate-200 dark:border-slate-800">
+                <Button variant="outline" size="sm" className="border-border dark:border-border">
                   Start Chat
                 </Button>
               </div>
@@ -326,18 +326,18 @@ export default function SupportPage() {
           </CardContent>
         </Card>
 
-        <Card className="hover:shadow-lg transition-shadow border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900">
+        <Card className="hover:shadow-lg transition-shadow border-border dark:border-border bg-card">
           <CardContent className="p-6">
             <div className="flex items-start gap-4">
               <div className="h-12 w-12 rounded-lg bg-purple-50 dark:bg-purple-950/30 flex items-center justify-center flex-shrink-0">
                 <Mail className="h-6 w-6 text-purple-600 dark:text-purple-400" />
               </div>
               <div>
-                <h3 className="font-semibold mb-1 text-slate-900 dark:text-slate-100">Email Support</h3>
-                <p className="text-sm text-slate-600 dark:text-slate-400 mb-3">
+                <h3 className="font-semibold mb-1 text-foreground dark:text-foreground">Email Support</h3>
+                <p className="text-sm text-muted-foreground dark:text-muted-foreground mb-3">
                   Response within 24 hours
                 </p>
-                <Button variant="outline" size="sm" asChild className="border-slate-200 dark:border-slate-800">
+                <Button variant="outline" size="sm" asChild className="border-border dark:border-border">
                   <a href="mailto:support@aios-platform.com">
                     Send Email
                   </a>
@@ -347,18 +347,18 @@ export default function SupportPage() {
           </CardContent>
         </Card>
 
-        <Card className="hover:shadow-lg transition-shadow border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900">
+        <Card className="hover:shadow-lg transition-shadow border-border dark:border-border bg-card">
           <CardContent className="p-6">
             <div className="flex items-start gap-4">
               <div className="h-12 w-12 rounded-lg bg-green-50 dark:bg-green-950/30 flex items-center justify-center flex-shrink-0">
                 <Phone className="h-6 w-6 text-green-600 dark:text-green-400" />
               </div>
               <div>
-                <h3 className="font-semibold mb-1 text-slate-900 dark:text-slate-100">Phone Support</h3>
-                <p className="text-sm text-slate-600 dark:text-slate-400 mb-3">
+                <h3 className="font-semibold mb-1 text-foreground dark:text-foreground">Phone Support</h3>
+                <p className="text-sm text-muted-foreground dark:text-muted-foreground mb-3">
                   Enterprise customers only
                 </p>
-                <Button variant="outline" size="sm" className="border-slate-200 dark:border-slate-800">
+                <Button variant="outline" size="sm" className="border-border dark:border-border">
                   Schedule Call
                 </Button>
               </div>
@@ -368,7 +368,7 @@ export default function SupportPage() {
       </div>
 
       {/* Filters */}
-      <Card className="border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900">
+      <Card className="border-border dark:border-border bg-card">
         <CardContent className="p-4">
           <div className="flex flex-col sm:flex-row gap-4">
             <div className="relative flex-1">
@@ -377,11 +377,11 @@ export default function SupportPage() {
                 placeholder="Search tickets..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-9 border-slate-200 dark:border-slate-800"
+                className="pl-9 border-border dark:border-border"
               />
             </div>
             <Select value={filterStatus} onValueChange={setFilterStatus}>
-              <SelectTrigger className="w-full sm:w-48 border-slate-200 dark:border-slate-800">
+              <SelectTrigger className="w-full sm:w-48 border-border dark:border-border">
                 <Filter className="h-4 w-4 mr-2" />
                 <SelectValue placeholder="All statuses" />
               </SelectTrigger>
@@ -398,10 +398,10 @@ export default function SupportPage() {
       </Card>
 
       {/* Tickets List */}
-      <Card className="border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900">
+      <Card className="border-border dark:border-border bg-card">
         <CardHeader>
-          <CardTitle className="text-slate-900 dark:text-slate-100">Your Support Tickets</CardTitle>
-          <CardDescription className="text-slate-600 dark:text-slate-400">
+          <CardTitle className="text-foreground dark:text-foreground">Your Support Tickets</CardTitle>
+          <CardDescription className="text-muted-foreground dark:text-muted-foreground">
             {filteredTickets.length === 0
               ? "No tickets found"
               : `Showing ${filteredTickets.length} ticket${filteredTickets.length !== 1 ? "s" : ""}`}
@@ -422,7 +422,7 @@ export default function SupportPage() {
               {!searchQuery && !filterStatus && (
                 <Button
                   onClick={() => setCreateDialogOpen(true)}
-                  className="bg-slate-900 dark:bg-slate-100 hover:bg-slate-800 dark:hover:bg-slate-200 text-white dark:text-slate-900"
+                  className="bg-slate-900 dark:bg-muted hover:bg-slate-800 dark:hover:bg-muted text-white dark:text-foreground"
                 >
                   <Plus className="h-4 w-4 mr-2" />
                   Create Your First Ticket
@@ -437,18 +437,18 @@ export default function SupportPage() {
                   href={`/dashboard/support/${ticket.id}`}
                   className="block"
                 >
-                  <div className="flex items-start justify-between p-4 rounded-lg border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
+                  <div className="flex items-start justify-between p-4 rounded-lg border border-border dark:border-border hover:bg-muted dark:hover:bg-muted transition-colors">
                     <div className="flex items-start gap-4 flex-1">
                       <div className="h-10 w-10 rounded-lg bg-blue-50 dark:bg-blue-950/30 flex items-center justify-center flex-shrink-0">
                         <MessageCircle className="h-5 w-5 text-blue-600 dark:text-blue-400" />
                       </div>
                       <div className="flex-1">
                         <div className="flex items-center gap-2 mb-1">
-                          <h3 className="font-medium text-slate-900 dark:text-slate-100">{ticket.subject}</h3>
+                          <h3 className="font-medium text-foreground dark:text-foreground">{ticket.subject}</h3>
                           {getStatusBadge(ticket.status)}
                           {getPriorityBadge(ticket.priority)}
                         </div>
-                        <p className="text-sm text-slate-600 dark:text-slate-400 line-clamp-2 mb-2">
+                        <p className="text-sm text-muted-foreground dark:text-muted-foreground line-clamp-2 mb-2">
                           {ticket.description}
                         </p>
                         <div className="flex items-center gap-4 text-xs text-muted-foreground">
@@ -481,22 +481,22 @@ export default function SupportPage() {
       </Card>
 
       {/* Help Resources */}
-      <Card className="border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900">
+      <Card className="border-border dark:border-border bg-card">
         <CardHeader>
-          <CardTitle className="text-slate-900 dark:text-slate-100">Help Resources</CardTitle>
-          <CardDescription className="text-slate-600 dark:text-slate-400">
+          <CardTitle className="text-foreground dark:text-foreground">Help Resources</CardTitle>
+          <CardDescription className="text-muted-foreground dark:text-muted-foreground">
             Find answers before creating a ticket
           </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="grid gap-4 sm:grid-cols-2">
-            <Button variant="outline" className="h-auto p-4 justify-start border-slate-200 dark:border-slate-800" asChild>
+            <Button variant="outline" className="h-auto p-4 justify-start border-border dark:border-border" asChild>
               <Link href="/dashboard/help">
                 <div className="flex items-start gap-3">
                   <MessageCircle className="h-5 w-5 text-blue-600 dark:text-blue-400 flex-shrink-0 mt-0.5" />
                   <div className="text-left">
-                    <p className="font-medium mb-1 text-slate-900 dark:text-slate-100">Knowledge Base</p>
-                    <p className="text-xs text-slate-600 dark:text-slate-400">
+                    <p className="font-medium mb-1 text-foreground dark:text-foreground">Knowledge Base</p>
+                    <p className="text-xs text-muted-foreground dark:text-muted-foreground">
                       Browse articles and guides
                     </p>
                   </div>
@@ -504,13 +504,13 @@ export default function SupportPage() {
               </Link>
             </Button>
 
-            <Button variant="outline" className="h-auto p-4 justify-start border-slate-200 dark:border-slate-800" asChild>
+            <Button variant="outline" className="h-auto p-4 justify-start border-border dark:border-border" asChild>
               <a href="https://community.aios-platform.com" target="_blank" rel="noopener noreferrer">
                 <div className="flex items-start gap-3">
                   <MessageSquare className="h-5 w-5 text-purple-600 dark:text-purple-400 flex-shrink-0 mt-0.5" />
                   <div className="text-left">
-                    <p className="font-medium mb-1 text-slate-900 dark:text-slate-100">Community Forum</p>
-                    <p className="text-xs text-slate-600 dark:text-slate-400">
+                    <p className="font-medium mb-1 text-foreground dark:text-foreground">Community Forum</p>
+                    <p className="text-xs text-muted-foreground dark:text-muted-foreground">
                       Ask questions and share tips
                     </p>
                   </div>

@@ -29,7 +29,7 @@ export default function AdvancedAutomation1() {
           </div>
 
           <div className="grid md:grid-cols-2 gap-4">
-            <div className="p-4 bg-white dark:bg-card rounded-lg border">
+            <div className="p-4 bg-card rounded-lg border">
               <h4 className="font-semibold text-sm mb-2">Template Workflows</h4>
               <ul className="text-xs text-muted-foreground space-y-1">
                 <li>✓ Quick to set up</li>
@@ -38,7 +38,7 @@ export default function AdvancedAutomation1() {
                 <li>✗ Limited customization</li>
               </ul>
             </div>
-            <div className="p-4 bg-white dark:bg-card rounded-lg border">
+            <div className="p-4 bg-card rounded-lg border">
               <h4 className="font-semibold text-sm mb-2">Custom Workflows</h4>
               <ul className="text-xs text-muted-foreground space-y-1">
                 <li>✓ Fully customizable</li>
@@ -72,15 +72,15 @@ export default function AdvancedAutomation1() {
                 The event that starts your workflow execution.
               </p>
               <div className="grid md:grid-cols-3 gap-3">
-                <div className="p-3 bg-white dark:bg-card rounded border">
+                <div className="p-3 bg-card rounded border">
                   <p className="font-medium text-xs mb-1">⏰ Schedule</p>
                   <p className="text-xs text-muted-foreground">Time-based triggers (cron)</p>
                 </div>
-                <div className="p-3 bg-white dark:bg-card rounded border">
+                <div className="p-3 bg-card rounded border">
                   <p className="font-medium text-xs mb-1">🔔 Event</p>
                   <p className="text-xs text-muted-foreground">App events (new email, task created)</p>
                 </div>
-                <div className="p-3 bg-white dark:bg-card rounded border">
+                <div className="p-3 bg-card rounded border">
                   <p className="font-medium text-xs mb-1">🌐 Webhook</p>
                   <p className="text-xs text-muted-foreground">External API calls</p>
                 </div>
@@ -98,19 +98,19 @@ export default function AdvancedAutomation1() {
                 The actions your workflow performs, executed in sequence.
               </p>
               <div className="space-y-2">
-                <div className="p-3 bg-white dark:bg-card rounded border">
+                <div className="p-3 bg-card rounded border">
                   <p className="font-medium text-xs mb-1">Data Operations</p>
                   <p className="text-xs text-muted-foreground">Fetch, transform, filter, aggregate data</p>
                 </div>
-                <div className="p-3 bg-white dark:bg-card rounded border">
+                <div className="p-3 bg-card rounded border">
                   <p className="font-medium text-xs mb-1">Integration Actions</p>
                   <p className="text-xs text-muted-foreground">Send email, create task, post to Slack</p>
                 </div>
-                <div className="p-3 bg-white dark:bg-card rounded border">
+                <div className="p-3 bg-card rounded border">
                   <p className="font-medium text-xs mb-1">AI Operations</p>
                   <p className="text-xs text-muted-foreground">Analyze text, generate content, classify data</p>
                 </div>
-                <div className="p-3 bg-white dark:bg-card rounded border">
+                <div className="p-3 bg-card rounded border">
                   <p className="font-medium text-xs mb-1">Control Flow</p>
                   <p className="text-xs text-muted-foreground">Conditions, loops, delays</p>
                 </div>
@@ -127,7 +127,7 @@ export default function AdvancedAutomation1() {
               <p className="text-sm text-muted-foreground mb-3">
                 The results of your workflow - data to store, messages to send, or actions to take.
               </p>
-              <div className="p-3 bg-white dark:bg-card rounded border">
+              <div className="p-3 bg-card rounded border">
                 <p className="text-xs text-muted-foreground">
                   Outputs can be returned as JSON data, sent as notifications, stored in databases, or passed to other workflows.
                 </p>
@@ -219,7 +219,7 @@ export default function AdvancedAutomation1() {
           <div className="bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-800 rounded-lg p-6">
             <h4 className="font-semibold mb-3">Data Flow Example</h4>
             <div className="space-y-3">
-              <div className="p-4 bg-white dark:bg-card rounded-lg border">
+              <div className="p-4 bg-card rounded-lg border">
                 <div className="flex items-center gap-2 mb-2">
                   <div className="px-2 py-1 bg-blue-100 dark:bg-blue-900/30 rounded text-xs font-medium">Step 1</div>
                   <p className="font-medium text-sm">Fetch Emails</p>
@@ -234,7 +234,7 @@ export default function AdvancedAutomation1() {
                 <div className="text-blue-600">↓ Data flows down</div>
               </div>
 
-              <div className="p-4 bg-white dark:bg-card rounded-lg border">
+              <div className="p-4 bg-card rounded-lg border">
                 <div className="flex items-center gap-2 mb-2">
                   <div className="px-2 py-1 bg-green-100 dark:bg-green-900/30 rounded text-xs font-medium">Step 2</div>
                   <p className="font-medium text-sm">AI: Summarize</p>
@@ -249,7 +249,7 @@ export default function AdvancedAutomation1() {
                 <div className="text-blue-600">↓ Data flows down</div>
               </div>
 
-              <div className="p-4 bg-white dark:bg-card rounded-lg border">
+              <div className="p-4 bg-card rounded-lg border">
                 <div className="flex items-center gap-2 mb-2">
                   <div className="px-2 py-1 bg-purple-100 dark:bg-purple-900/30 rounded text-xs font-medium">Step 3</div>
                   <p className="font-medium text-sm">Send Slack Message</p>
@@ -263,7 +263,7 @@ export default function AdvancedAutomation1() {
           </div>
 
           <div className="space-y-3">
-            <div className="p-4 bg-white dark:bg-card rounded-lg border">
+            <div className="p-4 bg-card rounded-lg border">
               <h4 className="font-semibold text-sm mb-2">Referencing Previous Steps</h4>
               <p className="text-xs text-muted-foreground mb-2">
                 Use the syntax <code className="bg-muted dark:bg-muted px-1 rounded">{"{{stepName.outputField}}"}</code> to reference data from previous steps:
@@ -275,7 +275,7 @@ export default function AdvancedAutomation1() {
               </ul>
             </div>
 
-            <div className="p-4 bg-white dark:bg-card rounded-lg border">
+            <div className="p-4 bg-card rounded-lg border">
               <h4 className="font-semibold text-sm mb-2">Data Transformations</h4>
               <p className="text-xs text-muted-foreground mb-2">
                 Built-in functions let you transform data on the fly:
@@ -474,7 +474,7 @@ return result;`}
           </p>
         </div>
 
-        <div className="flex items-start gap-3 p-4 bg-white dark:bg-card rounded-lg border">
+        <div className="flex items-start gap-3 p-4 bg-card rounded-lg border">
           <div className="h-5 w-5 rounded-full bg-green-600 text-white flex items-center justify-center text-xs font-semibold flex-shrink-0 mt-0.5">
             ✓
           </div>

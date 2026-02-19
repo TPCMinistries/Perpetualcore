@@ -70,7 +70,6 @@ export default function ConversationPage() {
   useEffect(() => {
     const supabase = createClient();
 
-    console.log(`[Team Chat] Setting up realtime subscription for conversation ${conversationId}`);
 
     // Subscribe to INSERT events on conversation_messages for this conversation
     const channel = supabase
@@ -84,7 +83,6 @@ export default function ConversationPage() {
           filter: `conversation_id=eq.${conversationId}`,
         },
         async (payload) => {
-          console.log('[Team Chat] New message received via realtime:', payload.new);
 
           // Fetch the complete message with profile data
           const { data: newMessageData, error } = await supabase
@@ -119,12 +117,10 @@ export default function ConversationPage() {
         }
       )
       .subscribe((status) => {
-        console.log('[Team Chat] Realtime subscription status:', status);
       });
 
     // Cleanup subscription on unmount
     return () => {
-      console.log(`[Team Chat] Cleaning up realtime subscription for conversation ${conversationId}`);
       supabase.removeChannel(channel);
     };
   }, [conversationId]);

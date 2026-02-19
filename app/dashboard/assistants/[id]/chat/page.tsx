@@ -222,7 +222,7 @@ export default function AssistantChatPage() {
   return (
     <div className="flex flex-col h-[calc(100vh-8rem)]">
       {/* Header */}
-      <div className="border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 p-4">
+      <div className="border-b border-border dark:border-border bg-card dark:bg-background p-4">
         <Button variant="ghost" size="sm" asChild className="mb-2">
           <Link href="/dashboard/assistants">
             <ArrowLeft className="mr-2 h-4 w-4" />
@@ -234,8 +234,8 @@ export default function AssistantChatPage() {
             {assistant.avatar_emoji}
           </div>
           <div className="flex-1">
-            <h1 className="text-2xl font-semibold text-slate-900 dark:text-slate-100">{assistant.name}</h1>
-            <p className="text-sm text-slate-600 dark:text-slate-400">
+            <h1 className="text-2xl font-semibold text-foreground dark:text-foreground">{assistant.name}</h1>
+            <p className="text-sm text-muted-foreground dark:text-muted-foreground">
               {assistant.description}
             </p>
           </div>
@@ -269,7 +269,7 @@ export default function AssistantChatPage() {
               className={`max-w-[80%] p-4 ${
                 message.role === "user"
                   ? "bg-gradient-to-br from-blue-600 to-blue-700 text-white border-blue-600"
-                  : "bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800"
+                  : "bg-card border-border dark:border-border"
               }`}
             >
               <div className="whitespace-pre-wrap break-words">
@@ -277,8 +277,8 @@ export default function AssistantChatPage() {
               </div>
 
               {message.role === "assistant" && (
-                <div className="flex items-center gap-1 mt-2 pt-2 border-t border-slate-200 dark:border-slate-700">
-                  <span className="text-xs text-slate-600 dark:text-slate-400 mr-2">
+                <div className="flex items-center gap-1 mt-2 pt-2 border-t border-border dark:border-border">
+                  <span className="text-xs text-muted-foreground dark:text-muted-foreground mr-2">
                     Rate this response:
                   </span>
                   {[1, 2, 3, 4, 5].map((rating) => (
@@ -291,7 +291,7 @@ export default function AssistantChatPage() {
                         className={`h-3 w-3 ${
                           message.rating && message.rating >= rating
                             ? "fill-yellow-500 text-yellow-500"
-                            : "text-slate-400 dark:text-slate-600"
+                            : "text-muted-foreground dark:text-muted-foreground"
                         }`}
                       />
                     </button>
@@ -302,7 +302,7 @@ export default function AssistantChatPage() {
               <div className={`text-xs mt-2 ${
                 message.role === "user"
                   ? "text-blue-100"
-                  : "text-slate-500 dark:text-slate-500"
+                  : "text-muted-foreground dark:text-muted-foreground"
               }`}>
                 {new Date(message.created_at).toLocaleTimeString()}
               </div>
@@ -329,14 +329,14 @@ export default function AssistantChatPage() {
       </div>
 
       {/* Input */}
-      <div className="border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 p-4">
+      <div className="border-t border-border dark:border-border bg-card dark:bg-background p-4">
         <div className="flex gap-2">
           <Textarea
             value={inputMessage}
             onChange={(e) => setInputMessage(e.target.value)}
             onKeyDown={handleKeyDown}
             placeholder={`Message ${assistant.name}...`}
-            className="resize-none border-slate-200 dark:border-slate-800 focus:border-blue-500 dark:focus:border-blue-500"
+            className="resize-none border-border dark:border-border focus:border-blue-500 dark:focus:border-blue-500"
             rows={3}
             disabled={sending}
           />
@@ -353,7 +353,7 @@ export default function AssistantChatPage() {
             )}
           </Button>
         </div>
-        <p className="text-xs text-slate-600 dark:text-slate-400 mt-2">
+        <p className="text-xs text-muted-foreground dark:text-muted-foreground mt-2">
           Press Enter to send, Shift+Enter for new line
         </p>
       </div>

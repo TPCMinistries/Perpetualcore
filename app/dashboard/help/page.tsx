@@ -146,15 +146,15 @@ export default function HelpCenterPage() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="border border-slate-200 dark:border-slate-800 rounded-xl p-8 bg-white dark:bg-slate-900">
+      <div className="border border-border dark:border-border rounded-xl p-8 bg-card">
         <div className="text-center max-w-3xl mx-auto">
-          <div className="h-16 w-16 rounded-2xl bg-slate-900 dark:bg-slate-100 flex items-center justify-center mx-auto mb-4">
-            <HelpCircle className="h-8 w-8 text-white dark:text-slate-900" />
+          <div className="h-16 w-16 rounded-2xl bg-slate-900 dark:bg-muted flex items-center justify-center mx-auto mb-4">
+            <HelpCircle className="h-8 w-8 text-white dark:text-foreground" />
           </div>
-          <h1 className="text-4xl font-semibold text-slate-900 dark:text-slate-100 mb-4">
+          <h1 className="text-4xl font-semibold text-foreground dark:text-foreground mb-4">
             How can we help you?
           </h1>
-          <p className="text-slate-600 dark:text-slate-400 mb-6">
+          <p className="text-muted-foreground dark:text-muted-foreground mb-6">
             Search our knowledge base or browse categories below
           </p>
 
@@ -165,7 +165,7 @@ export default function HelpCenterPage() {
               placeholder="Search for help articles, guides, and tutorials..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-12 h-14 text-lg bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800"
+              className="pl-12 h-14 text-lg bg-card border-border dark:border-border"
             />
           </div>
         </div>
@@ -180,18 +180,18 @@ export default function HelpCenterPage() {
             target={link.external ? "_blank" : undefined}
             className="group"
           >
-            <Card className="h-full hover:shadow-lg transition-all duration-300 border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900">
+            <Card className="h-full hover:shadow-lg transition-all duration-300 border-border dark:border-border bg-card">
               <CardContent className="p-6">
                 <div className="flex items-start gap-4">
                   <div className="h-12 w-12 rounded-lg bg-blue-50 dark:bg-blue-950/30 flex items-center justify-center flex-shrink-0">
                     <link.icon className="h-6 w-6 text-blue-600 dark:text-blue-400" />
                   </div>
                   <div className="flex-1">
-                    <h3 className="font-semibold mb-1 text-slate-900 dark:text-slate-100 transition-colors flex items-center gap-2">
+                    <h3 className="font-semibold mb-1 text-foreground dark:text-foreground transition-colors flex items-center gap-2">
                       {link.title}
                       {link.external && <ExternalLink className="h-3 w-3" />}
                     </h3>
-                    <p className="text-sm text-slate-600 dark:text-slate-400">{link.description}</p>
+                    <p className="text-sm text-muted-foreground dark:text-muted-foreground">{link.description}</p>
                   </div>
                 </div>
               </CardContent>
@@ -206,19 +206,19 @@ export default function HelpCenterPage() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {categories.map((category) => (
             <Link key={category.title} href={`/help/${category.title.toLowerCase().replace(/ & /g, '-').replace(/ /g, '-')}`} className="group">
-              <Card className="h-full hover:shadow-lg transition-all duration-300 border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900">
+              <Card className="h-full hover:shadow-lg transition-all duration-300 border-border dark:border-border bg-card">
                 <CardHeader>
                   <div className="flex items-start justify-between mb-2">
                     <div className={`h-12 w-12 rounded-xl ${category.color} flex items-center justify-center`}>
                       <category.icon className="h-6 w-6" />
                     </div>
-                    <Badge variant="secondary" className="border-slate-200 dark:border-slate-700">{category.count} articles</Badge>
+                    <Badge variant="secondary" className="border-border dark:border-border">{category.count} articles</Badge>
                   </div>
-                  <CardTitle className="text-slate-900 dark:text-slate-100 transition-colors flex items-center justify-between">
+                  <CardTitle className="text-foreground dark:text-foreground transition-colors flex items-center justify-between">
                     {category.title}
-                    <ChevronRight className="h-5 w-5 opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all text-slate-400" />
+                    <ChevronRight className="h-5 w-5 opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all text-muted-foreground" />
                   </CardTitle>
-                  <CardDescription className="text-slate-600 dark:text-slate-400">{category.description}</CardDescription>
+                  <CardDescription className="text-muted-foreground dark:text-muted-foreground">{category.description}</CardDescription>
                 </CardHeader>
               </Card>
             </Link>
@@ -228,28 +228,28 @@ export default function HelpCenterPage() {
 
       {/* Popular Articles */}
       <div>
-        <h2 className="text-2xl font-semibold mb-4 text-slate-900 dark:text-slate-100">Popular Articles</h2>
-        <Card className="border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900">
+        <h2 className="text-2xl font-semibold mb-4 text-foreground dark:text-foreground">Popular Articles</h2>
+        <Card className="border-border dark:border-border bg-card">
           <CardContent className="p-6">
             <div className="space-y-4">
               {popularArticles.map((article, index) => (
                 <Link
                   key={article.title}
                   href={article.url}
-                  className="flex items-start gap-4 p-4 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors group"
+                  className="flex items-start gap-4 p-4 rounded-lg hover:bg-muted dark:hover:bg-muted transition-colors group"
                 >
                   <div className="h-10 w-10 rounded-lg bg-blue-50 dark:bg-blue-950/30 flex items-center justify-center flex-shrink-0">
                     <article.icon className="h-5 w-5 text-blue-600 dark:text-blue-400" />
                   </div>
                   <div className="flex-1">
                     <div className="flex items-start justify-between gap-4 mb-1">
-                      <h3 className="font-semibold text-slate-900 dark:text-slate-100 transition-colors">
+                      <h3 className="font-semibold text-foreground dark:text-foreground transition-colors">
                         {article.title}
                       </h3>
-                      <ChevronRight className="h-5 w-5 text-slate-400 group-hover:translate-x-1 transition-all flex-shrink-0" />
+                      <ChevronRight className="h-5 w-5 text-muted-foreground group-hover:translate-x-1 transition-all flex-shrink-0" />
                     </div>
-                    <div className="flex items-center gap-3 text-sm text-slate-600 dark:text-slate-400">
-                      <Badge variant="outline" className="text-xs border-slate-200 dark:border-slate-700">{article.category}</Badge>
+                    <div className="flex items-center gap-3 text-sm text-muted-foreground dark:text-muted-foreground">
+                      <Badge variant="outline" className="text-xs border-border dark:border-border">{article.category}</Badge>
                       <span>{article.readTime}</span>
                     </div>
                   </div>
@@ -261,21 +261,21 @@ export default function HelpCenterPage() {
       </div>
 
       {/* Still Need Help */}
-      <Card className="border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900">
+      <Card className="border-border dark:border-border bg-card">
         <CardContent className="p-8 text-center">
           <MessageCircle className="h-12 w-12 mx-auto mb-4 text-blue-600 dark:text-blue-400" />
-          <h3 className="text-xl font-semibold mb-2 text-slate-900 dark:text-slate-100">Still need help?</h3>
-          <p className="text-slate-600 dark:text-slate-400 mb-6">
+          <h3 className="text-xl font-semibold mb-2 text-foreground dark:text-foreground">Still need help?</h3>
+          <p className="text-muted-foreground dark:text-muted-foreground mb-6">
             Can't find what you're looking for? Our support team is here to help!
           </p>
           <div className="flex justify-center gap-4">
-            <Button asChild className="bg-slate-900 dark:bg-slate-100 hover:bg-slate-800 dark:hover:bg-slate-200 text-white dark:text-slate-900">
+            <Button asChild className="bg-slate-900 dark:bg-muted hover:bg-slate-800 dark:hover:bg-muted text-white dark:text-foreground">
               <Link href="/dashboard/support">
                 <MessageCircle className="mr-2 h-4 w-4" />
                 Contact Support
               </Link>
             </Button>
-            <Button variant="outline" asChild className="border-slate-200 dark:border-slate-800">
+            <Button variant="outline" asChild className="border-border dark:border-border">
               <Link href="https://community.aios-platform.com" target="_blank">
                 Join Community
                 <ExternalLink className="ml-2 h-4 w-4" />

@@ -234,7 +234,7 @@ export default function VoiceMemosPage() {
       case "failed":
         return <AlertCircle className="h-4 w-4 text-red-500" />;
       default:
-        return <Clock className="h-4 w-4 text-slate-400" />;
+        return <Clock className="h-4 w-4 text-muted-foreground" />;
     }
   };
 
@@ -243,10 +243,10 @@ export default function VoiceMemosPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100">
+          <h1 className="text-2xl font-bold text-foreground dark:text-foreground">
             Voice Memos
           </h1>
-          <p className="text-sm text-slate-600 dark:text-slate-400">
+          <p className="text-sm text-muted-foreground dark:text-muted-foreground">
             Record, transcribe, and let AI extract insights from your voice
             notes
           </p>
@@ -286,7 +286,7 @@ export default function VoiceMemosPage() {
               <div className="h-20 w-20 rounded-full bg-violet-100 dark:bg-violet-900/30 flex items-center justify-center">
                 <Headphones className="h-10 w-10 text-violet-600 dark:text-violet-400" />
               </div>
-              <p className="text-sm text-slate-500">
+              <p className="text-sm text-muted-foreground">
                 Click to record a new voice memo
               </p>
               <Button
@@ -304,7 +304,7 @@ export default function VoiceMemosPage() {
 
       {/* Search */}
       <div className="relative">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
         <Input
           placeholder="Search memos by title, transcript, or summary..."
           className="pl-10"
@@ -316,7 +316,7 @@ export default function VoiceMemosPage() {
       {/* Memo List */}
       {loading ? (
         <div className="flex items-center justify-center py-12">
-          <Loader2 className="h-6 w-6 animate-spin text-slate-400" />
+          <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
         </div>
       ) : memos.length === 0 ? (
         <EmptyState
@@ -351,11 +351,11 @@ export default function VoiceMemosPage() {
                   >
                     <div className="flex items-center gap-2 mb-1">
                       {statusIcon(memo.processing_status)}
-                      <h3 className="font-medium text-slate-900 dark:text-slate-100 truncate">
+                      <h3 className="font-medium text-foreground dark:text-foreground truncate">
                         {memo.title || "Untitled Memo"}
                       </h3>
                     </div>
-                    <div className="flex items-center gap-3 text-xs text-slate-500">
+                    <div className="flex items-center gap-3 text-xs text-muted-foreground">
                       <span className="flex items-center gap-1">
                         <Clock className="h-3 w-3" />
                         {formatDuration(memo.duration_seconds)}
@@ -372,7 +372,7 @@ export default function VoiceMemosPage() {
                       ))}
                     </div>
                     {memo.ai_summary && (
-                      <p className="text-sm text-slate-600 dark:text-slate-400 mt-2 line-clamp-2">
+                      <p className="text-sm text-muted-foreground dark:text-muted-foreground mt-2 line-clamp-2">
                         {memo.ai_summary}
                       </p>
                     )}
@@ -429,16 +429,16 @@ export default function VoiceMemosPage() {
                     {/* Transcript */}
                     {memo.transcript ? (
                       <div>
-                        <h4 className="text-sm font-medium text-slate-700 dark:text-slate-300 mb-1 flex items-center gap-1">
+                        <h4 className="text-sm font-medium text-foreground dark:text-muted-foreground mb-1 flex items-center gap-1">
                           <FileText className="h-3.5 w-3.5" />
                           Transcript
                         </h4>
-                        <p className="text-sm text-slate-600 dark:text-slate-400 whitespace-pre-wrap">
+                        <p className="text-sm text-muted-foreground dark:text-muted-foreground whitespace-pre-wrap">
                           {memo.transcript}
                         </p>
                       </div>
                     ) : (
-                      <p className="text-sm text-slate-400 italic">
+                      <p className="text-sm text-muted-foreground italic">
                         {memo.processing_status === "processing"
                           ? "Transcription in progress..."
                           : memo.processing_status === "failed"
@@ -455,14 +455,14 @@ export default function VoiceMemosPage() {
                           AI Insights
                         </h4>
 
-                        <p className="text-sm text-slate-700 dark:text-slate-300">
+                        <p className="text-sm text-foreground dark:text-muted-foreground">
                           {memo.ai_summary}
                         </p>
 
                         {memo.ai_extracted_tasks &&
                           memo.ai_extracted_tasks.length > 0 && (
                             <div>
-                              <p className="text-xs font-medium text-slate-500 mb-1">
+                              <p className="text-xs font-medium text-muted-foreground mb-1">
                                 Extracted Tasks:
                               </p>
                               <ul className="space-y-1">
@@ -491,7 +491,7 @@ export default function VoiceMemosPage() {
                         {memo.ai_extracted_contacts &&
                           memo.ai_extracted_contacts.length > 0 && (
                             <div>
-                              <p className="text-xs font-medium text-slate-500 mb-1">
+                              <p className="text-xs font-medium text-muted-foreground mb-1">
                                 People Mentioned:
                               </p>
                               <div className="flex gap-1 flex-wrap">
@@ -509,7 +509,7 @@ export default function VoiceMemosPage() {
                           )}
 
                         {memo.ai_suggested_meeting_type && (
-                          <p className="text-xs text-slate-500">
+                          <p className="text-xs text-muted-foreground">
                             Suggested type:{" "}
                             <span className="font-medium">
                               {memo.ai_suggested_meeting_type.replace(/_/g, " ")}

@@ -38,16 +38,16 @@ export default async function AutomationPage() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="border border-slate-200 dark:border-slate-800 rounded-xl p-8 bg-white dark:bg-slate-900">
+      <div className="border border-border dark:border-border rounded-xl p-8 bg-card">
         <div className="flex items-center gap-4">
           <div className="h-12 w-12 rounded-lg bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center">
             <Workflow className="h-6 w-6 text-white" />
           </div>
           <div>
-            <h1 className="text-3xl font-semibold text-slate-900 dark:text-slate-100">
+            <h1 className="text-3xl font-semibold text-foreground dark:text-foreground">
               Automation Hub
             </h1>
-            <p className="text-slate-600 dark:text-slate-400 mt-1">
+            <p className="text-muted-foreground dark:text-muted-foreground mt-1">
               All your automations in one place - bots, workflows, n8n, and scheduled jobs
             </p>
           </div>

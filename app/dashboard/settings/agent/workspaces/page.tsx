@@ -288,11 +288,11 @@ export default function WorkspacesPage() {
       {workspaces.length === 0 ? (
         <Card>
           <CardContent className="py-12 text-center">
-            <Layers className="h-12 w-12 mx-auto text-slate-400 mb-4" />
-            <h3 className="text-lg font-medium text-slate-900 dark:text-white mb-2">
+            <Layers className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+            <h3 className="text-lg font-medium text-foreground dark:text-white mb-2">
               No workspaces yet
             </h3>
-            <p className="text-slate-600 dark:text-slate-400 mb-6">
+            <p className="text-muted-foreground dark:text-muted-foreground mb-6">
               Create your first workspace to route channel messages to different agent personas.
             </p>
             <Button onClick={openCreateDialog}>
@@ -335,7 +335,7 @@ export default function WorkspacesPage() {
                 <div className="space-y-3 mb-4">
                   {ws.persona.display_name && (
                     <div className="text-sm">
-                      <span className="text-slate-500 dark:text-slate-400">
+                      <span className="text-muted-foreground dark:text-muted-foreground">
                         Display name:{" "}
                       </span>
                       <span className="font-medium">
@@ -345,7 +345,7 @@ export default function WorkspacesPage() {
                   )}
                   {ws.persona.tone && (
                     <div className="text-sm">
-                      <span className="text-slate-500 dark:text-slate-400">
+                      <span className="text-muted-foreground dark:text-muted-foreground">
                         Tone:{" "}
                       </span>
                       <Badge variant="outline" className="capitalize">
@@ -357,11 +357,11 @@ export default function WorkspacesPage() {
 
                 {/* Channel bindings */}
                 <div className="mb-4">
-                  <p className="text-xs text-slate-500 dark:text-slate-400 uppercase tracking-wide mb-2">
+                  <p className="text-xs text-muted-foreground dark:text-muted-foreground uppercase tracking-wide mb-2">
                     Channel Bindings
                   </p>
                   {ws.channel_bindings.length === 0 ? (
-                    <p className="text-sm text-slate-400">No channels bound</p>
+                    <p className="text-sm text-muted-foreground">No channels bound</p>
                   ) : (
                     <div className="flex flex-wrap gap-1.5">
                       {ws.channel_bindings.map((binding, idx) => (
@@ -379,7 +379,7 @@ export default function WorkspacesPage() {
                 </div>
 
                 {/* Actions */}
-                <div className="flex items-center justify-between pt-4 border-t border-slate-200 dark:border-slate-800">
+                <div className="flex items-center justify-between pt-4 border-t border-border dark:border-border">
                   <Button
                     variant="outline"
                     size="sm"
@@ -446,7 +446,7 @@ export default function WorkspacesPage() {
           <div className="space-y-6 py-4">
             {/* Basic Info */}
             <div className="space-y-4">
-              <h3 className="text-sm font-semibold text-slate-900 dark:text-white uppercase tracking-wide">
+              <h3 className="text-sm font-semibold text-foreground dark:text-white uppercase tracking-wide">
                 Basic Info
               </h3>
               <div className="grid gap-4 sm:grid-cols-2">
@@ -503,7 +503,7 @@ export default function WorkspacesPage() {
 
             {/* Persona */}
             <div className="space-y-4">
-              <h3 className="text-sm font-semibold text-slate-900 dark:text-white uppercase tracking-wide">
+              <h3 className="text-sm font-semibold text-foreground dark:text-white uppercase tracking-wide">
                 Persona
               </h3>
               <div className="space-y-2">
@@ -589,7 +589,7 @@ export default function WorkspacesPage() {
             {/* Channel Bindings */}
             <div className="space-y-4">
               <div className="flex items-center justify-between">
-                <h3 className="text-sm font-semibold text-slate-900 dark:text-white uppercase tracking-wide">
+                <h3 className="text-sm font-semibold text-foreground dark:text-white uppercase tracking-wide">
                   Channel Bindings
                 </h3>
                 <Button variant="outline" size="sm" onClick={addChannelBinding}>
@@ -599,7 +599,7 @@ export default function WorkspacesPage() {
               </div>
 
               {formData.channel_bindings.length === 0 ? (
-                <p className="text-sm text-slate-500 dark:text-slate-400">
+                <p className="text-sm text-muted-foreground dark:text-muted-foreground">
                   No channels bound. Messages will only route here if this is the default workspace.
                 </p>
               ) : (
@@ -607,7 +607,7 @@ export default function WorkspacesPage() {
                   {formData.channel_bindings.map((binding, index) => (
                     <div
                       key={index}
-                      className="flex items-center gap-3 p-3 rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900"
+                      className="flex items-center gap-3 p-3 rounded-lg border border-border dark:border-border bg-muted dark:bg-card"
                     >
                       <Select
                         value={binding.channel_type}
@@ -652,7 +652,7 @@ export default function WorkspacesPage() {
                             })
                           }
                         />
-                        <span className="text-xs text-slate-500 whitespace-nowrap">
+                        <span className="text-xs text-muted-foreground whitespace-nowrap">
                           All
                         </span>
                       </div>
@@ -673,7 +673,7 @@ export default function WorkspacesPage() {
 
             {/* Context Filter */}
             <div className="space-y-4">
-              <h3 className="text-sm font-semibold text-slate-900 dark:text-white uppercase tracking-wide">
+              <h3 className="text-sm font-semibold text-foreground dark:text-white uppercase tracking-wide">
                 Context Filter
               </h3>
               <div className="space-y-2">

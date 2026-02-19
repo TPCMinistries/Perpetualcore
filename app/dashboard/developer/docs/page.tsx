@@ -309,7 +309,7 @@ agent = response.json()`,
                     <Button
                       size="sm"
                       variant="ghost"
-                      className="absolute top-2 right-2 text-slate-400 hover:text-slate-50"
+                      className="absolute top-2 right-2 text-muted-foreground hover:text-slate-50"
                       onClick={() => handleCopyCode(example.code, `auth-${example.language}`)}
                     >
                       {copiedCode === `auth-${example.language}` ? (
@@ -433,7 +433,7 @@ agent = response.json()`,
                     <Button
                       size="sm"
                       variant="ghost"
-                      className="absolute top-2 right-2 text-slate-400 hover:text-slate-50"
+                      className="absolute top-2 right-2 text-muted-foreground hover:text-slate-50"
                       onClick={() => handleCopyCode(example.code, `create-${example.language}`)}
                     >
                       {copiedCode === `create-${example.language}` ? (

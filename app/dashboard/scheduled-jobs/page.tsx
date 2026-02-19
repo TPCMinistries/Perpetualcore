@@ -263,7 +263,7 @@ export default function ScheduledJobsPage() {
             <Button
               variant="outline"
               asChild
-              className="bg-white/80 dark:bg-card/80 hover:bg-white dark:hover:bg-muted border-orange-200 dark:border-orange-800"
+              className="bg-card/80 dark:bg-card/80 hover:bg-card dark:hover:bg-muted border-orange-200 dark:border-orange-800"
             >
               <Link href="/dashboard/scheduled-jobs/templates">
                 <Plus className="mr-2 h-4 w-4" />
@@ -273,7 +273,7 @@ export default function ScheduledJobsPage() {
             <Button
               variant="outline"
               asChild
-              className="bg-white/80 dark:bg-card/80 hover:bg-white dark:hover:bg-muted border-orange-200 dark:border-orange-800"
+              className="bg-card/80 dark:bg-card/80 hover:bg-card dark:hover:bg-muted border-orange-200 dark:border-orange-800"
             >
               <Link href="/dashboard/scheduled-jobs/history">
                 <Activity className="mr-2 h-4 w-4" />
@@ -398,7 +398,7 @@ export default function ScheduledJobsPage() {
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <Link href="/dashboard/scheduled-jobs/templates?template=daily-summary">
-              <Card className="p-5 bg-white/80 dark:bg-card/80 hover:bg-white dark:hover:bg-muted border-purple-100 dark:border-purple-900/40 hover:border-purple-300 dark:hover:border-purple-700 transition-all cursor-pointer hover:shadow-lg group">
+              <Card className="p-5 bg-card/80 dark:bg-card/80 hover:bg-card dark:hover:bg-muted border-purple-100 dark:border-purple-900/40 hover:border-purple-300 dark:hover:border-purple-700 transition-all cursor-pointer hover:shadow-lg group">
                 <div className="flex items-start gap-3 mb-3">
                   <div className="h-10 w-10 rounded-lg bg-gradient-to-br from-blue-100 to-cyan-100 dark:from-blue-900/40 dark:to-cyan-900/40 flex items-center justify-center group-hover:scale-110 transition-transform">
                     <Calendar className="h-5 w-5 text-blue-600 dark:text-blue-400" />
@@ -420,7 +420,7 @@ export default function ScheduledJobsPage() {
             </Link>
 
             <Link href="/dashboard/scheduled-jobs/templates?template=weekly-backup">
-              <Card className="p-5 bg-white/80 dark:bg-card/80 hover:bg-white dark:hover:bg-muted border-purple-100 dark:border-purple-900/40 hover:border-purple-300 dark:hover:border-purple-700 transition-all cursor-pointer hover:shadow-lg group">
+              <Card className="p-5 bg-card/80 dark:bg-card/80 hover:bg-card dark:hover:bg-muted border-purple-100 dark:border-purple-900/40 hover:border-purple-300 dark:hover:border-purple-700 transition-all cursor-pointer hover:shadow-lg group">
                 <div className="flex items-start gap-3 mb-3">
                   <div className="h-10 w-10 rounded-lg bg-gradient-to-br from-green-100 to-emerald-100 dark:from-green-900/40 dark:to-emerald-900/40 flex items-center justify-center group-hover:scale-110 transition-transform">
                     <Activity className="h-5 w-5 text-green-600 dark:text-green-400" />
@@ -442,7 +442,7 @@ export default function ScheduledJobsPage() {
             </Link>
 
             <Link href="/dashboard/scheduled-jobs/templates?template=hourly-monitor">
-              <Card className="p-5 bg-white/80 dark:bg-card/80 hover:bg-white dark:hover:bg-muted border-purple-100 dark:border-purple-900/40 hover:border-purple-300 dark:hover:border-purple-700 transition-all cursor-pointer hover:shadow-lg group">
+              <Card className="p-5 bg-card/80 dark:bg-card/80 hover:bg-card dark:hover:bg-muted border-purple-100 dark:border-purple-900/40 hover:border-purple-300 dark:hover:border-purple-700 transition-all cursor-pointer hover:shadow-lg group">
                 <div className="flex items-start gap-3 mb-3">
                   <div className="h-10 w-10 rounded-lg bg-gradient-to-br from-orange-100 to-amber-100 dark:from-orange-900/40 dark:to-amber-900/40 flex items-center justify-center group-hover:scale-110 transition-transform">
                     <TrendingUp className="h-5 w-5 text-orange-600 dark:text-orange-400" />
