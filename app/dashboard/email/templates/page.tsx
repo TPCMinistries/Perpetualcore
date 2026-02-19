@@ -30,6 +30,7 @@ import {
   Sparkles,
   Search,
 } from "lucide-react";
+import { useConfirm } from "@/components/ui/confirm-dialog";
 import { toast } from "sonner";
 
 interface EmailTemplate {
@@ -49,6 +50,7 @@ interface EmailTemplate {
 }
 
 export default function EmailTemplatesPage() {
+  const { confirm } = useConfirm();
   const [templates, setTemplates] = useState<EmailTemplate[]>([]);
   const [loading, setLoading] = useState(true);
   const [showDialog, setShowDialog] = useState(false);
@@ -124,7 +126,7 @@ export default function EmailTemplatesPage() {
   }
 
   async function handleDeleteTemplate(id: string) {
-    if (!confirm("Delete this template?")) return;
+    if (!(await confirm("Delete this template?"))) return;
 
     try {
       const response = await fetch(`/api/email/templates/${id}`, {

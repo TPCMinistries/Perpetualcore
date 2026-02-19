@@ -40,9 +40,11 @@ import {
   Wand2,
   Cpu,
 } from "lucide-react";
+import { useConfirm } from "@/components/ui/confirm-dialog";
 import { toast } from "sonner";
 import { EmptyState } from "@/components/ui/empty-state";
 import { motion } from "framer-motion";
+import { cardVariants } from "@/lib/design/animations";
 import { DashboardPageWrapper, DashboardHeader } from "@/components/ui/dashboard-header";
 import { StatCard, StatCardGrid } from "@/components/ui/stat-card";
 import { FilterPills } from "@/components/ui/filter-pills";
@@ -120,16 +122,9 @@ const suggestionColors = {
   },
 };
 
-const cardVariants = {
-  hidden: { opacity: 0, y: 20 },
-  visible: (i: number) => ({
-    opacity: 1,
-    y: 0,
-    transition: { delay: i * 0.1, duration: 0.4, ease: "easeOut" },
-  }),
-};
 
 export default function AgentsPage() {
+  const { confirm } = useConfirm();
   const [agents, setAgents] = useState<Agent[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
@@ -183,7 +178,7 @@ export default function AgentsPage() {
   }
 
   async function deleteAgent(agentId: string) {
-    if (!confirm("Are you sure you want to delete this agent?")) return;
+    if (!(await confirm("Are you sure you want to delete this agent?"))) return;
 
     try {
       const response = await fetch(`/api/agents/${agentId}`, {

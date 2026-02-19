@@ -53,7 +53,7 @@ const NOTIFICATION_ICONS: Record<string, any> = {
 };
 
 const PRIORITY_COLORS: Record<string, string> = {
-  low: "text-gray-500 bg-gray-50 dark:bg-gray-800 dark:text-gray-400",
+  low: "text-muted-foreground bg-muted dark:bg-muted dark:text-muted-foreground",
   medium: "text-blue-600 bg-blue-50 dark:bg-blue-950/30 dark:text-blue-400",
   high: "text-orange-600 bg-orange-50 dark:bg-orange-950/30 dark:text-orange-400",
   urgent: "text-red-600 bg-red-50 dark:bg-red-950/30 dark:text-red-400",
@@ -153,7 +153,7 @@ export default function NotificationsPage() {
     return (
       <div className="p-8">
         <div className="flex items-center justify-center h-64">
-          <Loader2 className="h-8 w-8 animate-spin text-gray-500" />
+          <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
         </div>
       </div>
     );

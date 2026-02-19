@@ -203,7 +203,7 @@ export default function WorkflowDetailPage() {
       case "failed":
         return <AlertCircle className="h-5 w-5 text-red-600 dark:text-red-400" />;
       default:
-        return <Circle className="h-5 w-5 text-gray-400" />;
+        return <Circle className="h-5 w-5 text-muted-foreground" />;
     }
   }
 

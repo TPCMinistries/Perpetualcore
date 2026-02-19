@@ -22,6 +22,7 @@ import { DashboardPageWrapper, DashboardHeader } from "@/components/ui/dashboard
 import { StatCard, StatCardGrid } from "@/components/ui/stat-card";
 import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
+import { cardVariants } from "@/lib/design/animations";
 
 interface GraphNode {
   id: string;
@@ -52,18 +53,6 @@ interface ConceptPath {
   connected: boolean;
 }
 
-const cardVariants = {
-  hidden: { opacity: 0, y: 20 },
-  visible: (i: number) => ({
-    opacity: 1,
-    y: 0,
-    transition: {
-      delay: i * 0.1,
-      duration: 0.4,
-      ease: "easeOut",
-    },
-  }),
-};
 
 const relationshipColors: Record<string, { bg: string; text: string; badge: string }> = {
   related_to: {

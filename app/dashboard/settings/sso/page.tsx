@@ -12,9 +12,11 @@ import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
 import { Shield, Plus, Edit, Trash2, AlertCircle, Check, Key, Cloud } from "lucide-react";
+import { useConfirm } from "@/components/ui/confirm-dialog";
 import { SSOProvider, SSOProviderType } from "@/types";
 
 export default function SSOSettingsPage() {
+  const { confirm } = useConfirm();
   const [providers, setProviders] = useState<SSOProvider[]>([]);
   const [loading, setLoading] = useState(true);
   const [editingProvider, setEditingProvider] = useState<SSOProvider | null>(null);
@@ -91,7 +93,7 @@ export default function SSOSettingsPage() {
   }
 
   async function handleDelete(providerId: string) {
-    if (!confirm("Are you sure you want to delete this SSO provider?")) {
+    if (!(await confirm("Are you sure you want to delete this SSO provider?"))) {
       return;
     }
 

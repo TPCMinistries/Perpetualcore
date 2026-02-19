@@ -39,20 +39,13 @@ import {
 import { AuditLog, AuditLogStats } from "@/types";
 import { formatDistanceToNow } from "date-fns";
 import { motion } from "framer-motion";
+import { cardVariants } from "@/lib/design/animations";
 import { DashboardPageWrapper, DashboardHeader } from "@/components/ui/dashboard-header";
 import { StatCard, StatCardGrid } from "@/components/ui/stat-card";
 import AuditLogDetail from "@/components/admin/AuditLogDetail";
 import { EmptyState } from "@/components/ui/empty-state";
 import AuditLogExportDialog from "@/components/admin/AuditLogExportDialog";
 
-const cardVariants = {
-  hidden: { opacity: 0, y: 20 },
-  visible: (i: number) => ({
-    opacity: 1,
-    y: 0,
-    transition: { delay: i * 0.05, duration: 0.4, ease: "easeOut" },
-  }),
-};
 
 const statusConfig: Record<
   string,

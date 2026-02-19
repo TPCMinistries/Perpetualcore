@@ -359,7 +359,7 @@ export default function ApiKeysPage() {
                             Active
                           </Badge>
                         ) : (
-                          <Badge variant="outline" className="bg-gray-50 border-gray-300 text-gray-700">
+                          <Badge variant="outline" className="bg-muted border-border text-foreground">
                             Inactive
                           </Badge>
                         )}

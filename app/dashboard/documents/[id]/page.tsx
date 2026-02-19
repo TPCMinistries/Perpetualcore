@@ -16,6 +16,7 @@ import {
   CloudOff,
   Loader2,
 } from "lucide-react";
+import { useConfirm } from "@/components/ui/confirm-dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -47,6 +48,7 @@ export default function DocumentViewPage() {
   const params = useParams();
   const documentId = params.id as string;
 
+  const { confirm } = useConfirm();
   const [document, setDocument] = useState<Document | null>(null);
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState(false);
@@ -141,7 +143,7 @@ export default function DocumentViewPage() {
   };
 
   const handleDelete = async () => {
-    if (!confirm("Are you sure you want to delete this document?")) return;
+    if (!(await confirm("Are you sure you want to delete this document?"))) return;
 
     try {
       const response = await fetch(`/api/documents?id=${documentId}`, {

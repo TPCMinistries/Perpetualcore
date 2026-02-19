@@ -23,6 +23,7 @@ import {
   Send,
   X,
 } from "lucide-react";
+import { useConfirm } from "@/components/ui/confirm-dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -110,7 +111,7 @@ const STATUS_CONFIG: Record<string, { label: string; color: string; icon: any }>
   developing: { label: "Developing", color: "bg-purple-100 text-purple-700", icon: Edit },
   ready: { label: "Ready", color: "bg-green-100 text-green-700", icon: CheckCircle2 },
   implemented: { label: "Implemented", color: "bg-emerald-100 text-emerald-700", icon: Zap },
-  archived: { label: "Archived", color: "bg-gray-100 text-gray-700", icon: Archive },
+  archived: { label: "Archived", color: "bg-muted text-foreground", icon: Archive },
 };
 
 const PRIORITY_CONFIG: Record<string, { label: string; color: string }> = {
@@ -132,6 +133,7 @@ const CATEGORY_OPTIONS = [
 ];
 
 export default function IdeasPage() {
+  const { confirm } = useConfirm();
   const [ideas, setIdeas] = useState<Idea[]>([]);
   const [stats, setStats] = useState<{ byStatus: Record<string, number>; byCategory: Record<string, number> }>({
     byStatus: {},
@@ -277,7 +279,7 @@ export default function IdeasPage() {
 
   // Delete idea
   const handleDeleteIdea = async (ideaId: string) => {
-    if (!confirm("Are you sure you want to delete this idea?")) return;
+    if (!(await confirm("Are you sure you want to delete this idea?"))) return;
 
     try {
       const res = await fetch(`/api/ideas/${ideaId}`, {

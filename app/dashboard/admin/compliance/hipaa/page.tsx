@@ -139,7 +139,7 @@ export default function HIPAACompliancePage() {
     <div className="p-4 sm:p-8 max-w-7xl mx-auto space-y-6">
       <div>
         <h1 className="text-3xl font-bold">HIPAA Compliance</h1>
-        <p className="text-gray-600 mt-1">
+        <p className="text-muted-foreground mt-1">
           Health Insurance Portability and Accountability Act readiness checklist
         </p>
       </div>
@@ -148,7 +148,7 @@ export default function HIPAACompliancePage() {
       <div className="flex gap-2 text-sm">
         <Link
           href="/dashboard/admin/compliance"
-          className="px-3 py-1.5 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200"
+          className="px-3 py-1.5 bg-muted text-foreground rounded-lg hover:bg-muted"
         >
           &larr; Compliance Overview
         </Link>
@@ -174,16 +174,16 @@ export default function HIPAACompliancePage() {
           <CardContent>
             <div className="space-y-4">
               {HIPAA_CONTROLS.filter((c) => c.category === category).map((control) => (
-                <div key={control.id} className="flex items-start gap-3 p-3 rounded-lg bg-gray-50">
+                <div key={control.id} className="flex items-start gap-3 p-3 rounded-lg bg-muted">
                   <StatusIcon status={control.status} />
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 flex-wrap">
-                      <code className="text-xs bg-gray-200 px-1.5 py-0.5 rounded">{control.id}</code>
+                      <code className="text-xs bg-muted px-1.5 py-0.5 rounded">{control.id}</code>
                       <span className="font-medium text-sm">{control.name}</span>
                       <StatusBadge status={control.status} />
                     </div>
-                    <p className="text-xs text-gray-600 mt-1">{control.requirement}</p>
-                    <p className="text-xs text-gray-500 mt-1">
+                    <p className="text-xs text-muted-foreground mt-1">{control.requirement}</p>
+                    <p className="text-xs text-muted-foreground mt-1">
                       <span className="font-medium">Evidence:</span> {control.evidence}
                     </p>
                   </div>
@@ -201,7 +201,7 @@ function SummaryCard({ label, value, color }: { label: string; value: string; co
   return (
     <Card>
       <CardContent className="p-4 text-center">
-        <p className="text-sm text-gray-500">{label}</p>
+        <p className="text-sm text-muted-foreground">{label}</p>
         <p className={`text-2xl font-bold mt-1 ${color ?? "text-slate-900"}`}>{value}</p>
       </CardContent>
     </Card>
@@ -217,7 +217,7 @@ function StatusIcon({ status }: { status: HIPAAControl["status"] }) {
     case "partial":
       return <AlertTriangle className="h-5 w-5 text-yellow-600 flex-shrink-0 mt-0.5" />;
     case "not_applicable":
-      return <div className="h-5 w-5 rounded-full bg-gray-300 flex-shrink-0 mt-0.5" />;
+      return <div className="h-5 w-5 rounded-full bg-muted flex-shrink-0 mt-0.5" />;
   }
 }
 
@@ -226,7 +226,7 @@ function StatusBadge({ status }: { status: HIPAAControl["status"] }) {
     met: "bg-green-100 text-green-700",
     partial: "bg-yellow-100 text-yellow-700",
     not_met: "bg-red-100 text-red-700",
-    not_applicable: "bg-gray-100 text-gray-500",
+    not_applicable: "bg-muted text-muted-foreground",
   };
   const labels: Record<string, string> = {
     met: "Met",

@@ -36,7 +36,7 @@ export default function ComplianceOverviewPage() {
     <div className="p-4 sm:p-8 max-w-7xl mx-auto space-y-6">
       <div>
         <h1 className="text-3xl font-bold">Compliance & Security</h1>
-        <p className="text-gray-600 mt-1">
+        <p className="text-muted-foreground mt-1">
           Monitor your organization&apos;s security posture and compliance readiness
         </p>
       </div>
@@ -51,31 +51,31 @@ export default function ComplianceOverviewPage() {
         </Link>
         <Link
           href="/dashboard/admin/compliance/soc2"
-          className="px-3 py-1.5 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200"
+          className="px-3 py-1.5 bg-muted text-foreground rounded-lg hover:bg-muted"
         >
           SOC 2
         </Link>
         <Link
           href="/dashboard/admin/compliance/hipaa"
-          className="px-3 py-1.5 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200"
+          className="px-3 py-1.5 bg-muted text-foreground rounded-lg hover:bg-muted"
         >
           HIPAA
         </Link>
         <Link
           href="/dashboard/admin/compliance/data-retention"
-          className="px-3 py-1.5 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200"
+          className="px-3 py-1.5 bg-muted text-foreground rounded-lg hover:bg-muted"
         >
           Data Retention
         </Link>
         <Link
           href="/dashboard/admin/compliance/ip-whitelist"
-          className="px-3 py-1.5 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200"
+          className="px-3 py-1.5 bg-muted text-foreground rounded-lg hover:bg-muted"
         >
           IP Whitelist
         </Link>
         <Link
           href="/dashboard/admin/sessions"
-          className="px-3 py-1.5 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200"
+          className="px-3 py-1.5 bg-muted text-foreground rounded-lg hover:bg-muted"
         >
           Sessions
         </Link>
@@ -90,7 +90,7 @@ export default function ComplianceOverviewPage() {
           />
         ) : (
           <Card>
-            <CardContent className="p-6 text-center text-gray-500">
+            <CardContent className="p-6 text-center text-muted-foreground">
               Failed to load compliance data
             </CardContent>
           </Card>
@@ -156,7 +156,7 @@ export default function ComplianceOverviewPage() {
                       {percentage}%
                     </span>
                   </div>
-                  <div className="w-full bg-gray-200 rounded-full h-2">
+                  <div className="w-full bg-muted rounded-full h-2">
                     <div
                       className={`h-2 rounded-full ${
                         percentage >= 80 ? "bg-green-500" : percentage >= 60 ? "bg-yellow-500" : "bg-red-500"
@@ -164,7 +164,7 @@ export default function ComplianceOverviewPage() {
                       style={{ width: `${percentage}%` }}
                     />
                   </div>
-                  <p className="text-xs text-gray-500 mt-1">
+                  <p className="text-xs text-muted-foreground mt-1">
                     {catData.checks.filter((c) => c.status === "pass").length}/{catData.checks.length} checks passed
                   </p>
                 </CardContent>
@@ -191,14 +191,14 @@ function QuickAction({
   return (
     <Link
       href={href}
-      className="flex items-start gap-3 p-3 rounded-lg hover:bg-gray-50 transition-colors"
+      className="flex items-start gap-3 p-3 rounded-lg hover:bg-muted transition-colors"
     >
       <div className="p-2 bg-slate-100 rounded-lg flex-shrink-0">
         <Icon className="h-4 w-4 text-slate-600" />
       </div>
       <div>
         <div className="font-medium text-sm">{title}</div>
-        <div className="text-xs text-gray-500">{description}</div>
+        <div className="text-xs text-muted-foreground">{description}</div>
       </div>
     </Link>
   );

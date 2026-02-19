@@ -179,7 +179,7 @@ export default function BrowseTemplatesPage() {
               placeholder="Search templates..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10 bg-white dark:bg-gray-950"
+              className="pl-10 bg-white dark:bg-background"
             />
           </div>
         </div>

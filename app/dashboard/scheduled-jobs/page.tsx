@@ -19,6 +19,7 @@ import {
   Zap,
   Edit,
 } from "lucide-react";
+import { useConfirm } from "@/components/ui/confirm-dialog";
 import { toast } from "sonner";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -49,6 +50,7 @@ interface Stats {
 
 export default function ScheduledJobsPage() {
   const router = useRouter();
+  const { confirm } = useConfirm();
   const [jobs, setJobs] = useState<ScheduledJob[]>([]);
   const [stats, setStats] = useState<Stats>({
     total: 0,
@@ -139,7 +141,7 @@ export default function ScheduledJobsPage() {
   }
 
   async function deleteJob(jobId: string, jobName: string) {
-    if (!confirm(`Delete "${jobName}"? This cannot be undone.`)) return;
+    if (!(await confirm(`Delete "${jobName}"? This cannot be undone.`))) return;
 
     setActionLoading(jobId);
     try {
@@ -213,7 +215,7 @@ export default function ScheduledJobsPage() {
     const colors: { [key: string]: string } = {
       workflow: "bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200",
       agent: "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200",
-      custom: "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200",
+      custom: "bg-muted text-foreground dark:bg-muted dark:text-foreground",
     };
 
     return (
@@ -261,7 +263,7 @@ export default function ScheduledJobsPage() {
             <Button
               variant="outline"
               asChild
-              className="bg-white/80 dark:bg-gray-900/80 hover:bg-white dark:hover:bg-gray-900 border-orange-200 dark:border-orange-800"
+              className="bg-white/80 dark:bg-card/80 hover:bg-white dark:hover:bg-muted border-orange-200 dark:border-orange-800"
             >
               <Link href="/dashboard/scheduled-jobs/templates">
                 <Plus className="mr-2 h-4 w-4" />
@@ -271,7 +273,7 @@ export default function ScheduledJobsPage() {
             <Button
               variant="outline"
               asChild
-              className="bg-white/80 dark:bg-gray-900/80 hover:bg-white dark:hover:bg-gray-900 border-orange-200 dark:border-orange-800"
+              className="bg-white/80 dark:bg-card/80 hover:bg-white dark:hover:bg-muted border-orange-200 dark:border-orange-800"
             >
               <Link href="/dashboard/scheduled-jobs/history">
                 <Activity className="mr-2 h-4 w-4" />
@@ -396,7 +398,7 @@ export default function ScheduledJobsPage() {
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <Link href="/dashboard/scheduled-jobs/templates?template=daily-summary">
-              <Card className="p-5 bg-white/80 dark:bg-gray-900/80 hover:bg-white dark:hover:bg-gray-900 border-purple-100 dark:border-purple-900/40 hover:border-purple-300 dark:hover:border-purple-700 transition-all cursor-pointer hover:shadow-lg group">
+              <Card className="p-5 bg-white/80 dark:bg-card/80 hover:bg-white dark:hover:bg-muted border-purple-100 dark:border-purple-900/40 hover:border-purple-300 dark:hover:border-purple-700 transition-all cursor-pointer hover:shadow-lg group">
                 <div className="flex items-start gap-3 mb-3">
                   <div className="h-10 w-10 rounded-lg bg-gradient-to-br from-blue-100 to-cyan-100 dark:from-blue-900/40 dark:to-cyan-900/40 flex items-center justify-center group-hover:scale-110 transition-transform">
                     <Calendar className="h-5 w-5 text-blue-600 dark:text-blue-400" />
@@ -418,7 +420,7 @@ export default function ScheduledJobsPage() {
             </Link>
 
             <Link href="/dashboard/scheduled-jobs/templates?template=weekly-backup">
-              <Card className="p-5 bg-white/80 dark:bg-gray-900/80 hover:bg-white dark:hover:bg-gray-900 border-purple-100 dark:border-purple-900/40 hover:border-purple-300 dark:hover:border-purple-700 transition-all cursor-pointer hover:shadow-lg group">
+              <Card className="p-5 bg-white/80 dark:bg-card/80 hover:bg-white dark:hover:bg-muted border-purple-100 dark:border-purple-900/40 hover:border-purple-300 dark:hover:border-purple-700 transition-all cursor-pointer hover:shadow-lg group">
                 <div className="flex items-start gap-3 mb-3">
                   <div className="h-10 w-10 rounded-lg bg-gradient-to-br from-green-100 to-emerald-100 dark:from-green-900/40 dark:to-emerald-900/40 flex items-center justify-center group-hover:scale-110 transition-transform">
                     <Activity className="h-5 w-5 text-green-600 dark:text-green-400" />
@@ -440,7 +442,7 @@ export default function ScheduledJobsPage() {
             </Link>
 
             <Link href="/dashboard/scheduled-jobs/templates?template=hourly-monitor">
-              <Card className="p-5 bg-white/80 dark:bg-gray-900/80 hover:bg-white dark:hover:bg-gray-900 border-purple-100 dark:border-purple-900/40 hover:border-purple-300 dark:hover:border-purple-700 transition-all cursor-pointer hover:shadow-lg group">
+              <Card className="p-5 bg-white/80 dark:bg-card/80 hover:bg-white dark:hover:bg-muted border-purple-100 dark:border-purple-900/40 hover:border-purple-300 dark:hover:border-purple-700 transition-all cursor-pointer hover:shadow-lg group">
                 <div className="flex items-start gap-3 mb-3">
                   <div className="h-10 w-10 rounded-lg bg-gradient-to-br from-orange-100 to-amber-100 dark:from-orange-900/40 dark:to-amber-900/40 flex items-center justify-center group-hover:scale-110 transition-transform">
                     <TrendingUp className="h-5 w-5 text-orange-600 dark:text-orange-400" />
@@ -483,7 +485,7 @@ export default function ScheduledJobsPage() {
               className={`hover:shadow-lg transition-all duration-300 ${
                 job.enabled
                   ? "border-orange-200 dark:border-orange-900/40 bg-gradient-to-br from-white to-orange-50/30 dark:from-gray-900 dark:to-orange-950/10"
-                  : "opacity-60 border-gray-200 dark:border-gray-800"
+                  : "opacity-60 border-gray-200 dark:border-border"
               }`}
             >
               <CardHeader className="pb-4">
@@ -495,7 +497,7 @@ export default function ScheduledJobsPage() {
                           ? "bg-purple-100 dark:bg-purple-900/40"
                           : job.job_type === "agent"
                           ? "bg-blue-100 dark:bg-blue-900/40"
-                          : "bg-gray-100 dark:bg-gray-800"
+                          : "bg-muted dark:bg-muted"
                       }`}>
                         {getJobTypeIcon(job.job_type)}
                       </div>
@@ -512,7 +514,7 @@ export default function ScheduledJobsPage() {
                         Active
                       </Badge>
                     ) : (
-                      <Badge variant="outline" className="text-gray-600 dark:text-gray-400">
+                      <Badge variant="outline" className="text-muted-foreground dark:text-muted-foreground">
                         Paused
                       </Badge>
                     )}

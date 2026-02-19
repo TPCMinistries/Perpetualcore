@@ -29,7 +29,7 @@ export default function AdvancedAutomation1() {
           </div>
 
           <div className="grid md:grid-cols-2 gap-4">
-            <div className="p-4 bg-white dark:bg-gray-900 rounded-lg border">
+            <div className="p-4 bg-white dark:bg-card rounded-lg border">
               <h4 className="font-semibold text-sm mb-2">Template Workflows</h4>
               <ul className="text-xs text-muted-foreground space-y-1">
                 <li>✓ Quick to set up</li>
@@ -38,7 +38,7 @@ export default function AdvancedAutomation1() {
                 <li>✗ Limited customization</li>
               </ul>
             </div>
-            <div className="p-4 bg-white dark:bg-gray-900 rounded-lg border">
+            <div className="p-4 bg-white dark:bg-card rounded-lg border">
               <h4 className="font-semibold text-sm mb-2">Custom Workflows</h4>
               <ul className="text-xs text-muted-foreground space-y-1">
                 <li>✓ Fully customizable</li>
@@ -72,15 +72,15 @@ export default function AdvancedAutomation1() {
                 The event that starts your workflow execution.
               </p>
               <div className="grid md:grid-cols-3 gap-3">
-                <div className="p-3 bg-white dark:bg-gray-900 rounded border">
+                <div className="p-3 bg-white dark:bg-card rounded border">
                   <p className="font-medium text-xs mb-1">⏰ Schedule</p>
                   <p className="text-xs text-muted-foreground">Time-based triggers (cron)</p>
                 </div>
-                <div className="p-3 bg-white dark:bg-gray-900 rounded border">
+                <div className="p-3 bg-white dark:bg-card rounded border">
                   <p className="font-medium text-xs mb-1">🔔 Event</p>
                   <p className="text-xs text-muted-foreground">App events (new email, task created)</p>
                 </div>
-                <div className="p-3 bg-white dark:bg-gray-900 rounded border">
+                <div className="p-3 bg-white dark:bg-card rounded border">
                   <p className="font-medium text-xs mb-1">🌐 Webhook</p>
                   <p className="text-xs text-muted-foreground">External API calls</p>
                 </div>
@@ -98,19 +98,19 @@ export default function AdvancedAutomation1() {
                 The actions your workflow performs, executed in sequence.
               </p>
               <div className="space-y-2">
-                <div className="p-3 bg-white dark:bg-gray-900 rounded border">
+                <div className="p-3 bg-white dark:bg-card rounded border">
                   <p className="font-medium text-xs mb-1">Data Operations</p>
                   <p className="text-xs text-muted-foreground">Fetch, transform, filter, aggregate data</p>
                 </div>
-                <div className="p-3 bg-white dark:bg-gray-900 rounded border">
+                <div className="p-3 bg-white dark:bg-card rounded border">
                   <p className="font-medium text-xs mb-1">Integration Actions</p>
                   <p className="text-xs text-muted-foreground">Send email, create task, post to Slack</p>
                 </div>
-                <div className="p-3 bg-white dark:bg-gray-900 rounded border">
+                <div className="p-3 bg-white dark:bg-card rounded border">
                   <p className="font-medium text-xs mb-1">AI Operations</p>
                   <p className="text-xs text-muted-foreground">Analyze text, generate content, classify data</p>
                 </div>
-                <div className="p-3 bg-white dark:bg-gray-900 rounded border">
+                <div className="p-3 bg-white dark:bg-card rounded border">
                   <p className="font-medium text-xs mb-1">Control Flow</p>
                   <p className="text-xs text-muted-foreground">Conditions, loops, delays</p>
                 </div>
@@ -127,7 +127,7 @@ export default function AdvancedAutomation1() {
               <p className="text-sm text-muted-foreground mb-3">
                 The results of your workflow - data to store, messages to send, or actions to take.
               </p>
-              <div className="p-3 bg-white dark:bg-gray-900 rounded border">
+              <div className="p-3 bg-white dark:bg-card rounded border">
                 <p className="text-xs text-muted-foreground">
                   Outputs can be returned as JSON data, sent as notifications, stored in databases, or passed to other workflows.
                 </p>
@@ -219,13 +219,13 @@ export default function AdvancedAutomation1() {
           <div className="bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-800 rounded-lg p-6">
             <h4 className="font-semibold mb-3">Data Flow Example</h4>
             <div className="space-y-3">
-              <div className="p-4 bg-white dark:bg-gray-900 rounded-lg border">
+              <div className="p-4 bg-white dark:bg-card rounded-lg border">
                 <div className="flex items-center gap-2 mb-2">
                   <div className="px-2 py-1 bg-blue-100 dark:bg-blue-900/30 rounded text-xs font-medium">Step 1</div>
                   <p className="font-medium text-sm">Fetch Emails</p>
                 </div>
                 <p className="text-xs text-muted-foreground mb-2">Input: filter = "is:unread"</p>
-                <div className="p-2 bg-gray-50 dark:bg-gray-950 rounded border border-dashed">
+                <div className="p-2 bg-muted dark:bg-background rounded border border-dashed">
                   <code className="text-xs">{`Output: emails = [{"from": "...", "subject": "...", "body": "..."}]`}</code>
                 </div>
               </div>
@@ -234,13 +234,13 @@ export default function AdvancedAutomation1() {
                 <div className="text-blue-600">↓ Data flows down</div>
               </div>
 
-              <div className="p-4 bg-white dark:bg-gray-900 rounded-lg border">
+              <div className="p-4 bg-white dark:bg-card rounded-lg border">
                 <div className="flex items-center gap-2 mb-2">
                   <div className="px-2 py-1 bg-green-100 dark:bg-green-900/30 rounded text-xs font-medium">Step 2</div>
                   <p className="font-medium text-sm">AI: Summarize</p>
                 </div>
                 <p className="text-xs text-muted-foreground mb-2">Input: emails (from Step 1)</p>
-                <div className="p-2 bg-gray-50 dark:bg-gray-950 rounded border border-dashed">
+                <div className="p-2 bg-muted dark:bg-background rounded border border-dashed">
                   <code className="text-xs">Output: summary = "You have 5 unread emails about..."</code>
                 </div>
               </div>
@@ -249,13 +249,13 @@ export default function AdvancedAutomation1() {
                 <div className="text-blue-600">↓ Data flows down</div>
               </div>
 
-              <div className="p-4 bg-white dark:bg-gray-900 rounded-lg border">
+              <div className="p-4 bg-white dark:bg-card rounded-lg border">
                 <div className="flex items-center gap-2 mb-2">
                   <div className="px-2 py-1 bg-purple-100 dark:bg-purple-900/30 rounded text-xs font-medium">Step 3</div>
                   <p className="font-medium text-sm">Send Slack Message</p>
                 </div>
                 <p className="text-xs text-muted-foreground mb-2">Input: summary (from Step 2)</p>
-                <div className="p-2 bg-gray-50 dark:bg-gray-950 rounded border border-dashed">
+                <div className="p-2 bg-muted dark:bg-background rounded border border-dashed">
                   <code className="text-xs">Output: message_sent = true</code>
                 </div>
               </div>
@@ -263,31 +263,31 @@ export default function AdvancedAutomation1() {
           </div>
 
           <div className="space-y-3">
-            <div className="p-4 bg-white dark:bg-gray-900 rounded-lg border">
+            <div className="p-4 bg-white dark:bg-card rounded-lg border">
               <h4 className="font-semibold text-sm mb-2">Referencing Previous Steps</h4>
               <p className="text-xs text-muted-foreground mb-2">
-                Use the syntax <code className="bg-gray-100 dark:bg-gray-800 px-1 rounded">{"{{stepName.outputField}}"}</code> to reference data from previous steps:
+                Use the syntax <code className="bg-muted dark:bg-muted px-1 rounded">{"{{stepName.outputField}}"}</code> to reference data from previous steps:
               </p>
               <ul className="text-xs text-muted-foreground space-y-1 ml-4">
-                <li>• <code className="bg-gray-100 dark:bg-gray-800 px-1 rounded">{"{{step1.emails}}"}</code> - All emails from step 1</li>
-                <li>• <code className="bg-gray-100 dark:bg-gray-800 px-1 rounded">{"{{step1.emails[0].subject}}"}</code> - First email's subject</li>
-                <li>• <code className="bg-gray-100 dark:bg-gray-800 px-1 rounded">{"{{step2.summary}}"}</code> - Summary from step 2</li>
+                <li>• <code className="bg-muted dark:bg-muted px-1 rounded">{"{{step1.emails}}"}</code> - All emails from step 1</li>
+                <li>• <code className="bg-muted dark:bg-muted px-1 rounded">{"{{step1.emails[0].subject}}"}</code> - First email's subject</li>
+                <li>• <code className="bg-muted dark:bg-muted px-1 rounded">{"{{step2.summary}}"}</code> - Summary from step 2</li>
               </ul>
             </div>
 
-            <div className="p-4 bg-white dark:bg-gray-900 rounded-lg border">
+            <div className="p-4 bg-white dark:bg-card rounded-lg border">
               <h4 className="font-semibold text-sm mb-2">Data Transformations</h4>
               <p className="text-xs text-muted-foreground mb-2">
                 Built-in functions let you transform data on the fly:
               </p>
               <div className="space-y-1">
-                <div className="p-2 bg-gray-50 dark:bg-gray-950 rounded">
+                <div className="p-2 bg-muted dark:bg-background rounded">
                   <code className="text-xs">{"{{step1.emails | length}}"}</code> <span className="text-xs text-muted-foreground">- Count items</span>
                 </div>
-                <div className="p-2 bg-gray-50 dark:bg-gray-950 rounded">
+                <div className="p-2 bg-muted dark:bg-background rounded">
                   <code className="text-xs">{"{{step1.email.subject | uppercase}}"}</code> <span className="text-xs text-muted-foreground">- Convert to uppercase</span>
                 </div>
-                <div className="p-2 bg-gray-50 dark:bg-gray-950 rounded">
+                <div className="p-2 bg-muted dark:bg-background rounded">
                   <code className="text-xs">{"{{step1.emails | filter('urgent')}}"}</code> <span className="text-xs text-muted-foreground">- Filter by keyword</span>
                 </div>
               </div>
@@ -314,7 +314,7 @@ export default function AdvancedAutomation1() {
               <p className="text-xs text-muted-foreground mb-3">
                 Write custom JavaScript/Python for complex transformations
               </p>
-              <div className="p-2 bg-gray-50 dark:bg-gray-950 rounded border text-xs">
+              <div className="p-2 bg-muted dark:bg-background rounded border text-xs">
                 <code>
                   {`// Example: Parse custom data
 const result = data.map(item => ({
@@ -334,7 +334,7 @@ return result;`}
               <p className="text-xs text-muted-foreground mb-3">
                 Use AI for classification, extraction, generation
               </p>
-              <div className="p-2 bg-gray-50 dark:bg-gray-950 rounded border text-xs">
+              <div className="p-2 bg-muted dark:bg-background rounded border text-xs">
                 <p className="text-muted-foreground">
                   Prompt: "Classify this email as: urgent, normal, or spam"
                 </p>
@@ -346,7 +346,7 @@ return result;`}
               <p className="text-xs text-muted-foreground mb-3">
                 Call any external API
               </p>
-              <div className="p-2 bg-gray-50 dark:bg-gray-950 rounded border text-xs">
+              <div className="p-2 bg-muted dark:bg-background rounded border text-xs">
                 <code>POST https://api.example.com/data</code>
               </div>
             </Card>
@@ -356,7 +356,7 @@ return result;`}
               <p className="text-xs text-muted-foreground mb-3">
                 Query databases (Postgres, MySQL, MongoDB)
               </p>
-              <div className="p-2 bg-gray-50 dark:bg-gray-950 rounded border text-xs">
+              <div className="p-2 bg-muted dark:bg-background rounded border text-xs">
                 <code>SELECT * FROM users WHERE active = true</code>
               </div>
             </Card>
@@ -366,7 +366,7 @@ return result;`}
               <p className="text-xs text-muted-foreground mb-3">
                 Call another workflow as a step
               </p>
-              <div className="p-2 bg-gray-50 dark:bg-gray-950 rounded border text-xs text-muted-foreground">
+              <div className="p-2 bg-muted dark:bg-background rounded border text-xs text-muted-foreground">
                 Enables workflow reusability and modularity
               </div>
             </Card>
@@ -376,7 +376,7 @@ return result;`}
               <p className="text-xs text-muted-foreground mb-3">
                 Repeat steps for each item in a list
               </p>
-              <div className="p-2 bg-gray-50 dark:bg-gray-950 rounded border text-xs text-muted-foreground">
+              <div className="p-2 bg-muted dark:bg-background rounded border text-xs text-muted-foreground">
                 Process 100 emails one by one
               </div>
             </Card>
@@ -474,7 +474,7 @@ return result;`}
           </p>
         </div>
 
-        <div className="flex items-start gap-3 p-4 bg-white dark:bg-gray-900 rounded-lg border">
+        <div className="flex items-start gap-3 p-4 bg-white dark:bg-card rounded-lg border">
           <div className="h-5 w-5 rounded-full bg-green-600 text-white flex items-center justify-center text-xs font-semibold flex-shrink-0 mt-0.5">
             ✓
           </div>

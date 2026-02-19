@@ -385,7 +385,7 @@ export default function ChannelsSettingsPage() {
                     ) : (
                       <Badge
                         variant="outline"
-                        className="bg-gray-50 border-gray-300 text-gray-700 dark:bg-gray-950/30 dark:border-gray-700 dark:text-gray-400"
+                        className="bg-muted border-border text-foreground dark:bg-muted dark:border-border dark:text-muted-foreground"
                       >
                         <XCircle className="h-3 w-3 mr-1" />
                         Not Connected

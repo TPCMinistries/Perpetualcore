@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Input } from "@/components/ui/input";
 import { Workflow, Plus, Search, Play, Pause, Trash2, Edit, Eye, Clock, CheckCircle2, XCircle, Zap, PenTool } from "lucide-react";
+import { useConfirm } from "@/components/ui/confirm-dialog";
 import { StaggeredGrid, StaggeredGridItem } from "@/components/ui/page-wrapper";
 import { DashboardPageWrapper, DashboardHeader } from "@/components/ui/dashboard-header";
 import { WorkflowsPageSkeleton } from "@/components/ui/skeletons";
@@ -31,6 +32,7 @@ interface WorkflowType {
 
 export default function WorkflowsPage() {
   const router = useRouter();
+  const { confirm } = useConfirm();
   const [workflows, setWorkflows] = useState<WorkflowType[]>([]);
   const [filteredWorkflows, setFilteredWorkflows] = useState<WorkflowType[]>([]);
   const [loading, setLoading] = useState(true);
@@ -108,7 +110,7 @@ export default function WorkflowsPage() {
   }
 
   async function deleteWorkflow(id: string, name: string) {
-    if (!confirm(`Are you sure you want to delete "${name}"?`)) return;
+    if (!(await confirm(`Are you sure you want to delete "${name}"?`))) return;
 
     setDeletingId(id);
     try {
@@ -156,7 +158,7 @@ export default function WorkflowsPage() {
 
   function getTriggerBadge(triggerType: string) {
     const configs: { [key: string]: { label: string; className: string } } = {
-      manual: { label: "Manual", className: "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200" },
+      manual: { label: "Manual", className: "bg-muted text-foreground dark:bg-muted dark:text-foreground" },
       schedule: { label: "Scheduled", className: "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200" },
       webhook: { label: "Webhook", className: "bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200" },
       event: { label: "Event", className: "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200" },

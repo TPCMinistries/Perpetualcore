@@ -13,6 +13,7 @@ import {
   Calendar,
   FileText,
 } from "lucide-react";
+import { useConfirm } from "@/components/ui/confirm-dialog";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -65,6 +66,7 @@ interface PageProps {
 export default function BrandDetailPage({ params }: PageProps) {
   const { brandId } = use(params);
   const router = useRouter();
+  const { confirm } = useConfirm();
   const [brand, setBrand] = useState<Brand | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
@@ -166,7 +168,7 @@ export default function BrandDetailPage({ params }: PageProps) {
   };
 
   const handleDelete = async () => {
-    if (!confirm("Are you sure you want to delete this brand? This action cannot be undone.")) {
+    if (!(await confirm("Are you sure you want to delete this brand? This action cannot be undone."))) {
       return;
     }
 

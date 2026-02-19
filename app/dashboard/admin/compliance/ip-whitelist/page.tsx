@@ -98,7 +98,7 @@ export default function IPWhitelistPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold">IP Whitelist</h1>
-          <p className="text-gray-600 mt-1">
+          <p className="text-muted-foreground mt-1">
             Restrict access to trusted IP addresses and ranges
           </p>
         </div>
@@ -111,7 +111,7 @@ export default function IPWhitelistPage() {
       <div className="flex gap-2 text-sm">
         <Link
           href="/dashboard/admin/compliance"
-          className="px-3 py-1.5 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200"
+          className="px-3 py-1.5 bg-muted text-foreground rounded-lg hover:bg-muted"
         >
           &larr; Compliance Overview
         </Link>
@@ -163,7 +163,7 @@ export default function IPWhitelistPage() {
         </CardHeader>
         <CardContent>
           {rules.length === 0 ? (
-            <div className="text-center py-8 text-gray-500 text-sm">
+            <div className="text-center py-8 text-muted-foreground text-sm">
               No IP whitelist rules configured. All IPs are currently allowed.
             </div>
           ) : (
@@ -172,7 +172,7 @@ export default function IPWhitelistPage() {
                 <div
                   key={rule.id}
                   className={`flex items-center justify-between p-3 rounded-lg border ${
-                    rule.enabled ? "bg-white" : "bg-gray-50 opacity-60"
+                    rule.enabled ? "bg-white" : "bg-muted opacity-60"
                   }`}
                 >
                   <div className="flex items-center gap-3">
@@ -182,7 +182,7 @@ export default function IPWhitelistPage() {
                     />
                     <div>
                       <div className="flex items-center gap-2">
-                        <code className="text-sm font-mono bg-gray-100 px-2 py-0.5 rounded">
+                        <code className="text-sm font-mono bg-muted px-2 py-0.5 rounded">
                           {rule.ip_range}
                         </code>
                         <span className="font-medium text-sm">{rule.label}</span>
@@ -191,7 +191,7 @@ export default function IPWhitelistPage() {
                         )}
                       </div>
                       {rule.description && (
-                        <p className="text-xs text-gray-500 mt-0.5">{rule.description}</p>
+                        <p className="text-xs text-muted-foreground mt-0.5">{rule.description}</p>
                       )}
                     </div>
                   </div>

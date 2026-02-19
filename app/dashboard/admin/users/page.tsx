@@ -159,7 +159,7 @@ export default function AdminUsersPage() {
 
       {/* Search */}
       <div className="relative max-w-sm">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
         <Input
           placeholder="Search by name or email..."
           value={searchQuery}
@@ -257,7 +257,7 @@ export default function AdminUsersPage() {
                       <CheckCircle className="h-3.5 w-3.5" /> Enabled
                     </span>
                   ) : (
-                    <span className="flex items-center gap-1 text-gray-400">
+                    <span className="flex items-center gap-1 text-muted-foreground">
                       <XCircle className="h-3.5 w-3.5" /> Off
                     </span>
                   )}

@@ -100,7 +100,7 @@ export default function BetaTestersPage() {
       case "premium":
         return "bg-blue-500 text-white";
       default:
-        return "bg-gray-500 text-white";
+        return "bg-muted0 text-white";
     }
   }
 

@@ -84,7 +84,7 @@ export default function AdminOverviewPage() {
 
   if (!data) {
     return (
-      <div className="p-8 text-center text-gray-500">
+      <div className="p-8 text-center text-muted-foreground">
         Failed to load analytics. You may not have admin access.
       </div>
     );
@@ -96,7 +96,7 @@ export default function AdminOverviewPage() {
     <div className="p-4 sm:p-8 max-w-7xl mx-auto space-y-6">
       <div>
         <h1 className="text-3xl font-bold">Admin Overview</h1>
-        <p className="text-gray-600 mt-1">
+        <p className="text-muted-foreground mt-1">
           Revenue, growth, and platform health metrics
         </p>
       </div>
@@ -111,43 +111,43 @@ export default function AdminOverviewPage() {
         </Link>
         <Link
           href="/dashboard/admin/usage"
-          className="px-3 py-1.5 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200"
+          className="px-3 py-1.5 bg-muted text-foreground rounded-lg hover:bg-muted"
         >
           AI Usage
         </Link>
         <Link
           href="/dashboard/admin/users"
-          className="px-3 py-1.5 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200"
+          className="px-3 py-1.5 bg-muted text-foreground rounded-lg hover:bg-muted"
         >
           Users
         </Link>
         <Link
           href="/dashboard/admin/organizations"
-          className="px-3 py-1.5 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200"
+          className="px-3 py-1.5 bg-muted text-foreground rounded-lg hover:bg-muted"
         >
           Organizations
         </Link>
         <Link
           href="/dashboard/admin/compliance"
-          className="px-3 py-1.5 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200"
+          className="px-3 py-1.5 bg-muted text-foreground rounded-lg hover:bg-muted"
         >
           Compliance
         </Link>
         <Link
           href="/dashboard/admin/sso"
-          className="px-3 py-1.5 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200"
+          className="px-3 py-1.5 bg-muted text-foreground rounded-lg hover:bg-muted"
         >
           SSO
         </Link>
         <Link
           href="/dashboard/admin/sessions"
-          className="px-3 py-1.5 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200"
+          className="px-3 py-1.5 bg-muted text-foreground rounded-lg hover:bg-muted"
         >
           Sessions
         </Link>
         <Link
           href="/dashboard/audit-logs"
-          className="px-3 py-1.5 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200"
+          className="px-3 py-1.5 bg-muted text-foreground rounded-lg hover:bg-muted"
         >
           Audit Logs
         </Link>
@@ -225,7 +225,7 @@ export default function AdminOverviewPage() {
           </CardHeader>
           <CardContent>
             {data.revenue_by_plan.length === 0 ? (
-              <p className="text-sm text-gray-500">No revenue data yet</p>
+              <p className="text-sm text-muted-foreground">No revenue data yet</p>
             ) : (
               <div className="space-y-3">
                 {data.revenue_by_plan.map((plan) => (
@@ -235,7 +235,7 @@ export default function AdminOverviewPage() {
                   >
                     <div>
                       <span className="font-medium capitalize">{plan.plan}</span>
-                      <span className="text-sm text-gray-500 ml-2">
+                      <span className="text-sm text-muted-foreground ml-2">
                         ({plan.customer_count} customers)
                       </span>
                     </div>
@@ -256,7 +256,7 @@ export default function AdminOverviewPage() {
           </CardHeader>
           <CardContent>
             {data.top_customers.length === 0 ? (
-              <p className="text-sm text-gray-500">No customers yet</p>
+              <p className="text-sm text-muted-foreground">No customers yet</p>
             ) : (
               <div className="space-y-3">
                 {data.top_customers.slice(0, 5).map((customer, i) => (
@@ -268,7 +268,7 @@ export default function AdminOverviewPage() {
                       <div className="font-medium truncate">
                         {customer.user_name || "Unknown"}
                       </div>
-                      <div className="text-sm text-gray-500 truncate">
+                      <div className="text-sm text-muted-foreground truncate">
                         {customer.user_email}
                       </div>
                     </div>
@@ -276,7 +276,7 @@ export default function AdminOverviewPage() {
                       <div className="font-semibold">
                         ${customer.monthly_revenue.toLocaleString()}/mo
                       </div>
-                      <div className="text-xs text-gray-500 capitalize">
+                      <div className="text-xs text-muted-foreground capitalize">
                         {customer.plan}
                       </div>
                     </div>
@@ -295,16 +295,16 @@ export default function AdminOverviewPage() {
         </CardHeader>
         <CardContent>
           {data.recent_activity.length === 0 ? (
-            <p className="text-sm text-gray-500">No recent activity</p>
+            <p className="text-sm text-muted-foreground">No recent activity</p>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b text-left">
-                    <th className="pb-2 font-medium text-gray-600">Customer</th>
-                    <th className="pb-2 font-medium text-gray-600">Plan</th>
-                    <th className="pb-2 font-medium text-gray-600">Status</th>
-                    <th className="pb-2 font-medium text-gray-600">Date</th>
+                    <th className="pb-2 font-medium text-muted-foreground">Customer</th>
+                    <th className="pb-2 font-medium text-muted-foreground">Plan</th>
+                    <th className="pb-2 font-medium text-muted-foreground">Status</th>
+                    <th className="pb-2 font-medium text-muted-foreground">Date</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -312,7 +312,7 @@ export default function AdminOverviewPage() {
                     <tr key={item.id} className="border-b last:border-0">
                       <td className="py-2">
                         <div className="font-medium">{item.user_name || "Unknown"}</div>
-                        <div className="text-xs text-gray-500">{item.user_email}</div>
+                        <div className="text-xs text-muted-foreground">{item.user_email}</div>
                       </td>
                       <td className="py-2 capitalize">{item.plan}</td>
                       <td className="py-2">
@@ -323,14 +323,14 @@ export default function AdminOverviewPage() {
                               : item.status === "trialing"
                               ? "bg-blue-100 text-blue-700"
                               : item.status === "canceled"
-                              ? "bg-gray-100 text-gray-700"
+                              ? "bg-muted text-foreground"
                               : "bg-amber-100 text-amber-700"
                           }`}
                         >
                           {item.status}
                         </span>
                       </td>
-                      <td className="py-2 text-gray-500">
+                      <td className="py-2 text-muted-foreground">
                         {new Date(item.created_at).toLocaleDateString()}
                       </td>
                     </tr>
@@ -365,9 +365,9 @@ function MetricCard({
       <CardContent className="p-4 sm:p-6">
         <div className="flex items-start justify-between">
           <div>
-            <p className="text-sm text-gray-500">{title}</p>
+            <p className="text-sm text-muted-foreground">{title}</p>
             <p className="text-2xl font-bold mt-1">{value}</p>
-            <p className="text-xs text-gray-500 mt-1">{subtitle}</p>
+            <p className="text-xs text-muted-foreground mt-1">{subtitle}</p>
           </div>
           <div className={`p-2 rounded-lg ${iconBg}`}>
             <Icon className={`h-5 w-5 ${iconColor}`} />

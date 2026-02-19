@@ -18,6 +18,7 @@ import {
   FolderKanban,
   Sparkles,
 } from "lucide-react";
+import { useConfirm } from "@/components/ui/confirm-dialog";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -50,10 +51,11 @@ const entityTypeColors: Record<string, string> = {
 export default function EntitiesPage() {
   const router = useRouter();
   const { entities, isLoading, refreshEntities, switchEntity, currentEntity } = useEntityContext();
+  const { confirm } = useConfirm();
   const [deleting, setDeleting] = useState<string | null>(null);
 
   const handleDelete = async (entityId: string) => {
-    if (!confirm("Are you sure you want to delete this space? This will also delete all associated projects.")) {
+    if (!(await confirm("Are you sure you want to delete this space? This will also delete all associated projects."))) {
       return;
     }
 

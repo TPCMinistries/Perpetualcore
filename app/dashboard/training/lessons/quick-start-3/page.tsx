@@ -57,7 +57,7 @@ export default function QuickStartLesson3() {
           </p>
 
           <div className="grid md:grid-cols-2 gap-3 mb-4">
-            <div className="p-4 bg-white dark:bg-gray-900 rounded-lg border">
+            <div className="p-4 bg-white dark:bg-card rounded-lg border">
               <div className="flex items-center gap-2 mb-2">
                 <Zap className="h-5 w-5 text-green-600" />
                 <h4 className="font-semibold text-sm">Daily Summary</h4>
@@ -66,7 +66,7 @@ export default function QuickStartLesson3() {
                 Compiles your schedule, tasks, and important emails every morning
               </p>
             </div>
-            <div className="p-4 bg-white dark:bg-gray-900 rounded-lg border">
+            <div className="p-4 bg-white dark:bg-card rounded-lg border">
               <div className="flex items-center gap-2 mb-2">
                 <Zap className="h-5 w-5 text-blue-600" />
                 <h4 className="font-semibold text-sm">Email to Task</h4>
@@ -75,7 +75,7 @@ export default function QuickStartLesson3() {
                 Automatically creates tasks from flagged emails
               </p>
             </div>
-            <div className="p-4 bg-white dark:bg-gray-900 rounded-lg border">
+            <div className="p-4 bg-white dark:bg-card rounded-lg border">
               <div className="flex items-center gap-2 mb-2">
                 <Zap className="h-5 w-5 text-purple-600" />
                 <h4 className="font-semibold text-sm">Document Backup</h4>
@@ -84,7 +84,7 @@ export default function QuickStartLesson3() {
                 Syncs important files to cloud storage automatically
               </p>
             </div>
-            <div className="p-4 bg-white dark:bg-gray-900 rounded-lg border">
+            <div className="p-4 bg-white dark:bg-card rounded-lg border">
               <div className="flex items-center gap-2 mb-2">
                 <Zap className="h-5 w-5 text-orange-600" />
                 <h4 className="font-semibold text-sm">Meeting Prep</h4>
@@ -187,9 +187,9 @@ export default function QuickStartLesson3() {
           </div>
 
           <div className="space-y-4">
-            <div className="p-4 bg-white dark:bg-gray-900 rounded-lg border">
+            <div className="p-4 bg-white dark:bg-card rounded-lg border">
               <div className="flex items-center gap-2 mb-2">
-                <Settings2 className="h-5 w-5 text-gray-600" />
+                <Settings2 className="h-5 w-5 text-muted-foreground" />
                 <h4 className="font-semibold">Step Configuration</h4>
               </div>
               <p className="text-sm text-muted-foreground mb-2">
@@ -245,12 +245,12 @@ export default function QuickStartLesson3() {
 
           <Card className="p-6 bg-gradient-to-br from-purple-50 to-blue-50 dark:from-purple-950/20 dark:to-blue-950/20 border-purple-200">
             <h4 className="font-semibold mb-3">Recommended Trigger for Daily Summary</h4>
-            <div className="p-4 bg-white dark:bg-gray-900 rounded-lg border">
+            <div className="p-4 bg-white dark:bg-card rounded-lg border">
               <p className="font-medium text-sm mb-2">Schedule: Every Weekday at 8:00 AM</p>
               <p className="text-xs text-muted-foreground mb-3">
                 This ensures you get your summary every Monday through Friday at the start of your workday.
               </p>
-              <div className="p-2 bg-gray-50 dark:bg-gray-950 rounded border border-dashed">
+              <div className="p-2 bg-muted dark:bg-background rounded border border-dashed">
                 <code className="text-xs">Cron: 0 8 * * 1-5</code>
               </div>
             </div>
@@ -384,7 +384,7 @@ export default function QuickStartLesson3() {
           <li className="list-disc">Set the due date based on keywords in the email (e.g., "urgent," "tomorrow")</li>
         </ul>
 
-        <div className="flex items-start gap-3 p-4 bg-white dark:bg-gray-900 rounded-lg border">
+        <div className="flex items-start gap-3 p-4 bg-white dark:bg-card rounded-lg border">
           <CheckCircle2 className="h-5 w-5 text-green-600 flex-shrink-0 mt-0.5" />
           <div>
             <p className="font-medium text-sm mb-1">Success Criteria</p>

@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { toast } from "sonner";
 import { Shield, Check, AlertCircle, Copy, Download, Key } from "lucide-react";
+import { useConfirm } from "@/components/ui/confirm-dialog";
 import QRCode from "qrcode";
 
 interface TwoFactorStatus {
@@ -19,6 +20,7 @@ interface TwoFactorStatus {
 }
 
 export default function SecuritySettingsPage() {
+  const { confirm } = useConfirm();
   const [status, setStatus] = useState<TwoFactorStatus | null>(null);
   const [loading, setLoading] = useState(true);
   const [setupStep, setSetupStep] = useState<"idle" | "qr" | "verify" | "backup">("idle");
@@ -122,7 +124,7 @@ export default function SecuritySettingsPage() {
       return;
     }
 
-    if (!confirm("Are you sure you want to disable 2FA? This will make your account less secure.")) {
+    if (!(await confirm("Are you sure you want to disable 2FA? This will make your account less secure."))) {
       return;
     }
 

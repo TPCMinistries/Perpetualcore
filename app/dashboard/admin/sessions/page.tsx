@@ -80,7 +80,7 @@ export default function SessionManagementPage() {
     <div className="p-4 sm:p-8 max-w-7xl mx-auto space-y-6">
       <div>
         <h1 className="text-3xl font-bold">Session Management</h1>
-        <p className="text-gray-600 mt-1">
+        <p className="text-muted-foreground mt-1">
           Manage active sessions, enforce MFA, and configure session policies
         </p>
       </div>
@@ -88,7 +88,7 @@ export default function SessionManagementPage() {
       <div className="flex gap-2 text-sm">
         <Link
           href="/dashboard/admin/compliance"
-          className="px-3 py-1.5 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200"
+          className="px-3 py-1.5 bg-muted text-foreground rounded-lg hover:bg-muted"
         >
           &larr; Compliance Overview
         </Link>

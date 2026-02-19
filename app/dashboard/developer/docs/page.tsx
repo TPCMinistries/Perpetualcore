@@ -200,7 +200,7 @@ agent = response.json()`,
       DELETE: "bg-red-50 border-red-300 text-red-700",
       PATCH: "bg-purple-50 border-purple-300 text-purple-700",
     };
-    return colors[method as keyof typeof colors] || "bg-gray-50 border-gray-300 text-gray-700";
+    return colors[method as keyof typeof colors] || "bg-muted border-border text-foreground";
   }
 
   const filteredEndpoints = endpoints.filter(

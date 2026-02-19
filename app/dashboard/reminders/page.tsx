@@ -18,6 +18,7 @@ import {
   X,
   ChevronRight,
 } from "lucide-react";
+import { useConfirm } from "@/components/ui/confirm-dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -93,7 +94,7 @@ const STATUS_CONFIG: Record<string, { label: string; color: string; icon: any }>
   pending: { label: "Pending", color: "bg-blue-100 text-blue-700", icon: Clock },
   snoozed: { label: "Snoozed", color: "bg-yellow-100 text-yellow-700", icon: AlarmClock },
   completed: { label: "Done", color: "bg-green-100 text-green-700", icon: CheckCircle2 },
-  cancelled: { label: "Cancelled", color: "bg-gray-100 text-gray-700", icon: X },
+  cancelled: { label: "Cancelled", color: "bg-muted text-foreground", icon: X },
 };
 
 const SNOOZE_OPTIONS = [
@@ -105,6 +106,7 @@ const SNOOZE_OPTIONS = [
 ];
 
 export default function RemindersPage() {
+  const { confirm } = useConfirm();
   const [reminders, setReminders] = useState<Reminder[]>([]);
   const [stats, setStats] = useState<Stats | null>(null);
   const [loading, setLoading] = useState(true);
@@ -242,7 +244,7 @@ export default function RemindersPage() {
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm("Delete this reminder?")) return;
+    if (!(await confirm("Delete this reminder?"))) return;
 
     try {
       const res = await fetch(`/api/reminders?id=${id}`, { method: "DELETE" });

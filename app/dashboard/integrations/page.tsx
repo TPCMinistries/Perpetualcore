@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { Check, X, ExternalLink, Settings, AlertCircle, FileSpreadsheet } from "lucide-react";
+import { useConfirm } from "@/components/ui/confirm-dialog";
 import { EmptyState } from "@/components/ui/empty-state";
 import { GoogleSheetsConnect } from "@/components/integrations/GoogleSheetsConnect";
 
@@ -35,6 +36,7 @@ interface Integration {
 }
 
 export default function IntegrationsPage() {
+  const { confirm } = useConfirm();
   const [available, setAvailable] = useState<IntegrationConfig[]>([]);
   const [integrations, setIntegrations] = useState<Integration[]>([]);
   const [loading, setLoading] = useState(true);
@@ -102,7 +104,7 @@ export default function IntegrationsPage() {
   }
 
   async function handleDisconnect(integrationId: string, providerName: string) {
-    if (!confirm(`Are you sure you want to disconnect ${providerName}?`)) {
+    if (!(await confirm(`Are you sure you want to disconnect ${providerName}?`))) {
       return;
     }
 
@@ -285,7 +287,7 @@ export default function IntegrationsPage() {
                         </Badge>
                       )}
                       {!integration.configured && (
-                        <Badge variant="outline" className="mt-1 text-xs bg-gray-50 border-gray-300 text-gray-700">
+                        <Badge variant="outline" className="mt-1 text-xs bg-muted border-border text-foreground">
                           Coming Soon
                         </Badge>
                       )}

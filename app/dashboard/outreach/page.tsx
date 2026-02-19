@@ -22,6 +22,7 @@ import {
   Target,
   Zap,
 } from "lucide-react";
+import { useConfirm } from "@/components/ui/confirm-dialog";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -68,7 +69,7 @@ interface Sequence {
 }
 
 const statusColors: Record<string, { bg: string; text: string }> = {
-  draft: { bg: "bg-gray-100 dark:bg-gray-800", text: "text-gray-600 dark:text-gray-400" },
+  draft: { bg: "bg-muted dark:bg-muted", text: "text-muted-foreground dark:text-muted-foreground" },
   active: { bg: "bg-green-100 dark:bg-green-900/30", text: "text-green-600 dark:text-green-400" },
   paused: { bg: "bg-yellow-100 dark:bg-yellow-900/30", text: "text-yellow-600 dark:text-yellow-400" },
   completed: { bg: "bg-blue-100 dark:bg-blue-900/30", text: "text-blue-600 dark:text-blue-400" },
@@ -85,6 +86,7 @@ const typeLabels: Record<string, string> = {
 
 export default function OutreachPage() {
   const router = useRouter();
+  const { confirm } = useConfirm();
   const [sequences, setSequences] = useState<Sequence[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
@@ -169,7 +171,7 @@ export default function OutreachPage() {
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm("Are you sure you want to archive this sequence?")) return;
+    if (!(await confirm("Are you sure you want to archive this sequence?"))) return;
 
     try {
       const response = await fetch(`/api/outreach/${id}`, { method: "DELETE" });

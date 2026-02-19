@@ -344,7 +344,7 @@ export default function DataExportPage() {
                           {exportJob.data_types.join(", ").length > 50 ? "..." : ""}
                         </p>
                         {getStatusBadge(exportJob.status)}
-                        <Badge variant="outline" className="bg-gray-50 border-gray-300 text-gray-700 uppercase">
+                        <Badge variant="outline" className="bg-muted border-border text-foreground uppercase">
                           {exportJob.format}
                         </Badge>
                       </div>

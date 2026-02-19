@@ -51,7 +51,7 @@ export default function QuickStartLesson4() {
           </div>
 
           <div className="grid md:grid-cols-2 gap-4">
-            <div className="p-4 bg-white dark:bg-gray-900 rounded-lg border">
+            <div className="p-4 bg-white dark:bg-card rounded-lg border">
               <h4 className="font-semibold mb-2 text-sm">What You Can Upload</h4>
               <ul className="space-y-1 text-sm text-muted-foreground">
                 <li>• Company policies & procedures</li>
@@ -63,7 +63,7 @@ export default function QuickStartLesson4() {
               </ul>
             </div>
 
-            <div className="p-4 bg-white dark:bg-gray-900 rounded-lg border">
+            <div className="p-4 bg-white dark:bg-card rounded-lg border">
               <h4 className="font-semibold mb-2 text-sm">What AI Can Do</h4>
               <ul className="space-y-1 text-sm text-muted-foreground">
                 <li>• Answer questions using your docs</li>
@@ -119,19 +119,19 @@ export default function QuickStartLesson4() {
           <div className="bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-800 rounded-lg p-6">
             <h4 className="font-semibold mb-3">Example Collections</h4>
             <div className="grid md:grid-cols-2 gap-3">
-              <div className="p-3 bg-white dark:bg-gray-900 rounded border">
+              <div className="p-3 bg-white dark:bg-card rounded border">
                 <p className="font-medium text-sm mb-1">📚 Company Handbook</p>
                 <p className="text-xs text-muted-foreground">Policies, benefits, procedures</p>
               </div>
-              <div className="p-3 bg-white dark:bg-gray-900 rounded border">
+              <div className="p-3 bg-white dark:bg-card rounded border">
                 <p className="font-medium text-sm mb-1">🚀 Product Documentation</p>
                 <p className="text-xs text-muted-foreground">User guides, API docs, tutorials</p>
               </div>
-              <div className="p-3 bg-white dark:bg-gray-900 rounded border">
+              <div className="p-3 bg-white dark:bg-card rounded border">
                 <p className="font-medium text-sm mb-1">💼 Project Files</p>
                 <p className="text-xs text-muted-foreground">Proposals, contracts, reports</p>
               </div>
-              <div className="p-3 bg-white dark:bg-gray-900 rounded border">
+              <div className="p-3 bg-white dark:bg-card rounded border">
                 <p className="font-medium text-sm mb-1">🎓 Training Materials</p>
                 <p className="text-xs text-muted-foreground">Onboarding, courses, guides</p>
               </div>
@@ -152,35 +152,35 @@ export default function QuickStartLesson4() {
           <div className="bg-green-50 dark:bg-green-950/20 border border-green-200 dark:border-green-800 rounded-lg p-6">
             <h4 className="font-semibold mb-3">Supported File Types</h4>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-              <div className="p-2 bg-white dark:bg-gray-900 rounded border text-center">
+              <div className="p-2 bg-white dark:bg-card rounded border text-center">
                 <FileText className="h-6 w-6 mx-auto mb-1 text-red-600" />
                 <p className="text-xs font-medium">PDF</p>
               </div>
-              <div className="p-2 bg-white dark:bg-gray-900 rounded border text-center">
+              <div className="p-2 bg-white dark:bg-card rounded border text-center">
                 <FileText className="h-6 w-6 mx-auto mb-1 text-blue-600" />
                 <p className="text-xs font-medium">Word</p>
               </div>
-              <div className="p-2 bg-white dark:bg-gray-900 rounded border text-center">
+              <div className="p-2 bg-white dark:bg-card rounded border text-center">
                 <FileText className="h-6 w-6 mx-auto mb-1 text-green-600" />
                 <p className="text-xs font-medium">Excel</p>
               </div>
-              <div className="p-2 bg-white dark:bg-gray-900 rounded border text-center">
+              <div className="p-2 bg-white dark:bg-card rounded border text-center">
                 <FileText className="h-6 w-6 mx-auto mb-1 text-orange-600" />
                 <p className="text-xs font-medium">PowerPoint</p>
               </div>
-              <div className="p-2 bg-white dark:bg-gray-900 rounded border text-center">
-                <FileText className="h-6 w-6 mx-auto mb-1 text-gray-600" />
+              <div className="p-2 bg-white dark:bg-card rounded border text-center">
+                <FileText className="h-6 w-6 mx-auto mb-1 text-muted-foreground" />
                 <p className="text-xs font-medium">Text</p>
               </div>
-              <div className="p-2 bg-white dark:bg-gray-900 rounded border text-center">
+              <div className="p-2 bg-white dark:bg-card rounded border text-center">
                 <FileText className="h-6 w-6 mx-auto mb-1 text-purple-600" />
                 <p className="text-xs font-medium">Markdown</p>
               </div>
-              <div className="p-2 bg-white dark:bg-gray-900 rounded border text-center">
+              <div className="p-2 bg-white dark:bg-card rounded border text-center">
                 <FileText className="h-6 w-6 mx-auto mb-1 text-indigo-600" />
                 <p className="text-xs font-medium">CSV</p>
               </div>
-              <div className="p-2 bg-white dark:bg-gray-900 rounded border text-center">
+              <div className="p-2 bg-white dark:bg-card rounded border text-center">
                 <FileText className="h-6 w-6 mx-auto mb-1 text-pink-600" />
                 <p className="text-xs font-medium">JSON</p>
               </div>
@@ -188,7 +188,7 @@ export default function QuickStartLesson4() {
           </div>
 
           <div className="space-y-3">
-            <div className="p-4 bg-white dark:bg-gray-900 rounded-lg border">
+            <div className="p-4 bg-white dark:bg-card rounded-lg border">
               <h4 className="font-semibold text-sm mb-2 flex items-center gap-2">
                 <Upload className="h-4 w-4 text-blue-600" />
                 Upload Methods
@@ -233,32 +233,32 @@ export default function QuickStartLesson4() {
             </h4>
 
             <div className="space-y-4">
-              <div className="p-4 bg-white dark:bg-gray-900 rounded-lg border">
+              <div className="p-4 bg-white dark:bg-card rounded-lg border">
                 <p className="font-medium text-sm mb-2">1. Keyword Search</p>
                 <p className="text-xs text-muted-foreground mb-2">
                   Search for specific terms or phrases that appear in your documents
                 </p>
-                <div className="p-2 bg-gray-50 dark:bg-gray-950 rounded border border-dashed">
+                <div className="p-2 bg-muted dark:bg-background rounded border border-dashed">
                   <code className="text-xs">Example: "vacation policy" or "API authentication"</code>
                 </div>
               </div>
 
-              <div className="p-4 bg-white dark:bg-gray-900 rounded-lg border">
+              <div className="p-4 bg-white dark:bg-card rounded-lg border">
                 <p className="font-medium text-sm mb-2">2. Natural Language Questions</p>
                 <p className="text-xs text-muted-foreground mb-2">
                   Ask questions in plain English - AI understands context
                 </p>
-                <div className="p-2 bg-gray-50 dark:bg-gray-950 rounded border border-dashed">
+                <div className="p-2 bg-muted dark:bg-background rounded border border-dashed">
                   <code className="text-xs">Example: "How many vacation days do I get?" or "What's the process for expense reimbursement?"</code>
                 </div>
               </div>
 
-              <div className="p-4 bg-white dark:bg-gray-900 rounded-lg border">
+              <div className="p-4 bg-white dark:bg-card rounded-lg border">
                 <p className="font-medium text-sm mb-2">3. Semantic Search</p>
                 <p className="text-xs text-muted-foreground mb-2">
                   Find information by concept, even if the exact words don't match
                 </p>
-                <div className="p-2 bg-gray-50 dark:bg-gray-950 rounded border border-dashed">
+                <div className="p-2 bg-muted dark:bg-background rounded border border-dashed">
                   <code className="text-xs">Example: Search "time off" to find documents about "vacation", "PTO", or "leave"</code>
                 </div>
               </div>
@@ -306,7 +306,7 @@ export default function QuickStartLesson4() {
               When you chat with AI, it can access your Knowledge Base to provide accurate, personalized answers based on YOUR documents.
             </p>
             <div className="space-y-2">
-              <div className="p-3 bg-white dark:bg-gray-900 rounded border">
+              <div className="p-3 bg-white dark:bg-card rounded border">
                 <p className="text-xs font-medium mb-1">💬 Example Conversation</p>
                 <div className="space-y-2">
                   <p className="text-xs"><strong>You:</strong> "Summarize our Q4 product roadmap"</p>
@@ -425,7 +425,7 @@ export default function QuickStartLesson4() {
           <li className="list-disc">Bonus: Configure a Customer Support Agent to use this collection as its knowledge source</li>
         </ul>
 
-        <div className="flex items-start gap-3 p-4 bg-white dark:bg-gray-900 rounded-lg border">
+        <div className="flex items-start gap-3 p-4 bg-white dark:bg-card rounded-lg border">
           <CheckCircle2 className="h-5 w-5 text-green-600 flex-shrink-0 mt-0.5" />
           <div>
             <p className="font-medium text-sm mb-1">Success Criteria</p>

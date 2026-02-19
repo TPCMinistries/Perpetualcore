@@ -4,9 +4,11 @@ import { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Database, Trash2, Download, AlertTriangle } from "lucide-react";
+import { useConfirm } from "@/components/ui/confirm-dialog";
 import { toast } from "sonner";
 
 export default function DemoModePage() {
+  const { confirm } = useConfirm();
   const [isLoading, setIsLoading] = useState(false);
   const [isDemoMode, setIsDemoMode] = useState(false);
 
@@ -28,9 +30,9 @@ export default function DemoModePage() {
 
   async function handlePopulateSampleData() {
     if (
-      !confirm(
+      !(await confirm(
         "This will add sample documents, tasks, conversations, and calendar events to your account. Continue?"
-      )
+      ))
     ) {
       return;
     }
@@ -60,9 +62,9 @@ export default function DemoModePage() {
 
   async function handleClearDemoData() {
     if (
-      !confirm(
+      !(await confirm(
         "This will DELETE ALL your documents, tasks, conversations, and calendar events. This action cannot be undone. Are you sure?"
-      )
+      ))
     ) {
       return;
     }

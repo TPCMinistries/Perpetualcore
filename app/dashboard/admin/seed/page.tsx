@@ -5,14 +5,16 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Loader2, Database, CheckCircle2, AlertCircle, Trash2 } from "lucide-react";
+import { useConfirm } from "@/components/ui/confirm-dialog";
 
 export default function AdminSeedPage() {
+  const { confirm } = useConfirm();
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<any>(null);
   const [error, setError] = useState<string | null>(null);
 
   const handleSeed = async () => {
-    if (!confirm("This will DELETE all existing entities, projects, and tasks, then create fresh data. Continue?")) {
+    if (!(await confirm("This will DELETE all existing entities, projects, and tasks, then create fresh data. Continue?"))) {
       return;
     }
 

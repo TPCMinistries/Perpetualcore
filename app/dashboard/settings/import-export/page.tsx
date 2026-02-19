@@ -104,7 +104,7 @@ export default function ImportExportPage() {
     <div className="p-8 max-w-4xl mx-auto">
       <div className="mb-8">
         <h1 className="text-3xl font-bold">Import & Export</h1>
-        <p className="text-gray-600 mt-2">
+        <p className="text-muted-foreground mt-2">
           Back up your data or migrate from other services
         </p>
       </div>
@@ -270,7 +270,7 @@ export default function ImportExportPage() {
 
           <div>
             <label className="text-sm font-medium mb-2 block">Select File</label>
-            <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-gray-400 transition-colors">
+            <div className="border-2 border-dashed border-border rounded-lg p-8 text-center hover:border-gray-400 transition-colors">
               <input
                 type="file"
                 accept={
@@ -292,15 +292,15 @@ export default function ImportExportPage() {
                   <>
                     <CheckCircle2 className="h-12 w-12 text-green-600 mb-2" />
                     <p className="text-sm font-medium">{selectedFile.name}</p>
-                    <p className="text-xs text-gray-500 mt-1">
+                    <p className="text-xs text-muted-foreground mt-1">
                       {(selectedFile.size / 1024).toFixed(1)} KB
                     </p>
                   </>
                 ) : (
                   <>
-                    <Upload className="h-12 w-12 text-gray-400 mb-2" />
+                    <Upload className="h-12 w-12 text-muted-foreground mb-2" />
                     <p className="text-sm font-medium">Click to select file</p>
-                    <p className="text-xs text-gray-500 mt-1">
+                    <p className="text-xs text-muted-foreground mt-1">
                       or drag and drop
                     </p>
                   </>
