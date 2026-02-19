@@ -326,7 +326,7 @@ export default function ChangelogPage() {
                     </div>
                     <div className="flex-1">
                       <div className="flex items-center gap-2 mb-2">
-                        <Badge variant="outline" className="bg-gray-50 border-gray-300 text-gray-700 font-mono">
+                        <Badge variant="outline" className="bg-muted border-border text-foreground font-mono">
                           <Tag className="h-3 w-3 mr-1" />
                           v{entry.version}
                         </Badge>

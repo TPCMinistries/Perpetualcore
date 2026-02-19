@@ -25,6 +25,7 @@ import {
   ChevronRight,
   X,
 } from "lucide-react";
+import { useConfirm } from "@/components/ui/confirm-dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -152,6 +153,7 @@ const SOURCE_OPTIONS = [
 ];
 
 export default function LeadsPage() {
+  const { confirm } = useConfirm();
   const [leads, setLeads] = useState<Lead[]>([]);
   const [pipeline, setPipeline] = useState<PipelineStats>({});
   const [loading, setLoading] = useState(true);
@@ -289,7 +291,7 @@ export default function LeadsPage() {
 
   // Delete lead
   const handleDeleteLead = async (leadId: string) => {
-    if (!confirm("Are you sure you want to delete this lead?")) return;
+    if (!(await confirm("Are you sure you want to delete this lead?"))) return;
 
     try {
       const res = await fetch(`/api/leads/${leadId}`, {

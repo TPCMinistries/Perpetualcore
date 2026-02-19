@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
+import { cardVariants } from "@/lib/design/animations";
 import {
   Video,
   Users,
@@ -99,14 +100,6 @@ const sentimentColors: Record<string, { bg: string; text: string }> = {
   },
 };
 
-const cardVariants = {
-  hidden: { opacity: 0, y: 20 },
-  visible: (i: number) => ({
-    opacity: 1,
-    y: 0,
-    transition: { delay: i * 0.05, duration: 0.3 },
-  }),
-};
 
 function MeetingsSkeleton() {
   return (

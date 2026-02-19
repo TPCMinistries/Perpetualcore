@@ -4,6 +4,7 @@ import { useState, useEffect, use } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Loader2, Trash2 } from "lucide-react";
+import { useConfirm } from "@/components/ui/confirm-dialog";
 import { toast } from "sonner";
 import SkillBuilderForm from "@/components/skills/SkillBuilderForm";
 import type { CreateCustomSkillInput } from "@/lib/skills/custom/types";
@@ -15,6 +16,7 @@ export default function EditCustomSkillPage({
 }) {
   const { id } = use(params);
   const router = useRouter();
+  const { confirm } = useConfirm();
   const [skill, setSkill] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -88,7 +90,7 @@ export default function EditCustomSkillPage({
   };
 
   const handleDelete = async () => {
-    if (!confirm("Are you sure you want to delete this skill? This cannot be undone.")) {
+    if (!(await confirm("Are you sure you want to delete this skill? This cannot be undone."))) {
       return;
     }
 

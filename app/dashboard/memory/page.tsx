@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
+import { cardVariants } from "@/lib/design/animations";
 import {
   Brain,
   FileText,
@@ -89,14 +90,6 @@ const MEMORY_TYPE_COLORS: Record<string, string> = {
   workflow: "bg-cyan-100 text-cyan-700 dark:bg-cyan-900/30 dark:text-cyan-400",
 };
 
-const cardVariants = {
-  hidden: { opacity: 0, y: 20 },
-  visible: (i: number) => ({
-    opacity: 1,
-    y: 0,
-    transition: { delay: i * 0.05, duration: 0.3 },
-  }),
-};
 
 function MemorySkeleton() {
   return (

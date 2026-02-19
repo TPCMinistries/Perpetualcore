@@ -134,7 +134,7 @@ export default function NotificationSettingsPage() {
     return (
       <div className="p-8">
         <div className="flex items-center justify-center h-64">
-          <Loader2 className="h-8 w-8 animate-spin text-gray-500" />
+          <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
         </div>
       </div>
     );
@@ -151,7 +151,7 @@ export default function NotificationSettingsPage() {
           </Button>
         </Link>
         <h1 className="text-3xl font-bold">Notification Settings</h1>
-        <p className="text-gray-600 mt-2">
+        <p className="text-muted-foreground mt-2">
           Customize how and when you receive notifications
         </p>
       </div>
@@ -159,7 +159,7 @@ export default function NotificationSettingsPage() {
       {/* Notification Types */}
       <Card className="p-6 mb-6">
         <h2 className="text-xl font-semibold mb-4">Notification Types</h2>
-        <p className="text-sm text-gray-600 mb-6">
+        <p className="text-sm text-muted-foreground mb-6">
           Choose which types of notifications you want to receive
         </p>
 
@@ -168,7 +168,7 @@ export default function NotificationSettingsPage() {
             <div key={type.key} className="flex items-center justify-between py-3 border-b last:border-b-0">
               <div>
                 <p className="font-medium">{type.label}</p>
-                <p className="text-sm text-gray-600">{type.description}</p>
+                <p className="text-sm text-muted-foreground">{type.description}</p>
               </div>
               <label className="relative inline-flex items-center cursor-pointer">
                 <input
@@ -177,7 +177,7 @@ export default function NotificationSettingsPage() {
                   checked={preferences[type.key as keyof NotificationPreferences] as boolean}
                   onChange={() => togglePreference(type.key as keyof NotificationPreferences)}
                 />
-                <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                <div className="w-11 h-6 bg-muted peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-border after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
               </label>
             </div>
           ))}
@@ -187,7 +187,7 @@ export default function NotificationSettingsPage() {
       {/* Delivery Channels */}
       <Card className="p-6 mb-6">
         <h2 className="text-xl font-semibold mb-4">Delivery Channels</h2>
-        <p className="text-sm text-gray-600 mb-6">
+        <p className="text-sm text-muted-foreground mb-6">
           Choose how you want to receive notifications
         </p>
 
@@ -195,7 +195,7 @@ export default function NotificationSettingsPage() {
           <div className="flex items-center justify-between py-3 border-b">
             <div>
               <p className="font-medium">In-App Notifications</p>
-              <p className="text-sm text-gray-600">Receive notifications in the application</p>
+              <p className="text-sm text-muted-foreground">Receive notifications in the application</p>
             </div>
             <label className="relative inline-flex items-center cursor-pointer">
               <input
@@ -204,14 +204,14 @@ export default function NotificationSettingsPage() {
                 checked={preferences.channel_in_app}
                 onChange={() => togglePreference("channel_in_app")}
               />
-              <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+              <div className="w-11 h-6 bg-muted peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-border after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
             </label>
           </div>
 
           <div className="flex items-center justify-between py-3 border-b">
             <div>
               <p className="font-medium">Email Notifications</p>
-              <p className="text-sm text-gray-600">Receive notifications via email</p>
+              <p className="text-sm text-muted-foreground">Receive notifications via email</p>
             </div>
             <label className="relative inline-flex items-center cursor-pointer">
               <input
@@ -220,14 +220,14 @@ export default function NotificationSettingsPage() {
                 checked={preferences.channel_email}
                 onChange={() => togglePreference("channel_email")}
               />
-              <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+              <div className="w-11 h-6 bg-muted peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-border after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
             </label>
           </div>
 
           <div className="flex items-center justify-between py-3">
             <div>
               <p className="font-medium">WhatsApp Notifications</p>
-              <p className="text-sm text-gray-600">Receive urgent notifications via WhatsApp</p>
+              <p className="text-sm text-muted-foreground">Receive urgent notifications via WhatsApp</p>
             </div>
             <label className="relative inline-flex items-center cursor-pointer">
               <input
@@ -236,7 +236,7 @@ export default function NotificationSettingsPage() {
                 checked={preferences.channel_whatsapp}
                 onChange={() => togglePreference("channel_whatsapp")}
               />
-              <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+              <div className="w-11 h-6 bg-muted peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-border after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
             </label>
           </div>
         </div>
@@ -245,7 +245,7 @@ export default function NotificationSettingsPage() {
       {/* Quiet Hours */}
       <Card className="p-6 mb-6">
         <h2 className="text-xl font-semibold mb-4">Quiet Hours</h2>
-        <p className="text-sm text-gray-600 mb-6">
+        <p className="text-sm text-muted-foreground mb-6">
           Mute non-urgent notifications during specific hours
         </p>
 
@@ -253,7 +253,7 @@ export default function NotificationSettingsPage() {
           <div className="flex items-center justify-between py-3 border-b">
             <div>
               <p className="font-medium">Enable Quiet Hours</p>
-              <p className="text-sm text-gray-600">Automatically snooze non-urgent notifications</p>
+              <p className="text-sm text-muted-foreground">Automatically snooze non-urgent notifications</p>
             </div>
             <label className="relative inline-flex items-center cursor-pointer">
               <input
@@ -262,7 +262,7 @@ export default function NotificationSettingsPage() {
                 checked={preferences.quiet_hours_enabled}
                 onChange={() => togglePreference("quiet_hours_enabled")}
               />
-              <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+              <div className="w-11 h-6 bg-muted peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-border after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
             </label>
           </div>
 
@@ -294,7 +294,7 @@ export default function NotificationSettingsPage() {
       {/* Digest Settings */}
       <Card className="p-6 mb-6">
         <h2 className="text-xl font-semibold mb-4">Notification Digest</h2>
-        <p className="text-sm text-gray-600 mb-6">
+        <p className="text-sm text-muted-foreground mb-6">
           Receive a summary of notifications instead of individual alerts
         </p>
 
@@ -302,7 +302,7 @@ export default function NotificationSettingsPage() {
           <div className="flex items-center justify-between py-3 border-b">
             <div>
               <p className="font-medium">Enable Digest</p>
-              <p className="text-sm text-gray-600">Group notifications into a daily or weekly summary</p>
+              <p className="text-sm text-muted-foreground">Group notifications into a daily or weekly summary</p>
             </div>
             <label className="relative inline-flex items-center cursor-pointer">
               <input
@@ -311,7 +311,7 @@ export default function NotificationSettingsPage() {
                 checked={preferences.digest_enabled}
                 onChange={() => togglePreference("digest_enabled")}
               />
-              <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+              <div className="w-11 h-6 bg-muted peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-border after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
             </label>
           </div>
 

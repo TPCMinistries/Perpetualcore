@@ -81,8 +81,8 @@ const PLAN_INFO: Record<string, {
     price: 0,
     annualPrice: 0,
     icon: Sparkles,
-    color: "text-gray-600",
-    bgColor: "bg-gray-50",
+    color: "text-muted-foreground",
+    bgColor: "bg-muted",
   },
   starter: {
     name: "Starter",
@@ -121,8 +121,8 @@ const PLAN_INFO: Record<string, {
     price: 9999,
     annualPrice: 95990,
     icon: Building2,
-    color: "text-gray-800",
-    bgColor: "bg-gray-100",
+    color: "text-foreground",
+    bgColor: "bg-muted",
   },
 };
 
@@ -163,7 +163,7 @@ function PlanCard({
       <div className="mb-4">
         <h3 className="text-xl font-bold">{name}</h3>
         <div className="text-3xl font-bold mt-2">{price}</div>
-        <div className="text-sm text-gray-600">{subtitle}</div>
+        <div className="text-sm text-muted-foreground">{subtitle}</div>
       </div>
       <ul className="space-y-3 mb-6">
         {features.map((f) => (
@@ -171,9 +171,9 @@ function PlanCard({
             {f.included ? (
               <Check className="h-5 w-5 text-green-600 mt-0.5 flex-shrink-0" />
             ) : (
-              <X className="h-5 w-5 text-gray-400 mt-0.5 flex-shrink-0" />
+              <X className="h-5 w-5 text-muted-foreground mt-0.5 flex-shrink-0" />
             )}
-            <span className={`text-sm ${f.included ? "" : "text-gray-600"}`}>{f.text}</span>
+            <span className={`text-sm ${f.included ? "" : "text-muted-foreground"}`}>{f.text}</span>
           </li>
         ))}
       </ul>
@@ -333,7 +333,7 @@ export default function BillingPage() {
     return (
       <div className="p-8">
         <div className="flex items-center justify-center h-64">
-          <Loader2 className="h-8 w-8 animate-spin text-gray-500" />
+          <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
         </div>
       </div>
     );
@@ -347,7 +347,7 @@ export default function BillingPage() {
       {/* Header */}
       <div className="mb-6">
         <h1 className="text-3xl font-bold">Billing & Usage</h1>
-        <p className="text-gray-600 mt-2">
+        <p className="text-muted-foreground mt-2">
           Manage your subscription and view usage statistics
         </p>
       </div>
@@ -368,7 +368,7 @@ export default function BillingPage() {
                 <h3 className="text-2xl font-bold">
                   {PLAN_INFO[currentPlan].name} Plan
                 </h3>
-                <p className="text-gray-600 mt-1">
+                <p className="text-muted-foreground mt-1">
                   {getPriceDisplay(currentPlan)}
                 </p>
 
@@ -393,7 +393,7 @@ export default function BillingPage() {
                 {subscription?.status === "active" &&
                   !subscription.cancel_at_period_end &&
                   subscription.current_period_end && (
-                    <div className="flex items-center gap-2 mt-3 text-sm text-gray-600">
+                    <div className="flex items-center gap-2 mt-3 text-sm text-muted-foreground">
                       <CheckCircle2 className="h-4 w-4 text-green-600" />
                       Renews{" "}
                       {new Date(
@@ -444,7 +444,7 @@ export default function BillingPage() {
           <CardContent>
             <div className="space-y-2">
               <div className="flex justify-between text-sm">
-                <span className="text-gray-600">This month</span>
+                <span className="text-muted-foreground">This month</span>
                 <span className="font-medium">
                   {usage?.ai_messages_count || 0}
                   {limits?.ai_messages_per_month === -1
@@ -475,7 +475,7 @@ export default function BillingPage() {
           <CardContent>
             <div className="space-y-2">
               <div className="flex justify-between text-sm">
-                <span className="text-gray-600">Stored</span>
+                <span className="text-muted-foreground">Stored</span>
                 <span className="font-medium">
                   {usage?.documents_stored || 0}
                   {limits?.documents_limit === -1
@@ -506,7 +506,7 @@ export default function BillingPage() {
           <CardContent>
             <div className="space-y-2">
               <div className="flex justify-between text-sm">
-                <span className="text-gray-600">Used</span>
+                <span className="text-muted-foreground">Used</span>
                 <span className="font-medium">
                   {formatBytes(usage?.storage_bytes || 0)} GB / {limits?.storage_gb || 0} GB
                 </span>
@@ -532,15 +532,15 @@ export default function BillingPage() {
           <CardContent>
             <div className="space-y-2 text-sm">
               <div className="flex justify-between">
-                <span className="text-gray-600">Emails synced</span>
+                <span className="text-muted-foreground">Emails synced</span>
                 <span className="font-medium">{usage?.emails_synced || 0}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-gray-600">WhatsApp messages</span>
+                <span className="text-muted-foreground">WhatsApp messages</span>
                 <span className="font-medium">{usage?.whatsapp_messages || 0}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-gray-600">Calendar events</span>
+                <span className="text-muted-foreground">Calendar events</span>
                 <span className="font-medium">{usage?.calendar_events || 0}</span>
               </div>
             </div>
@@ -562,11 +562,11 @@ export default function BillingPage() {
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b text-left">
-                    <th className="pb-3 font-medium text-gray-600">Invoice</th>
-                    <th className="pb-3 font-medium text-gray-600">Date</th>
-                    <th className="pb-3 font-medium text-gray-600">Amount</th>
-                    <th className="pb-3 font-medium text-gray-600">Status</th>
-                    <th className="pb-3 font-medium text-gray-600 text-right">Actions</th>
+                    <th className="pb-3 font-medium text-muted-foreground">Invoice</th>
+                    <th className="pb-3 font-medium text-muted-foreground">Date</th>
+                    <th className="pb-3 font-medium text-muted-foreground">Amount</th>
+                    <th className="pb-3 font-medium text-muted-foreground">Status</th>
+                    <th className="pb-3 font-medium text-muted-foreground text-right">Actions</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -575,7 +575,7 @@ export default function BillingPage() {
                       <td className="py-3 font-mono text-xs">
                         {invoice.number || invoice.id.slice(-8)}
                       </td>
-                      <td className="py-3 text-gray-600">
+                      <td className="py-3 text-muted-foreground">
                         {new Date(invoice.created * 1000).toLocaleDateString()}
                       </td>
                       <td className="py-3 font-medium">
@@ -591,7 +591,7 @@ export default function BillingPage() {
                               ? "bg-green-100 text-green-700"
                               : invoice.status === "open"
                               ? "bg-yellow-100 text-yellow-700"
-                              : "bg-gray-100 text-gray-700"
+                              : "bg-muted text-foreground"
                           }`}
                         >
                           {invoice.paid ? "Paid" : invoice.status || "Unknown"}
@@ -604,7 +604,7 @@ export default function BillingPage() {
                               href={invoice.invoiceUrl}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="text-gray-500 hover:text-gray-700"
+                              className="text-muted-foreground hover:text-foreground"
                               title="View invoice"
                             >
                               <ExternalLink className="h-4 w-4" />
@@ -615,7 +615,7 @@ export default function BillingPage() {
                               href={invoice.invoicePdf}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="text-gray-500 hover:text-gray-700"
+                              className="text-muted-foreground hover:text-foreground"
                               title="Download PDF"
                             >
                               <Download className="h-4 w-4" />
@@ -634,13 +634,13 @@ export default function BillingPage() {
 
       {/* Billing Interval Toggle */}
       <div className="flex justify-center mb-6">
-        <div className="inline-flex items-center gap-3 bg-gray-100 rounded-lg p-1">
+        <div className="inline-flex items-center gap-3 bg-muted rounded-lg p-1">
           <button
             onClick={() => setBillingInterval("monthly")}
             className={`px-4 py-2 rounded-md font-medium transition-all ${
               billingInterval === "monthly"
-                ? "bg-white text-gray-900 shadow-sm"
-                : "text-gray-600"
+                ? "bg-white text-foreground shadow-sm"
+                : "text-muted-foreground"
             }`}
           >
             Monthly
@@ -649,8 +649,8 @@ export default function BillingPage() {
             onClick={() => setBillingInterval("annual")}
             className={`px-4 py-2 rounded-md font-medium transition-all ${
               billingInterval === "annual"
-                ? "bg-white text-gray-900 shadow-sm"
-                : "text-gray-600"
+                ? "bg-white text-foreground shadow-sm"
+                : "text-muted-foreground"
             }`}
           >
             Annual
@@ -772,7 +772,7 @@ export default function BillingPage() {
               <div className="mb-4">
                 <h3 className="text-xl font-bold">Enterprise</h3>
                 <div className="text-3xl font-bold mt-2">Custom</div>
-                <div className="text-sm text-gray-600">contact sales</div>
+                <div className="text-sm text-muted-foreground">contact sales</div>
               </div>
               <ul className="space-y-3 mb-6">
                 {[

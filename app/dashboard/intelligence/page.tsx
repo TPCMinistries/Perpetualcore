@@ -22,6 +22,7 @@ import { DashboardPageWrapper, DashboardHeader } from "@/components/ui/dashboard
 import { StatCard, StatCardGrid } from "@/components/ui/stat-card";
 import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
+import { cardVariants } from "@/lib/design/animations";
 
 interface Insight {
   id: string;
@@ -58,18 +59,6 @@ interface Suggestion {
   status: string;
 }
 
-const cardVariants = {
-  hidden: { opacity: 0, y: 20 },
-  visible: (i: number) => ({
-    opacity: 1,
-    y: 0,
-    transition: {
-      delay: i * 0.1,
-      duration: 0.4,
-      ease: "easeOut",
-    },
-  }),
-};
 
 const priorityColors = {
   high: "bg-rose-100 text-rose-700 dark:bg-rose-900/30 dark:text-rose-400",

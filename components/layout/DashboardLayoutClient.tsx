@@ -19,6 +19,7 @@ import { Button } from "../ui/button";
 import { PanelLeft, PanelLeftClose } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Breadcrumb } from "../ui/breadcrumb";
+import { ConfirmProvider } from "../ui/confirm-dialog";
 
 function DashboardLayoutInner({
   children,
@@ -129,6 +130,7 @@ export function DashboardLayoutClient({
   profile: any;
 }) {
   return (
+    <ConfirmProvider>
     <EntityProvider>
       <WorkspaceProvider>
         <AIAssistantProvider>
@@ -145,5 +147,6 @@ export function DashboardLayoutClient({
         </AIAssistantProvider>
       </WorkspaceProvider>
     </EntityProvider>
+    </ConfirmProvider>
   );
 }

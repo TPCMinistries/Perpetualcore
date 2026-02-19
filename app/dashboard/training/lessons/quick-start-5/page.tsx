@@ -266,7 +266,7 @@ export default function QuickStartLesson5() {
               </li>
             </ol>
 
-            <div className="bg-white dark:bg-gray-900 rounded-lg border p-4">
+            <div className="bg-white dark:bg-card rounded-lg border p-4">
               <p className="text-sm font-medium mb-2">What You Can Do With Calendar Integration:</p>
               <ul className="text-sm text-muted-foreground space-y-1">
                 <li>✅ Get daily summaries of your schedule</li>
@@ -319,7 +319,7 @@ export default function QuickStartLesson5() {
               <p className="text-sm text-muted-foreground mb-3">
                 With calendar connected, AI Chat can now answer questions about your real schedule.
               </p>
-              <div className="bg-white dark:bg-gray-900 rounded-lg border p-4 mb-4">
+              <div className="bg-white dark:bg-card rounded-lg border p-4 mb-4">
                 <p className="text-sm font-medium mb-2">Try asking:</p>
                 <ul className="text-sm text-muted-foreground space-y-1">
                   <li>• "What meetings do I have today?"</li>
@@ -340,7 +340,7 @@ export default function QuickStartLesson5() {
               <p className="text-sm text-muted-foreground mb-3">
                 Your Customer Support Agent can now read and respond to real emails!
               </p>
-              <div className="bg-white dark:bg-gray-900 rounded-lg border p-4 mb-4">
+              <div className="bg-white dark:bg-card rounded-lg border p-4 mb-4">
                 <p className="text-sm font-medium mb-2">Enhancement Ideas:</p>
                 <ul className="text-sm text-muted-foreground space-y-1">
                   <li>• Configure the agent to monitor a support inbox</li>
@@ -491,7 +491,7 @@ export default function QuickStartLesson5() {
           </li>
         </ol>
 
-        <div className="flex items-start gap-3 p-4 bg-white dark:bg-gray-900 rounded-lg border">
+        <div className="flex items-start gap-3 p-4 bg-white dark:bg-card rounded-lg border">
           <CheckCircle2 className="h-5 w-5 text-green-600 flex-shrink-0 mt-0.5" />
           <div>
             <p className="font-medium text-sm mb-1">Success Criteria</p>

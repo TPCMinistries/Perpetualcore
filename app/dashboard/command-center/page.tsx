@@ -684,7 +684,7 @@ function DailyCommandView({ onNavigate }: DailyCommandViewProps) {
                 "h-10 w-10 rounded-xl flex items-center justify-center",
                 taskHealthIssues > 0 ? "bg-amber-100 dark:bg-amber-900/50" : "bg-muted"
               )}>
-                <AlertTriangle className={cn("h-5 w-5", taskHealthIssues > 0 ? "text-amber-600" : "text-gray-600")} />
+                <AlertTriangle className={cn("h-5 w-5", taskHealthIssues > 0 ? "text-amber-600" : "text-muted-foreground")} />
               </div>
             </div>
           </CardContent>
@@ -1191,7 +1191,7 @@ function DeadlineRow({ item, urgent = false, onNavigate }: DeadlineRowProps) {
     urgent: "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400",
     high: "bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400",
     medium: "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400",
-    low: "bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-400",
+    low: "bg-muted text-foreground dark:bg-muted dark:text-muted-foreground",
   };
 
   const typeIcons: Record<string, typeof Briefcase> = {
@@ -1604,7 +1604,7 @@ function DecisionInbox({ navigationTarget, onNavigationHandled, onNavigate }: De
     urgent: "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400 border-red-200",
     high: "bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400 border-orange-200",
     medium: "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400 border-blue-200",
-    low: "bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-400 border-gray-200",
+    low: "bg-muted text-foreground dark:bg-muted dark:text-muted-foreground border-gray-200",
   };
 
   if (loading) {
@@ -1969,7 +1969,7 @@ Examples:
                                     decision.priority === "urgent" && "border-red-300 text-red-600",
                                     decision.priority === "high" && "border-orange-300 text-orange-600",
                                     decision.priority === "medium" && "border-blue-300 text-blue-600",
-                                    decision.priority === "low" && "border-gray-300 text-muted-foreground"
+                                    decision.priority === "low" && "border-border text-muted-foreground"
                                   )}
                                 >
                                   {decision.priority}
@@ -2132,7 +2132,7 @@ Examples:
                 <Users className="h-4 w-4" />
                 Delegate
               </div>
-              <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-muted text-gray-700 dark:text-gray-400 text-sm font-medium">
+              <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-muted text-foreground dark:text-muted-foreground text-sm font-medium">
                 <Clock className="h-4 w-4" />
                 Defer
               </div>
@@ -2185,7 +2185,7 @@ Examples:
                       decision.priority === "urgent" && "text-red-600",
                       decision.priority === "high" && "text-orange-600",
                       decision.priority === "medium" && "text-blue-600",
-                      decision.priority === "low" && "text-gray-600"
+                      decision.priority === "low" && "text-muted-foreground"
                     )} />
                   </div>
 
@@ -2274,7 +2274,7 @@ Examples:
                     {/* Deferred Until */}
                     {decision.status === "deferred" && decision.deferred_until && (
                       <div className="mt-3 p-2 rounded-lg bg-muted/50 border border-border">
-                        <p className="text-sm text-gray-700 dark:text-gray-400">
+                        <p className="text-sm text-foreground dark:text-muted-foreground">
                           <strong>Deferred until:</strong>{" "}
                           {new Date(decision.deferred_until).toLocaleDateString("en-US", {
                             month: "long",
@@ -2935,7 +2935,7 @@ function OpportunityListItem({
     if (opportunity.final_decision === "approved") return { label: "Pursuing", color: "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400" };
     if (opportunity.final_decision === "rejected") return { label: "Rejected", color: "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400" };
     if (hasScore) return { label: "Evaluating", color: "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400" };
-    return { label: "New", color: "bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-400" };
+    return { label: "New", color: "bg-muted text-foreground dark:bg-muted dark:text-muted-foreground" };
   };
 
   const status = getStatus();
@@ -3209,7 +3209,7 @@ function OpportunityDetailPanel({
     if (opportunity.final_decision === "approved") return { label: "Pursuing", color: "bg-green-100 text-green-700" };
     if (opportunity.final_decision === "rejected") return { label: "Rejected", color: "bg-red-100 text-red-700" };
     if (hasScore) return { label: "Evaluating", color: "bg-blue-100 text-blue-700" };
-    return { label: "New", color: "bg-gray-100 text-gray-700" };
+    return { label: "New", color: "bg-muted text-foreground" };
   };
 
   const status = getStatus();
@@ -3255,7 +3255,7 @@ function OpportunityDetailPanel({
           key={i}
           className={cn(
             "h-3 w-3 rounded-full",
-            i < filled ? "bg-blue-500" : "bg-gray-200 dark:bg-gray-700"
+            i < filled ? "bg-blue-500" : "bg-muted dark:bg-muted"
           )}
         />
       ))}
@@ -3331,7 +3331,7 @@ function OpportunityDetailPanel({
                     : score >= 60
                       ? "border-yellow-500 text-yellow-600 bg-yellow-50 dark:bg-yellow-900/20"
                       : "border-red-500 text-red-600 bg-red-50 dark:bg-red-900/20"
-                  : "border-gray-300 text-gray-400 bg-gray-50"
+                  : "border-border text-muted-foreground bg-muted"
               )}
             >
               {hasScore ? Math.round(score) : "--"}
@@ -3807,7 +3807,7 @@ function ScoreBreakdownRow({
     blue: "bg-blue-500",
     green: "bg-green-500",
     orange: "bg-orange-500",
-    gray: "bg-gray-500",
+    gray: "bg-muted0",
   };
 
   const textColors = {
@@ -3909,7 +3909,7 @@ function ProjectsModule({ onNavigateToDecision }: ProjectsModuleProps) {
   const statusColors: Record<string, string> = {
     planning: "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400",
     active: "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400",
-    on_hold: "bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-400",
+    on_hold: "bg-muted text-foreground dark:bg-muted dark:text-muted-foreground",
     completed: "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400",
     cancelled: "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400",
   };

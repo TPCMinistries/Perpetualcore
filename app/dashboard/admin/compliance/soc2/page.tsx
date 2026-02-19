@@ -140,7 +140,7 @@ export default function SOC2ReadinessPage() {
     <div className="p-4 sm:p-8 max-w-7xl mx-auto space-y-6">
       <div>
         <h1 className="text-3xl font-bold">SOC 2 Type II Readiness</h1>
-        <p className="text-gray-600 mt-1">
+        <p className="text-muted-foreground mt-1">
           Service Organization Control 2 — Trust Services Criteria assessment
         </p>
       </div>
@@ -149,7 +149,7 @@ export default function SOC2ReadinessPage() {
       <div className="flex gap-2 text-sm">
         <Link
           href="/dashboard/admin/compliance"
-          className="px-3 py-1.5 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200"
+          className="px-3 py-1.5 bg-muted text-foreground rounded-lg hover:bg-muted"
         >
           &larr; Compliance Overview
         </Link>
@@ -181,7 +181,7 @@ export default function SOC2ReadinessPage() {
             <Card key={principle}>
               <CardContent className="p-4 text-center">
                 <Shield className="h-5 w-5 text-slate-500 mx-auto mb-1" />
-                <p className="text-xs font-medium text-gray-600">{principle}</p>
+                <p className="text-xs font-medium text-muted-foreground">{principle}</p>
                 <p className="text-lg font-bold mt-1">
                   {implemented}/{controls.length}
                 </p>
@@ -204,7 +204,7 @@ export default function SOC2ReadinessPage() {
             <CardContent>
               <div className="space-y-3">
                 {controls.map((control) => (
-                  <div key={control.id} className="flex items-start gap-3 p-3 rounded-lg bg-gray-50">
+                  <div key={control.id} className="flex items-start gap-3 p-3 rounded-lg bg-muted">
                     {control.status === "implemented" ? (
                       <CheckCircle className="h-5 w-5 text-green-600 flex-shrink-0 mt-0.5" />
                     ) : control.status === "partial" ? (
@@ -214,11 +214,11 @@ export default function SOC2ReadinessPage() {
                     )}
                     <div className="flex-1">
                       <div className="flex items-center gap-2 flex-wrap">
-                        <code className="text-xs bg-gray-200 px-1.5 py-0.5 rounded">{control.id}</code>
+                        <code className="text-xs bg-muted px-1.5 py-0.5 rounded">{control.id}</code>
                         <span className="font-medium text-sm">{control.name}</span>
                       </div>
-                      <p className="text-xs text-gray-600 mt-1">{control.description}</p>
-                      <p className="text-xs text-gray-500 mt-1">
+                      <p className="text-xs text-muted-foreground mt-1">{control.description}</p>
+                      <p className="text-xs text-muted-foreground mt-1">
                         <span className="font-medium">Evidence:</span> {control.evidence}
                       </p>
                     </div>

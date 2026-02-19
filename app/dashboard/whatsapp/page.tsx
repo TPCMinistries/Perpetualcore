@@ -194,9 +194,9 @@ export default function WhatsAppPage() {
       case "read":
         return <CheckCheck className="h-3 w-3 text-blue-600" />;
       case "sent":
-        return <Check className="h-3 w-3 text-gray-400" />;
+        return <Check className="h-3 w-3 text-muted-foreground" />;
       default:
-        return <Loader2 className="h-3 w-3 animate-spin text-gray-400" />;
+        return <Loader2 className="h-3 w-3 animate-spin text-muted-foreground" />;
     }
   };
 
@@ -204,7 +204,7 @@ export default function WhatsAppPage() {
     return (
       <div className="p-8">
         <div className="flex items-center justify-center h-64">
-          <Loader2 className="h-8 w-8 animate-spin text-gray-500" />
+          <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
         </div>
       </div>
     );
@@ -241,7 +241,7 @@ export default function WhatsAppPage() {
                     onChange={(e) => setPhoneNumber(e.target.value)}
                     className="text-lg"
                   />
-                  <p className="text-xs text-gray-500 mt-1">
+                  <p className="text-xs text-muted-foreground mt-1">
                     Format: +[country code][number] (e.g., +14155551234)
                   </p>
                 </div>
@@ -441,9 +441,9 @@ export default function WhatsAppPage() {
           <div className="flex-1 overflow-y-auto mb-4 space-y-4">
             {messages.length === 0 ? (
               <div className="flex flex-col items-center justify-center h-full text-center">
-                <MessageCircle className="h-12 w-12 text-gray-400 mb-4" />
-                <p className="text-gray-600">No messages yet</p>
-                <p className="text-sm text-gray-500 mt-2">
+                <MessageCircle className="h-12 w-12 text-muted-foreground mb-4" />
+                <p className="text-muted-foreground">No messages yet</p>
+                <p className="text-sm text-muted-foreground mt-2">
                   Send a message or text your connected number
                 </p>
               </div>
@@ -470,7 +470,7 @@ export default function WhatsAppPage() {
                         className={`flex items-center gap-1 mt-1 text-xs ${
                           message.direction === "outbound"
                             ? "text-blue-100 justify-end"
-                            : "text-gray-500"
+                            : "text-muted-foreground"
                         }`}
                       >
                         {message.ai_response && (

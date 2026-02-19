@@ -133,8 +133,8 @@ export default function IntegrationsPage() {
           description: "Sync repositories and manage issues",
           category: "development",
           icon: Github,
-          color: "text-gray-900 dark:text-gray-100",
-          bgColor: "bg-gray-50 dark:bg-gray-950/30",
+          color: "text-foreground dark:text-foreground",
+          bgColor: "bg-muted dark:bg-muted",
           connected: false,
           oauth: true,
           configurable: true,
@@ -170,7 +170,7 @@ export default function IntegrationsPage() {
           category: "productivity",
           icon: FileText,
           color: "text-black dark:text-white",
-          bgColor: "bg-gray-50 dark:bg-gray-950/30",
+          bgColor: "bg-muted dark:bg-muted",
           connected: false,
           oauth: true,
           configurable: true,
@@ -471,7 +471,7 @@ export default function IntegrationsPage() {
                         Connected
                       </Badge>
                     ) : (
-                      <Badge variant="outline" className="bg-gray-50 border-gray-300 text-gray-700">
+                      <Badge variant="outline" className="bg-muted border-border text-foreground">
                         <XCircle className="h-3 w-3 mr-1" />
                         Not Connected
                       </Badge>

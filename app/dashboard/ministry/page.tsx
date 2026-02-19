@@ -122,7 +122,7 @@ const EVENT_TYPES: Record<string, { label: string; icon: any; color: string }> =
   workshop: { label: "Workshop", icon: BookOpen, color: "bg-cyan-100 text-cyan-700" },
   youth_event: { label: "Youth Event", icon: Users, color: "bg-yellow-100 text-yellow-700" },
   community: { label: "Community", icon: Users, color: "bg-teal-100 text-teal-700" },
-  other: { label: "Other", icon: Calendar, color: "bg-gray-100 text-gray-700" },
+  other: { label: "Other", icon: Calendar, color: "bg-muted text-foreground" },
 };
 
 const PRAYER_TYPES: Record<string, { label: string; color: string }> = {
@@ -131,7 +131,7 @@ const PRAYER_TYPES: Record<string, { label: string; color: string }> = {
   provision: { label: "Provision", color: "bg-green-100 text-green-700" },
   relationships: { label: "Relationships", color: "bg-pink-100 text-pink-700" },
   ministry: { label: "Ministry", color: "bg-purple-100 text-purple-700" },
-  general: { label: "General", color: "bg-gray-100 text-gray-700" },
+  general: { label: "General", color: "bg-muted text-foreground" },
   praise: { label: "Praise", color: "bg-yellow-100 text-yellow-700" },
 };
 

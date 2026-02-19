@@ -28,6 +28,7 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Copy, Plus, RefreshCw, Mail, MoreVertical, Send, Trash2 } from "lucide-react";
+import { useConfirm } from "@/components/ui/confirm-dialog";
 import { toast } from "sonner";
 import {
   DropdownMenu,
@@ -63,6 +64,7 @@ interface BetaUserStats {
 }
 
 export default function BetaCodesPage() {
+  const { confirm } = useConfirm();
   const [codes, setCodes] = useState<BetaCode[]>([]);
   const [loading, setLoading] = useState(true);
   const [generating, setGenerating] = useState(false);
@@ -246,7 +248,7 @@ export default function BetaCodesPage() {
   };
 
   const handleDeleteCode = async (code: BetaCode) => {
-    if (!confirm(`Are you sure you want to delete code ${code.code}?`)) {
+    if (!(await confirm(`Are you sure you want to delete code ${code.code}?`))) {
       return;
     }
 

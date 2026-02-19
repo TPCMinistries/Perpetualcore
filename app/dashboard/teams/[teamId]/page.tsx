@@ -125,8 +125,8 @@ const roleIcons: Record<TeamMemberRole, React.ReactNode> = {
 const roleColors: Record<TeamMemberRole, string> = {
   lead: "bg-yellow-100 text-yellow-800",
   manager: "bg-blue-100 text-blue-800",
-  member: "bg-gray-100 text-gray-800",
-  viewer: "bg-gray-100 text-gray-600",
+  member: "bg-muted text-foreground",
+  viewer: "bg-muted text-muted-foreground",
 };
 
 export default function TeamDetailPage() {
