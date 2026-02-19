@@ -136,7 +136,7 @@ const PRAYER_TYPES: Record<string, { label: string; color: string }> = {
 };
 
 const PRIORITY_CONFIG: Record<string, { label: string; color: string }> = {
-  low: { label: "Low", color: "bg-slate-100 text-slate-700" },
+  low: { label: "Low", color: "bg-muted text-foreground" },
   normal: { label: "Normal", color: "bg-blue-100 text-blue-700" },
   high: { label: "High", color: "bg-orange-100 text-orange-700" },
   urgent: { label: "Urgent", color: "bg-red-100 text-red-700" },
@@ -540,7 +540,7 @@ export default function MinistryPage() {
                   placeholder="Add a prayer request..."
                   value={quickPrayer}
                   onChange={(e) => setQuickPrayer(e.target.value)}
-                  className="bg-white"
+                  className="bg-card"
                   onKeyDown={(e) => {
                     if (e.key === "Enter") handleQuickPrayer();
                   }}

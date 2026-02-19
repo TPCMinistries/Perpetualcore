@@ -231,7 +231,7 @@ export default function KnowledgePage() {
         className="mb-6"
       >
         <Card>
-          <CardHeader className="border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/30">
+          <CardHeader className="border-b border-border dark:border-border bg-muted/50 dark:bg-card/30">
             <div className="flex items-center gap-3">
               <div className="p-2 rounded-lg bg-violet-100 dark:bg-violet-900/30">
                 <Search className="h-4 w-4 text-violet-600 dark:text-violet-400" />
@@ -252,11 +252,11 @@ export default function KnowledgePage() {
                   value={searchConcept}
                   onChange={(e) => setSearchConcept(e.target.value)}
                   list="concepts-list"
-                  className="h-11 bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700 focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500"
+                  className="h-11 bg-card border-border dark:border-border focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500"
                 />
               </div>
-              <div className="flex items-center justify-center w-10 h-10 rounded-full bg-slate-100 dark:bg-slate-800">
-                <ArrowRight className="h-4 w-4 text-slate-500" />
+              <div className="flex items-center justify-center w-10 h-10 rounded-full bg-muted dark:bg-card">
+                <ArrowRight className="h-4 w-4 text-muted-foreground" />
               </div>
               <div className="flex-1">
                 <Input
@@ -264,7 +264,7 @@ export default function KnowledgePage() {
                   value={targetConcept}
                   onChange={(e) => setTargetConcept(e.target.value)}
                   list="concepts-list"
-                  className="h-11 bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700 focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500"
+                  className="h-11 bg-card border-border dark:border-border focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500"
                 />
               </div>
               <Button
@@ -293,7 +293,7 @@ export default function KnowledgePage() {
               <motion.div
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="mt-6 p-4 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700"
+                className="mt-6 p-4 rounded-xl bg-muted dark:bg-card/50 border border-border dark:border-border"
               >
                 {pathResult.connected ? (
                   <div>
@@ -311,15 +311,15 @@ export default function KnowledgePage() {
                       </Badge>
                       {pathResult.path.map((edge, i) => {
                         const colors = relationshipColors[edge.relationship_type] || {
-                          badge: "bg-slate-100 text-slate-800 dark:bg-slate-700 dark:text-slate-200",
+                          badge: "bg-muted text-foreground dark:bg-muted dark:text-foreground",
                         };
                         return (
                           <div key={i} className="flex items-center gap-2">
-                            <ArrowRight className="h-4 w-4 text-slate-400" />
+                            <ArrowRight className="h-4 w-4 text-muted-foreground" />
                             <Badge className={cn("text-xs", colors.badge)}>
                               {edge.relationship_type.replace("_", " ")}
                             </Badge>
-                            <ArrowRight className="h-4 w-4 text-slate-400" />
+                            <ArrowRight className="h-4 w-4 text-muted-foreground" />
                             <Badge variant="outline" className="text-sm px-3 py-1">
                               {edge.source_concept === pathResult.path[i - 1]?.target_concept ||
                               edge.source_concept === pathResult.source
@@ -332,7 +332,7 @@ export default function KnowledgePage() {
                     </div>
                   </div>
                 ) : (
-                  <div className="flex items-center gap-3 text-slate-500 dark:text-slate-400">
+                  <div className="flex items-center gap-3 text-muted-foreground dark:text-muted-foreground">
                     <Brain className="h-5 w-5" />
                     <p className="text-sm">
                       No connection found between &quot;{pathResult.source}&quot; and &quot;{pathResult.target}&quot;
@@ -354,7 +354,7 @@ export default function KnowledgePage() {
           variants={cardVariants}
         >
           <Card className="h-full">
-            <CardHeader className="border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/30">
+            <CardHeader className="border-b border-border dark:border-border bg-muted/50 dark:bg-card/30">
               <div className="flex items-center gap-3">
                 <div className="p-2 rounded-lg bg-amber-100 dark:bg-amber-900/30">
                   <TrendingUp className="h-4 w-4 text-amber-600 dark:text-amber-400" />
@@ -374,19 +374,19 @@ export default function KnowledgePage() {
                       initial={{ opacity: 0, x: -10 }}
                       animate={{ opacity: 1, x: 0 }}
                       transition={{ delay: i * 0.05 }}
-                      className="flex items-center justify-between p-3 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors"
+                      className="flex items-center justify-between p-3 rounded-lg hover:bg-muted dark:hover:bg-muted/50 transition-colors"
                     >
                       <div className="flex items-center gap-3">
                         <span className={cn(
                           "flex items-center justify-center w-6 h-6 rounded-full text-xs font-bold",
                           i === 0 ? "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400" :
-                          i === 1 ? "bg-slate-200 text-slate-700 dark:bg-slate-700 dark:text-slate-300" :
+                          i === 1 ? "bg-muted text-foreground dark:bg-muted dark:text-muted-foreground" :
                           i === 2 ? "bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400" :
-                          "bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400"
+                          "bg-muted text-muted-foreground dark:bg-card dark:text-muted-foreground"
                         )}>
                           {i + 1}
                         </span>
-                        <span className="font-medium text-slate-900 dark:text-white">{item.concept}</span>
+                        <span className="font-medium text-foreground dark:text-white">{item.concept}</span>
                       </div>
                       <Badge variant="secondary" className="font-medium">
                         {item.connections} links
@@ -396,8 +396,8 @@ export default function KnowledgePage() {
                 </div>
               ) : (
                 <div className="flex flex-col items-center justify-center py-8 text-center">
-                  <Brain className="h-10 w-10 text-slate-300 dark:text-slate-600 mb-3" />
-                  <p className="text-sm text-slate-500 dark:text-slate-400">
+                  <Brain className="h-10 w-10 text-muted-foreground dark:text-muted-foreground mb-3" />
+                  <p className="text-sm text-muted-foreground dark:text-muted-foreground">
                     No concepts yet. Keep chatting to build your knowledge graph!
                   </p>
                 </div>
@@ -414,7 +414,7 @@ export default function KnowledgePage() {
           variants={cardVariants}
         >
           <Card className="h-full">
-            <CardHeader className="border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/30">
+            <CardHeader className="border-b border-border dark:border-border bg-muted/50 dark:bg-card/30">
               <div className="flex items-center gap-3">
                 <div className="p-2 rounded-lg bg-blue-100 dark:bg-blue-900/30">
                   <Link2 className="h-4 w-4 text-blue-600 dark:text-blue-400" />
@@ -432,9 +432,9 @@ export default function KnowledgePage() {
                     .sort(([, a], [, b]) => b - a)
                     .map(([type, count], i) => {
                       const colors = relationshipColors[type] || {
-                        bg: "bg-slate-500",
-                        text: "text-slate-600 dark:text-slate-400",
-                        badge: "bg-slate-100 text-slate-800 dark:bg-slate-700 dark:text-slate-200",
+                        bg: "bg-muted0",
+                        text: "text-muted-foreground dark:text-muted-foreground",
+                        badge: "bg-muted text-foreground dark:bg-muted dark:text-foreground",
                       };
                       const total = stats.totalRelationships || 1;
                       const percent = (count / total) * 100;
@@ -451,11 +451,11 @@ export default function KnowledgePage() {
                             <Badge className={cn("text-xs", colors.badge)}>
                               {type.replace("_", " ")}
                             </Badge>
-                            <span className="text-sm text-slate-500 dark:text-slate-400">
+                            <span className="text-sm text-muted-foreground dark:text-muted-foreground">
                               {count} ({percent.toFixed(0)}%)
                             </span>
                           </div>
-                          <div className="h-2 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
+                          <div className="h-2 bg-muted dark:bg-card rounded-full overflow-hidden">
                             <motion.div
                               className={cn("h-full rounded-full", colors.bg)}
                               initial={{ width: 0 }}
@@ -469,8 +469,8 @@ export default function KnowledgePage() {
                 </div>
               ) : (
                 <div className="flex flex-col items-center justify-center py-8 text-center">
-                  <Link2 className="h-10 w-10 text-slate-300 dark:text-slate-600 mb-3" />
-                  <p className="text-sm text-slate-500 dark:text-slate-400">
+                  <Link2 className="h-10 w-10 text-muted-foreground dark:text-muted-foreground mb-3" />
+                  <p className="text-sm text-muted-foreground dark:text-muted-foreground">
                     No relationships yet. The graph builds as you chat!
                   </p>
                 </div>
@@ -489,7 +489,7 @@ export default function KnowledgePage() {
         className="mb-6"
       >
         <Card>
-          <CardHeader className="border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/30">
+          <CardHeader className="border-b border-border dark:border-border bg-muted/50 dark:bg-card/30">
             <div className="flex items-center gap-3">
               <div className="p-2 rounded-lg bg-violet-100 dark:bg-violet-900/30">
                 <Network className="h-4 w-4 text-violet-600 dark:text-violet-400" />
@@ -502,7 +502,7 @@ export default function KnowledgePage() {
           </CardHeader>
           <CardContent className="pt-6">
             {nodes.length > 0 ? (
-              <div className="relative min-h-[400px] bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-800/50 dark:to-slate-900/50 rounded-xl p-8 overflow-hidden border border-slate-200 dark:border-slate-700">
+              <div className="relative min-h-[400px] bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-800/50 dark:to-slate-900/50 rounded-xl p-8 overflow-hidden border border-border dark:border-border">
                 {/* Decorative background elements */}
                 <div className="absolute inset-0 opacity-30">
                   <div className="absolute top-10 left-10 w-32 h-32 bg-violet-200 dark:bg-violet-900/30 rounded-full blur-3xl" />
@@ -532,18 +532,18 @@ export default function KnowledgePage() {
                               ? "bg-gradient-to-r from-violet-100 to-purple-100 dark:from-violet-900/40 dark:to-purple-900/40 border-violet-300 dark:border-violet-600 shadow-violet-200 dark:shadow-violet-900/30"
                               : isMediumConnection
                               ? "bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-700"
-                              : "bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-600",
+                              : "bg-card border-border dark:border-border",
                             "hover:shadow-lg hover:scale-105 hover:-translate-y-1"
                           )}
                         >
                           <span className={cn(
                             "text-sm font-medium whitespace-nowrap",
-                            isHighConnection ? "text-violet-700 dark:text-violet-300" : "text-slate-700 dark:text-slate-300"
+                            isHighConnection ? "text-violet-700 dark:text-violet-300" : "text-foreground dark:text-muted-foreground"
                           )}>
                             {node.label}
                           </span>
                         </div>
-                        <span className="absolute -bottom-6 left-1/2 -translate-x-1/2 text-xs text-slate-500 dark:text-slate-400 opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+                        <span className="absolute -bottom-6 left-1/2 -translate-x-1/2 text-xs text-muted-foreground dark:text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
                           {node.connections} links
                         </span>
                       </motion.div>
@@ -552,20 +552,20 @@ export default function KnowledgePage() {
                 </div>
 
                 {nodes.length > 20 && (
-                  <p className="text-center text-sm text-slate-500 dark:text-slate-400 mt-10">
+                  <p className="text-center text-sm text-muted-foreground dark:text-muted-foreground mt-10">
                     Showing top 20 of {nodes.length} concepts
                   </p>
                 )}
               </div>
             ) : (
               <div className="flex flex-col items-center justify-center py-16 text-center">
-                <div className="p-4 rounded-2xl bg-slate-100 dark:bg-slate-800 mb-4">
-                  <Network className="h-10 w-10 text-slate-400 dark:text-slate-500" />
+                <div className="p-4 rounded-2xl bg-muted dark:bg-card mb-4">
+                  <Network className="h-10 w-10 text-muted-foreground dark:text-muted-foreground" />
                 </div>
-                <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-2">
+                <h3 className="text-lg font-semibold text-foreground dark:text-white mb-2">
                   No knowledge graph yet
                 </h3>
-                <p className="text-slate-500 dark:text-slate-400 max-w-md">
+                <p className="text-muted-foreground dark:text-muted-foreground max-w-md">
                   Your knowledge graph will grow as you have conversations with AI.
                   Concepts and relationships are automatically extracted from your chats.
                 </p>
@@ -584,7 +584,7 @@ export default function KnowledgePage() {
           variants={cardVariants}
         >
           <Card>
-            <CardHeader className="border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/30">
+            <CardHeader className="border-b border-border dark:border-border bg-muted/50 dark:bg-card/30">
               <div className="flex items-center gap-3">
                 <div className="p-2 rounded-lg bg-emerald-100 dark:bg-emerald-900/30">
                   <Layers className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
@@ -603,7 +603,7 @@ export default function KnowledgePage() {
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: i * 0.1 }}
-                    className="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700"
+                    className="p-4 rounded-xl bg-muted dark:bg-card/50 border border-border dark:border-border"
                   >
                     <div className="flex items-center gap-3 mb-3">
                       <div className={cn(
@@ -612,7 +612,7 @@ export default function KnowledgePage() {
                         i === 1 ? "bg-blue-100 dark:bg-blue-900/30" :
                         i === 2 ? "bg-emerald-100 dark:bg-emerald-900/30" :
                         i === 3 ? "bg-amber-100 dark:bg-amber-900/30" :
-                        "bg-slate-100 dark:bg-slate-700"
+                        "bg-muted dark:bg-muted"
                       )}>
                         <Layers className={cn(
                           "h-4 w-4",
@@ -620,10 +620,10 @@ export default function KnowledgePage() {
                           i === 1 ? "text-blue-600 dark:text-blue-400" :
                           i === 2 ? "text-emerald-600 dark:text-emerald-400" :
                           i === 3 ? "text-amber-600 dark:text-amber-400" :
-                          "text-slate-600 dark:text-slate-400"
+                          "text-muted-foreground dark:text-muted-foreground"
                         )} />
                       </div>
-                      <span className="font-medium text-slate-900 dark:text-white">Cluster {i + 1}</span>
+                      <span className="font-medium text-foreground dark:text-white">Cluster {i + 1}</span>
                       <Badge variant="secondary" className="ml-auto">
                         {cluster.length} concepts
                       </Badge>
@@ -635,7 +635,7 @@ export default function KnowledgePage() {
                         </Badge>
                       ))}
                       {cluster.length > 10 && (
-                        <Badge variant="outline" className="text-xs text-slate-400">
+                        <Badge variant="outline" className="text-xs text-muted-foreground">
                           +{cluster.length - 10} more
                         </Badge>
                       )}

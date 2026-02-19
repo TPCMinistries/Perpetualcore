@@ -134,7 +134,7 @@ export default function AgentSettingsPage({ params }: { params: { id: string } }
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <Loader2 className="h-8 w-8 animate-spin text-slate-400" />
+        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
       </div>
     );
   }
@@ -142,7 +142,7 @@ export default function AgentSettingsPage({ params }: { params: { id: string } }
   if (!agent) {
     return (
       <div className="text-center py-12">
-        <p className="text-slate-600 dark:text-slate-400">Agent not found</p>
+        <p className="text-muted-foreground dark:text-muted-foreground">Agent not found</p>
       </div>
     );
   }
@@ -155,7 +155,7 @@ export default function AgentSettingsPage({ params }: { params: { id: string } }
           variant="ghost"
           size="sm"
           onClick={() => router.push(`/dashboard/agents/${params.id}`)}
-          className="text-slate-600 dark:text-slate-400"
+          className="text-muted-foreground dark:text-muted-foreground"
         >
           <ArrowLeft className="h-4 w-4 mr-2" />
           Back to Agent
@@ -168,10 +168,10 @@ export default function AgentSettingsPage({ params }: { params: { id: string } }
             <SettingsIcon className="h-6 w-6 text-white" />
           </div>
           <div>
-            <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-100">
+            <h1 className="text-3xl font-bold text-foreground dark:text-foreground">
               Agent Settings
             </h1>
-            <p className="text-slate-600 dark:text-slate-400">
+            <p className="text-muted-foreground dark:text-muted-foreground">
               Configure your AI agent's behavior and capabilities
             </p>
           </div>
@@ -180,19 +180,19 @@ export default function AgentSettingsPage({ params }: { params: { id: string } }
 
       {/* Form */}
       <form onSubmit={handleSubmit} className="max-w-3xl space-y-6">
-        <Card className="border-slate-200 dark:border-slate-800">
+        <Card className="border-border dark:border-border">
           <CardHeader>
-            <CardTitle className="text-slate-900 dark:text-slate-100">
+            <CardTitle className="text-foreground dark:text-foreground">
               Agent Configuration
             </CardTitle>
-            <CardDescription className="text-slate-600 dark:text-slate-400">
+            <CardDescription className="text-muted-foreground dark:text-muted-foreground">
               Update the settings and behavior of your AI agent
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
             {/* Agent Name */}
             <div className="space-y-2">
-              <Label htmlFor="name" className="text-slate-900 dark:text-slate-100">
+              <Label htmlFor="name" className="text-foreground dark:text-foreground">
                 Agent Name *
               </Label>
               <Input
@@ -200,14 +200,14 @@ export default function AgentSettingsPage({ params }: { params: { id: string } }
                 value={formData.name}
                 onChange={(e) => handleChange("name", e.target.value)}
                 placeholder="e.g., My Email Monitor"
-                className="border-slate-300 dark:border-slate-700"
+                className="border-border dark:border-border"
                 required
               />
             </div>
 
             {/* Agent Type */}
             <div className="space-y-2">
-              <Label htmlFor="agent_type" className="text-slate-900 dark:text-slate-100">
+              <Label htmlFor="agent_type" className="text-foreground dark:text-foreground">
                 Agent Type *
               </Label>
               <Select
@@ -215,7 +215,7 @@ export default function AgentSettingsPage({ params }: { params: { id: string } }
                 onValueChange={(value) => handleChange("agent_type", value)}
                 required
               >
-                <SelectTrigger className="border-slate-300 dark:border-slate-700">
+                <SelectTrigger className="border-border dark:border-border">
                   <SelectValue placeholder="Select agent type" />
                 </SelectTrigger>
                 <SelectContent>
@@ -230,7 +230,7 @@ export default function AgentSettingsPage({ params }: { params: { id: string } }
 
             {/* Description */}
             <div className="space-y-2">
-              <Label htmlFor="description" className="text-slate-900 dark:text-slate-100">
+              <Label htmlFor="description" className="text-foreground dark:text-foreground">
                 Description
               </Label>
               <Textarea
@@ -238,20 +238,20 @@ export default function AgentSettingsPage({ params }: { params: { id: string } }
                 value={formData.description}
                 onChange={(e) => handleChange("description", e.target.value)}
                 placeholder="Describe what this agent does..."
-                className="border-slate-300 dark:border-slate-700 min-h-[100px]"
+                className="border-border dark:border-border min-h-[100px]"
               />
             </div>
 
             {/* Personality */}
             <div className="space-y-2">
-              <Label htmlFor="personality" className="text-slate-900 dark:text-slate-100">
+              <Label htmlFor="personality" className="text-foreground dark:text-foreground">
                 Personality
               </Label>
               <Select
                 value={formData.personality}
                 onValueChange={(value) => handleChange("personality", value)}
               >
-                <SelectTrigger className="border-slate-300 dark:border-slate-700">
+                <SelectTrigger className="border-border dark:border-border">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -262,14 +262,14 @@ export default function AgentSettingsPage({ params }: { params: { id: string } }
                   ))}
                 </SelectContent>
               </Select>
-              <p className="text-sm text-slate-600 dark:text-slate-400">
+              <p className="text-sm text-muted-foreground dark:text-muted-foreground">
                 The tone and style of communication for this agent
               </p>
             </div>
 
             {/* Custom Instructions */}
             <div className="space-y-2">
-              <Label htmlFor="instructions" className="text-slate-900 dark:text-slate-100">
+              <Label htmlFor="instructions" className="text-foreground dark:text-foreground">
                 Custom Instructions
               </Label>
               <Textarea
@@ -277,20 +277,20 @@ export default function AgentSettingsPage({ params }: { params: { id: string } }
                 value={formData.instructions}
                 onChange={(e) => handleChange("instructions", e.target.value)}
                 placeholder="Add any specific instructions or guidelines for this agent..."
-                className="border-slate-300 dark:border-slate-700 min-h-[150px] font-mono text-sm"
+                className="border-border dark:border-border min-h-[150px] font-mono text-sm"
               />
-              <p className="text-sm text-slate-600 dark:text-slate-400">
+              <p className="text-sm text-muted-foreground dark:text-muted-foreground">
                 Optional: Provide custom instructions to customize the agent's behavior
               </p>
             </div>
 
             {/* Enabled Toggle */}
-            <div className="flex items-center justify-between p-4 border border-slate-200 dark:border-slate-800 rounded-lg">
+            <div className="flex items-center justify-between p-4 border border-border dark:border-border rounded-lg">
               <div className="space-y-0.5">
-                <Label htmlFor="enabled" className="text-base text-slate-900 dark:text-slate-100">
+                <Label htmlFor="enabled" className="text-base text-foreground dark:text-foreground">
                   Active Status
                 </Label>
-                <p className="text-sm text-slate-600 dark:text-slate-400">
+                <p className="text-sm text-muted-foreground dark:text-muted-foreground">
                   Enable or disable this agent's automated monitoring
                 </p>
               </div>
@@ -322,7 +322,7 @@ export default function AgentSettingsPage({ params }: { params: { id: string } }
                 variant="outline"
                 onClick={() => router.push(`/dashboard/agents/${params.id}`)}
                 disabled={saving}
-                className="border-slate-300 dark:border-slate-700"
+                className="border-border dark:border-border"
               >
                 Cancel
               </Button>

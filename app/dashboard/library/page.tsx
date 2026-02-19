@@ -618,10 +618,10 @@ export default function LibraryPage() {
                 <BookOpen className="h-8 w-8 text-white" />
               </motion.div>
               <div>
-                <h1 className="text-3xl font-bold text-slate-900 dark:text-white">
+                <h1 className="text-3xl font-bold text-foreground dark:text-white">
                   Library
                 </h1>
-                <p className="text-base text-slate-500 dark:text-slate-400 mt-1">
+                <p className="text-base text-muted-foreground dark:text-muted-foreground mt-1">
                   {stats.total} documents • {collections.length} collections • {spaces.length} spaces
                 </p>
               </div>
@@ -635,8 +635,8 @@ export default function LibraryPage() {
                   className={cn(
                     "px-4 py-2 rounded-lg text-sm font-medium transition-all",
                     viewMode === "files"
-                      ? "bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-md shadow-violet-500/10"
-                      : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-white/50 dark:hover:bg-slate-700/50"
+                      ? "bg-card dark:bg-muted text-foreground dark:text-white shadow-md shadow-violet-500/10"
+                      : "text-muted-foreground dark:text-muted-foreground hover:text-foreground dark:hover:text-white hover:bg-card/50 dark:hover:bg-muted/50"
                   )}
                 >
                   <FileText className="h-4 w-4 inline mr-2" />
@@ -647,8 +647,8 @@ export default function LibraryPage() {
                   className={cn(
                     "px-4 py-2 rounded-lg text-sm font-medium transition-all",
                     viewMode === "graph"
-                      ? "bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-md shadow-violet-500/10"
-                      : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-white/50 dark:hover:bg-slate-700/50"
+                      ? "bg-card dark:bg-muted text-foreground dark:text-white shadow-md shadow-violet-500/10"
+                      : "text-muted-foreground dark:text-muted-foreground hover:text-foreground dark:hover:text-white hover:bg-card/50 dark:hover:bg-muted/50"
                   )}
                 >
                   <Network className="h-4 w-4 inline mr-2" />
@@ -664,7 +664,7 @@ export default function LibraryPage() {
                   "gap-2 border-2 transition-all",
                   isAiPanelOpen
                     ? "border-violet-500 bg-violet-50 dark:bg-violet-950/50 text-violet-700 dark:text-violet-300"
-                    : "border-slate-200 dark:border-slate-700"
+                    : "border-border dark:border-border"
                 )}
               >
                 <Sparkles className="h-4 w-4" />
@@ -676,7 +676,7 @@ export default function LibraryPage() {
                 )}
               </Button>
 
-              <div className="h-8 w-px bg-slate-200 dark:bg-slate-700" />
+              <div className="h-8 w-px bg-muted dark:bg-muted" />
 
               <FileUpload onUploadComplete={handleUploadComplete} variant="button" />
 
@@ -726,7 +726,7 @@ export default function LibraryPage() {
                     <Sparkles className="h-4 w-4 text-violet-500" />
                     <div>
                       <div className="font-medium">AI Composer</div>
-                      <div className="text-xs text-slate-500">Collaborate with AI to write</div>
+                      <div className="text-xs text-muted-foreground">Collaborate with AI to write</div>
                     </div>
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
@@ -734,7 +734,7 @@ export default function LibraryPage() {
                     <FileText className="h-4 w-4" />
                     <div>
                       <div className="font-medium">Quick Document</div>
-                      <div className="text-xs text-slate-500">Simple text editor</div>
+                      <div className="text-xs text-muted-foreground">Simple text editor</div>
                     </div>
                   </DropdownMenuItem>
                 </DropdownMenuContent>
@@ -795,8 +795,8 @@ export default function LibraryPage() {
                     )}>
                       <div className="flex items-center justify-between">
                         <div>
-                          <p className="text-sm font-medium text-slate-500 dark:text-slate-400">Documents</p>
-                          <h3 className="text-4xl font-bold text-slate-900 dark:text-white mt-2">{stats.total}</h3>
+                          <p className="text-sm font-medium text-muted-foreground dark:text-muted-foreground">Documents</p>
+                          <h3 className="text-4xl font-bold text-foreground dark:text-white mt-2">{stats.total}</h3>
                           <p className="text-sm text-emerald-600 dark:text-emerald-400 mt-1 flex items-center gap-1">
                             <TrendingUp className="h-3.5 w-3.5" />
                             +{stats.recentCount} this month
@@ -817,8 +817,8 @@ export default function LibraryPage() {
                     )}>
                       <div className="flex items-center justify-between">
                         <div>
-                          <p className="text-sm font-medium text-slate-500 dark:text-slate-400">AI Summaries</p>
-                          <h3 className="text-4xl font-bold text-slate-900 dark:text-white mt-2">{stats.withSummaries}</h3>
+                          <p className="text-sm font-medium text-muted-foreground dark:text-muted-foreground">AI Summaries</p>
+                          <h3 className="text-4xl font-bold text-foreground dark:text-white mt-2">{stats.withSummaries}</h3>
                           <p className="text-sm text-amber-600 dark:text-amber-400 mt-1 flex items-center gap-1">
                             <Zap className="h-3.5 w-3.5" />
                             {pendingSummaries} pending
@@ -839,8 +839,8 @@ export default function LibraryPage() {
                     )}>
                       <div className="flex items-center justify-between">
                         <div>
-                          <p className="text-sm font-medium text-slate-500 dark:text-slate-400">Collections</p>
-                          <h3 className="text-4xl font-bold text-slate-900 dark:text-white mt-2">{collections.length}</h3>
+                          <p className="text-sm font-medium text-muted-foreground dark:text-muted-foreground">Collections</p>
+                          <h3 className="text-4xl font-bold text-foreground dark:text-white mt-2">{collections.length}</h3>
                           <p className="text-sm text-violet-600 dark:text-violet-400 mt-1 flex items-center gap-1">
                             <Layers className="h-3.5 w-3.5" />
                             Auto-organized
@@ -863,32 +863,32 @@ export default function LibraryPage() {
                 {/* Search & Filters */}
                 <div className="flex items-center gap-4">
                   <div className="relative flex-1">
-                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400" />
+                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
                     <Input
                       type="text"
                       placeholder="Search your library..."
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
-                      className="pl-12 h-12 text-base bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700 focus:border-violet-500 focus:ring-violet-500/20"
+                      className="pl-12 h-12 text-base bg-card border-border dark:border-border focus:border-violet-500 focus:ring-violet-500/20"
                     />
                     {searchQuery && (
                       <button
                         onClick={() => setSearchQuery("")}
-                        className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300"
+                        className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-muted-foreground dark:hover:text-muted-foreground"
                       >
                         <X className="h-5 w-5" />
                       </button>
                     )}
                   </div>
 
-                  <div className="flex items-center gap-2 p-1 rounded-xl bg-slate-100 dark:bg-slate-800">
+                  <div className="flex items-center gap-2 p-1 rounded-xl bg-muted dark:bg-card">
                     <button
                       onClick={() => setDisplayMode("list")}
                       className={cn(
                         "p-2.5 rounded-lg transition-all",
                         displayMode === "list"
-                          ? "bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-sm"
-                          : "text-slate-500 hover:text-slate-700 dark:hover:text-slate-300"
+                          ? "bg-card dark:bg-muted text-foreground dark:text-white shadow-sm"
+                          : "text-muted-foreground hover:text-foreground dark:hover:text-muted-foreground"
                       )}
                     >
                       <List className="h-5 w-5" />
@@ -898,8 +898,8 @@ export default function LibraryPage() {
                       className={cn(
                         "p-2.5 rounded-lg transition-all",
                         displayMode === "grid"
-                          ? "bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-sm"
-                          : "text-slate-500 hover:text-slate-700 dark:hover:text-slate-300"
+                          ? "bg-card dark:bg-muted text-foreground dark:text-white shadow-sm"
+                          : "text-muted-foreground hover:text-foreground dark:hover:text-muted-foreground"
                       )}
                     >
                       <LayoutGrid className="h-5 w-5" />
@@ -909,7 +909,7 @@ export default function LibraryPage() {
 
                 {/* Collection Pills */}
                 <div className="flex items-center gap-3 overflow-x-auto pb-2">
-                  <span className="text-sm font-medium text-slate-500 dark:text-slate-400 flex-shrink-0">Collections:</span>
+                  <span className="text-sm font-medium text-muted-foreground dark:text-muted-foreground flex-shrink-0">Collections:</span>
                   <button
                     onClick={() => {
                       setSelectedCollectionId(null);
@@ -919,7 +919,7 @@ export default function LibraryPage() {
                       "px-4 py-2 rounded-full text-sm font-medium transition-all flex-shrink-0",
                       selectedCollectionId === null
                         ? "bg-violet-600 text-white shadow-md shadow-violet-500/25"
-                        : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700"
+                        : "bg-muted dark:bg-card text-muted-foreground dark:text-muted-foreground hover:bg-muted dark:hover:bg-muted"
                     )}
                   >
                     All Documents
@@ -940,7 +940,7 @@ export default function LibraryPage() {
                         "px-4 py-2 rounded-full text-sm font-medium transition-all flex-shrink-0 flex items-center gap-2",
                         selectedCollectionId === collection.id
                           ? "bg-violet-600 text-white shadow-md shadow-violet-500/25"
-                          : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700"
+                          : "bg-muted dark:bg-card text-muted-foreground dark:text-muted-foreground hover:bg-muted dark:hover:bg-muted"
                       )}
                     >
                       {collection.name}
@@ -968,14 +968,14 @@ export default function LibraryPage() {
                 {/* Type Filters */}
                 {documentTypes.length > 0 && (
                   <div className="flex items-center gap-2 flex-wrap">
-                    <Filter className="h-4 w-4 text-slate-400" />
+                    <Filter className="h-4 w-4 text-muted-foreground" />
                     <button
                       onClick={() => setFilterType(null)}
                       className={cn(
                         "px-3 py-1.5 rounded-lg text-sm font-medium transition-all",
                         filterType === null
-                          ? "bg-slate-900 dark:bg-white text-white dark:text-slate-900"
-                          : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700"
+                          ? "bg-slate-900 dark:bg-white text-white dark:text-foreground"
+                          : "bg-muted dark:bg-card text-muted-foreground dark:text-muted-foreground hover:bg-muted dark:hover:bg-muted"
                       )}
                     >
                       All Types
@@ -987,8 +987,8 @@ export default function LibraryPage() {
                         className={cn(
                           "px-3 py-1.5 rounded-lg text-sm font-medium transition-all",
                           filterType === type
-                            ? "bg-slate-900 dark:bg-white text-white dark:text-slate-900"
-                            : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700"
+                            ? "bg-slate-900 dark:bg-white text-white dark:text-foreground"
+                            : "bg-muted dark:bg-card text-muted-foreground dark:text-muted-foreground hover:bg-muted dark:hover:bg-muted"
                         )}
                       >
                         {type}
@@ -1001,15 +1001,15 @@ export default function LibraryPage() {
                 {isLoading ? (
                   <DocumentGridSkeleton />
                 ) : filteredDocuments.length === 0 ? (
-                  <Card className="border-2 border-dashed border-slate-200 dark:border-slate-700 bg-white/50 dark:bg-slate-900/50 p-16 text-center">
+                  <Card className="border-2 border-dashed border-border dark:border-border bg-card/50 dark:bg-card/50 p-16 text-center">
                     <div className="max-w-md mx-auto">
-                      <div className="h-20 w-20 rounded-2xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center mx-auto mb-6">
-                        <Upload className="h-10 w-10 text-slate-400" />
+                      <div className="h-20 w-20 rounded-2xl bg-muted dark:bg-card flex items-center justify-center mx-auto mb-6">
+                        <Upload className="h-10 w-10 text-muted-foreground" />
                       </div>
-                      <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-3">
+                      <h2 className="text-2xl font-bold text-foreground dark:text-white mb-3">
                         Your Knowledge Base Awaits
                       </h2>
-                      <p className="text-slate-500 dark:text-slate-400 mb-8">
+                      <p className="text-muted-foreground dark:text-muted-foreground mb-8">
                         Upload documents, PDFs, or create new docs to build your AI-powered knowledge library.
                       </p>
                       <div className="flex items-center justify-center gap-4">
@@ -1049,14 +1049,14 @@ export default function LibraryPage() {
                               ? "bg-red-100 dark:bg-red-900/30"
                               : doc.status === "processing"
                               ? "bg-amber-100 dark:bg-amber-900/30"
-                              : "bg-slate-100 dark:bg-slate-800 group-hover:bg-violet-100 dark:group-hover:bg-violet-900/30"
+                              : "bg-muted dark:bg-card group-hover:bg-violet-100 dark:group-hover:bg-violet-900/30"
                           )}>
                             {doc.status === "failed" ? (
                               <AlertTriangle className="h-6 w-6 text-red-500 dark:text-red-400" />
                             ) : doc.status === "processing" ? (
                               <Loader2 className="h-6 w-6 text-amber-500 dark:text-amber-400 animate-spin" />
                             ) : (
-                              <FileText className="h-6 w-6 text-slate-500 dark:text-slate-400 group-hover:text-violet-600 dark:group-hover:text-violet-400 transition-colors" />
+                              <FileText className="h-6 w-6 text-muted-foreground dark:text-muted-foreground group-hover:text-violet-600 dark:group-hover:text-violet-400 transition-colors" />
                             )}
                           </div>
 
@@ -1064,10 +1064,10 @@ export default function LibraryPage() {
                           <div className="flex-1 min-w-0">
                             <div className="flex items-start justify-between gap-4">
                               <div className="flex-1 min-w-0">
-                                <h3 className="text-lg font-semibold text-slate-900 dark:text-white group-hover:text-violet-600 dark:group-hover:text-violet-400 transition-colors truncate">
+                                <h3 className="text-lg font-semibold text-foreground dark:text-white group-hover:text-violet-600 dark:group-hover:text-violet-400 transition-colors truncate">
                                   {doc.title}
                                 </h3>
-                                <div className="flex items-center gap-4 mt-1.5 text-sm text-slate-500 dark:text-slate-400">
+                                <div className="flex items-center gap-4 mt-1.5 text-sm text-muted-foreground dark:text-muted-foreground">
                                   <span className="flex items-center gap-1">
                                     <Clock className="h-3.5 w-3.5" />
                                     {formatDate(doc.created_at)}
@@ -1121,7 +1121,7 @@ export default function LibraryPage() {
                                       e.stopPropagation();
                                       handleOpenChat(doc);
                                     }}
-                                    className="text-slate-500 hover:text-violet-600 dark:hover:text-violet-400"
+                                    className="text-muted-foreground hover:text-violet-600 dark:hover:text-violet-400"
                                   >
                                     <MessageSquare className="h-4 w-4 mr-1" />
                                     Chat
@@ -1190,7 +1190,7 @@ export default function LibraryPage() {
 
                             {/* Summary Preview */}
                             {doc.summary && doc.status === "completed" && (
-                              <p className="mt-3 text-sm text-slate-600 dark:text-slate-400 line-clamp-2">
+                              <p className="mt-3 text-sm text-muted-foreground dark:text-muted-foreground line-clamp-2">
                                 {doc.summary}
                               </p>
                             )}
@@ -1217,7 +1217,7 @@ export default function LibraryPage() {
               className={cn(
                 "fixed right-0 top-0 h-screen w-[400px] z-40",
                 "border-l border-white/20 dark:border-white/10",
-                "bg-white/90 dark:bg-slate-900/90 backdrop-blur-2xl",
+                "bg-card/90 dark:bg-card/90 backdrop-blur-2xl",
                 "shadow-[-20px_0_60px_rgba(139,92,246,0.1)]"
               )}
             >

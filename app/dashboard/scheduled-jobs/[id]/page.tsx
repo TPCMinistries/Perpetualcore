@@ -568,7 +568,7 @@ export default function ScheduledJobDetailPage() {
               <div className="bg-slate-950 text-slate-100 p-4 rounded-lg font-mono text-sm space-y-1 max-h-96 overflow-y-auto">
                 {logs.map((log, index) => (
                   <div key={index} className="flex gap-3">
-                    <span className="text-slate-500">
+                    <span className="text-muted-foreground">
                       {new Date(log.timestamp).toLocaleTimeString()}
                     </span>
                     <span className={

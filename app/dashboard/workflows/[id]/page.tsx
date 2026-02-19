@@ -210,7 +210,7 @@ export default function WorkflowDetailPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <Loader2 className="h-8 w-8 animate-spin text-slate-400" />
+        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
       </div>
     );
   }
@@ -218,7 +218,7 @@ export default function WorkflowDetailPage() {
   if (!workflow) {
     return (
       <div className="text-center py-12">
-        <p className="text-slate-600 dark:text-slate-400">Workflow not found</p>
+        <p className="text-muted-foreground dark:text-muted-foreground">Workflow not found</p>
         <Button asChild className="mt-4">
           <Link href="/dashboard/workflows">Back to Workflows</Link>
         </Button>
@@ -234,7 +234,7 @@ export default function WorkflowDetailPage() {
           variant="ghost"
           size="sm"
           onClick={() => router.push("/dashboard/workflows")}
-          className="text-slate-600 dark:text-slate-400"
+          className="text-muted-foreground dark:text-muted-foreground"
         >
           <ArrowLeft className="h-4 w-4 mr-2" />
           Back to Workflows
@@ -242,29 +242,29 @@ export default function WorkflowDetailPage() {
       </div>
 
       {/* Workflow Info Card */}
-      <Card className="border-slate-200 dark:border-slate-800">
+      <Card className="border-border dark:border-border">
         <CardHeader>
           <div className="flex items-start justify-between">
             <div className="flex items-start gap-4">
               <div className="text-5xl">{workflow.icon}</div>
               <div>
                 <div className="flex items-center gap-2 mb-2">
-                  <CardTitle className="text-2xl text-slate-900 dark:text-slate-100">
+                  <CardTitle className="text-2xl text-foreground dark:text-foreground">
                     {workflow.name}
                   </CardTitle>
                   <Badge
                     variant={workflow.enabled ? "default" : "secondary"}
                     className={
                       workflow.enabled
-                        ? "bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900"
-                        : "bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-slate-100"
+                        ? "bg-slate-900 dark:bg-muted text-white dark:text-foreground"
+                        : "bg-muted dark:bg-card text-foreground dark:text-foreground"
                     }
                   >
                     {workflow.enabled ? "Active" : "Paused"}
                   </Badge>
                 </div>
-                <p className="text-slate-600 dark:text-slate-400">{workflow.description}</p>
-                <div className="flex items-center gap-4 mt-3 text-sm text-slate-600 dark:text-slate-400">
+                <p className="text-muted-foreground dark:text-muted-foreground">{workflow.description}</p>
+                <div className="flex items-center gap-4 mt-3 text-sm text-muted-foreground dark:text-muted-foreground">
                   <span className="flex items-center gap-1">
                     <Clock className="h-4 w-4" />
                     {workflow.actions.length} steps
@@ -285,7 +285,7 @@ export default function WorkflowDetailPage() {
               size="lg"
               variant="outline"
               asChild
-              className="border-slate-200 dark:border-slate-800"
+              className="border-border dark:border-border"
             >
               <Link href={`/dashboard/workflows/${workflowId}/builder`}>
                 <PenTool className="mr-2 h-4 w-4" />
@@ -296,7 +296,7 @@ export default function WorkflowDetailPage() {
               size="lg"
               onClick={executeWorkflow}
               disabled={!workflow.enabled || executing}
-              className="bg-slate-900 dark:bg-slate-100 hover:bg-slate-800 dark:hover:bg-slate-200 text-white dark:text-slate-900"
+              className="bg-slate-900 dark:bg-muted hover:bg-slate-800 dark:hover:bg-muted text-white dark:text-foreground"
             >
               {executing ? (
                 <>
@@ -316,9 +316,9 @@ export default function WorkflowDetailPage() {
       </Card>
 
       {/* Workflow Steps */}
-      <Card className="border-slate-200 dark:border-slate-800">
+      <Card className="border-border dark:border-border">
         <CardHeader>
-          <CardTitle className="text-slate-900 dark:text-slate-100">Workflow Steps</CardTitle>
+          <CardTitle className="text-foreground dark:text-foreground">Workflow Steps</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
@@ -337,7 +337,7 @@ export default function WorkflowDetailPage() {
                   className={`flex items-start gap-4 p-4 rounded-lg border ${
                     isActive
                       ? "border-blue-300 dark:border-blue-700 bg-blue-50 dark:bg-blue-950/20"
-                      : "border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900"
+                      : "border-border dark:border-border bg-card"
                   } transition-colors`}
                 >
                   <div className="flex-shrink-0 mt-0.5">
@@ -345,12 +345,12 @@ export default function WorkflowDetailPage() {
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-1">
-                      <span className="font-medium text-slate-900 dark:text-slate-100">
+                      <span className="font-medium text-foreground dark:text-foreground">
                         Step {step.step}: {step.title}
                       </span>
                       <Badge
                         variant="outline"
-                        className="text-xs bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300"
+                        className="text-xs bg-muted dark:bg-card text-foreground dark:text-muted-foreground"
                       >
                         {action.config.execution_type}
                       </Badge>
@@ -359,16 +359,16 @@ export default function WorkflowDetailPage() {
                         className={`text-xs ${
                           action.config.priority === "high"
                             ? "bg-red-100 dark:bg-red-950 text-red-700 dark:text-red-300 border-red-200 dark:border-red-800"
-                            : "bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300"
+                            : "bg-muted dark:bg-card text-foreground dark:text-muted-foreground"
                         }`}
                       >
                         {action.config.priority}
                       </Badge>
                     </div>
-                    <p className="text-sm text-slate-600 dark:text-slate-400 mb-2">
+                    <p className="text-sm text-muted-foreground dark:text-muted-foreground mb-2">
                       {action.config.description}
                     </p>
-                    <div className="flex items-center gap-3 text-xs text-slate-500 dark:text-slate-500">
+                    <div className="flex items-center gap-3 text-xs text-muted-foreground dark:text-muted-foreground">
                       <span className="flex items-center gap-1">
                         <Clock className="h-3 w-3" />
                         ~{action.config.estimated_duration_minutes} min
@@ -403,7 +403,7 @@ export default function WorkflowDetailPage() {
               setExecutionSteps([]);
               setCurrentStep(-1);
             }}
-            className="border-slate-200 dark:border-slate-800"
+            className="border-border dark:border-border"
           >
             Clear Results
           </Button>

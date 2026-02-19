@@ -82,8 +82,8 @@ export default function OrgDetailPage() {
       {/* Header */}
       <div className="flex items-start justify-between">
         <div className="flex items-start gap-3">
-          <div className="p-3 bg-slate-100 rounded-lg">
-            <Building2 className="h-6 w-6 text-slate-600" />
+          <div className="p-3 bg-muted rounded-lg">
+            <Building2 className="h-6 w-6 text-muted-foreground" />
           </div>
           <div>
             <h1 className="text-3xl font-bold">{org.name}</h1>
@@ -106,7 +106,7 @@ export default function OrgDetailPage() {
         <Card className="lg:col-span-2">
           <CardHeader>
             <CardTitle className="text-lg flex items-center gap-2">
-              <Users className="h-5 w-5 text-slate-500" />
+              <Users className="h-5 w-5 text-muted-foreground" />
               Members ({members.length})
             </CardTitle>
           </CardHeader>
@@ -131,7 +131,7 @@ export default function OrgDetailPage() {
           <Card>
             <CardHeader className="pb-2">
               <CardTitle className="text-sm flex items-center gap-2">
-                <Key className="h-4 w-4 text-slate-500" />
+                <Key className="h-4 w-4 text-muted-foreground" />
                 SSO Providers
               </CardTitle>
             </CardHeader>
@@ -157,7 +157,7 @@ export default function OrgDetailPage() {
           <Card>
             <CardHeader className="pb-2">
               <CardTitle className="text-sm flex items-center gap-2">
-                <Shield className="h-4 w-4 text-slate-500" />
+                <Shield className="h-4 w-4 text-muted-foreground" />
                 Compliance
               </CardTitle>
             </CardHeader>

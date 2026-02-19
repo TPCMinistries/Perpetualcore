@@ -157,7 +157,7 @@ export default function IPWhitelistPage() {
       <Card>
         <CardHeader>
           <CardTitle className="text-lg flex items-center gap-2">
-            <Globe className="h-5 w-5 text-slate-500" />
+            <Globe className="h-5 w-5 text-muted-foreground" />
             Whitelist Rules ({rules.length})
           </CardTitle>
         </CardHeader>
@@ -172,7 +172,7 @@ export default function IPWhitelistPage() {
                 <div
                   key={rule.id}
                   className={`flex items-center justify-between p-3 rounded-lg border ${
-                    rule.enabled ? "bg-white" : "bg-muted opacity-60"
+                    rule.enabled ? "bg-card" : "bg-muted opacity-60"
                   }`}
                 >
                   <div className="flex items-center gap-3">

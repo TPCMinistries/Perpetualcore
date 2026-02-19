@@ -167,7 +167,7 @@ export default function HIPAACompliancePage() {
         <Card key={category}>
           <CardHeader>
             <CardTitle className="text-lg flex items-center gap-2">
-              <FileText className="h-5 w-5 text-slate-500" />
+              <FileText className="h-5 w-5 text-muted-foreground" />
               {category}
             </CardTitle>
           </CardHeader>
@@ -202,7 +202,7 @@ function SummaryCard({ label, value, color }: { label: string; value: string; co
     <Card>
       <CardContent className="p-4 text-center">
         <p className="text-sm text-muted-foreground">{label}</p>
-        <p className={`text-2xl font-bold mt-1 ${color ?? "text-slate-900"}`}>{value}</p>
+        <p className={`text-2xl font-bold mt-1 ${color ?? "text-foreground"}`}>{value}</p>
       </CardContent>
     </Card>
   );

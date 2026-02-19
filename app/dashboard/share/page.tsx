@@ -130,7 +130,7 @@ export default function SharePage() {
           <h1 className="text-4xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
             Share Your AI Brain
           </h1>
-          <p className="text-lg text-slate-600 dark:text-slate-300 max-w-2xl mx-auto">
+          <p className="text-lg text-muted-foreground dark:text-muted-foreground max-w-2xl mx-auto">
             Your infinite memory AI gets even better when you collaborate. Invite teammates, students, or
             friends to experience it.
           </p>
@@ -143,7 +143,7 @@ export default function SharePage() {
               <div className="text-3xl font-bold text-purple-600 dark:text-purple-400 mb-1">
                 {stats.invitesSent}
               </div>
-              <p className="text-sm text-slate-600 dark:text-slate-400">Invites Sent</p>
+              <p className="text-sm text-muted-foreground dark:text-muted-foreground">Invites Sent</p>
             </CardContent>
           </Card>
           <Card className="bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-950/30 dark:to-blue-900/30 border-blue-200 dark:border-blue-800">
@@ -151,13 +151,13 @@ export default function SharePage() {
               <div className="text-3xl font-bold text-blue-600 dark:text-blue-400 mb-1">
                 {stats.teamMembers}
               </div>
-              <p className="text-sm text-slate-600 dark:text-slate-400">Team Members</p>
+              <p className="text-sm text-muted-foreground dark:text-muted-foreground">Team Members</p>
             </CardContent>
           </Card>
           <Card className="bg-gradient-to-br from-green-50 to-green-100 dark:from-green-950/30 dark:to-green-900/30 border-green-200 dark:border-green-800">
             <CardContent className="p-6 text-center">
               <div className="text-3xl font-bold text-green-600 dark:text-green-400 mb-1">∞</div>
-              <p className="text-sm text-slate-600 dark:text-slate-400">Shared Docs</p>
+              <p className="text-sm text-muted-foreground dark:text-muted-foreground">Shared Docs</p>
             </CardContent>
           </Card>
           <Card className="bg-gradient-to-br from-indigo-50 to-indigo-100 dark:from-indigo-950/30 dark:to-indigo-900/30 border-indigo-200 dark:border-indigo-800">
@@ -165,13 +165,13 @@ export default function SharePage() {
               <div className="text-3xl font-bold text-indigo-600 dark:text-indigo-400 mb-1">
                 <Sparkles className="h-8 w-8 mx-auto" />
               </div>
-              <p className="text-sm text-slate-600 dark:text-slate-400">Infinite Memory</p>
+              <p className="text-sm text-muted-foreground dark:text-muted-foreground">Infinite Memory</p>
             </CardContent>
           </Card>
         </div>
 
         {/* Share Link */}
-        <Card className="border-slate-200 dark:border-slate-800">
+        <Card className="border-border dark:border-border">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <LinkIcon className="h-5 w-5 text-purple-600 dark:text-purple-400" />
@@ -179,19 +179,19 @@ export default function SharePage() {
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <p className="text-sm text-slate-600 dark:text-slate-400">
+            <p className="text-sm text-muted-foreground dark:text-muted-foreground">
               Share this link with anyone. When they sign up, you'll both unlock collaboration features.
             </p>
             <div className="flex gap-2">
-              <Input value={inviteLink} readOnly className="font-mono text-sm bg-slate-50 dark:bg-slate-900" />
+              <Input value={inviteLink} readOnly className="font-mono text-sm bg-muted dark:bg-card" />
               <Button onClick={handleCopyLink} variant="outline" className="shrink-0">
                 {copied ? <Check className="h-4 w-4 text-green-600" /> : <Copy className="h-4 w-4" />}
               </Button>
             </div>
 
             {/* Social Share Buttons */}
-            <div className="pt-4 border-t border-slate-200 dark:border-slate-800">
-              <p className="text-sm font-medium mb-3 text-slate-700 dark:text-slate-300">
+            <div className="pt-4 border-t border-border dark:border-border">
+              <p className="text-sm font-medium mb-3 text-foreground dark:text-muted-foreground">
                 Share on social media:
               </p>
               <div className="flex gap-3">
@@ -217,7 +217,7 @@ export default function SharePage() {
         </Card>
 
         {/* Email Invite */}
-        <Card className="border-slate-200 dark:border-slate-800">
+        <Card className="border-border dark:border-border">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Mail className="h-5 w-5 text-blue-600 dark:text-blue-400" />
@@ -226,7 +226,7 @@ export default function SharePage() {
           </CardHeader>
           <CardContent className="space-y-4">
             <div>
-              <label className="text-sm font-medium mb-2 block text-slate-700 dark:text-slate-300">
+              <label className="text-sm font-medium mb-2 block text-foreground dark:text-muted-foreground">
                 Email Address
               </label>
               <Input
@@ -243,7 +243,7 @@ export default function SharePage() {
             </div>
 
             <div>
-              <label className="text-sm font-medium mb-2 block text-slate-700 dark:text-slate-300">
+              <label className="text-sm font-medium mb-2 block text-foreground dark:text-muted-foreground">
                 Personal Message (Optional)
               </label>
               <Textarea
@@ -286,8 +286,8 @@ export default function SharePage() {
                 <div className="h-10 w-10 rounded-lg bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center mb-2">
                   <Users className="h-5 w-5 text-purple-600 dark:text-purple-400" />
                 </div>
-                <h3 className="font-semibold text-slate-900 dark:text-white">Shared Knowledge</h3>
-                <p className="text-sm text-slate-600 dark:text-slate-400">
+                <h3 className="font-semibold text-foreground dark:text-white">Shared Knowledge</h3>
+                <p className="text-sm text-muted-foreground dark:text-muted-foreground">
                   Collaborate on documents and conversations with your team
                 </p>
               </div>
@@ -295,8 +295,8 @@ export default function SharePage() {
                 <div className="h-10 w-10 rounded-lg bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center mb-2">
                   <Sparkles className="h-5 w-5 text-blue-600 dark:text-blue-400" />
                 </div>
-                <h3 className="font-semibold text-slate-900 dark:text-white">Smarter AI</h3>
-                <p className="text-sm text-slate-600 dark:text-slate-400">
+                <h3 className="font-semibold text-foreground dark:text-white">Smarter AI</h3>
+                <p className="text-sm text-muted-foreground dark:text-muted-foreground">
                   AI becomes more powerful with shared context and knowledge
                 </p>
               </div>
@@ -304,8 +304,8 @@ export default function SharePage() {
                 <div className="h-10 w-10 rounded-lg bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center mb-2">
                   <MessageSquare className="h-5 w-5 text-indigo-600 dark:text-indigo-400" />
                 </div>
-                <h3 className="font-semibold text-slate-900 dark:text-white">Team Conversations</h3>
-                <p className="text-sm text-slate-600 dark:text-slate-400">
+                <h3 className="font-semibold text-foreground dark:text-white">Team Conversations</h3>
+                <p className="text-sm text-muted-foreground dark:text-muted-foreground">
                   Create shared AI conversations for projects and collaboration
                 </p>
               </div>
@@ -314,14 +314,14 @@ export default function SharePage() {
         </Card>
 
         {/* CTA to Team Settings */}
-        <Card className="border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/50">
+        <Card className="border-border dark:border-border bg-muted dark:bg-card/50">
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <h3 className="font-semibold mb-1 text-slate-900 dark:text-white">
+                <h3 className="font-semibold mb-1 text-foreground dark:text-white">
                   Need more team management?
                 </h3>
-                <p className="text-sm text-slate-600 dark:text-slate-400">
+                <p className="text-sm text-muted-foreground dark:text-muted-foreground">
                   Manage team members, roles, and permissions
                 </p>
               </div>

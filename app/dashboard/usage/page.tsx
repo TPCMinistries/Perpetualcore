@@ -199,24 +199,24 @@ export default function UsageAnalyticsPage() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="border border-slate-200 dark:border-slate-800 rounded-xl p-8 bg-white dark:bg-slate-900">
+      <div className="border border-border dark:border-border rounded-xl p-8 bg-card">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <div className="h-12 w-12 rounded-lg bg-slate-900 dark:bg-slate-100 flex items-center justify-center">
-              <BarChart3 className="h-6 w-6 text-white dark:text-slate-900" />
+            <div className="h-12 w-12 rounded-lg bg-slate-900 dark:bg-muted flex items-center justify-center">
+              <BarChart3 className="h-6 w-6 text-white dark:text-foreground" />
             </div>
             <div>
-              <h1 className="text-3xl font-semibold text-slate-900 dark:text-slate-100">
+              <h1 className="text-3xl font-semibold text-foreground dark:text-foreground">
                 Usage Analytics
               </h1>
-              <p className="text-slate-600 dark:text-slate-400 mt-1">
+              <p className="text-muted-foreground dark:text-muted-foreground mt-1">
                 Track your API usage, tokens, and costs
               </p>
             </div>
           </div>
           <div className="flex items-center gap-3">
             <Select value={timeRange} onValueChange={setTimeRange}>
-              <SelectTrigger className="w-40 border-slate-200 dark:border-slate-800">
+              <SelectTrigger className="w-40 border-border dark:border-border">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -230,7 +230,7 @@ export default function UsageAnalyticsPage() {
               onClick={handleExport}
               disabled={exporting}
               variant="outline"
-              className="border-slate-200 dark:border-slate-800"
+              className="border-border dark:border-border"
             >
               {exporting ? (
                 <>
@@ -250,11 +250,11 @@ export default function UsageAnalyticsPage() {
 
       {/* Key Metrics */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <Card className="border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6">
+        <Card className="border-border dark:border-border bg-card p-6">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-slate-600 dark:text-slate-400">API Calls</p>
-              <p className="text-3xl font-semibold text-slate-900 dark:text-slate-100 mt-1">{formatNumber(stats?.api_calls || 0)}</p>
+              <p className="text-sm text-muted-foreground dark:text-muted-foreground">API Calls</p>
+              <p className="text-3xl font-semibold text-foreground dark:text-foreground mt-1">{formatNumber(stats?.api_calls || 0)}</p>
             </div>
             <div className="h-10 w-10 rounded-lg bg-blue-50 dark:bg-blue-950/30 flex items-center justify-center">
               <Activity className="h-5 w-5 text-blue-600 dark:text-blue-400" />
@@ -266,11 +266,11 @@ export default function UsageAnalyticsPage() {
           </div>
         </Card>
 
-        <Card className="border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6">
+        <Card className="border-border dark:border-border bg-card p-6">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-slate-600 dark:text-slate-400">AI Tokens Used</p>
-              <p className="text-3xl font-semibold text-slate-900 dark:text-slate-100 mt-1">{formatNumber(stats?.tokens_used || 0)}</p>
+              <p className="text-sm text-muted-foreground dark:text-muted-foreground">AI Tokens Used</p>
+              <p className="text-3xl font-semibold text-foreground dark:text-foreground mt-1">{formatNumber(stats?.tokens_used || 0)}</p>
             </div>
             <div className="h-10 w-10 rounded-lg bg-purple-50 dark:bg-purple-950/30 flex items-center justify-center">
               <Zap className="h-5 w-5 text-purple-600 dark:text-purple-400" />
@@ -282,11 +282,11 @@ export default function UsageAnalyticsPage() {
           </div>
         </Card>
 
-        <Card className="border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6">
+        <Card className="border-border dark:border-border bg-card p-6">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-slate-600 dark:text-slate-400">Storage Used</p>
-              <p className="text-3xl font-semibold text-slate-900 dark:text-slate-100 mt-1">{stats?.storage_used.toFixed(1)} GB</p>
+              <p className="text-sm text-muted-foreground dark:text-muted-foreground">Storage Used</p>
+              <p className="text-3xl font-semibold text-foreground dark:text-foreground mt-1">{stats?.storage_used.toFixed(1)} GB</p>
             </div>
             <div className="h-10 w-10 rounded-lg bg-amber-50 dark:bg-amber-950/30 flex items-center justify-center">
               <Database className="h-5 w-5 text-amber-600 dark:text-amber-400" />
@@ -298,11 +298,11 @@ export default function UsageAnalyticsPage() {
           </div>
         </Card>
 
-        <Card className="border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6">
+        <Card className="border-border dark:border-border bg-card p-6">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-slate-600 dark:text-slate-400">Total Cost</p>
-              <p className="text-3xl font-semibold text-slate-900 dark:text-slate-100 mt-1">${stats?.total_cost.toFixed(2)}</p>
+              <p className="text-sm text-muted-foreground dark:text-muted-foreground">Total Cost</p>
+              <p className="text-3xl font-semibold text-foreground dark:text-foreground mt-1">${stats?.total_cost.toFixed(2)}</p>
             </div>
             <div className="h-10 w-10 rounded-lg bg-green-50 dark:bg-green-950/30 flex items-center justify-center">
               <DollarSign className="h-5 w-5 text-green-600 dark:text-green-400" />
@@ -483,12 +483,12 @@ export default function UsageAnalyticsPage() {
               <p className="text-lg font-semibold">{stats?.documents_processed || 0}</p>
             </div>
 
-            <div className="flex items-center justify-between p-4 rounded-lg bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
+            <div className="flex items-center justify-between p-4 rounded-lg bg-muted dark:bg-card border border-border dark:border-border">
               <div>
-                <p className="font-semibold text-lg text-slate-900 dark:text-slate-100">Estimated Cost</p>
-                <p className="text-sm text-slate-600 dark:text-slate-400">for {timeRange}</p>
+                <p className="font-semibold text-lg text-foreground dark:text-foreground">Estimated Cost</p>
+                <p className="text-sm text-muted-foreground dark:text-muted-foreground">for {timeRange}</p>
               </div>
-              <p className="text-2xl font-bold text-slate-900 dark:text-slate-100">
+              <p className="text-2xl font-bold text-foreground dark:text-foreground">
                 ${stats?.total_cost.toFixed(2)}
               </p>
             </div>

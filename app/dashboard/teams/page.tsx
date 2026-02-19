@@ -393,7 +393,6 @@ function TeamCard({
   const isBOS2 = templateId?.includes("-engine") || templateId?.includes("training") || templateId?.includes("research") || templateId?.includes("technology") || templateId?.includes("opportunities") || workflowStages?.length > 0;
 
   const handleClick = () => {
-    console.log("Team card clicked:", team.id, team.name);
     onClick();
   };
 

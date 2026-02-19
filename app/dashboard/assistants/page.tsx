@@ -184,12 +184,12 @@ export default function AssistantsPage() {
       marketing: "bg-violet-100 dark:bg-violet-900/30 text-violet-700 dark:text-violet-400",
       sales: "bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400",
       research: "bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400",
-      code_review: "bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-400",
+      code_review: "bg-muted dark:bg-card text-foreground dark:text-muted-foreground",
       writing: "bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400",
       customer_support: "bg-cyan-100 dark:bg-cyan-900/30 text-cyan-700 dark:text-cyan-400",
       project_management: "bg-rose-100 dark:bg-rose-900/30 text-rose-700 dark:text-rose-400",
       data_analysis: "bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-400",
-      custom: "bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-400",
+      custom: "bg-muted dark:bg-card text-foreground dark:text-muted-foreground",
     };
 
     const RoleIcon = roleIcons[role] || Bot;
@@ -320,12 +320,12 @@ export default function AssistantsPage() {
               <div className="flex flex-col md:flex-row items-center gap-4">
                 <div className="flex-1 w-full md:w-auto">
                   <div className="relative">
-                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-slate-400" />
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                     <Input
                       placeholder="Search advisors..."
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
-                      className="pl-10 h-11 bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700"
+                      className="pl-10 h-11 bg-card border-border dark:border-border"
                     />
                   </div>
                 </div>
@@ -335,14 +335,14 @@ export default function AssistantsPage() {
                     value={filterStatus}
                     onChange={setFilterStatus}
                   />
-                  <div className="flex gap-1 p-1 bg-slate-100 dark:bg-slate-800 rounded-lg">
+                  <div className="flex gap-1 p-1 bg-muted dark:bg-card rounded-lg">
                     <button
                       onClick={() => setViewMode("grid")}
                       className={cn(
                         "p-2 rounded-md transition-colors",
                         viewMode === "grid"
-                          ? "bg-white dark:bg-slate-700 shadow-sm"
-                          : "text-slate-500 hover:text-slate-700 dark:hover:text-slate-300"
+                          ? "bg-card dark:bg-muted shadow-sm"
+                          : "text-muted-foreground hover:text-foreground dark:hover:text-muted-foreground"
                       )}
                     >
                       <LayoutGrid className="h-4 w-4" />
@@ -352,8 +352,8 @@ export default function AssistantsPage() {
                       className={cn(
                         "p-2 rounded-md transition-colors",
                         viewMode === "list"
-                          ? "bg-white dark:bg-slate-700 shadow-sm"
-                          : "text-slate-500 hover:text-slate-700 dark:hover:text-slate-300"
+                          ? "bg-card dark:bg-muted shadow-sm"
+                          : "text-muted-foreground hover:text-foreground dark:hover:text-muted-foreground"
                       )}
                     >
                       <ListIcon className="h-4 w-4" />
@@ -398,11 +398,11 @@ export default function AssistantsPage() {
           <Card>
             <CardContent className="py-12">
               <div className="text-center">
-                <div className="p-4 rounded-2xl bg-slate-100 dark:bg-slate-800 w-fit mx-auto mb-4">
-                  <Search className="h-8 w-8 text-slate-400" />
+                <div className="p-4 rounded-2xl bg-muted dark:bg-card w-fit mx-auto mb-4">
+                  <Search className="h-8 w-8 text-muted-foreground" />
                 </div>
-                <h3 className="text-lg font-semibold mb-2 text-slate-900 dark:text-white">No advisors found</h3>
-                <p className="text-sm text-slate-500 dark:text-slate-400">
+                <h3 className="text-lg font-semibold mb-2 text-foreground dark:text-white">No advisors found</h3>
+                <p className="text-sm text-muted-foreground dark:text-muted-foreground">
                   Try adjusting your search or filters
                 </p>
               </div>
@@ -412,7 +412,7 @@ export default function AssistantsPage() {
       ) : (
         <div>
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-semibold text-slate-900 dark:text-white">
+            <h2 className="text-lg font-semibold text-foreground dark:text-white">
               {filteredAssistants.length} Advisor{filteredAssistants.length !== 1 ? "s" : ""} on Your Team
             </h2>
           </div>
@@ -437,14 +437,14 @@ export default function AssistantsPage() {
                   >
                     <CardHeader className="pb-3">
                       <div className="flex items-start gap-3">
-                        <div className="text-4xl p-2 rounded-xl bg-slate-100 dark:bg-slate-800">
+                        <div className="text-4xl p-2 rounded-xl bg-muted dark:bg-card">
                           {assistant.avatar_emoji}
                         </div>
                         <div className="flex-1 min-w-0">
-                          <CardTitle className="text-lg text-slate-900 dark:text-white">
+                          <CardTitle className="text-lg text-foreground dark:text-white">
                             {assistant.name}
                           </CardTitle>
-                          <p className="text-sm text-slate-500 dark:text-slate-400 line-clamp-2 mt-1">
+                          <p className="text-sm text-muted-foreground dark:text-muted-foreground line-clamp-2 mt-1">
                             {assistant.description}
                           </p>
                         </div>
@@ -460,7 +460,7 @@ export default function AssistantsPage() {
                             Active
                           </Badge>
                         ) : (
-                          <Badge variant="outline" className="bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border-0">
+                          <Badge variant="outline" className="bg-muted dark:bg-card text-muted-foreground dark:text-muted-foreground border-0">
                             Disabled
                           </Badge>
                         )}
@@ -476,7 +476,7 @@ export default function AssistantsPage() {
                       </div>
 
                       {assistant.total_messages > 0 && (
-                        <div className="flex items-center gap-4 text-xs text-slate-500 dark:text-slate-400">
+                        <div className="flex items-center gap-4 text-xs text-muted-foreground dark:text-muted-foreground">
                           <span className="flex items-center gap-1">
                             <MessageSquare className="h-3 w-3" />
                             {assistant.total_conversations} chats
@@ -515,7 +515,7 @@ export default function AssistantsPage() {
                           size="icon"
                           onClick={() => deleteAssistant(assistant.id, assistant.name)}
                           disabled={actionLoading === assistant.id}
-                          className="h-10 w-10 text-slate-500 hover:text-rose-600 hover:border-rose-300 dark:hover:border-rose-700"
+                          className="h-10 w-10 text-muted-foreground hover:text-rose-600 hover:border-rose-300 dark:hover:border-rose-700"
                         >
                           <Trash2 className="h-4 w-4" />
                         </Button>

@@ -48,7 +48,7 @@ export default function WorkflowBuilderPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-[calc(100vh-120px)]">
-        <Loader2 className="h-8 w-8 animate-spin text-slate-400" />
+        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
       </div>
     );
   }
@@ -56,7 +56,7 @@ export default function WorkflowBuilderPage() {
   if (!workflow) {
     return (
       <div className="text-center py-12">
-        <p className="text-slate-600 dark:text-slate-400">
+        <p className="text-muted-foreground dark:text-muted-foreground">
           Workflow not found
         </p>
         <Button asChild className="mt-4">

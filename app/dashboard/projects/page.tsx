@@ -755,21 +755,21 @@ Respond ONLY with valid JSON, no other text.`
                   <div className="flex items-center gap-1 flex-1">
                     <div className={cn(
                       "flex-1 h-1.5 rounded-full transition-colors",
-                      createStep >= 1 ? "bg-violet-500" : "bg-slate-200 dark:bg-slate-700"
+                      createStep >= 1 ? "bg-violet-500" : "bg-muted dark:bg-muted"
                     )} />
                     <span className="text-[10px] text-muted-foreground">Type</span>
                   </div>
                   <div className="flex items-center gap-1 flex-1">
                     <div className={cn(
                       "flex-1 h-1.5 rounded-full transition-colors",
-                      createStep >= 2 ? "bg-violet-500" : "bg-slate-200 dark:bg-slate-700"
+                      createStep >= 2 ? "bg-violet-500" : "bg-muted dark:bg-muted"
                     )} />
                     <span className="text-[10px] text-muted-foreground">Details</span>
                   </div>
                   <div className="flex items-center gap-1 flex-1">
                     <div className={cn(
                       "flex-1 h-1.5 rounded-full transition-colors",
-                      createStep >= 3 ? "bg-violet-500" : "bg-slate-200 dark:bg-slate-700"
+                      createStep >= 3 ? "bg-violet-500" : "bg-muted dark:bg-muted"
                     )} />
                     <span className="text-[10px] text-muted-foreground">Setup</span>
                   </div>
@@ -787,7 +787,7 @@ Respond ONLY with valid JSON, no other text.`
                         "w-full flex items-center gap-4 p-4 rounded-xl border-2 text-left transition-all",
                         aiSetupMode
                           ? "border-violet-500 bg-gradient-to-r from-violet-50 to-purple-50 dark:from-violet-950/30 dark:to-purple-950/30"
-                          : "border-dashed border-slate-300 dark:border-slate-600 hover:border-violet-300 dark:hover:border-violet-700"
+                          : "border-dashed border-border dark:border-border hover:border-violet-300 dark:hover:border-violet-700"
                       )}
                     >
                       <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center flex-shrink-0">
@@ -820,7 +820,7 @@ Respond ONLY with valid JSON, no other text.`
                               "flex-1 flex items-center justify-center gap-2 px-4 py-3 border-2 border-dashed rounded-lg cursor-pointer transition-colors",
                               aiFileContent
                                 ? "border-violet-500 bg-violet-50 dark:bg-violet-950/30"
-                                : "border-slate-300 dark:border-slate-600 hover:border-violet-400"
+                                : "border-border dark:border-border hover:border-violet-400"
                             )}>
                               <input
                                 type="file"
@@ -852,7 +852,7 @@ Respond ONLY with valid JSON, no other text.`
                                       setAiFileContent(null);
                                       setAiFileName(null);
                                     }}
-                                    className="ml-2 text-slate-400 hover:text-red-500"
+                                    className="ml-2 text-muted-foreground hover:text-red-500"
                                   >
                                     <X className="h-4 w-4" />
                                   </button>
@@ -892,7 +892,7 @@ Respond ONLY with valid JSON, no other text.`
                     <>
                       <div className="relative mb-4">
                         <div className="absolute inset-0 flex items-center">
-                          <div className="w-full border-t border-slate-200 dark:border-slate-700" />
+                          <div className="w-full border-t border-border dark:border-border" />
                         </div>
                         <div className="relative flex justify-center text-xs">
                           <span className="bg-background px-2 text-muted-foreground">Or choose a project type</span>
@@ -914,7 +914,7 @@ Respond ONLY with valid JSON, no other text.`
                                     "flex items-center gap-3 p-3 rounded-xl border-2 text-left transition-all hover:border-violet-300 dark:hover:border-violet-700",
                                     newProjectType === type.id
                                       ? "border-violet-500 bg-violet-50 dark:bg-violet-950/30"
-                                      : "border-slate-200 dark:border-slate-700"
+                                      : "border-border dark:border-border"
                                   )}
                                 >
                                   <span className="text-xl">{type.emoji}</span>
@@ -949,7 +949,7 @@ Respond ONLY with valid JSON, no other text.`
                           <p className="text-xs font-medium text-muted-foreground mb-1">Milestones:</p>
                           <div className="flex flex-wrap gap-1">
                             {aiSuggestions.milestones.map((m, i) => (
-                              <span key={i} className="px-2 py-1 bg-white dark:bg-slate-800 rounded-md text-xs">{m}</span>
+                              <span key={i} className="px-2 py-1 bg-card rounded-md text-xs">{m}</span>
                             ))}
                           </div>
                         </div>
@@ -959,7 +959,7 @@ Respond ONLY with valid JSON, no other text.`
                           <p className="text-xs font-medium text-muted-foreground mb-1">Initial Tasks:</p>
                           <div className="flex flex-wrap gap-1">
                             {aiSuggestions.tasks.slice(0, 5).map((t, i) => (
-                              <span key={i} className="px-2 py-1 bg-white dark:bg-slate-800 rounded-md text-xs">{t}</span>
+                              <span key={i} className="px-2 py-1 bg-card rounded-md text-xs">{t}</span>
                             ))}
                             {aiSuggestions.tasks.length > 5 && (
                               <span className="px-2 py-1 text-xs text-muted-foreground">+{aiSuggestions.tasks.length - 5} more</span>
@@ -1000,7 +1000,7 @@ Respond ONLY with valid JSON, no other text.`
                           type="button"
                           onClick={() => setNewProjectEmoji(emoji)}
                           className={cn(
-                            "w-8 h-8 rounded-lg text-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors",
+                            "w-8 h-8 rounded-lg text-lg hover:bg-muted dark:hover:bg-muted transition-colors",
                             newProjectEmoji === emoji && "bg-violet-100 dark:bg-violet-900/30"
                           )}
                         >
@@ -1054,7 +1054,7 @@ Respond ONLY with valid JSON, no other text.`
                             "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm transition-colors border",
                             newProjectTeams.includes(team.id)
                               ? "border-violet-500 bg-violet-50 dark:bg-violet-950/30 text-violet-700 dark:text-violet-300"
-                              : "border-slate-200 dark:border-slate-700 hover:border-violet-300 dark:hover:border-violet-600"
+                              : "border-border dark:border-border hover:border-violet-300 dark:hover:border-violet-600"
                           )}
                         >
                           <span>{team.emoji}</span>
@@ -1137,7 +1137,7 @@ Respond ONLY with valid JSON, no other text.`
                             "px-3 py-1.5 rounded-full text-xs font-medium transition-colors",
                             newProjectTags.includes(tag)
                               ? "bg-violet-100 dark:bg-violet-900/30 text-violet-700 dark:text-violet-300"
-                              : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700"
+                              : "bg-muted dark:bg-card text-muted-foreground dark:text-muted-foreground hover:bg-muted dark:hover:bg-muted"
                           )}
                         >
                           {tag}
@@ -1293,7 +1293,7 @@ Respond ONLY with valid JSON, no other text.`
                               key={i}
                               type="button"
                               onClick={() => setNewProjectMilestones(prev => [...prev, m])}
-                              className="px-2 py-1 bg-slate-100 dark:bg-slate-800 hover:bg-violet-100 dark:hover:bg-violet-900/30 rounded text-xs transition-colors"
+                              className="px-2 py-1 bg-muted dark:bg-card hover:bg-violet-100 dark:hover:bg-violet-900/30 rounded text-xs transition-colors"
                             >
                               + {m}
                             </button>
@@ -1322,7 +1322,7 @@ Respond ONLY with valid JSON, no other text.`
                                 "flex items-center gap-2 p-2 rounded-lg border text-left transition-colors",
                                 newProjectMembers.includes(member.id)
                                   ? "border-violet-500 bg-violet-50 dark:bg-violet-950/30"
-                                  : "border-slate-200 dark:border-slate-700 hover:border-violet-300"
+                                  : "border-border dark:border-border hover:border-violet-300"
                               )}
                             >
                               <div className="w-8 h-8 rounded-full bg-gradient-to-br from-violet-400 to-purple-500 flex items-center justify-center text-white text-xs font-medium">
@@ -1627,7 +1627,7 @@ function ProjectCard({
   onArchive: () => void;
 }) {
   const priorityColors: Record<ProjectPriority, string> = {
-    low: "bg-slate-500",
+    low: "bg-muted0",
     medium: "bg-blue-500",
     high: "bg-orange-500",
     urgent: "bg-red-500",

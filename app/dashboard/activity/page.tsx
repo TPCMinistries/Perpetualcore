@@ -33,24 +33,24 @@ export default function ActivityPage() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="border border-slate-200 dark:border-slate-800 rounded-xl p-8 bg-white dark:bg-slate-900">
+      <div className="border border-border dark:border-border rounded-xl p-8 bg-card">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <div className="h-12 w-12 rounded-lg bg-slate-900 dark:bg-slate-100 flex items-center justify-center">
-              <Activity className="h-6 w-6 text-white dark:text-slate-900" />
+            <div className="h-12 w-12 rounded-lg bg-slate-900 dark:bg-muted flex items-center justify-center">
+              <Activity className="h-6 w-6 text-white dark:text-foreground" />
             </div>
             <div>
-              <h1 className="text-3xl font-semibold text-slate-900 dark:text-slate-100">
+              <h1 className="text-3xl font-semibold text-foreground dark:text-foreground">
                 Activity Feed
               </h1>
-              <p className="text-slate-600 dark:text-slate-400 mt-1">
+              <p className="text-muted-foreground dark:text-muted-foreground mt-1">
                 Track all team activity and collaboration in real-time
               </p>
             </div>
           </div>
           <Button
             variant="outline"
-            className="border-slate-200 dark:border-slate-800"
+            className="border-border dark:border-border"
           >
             <Download className="mr-2 h-4 w-4" />
             Export
@@ -59,14 +59,14 @@ export default function ActivityPage() {
       </div>
 
       {/* Filters */}
-      <Card className="border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900">
+      <Card className="border-border dark:border-border bg-card">
         <CardContent className="pt-6">
           <div className="flex flex-wrap gap-4 items-center">
             <div className="flex items-center gap-2">
-              <div className="h-8 w-8 rounded-lg bg-slate-100 dark:bg-slate-800 flex items-center justify-center">
-                <Filter className="h-4 w-4 text-slate-600 dark:text-slate-400" />
+              <div className="h-8 w-8 rounded-lg bg-muted dark:bg-card flex items-center justify-center">
+                <Filter className="h-4 w-4 text-muted-foreground dark:text-muted-foreground" />
               </div>
-              <span className="text-sm font-semibold text-slate-900 dark:text-slate-100">Filters:</span>
+              <span className="text-sm font-semibold text-foreground dark:text-foreground">Filters:</span>
             </div>
 
             {/* Entity Type Filter */}
@@ -154,7 +154,7 @@ export default function ActivityPage() {
               <Button
                 variant="ghost"
                 size="sm"
-                className="text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800"
+                className="text-muted-foreground dark:text-muted-foreground hover:bg-muted dark:hover:bg-muted"
                 onClick={() => {
                   setFilterType("all");
                   setFilterAction("all");
@@ -170,11 +170,11 @@ export default function ActivityPage() {
 
       {/* Quick Stats */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <Card className="p-6 border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900">
+        <Card className="p-6 border-border dark:border-border bg-card">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-slate-600 dark:text-slate-400">Total Activity</p>
-              <p className="text-3xl font-semibold text-slate-900 dark:text-slate-100 mt-1">247</p>
+              <p className="text-sm text-muted-foreground dark:text-muted-foreground">Total Activity</p>
+              <p className="text-3xl font-semibold text-foreground dark:text-foreground mt-1">247</p>
             </div>
             <div className="h-10 w-10 rounded-lg bg-teal-50 dark:bg-teal-950/30 flex items-center justify-center">
               <Activity className="h-5 w-5 text-teal-600 dark:text-teal-400" />
@@ -186,11 +186,11 @@ export default function ActivityPage() {
           </div>
         </Card>
 
-        <Card className="p-6 border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900">
+        <Card className="p-6 border-border dark:border-border bg-card">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-slate-600 dark:text-slate-400">Active Users</p>
-              <p className="text-3xl font-semibold text-slate-900 dark:text-slate-100 mt-1">12</p>
+              <p className="text-sm text-muted-foreground dark:text-muted-foreground">Active Users</p>
+              <p className="text-3xl font-semibold text-foreground dark:text-foreground mt-1">12</p>
             </div>
             <div className="h-10 w-10 rounded-lg bg-blue-50 dark:bg-blue-950/30 flex items-center justify-center">
               <Users className="h-5 w-5 text-blue-600 dark:text-blue-400" />
@@ -202,33 +202,33 @@ export default function ActivityPage() {
           </div>
         </Card>
 
-        <Card className="p-6 border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900">
+        <Card className="p-6 border-border dark:border-border bg-card">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-slate-600 dark:text-slate-400">Comments</p>
-              <p className="text-3xl font-semibold text-slate-900 dark:text-slate-100 mt-1">63</p>
+              <p className="text-sm text-muted-foreground dark:text-muted-foreground">Comments</p>
+              <p className="text-3xl font-semibold text-foreground dark:text-foreground mt-1">63</p>
             </div>
             <div className="h-10 w-10 rounded-lg bg-cyan-50 dark:bg-cyan-950/30 flex items-center justify-center">
               <MessageSquare className="h-5 w-5 text-cyan-600 dark:text-cyan-400" />
             </div>
           </div>
           <div className="flex items-center gap-1 mt-3 text-xs">
-            <span className="text-slate-600 dark:text-slate-400 font-medium">18 today</span>
+            <span className="text-muted-foreground dark:text-muted-foreground font-medium">18 today</span>
           </div>
         </Card>
 
-        <Card className="p-6 border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900">
+        <Card className="p-6 border-border dark:border-border bg-card">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-slate-600 dark:text-slate-400">Tasks Done</p>
-              <p className="text-3xl font-semibold text-slate-900 dark:text-slate-100 mt-1">34</p>
+              <p className="text-sm text-muted-foreground dark:text-muted-foreground">Tasks Done</p>
+              <p className="text-3xl font-semibold text-foreground dark:text-foreground mt-1">34</p>
             </div>
             <div className="h-10 w-10 rounded-lg bg-green-50 dark:bg-green-950/30 flex items-center justify-center">
               <CheckSquare className="h-5 w-5 text-green-600 dark:text-green-400" />
             </div>
           </div>
           <div className="flex items-center gap-1 mt-3 text-xs">
-            <span className="text-slate-600 dark:text-slate-400 font-medium">85% completion rate</span>
+            <span className="text-muted-foreground dark:text-muted-foreground font-medium">85% completion rate</span>
           </div>
         </Card>
       </div>

@@ -180,7 +180,7 @@ export default function SOC2ReadinessPage() {
           return (
             <Card key={principle}>
               <CardContent className="p-4 text-center">
-                <Shield className="h-5 w-5 text-slate-500 mx-auto mb-1" />
+                <Shield className="h-5 w-5 text-muted-foreground mx-auto mb-1" />
                 <p className="text-xs font-medium text-muted-foreground">{principle}</p>
                 <p className="text-lg font-bold mt-1">
                   {implemented}/{controls.length}

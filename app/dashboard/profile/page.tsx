@@ -238,7 +238,7 @@ export default function ProfilePage() {
             variants={cardVariants}
           >
             <Card className="overflow-hidden">
-              <CardHeader className="border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/30">
+              <CardHeader className="border-b border-border dark:border-border bg-muted/50 dark:bg-card/30">
                 <CardTitle className="text-base">Profile Picture</CardTitle>
                 <CardDescription>Your public avatar</CardDescription>
               </CardHeader>
@@ -255,14 +255,14 @@ export default function ProfilePage() {
                   </button>
                 </div>
                 <div className="text-center">
-                  <p className="font-semibold text-slate-900 dark:text-white">
+                  <p className="font-semibold text-foreground dark:text-white">
                     {profile.full_name || "Your Name"}
                   </p>
-                  <p className="text-sm text-slate-500 dark:text-slate-400">
+                  <p className="text-sm text-muted-foreground dark:text-muted-foreground">
                     {profile.title || "Add your title"}
                   </p>
                 </div>
-                <p className="text-xs text-slate-400 dark:text-slate-500">
+                <p className="text-xs text-muted-foreground dark:text-muted-foreground">
                   JPG, PNG or GIF. Max 5MB.
                 </p>
               </CardContent>
@@ -277,20 +277,20 @@ export default function ProfilePage() {
             variants={cardVariants}
           >
             <Card>
-              <CardHeader className="border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/30">
+              <CardHeader className="border-b border-border dark:border-border bg-muted/50 dark:bg-card/30">
                 <CardTitle className="text-base">Profile Completion</CardTitle>
               </CardHeader>
               <CardContent className="pt-6">
                 <div className="space-y-3">
                   <div className="flex items-center justify-between">
-                    <span className="text-sm text-slate-600 dark:text-slate-400">
+                    <span className="text-sm text-muted-foreground dark:text-muted-foreground">
                       {completedFields} of {totalFields} fields
                     </span>
                     <span className="text-sm font-semibold text-violet-600 dark:text-violet-400">
                       {completionPercent}%
                     </span>
                   </div>
-                  <div className="h-2 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
+                  <div className="h-2 bg-muted dark:bg-card rounded-full overflow-hidden">
                     <motion.div
                       className="h-full bg-gradient-to-r from-violet-500 to-purple-600 rounded-full"
                       initial={{ width: 0 }}
@@ -299,7 +299,7 @@ export default function ProfilePage() {
                     />
                   </div>
                   {completionPercent < 100 && (
-                    <p className="text-xs text-slate-500 dark:text-slate-400">
+                    <p className="text-xs text-muted-foreground dark:text-muted-foreground">
                       Complete your profile for better collaboration
                     </p>
                   )}
@@ -322,7 +322,7 @@ export default function ProfilePage() {
             variants={cardVariants}
           >
             <Card>
-              <CardHeader className="border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/30">
+              <CardHeader className="border-b border-border dark:border-border bg-muted/50 dark:bg-card/30">
                 <CardTitle className="text-base">Quick Settings</CardTitle>
               </CardHeader>
               <CardContent className="pt-4">
@@ -333,16 +333,16 @@ export default function ProfilePage() {
                       <a
                         key={link.label}
                         href={link.href}
-                        className="flex items-center gap-3 p-3 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors group"
+                        className="flex items-center gap-3 p-3 rounded-xl hover:bg-muted dark:hover:bg-muted/50 transition-colors group"
                       >
                         <div className={cn("p-2 rounded-lg", linkColors[link.color as keyof typeof linkColors])}>
                           <Icon className="h-4 w-4" />
                         </div>
                         <div className="flex-1 min-w-0">
-                          <p className="text-sm font-medium text-slate-900 dark:text-white">
+                          <p className="text-sm font-medium text-foreground dark:text-white">
                             {link.label}
                           </p>
-                          <p className="text-xs text-slate-500 dark:text-slate-400">
+                          <p className="text-xs text-muted-foreground dark:text-muted-foreground">
                             {link.description}
                           </p>
                         </div>
@@ -364,7 +364,7 @@ export default function ProfilePage() {
           className="lg:col-span-2"
         >
           <Card>
-            <CardHeader className="border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/30">
+            <CardHeader className="border-b border-border dark:border-border bg-muted/50 dark:bg-card/30">
               <CardTitle className="text-base">Personal Information</CardTitle>
               <CardDescription>Update your personal details</CardDescription>
             </CardHeader>
@@ -372,35 +372,35 @@ export default function ProfilePage() {
               {/* Name & Email */}
               <div className="grid gap-4 sm:grid-cols-2">
                 <div className="space-y-2">
-                  <Label htmlFor="full_name" className="text-slate-700 dark:text-slate-300">
+                  <Label htmlFor="full_name" className="text-foreground dark:text-muted-foreground">
                     Full Name <span className="text-rose-500">*</span>
                   </Label>
                   <div className="relative">
-                    <User className="absolute left-3 top-3 h-4 w-4 text-slate-400" />
+                    <User className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                     <Input
                       id="full_name"
                       value={profile.full_name}
                       onChange={(e) => setProfile({ ...profile, full_name: e.target.value })}
-                      className="pl-10 h-11 bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700 focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500"
+                      className="pl-10 h-11 bg-card border-border dark:border-border focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500"
                       placeholder="John Doe"
                     />
                   </div>
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="email" className="text-slate-700 dark:text-slate-300">
+                  <Label htmlFor="email" className="text-foreground dark:text-muted-foreground">
                     Email Address
                   </Label>
                   <div className="relative">
-                    <Mail className="absolute left-3 top-3 h-4 w-4 text-slate-400" />
+                    <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                     <Input
                       id="email"
                       value={profile.email}
                       disabled
-                      className="pl-10 h-11 bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 cursor-not-allowed"
+                      className="pl-10 h-11 bg-muted dark:bg-card border-border dark:border-border cursor-not-allowed"
                     />
                   </div>
-                  <p className="text-xs text-slate-500 dark:text-slate-400">
+                  <p className="text-xs text-muted-foreground dark:text-muted-foreground">
                     Managed through authentication settings
                   </p>
                 </div>
@@ -409,32 +409,32 @@ export default function ProfilePage() {
               {/* Phone & Location */}
               <div className="grid gap-4 sm:grid-cols-2">
                 <div className="space-y-2">
-                  <Label htmlFor="phone" className="text-slate-700 dark:text-slate-300">
+                  <Label htmlFor="phone" className="text-foreground dark:text-muted-foreground">
                     Phone Number
                   </Label>
                   <div className="relative">
-                    <Phone className="absolute left-3 top-3 h-4 w-4 text-slate-400" />
+                    <Phone className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                     <Input
                       id="phone"
                       value={profile.phone || ""}
                       onChange={(e) => setProfile({ ...profile, phone: e.target.value })}
-                      className="pl-10 h-11 bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700 focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500"
+                      className="pl-10 h-11 bg-card border-border dark:border-border focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500"
                       placeholder="+1 (555) 123-4567"
                     />
                   </div>
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="location" className="text-slate-700 dark:text-slate-300">
+                  <Label htmlFor="location" className="text-foreground dark:text-muted-foreground">
                     Location
                   </Label>
                   <div className="relative">
-                    <MapPin className="absolute left-3 top-3 h-4 w-4 text-slate-400" />
+                    <MapPin className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                     <Input
                       id="location"
                       value={profile.location || ""}
                       onChange={(e) => setProfile({ ...profile, location: e.target.value })}
-                      className="pl-10 h-11 bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700 focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500"
+                      className="pl-10 h-11 bg-card border-border dark:border-border focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500"
                       placeholder="San Francisco, CA"
                     />
                   </div>
@@ -444,30 +444,30 @@ export default function ProfilePage() {
               {/* Company & Title */}
               <div className="grid gap-4 sm:grid-cols-2">
                 <div className="space-y-2">
-                  <Label htmlFor="company" className="text-slate-700 dark:text-slate-300">
+                  <Label htmlFor="company" className="text-foreground dark:text-muted-foreground">
                     Company
                   </Label>
                   <div className="relative">
-                    <Building2 className="absolute left-3 top-3 h-4 w-4 text-slate-400" />
+                    <Building2 className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                     <Input
                       id="company"
                       value={profile.company || ""}
                       onChange={(e) => setProfile({ ...profile, company: e.target.value })}
-                      className="pl-10 h-11 bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700 focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500"
+                      className="pl-10 h-11 bg-card border-border dark:border-border focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500"
                       placeholder="Acme Inc"
                     />
                   </div>
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="title" className="text-slate-700 dark:text-slate-300">
+                  <Label htmlFor="title" className="text-foreground dark:text-muted-foreground">
                     Job Title
                   </Label>
                   <Input
                     id="title"
                     value={profile.title || ""}
                     onChange={(e) => setProfile({ ...profile, title: e.target.value })}
-                    className="h-11 bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700 focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500"
+                    className="h-11 bg-card border-border dark:border-border focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500"
                     placeholder="Product Manager"
                   />
                 </div>
@@ -475,16 +475,16 @@ export default function ProfilePage() {
 
               {/* Website */}
               <div className="space-y-2">
-                <Label htmlFor="website" className="text-slate-700 dark:text-slate-300">
+                <Label htmlFor="website" className="text-foreground dark:text-muted-foreground">
                   Website
                 </Label>
                 <div className="relative">
-                  <Globe className="absolute left-3 top-3 h-4 w-4 text-slate-400" />
+                  <Globe className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                   <Input
                     id="website"
                     value={profile.website || ""}
                     onChange={(e) => setProfile({ ...profile, website: e.target.value })}
-                    className="pl-10 h-11 bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700 focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500"
+                    className="pl-10 h-11 bg-card border-border dark:border-border focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500"
                     placeholder="https://yourwebsite.com"
                   />
                 </div>
@@ -492,7 +492,7 @@ export default function ProfilePage() {
 
               {/* Bio */}
               <div className="space-y-2">
-                <Label htmlFor="bio" className="text-slate-700 dark:text-slate-300">
+                <Label htmlFor="bio" className="text-foreground dark:text-muted-foreground">
                   Bio
                 </Label>
                 <Textarea
@@ -501,9 +501,9 @@ export default function ProfilePage() {
                   onChange={(e) => setProfile({ ...profile, bio: e.target.value })}
                   placeholder="Tell us about yourself..."
                   rows={4}
-                  className="bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700 focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 resize-none"
+                  className="bg-card border-border dark:border-border focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 resize-none"
                 />
-                <p className="text-xs text-slate-500 dark:text-slate-400">
+                <p className="text-xs text-muted-foreground dark:text-muted-foreground">
                   Brief description for your profile. Max 500 characters.
                 </p>
               </div>

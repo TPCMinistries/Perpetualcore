@@ -283,7 +283,7 @@ export default function TeamConversationsPage() {
             <Button
               onClick={() => setCreateModalOpen(true)}
               size="lg"
-              className="bg-slate-900 dark:bg-slate-100 hover:bg-slate-800 dark:hover:bg-slate-200 text-white dark:text-slate-900 shadow-lg hover:shadow-xl transition-all"
+              className="bg-slate-900 dark:bg-muted hover:bg-slate-800 dark:hover:bg-muted text-white dark:text-foreground shadow-lg hover:shadow-xl transition-all"
             >
               <Plus className="mr-2 h-5 w-5" />
               New Conversation
@@ -346,7 +346,7 @@ export default function TeamConversationsPage() {
               >
                 <div className="flex items-start justify-between mb-4">
                   <div className="flex-1 min-w-0">
-                    <h3 className="text-xl font-bold text-foreground group-hover:text-slate-800 dark:group-hover:text-slate-200 truncate mb-2">
+                    <h3 className="text-xl font-bold text-foreground group-hover:text-foreground dark:group-hover:text-slate-200 truncate mb-2">
                       {conversation.title}
                     </h3>
                     {conversation.description && (
@@ -488,7 +488,7 @@ export default function TeamConversationsPage() {
                       <MessageSquare className="h-4 w-4" />
                       <div>
                         <div className="font-medium">General Discussion</div>
-                        <div className="text-xs text-slate-500">Open-ended team conversation</div>
+                        <div className="text-xs text-muted-foreground">Open-ended team conversation</div>
                       </div>
                     </div>
                   </SelectItem>
@@ -497,7 +497,7 @@ export default function TeamConversationsPage() {
                       <MessageSquare className="h-4 w-4" />
                       <div>
                         <div className="font-medium">Document Review</div>
-                        <div className="text-xs text-slate-500">Collaborate on documents</div>
+                        <div className="text-xs text-muted-foreground">Collaborate on documents</div>
                       </div>
                     </div>
                   </SelectItem>
@@ -506,7 +506,7 @@ export default function TeamConversationsPage() {
                       <MessageSquare className="h-4 w-4" />
                       <div>
                         <div className="font-medium">Training Session</div>
-                        <div className="text-xs text-slate-500">Learning and development</div>
+                        <div className="text-xs text-muted-foreground">Learning and development</div>
                       </div>
                     </div>
                   </SelectItem>
@@ -515,7 +515,7 @@ export default function TeamConversationsPage() {
                       <MessageSquare className="h-4 w-4" />
                       <div>
                         <div className="font-medium">Project Planning</div>
-                        <div className="text-xs text-slate-500">Plan and execute projects</div>
+                        <div className="text-xs text-muted-foreground">Plan and execute projects</div>
                       </div>
                     </div>
                   </SelectItem>
@@ -549,7 +549,7 @@ export default function TeamConversationsPage() {
                     is_private: e.target.checked,
                   })
                 }
-                className="mt-1 h-5 w-5 rounded border-slate-300 text-slate-900 focus:ring-slate-900"
+                className="mt-1 h-5 w-5 rounded border-border text-foreground focus:ring-slate-900"
               />
               <div className="flex-1">
                 <Label htmlFor="is_private" className="cursor-pointer font-semibold text-foreground flex items-center gap-2">
@@ -580,7 +580,7 @@ export default function TeamConversationsPage() {
               onClick={handleCreateConversation}
               disabled={creating || !newConversation.title.trim()}
               size="lg"
-              className="min-w-[180px] bg-slate-900 dark:bg-slate-100 hover:bg-slate-800 dark:hover:bg-slate-200 text-white dark:text-slate-900 shadow-lg"
+              className="min-w-[180px] bg-slate-900 dark:bg-muted hover:bg-slate-800 dark:hover:bg-muted text-white dark:text-foreground shadow-lg"
             >
               {creating ? (
                 <>

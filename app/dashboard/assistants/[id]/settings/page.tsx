@@ -135,7 +135,7 @@ export default function AssistantSettingsPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <Loader2 className="h-8 w-8 animate-spin text-slate-600" />
+        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
       </div>
     );
   }
@@ -143,7 +143,7 @@ export default function AssistantSettingsPage() {
   if (!assistant) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <p className="text-slate-600 dark:text-slate-400">Assistant not found</p>
+        <p className="text-muted-foreground dark:text-muted-foreground">Assistant not found</p>
       </div>
     );
   }
@@ -163,10 +163,10 @@ export default function AssistantSettingsPage() {
             <SettingsIcon className="h-6 w-6 text-white" />
           </div>
           <div>
-            <h1 className="text-3xl font-semibold text-slate-900 dark:text-slate-100">
+            <h1 className="text-3xl font-semibold text-foreground dark:text-foreground">
               Assistant Settings
             </h1>
-            <p className="text-slate-600 dark:text-slate-400">
+            <p className="text-muted-foreground dark:text-muted-foreground">
               Customize {assistant.name}'s configuration
             </p>
           </div>
@@ -174,14 +174,14 @@ export default function AssistantSettingsPage() {
       </div>
 
       {/* Settings Form */}
-      <Card className="border-slate-200 dark:border-slate-800">
+      <Card className="border-border dark:border-border">
         <CardHeader>
-          <CardTitle className="text-slate-900 dark:text-slate-100">Configuration</CardTitle>
+          <CardTitle className="text-foreground dark:text-foreground">Configuration</CardTitle>
         </CardHeader>
         <CardContent className="space-y-6">
           {/* Name */}
           <div className="space-y-2">
-            <Label htmlFor="name" className="text-slate-700 dark:text-slate-300">
+            <Label htmlFor="name" className="text-foreground dark:text-muted-foreground">
               Name
             </Label>
             <Input
@@ -189,13 +189,13 @@ export default function AssistantSettingsPage() {
               value={formData.name}
               onChange={(e) => setFormData({ ...formData, name: e.target.value })}
               placeholder="Assistant Name"
-              className="border-slate-200 dark:border-slate-800"
+              className="border-border dark:border-border"
             />
           </div>
 
           {/* Description */}
           <div className="space-y-2">
-            <Label htmlFor="description" className="text-slate-700 dark:text-slate-300">
+            <Label htmlFor="description" className="text-foreground dark:text-muted-foreground">
               Description
             </Label>
             <Textarea
@@ -204,20 +204,20 @@ export default function AssistantSettingsPage() {
               onChange={(e) => setFormData({ ...formData, description: e.target.value })}
               placeholder="Brief description of the assistant's purpose"
               rows={3}
-              className="border-slate-200 dark:border-slate-800 resize-none"
+              className="border-border dark:border-border resize-none"
             />
           </div>
 
           {/* Role */}
           <div className="space-y-2">
-            <Label htmlFor="role" className="text-slate-700 dark:text-slate-300">
+            <Label htmlFor="role" className="text-foreground dark:text-muted-foreground">
               Role
             </Label>
             <Select
               value={formData.role}
               onValueChange={(value) => setFormData({ ...formData, role: value })}
             >
-              <SelectTrigger className="border-slate-200 dark:border-slate-800">
+              <SelectTrigger className="border-border dark:border-border">
                 <SelectValue placeholder="Select a role" />
               </SelectTrigger>
               <SelectContent>
@@ -232,7 +232,7 @@ export default function AssistantSettingsPage() {
 
           {/* Avatar Emoji */}
           <div className="space-y-2">
-            <Label htmlFor="emoji" className="text-slate-700 dark:text-slate-300">
+            <Label htmlFor="emoji" className="text-foreground dark:text-muted-foreground">
               Avatar Emoji
             </Label>
             <Input
@@ -241,23 +241,23 @@ export default function AssistantSettingsPage() {
               onChange={(e) => setFormData({ ...formData, avatar_emoji: e.target.value })}
               placeholder="e.g. 🤖, 💼, 📊"
               maxLength={2}
-              className="border-slate-200 dark:border-slate-800"
+              className="border-border dark:border-border"
             />
-            <p className="text-xs text-slate-500 dark:text-slate-500">
+            <p className="text-xs text-muted-foreground dark:text-muted-foreground">
               Enter a single emoji to represent this assistant
             </p>
           </div>
 
           {/* Tone */}
           <div className="space-y-2">
-            <Label htmlFor="tone" className="text-slate-700 dark:text-slate-300">
+            <Label htmlFor="tone" className="text-foreground dark:text-muted-foreground">
               Tone
             </Label>
             <Select
               value={formData.tone}
               onValueChange={(value) => setFormData({ ...formData, tone: value })}
             >
-              <SelectTrigger className="border-slate-200 dark:border-slate-800">
+              <SelectTrigger className="border-border dark:border-border">
                 <SelectValue placeholder="Select a tone" />
               </SelectTrigger>
               <SelectContent>
@@ -272,7 +272,7 @@ export default function AssistantSettingsPage() {
 
           {/* System Instructions */}
           <div className="space-y-2">
-            <Label htmlFor="instructions" className="text-slate-700 dark:text-slate-300">
+            <Label htmlFor="instructions" className="text-foreground dark:text-muted-foreground">
               System Instructions
             </Label>
             <Textarea
@@ -283,9 +283,9 @@ export default function AssistantSettingsPage() {
               }
               placeholder="Detailed instructions for how this assistant should behave..."
               rows={8}
-              className="border-slate-200 dark:border-slate-800 resize-none font-mono text-sm"
+              className="border-border dark:border-border resize-none font-mono text-sm"
             />
-            <p className="text-xs text-slate-500 dark:text-slate-500">
+            <p className="text-xs text-muted-foreground dark:text-muted-foreground">
               These instructions guide the assistant's behavior and expertise
             </p>
           </div>
@@ -297,15 +297,15 @@ export default function AssistantSettingsPage() {
               id="is_active"
               checked={formData.is_active}
               onChange={(e) => setFormData({ ...formData, is_active: e.target.checked })}
-              className="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+              className="h-4 w-4 rounded border-border text-blue-600 focus:ring-blue-500"
             />
-            <Label htmlFor="is_active" className="text-slate-700 dark:text-slate-300 cursor-pointer">
+            <Label htmlFor="is_active" className="text-foreground dark:text-muted-foreground cursor-pointer">
               Active (assistant appears in Executive Suite)
             </Label>
           </div>
 
           {/* Actions */}
-          <div className="flex items-center gap-3 pt-4 border-t border-slate-200 dark:border-slate-800">
+          <div className="flex items-center gap-3 pt-4 border-t border-border dark:border-border">
             <Button
               onClick={handleSave}
               disabled={saving}
@@ -326,7 +326,7 @@ export default function AssistantSettingsPage() {
             <Button
               variant="outline"
               onClick={() => router.push("/dashboard/assistants")}
-              className="border-slate-200 dark:border-slate-800"
+              className="border-border dark:border-border"
             >
               Cancel
             </Button>

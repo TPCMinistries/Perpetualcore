@@ -121,8 +121,8 @@ const priorityConfig: Record<
   low: {
     color: "bg-slate-400",
     label: "Low",
-    bg: "bg-slate-100 dark:bg-slate-800",
-    text: "text-slate-600 dark:text-slate-400",
+    bg: "bg-muted dark:bg-card",
+    text: "text-muted-foreground dark:text-muted-foreground",
   },
 };
 
@@ -302,13 +302,13 @@ export default function TasksPage() {
       <DashboardPageWrapper maxWidth="4xl">
         <div className="space-y-6">
           {/* Header Skeleton */}
-          <div className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-8">
+          <div className="rounded-2xl border border-border dark:border-border bg-card p-8">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-4">
-                <div className="h-14 w-14 rounded-xl bg-slate-200 dark:bg-slate-700 animate-pulse" />
+                <div className="h-14 w-14 rounded-xl bg-muted dark:bg-muted animate-pulse" />
                 <div className="space-y-2">
-                  <div className="h-8 w-32 bg-slate-200 dark:bg-slate-700 rounded animate-pulse" />
-                  <div className="h-4 w-48 bg-slate-100 dark:bg-slate-800 rounded animate-pulse" />
+                  <div className="h-8 w-32 bg-muted dark:bg-muted rounded animate-pulse" />
+                  <div className="h-4 w-48 bg-muted dark:bg-card rounded animate-pulse" />
                 </div>
               </div>
               <div className="h-10 w-32 bg-violet-200 dark:bg-violet-900/50 rounded-lg animate-pulse" />
@@ -319,12 +319,12 @@ export default function TasksPage() {
             {[...Array(3)].map((_, i) => (
               <Card
                 key={i}
-                className="border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900"
+                className="border-border dark:border-border bg-card"
               >
                 <CardContent className="p-6">
                   <div className="space-y-2">
-                    <div className="h-4 w-20 bg-slate-200 dark:bg-slate-700 rounded animate-pulse" />
-                    <div className="h-8 w-16 bg-slate-100 dark:bg-slate-800 rounded animate-pulse" />
+                    <div className="h-4 w-20 bg-muted dark:bg-muted rounded animate-pulse" />
+                    <div className="h-8 w-16 bg-muted dark:bg-card rounded animate-pulse" />
                   </div>
                 </CardContent>
               </Card>
@@ -335,7 +335,7 @@ export default function TasksPage() {
             {[...Array(5)].map((_, i) => (
               <div
                 key={i}
-                className="h-24 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl animate-pulse"
+                className="h-24 bg-card border border-border dark:border-border rounded-xl animate-pulse"
               />
             ))}
           </div>
@@ -425,13 +425,13 @@ export default function TasksPage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.3 }}
           >
-            <Card className="border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-lg overflow-hidden">
-              <CardHeader className="border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/30 py-4">
+            <Card className="border-border dark:border-border bg-card shadow-lg overflow-hidden">
+              <CardHeader className="border-b border-border dark:border-border bg-muted/50 dark:bg-card/30 py-4">
                 <div className="flex items-center gap-3">
                   <div className="p-2 rounded-lg bg-violet-100 dark:bg-violet-900/30">
                     <Plus className="h-4 w-4 text-violet-600 dark:text-violet-400" />
                   </div>
-                  <CardTitle className="text-base font-semibold text-slate-900 dark:text-slate-100">
+                  <CardTitle className="text-base font-semibold text-foreground dark:text-foreground">
                     New Task
                   </CardTitle>
                 </div>
@@ -447,7 +447,7 @@ export default function TasksPage() {
                     onKeyDown={(e) =>
                       e.key === "Enter" && !e.shiftKey && createTask()
                     }
-                    className="border-slate-200 dark:border-slate-700 text-lg h-12"
+                    className="border-border dark:border-border text-lg h-12"
                     autoFocus
                   />
                   <Textarea
@@ -456,7 +456,7 @@ export default function TasksPage() {
                     onChange={(e) =>
                       setNewTask({ ...newTask, description: e.target.value })
                     }
-                    className="border-slate-200 dark:border-slate-700 resize-none"
+                    className="border-border dark:border-border resize-none"
                     rows={2}
                   />
                   <div className="flex items-center gap-4 pt-2">
@@ -466,8 +466,8 @@ export default function TasksPage() {
                         setNewTask({ ...newTask, priority: value })
                       }
                     >
-                      <SelectTrigger className="w-[140px] border-slate-200 dark:border-slate-700">
-                        <Flag className="h-4 w-4 mr-2 text-slate-400" />
+                      <SelectTrigger className="w-[140px] border-border dark:border-border">
+                        <Flag className="h-4 w-4 mr-2 text-muted-foreground" />
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
@@ -483,13 +483,13 @@ export default function TasksPage() {
                       onChange={(e) =>
                         setNewTask({ ...newTask, dueDate: e.target.value })
                       }
-                      className="w-[160px] border-slate-200 dark:border-slate-700"
+                      className="w-[160px] border-border dark:border-border"
                     />
                     <div className="flex-1" />
                     <Button
                       variant="outline"
                       onClick={() => setShowNewTask(false)}
-                      className="border-slate-200 dark:border-slate-700"
+                      className="border-border dark:border-border"
                     >
                       Cancel
                     </Button>
@@ -530,7 +530,7 @@ export default function TasksPage() {
                 <StaggeredGridItem key={task.id}>
                 <div
                   onClick={() => router.push(`/dashboard/tasks/${task.id}`)}
-                  className={`group relative bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 hover:border-violet-300 dark:hover:border-violet-700 hover:shadow-lg transition-all cursor-pointer ${
+                  className={`group relative bg-card rounded-xl border border-border dark:border-border hover:border-violet-300 dark:hover:border-violet-700 hover:shadow-lg transition-all cursor-pointer ${
                     task.status === "done" || task.status === "completed"
                       ? "opacity-60"
                       : ""
@@ -554,7 +554,7 @@ export default function TasksPage() {
                         {task.status === "done" || task.status === "completed" ? (
                           <CheckCircle2 className="h-5 w-5 text-emerald-500" />
                         ) : (
-                          <Circle className="h-5 w-5 text-slate-300 dark:text-slate-600 group-hover/check:text-violet-500 transition-colors" />
+                          <Circle className="h-5 w-5 text-muted-foreground dark:text-muted-foreground group-hover/check:text-violet-500 transition-colors" />
                         )}
                       </button>
 
@@ -566,15 +566,15 @@ export default function TasksPage() {
                               className={`font-medium text-base leading-snug ${
                                 task.status === "done" ||
                                 task.status === "completed"
-                                  ? "line-through text-slate-400 dark:text-slate-500"
-                                  : "text-slate-900 dark:text-white"
+                                  ? "line-through text-muted-foreground dark:text-muted-foreground"
+                                  : "text-foreground dark:text-white"
                               }`}
                             >
                               {task.title}
                             </h3>
 
                             {task.description && (
-                              <p className="text-sm text-slate-500 dark:text-slate-400 mt-1 line-clamp-1">
+                              <p className="text-sm text-muted-foreground dark:text-muted-foreground mt-1 line-clamp-1">
                                 {task.description}
                               </p>
                             )}
@@ -592,7 +592,7 @@ export default function TasksPage() {
                                   size="sm"
                                   className="h-8 w-8 p-0"
                                 >
-                                  <MoreHorizontal className="h-4 w-4 text-slate-400" />
+                                  <MoreHorizontal className="h-4 w-4 text-muted-foreground" />
                                 </Button>
                               </DropdownMenuTrigger>
                               <DropdownMenuContent align="end">
@@ -628,7 +628,7 @@ export default function TasksPage() {
                               className={`inline-flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 rounded-full ${
                                 dueInfo.urgent
                                   ? "text-rose-700 dark:text-rose-400 bg-rose-100 dark:bg-rose-900/30"
-                                  : "text-slate-600 dark:text-slate-400 bg-slate-100 dark:bg-slate-800"
+                                  : "text-muted-foreground dark:text-muted-foreground bg-muted dark:bg-card"
                               }`}
                             >
                               <Clock className="h-3 w-3" />
@@ -692,7 +692,7 @@ export default function TasksPage() {
                             {task.execution_log && task.execution_log.length > 0 && (
                               <button
                                 onClick={(e) => toggleExecutionLog(task.id, e)}
-                                className="flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300 transition-colors"
+                                className="flex items-center gap-1.5 text-xs text-muted-foreground dark:text-muted-foreground hover:text-foreground dark:hover:text-muted-foreground transition-colors"
                               >
                                 {expandedLogs[task.id] ? (
                                   <ChevronUp className="h-3.5 w-3.5" />
@@ -709,19 +709,19 @@ export default function TasksPage() {
                         {/* Execution Log Expanded */}
                         {expandedLogs[task.id] && task.execution_log && (
                           <div
-                            className="mt-3 space-y-2 pl-4 border-l-2 border-slate-200 dark:border-slate-700"
+                            className="mt-3 space-y-2 pl-4 border-l-2 border-border dark:border-border"
                             onClick={(e) => e.stopPropagation()}
                           >
                             {task.execution_log.map((log, logIdx) => (
                               <div key={logIdx} className="text-xs">
-                                <div className="flex items-center gap-2 text-slate-700 dark:text-slate-300">
+                                <div className="flex items-center gap-2 text-foreground dark:text-muted-foreground">
                                   <span className="font-medium">{log.event}</span>
-                                  <span className="text-slate-400 dark:text-slate-500">
+                                  <span className="text-muted-foreground dark:text-muted-foreground">
                                     {new Date(log.timestamp).toLocaleString()}
                                   </span>
                                 </div>
                                 {log.result && (
-                                  <div className="mt-1 p-2 bg-emerald-50 dark:bg-emerald-900/20 rounded text-slate-600 dark:text-slate-400">
+                                  <div className="mt-1 p-2 bg-emerald-50 dark:bg-emerald-900/20 rounded text-muted-foreground dark:text-muted-foreground">
                                     {typeof log.result === "string"
                                       ? log.result
                                       : JSON.stringify(log.result, null, 2)}

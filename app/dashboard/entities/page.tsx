@@ -43,7 +43,7 @@ const entityTypeIcons: Record<string, React.ReactNode> = {
 const entityTypeColors: Record<string, string> = {
   nonprofit: "bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400",
   llc: "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400",
-  corporation: "bg-slate-100 text-slate-700 dark:bg-slate-900/30 dark:text-slate-400",
+  corporation: "bg-muted text-foreground dark:bg-card/30 dark:text-muted-foreground",
   personal: "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400",
   ministry: "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400",
 };
@@ -88,7 +88,7 @@ export default function EntitiesPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900 dark:text-white">
+          <h1 className="text-2xl font-bold text-foreground dark:text-white">
             Spaces
           </h1>
           <p className="text-muted-foreground mt-1">

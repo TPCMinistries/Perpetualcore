@@ -144,7 +144,7 @@ export default async function DashboardPage() {
       case "medium":
         return "bg-amber-100 dark:bg-amber-950/40 text-amber-700 dark:text-amber-400 border-0";
       case "low":
-        return "bg-muted text-slate-700 dark:text-slate-400 border-0";
+        return "bg-muted text-foreground dark:text-muted-foreground border-0";
     }
   }
 
@@ -155,11 +155,11 @@ export default async function DashboardPage() {
       <div className="relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-slate-50/50 via-blue-50/30 to-blue-100/20 dark:from-slate-900/50 dark:via-blue-950/20 dark:to-blue-900/10 rounded-2xl" />
 
-        <div className="relative border border-slate-200/60 dark:border-slate-800/60 rounded-2xl p-6 md:p-12 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl shadow-lg">
+        <div className="relative border border-border/60 dark:border-border/60 rounded-2xl p-6 md:p-12 bg-card/80 dark:bg-card/80 backdrop-blur-xl shadow-lg">
           <div className="flex flex-col sm:flex-row items-start justify-between mb-6 md:mb-8">
             <div className="flex items-start gap-4 md:gap-6 w-full">
               <div className="h-14 w-14 md:h-14 md:w-14 rounded-xl bg-gradient-to-br from-slate-900 to-slate-700 dark:from-slate-100 dark:to-slate-300 flex items-center justify-center shadow-md flex-shrink-0">
-                <IconComponent className="h-7 w-7 md:h-7 md:w-7 text-white dark:text-slate-900" />
+                <IconComponent className="h-7 w-7 md:h-7 md:w-7 text-white dark:text-foreground" />
               </div>
               <div className="flex-1 min-w-0">
                 <h1 className="text-2xl md:text-4xl font-bold tracking-tight text-foreground mb-2">
@@ -186,7 +186,7 @@ export default async function DashboardPage() {
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-0 mb-6">
           <h2 className="text-xl md:text-2xl font-semibold tracking-tight text-foreground">Your Metrics</h2>
           <Link href="/dashboard/analytics" className="w-full sm:w-auto">
-            <Button variant="outline" size="sm" className="w-full sm:w-auto text-muted-foreground hover:text-slate-900 dark:hover:text-slate-100 border-border">
+            <Button variant="outline" size="sm" className="w-full sm:w-auto text-muted-foreground hover:text-foreground dark:hover:text-slate-100 border-border">
               <span className="hidden sm:inline">View Full Analytics</span>
               <span className="sm:hidden">Analytics</span>
               <ArrowRight className="ml-2 h-4 w-4" />
@@ -270,7 +270,7 @@ export default async function DashboardPage() {
               <p className="text-xs md:text-sm text-muted-foreground">Personalized recommendations powered by AI</p>
             </div>
           </div>
-          <Badge className="bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 border-0 px-3 py-1.5 text-xs font-medium w-fit">
+          <Badge className="bg-slate-900 dark:bg-muted text-white dark:text-foreground border-0 px-3 py-1.5 text-xs font-medium w-fit">
             <Sparkles className="mr-1.5 h-3.5 w-3.5" />
             Powered by Claude
           </Badge>
@@ -285,7 +285,7 @@ export default async function DashboardPage() {
             const impactColors: Record<string, string> = {
               high: "bg-emerald-100 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400 border-0",
               medium: "bg-amber-100 dark:bg-amber-950/40 text-amber-700 dark:text-amber-400 border-0",
-              low: "bg-muted text-slate-700 dark:text-slate-400 border-0",
+              low: "bg-muted text-foreground dark:text-muted-foreground border-0",
             };
             const impactColor = impactColors[insight.impact];
 
@@ -321,7 +321,7 @@ export default async function DashboardPage() {
                       <Zap className="h-3.5 w-3.5" />
                       <span>{insight.confidence}% Confidence</span>
                     </div>
-                    <ArrowRight className="h-4 w-4 text-slate-400 group-hover:text-blue-600 dark:group-hover:text-blue-400 group-hover:translate-x-1 transition-all" />
+                    <ArrowRight className="h-4 w-4 text-muted-foreground group-hover:text-blue-600 dark:group-hover:text-blue-400 group-hover:translate-x-1 transition-all" />
                   </div>
                 </CardContent>
               </Card>
@@ -404,7 +404,7 @@ export default async function DashboardPage() {
                     <p className="text-sm text-muted-foreground mb-4 leading-relaxed">
                       {action.description}
                     </p>
-                    <div className="flex items-center text-sm font-medium text-foreground group-hover:text-slate-900 dark:group-hover:text-slate-100">
+                    <div className="flex items-center text-sm font-medium text-foreground group-hover:text-foreground dark:group-hover:text-slate-100">
                       Get started
                       <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
                     </div>
@@ -424,7 +424,7 @@ export default async function DashboardPage() {
             <p className="text-xs md:text-sm text-muted-foreground mt-1">What's been happening in your workspace</p>
           </div>
           <Link href="/dashboard/activity" className="w-full sm:w-auto">
-            <Button variant="outline" size="sm" className="w-full sm:w-auto text-muted-foreground hover:text-slate-900 dark:hover:text-slate-100 border-border">
+            <Button variant="outline" size="sm" className="w-full sm:w-auto text-muted-foreground hover:text-foreground dark:hover:text-slate-100 border-border">
               View All
               <ArrowRight className="ml-2 h-4 w-4" />
             </Button>

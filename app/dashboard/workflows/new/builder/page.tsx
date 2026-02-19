@@ -47,7 +47,7 @@ export default function NewWorkflowBuilderPage() {
 
   return (
     <div className="flex flex-col items-center justify-center h-[calc(100vh-120px)] gap-4">
-      <Loader2 className="h-8 w-8 animate-spin text-slate-400" />
+      <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
       <p className="text-sm text-muted-foreground">
         Creating new workflow...
       </p>

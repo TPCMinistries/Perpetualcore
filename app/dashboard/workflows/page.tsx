@@ -204,11 +204,11 @@ export default function WorkflowsPage() {
             variant={selectedCategory === category.id ? "default" : "outline"}
             size="sm"
             onClick={() => setSelectedCategory(category.id)}
-            className={selectedCategory === category.id ? "bg-slate-900 dark:bg-slate-100 hover:bg-slate-800 dark:hover:bg-slate-200 text-white dark:text-slate-900" : "border-slate-200 dark:border-slate-800"}
+            className={selectedCategory === category.id ? "bg-slate-900 dark:bg-muted hover:bg-slate-800 dark:hover:bg-muted text-white dark:text-foreground" : "border-border dark:border-border"}
           >
             {category.label}
             {category.id !== "all" && (
-              <Badge variant="secondary" className="ml-2 bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-slate-100">
+              <Badge variant="secondary" className="ml-2 bg-muted dark:bg-card text-foreground dark:text-foreground">
                 {workflows.filter((w) => w.category === category.id).length}
               </Badge>
             )}
@@ -245,20 +245,20 @@ export default function WorkflowsPage() {
           {filteredWorkflows.map((workflow) => (
             <StaggeredGridItem key={workflow.id}>
             <Card
-              className="border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 hover:border-slate-300 dark:hover:border-slate-700 transition-colors flex flex-col"
+              className="border-border dark:border-border bg-card hover:border-border dark:hover:border-border transition-colors flex flex-col"
             >
               <CardHeader>
                 <div className="flex items-start justify-between mb-2">
                   <div className="text-4xl">{workflow.icon}</div>
                   <div className="flex gap-1">
                     {getTriggerBadge(workflow.trigger_type)}
-                    <Badge variant={workflow.enabled ? "default" : "secondary"} className={workflow.enabled ? "bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900" : "bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-slate-100"}>
+                    <Badge variant={workflow.enabled ? "default" : "secondary"} className={workflow.enabled ? "bg-slate-900 dark:bg-muted text-white dark:text-foreground" : "bg-muted dark:bg-card text-foreground dark:text-foreground"}>
                       {workflow.enabled ? "Active" : "Paused"}
                     </Badge>
                   </div>
                 </div>
-                <CardTitle className="text-xl text-slate-900 dark:text-slate-100">{workflow.name}</CardTitle>
-                <p className="text-sm text-slate-600 dark:text-slate-400">
+                <CardTitle className="text-xl text-foreground dark:text-foreground">{workflow.name}</CardTitle>
+                <p className="text-sm text-muted-foreground dark:text-muted-foreground">
                   {workflow.description || "No description"}
                 </p>
               </CardHeader>
@@ -267,23 +267,23 @@ export default function WorkflowsPage() {
                 {/* Stats */}
                 <div className="grid grid-cols-2 gap-3 text-sm">
                   <div className="flex items-center gap-2">
-                    <Play className="h-4 w-4 text-slate-400" />
+                    <Play className="h-4 w-4 text-muted-foreground" />
                     <div>
-                      <div className="font-medium text-slate-900 dark:text-slate-100">{workflow.total_runs}</div>
-                      <div className="text-xs text-slate-600 dark:text-slate-400">Total Runs</div>
+                      <div className="font-medium text-foreground dark:text-foreground">{workflow.total_runs}</div>
+                      <div className="text-xs text-muted-foreground dark:text-muted-foreground">Total Runs</div>
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
                     <CheckCircle2 className="h-4 w-4 text-green-600 dark:text-green-400" />
                     <div>
-                      <div className="font-medium text-slate-900 dark:text-slate-100">{getSuccessRate(workflow)}%</div>
-                      <div className="text-xs text-slate-600 dark:text-slate-400">Success</div>
+                      <div className="font-medium text-foreground dark:text-foreground">{getSuccessRate(workflow)}%</div>
+                      <div className="text-xs text-muted-foreground dark:text-muted-foreground">Success</div>
                     </div>
                   </div>
                 </div>
 
                 {workflow.last_run_at && (
-                  <div className="text-xs text-slate-600 dark:text-slate-400 flex items-center gap-1">
+                  <div className="text-xs text-muted-foreground dark:text-muted-foreground flex items-center gap-1">
                     <Clock className="h-3 w-3" />
                     Last run: {new Date(workflow.last_run_at).toLocaleDateString()}
                   </div>
@@ -296,7 +296,7 @@ export default function WorkflowsPage() {
                     variant="default"
                     onClick={() => router.push(`/dashboard/workflows/${workflow.id}`)}
                     disabled={!workflow.enabled}
-                    className="flex-1 bg-slate-900 dark:bg-slate-100 hover:bg-slate-800 dark:hover:bg-slate-200 text-white dark:text-slate-900"
+                    className="flex-1 bg-slate-900 dark:bg-muted hover:bg-slate-800 dark:hover:bg-muted text-white dark:text-foreground"
                   >
                     <Play className="mr-1 h-3 w-3" />
                     Run
@@ -305,7 +305,7 @@ export default function WorkflowsPage() {
                     size="sm"
                     variant="outline"
                     onClick={() => router.push(`/dashboard/workflows/${workflow.id}`)}
-                    className="border-slate-200 dark:border-slate-800"
+                    className="border-border dark:border-border"
                   >
                     <Edit className="h-3 w-3" />
                   </Button>
@@ -314,7 +314,7 @@ export default function WorkflowsPage() {
                     variant="outline"
                     onClick={() => toggleWorkflow(workflow.id, workflow.enabled)}
                     disabled={togglingId === workflow.id}
-                    className="border-slate-200 dark:border-slate-800"
+                    className="border-border dark:border-border"
                   >
                     {workflow.enabled ? <Pause className="h-3 w-3" /> : <Play className="h-3 w-3" />}
                   </Button>
@@ -323,7 +323,7 @@ export default function WorkflowsPage() {
                     variant="outline"
                     onClick={() => deleteWorkflow(workflow.id, workflow.name)}
                     disabled={deletingId === workflow.id}
-                    className="border-slate-200 dark:border-slate-800"
+                    className="border-border dark:border-border"
                   >
                     <Trash2 className="h-3 w-3" />
                   </Button>

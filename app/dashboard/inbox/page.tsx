@@ -664,7 +664,7 @@ export default function InboxPage() {
   return (
     <div className="h-[calc(100vh-4rem)] flex flex-col">
       {/* Top Bar */}
-      <div className="flex items-center justify-between px-6 py-4 border-b bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl">
+      <div className="flex items-center justify-between px-6 py-4 border-b bg-card/80 dark:bg-card/80 backdrop-blur-xl">
         <div className="flex items-center gap-4">
           {/* Account Selector */}
           <DropdownMenu>
@@ -725,14 +725,14 @@ export default function InboxPage() {
               placeholder="Search emails..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10 bg-slate-50 dark:bg-slate-800 border-0"
+              className="pl-10 bg-muted dark:bg-card border-0"
             />
           </div>
         </div>
 
         <div className="flex items-center gap-2">
           {/* Quick Filters */}
-          <div className="flex items-center gap-1 bg-slate-100 dark:bg-slate-800 rounded-lg p-1">
+          <div className="flex items-center gap-1 bg-muted dark:bg-card rounded-lg p-1">
             <Button
               variant={filter === "all" ? "default" : "ghost"}
               size="sm"
@@ -810,7 +810,7 @@ export default function InboxPage() {
       <div className="flex-1 flex overflow-hidden">
         {/* Folders Sidebar */}
         {showFolders && folders.length > 0 && (
-          <div className="w-[200px] border-r bg-slate-50/80 dark:bg-slate-900/80 p-3 overflow-y-auto">
+          <div className="w-[200px] border-r bg-muted/80 dark:bg-card/80 p-3 overflow-y-auto">
             <div className="flex items-center justify-between mb-3">
               <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Folders</span>
             </div>
@@ -820,8 +820,8 @@ export default function InboxPage() {
               onClick={() => { setSelectedFolderId(null); fetchEmails(); }}
               className={`w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm mb-1 transition-colors ${
                 !selectedFolderId
-                  ? "bg-white dark:bg-slate-800 shadow-sm font-medium"
-                  : "hover:bg-white/50 dark:hover:bg-slate-800/50"
+                  ? "bg-card shadow-sm font-medium"
+                  : "hover:bg-card/50 dark:hover:bg-muted/50"
               }`}
             >
               <Inbox className="h-4 w-4" />
@@ -845,8 +845,8 @@ export default function InboxPage() {
                     onClick={() => selectFolder(folder.id)}
                     className={`w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-colors ${
                       selectedFolderId === folder.id
-                        ? "bg-white dark:bg-slate-800 shadow-sm font-medium"
-                        : "hover:bg-white/50 dark:hover:bg-slate-800/50"
+                        ? "bg-card shadow-sm font-medium"
+                        : "hover:bg-card/50 dark:hover:bg-muted/50"
                     }`}
                   >
                     <IconComponent
@@ -870,19 +870,19 @@ export default function InboxPage() {
         )}
 
         {/* Email List */}
-        <div className={`${showFolders && folders.length > 0 ? "w-[350px]" : "w-[400px]"} border-r overflow-y-auto bg-slate-50/50 dark:bg-slate-900/50`}>
+        <div className={`${showFolders && folders.length > 0 ? "w-[350px]" : "w-[400px]"} border-r overflow-y-auto bg-muted/50 dark:bg-card/50`}>
           {loadingEmails ? (
             <div className="p-4 space-y-3">
               {[...Array(8)].map((_, i) => (
-                <div key={i} className="animate-pulse p-4 rounded-lg bg-white dark:bg-slate-800">
-                  <div className="h-4 bg-slate-200 dark:bg-slate-700 rounded w-3/4 mb-2" />
-                  <div className="h-3 bg-slate-200 dark:bg-slate-700 rounded w-1/2" />
+                <div key={i} className="animate-pulse p-4 rounded-lg bg-card">
+                  <div className="h-4 bg-muted dark:bg-muted rounded w-3/4 mb-2" />
+                  <div className="h-3 bg-muted dark:bg-muted rounded w-1/2" />
                 </div>
               ))}
             </div>
           ) : filteredEmails.length === 0 ? (
             <div className="p-12 text-center">
-              <div className="h-16 w-16 mx-auto mb-4 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center">
+              <div className="h-16 w-16 mx-auto mb-4 rounded-full bg-muted dark:bg-card flex items-center justify-center">
                 <Inbox className="h-8 w-8 text-muted-foreground" />
               </div>
               <h3 className="font-semibold mb-1">No emails found</h3>
@@ -906,9 +906,9 @@ export default function InboxPage() {
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   onClick={() => selectEmail(email)}
-                  className={`p-4 cursor-pointer transition-all hover:bg-white dark:hover:bg-slate-800 ${
+                  className={`p-4 cursor-pointer transition-all hover:bg-card dark:hover:bg-muted ${
                     selectedEmail?.id === email.id
-                      ? "bg-white dark:bg-slate-800 border-l-2 border-l-blue-500"
+                      ? "bg-card border-l-2 border-l-blue-500"
                       : ""
                   } ${!email.is_read ? "bg-blue-50/50 dark:bg-blue-950/20" : ""}`}
                 >
@@ -934,7 +934,7 @@ export default function InboxPage() {
                         </span>
                       </div>
 
-                      <p className={`text-sm truncate ${!email.is_read ? "text-slate-900 dark:text-slate-100" : "text-muted-foreground"}`}>
+                      <p className={`text-sm truncate ${!email.is_read ? "text-foreground dark:text-foreground" : "text-muted-foreground"}`}>
                         {email.subject || "(No subject)"}
                       </p>
 
@@ -948,7 +948,7 @@ export default function InboxPage() {
                           <Star className="h-3 w-3 fill-yellow-500 text-yellow-500" />
                         )}
                         {email.has_attachments && (
-                          <Paperclip className="h-3 w-3 text-slate-400" />
+                          <Paperclip className="h-3 w-3 text-muted-foreground" />
                         )}
                         {email.ai_category && (
                           <Badge variant="secondary" className="text-xs px-1.5 py-0 h-5">
@@ -975,7 +975,7 @@ export default function InboxPage() {
         </div>
 
         {/* Email Detail */}
-        <div className="flex-1 flex flex-col bg-white dark:bg-slate-900 overflow-hidden">
+        <div className="flex-1 flex flex-col bg-card overflow-hidden">
           {selectedEmail ? (
             <>
               {/* Email Header */}
@@ -1108,7 +1108,7 @@ export default function InboxPage() {
 
               {/* Contact Card */}
               {(contactInfo || loadingContact) && (
-                <div className="px-6 py-3 border-b bg-slate-50/50 dark:bg-slate-800/30">
+                <div className="px-6 py-3 border-b bg-muted/50 dark:bg-card/30">
                   {loadingContact ? (
                     <div className="flex items-center gap-2 text-sm text-muted-foreground">
                       <Loader2 className="h-4 w-4 animate-spin" />
@@ -1227,7 +1227,7 @@ export default function InboxPage() {
                     {!triaging && !aiInsightsExpanded && (
                       <div className="flex-1 flex items-center gap-6 text-sm">
                         {selectedEmail.ai_summary && (
-                          <p className="flex-1 text-slate-600 dark:text-slate-300 truncate">{selectedEmail.ai_summary}</p>
+                          <p className="flex-1 text-muted-foreground dark:text-muted-foreground truncate">{selectedEmail.ai_summary}</p>
                         )}
                         {selectedEmail.ai_priority_score !== undefined && selectedEmail.ai_priority_score !== null && (
                           <div className="text-center flex-shrink-0">
@@ -1257,14 +1257,14 @@ export default function InboxPage() {
                       {selectedEmail.ai_summary && (
                         <div>
                           <h4 className="text-xs font-semibold text-violet-700 dark:text-violet-300 uppercase tracking-wide mb-1">Summary</h4>
-                          <p className="text-sm text-slate-700 dark:text-slate-200">{selectedEmail.ai_summary}</p>
+                          <p className="text-sm text-foreground dark:text-foreground">{selectedEmail.ai_summary}</p>
                         </div>
                       )}
 
                       {/* Metrics Grid */}
                       <div className="grid grid-cols-4 gap-4">
                         {selectedEmail.ai_priority_score !== undefined && selectedEmail.ai_priority_score !== null && (
-                          <div className="bg-white/60 dark:bg-slate-800/60 rounded-lg p-3 text-center">
+                          <div className="bg-card/60 dark:bg-card/60 rounded-lg p-3 text-center">
                             <span className="text-xs text-muted-foreground block mb-1">Priority Score</span>
                             <span className={`text-2xl font-bold ${
                               selectedEmail.ai_priority_score > 0.7 ? "text-red-600" :
@@ -1280,11 +1280,11 @@ export default function InboxPage() {
                         )}
 
                         {selectedEmail.ai_sentiment && (
-                          <div className="bg-white/60 dark:bg-slate-800/60 rounded-lg p-3 text-center">
+                          <div className="bg-card/60 dark:bg-card/60 rounded-lg p-3 text-center">
                             <span className="text-xs text-muted-foreground block mb-1">Sentiment</span>
                             <span className={`text-2xl font-bold capitalize ${
                               selectedEmail.ai_sentiment === "positive" ? "text-green-600" :
-                              selectedEmail.ai_sentiment === "negative" ? "text-red-600" : "text-slate-600"
+                              selectedEmail.ai_sentiment === "negative" ? "text-red-600" : "text-muted-foreground"
                             }`}>
                               {selectedEmail.ai_sentiment}
                             </span>
@@ -1293,9 +1293,9 @@ export default function InboxPage() {
                         )}
 
                         {selectedEmail.ai_category && (
-                          <div className="bg-white/60 dark:bg-slate-800/60 rounded-lg p-3 text-center">
+                          <div className="bg-card/60 dark:bg-card/60 rounded-lg p-3 text-center">
                             <span className="text-xs text-muted-foreground block mb-1">Category</span>
-                            <span className="text-lg font-semibold capitalize text-slate-700 dark:text-slate-200">
+                            <span className="text-lg font-semibold capitalize text-foreground dark:text-foreground">
                               {selectedEmail.ai_category}
                             </span>
                             <p className="text-xs text-muted-foreground mt-1">Auto-classified</p>
@@ -1303,7 +1303,7 @@ export default function InboxPage() {
                         )}
 
                         {selectedEmail.requires_response !== undefined && (
-                          <div className="bg-white/60 dark:bg-slate-800/60 rounded-lg p-3 text-center">
+                          <div className="bg-card/60 dark:bg-card/60 rounded-lg p-3 text-center">
                             <span className="text-xs text-muted-foreground block mb-1">Response</span>
                             <span className={`text-lg font-semibold ${
                               selectedEmail.requires_response ? "text-orange-600" : "text-green-600"
@@ -1353,7 +1353,7 @@ export default function InboxPage() {
 
               {/* Attachments */}
               {(selectedEmail.has_attachments || attachments.length > 0) && (
-                <div className="px-6 py-3 border-b bg-slate-50/50 dark:bg-slate-800/30">
+                <div className="px-6 py-3 border-b bg-muted/50 dark:bg-card/30">
                   <div className="flex items-center gap-2 mb-2">
                     <Paperclip className="h-4 w-4 text-muted-foreground" />
                     <span className="text-sm font-medium">
@@ -1370,14 +1370,14 @@ export default function InboxPage() {
                       {attachments.map((att) => (
                         <div
                           key={att.id}
-                          className="flex items-center gap-2 px-3 py-2 bg-white dark:bg-slate-800 rounded-lg border shadow-sm"
+                          className="flex items-center gap-2 px-3 py-2 bg-card rounded-lg border shadow-sm"
                         >
                           {att.mime_type?.startsWith("image/") ? (
                             <Image className="h-4 w-4 text-blue-500" />
                           ) : att.mime_type?.includes("pdf") ? (
                             <FileText className="h-4 w-4 text-red-500" />
                           ) : (
-                            <File className="h-4 w-4 text-slate-500" />
+                            <File className="h-4 w-4 text-muted-foreground" />
                           )}
                           <span className="text-sm max-w-[150px] truncate" title={att.filename}>
                             {att.filename}
@@ -1437,7 +1437,7 @@ export default function InboxPage() {
               </div>
 
               {/* Reply Actions */}
-              <div className="p-4 border-t flex gap-2 bg-slate-50 dark:bg-slate-800/50">
+              <div className="p-4 border-t flex gap-2 bg-muted dark:bg-card/50">
                 <Button
                   variant="outline"
                   onClick={() => {

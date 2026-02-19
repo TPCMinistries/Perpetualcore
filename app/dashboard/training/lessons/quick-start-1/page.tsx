@@ -171,7 +171,7 @@ export default function QuickStartLesson1() {
           </p>
 
           <div className="grid md:grid-cols-2 gap-4 my-6">
-            <div className="p-4 bg-white dark:bg-card rounded-lg border">
+            <div className="p-4 bg-card rounded-lg border">
               <h4 className="font-semibold mb-2 text-sm">What You Can Upload</h4>
               <ul className="space-y-1 text-sm text-muted-foreground">
                 <li>• Company policies & procedures</li>
@@ -182,7 +182,7 @@ export default function QuickStartLesson1() {
               </ul>
             </div>
 
-            <div className="p-4 bg-white dark:bg-card rounded-lg border">
+            <div className="p-4 bg-card rounded-lg border">
               <h4 className="font-semibold mb-2 text-sm">What AI Can Do</h4>
               <ul className="space-y-1 text-sm text-muted-foreground">
                 <li>• Answer questions using your docs</li>

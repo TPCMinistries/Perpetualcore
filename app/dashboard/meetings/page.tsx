@@ -78,7 +78,7 @@ const meetingTypeColors: Record<string, string> = {
   "1:1": "bg-amber-500",
   sales: "bg-rose-500",
   support: "bg-cyan-500",
-  other: "bg-slate-500",
+  other: "bg-muted0",
 };
 
 const sentimentColors: Record<string, { bg: string; text: string }> = {
@@ -87,8 +87,8 @@ const sentimentColors: Record<string, { bg: string; text: string }> = {
     text: "text-green-600 dark:text-green-400",
   },
   neutral: {
-    bg: "bg-slate-50 dark:bg-slate-500/10",
-    text: "text-slate-600 dark:text-slate-400",
+    bg: "bg-muted dark:bg-muted0/10",
+    text: "text-muted-foreground dark:text-muted-foreground",
   },
   negative: {
     bg: "bg-red-50 dark:bg-red-500/10",
@@ -446,12 +446,12 @@ export default function MeetingsPage() {
       {/* Filters Row */}
       <div className="flex items-center gap-4 mb-6">
         <div className="relative flex-1 max-w-md">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
             placeholder="Search meetings..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-10 bg-white dark:bg-slate-800/50 border-slate-200 dark:border-slate-700"
+            className="pl-10 bg-card/50 border-border dark:border-border"
           />
         </div>
         <FilterPills
@@ -485,7 +485,7 @@ export default function MeetingsPage() {
             >
               <Card
                 onClick={() => router.push(`/dashboard/meetings/${meeting.id}`)}
-                className="border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 hover:shadow-lg hover:shadow-violet-500/5 hover:border-violet-200 dark:hover:border-violet-800/50 transition-all cursor-pointer group"
+                className="border-border dark:border-border bg-card hover:shadow-lg hover:shadow-violet-500/5 hover:border-violet-200 dark:hover:border-violet-800/50 transition-all cursor-pointer group"
               >
                 <CardContent className="p-6">
                   <div className="flex items-start justify-between">
@@ -498,33 +498,33 @@ export default function MeetingsPage() {
                             meetingTypeColors.other
                           }`}
                         />
-                        <span className="text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wide">
+                        <span className="text-xs font-medium text-muted-foreground dark:text-muted-foreground uppercase tracking-wide">
                           {meeting.meeting_type}
                         </span>
-                        <span className="text-xs text-slate-400 dark:text-slate-500">
+                        <span className="text-xs text-muted-foreground dark:text-muted-foreground">
                           •
                         </span>
-                        <span className="text-xs text-slate-500 dark:text-slate-400">
+                        <span className="text-xs text-muted-foreground dark:text-muted-foreground">
                           {formatDate(meeting.meeting_date)}
                         </span>
                         {meeting.source && meeting.source !== "manual" && (
                           <>
-                            <span className="text-xs text-slate-400 dark:text-slate-500">
+                            <span className="text-xs text-muted-foreground dark:text-muted-foreground">
                               •
                             </span>
-                            <span className="text-xs text-slate-500 dark:text-slate-400 capitalize">
+                            <span className="text-xs text-muted-foreground dark:text-muted-foreground capitalize">
                               via {meeting.source}
                             </span>
                           </>
                         )}
                       </div>
 
-                      <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-2 group-hover:text-violet-600 dark:group-hover:text-violet-400 transition-colors">
+                      <h3 className="text-lg font-semibold text-foreground dark:text-white mb-2 group-hover:text-violet-600 dark:group-hover:text-violet-400 transition-colors">
                         {meeting.meeting_title}
                       </h3>
 
                       {meeting.executive_summary && (
-                        <p className="text-sm text-slate-600 dark:text-slate-400 line-clamp-2 mb-3">
+                        <p className="text-sm text-muted-foreground dark:text-muted-foreground line-clamp-2 mb-3">
                           {meeting.executive_summary}
                         </p>
                       )}
@@ -533,7 +533,7 @@ export default function MeetingsPage() {
                       <div className="flex items-center gap-3 flex-wrap">
                         {/* Attendees */}
                         {meeting.attendees && meeting.attendees.length > 0 && (
-                          <span className="inline-flex items-center gap-1.5 text-xs font-medium text-slate-600 dark:text-slate-400 bg-slate-100 dark:bg-slate-700/50 px-2.5 py-1 rounded-full">
+                          <span className="inline-flex items-center gap-1.5 text-xs font-medium text-muted-foreground dark:text-muted-foreground bg-muted dark:bg-muted/50 px-2.5 py-1 rounded-full">
                             <Users className="h-3 w-3" />
                             {meeting.attendees.length} attendee
                             {meeting.attendees.length > 1 ? "s" : ""}
@@ -597,7 +597,7 @@ export default function MeetingsPage() {
                             size="sm"
                             className="h-8 w-8 p-0"
                           >
-                            <MoreHorizontal className="h-4 w-4 text-slate-400" />
+                            <MoreHorizontal className="h-4 w-4 text-muted-foreground" />
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">

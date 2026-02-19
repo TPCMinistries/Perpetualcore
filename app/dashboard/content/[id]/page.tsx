@@ -273,7 +273,7 @@ export default function ContentEditorPage({ params }: { params: Promise<{ id: st
           <Button
             variant="ghost"
             onClick={() => router.push("/dashboard/content")}
-            className="mb-4 -ml-2 text-slate-600 dark:text-slate-400"
+            className="mb-4 -ml-2 text-muted-foreground dark:text-muted-foreground"
           >
             <ArrowLeft className="h-4 w-4 mr-2" />
             Back to Content Studio
@@ -281,11 +281,11 @@ export default function ContentEditorPage({ params }: { params: Promise<{ id: st
 
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="h-10 w-10 rounded-xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center">
-                <PlatformIcon className="h-5 w-5 text-slate-600 dark:text-slate-400" />
+              <div className="h-10 w-10 rounded-xl bg-muted dark:bg-card flex items-center justify-center">
+                <PlatformIcon className="h-5 w-5 text-muted-foreground dark:text-muted-foreground" />
               </div>
               <div>
-                <h1 className="text-2xl font-bold text-slate-900 dark:text-white">
+                <h1 className="text-2xl font-bold text-foreground dark:text-white">
                   {content.title}
                 </h1>
                 <div className="flex items-center gap-2 mt-1">
@@ -347,7 +347,7 @@ export default function ContentEditorPage({ params }: { params: Promise<{ id: st
         <div className="grid gap-6 lg:grid-cols-3">
           {/* Editor */}
           <div className="lg:col-span-2 space-y-4">
-            <Card className="border-0 shadow-lg shadow-slate-200/50 dark:shadow-none bg-white dark:bg-slate-800/50">
+            <Card className="border-0 shadow-lg shadow-slate-200/50 dark:shadow-none bg-card/50">
               <CardContent className="p-6 space-y-4">
                 <div className="space-y-2">
                   <Label>Title</Label>
@@ -374,7 +374,7 @@ export default function ContentEditorPage({ params }: { params: Promise<{ id: st
                     {charLimit && (
                       <span className={cn(
                         "text-xs",
-                        getCharCount() > charLimit ? "text-red-500" : "text-slate-500"
+                        getCharCount() > charLimit ? "text-red-500" : "text-muted-foreground"
                       )}>
                         {getCharCount()} / {charLimit}
                       </span>
@@ -416,7 +416,7 @@ export default function ContentEditorPage({ params }: { params: Promise<{ id: st
 
           {/* Sidebar */}
           <div className="space-y-4">
-            <Card className="border-0 shadow-lg shadow-slate-200/50 dark:shadow-none bg-white dark:bg-slate-800/50">
+            <Card className="border-0 shadow-lg shadow-slate-200/50 dark:shadow-none bg-card/50">
               <CardHeader>
                 <CardTitle className="text-base">Status</CardTitle>
               </CardHeader>
@@ -460,21 +460,21 @@ export default function ContentEditorPage({ params }: { params: Promise<{ id: st
               </CardContent>
             </Card>
 
-            <Card className="border-0 shadow-lg shadow-slate-200/50 dark:shadow-none bg-white dark:bg-slate-800/50">
+            <Card className="border-0 shadow-lg shadow-slate-200/50 dark:shadow-none bg-card/50">
               <CardHeader>
                 <CardTitle className="text-base">Details</CardTitle>
               </CardHeader>
               <CardContent className="space-y-3 text-sm">
                 <div className="flex justify-between">
-                  <span className="text-slate-500">Platform</span>
+                  <span className="text-muted-foreground">Platform</span>
                   <span className="capitalize">{content.platform || "Not set"}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-slate-500">Type</span>
+                  <span className="text-muted-foreground">Type</span>
                   <span className="capitalize">{content.content_type?.replace("_", " ")}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-slate-500">Created</span>
+                  <span className="text-muted-foreground">Created</span>
                   <span>{new Date(content.created_at).toLocaleDateString()}</span>
                 </div>
               </CardContent>
@@ -525,7 +525,7 @@ export default function ContentEditorPage({ params }: { params: Promise<{ id: st
           <DialogHeader>
             <DialogTitle>Delete Content</DialogTitle>
           </DialogHeader>
-          <p className="text-slate-600 dark:text-slate-400">
+          <p className="text-muted-foreground dark:text-muted-foreground">
             Are you sure you want to delete this content? This action cannot be undone.
           </p>
           <DialogFooter>
@@ -546,10 +546,10 @@ export default function ContentEditorPage({ params }: { params: Promise<{ id: st
             <DialogTitle>Approve & Post Content</DialogTitle>
           </DialogHeader>
           <div className="py-4 space-y-4">
-            <p className="text-slate-600 dark:text-slate-400">
+            <p className="text-muted-foreground dark:text-muted-foreground">
               This will save your content, mark it as approved, and trigger the automated posting workflow.
             </p>
-            <div className="p-4 rounded-lg bg-slate-50 dark:bg-slate-800/50 space-y-2">
+            <div className="p-4 rounded-lg bg-muted dark:bg-card/50 space-y-2">
               <p className="text-sm font-medium">{formData.title || content.title}</p>
               <div className="flex items-center gap-2">
                 <Badge variant="secondary" className="text-xs capitalize">
