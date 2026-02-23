@@ -10,11 +10,11 @@ See: .planning/PROJECT.md (updated 2026-02-23)
 ## Current Position
 
 Phase: 2 of 3 (Onboarding Optimization)
-Plan: 1 of 2 completed in current phase
-Status: Plan 02-01 complete — ready for Plan 02-02
-Last activity: 2026-02-23 — Plan 02-01 complete (guided first-chat aha moment)
+Plan: 2 of 2 completed in current phase
+Status: Phase 02 complete — all plans done
+Last activity: 2026-02-23 — Plan 02-02 complete (activation checklist with 3 milestones)
 
-Progress: [####░░░░░░] 40%
+Progress: [######░░░░] 60%
 
 ## Performance Metrics
 
@@ -28,15 +28,16 @@ Progress: [####░░░░░░] 40%
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
 | 01-social-proof | 1 | 7 min | 7 min |
-| 02-onboarding-optimization | 1 | 9 min | 9 min |
+| 02-onboarding-optimization | 2 | 62 min | 31 min |
 
 **Recent Trend:**
-- Last 5 plans: 7 min, 9 min
-- Trend: Steady
+- Last 5 plans: 7 min, 9 min, 53 min
+- Trend: Variable (build-heavy plans take longer)
 
 *Updated after each plan completion*
 | Phase 01-social-proof P01-01 | 7 | 2 tasks | 5 files |
 | Phase 02-onboarding-optimization P02-01 | 9 | 2 tasks | 5 files |
+| Phase 02-onboarding-optimization P02-02 | 53 | 2 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -55,6 +56,9 @@ Recent decisions affecting current work:
 - guided=true URL param used as signal between onboarding and first-chat — zero DB state required
 - 10-minute window for first-conversation context injection — long enough for completion, prevents stale injection
 - isGuidedFirstChat deactivates when messages.length > 0 — transitions automatically after first send
+- ai_assistants table (user_id field) used as heuristic for explore_agents milestone — no new infrastructure needed
+- OnboardingChecklist moved to layout.tsx to appear on every dashboard page, not just overview
+- DashboardWithOnboarding had OnboardingChecklist removed to prevent duplicate rendering
 
 ### Pending Todos
 
@@ -68,5 +72,5 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-23
-Stopped at: Completed 02-onboarding-optimization/02-01-PLAN.md — guided first-chat aha moment built
+Stopped at: Completed 02-onboarding-optimization/02-02-PLAN.md — activation checklist with 3 milestones built
 Resume file: None
