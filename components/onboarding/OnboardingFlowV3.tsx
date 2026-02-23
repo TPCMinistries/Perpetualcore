@@ -83,7 +83,9 @@ export function OnboardingFlowV3({ userProfile }: OnboardingFlowV3Props) {
 
   const handleActionClick = async (action: string) => {
     await completeOnboarding();
-    router.push(action);
+    // Append guided=true when navigating to chat so the aha moment fires
+    const destination = action === "/dashboard/chat" ? "/dashboard/chat?guided=true" : action;
+    router.push(destination);
   };
 
   const updateOnboardingProgress = async (step: number, completed: boolean) => {
@@ -137,10 +139,14 @@ export function OnboardingFlowV3({ userProfile }: OnboardingFlowV3Props) {
 
       setIsOpen(false);
       toast.success(`Welcome aboard, ${userContext.preferredName}! 🧠`);
+      // Redirect to guided first chat — the persistent memory aha moment
+      router.push("/dashboard/chat?guided=true");
     } catch (error) {
       setIsOpen(false);
       toast.success(`Welcome aboard! 🧠`);
       console.error("Failed to complete onboarding:", error);
+      // Still redirect even on error — onboarding data was likely saved
+      router.push("/dashboard/chat?guided=true");
     } finally {
       setIsLoading(false);
     }
@@ -1028,7 +1034,7 @@ function CompleteStep({
         className="mt-6 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-lg px-8"
       >
         <Sparkles className="mr-2 h-5 w-5" />
-        Start Using My AI Brain
+        Start Your First Conversation
       </Button>
 
       <p className="text-xs text-muted-foreground">
