@@ -70,31 +70,36 @@ export async function getOnboardingProgress() {
       return { error: "Not authenticated", data: [] };
     }
 
-    // Check actual user activity instead of relying on manual progress tracking
-    const [conversationsResult, documentsResult] = await Promise.all([
-      // Check if user has any conversations
+    // Check three activation milestones in parallel
+    const [conversationsResult, documentsResult, assistantsResult] = await Promise.all([
+      // Milestone 1: first_chat — has any conversation
       supabase
         .from("conversations")
         .select("id")
         .eq("user_id", user.id)
         .limit(1),
-      // Check if user has any documents
+      // Milestone 2: first_document — has any document
       supabase
         .from("documents")
         .select("id")
         .eq("user_id", user.id)
         .limit(1),
+      // Milestone 3: explore_agents — has created or interacted with an AI assistant
+      supabase
+        .from("ai_assistants")
+        .select("id")
+        .eq("user_id", user.id)
+        .limit(1),
     ]);
 
-    const hasConversations = (conversationsResult.data?.length ?? 0) > 0;
-    const hasDocuments = (documentsResult.data?.length ?? 0) > 0;
-    // User has searched if they have both conversations and documents
-    const hasSearched = hasConversations && hasDocuments;
+    const hasChat = (conversationsResult.data?.length ?? 0) > 0;
+    const hasDocument = (documentsResult.data?.length ?? 0) > 0;
+    const hasExploredAgents = (assistantsResult.data?.length ?? 0) > 0;
 
     const progress = [
-      { step_key: "first_conversation", completed: hasConversations },
-      { step_key: "first_document", completed: hasDocuments },
-      { step_key: "first_search", completed: hasSearched },
+      { step_key: "first_chat", completed: hasChat },
+      { step_key: "first_document", completed: hasDocument },
+      { step_key: "explore_agents", completed: hasExploredAgents },
     ];
 
     return { data: progress };
