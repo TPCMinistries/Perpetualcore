@@ -13,7 +13,7 @@ Milestone v1.0 Conversion Optimization takes a fully-built product and optimizes
 Decimal phases appear between their surrounding integers in numeric order.
 
 - [x] **Phase 1: Social Proof** - Add founder credibility, comparison table, and trust signals to the landing page
-- [ ] **Phase 2: Onboarding Optimization** - Improve the first-use flow to deliver a guided aha moment with activation checklist
+- [x] **Phase 2: Onboarding Optimization** - Improve the first-use flow to deliver a guided aha moment with activation checklist (completed 2026-02-23)
 - [ ] **Phase 3: Conversion Analytics** - Instrument the full funnel with event tracking, UTM attribution, and admin dashboard visualization
 
 ## Phase Details
@@ -40,7 +40,7 @@ Plans:
   1. New user is guided through a contextual first-chat experience that demonstrates persistent memory
   2. New user sees an onboarding checklist that tracks activation milestones (first chat, upload doc, explore agents)
   3. Completed checklist items are visually marked so the user knows what they have and have not done
-**Plans:** 1/2 plans executed
+**Plans:** 2/2 plans complete
 
 Plans:
 - [ ] 02-01-PLAN.md — Guided first-chat aha moment (onboarding-to-chat redirect with personalized AI greeting)
@@ -64,5 +64,5 @@ Phases execute in numeric order: 1 -> 2 -> 3
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Social Proof | 1/1 | Complete    | 2026-02-23 |
-| 2. Onboarding Optimization | 1/2 | In Progress|  |
+| 2. Onboarding Optimization | 2/2 | Complete   | 2026-02-23 |
 | 3. Conversion Analytics | 0/TBD | Not started | - |
