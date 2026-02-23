@@ -57,21 +57,21 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| PROOF-01 | TBD | Pending |
-| PROOF-02 | TBD | Pending |
-| PROOF-03 | TBD | Pending |
-| PROOF-04 | TBD | Pending |
-| ONBD-01 | TBD | Pending |
-| ONBD-02 | TBD | Pending |
-| ANLYT-01 | TBD | Pending |
-| ANLYT-02 | TBD | Pending |
-| ANLYT-03 | TBD | Pending |
+| PROOF-01 | Phase 1 | Pending |
+| PROOF-02 | Phase 1 | Pending |
+| PROOF-03 | Phase 1 | Pending |
+| PROOF-04 | Phase 1 | Pending |
+| ONBD-01 | Phase 2 | Pending |
+| ONBD-02 | Phase 2 | Pending |
+| ANLYT-01 | Phase 3 | Pending |
+| ANLYT-02 | Phase 3 | Pending |
+| ANLYT-03 | Phase 3 | Pending |
 
 **Coverage:**
 - v1.0 requirements: 9 total
-- Mapped to phases: 0
-- Unmapped: 9
+- Mapped to phases: 9
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-02-23*
-*Last updated: 2026-02-23 after initial definition*
+*Last updated: 2026-02-23 — traceability filled after roadmap creation*
