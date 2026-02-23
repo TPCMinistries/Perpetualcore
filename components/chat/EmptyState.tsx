@@ -12,16 +12,18 @@ import {
   MessageSquare,
   ChevronDown,
   ChevronUp,
-  Eye,
-  EyeOff,
+  ArrowRight,
+  Sparkles,
 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
+import { buildFirstChatPrompt, getFirstChatSuggestions } from "@/lib/onboarding/guided-chat";
 
 interface EmptyStateProps {
   onSuggestionClick: (prompt: string) => void;
   userName?: string;
   conversations?: any[];
   onSelectConversation?: (id: string) => void;
+  isGuidedFirstChat?: boolean;
 }
 
 interface RecentDocument {
@@ -53,6 +55,12 @@ interface RecentActivity {
   meetings: UpcomingMeeting[];
 }
 
+interface OnboardingProfile {
+  preferred_name?: string;
+  user_role?: string;
+  primary_goals?: string[];
+}
+
 const QUICK_PROMPTS = [
   { icon: "📝", text: "Plan my day", prompt: "Help me plan my day based on my tasks and meetings" },
   { icon: "✍️", text: "Draft email", prompt: "Help me draft a professional email" },
@@ -65,14 +73,19 @@ export function EmptyState({
   userName,
   conversations,
   onSelectConversation,
+  isGuidedFirstChat = false,
 }: EmptyStateProps) {
   const [activity, setActivity] = useState<RecentActivity | null>(null);
   const [loading, setLoading] = useState(true);
   const [showConversations, setShowConversations] = useState(false); // Collapsed by default
+  const [onboardingProfile, setOnboardingProfile] = useState<OnboardingProfile | null>(null);
 
   useEffect(() => {
     fetchActivity();
-  }, []);
+    if (isGuidedFirstChat) {
+      fetchOnboardingProfile();
+    }
+  }, [isGuidedFirstChat]);
 
   const fetchActivity = async () => {
     try {
@@ -85,6 +98,22 @@ export function EmptyState({
       console.error("Failed to fetch activity:", error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchOnboardingProfile = async () => {
+    try {
+      const res = await fetch("/api/profile/context");
+      if (res.ok) {
+        const data = await res.json();
+        setOnboardingProfile({
+          preferred_name: data.preferred_name,
+          user_role: data.user_role,
+          primary_goals: data.primary_goals || [],
+        });
+      }
+    } catch (error) {
+      console.error("Failed to fetch onboarding profile:", error);
     }
   };
 
@@ -118,6 +147,114 @@ export function EmptyState({
     }
   };
 
+  // Build guided first-chat content when profile is loaded
+  const firstChatPrompt = isGuidedFirstChat && onboardingProfile?.user_role
+    ? buildFirstChatPrompt({
+        preferredName: onboardingProfile.preferred_name || userName || "there",
+        userRole: onboardingProfile.user_role,
+        primaryGoals: onboardingProfile.primary_goals || [],
+      })
+    : null;
+
+  const firstChatSuggestions = isGuidedFirstChat && onboardingProfile?.user_role
+    ? getFirstChatSuggestions(
+        onboardingProfile.user_role,
+        onboardingProfile.primary_goals || []
+      )
+    : null;
+
+  const displayName = onboardingProfile?.preferred_name || userName || "there";
+
+  // Guided first-chat layout — personalized aha moment
+  if (isGuidedFirstChat) {
+    return (
+      <div className="flex-1 flex flex-col px-4 py-6 overflow-auto">
+        <div className="max-w-2xl mx-auto w-full flex-1 flex flex-col">
+          {/* Personalized welcome header */}
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="text-center mb-8 mt-6"
+          >
+            <div className="inline-flex h-14 w-14 rounded-full bg-gradient-to-br from-purple-500 via-blue-500 to-indigo-600 items-center justify-center mb-4 shadow-lg">
+              <Sparkles className="h-7 w-7 text-white" />
+            </div>
+            <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100 mb-2">
+              Welcome to your AI brain, {displayName}!
+            </h1>
+            <p className="text-sm text-slate-500 dark:text-slate-400 max-w-md mx-auto">
+              I already know a bit about you from your setup. Try asking me something — I'll remember everything.
+            </p>
+          </motion.div>
+
+          {/* Pre-built first message card */}
+          {firstChatPrompt ? (
+            <motion.div
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.1 }}
+              className="mb-6"
+            >
+              <p className="text-xs text-slate-400 dark:text-slate-500 mb-2 text-center font-medium uppercase tracking-wider">
+                Send your first message
+              </p>
+              <button
+                onClick={() => onSuggestionClick(firstChatPrompt)}
+                className="w-full p-4 rounded-xl border-2 border-purple-200 dark:border-purple-800 bg-gradient-to-r from-purple-50 to-blue-50 dark:from-purple-950/30 dark:to-blue-950/30 hover:border-purple-400 dark:hover:border-purple-600 hover:shadow-md transition-all text-left group"
+              >
+                <div className="flex items-center justify-between gap-3">
+                  <p className="text-sm font-medium text-slate-700 dark:text-slate-200 leading-relaxed">
+                    "{firstChatPrompt}"
+                  </p>
+                  <ArrowRight className="h-4 w-4 text-purple-500 flex-shrink-0 group-hover:translate-x-1 transition-transform" />
+                </div>
+              </button>
+            </motion.div>
+          ) : (
+            <div className="mb-6 flex justify-center">
+              <Skeleton className="h-16 w-full rounded-xl" />
+            </div>
+          )}
+
+          {/* Personalized quick suggestions */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.2 }}
+            className="flex flex-wrap justify-center gap-2"
+          >
+            {firstChatSuggestions
+              ? firstChatSuggestions.map((suggestion, idx) => (
+                  <Button
+                    key={idx}
+                    variant="outline"
+                    size="sm"
+                    onClick={() => onSuggestionClick(suggestion.prompt)}
+                    className="text-xs gap-1.5 h-9 hover:bg-violet-50 hover:border-violet-300 dark:hover:bg-violet-900/20"
+                  >
+                    <span>{suggestion.icon}</span>
+                    {suggestion.text}
+                  </Button>
+                ))
+              : QUICK_PROMPTS.map((prompt, idx) => (
+                  <Button
+                    key={idx}
+                    variant="outline"
+                    size="sm"
+                    onClick={() => onSuggestionClick(prompt.prompt)}
+                    className="text-xs gap-1.5 h-9 hover:bg-violet-50 hover:border-violet-300 dark:hover:bg-violet-900/20"
+                  >
+                    <span>{prompt.icon}</span>
+                    {prompt.text}
+                  </Button>
+                ))}
+          </motion.div>
+        </div>
+      </div>
+    );
+  }
+
+  // Standard empty state layout
   // Combine all activity items into a single list
   const activityItems: { type: string; item: any }[] = [];
   activity?.meetings?.slice(0, 2).forEach(m => activityItems.push({ type: 'meeting', item: m }));

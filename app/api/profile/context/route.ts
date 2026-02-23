@@ -83,7 +83,7 @@ export async function GET() {
     const { data: profile, error: profileError } = await supabase
       .from("profiles")
       .select(
-        "preferred_name, user_role, industry, primary_goal, team_context, content_types, ai_experience_level"
+        "preferred_name, user_role, industry, primary_goal, primary_goals, team_context, content_types, ai_experience_level, onboarding_completed_at"
       )
       .eq("id", user.id)
       .single();

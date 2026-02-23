@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect, useCallback } from "react";
+import { useSearchParams } from "next/navigation";
 import { toast } from "sonner";
 import {
   ChatLayout,
@@ -22,6 +23,8 @@ import PromptLibrary from "@/components/chat/PromptLibrary";
 import { type PromptTemplate } from "@/lib/prompts/templates";
 
 export default function ChatPage() {
+  const searchParams = useSearchParams();
+
   // Core state
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
@@ -424,6 +427,7 @@ export default function ChatPage() {
             userName={userName}
             conversations={conversations}
             onSelectConversation={handleSelectConversation}
+            isGuidedFirstChat={searchParams.get("guided") === "true" && messages.length === 0}
           />
         ) : (
           <ChatMessages
