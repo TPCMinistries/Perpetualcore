@@ -41,6 +41,10 @@ import {
 } from "lucide-react";
 import { INDUSTRY_CONFIGS } from "@/lib/dashboard/industry-config";
 import { PublicMobileNav } from "@/components/layout/PublicMobileNav";
+import { SocialProofBanner } from "@/components/landing/SocialProofBanner";
+import { ComparisonTable } from "@/components/landing/ComparisonTable";
+import { TrustBadges } from "@/components/landing/TrustBadges";
+import { FounderStory } from "@/components/landing/FounderStory";
 
 // Demo chat messages
 const DEMO_MESSAGES = [
@@ -375,6 +379,9 @@ export default function HomePage() {
           </div>
         </div>
       </section>
+
+      {/* Social Proof Banner - Trusted by Organizations */}
+      <SocialProofBanner />
 
       {/* Value Proposition Banner - Above Chat Demo */}
       <section className="bg-gradient-to-r from-slate-900 to-slate-800 dark:from-slate-800 dark:to-slate-900 py-12 sm:py-16 animate-on-scroll">
@@ -713,6 +720,9 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* Comparison Table - How Perpetual Core Compares */}
+      <ComparisonTable />
+
       {/* AI Executive Suite - NEW FEATURE SHOWCASE */}
       <section className="container mx-auto px-4 py-20 sm:py-32 animate-on-scroll bg-gradient-to-b from-background via-muted/10 to-background">
         <div className="max-w-6xl mx-auto">
@@ -1036,6 +1046,9 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* Trust Badges - SOC 2, SSO, Uptime */}
+      <TrustBadges />
+
       {/* Features Grid - Enhanced Glassmorphic */}
       <section id="features" className="container mx-auto px-4 py-20 animate-on-scroll">
         <div className="text-center mb-16">
@@ -1113,6 +1126,9 @@ export default function HomePage() {
           </div>
         </div>
       </section>
+
+      {/* Founder Story - Built By a Builder */}
+      <FounderStory />
 
       {/* Pricing Teaser - Enhanced Glassmorphic */}
       <section className="container mx-auto px-4 py-20 animate-on-scroll">
