@@ -40,7 +40,11 @@ Plans:
   1. New user is guided through a contextual first-chat experience that demonstrates persistent memory
   2. New user sees an onboarding checklist that tracks activation milestones (first chat, upload doc, explore agents)
   3. Completed checklist items are visually marked so the user knows what they have and have not done
-**Plans**: TBD
+**Plans:** 2 plans
+
+Plans:
+- [ ] 02-01-PLAN.md — Guided first-chat aha moment (onboarding-to-chat redirect with personalized AI greeting)
+- [ ] 02-02-PLAN.md — Activation checklist with 3 milestones (first chat, upload doc, explore agents)
 
 ### Phase 3: Conversion Analytics
 **Goal**: Every step of the visitor-to-active-user funnel is tracked, attributed to campaigns, and visible in the admin dashboard
@@ -60,5 +64,5 @@ Phases execute in numeric order: 1 -> 2 -> 3
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Social Proof | 1/1 | Complete    | 2026-02-23 |
-| 2. Onboarding Optimization | 0/TBD | Not started | - |
+| 2. Onboarding Optimization | 0/2 | In progress | - |
 | 3. Conversion Analytics | 0/TBD | Not started | - |
