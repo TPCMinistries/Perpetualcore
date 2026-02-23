@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from "react";
 import { WelcomeWizard } from "@/components/onboarding/WelcomeWizard";
-import { OnboardingChecklist } from "@/components/onboarding/OnboardingChecklist";
 import { completeOnboarding, needsOnboarding } from "@/lib/onboarding/actions";
 
 interface DashboardWithOnboardingProps {
@@ -38,13 +37,7 @@ export function DashboardWithOnboarding({ children }: DashboardWithOnboardingPro
   return (
     <>
       <WelcomeWizard open={showWizard} onComplete={handleOnboardingComplete} />
-      {!showWizard && (
-        <div className="space-y-8">
-          <OnboardingChecklist />
-          {children}
-        </div>
-      )}
-      {showWizard && children}
+      {children}
     </>
   );
 }
