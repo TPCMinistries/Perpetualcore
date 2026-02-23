@@ -27,7 +27,10 @@ Decimal phases appear between their surrounding integers in numeric order.
   2. Visitor can compare Perpetual Core vs ChatGPT vs competitors in a feature table showing memory, models, RAG, agents, and pricing differentiators
   3. Visitor can see trust badges (SOC 2 ready, enterprise SSO, 99.9% uptime SLA) on the landing page
   4. Visitor can see a "trusted by X organizations" counter with industry/partner logo placeholders
-**Plans**: TBD
+**Plans:** 1 plan
+
+Plans:
+- [ ] 01-01-PLAN.md — Create and integrate 4 social proof sections (founder story, comparison table, trust badges, org counter)
 
 ### Phase 2: Onboarding Optimization
 **Goal**: New users reach an aha moment during their first session and know exactly what to do next
@@ -52,10 +55,10 @@ Decimal phases appear between their surrounding integers in numeric order.
 ## Progress
 
 **Execution Order:**
-Phases execute in numeric order: 1 → 2 → 3
+Phases execute in numeric order: 1 -> 2 -> 3
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Social Proof | 0/TBD | Not started | - |
+| 1. Social Proof | 0/1 | Planned | - |
 | 2. Onboarding Optimization | 0/TBD | Not started | - |
 | 3. Conversion Analytics | 0/TBD | Not started | - |
