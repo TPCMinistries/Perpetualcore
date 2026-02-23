@@ -16,7 +16,7 @@ Requirements for Milestone v1.0: Conversion Optimization. Each maps to roadmap p
 
 ### Onboarding Optimization
 
-- [ ] **ONBD-01**: Existing onboarding flow analyzed and improved — guided first-use experience leads to aha moment (contextual AI chat that demonstrates persistent memory)
+- [x] **ONBD-01**: Existing onboarding flow analyzed and improved — guided first-use experience leads to aha moment (contextual AI chat that demonstrates persistent memory)
 - [ ] **ONBD-02**: New user receives onboarding checklist tracking key activation milestones (first chat, upload doc, explore agents)
 
 ### Conversion Analytics
@@ -61,7 +61,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | PROOF-02 | Phase 1 | Complete |
 | PROOF-03 | Phase 1 | Complete |
 | PROOF-04 | Phase 1 | Complete |
-| ONBD-01 | Phase 2 | Pending |
+| ONBD-01 | Phase 2 | Complete |
 | ONBD-02 | Phase 2 | Pending |
 | ANLYT-01 | Phase 3 | Pending |
 | ANLYT-02 | Phase 3 | Pending |

@@ -5,36 +5,38 @@
 See: .planning/PROJECT.md (updated 2026-02-23)
 
 **Core value:** The AI operating system brain — if this breaks, everything downstream breaks
-**Current focus:** v1.0 Conversion Optimization — Phase 1: Social Proof
+**Current focus:** v1.0 Conversion Optimization — Phase 2: Onboarding Optimization
 
 ## Current Position
 
-Phase: 1 of 3 (Social Proof)
-Plan: 1 of 1 completed in current phase
-Status: Plan 01-01 complete — ready for next plan or next phase
-Last activity: 2026-02-23 — Plan 01-01 complete (social proof components + landing page integration)
+Phase: 2 of 3 (Onboarding Optimization)
+Plan: 1 of 2 completed in current phase
+Status: Plan 02-01 complete — ready for Plan 02-02
+Last activity: 2026-02-23 — Plan 02-01 complete (guided first-chat aha moment)
 
-Progress: [##░░░░░░░░] 20%
+Progress: [####░░░░░░] 40%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 1
-- Average duration: 7 min
-- Total execution time: 7 min
+- Total plans completed: 2
+- Average duration: 8 min
+- Total execution time: 16 min
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
 | 01-social-proof | 1 | 7 min | 7 min |
+| 02-onboarding-optimization | 1 | 9 min | 9 min |
 
 **Recent Trend:**
-- Last 5 plans: 7 min
-- Trend: Establishing baseline
+- Last 5 plans: 7 min, 9 min
+- Trend: Steady
 
 *Updated after each plan completion*
 | Phase 01-social-proof P01-01 | 7 | 2 tasks | 5 files |
+| Phase 02-onboarding-optimization P02-01 | 9 | 2 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -50,6 +52,9 @@ Recent decisions affecting current work:
 - SocialProofBanner placed immediately after Hero for maximum credibility impact (PROOF-04 first, then value props)
 - ComparisonTable placed after Core Value Props as the logical prove-it moment (PROOF-02 after features)
 - FounderStory placed after Benefits section as personal touch before pricing ask (PROOF-01 last section before price)
+- guided=true URL param used as signal between onboarding and first-chat — zero DB state required
+- 10-minute window for first-conversation context injection — long enough for completion, prevents stale injection
+- isGuidedFirstChat deactivates when messages.length > 0 — transitions automatically after first send
 
 ### Pending Todos
 
@@ -63,5 +68,5 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-23
-Stopped at: Completed 01-social-proof/01-01-PLAN.md — four social proof components built and integrated
+Stopped at: Completed 02-onboarding-optimization/02-01-PLAN.md — guided first-chat aha moment built
 Resume file: None
