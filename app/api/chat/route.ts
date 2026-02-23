@@ -673,6 +673,52 @@ You can render rich interactive UI blocks inline in the conversation. When appro
       if (isDev) console.error("⚠️ Memory loading error (non-fatal):", error);
     }
 
+    // === First-Conversation Context Injection (Onboarding Aha Moment) ===
+    // When the user just completed onboarding and this is their first conversation,
+    // inject personalized context so the AI greets them by name and references their goals.
+    try {
+      const isNewConversation = !conversationId;
+      const onboardingCompletedAt = profile?.onboarding_completed_at;
+      const isRecentlyOnboarded = onboardingCompletedAt
+        ? (Date.now() - new Date(onboardingCompletedAt).getTime()) < 10 * 60 * 1000 // within 10 minutes
+        : false;
+
+      if (
+        isNewConversation &&
+        profile?.onboarding_completed &&
+        isRecentlyOnboarded &&
+        profile?.preferred_name &&
+        profile?.user_role &&
+        profile?.primary_goals?.length > 0
+      ) {
+        const goalLabels = (profile.primary_goals as string[])
+          .slice(0, 3)
+          .map((g: string) => g.replace(/_/g, " "))
+          .join(", ");
+
+        const firstConversationContext = `
+--- FIRST CONVERSATION CONTEXT ---
+This is the user's very first conversation. They JUST completed onboarding moments ago.
+Their name is: ${profile.preferred_name}
+Their role is: ${profile.user_role.replace(/_/g, " ")}
+Their goals are: ${goalLabels}
+
+IMPORTANT: Make your FIRST response demonstrate that you remember them personally.
+• Greet them by their preferred name: "${profile.preferred_name}"
+• Reference their role (${profile.user_role.replace(/_/g, " ")}) in your response
+• Proactively mention at least one of their goals and how you can help
+• This is the "aha moment" — make it undeniable that you have persistent memory of who they are
+• Do NOT be generic. Be specific to their role and goals from the very first sentence.
+• Example opener: "Hey ${profile.preferred_name}! As a ${profile.user_role.replace(/_/g, " ")}, I can see you're looking to ${(profile.primary_goals as string[])[0]?.replace(/_/g, " ")} — let me show you exactly how I can help with that..."
+---`;
+
+        systemPrompt += "\n\n" + firstConversationContext;
+        if (isDev) console.log("🎉 First-conversation aha moment context injected for:", profile.preferred_name);
+      }
+    } catch (error) {
+      if (isDev) console.error("⚠️ First-conversation context injection error (non-fatal):", error);
+    }
+
     // Proactive skill suggestions - detect skill-related queries and suggest enabling skills
     const skillKeywordMap: Record<string, { keywords: RegExp; skillId: string; skillName: string; settingsPath: string }> = {
       todoist: {
