@@ -9,10 +9,10 @@ Requirements for Milestone v1.0: Conversion Optimization. Each maps to roadmap p
 
 ### Social Proof
 
-- [ ] **PROOF-01**: Visitor sees "Built By" founder section with Lorenzo's story, photo placeholder, and IHA mission on landing page
-- [ ] **PROOF-02**: Visitor sees feature comparison table (Perpetual Core vs ChatGPT vs competitors) with clear differentiators across memory, models, RAG, agents, and pricing
-- [ ] **PROOF-03**: Landing page displays security/compliance trust badges (SOC 2 ready, enterprise SSO, 99.9% uptime SLA)
-- [ ] **PROOF-04**: Landing page shows "trusted by X organizations" counter with industry/partner logo placeholders
+- [x] **PROOF-01**: Visitor sees "Built By" founder section with Lorenzo's story, photo placeholder, and IHA mission on landing page
+- [x] **PROOF-02**: Visitor sees feature comparison table (Perpetual Core vs ChatGPT vs competitors) with clear differentiators across memory, models, RAG, agents, and pricing
+- [x] **PROOF-03**: Landing page displays security/compliance trust badges (SOC 2 ready, enterprise SSO, 99.9% uptime SLA)
+- [x] **PROOF-04**: Landing page shows "trusted by X organizations" counter with industry/partner logo placeholders
 
 ### Onboarding Optimization
 
@@ -57,10 +57,10 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| PROOF-01 | Phase 1 | Pending |
-| PROOF-02 | Phase 1 | Pending |
-| PROOF-03 | Phase 1 | Pending |
-| PROOF-04 | Phase 1 | Pending |
+| PROOF-01 | Phase 1 | Complete |
+| PROOF-02 | Phase 1 | Complete |
+| PROOF-03 | Phase 1 | Complete |
+| PROOF-04 | Phase 1 | Complete |
 | ONBD-01 | Phase 2 | Pending |
 | ONBD-02 | Phase 2 | Pending |
 | ANLYT-01 | Phase 3 | Pending |

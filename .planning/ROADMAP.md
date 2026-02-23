@@ -12,7 +12,7 @@ Milestone v1.0 Conversion Optimization takes a fully-built product and optimizes
 
 Decimal phases appear between their surrounding integers in numeric order.
 
-- [ ] **Phase 1: Social Proof** - Add founder credibility, comparison table, and trust signals to the landing page
+- [x] **Phase 1: Social Proof** - Add founder credibility, comparison table, and trust signals to the landing page
 - [ ] **Phase 2: Onboarding Optimization** - Improve the first-use flow to deliver a guided aha moment with activation checklist
 - [ ] **Phase 3: Conversion Analytics** - Instrument the full funnel with event tracking, UTM attribution, and admin dashboard visualization
 
@@ -27,10 +27,10 @@ Decimal phases appear between their surrounding integers in numeric order.
   2. Visitor can compare Perpetual Core vs ChatGPT vs competitors in a feature table showing memory, models, RAG, agents, and pricing differentiators
   3. Visitor can see trust badges (SOC 2 ready, enterprise SSO, 99.9% uptime SLA) on the landing page
   4. Visitor can see a "trusted by X organizations" counter with industry/partner logo placeholders
-**Plans:** 1 plan
+**Plans:** 1/1 plans complete
 
 Plans:
-- [ ] 01-01-PLAN.md — Create and integrate 4 social proof sections (founder story, comparison table, trust badges, org counter)
+- [x] 01-01-PLAN.md — Create and integrate 4 social proof sections (founder story, comparison table, trust badges, org counter)
 
 ### Phase 2: Onboarding Optimization
 **Goal**: New users reach an aha moment during their first session and know exactly what to do next
@@ -59,6 +59,6 @@ Phases execute in numeric order: 1 -> 2 -> 3
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Social Proof | 0/1 | Planned | - |
+| 1. Social Proof | 1/1 | Complete   | 2026-02-23 |
 | 2. Onboarding Optimization | 0/TBD | Not started | - |
 | 3. Conversion Analytics | 0/TBD | Not started | - |
