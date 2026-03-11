@@ -1,5 +1,6 @@
 import { createAdminClient } from "@/lib/supabase/server";
 import { PLAN_LIMITS, PlanType } from "@/lib/stripe/client";
+import { planIncludesOperate } from "@/lib/ghl/client";
 
 export interface EnforcementResult {
   allowed: boolean;
@@ -169,6 +170,32 @@ export async function enforceCustomSkillLimit(
   }
 
   return { allowed: true, current, limit, plan };
+}
+
+// ============================================================
+// OPERATE (GHL) Feature Gate
+// ============================================================
+
+/**
+ * Check if user's plan includes OPERATE (GHL) access
+ */
+export async function enforceOperateAccess(
+  organizationId?: string
+): Promise<EnforcementResult> {
+  const plan = organizationId
+    ? await getOrgPlan(organizationId)
+    : "free" as PlanType;
+  const hasOperate = planIncludesOperate(plan);
+
+  return {
+    allowed: hasOperate,
+    current: hasOperate ? 1 : 0,
+    limit: hasOperate ? 1 : 0,
+    plan,
+    message: hasOperate
+      ? undefined
+      : `OPERATE (Business OS) is available on Pro plans and above. Upgrade to unlock your full business operations suite.`,
+  };
 }
 
 // ============================================================

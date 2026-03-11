@@ -6,6 +6,7 @@ import {
   sendPaymentFailedEmail,
   sendSubscriptionCanceledEmail,
 } from "@/lib/email";
+import { planIncludesOperate } from "@/lib/ghl/client";
 import Stripe from "stripe";
 
 export const runtime = "nodejs";
@@ -338,6 +339,24 @@ async function handleSubscriptionCreated(
   if (subError) {
     console.error("Error creating subscription:", subError);
     throw subError;
+  }
+
+  // Auto-provision GHL sub-account if plan includes OPERATE
+  if (planIncludesOperate(planType)) {
+    try {
+      const appUrl = process.env.NEXT_PUBLIC_APP_URL || process.env.VERCEL_URL;
+      if (appUrl) {
+        await fetch(`${appUrl}/api/ghl/provision`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ userId: user.id }),
+        });
+        console.log("GHL provisioning triggered for user:", user.id);
+      }
+    } catch (ghlError) {
+      // Don't fail the webhook if GHL provisioning fails
+      console.error("GHL auto-provision failed (non-blocking):", ghlError);
+    }
   }
 
   console.log("Subscription created:", subscriptionId);
