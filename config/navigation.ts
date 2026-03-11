@@ -55,6 +55,7 @@ import {
   Database,
   Sheet,
   Globe2,
+  Building2,
 } from "lucide-react";
 import { UserExperienceLevel, AdaptiveNavConfig } from "@/types/user-experience";
 
@@ -716,6 +717,39 @@ export const NAVIGATION_CONFIG_V2: NavigationSection[] = [
           isCore: true,
           badge: "new",
           helpText: "Monitor all 13 projects — databases, deployments, and health",
+        },
+      },
+    ],
+  },
+
+  // PLATFORM - Ecosystem products
+  {
+    section: "Platform",
+    color: "text-muted-foreground",
+    bgColor: "bg-muted/30",
+    collapsible: true,
+    defaultCollapsed: false,
+    items: [
+      {
+        name: "Operate",
+        href: "/dashboard/operate",
+        icon: Building2,
+        adaptiveConfig: {
+          visibleFor: ["beginner", "intermediate", "advanced"],
+          complexity: "essential",
+          isCore: true,
+          helpText: "Business OS — CRM, pipelines, funnels, automations, and client management",
+        },
+      },
+      {
+        name: "Learn",
+        href: "/dashboard/learn",
+        icon: GraduationCap,
+        adaptiveConfig: {
+          visibleFor: ["beginner", "intermediate", "advanced"],
+          complexity: "essential",
+          isCore: true,
+          helpText: "AI Academy — certification tracks, cohort management, and training",
         },
       },
     ],
