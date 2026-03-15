@@ -11,6 +11,7 @@ import {
   ScrollText,
   MonitorSmartphone,
   BarChart3,
+  Rocket,
 } from "lucide-react";
 
 interface NavItem {
@@ -32,6 +33,12 @@ const NAV_SECTIONS: { title: string; items: NavItem[] }[] = [
     items: [
       { label: "Users", href: "/dashboard/admin/users", icon: Users },
       { label: "Organizations", href: "/dashboard/admin/organizations", icon: Building2 },
+    ],
+  },
+  {
+    title: "Platform",
+    items: [
+      { label: "OPERATE (GHL)", href: "/dashboard/admin/operate", icon: Rocket },
     ],
   },
   {
