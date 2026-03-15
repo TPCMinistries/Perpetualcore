@@ -17,7 +17,7 @@ const PLANS = [
     name: "Free",
     description: "Perfect for trying out Perpetual Core",
     price: 0,
-    priceId: null,
+    checkoutEnabled: false,
     interval: "forever",
     icon: Sparkles,
     popular: false,
@@ -43,7 +43,7 @@ const PLANS = [
     name: "Starter",
     description: "For individuals and professionals",
     price: 49,
-    priceId: process.env.NEXT_PUBLIC_STRIPE_PRICE_PRO_MONTHLY,
+    checkoutEnabled: true,
     interval: "per month",
     icon: Zap,
     popular: true,
@@ -70,7 +70,7 @@ const PLANS = [
     name: "Pro",
     description: "Power users who need unlimited AI",
     price: 99,
-    priceId: process.env.NEXT_PUBLIC_STRIPE_PRICE_BUSINESS_MONTHLY,
+    checkoutEnabled: true,
     interval: "per month",
     icon: Crown,
     popular: false,
@@ -96,7 +96,7 @@ const PLANS = [
     name: "Team",
     description: "For small teams (up to 10 people)",
     price: 499,
-    priceId: null,
+    checkoutEnabled: false,
     interval: "per month",
     icon: Users,
     popular: false,
@@ -124,7 +124,7 @@ const PLANS = [
     name: "Business",
     description: "For growing companies (up to 50 people)",
     price: 1999,
-    priceId: null,
+    checkoutEnabled: false,
     interval: "per month",
     icon: Briefcase,
     popular: false,
@@ -152,7 +152,7 @@ const PLANS = [
     name: "Enterprise",
     description: "For large organizations (100-250 people)",
     price: 9999,
-    priceId: null,
+    checkoutEnabled: false,
     interval: "per month",
     icon: Building2,
     popular: false,
@@ -182,7 +182,7 @@ const PLANS = [
     name: "Custom",
     description: "For enterprises (250+ people)",
     price: null,
-    priceId: null,
+    checkoutEnabled: false,
     interval: "custom",
     icon: Rocket,
     popular: false,
@@ -249,7 +249,7 @@ export default function PricingPage() {
   const [billingInterval, setBillingInterval] = useState<"monthly" | "yearly">("monthly");
   const [isLoading, setIsLoading] = useState<string | null>(null);
 
-  async function handleSubscribe(planId: string, priceId: string | null) {
+  async function handleSubscribe(planId: string, checkoutEnabled: boolean) {
     // Track CTA click
     trackClientEvent("cta_click", {
       event_name: `pricing_${planId}_start`,
@@ -262,20 +262,20 @@ export default function PricingPage() {
       return;
     }
 
-    // Handle team/business/enterprise - direct to consultation/sales
+    // Handle team/business - direct to consultation
     if (planId === "team" || planId === "business") {
       router.push("/consultation");
       return;
     }
 
+    // Handle enterprise/custom - direct to enterprise demo
     if (planId === "enterprise" || planId === "custom") {
       router.push("/enterprise-demo");
       return;
     }
 
-    // Handle paid plans without price ID
-    if (!priceId) {
-      toast.error("This plan is not yet configured. Please contact sales.");
+    // Self-serve checkout (starter, pro) — server resolves price IDs
+    if (!checkoutEnabled) {
       router.push("/contact-sales?plan=" + planId);
       return;
     }
@@ -287,12 +287,13 @@ export default function PricingPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           plan: planId,
-          interval: billingInterval,
+          interval: billingInterval === "yearly" ? "annual" : "monthly",
         }),
       });
 
       if (!response.ok) {
-        throw new Error("Failed to create checkout session");
+        const data = await response.json().catch(() => ({}));
+        throw new Error(data.error || "Failed to create checkout session");
       }
 
       const { url } = await response.json();
@@ -463,7 +464,7 @@ export default function PricingPage() {
                         : ""
                     }`}
                     variant={plan.popular || plan.id === "custom" ? "default" : "outline"}
-                    onClick={() => handleSubscribe(plan.id, plan.priceId || null)}
+                    onClick={() => handleSubscribe(plan.id, plan.checkoutEnabled)}
                     disabled={isLoading === plan.id}
                   >
                     {isLoading === plan.id ? (

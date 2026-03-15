@@ -29,37 +29,66 @@ NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_test_51xxxxx
 
 ## Step 3: Create Products and Prices
 
-### Pro Plan
+### Starter Plan ($49/mo)
 
 1. Go to **Products → Add Product**
-2. Create "Pro Plan" product:
-   - Name: `Pro Plan`
-   - Description: `For individuals and small teams`
+2. Create "Starter" product:
+   - Name: `Starter`
+   - Description: `For individuals and professionals`
    - Pricing:
-     - **Monthly**: $29/month (recurring)
-       - Copy Price ID → `NEXT_PUBLIC_STRIPE_PRICE_PRO_MONTHLY`
-     - **Yearly**: $278/year (recurring, 20% discount)
-       - Copy Price ID → `NEXT_PUBLIC_STRIPE_PRICE_PRO_YEARLY`
+     - **Monthly**: $49/month (recurring) → `STRIPE_STARTER_MONTHLY_PRICE_ID`
+     - **Annual**: $470/year (recurring, 20% discount) → `STRIPE_STARTER_ANNUAL_PRICE_ID`
 
-### Team Plan
+### Pro Plan ($99/mo)
 
-1. Create "Team Plan" product:
-   - Name: `Team Plan`
-   - Description: `For growing teams and businesses`
+1. Create "Pro" product:
+   - Name: `Pro`
+   - Description: `Power users who need unlimited AI`
    - Pricing:
-     - **Monthly**: $99/month (recurring)
-       - Copy Price ID → `NEXT_PUBLIC_STRIPE_PRICE_TEAM_MONTHLY`
-     - **Yearly**: $950/year (recurring, 20% discount)
-       - Copy Price ID → `NEXT_PUBLIC_STRIPE_PRICE_TEAM_YEARLY`
+     - **Monthly**: $99/month (recurring) → `STRIPE_PRO_MONTHLY_PRICE_ID`
+     - **Annual**: $950/year (recurring, 20% discount) → `STRIPE_PRO_ANNUAL_PRICE_ID`
+
+### Team Plan ($499/mo)
+
+1. Create "Team" product:
+   - Name: `Team`
+   - Description: `For small teams (up to 10 people)`
+   - Pricing:
+     - **Monthly**: $499/month (recurring) → `STRIPE_TEAM_MONTHLY_PRICE_ID`
+     - **Annual**: $4,790/year (recurring, 20% discount) → `STRIPE_TEAM_ANNUAL_PRICE_ID`
+
+### Business Plan ($1,999/mo)
+
+1. Create "Business" product:
+   - Name: `Business`
+   - Description: `For growing companies (up to 50 people)`
+   - Pricing:
+     - **Monthly**: $1,999/month (recurring) → `STRIPE_BUSINESS_MONTHLY_PRICE_ID`
+     - **Annual**: $19,190/year (recurring, 20% discount) → `STRIPE_BUSINESS_ANNUAL_PRICE_ID`
+
+### Enterprise Plan ($9,999/mo)
+
+1. Create "Enterprise" product:
+   - Name: `Enterprise`
+   - Description: `For large organizations (100-250 people)`
+   - Pricing:
+     - **Monthly**: $9,999/month (recurring) → `STRIPE_ENTERPRISE_MONTHLY_PRICE_ID`
+     - **Annual**: $95,990/year (recurring, 20% discount) → `STRIPE_ENTERPRISE_ANNUAL_PRICE_ID`
 
 ### Update Environment Variables
 
 ```bash
-# .env.local
-NEXT_PUBLIC_STRIPE_PRICE_PRO_MONTHLY=price_1xxxxx
-NEXT_PUBLIC_STRIPE_PRICE_PRO_YEARLY=price_1xxxxx
-NEXT_PUBLIC_STRIPE_PRICE_TEAM_MONTHLY=price_1xxxxx
-NEXT_PUBLIC_STRIPE_PRICE_TEAM_YEARLY=price_1xxxxx
+# .env.local (server-side only — no NEXT_PUBLIC_ prefix needed)
+STRIPE_STARTER_MONTHLY_PRICE_ID=price_xxx
+STRIPE_STARTER_ANNUAL_PRICE_ID=price_xxx
+STRIPE_PRO_MONTHLY_PRICE_ID=price_xxx
+STRIPE_PRO_ANNUAL_PRICE_ID=price_xxx
+STRIPE_TEAM_MONTHLY_PRICE_ID=price_xxx
+STRIPE_TEAM_ANNUAL_PRICE_ID=price_xxx
+STRIPE_BUSINESS_MONTHLY_PRICE_ID=price_xxx
+STRIPE_BUSINESS_ANNUAL_PRICE_ID=price_xxx
+STRIPE_ENTERPRISE_MONTHLY_PRICE_ID=price_xxx
+STRIPE_ENTERPRISE_ANNUAL_PRICE_ID=price_xxx
 ```
 
 ## Step 4: Configure Customer Portal
@@ -250,11 +279,17 @@ STRIPE_SECRET_KEY=sk_test_...
 NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_test_...
 STRIPE_WEBHOOK_SECRET=whsec_...
 
-# Price IDs (from Stripe Dashboard)
-NEXT_PUBLIC_STRIPE_PRICE_PRO_MONTHLY=price_...
-NEXT_PUBLIC_STRIPE_PRICE_PRO_YEARLY=price_...
-NEXT_PUBLIC_STRIPE_PRICE_TEAM_MONTHLY=price_...
-NEXT_PUBLIC_STRIPE_PRICE_TEAM_YEARLY=price_...
+# Price IDs (server-side only — from Stripe Dashboard)
+STRIPE_STARTER_MONTHLY_PRICE_ID=price_...
+STRIPE_STARTER_ANNUAL_PRICE_ID=price_...
+STRIPE_PRO_MONTHLY_PRICE_ID=price_...
+STRIPE_PRO_ANNUAL_PRICE_ID=price_...
+STRIPE_TEAM_MONTHLY_PRICE_ID=price_...
+STRIPE_TEAM_ANNUAL_PRICE_ID=price_...
+STRIPE_BUSINESS_MONTHLY_PRICE_ID=price_...
+STRIPE_BUSINESS_ANNUAL_PRICE_ID=price_...
+STRIPE_ENTERPRISE_MONTHLY_PRICE_ID=price_...
+STRIPE_ENTERPRISE_ANNUAL_PRICE_ID=price_...
 
 # App URL (for redirects)
 NEXT_PUBLIC_APP_URL=https://your-domain.com
