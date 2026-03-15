@@ -8,6 +8,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Check, Zap, Crown, Building2, Sparkles, ArrowRight, Users, Briefcase, Rocket } from "lucide-react";
 import { toast } from "sonner";
 import { PublicMobileNav } from "@/components/layout/PublicMobileNav";
+import { PageViewTracker } from "@/components/analytics/PageViewTracker";
+import { trackClientEvent } from "@/lib/analytics/track-event";
 
 const PLANS = [
   {
@@ -248,6 +250,12 @@ export default function PricingPage() {
   const [isLoading, setIsLoading] = useState<string | null>(null);
 
   async function handleSubscribe(planId: string, priceId: string | null) {
+    // Track CTA click
+    trackClientEvent("cta_click", {
+      event_name: `pricing_${planId}_start`,
+      metadata: { plan_id: planId, billing_interval: billingInterval },
+    });
+
     // Handle free plan
     if (planId === "free") {
       router.push("/signup?plan=free");
@@ -299,6 +307,7 @@ export default function PricingPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white dark:from-gray-900 dark:to-gray-800">
+      <PageViewTracker />
       {/* Header */}
       <header className="border-b bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm sticky top-0 z-10">
         <div className="container mx-auto px-3 sm:px-4 py-3 sm:py-4 flex items-center justify-between">
@@ -577,7 +586,7 @@ export default function PricingPage() {
                 Start your 14-day free trial and experience AI that never forgets.
               </p>
               <Button size="lg" variant="secondary" asChild>
-                <Link href="/signup">
+                <Link href="/signup" onClick={() => trackClientEvent("cta_click", { event_name: "pricing_bottom_start_trial" })}>
                   Start Free Trial <ArrowRight className="ml-2 h-5 w-5" />
                 </Link>
               </Button>
