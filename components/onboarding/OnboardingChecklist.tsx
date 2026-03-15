@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Check, Sparkles, MessageSquare, Upload, Bot, X } from "lucide-react";
 import Link from "next/link";
 import { getOnboardingProgress, dismissOnboardingChecklist, isChecklistDismissed } from "@/lib/onboarding/actions";
+import { trackClientEvent } from "@/lib/analytics/track-event";
 
 interface ChecklistStep {
   key: string;
@@ -70,9 +71,17 @@ export function OnboardingChecklist() {
       setSteps(prevSteps =>
         prevSteps.map(step => {
           const progress = data.find((p: { step_key: string; completed: boolean }) => p.step_key === step.key);
+          const nowComplete = progress?.completed || false;
+
+          // Track activation milestone when newly completed
+          if (nowComplete && !step.completed) {
+            const eventType = step.key as "first_chat" | "first_document" | "explore_agents";
+            trackClientEvent(eventType, { event_name: `activation_${step.key}` });
+          }
+
           return {
             ...step,
-            completed: progress?.completed || false,
+            completed: nowComplete,
           };
         })
       );
