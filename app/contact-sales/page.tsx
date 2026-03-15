@@ -53,7 +53,7 @@ function ContactSalesForm() {
       }
     } catch (error) {
       console.error("Contact sales error:", error);
-      toast.error("Failed to submit. Please email sales@aios-platform.com directly.");
+      toast.error("Failed to submit. Please email sales@perpetualcore.com directly.");
     } finally {
       setIsSubmitting(false);
     }
@@ -329,8 +329,8 @@ function ContactSalesForm() {
               <p className="font-semibold mb-2">Need immediate assistance?</p>
               <p className="text-sm text-muted-foreground mb-4">
                 Email us directly at{" "}
-                <a href="mailto:sales@aios-platform.com" className="text-primary hover:underline">
-                  sales@aios-platform.com
+                <a href="mailto:sales@perpetualcore.com" className="text-primary hover:underline">
+                  sales@perpetualcore.com
                 </a>
               </p>
               <p className="text-xs text-muted-foreground">
