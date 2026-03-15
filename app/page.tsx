@@ -45,6 +45,8 @@ import { SocialProofBanner } from "@/components/landing/SocialProofBanner";
 import { ComparisonTable } from "@/components/landing/ComparisonTable";
 import { TrustBadges } from "@/components/landing/TrustBadges";
 import { FounderStory } from "@/components/landing/FounderStory";
+import { PageViewTracker } from "@/components/analytics/PageViewTracker";
+import { trackClientEvent } from "@/lib/analytics/track-event";
 
 // Demo chat messages
 const DEMO_MESSAGES = [
@@ -148,6 +150,7 @@ export default function HomePage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-background via-background to-muted/20">
+      <PageViewTracker />
       <style jsx global>{`
         @keyframes fadeIn {
           from {
@@ -326,7 +329,7 @@ export default function HomePage() {
               asChild
               className="text-base sm:text-xl px-8 sm:px-12 py-6 sm:py-8 h-auto rounded-2xl shadow-2xl hover:shadow-3xl transition-all bg-gradient-to-r from-primary to-purple-600 hover:from-primary/90 hover:to-purple-600/90 active:scale-95 touch-manipulation"
             >
-              <Link href="/signup">
+              <Link href="/signup" onClick={() => trackClientEvent("cta_click", { event_name: "hero_get_started" })}>
                 Start Free Trial <ArrowRight className="ml-2 sm:ml-3 h-5 sm:h-6 w-5 sm:w-6" />
               </Link>
             </Button>
@@ -336,7 +339,7 @@ export default function HomePage() {
               asChild
               className="text-base sm:text-xl px-8 sm:px-12 py-6 sm:py-8 h-auto rounded-2xl backdrop-blur-2xl bg-transparent border-2 hover:bg-accent/50 shadow-xl hover:shadow-2xl transition-all active:scale-95 touch-manipulation"
             >
-              <Link href="/pricing">View Pricing</Link>
+              <Link href="/pricing" onClick={() => trackClientEvent("cta_click", { event_name: "hero_view_pricing" })}>View Pricing</Link>
             </Button>
           </div>
 
