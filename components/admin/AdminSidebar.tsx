@@ -12,6 +12,7 @@ import {
   MonitorSmartphone,
   BarChart3,
   Rocket,
+  Funnel,
 } from "lucide-react";
 
 interface NavItem {
@@ -26,6 +27,7 @@ const NAV_SECTIONS: { title: string; items: NavItem[] }[] = [
     items: [
       { label: "Overview", href: "/dashboard/admin/overview", icon: LayoutDashboard },
       { label: "AI Usage", href: "/dashboard/admin/usage", icon: BarChart3 },
+      { label: "Analytics", href: "/dashboard/admin/analytics", icon: Funnel },
     ],
   },
   {

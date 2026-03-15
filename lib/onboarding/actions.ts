@@ -2,6 +2,7 @@
 
 import { createClient } from "@/lib/supabase/server";
 import { IndustryType } from "@/lib/dashboard/industry-config";
+import { trackEvent, trackActivation } from "@/lib/analytics/server-events";
 
 export interface OnboardingData {
   industry: IndustryType;
@@ -33,6 +34,13 @@ export async function completeOnboarding(data: OnboardingData) {
       console.error("Error updating profile:", profileError);
       return { error: "Failed to complete onboarding" };
     }
+
+    // Track onboarding completion event
+    trackEvent({
+      event_type: "onboarding_complete",
+      user_id: user.id,
+      metadata: { industry: data.industry, goal: data.goal },
+    });
 
     return { success: true };
   } catch (error: any) {

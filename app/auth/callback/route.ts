@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { logAudit, extractRequestContext } from "@/lib/audit/logger";
+import { trackSignup } from "@/lib/analytics/server-events";
+import { ANON_COOKIE_NAME, UTM_COOKIE_NAME, deserializeUTM } from "@/lib/analytics/utm-store";
 
 /**
  * GET /auth/callback
@@ -69,10 +71,15 @@ export async function GET(request: NextRequest) {
         ...ctx,
       });
 
-      // Send welcome email for new OAuth users (created within last 60s)
+      // Track signup + send welcome email for new OAuth users (created within last 60s)
       const createdAt = new Date(user.created_at).getTime();
       const isNewUser = Date.now() - createdAt < 60_000;
       if (isNewUser) {
+        // Track signup analytics event
+        const anonymousId = request.cookies.get(ANON_COOKIE_NAME)?.value;
+        const utmCookie = request.cookies.get(UTM_COOKIE_NAME)?.value;
+        const utm = utmCookie ? deserializeUTM(utmCookie) : {};
+        trackSignup(user.id, anonymousId, utm ?? {}, "oauth");
         const appUrl = process.env.NEXT_PUBLIC_APP_URL || request.nextUrl.origin;
         fetch(`${appUrl}/api/email/welcome`, {
           method: "POST",
@@ -120,9 +127,15 @@ export async function GET(request: NextRequest) {
       return NextResponse.redirect(redirectTo);
     }
 
-    // Send welcome email for new signups
+    // Track signup + send welcome email for new email signups
     if (type === "signup") {
       const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        const anonymousId = request.cookies.get(ANON_COOKIE_NAME)?.value;
+        const utmCookie = request.cookies.get(UTM_COOKIE_NAME)?.value;
+        const utm = utmCookie ? deserializeUTM(utmCookie) : {};
+        trackSignup(user.id, anonymousId, utm ?? {}, "email");
+      }
       if (user?.email) {
         const appUrl = process.env.NEXT_PUBLIC_APP_URL || request.nextUrl.origin;
         fetch(`${appUrl}/api/email/welcome`, {
