@@ -20,9 +20,9 @@ export async function GET(request: NextRequest) {
 
   const admin = createAdminClient();
   const { data: profile } = await admin
-    .from("user_profiles")
+    .from("profiles")
     .select("is_admin, is_super_admin")
-    .eq("user_id", user.id)
+    .eq("id", user.id)
     .single();
 
   if (!profile?.is_admin && !profile?.is_super_admin) {

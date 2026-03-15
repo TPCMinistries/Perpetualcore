@@ -23,7 +23,7 @@ CREATE TABLE IF NOT EXISTS analytics_events (
   event_name TEXT, -- Specific event label (e.g. 'hero_start_free', 'pricing_pro_cta')
 
   -- User identity
-  user_id UUID REFERENCES user_profiles(user_id) ON DELETE SET NULL,
+  user_id UUID REFERENCES profiles(id) ON DELETE SET NULL,
   anonymous_id TEXT, -- Cookie-based ID for pre-signup visitors
   session_id TEXT,
 
@@ -67,8 +67,8 @@ CREATE POLICY "Admins can view analytics events"
   ON analytics_events FOR SELECT
   USING (
     EXISTS (
-      SELECT 1 FROM user_profiles
-      WHERE user_id = auth.uid()
+      SELECT 1 FROM profiles
+      WHERE id = auth.uid()
       AND (is_super_admin = true OR is_admin = true)
     )
   );
