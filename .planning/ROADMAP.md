@@ -84,7 +84,7 @@ Plans:
   2. An authenticated user can create an org (name, type, NAICS codes) and invite a collaborator who successfully accepts via the invite flow and receives the correct role
   3. SAM.gov, Simpler.Grants.gov, Grants.gov, and SBIR.gov API keys are set in Vercel env and return non-401 responses in a smoke test script
   4. The workspace-scoped routing and accept-invite pages are live in the Perpetual Core app (ported from ldc-command-center, adapted to `rfp_orgs`)
-**Plans:** 4 plans
+**Plans:** 2/4 plans executed
 
 Plans:
 - [ ] 04-01-PLAN.md — rfp_* schema migration (11 tables) + RLS policies + automated tenant-isolation test suite (FOUND-01)
@@ -248,7 +248,7 @@ Phase 5 and Phase 6 may run partially in parallel (Discovery cron runs while vau
 | 1. Social Proof | 1/1 | Complete | 2026-02-23 |
 | 2. Onboarding Optimization | 2/2 | Complete | 2026-02-23 |
 | 3. Conversion Analytics | 0/TBD | Deferred | - |
-| 4. Foundations & Salvage Port | 0/4 | Not started | - |
+| 4. Foundations & Salvage Port | 2/4 | In Progress|  |
 | 5. Discovery | 0/TBD | Not started | - |
 | 6. Capture Profile | 0/TBD | Not started | - |
 | 7. Drafting Agent | 0/TBD | Not started | - |

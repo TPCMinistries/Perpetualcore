@@ -11,11 +11,11 @@ See: .planning/PROJECT.md (updated 2026-05-09)
 
 **Milestone:** v2.0 RFP & Proposal Engine
 **Phase:** 4 of 11 (Phase 4: Foundations & Salvage Port)
-**Plan:** 1 of 4 complete (04-01: rfp_* schema + RLS)
-**Status:** In progress — Phase 4 Plan 1 complete; Plans 2-4 remaining
-**Progress:** [██████░░░░] 57%
+**Plan:** 2 of 4 complete (04-02: RFP API env infrastructure + smoke test)
+**Status:** In progress — Phase 4 Plans 1-2 complete; Plans 3-4 remaining
+**Progress:** [███████░░░] 71%
 
-Last activity: 2026-05-09 — 04-01 complete: 11 rfp_* tables + tenant-isolation RLS + 6/6 vitest tests passing
+Last activity: 2026-05-09 — 04-02 complete: Zod env vars for 4 Discovery sources + lib/rfp/sources.ts registry + npm run smoke:rfp-apis (Grants.gov PASS, SBIR.gov PASS, SAM/Simpler SKIP pending keys)
 
 ## Performance Metrics
 
@@ -36,6 +36,7 @@ Last activity: 2026-05-09 — 04-01 complete: 11 rfp_* tables + tenant-isolation
 | Phase | Plan | Duration | Tasks | Files |
 |-------|------|----------|-------|-------|
 | 04-foundations-salvage-port | P01 | 7 min | 3 | 5 |
+| 04-foundations-salvage-port | P02 | 14 min | 3 | 8 |
 
 ## Accumulated Context
 
@@ -76,9 +77,9 @@ Decisions are logged in PROJECT.md Key Decisions table. Notable carries:
 ## Session Continuity
 
 Last session: 2026-05-09
-Stopped at: Completed 04-01-PLAN.md (rfp_* schema + RLS + vitest tenant isolation suite 6/6 pass)
+Stopped at: Completed 04-02-PLAN.md (env infrastructure + smoke test; Grants.gov [PASS], SBIR.gov [PASS])
 Resume file: None
-Next action: Execute 04-02-PLAN.md (next plan in Phase 4)
+Next action: Execute 04-03-PLAN.md (next plan in Phase 4)
 
 ### v2.0 Phase 4 Key Decisions
 
@@ -86,3 +87,6 @@ Next action: Execute 04-02-PLAN.md (next plan in Phase 4)
 - `rfp_proposal_sections` and `rfp_compliance_checks` gated via parent `rfp_proposals` subquery (no org_id denorm) — keeps relational integrity
 - 3 migration files (schema, RLS policies, RLS fix) — atomic rollback isolation; never amend committed migrations
 - vitest `environmentMatchGlobs` for `tests/rls/**` → node environment (not jsdom) for live DB integration tests
+- SBIR.gov API endpoint www.sbir.gov/api/solicitations.json is defunct (Drupal 7→10 migration); smoke test uses robots.txt for domain reachability; Phase 5 must research correct endpoint (tracked: deferred-items.md SBIR-ENDPOINT-UPDATE)
+- Simpler Grants auth header is X-API-Key per TECH-SPEC §4.1 (not X-Auth as in plan body); to be confirmed when Lorenzo generates the key
+- BASE_URLS fallback const in sources.ts guards against Zod parse failure in standalone scripts where Supabase keys are absent from shell
