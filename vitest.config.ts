@@ -9,12 +9,16 @@ export default defineConfig({
     environment: "jsdom",
     globals: true,
     setupFiles: ["./tests/setup.ts"],
-    include: ["**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}"],
+    include: ["**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}", "tests/**/*.test.ts"],
     exclude: [
       "**/node_modules/**",
       "**/dist/**",
       "**/e2e/**",
       "**/.next/**",
+    ],
+    // RLS integration tests run against the live database — use node environment
+    environmentMatchGlobs: [
+      ["tests/rls/**", "node"],
     ],
     coverage: {
       provider: "v8",
