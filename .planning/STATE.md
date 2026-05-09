@@ -2,23 +2,21 @@
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-02-23)
+See: .planning/PROJECT.md (updated 2026-05-09)
 
 **Core value:** The AI operating system brain — if this breaks, everything downstream breaks
-**Current focus:** v1.0 Conversion Optimization — Phase 2: Onboarding Optimization
+**Current focus:** v2.0 RFP & Proposal Engine — defining requirements
 
 ## Current Position
 
-Phase: 2 of 3 (Onboarding Optimization)
-Plan: 2 of 2 completed in current phase
-Status: Phase 02 complete — all plans done
-Last activity: 2026-02-23 — Plan 02-02 complete (activation checklist with 3 milestones)
-
-Progress: [######░░░░] 60%
+Phase: Not started (defining requirements)
+Plan: —
+Status: Defining requirements
+Last activity: 2026-05-09 — Milestone v2.0 RFP & Proposal Engine started
 
 ## Performance Metrics
 
-**Velocity:**
+**Velocity (v1.0):**
 - Total plans completed: 2
 - Average duration: 8 min
 - Total execution time: 16 min
@@ -30,47 +28,39 @@ Progress: [######░░░░] 60%
 | 01-social-proof | 1 | 7 min | 7 min |
 | 02-onboarding-optimization | 2 | 62 min | 31 min |
 
-**Recent Trend:**
-- Last 5 plans: 7 min, 9 min, 53 min
-- Trend: Variable (build-heavy plans take longer)
-
-*Updated after each plan completion*
-| Phase 01-social-proof P01-01 | 7 | 2 tasks | 5 files |
-| Phase 02-onboarding-optimization P02-01 | 9 | 2 tasks | 5 files |
-| Phase 02-onboarding-optimization P02-02 | 53 | 2 tasks | 4 files |
-
 ## Accumulated Context
 
-### Decisions
+### Decisions (carried from v1.0)
 
-Decisions are logged in PROJECT.md Key Decisions table.
-Recent decisions affecting current work:
+Decisions are logged in PROJECT.md Key Decisions table. Notable carries:
 
-- Aha moment = guided first chat (lowest friction, demos persistent memory + multi-model intelligence)
-- Social proof = manufactured (founder credibility + ChatGPT comparison + trust badges — no real user base yet)
-- Signup flow left as-is (not a conversion bottleneck)
-- All four landing page social proof components use named exports matching codebase convention
-- SocialProofBanner placed immediately after Hero for maximum credibility impact (PROOF-04 first, then value props)
-- ComparisonTable placed after Core Value Props as the logical prove-it moment (PROOF-02 after features)
-- FounderStory placed after Benefits section as personal touch before pricing ask (PROOF-01 last section before price)
-- guided=true URL param used as signal between onboarding and first-chat — zero DB state required
-- 10-minute window for first-conversation context injection — long enough for completion, prevents stale injection
-- isGuidedFirstChat deactivates when messages.length > 0 — transitions automatically after first send
-- ai_assistants table (user_id field) used as heuristic for explore_agents milestone — no new infrastructure needed
-- OnboardingChecklist moved to layout.tsx to appear on every dashboard page, not just overview
-- DashboardWithOnboarding had OnboardingChecklist removed to prevent duplicate rendering
+- ANLYT-01/02/03 deferred — conversion analytics revisit post-launch
+- All four landing page social proof components shipped using named exports (PROOF-04 → PROOF-02 → PROOF-01 page order)
+- Onboarding checklist lives in dashboard layout.tsx (every page, not only overview)
+
+### v2.0 Decisions (new)
+
+- Milestone v2.0: RFP & Proposal Engine — first commercial product under The Perpetual Core LLC
+- Skip parallel research — pre-staged research in `.planning/research/rfp-engine/` is ground truth
+- Salvage from `ldc-command-center` — port file-by-file during the relevant phase
+- SAM.gov key lapsed (smoke test 2026-05-09 returned 401) — Lorenzo re-registers; ~10-day wait
+- Federal-grant Discovery (Grants.gov, SBIR, Simpler Grants) unblocks earlier — does not require SAM.gov
 
 ### Pending Todos
 
-- Replace FounderStory photo placeholder with Lorenzo's real headshot
-- Swap industry logo placeholders in SocialProofBanner with real partner logos as partnerships signed
+- (Lorenzo, today) Re-register SAM.gov API key under The Perpetual Core LLC
+- (Lorenzo, today) Generate Simpler.Grants.gov API key (5 min)
+- (Lorenzo, this week) Vault collection per `VAULT-CHECKLIST.md` for Uplift, IHA, Perpetual Core
+- Replace FounderStory photo placeholder with Lorenzo's real headshot (carried from v1.0)
+- Swap industry logo placeholders in SocialProofBanner with real partner logos as partnerships signed (carried from v1.0)
 
 ### Blockers/Concerns
 
-None.
+- SAM.gov key lapsed — federal-contract leg of Discovery (Phase 2 in v2.0) waits ~10 business days from re-registration date
+- Vault docs not yet collected — Phase 3 (Capture Profile) gated on MV-bar collection per `VAULT-CHECKLIST.md`
 
 ## Session Continuity
 
-Last session: 2026-02-23
-Stopped at: Completed 02-onboarding-optimization/02-02-PLAN.md — activation checklist with 3 milestones built
+Last session: 2026-05-09
+Stopped at: Started v2.0 milestone, requirements next
 Resume file: None
