@@ -155,8 +155,6 @@ Explicit exclusions with reasoning. Documented to prevent scope creep.
 
 ## Traceability
 
-Updated during roadmap creation. Empty for v2.0 until roadmapper runs.
-
 ### v1.0 (shipped)
 
 | Requirement | Phase | Status |
@@ -171,18 +169,70 @@ Updated during roadmap creation. Empty for v2.0 until roadmapper runs.
 | ANLYT-02 | Phase 3 | Deferred |
 | ANLYT-03 | Phase 3 | Deferred |
 
-### v2.0 (active — pending roadmap)
+### v2.0 (active)
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| FOUND-01 → LAUNCH-05 | TBD | Pending |
+| FOUND-01 | Phase 4 | Pending |
+| FOUND-02 | Phase 4 | Pending |
+| FOUND-03 | Phase 4 | Pending |
+| ORG-01 | Phase 4 | Pending |
+| ORG-02 | Phase 4 | Pending |
+| DISC-01 | Phase 5 | Pending |
+| DISC-02 | Phase 5 | Pending |
+| DISC-03 | Phase 5 | Pending |
+| DISC-04 | Phase 5 | Pending |
+| DISC-05 | Phase 5 | Pending |
+| DISC-06 | Phase 5 | Pending |
+| DISC-07 | Phase 5 | Pending |
+| ORG-03 | Phase 5 | Pending |
+| ORG-04 | Phase 5 | Pending |
+| CAP-01 | Phase 6 | Pending |
+| CAP-02 | Phase 6 | Pending |
+| CAP-03 | Phase 6 | Pending |
+| CAP-04 | Phase 6 | Pending |
+| CAP-05 | Phase 6 | Pending |
+| CAP-06 | Phase 6 | Pending |
+| DRAFT-01 | Phase 7 | Pending |
+| DRAFT-02 | Phase 7 | Pending |
+| DRAFT-03 | Phase 7 | Pending |
+| DRAFT-04 | Phase 7 | Pending |
+| DRAFT-05 | Phase 7 | Pending |
+| DRAFT-06 | Phase 7 | Pending |
+| DRAFT-07 | Phase 7 | Pending |
+| REV-01 | Phase 8 | Pending |
+| REV-02 | Phase 8 | Pending |
+| REV-03 | Phase 8 | Pending |
+| REV-04 | Phase 8 | Pending |
+| COMP-01 | Phase 9 | Pending |
+| COMP-02 | Phase 9 | Pending |
+| COMP-03 | Phase 9 | Pending |
+| COMP-04 | Phase 9 | Pending |
+| COMP-05 | Phase 9 | Pending |
+| COMP-06 | Phase 9 | Pending |
+| COMP-07 | Phase 9 | Pending |
+| COMP-08 | Phase 9 | Pending |
+| SAAS-01 | Phase 10 | Pending |
+| SAAS-02 | Phase 10 | Pending |
+| SAAS-03 | Phase 10 | Pending |
+| SAAS-04 | Phase 10 | Pending |
+| SAAS-05 | Phase 10 | Pending |
+| SAAS-06 | Phase 10 | Pending |
+| SAAS-07 | Phase 10 | Pending |
+| LAUNCH-01 | Phase 11 | Pending |
+| LAUNCH-02 | Phase 11 | Pending |
+| LAUNCH-03 | Phase 11 | Pending |
+| LAUNCH-04 | Phase 11 | Pending |
+| LAUNCH-05 | Phase 11 | Pending |
 
 **Coverage:**
-- v2.0 requirements: 47 total
-- Mapped to phases: 0 (pending roadmapper)
-- Unmapped: 47 ⚠ (until roadmap created)
+- v2.0 requirements: 51 total
+- Mapped to phases: 51
+- Unmapped: 0
+
+*Note: The instructions listed 47 requirements; actual count from the file is 51 (FOUND 3 + DISC 7 + ORG 4 + CAP 6 + DRAFT 7 + REV 4 + COMP 8 + SAAS 7 + LAUNCH 5 = 51). All 51 are mapped.*
 
 ---
 
 *Requirements defined: 2026-02-23 (v1.0) · 2026-05-09 (v2.0)*
-*Last updated: 2026-05-09 — v2.0 requirements added*
+*Last updated: 2026-05-09 — v2.0 traceability filled by roadmapper*
