@@ -11,11 +11,11 @@ See: .planning/PROJECT.md (updated 2026-05-09)
 
 **Milestone:** v2.0 RFP & Proposal Engine
 **Phase:** 4 of 11 (Phase 4: Foundations & Salvage Port)
-**Plan:** None started yet
-**Status:** Ready to plan — roadmap complete, awaiting `/gsd:plan-phase 4`
-**Progress:** Phase 4 [ ] → 5 [ ] → 6 [ ] → 7 [ ] → 8 [ ] → 9 [ ] → 10 [ ] → 11 [ ]
+**Plan:** 1 of 4 complete (04-01: rfp_* schema + RLS)
+**Status:** In progress — Phase 4 Plan 1 complete; Plans 2-4 remaining
+**Progress:** [██████░░░░] 57%
 
-Last activity: 2026-05-09 — v2.0 roadmap created (8 phases, Phase 4–11)
+Last activity: 2026-05-09 — 04-01 complete: 11 rfp_* tables + tenant-isolation RLS + 6/6 vitest tests passing
 
 ## Performance Metrics
 
@@ -31,7 +31,11 @@ Last activity: 2026-05-09 — v2.0 roadmap created (8 phases, Phase 4–11)
 | 01-social-proof | 1 | 7 min | 7 min |
 | 02-onboarding-optimization | 2 | 62 min | 31 min |
 
-**v2.0 velocity:** Not yet started
+**v2.0 velocity:** 1 plan completed, 7 min avg
+
+| Phase | Plan | Duration | Tasks | Files |
+|-------|------|----------|-------|-------|
+| 04-foundations-salvage-port | P01 | 7 min | 3 | 5 |
 
 ## Accumulated Context
 
@@ -72,6 +76,13 @@ Decisions are logged in PROJECT.md Key Decisions table. Notable carries:
 ## Session Continuity
 
 Last session: 2026-05-09
-Stopped at: Roadmap created for v2.0 (Phases 4–11); ready to plan Phase 4
+Stopped at: Completed 04-01-PLAN.md (rfp_* schema + RLS + vitest tenant isolation suite 6/6 pass)
 Resume file: None
-Next action: `/gsd:plan-phase 4`
+Next action: Execute 04-02-PLAN.md (next plan in Phase 4)
+
+### v2.0 Phase 4 Key Decisions
+
+- SECURITY DEFINER helper functions (`rfp_my_org_ids` et al.) break RLS recursion on `rfp_user_orgs` — all 37 policies use array membership pattern
+- `rfp_proposal_sections` and `rfp_compliance_checks` gated via parent `rfp_proposals` subquery (no org_id denorm) — keeps relational integrity
+- 3 migration files (schema, RLS policies, RLS fix) — atomic rollback isolation; never amend committed migrations
+- vitest `environmentMatchGlobs` for `tests/rls/**` → node environment (not jsdom) for live DB integration tests

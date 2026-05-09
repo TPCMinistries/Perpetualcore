@@ -29,7 +29,7 @@ Multi-tenant SaaS RFP & Proposal Engine: Discovery → Capture Profile → Draft
 
 ### Foundations
 
-- [ ] **FOUND-01**: Schema migration creates the full `rfp_*` namespace (`rfp_orgs`, `rfp_users`, `rfp_user_orgs`, `rfp_capture_profiles`, `rfp_vault_artifacts`, `rfp_opportunities`, `rfp_opp_matches`, `rfp_proposals`, `rfp_proposal_sections`, `rfp_compliance_checks`, `rfp_agent_sessions`) with RLS policies enforcing tenant isolation per `rfp_user_orgs`
+- [x] **FOUND-01**: Schema migration creates the full `rfp_*` namespace (`rfp_orgs`, `rfp_users`, `rfp_user_orgs`, `rfp_capture_profiles`, `rfp_vault_artifacts`, `rfp_opportunities`, `rfp_opp_matches`, `rfp_proposals`, `rfp_proposal_sections`, `rfp_compliance_checks`, `rfp_agent_sessions`) with RLS policies enforcing tenant isolation per `rfp_user_orgs`
 - [ ] **FOUND-02**: Workspace + auth + accept-invite scaffolding ported from `ldc-command-center` and adapted to `rfp_orgs` multi-tenancy
 - [ ] **FOUND-03**: External API keys provisioned in Vercel env: SAM.gov (re-registered), Simpler.Grants.gov, plus verified Grants.gov + SBIR.gov endpoints
 
@@ -173,7 +173,7 @@ Explicit exclusions with reasoning. Documented to prevent scope creep.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| FOUND-01 | Phase 4 | Pending |
+| FOUND-01 | Phase 4 | Complete |
 | FOUND-02 | Phase 4 | Pending |
 | FOUND-03 | Phase 4 | Pending |
 | ORG-01 | Phase 4 | Pending |
