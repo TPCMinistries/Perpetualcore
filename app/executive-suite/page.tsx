@@ -351,7 +351,7 @@ export default function ExecutiveSuitePage() {
       {/* Footer */}
       <footer className="border-t mt-16 py-8">
         <div className="container mx-auto px-4 text-center text-sm text-muted-foreground">
-          <p>© 2025 Perpetual Core. All rights reserved.</p>
+          <p>© 2026 Perpetual Core. All rights reserved.</p>
           <div className="flex justify-center gap-6 mt-4">
             <Link href="/terms" className="hover:underline">Terms</Link>
             <Link href="/privacy" className="hover:underline">Privacy</Link>
