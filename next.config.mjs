@@ -146,6 +146,18 @@ const nextConfig = {
     return config;
   },
 
+  // 301 redirects for retired routes per BRAND_ARCHITECTURE §7
+  async redirects() {
+    return [
+      {
+        // Legacy "Transformation Stack" page → studio engagements
+        source: "/consulting",
+        destination: "/studio/engagements",
+        permanent: true,
+      },
+    ];
+  },
+
   // Headers for better caching and security
   async headers() {
     // Security headers applied to all routes
