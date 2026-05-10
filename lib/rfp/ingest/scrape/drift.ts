@@ -67,11 +67,21 @@ function getAlertConfig(): { from: string; to: string } {
  * Note: throttle decision is made BEFORE inserting the new row. Caller of
  * recordDrift always inserts; only the email is suppressed.
  */
+// Cast helper — the rfp_* tables (rfp_source_drift, rfp_source_baseline,
+// rfp_opportunities) aren't in lib/supabase/database.types.ts yet. Rather than
+// regen the entire 250+ table type file as part of Phase 5, we narrow at the
+// call site via this `any`-typed adapter. Same shape as the federal
+// orchestrator (lib/rfp/ingest/run.ts) uses with `as unknown as never[]`.
+// TODO(post-Phase-5): regenerate database.types.ts and remove these casts.
+function getRfpClient(): { from: (table: string) => any } {
+  return createAdminClient() as unknown as { from: (table: string) => any };
+}
+
 async function shouldSuppressAlertEmail(
   source: string,
   reason: DriftReason
 ): Promise<boolean> {
-  const supabase = createAdminClient();
+  const supabase = getRfpClient();
   const cutoff = new Date(Date.now() - TWENTY_FOUR_HOURS_MS).toISOString();
   const { data, error } = await supabase
     .from("rfp_source_drift")
@@ -105,7 +115,7 @@ async function shouldSuppressAlertEmail(
  */
 export async function recordDrift(opts: RecordDriftOpts): Promise<void> {
   const { source, reason, details } = opts;
-  const supabase = createAdminClient();
+  const supabase = getRfpClient();
 
   // Throttle decision happens BEFORE insert so the just-inserted row doesn't
   // suppress its own email.
@@ -213,7 +223,7 @@ export async function recordBaseline(
     );
     return;
   }
-  const supabase = createAdminClient();
+  const supabase = getRfpClient();
   const { error } = await supabase
     .from("rfp_source_baseline")
     .insert({ source, parsed_count });
@@ -234,7 +244,7 @@ export async function recordBaseline(
 export async function getRollingBaseline(
   source: string
 ): Promise<number | null> {
-  const supabase = createAdminClient();
+  const supabase = getRfpClient();
   const { data, error } = await supabase
     .from("rfp_source_baseline")
     .select("parsed_count")
@@ -248,13 +258,15 @@ export async function getRollingBaseline(
     );
     return null;
   }
-  if (!data || data.length < 3) return null;
+  if (!data || (data as unknown[]).length < 3) return null;
 
-  const sum = data.reduce(
-    (acc, row) => acc + (row.parsed_count as number),
+  type BaselineRow = { parsed_count: number };
+  const rows = data as BaselineRow[];
+  const sum = rows.reduce(
+    (acc: number, row: BaselineRow) => acc + row.parsed_count,
     0
   );
-  return sum / data.length;
+  return sum / rows.length;
 }
 
 /**

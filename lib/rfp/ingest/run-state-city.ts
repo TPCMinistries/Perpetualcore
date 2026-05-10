@@ -62,7 +62,12 @@ export async function runStateCityIngest(): Promise<StateCityIngestResult[]> {
     })
   );
 
-  const supabase = createAdminClient();
+  // Cast through `any`-typed `from()` for the rfp_* tables — they are not yet
+  // present in lib/supabase/database.types.ts (will be regen'd post-Phase-5).
+  // Same approach as lib/rfp/ingest/scrape/drift.ts (getRfpClient).
+  const supabase = createAdminClient() as unknown as {
+    from: (table: string) => any;
+  };
   const results: StateCityIngestResult[] = [];
 
   for (let i = 0; i < settled.length; i++) {
@@ -190,8 +195,10 @@ export async function runStateCityIngest(): Promise<StateCityIngestResult[]> {
         },
       }).catch(() => {});
     } else {
-      result.upserted = data?.length ?? 0;
-      result.upserted_ids = (data ?? []).map((r) => String(r.id));
+      type IdRow = { id: string };
+      const idRows = (data ?? []) as IdRow[];
+      result.upserted = idRows.length;
+      result.upserted_ids = idRows.map((r: IdRow) => String(r.id));
     }
 
     // Touch last_seen_at separately if the column exists. Failure here is

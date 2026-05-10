@@ -26,7 +26,16 @@
  */
 
 import { NextRequest, NextResponse } from "next/server";
-import { runStateCityIngest } from "@/lib/rfp/ingest/run-state-city";
+import {
+  runStateCityIngest,
+  type StateCityIngestResult,
+} from "@/lib/rfp/ingest/run-state-city";
+
+interface IngestTotals {
+  fetched: number;
+  upserted: number;
+  errors: number;
+}
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -41,8 +50,8 @@ export async function POST(request: NextRequest) {
 
   try {
     const results = await runStateCityIngest();
-    const totals = results.reduce(
-      (acc, r) => {
+    const totals = results.reduce<IngestTotals>(
+      (acc: IngestTotals, r: StateCityIngestResult) => {
         acc.fetched += r.fetched;
         acc.upserted += r.upserted;
         acc.errors += r.errors.length;
