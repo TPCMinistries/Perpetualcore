@@ -40,6 +40,8 @@ Last activity: 2026-05-10 — 05-01 complete: federal Discovery cron live (SAM.g
 | 05-discovery | P01 | ~25 min | 3 | 9 |
 | Phase 12-studio-repositioning-v1-1 P01 | 2 | 1 tasks | 1 files |
 | Phase 12-studio-repositioning-v1-1 P03 | 18 | 2 tasks | 4 files |
+| 12-studio-repositioning-v1-1 | P04 | 9 min | 3 | 4 |
+| Phase 12-studio-repositioning-v1-1 P02 | 10 | 3 tasks | 6 files |
 
 ## Accumulated Context
 
@@ -80,9 +82,17 @@ Decisions are logged in PROJECT.md Key Decisions table. Notable carries:
 ## Session Continuity
 
 Last session: 2026-05-10
-Stopped at: Completed 05-01-PLAN.md (federal Discovery ingestion: cron + 4 federal-source fetchers + idempotent upsert)
+Stopped at: Completed 12-04-PLAN.md (Vellum waitlist data layer: migration + /api/early-access extension + /api/vellum/setup-intent + email template)
 Resume file: None
-Next action: Execute 05-02-PLAN.md — state/city scraper plan (NY State Grants Gateway + NYC DYCD/HRA/DOE) — note: untracked scrape/* files in working tree from a prior partial run; the 05-02 executor should reconcile
+Next action: Execute 12-05-PLAN.md — Vellum form UI (/products/vellum page) + admin waitlist view (/admin/vellum-waitlist). Depends on Plan 12-04 (this plan). All endpoints are live.
+
+### Phase 12 Studio Repositioning Key Decisions (Plan 04)
+
+- Email template returns HTML string, not JSX — matches existing codebase pattern (sendEmail helpers in lib/email/index.ts)
+- 30% mission-driven discount sourced from BRAND_ARCHITECTURE.md §8 Lorenzo's locks (2026-05-10); hardcoded string, not parameterized
+- Stripe apiVersion "2024-12-18.acacia" used to match existing repo convention; Stripe v19 type mismatch is pre-existing, deferred for upgrade pass
+- Migration applied via `supabase db query --linked` (not db push) because remote migration history was ahead of local; on-disk .sql is repo source of truth
+- vellum_early_access is append-only — no UPDATE/DELETE policies; app dedupes by email + most-recent on read
 
 ### v2.0 Phase 5 Key Decisions (Plan 01)
 
