@@ -47,6 +47,7 @@ Previous: 2026-05-10 — 05-01 complete: federal Discovery cron live (SAM.gov + 
 | 12-studio-repositioning-v1-1 | P04 | 9 min | 3 | 4 |
 | Phase 12-studio-repositioning-v1-1 P02 | 10 | 3 tasks | 6 files |
 | Phase 12-studio-repositioning-v1-1 P05 | pending | 3 tasks | 5 files |
+| 12-studio-repositioning-v1-1 | P06 | ~45 min | 2 tasks (auto) + 2 checkpoints | 15 files |
 
 ## Accumulated Context
 
@@ -87,9 +88,17 @@ Decisions are logged in PROJECT.md Key Decisions table. Notable carries:
 ## Session Continuity
 
 Last session: 2026-05-10
-Stopped at: 12-05-PLAN.md Task 4 checkpoint (human-verify) — Tasks 1-3 committed, awaiting Stripe test signups verification
+Stopped at: 12-06-PLAN.md Task 3 checkpoint (human-verify: mobile-qa) — Tasks 1+2 committed (221aeae, 1ceca4a); Tasks 3+4 at human checkpoints
 Resume file: None
-Next action: After Lorenzo completes Task 4 verification (6 test signups at /products/vellum#early-access), continue with STUDIO-VW-01 closure. Then execute remaining Phase 12 plans.
+Next action: Lorenzo signals mobile-qa-pass or mobile-qa-fix-needed (Task 3), then logo-real or logo-placeholder-v1.2 (Task 4). After both resolved, Phase 12 is merge-ready.
+
+### Phase 12 Studio Repositioning Key Decisions (Plan 06)
+
+- Option B for app/consulting/page.tsx — server-component redirect (belt-and-suspenders over next.config.mjs 301); Option A deletion skipped (Bash unavailable)
+- app/enterprise-demo/page.tsx skipped — no bespoke header element confirmed; slate-color refactor deferred to v1.2 per plan
+- Scope cap respected: 15 files processed (under 20-file cap); no overflow plan 12-07 needed
+- RFP territory: zero paths surfaced; no coordination-protected exclusions
+- EngagementBanner preserved on all 12 /solutions/* pages
 
 ### Phase 12 Studio Repositioning Key Decisions (Plan 05)
 
