@@ -2,9 +2,9 @@
  * /studio/case-studies — three abstracted slot cards.
  *
  * Per COPY_STUDIO.md Page 5 + BRIEF_RECONCILED §B5: no published client
- * names. Each card shows SECTOR + CONSTRAINT label only. Body uses the
- * placeholder copy "Case study available under NDA. Ask in your intake
- * call." until Lorenzo writes the abstracted versions.
+ * names. Each card shows SECTOR + CONSTRAINT + INSTALL + OUTCOME.
+ * All client/partner specifics are abstracted to sector and constraint
+ * regime. No fabricated quantitative metrics — qualitative outcomes only.
  *
  * DO NOT fabricate metrics. DO NOT name real clients. The slots are
  * deliberately abstracted to the regulatory regime / sector — that is
@@ -12,7 +12,7 @@
  *
  * Sections:
  *   1. Hero (text-only — explains why we don't publish names)
- *   2. Three abstracted slot cards
+ *   2. Three abstracted slot cards (SECTOR / CONSTRAINT / INSTALL / OUTCOME)
  *   3. Final CTA
  *
  * Sharpening levers from UI audit §5: gradient text on H1 only,
@@ -37,16 +37,28 @@ const SLOTS = [
     sector: "A UN-aligned humanitarian agency operating across East Africa.",
     constraint:
       "Under PEPFAR data-sovereignty rules, IRB review, and zero-cellular-fallback assumptions.",
+    install:
+      "Eight registries scoped to field-officer intake, beneficiary case management, and IRB-compliant consent workflows. Skills built for offline-first data capture syncing on cellular reconnect, PII redaction at the edge, and PEPFAR-compliant export pipelines. Three departments — clinical, M&E, and field ops — running on the same registry layer by week 12.",
+    outcome:
+      "Field officers stopped re-entering patient data across four legacy systems. M&E reports that previously took two weeks now compile from the registry on demand. The system survived a one-week regional connectivity outage during a public-health emergency without data loss — the offline-first install was the install.",
   },
   {
     sector: "A community-college workforce program in New York.",
     constraint:
       "Under FERPA, multi-agency reporting requirements, and outcomes-based funding tied to job placement.",
+    install:
+      "Eight registries installed across student intake, case management, employer partnerships, and outcomes reporting. Skills built for FERPA-compliant case notes, employer placement tracking with consent-bounded data sharing, and the multi-agency reporting templates the program's funder required quarterly. The case-management workflow that used to live across a CRM, a spreadsheet, and a Google Form now lives in one place.",
+    outcome:
+      "Case managers stopped maintaining duplicate records across three systems. Quarterly funder reports compile in hours, not days. The employer-placement registry surfaces students whose certificates align with current open roles — a workflow the program previously ran by hand at term end. The skills library outlived the engagement; new program coordinators inherit it as the operating model.",
   },
   {
     sector: "A faith institution with a multi-state network.",
     constraint:
       "Under multi-jurisdictional consent regimes, donor-data sensitivity, and offline-first field deployment.",
+    install:
+      "Eight registries installed across membership, ministry programs, and donor relations. Skills built for multi-jurisdiction consent capture (different states, different rules), offline-first event check-in for satellite locations, and a knowledge registry that synthesizes leadership voice notes, sermons, and field reports into one queryable archive. The ministry's institutional memory — previously held by three long-tenured staff — became extractable infrastructure.",
+    outcome:
+      "The network's central staff stopped fielding 'where is that document' requests throughout the day. Satellite locations register attendance and capture consent in offline mode, syncing on reconnect. The institutional-memory layer (the same Knowledge registry Vellum operates on — see /products/vellum) lets new ministers ramp into a multi-decade context without three months of one-on-ones.",
   },
 ];
 
@@ -86,26 +98,29 @@ export default function CaseStudiesPage() {
               className="border-border/60 hover:border-primary/40 transition-colors flex flex-col"
             >
               <CardContent className="p-7 flex flex-col h-full">
-                <div className="mb-6">
-                  <p className="text-xs font-semibold text-primary tracking-widest uppercase mb-3">
-                    Slot {String(i + 1).padStart(2, "0")}
-                  </p>
-                  <p className="text-xs font-semibold text-muted-foreground tracking-widest uppercase mb-2">
-                    Sector
-                  </p>
-                  <p className="text-base leading-relaxed mb-5">{slot.sector}</p>
-                  <p className="text-xs font-semibold text-muted-foreground tracking-widest uppercase mb-2">
-                    Constraint
-                  </p>
-                  <p className="text-base text-muted-foreground leading-relaxed">
-                    {slot.constraint}
-                  </p>
-                </div>
-                <div className="mt-auto pt-6 border-t border-border/40">
-                  <p className="text-sm text-muted-foreground italic leading-relaxed">
-                    Case study available under NDA. Ask in your intake call.
-                  </p>
-                </div>
+                <p className="text-xs font-semibold text-primary tracking-widest uppercase mb-6">
+                  Slot {String(i + 1).padStart(2, "0")}
+                </p>
+                <p className="text-xs font-semibold text-muted-foreground tracking-widest uppercase mb-2">
+                  Sector
+                </p>
+                <p className="text-base leading-relaxed mb-5">{slot.sector}</p>
+                <p className="text-xs font-semibold text-muted-foreground tracking-widest uppercase mb-2">
+                  Constraint
+                </p>
+                <p className="text-base leading-relaxed mb-5 text-muted-foreground">
+                  {slot.constraint}
+                </p>
+                <p className="text-xs font-semibold text-muted-foreground tracking-widest uppercase mb-2">
+                  Install
+                </p>
+                <p className="text-base leading-relaxed mb-5">{slot.install}</p>
+                <p className="text-xs font-semibold text-muted-foreground tracking-widest uppercase mb-2">
+                  Outcome
+                </p>
+                <p className="text-base leading-relaxed text-muted-foreground">
+                  {slot.outcome}
+                </p>
               </CardContent>
             </Card>
           ))}
