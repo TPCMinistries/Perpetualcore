@@ -1756,7 +1756,7 @@ export default function AccountantsPage() {
           </div>
           <div className="border-t pt-8 text-center text-sm text-muted-foreground">
             <p className="mb-2">
-              © 2026 AI Operating System. All rights reserved. | IRS Compliant | SOC 2 Type II Certified | GDPR Ready
+              © 2026 AI Operating System. All rights reserved. | IRS-aware | SOC 2 Type I in progress | GDPR-aware
             </p>
             <p className="text-xs">
               Perpetual Core is not a CPA firm and does not provide tax, accounting, or audit services. Professional relationships remain between firms and their clients.

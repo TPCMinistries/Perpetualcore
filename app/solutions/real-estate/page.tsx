@@ -1276,7 +1276,7 @@ export default function RealEstatePage() {
           </div>
           <div className="border-t pt-8 text-center text-sm text-muted-foreground">
             <p className="mb-2">
-              © 2026 AI Operating System. All rights reserved. | SOC 2 Certified | Bank-Level Security
+              © 2026 AI Operating System. All rights reserved. | SOC 2 Type I in progress | Encrypted in transit and at rest
             </p>
             <p className="text-xs">
               Perpetual Core is a software tool designed to assist real estate professionals. Users are responsible for compliance with all applicable real estate laws and regulations.

@@ -1414,7 +1414,7 @@ export default function ConsultingPage() {
           </div>
           <div className="border-t pt-8 text-center text-sm text-muted-foreground">
             <p className="mb-2">
-              © 2026 AI Operating System. All rights reserved. | SOC 2 Type II Certified | Client Confidentiality Guaranteed
+              © 2026 AI Operating System. All rights reserved. | SOC 2 Type I in progress | Client confidentiality first
             </p>
             <p className="text-xs max-w-3xl mx-auto">
               Perpetual Core is a knowledge management platform designed for consulting firms. Professional judgment and client confidentiality

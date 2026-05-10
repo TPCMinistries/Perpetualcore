@@ -1285,7 +1285,7 @@ export default function SalesTeamsPage() {
           </div>
           <div className="border-t pt-8 text-center text-sm text-muted-foreground">
             <p className="mb-2">
-              © 2026 AI Operating System. All rights reserved. | SOC 2 Type II Certified | GDPR Ready
+              © 2026 AI Operating System. All rights reserved. | SOC 2 Type I in progress | GDPR-aware
             </p>
             <p className="text-xs">
               Your sales data is encrypted and never used to train AI models. Enterprise security built for sales teams.
