@@ -1,8 +1,25 @@
 import { NextResponse } from "next/server";
-import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/server";
 import { sendSalesInquiryEmail, sendSalesConfirmationEmail } from "@/lib/email";
 import { z } from "zod";
 import { validationErrorResponse } from "@/lib/validations/schemas";
+
+// This endpoint serves the engagement intake (homepage CTA), the Atlas
+// flagship intake (/products/atlas), and the Atlas Discovery audit
+// intake (/products/atlas-discovery). All three submit the same shape;
+// routing distinguishes via two mechanisms:
+//   1. Explicit `product` field (preferred):
+//      - "atlas-discovery"  — productized audit
+//      - "atlas-flagship"   — by-invitation full install (optional — may be omitted by /products/atlas)
+//      - undefined          — generic engagement intake
+//   2. `message` field prefix (legacy/redundant):
+//      - "[Atlas intake] ..."           — flagship by-invitation
+//      - "[Atlas Discovery intake] ..." — productized audit
+//      - no prefix                       — generic engagement intake
+// Filtering by product or by message prefix both work. Atlas Discovery
+// rows can be queried via:
+//   SELECT * FROM sales_contacts WHERE product = 'atlas-discovery'
+//      OR message ILIKE '%Atlas Discovery intake%';
 
 // Simple in-memory rate limiting (resets on server restart)
 const rateLimitMap = new Map<string, { count: number; resetTime: number }>();
@@ -57,6 +74,16 @@ const contactSalesSchema = z.object({
     .transform(s => s.trim().replace(/[<>]/g, ""))
     .optional()
     .nullable(),
+  // Optional product tag — allows callers to identify which product surface
+  // generated the intake. Accepted pattern: lowercase alpha + hyphens only.
+  // Field is optional so legacy callers (homepage CTA, /products/atlas) continue
+  // to work without modification; their rows get product = NULL.
+  product: z.string()
+    .min(1)
+    .max(64)
+    .regex(/^[a-z0-9-]+$/, "product must be lowercase alphanumeric with hyphens")
+    .optional()
+    .nullable(),
 });
 
 export async function POST(request: Request) {
@@ -90,10 +117,13 @@ export async function POST(request: Request) {
       employees: sanitizedEmployees,
       plan: sanitizedPlan,
       message: sanitizedMessage,
+      product: sanitizedProduct,
     } = validatedData;
 
-    // Save to database for tracking
-    const supabase = await createClient();
+    // Save to database for tracking.
+    // Use createAdminClient() for server-side INSERT per CORE-tier rule
+    // (CLAUDE.md: background/server operations ALWAYS use createAdminClient()).
+    const supabase = createAdminClient();
     const { error: dbError } = await supabase.from("sales_contacts").insert({
       name: sanitizedName,
       email: sanitizedEmail,
@@ -102,6 +132,7 @@ export async function POST(request: Request) {
       company_size: sanitizedEmployees,
       interested_in: sanitizedPlan,
       message: sanitizedMessage,
+      product: sanitizedProduct ?? null,
       created_at: new Date().toISOString(),
       status: "new",
     });
