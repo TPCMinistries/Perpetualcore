@@ -9,6 +9,21 @@
  * Request object suitable for smoke-testing auth without fetching a full
  * result set. Phase 5 cron workers import `RFP_SOURCES` and call the
  * full search API; this file stays focused on the registry contract.
+ *
+ * -----------------------------------------------------------------------------
+ * IMPORTANT: source key vs schema enum value mapping
+ * -----------------------------------------------------------------------------
+ * The registry key here is `sbir_gov` for symmetry with `sam_gov` /
+ * `grants_gov` / `simpler_grants`. The Postgres schema (rfp_opportunities.source
+ * CHECK constraint, see supabase/migrations/20260509_rfp_schema.sql) uses the
+ * shorter canonical value `sbir`. The ingest normalizer
+ * (lib/rfp/ingest/normalize.ts) is responsible for mapping `sbir_gov` -> `sbir`
+ * when writing rows. Do NOT change the schema enum to add `sbir_gov` — the
+ * shorter value is the canonical storage form.
+ *
+ * All other registry keys (sam_gov, grants_gov, simpler_grants) match the
+ * schema enum values exactly.
+ * -----------------------------------------------------------------------------
  */
 
 import { env } from "@/lib/env";
