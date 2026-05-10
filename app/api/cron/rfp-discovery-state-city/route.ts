@@ -30,6 +30,7 @@ import {
   runStateCityIngest,
   type StateCityIngestResult,
 } from "@/lib/rfp/ingest/run-state-city";
+import { scoreNewOpportunitiesForAllActiveOrgs } from "@/lib/rfp/scoring/recompute";
 
 interface IngestTotals {
   fetched: number;
@@ -60,15 +61,35 @@ export async function POST(request: NextRequest) {
       { fetched: 0, upserted: 0, errors: 0 }
     );
 
+    // Hand off to Phase 05-03 scoring. Use the upserted_ids surfaced by the
+    // state/city orchestrator (StateCityIngestResult.upserted_ids, added in
+    // Plan 05-02). Scoring failure is non-fatal: ingest already landed.
+    const upsertedIds = results.flatMap((r) => r.upserted_ids);
+    let scored: { scored: number; orgs: number } | { error: string } = {
+      scored: 0,
+      orgs: 0,
+    };
+    try {
+      scored = await scoreNewOpportunitiesForAllActiveOrgs(upsertedIds);
+    } catch (e) {
+      const message = e instanceof Error ? e.message : String(e);
+      console.error(
+        "[rfp-discovery-state-city] scoring failed (non-fatal):",
+        message
+      );
+      scored = { error: message };
+    }
+
     const duration_ms = Date.now() - startedAt;
     console.log(
-      `[rfp-discovery-state-city] fetched=${totals.fetched} upserted=${totals.upserted} errors=${totals.errors} duration=${duration_ms}ms`
+      `[rfp-discovery-state-city] fetched=${totals.fetched} upserted=${totals.upserted} errors=${totals.errors} scored=${"scored" in scored ? scored.scored : "error"} duration=${duration_ms}ms`
     );
 
     return NextResponse.json({
       ok: true,
       results,
       totals,
+      scored,
       duration_ms,
     });
   } catch (e: unknown) {

@@ -22,6 +22,7 @@ import {
   runFederalIngest,
   type IngestRunResult,
 } from "@/lib/rfp/ingest/run";
+import { scoreNewOpportunitiesForAllActiveOrgs } from "@/lib/rfp/scoring/recompute";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -59,19 +60,38 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
   try {
     const results: IngestRunResult = await runFederalIngest();
 
-    const duration_ms = Date.now() - startedAt;
     const totalFetched = results.reduce((s, r) => s + r.fetched, 0);
     const totalUpserted = results.reduce((s, r) => s + r.upserted, 0);
 
+    // Hand off to Phase 05-03 scoring. Collect all upserted_ids across the
+    // per-source results. The scorer iterates active orgs and writes
+    // rfp_opp_matches rows. Wrapped in try/catch — a scoring failure must
+    // NOT 500 the cron; ingest already landed and is the cron's core duty.
+    const upsertedIds = results.flatMap((r) => r.upserted_ids);
+    let scored: { scored: number; orgs: number } | { error: string } = {
+      scored: 0,
+      orgs: 0,
+    };
+    try {
+      scored = await scoreNewOpportunitiesForAllActiveOrgs(upsertedIds);
+    } catch (e) {
+      const message = e instanceof Error ? e.message : String(e);
+      console.error("[rfp-discovery-federal] scoring failed (non-fatal):", message);
+      scored = { error: message };
+    }
+
+    const duration_ms = Date.now() - startedAt;
     console.log(
       `[rfp-discovery-federal] complete in ${duration_ms}ms — ` +
-        `fetched=${totalFetched} upserted=${totalUpserted}`
+        `fetched=${totalFetched} upserted=${totalUpserted} ` +
+        `scored=${"scored" in scored ? scored.scored : "error"}`
     );
 
     return NextResponse.json({
       ok: true,
       duration_ms,
       results,
+      scored,
     });
   } catch (err) {
     // runFederalIngest is designed to never throw, but defense-in-depth.
