@@ -37,7 +37,7 @@ Multi-tenant SaaS RFP & Proposal Engine: Discovery → Capture Profile → Draft
 
 - [x] **DISC-01**: Cron worker scans SAM.gov, Grants.gov, Simpler.Grants.gov, and SBIR.gov every 6 hours; persists normalized opportunities to `rfp_opportunities`
 - [ ] **DISC-02**: Per-source web scrapers for NY State Grants Gateway and NYC DYCD / HRA / DOE Discretionary listings populate `rfp_opportunities` on the same cadence with throttling and schema-drift alerting
-- [ ] **DISC-03**: Per-org fit-scoring function (30% NAICS, 25% keyword alignment, 20% geo, 15% dollar-size band, 10% past-funder) writes to `rfp_opp_matches` for every active org per opportunity
+- [x] **DISC-03**: Per-org fit-scoring function (30% NAICS, 25% keyword alignment, 20% geo, 15% dollar-size band, 10% past-funder) writes to `rfp_opp_matches` for every active org per opportunity
 - [ ] **DISC-04**: User sees Discovery feed with ranked opportunities showing fit score, win probability, amount, deadline, source, agency, brief
 - [ ] **DISC-05**: User can filter Discovery feed by active org, mode (nonprofit / for-profit / dual), source, and deadline window
 - [ ] **DISC-06**: User receives Slack, Telegram, or email notification when an opportunity scores fit ≥ 80 for their org (per-org notification preferences)
@@ -180,7 +180,7 @@ Explicit exclusions with reasoning. Documented to prevent scope creep.
 | ORG-02 | Phase 4 | Pending |
 | DISC-01 | Phase 5 | Complete |
 | DISC-02 | Phase 5 | Pending |
-| DISC-03 | Phase 5 | Pending |
+| DISC-03 | Phase 5 | Complete |
 | DISC-04 | Phase 5 | Pending |
 | DISC-05 | Phase 5 | Pending |
 | DISC-06 | Phase 5 | Pending |

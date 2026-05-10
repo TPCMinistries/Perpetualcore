@@ -11,11 +11,11 @@ See: .planning/PROJECT.md (updated 2026-05-09)
 
 **Milestone:** v2.0 RFP & Proposal Engine
 **Phase:** 5 of 11 (Phase 5: Discovery)
-**Plan:** 2 of 7 complete (05-02: State/city scrapers + drift detection)
-**Status:** In progress — Phase 4 closed; Phase 5 Plans 01–02 complete; Plans 03–07 remaining
-**Progress:** [██████░░░░] 60%
+**Plan:** 3 of 7 complete (05-03: Fit-scoring engine + AI summary + async recompute)
+**Status:** In progress — Phase 4 closed; Phase 5 Plans 01–03 complete; Plans 04–07 remaining
+**Progress:** [█████░░░░░] 50%
 
-Last activity: 2026-05-10 — 05-02 complete: NY State + NYC DYCD/HRA/DOE scrapers + drift detection live. Vercel cron at `30 */6 * * *` (offset +30m from federal). Two new tables (rfp_source_drift, rfp_source_baseline) with service-only RLS. Drift triggers: http_status, fetch_error, zero_nodes, shape_mismatch, count_anomaly (>50% drop from rolling 3-run baseline). Throttled admin email alerts (1 per source/reason per 24h) with [DRIFT-ALERT-FALLBACK] log fallback when Resend domain unverified.
+Last activity: 2026-05-10 — 05-03 complete: Fit-scoring engine wired end-to-end. 30/25/20/15/10 weighted score (NAICS/keyword/geo/dollar-band/past-funder) + 4-chip parity contract + 1-2 sentence AI summary (claude-sonnet-4-5 primary, claude-haiku-4-5 fallback) writes to rfp_opp_matches. Both crons hand off ingested opps to scoring (non-fatal on failure). POST /api/rfp/orgs/[orgId]/recompute-scores endpoint provides 202-Accepted async refresh for Phase 6 capture-profile mutations (fire-and-forget via `void recompute(...).catch(log)` since Next 14 lacks `after()`). DISC-03 closed.
 
 ## Performance Metrics
 
@@ -31,7 +31,7 @@ Last activity: 2026-05-10 — 05-02 complete: NY State + NYC DYCD/HRA/DOE scrape
 | 01-social-proof | 1 | 7 min | 7 min |
 | 02-onboarding-optimization | 2 | 62 min | 31 min |
 
-**v2.0 velocity:** 4 plans completed (Phase 4 P01–P02, Phase 5 P01–P02)
+**v2.0 velocity:** 5 plans completed (Phase 4 P01–P02, Phase 5 P01–P03)
 
 | Phase | Plan | Duration | Tasks | Files |
 |-------|------|----------|-------|-------|
@@ -39,6 +39,7 @@ Last activity: 2026-05-10 — 05-02 complete: NY State + NYC DYCD/HRA/DOE scrape
 | 04-foundations-salvage-port | P02 | 14 min | 3 | 8 |
 | 05-discovery | P01 | ~25 min | 3 | 9 |
 | 05-discovery | P02 | ~120 min (2 sessions) | 3 | 13 |
+| 05-discovery | P03 | ~95 min (2 sessions) | 3 | 6 |
 
 ## Accumulated Context
 
@@ -79,9 +80,26 @@ Decisions are logged in PROJECT.md Key Decisions table. Notable carries:
 ## Session Continuity
 
 Last session: 2026-05-10
-Stopped at: Completed 05-02-PLAN.md (state/city scrapers + drift detection: NY State Grants Gateway + NYC DYCD/HRA/DOE + rolling-baseline count anomaly + throttled admin email alerts)
+Stopped at: Completed 05-03-PLAN.md (fit-scoring engine: 30/25/20/15/10 weights + chip-count parity + AI summary with sonnet-4.5/haiku-4.5 fallback + recompute orchestrators + cron hand-off + async per-org POST endpoint)
 Resume file: None
-Next action: Execute 05-03-PLAN.md — Fit scoring engine (30/25/20/15/10) + AI summary + async recompute on capture-profile change (DISC-03)
+Next action: Execute 05-04-PLAN.md — Feed UI (ranked list + detail pane, infinite scroll, filter pills, fit-score chip)
+
+### v2.0 Phase 5 Key Decisions (Plan 03)
+
+- Weights frozen at 30/25/20/15/10 (NAICS / keyword / geo / dollar-band / past-funder) per TECH-SPEC §4.1; user-tunable weights deferred to Phase 7/10
+- Tier thresholds frozen at 90 Strong / 70 Good / 50 Marginal / <50 Weak; tierFor() helper in weights.ts
+- Chip-count parity contract: scoreOpportunity ALWAYS returns chips.length === 4. Non-pending rows pad with source-tier fallback (Federal / NY State / NYC / Foundation / Other source); profile-pending rows fill 4 slots deterministically. FeedRow.tsx renders chips[0..3] with zero index guards
+- Profile-pending fallback returns fit_score=50 with 'Profile pending' chip — sits in Marginal tier so user sees the row but knows profile isn't dialed in yet
+- AI model lineup: claude-sonnet-4-5 primary, claude-haiku-4-5 fallback. ~80 max_tokens cap. Profile-pending case returns literal sentinel; no AI call paid for
+- generateFitSummary never throws — every error path (rate limit, network, missing key, empty response) returns null. Caller persists null; FeedRow shows "No summary generated."
+- scored_version increments by 1 on every (opp, org) upsert — cache key for AI summary + freshness signal for feed (05-04)
+- Cron scoring hand-off wrapped in try/catch; scoring failure is non-fatal — ingest already landed. Response body includes scored:{scored,orgs}|{error}
+- recomputeAllForOrg scopes to live opps (deadline IS NULL OR > now()); AI summaries OFF by default. When off, upsert omits summary column so existing prose is preserved
+- Recompute endpoint uses `void recompute(...).catch(log)` fire-and-forget — Next 14.x lacks the stable after() API. Idempotent on (opp_id, org_id) so serverless interruption is safe
+- 404 (not 403) on non-member orgId — prevents probing for valid org IDs
+- Alerts skipped on recomputeAllForOrg path; alerts only fire on cron-discovered new opps (05-07 will subscribe to opp-match INSERTs from cron hand-off)
+- Local asyncPool helper (no p-limit dep); concurrency=3 for AI calls, 5-8 for pure scoring
+- Federal run.ts: applied the same `{ from: (table: string) => any }` admin client narrowing that run-state-city.ts uses — closes a TS2589/TS2769 gap surfaced by scoped tsc
 
 ### v2.0 Phase 5 Key Decisions (Plan 02)
 
