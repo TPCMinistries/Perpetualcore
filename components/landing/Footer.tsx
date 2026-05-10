@@ -21,6 +21,7 @@ const STUDIO_LINKS = [
 const PRODUCT_LINKS = [
   { label: "Platform", href: "/products/platform" },
   { label: "Atlas", href: "/products/atlas" },
+  { label: "Atlas Discovery", href: "/products/atlas-discovery" },
   { label: "Sentinel", href: "/products/sentinel" },
   { label: "Sage", href: "/products/sage" },
   { label: "Vellum", href: "/products/vellum" },

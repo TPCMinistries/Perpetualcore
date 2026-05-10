@@ -161,6 +161,29 @@ export default function AtlasPage() {
         </div>
       </section>
 
+      {/* Lower-friction entry — Atlas Discovery cross-link */}
+      <section className="container mx-auto px-4 py-24 border-t border-border/40">
+        <div className="max-w-3xl">
+          <p className="text-sm italic text-muted-foreground tracking-wide mb-4">
+            Lower-friction entry.
+          </p>
+          <h2 className="text-3xl sm:text-4xl font-semibold tracking-tight leading-tight mb-6">
+            Not ready for the full Atlas install? Start with Atlas Discovery.
+          </h2>
+          <p className="text-lg text-muted-foreground leading-relaxed mb-8">
+            Atlas Discovery is a 2 to 3 week productized audit — $5,000 to $15,000 — that maps the
+            portco&apos;s operations, ranks AI opportunities, and produces an OP + CFO co-signable
+            contract framework. The deliverable is yours either way. Most funds start there before a
+            full Atlas install.
+          </p>
+          <Button size="lg" asChild className="text-base px-7">
+            <Link href="/products/atlas-discovery">
+              See Atlas Discovery <ArrowRight className="ml-2 h-4 w-4" />
+            </Link>
+          </Button>
+        </div>
+      </section>
+
       {/* Intake form */}
       <section id="intake" className="container mx-auto px-4 py-24 border-t border-border/40">
         <div className="max-w-3xl">
