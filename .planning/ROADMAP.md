@@ -263,7 +263,7 @@ Plans:
   3. Bidirectional IHA↔PC links verified post-deploy: theiha.org SUSTAIN pillar resolves to perpetualcore.com/engine; perpetualcore.com `/about` + `/engine` resolve to theiha.org with proper rel attributes; both link directions test green from prod
   4. `/products/vellum` has a working early-access waitlist: email + tier preference (Operator $49 / Team $249) capture, persistence in `vellum_early_access` Supabase table, Stripe-ready intent flow (signup intent or deposit, not full checkout); at least 5 internal test signups complete without errors
   5. MERGE_PLAN.md deferred items closed: navbar consolidated to one canonical `<Navbar/>` component everywhere (no per-page implementations), all stale "© 2024" footers bumped to 2026 (verified by grep returning zero matches), mobile responsiveness verified at 375 / 768 / 1024 on every new repositioning page, logo decision documented (real logo wired or "PC" placeholder accepted for v1)
-**Plans:** 6 plans
+**Plans:** 2/6 plans executed
 
 Plans:
 - [ ] 12-01-PLAN.md — Real abstracted case studies on /studio/case-studies (STUDIO-CS-01)
@@ -295,4 +295,4 @@ Phase 5 and Phase 6 may run partially in parallel (Discovery cron runs while vau
 | 9. Compliance Gate | 0/TBD | Not started | - |
 | 10. Multi-Tenant Productization | 0/TBD | Not started | - |
 | 11. Launch (Beta + Public) | 0/TBD | Not started | - |
-| 12. Studio Repositioning v1.1 | 0/6 | Planned | - |
+| 12. Studio Repositioning v1.1 | 2/6 | In Progress|  |

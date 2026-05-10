@@ -13,7 +13,7 @@ See: .planning/PROJECT.md (updated 2026-05-09)
 **Phase:** 5 of 11 (Phase 5: Discovery)
 **Plan:** 1 of 7 complete (05-01: Federal Discovery ingestion)
 **Status:** In progress — Phase 4 closed; Phase 5 Plan 01 complete; Plans 02-07 remaining
-**Progress:** [██████░░░░] 57%
+**Progress:** [████░░░░░░] 40%
 
 Last activity: 2026-05-10 — 05-01 complete: federal Discovery cron live (SAM.gov + Grants.gov + Simpler.Grants.gov + SBIR.gov), 6h cadence on /api/cron/rfp-discovery-federal, idempotent upsert keyed on (source, source_id), soft-skip on missing keys / endpoint maintenance. SBIR.gov endpoint resolved (api.www.sbir.gov/public/api/solicitations) — currently in maintenance, self-heals.
 
@@ -38,6 +38,7 @@ Last activity: 2026-05-10 — 05-01 complete: federal Discovery cron live (SAM.g
 | 04-foundations-salvage-port | P01 | 7 min | 3 | 5 |
 | 04-foundations-salvage-port | P02 | 14 min | 3 | 8 |
 | 05-discovery | P01 | ~25 min | 3 | 9 |
+| Phase 12-studio-repositioning-v1-1 P01 | 2 | 1 tasks | 1 files |
 
 ## Accumulated Context
 
