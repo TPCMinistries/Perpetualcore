@@ -32,6 +32,13 @@ export interface IngestSourceResult {
   source: "sam_gov" | "grants_gov" | "simpler_grants" | "sbir_gov";
   fetched: number;
   upserted: number;
+  /**
+   * Opportunity IDs that were upserted in this run.
+   * Phase 05-03 scoring (lib/rfp/scoring/recompute.ts) consumes these to score
+   * only the freshly seen opps; existing rows are not re-scored unless the
+   * org's capture profile changes (handled separately by recomputeAllForOrg).
+   */
+  upserted_ids: string[];
   errors: string[];
 }
 
@@ -72,9 +79,10 @@ function normalizeBatch(
  */
 async function upsertBatch(rows: OpportunityRow[]): Promise<{
   upserted: number;
+  upserted_ids: string[];
   errors: string[];
 }> {
-  if (rows.length === 0) return { upserted: 0, errors: [] };
+  if (rows.length === 0) return { upserted: 0, upserted_ids: [], errors: [] };
 
   const supabase = createAdminClient();
 
@@ -90,10 +98,16 @@ async function upsertBatch(rows: OpportunityRow[]): Promise<{
     .select("id");
 
   if (error) {
-    return { upserted: 0, errors: [`upsert: ${error.message}`] };
+    return { upserted: 0, upserted_ids: [], errors: [`upsert: ${error.message}`] };
   }
 
-  return { upserted: data?.length ?? rows.length, errors: [] };
+  // Surface the upserted IDs so the cron route can hand them to Phase 05-03
+  // scoring. The cast above loses supabase-js's type for `data`; narrow inline.
+  type IdRow = { id: string };
+  const idRows = (data ?? []) as unknown as IdRow[];
+  const upserted_ids = idRows.map((r) => String(r.id));
+
+  return { upserted: idRows.length || rows.length, upserted_ids, errors: [] };
 }
 
 /**
@@ -127,6 +141,7 @@ export async function runFederalIngest(): Promise<IngestRunResult> {
         source: spec.name,
         fetched: 0,
         upserted: 0,
+        upserted_ids: [],
         errors: [`fetcher rejected: ${reason}`],
       });
       continue;
@@ -134,12 +149,13 @@ export async function runFederalIngest(): Promise<IngestRunResult> {
 
     const inputs = outcome.value;
     const { rows, errors: normErrors } = normalizeBatch(inputs);
-    const { upserted, errors: upsertErrors } = await upsertBatch(rows);
+    const { upserted, upserted_ids, errors: upsertErrors } = await upsertBatch(rows);
 
     results.push({
       source: spec.name,
       fetched: inputs.length,
       upserted,
+      upserted_ids,
       errors: [...normErrors, ...upsertErrors],
     });
   }
