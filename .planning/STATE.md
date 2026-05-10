@@ -15,7 +15,9 @@ See: .planning/PROJECT.md (updated 2026-05-09)
 **Status:** In progress — Phase 4 closed; Phase 5 Plan 01 complete; Plans 02-07 remaining
 **Progress:** [████░░░░░░] 40%
 
-Last activity: 2026-05-10 — 12-02 complete (studio repositioning, Atlas Discovery): /products/atlas-discovery page with hero/what's-included/pricing/intake form; cross-links from /products/atlas and footer; /api/contact-sales extended with optional product field + createAdminClient() switch; sales_contacts table created in LDC Brain AI Supabase (was missing from remote); dual-filter routing (product='atlas-discovery' OR message ILIKE '%Atlas Discovery intake%') verified live.
+Last activity: 2026-05-10 — 12-05 checkpoint (Tasks 1-3 of 4 complete): EarlyAccessForm with Stripe Elements + 3DS-resume logic built (f2bfb61); /products/vellum updated with #early-access section + unconditional IHA hyperlink, STUDIO-LK-01 closed (1c0bd3a); /admin/vellum-waitlist server component with auth gate + CSV export built (051ecc0). Task 4 awaiting Lorenzo 6-signup Stripe test verification before STUDIO-VW-01 can close.
+
+Previous: 2026-05-10 — 12-02 complete (studio repositioning, Atlas Discovery): /products/atlas-discovery page with hero/what's-included/pricing/intake form; cross-links from /products/atlas and footer; /api/contact-sales extended with optional product field + createAdminClient() switch; sales_contacts table created in LDC Brain AI Supabase (was missing from remote); dual-filter routing (product='atlas-discovery' OR message ILIKE '%Atlas Discovery intake%') verified live.
 
 Previous: 2026-05-10 — 05-01 complete: federal Discovery cron live (SAM.gov + Grants.gov + Simpler.Grants.gov + SBIR.gov), 6h cadence on /api/cron/rfp-discovery-federal, idempotent upsert keyed on (source, source_id), soft-skip on missing keys / endpoint maintenance. SBIR.gov endpoint resolved (api.www.sbir.gov/public/api/solicitations) — currently in maintenance, self-heals.
 
@@ -44,6 +46,7 @@ Previous: 2026-05-10 — 05-01 complete: federal Discovery cron live (SAM.gov + 
 | Phase 12-studio-repositioning-v1-1 P03 | 18 | 2 tasks | 4 files |
 | 12-studio-repositioning-v1-1 | P04 | 9 min | 3 | 4 |
 | Phase 12-studio-repositioning-v1-1 P02 | 10 | 3 tasks | 6 files |
+| Phase 12-studio-repositioning-v1-1 P05 | pending | 3 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -84,9 +87,16 @@ Decisions are logged in PROJECT.md Key Decisions table. Notable carries:
 ## Session Continuity
 
 Last session: 2026-05-10
-Stopped at: Completed 12-04-PLAN.md (Vellum waitlist data layer: migration + /api/early-access extension + /api/vellum/setup-intent + email template)
+Stopped at: 12-05-PLAN.md Task 4 checkpoint (human-verify) — Tasks 1-3 committed, awaiting Stripe test signups verification
 Resume file: None
-Next action: Execute 12-05-PLAN.md — Vellum form UI (/products/vellum page) + admin waitlist view (/admin/vellum-waitlist). Depends on Plan 12-04 (this plan). All endpoints are live.
+Next action: After Lorenzo completes Task 4 verification (6 test signups at /products/vellum#early-access), continue with STUDIO-VW-01 closure. Then execute remaining Phase 12 plans.
+
+### Phase 12 Studio Repositioning Key Decisions (Plan 05)
+
+- @stripe/stripe-js + @stripe/react-stripe-js installed (Rule 3 auto-fix — missing Stripe Elements client packages, not previously in package.json)
+- Admin page uses server-component auth pattern via checkAdminAccess() from lib/admin/checkAdmin.ts; CSV export extracted to VellumWaitlistClient.tsx (client component) to avoid "use client" on whole page
+- IHA hyperlinks use single-line attr format (href + rel on same line) to satisfy grep-based STUDIO-LK-01 verification check pattern
+- STUDIO-LK-01 vellum coverage: unconditional IHA hyperlinks added to /products/vellum 10% callout (two instances, commit 1c0bd3a) — plan explicitly owned this edit; closed
 
 ### Phase 12 Studio Repositioning Key Decisions (Plan 04)
 
