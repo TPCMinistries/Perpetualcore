@@ -163,6 +163,17 @@ const nextConfig = {
         destination: "/studio/process",
         permanent: true,
       },
+      {
+        // RFP Engine product card → live RFP marketing surface.
+        // Preserves the live SEO at /rfp (the (rfp-marketing) route
+        // group) while letting /products/rfp-engine be a valid card
+        // target from /products. Per Session 3 brief Step 5: option
+        // (b) chosen so the live live page remains the canonical URL
+        // and we don't fork content. DO NOT touch (rfp-marketing).
+        source: "/products/rfp-engine",
+        destination: "/rfp",
+        permanent: true,
+      },
     ];
   },
 
