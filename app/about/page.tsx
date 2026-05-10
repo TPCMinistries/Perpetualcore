@@ -10,6 +10,7 @@
  * Capital — IHA full name links to https://theiha.org.
  */
 
+import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -64,9 +65,15 @@ export default function AboutPage() {
           </h2>
 
           <div className="grid md:grid-cols-[280px_1fr] gap-10 items-start">
-            {/* TODO: replace placeholder with real Lorenzo photo */}
-            <div className="aspect-square w-full max-w-[280px] rounded-2xl bg-gradient-to-br from-primary/20 via-purple-500/20 to-blue-500/10 border border-border/60 flex items-center justify-center">
-              <span className="text-5xl font-semibold tracking-tight text-primary/80">LDC</span>
+            <div className="relative aspect-square w-full max-w-[280px] rounded-2xl overflow-hidden border border-border/60">
+              <Image
+                src="/images/lorenzo-headshot.jpg"
+                alt="Lorenzo Daughtry-Chambers, founder of Perpetual Core"
+                fill
+                sizes="(max-width: 768px) 100vw, 280px"
+                className="object-cover"
+                priority
+              />
             </div>
 
             <div className="space-y-5 text-lg text-muted-foreground leading-relaxed">
