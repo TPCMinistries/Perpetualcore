@@ -14,20 +14,19 @@
  *       Institution       — Contact us. 25+ users, SSO, custom retention, on-prem option.
  *   - 30% mission-driven discount call-out for verified 501(c)(3)s on
  *     Operator + Team. Negotiated on Institution.
- *   - 10% to IHA call-out in pricing footer (per §9 — base studio
- *     giving rate; Sage's 15% is the elevated personal-product rate).
+ *   - 10% to IHA call-out in pricing footer with unconditional IHA hyperlink
+ *     (Plan 12-05 owns STUDIO-LK-01 vellum coverage — added unconditionally per plan).
  *   - 4–6 paragraph value prop section before pricing — institutional
  *     memory framing, not consumer note-taking. References the eight
  *     registries (Vellum operates on Knowledge per /engine §2).
- *   - Primary CTA "Start free" → /signup?product=vellum
- *   - Secondary CTA "Talk to us" → /contact?product=vellum
+ *   - Hero CTAs scroll to #early-access (Plan 12-05 replaces /signup + /contact).
  *
- * Note on signup/contact routing: /signup and /contact may not exist
- * yet at the canonical paths — the studio's existing surfaces are
- * /auth/signup and /contact-sales. The brief specifies
- * /signup?product=vellum and /contact?product=vellum, so we honor the
- * brief and let those redirects/routes get added later. If they 404
- * on first ship, that's a known gap — flagged in SESSION_3_REPORT.
+ * Plan 12-05 changes (Wave 2):
+ *   - Hero "Start free" → anchor scroll to #early-access (was signup route)
+ *   - Hero "Talk to us" → anchor scroll to #early-access (was contact route)
+ *   - Pricing card CTAs → anchor scroll to #early-access
+ *   - New #early-access section with EarlyAccessForm embedded
+ *   - Unconditional IHA hyperlink added to 10% callout (STUDIO-LK-01 closure for vellum)
  */
 
 import Link from "next/link";
@@ -44,6 +43,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Navbar } from "@/components/landing/Navbar";
 import { Footer } from "@/components/landing/Footer";
+import { EarlyAccessForm } from "@/components/vellum/EarlyAccessForm";
 
 export const metadata = {
   title: "Vellum by Perpetual Core — institutional memory",
@@ -57,7 +57,7 @@ const PRICING_TIERS = [
     price: "$0",
     cadence: null,
     body: "1 user, 100 sources, basic synthesis. The on-ramp — bring a small corpus, see if it thinks the way your team thinks before you pay anything.",
-    cta: { label: "Start free", href: "/signup?product=vellum" },
+    cta: { label: "Reserve early access", href: "#early-access" },
     featured: false,
     discountEligible: false,
   },
@@ -66,7 +66,7 @@ const PRICING_TIERS = [
     price: "$49",
     cadence: "/month",
     body: "1 user, unlimited sources, voice + channels (Telegram, web), 30-day retention. The single-operator tier — built for the founder, ED, or program lead who carries the org's memory in their head.",
-    cta: { label: "Start free, upgrade later", href: "/signup?product=vellum" },
+    cta: { label: "Reserve early access", href: "#early-access" },
     featured: true,
     discountEligible: true,
   },
@@ -75,7 +75,7 @@ const PRICING_TIERS = [
     price: "$249",
     cadence: "/month",
     body: "5 users, all channels + integrations, 1-year retention. The small-team tier — for organizations that need shared memory across an executive team or program staff, not just one operator.",
-    cta: { label: "Start free, upgrade later", href: "/signup?product=vellum" },
+    cta: { label: "Reserve early access", href: "#early-access" },
     featured: false,
     discountEligible: true,
   },
@@ -84,7 +84,7 @@ const PRICING_TIERS = [
     price: "Contact us",
     cadence: null,
     body: "25+ users, SSO, custom retention, on-prem option. For institutions whose data can't leave their own infrastructure or whose compliance team needs every retention parameter on the table.",
-    cta: { label: "Talk to us", href: "/contact?product=vellum" },
+    cta: { label: "Talk to us", href: "#early-access" },
     featured: false,
     discountEligible: false,
   },
@@ -139,12 +139,12 @@ export default function VellumPage() {
           </p>
           <div className="flex flex-col sm:flex-row gap-3">
             <Button size="lg" asChild className="text-base px-7">
-              <Link href="/signup?product=vellum">
-                Start free <ArrowRight className="ml-2 h-4 w-4" />
+              <Link href="#early-access">
+                Reserve early access <ArrowRight className="ml-2 h-4 w-4" />
               </Link>
             </Button>
             <Button size="lg" variant="outline" asChild className="text-base px-7">
-              <Link href="/contact?product=vellum">Talk to us</Link>
+              <Link href="#early-access">Talk to us</Link>
             </Button>
           </div>
         </div>
@@ -265,19 +265,46 @@ export default function VellumPage() {
           ))}
         </div>
 
-        {/* Pricing footer — IHA giving call-out */}
+        {/* Pricing footer — IHA giving call-out — STUDIO-LK-01 vellum coverage (Plan 12-05, unconditional) */}
         <div className="max-w-3xl mt-12 p-6 rounded-lg border border-border/60 bg-muted/20">
           <div className="flex items-start gap-4">
             <div className="h-9 w-9 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center flex-shrink-0">
               <Sparkles className="h-4 w-4 text-primary" />
             </div>
             <div>
-              <p className="text-sm font-semibold mb-2">10% of every Vellum subscription funds the Institute for Human Advancement.</p>
+              <p className="text-sm font-semibold mb-2">
+                10% of every Vellum subscription funds the{" "}
+                <a href="https://theiha.org" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline underline-offset-4">Institute for Human Advancement</a>.
+              </p>
               <p className="text-sm text-muted-foreground leading-relaxed">
-                Per the studio commitment: 10–15% of every revenue dollar Perpetual Core earns funds workforce development through the Institute for Human Advancement. Vellum sits at the base 10% line — Sage, the personal product, sits at the elevated 15% rate.
+                Per the studio commitment: 10–15% of every revenue dollar Perpetual Core earns funds workforce development through the{" "}
+                <a href="https://theiha.org" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline underline-offset-4">Institute for Human Advancement</a>. Vellum sits at the base 10% line — Sage, the personal product, sits at the elevated 15% rate.
               </p>
             </div>
           </div>
+        </div>
+      </section>
+
+      {/* Early Access — EarlyAccessForm (Plan 12-05 STUDIO-VW-01) */}
+      <section
+        id="early-access"
+        className="container mx-auto px-4 py-32 border-t border-border/40"
+      >
+        <div className="max-w-2xl mx-auto">
+          <p className="text-sm italic text-muted-foreground tracking-wide mb-6">
+            Early access.
+          </p>
+          <h2 className="text-3xl sm:text-4xl font-semibold tracking-tight leading-tight mb-6">
+            Reserve a tier. We&apos;ll reach out when invitations open.
+          </h2>
+          <p className="text-lg text-muted-foreground leading-relaxed mb-10">
+            Vellum by Perpetual Core is in early access. Pick the tier you&apos;d
+            use — Free, Operator at $49/month, Team at $249/month, or
+            Institution. For Operator and Team we capture a payment method via
+            Stripe so you&apos;re ready when invitations open.{" "}
+            <strong>No charge today.</strong>
+          </p>
+          <EarlyAccessForm />
         </div>
       </section>
 
@@ -295,8 +322,8 @@ export default function VellumPage() {
           </p>
           <div className="flex flex-col sm:flex-row gap-3">
             <Button size="lg" asChild className="text-base px-7">
-              <Link href="/signup?product=vellum">
-                Start free <ArrowRight className="ml-2 h-4 w-4" />
+              <Link href="#early-access">
+                Reserve early access <ArrowRight className="ml-2 h-4 w-4" />
               </Link>
             </Button>
             <Button size="lg" variant="outline" asChild className="text-base px-7">
