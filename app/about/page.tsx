@@ -41,7 +41,16 @@ export default function AboutPage() {
             , not the other way around.
           </h1>
           <p className="text-xl text-muted-foreground leading-relaxed mb-10">
-            Perpetual Core is the for-profit infrastructure entity inside the Institute for Human Advancement ecosystem. Lorenzo Daughtry-Chambers founded it in 2024 to install AI operating systems for the mid-market mission-driven organizations the joint ventures don&apos;t serve.
+            Perpetual Core is the for-profit infrastructure entity inside the{" "}
+            <a
+              href="https://theiha.org"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-primary hover:underline underline-offset-4"
+            >
+              Institute for Human Advancement
+            </a>{" "}
+            ecosystem. Lorenzo Daughtry-Chambers founded it in 2024 to install AI operating systems for the mid-market mission-driven organizations the joint ventures don&apos;t serve.
           </p>
           <div className="flex flex-col sm:flex-row gap-3">
             <Button asChild>
@@ -154,7 +163,16 @@ export default function AboutPage() {
             <CardContent className="p-7">
               <h3 className="text-xl font-semibold mb-3">Field research.</h3>
               <p className="text-base text-muted-foreground leading-relaxed">
-                The Institute for Human Advancement&apos;s Kenya work — production AI deployments under PEPFAR rules, IRB review, and offline-first connectivity, built across parish networks in East Africa — is the field-research arm that informs Perpetual Core methodology. The constraints we name in our positioning aren&apos;t theoretical. They&apos;re what our team works under every quarter.
+                The{" "}
+                <a
+                  href="https://theiha.org"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-primary hover:underline underline-offset-4"
+                >
+                  Institute for Human Advancement
+                </a>
+                &apos;s Kenya work — production AI deployments under PEPFAR rules, IRB review, and offline-first connectivity, built across parish networks in East Africa — is the field-research arm that informs Perpetual Core methodology. The constraints we name in our positioning aren&apos;t theoretical. They&apos;re what our team works under every quarter.
               </p>
             </CardContent>
           </Card>
@@ -205,7 +223,16 @@ export default function AboutPage() {
             <li>
               <p className="font-semibold text-lg mb-1">5. The Perpetual Engine commitment is structural.</p>
               <p className="text-muted-foreground">
-                10% of every engagement — $7,500 to $25,000+ per client — funds the Institute for Human Advancement. Audited annually. Line-itemed on every invoice. This is why we built the studio.
+                10% of every engagement — $7,500 to $25,000+ per client — funds the{" "}
+                <a
+                  href="https://theiha.org"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-primary hover:underline underline-offset-4"
+                >
+                  Institute for Human Advancement
+                </a>
+                . Audited annually. Line-itemed on every invoice. This is why we built the studio.
               </p>
             </li>
           </ol>

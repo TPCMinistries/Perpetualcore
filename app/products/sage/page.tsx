@@ -126,7 +126,16 @@ export default function SagePage() {
             The 15% line.
           </p>
           <h2 className="text-3xl sm:text-4xl font-semibold tracking-tight leading-tight mb-6">
-            15% of every Sage subscription funds the Institute for Human Advancement.
+            15% of every Sage subscription funds the{" "}
+            <a
+              href="https://theiha.org"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-primary hover:underline underline-offset-4"
+            >
+              Institute for Human Advancement
+            </a>
+            .
           </h2>
           <p className="text-lg text-muted-foreground leading-relaxed mb-6">
             That&apos;s the highest giving rate of any product in the studio — three to five times the standard ten-percent line — because Sage is the personal product, the one you live with day-to-day, and the one whose proceeds fund the broader mission most directly.

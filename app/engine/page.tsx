@@ -153,7 +153,16 @@ export default function EnginePage() {
             The substrate behind every Perpetual Core install.
           </h1>
           <p className="text-xl text-muted-foreground leading-relaxed mb-6">
-            Eight registries. The AI-First Framework. A compounding skills library. And the commitment that 10 to 15% of every revenue dollar funds workforce development through the Institute for Human Advancement.
+            Eight registries. The AI-First Framework. A compounding skills library. And the commitment that 10 to 15% of every revenue dollar funds workforce development through the{" "}
+            <a
+              href="https://theiha.org"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-primary hover:underline underline-offset-4"
+            >
+              Institute for Human Advancement
+            </a>
+            .
           </p>
           <p className="text-lg text-muted-foreground leading-relaxed mb-10">
             The Engine is what we install. Methodology, substrate, and impact, bundled. It&apos;s the reason a $75,000 engagement compounds — and the reason no joint venture can copy what we do.
@@ -304,12 +313,30 @@ export default function EnginePage() {
             The mission.
           </p>
           <h2 className="text-3xl sm:text-4xl font-semibold tracking-tight leading-tight mb-10">
-            10% of every engagement — $7,500 to $25,000+ per client — funds the Institute for Human Advancement.
+            10% of every engagement — $7,500 to $25,000+ per client — funds the{" "}
+            <a
+              href="https://theiha.org"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-primary hover:underline underline-offset-4"
+            >
+              Institute for Human Advancement
+            </a>
+            .
           </h2>
 
           <div className="space-y-6 text-lg text-muted-foreground leading-relaxed mb-10">
             <p>
-              The Institute for Human Advancement is our 501(c)(3) parent. It runs workforce development for low-income New Yorkers, healthcare-pathway training in community-college workforce programs, and field health work in East Africa. The studio exists to fund the mission — not the other way around.
+              The{" "}
+              <a
+                href="https://theiha.org"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-primary hover:underline underline-offset-4"
+              >
+                Institute for Human Advancement
+              </a>{" "}
+              is our 501(c)(3) parent. It runs workforce development for low-income New Yorkers, healthcare-pathway training in community-college workforce programs, and field health work in East Africa. The studio exists to fund the mission — not the other way around.
             </p>
             <p className="text-foreground">Here&apos;s what flows where:</p>
           </div>
