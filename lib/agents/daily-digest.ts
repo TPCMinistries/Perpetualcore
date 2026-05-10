@@ -8,7 +8,7 @@
  * - AI-generated insights and recommendations
  */
 
-import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/server";
 import { logger } from "@/lib/logging";
 import Anthropic from "@anthropic-ai/sdk";
 import { fetchTodayEvents, isCalendarConnected } from "@/lib/integrations/google-calendar";
@@ -59,7 +59,7 @@ const anthropic = new Anthropic();
  * Gather all data needed for the daily digest
  */
 async function gatherDigestData(userId: string, config: AgentConfig): Promise<DigestData> {
-  const supabase = await createClient();
+  const supabase = createAdminClient();
 
   const today = new Date();
   today.setHours(0, 0, 0, 0);
@@ -276,7 +276,7 @@ async function storeDigest(
   data: DigestData,
   content: GeneratedDigest
 ): Promise<string> {
-  const supabase = await createClient();
+  const supabase = createAdminClient();
 
   // Store as a notification or in a digests table
   const { data: notification, error } = await supabase
@@ -317,7 +317,7 @@ export async function processDigestForAgent(agentId: string): Promise<{
   processed: boolean;
   digestId: string;
 }> {
-  const supabase = await createClient();
+  const supabase = createAdminClient();
 
   // Get agent details
   const { data: agent, error: agentError } = await supabase
@@ -387,7 +387,7 @@ export async function processAllDailyDigestAgents(): Promise<{
   totalProcessed: number;
   digestsGenerated: number;
 }> {
-  const supabase = await createClient();
+  const supabase = createAdminClient();
 
   // Get all enabled daily digest agents
   const { data: agents, error } = await supabase

@@ -12,6 +12,8 @@ import {
   ThumbsUp,
   ThumbsDown,
   Loader2,
+  Image,
+  FileText,
 } from "lucide-react";
 import { Message } from "./types";
 import { cn } from "@/lib/utils";
@@ -55,7 +57,7 @@ export function ChatMessages({
 
   return (
     <div className="flex-1 overflow-y-auto">
-      <div className="max-w-3xl mx-auto px-4 py-6 space-y-6">
+      <div className="max-w-3xl mx-auto px-4 py-6 space-y-4">
         <AnimatePresence mode="popLayout">
           {messages.map((message, index) => (
             <motion.div
@@ -71,7 +73,7 @@ export function ChatMessages({
             >
               {/* Assistant Avatar */}
               {message.role === "assistant" && (
-                <div className="flex-shrink-0 w-8 h-8 rounded-full bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center">
+                <div className="flex-shrink-0 w-8 h-8 rounded-full bg-gradient-to-br from-violet-500 to-purple-600 shadow-lg shadow-violet-500/20 flex items-center justify-center">
                   <Bot className="h-4 w-4 text-white" />
                 </div>
               )}
@@ -87,8 +89,8 @@ export function ChatMessages({
                   className={cn(
                     "rounded-2xl px-4 py-3",
                     message.role === "user"
-                      ? "bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900"
-                      : "bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-slate-100"
+                      ? "bg-gradient-to-br from-primary via-purple-600 to-purple-700 text-white"
+                      : "bg-card/80 backdrop-blur-sm border border-border/50 text-foreground"
                   )}
                 >
                   {message.toolActivity && message.toolActivity.length > 0 && (
@@ -126,9 +128,9 @@ export function ChatMessages({
                       {message.attachments.map((att, attIdx) => (
                         <div
                           key={attIdx}
-                          className="flex items-center gap-1.5 text-xs bg-white/10 rounded px-2 py-1"
+                          className="flex items-center gap-1.5 text-xs bg-background/20 border border-border/30 rounded px-2 py-1"
                         >
-                          {att.type === "image" ? "🖼️" : "📄"}
+                          {att.type === "image" ? <Image className="h-3 w-3" /> : <FileText className="h-3 w-3" />}
                           <span className="truncate max-w-[100px]">
                             {att.file.name}
                           </span>
@@ -140,7 +142,7 @@ export function ChatMessages({
 
                 {/* Actions (visible on hover for assistant messages) */}
                 {message.role === "assistant" && (
-                  <div className="absolute -bottom-8 left-0 opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1">
+                  <div className="absolute -bottom-6 left-10 opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1 bg-card/90 backdrop-blur-sm border border-border/50 rounded-lg px-1 py-0.5 shadow-md">
                     <Button
                       variant="ghost"
                       size="icon"
@@ -188,8 +190,8 @@ export function ChatMessages({
 
               {/* User Avatar */}
               {message.role === "user" && (
-                <div className="flex-shrink-0 w-8 h-8 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center">
-                  <User className="h-4 w-4 text-slate-600 dark:text-slate-300" />
+                <div className="flex-shrink-0 w-8 h-8 rounded-full bg-gradient-to-br from-slate-600 to-slate-700 dark:from-slate-500 dark:to-slate-600 flex items-center justify-center">
+                  <User className="h-4 w-4 text-white" />
                 </div>
               )}
             </motion.div>
@@ -202,15 +204,21 @@ export function ChatMessages({
               animate={{ opacity: 1, y: 0 }}
               className="flex gap-4"
             >
-              <div className="flex-shrink-0 w-8 h-8 rounded-full bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center">
+              <div className="flex-shrink-0 w-8 h-8 rounded-full bg-gradient-to-br from-violet-500 to-purple-600 shadow-lg shadow-violet-500/20 flex items-center justify-center">
                 <Bot className="h-4 w-4 text-white" />
               </div>
-              <div className="bg-slate-100 dark:bg-slate-800 rounded-2xl px-4 py-3">
-                <div className="flex items-center gap-1">
-                  <Loader2 className="h-4 w-4 animate-spin text-violet-500" />
-                  <span className="text-sm text-slate-500 dark:text-slate-400">
-                    Thinking...
-                  </span>
+              <div className="bg-card/80 backdrop-blur-sm border border-border/50 rounded-2xl px-4 py-3">
+                <div className="flex items-center gap-1.5">
+                  <div className="flex gap-1">
+                    {[0, 1, 2].map((i) => (
+                      <div
+                        key={i}
+                        className="h-2 w-2 rounded-full bg-violet-400 animate-bounce"
+                        style={{ animationDelay: `${i * 150}ms` }}
+                      />
+                    ))}
+                  </div>
+                  <span className="text-sm text-muted-foreground ml-1">Thinking...</span>
                 </div>
               </div>
             </motion.div>

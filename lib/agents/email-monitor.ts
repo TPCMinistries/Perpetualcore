@@ -4,7 +4,7 @@
  * Monitors emails and automatically creates tasks for actionable items
  */
 
-import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/server";
 import { fetchUnreadEmails, isGmailConnected, markAsRead } from "@/lib/integrations/gmail";
 import { logger } from "@/lib/logging";
 
@@ -80,7 +80,7 @@ export async function analyzeEmail(email: {
  * Process emails for a specific agent
  */
 export async function processEmailsForAgent(agentId: string) {
-  const supabase = await createClient();
+  const supabase = createAdminClient();
 
   // Get agent details with creator's profile
   const { data: agent, error: agentError } = await supabase
@@ -265,7 +265,7 @@ export async function processEmailsForAgent(agentId: string) {
  * Process all enabled email monitor agents
  */
 export async function processAllEmailMonitorAgents() {
-  const supabase = await createClient();
+  const supabase = createAdminClient();
 
   const { data: agents, error } = await supabase
     .from("ai_agents")

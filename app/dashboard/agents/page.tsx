@@ -39,11 +39,17 @@ import {
   List as ListIcon,
   Wand2,
   Cpu,
+  AlertTriangle,
+  Link as LinkIcon,
+  Power,
+  Loader2,
+  ClipboardList,
 } from "lucide-react";
 import { useConfirm } from "@/components/ui/confirm-dialog";
 import { toast } from "sonner";
 import { EmptyState } from "@/components/ui/empty-state";
 import { motion } from "framer-motion";
+import { createClient } from "@/lib/supabase/client";
 import { cardVariants } from "@/lib/design/animations";
 import { DashboardPageWrapper, DashboardHeader } from "@/components/ui/dashboard-header";
 import { StatCard, StatCardGrid } from "@/components/ui/stat-card";
@@ -64,12 +70,67 @@ interface Agent {
   created_at: string;
 }
 
+// System agent type definitions with prerequisites
+interface SystemAgentType {
+  type: string;
+  name: string;
+  description: string;
+  icon: any;
+  prerequisites: ("gmail" | "google-calendar")[];
+  defaultConfig: Record<string, any>;
+}
+
+const SYSTEM_AGENT_TYPES: SystemAgentType[] = [
+  {
+    type: "email_monitor",
+    name: "Email Monitor",
+    description: "Monitors Gmail for important emails and creates tasks from action items",
+    icon: Mail,
+    prerequisites: ["gmail"],
+    defaultConfig: { scan_interval_minutes: 15, auto_categorize: true, priority_threshold: "medium" },
+  },
+  {
+    type: "calendar_monitor",
+    name: "Calendar Monitor",
+    description: "Tracks upcoming events and sends prep reminders with context",
+    icon: Calendar,
+    prerequisites: ["google-calendar"],
+    defaultConfig: { prep_time_minutes: 30, auto_prep: true, conflict_detection: true },
+  },
+  {
+    type: "task_manager",
+    name: "Task Manager",
+    description: "Intelligently organizes, prioritizes, and follows up on your tasks",
+    icon: ClipboardList,
+    prerequisites: [],
+    defaultConfig: { auto_prioritize: true, daily_review: true, follow_up_days: 3 },
+  },
+  {
+    type: "document_analyzer",
+    name: "Document Analyzer",
+    description: "Processes uploaded documents, extracts key info and action items",
+    icon: FileText,
+    prerequisites: [],
+    defaultConfig: { auto_summarize: true, extract_action_items: true, auto_tag: true },
+  },
+  {
+    type: "daily_digest",
+    name: "Daily Digest",
+    description: "Sends a morning summary of tasks, emails, and calendar events",
+    icon: MessageSquare,
+    prerequisites: [],
+    defaultConfig: { send_time: "08:00", include_tasks: true, include_calendar: true, include_emails: true },
+  },
+];
+
 // Agent type icons mapping
 const agentTypeIcons: { [key: string]: any } = {
   document_analyzer: FileText,
   task_manager: CheckCircle2,
   meeting_assistant: Calendar,
   email_organizer: Mail,
+  email_monitor: Mail,
+  calendar_monitor: Calendar,
   research_assistant: Search,
   workflow_optimizer: Zap,
   daily_digest: MessageSquare,
@@ -133,6 +194,8 @@ export default function AgentsPage() {
   const [filterPersonality, setFilterPersonality] = useState("all");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [showAISuggestions, setShowAISuggestions] = useState(true);
+  const [connectedIntegrations, setConnectedIntegrations] = useState<Set<string>>(new Set());
+  const [enablingAgent, setEnablingAgent] = useState<string | null>(null);
 
   // Smart Coaching
   const { suggestions, dismissSuggestion, completeSuggestion } =
@@ -140,6 +203,7 @@ export default function AgentsPage() {
 
   useEffect(() => {
     fetchAgents();
+    fetchIntegrationStatus();
   }, []);
 
   async function fetchAgents() {
@@ -153,6 +217,142 @@ export default function AgentsPage() {
       console.error("Error fetching agents:", error);
     } finally {
       setIsLoading(false);
+    }
+  }
+
+  async function fetchIntegrationStatus() {
+    try {
+      const supabase = createClient();
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      const connected = new Set<string>();
+
+      // Check user_integrations table (settings page connections)
+      const { data: userIntegrations } = await supabase
+        .from("user_integrations")
+        .select("integration_id, is_connected")
+        .eq("user_id", user.id)
+        .eq("is_connected", true);
+
+      if (userIntegrations) {
+        userIntegrations.forEach((i: any) => connected.add(i.integration_id));
+      }
+
+      // Check org-level integrations table (main integrations page connections)
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("organization_id")
+        .eq("id", user.id)
+        .single();
+
+      if (profile?.organization_id) {
+        const { data: orgIntegrations } = await supabase
+          .from("integrations")
+          .select("provider, is_active")
+          .eq("organization_id", profile.organization_id)
+          .eq("is_active", true);
+
+        if (orgIntegrations) {
+          orgIntegrations.forEach((i: any) => {
+            // Map "google" provider to specific services
+            if (i.provider === "google") {
+              connected.add("gmail");
+              connected.add("google-calendar");
+            }
+            connected.add(i.provider);
+          });
+        }
+      }
+
+      setConnectedIntegrations(connected);
+    } catch (error) {
+      console.error("Error fetching integration status:", error);
+    }
+  }
+
+  function isPrerequisiteMet(prerequisite: string): boolean {
+    return connectedIntegrations.has(prerequisite);
+  }
+
+  function areAllPrerequisitesMet(prerequisites: string[]): boolean {
+    if (prerequisites.length === 0) return true;
+    return prerequisites.every((p) => isPrerequisiteMet(p));
+  }
+
+  function getExistingAgentByType(agentType: string): Agent | undefined {
+    return agents.find((a) => a.agent_type === agentType);
+  }
+
+  async function enableSystemAgent(agentDef: SystemAgentType) {
+    if (!areAllPrerequisitesMet(agentDef.prerequisites)) {
+      toast.error("Please connect the required integrations first", {
+        description: `This agent requires: ${agentDef.prerequisites.map(p => p === "gmail" ? "Gmail" : "Google Calendar").join(", ")}`,
+        action: {
+          label: "Go to Integrations",
+          onClick: () => window.location.href = "/dashboard/integrations",
+        },
+      });
+      return;
+    }
+
+    const existing = getExistingAgentByType(agentDef.type);
+    if (existing) {
+      // Agent already exists, just toggle it on
+      await toggleAgent(existing.id, false);
+      return;
+    }
+
+    setEnablingAgent(agentDef.type);
+    try {
+      const response = await fetch("/api/agents", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: agentDef.name,
+          description: agentDef.description,
+          agent_type: agentDef.type,
+          config: agentDef.defaultConfig,
+          personality: "professional",
+        }),
+      });
+
+      if (response.ok) {
+        toast.success(`${agentDef.name} activated successfully`);
+        fetchAgents();
+      } else {
+        const data = await response.json();
+        if (data.code === "FEATURE_GATED") {
+          toast.error("Feature not available on your plan", {
+            description: data.reason,
+          });
+        } else {
+          toast.error(`Failed to activate ${agentDef.name}`);
+        }
+      }
+    } catch (error) {
+      toast.error(`Failed to activate ${agentDef.name}`);
+    } finally {
+      setEnablingAgent(null);
+    }
+  }
+
+  async function disableSystemAgent(agentId: string, agentName: string) {
+    try {
+      const response = await fetch(`/api/agents/${agentId}/toggle`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ enabled: false }),
+      });
+
+      if (response.ok) {
+        toast.success(`${agentName} deactivated`);
+        fetchAgents();
+      } else {
+        toast.error("Failed to deactivate agent");
+      }
+    } catch (error) {
+      toast.error("Failed to deactivate agent");
     }
   }
 
@@ -381,6 +581,152 @@ export default function AgentsPage() {
             iconColor="blue"
           />
         </StatCardGrid>
+
+        {/* System Agents - Enable/Disable Panel */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, delay: 0.1 }}
+        >
+          <Card className="border-border bg-background overflow-hidden">
+            <CardHeader className="border-b border-border bg-muted/50 py-4">
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded-lg bg-violet-100 dark:bg-violet-900/30">
+                  <Power className="h-4 w-4 text-violet-600 dark:text-violet-400" />
+                </div>
+                <CardTitle className="text-base font-semibold text-foreground">
+                  System Agents
+                </CardTitle>
+                <Badge variant="outline" className="text-xs border-border text-muted-foreground">
+                  {SYSTEM_AGENT_TYPES.filter((sa) => {
+                    const existing = getExistingAgentByType(sa.type);
+                    return existing?.enabled;
+                  }).length} / {SYSTEM_AGENT_TYPES.length} active
+                </Badge>
+              </div>
+            </CardHeader>
+            <CardContent className="p-4">
+              <div className="space-y-3">
+                {SYSTEM_AGENT_TYPES.map((agentDef) => {
+                  const existingAgent = getExistingAgentByType(agentDef.type);
+                  const isActive = existingAgent?.enabled ?? false;
+                  const prereqsMet = areAllPrerequisitesMet(agentDef.prerequisites);
+                  const isEnabling = enablingAgent === agentDef.type;
+                  const AgentIcon = agentDef.icon;
+
+                  return (
+                    <div
+                      key={agentDef.type}
+                      className={`flex items-center justify-between p-4 rounded-xl border transition-all ${
+                        isActive
+                          ? "border-violet-200 dark:border-violet-800 bg-violet-50/50 dark:bg-violet-950/20"
+                          : "border-border bg-background hover:bg-muted/30"
+                      }`}
+                    >
+                      <div className="flex items-center gap-4 flex-1 min-w-0">
+                        <div
+                          className={`h-10 w-10 rounded-lg flex items-center justify-center flex-shrink-0 ${
+                            isActive
+                              ? "bg-violet-100 dark:bg-violet-900/30"
+                              : "bg-muted"
+                          }`}
+                        >
+                          <AgentIcon
+                            className={`h-5 w-5 ${
+                              isActive
+                                ? "text-violet-600 dark:text-violet-400"
+                                : "text-muted-foreground"
+                            }`}
+                          />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <h4 className="font-medium text-sm text-foreground truncate">
+                              {agentDef.name}
+                            </h4>
+                            {isActive && (
+                              <Badge className="bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800 text-xs">
+                                Active
+                              </Badge>
+                            )}
+                          </div>
+                          <p className="text-xs text-muted-foreground line-clamp-1 mt-0.5">
+                            {agentDef.description}
+                          </p>
+                          {/* Prerequisites */}
+                          {agentDef.prerequisites.length > 0 && (
+                            <div className="flex items-center gap-2 mt-1.5">
+                              {agentDef.prerequisites.map((prereq) => {
+                                const met = isPrerequisiteMet(prereq);
+                                return (
+                                  <span
+                                    key={prereq}
+                                    className={`inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full ${
+                                      met
+                                        ? "bg-emerald-50 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800"
+                                        : "bg-amber-50 dark:bg-amber-950/30 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-800"
+                                    }`}
+                                  >
+                                    {met ? (
+                                      <CheckCircle2 className="h-3 w-3" />
+                                    ) : (
+                                      <AlertTriangle className="h-3 w-3" />
+                                    )}
+                                    {prereq === "gmail" ? "Gmail" : "Calendar"}
+                                  </span>
+                                );
+                              })}
+                              {!prereqsMet && (
+                                <Link
+                                  href="/dashboard/integrations"
+                                  className="text-xs text-violet-600 dark:text-violet-400 hover:underline flex items-center gap-1"
+                                >
+                                  <LinkIcon className="h-3 w-3" />
+                                  Connect
+                                </Link>
+                              )}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                      <div className="ml-4 flex-shrink-0">
+                        {isEnabling ? (
+                          <Button size="sm" disabled className="min-w-[80px]">
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                          </Button>
+                        ) : isActive ? (
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => disableSystemAgent(existingAgent!.id, agentDef.name)}
+                            className="min-w-[80px] border-rose-200 dark:border-rose-800 text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/20"
+                          >
+                            <Pause className="h-4 w-4 mr-1" />
+                            Disable
+                          </Button>
+                        ) : (
+                          <Button
+                            size="sm"
+                            onClick={() => enableSystemAgent(agentDef)}
+                            disabled={!prereqsMet}
+                            className={`min-w-[80px] ${
+                              prereqsMet
+                                ? "bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-700 hover:to-purple-700 text-white"
+                                : ""
+                            }`}
+                          >
+                            <Play className="h-4 w-4 mr-1" />
+                            Enable
+                          </Button>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </CardContent>
+          </Card>
+        </motion.div>
 
         {/* Smart Coaching Cards */}
         {suggestions.length > 0 && (

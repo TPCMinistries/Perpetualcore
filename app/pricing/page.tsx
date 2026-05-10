@@ -4,12 +4,28 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Check, Zap, Crown, Building2, Sparkles, ArrowRight, Users, Briefcase, Rocket } from "lucide-react";
+import {
+  Check,
+  Zap,
+  Crown,
+  Building2,
+  Sparkles,
+  ArrowRight,
+  Users,
+  Briefcase,
+  Rocket,
+  ChevronDown,
+  Minus,
+} from "lucide-react";
 import { toast } from "sonner";
 import { PublicMobileNav } from "@/components/layout/PublicMobileNav";
 import { PageViewTracker } from "@/components/analytics/PageViewTracker";
 import { trackClientEvent } from "@/lib/analytics/track-event";
+import { motion } from "framer-motion";
+
+// ---------------------------------------------------------------------------
+// DATA
+// ---------------------------------------------------------------------------
 
 const PLANS = [
   {
@@ -212,7 +228,7 @@ const PLANS = [
 const FAQ_ITEMS = [
   {
     question: "How does the 'unlimited' AI work? Won't I get a surprise bill?",
-    answer: "No surprise bills! Starter includes unlimited GPT-4o Mini + 100 premium model messages (Claude, GPT-4). If you hit the 100 premium limit, you can still use GPT-4o Mini unlimited. Pro includes truly unlimited everything. We built this specifically to avoid surprise bills—you know exactly what you're paying.",
+    answer: "No surprise bills! Starter includes unlimited GPT-4o Mini + 100 premium model messages (Claude, GPT-4). If you hit the 100 premium limit, you can still use GPT-4o Mini unlimited. Pro includes truly unlimited everything. We built this specifically to avoid surprise bills\u2014you know exactly what you're paying.",
   },
   {
     question: "What's the difference between GPT-4o Mini and premium models?",
@@ -220,7 +236,7 @@ const FAQ_ITEMS = [
   },
   {
     question: "How does team pricing work?",
-    answer: "Team plans ($499/mo for up to 10 users = $49.90/user), Business ($1,999/mo for up to 50 users = $39.98/user), Enterprise ($9,999/mo for up to 250 users = $39.99/user). Everyone on the team gets full access to all features. No per-user billing—one flat monthly price.",
+    answer: "Team plans ($499/mo for up to 10 users = $49.90/user), Business ($1,999/mo for up to 50 users = $39.98/user), Enterprise ($9,999/mo for up to 250 users = $39.99/user). Everyone on the team gets full access to all features. No per-user billing\u2014one flat monthly price.",
   },
   {
     question: "What's included in Enterprise implementation?",
@@ -240,14 +256,99 @@ const FAQ_ITEMS = [
   },
   {
     question: "What makes this different from ChatGPT?",
-    answer: "ChatGPT forgets. Perpetual Core never forgets—infinite conversation history, personal knowledge base (RAG on your docs), team collaboration, automation/workflows, and integrations (email, calendar, Slack). We're an AI Operating System, not just chat.",
+    answer: "ChatGPT is a chatbot — you ask, it answers, then it forgets. Perpetual Core is an AI Operating System — it learns your preferences, builds a knowledge graph, routes across 11 models to save you 90%, and deploys 5 proactive agents that work 24/7. Plus team collaboration, automation/workflows, and integrations (email, calendar, Slack). It's not just smarter — it gets smarter every day.",
   },
 ];
+
+// Subset plans for the self-serve grid vs the enterprise section
+const SELF_SERVE_PLANS = PLANS.filter((p) =>
+  ["free", "starter", "pro", "team"].includes(p.id)
+);
+const ENTERPRISE_PLANS = PLANS.filter((p) =>
+  ["business", "enterprise", "custom"].includes(p.id)
+);
+
+// Feature comparison rows (self-serve plans only)
+const COMPARISON_FEATURES: {
+  label: string;
+  plans: Record<string, string | boolean>;
+}[] = [
+  {
+    label: "AI Messages",
+    plans: { free: "Unlimited", starter: "Unlimited", pro: "Unlimited", team: "Unlimited" },
+  },
+  {
+    label: "Premium Model Messages",
+    plans: { free: false, starter: "100 / mo", pro: "Unlimited", team: "Unlimited" },
+  },
+  {
+    label: "Documents",
+    plans: { free: "5", starter: "Unlimited", pro: "Unlimited", team: "Unlimited" },
+  },
+  {
+    label: "Storage",
+    plans: { free: "1 GB", starter: "10 GB", pro: "50 GB", team: "500 GB" },
+  },
+  {
+    label: "Team Members",
+    plans: { free: "1", starter: "1", pro: "1", team: "Up to 10" },
+  },
+  {
+    label: "Automations & Workflows",
+    plans: { free: "5 basic", starter: "Unlimited", pro: "Advanced", team: "Team library" },
+  },
+  {
+    label: "Email & Calendar Integration",
+    plans: { free: false, starter: true, pro: true, team: true },
+  },
+  {
+    label: "API Access",
+    plans: { free: false, starter: false, pro: true, team: true },
+  },
+  {
+    label: "Slack / Teams Integration",
+    plans: { free: false, starter: false, pro: false, team: true },
+  },
+  {
+    label: "Role-Based Access Control",
+    plans: { free: false, starter: false, pro: false, team: true },
+  },
+  {
+    label: "Dedicated Success Manager",
+    plans: { free: false, starter: false, pro: false, team: true },
+  },
+  {
+    label: "Support",
+    plans: { free: "Community", starter: "Priority email", pro: "4-hour response", team: "Dedicated" },
+  },
+];
+
+// ---------------------------------------------------------------------------
+// ANIMATION VARIANTS
+// ---------------------------------------------------------------------------
+
+const fadeUp = {
+  initial: { opacity: 0, y: 24 },
+  whileInView: { opacity: 1, y: 0 },
+  viewport: { once: true },
+  transition: { duration: 0.5, ease: [0.21, 0.47, 0.32, 0.98] },
+};
+
+const stagger = {
+  initial: { opacity: 0, y: 24 },
+  whileInView: { opacity: 1, y: 0 },
+  viewport: { once: true },
+};
+
+// ---------------------------------------------------------------------------
+// COMPONENT
+// ---------------------------------------------------------------------------
 
 export default function PricingPage() {
   const router = useRouter();
   const [billingInterval, setBillingInterval] = useState<"monthly" | "yearly">("monthly");
   const [isLoading, setIsLoading] = useState<string | null>(null);
+  const [openFaq, setOpenFaq] = useState<number | null>(null);
 
   async function handleSubscribe(planId: string, checkoutEnabled: boolean) {
     // Track CTA click
@@ -274,7 +375,7 @@ export default function PricingPage() {
       return;
     }
 
-    // Self-serve checkout (starter, pro) — server resolves price IDs
+    // Self-serve checkout (starter, pro) -- server resolves price IDs
     if (!checkoutEnabled) {
       router.push("/contact-sales?plan=" + planId);
       return;
@@ -306,304 +407,655 @@ export default function PricingPage() {
     }
   }
 
+  // Pricing helpers
+  function getDisplayPrice(plan: (typeof PLANS)[number]) {
+    const yearlyPrice = plan.price ? Math.floor(plan.price * 12 * 0.8) : null;
+    const displayPrice =
+      billingInterval === "yearly" && yearlyPrice
+        ? Math.floor(yearlyPrice / 12)
+        : plan.price;
+    const monthlySavings =
+      plan.price && yearlyPrice ? plan.price - Math.floor(yearlyPrice / 12) : 0;
+    return { yearlyPrice, displayPrice, monthlySavings };
+  }
+
+  // CTA label helper
+  function ctaLabel(planId: string) {
+    if (planId === "enterprise" || planId === "custom") return "Contact Sales";
+    if (planId === "free") return "Get Started Free";
+    return "Start Free Trial";
+  }
+
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white dark:from-gray-900 dark:to-gray-800">
+    <div className="min-h-screen bg-gradient-to-b from-background via-background to-muted/20">
       <PageViewTracker />
-      {/* Header */}
-      <header className="border-b bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm sticky top-0 z-10">
-        <div className="container mx-auto px-3 sm:px-4 py-3 sm:py-4 flex items-center justify-between">
-          <Link href="/" className="flex items-center space-x-2">
-            <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center text-primary-foreground font-bold shadow-lg">
+
+      {/* ----------------------------------------------------------------- */}
+      {/* HEADER                                                            */}
+      {/* ----------------------------------------------------------------- */}
+      <header className="border-b border-border/40 backdrop-blur-xl bg-background/80 sticky top-0 z-50">
+        <div className="container mx-auto px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between">
+          <Link href="/" className="flex items-center gap-2.5 group">
+            <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-primary via-purple-600 to-violet-700 flex items-center justify-center text-white font-bold text-sm shadow-lg shadow-primary/25 transition-shadow group-hover:shadow-primary/40">
               AI
             </div>
-            <span className="text-lg sm:text-xl font-bold">Perpetual Core</span>
+            <span className="text-lg sm:text-xl font-bold tracking-tight">
+              Perpetual Core
+            </span>
           </Link>
-          <div className="flex items-center gap-2">
-            <div className="hidden sm:block">
-              <Link href="/login" className="text-sm font-medium hover:underline">
-                Sign In
-              </Link>
-            </div>
+
+          <div className="flex items-center gap-3">
+            <Link
+              href="/login"
+              className="hidden sm:inline-flex text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+            >
+              Sign In
+            </Link>
             <div className="md:hidden">
               <PublicMobileNav />
             </div>
-            <Button asChild size="sm" className="h-9 shadow-md active:scale-95 transition-all">
+            <Button
+              asChild
+              size="sm"
+              className="h-9 bg-gradient-to-r from-primary to-purple-600 hover:from-primary/90 hover:to-purple-600/90 shadow-md shadow-primary/20 active:scale-95 transition-all"
+            >
               <Link href="/signup">Get Started</Link>
             </Button>
           </div>
         </div>
       </header>
 
-      <div className="container mx-auto px-4 py-12 sm:py-16">
-        {/* Hero Section */}
-        <div className="text-center mb-12 sm:mb-16">
-          <h1 className="text-4xl sm:text-5xl font-bold tracking-tight mb-4 px-4">
-            Simple, Transparent Pricing
-          </h1>
-          <p className="text-base sm:text-xl text-muted-foreground max-w-2xl mx-auto mb-6 sm:mb-8 px-4">
-            Choose the perfect plan for your needs. All plans include a 14-day free trial.
-          </p>
+      {/* ----------------------------------------------------------------- */}
+      {/* HERO                                                              */}
+      {/* ----------------------------------------------------------------- */}
+      <section className="relative overflow-hidden">
+        {/* Animated gradient orb */}
+        <div
+          aria-hidden
+          className="pointer-events-none absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full bg-gradient-to-br from-primary/20 via-purple-600/10 to-violet-700/5 blur-3xl opacity-60"
+        />
+
+        <div className="relative container mx-auto px-4 sm:px-6 pt-16 sm:pt-24 pb-12 sm:pb-16 text-center">
+          <motion.h1
+            {...fadeUp}
+            className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tighter mb-5"
+          >
+            <span className="bg-gradient-to-r from-foreground via-foreground to-muted-foreground bg-clip-text">
+              11 Models.{" "}
+            </span>
+            <span className="bg-gradient-to-r from-primary via-purple-600 to-violet-500 bg-clip-text text-transparent">
+              One Price.
+            </span>
+          </motion.h1>
+
+          <motion.p
+            {...fadeUp}
+            transition={{ ...fadeUp.transition, delay: 0.1 }}
+            className="text-base sm:text-lg lg:text-xl text-muted-foreground max-w-2xl mx-auto mb-8 sm:mb-10 leading-relaxed"
+          >
+            Stop paying for 3 subscriptions. Get all 11 models, 5 agents, and
+            workflows in one plan. 14-day free trial.
+          </motion.p>
 
           {/* Billing Toggle */}
-          <div className="inline-flex items-center gap-2 sm:gap-4 p-1 bg-muted rounded-lg touch-manipulation">
+          <motion.div
+            {...fadeUp}
+            transition={{ ...fadeUp.transition, delay: 0.2 }}
+            className="inline-flex items-center p-1 rounded-full bg-muted/60 backdrop-blur-sm border border-border/50"
+          >
             <button
               onClick={() => setBillingInterval("monthly")}
-              className={`px-4 sm:px-6 py-2 rounded-md font-medium transition active:scale-95 ${
+              className={`relative px-5 sm:px-7 py-2 rounded-full text-sm font-medium transition-all duration-300 ${
                 billingInterval === "monthly"
-                  ? "bg-white dark:bg-gray-800 shadow"
-                  : "text-muted-foreground"
+                  ? "bg-background shadow-md text-foreground"
+                  : "text-muted-foreground hover:text-foreground"
               }`}
             >
               Monthly
             </button>
             <button
               onClick={() => setBillingInterval("yearly")}
-              className={`px-4 sm:px-6 py-2 rounded-md font-medium transition active:scale-95 relative ${
+              className={`relative px-5 sm:px-7 py-2 rounded-full text-sm font-medium transition-all duration-300 ${
                 billingInterval === "yearly"
-                  ? "bg-white dark:bg-gray-800 shadow"
-                  : "text-muted-foreground"
+                  ? "bg-background shadow-md text-foreground"
+                  : "text-muted-foreground hover:text-foreground"
               }`}
             >
               Yearly
-              <span className="absolute -top-2 -right-2 bg-green-500 text-white text-xs px-2 py-0.5 rounded-full shadow-md">
-                Save 20%
+              <span className="ml-1.5 inline-flex items-center rounded-full bg-emerald-500/10 px-2 py-0.5 text-[11px] font-semibold text-emerald-600 dark:text-emerald-400 ring-1 ring-emerald-500/20">
+                -20%
               </span>
             </button>
-          </div>
+          </motion.div>
 
-          {/* Guarantees */}
-          <div className="mt-8 flex flex-wrap items-center justify-center gap-6 sm:gap-8 text-sm text-muted-foreground">
-            <div className="flex items-center gap-2">
-              <Check className="h-5 w-5 text-green-500" />
-              <span className="font-medium text-foreground">14-day free trial</span>
-            </div>
-            <div className="hidden sm:block h-4 w-px bg-border" />
-            <div className="flex items-center gap-2">
-              <Check className="h-5 w-5 text-green-500" />
-              <span className="font-medium text-foreground">No credit card required</span>
-            </div>
-            <div className="hidden sm:block h-4 w-px bg-border" />
-            <div className="flex items-center gap-2">
-              <Check className="h-5 w-5 text-green-500" />
-              <span className="font-medium text-foreground">Cancel anytime</span>
-            </div>
-          </div>
+          {/* Trust badges */}
+          <motion.div
+            {...fadeUp}
+            transition={{ ...fadeUp.transition, delay: 0.3 }}
+            className="mt-8 flex flex-wrap items-center justify-center gap-x-6 gap-y-3 text-sm text-muted-foreground"
+          >
+            {["14-day free trial", "No credit card required", "Cancel anytime"].map(
+              (item) => (
+                <div key={item} className="flex items-center gap-2">
+                  <Check className="h-4 w-4 text-emerald-500" />
+                  <span className="font-medium text-foreground/80">{item}</span>
+                </div>
+              )
+            )}
+          </motion.div>
         </div>
+      </section>
 
-        {/* Pricing Cards */}
-        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8 mb-12 sm:mb-16">
-          {PLANS.map((plan) => {
+      {/* ----------------------------------------------------------------- */}
+      {/* SELF-SERVE PRICING CARDS                                          */}
+      {/* ----------------------------------------------------------------- */}
+      <section className="container mx-auto px-4 sm:px-6 pb-16 sm:pb-24">
+        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-5 lg:gap-6">
+          {SELF_SERVE_PLANS.map((plan, idx) => {
             const Icon = plan.icon;
-            const yearlyPrice = plan.price ? Math.floor(plan.price * 12 * 0.8) : null;
-            const displayPrice =
-              billingInterval === "yearly" && yearlyPrice
-                ? Math.floor(yearlyPrice / 12)
-                : plan.price;
-
-            const monthlySavings = plan.price && yearlyPrice ? plan.price - Math.floor(yearlyPrice / 12) : 0;
+            const { yearlyPrice, displayPrice, monthlySavings } = getDisplayPrice(plan);
 
             return (
-              <Card
+              <motion.div
                 key={plan.id}
-                className={`relative ${
+                {...stagger}
+                transition={{
+                  duration: 0.5,
+                  ease: [0.21, 0.47, 0.32, 0.98],
+                  delay: idx * 0.08,
+                }}
+                className={`relative group rounded-2xl p-[1px] transition-all duration-300 hover:-translate-y-1 hover:shadow-xl ${
                   plan.popular
-                    ? "border-primary shadow-lg scale-105"
-                    : (plan as any).borderColor || "border-border"
-                } ${(plan as any).bgColor || ""}`}
+                    ? "bg-gradient-to-b from-primary via-purple-600 to-violet-700 shadow-lg shadow-primary/20 ring-1 ring-primary/20"
+                    : "bg-border/50 hover:bg-border"
+                }`}
               >
-                {(plan.popular || plan.badge) && (
-                  <div className="absolute -top-4 left-0 right-0 flex justify-center">
-                    <span className={`${plan.popular ? 'bg-primary text-primary-foreground' : 'bg-gradient-to-r from-amber-500 to-orange-500 text-white'} text-sm font-medium px-4 py-1 rounded-full shadow-lg`}>
-                      {plan.badge || "Most Popular"}
+                {/* Badge */}
+                {plan.badge && (
+                  <div className="absolute -top-3 left-0 right-0 flex justify-center z-10">
+                    <span
+                      className={`text-xs font-semibold px-3 py-1 rounded-full shadow-lg ${
+                        plan.popular
+                          ? "bg-primary text-primary-foreground"
+                          : "bg-gradient-to-r from-amber-500 to-orange-500 text-white"
+                      }`}
+                    >
+                      {plan.badge}
                     </span>
                   </div>
                 )}
 
-                <CardHeader className="text-center pb-8">
-                  <div className="mx-auto w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mb-4">
-                    <Icon className="h-6 w-6 text-primary" />
+                {/* Card inner */}
+                <div className="relative h-full rounded-[calc(1rem-1px)] backdrop-blur-xl bg-card/80 border-0 p-6 sm:p-7 flex flex-col">
+                  {/* Icon */}
+                  <div className="mb-5 flex items-center justify-center w-11 h-11 rounded-xl bg-gradient-to-br from-primary/10 via-purple-600/10 to-violet-500/10 ring-1 ring-primary/10">
+                    <Icon className="h-5 w-5 text-primary" />
                   </div>
-                  <CardTitle className="text-2xl">{plan.name}</CardTitle>
-                  <CardDescription>{plan.description}</CardDescription>
 
-                  <div className="mt-4">
+                  {/* Title */}
+                  <h3 className="text-xl font-semibold tracking-tight">{plan.name}</h3>
+                  <p className="text-sm text-muted-foreground mt-1 mb-5">
+                    {plan.description}
+                  </p>
+
+                  {/* Price */}
+                  <div className="mb-6">
                     {plan.price === null ? (
-                      <div className="text-3xl font-bold">Custom</div>
+                      <span className="text-4xl font-bold tracking-tighter">Custom</span>
                     ) : plan.price === 0 ? (
-                      <div className="text-3xl font-bold">Free</div>
+                      <span className="text-4xl font-bold tracking-tighter">Free</span>
                     ) : (
                       <>
-                        <div className="text-4xl font-bold">
-                          ${displayPrice}
-                          <span className="text-lg text-muted-foreground font-normal">
-                            /month
+                        <div className="flex items-baseline gap-1">
+                          <span className="text-4xl font-bold tracking-tighter">
+                            ${displayPrice}
                           </span>
+                          <span className="text-sm text-muted-foreground">/month</span>
                         </div>
                         {billingInterval === "yearly" && yearlyPrice ? (
-                          <div className="text-sm mt-2">
-                            <div className="text-muted-foreground">
-                              ${yearlyPrice}/year (billed annually)
-                            </div>
-                            <div className="text-green-600 dark:text-green-400 font-semibold mt-1">
+                          <div className="mt-1.5 space-y-0.5">
+                            <p className="text-xs text-muted-foreground">
+                              ${yearlyPrice}/year billed annually
+                            </p>
+                            <p className="text-xs font-semibold text-emerald-600 dark:text-emerald-400">
                               Save ${monthlySavings * 12}/year
-                            </div>
+                            </p>
                           </div>
                         ) : null}
                       </>
                     )}
                   </div>
-                </CardHeader>
 
-                <CardContent>
+                  {/* CTA */}
                   <Button
-                    className={`w-full mb-6 ${
+                    className={`w-full mb-6 transition-all duration-200 ${
                       plan.popular
-                        ? "bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 shadow-lg"
-                        : plan.id === "custom"
-                        ? "bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white shadow-lg"
+                        ? "bg-gradient-to-r from-primary via-purple-600 to-violet-600 hover:from-primary/90 hover:via-purple-600/90 hover:to-violet-600/90 text-white shadow-lg shadow-primary/25"
                         : ""
                     }`}
-                    variant={plan.popular || plan.id === "custom" ? "default" : "outline"}
+                    variant={plan.popular ? "default" : "outline"}
                     onClick={() => handleSubscribe(plan.id, plan.checkoutEnabled)}
                     disabled={isLoading === plan.id}
                   >
                     {isLoading === plan.id ? (
                       "Loading..."
-                    ) : plan.id === "enterprise" || plan.id === "custom" ? (
-                      "Contact Sales"
-                    ) : plan.id === "free" ? (
-                      "Get Started Free"
                     ) : (
-                      <>
-                        Start Free Trial <ArrowRight className="ml-2 h-4 w-4" />
-                      </>
+                      <span className="flex items-center gap-2">
+                        {ctaLabel(plan.id)}
+                        {plan.id !== "free" && <ArrowRight className="h-4 w-4" />}
+                      </span>
                     )}
                   </Button>
 
-                  <ul className="space-y-3">
-                    {plan.features.map((feature, index) => (
-                      <li key={index} className="flex items-start gap-2">
-                        <Check className="h-5 w-5 text-green-500 flex-shrink-0 mt-0.5" />
-                        <span className="text-sm">{feature}</span>
+                  {/* Features */}
+                  <ul className="space-y-2.5 flex-1">
+                    {plan.features.map((feature, i) => (
+                      <li key={i} className="flex items-start gap-2.5">
+                        <Check className="h-4 w-4 text-emerald-500 flex-shrink-0 mt-0.5" />
+                        <span className="text-sm text-muted-foreground leading-snug">
+                          {feature}
+                        </span>
                       </li>
                     ))}
                   </ul>
-                </CardContent>
-              </Card>
+                </div>
+              </motion.div>
             );
           })}
         </div>
+      </section>
 
-        {/* Feature Comparison Table */}
-        <div className="mb-16">
-          <h2 className="text-3xl font-bold text-center mb-8">Compare Plans</h2>
-          <Card>
-            <CardContent className="p-0">
-              <div className="overflow-x-auto">
-                <table className="w-full">
-                  <thead className="border-b">
-                    <tr>
-                      <th className="text-left p-4 font-semibold">Features</th>
-                      {PLANS.map((plan) => (
-                        <th key={plan.id} className="text-center p-4 font-semibold">
-                          {plan.name}
-                        </th>
-                      ))}
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr className="border-b">
-                      <td className="p-4">AI Messages</td>
-                      {PLANS.map((plan) => (
-                        <td key={plan.id} className="text-center p-4">
-                          {plan.limits.ai_messages === -1
-                            ? "Unlimited"
-                            : plan.limits.ai_messages.toLocaleString()}
-                        </td>
-                      ))}
-                    </tr>
-                    <tr className="border-b">
-                      <td className="p-4">Documents</td>
-                      {PLANS.map((plan) => (
-                        <td key={plan.id} className="text-center p-4">
-                          {plan.limits.documents === -1
-                            ? "Unlimited"
-                            : plan.limits.documents.toLocaleString()}
-                        </td>
-                      ))}
-                    </tr>
-                    <tr className="border-b">
-                      <td className="p-4">Storage</td>
-                      {PLANS.map((plan) => (
-                        <td key={plan.id} className="text-center p-4">
-                          {plan.limits.storage_gb === -1
-                            ? "Unlimited"
-                            : `${plan.limits.storage_gb} GB`}
-                        </td>
-                      ))}
-                    </tr>
-                    <tr className="border-b">
-                      <td className="p-4">Team Members</td>
-                      {PLANS.map((plan) => (
-                        <td key={plan.id} className="text-center p-4">
-                          {plan.limits.team_members === -1
-                            ? "Unlimited"
-                            : plan.limits.team_members}
-                        </td>
-                      ))}
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
+      {/* ----------------------------------------------------------------- */}
+      {/* ENTERPRISE SECTION                                                */}
+      {/* ----------------------------------------------------------------- */}
+      <section className="container mx-auto px-4 sm:px-6 pb-16 sm:pb-24">
+        <motion.div
+          {...fadeUp}
+          className="rounded-2xl bg-gradient-to-br from-slate-900 to-slate-800 p-8 sm:p-12 overflow-hidden relative"
+        >
+          {/* Subtle gradient accent */}
+          <div
+            aria-hidden
+            className="pointer-events-none absolute -top-32 -right-32 w-64 h-64 rounded-full bg-primary/10 blur-3xl"
+          />
 
-        {/* FAQ Section */}
-        <div className="max-w-3xl mx-auto">
-          <h2 className="text-3xl font-bold text-center mb-8">
-            Frequently Asked Questions
-          </h2>
-          <div className="space-y-4">
-            {FAQ_ITEMS.map((item, index) => (
-              <Card key={index}>
-                <CardHeader>
-                  <CardTitle className="text-lg">{item.question}</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-muted-foreground">{item.answer}</p>
-                </CardContent>
-              </Card>
-            ))}
+          <div className="relative">
+            <h2 className="text-2xl sm:text-3xl font-bold tracking-tighter text-white mb-2">
+              Enterprise-grade plans
+            </h2>
+            <p className="text-slate-400 mb-10 max-w-xl">
+              For organizations that need advanced security, custom deployments,
+              and dedicated support at scale.
+            </p>
+
+            <div className="grid md:grid-cols-3 gap-6">
+              {ENTERPRISE_PLANS.map((plan, idx) => {
+                const Icon = plan.icon;
+                const { yearlyPrice, displayPrice, monthlySavings } = getDisplayPrice(plan);
+
+                return (
+                  <motion.div
+                    key={plan.id}
+                    {...stagger}
+                    transition={{
+                      duration: 0.5,
+                      ease: [0.21, 0.47, 0.32, 0.98],
+                      delay: idx * 0.1,
+                    }}
+                    className="rounded-xl border border-white/10 bg-white/5 backdrop-blur-sm p-6 flex flex-col hover:bg-white/[0.08] transition-colors duration-300"
+                  >
+                    <div className="flex items-center gap-3 mb-4">
+                      <div className="w-10 h-10 rounded-lg bg-white/10 flex items-center justify-center">
+                        <Icon className="h-5 w-5 text-purple-400" />
+                      </div>
+                      <div>
+                        <h3 className="text-lg font-semibold text-white">{plan.name}</h3>
+                        <p className="text-xs text-slate-400">{plan.description}</p>
+                      </div>
+                    </div>
+
+                    {/* Price */}
+                    <div className="mb-5">
+                      {plan.price === null ? (
+                        <span className="text-3xl font-bold tracking-tighter text-white">
+                          Custom
+                        </span>
+                      ) : (
+                        <>
+                          <div className="flex items-baseline gap-1">
+                            <span className="text-3xl font-bold tracking-tighter text-white">
+                              ${displayPrice?.toLocaleString()}
+                            </span>
+                            <span className="text-sm text-slate-400">/mo</span>
+                          </div>
+                          {billingInterval === "yearly" && yearlyPrice ? (
+                            <p className="text-xs text-emerald-400 mt-1">
+                              Save ${(monthlySavings * 12).toLocaleString()}/year
+                            </p>
+                          ) : null}
+                        </>
+                      )}
+                    </div>
+
+                    {/* Features */}
+                    <ul className="space-y-2 mb-6 flex-1">
+                      {plan.features.slice(0, 5).map((feature, i) => (
+                        <li key={i} className="flex items-start gap-2">
+                          <Check className="h-4 w-4 text-purple-400 flex-shrink-0 mt-0.5" />
+                          <span className="text-sm text-slate-300 leading-snug">
+                            {feature}
+                          </span>
+                        </li>
+                      ))}
+                      {plan.features.length > 5 && (
+                        <li className="text-xs text-slate-500 pl-6">
+                          +{plan.features.length - 5} more features
+                        </li>
+                      )}
+                    </ul>
+
+                    {/* CTA */}
+                    <Button
+                      variant="outline"
+                      className="w-full border-white/20 text-white hover:bg-white/10 hover:text-white"
+                      onClick={() => handleSubscribe(plan.id, plan.checkoutEnabled)}
+                      disabled={isLoading === plan.id}
+                    >
+                      {isLoading === plan.id
+                        ? "Loading..."
+                        : plan.id === "custom"
+                        ? "Contact Sales"
+                        : "Talk to Sales"}
+                    </Button>
+                  </motion.div>
+                );
+              })}
+            </div>
           </div>
-        </div>
+        </motion.div>
+      </section>
 
-        {/* CTA Section */}
-        <div className="mt-16 text-center">
-          <Card className="max-w-2xl mx-auto bg-primary text-primary-foreground">
-            <CardContent className="p-8">
-              <h2 className="text-3xl font-bold mb-4">Ready to get started?</h2>
-              <p className="text-lg mb-6 opacity-90">
-                Start your 14-day free trial and experience AI that never forgets.
+      {/* ----------------------------------------------------------------- */}
+      {/* FEATURE COMPARISON TABLE                                          */}
+      {/* ----------------------------------------------------------------- */}
+      <section className="container mx-auto px-4 sm:px-6 pb-16 sm:pb-24">
+        <motion.div {...fadeUp}>
+          <h2 className="text-2xl sm:text-3xl font-bold tracking-tighter text-center mb-3">
+            Compare plans
+          </h2>
+          <p className="text-muted-foreground text-center mb-10 max-w-lg mx-auto">
+            See exactly what each plan includes so you can pick the right one.
+          </p>
+        </motion.div>
+
+        <motion.div
+          {...fadeUp}
+          transition={{ ...fadeUp.transition, delay: 0.1 }}
+          className="rounded-2xl border border-border/50 backdrop-blur-xl bg-card/50 overflow-hidden"
+        >
+          <div className="overflow-x-auto">
+            <table className="w-full min-w-[640px]">
+              <thead>
+                <tr className="border-b border-border/50">
+                  <th className="text-left p-4 sm:p-5 text-sm font-medium text-muted-foreground w-[240px]">
+                    Feature
+                  </th>
+                  {SELF_SERVE_PLANS.map((plan) => (
+                    <th
+                      key={plan.id}
+                      className={`text-center p-4 sm:p-5 text-sm font-semibold ${
+                        plan.popular ? "text-primary" : ""
+                      }`}
+                    >
+                      {plan.name}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {COMPARISON_FEATURES.map((row, idx) => (
+                  <tr
+                    key={row.label}
+                    className={`border-b border-border/30 ${
+                      idx % 2 === 0 ? "" : "bg-muted/10"
+                    }`}
+                  >
+                    <td className="p-4 sm:p-5 text-sm font-medium">{row.label}</td>
+                    {SELF_SERVE_PLANS.map((plan) => {
+                      const val = row.plans[plan.id];
+                      return (
+                        <td key={plan.id} className="text-center p-4 sm:p-5 text-sm">
+                          {val === true ? (
+                            <Check className="h-4 w-4 text-emerald-500 mx-auto" />
+                          ) : val === false ? (
+                            <Minus className="h-4 w-4 text-muted-foreground/40 mx-auto" />
+                          ) : (
+                            <span className="text-muted-foreground">{val}</span>
+                          )}
+                        </td>
+                      );
+                    })}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </motion.div>
+      </section>
+
+      {/* ----------------------------------------------------------------- */}
+      {/* COST COMPARISON — WHY PAY FOR 3?                                  */}
+      {/* ----------------------------------------------------------------- */}
+      <section className="container mx-auto px-4 sm:px-6 pb-16 sm:pb-24">
+        <motion.div {...fadeUp}>
+          <h2 className="text-2xl sm:text-3xl font-bold tracking-tighter text-center mb-3">
+            Why pay for 3 subscriptions?
+          </h2>
+          <p className="text-muted-foreground text-center mb-10 max-w-lg mx-auto">
+            Most teams pay $60+/month for separate AI tools. Perpetual Core
+            gives you everything in one place for less.
+          </p>
+        </motion.div>
+
+        <motion.div
+          {...fadeUp}
+          transition={{ ...fadeUp.transition, delay: 0.1 }}
+          className="max-w-3xl mx-auto rounded-2xl border border-border/50 backdrop-blur-xl bg-card/50 overflow-hidden"
+        >
+          <div className="p-6 sm:p-8">
+            {/* Competitor breakdown */}
+            <div className="space-y-4 mb-6">
+              {[
+                { name: "ChatGPT Plus", price: "$20/mo", detail: "1 model (GPT-4)" },
+                { name: "Claude Pro", price: "$20/mo", detail: "1 model (Claude)" },
+                { name: "Gemini Advanced", price: "$20/mo", detail: "1 model (Gemini)" },
+              ].map((comp) => (
+                <div
+                  key={comp.name}
+                  className="flex items-center justify-between text-sm"
+                >
+                  <div className="flex items-center gap-2.5">
+                    <Minus className="h-4 w-4 text-muted-foreground/40" />
+                    <span className="text-muted-foreground">{comp.name}</span>
+                  </div>
+                  <div className="text-right flex items-baseline gap-2">
+                    <span className="font-semibold">{comp.price}</span>
+                    <span className="text-xs text-muted-foreground">
+                      {comp.detail}
+                    </span>
+                  </div>
+                </div>
+              ))}
+
+              <div className="border-t border-border/50 pt-4 flex items-center justify-between">
+                <span className="text-sm font-medium text-muted-foreground">
+                  Total for 3 models
+                </span>
+                <span className="text-lg font-bold">$60/mo</span>
+              </div>
+            </div>
+
+            {/* Perpetual Core callout */}
+            <div className="rounded-xl bg-gradient-to-r from-primary/10 via-purple-500/10 to-blue-500/10 border border-primary/20 p-5">
+              <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center gap-2.5">
+                  <Check className="h-5 w-5 text-emerald-500" />
+                  <span className="font-semibold text-foreground">
+                    Perpetual Core Starter
+                  </span>
+                </div>
+                <span className="text-xl font-bold text-primary">$49/mo</span>
+              </div>
+              <p className="text-sm text-muted-foreground ml-[30px]">
+                ALL 11 models + 5 AI agents + workflows + knowledge base
               </p>
-              <Button size="lg" variant="secondary" asChild>
-                <Link href="/signup" onClick={() => trackClientEvent("cta_click", { event_name: "pricing_bottom_start_trial" })}>
-                  Start Free Trial <ArrowRight className="ml-2 h-5 w-5" />
+              <p className="text-sm font-semibold text-emerald-600 dark:text-emerald-400 mt-2 ml-[30px]">
+                Save $132/year and get 8 more models
+              </p>
+            </div>
+          </div>
+        </motion.div>
+      </section>
+
+      {/* ----------------------------------------------------------------- */}
+      {/* FAQ                                                               */}
+      {/* ----------------------------------------------------------------- */}
+      <section className="container mx-auto px-4 sm:px-6 pb-16 sm:pb-24">
+        <motion.div {...fadeUp}>
+          <h2 className="text-2xl sm:text-3xl font-bold tracking-tighter text-center mb-3">
+            Frequently asked questions
+          </h2>
+          <p className="text-muted-foreground text-center mb-10 max-w-lg mx-auto">
+            Everything you need to know about our plans and billing.
+          </p>
+        </motion.div>
+
+        <motion.div
+          {...fadeUp}
+          transition={{ ...fadeUp.transition, delay: 0.1 }}
+          className="max-w-2xl mx-auto divide-y divide-border/50 rounded-2xl border border-border/50 backdrop-blur-xl bg-card/50 overflow-hidden"
+        >
+          {FAQ_ITEMS.map((item, idx) => {
+            const isOpen = openFaq === idx;
+            return (
+              <div key={idx}>
+                <button
+                  onClick={() => setOpenFaq(isOpen ? null : idx)}
+                  className="w-full flex items-center justify-between gap-4 p-5 sm:p-6 text-left hover:bg-muted/30 transition-colors"
+                >
+                  <span className="text-sm sm:text-base font-medium leading-snug pr-4">
+                    {item.question}
+                  </span>
+                  <ChevronDown
+                    className={`h-4 w-4 flex-shrink-0 text-muted-foreground transition-transform duration-200 ${
+                      isOpen ? "rotate-180" : ""
+                    }`}
+                  />
+                </button>
+                <div
+                  className={`overflow-hidden transition-all duration-300 ease-in-out ${
+                    isOpen ? "max-h-96" : "max-h-0"
+                  }`}
+                >
+                  <p className="px-5 sm:px-6 pb-5 sm:pb-6 text-sm text-muted-foreground leading-relaxed">
+                    {item.answer}
+                  </p>
+                </div>
+              </div>
+            );
+          })}
+        </motion.div>
+      </section>
+
+      {/* ----------------------------------------------------------------- */}
+      {/* BOTTOM CTA                                                        */}
+      {/* ----------------------------------------------------------------- */}
+      <section className="container mx-auto px-4 sm:px-6 pb-16 sm:pb-24">
+        <motion.div
+          {...fadeUp}
+          className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary/10 via-purple-600/5 to-violet-700/10 border border-primary/20 p-8 sm:p-14 text-center"
+        >
+          {/* Background orb */}
+          <div
+            aria-hidden
+            className="pointer-events-none absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] h-[400px] rounded-full bg-primary/5 blur-3xl"
+          />
+
+          <div className="relative">
+            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tighter mb-4">
+              Ready to get started?
+            </h2>
+            <p className="text-muted-foreground text-base sm:text-lg max-w-xl mx-auto mb-8">
+              Start your 14-day free trial and experience AI that learns you.
+            </p>
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
+              <Button
+                size="lg"
+                className="bg-gradient-to-r from-primary via-purple-600 to-violet-600 hover:from-primary/90 hover:via-purple-600/90 hover:to-violet-600/90 text-white shadow-lg shadow-primary/25 h-12 px-8"
+                asChild
+              >
+                <Link
+                  href="/signup"
+                  onClick={() =>
+                    trackClientEvent("cta_click", {
+                      event_name: "pricing_bottom_start_trial",
+                    })
+                  }
+                >
+                  Start Free Trial
+                  <ArrowRight className="ml-2 h-4 w-4" />
                 </Link>
               </Button>
-            </CardContent>
-          </Card>
-        </div>
-      </div>
+              <Button
+                variant="outline"
+                size="lg"
+                className="h-12 px-8 backdrop-blur-sm"
+                asChild
+              >
+                <Link href="/enterprise-demo">Contact Sales</Link>
+              </Button>
+            </div>
 
-      {/* Footer */}
-      <footer className="border-t mt-16 py-8">
-        <div className="container mx-auto px-4 text-center text-sm text-muted-foreground">
-          <p>© 2025 Perpetual Core. All rights reserved.</p>
-          <div className="flex justify-center gap-6 mt-4">
-            <Link href="/terms" className="hover:underline">Terms</Link>
-            <Link href="/privacy" className="hover:underline">Privacy</Link>
-            <Link href="/cookies" className="hover:underline">Cookies</Link>
+            {/* Trust indicators */}
+            <div className="mt-8 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-xs text-muted-foreground">
+              <span>No credit card required</span>
+              <span className="hidden sm:inline">|</span>
+              <span>SOC 2 infrastructure</span>
+              <span className="hidden sm:inline">|</span>
+              <span>99.9% uptime SLA</span>
+            </div>
+          </div>
+        </motion.div>
+      </section>
+
+      {/* ----------------------------------------------------------------- */}
+      {/* FOOTER                                                            */}
+      {/* ----------------------------------------------------------------- */}
+      <footer className="border-t border-border/40 bg-background/80 backdrop-blur-sm">
+        <div className="container mx-auto px-4 sm:px-6 py-8 sm:py-10">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div className="flex items-center gap-2.5">
+              <div className="h-7 w-7 rounded-md bg-gradient-to-br from-primary via-purple-600 to-violet-700 flex items-center justify-center text-white text-xs font-bold">
+                AI
+              </div>
+              <span className="text-sm font-semibold tracking-tight">
+                Perpetual Core
+              </span>
+            </div>
+            <div className="flex items-center gap-6 text-sm text-muted-foreground">
+              <Link href="/terms" className="hover:text-foreground transition-colors">
+                Terms
+              </Link>
+              <Link href="/privacy" className="hover:text-foreground transition-colors">
+                Privacy
+              </Link>
+              <Link href="/cookies" className="hover:text-foreground transition-colors">
+                Cookies
+              </Link>
+            </div>
+            <p className="text-xs text-muted-foreground">
+              &copy; {new Date().getFullYear()} Perpetual Core. All rights reserved.
+            </p>
           </div>
         </div>
       </footer>

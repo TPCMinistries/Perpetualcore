@@ -5,7 +5,7 @@
  * for upcoming meetings and important events.
  */
 
-import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/server";
 import { logger } from "@/lib/logging";
 import Anthropic from "@anthropic-ai/sdk";
 import {
@@ -151,7 +151,7 @@ export async function processCalendarForAgent(agentId: string): Promise<{
   tasksCreated: number;
   conflictsFound: number;
 }> {
-  const supabase = await createClient();
+  const supabase = createAdminClient();
 
   // Get agent details
   const { data: agent, error: agentError } = await supabase
@@ -334,7 +334,7 @@ export async function processAllCalendarMonitorAgents(): Promise<{
   totalTasksCreated: number;
   totalConflicts: number;
 }> {
-  const supabase = await createClient();
+  const supabase = createAdminClient();
 
   // Get all enabled calendar monitor agents
   const { data: agents, error } = await supabase

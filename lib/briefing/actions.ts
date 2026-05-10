@@ -28,12 +28,16 @@ export async function getBriefingData(userId: string): Promise<BriefingData> {
     automationData,
     meetingsData,
     insightsData,
+    agentActivityData,
+    unreadNotificationsCount,
   ] = await Promise.all([
     getOvernightSummary(supabase, userId, lastLogin),
     getTodaysPriorities(supabase, userId),
     getAutomationResults(supabase, userId),
     getUpcomingMeetings(supabase, userId),
     getAIInsights(supabase, userId),
+    getAgentActivitySummary(supabase, userId),
+    getUnreadNotificationsCount(supabase, userId),
   ]);
 
   // Generate quick actions based on context
@@ -46,6 +50,8 @@ export async function getBriefingData(userId: string): Promise<BriefingData> {
     meetings: meetingsData,
     insights: insightsData,
     quickActions,
+    agentActivity: agentActivityData,
+    unreadNotifications: unreadNotificationsCount,
   };
 }
 
@@ -383,6 +389,78 @@ function generateQuickActions(
   });
 
   return actions.slice(0, 5);
+}
+
+async function getAgentActivitySummary(supabase: any, userId: string) {
+  // Get user's organization
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("organization_id")
+    .eq("id", userId)
+    .single();
+
+  if (!profile?.organization_id) {
+    return { todayCount: 0, recentActions: [] };
+  }
+
+  // Get org's agents
+  const { data: orgAgents } = await supabase
+    .from("ai_agents")
+    .select("id")
+    .eq("organization_id", profile.organization_id);
+
+  const agentIds = orgAgents?.map((a: any) => a.id) || [];
+
+  if (agentIds.length === 0) {
+    return { todayCount: 0, recentActions: [] };
+  }
+
+  const todayStart = new Date();
+  todayStart.setHours(0, 0, 0, 0);
+
+  // Count today's actions and get recent 5 in parallel
+  const [countResult, recentResult] = await Promise.all([
+    supabase
+      .from("agent_actions")
+      .select("id", { count: "exact", head: true })
+      .in("agent_id", agentIds)
+      .gte("created_at", todayStart.toISOString()),
+    supabase
+      .from("agent_actions")
+      .select(`
+        id,
+        action_type,
+        status,
+        created_at,
+        agent:ai_agents(name)
+      `)
+      .in("agent_id", agentIds)
+      .order("created_at", { ascending: false })
+      .limit(5),
+  ]);
+
+  const recentActions = (recentResult.data || []).map((a: any) => ({
+    id: a.id,
+    action_type: a.action_type,
+    status: a.status,
+    agent_name: a.agent?.name || "Unknown Agent",
+    created_at: a.created_at,
+  }));
+
+  return {
+    todayCount: countResult.count || 0,
+    recentActions,
+  };
+}
+
+async function getUnreadNotificationsCount(supabase: any, userId: string): Promise<number> {
+  const { count } = await supabase
+    .from("notifications")
+    .select("id", { count: "exact", head: true })
+    .eq("user_id", userId)
+    .eq("read", false);
+
+  return count || 0;
 }
 
 /**

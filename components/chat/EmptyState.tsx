@@ -179,10 +179,10 @@ export function EmptyState({
             <div className="inline-flex h-14 w-14 rounded-full bg-gradient-to-br from-purple-500 via-blue-500 to-indigo-600 items-center justify-center mb-4 shadow-lg">
               <Sparkles className="h-7 w-7 text-white" />
             </div>
-            <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100 mb-2">
-              Welcome to your AI brain, {displayName}!
+            <h1 className="text-2xl font-bold text-foreground mb-2">
+              Welcome to your AI brain, <span className="bg-gradient-to-r from-primary to-purple-500 bg-clip-text text-transparent">{displayName}</span>!
             </h1>
-            <p className="text-sm text-slate-500 dark:text-slate-400 max-w-md mx-auto">
+            <p className="text-sm text-muted-foreground max-w-md mx-auto">
               I already know a bit about you from your setup. Try asking me something — I'll remember everything.
             </p>
           </motion.div>
@@ -195,18 +195,18 @@ export function EmptyState({
               transition={{ delay: 0.1 }}
               className="mb-6"
             >
-              <p className="text-xs text-slate-400 dark:text-slate-500 mb-2 text-center font-medium uppercase tracking-wider">
+              <p className="text-xs text-muted-foreground mb-2 text-center font-medium uppercase tracking-wider">
                 Send your first message
               </p>
               <button
                 onClick={() => onSuggestionClick(firstChatPrompt)}
-                className="w-full p-4 rounded-xl border-2 border-purple-200 dark:border-purple-800 bg-gradient-to-r from-purple-50 to-blue-50 dark:from-purple-950/30 dark:to-blue-950/30 hover:border-purple-400 dark:hover:border-purple-600 hover:shadow-md transition-all text-left group"
+                className="w-full p-4 rounded-xl border-2 border-primary/20 bg-gradient-to-r from-primary/5 to-blue-500/5 hover:border-primary/40 hover:shadow-md hover:shadow-primary/5 transition-all text-left group"
               >
                 <div className="flex items-center justify-between gap-3">
-                  <p className="text-sm font-medium text-slate-700 dark:text-slate-200 leading-relaxed">
+                  <p className="text-sm font-medium text-foreground/80 leading-relaxed">
                     "{firstChatPrompt}"
                   </p>
-                  <ArrowRight className="h-4 w-4 text-purple-500 flex-shrink-0 group-hover:translate-x-1 transition-transform" />
+                  <ArrowRight className="h-4 w-4 text-primary flex-shrink-0 group-hover:translate-x-1 transition-transform" />
                 </div>
               </button>
             </motion.div>
@@ -272,10 +272,10 @@ export function EmptyState({
           animate={{ opacity: 1, y: 0 }}
           className="text-center mb-6 mt-8"
         >
-          <h1 className="text-xl font-semibold text-slate-900 dark:text-slate-100 mb-1">
-            {userName ? `Hey ${userName}, what can I help with?` : "What can I help with?"}
+          <h1 className="text-xl font-semibold text-foreground mb-1">
+            {userName ? <>Hey <span className="bg-gradient-to-r from-primary to-purple-500 bg-clip-text text-transparent">{userName}</span>, what can I help with?</> : "What can I help with?"}
           </h1>
-          <p className="text-sm text-slate-500 dark:text-slate-400">
+          <p className="text-sm text-muted-foreground">
             Start a new conversation or continue where you left off
           </p>
         </motion.div>
@@ -309,7 +309,7 @@ export function EmptyState({
             transition={{ delay: 0.15 }}
             className="mb-6"
           >
-            <div className="text-xs text-slate-500 dark:text-slate-400 mb-2 text-center">
+            <div className="text-xs text-muted-foreground mb-2 text-center">
               From your activity:
             </div>
             <div className="flex flex-wrap justify-center gap-2">
@@ -325,12 +325,12 @@ export function EmptyState({
                       onSuggestionClick(`Summarize my document "${item.item.title}"`);
                     }
                   }}
-                  className="flex items-center gap-2 px-3 py-2 rounded-lg bg-slate-50 dark:bg-slate-800/50 hover:bg-slate-100 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-700 transition-colors text-xs"
+                  className="flex items-center gap-2 px-3 py-2 rounded-lg bg-card/80 hover:bg-accent/80 border border-border/50 hover:border-primary/30 transition-all duration-200 text-xs hover:-translate-y-0.5 hover:shadow-sm"
                 >
                   {item.type === 'meeting' && <Calendar className="h-3.5 w-3.5 text-blue-500 flex-shrink-0" />}
                   {item.type === 'task' && <CheckSquare className="h-3.5 w-3.5 text-amber-500 flex-shrink-0" />}
                   {item.type === 'document' && <FileText className="h-3.5 w-3.5 text-violet-500 flex-shrink-0" />}
-                  <span className="text-slate-700 dark:text-slate-300 max-w-[150px] truncate">
+                  <span className="text-foreground/80 max-w-[150px] truncate">
                     {item.item.title}
                   </span>
                 </button>
@@ -355,22 +355,22 @@ export function EmptyState({
             transition={{ delay: 0.2 }}
             className="mt-auto"
           >
-            <div className="bg-gradient-to-b from-violet-50 to-slate-50 dark:from-violet-950/30 dark:to-slate-900 rounded-xl border border-violet-200 dark:border-violet-800/50 overflow-hidden">
+            <div className="bg-gradient-to-b from-primary/5 to-card rounded-xl border border-border/50 overflow-hidden backdrop-blur-sm">
               {/* Header with toggle */}
               <button
                 onClick={() => setShowConversations(!showConversations)}
-                className="w-full px-4 py-3 flex items-center justify-between bg-violet-100/50 dark:bg-violet-900/20 hover:bg-violet-100 dark:hover:bg-violet-900/30 transition-colors"
+                className="w-full px-4 py-3 flex items-center justify-between bg-primary/5 hover:bg-primary/10 transition-colors"
               >
                 <div className="flex items-center gap-2">
-                  <MessageSquare className="h-4 w-4 text-violet-600 dark:text-violet-400" />
-                  <span className="text-sm font-medium text-violet-900 dark:text-violet-100">
+                  <MessageSquare className="h-4 w-4 text-primary" />
+                  <span className="text-sm font-medium text-foreground">
                     Recent conversations
                   </span>
-                  <span className="text-xs text-violet-600 dark:text-violet-400 bg-violet-200 dark:bg-violet-800 px-1.5 py-0.5 rounded-full">
+                  <span className="text-xs text-primary bg-primary/10 px-1.5 py-0.5 rounded-full">
                     {recentConversations.length}
                   </span>
                 </div>
-                <div className="flex items-center gap-2 text-violet-600 dark:text-violet-400">
+                <div className="flex items-center gap-2 text-primary">
                   <span className="text-xs">{showConversations ? "Hide" : "Show"}</span>
                   {showConversations ? (
                     <ChevronUp className="h-4 w-4" />
@@ -387,13 +387,13 @@ export function EmptyState({
                     <button
                       key={conv.id}
                       onClick={() => onSelectConversation?.(conv.id)}
-                      className="w-full text-left px-3 py-2 rounded-lg hover:bg-violet-50 dark:hover:bg-violet-900/20 transition-colors"
+                      className="w-full text-left px-3 py-2 rounded-lg hover:bg-accent/80 transition-colors"
                     >
                       <div className="flex items-center justify-between gap-2">
-                        <span className="text-sm text-slate-700 dark:text-slate-300 truncate">
+                        <span className="text-sm text-foreground/80 truncate">
                           {conv.title || "New conversation"}
                         </span>
-                        <span className="text-xs text-slate-400 dark:text-slate-500 flex-shrink-0">
+                        <span className="text-xs text-muted-foreground flex-shrink-0">
                           {formatTime(conv.updated_at)}
                         </span>
                       </div>

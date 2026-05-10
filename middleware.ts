@@ -33,7 +33,49 @@ try {
   // Silently fall back to no rate limiting if Redis is unavailable
 }
 
+// Hosts that map to the RFP Engine product surface.
+// Production: rfp.perpetualcore.com
+// Local dev:  rfp.localhost:3001 (add to /etc/hosts: 127.0.0.1 rfp.localhost)
+function isRfpHost(host: string | null): boolean {
+  if (!host) return false;
+  const h = host.toLowerCase().split(':')[0];
+  return h === 'rfp.perpetualcore.com' || h === 'rfp.localhost';
+}
+
+// Paths the RFP subdomain serves directly (post-auth product routes).
+// Anything not matched here gets rewritten under /rfp/* for the marketing surface.
+function isRfpAppPath(pathname: string): boolean {
+  return (
+    pathname.startsWith('/api/') ||
+    pathname.startsWith('/_next') ||
+    pathname.startsWith('/auth/') ||
+    pathname.startsWith('/login') ||
+    pathname.startsWith('/signup') ||
+    pathname.startsWith('/reset-password') ||
+    pathname.startsWith('/accept-invite') ||
+    pathname.startsWith('/orgs') ||
+    pathname.startsWith('/org/') ||
+    pathname.startsWith('/dashboard') ||
+    pathname.startsWith('/contact-sales') ||
+    pathname === '/privacy' ||
+    pathname === '/terms' ||
+    pathname.startsWith('/rfp')
+  );
+}
+
 export async function middleware(request: NextRequest) {
+  const host = request.headers.get('host');
+  const pathname = request.nextUrl.pathname;
+
+  // ── Subdomain rewrite: rfp.* serves the RFP Engine product surface ──
+  // Marketing routes get rewritten under /rfp/* so they share the RFP layout.
+  // App + auth routes pass through so SSO works across subdomains.
+  if (isRfpHost(host) && !isRfpAppPath(pathname)) {
+    const url = request.nextUrl.clone();
+    url.pathname = `/rfp${pathname === '/' ? '' : pathname}`;
+    return NextResponse.rewrite(url);
+  }
+
   // Allow public access to specific pages
   if (
     request.nextUrl.pathname === '/presentation' ||
@@ -78,6 +120,15 @@ export async function middleware(request: NextRequest) {
     },
   });
 
+  // Cross-subdomain SSO: scope auth cookies to .perpetualcore.com in production
+  // so signing in on perpetualcore.com persists on rfp.perpetualcore.com (and any
+  // future product subdomain). Stays unset locally to avoid breaking localhost.
+  const hostname = (host || '').toLowerCase().split(':')[0];
+  const cookieDomain =
+    process.env.NODE_ENV === 'production' && hostname.endsWith('perpetualcore.com')
+      ? '.perpetualcore.com'
+      : undefined;
+
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
@@ -94,6 +145,7 @@ export async function middleware(request: NextRequest) {
             path: '/',
             sameSite: 'lax' as const,
             secure: process.env.NODE_ENV === 'production',
+            ...(cookieDomain ? { domain: cookieDomain } : {}),
           };
 
           request.cookies.set({

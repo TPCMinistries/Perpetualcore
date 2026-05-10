@@ -46,6 +46,7 @@ import {
   MessagesSquare,
   Palette,
   AudioLines,
+  Briefcase,
   // New icons for redesign
   LayoutDashboard,
   Workflow,
@@ -752,6 +753,18 @@ export const NAVIGATION_CONFIG_V2: NavigationSection[] = [
           helpText: "AI Academy — certification tracks, cohort management, and training",
         },
       },
+      {
+        name: "RFP Engine",
+        href: "/orgs/new",
+        icon: FileText,
+        adaptiveConfig: {
+          visibleFor: ["beginner", "intermediate", "advanced"],
+          complexity: "essential",
+          isCore: true,
+          badge: "new",
+          helpText: "Discover, capture, and draft proposals — multi-tenant workspaces with Vault, Discovery, and Compliance",
+        },
+      },
     ],
   },
 
@@ -816,6 +829,18 @@ export const NAVIGATION_CONFIG_V2: NavigationSection[] = [
           complexity: "essential",
           isCore: true,
           helpText: "Talk to multiple AI models - auto-selects the best one for your task",
+        },
+      },
+      {
+        name: "AI Executives",
+        href: "/dashboard/executives",
+        icon: Briefcase,
+        adaptiveConfig: {
+          visibleFor: ["beginner", "intermediate", "advanced"],
+          complexity: "essential",
+          isCore: true,
+          badge: "new",
+          helpText: "Your 15 executive AI advisors - CEO, CFO, Legal, Sales, Marketing, and more",
         },
       },
       {

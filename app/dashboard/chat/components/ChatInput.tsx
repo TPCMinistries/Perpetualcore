@@ -112,7 +112,7 @@ export function ChatInput({
             variant="outline"
             size="sm"
             onClick={onOpenCommandPalette}
-            className="gap-2"
+            className="gap-2 rounded-lg hover:bg-accent/80"
           >
             <Command className="h-4 w-4" />
             <span className="hidden sm:inline">Quick Prompts</span>
@@ -124,7 +124,7 @@ export function ChatInput({
             variant="outline"
             size="sm"
             onClick={onOpenPromptLibrary}
-            className="gap-2"
+            className="gap-2 rounded-lg hover:bg-accent/80"
           >
             <Library className="h-4 w-4" />
             <span className="hidden sm:inline">Browse Library</span>
@@ -133,7 +133,7 @@ export function ChatInput({
             variant="outline"
             size="sm"
             onClick={onToggleQuickActions}
-            className="gap-2"
+            className="gap-2 rounded-lg hover:bg-accent/80"
           >
             <Zap className="h-4 w-4" />
             <span className="hidden sm:inline">Quick Actions</span>
@@ -195,8 +195,8 @@ export function ChatInput({
           onDrop={onDrop}
           className={`relative rounded-2xl border transition-all shadow-sm ${
             isDragging
-              ? "border-slate-400 dark:border-border bg-muted dark:bg-card shadow-lg"
-              : "border-border dark:border-border bg-card hover:border-border dark:hover:border-border"
+              ? "border-primary/50 bg-primary/5 ring-2 ring-primary/20 shadow-lg"
+              : "border-border/50 bg-card/80 backdrop-blur-sm hover:border-primary/30 focus-within:border-primary/50 focus-within:shadow-sm focus-within:shadow-primary/10"
           }`}
         >
           {/* Mention Dropdown */}
@@ -268,7 +268,7 @@ export function ChatInput({
             <Button
               type="submit"
               disabled={isLoading || (!input.trim() && attachments.length === 0)}
-              className="h-9 w-9 p-0 rounded-lg bg-slate-900 dark:bg-muted hover:bg-slate-800 dark:hover:bg-muted text-white dark:text-foreground disabled:opacity-50"
+              className="h-9 w-9 p-0 rounded-xl bg-gradient-to-r from-primary to-purple-600 hover:from-primary/90 hover:to-purple-600/90 text-white shadow-sm hover:shadow-md transition-all disabled:opacity-50"
               size="icon"
             >
               {isLoading ? (
