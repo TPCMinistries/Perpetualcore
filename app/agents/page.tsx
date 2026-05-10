@@ -4,8 +4,9 @@ import { Bot, Users, Briefcase, Heart, GraduationCap, Building2, DollarSign, Fil
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { PublicMobileNav } from "@/components/layout/PublicMobileNav";
 import { ErrorBoundary } from "@/components/ui/error-boundary";
+import { Navbar } from "@/components/landing/Navbar";
+import { Footer } from "@/components/landing/Footer";
 
 const AGENT_CATEGORIES = [
   {
@@ -64,26 +65,7 @@ export default function AgentsLibraryPage() {
   return (
     <ErrorBoundary>
       <div className="min-h-screen bg-gradient-to-b from-background via-background to-muted/20">
-      {/* Header */}
-      <header className="border-b border-border/40 backdrop-blur-xl bg-background/80 sticky top-0 z-50">
-        <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-          <Link href="/" className="text-xl font-bold bg-gradient-to-r from-primary to-purple-600 bg-clip-text text-transparent">
-            Perpetual Core
-          </Link>
-          <nav className="hidden md:flex items-center gap-6">
-            <Link href="/" className="text-sm font-medium hover:text-primary transition">Home</Link>
-            <Link href="/features/intelligence" className="text-sm font-medium hover:text-primary transition">Intelligence</Link>
-            <Link href="/agents" className="text-sm font-medium text-primary">Agents</Link>
-            <Link href="/pricing" className="text-sm font-medium hover:text-primary transition">Pricing</Link>
-            <Button asChild>
-              <Link href="/signup">Get Started</Link>
-            </Button>
-          </nav>
-          <div className="md:hidden">
-            <PublicMobileNav />
-          </div>
-        </div>
-      </header>
+      <Navbar />
 
       {/* Hero Section */}
       <section className="container mx-auto px-4 pt-20 pb-16">
@@ -198,21 +180,7 @@ export default function AgentsLibraryPage() {
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="border-t border-border/40 py-12">
-        <div className="container mx-auto px-4">
-          <div className="flex flex-col md:flex-row justify-between items-center gap-4">
-            <p className="text-sm text-muted-foreground">
-              © 2026 Perpetual Core. All rights reserved.
-            </p>
-            <div className="flex gap-6 text-sm">
-              <Link href="/" className="text-muted-foreground hover:text-foreground">Home</Link>
-              <Link href="/pricing" className="text-muted-foreground hover:text-foreground">Pricing</Link>
-              <Link href="/consulting" className="text-muted-foreground hover:text-foreground">Consulting</Link>
-            </div>
-          </div>
-        </div>
-      </footer>
+      <Footer />
       </div>
     </ErrorBoundary>
   );
