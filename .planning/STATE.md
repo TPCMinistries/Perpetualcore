@@ -15,7 +15,9 @@ See: .planning/PROJECT.md (updated 2026-05-09)
 **Status:** In progress — Phase 4 closed; Phase 5 Plan 01 complete; Plans 02-07 remaining
 **Progress:** [████░░░░░░] 40%
 
-Last activity: 2026-05-10 — 05-01 complete: federal Discovery cron live (SAM.gov + Grants.gov + Simpler.Grants.gov + SBIR.gov), 6h cadence on /api/cron/rfp-discovery-federal, idempotent upsert keyed on (source, source_id), soft-skip on missing keys / endpoint maintenance. SBIR.gov endpoint resolved (api.www.sbir.gov/public/api/solicitations) — currently in maintenance, self-heals.
+Last activity: 2026-05-10 — 12-02 complete (studio repositioning, Atlas Discovery): /products/atlas-discovery page with hero/what's-included/pricing/intake form; cross-links from /products/atlas and footer; /api/contact-sales extended with optional product field + createAdminClient() switch; sales_contacts table created in LDC Brain AI Supabase (was missing from remote); dual-filter routing (product='atlas-discovery' OR message ILIKE '%Atlas Discovery intake%') verified live.
+
+Previous: 2026-05-10 — 05-01 complete: federal Discovery cron live (SAM.gov + Grants.gov + Simpler.Grants.gov + SBIR.gov), 6h cadence on /api/cron/rfp-discovery-federal, idempotent upsert keyed on (source, source_id), soft-skip on missing keys / endpoint maintenance. SBIR.gov endpoint resolved (api.www.sbir.gov/public/api/solicitations) — currently in maintenance, self-heals.
 
 ## Performance Metrics
 
