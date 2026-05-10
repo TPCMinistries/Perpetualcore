@@ -157,11 +157,10 @@ const nextConfig = {
       },
       {
         // Legacy "Guided Implementation" page → studio process
-        // (Session 2 builds /studio/process; until then traffic lands
-        // on /studio/engagements, which already carries the engagement-
-        // arc table that /studio/process will own.)
+        // (Session 2 built /studio/process; redirect now points to its
+        // canonical destination.)
         source: "/consultation",
-        destination: "/studio/engagements",
+        destination: "/studio/process",
         permanent: true,
       },
     ];
