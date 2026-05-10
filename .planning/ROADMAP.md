@@ -112,7 +112,16 @@ Plans:
   4. User in `dual` mode sees a combined feed spanning both nonprofit and for-profit orgs they own, with mode filters available
   5. User pastes a foundation or corporate grant URL into Quick Import and the opportunity appears in the feed within 30 seconds, normalized to the standard schema
   6. User whose org scores fit ≥ 80 on a new opportunity receives a Slack, Telegram, or email notification (per their stored preference) without taking any manual action
-**Plans**: TBD
+**Plans:** 7 plans
+
+Plans:
+- [ ] 05-01-PLAN.md — Federal Discovery ingestion: SAM.gov + Grants.gov + Simpler.Grants.gov + SBIR.gov cron + normalizer (DISC-01)
+- [ ] 05-02-PLAN.md — State/city scrapers: NY State + NYC DYCD/HRA/DOE with throttling + structure-drift alerting (DISC-02)
+- [ ] 05-03-PLAN.md — Fit scoring engine (30/25/20/15/10) + AI summary + async recompute on capture-profile change (DISC-03)
+- [ ] 05-04-PLAN.md — Discovery feed UI: split-pane list/detail + filter pills + OrgSwitcher in dashboard chrome (DISC-04, DISC-05, ORG-03)
+- [ ] 05-05-PLAN.md — Quick Import: persistent URL bar + 4-step inline progress + needs-review fallback (DISC-07)
+- [ ] 05-06-PLAN.md — Dual-mode feed: union of orgs with Mode filter + scoring-org row badges (ORG-04)
+- [ ] 05-07-PLAN.md — Alert delivery: rfp_alert_prefs + email/Telegram/Discord channels + 5/day cap + settings UI (DISC-06)
 
 **Salvage notes (ldc-command-center):**
 - Port `GrantImporter.tsx` → Quick Import URL field (DISC-07); already has Tavily AI fallback for any URL
@@ -120,6 +129,8 @@ Plans:
 - Port SAM.gov client (already integrated in the v0 API routes) — update API key and endpoint version per spec § 4.1
 - Port `RFPClient.tsx` and `RFPSidebar.tsx` → Discovery feed container and detail nav; adapt fit-score display
 - ORG-03 (org switcher) and ORG-04 (dual-mode feed) land here because they are only meaningful once the Discovery feed exists to be scoped
+
+**Phase 5 deviation note:** CONTEXT.md decision substitutes Discord for Slack at MVP (Lorenzo's call — workforce nonprofits and SBIR teams collaborate in Discord). Slack support is deferred to a follow-up integration phase per `.planning/phases/05-discovery/deferred-items.md` (SLACK-CHANNEL-INTEGRATION).
 
 ---
 
@@ -249,7 +260,7 @@ Phase 5 and Phase 6 may run partially in parallel (Discovery cron runs while vau
 | 2. Onboarding Optimization | 2/2 | Complete | 2026-02-23 |
 | 3. Conversion Analytics | 0/TBD | Deferred | - |
 | 4. Foundations & Salvage Port | 2/4 | In Progress|  |
-| 5. Discovery | 0/TBD | Not started | - |
+| 5. Discovery | 0/7 | Planned | - |
 | 6. Capture Profile | 0/TBD | Not started | - |
 | 7. Drafting Agent | 0/TBD | Not started | - |
 | 8. Reviewer Agent | 0/TBD | Not started | - |
