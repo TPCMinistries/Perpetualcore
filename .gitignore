@@ -47,3 +47,4 @@ next-env.d.ts
 /public/sw.js
 /public/fallback-*.js
 .env.vercel
+.claude/worktrees/
