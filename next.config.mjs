@@ -174,6 +174,17 @@ const nextConfig = {
         destination: "/rfp",
         permanent: true,
       },
+      {
+        // /contact alias → existing /contact-sales surface.
+        // The brief specifies CTAs like /contact?product=vellum on
+        // /products/vellum; we don't have a /contact route, so this
+        // 308 forwards to /contact-sales while preserving the
+        // ?product=<slug> query string. If a dedicated /contact page
+        // gets built later, this redirect can be removed.
+        source: "/contact",
+        destination: "/contact-sales",
+        permanent: true,
+      },
     ];
   },
 
