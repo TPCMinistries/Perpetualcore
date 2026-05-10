@@ -2,10 +2,44 @@
 
 **Author:** previous orchestrator session
 **Date:** 2026-05-10
-**Status:** Wave 1 in flight; Waves 2–4 + verification pending
+**Status:** Wave 1 PARTIAL — agents hit usage cap mid-execution; Tasks 2–3 of both 05-01 and 05-02 unfinished
 **Project:** Perpetual Core — `/Users/lorenzodaughtry-chambers/ORGANIZED/01_PROJECTS/ACTIVE/perpetual-core`
 
 > **You are reading this because:** the previous session wrote up state and the user `/clear`ed for fresh context. Pick up where it left off. Lorenzo's preference is autonomous execution — keep going, don't ask permission for things already decided.
+
+## ⚠ Wave 1 partial state — IMPORTANT
+
+Both Wave 1 agents hit the Anthropic usage cap mid-execution (Task 1 done, Tasks 2–3 missing).
+**Usage resets at 12:50pm America/New_York on 2026-05-10.**
+
+### What's committed (verified on disk):
+
+**05-01:**
+- `bbd043c feat(05-01): extend rfp_opportunities with brief/keywords/geo/url/needs_review/last_seen_at`
+- `supabase/migrations/20260510_rfp_opportunities_extensions.sql` (applied)
+- ✗ No `lib/rfp/ingestion/` adapters
+- ✗ No cron handler at `app/api/cron/rfp-discovery/route.ts`
+- ✗ No tests
+- ✗ No `05-01-SUMMARY.md`
+
+**05-02:**
+- `04f6bfc feat(05-02): rfp_source_drift + rfp_source_baseline + drift detector with throttled email alerts`
+- `supabase/migrations/20260510_rfp_source_baseline.sql` (applied)
+- `supabase/migrations/20260510_rfp_state_city_drift.sql` (applied)
+- ✗ No NY State / NYC scrapers
+- ✗ No cron wiring for state+city
+- ✗ No `05-02-SUMMARY.md`
+
+### What to do when usage resets:
+
+Re-spawn the two Wave 1 executor agents with the SAME prompts as before. They'll:
+- Read existing PLAN.md
+- See Task 1 already committed (and `rfp_*` columns/tables already on disk)
+- Resume from Task 2
+
+The plans were written to be idempotent — Task 1 won't be re-run because the migrations already exist. Executors should proceed to Tasks 2–3 cleanly.
+
+If executors fail to resume cleanly: they may try to re-create existing migrations and crash. Mitigation: explicitly tell each agent in its prompt "Task 1 already committed — start at Task 2."
 
 ---
 
