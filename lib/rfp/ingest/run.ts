@@ -84,11 +84,15 @@ async function upsertBatch(rows: OpportunityRow[]): Promise<{
 }> {
   if (rows.length === 0) return { upserted: 0, upserted_ids: [], errors: [] };
 
-  const supabase = createAdminClient();
+  // Cast through `{ from: (table: string) => any }` because rfp_* tables
+  // are not yet in lib/supabase/database.types.ts (regen deferred per
+  // CLAUDE.md). Without the cast, `.from("rfp_opportunities")` fails the
+  // generated literal-table-name overload (TS2769 / TS2589). Mirrors the
+  // pattern in lib/rfp/ingest/run-state-city.ts and lib/rfp/scoring/recompute.ts.
+  const supabase = createAdminClient() as unknown as {
+    from: (table: string) => any;
+  };
 
-  // Cast through unknown to bypass the generated Database type — the new
-  // columns from 20260510_rfp_opportunities_extensions.sql aren't reflected
-  // in lib/supabase/database.types.ts yet (Phase 5 doesn't regen types).
   const { data, error } = await supabase
     .from("rfp_opportunities")
     .upsert(rows as unknown as never[], {

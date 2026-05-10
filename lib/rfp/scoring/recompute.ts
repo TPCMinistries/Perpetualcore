@@ -113,7 +113,6 @@ async function asyncPool<T, R>(
  * lib/rfp/ingest/run-state-city.ts and lib/rfp/orgs.ts.
  */
 function rfpAdmin(): { from: (table: string) => any } {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return createAdminClient() as unknown as { from: (table: string) => any };
 }
 
