@@ -23,6 +23,12 @@ Decimal phases appear between their surrounding integers in numeric order.
 ### Milestone v2.0 — RFP & Proposal Engine
 
 - [ ] **Phase 4: Foundations & Salvage Port** - Schema migration, workspace/auth scaffolding ported from ldc-command-center, and external API keys provisioned
+
+### Milestone v3.0 — Studio Polish & Launch
+
+The v3.0 milestone polishes the Studio Repositioning sprint (rebased and ready to merge as 25 commits on `feat/studio-repositioning`) into ship-ready state. Strategy + 5 copy docs + 3 build sessions landed 2026-05-10; v3.0 closes the gaps the build agents flagged.
+
+- [ ] **Phase 12: Studio Repositioning v1.1** - Real abstracted case studies, Atlas Discovery audit landing page, IHA↔PC bidirectional links, Vellum early-access waitlist, MERGE_PLAN.md deferred items closed
 - [ ] **Phase 5: Discovery** - Always-on opportunity scanner across 6 sources with fit scoring, org setup, feed UI, and URL importer
 - [ ] **Phase 6: Capture Profile** - Vault ingestion, voice fingerprinting, PII redaction, embeddings, and profile editor
 - [ ] **Phase 7: Drafting Agent** - Section generation grounded in org vault, both nonprofit and for-profit conventions, with [VERIFY] markers
@@ -112,11 +118,11 @@ Plans:
   4. User in `dual` mode sees a combined feed spanning both nonprofit and for-profit orgs they own, with mode filters available
   5. User pastes a foundation or corporate grant URL into Quick Import and the opportunity appears in the feed within 30 seconds, normalized to the standard schema
   6. User whose org scores fit ≥ 80 on a new opportunity receives a Slack, Telegram, or email notification (per their stored preference) without taking any manual action
-**Plans:** 7 plans
+**Plans:** 2/7 plans complete
 
 Plans:
-- [ ] 05-01-PLAN.md — Federal Discovery ingestion: SAM.gov + Grants.gov + Simpler.Grants.gov + SBIR.gov cron + normalizer (DISC-01)
-- [ ] 05-02-PLAN.md — State/city scrapers: NY State + NYC DYCD/HRA/DOE with throttling + structure-drift alerting (DISC-02)
+- [x] 05-01-PLAN.md — Federal Discovery ingestion: SAM.gov + Grants.gov + Simpler.Grants.gov + SBIR.gov cron + normalizer (DISC-01)
+- [x] 05-02-PLAN.md — State/city scrapers: NY State + NYC DYCD/HRA/DOE with throttling + structure-drift alerting (DISC-02)
 - [ ] 05-03-PLAN.md — Fit scoring engine (30/25/20/15/10) + AI summary + async recompute on capture-profile change (DISC-03)
 - [ ] 05-04-PLAN.md — Discovery feed UI: split-pane list/detail + filter pills + OrgSwitcher in dashboard chrome (DISC-04, DISC-05, ORG-03)
 - [ ] 05-05-PLAN.md — Quick Import: persistent URL bar + 4-step inline progress + needs-review fallback (DISC-07)
@@ -247,10 +253,32 @@ Plans:
 
 ---
 
+### Phase 12: Studio Repositioning v1.1
+**Goal**: Polish the studio repositioning sprint into ship-ready state — real abstracted case studies on `/studio/case-studies` (no fabricated metrics), Atlas Discovery audit landing page on the studio site, IHA↔PC bidirectional link audit, Vellum early-access waitlist with Stripe-ready capture flow, and MERGE_PLAN.md deferred items closed.
+**Depends on**: `feat/studio-repositioning` merged to main (or branched off if pre-merge); browser QA + counsel review of compliance hedging completed for the base 25-commit sprint
+**Requirements**: STUDIO-CS-01, STUDIO-AD-01, STUDIO-LK-01, STUDIO-VW-01, STUDIO-PL-01
+**Success Criteria** (what must be TRUE):
+  1. `/studio/case-studies` renders 3 real abstracted case study cards (Sector + Constraint + Install + Outcome structure, ~100 words each, no client names, no fabricated metrics) replacing the "Case study available under NDA" stubs
+  2. `/products/atlas-discovery` landing page renders with hero, what's-included, intake form, $5,000–$15,000 productized-audit pricing band, and is reachable from the `/products/atlas` by-invitation page
+  3. Bidirectional IHA↔PC links verified post-deploy: theiha.org SUSTAIN pillar resolves to perpetualcore.com/engine; perpetualcore.com `/about` + `/engine` resolve to theiha.org with proper rel attributes; both link directions test green from prod
+  4. `/products/vellum` has a working early-access waitlist: email + tier preference (Operator $49 / Team $249) capture, persistence in `vellum_early_access` Supabase table, Stripe-ready intent flow (signup intent or deposit, not full checkout); at least 5 internal test signups complete without errors
+  5. MERGE_PLAN.md deferred items closed: navbar consolidated to one canonical `<Navbar/>` component everywhere (no per-page implementations), all stale "© 2024" footers bumped to 2026 (verified by grep returning zero matches), mobile responsiveness verified at 375 / 768 / 1024 on every new repositioning page, logo decision documented (real logo wired or "PC" placeholder accepted for v1)
+**Plans:** 6 plans
+
+Plans:
+- [ ] 12-01-PLAN.md — Real abstracted case studies on /studio/case-studies (STUDIO-CS-01)
+- [ ] 12-02-PLAN.md — /products/atlas-discovery audit landing page + cross-link from /products/atlas (STUDIO-AD-01)
+- [ ] 12-03-PLAN.md — IHA↔Perpetual Core bidirectional link audit (STUDIO-LK-01)
+- [ ] 12-04-PLAN.md — Vellum waitlist data layer: Supabase migration + early-access endpoint + Stripe setup_intent + Resend email (STUDIO-VW-01)
+- [ ] 12-05-PLAN.md — Vellum waitlist UI: EarlyAccessForm + /admin/vellum-waitlist + 5-signup verification (STUDIO-VW-01)
+- [ ] 12-06-PLAN.md — Deferred-items closure: navbar consolidation, year audit, mobile QA, logo decision (STUDIO-PL-01)
+
+---
+
 ## Progress
 
 **Execution Order:**
-Phases execute in numeric order: 1 → 2 → 3 (deferred) → 4 → 5 → 6 → 7 → 8 → 9 → 10 → 11
+Phases execute in numeric order: 1 → 2 → 3 (deferred) → 4 → 5 → 6 → 7 → 8 → 9 → 10 → 11 → 12
 
 Phase 5 and Phase 6 may run partially in parallel (Discovery cron runs while vault collection happens).
 
@@ -267,3 +295,4 @@ Phase 5 and Phase 6 may run partially in parallel (Discovery cron runs while vau
 | 9. Compliance Gate | 0/TBD | Not started | - |
 | 10. Multi-Tenant Productization | 0/TBD | Not started | - |
 | 11. Launch (Beta + Public) | 0/TBD | Not started | - |
+| 12. Studio Repositioning v1.1 | 0/6 | Planned | - |
