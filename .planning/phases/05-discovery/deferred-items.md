@@ -62,13 +62,13 @@ The `lib/rfp/ingest/sbir.ts` fetcher treats HTTP 429 with this body as a soft SK
 
 ## QUICK-IMPORT-QUEUE-DURABILITY
 
-**Captured:** 2026-05-10 during Plan 05-05 planning
+**Captured:** 2026-05-10 during Plan 05-05 planning. Refined 2026-05-10 during execution.
 **Owner:** Phase 10 (productization) or earlier if Quick Import volume warrants
 **Status:** Open
 
-**Summary:** Plan 05-05 stores Quick Import job state in Upstash Redis with a 1h TTL (or in-memory Map as fallback). At MVP volume this is fine. At scale OR when Vercel function instances cold-start mid-job, jobs can lose state.
+**Summary:** Plan 05-05 stores Quick Import job state in Upstash Redis with a 1h TTL. **There is NO module-scope Map fallback** — `lib/rfp/import/job-store.ts` throws on first call when `UPSTASH_REDIS_REST_URL` / `UPSTASH_REDIS_REST_TOKEN` are missing, and the POST route maps that to a 503. The Map fallback was explicitly removed during planning because module memory does not survive across Vercel lambda invocations — POST writes on lambda A, GET reads from lambda B, status returns 404, user has no way to know if the import succeeded (breaks Success Criterion 5 in the plan). Dispatch is fire-and-forget (`void runQuickImport(...).catch(log)`) since Next 14.2 doesn't ship the stable `after()` API; at higher volume this should move to a proper queue.
 
-**Action when revisiting:** Persist ImportJob state in a `rfp_import_jobs` table with the same step/status fields. Cron sweep cleans up stale jobs.
+**Action when revisiting:** Persist ImportJob state in a `rfp_import_jobs` table with the same step/status fields. Cron sweep cleans up stale jobs. Optionally: migrate dispatch from fire-and-forget to BullMQ-on-Upstash or Vercel Queues so retries and at-least-once semantics are guaranteed.
 
 ---
 
