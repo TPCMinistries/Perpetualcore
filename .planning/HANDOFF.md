@@ -2,44 +2,43 @@
 
 **Author:** previous orchestrator session
 **Date:** 2026-05-10
-**Status:** Wave 1 PARTIAL — agents hit usage cap mid-execution; Tasks 2–3 of both 05-01 and 05-02 unfinished
+**Status:** Wave 1 COMPLETE. Studio rebased but not merged yet. Awaiting studio merge → my rebase → push → Wave 2.
 **Project:** Perpetual Core — `/Users/lorenzodaughtry-chambers/ORGANIZED/01_PROJECTS/ACTIVE/perpetual-core`
 
 > **You are reading this because:** the previous session wrote up state and the user `/clear`ed for fresh context. Pick up where it left off. Lorenzo's preference is autonomous execution — keep going, don't ask permission for things already decided.
 
-## ⚠ Wave 1 partial state — IMPORTANT
+## ✓ Wave 1 status — COMPLETE
 
-Both Wave 1 agents hit the Anthropic usage cap mid-execution (Task 1 done, Tasks 2–3 missing).
-**Usage resets at 12:50pm America/New_York on 2026-05-10.**
+Both 05-01 and 05-02 plans fully executed, all SUMMARYs written, all migrations applied to LDC Brain.
 
-### What's committed (verified on disk):
+### 05-01 (Federal ingestion) — DONE
+- All 3 tasks committed (commits `bbd043c`, `48b048f`, `5595542`, `1175b66`, `3c66267`, `8ac6604`, `2a6c9b3`)
+- SAM.gov / Grants.gov / Simpler Grants / SBIR.gov adapters
+- Cron at `0 */6 * * *`
+- SUMMARY: `.planning/phases/05-discovery/05-01-SUMMARY.md`
+- Bonus: SBIR endpoint research resolved — official host is `api.www.sbir.gov/public/api/solicitations` (not `www.sbir.gov`); soft-skips on 429 maintenance mode
 
-**05-01:**
-- `bbd043c feat(05-01): extend rfp_opportunities with brief/keywords/geo/url/needs_review/last_seen_at`
-- `supabase/migrations/20260510_rfp_opportunities_extensions.sql` (applied)
-- ✗ No `lib/rfp/ingestion/` adapters
-- ✗ No cron handler at `app/api/cron/rfp-discovery/route.ts`
-- ✗ No tests
-- ✗ No `05-01-SUMMARY.md`
+### 05-02 (State+City scrapers) — DONE
+- All 3 tasks committed (commits `04f6bfc`, `13b2e94`, `687cd2c`, plus `7ba2214` post-execution fix note)
+- NY State + NYC DYCD/HRA/DOE scrapers (regex-based, no cheerio dep — Vercel cold-start friendly)
+- Drift detector with rolling 3-run baseline + count_anomaly trigger
+- Cron at `30 */6 * * *` (offset +30m from federal cron)
+- SUMMARY: `.planning/phases/05-discovery/05-02-SUMMARY.md`
 
-**05-02:**
-- `04f6bfc feat(05-02): rfp_source_drift + rfp_source_baseline + drift detector with throttled email alerts`
-- `supabase/migrations/20260510_rfp_source_baseline.sql` (applied)
-- `supabase/migrations/20260510_rfp_state_city_drift.sql` (applied)
-- ✗ No NY State / NYC scrapers
-- ✗ No cron wiring for state+city
-- ✗ No `05-02-SUMMARY.md`
+### ⚠ Production-bound bug caught + fixed during Wave 1 close-out
 
-### What to do when usage resets:
+The 05-02 executor wrote migration SQL files but **never applied them to LDC Brain DB**. First cron firing would have crashed (`relation "rfp_source_drift" does not exist`, plus `check_violation` for `nyc_hra`/`nyc_doe` source values). The orchestrator caught this via Supabase MCP query during SUMMARY write, applied both migrations via `apply_migration`, verified RLS + policies, and documented in `05-02-SUMMARY.md` under "Post-execution fix."
 
-Re-spawn the two Wave 1 executor agents with the SAME prompts as before. They'll:
-- Read existing PLAN.md
-- See Task 1 already committed (and `rfp_*` columns/tables already on disk)
-- Resume from Task 2
+**Lesson encoded:** future Phase 5 plan executors must verify table existence via Supabase MCP, not just file presence on disk.
 
-The plans were written to be idempotent — Task 1 won't be re-run because the migrations already exist. Executors should proceed to Tasks 2–3 cleanly.
+### Schema state in LDC Brain (`hgxxxmtfmvguotkowxbu`) — verified
 
-If executors fail to resume cleanly: they may try to re-create existing migrations and crash. Mitigation: explicitly tell each agent in its prompt "Task 1 already committed — start at Task 2."
+```
+rfp_opportunities: extended with brief, keywords[], geo, url, needs_review, last_seen_at
+rfp_opportunities.source CHECK constraint: includes 'nyc_hra', 'nyc_doe'
+rfp_source_drift: exists, RLS service-only
+rfp_source_baseline: exists, RLS service-only
+```
 
 ---
 
@@ -114,33 +113,51 @@ Read `.planning/phases/05-discovery/05-CONTEXT.md` for full text. Key locks:
 
 ## What to do RIGHT NOW
 
-### Step 1: Check Wave 1 status
+### Step 1: Confirm Wave 1 is complete (sanity check)
 
 ```bash
 cd ~/ORGANIZED/01_PROJECTS/ACTIVE/perpetual-core
-ls -1 .planning/phases/05-discovery/*-SUMMARY.md 2>/dev/null
-git log --oneline -20 2>&1 | grep -E "feat\(05-0[12]\)"
+ls -1 .planning/phases/05-discovery/05-0[12]-SUMMARY.md
+git log --oneline feat/rfp-orgs-invites-cont -10
+git rev-parse --short main feat/rfp-orgs-invites-cont feat/studio-repositioning
 ```
 
-Expected when Wave 1 succeeded:
-- `05-01-SUMMARY.md` and `05-02-SUMMARY.md` exist
-- ~6+ commits prefixed `feat(05-01):` and `feat(05-02):`
-- New migration files in `supabase/migrations/20260510_*.sql`
-- New cron handlers under `app/api/cron/` or similar
+Expected: both SUMMARYs exist, feat/rfp-orgs-invites-cont has ~10 RFP-flavored commits on top of `2a6c9b3`. If true, skip to Step 2.
 
-If Wave 1 hasn't completed: `TaskList` may show in-progress agents, OR the previous session may have lost track. Search recent commits — if 05-01/02 commits are landing in real time, agents are still working; wait. If no commits in 30+ min and no SUMMARY files: spawn fresh execute-plan agents using the prompts below (idempotent — skip-if-summary-exists).
+### Step 2: Check whether studio merged into main yet
 
-### Step 2: Spot-check Wave 1
+```bash
+git rev-parse --short main           # was 2a6c9b3 at handoff
+git rev-parse --short feat/studio-repositioning
+git log --oneline main feat/studio-repositioning..main 2>&1 | head -5
+```
 
-For each completed plan:
-1. SUMMARY.md exists in `.planning/phases/05-discovery/`
-2. First 2 files from `key-files.created` exist on disk (`ls` them)
-3. `git log --oneline | grep "feat(05-0X)"` returns ≥1 commit
-4. `grep -l "Self-Check: FAILED" .planning/phases/05-discovery/*.md` returns nothing
+- If `main` HEAD is still `2a6c9b3`: studio has NOT merged. Their Claude window is paused waiting for Lorenzo to greenlight the ff-merge. **Do not drive the merge yourself** — the rebase will hit conflicts in `app/page.tsx`, `components/landing/*`, `app/solutions/*` that need Lorenzo's eye for "keep my version vs studio's repositioning copy" file by file.
+- If `main` HEAD has advanced: studio merged. Proceed to Step 3.
 
-If any check fails: surface to Lorenzo; do NOT auto-retry — he'll decide.
+### Step 3: After studio merges — rebase + handle conflicts (needs Lorenzo)
 
-### Step 3: Spawn Wave 2
+```bash
+git checkout feat/rfp-orgs-invites-cont
+git rebase main
+```
+
+Expect conflicts in:
+- `app/page.tsx`, `components/landing/*.tsx`, `app/solutions/*.tsx`, `components/dashboard/*.tsx`, `lib/agents/*.ts`, `components/ui/*.tsx` — these were pre-session local edits that were `git add -A`'d into the WIP commit. Studio's repositioning copy almost certainly conflicts. **Resolve file-by-file with Lorenzo's input** — defaults usually favor studio's repositioning unless he says otherwise.
+- `middleware.ts`, `config/navigation.ts` — my edits, probably no conflict (studio likely didn't touch them).
+
+### Step 4: Push (gated on Lorenzo's QA + legal review per studio's plan)
+
+```bash
+git checkout main
+git push origin main
+git checkout feat/rfp-orgs-invites-cont
+git push origin feat/rfp-orgs-invites-cont
+```
+
+This pushes 32+ commits to remote. Vercel auto-deploys main to production. **Don't push without explicit Lorenzo OK** — studio's own plan said deploy only after QA + legal review.
+
+### Step 5: Spawn Wave 2 (after rebase clean, doesn't require push)
 
 Once Wave 1 spot-checks pass, spawn ONE agent for 05-03:
 

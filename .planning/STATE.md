@@ -11,11 +11,11 @@ See: .planning/PROJECT.md (updated 2026-05-09)
 
 **Milestone:** v2.0 RFP & Proposal Engine
 **Phase:** 5 of 11 (Phase 5: Discovery)
-**Plan:** 1 of 7 complete (05-01: Federal Discovery ingestion)
-**Status:** In progress — Phase 4 closed; Phase 5 Plan 01 complete; Plans 02-07 remaining
-**Progress:** [██████░░░░] 57%
+**Plan:** 2 of 7 complete (05-02: State/city scrapers + drift detection)
+**Status:** In progress — Phase 4 closed; Phase 5 Plans 01–02 complete; Plans 03–07 remaining
+**Progress:** [██████░░░░] 60%
 
-Last activity: 2026-05-10 — 05-01 complete: federal Discovery cron live (SAM.gov + Grants.gov + Simpler.Grants.gov + SBIR.gov), 6h cadence on /api/cron/rfp-discovery-federal, idempotent upsert keyed on (source, source_id), soft-skip on missing keys / endpoint maintenance. SBIR.gov endpoint resolved (api.www.sbir.gov/public/api/solicitations) — currently in maintenance, self-heals.
+Last activity: 2026-05-10 — 05-02 complete: NY State + NYC DYCD/HRA/DOE scrapers + drift detection live. Vercel cron at `30 */6 * * *` (offset +30m from federal). Two new tables (rfp_source_drift, rfp_source_baseline) with service-only RLS. Drift triggers: http_status, fetch_error, zero_nodes, shape_mismatch, count_anomaly (>50% drop from rolling 3-run baseline). Throttled admin email alerts (1 per source/reason per 24h) with [DRIFT-ALERT-FALLBACK] log fallback when Resend domain unverified.
 
 ## Performance Metrics
 
@@ -31,13 +31,14 @@ Last activity: 2026-05-10 — 05-01 complete: federal Discovery cron live (SAM.g
 | 01-social-proof | 1 | 7 min | 7 min |
 | 02-onboarding-optimization | 2 | 62 min | 31 min |
 
-**v2.0 velocity:** 1 plan completed, 7 min avg
+**v2.0 velocity:** 4 plans completed (Phase 4 P01–P02, Phase 5 P01–P02)
 
 | Phase | Plan | Duration | Tasks | Files |
 |-------|------|----------|-------|-------|
 | 04-foundations-salvage-port | P01 | 7 min | 3 | 5 |
 | 04-foundations-salvage-port | P02 | 14 min | 3 | 8 |
 | 05-discovery | P01 | ~25 min | 3 | 9 |
+| 05-discovery | P02 | ~120 min (2 sessions) | 3 | 13 |
 
 ## Accumulated Context
 
@@ -78,9 +79,23 @@ Decisions are logged in PROJECT.md Key Decisions table. Notable carries:
 ## Session Continuity
 
 Last session: 2026-05-10
-Stopped at: Completed 05-01-PLAN.md (federal Discovery ingestion: cron + 4 federal-source fetchers + idempotent upsert)
+Stopped at: Completed 05-02-PLAN.md (state/city scrapers + drift detection: NY State Grants Gateway + NYC DYCD/HRA/DOE + rolling-baseline count anomaly + throttled admin email alerts)
 Resume file: None
-Next action: Execute 05-02-PLAN.md — state/city scraper plan (NY State Grants Gateway + NYC DYCD/HRA/DOE) — note: untracked scrape/* files in working tree from a prior partial run; the 05-02 executor should reconcile
+Next action: Execute 05-03-PLAN.md — Fit scoring engine (30/25/20/15/10) + AI summary + async recompute on capture-profile change (DISC-03)
+
+### v2.0 Phase 5 Key Decisions (Plan 02)
+
+- Regex-bounded HTML extraction over cheerio/jsdom for state/city scrapers — keeps Vercel cold-start fast and avoids a heavy dep for sources that render server-side
+- count_anomaly threshold = 50% drop from rolling 3-run baseline; deliberately blunt to avoid noise from normal weekly variance while still catching parser breakage
+- Rolling baseline self-heals: recordBaseline runs on every successful scrape, so legitimate long-term shrinks re-establish a new baseline within 3 cron ticks
+- Drift = signal, not gate — count_anomaly fires alongside upsert; records always land. Silent breakage is the failure mode being prevented
+- Throttled alert emails: at most 1 per (source, reason) per 24h via SELECT-on-insert. Drift rows always persisted regardless of email outcome
+- RESEND_FROM_EMAIL fallback chain: RFP_ALERT_FROM_EMAIL ?? RESEND_FROM_EMAIL ?? noreply@perpetualcore.com. Falls through to [DRIFT-ALERT-FALLBACK] console log when Resend rejects (domain unverified)
+- Service-only RLS via USING(false) on rfp_source_drift + rfp_source_baseline. Only service_role can read/write. Admin UI in Phase 10
+- Local OpportunityInput shape in scrape/types.ts (mirrors but doesn't import from 05-01's normalize.ts) — avoids commit-ordering coupling
+- 30-minute offset cron: federal at `0 */6`, state/city at `30 */6` — spreads function-execution load across the hour
+- rfp_opportunities source CHECK constraint extended additively to include 'nyc_hra' and 'nyc_doe' (DYCD already permitted by Phase 4 schema)
+- Wave 1 commit-granularity deviation: parallel-session executor consolidated Tasks 2+3 into wip(rfp) commits to keep branch clean during handoff. Deliverables functionally complete; SUMMARY documents the deviation
 
 ### v2.0 Phase 5 Key Decisions (Plan 01)
 

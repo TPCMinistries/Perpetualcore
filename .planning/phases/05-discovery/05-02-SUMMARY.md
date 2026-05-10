@@ -97,7 +97,7 @@ Tasks were executed across two sessions due to context-budget pressure during Wa
 
 1. **Task 1: rfp_source_drift table + drift detector** — `04f6bfc` (feat) — drift detector module + both migrations.
 2. **Task 1 (continued): source enum extension** — included in the second migration `20260510_rfp_source_baseline.sql` (committed alongside Task 1) — adds `nyc_hra` and `nyc_doe` to the `rfp_opportunities.source` CHECK constraint.
-3. **Task 2: NY State + NYC DYCD/HRA/DOE scrapers + run-state-city orchestrator + scrape README** — `11d67fd` (wip — consolidated multiple in-flight files; deliverables byte-equivalent to the per-task commits the plan called for) and `687cd2c` (fix — TS strict-mode upsert cast through unknown).
+3. **Task 2: NY State + NYC DYCD/HRA/DOE scrapers + run-state-city orchestrator + scrape README** — `11d67fd` (wip — consolidated multiple in-flight files; deliverables byte-equivalent to the per-task commits the plan called for) plus `687cd2c` (fix — TS strict-mode upsert cast through unknown) plus `cf52c66` (fix — narrow Database type for rfp_* table client calls; explicit IdRow / BaselineRow / IngestTotals / StateCityIngestResult typing).
 4. **Task 3: cron route + vercel.json offset schedule** — `13b2e94` (wip — same consolidation).
 
 **Plan metadata commit:** added with this SUMMARY.
@@ -157,13 +157,13 @@ _Atomic-per-task ideal not perfectly met:_ a parallel-session executor batched T
 
 ### Auto-fixed Issues
 
-**1. [Rule 3 - Blocking] Strict-mode upsert type mismatch**
-- **Found during:** Task 2 (run-state-city orchestrator)
-- **Issue:** `supabase.from("rfp_opportunities").upsert(rows, ...)` failed strict-mode typecheck because the local `StateCitySourceName` enum (`'ny_state' | 'nyc_dycd' | 'nyc_hra' | 'nyc_doe'`) does not match the `Database` types' generated `rfp_opportunities.source` enum, and several columns added by 05-01 (`last_seen_at`, etc.) aren't reflected in `database.types.ts` either.
-- **Fix:** Cast `rows as unknown as never[]` to match the existing pattern in `lib/rfp/ingest/run.ts` (federal orchestrator). Documented inline.
-- **Files modified:** `lib/rfp/ingest/run-state-city.ts`
-- **Verification:** Project tsc no longer errors on this file (full project typecheck pending; scoped check passed).
-- **Committed in:** `687cd2c`
+**1. [Rule 3 - Blocking] Strict-mode types for rfp_* table client calls**
+- **Found during:** Task 2 (drift.ts + run-state-city orchestrator)
+- **Issue:** `lib/supabase/database.types.ts` does not include the rfp_* tables (rfp_opportunities, rfp_source_drift, rfp_source_baseline). Without explicit narrowing, supabase-js's strict overload set produces TS2769 / TS2589 ("Type instantiation is excessively deep") errors on every `.from()` call against those tables. ESLint did not flag this; only scoped `tsc --noEmit` against the project tsconfig surfaces it.
+- **Fix:** Two-stage. First (`687cd2c`): cast upserted rows via `as unknown as never[]` matching the federal orchestrator pattern. Second (`cf52c66`): narrow `createAdminClient()` once per function via a `getRfpClient(): { from: (table: string) => any }` helper in `drift.ts` and an inline cast in `run-state-city.ts`. Also tightened implicit-any params on three `.reduce` / `.map` callbacks (`StateCityIngestResult`, `IdRow`, `BaselineRow`, `IngestTotals`).
+- **Files modified:** `lib/rfp/ingest/scrape/drift.ts`, `lib/rfp/ingest/run-state-city.ts`, `app/api/cron/rfp-discovery-state-city/route.ts`
+- **Verification:** Scoped `tsc --noEmit -p /tmp/tsconfig.scoped.json` (against the project tsconfig with explicit include of the rfp scrape/orchestrator/cron files + their dependencies) returns clean.
+- **Committed in:** `687cd2c` + `cf52c66`
 
 **2. [Process] Plan-prescribed atomic per-task commits did not happen as written**
 - **Found during:** Resume — Wave 1 ran out of context mid-execution and the parallel-session executor consolidated multiple in-flight files into two `wip(rfp)` commits (`11d67fd` and `13b2e94`) to keep the branch clean during a session handoff.
@@ -180,7 +180,8 @@ _Atomic-per-task ideal not perfectly met:_ a parallel-session executor batched T
 ## Issues Encountered
 
 - **Wave 1 context exhaustion:** A previous executor session ran out of context mid-Wave-1 and committed in-flight scrapers/orchestrator/cron-route as `wip(rfp): …` to preserve work for the next session. Continuation agent (this run) verified the WIP commits contain functionally complete code, fixed the one TS strict-mode error in the orchestrator, and authored this SUMMARY.
-- **Generated DB types out of date:** `lib/supabase/database.types.ts` does not reflect the rfp_* tables. Worked around with the `as unknown as never[]` cast, matching the federal orchestrator. Recommend regenerating types in a follow-up `chore(supabase):` once Phase 5 lands.
+- **Generated DB types out of date:** `lib/supabase/database.types.ts` does not reflect the rfp_* tables. Worked around with `as unknown as never[]` upsert cast plus a `getRfpClient(): { from: (table: string) => any }` helper in `drift.ts` (and equivalent inline cast in `run-state-city.ts`) to silence the otherwise-unavoidable TS2769 / TS2589 errors on `.from("rfp_*")` calls. Recommend regenerating types in a follow-up `chore(supabase):` once Phase 5 lands.
+- **Project-wide tsc OOMs at 4GB heap:** running `npx tsc --noEmit -p tsconfig.json` against the full project hit `FATAL ERROR: Ineffective mark-compacts near heap limit Allocation failed - JavaScript heap out of memory` after ~1000s of compilation. This is a pre-existing codebase-size issue acknowledged in `next.config.mjs` (lines 119–127): `typescript.ignoreBuildErrors: true` and `eslint.ignoreDuringBuilds: true`. Not blocking Phase 5; mentioned here so future executors don't waste cycles re-discovering it. Use scoped tsconfig + ESLint for per-PR strict checks.
 - **Resend domain verification pending:** `perpetualcore.com` DNS records aren't in place yet, so live drift alert emails will fall back to `[DRIFT-ALERT-FALLBACK]` console logs. Not a Phase 5 blocker. Tracked: `.planning/phases/05-discovery/deferred-items.md` RESEND-DOMAIN-VERIFICATION.
 
 ## Authentication Gates
@@ -229,7 +230,10 @@ Run during this session:
 - [x] Commit `04f6bfc` exists in git log (Task 1)
 - [x] Commit `11d67fd` exists in git log (Task 2 + Task 3 WIP consolidation)
 - [x] Commit `13b2e94` exists in git log (Task 3 cron route + vercel.json)
-- [x] Commit `687cd2c` exists in git log (TS strict-mode fix)
+- [x] Commit `687cd2c` exists in git log (TS strict-mode upsert cast)
+- [x] Commit `cf52c66` exists in git log (TS strict-mode rfp_* client typing)
+- [x] `npx eslint lib/rfp/ingest/scrape lib/rfp/ingest/run-state-city.ts app/api/cron/rfp-discovery-state-city/route.ts` returns clean
+- [x] `npx tsc --noEmit -p /tmp/tsconfig.scoped.json` (scoped tsconfig including all rfp ingest + orchestrator + cron + supabase server + email + types files) returns clean
 
 ---
 
