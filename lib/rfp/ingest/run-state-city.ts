@@ -165,9 +165,14 @@ export async function runStateCityIngest(): Promise<StateCityIngestResult[]> {
       // will start populating them.
     }));
 
+    // Cast through unknown to bypass the generated Database type — the new
+    // columns (last_seen_at) and new source enum values ('nyc_hra', 'nyc_doe')
+    // from the 05-01 / 05-02 migrations aren't reflected in
+    // lib/supabase/database.types.ts yet. Matches the pattern used in
+    // lib/rfp/ingest/run.ts (federal orchestrator).
     const { data, error } = await supabase
       .from("rfp_opportunities")
-      .upsert(rows, {
+      .upsert(rows as unknown as never[], {
         onConflict: "source,source_id",
         ignoreDuplicates: false,
       })
