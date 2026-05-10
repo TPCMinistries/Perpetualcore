@@ -10,7 +10,7 @@
  */
 
 import Link from "next/link";
-import { ArrowRight, CheckCircle2, Database, Users, Sparkles, FileText, GraduationCap, Heart } from "lucide-react";
+import { ArrowRight, Database, Sparkles, FileText, GraduationCap, Heart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Navbar } from "@/components/landing/Navbar";
@@ -184,7 +184,7 @@ export default function StudioEngagementsPage() {
             return (
               <div key={item.label} className="flex gap-4">
                 <div className="flex-shrink-0 h-9 w-9 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center">
-                  <Icon className="h-4.5 w-4.5 text-primary" />
+                  <Icon className="h-4 w-4 text-primary" />
                 </div>
                 <div>
                   <p className="text-base leading-relaxed">

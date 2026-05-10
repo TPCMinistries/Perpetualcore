@@ -289,7 +289,7 @@ export default function PricingPage() {
                 <CardContent className="p-7 flex flex-col h-full">
                   <div className="mb-5">
                     <div className="h-9 w-9 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center mb-4">
-                      <Icon className="h-4.5 w-4.5 text-primary" />
+                      <Icon className="h-4 w-4 text-primary" />
                     </div>
                     <h3 className="text-xl font-semibold mb-1">{plan.name}</h3>
                     <p className="text-sm text-muted-foreground">{plan.description}</p>
