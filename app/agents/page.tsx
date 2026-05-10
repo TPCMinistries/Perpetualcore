@@ -203,7 +203,7 @@ export default function AgentsLibraryPage() {
         <div className="container mx-auto px-4">
           <div className="flex flex-col md:flex-row justify-between items-center gap-4">
             <p className="text-sm text-muted-foreground">
-              © 2024 Perpetual Core. All rights reserved.
+              © 2026 Perpetual Core. All rights reserved.
             </p>
             <div className="flex gap-6 text-sm">
               <Link href="/" className="text-muted-foreground hover:text-foreground">Home</Link>

@@ -1406,7 +1406,7 @@ export default function FinancialAdvisorsPage() {
           </div>
           <div className="border-t pt-8 text-center text-sm text-muted-foreground">
             <p className="mb-2">
-              © 2024 AI Operating System. All rights reserved. | SOC 2 Type II Certified | SEC Compliant
+              © 2026 AI Operating System. All rights reserved. | SOC 2 Type II Certified | SEC Compliant
             </p>
             <p className="text-xs max-w-3xl mx-auto">
               Perpetual Core is a practice management tool. Investment advice and fiduciary responsibilities remain with registered advisors.

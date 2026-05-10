@@ -1468,7 +1468,7 @@ export default function HealthcarePage() {
           </div>
           <div className="border-t pt-8 text-center text-sm text-muted-foreground">
             <p className="mb-2">
-              © 2024 AI Operating System. All rights reserved. | HIPAA Compliant | SOC 2 Type II Certified | GDPR Ready
+              © 2026 AI Operating System. All rights reserved. | HIPAA Compliant | SOC 2 Type II Certified | GDPR Ready
             </p>
             <p className="text-xs">
               Perpetual Core is not a healthcare provider and does not provide medical advice. BAA included with all healthcare plans.

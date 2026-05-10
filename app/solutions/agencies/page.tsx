@@ -1617,7 +1617,7 @@ export default function AgenciesPage() {
           </div>
           <div className="border-t pt-8 text-center text-sm text-muted-foreground">
             <p className="mb-2">
-              © 2024 AI Operating System. All rights reserved. | SOC 2 Type II Certified | GDPR Ready
+              © 2026 AI Operating System. All rights reserved. | SOC 2 Type II Certified | GDPR Ready
             </p>
             <p className="text-xs">
               Perpetual Core is a productivity platform. All AI-generated content should be reviewed by qualified professionals.

@@ -227,7 +227,7 @@ export default function SolutionsPage() {
             </div>
           </div>
           <div className="border-t pt-8 text-center text-sm text-muted-foreground">
-            <p>© 2024 AI Operating System. All rights reserved.</p>
+            <p>© 2026 AI Operating System. All rights reserved.</p>
           </div>
         </div>
       </footer>
