@@ -149,3 +149,43 @@ Narrow-scope conflict-free fixes from UI_AUDIT.md, run in parallel with active s
 - 17 stale "© 2024" footers across `app/solutions/*`, `app/industries/[industry]`, `app/features/intelligence`, `app/agents`, `app/consulting` — bulk year bump candidate.
 - `app/features/intelligence/page.tsx` says "© 2024 Perpetual Core" while sibling `app/features/page.tsx` now says 2026 — consider canonicalizing to a shared `<Footer/>` to prevent drift.
 - Compliance claims ("HIPAA Compliant", "SOC 2 Type II Certified", "FERPA Compliant", "ABA Compliant", "SEC Compliant") in solutions/* footers — flagged in UI_AUDIT, needs legal review before next deploy.
+
+## Rebase + worktree teardown (2026-05-10 late evening, lead)
+
+Second-RFP session paused; their work preserved on `feat/rfp-orgs-invites-cont` (11d67fd wip + df14af0 gitignore + 13b2e94 wip(rfp): state/city cron + their additional commits up to 687cd2c). Rebase of `feat/studio-repositioning` onto main: **25 commits replayed cleanly, 0 conflicts.** File regions independent (repositioning = app/(homepage|studio|engine|about|pricing|products), main's new work = app/api/cron + lib/rfp + app/(rfp-marketing)).
+
+Worktree at `.claude/worktrees/agent-aca1286e51baa739e` removed. Branches intact.
+
+## Phase 12 (Studio Repositioning v1.1) execution (2026-05-10 late evening)
+
+**Roadmap added:** v3.0 Milestone "Studio Polish & Launch" with Phase 12. Requirements STUDIO-CS-01 through STUDIO-PL-01 added to REQUIREMENTS.md.
+
+**Planning:** 6 plans across 3 waves. Verification passed iteration 2/3 (4 blockers + 8 warnings + 2 info resolved surgically). Plan commits `b2b6a83` (initial) + `a03c07f` (revisions) on rfp branch, cherry-picked as `24470ca` onto feat/studio-repositioning.
+
+**Wave 1 execution (parallel, 4 plans):**
+
+| Plan | Commits | Outcome |
+|---|---|---|
+| 12-01 case studies | `6739d95` `a164e7f` | INSTALL+OUTCOME prose for all 3 slots. Zero stubs, zero client names, zero fabricated metrics. |
+| 12-02 atlas-discovery | `640f2ad` `d8f93a4` `e845d24` (+ atlas-discovery files bundled in early commit) | New page (16.9kb), cross-link from /products/atlas, sales_contacts.product migration with dual-write product field + message prefix. |
+| 12-03 IHA links PC-side | `03bed68` `e5775e0` `bff52a8` | 7 IHA hyperlinks across /about, /engine, /products/sage. Direction-B (iha-website hyperlinking) deferred via phase_2_followup. |
+| 12-04 Vellum data layer | `cf29084` `e7e032f` `17b3097` `15a61b4` | vellum_early_access table (RLS service-role-only), /api/early-access vellum branch with Resend confirmation, /api/vellum/setup-intent Stripe setupIntent endpoint. |
+
+**Wave 2 execution (1 plan, 3/4 tasks complete):**
+
+| Plan | Commits | Outcome |
+|---|---|---|
+| 12-05 Vellum UI + admin | `f2bfb61` `1c0bd3a` `051ecc0` | EarlyAccessForm (Stripe Elements + 3DS-redirect resume via sessionStorage + ?confirmed=1), /products/vellum updated with unconditional IHA hyperlink + form mount, /admin/vellum-waitlist for Lorenzo view. Task 4 (6-signup verification) awaits Lorenzo. |
+
+**Wave 3 execution (1 plan, 2/4 tasks complete):**
+
+| Plan | Commits | Outcome |
+|---|---|---|
+| 12-06 navbar + cleanup | `221aeae` `1ceca4a` `4009279` | Canonical Navbar+Footer consolidated across 15 files (12 /solutions/* + features/intelligence + agents + app/consulting redirect). Year audit: zero "© 2024" matches site-wide. Task 3 (mobile QA at 375/768/1024) + Task 4 (logo decision) await Lorenzo. |
+
+**Three Lorenzo-gated checkpoints outstanding:**
+1. `12-05 Task 4` — 6 Stripe test signups (Free / Operator+501c3 / Team / Institution / Declined card / 3DS card). Resume signals: `vellum-flow-verified` or `issues [description]`.
+2. `12-06 Task 3` — mobile QA across 17 pages at 375/768/1024. Resume signals: `mobile-qa-pass` or `mobile-qa-fix-needed [list]`.
+3. `12-06 Task 4` — logo decision. Resume signals: `logo-real [SVG path]` or `logo-placeholder-v1.2`.
+
+After all three close: spawn gsd-verifier for phase goal achievement, mark Phase 12 complete via `gsd-tools phase complete 12`, branch is merge-ready (base + v1.1 stacked).
