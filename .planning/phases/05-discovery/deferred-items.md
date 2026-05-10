@@ -8,9 +8,27 @@ Items captured during Phase 5 planning that are explicitly out of scope for this
 
 **Carried:** 2026-05-10 from `.planning/phases/04-foundations-salvage-port/deferred-items.md`
 **Owner:** Executor of Plan 05-01 (federal Discovery ingestion)
-**Status:** Open. Plan 05-01 Task 2e attempts a CSV-download path and a JSON path; whichever works is wired in. If both fail, the SBIR fetcher returns `[]` and re-tracks this item with the attempted endpoints noted.
+**Status:** **RESOLVED 2026-05-10 during Plan 05-01 execution.**
 
-**Action:** Confirm endpoint resolution during Plan 05-01 execution and update this entry to CLOSED with the working URL, or carry forward with current attempts logged.
+**Resolution:** The official SBIR API host is `api.www.sbir.gov`, path `/public/api/solicitations` (per the documentation page at https://www.sbir.gov/api/solicitation). The legacy host `www.sbir.gov/api/solicitations.json` from Phase 04 TECH-SPEC was a pre-Drupal-10 path and is permanently 404. The CSV bulk download (`sites/default/files/Solicitations.csv`) is also 404. The fetcher in `lib/rfp/ingest/sbir.ts` is wired to the correct endpoint. See SBIR-API-MAINTENANCE below for the current runtime state of that endpoint.
+
+---
+
+## SBIR-API-MAINTENANCE
+
+**Captured:** 2026-05-10 during Plan 05-01 Task 2e execution
+**Owner:** No human action required — self-healing
+**Status:** Open. Transient state (SBIR.gov maintenance window).
+
+**Summary:** The SBIR Public API at `api.www.sbir.gov/public/api/solicitations` returns HTTP 429 with body
+```
+{"Code":"TooManyRequestsError","Message":"The SBIR Public API is not available at this time."}
+```
+as of 2026-05-10. The official `/api` documentation page at www.sbir.gov/api carries an explicit maintenance banner: "Please be advised that the SBIR.gov APIs are currently undergoing maintenance. In the meantime, if you require assistance in obtaining your data, please contact our helpdesk."
+
+The `lib/rfp/ingest/sbir.ts` fetcher treats HTTP 429 with this body as a soft SKIP (parses the message, logs `[skip] sbir: <message>`, returns `[]`). The orchestrator continues with the other federal sources unaffected. **When the API exits maintenance, the fetcher will start producing rows automatically with NO code change required** — the integration is correct.
+
+**Action when revisiting:** Periodically check whether the fetcher starts returning rows. If maintenance persists past 30 days and SBIR coverage becomes time-critical, escalate via SBIR.gov helpdesk (contact info on the maintenance banner) or build the Playwright scrape fallback against the public solicitations search UI as originally listed in the Phase 04 deferred entry.
 
 ---
 

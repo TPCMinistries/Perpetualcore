@@ -5,17 +5,17 @@
 See: .planning/PROJECT.md (updated 2026-05-09)
 
 **Core value:** The AI operating system brain — if this breaks, everything downstream breaks
-**Current focus:** v2.0 RFP & Proposal Engine — Phase 4 (Foundations & Salvage Port)
+**Current focus:** v2.0 RFP & Proposal Engine — Phase 5 (Discovery)
 
 ## Current Position
 
 **Milestone:** v2.0 RFP & Proposal Engine
-**Phase:** 4 of 11 (Phase 4: Foundations & Salvage Port)
-**Plan:** 2 of 4 complete (04-02: RFP API env infrastructure + smoke test)
-**Status:** In progress — Phase 4 Plans 1-2 complete; Plans 3-4 remaining
-**Progress:** [███████░░░] 71%
+**Phase:** 5 of 11 (Phase 5: Discovery)
+**Plan:** 1 of 7 complete (05-01: Federal Discovery ingestion)
+**Status:** In progress — Phase 4 closed; Phase 5 Plan 01 complete; Plans 02-07 remaining
+**Progress:** [██████░░░░] 57%
 
-Last activity: 2026-05-09 — 04-02 complete: Zod env vars for 4 Discovery sources + lib/rfp/sources.ts registry + npm run smoke:rfp-apis (Grants.gov PASS, SBIR.gov PASS, SAM/Simpler SKIP pending keys)
+Last activity: 2026-05-10 — 05-01 complete: federal Discovery cron live (SAM.gov + Grants.gov + Simpler.Grants.gov + SBIR.gov), 6h cadence on /api/cron/rfp-discovery-federal, idempotent upsert keyed on (source, source_id), soft-skip on missing keys / endpoint maintenance. SBIR.gov endpoint resolved (api.www.sbir.gov/public/api/solicitations) — currently in maintenance, self-heals.
 
 ## Performance Metrics
 
@@ -37,6 +37,7 @@ Last activity: 2026-05-09 — 04-02 complete: Zod env vars for 4 Discovery sourc
 |-------|------|----------|-------|-------|
 | 04-foundations-salvage-port | P01 | 7 min | 3 | 5 |
 | 04-foundations-salvage-port | P02 | 14 min | 3 | 8 |
+| 05-discovery | P01 | ~25 min | 3 | 9 |
 
 ## Accumulated Context
 
@@ -76,17 +77,25 @@ Decisions are logged in PROJECT.md Key Decisions table. Notable carries:
 
 ## Session Continuity
 
-Last session: 2026-05-09
-Stopped at: Completed 04-02-PLAN.md (env infrastructure + smoke test; Grants.gov [PASS], SBIR.gov [PASS])
+Last session: 2026-05-10
+Stopped at: Completed 05-01-PLAN.md (federal Discovery ingestion: cron + 4 federal-source fetchers + idempotent upsert)
 Resume file: None
-Next action: Execute 04-03-PLAN.md (next plan in Phase 4)
+Next action: Execute 05-02-PLAN.md — state/city scraper plan (NY State Grants Gateway + NYC DYCD/HRA/DOE) — note: untracked scrape/* files in working tree from a prior partial run; the 05-02 executor should reconcile
 
-### v2.0 Phase 4 Key Decisions
+### v2.0 Phase 5 Key Decisions (Plan 01)
+
+- SBIR.gov endpoint RESOLVED: official host is `api.www.sbir.gov`, path `/public/api/solicitations` (per the docs page). Legacy `www.sbir.gov/api/solicitations.json` is permanently 404 post-Drupal-10. CSV bulk path also 404. Phase 04 SBIR-ENDPOINT-UPDATE is closed.
+- SBIR API in maintenance as of 2026-05-10 (HTTP 429 with explicit maintenance message). Treated as soft-skip; self-heals when API recovers — no code change needed. Tracked as Phase 05 SBIR-API-MAINTENANCE.
+- Federal ingest soft-skip semantics: missing API key OR endpoint maintenance returns `[]` + console log, never throws. `Promise.allSettled` orchestrator means one source's failure never aborts the run.
+- Cron `/api/cron/rfp-discovery-federal` on `0 */6 * * *` (every 6h UTC) — bearer-secret auth using existing CRON_SECRET. Idempotent upsert on (source, source_id) refreshes `last_seen_at` on every run.
+- `needs_review = true` on Simpler Grants partial rows (missing close_date AND award_ceiling AND agency) — feed UI surfaces them for human cleanup rather than dropping data. Aligns with CONTEXT.md "save raw + flag" decision.
+- Rate-limit posture: 200 records/source/run cap (2 paginated pages of 100). Stays well under SAM.gov free-tier 1k/day limit.
+
+### v2.0 Phase 4 Key Decisions (carried)
 
 - SECURITY DEFINER helper functions (`rfp_my_org_ids` et al.) break RLS recursion on `rfp_user_orgs` — all 37 policies use array membership pattern
 - `rfp_proposal_sections` and `rfp_compliance_checks` gated via parent `rfp_proposals` subquery (no org_id denorm) — keeps relational integrity
 - 3 migration files (schema, RLS policies, RLS fix) — atomic rollback isolation; never amend committed migrations
 - vitest `environmentMatchGlobs` for `tests/rls/**` → node environment (not jsdom) for live DB integration tests
-- SBIR.gov API endpoint www.sbir.gov/api/solicitations.json is defunct (Drupal 7→10 migration); smoke test uses robots.txt for domain reachability; Phase 5 must research correct endpoint (tracked: deferred-items.md SBIR-ENDPOINT-UPDATE)
 - Simpler Grants auth header is X-API-Key per TECH-SPEC §4.1 (not X-Auth as in plan body); to be confirmed when Lorenzo generates the key
 - BASE_URLS fallback const in sources.ts guards against Zod parse failure in standalone scripts where Supabase keys are absent from shell
