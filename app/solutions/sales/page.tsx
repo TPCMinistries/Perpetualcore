@@ -9,6 +9,7 @@ import {
   XCircle, AlertCircle, Sparkles, MessageSquare, Infinity, Database, Lock,
   Search, FileText, Clock, Plus, Minus, ArrowRight
 } from "lucide-react";
+import { EngagementBanner } from "@/components/landing/EngagementBanner";
 
 export default function SalesTeamsPage() {
   // FAQ State
@@ -38,6 +39,8 @@ export default function SalesTeamsPage() {
           </div>
         </div>
       </header>
+
+      <EngagementBanner />
 
       {/* Hero Section */}
       <section className="container mx-auto px-4 py-20 text-center">

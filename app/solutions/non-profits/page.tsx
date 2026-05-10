@@ -9,6 +9,7 @@ import {
   AlertCircle, Brain, Shield, Lock, Database, Sparkles, FileText, Search,
   Clock, Zap, TrendingUp, ArrowRight, DollarSign, Plus, Minus
 } from "lucide-react";
+import { EngagementBanner } from "@/components/landing/EngagementBanner";
 
 export default function NonProfitsPage() {
   // FAQ State
@@ -38,6 +39,8 @@ export default function NonProfitsPage() {
           </div>
         </div>
       </header>
+
+      <EngagementBanner />
 
       {/* Hero Section */}
       <section className="container mx-auto px-4 py-20 text-center">

@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { EngagementBanner } from "@/components/landing/EngagementBanner";
 
 export default function LawFirmsPage() {
   // ROI Calculator State
@@ -53,6 +54,8 @@ export default function LawFirmsPage() {
           </div>
         </div>
       </header>
+
+      <EngagementBanner />
 
       {/* Hero Section - Enhanced with Urgency */}
       <section className="container mx-auto px-4 py-16 md:py-24 relative overflow-hidden">

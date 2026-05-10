@@ -4,6 +4,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { INDUSTRY_CONFIGS } from "@/lib/dashboard/industry-config";
 import { ArrowRight, Briefcase } from "lucide-react";
 import { PublicMobileNav } from "@/components/layout/PublicMobileNav";
+import { EngagementBanner } from "@/components/landing/EngagementBanner";
 
 export const metadata = {
   title: "Solutions by Industry | Perpetual Core",
@@ -85,6 +86,8 @@ export default function SolutionsPage() {
           </div>
         </div>
       </header>
+
+      <EngagementBanner />
 
       {/* Hero Section */}
       <section className="container mx-auto px-4 py-16 sm:py-24 md:py-32">

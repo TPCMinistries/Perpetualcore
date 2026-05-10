@@ -9,6 +9,7 @@ import {
   Shield, XCircle, AlertCircle, Brain, Calendar, MessageCircle, Clock,
   Zap, ArrowRight, Database, Lock, Sparkles, Plus, Minus, GraduationCap
 } from "lucide-react";
+import { EngagementBanner } from "@/components/landing/EngagementBanner";
 
 export default function EducationPage() {
   // FAQ State
@@ -38,6 +39,8 @@ export default function EducationPage() {
           </div>
         </div>
       </header>
+
+      <EngagementBanner />
 
       {/* Hero Section */}
       <section className="container mx-auto px-4 py-20 text-center">

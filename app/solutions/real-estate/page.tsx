@@ -10,6 +10,7 @@ import {
   Zap, Lock, Building2, XCircle, AlertCircle, Play, ChevronDown, Minus, Plus,
   Sparkles, MessageSquare, Mail, Calendar, MapPin, Key
 } from "lucide-react";
+import { EngagementBanner } from "@/components/landing/EngagementBanner";
 
 export default function RealEstatePage() {
   // FAQ State
@@ -39,6 +40,8 @@ export default function RealEstatePage() {
           </div>
         </div>
       </header>
+
+      <EngagementBanner />
 
       {/* Hero Section */}
       <section className="container mx-auto px-4 py-16 md:py-24 relative overflow-hidden">
