@@ -29,11 +29,14 @@
  * we are running in server / background contexts (cron handlers, fire-and-
  * forget recompute after profile mutations).
  *
- * Alerts:
- *   This module does NOT fire alert deliveries. Per 05-CONTEXT.md, alerts
- *   only fire on cron-discovered new opps and are routed by Plan 05-07
- *   (which subscribes to opp-match inserts). recomputeAllForOrg() is a
- *   refresh path; new prose, no alerts.
+ * Alerts (Plan 05-07):
+ *   `scoreNewOpportunitiesForAllActiveOrgs` fires alerts after upsert via
+ *   `maybeDispatchAlert` for every match row with fit_score >= 80 (system
+ *   default threshold; each user's actual threshold is applied inside the
+ *   dispatcher). recomputeAllForOrg() is silent per 05-CONTEXT.md — profile
+ *   changes shouldn't flood users with alerts on every capacity-fact edit.
+ *   Alert failures are non-fatal: scoring writes still land even if dispatch
+ *   throws.
  */
 
 import { createAdminClient } from '@/lib/supabase/server';
@@ -44,6 +47,8 @@ import {
   type ScoreBreakdown,
 } from './score';
 import { generateFitSummary } from './summary';
+import { maybeDispatchAlert } from '@/lib/rfp/alerts/dispatch';
+import { DEFAULT_THRESHOLD } from '@/lib/rfp/alerts/prefs';
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
@@ -395,6 +400,42 @@ export async function scoreNewOpportunitiesForAllActiveOrgs(
   const { upserted, error } = await upsertMatches(rows);
   if (error) {
     console.error('[scoring/recompute] upsert batch failed:', error);
+  }
+
+  // 8. Plan 05-07 — fire alerts for newly-high-fit matches.
+  //
+  // Only the cron path (this function) dispatches alerts; recomputeAllForOrg
+  // is silent because profile-driven recomputes would flood the user every
+  // time they edit their capacity facts. We use DEFAULT_THRESHOLD (80) as the
+  // floor here — every per-user dispatcher then applies the user's actual
+  // threshold (60-100, user-tunable).
+  //
+  // Wrapped in try/catch — alert delivery is non-fatal. Concurrency capped at
+  // 3 so we don't fan out hundreds of HTTP calls synchronously inside one
+  // cron lambda; each call already iterates per-org-member sequentially.
+  try {
+    const alertable = rows.filter((r) => r.fit_score >= DEFAULT_THRESHOLD);
+    if (alertable.length > 0) {
+      await asyncPool(3, alertable, async (row) => {
+        try {
+          await maybeDispatchAlert({
+            oppId: row.opp_id,
+            matchOrgId: row.org_id,
+            fit_score: row.fit_score,
+          });
+        } catch (e) {
+          console.error(
+            `[scoring/recompute] alert dispatch failed (opp=${row.opp_id}, org=${row.org_id}):`,
+            e instanceof Error ? e.message : String(e)
+          );
+        }
+      });
+    }
+  } catch (e) {
+    console.error(
+      '[scoring/recompute] alert fan-out failed (non-fatal):',
+      e instanceof Error ? e.message : String(e)
+    );
   }
 
   return { scored: upserted, orgs: orgIds.length };
