@@ -12,13 +12,24 @@
  *   NOT pass an admin client — RLS enforces per-user membership even on the
  *   server prefetch.
  *
+ * Phase 05-06 — dual mode prefetch:
+ *   When the active org has type='dual', the prefetch resolves the user's
+ *   underlying nonprofit/forprofit member orgs via listUserOrgs() and either:
+ *     (a) Passes dual_org_ids to buildFeedQuery (matching what the API does), OR
+ *     (b) Short-circuits with empty rows + empty_reason='no_member_orgs' when
+ *         the user has no qualifying underlying member orgs.
+ *   The client receives the same response shape it'd get from the API, so
+ *   first paint and subsequent fetches stay visually identical.
+ *
  * URL filters are read on the server too so the page renders the right view
- * when shared as a deep link.
+ * when shared as a deep link. Mode is also read from ?mode=... in dual mode.
  */
 
 import { buildFeedQuery } from "@/lib/rfp/feed";
+import { getOrgForUser, listUserOrgs } from "@/lib/rfp/orgs";
+import { notFound } from "next/navigation";
 import { DiscoveryClient } from "./DiscoveryClient";
-import type { FilterValues } from "./parts/FilterPills";
+import type { FilterValues, ModeFilter } from "./parts/FilterPills";
 
 interface DiscoveryPageProps {
   params: Promise<{ orgId: string }>;
@@ -46,6 +57,14 @@ function parseFiltersFromSearch(
   return { sources, deadline_within_days, min_amount };
 }
 
+function parseModeFromSearch(
+  raw: Record<string, string | string[] | undefined>
+): ModeFilter {
+  const m = typeof raw.mode === "string" ? raw.mode : null;
+  if (m === "nonprofit" || m === "forprofit" || m === "all") return m;
+  return "all";
+}
+
 export default async function DiscoveryPage({
   params,
   searchParams,
@@ -53,6 +72,42 @@ export default async function DiscoveryPage({
   const { orgId } = await params;
   const sp = await searchParams;
   const initialFilters = parseFiltersFromSearch(sp);
+  const initialMode = parseModeFromSearch(sp);
+
+  // Load the active org (also serves as a membership check — getOrgForUser
+  // returns null for non-members thanks to RLS). The dashboard layout already
+  // does this check, but doing it here too lets us read org.type without
+  // duplicating the layout's prop drilling.
+  const org = await getOrgForUser(orgId);
+  if (!org) {
+    // Defense-in-depth — layout would have already 404'd, but if a deep link
+    // somehow lands here without membership, we re-enforce.
+    notFound();
+  }
+
+  const isDualMode = org.type === "dual";
+
+  // For dual mode we need to resolve the underlying org ids upfront so the
+  // server prefetch hits the same data the client API would.
+  let dualOrgIds: string[] | undefined;
+  let initialEmptyReason: "no_member_orgs" | null = null;
+  if (isDualMode) {
+    const memberOrgs = await listUserOrgs();
+    const underlying = memberOrgs.filter((m) => m.rfp_orgs.type !== "dual");
+    let filtered: typeof underlying;
+    if (initialMode === "nonprofit") {
+      filtered = underlying.filter((m) => m.rfp_orgs.type === "nonprofit");
+    } else if (initialMode === "forprofit") {
+      filtered = underlying.filter((m) => m.rfp_orgs.type === "forprofit");
+    } else {
+      filtered = underlying;
+    }
+    if (filtered.length === 0) {
+      initialEmptyReason = "no_member_orgs";
+    } else {
+      dualOrgIds = filtered.map((m) => m.rfp_orgs.id);
+    }
+  }
 
   // Server-side first-page prefetch — RLS-bound (request-scoped createClient
   // inside buildFeedQuery). Empty rows just mean "no matches yet" — never an
@@ -61,27 +116,36 @@ export default async function DiscoveryPage({
   let initialCursor: Awaited<
     ReturnType<typeof buildFeedQuery>
   >["next_cursor"] = null;
-  try {
-    const page = await buildFeedQuery({
-      org_id: orgId,
-      sources: initialFilters.sources.length > 0 ? initialFilters.sources : undefined,
-      deadline_within_days: initialFilters.deadline_within_days,
-      min_amount: initialFilters.min_amount,
-      limit: 25,
-    });
-    initialRows = page.rows;
-    initialCursor = page.next_cursor;
-  } catch (e) {
-    // Render an empty feed rather than a 500 — the client will retry on filter change.
-    console.error("[discovery/page] prefetch failed", e);
+  // Skip the prefetch entirely when we already know the dual user has no
+  // member orgs — the client will render the empty state immediately and a
+  // wasted query would just return [] anyway.
+  if (initialEmptyReason !== "no_member_orgs") {
+    try {
+      const page = await buildFeedQuery({
+        org_id: orgId,
+        dual_org_ids: dualOrgIds,
+        mode_filter: isDualMode ? initialMode : undefined,
+        sources: initialFilters.sources.length > 0 ? initialFilters.sources : undefined,
+        deadline_within_days: initialFilters.deadline_within_days,
+        min_amount: initialFilters.min_amount,
+        limit: 25,
+      });
+      initialRows = page.rows;
+      initialCursor = page.next_cursor;
+    } catch (e) {
+      // Render an empty feed rather than a 500 — the client will retry on filter change.
+      console.error("[discovery/page] prefetch failed", e);
+    }
   }
 
   return (
     <DiscoveryClient
-      orgId={orgId}
+      org={org}
       initialRows={initialRows}
       initialCursor={initialCursor}
       initialFilters={initialFilters}
+      initialMode={initialMode}
+      initialEmptyReason={initialEmptyReason}
     />
   );
 }

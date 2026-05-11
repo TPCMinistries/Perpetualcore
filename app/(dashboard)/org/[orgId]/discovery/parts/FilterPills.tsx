@@ -20,6 +20,13 @@ import { useEffect, useRef, useState } from "react";
 
 export type DeadlineWindow = 7 | 30 | null;
 
+/**
+ * Phase 05-06 — Mode filter, surfaced only to dual-org users. 'all' unions
+ * scored matches across both nonprofit + forprofit member orgs; nonprofit and
+ * forprofit narrow to one side. Single-mode users never see this control.
+ */
+export type ModeFilter = "all" | "nonprofit" | "forprofit";
+
 export interface FilterValues {
   sources: string[];
   deadline_within_days: DeadlineWindow;
@@ -29,6 +36,12 @@ export interface FilterValues {
 interface FilterPillsProps {
   value: FilterValues;
   onChange: (next: FilterValues) => void;
+  /** True only when the active org's type === 'dual'. Hides the Mode pill otherwise. */
+  isDualMode?: boolean;
+  /** Current dual-mode selection. Required when isDualMode is true. */
+  mode?: ModeFilter;
+  /** Notifier for Mode pill changes. Required when isDualMode is true. */
+  onModeChange?: (next: ModeFilter) => void;
 }
 
 const SOURCE_OPTIONS: Array<{ key: string; label: string }> = [
@@ -49,6 +62,103 @@ function pillBase(active: boolean): string {
       ? "bg-zinc-900 border-zinc-600 text-zinc-100"
       : "bg-zinc-950 border-zinc-800 text-zinc-400 hover:text-zinc-200 hover:border-zinc-700"
   }`;
+}
+
+// ── Mode pill (dual-org only) ─────────────────────────────────────────────────
+//
+// Phase 05-06. Renders ONLY when isDualMode prop is true. Same visual treatment
+// as the Source pill — popover with three exclusive options. We deliberately use
+// a popover instead of a click-to-cycle so the active value is always legible
+// in the trigger ("Mode: All" / "Mode: Nonprofit" / "Mode: For-profit") and so
+// the user doesn't have to discover the cycle order by clicking.
+
+const MODE_OPTIONS: Array<{ key: ModeFilter; label: string }> = [
+  { key: "all", label: "All" },
+  { key: "nonprofit", label: "Nonprofit" },
+  { key: "forprofit", label: "For-profit" },
+];
+
+function modeLabel(m: ModeFilter): string {
+  return MODE_OPTIONS.find((o) => o.key === m)?.label ?? "All";
+}
+
+function ModePill({
+  value,
+  onChange,
+}: {
+  value: ModeFilter;
+  onChange: (next: ModeFilter) => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement | null>(null);
+
+  // Click-outside to close
+  useEffect(() => {
+    if (!open) return;
+    function onDocClick(e: MouseEvent) {
+      if (ref.current && !ref.current.contains(e.target as Node)) {
+        setOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", onDocClick);
+    return () => document.removeEventListener("mousedown", onDocClick);
+  }, [open]);
+
+  // Treat any non-default selection as "active" (filtered) styling.
+  const active = value !== "all";
+
+  return (
+    <div className="relative" ref={ref}>
+      <button
+        type="button"
+        onClick={() => setOpen((v) => !v)}
+        className={pillBase(active)}
+        aria-haspopup="listbox"
+        aria-expanded={open}
+        data-testid="mode-pill"
+      >
+        Mode
+        <span className={active ? "text-emerald-300" : "text-zinc-400"}>
+          · {modeLabel(value)}
+        </span>
+        <span aria-hidden="true">▾</span>
+      </button>
+      {open && (
+        <div
+          role="listbox"
+          className="absolute left-0 top-full mt-2 w-40 z-50 rounded-md border border-zinc-800 bg-zinc-950 shadow-xl p-1"
+        >
+          {MODE_OPTIONS.map((opt) => {
+            const selected = opt.key === value;
+            return (
+              <button
+                key={opt.key}
+                type="button"
+                role="option"
+                aria-selected={selected}
+                onClick={() => {
+                  onChange(opt.key);
+                  setOpen(false);
+                }}
+                className={`flex items-center justify-between w-full px-2 py-1.5 rounded text-sm text-left ${
+                  selected
+                    ? "bg-zinc-900 text-zinc-100"
+                    : "text-zinc-200 hover:bg-zinc-900"
+                }`}
+              >
+                <span>{opt.label}</span>
+                {selected && (
+                  <span aria-hidden="true" className="text-emerald-300 text-xs">
+                    ●
+                  </span>
+                )}
+              </button>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
 }
 
 // ── Source pill (multi-select popover) ────────────────────────────────────────
@@ -221,7 +331,13 @@ function MinAmountPill({
 
 // ── Main pills row ────────────────────────────────────────────────────────────
 
-export function FilterPills({ value, onChange }: FilterPillsProps) {
+export function FilterPills({
+  value,
+  onChange,
+  isDualMode = false,
+  mode = "all",
+  onModeChange,
+}: FilterPillsProps) {
   const hasAny =
     value.sources.length > 0 ||
     value.deadline_within_days !== null ||
@@ -232,6 +348,10 @@ export function FilterPills({ value, onChange }: FilterPillsProps) {
       <span className="text-[10px] uppercase tracking-[0.2em] text-zinc-500 font-mono pr-1">
         Filter
       </span>
+      {/* Mode pill — dual-org users only. Renders to the left of Source per 05-06 plan. */}
+      {isDualMode && onModeChange && (
+        <ModePill value={mode} onChange={onModeChange} />
+      )}
       <SourcePill
         selected={value.sources}
         onChange={(sources) => onChange({ ...value, sources })}
