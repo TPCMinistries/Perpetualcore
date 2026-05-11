@@ -103,7 +103,13 @@ export function OrgSwitcher({ currentOrgId }: OrgSwitcherProps) {
             {current ? current.rfp_orgs.name : "Loading…"}
           </span>
           {current && (
-            <span className="text-[10px] uppercase tracking-wide text-zinc-500">
+            <span
+              className={`text-[10px] uppercase tracking-wide font-mono ${
+                current.rfp_orgs.type === "dual"
+                  ? "text-emerald-300"
+                  : "text-zinc-500"
+              }`}
+            >
               {current.rfp_orgs.type}
             </span>
           )}
@@ -135,11 +141,29 @@ export function OrgSwitcher({ currentOrgId }: OrgSwitcherProps) {
             disabled
             className="opacity-100 cursor-default focus:bg-transparent"
           >
-            <div className="flex items-center justify-between w-full">
-              <span className="truncate">{current.rfp_orgs.name}</span>
-              <span className="ml-2 shrink-0 text-[10px] uppercase tracking-wide text-emerald-400">
-                Current
-              </span>
+            <div className="flex flex-col w-full min-w-0">
+              <div className="flex items-center justify-between w-full min-w-0">
+                <div className="flex items-center gap-1.5 min-w-0">
+                  <span className="truncate">{current.rfp_orgs.name}</span>
+                  {/* Phase 05-06 — dual chip next to dual orgs' names */}
+                  {current.rfp_orgs.type === "dual" && (
+                    <span
+                      className="shrink-0 text-[10px] uppercase tracking-wide font-mono text-emerald-300 border border-emerald-900/50 bg-emerald-950/40 rounded px-1 py-0"
+                      data-testid="org-dual-chip"
+                    >
+                      dual
+                    </span>
+                  )}
+                </div>
+                <span className="ml-2 shrink-0 text-[10px] uppercase tracking-wide text-emerald-400">
+                  Current
+                </span>
+              </div>
+              {current.rfp_orgs.type === "dual" && (
+                <span className="text-[10px] text-zinc-500 mt-0.5">
+                  Nonprofit + For-profit
+                </span>
+              )}
             </div>
           </DropdownMenuItem>
         )}
@@ -151,11 +175,34 @@ export function OrgSwitcher({ currentOrgId }: OrgSwitcherProps) {
             }}
             className="cursor-pointer focus:bg-zinc-900"
           >
-            <div className="flex items-center justify-between w-full min-w-0">
-              <span className="truncate">{o.rfp_orgs.name}</span>
-              <span className="ml-2 shrink-0 text-[10px] uppercase tracking-wide text-zinc-500">
-                {o.rfp_orgs.type}
-              </span>
+            <div className="flex flex-col w-full min-w-0">
+              <div className="flex items-center justify-between w-full min-w-0">
+                <div className="flex items-center gap-1.5 min-w-0">
+                  <span className="truncate">{o.rfp_orgs.name}</span>
+                  {o.rfp_orgs.type === "dual" && (
+                    <span
+                      className="shrink-0 text-[10px] uppercase tracking-wide font-mono text-emerald-300 border border-emerald-900/50 bg-emerald-950/40 rounded px-1 py-0"
+                      data-testid="org-dual-chip"
+                    >
+                      dual
+                    </span>
+                  )}
+                </div>
+                <span
+                  className={`ml-2 shrink-0 text-[10px] uppercase tracking-wide ${
+                    o.rfp_orgs.type === "dual"
+                      ? "text-zinc-400"
+                      : "text-zinc-500"
+                  }`}
+                >
+                  {o.rfp_orgs.type}
+                </span>
+              </div>
+              {o.rfp_orgs.type === "dual" && (
+                <span className="text-[10px] text-zinc-500 mt-0.5">
+                  Nonprofit + For-profit
+                </span>
+              )}
             </div>
           </DropdownMenuItem>
         ))}
