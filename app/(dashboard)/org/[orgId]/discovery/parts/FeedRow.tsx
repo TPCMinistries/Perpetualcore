@@ -20,6 +20,22 @@ interface FeedRowProps {
   row: FeedRowType;
   selected: boolean;
   onClick: () => void;
+  /**
+   * Phase 05-06 — when true (dual-mode), render a small badge showing the
+   * scoring-org's type + name (e.g. "NP · Uplift Communities"). Always shown
+   * in dual mode regardless of whether the scoring org matches the active org
+   * — the badge is the user's primary signal for which side of the dual lens
+   * produced the row.
+   */
+  showOrgBadge?: boolean;
+  /**
+   * Active org id — currently unused by FeedRow since the plan calls for the
+   * badge to render unconditionally in dual mode, but threaded through for
+   * forward-compat (a future UX iteration could choose to hide the badge when
+   * scored_for_org IS the active org, e.g. if we ever surface single-mode
+   * scoring for a dual org).
+   */
+  activeOrgId?: string;
 }
 
 function formatAmount(row: FeedRowType): string {
@@ -43,7 +59,34 @@ function formatDeadline(row: FeedRowType): string {
   return dl.toLocaleDateString("en-US", { month: "short", day: "numeric" });
 }
 
-export function FeedRow({ row, selected, onClick }: FeedRowProps) {
+/**
+ * Compact org-type label for the dual-mode scoring badge. We use NP / FP to
+ * keep the badge tight in the narrow list column; the full org name is
+ * appended after a middle dot ("NP · Uplift Communities").
+ */
+function orgTypeAbbrev(t: FeedRowType["scored_for_org_type"]): string {
+  if (t === "nonprofit") return "NP";
+  if (t === "forprofit") return "FP";
+  return "DUAL";
+}
+
+export function FeedRow({
+  row,
+  selected,
+  onClick,
+  showOrgBadge = false,
+  // activeOrgId intentionally accepted but unused — see prop docs above.
+  activeOrgId: _activeOrgId,
+}: FeedRowProps) {
+  // Suppress unused-var lint with an explicit no-op reference.
+  void _activeOrgId;
+
+  // The badge only renders when (a) the parent says we're in dual mode and
+  // (b) the row actually carries a non-empty scoring-org name (defensive —
+  // single-mode rows leave the name empty since the API doesn't echo it back).
+  const badgeVisible =
+    showOrgBadge && row.scored_for_org_name.trim().length > 0;
+
   return (
     <button
       type="button"
@@ -60,6 +103,18 @@ export function FeedRow({ row, selected, onClick }: FeedRowProps) {
         <span className="font-semibold text-zinc-100 truncate min-w-0 flex-1">
           {row.title}
         </span>
+        {badgeVisible && (
+          <span
+            className="shrink-0 ml-1 inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-mono uppercase tracking-wide bg-zinc-900 text-zinc-400 border border-zinc-800"
+            data-testid="feed-row-org-badge"
+            title={`Scored for ${row.scored_for_org_name}`}
+          >
+            {orgTypeAbbrev(row.scored_for_org_type)} ·{" "}
+            <span className="ml-1 max-w-[8rem] truncate inline-block align-bottom">
+              {row.scored_for_org_name}
+            </span>
+          </span>
+        )}
         {row.needs_review && (
           <span className="shrink-0 inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-mono uppercase tracking-wide bg-amber-950 text-amber-300 border border-amber-700/40">
             Needs review

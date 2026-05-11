@@ -28,6 +28,17 @@ interface FeedListProps {
   hasMore: boolean;
   loading: boolean;
   onLoadMore: () => void;
+  /**
+   * Phase 05-06 — when true (dual-mode), each row gets a scoring-org badge so
+   * the user can see which underlying org each opp was matched against.
+   */
+  showOrgBadge?: boolean;
+  /**
+   * Phase 05-06 — the active org's id. FeedRow uses this to suppress its badge
+   * when the scoring org IS the active org (single-mode case never reaches this
+   * branch, so this is purely a dual-mode concern).
+   */
+  activeOrgId?: string;
 }
 
 export function FeedList({
@@ -37,6 +48,8 @@ export function FeedList({
   hasMore,
   loading,
   onLoadMore,
+  showOrgBadge = false,
+  activeOrgId,
 }: FeedListProps) {
   const sentinelRef = useRef<HTMLDivElement | null>(null);
 
@@ -85,6 +98,8 @@ export function FeedList({
               row={row}
               selected={row.opp_id === selectedOppId}
               onClick={() => onSelect(row)}
+              showOrgBadge={showOrgBadge}
+              activeOrgId={activeOrgId}
             />
           </li>
         ))}
