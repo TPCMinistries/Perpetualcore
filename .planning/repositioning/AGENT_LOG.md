@@ -189,3 +189,13 @@ Worktree at `.claude/worktrees/agent-aca1286e51baa739e` removed. Branches intact
 3. `12-06 Task 4` — logo decision. Resume signals: `logo-real [SVG path]` or `logo-placeholder-v1.2`.
 
 After all three close: spawn gsd-verifier for phase goal achievement, mark Phase 12 complete via `gsd-tools phase complete 12`, branch is merge-ready (base + v1.1 stacked).
+
+## Logo decision (2026-05-11, Lorenzo)
+
+**Decision:** placeholder-accepted-v1.2
+
+**Rationale:** Comprehensive search across all 13 active projects under `~/ORGANIZED/01_PROJECTS/` found no Perpetual Core logo SVG anywhere. Existing brand SVGs are IHA (favicon.svg), KCC/DYCD (workforce), Streams of Grace icon, AI marketing (lorenzodc-personal-site) — none PC-specific. Rather than block Phase 12 close on logo creation, Lorenzo accepts the violet-gradient "PC" placeholder for v1. The mark is at least on-brand (gradient matches the primary palette) and lives consistently in `<Navbar/>`, `<Footer/>`, and `PublicMobileNav`.
+
+**v1.2 replacement target:** TBD. Tracked as a v1.2 follow-up after Phase 12 ships.
+
+Closes 12-06 Task 4 checkpoint.
