@@ -5,13 +5,22 @@
  * with rfp_opportunities. Plan 05-03 wrote the scoring engine; this module is the
  * read-side helper that translates UI filters into a single Supabase query.
  *
+ * Phase 05-06 (Plan): Extended for dual-mode users. When `dual_org_ids` is
+ * provided, the query unions rfp_opp_matches across multiple orgs the caller
+ * owns (verified upstream by the API route before reaching this helper). Rows
+ * are deduplicated by opp_id keeping the highest fit_score, so the same opp
+ * scored against both a nonprofit and a for-profit org collapses to one row
+ * surfaced under whichever org best matched. The selected org's name/type is
+ * carried back via `scored_for_org_name`/`scored_for_org_type` for the row badge.
+ *
  * Why request-scoped createClient (NOT createAdminClient):
  *   The RLS policy on rfp_opp_matches restricts SELECT to rows where the caller
  *   is a member of the row's org (via rfp_user_orgs). createAdminClient bypasses
  *   RLS and would let any authenticated user read any org's matches. We instead
  *   use the cookie-bound createClient so the caller's session enforces per-org
- *   scoping. The explicit .eq('org_id', filters.org_id) is a safety belt + a
- *   hint to the planner to use the (org_id, fit_score DESC) index from 05-03.
+ *   scoping. In dual mode the same RLS guard applies: passing dual_org_ids the
+ *   user isn't a member of would silently return zero rows for those — but the
+ *   API route already gates membership before calling us.
  *
  * Stable keyset pagination:
  *   Order is (fit_score DESC, opp_id ASC). The opp_id tiebreaker makes pagination
@@ -28,6 +37,17 @@
  * Deadline filter:
  *   "deadline_within_days = 7|30" means dl IS NOT NULL AND dl >= now AND dl <= now+N
  *   We DO NOT show rows with already-past deadlines (no value to the user).
+ *
+ * Dual-mode dedup + over-fetch:
+ *   When dual_org_ids is set, we fetch limit*2 rows to compensate for opp_id
+ *   collisions that collapse during dedup. After dedup we slice to `limit`. This
+ *   keeps the keyset cursor stable: the dedup happens AFTER ordering, so the
+ *   last surviving row's (fit_score, opp_id) is still monotonically decreasing
+ *   relative to the next page. The 2× ratio is conservative — in the worst case
+ *   every opp is duplicated (dual user with identical scores on both sides),
+ *   we'd still return at least `limit` rows. Mode filtering happens upstream in
+ *   the API route by pre-filtering dual_org_ids; this helper just receives the
+ *   already-resolved set.
  */
 
 import { createClient } from "@/lib/supabase/server";
@@ -35,9 +55,25 @@ import { tierFor, type FitTier } from "@/lib/rfp/scoring/weights";
 
 // ── Public types ─────────────────────────────────────────────────────────────
 
+export type FeedModeFilter = "all" | "nonprofit" | "forprofit";
+
 export interface FeedFilters {
-  /** Required — the org whose matches we're reading. RLS enforces membership. */
+  /** Required — the active org (used as default scope when dual_org_ids is empty). */
   org_id: string;
+  /**
+   * Dual-mode: when non-empty, query rfp_opp_matches with `.in('org_id', dual_org_ids)`
+   * instead of `.eq('org_id', org_id)`. Caller (the API route) is responsible for
+   * confirming the user is a member of each org and that the active `org_id` has
+   * type='dual'. RLS still applies — non-member org_ids silently contribute zero rows.
+   */
+  dual_org_ids?: string[];
+  /**
+   * Mode discriminator surfaced to the caller for telemetry/empty-state copy. The
+   * actual mode → org-type filtering is applied UPSTREAM (the API route resolves
+   * which orgs in dual_org_ids match the requested mode). This field is here so
+   * the helper can be invoked directly from server prefetch with the right shape.
+   */
+  mode_filter?: FeedModeFilter;
   /** Optional source codes (e.g. ['sam_gov','grants_gov']). Empty/undefined = all. */
   sources?: string[];
   /** 7 or 30 to filter rows whose deadline falls within N days; null/undef = no filter. */
@@ -65,6 +101,15 @@ export interface FeedRow {
   chips: string[];
   summary: string | null;
   needs_review: boolean;
+  /**
+   * The org this row was scored against. In single-org mode this equals the
+   * active org. In dual mode it's the underlying nonprofit/forprofit org that
+   * produced the highest fit_score for this opp. The FeedRow component renders
+   * a small badge when this differs from the active org (dual mode signal).
+   */
+  scored_for_org_id: string;
+  scored_for_org_name: string;
+  scored_for_org_type: "nonprofit" | "forprofit" | "dual";
 }
 
 export interface FeedPage {
@@ -77,22 +122,32 @@ export interface FeedPage {
 // Keep this loose — the rfp_* tables aren't in database.types.ts yet (per
 // repo-wide pattern set in 05-01/02/03).
 
+interface OrgJoinShape {
+  id: string;
+  name: string;
+  type: "nonprofit" | "forprofit" | "dual";
+}
+
+interface OppJoinShape {
+  source: string;
+  title: string;
+  agency: string | null;
+  amount_min: number | null;
+  amount_max: number | null;
+  deadline: string | null;
+  brief: string | null;
+  url: string | null;
+  needs_review: boolean | null;
+}
+
 interface MatchJoinRow {
   opp_id: string;
+  org_id: string;
   fit_score: number;
   chips: string[] | null;
   summary: string | null;
-  rfp_opportunities: {
-    source: string;
-    title: string;
-    agency: string | null;
-    amount_min: number | null;
-    amount_max: number | null;
-    deadline: string | null;
-    brief: string | null;
-    url: string | null;
-    needs_review: boolean | null;
-  } | null;
+  rfp_opportunities: OppJoinShape | null;
+  rfp_orgs: OrgJoinShape | null;
 }
 
 // ── Helper ────────────────────────────────────────────────────────────────────
@@ -102,6 +157,17 @@ function toFeedRow(r: MatchJoinRow): FeedRow | null {
   // RLS or a deleted opp could in theory leave a dangling match), skip the row.
   if (!r.rfp_opportunities) return null;
   const opp = r.rfp_opportunities;
+
+  // Org join is best-effort — in single-org mode the row's org_id IS the active
+  // org, so we synthesize a placeholder if the nested select didn't return it
+  // (rfp_orgs could be filtered by RLS in edge cases, though the caller is by
+  // definition a member). Single-org callers don't read this field anyway.
+  const org: OrgJoinShape = r.rfp_orgs ?? {
+    id: r.org_id,
+    name: "",
+    type: "nonprofit",
+  };
+
   return {
     opp_id: r.opp_id,
     source: opp.source,
@@ -117,15 +183,26 @@ function toFeedRow(r: MatchJoinRow): FeedRow | null {
     chips: r.chips ?? [],
     summary: r.summary,
     needs_review: opp.needs_review ?? false,
+    scored_for_org_id: org.id,
+    scored_for_org_name: org.name,
+    scored_for_org_type: org.type,
   };
 }
 
 // ── Main entry point ──────────────────────────────────────────────────────────
 
 export async function buildFeedQuery(filters: FeedFilters): Promise<FeedPage> {
-  // Request-scoped client — RLS enforces caller membership in filters.org_id.
+  // Request-scoped client — RLS enforces caller membership in every org_id we hit.
   const supabase = await createClient();
   const limit = filters.limit ?? 25;
+  const dualMode =
+    Array.isArray(filters.dual_org_ids) && filters.dual_org_ids.length > 0;
+
+  // Over-fetch ratio for dual mode. We dedup by opp_id keeping highest fit_score,
+  // so up to 50% of fetched rows could collapse in the worst case (every opp
+  // scored against both nonprofit + for-profit). 2× keeps us safe; we slice
+  // back to `limit` after dedup.
+  const fetchLimit = dualMode ? limit * 2 : limit;
 
   // Untyped client narrowing — rfp_* tables not in database.types.ts yet (per
   // the 05-03 / lib/rfp/orgs.ts pattern). The `from(table) => any` shape lets
@@ -138,9 +215,15 @@ export async function buildFeedQuery(filters: FeedFilters): Promise<FeedPage> {
   let query = rfp
     .from("rfp_opp_matches")
     .select(
-      "opp_id, fit_score, chips, summary, rfp_opportunities ( source, title, agency, amount_min, amount_max, deadline, brief, url, needs_review )"
-    )
-    .eq("org_id", filters.org_id);
+      "opp_id, org_id, fit_score, chips, summary, rfp_opportunities ( source, title, agency, amount_min, amount_max, deadline, brief, url, needs_review ), rfp_orgs ( id, name, type )"
+    );
+
+  // Org scope: dual_org_ids takes precedence; falls back to single org_id.
+  if (dualMode) {
+    query = query.in("org_id", filters.dual_org_ids as string[]);
+  } else {
+    query = query.eq("org_id", filters.org_id);
+  }
 
   // Deadline filter — bounded window relative to "now"
   if (
@@ -180,7 +263,7 @@ export async function buildFeedQuery(filters: FeedFilters): Promise<FeedPage> {
   query = query
     .order("fit_score", { ascending: false })
     .order("opp_id", { ascending: true })
-    .limit(limit);
+    .limit(fetchLimit);
 
   const { data, error } = await query;
   if (error) {
@@ -188,8 +271,33 @@ export async function buildFeedQuery(filters: FeedFilters): Promise<FeedPage> {
   }
 
   const rawRows: MatchJoinRow[] = (data ?? []) as MatchJoinRow[];
+
+  // In dual mode, dedup by opp_id keeping the row with the highest fit_score.
+  // Iteration order matches the DESC sort, so the first occurrence of an opp_id
+  // already has the highest score — but we compare explicitly to be safe against
+  // any future ordering changes.
+  let workingRows: MatchJoinRow[];
+  if (dualMode) {
+    const byOpp = new Map<string, MatchJoinRow>();
+    for (const r of rawRows) {
+      const existing = byOpp.get(r.opp_id);
+      if (!existing || r.fit_score > existing.fit_score) {
+        byOpp.set(r.opp_id, r);
+      }
+    }
+    // Re-emit in DESC(fit_score), ASC(opp_id) order to keep cursor monotonic.
+    workingRows = Array.from(byOpp.values()).sort((a, b) => {
+      if (b.fit_score !== a.fit_score) return b.fit_score - a.fit_score;
+      return a.opp_id < b.opp_id ? -1 : a.opp_id > b.opp_id ? 1 : 0;
+    });
+    // After dedup we may have more than `limit` rows (we over-fetched); slice down.
+    if (workingRows.length > limit) workingRows = workingRows.slice(0, limit);
+  } else {
+    workingRows = rawRows;
+  }
+
   const rows: FeedRow[] = [];
-  for (const r of rawRows) {
+  for (const r of workingRows) {
     const mapped = toFeedRow(r);
     if (mapped) rows.push(mapped);
   }
@@ -198,6 +306,9 @@ export async function buildFeedQuery(filters: FeedFilters): Promise<FeedPage> {
   // match row will still appear with rfp_opportunities === null. The toFeedRow
   // skip above already drops those; we don't need an extra in-memory step.
 
+  // Cursor: only emit when the page is "full" (rows.length === limit). In dual
+  // mode we sliced to limit after dedup, so this still holds: a full page means
+  // there were at least `limit` distinct opps in the fetched window.
   const next_cursor =
     rows.length === limit
       ? {
