@@ -3,6 +3,7 @@
 import { Brain, Sparkles, TrendingUp, Network, Lightbulb, Target, Zap, BarChart3, ArrowRight } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { LoadingButton } from "@/components/ui/loading-button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ErrorBoundary } from "@/components/ui/error-boundary";
 import { Navbar } from "@/components/landing/Navbar";
