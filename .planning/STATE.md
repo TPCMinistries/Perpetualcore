@@ -11,11 +11,11 @@ See: .planning/PROJECT.md (updated 2026-05-09)
 
 **Milestone:** v2.0 RFP & Proposal Engine
 **Phase:** 5 of 11 (Phase 5: Discovery)
-**Plan:** 5 of 7 complete (05-04 Feed UI + 05-05 Quick Import merged via parallel worktrees)
-**Status:** In progress — Phase 4 closed; Phase 5 Plans 01–05 complete; Plans 06–07 (Wave 4) remaining
-**Progress:** [███████░░░] 71%
+**Plan:** 7 of 7 complete — Phase 5 ALL PLANS LANDED
+**Status:** Phase 5 build complete — awaiting verifier pass before phase close. RFP branch pushed to origin (preview deploy on Vercel).
+**Progress:** [██████████] 100%
 
-Last activity: 2026-05-11 — Wave 3 complete: 05-04 (Discovery feed UI: split-pane list/detail, FitScoreChip with tier-color thresholds, filter pills, infinite scroll, OrgSwitcher) + 05-05 (Quick Import: persistent input bar with 4-step progress, URL/PDF/DOCX fetch+extract via claude-sonnet-4-5, Upstash-Redis-only job state, fire-and-forget runner) executed in parallel isolated worktrees on branches feat/05-04-feed-ui and feat/05-05-quick-import (off 02ec095) and merged back into feat/rfp-orgs-invites-cont via two no-ff merges (2eb15a1, 7530629). Zero conflicts at merge. Integration contract held: DiscoveryClient imports `<QuickImportBar />` from `@/components/rfp/quick-import-bar` — 05-05's named export satisfies it. Scoped tsc + ESLint clean across both. DISC-04, DISC-05, DISC-07, ORG-03 closed.
+Last activity: 2026-05-11 — Wave 4 complete: 05-06 (Dual-mode feed: union query across user's nonprofit+forprofit orgs, ModePill renders only for dual-type orgs, scoring-org badge on FeedRow, empty-state with /orgs/new CTA when user has no member orgs) + 05-07 (Alert delivery: rfp_alert_prefs + rfp_alert_log tables with composite (org_id, user_id NULL/NOT NULL) identity for org-default vs user-override, RLS via rfp_my_org_ids/rfp_my_owned_org_ids, email + Telegram + Discord channel adapters, 5/day frequency cap, settings UI at /org/[orgId]/settings/alerts, hooked into scoreNewOpportunitiesForAllActiveOrgs cron path) executed in parallel isolated worktrees and merged via no-ff. Migration 20260511_rfp_alert_prefs.sql applied to LDC Brain. Phase 5 closes DISC-06 (Slack deferred per CONTEXT) and ORG-04.
 
 ## Performance Metrics
 
@@ -31,7 +31,7 @@ Last activity: 2026-05-11 — Wave 3 complete: 05-04 (Discovery feed UI: split-p
 | 01-social-proof | 1 | 7 min | 7 min |
 | 02-onboarding-optimization | 2 | 62 min | 31 min |
 
-**v2.0 velocity:** 7 plans completed (Phase 4 P01–P02, Phase 5 P01–P05)
+**v2.0 velocity:** 9 plans completed (Phase 4 P01–P02, Phase 5 P01–P07 — phase 5 fully landed)
 
 | Phase | Plan | Duration | Tasks | Files |
 |-------|------|----------|-------|-------|
@@ -42,6 +42,8 @@ Last activity: 2026-05-11 — Wave 3 complete: 05-04 (Discovery feed UI: split-p
 | 05-discovery | P03 | ~95 min (2 sessions, worktree recovery) | 3 | 6 |
 | 05-discovery | P04 | ~75 min (parallel worktree) | 3 | 11 |
 | 05-discovery | P05 | ~40 min (parallel worktree) | 3 | 8 |
+| 05-discovery | P06 | ~45 min (parallel worktree) | 2 | 8 |
+| 05-discovery | P07 | ~70 min (parallel worktree) | 3 | 14 |
 
 ## Accumulated Context
 
@@ -82,9 +84,26 @@ Decisions are logged in PROJECT.md Key Decisions table. Notable carries:
 ## Session Continuity
 
 Last session: 2026-05-11
-Stopped at: Wave 3 merged into feat/rfp-orgs-invites-cont. 05-04 (Feed UI) + 05-05 (Quick Import) shipped via parallel worktrees (race-free with active studio session in main tree). Integration contract verified post-merge via scoped tsc.
+Stopped at: Phase 5 ALL 7 plans landed. RFP branch pushed to origin → Vercel preview deploy. Migration rfp_alert_prefs_and_log applied to LDC Brain.
 Resume file: None
-Next action: Execute Wave 4 — 05-06 (Dual-mode feed: union of orgs + Mode pill, closes ORG-04) and 05-07 (Alert delivery: rfp_alert_prefs + email/Telegram/Discord, closes DISC-06). Both can run in parallel worktrees off 7530629.
+Next action: Spawn gsd-verifier on Phase 5. If pass: `gsd-tools phase complete 5` + open PR for Lorenzo's QA. Then Phase 6 (Capture Profile) or whatever priority sequence.
+
+### v2.0 Phase 5 Key Decisions (Plans 06 + 07)
+
+- Dual-mode feed: `mode='all'` for dual-type orgs unions opp_matches across underlying nonprofit + forprofit org IDs the user owns. ModePill (`All / Nonprofit / For-profit`) renders ONLY for users whose ACTIVE org is `dual` type; hidden for single-mode orgs. Mode-filter URL-syncs only when non-default
+- Dual-mode feed query strategy: over-fetch 2× then deduplicate by opp_id keeping highest fit_score, re-sort, slice to limit — preserves keyset-cursor stability across the union path
+- Empty `dual_org_ids` (user has dual lens but no qualifying member orgs) returns `{ rows: [], empty_reason: 'no_member_orgs' }` — DiscoveryClient renders inline empty state with `/orgs/new` CTA (anti-confusion vs an "empty because no matches" state)
+- FeedRow renders scoring-org badge inline with title in dual mode (compact `NP · {orgName}` / `FP · {orgName}`)
+- OrgSwitcher highlights `dual` orgs (emerald-300 type label + dropdown subtitle "Nonprofit + For-profit")
+- Alert prefs composite identity: `(org_id, user_id NULL)` = org default, `(org_id, user_id NOT NULL)` = user override. Postgres NULL-as-distinct UNIQUE handled via partial unique indexes (`WHERE user_id IS NULL` / `WHERE user_id IS NOT NULL`)
+- Alert channels at MVP: email + Telegram + Discord. Slack explicitly deferred per 05-CONTEXT.md → no Slack code path. Defer doc: ALERT-SLACK in deferred-items.md
+- Alert threshold: default ≥80, user-tunable 60–100. Frequency cap: 5 sends/day per (user, channel). 6th in 24h logged with `status='batched'` — once-per-day digest flush deferred (ALERT-DIGEST-FLUSH)
+- Alerts fire ONLY on cron-discovered new opps (`scoreNewOpportunitiesForAllActiveOrgs` hand-off). `recomputeAllForOrg` path explicitly skips alerts — capture-profile edits shouldn't flood users
+- Email content: HTML inline reasoning chips + AI summary. Telegram/Discord: compact one-liner — `94 · Strong fit · {title} · ${amount} · deadline {date} · open →`
+- Resend from-email precedence: `RFP_ALERT_FROM_EMAIL ?? RESEND_FROM_EMAIL ?? 'noreply@perpetualcore.com'`. Domain perpetualcore.com unverified → 4xx response logs `status='skipped_unverified'` and falls through to `console.log` rather than crashing the cron
+- Telegram chat_id and Discord webhook URL stored per-pref-row. HTTPS POST to `api.telegram.org/bot{TOKEN}/sendMessage` and the user-supplied Discord webhook URL respectively
+- Alert dispatch wrapped in try/catch in recompute.ts — failure is non-fatal. Concurrency capped at 5. `maybeDispatchAlert` resolver: user-override pref → org-default → system default (≥80, email-only)
+- `rfp_alert_log` is the source of truth for the frequency cap (filters on `user_id, channel, created_at DESC`) AND the settings UI's "N alerts batched today" indicator
 
 ### v2.0 Phase 5 Key Decisions (Plans 04 + 05)
 

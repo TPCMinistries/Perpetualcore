@@ -118,7 +118,7 @@ Plans:
   4. User in `dual` mode sees a combined feed spanning both nonprofit and for-profit orgs they own, with mode filters available
   5. User pastes a foundation or corporate grant URL into Quick Import and the opportunity appears in the feed within 30 seconds, normalized to the standard schema
   6. User whose org scores fit ≥ 80 on a new opportunity receives a Slack, Telegram, or email notification (per their stored preference) without taking any manual action
-**Plans:** 5/7 plans complete
+**Plans:** 7/7 plans complete
 
 Plans:
 - [x] 05-01-PLAN.md — Federal Discovery ingestion: SAM.gov + Grants.gov + Simpler.Grants.gov + SBIR.gov cron + normalizer (DISC-01)
@@ -126,8 +126,8 @@ Plans:
 - [x] 05-03-PLAN.md — Fit scoring engine (30/25/20/15/10) + AI summary + async recompute on capture-profile change (DISC-03)
 - [x] 05-04-PLAN.md — Discovery feed UI: split-pane list/detail + filter pills + OrgSwitcher in dashboard chrome (DISC-04, DISC-05, ORG-03)
 - [x] 05-05-PLAN.md — Quick Import: persistent URL bar + 4-step inline progress + needs-review fallback (DISC-07)
-- [ ] 05-06-PLAN.md — Dual-mode feed: union of orgs with Mode filter + scoring-org row badges (ORG-04)
-- [ ] 05-07-PLAN.md — Alert delivery: rfp_alert_prefs + email/Telegram/Discord channels + 5/day cap + settings UI (DISC-06)
+- [x] 05-06-PLAN.md — Dual-mode feed: union of orgs with Mode filter + scoring-org row badges (ORG-04)
+- [x] 05-07-PLAN.md — Alert delivery: rfp_alert_prefs + email/Telegram/Discord channels + 5/day cap + settings UI (DISC-06)
 
 **Salvage notes (ldc-command-center):**
 - Port `GrantImporter.tsx` → Quick Import URL field (DISC-07); already has Tavily AI fallback for any URL
