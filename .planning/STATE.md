@@ -11,11 +11,11 @@ See: .planning/PROJECT.md (updated 2026-05-09)
 
 **Milestone:** v2.0 RFP & Proposal Engine
 **Phase:** 5 of 11 (Phase 5: Discovery)
-**Plan:** 3 of 7 complete (05-03: Fit-scoring engine + AI summary + async recompute)
-**Status:** In progress — Phase 4 closed; Phase 5 Plans 01–03 complete; Plans 04–07 remaining
-**Progress:** [█████░░░░░] 50%
+**Plan:** 5 of 7 complete (05-04 Feed UI + 05-05 Quick Import merged via parallel worktrees)
+**Status:** In progress — Phase 4 closed; Phase 5 Plans 01–05 complete; Plans 06–07 (Wave 4) remaining
+**Progress:** [███████░░░] 71%
 
-Last activity: 2026-05-10 — 05-03 complete: Fit-scoring engine wired end-to-end. 30/25/20/15/10 weighted score (NAICS/keyword/geo/dollar-band/past-funder) + 4-chip parity contract + 1-2 sentence AI summary (claude-sonnet-4-5 primary, claude-haiku-4-5 fallback) writes to rfp_opp_matches. Both crons hand off ingested opps to scoring (non-fatal on failure). POST /api/rfp/orgs/[orgId]/recompute-scores endpoint provides 202-Accepted async refresh for Phase 6 capture-profile mutations (fire-and-forget via `void recompute(...).catch(log)` since Next 14 lacks `after()`). DISC-03 closed.
+Last activity: 2026-05-11 — Wave 3 complete: 05-04 (Discovery feed UI: split-pane list/detail, FitScoreChip with tier-color thresholds, filter pills, infinite scroll, OrgSwitcher) + 05-05 (Quick Import: persistent input bar with 4-step progress, URL/PDF/DOCX fetch+extract via claude-sonnet-4-5, Upstash-Redis-only job state, fire-and-forget runner) executed in parallel isolated worktrees on branches feat/05-04-feed-ui and feat/05-05-quick-import (off 02ec095) and merged back into feat/rfp-orgs-invites-cont via two no-ff merges (2eb15a1, 7530629). Zero conflicts at merge. Integration contract held: DiscoveryClient imports `<QuickImportBar />` from `@/components/rfp/quick-import-bar` — 05-05's named export satisfies it. Scoped tsc + ESLint clean across both. DISC-04, DISC-05, DISC-07, ORG-03 closed.
 
 ## Performance Metrics
 
@@ -31,7 +31,7 @@ Last activity: 2026-05-10 — 05-03 complete: Fit-scoring engine wired end-to-en
 | 01-social-proof | 1 | 7 min | 7 min |
 | 02-onboarding-optimization | 2 | 62 min | 31 min |
 
-**v2.0 velocity:** 5 plans completed (Phase 4 P01–P02, Phase 5 P01–P03)
+**v2.0 velocity:** 7 plans completed (Phase 4 P01–P02, Phase 5 P01–P05)
 
 | Phase | Plan | Duration | Tasks | Files |
 |-------|------|----------|-------|-------|
@@ -39,7 +39,9 @@ Last activity: 2026-05-10 — 05-03 complete: Fit-scoring engine wired end-to-en
 | 04-foundations-salvage-port | P02 | 14 min | 3 | 8 |
 | 05-discovery | P01 | ~25 min | 3 | 9 |
 | 05-discovery | P02 | ~120 min (2 sessions) | 3 | 13 |
-| 05-discovery | P03 | ~95 min (2 sessions) | 3 | 6 |
+| 05-discovery | P03 | ~95 min (2 sessions, worktree recovery) | 3 | 6 |
+| 05-discovery | P04 | ~75 min (parallel worktree) | 3 | 11 |
+| 05-discovery | P05 | ~40 min (parallel worktree) | 3 | 8 |
 
 ## Accumulated Context
 
@@ -79,10 +81,27 @@ Decisions are logged in PROJECT.md Key Decisions table. Notable carries:
 
 ## Session Continuity
 
-Last session: 2026-05-10
-Stopped at: Completed 05-03-PLAN.md (fit-scoring engine: 30/25/20/15/10 weights + chip-count parity + AI summary with sonnet-4.5/haiku-4.5 fallback + recompute orchestrators + cron hand-off + async per-org POST endpoint)
+Last session: 2026-05-11
+Stopped at: Wave 3 merged into feat/rfp-orgs-invites-cont. 05-04 (Feed UI) + 05-05 (Quick Import) shipped via parallel worktrees (race-free with active studio session in main tree). Integration contract verified post-merge via scoped tsc.
 Resume file: None
-Next action: Execute 05-04-PLAN.md — Feed UI (ranked list + detail pane, infinite scroll, filter pills, fit-score chip)
+Next action: Execute Wave 4 — 05-06 (Dual-mode feed: union of orgs + Mode pill, closes ORG-04) and 05-07 (Alert delivery: rfp_alert_prefs + email/Telegram/Discord, closes DISC-06). Both can run in parallel worktrees off 7530629.
+
+### v2.0 Phase 5 Key Decisions (Plans 04 + 05)
+
+- Discovery feed lives at `app/(dashboard)/org/[orgId]/discovery/` (not under rfp-marketing); split-pane (list-left, detail-right), full-bleed viewport-height layout — dashboard `<main>` container wrapper was dropped so future split-pane routes work edge-to-edge
+- Server prefetch via request-scoped `createClient` (cookies-bound); RLS on rfp_opp_matches enforces per-org membership. Admin client explicitly forbidden on feed reads
+- Keyset cursor `(fit_score DESC, opp_id ASC)` base64-encoded JSON; opp_id is the deterministic tiebreaker for tier-boundary clustering (90/70/50)
+- URL search-param sync via `useRouter().replace({scroll:false})` — filters bookmarkable + shareable; server page.tsx re-reads them so deep-links hydrate correctly
+- DetailPane ALWAYS renders the summary block; null summary renders literal "No summary generated." (never an empty element) — explicit must-have from 05-04-PLAN
+- 404 (not 403) on non-member opp_id detail — same anti-probe pattern as 05-03's recompute endpoint
+- Plan 05-04 ↔ Plan 05-05 ran in parallel worktrees off 02ec095 with a hard contract: `components/rfp/quick-import-bar.tsx` exports named `QuickImportBar({ orgId, onImported? })`. 05-04 used a local untracked stub for typecheck; 05-05's real file landed at merge. Zero conflicts.
+- Quick Import job state lives ENTIRELY in Upstash Redis (no Map fallback) — POST and GET routinely land on different Vercel lambdas; a module-scope Map would 404 the GET. 1-hour TTL on jobs
+- Fire-and-forget dispatch: `void runQuickImport(...).catch(log)` (Next 14 lacks `after()` API). Runner contracted to never throw — all error paths set step='error'/status='failure' in Redis
+- Quick Import extraction: claude-sonnet-4-5 primary + claude-haiku-4-5 fallback (max_tokens=800, strict JSON, ≤300-char brief). Sonnet trade-off accepted vs Haiku-only — extraction runs per-user-submission, not per-cron-opp
+- Quick Import opp scores against EVERY active org (via scoreNewOpportunitiesForAllActiveOrgs), not just importing user's org — matches 05-CONTEXT.md's "foundation URL = network-wide source" framing
+- Source-id = SHA-256(url, 32-hex). Re-importing same URL → upsert refresh on (source, source_id) UNIQUE, never duplicate
+- PDF/DOCX flow through the same fetch+extract pipeline; they do NOT enter the vault (vault is Phase 6)
+- 10/min/user rate limit on Quick Import POST via existing `createRateLimiter` (prefix `rfp-import`); 403 on not-yours jobId, 404 on expired-TTL — UI can distinguish session-switch vs stale
 
 ### v2.0 Phase 5 Key Decisions (Plan 03)
 

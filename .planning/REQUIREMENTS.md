@@ -38,16 +38,16 @@ Multi-tenant SaaS RFP & Proposal Engine: Discovery → Capture Profile → Draft
 - [x] **DISC-01**: Cron worker scans SAM.gov, Grants.gov, Simpler.Grants.gov, and SBIR.gov every 6 hours; persists normalized opportunities to `rfp_opportunities`
 - [ ] **DISC-02**: Per-source web scrapers for NY State Grants Gateway and NYC DYCD / HRA / DOE Discretionary listings populate `rfp_opportunities` on the same cadence with throttling and schema-drift alerting
 - [x] **DISC-03**: Per-org fit-scoring function (30% NAICS, 25% keyword alignment, 20% geo, 15% dollar-size band, 10% past-funder) writes to `rfp_opp_matches` for every active org per opportunity
-- [ ] **DISC-04**: User sees Discovery feed with ranked opportunities showing fit score, win probability, amount, deadline, source, agency, brief
-- [ ] **DISC-05**: User can filter Discovery feed by active org, mode (nonprofit / for-profit / dual), source, and deadline window
+- [x] **DISC-04**: User sees Discovery feed with ranked opportunities showing fit score, win probability, amount, deadline, source, agency, brief
+- [x] **DISC-05**: User can filter Discovery feed by active org, mode (nonprofit / for-profit / dual), source, and deadline window
 - [ ] **DISC-06**: User receives Slack, Telegram, or email notification when an opportunity scores fit ≥ 80 for their org (per-org notification preferences)
-- [ ] **DISC-07**: User can paste any URL (foundation, corporate, state portal, international) into a "Quick Import" field; universal AI URL importer (salvaged from `ldc-command-center`) extracts and normalizes the opportunity into `rfp_opportunities`
+- [x] **DISC-07**: User can paste any URL (foundation, corporate, state portal, international) into a "Quick Import" field; universal AI URL importer (salvaged from `ldc-command-center`) extracts and normalizes the opportunity into `rfp_opportunities`
 
 ### Org & User Setup
 
 - [ ] **ORG-01**: Authenticated user can create an org with name, type (`nonprofit | forprofit | dual`), and NAICS codes
 - [ ] **ORG-02**: User can invite collaborators to an org with role (`owner | writer | reviewer | viewer`); RLS enforces role-based read/write access
-- [ ] **ORG-03**: User can switch between multiple orgs via persistent org switcher in the UI; active org scopes Discovery, Vault, Drafts, and Compliance
+- [x] **ORG-03**: User can switch between multiple orgs via persistent org switcher in the UI; active org scopes Discovery, Vault, Drafts, and Compliance
 - [ ] **ORG-04**: User in `dual` mode sees a combined Discovery feed across both nonprofit and for-profit orgs they own
 
 ### Capture Profile
@@ -181,11 +181,11 @@ Explicit exclusions with reasoning. Documented to prevent scope creep.
 | DISC-01 | Phase 5 | Complete |
 | DISC-02 | Phase 5 | Pending |
 | DISC-03 | Phase 5 | Complete |
-| DISC-04 | Phase 5 | Pending |
-| DISC-05 | Phase 5 | Pending |
+| DISC-04 | Phase 5 | Complete (05-04) |
+| DISC-05 | Phase 5 | Complete (05-04) |
 | DISC-06 | Phase 5 | Pending |
-| DISC-07 | Phase 5 | Pending |
-| ORG-03 | Phase 5 | Pending |
+| DISC-07 | Phase 5 | Complete (05-05) |
+| ORG-03 | Phase 5 | Complete (05-04) |
 | ORG-04 | Phase 5 | Pending |
 | CAP-01 | Phase 6 | Pending |
 | CAP-02 | Phase 6 | Pending |
