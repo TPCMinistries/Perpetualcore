@@ -31,21 +31,21 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || "https://perpetualcore.ai"),
+  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || "https://perpetualcore.com"),
   title: {
-    default: "Perpetual Core | AI-Powered Knowledge Platform",
+    default: "Perpetual Core — An AI-first studio",
     template: "%s | Perpetual Core",
   },
-  description: "Transform how your team works with AI-powered knowledge management. Persistent memory, RAG search, AI agents, and multi-model intelligence in one unified platform.",
+  description: "We install operating systems for mission-driven organizations. Engagements start at $75,000. Production AI under PEPFAR rules, IRB review, and GDPR-equivalent consent.",
   keywords: [
-    "AI knowledge management",
-    "RAG search",
-    "AI agents",
-    "document AI",
-    "enterprise AI",
-    "team collaboration",
-    "AI assistant",
-    "knowledge base",
+    "AI implementation studio",
+    "AI operating system",
+    "mission-driven AI",
+    "nonprofit AI implementation",
+    "AI for healthcare",
+    "AI for foundations",
+    "Perpetual Engine",
+    "AI engagement studio",
   ],
   authors: [{ name: "Perpetual Core" }],
   creator: "Perpetual Core",
@@ -62,22 +62,22 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     siteName: "Perpetual Core",
-    title: "Perpetual Core | AI-Powered Knowledge Platform",
-    description: "Transform how your team works with AI-powered knowledge management. Persistent memory, RAG search, AI agents, and multi-model intelligence.",
+    title: "Perpetual Core — An AI-first studio",
+    description: "We install operating systems for mission-driven organizations. Engagements start at $75,000.",
     locale: "en_US",
     images: [
       {
         url: "/og-image.png",
         width: 1200,
         height: 630,
-        alt: "Perpetual Core - AI-Powered Knowledge Platform",
+        alt: "Perpetual Core — An AI-first studio",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Perpetual Core | AI-Powered Knowledge Platform",
-    description: "Transform how your team works with AI-powered knowledge management. Persistent memory, RAG search, AI agents, and multi-model intelligence.",
+    title: "Perpetual Core — An AI-first studio",
+    description: "We install operating systems for mission-driven organizations. Engagements start at $75,000.",
     images: ["/og-image.png"],
   },
   robots: {
