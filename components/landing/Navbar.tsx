@@ -59,11 +59,11 @@ function DropdownPanel({
 }) {
   return (
     <div
-      className={`absolute top-full mt-2 ${width} backdrop-blur-2xl bg-card/95 border border-border rounded-lg shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 ${
+      className={`absolute top-full mt-2 ${width} bg-card border border-border/80 rounded-sm shadow-card opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-150 z-50 ${
         align === "right" ? "right-0" : "left-0"
       }`}
     >
-      <div className="p-2">{children}</div>
+      <div className="p-1.5">{children}</div>
     </div>
   );
 }
@@ -76,22 +76,21 @@ export function Navbar() {
   }
 
   return (
-    <header className="border-b border-border/40 backdrop-blur-2xl bg-background/80 sticky top-0 z-50">
-      <div className="container mx-auto px-3 sm:px-4 py-3 sm:py-4 flex items-center justify-between">
-        <Link href="/" className="flex items-center space-x-2">
-          {/* TODO: replace placeholder logo block with real Perpetual Core wordmark/mark */}
-          <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-primary to-purple-600 flex items-center justify-center text-primary-foreground font-bold shadow-lg">
-            PC
-          </div>
-          <span className="text-lg sm:text-xl font-semibold tracking-tight">Perpetual Core</span>
+    <header className="border-b border-border/60 backdrop-blur-md bg-background/90 sticky top-0 z-50">
+      <div className="container mx-auto px-6 sm:px-8 py-4 flex items-center justify-between">
+        <Link href="/" className="flex items-center">
+          {/* Wordmark — Newsreader regular at nav scale */}
+          <span className="font-serif text-lg font-normal tracking-tight text-foreground">
+            Perpetual Core
+          </span>
         </Link>
 
-        <nav className="hidden md:flex items-center gap-7">
+        <nav className="hidden md:flex items-center gap-8">
           {/* Studio dropdown */}
           <div className="relative group">
             <Link
               href="/studio"
-              className="text-sm font-medium hover:text-primary transition flex items-center gap-1"
+              className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1"
             >
               Studio <ChevronDown className="h-4 w-4 group-hover:rotate-180 transition-transform" />
             </Link>
@@ -113,7 +112,7 @@ export function Navbar() {
           <div className="relative group">
             <Link
               href="/products"
-              className="text-sm font-medium hover:text-primary transition flex items-center gap-1"
+              className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1"
             >
               Products <ChevronDown className="h-4 w-4 group-hover:rotate-180 transition-transform" />
             </Link>
@@ -135,7 +134,7 @@ export function Navbar() {
           <div className="relative group">
             <Link
               href="/solutions"
-              className="text-sm font-medium hover:text-primary transition flex items-center gap-1"
+              className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1"
             >
               Industries <ChevronDown className="h-4 w-4 group-hover:rotate-180 transition-transform" />
             </Link>
@@ -166,26 +165,26 @@ export function Navbar() {
             </DropdownPanel>
           </div>
 
-          <Link href="/pricing" className="text-sm font-medium hover:text-primary transition">
+          <Link href="/pricing" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
             Pricing
           </Link>
-          <Link href="/about" className="text-sm font-medium hover:text-primary transition">
+          <Link href="/about" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
             About
           </Link>
         </nav>
 
-        <div className="hidden md:flex items-center gap-3">
-          <Link href="/login" className="text-sm font-medium hover:underline">
+        <div className="hidden md:flex items-center gap-5">
+          <Link href="/login" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
             Sign In
           </Link>
-          <Button asChild className="shadow-md hover:shadow-lg transition-shadow">
+          <Button asChild size="sm" className="text-sm px-5 h-9 shadow-none">
             <Link href="/studio/engagements">Start Engagement</Link>
           </Button>
         </div>
 
         <div className="md:hidden flex items-center gap-2">
           <PublicMobileNav />
-          <Button size="sm" asChild className="h-9 px-4 text-sm font-semibold shadow-md active:scale-95 transition-all">
+          <Button size="sm" asChild className="h-9 px-4 text-sm font-medium shadow-none">
             <Link href="/studio/engagements">Start</Link>
           </Button>
         </div>

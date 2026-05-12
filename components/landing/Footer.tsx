@@ -45,17 +45,16 @@ const LEGAL_LINKS = [
 
 export function Footer() {
   return (
-    <footer className="border-t border-border/40 bg-background py-16">
-      <div className="container mx-auto px-4">
+    <footer className="border-t border-border/60 bg-background py-16">
+      <div className="container mx-auto px-6 sm:px-8">
         <div className="grid md:grid-cols-5 gap-8 mb-10">
           {/* Brand column */}
           <div className="md:col-span-1">
-            <div className="flex items-center space-x-2 mb-4">
-              {/* TODO: replace placeholder logo block with real Perpetual Core mark */}
-              <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-primary to-purple-600 flex items-center justify-center text-primary-foreground font-bold shadow-md">
-                PC
-              </div>
-              <span className="text-lg font-semibold tracking-tight">Perpetual Core</span>
+            <div className="mb-4">
+              {/* Wordmark — Newsreader regular */}
+              <span className="font-serif text-base font-normal tracking-tight text-foreground">
+                Perpetual Core
+              </span>
             </div>
             <p className="text-sm text-muted-foreground leading-relaxed">
               The AI-first studio that installs operating systems for mission-driven organizations.
@@ -119,7 +118,7 @@ export function Footer() {
           </div>
         </div>
 
-        <div className="border-t border-border/40 pt-8 flex flex-col md:flex-row md:justify-between md:items-center gap-3 text-sm text-muted-foreground">
+        <div className="border-t border-border/60 pt-8 flex flex-col md:flex-row md:justify-between md:items-center gap-3 text-sm text-muted-foreground">
           <p>© 2026 Perpetual Core. All rights reserved.</p>
           <p className="text-xs">
             10% of every engagement funds the{" "}
