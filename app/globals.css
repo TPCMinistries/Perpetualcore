@@ -4,78 +4,95 @@
 
 @layer base {
   :root {
-    --background: 40 20% 98%;
-    --foreground: 222.2 84% 4.9%;
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
-    /* Blue-violet primary */
-    --primary: 256 67% 55%;
-    --primary-foreground: 0 0% 100%;
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
-    --muted: 256 20% 95%;
-    --muted-foreground: 215.4 16.3% 46.9%;
-    --accent: 256 40% 96%;
-    --accent-foreground: 222.2 47.4% 11.2%;
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 220 20% 91%;
-    --input: 220 20% 91%;
-    --ring: 256 67% 55%;
-    --radius: 0.75rem;
+    /* ── Parchment background system (Editorial Gravity v2) ── */
+    --background: 40 20% 97%;        /* #F9F7F4 — parchment, not pure white */
+    --foreground: 30 10% 9%;         /* #1A1714 — near-black with warmth */
 
-    /* Sidebar */
+    /* ── Surface tokens ── */
+    --card: 0 0% 100%;               /* #FFFFFF — cards pop off parchment */
+    --card-foreground: 30 10% 9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 30 10% 9%;
+
+    /* ── Desaturated violet primary (authority, not brightness) ── */
+    --primary: 256 46% 45%;          /* #5B3FA8 — muted authority violet */
+    --primary-foreground: 0 0% 100%;
+
+    /* ── Secondary / muted ── */
+    --secondary: 30 10% 93%;
+    --secondary-foreground: 30 10% 9%;
+    --muted: 40 14% 93%;
+    --muted-foreground: 30 8% 40%;   /* #6B6560 — warm mid-gray */
+    --accent: 40 16% 93%;            /* #F2EFE9 — hover tint */
+    --accent-foreground: 30 10% 9%;
+
+    /* ── System ── */
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 30 14% 88%;            /* #E5E0DA — warm border */
+    --input: 30 14% 88%;
+    --ring: 256 46% 45%;
+    --radius: 0.375rem;              /* Tighter radius — editorial crispness */
+
+    /* ── Extended semantic tokens ── */
+    --ink: 30 10% 9%;                /* Alias for --foreground */
+    --ink-muted: 30 8% 40%;          /* Alias for --muted-foreground */
+    --parchment: 40 20% 97%;         /* Named parchment token */
+    --surface: 0 0% 100%;            /* Card surface */
+    --surface-hover: 40 16% 93%;     /* Card hover bg */
+    --surface-dark: 30 10% 9%;       /* Engine commitment dark block */
+
+    /* ── Sidebar ── */
     --sidebar-bg: 260 30% 10%;
     --sidebar-hover: 256 30% 18%;
-    --sidebar-active: 256 67% 55%;
+    --sidebar-active: 256 46% 45%;
 
-    /* Glow tokens */
-    --glow-primary: 256 67% 55% / 0.25;
-    --shadow-colored: 256 67% 55% / 0.12;
+    /* ── Glow tokens (used sparingly) ── */
+    --glow-primary: 256 46% 45% / 0.15;
+    --shadow-colored: 256 46% 45% / 0.08;
 
-    /* Gradient text colors */
-    --gradient-from: 256 67% 55%;
-    --gradient-via: 220 80% 55%;
-    --gradient-to: 190 80% 50%;
+    /* ── Gradient text colors (for .text-gradient utility — H1 only) ── */
+    --gradient-from: 256 46% 45%;
+    --gradient-to: 256 46% 35%;
   }
 
   .dark {
     --background: 260 30% 6%;
-    --foreground: 210 40% 98%;
+    --foreground: 40 20% 95%;
     --card: 260 25% 9%;
-    --card-foreground: 210 40% 98%;
+    --card-foreground: 40 20% 95%;
     --popover: 260 25% 9%;
-    --popover-foreground: 210 40% 98%;
-    /* Luminous violet in dark mode */
-    --primary: 256 80% 68%;
+    --popover-foreground: 40 20% 95%;
+    --primary: 256 60% 62%;          /* Slightly less saturated than previous 80% */
     --primary-foreground: 0 0% 100%;
     --secondary: 256 20% 15%;
-    --secondary-foreground: 210 40% 98%;
+    --secondary-foreground: 40 20% 95%;
     --muted: 256 15% 15%;
-    --muted-foreground: 215 20.2% 65.1%;
+    --muted-foreground: 30 8% 55%;
     --accent: 256 30% 18%;
-    --accent-foreground: 210 40% 98%;
+    --accent-foreground: 40 20% 95%;
     --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 256 15% 18%;
-    --input: 256 15% 18%;
-    --ring: 256 80% 68%;
+    --destructive-foreground: 40 20% 95%;
+    --border: 256 15% 20%;
+    --input: 256 15% 20%;
+    --ring: 256 60% 62%;
 
-    /* Sidebar - dark */
+    --ink: 40 20% 95%;
+    --ink-muted: 30 8% 55%;
+    --parchment: 260 30% 6%;
+    --surface: 260 25% 9%;
+    --surface-hover: 256 20% 14%;
+    --surface-dark: 260 35% 4%;
+
     --sidebar-bg: 260 30% 6%;
     --sidebar-hover: 256 25% 15%;
-    --sidebar-active: 256 80% 68%;
+    --sidebar-active: 256 60% 62%;
 
-    /* Glow tokens - dark */
-    --glow-primary: 256 80% 68% / 0.35;
-    --shadow-colored: 256 80% 68% / 0.15;
+    --glow-primary: 256 60% 62% / 0.25;
+    --shadow-colored: 256 60% 62% / 0.12;
 
-    /* Gradient text colors - brighter for dark */
-    --gradient-from: 256 80% 72%;
-    --gradient-via: 220 80% 65%;
-    --gradient-to: 190 80% 60%;
+    --gradient-from: 256 60% 65%;
+    --gradient-to: 256 60% 50%;
   }
 }
 
@@ -85,21 +102,19 @@
   }
   body {
     @apply bg-background text-foreground;
+    font-feature-settings: "rlig" 1, "calt" 1;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
 }
 
 @layer utilities {
-  .animation-delay-2000 {
-    animation-delay: 2s;
-  }
-  .animation-delay-4000 {
-    animation-delay: 4s;
-  }
-  .animation-delay-6000 {
-    animation-delay: 6s;
+  /* ── Serif display (Newsreader) ── */
+  .font-display {
+    font-family: var(--font-newsreader), Georgia, serif;
   }
 
-  /* ── Typography Scale ── */
+  /* ── Typography Scale (shared across app) ── */
   .typo-page-title {
     @apply text-2xl font-semibold text-foreground;
   }
@@ -124,32 +139,46 @@
   .typo-badge {
     @apply text-xs font-medium;
   }
+
+  /* ── Eyebrow (uppercase small caps — editorial register) ── */
+  .eyebrow {
+    @apply text-xs uppercase tracking-widest font-medium text-muted-foreground;
+  }
+
+  /* ── Animation delays ── */
+  .animation-delay-2000 {
+    animation-delay: 2s;
+  }
+  .animation-delay-4000 {
+    animation-delay: 4s;
+  }
+  .animation-delay-6000 {
+    animation-delay: 6s;
+  }
 }
 
-/* Shadow utilities — outside @layer so they work as plain classes */
+/* Shadow utilities */
 .shadow-soft {
-  box-shadow: 0 2px 8px -2px rgba(0, 0, 0, 0.05),
-              0 4px 16px -4px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 1px 4px -1px rgba(26, 23, 20, 0.04),
+              0 4px 12px -4px rgba(26, 23, 20, 0.06);
 }
 .shadow-soft-lg {
-  box-shadow: 0 4px 12px -2px rgba(0, 0, 0, 0.06),
-              0 8px 32px -8px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 2px 8px -2px rgba(26, 23, 20, 0.05),
+              0 8px 24px -8px rgba(26, 23, 20, 0.08);
 }
 
-/* Colored glow */
-.shadow-glow {
-  box-shadow: 0 0 24px hsl(var(--glow-primary)),
-              0 0 48px hsl(var(--shadow-colored));
-}
-.shadow-glow-sm {
-  box-shadow: 0 0 16px hsl(var(--glow-primary)),
-              0 2px 8px hsl(var(--shadow-colored));
+/* Editorial card — subtle lift, no glow */
+.shadow-card {
+  box-shadow: 0 1px 3px rgba(26, 23, 20, 0.06),
+              0 4px 16px -4px rgba(26, 23, 20, 0.08);
 }
 
-/* Gradient text — uses CSS variables so it auto-switches in dark mode */
+/* Gradient text — H1 only, single-stop monochrome violet */
 .text-gradient {
-  background: linear-gradient(135deg, hsl(var(--gradient-from)), hsl(var(--gradient-via)), hsl(var(--gradient-to)));
+  background: linear-gradient(150deg, hsl(var(--gradient-from)), hsl(var(--gradient-to)));
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
+
+/* Keyframes kept for accordion and any product-page animations */
