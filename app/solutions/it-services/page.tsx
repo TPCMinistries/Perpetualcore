@@ -9,7 +9,6 @@ import {
   Sparkles, MessageSquare, Infinity, Database, Lock, Search, FileText,
   Clock, TrendingUp, ArrowRight, Settings, Network, HardDrive, Plus, Minus
 } from "lucide-react";
-import { EngagementBanner } from "@/components/landing/EngagementBanner";
 
 export default function ITServicesPage() {
   // FAQ State
@@ -39,8 +38,6 @@ export default function ITServicesPage() {
           </div>
         </div>
       </header>
-
-      <EngagementBanner />
 
       {/* Hero Section */}
       <section className="container mx-auto px-4 py-20 text-center">
@@ -1402,7 +1399,7 @@ export default function ITServicesPage() {
           </div>
           <div className="border-t pt-8 text-center text-sm text-muted-foreground">
             <p className="mb-2">
-              © 2026 AI Operating System. All rights reserved. | SOC 2 Type I in progress | Enterprise Security
+              © 2024 AI Operating System. All rights reserved. | SOC 2 Type II Certified | Enterprise Security
             </p>
             <p className="text-xs max-w-3xl mx-auto">
               Perpetual Core is an IT knowledge management platform. Technical decisions and client responsibilities remain with IT professionals.

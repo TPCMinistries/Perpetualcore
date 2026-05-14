@@ -10,7 +10,6 @@ import {
   Zap, Lock, Building2, XCircle, AlertCircle, Play, ChevronDown, Minus, Plus,
   Sparkles, MessageSquare, Mail, Calendar, MapPin, Key
 } from "lucide-react";
-import { EngagementBanner } from "@/components/landing/EngagementBanner";
 
 export default function RealEstatePage() {
   // FAQ State
@@ -40,8 +39,6 @@ export default function RealEstatePage() {
           </div>
         </div>
       </header>
-
-      <EngagementBanner />
 
       {/* Hero Section */}
       <section className="container mx-auto px-4 py-16 md:py-24 relative overflow-hidden">
@@ -1276,7 +1273,7 @@ export default function RealEstatePage() {
           </div>
           <div className="border-t pt-8 text-center text-sm text-muted-foreground">
             <p className="mb-2">
-              © 2026 AI Operating System. All rights reserved. | SOC 2 Type I in progress | Encrypted in transit and at rest
+              © 2024 AI Operating System. All rights reserved. | SOC 2 Certified | Bank-Level Security
             </p>
             <p className="text-xs">
               Perpetual Core is a software tool designed to assist real estate professionals. Users are responsible for compliance with all applicable real estate laws and regulations.

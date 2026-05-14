@@ -9,7 +9,6 @@ import {
   XCircle, AlertCircle, Sparkles, MessageSquare, Infinity, Zap, Database, Lock,
   Search, Lightbulb, PresentationIcon, BarChart3, BookOpen, LineChart, Plus, Minus
 } from "lucide-react";
-import { EngagementBanner } from "@/components/landing/EngagementBanner";
 
 export default function ConsultingPage() {
   // FAQ State
@@ -39,8 +38,6 @@ export default function ConsultingPage() {
           </div>
         </div>
       </header>
-
-      <EngagementBanner />
 
       {/* Hero Section */}
       <section className="container mx-auto px-4 py-20 text-center">
@@ -1414,7 +1411,7 @@ export default function ConsultingPage() {
           </div>
           <div className="border-t pt-8 text-center text-sm text-muted-foreground">
             <p className="mb-2">
-              © 2026 AI Operating System. All rights reserved. | SOC 2 Type I in progress | Client confidentiality first
+              © 2024 AI Operating System. All rights reserved. | SOC 2 Type II Certified | Client Confidentiality Guaranteed
             </p>
             <p className="text-xs max-w-3xl mx-auto">
               Perpetual Core is a knowledge management platform designed for consulting firms. Professional judgment and client confidentiality

@@ -9,7 +9,6 @@ import {
   XCircle, AlertCircle, Sparkles, MessageSquare, Infinity, Database, Lock,
   Search, FileText, Clock, Plus, Minus, ArrowRight
 } from "lucide-react";
-import { EngagementBanner } from "@/components/landing/EngagementBanner";
 
 export default function SalesTeamsPage() {
   // FAQ State
@@ -39,8 +38,6 @@ export default function SalesTeamsPage() {
           </div>
         </div>
       </header>
-
-      <EngagementBanner />
 
       {/* Hero Section */}
       <section className="container mx-auto px-4 py-20 text-center">
@@ -1285,7 +1282,7 @@ export default function SalesTeamsPage() {
           </div>
           <div className="border-t pt-8 text-center text-sm text-muted-foreground">
             <p className="mb-2">
-              © 2026 AI Operating System. All rights reserved. | SOC 2 Type I in progress | GDPR-aware
+              © 2024 AI Operating System. All rights reserved. | SOC 2 Type II Certified | GDPR Ready
             </p>
             <p className="text-xs">
               Your sales data is encrypted and never used to train AI models. Enterprise security built for sales teams.

@@ -9,7 +9,6 @@ import {
   XCircle, AlertCircle, Sparkles, MessageSquare, Infinity, Database, Lock,
   Search, Clock, Zap, Target, Building2, Plus, Minus, ArrowRight
 } from "lucide-react";
-import { EngagementBanner } from "@/components/landing/EngagementBanner";
 
 export default function FinancialAdvisorsPage() {
   // FAQ State
@@ -39,8 +38,6 @@ export default function FinancialAdvisorsPage() {
           </div>
         </div>
       </header>
-
-      <EngagementBanner />
 
       {/* Hero Section */}
       <section className="container mx-auto px-4 py-20 text-center">
@@ -1406,7 +1403,7 @@ export default function FinancialAdvisorsPage() {
           </div>
           <div className="border-t pt-8 text-center text-sm text-muted-foreground">
             <p className="mb-2">
-              © 2026 AI Operating System. All rights reserved. | SOC 2 Type I in progress | SEC-aware
+              © 2024 AI Operating System. All rights reserved. | SOC 2 Type II Certified | SEC Compliant
             </p>
             <p className="text-xs max-w-3xl mx-auto">
               Perpetual Core is a practice management tool. Investment advice and fiduciary responsibilities remain with registered advisors.

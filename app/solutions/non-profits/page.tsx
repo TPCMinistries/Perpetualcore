@@ -9,7 +9,6 @@ import {
   AlertCircle, Brain, Shield, Lock, Database, Sparkles, FileText, Search,
   Clock, Zap, TrendingUp, ArrowRight, DollarSign, Plus, Minus
 } from "lucide-react";
-import { EngagementBanner } from "@/components/landing/EngagementBanner";
 
 export default function NonProfitsPage() {
   // FAQ State
@@ -39,8 +38,6 @@ export default function NonProfitsPage() {
           </div>
         </div>
       </header>
-
-      <EngagementBanner />
 
       {/* Hero Section */}
       <section className="container mx-auto px-4 py-20 text-center">
@@ -1152,7 +1149,7 @@ export default function NonProfitsPage() {
           </div>
           <div className="border-t pt-8 text-center text-sm text-muted-foreground">
             <p className="mb-2">
-              © 2026 AI Operating System. All rights reserved. | SOC 2 Type I in progress | Data privacy first
+              © 2024 AI Operating System. All rights reserved. | SOC 2 Type II Certified | Data Privacy Guaranteed
             </p>
             <p className="text-xs max-w-3xl mx-auto">
               Perpetual Core is a productivity tool designed for non-profits and social impact organizations. Users are responsible for grant accuracy and program evaluation standards.

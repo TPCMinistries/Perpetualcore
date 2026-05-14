@@ -52,7 +52,7 @@ function DashboardLayoutInner({
       {/* Main Content */}
       <main id="main-content" className="flex-1 overflow-y-auto relative z-10" role="main">
         {/* Header Bar - Glass effect */}
-        <header className="sticky top-0 z-20 bg-white/60 dark:bg-[#150e2e]/70 backdrop-blur-xl px-4 sm:px-6 py-3 flex items-center justify-between border-b border-black/[0.04] dark:border-white/[0.06]" role="banner">
+        <header className="sticky top-0 z-20 bg-white/60 dark:bg-[#150e2e]/70 backdrop-blur-2xl px-4 sm:px-6 py-3 flex items-center justify-between border-b border-black/[0.04] dark:border-white/[0.06]" role="banner">
           <div className="flex items-center gap-3">
             {/* Sidebar Toggle - Desktop */}
             <Button
@@ -111,7 +111,7 @@ function DashboardLayoutInner({
               initial={{ opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -8 }}
-              transition={{ type: "spring", stiffness: 300, damping: 30 }}
+              transition={{ duration: 0.15, ease: "easeOut" }}
             >
               {children}
             </motion.div>

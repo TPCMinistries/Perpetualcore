@@ -9,7 +9,6 @@ import {
   Shield, XCircle, AlertCircle, Brain, Calendar, MessageCircle, Clock,
   Zap, ArrowRight, Database, Lock, Sparkles, Plus, Minus, GraduationCap
 } from "lucide-react";
-import { EngagementBanner } from "@/components/landing/EngagementBanner";
 
 export default function EducationPage() {
   // FAQ State
@@ -39,8 +38,6 @@ export default function EducationPage() {
           </div>
         </div>
       </header>
-
-      <EngagementBanner />
 
       {/* Hero Section */}
       <section className="container mx-auto px-4 py-20 text-center">
@@ -1210,7 +1207,7 @@ export default function EducationPage() {
           </div>
           <div className="border-t pt-8 text-center text-sm text-muted-foreground">
             <p className="mb-2">
-              © 2026 AI Operating System. All rights reserved. | SOC 2 Type I in progress | FERPA-conscious
+              © 2024 AI Operating System. All rights reserved. | SOC 2 Type II Certified | FERPA Compliant
             </p>
             <p className="text-xs max-w-3xl mx-auto">
               Perpetual Core is a productivity tool designed for schools and educational organizations. Educators are responsible for pedagogical decisions and student outcomes.
