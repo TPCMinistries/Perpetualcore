@@ -30,7 +30,7 @@ const PROGRAMS = [
     body: "Production Sentinel run for one organization on a monthly subscription. Unlimited DD vets per month. We operate the agent; you receive the dossiers. For legal teams, investigators, journalists, and operators who need ongoing DD capability — not a one-off vet.",
     audience: "Legal · Investigations · Journalism",
     cta: "Start a retainer",
-    href: "mailto:retainers@perpetualcore.com?subject=Sentinel%20retainer",
+    href: "mailto:lorenzo@perpetualcore.com?subject=Retainer%20%E2%80%94%20Sentinel%20on%20Retainer",
   },
   {
     index: "02",
@@ -41,7 +41,7 @@ const PROGRAMS = [
     body: "Managed RFP discovery and drafting. RFP Engine + RFP Sentry run as a service. We surface scored opportunities, deliver draft responses on request, and brief you weekly. For capture teams, EDs, and grant-funded orgs who need pipeline volume without staffing for it.",
     audience: "Capture teams · Grant orgs · EDs",
     cta: "Talk to capture",
-    href: "mailto:retainers@perpetualcore.com?subject=Capture%20pipeline%20retainer",
+    href: "mailto:lorenzo@perpetualcore.com?subject=Retainer%20%E2%80%94%20Capture%20Pipeline",
   },
   {
     index: "03",
@@ -52,7 +52,7 @@ const PROGRAMS = [
     body: "Productized AI operations review. Ten hours of operator-grade time per month — agent tuning, workflow optimization, skill audits, vendor consolidation. Quarterly business review with your executive team. For orgs who installed AI piecemeal and need ongoing operator oversight.",
     audience: "Founders · COOs · Operating partners",
     cta: "Start a concierge",
-    href: "mailto:retainers@perpetualcore.com?subject=Operator%20concierge%20retainer",
+    href: "mailto:lorenzo@perpetualcore.com?subject=Retainer%20%E2%80%94%20Operator%20Concierge",
   },
   {
     index: "04",
@@ -63,7 +63,7 @@ const PROGRAMS = [
     body: "We build one production skill per month against your real workflows — SKILL.md format, per-org JSON config, versioned and auditable. The library compounds; you keep them all. For orgs that want gradual automation without an engagement, and a compounding skills asset that grows month over month.",
     audience: "Mid-market orgs · Steady-cadence buyers",
     cta: "Subscribe to skills",
-    href: "mailto:retainers@perpetualcore.com?subject=Skills%20subscription",
+    href: "mailto:lorenzo@perpetualcore.com?subject=Retainer%20%E2%80%94%20Skills%20Subscription",
   },
   {
     index: "05",
@@ -74,7 +74,7 @@ const PROGRAMS = [
     body: "Managed Vellum deployment for institutions whose data can't leave their infrastructure or whose compliance team needs every retention parameter on the table. White-glove install, ongoing tune, dedicated retention engineering. Includes the underlying institutional-memory product.",
     audience: "Health systems · Foundations · Universities",
     cta: "Contact for Institutional",
-    href: "mailto:retainers@perpetualcore.com?subject=Vellum%20Institutional",
+    href: "mailto:lorenzo@perpetualcore.com?subject=Retainer%20%E2%80%94%20Vellum%20Institutional",
   },
 ];
 
@@ -112,8 +112,8 @@ export default function StudioRetainersPage() {
               agents. Your team gets the output. No engagement commitment required.
             </p>
             <p>
-              Retainers run continuously, cancellable monthly, and roll into a full engagement when
-              the org is ready. Many start here.
+              Retainers run continuously, cancellable monthly. Many orgs start here and roll into
+              a full engagement when the work scales.
             </p>
           </div>
 
@@ -306,9 +306,9 @@ export default function StudioRetainersPage() {
                   substrate (that&apos;s the engagement); you inherit the output it produces.
                 </p>
                 <p>
-                  Cancellable any month, 30 days&apos; notice. Move up to an engagement at any
-                  point and the retainer fees from the prior six months credit toward the
-                  engagement. We don&apos;t double-bill.
+                  Cancellable any month, 30 days&apos; notice. Move up to a full engagement at
+                  any point — we discuss retainer credit toward engagement scope on a
+                  case-by-case basis, depending on the work already shipped.
                 </p>
                 <p className="text-foreground font-medium">
                   Retainers are the studio at production cadence. Engagements are the studio at
@@ -339,7 +339,7 @@ export default function StudioRetainersPage() {
                   asChild
                   className="text-sm font-medium h-11 px-7 shadow-none bg-foreground text-background hover:bg-foreground/90 rounded-[6px]"
                 >
-                  <a href="mailto:retainers@perpetualcore.com">
+                  <a href="mailto:lorenzo@perpetualcore.com?subject=Start%20a%20retainer">
                     Start a retainer <ArrowRight className="ml-2 h-4 w-4" />
                   </a>
                 </Button>

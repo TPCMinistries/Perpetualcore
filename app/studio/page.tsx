@@ -135,7 +135,8 @@ export default function StudioOverviewPage() {
               <p className="text-base text-muted-foreground leading-[1.7]">
                 The spectrum is deliberate. Most orgs start narrow and grow into the full Engine.
                 Some never need the full install. Some go straight to it. The studio meets the
-                work where it is.
+                work where it is. Move between bands as the work scales — we discuss credit
+                case-by-case when you do.
               </p>
             </div>
           </div>
@@ -212,8 +213,8 @@ export default function StudioOverviewPage() {
             <p className="text-sm text-muted-foreground leading-[1.7] italic">
               Most orgs cross bands over time. A product subscription becomes a retainer when the
               work scales. A retainer rolls into an engagement when the org commits to installing
-              the substrate. Retainer fees from the prior six months credit toward an engagement.
-              We don&apos;t double-bill the journey.
+              the substrate. We discuss credit toward engagement scope case-by-case when you make
+              that move.
             </p>
           </div>
         </div>

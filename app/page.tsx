@@ -424,7 +424,7 @@ export default function HomePage() {
               <p>
                 Most orgs cross bands over time. Subscriptions become retainers when the work
                 scales. Retainers roll into engagements when the org commits to installing the
-                substrate. We don&apos;t double-bill the journey.
+                substrate. We discuss credit case-by-case when you cross a band.
               </p>
             </div>
           </div>
@@ -614,7 +614,7 @@ export default function HomePage() {
                 <Button asChild className="text-sm font-medium h-10 px-5 shadow-none bg-foreground text-background hover:bg-foreground/90 rounded-[6px]">
                   <Link href="/fund">Read the thesis <ArrowRight className="ml-2 h-3.5 w-3.5" /></Link>
                 </Button>
-                <a href="mailto:invest@perpetualcore.com" className="inline-flex items-center text-sm font-medium text-foreground hover:text-primary transition-colors py-2">
+                <a href="mailto:lorenzo@perpetualcore.com?subject=DeepFutures%20inquiry" className="inline-flex items-center text-sm font-medium text-foreground hover:text-primary transition-colors py-2">
                   Founders apply <ArrowRight className="ml-1.5 h-3.5 w-3.5" />
                 </a>
               </div>
@@ -904,7 +904,7 @@ export default function HomePage() {
                   <p className="text-lg font-semibold tracking-[-0.01em] text-foreground mb-2">See the portfolio →</p>
                   <p className="text-sm text-muted-foreground leading-[1.6]">Seven products in production. Use them, or have us install them.</p>
                 </Link>
-                <a href="mailto:invest@perpetualcore.com" className="group bg-card p-6 sm:p-7 hover:bg-surface-hover transition-colors">
+                <a href="mailto:lorenzo@perpetualcore.com?subject=DeepFutures%20inquiry" className="group bg-card p-6 sm:p-7 hover:bg-surface-hover transition-colors">
                   <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-primary mb-3">For founders</p>
                   <p className="text-lg font-semibold tracking-[-0.01em] text-foreground mb-2">Talk to the fund →</p>
                   <p className="text-sm text-muted-foreground leading-[1.6]">DeepFutures invests where we install. Pre-seed, by introduction.</p>

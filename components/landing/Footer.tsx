@@ -33,8 +33,8 @@ const PRODUCT_LINKS = [
 const FUND_LINKS = [
   { label: "DeepFutures overview", href: "/fund" },
   { label: "Thesis", href: "/fund#thesis" },
-  { label: "For founders", href: "mailto:invest@perpetualcore.com" },
-  { label: "For LPs", href: "mailto:lp@perpetualcore.com" },
+  { label: "For founders", href: "mailto:lorenzo@perpetualcore.com?subject=DeepFutures%20%E2%80%94%20founder%20intro" },
+  { label: "For LPs", href: "mailto:lorenzo@perpetualcore.com?subject=DeepFutures%20%E2%80%94%20LP%20inquiry" },
 ];
 
 const INSTITUTE_LINKS = [

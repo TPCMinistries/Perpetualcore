@@ -74,7 +74,7 @@ const FAQS = [
   },
   {
     q: "Can we start small and scale up?",
-    a: "Yes. Most orgs start with one or two staff on Platform Pro ($99/mo each). The 3-band spectrum is designed for movement: subscriptions → retainers ($5K–$15K/mo) → engagements ($75K–$250K+ full installs). Retainer fees credit toward an engagement if you ever cross the band.",
+    a: "Yes. Most orgs start with one or two staff on Platform Pro ($99/mo each). The 3-band spectrum is designed for movement: subscriptions → retainers ($5K–$15K/mo) → engagements ($75K–$250K+ full installs). We discuss credit toward engagement scope case-by-case if you cross bands.",
   },
   {
     q: "Will you actually be there when our ED leaves?",

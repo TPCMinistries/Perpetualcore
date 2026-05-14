@@ -179,7 +179,7 @@ export default function FundPage() {
 
               <div className="grid sm:grid-cols-2 gap-px bg-border border border-border">
                 <a
-                  href="mailto:invest@perpetualcore.com?subject=DeepFutures%20%E2%80%94%20founder%20intro"
+                  href="mailto:lorenzo@perpetualcore.com?subject=DeepFutures%20%E2%80%94%20founder%20intro"
                   className="bg-card p-6 sm:p-8 hover:bg-surface-hover transition-colors"
                 >
                   <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-primary mb-3">
@@ -193,7 +193,7 @@ export default function FundPage() {
                   </p>
                 </a>
                 <a
-                  href="mailto:lp@perpetualcore.com?subject=DeepFutures%20%E2%80%94%20LP%20inquiry"
+                  href="mailto:lorenzo@perpetualcore.com?subject=DeepFutures%20%E2%80%94%20LP%20inquiry"
                   className="bg-card p-6 sm:p-8 hover:bg-surface-hover transition-colors"
                 >
                   <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-primary mb-3">
