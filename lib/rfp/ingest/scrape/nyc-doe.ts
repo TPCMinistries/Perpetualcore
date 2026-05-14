@@ -1,16 +1,20 @@
 /**
- * NYC DOE (Department of Education) Vendor RFP / Contract Opportunities scraper.
+ * NYC DOE (Department of Education) scraper — rewritten 2026-05-14.
  *
- * Source: https://www.nyc.gov/site/doe/funding/contract-opportunities.page
- * Auth:   none
- * Throttle: 1 req / sec
+ * OLD SOURCE (broken, HTTP 404):
+ *   https://www.nyc.gov/site/doe/funding/contract-opportunities.page
  *
- * Many DOE solicitations live behind the DOE Vendor Portal (login required).
- * The static contract-opportunities page lists active RFPs with title,
- * solicitation number, due date, and a link to the full RFx PDF.
+ * NEW SOURCE (via the shared PASSPort fetcher):
+ *   https://passport.cityofnewyork.us/page.aspx/en/rfp/request_browse_public
  *
- * Last verified: 2026-05-10. Baseline expected node count: ~5-25 active.
- * If the static page disappears or changes structure, drift fires.
+ * DOE solicitations appear under two PASSPort agency names: "DEPARTMENT OF
+ * EDUCATION" itself and "SCHOOL CONSTRUCTION AUTHORITY" (capital-projects arm).
+ * `isDoeAgency` (utils.ts) accepts both. DOE's vendor-portal RFx (separate
+ * NYCDOE Vendor Portal at vendorportal.nycenet.edu, login-walled) is out of
+ * scope and remains a Phase 8 candidate.
+ *
+ * Same page-1-only limitation as the DYCD/HRA scrapers. See `nyc-dycd.ts` for
+ * the architectural rationale.
  */
 
 import { recordDrift } from "./drift";
@@ -18,131 +22,99 @@ import type { OpportunityInput } from "./types";
 import {
   decodeEntities,
   fallbackSourceId,
-  fetchHtml,
+  fetchPassportPage1Cached,
+  isDoeAgency,
   normalizeKeywords,
-  stripTags,
   toIsoDate,
+  type PassportRow,
 } from "./utils";
 
 const SOURCE = "nyc_doe" as const;
 
-const BASE_URL =
-  "https://www.nyc.gov/site/doe/funding/contract-opportunities.page";
+const PASSPORT_BROWSE_URL =
+  "https://passport.cityofnewyork.us/page.aspx/en/rfp/request_browse_public";
 
 export async function fetchNycDoeOpportunities(): Promise<OpportunityInput[]> {
-  let resp: Awaited<ReturnType<typeof fetchHtml>>;
+  let result: Awaited<ReturnType<typeof fetchPassportPage1Cached>>;
   try {
-    resp = await fetchHtml(BASE_URL);
+    result = await fetchPassportPage1Cached();
   } catch (e: unknown) {
     const message = e instanceof Error ? e.message : String(e);
     await recordDrift({
       source: SOURCE,
       reason: "fetch_error",
-      details: { message, url: BASE_URL },
+      details: { message, url: PASSPORT_BROWSE_URL },
     });
     return [];
   }
 
-  if (resp.status >= 400) {
+  if (result.status >= 400) {
     await recordDrift({
       source: SOURCE,
       reason: "http_status",
-      details: { status: resp.status, url: BASE_URL },
+      details: { status: result.status, url: PASSPORT_BROWSE_URL },
     });
     return [];
   }
 
-  const records = parseDoeListing(resp.html, resp.finalUrl);
-
-  if (records.length === 0) {
+  if (result.rows.length === 0) {
     await recordDrift({
       source: SOURCE,
       reason: "shape_mismatch",
       details: {
-        url: BASE_URL,
-        html_bytes: resp.html.length,
-        hint: "DOE contract-opportunities page structure may have changed; verify URL and rebuild parser. Many solicitations live in the DOE Vendor Portal (login-walled).",
+        url: PASSPORT_BROWSE_URL,
+        html_bytes: result.html_bytes,
+        hint: "PASSPort grid `#body_x_grid_grd` returned zero rows.",
       },
     });
     return [];
   }
 
-  return records;
+  return result.rows.filter((row) => isDoeAgency(row.agency)).map(toRow);
 }
 
-function parseDoeListing(html: string, finalUrl: string): OpportunityInput[] {
-  const records: OpportunityInput[] = [];
-
-  // Primary table layout.
-  for (const tableMatch of html.matchAll(/<table[^>]*>([\s\S]*?)<\/table>/gi)) {
-    for (const rowMatch of tableMatch[1].matchAll(
-      /<tr[^>]*>([\s\S]*?)<\/tr>/gi
-    )) {
-      const cells = Array.from(
-        rowMatch[1].matchAll(/<t[dh][^>]*>([\s\S]*?)<\/t[dh]>/gi)
-      ).map((m) => stripTags(m[1]));
-      if (cells.length < 2) continue;
-      if (
-        /^(solicitation|title|rfx|contract|due\s*date)/i.test(cells[0])
-      ) {
-        continue;
-      }
-
-      const title =
-        cells.find((c) => c && c.length > 12) ?? cells[1] ?? cells[0];
-      if (!title) continue;
-
-      const idCell = cells.find((c) =>
-        /^(R\d|RFx|RFP|EOI)[A-Z0-9-]*$/i.test(c)
-      );
-
-      const linkMatch = /<a[^>]+href="([^"]+)"/i.exec(rowMatch[1]);
-      const url = linkMatch ? absoluteUrl(linkMatch[1], finalUrl) : null;
-      const dateCell = cells.find((c) => /\d{4}|\d{1,2}\/\d{1,2}/.test(c));
-
-      records.push({
-        source: SOURCE,
-        source_id: idCell ?? fallbackSourceId([SOURCE, title, url ?? ""]),
-        title: decodeEntities(title),
-        agency: "NYC Department of Education",
-        deadline: toIsoDate(dateCell),
-        url,
-        geo: "NYC",
-        keywords: normalizeKeywords(title.split(/\s+/)),
-        raw_json: { row_cells: cells },
-      });
-    }
-  }
-
-  // Fallback: anchor-based extraction for non-tabular layouts.
-  if (records.length === 0) {
-    for (const linkMatch of html.matchAll(
-      /<a[^>]+href="([^"]+)"[^>]*>([\s\S]*?)<\/a>/gi
-    )) {
-      const href = linkMatch[1];
-      const text = stripTags(linkMatch[2]);
-      if (!text) continue;
-      if (!/(rfp|rfx|solicitation|contract|vendor)/i.test(text)) continue;
-      records.push({
-        source: SOURCE,
-        source_id: fallbackSourceId([SOURCE, text, href]),
-        title: decodeEntities(text),
-        agency: "NYC Department of Education",
-        url: absoluteUrl(href, finalUrl),
-        geo: "NYC",
-        keywords: normalizeKeywords(text.split(/\s+/)),
-        raw_json: { anchor_only: true },
-      });
-    }
-  }
-
-  return records;
+function toRow(row: PassportRow): OpportunityInput {
+  const deadline = parsePassportDueDate(row.due_date_raw);
+  return {
+    source: SOURCE,
+    source_id:
+      row.epin && row.epin.length >= 4
+        ? row.epin
+        : fallbackSourceId([SOURCE, row.procurement_name, row.agency]),
+    title: decodeEntities(row.procurement_name),
+    agency: "NYC Department of Education",
+    type: row.procurement_method || null,
+    deadline,
+    posted_at: toIsoDate(row.release_date_raw),
+    brief: [row.program, row.industry, row.main_commodity, row.status]
+      .filter(Boolean)
+      .join(" • "),
+    geo: "NYC",
+    url: PASSPORT_BROWSE_URL,
+    keywords: normalizeKeywords([
+      row.procurement_name,
+      row.program,
+      row.industry,
+      row.main_commodity,
+    ].flatMap((s) => s.split(/[\s,\-–()/]+/))),
+    raw_json: {
+      portal: "passport_nyc",
+      epin: row.epin,
+      agency_raw: row.agency,
+      program: row.program,
+      industry: row.industry,
+      status: row.status,
+      procurement_method: row.procurement_method,
+      release_date_raw: row.release_date_raw,
+      due_date_raw: row.due_date_raw,
+      main_commodity: row.main_commodity,
+    },
+  };
 }
 
-function absoluteUrl(href: string, base: string): string {
-  try {
-    return new URL(href, base).toString();
-  } catch {
-    return href;
-  }
+function parsePassportDueDate(raw: string): string | null {
+  if (!raw) return null;
+  if (raw.includes("2099")) return null;
+  if (/buyer has not set/i.test(raw)) return null;
+  return toIsoDate(raw);
 }

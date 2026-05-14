@@ -126,3 +126,220 @@ export async function fetchHtml(
   const html = await resp.text();
   return { status: resp.status, html, finalUrl: resp.url || url };
 }
+
+// =============================================================================
+// PASSPort shared fetcher
+// =============================================================================
+//
+// PASSPort (https://passport.cityofnewyork.us/) is NYC's unified procurement
+// portal — an Ivalua-hosted ASP.NET WebForms app that replaced the per-agency
+// nyc.gov/site/{dycd,hra,doe}/ static pages (all now HTTP 404 as of 2026-05-14).
+//
+// The public "Browse RFx" page server-renders the first page of the data grid
+// inline in the initial HTML response, so a simple GET captures 15 active
+// solicitations across all NYC agencies. Subsequent pages are loaded via an
+// ASP.NET `__doPostBack` flow with a CSRF token + session cookie that we have
+// not been able to replay from raw `fetch()` (the server returns page 1 again
+// regardless of the `__EVENTARGUMENT=Page|N` we POST).
+//
+// Pagination would require a headless browser (Playwright). The host project
+// has `@playwright/test` in devDependencies but the installed browser binaries
+// do not match the installed library version, and the task brief explicitly
+// forbids installing new browser binaries. Therefore THIS MODULE ONLY READS
+// PAGE 1. The site reports ~150 total active solicitations city-wide; we will
+// surface the first 15 (sorted by Release Date desc, which is the default).
+//
+// When/if Playwright is wired up in a later phase, swap `fetchPassportPage1`
+// for a paginating implementation; the per-agency scrapers below need no
+// changes because they consume the parsed row list, not the network layer.
+
+const PASSPORT_BROWSE_URL =
+  "https://passport.cityofnewyork.us/page.aspx/en/rfp/request_browse_public";
+
+export interface PassportRow {
+  /** EPIN — the NYC procurement opportunity unique ID (e.g. "06926P0008"). */
+  epin: string;
+  /** Procurement Name — the most useful "title" of the opportunity. */
+  procurement_name: string;
+  /** Sponsoring agency (PASSPort's "Agency" column), upper-cased by the site. */
+  agency: string;
+  /** "Program" code from PASSPort, e.g. "(0705) DOMESTIC VIOLENCE SERVICES". */
+  program: string;
+  /** "Industry" from PASSPort, e.g. "Human/Client Service". */
+  industry: string;
+  /** RFx Status: usually "Released", sometimes "Anticipated" / "Closed". */
+  status: string;
+  /** Procurement Method, e.g. "Competitive Sealed Proposal". */
+  procurement_method: string;
+  /** Release Date as displayed by PASSPort (in browser's local TZ — verbatim). */
+  release_date_raw: string;
+  /** Due Date as displayed by PASSPort. "12/31/2099 7:00:00 PM" = no deadline. */
+  due_date_raw: string;
+  /** Main commodity, e.g. "Housing Services". */
+  main_commodity: string;
+}
+
+/**
+ * Fetches PASSPort's public RFx browse page and parses the first 15 rows.
+ *
+ * Returns an object with all the rows on page 1 plus the raw HTML byte count
+ * (for drift triage). Throws only for network errors — HTTP >= 400 is returned
+ * as `{status >= 400, rows: []}` so callers can record `http_status` drift.
+ */
+export async function fetchPassportPage1(): Promise<{
+  status: number;
+  rows: PassportRow[];
+  html_bytes: number;
+  finalUrl: string;
+}> {
+  const resp = await fetchHtml(PASSPORT_BROWSE_URL, {
+    headers: {
+      // PASSPort sometimes 403s on the bare user agent; use a real browser UA.
+      "User-Agent":
+        "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36",
+    },
+  });
+
+  if (resp.status >= 400) {
+    return {
+      status: resp.status,
+      rows: [],
+      html_bytes: resp.html.length,
+      finalUrl: resp.finalUrl,
+    };
+  }
+
+  const rows = parsePassportGrid(resp.html);
+  return {
+    status: resp.status,
+    rows,
+    html_bytes: resp.html.length,
+    finalUrl: resp.finalUrl,
+  };
+}
+
+/**
+ * Parses the PASSPort RFx browse grid (`#body_x_grid_grd > tbody > tr`).
+ *
+ * Column order observed 2026-05-14:
+ *   0  Editing column (icon)
+ *   1  Program
+ *   2  Industry
+ *   3  EPIN
+ *   4  Procurement Name
+ *   5  Agency
+ *   6  RFx Status
+ *   7  Procurement Method
+ *   8  Release Date (Your Local Time)
+ *   9  Due Date (Your Local Time)
+ *   10 (Release Date dup col — Ivalua quirk)
+ *   11 (Due Date dup col)
+ *   12 Remaining time
+ *   13 Main Commodity
+ */
+function parsePassportGrid(html: string): PassportRow[] {
+  const gridMatch =
+    /<table[^>]+id="body_x_grid_grd"[^>]*>([\s\S]*?)<\/table>/i.exec(html);
+  if (!gridMatch) return [];
+  const tbodyMatch = /<tbody[^>]*>([\s\S]*?)<\/tbody>/i.exec(gridMatch[1]);
+  if (!tbodyMatch) return [];
+
+  // PASSPort sometimes lists the same EPIN twice when the solicitation has
+  // multiple lots / commodity lines (each rendered as its own grid row but
+  // sharing the same opportunity ID). We dedupe by EPIN so a single upsert
+  // batch never violates the (source, source_id) ON CONFLICT key.
+  const seenEpins = new Set<string>();
+  const rows: PassportRow[] = [];
+  const trMatches = tbodyMatch[1].matchAll(/<tr[^>]*>([\s\S]*?)<\/tr>/gi);
+  for (const tr of trMatches) {
+    const cells = Array.from(
+      tr[1].matchAll(/<td[^>]*>([\s\S]*?)<\/td>/gi)
+    ).map((m) => stripTags(m[1]));
+    if (cells.length < 10) continue;
+
+    const epin = cells[3];
+    const procurementName = cells[4];
+    if (!epin || !procurementName) continue;
+    if (seenEpins.has(epin)) continue;
+    seenEpins.add(epin);
+
+    rows.push({
+      epin,
+      procurement_name: decodeEntities(procurementName),
+      agency: decodeEntities(cells[5] ?? ""),
+      program: decodeEntities(cells[1] ?? ""),
+      industry: decodeEntities(cells[2] ?? ""),
+      status: cells[6] ?? "",
+      procurement_method: decodeEntities(cells[7] ?? ""),
+      release_date_raw: cells[8] ?? "",
+      due_date_raw: cells[9] ?? "",
+      main_commodity: decodeEntities(cells[13] ?? ""),
+    });
+  }
+  return rows;
+}
+
+/**
+ * Memoized PASSPort fetch — when multiple per-agency scrapers run in the same
+ * orchestrator pass, they share one HTTP request instead of hammering the
+ * portal with three identical GETs. Cache is per-Node-process; cron invocations
+ * (cold lambdas) reset it naturally.
+ */
+let _passportCache: {
+  expiresAt: number;
+  promise: Promise<Awaited<ReturnType<typeof fetchPassportPage1>>>;
+} | null = null;
+const PASSPORT_CACHE_TTL_MS = 60_000; // 60s — plenty for one orchestrator run.
+
+export function fetchPassportPage1Cached(): Promise<
+  Awaited<ReturnType<typeof fetchPassportPage1>>
+> {
+  const now = Date.now();
+  if (_passportCache && _passportCache.expiresAt > now) {
+    return _passportCache.promise;
+  }
+  const promise = fetchPassportPage1();
+  _passportCache = { expiresAt: now + PASSPORT_CACHE_TTL_MS, promise };
+  // If the fetch rejects, clear the cache so the next caller retries.
+  promise.catch(() => {
+    _passportCache = null;
+  });
+  return promise;
+}
+
+/**
+ * Returns true if `agency` (as reported by PASSPort) refers to NYC HRA. HRA is
+ * now part of NYC DSS (Department of Social Services), so we match either the
+ * legacy or the merged name; PASSPort uses "DEPARTMENT OF SOCIAL SERVICES" as
+ * the umbrella for HRA + DHS contracts.
+ */
+export function isHraAgency(agency: string): boolean {
+  const a = agency.toUpperCase();
+  return (
+    a.includes("HUMAN RESOURCES ADMINISTRATION") ||
+    a.includes("DEPARTMENT OF SOCIAL SERVICES") ||
+    a === "HRA" ||
+    a === "DSS"
+  );
+}
+
+/** True if PASSPort agency string refers to NYC DYCD. */
+export function isDycdAgency(agency: string): boolean {
+  const a = agency.toUpperCase();
+  return (
+    a.includes("YOUTH AND COMMUNITY DEVELOPMENT") ||
+    a.includes("YOUTH & COMMUNITY DEVELOPMENT") ||
+    a === "DYCD"
+  );
+}
+
+/** True if PASSPort agency string refers to NYC DOE. */
+export function isDoeAgency(agency: string): boolean {
+  const a = agency.toUpperCase();
+  return (
+    a.includes("DEPARTMENT OF EDUCATION") ||
+    a.includes("SCHOOL CONSTRUCTION AUTHORITY") ||
+    a === "DOE" ||
+    a === "NYCDOE"
+  );
+}

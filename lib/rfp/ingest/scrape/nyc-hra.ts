@@ -1,18 +1,20 @@
 /**
- * NYC HRA (Human Resources Administration) RFP / contracting scraper.
+ * NYC HRA (Human Resources Administration) scraper — rewritten 2026-05-14.
  *
- * Source: https://www.nyc.gov/site/hra/about/contracting-procurement.page
- * Auth:   none
- * Throttle: 1 req / sec
+ * OLD SOURCE (broken, HTTP 404):
+ *   https://www.nyc.gov/site/hra/about/contracting-procurement.page
  *
- * HRA's procurement page links out to PASSPort (NYC's procurement portal) for
- * the live opportunity list. This scraper extracts whatever is enumerated on
- * the static page itself; entries flow through to OpportunityInput[].
+ * NEW SOURCE (via the shared PASSPort fetcher):
+ *   https://passport.cityofnewyork.us/page.aspx/en/rfp/request_browse_public
  *
- * Last verified: 2026-05-10. Baseline expected node count: ~5-15 (HRA posts
- * relatively few; bulk of NYC procurement opps live in PASSPort which is
- * paywalled / login-walled, so a future Phase 10 extension may need a real
- * auth flow).
+ * HRA is now an operating bureau under NYC DSS (Department of Social Services);
+ * PASSPort reports both HRA-only and DHS-only solicitations under the umbrella
+ * agency name "DEPARTMENT OF SOCIAL SERVICES". We accept either label in
+ * `isHraAgency` (see `utils.ts`) so we don't miss legacy HRA solicitations
+ * that might still be tagged the old way.
+ *
+ * Same page-1-only limitation as the DYCD scraper. See `utils.ts` for the
+ * pagination diagnosis and `nyc-dycd.ts` for the architectural rationale.
  */
 
 import { recordDrift } from "./drift";
@@ -20,128 +22,99 @@ import type { OpportunityInput } from "./types";
 import {
   decodeEntities,
   fallbackSourceId,
-  fetchHtml,
+  fetchPassportPage1Cached,
+  isHraAgency,
   normalizeKeywords,
-  stripTags,
   toIsoDate,
+  type PassportRow,
 } from "./utils";
 
 const SOURCE = "nyc_hra" as const;
 
-const BASE_URL =
-  "https://www.nyc.gov/site/hra/about/contracting-procurement.page";
+const PASSPORT_BROWSE_URL =
+  "https://passport.cityofnewyork.us/page.aspx/en/rfp/request_browse_public";
 
 export async function fetchNycHraOpportunities(): Promise<OpportunityInput[]> {
-  let resp: Awaited<ReturnType<typeof fetchHtml>>;
+  let result: Awaited<ReturnType<typeof fetchPassportPage1Cached>>;
   try {
-    resp = await fetchHtml(BASE_URL);
+    result = await fetchPassportPage1Cached();
   } catch (e: unknown) {
     const message = e instanceof Error ? e.message : String(e);
     await recordDrift({
       source: SOURCE,
       reason: "fetch_error",
-      details: { message, url: BASE_URL },
+      details: { message, url: PASSPORT_BROWSE_URL },
     });
     return [];
   }
 
-  if (resp.status >= 400) {
+  if (result.status >= 400) {
     await recordDrift({
       source: SOURCE,
       reason: "http_status",
-      details: { status: resp.status, url: BASE_URL },
+      details: { status: result.status, url: PASSPORT_BROWSE_URL },
     });
     return [];
   }
 
-  const records = parseHraListing(resp.html, resp.finalUrl);
-
-  if (records.length === 0) {
+  if (result.rows.length === 0) {
     await recordDrift({
       source: SOURCE,
       reason: "shape_mismatch",
       details: {
-        url: BASE_URL,
-        html_bytes: resp.html.length,
-        hint: "HRA contracting page may have moved opportunity listings into PASSPort. Confirm at the URL and update parser.",
+        url: PASSPORT_BROWSE_URL,
+        html_bytes: result.html_bytes,
+        hint: "PASSPort grid `#body_x_grid_grd` returned zero rows.",
       },
     });
     return [];
   }
 
-  return records;
+  return result.rows.filter((row) => isHraAgency(row.agency)).map(toRow);
 }
 
-function parseHraListing(html: string, finalUrl: string): OpportunityInput[] {
-  const records: OpportunityInput[] = [];
-
-  // First try table layout (common for static HRA postings).
-  const tableMatches = html.matchAll(/<table[^>]*>([\s\S]*?)<\/table>/gi);
-  for (const tableMatch of tableMatches) {
-    for (const rowMatch of tableMatch[1].matchAll(
-      /<tr[^>]*>([\s\S]*?)<\/tr>/gi
-    )) {
-      const cells = Array.from(
-        rowMatch[1].matchAll(/<t[dh][^>]*>([\s\S]*?)<\/t[dh]>/gi)
-      ).map((m) => stripTags(m[1]));
-      if (cells.length < 2) continue;
-      if (/^(title|solicitation|rfp|contract\s*type)/i.test(cells[0])) continue;
-
-      const title =
-        cells.find((c) => c && c.length > 12) ?? cells[0];
-      if (!title) continue;
-
-      const linkMatch = /<a[^>]+href="([^"]+)"/i.exec(rowMatch[1]);
-      const url = linkMatch ? absoluteUrl(linkMatch[1], finalUrl) : null;
-      const dateCell = cells.find((c) => /\d{4}|\d{1,2}\/\d{1,2}/.test(c));
-      const idCell = cells.find((c) => /^[A-Z0-9-]{6,}$/.test(c));
-
-      records.push({
-        source: SOURCE,
-        source_id: idCell ?? fallbackSourceId([SOURCE, title, url ?? ""]),
-        title: decodeEntities(title),
-        agency: "NYC Human Resources Administration",
-        deadline: toIsoDate(dateCell),
-        url,
-        geo: "NYC",
-        keywords: normalizeKeywords(title.split(/\s+/)),
-        raw_json: { row_cells: cells },
-      });
-    }
-  }
-
-  // Fallback: bullet/paragraph listing — pull anchor titles that look like RFPs.
-  if (records.length === 0) {
-    for (const linkMatch of html.matchAll(
-      /<a[^>]+href="([^"]+)"[^>]*>([\s\S]*?)<\/a>/gi
-    )) {
-      const href = linkMatch[1];
-      const text = stripTags(linkMatch[2]);
-      if (!text) continue;
-      // Only accept anchors that read like procurement / RFP titles.
-      if (!/(rfp|solicitation|procurement|concept paper|negotiated acquisition)/i.test(text)) {
-        continue;
-      }
-      records.push({
-        source: SOURCE,
-        source_id: fallbackSourceId([SOURCE, text, href]),
-        title: decodeEntities(text),
-        agency: "NYC Human Resources Administration",
-        url: absoluteUrl(href, finalUrl),
-        geo: "NYC",
-        keywords: normalizeKeywords(text.split(/\s+/)),
-        raw_json: { anchor_only: true },
-      });
-    }
-  }
-
-  return records;
+function toRow(row: PassportRow): OpportunityInput {
+  const deadline = parsePassportDueDate(row.due_date_raw);
+  return {
+    source: SOURCE,
+    source_id:
+      row.epin && row.epin.length >= 4
+        ? row.epin
+        : fallbackSourceId([SOURCE, row.procurement_name, row.agency]),
+    title: decodeEntities(row.procurement_name),
+    agency: "NYC Human Resources Administration",
+    type: row.procurement_method || null,
+    deadline,
+    posted_at: toIsoDate(row.release_date_raw),
+    brief: [row.program, row.industry, row.main_commodity, row.status]
+      .filter(Boolean)
+      .join(" • "),
+    geo: "NYC",
+    url: PASSPORT_BROWSE_URL,
+    keywords: normalizeKeywords([
+      row.procurement_name,
+      row.program,
+      row.industry,
+      row.main_commodity,
+    ].flatMap((s) => s.split(/[\s,\-–()/]+/))),
+    raw_json: {
+      portal: "passport_nyc",
+      epin: row.epin,
+      agency_raw: row.agency,
+      program: row.program,
+      industry: row.industry,
+      status: row.status,
+      procurement_method: row.procurement_method,
+      release_date_raw: row.release_date_raw,
+      due_date_raw: row.due_date_raw,
+      main_commodity: row.main_commodity,
+    },
+  };
 }
 
-function absoluteUrl(href: string, base: string): string {
-  try {
-    return new URL(href, base).toString();
-  } catch {
-    return href;
-  }
+function parsePassportDueDate(raw: string): string | null {
+  if (!raw) return null;
+  if (raw.includes("2099")) return null;
+  if (/buyer has not set/i.test(raw)) return null;
+  return toIsoDate(raw);
 }

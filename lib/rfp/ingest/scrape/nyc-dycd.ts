@@ -1,19 +1,29 @@
 /**
- * NYC DYCD (Dept of Youth & Community Development) RFP listing scraper.
+ * NYC DYCD (Dept of Youth & Community Development) scraper — rewritten 2026-05-14.
  *
- * Source: https://www.nyc.gov/site/dycd/funding/rfp-listings.page
- * Auth:   none
- * Throttle: 1 req / sec
+ * OLD SOURCE (broken, HTTP 404):
+ *   https://www.nyc.gov/site/dycd/funding/rfp-listings.page
  *
- * Strategy:
- *   1. Fetch the listing page.
- *   2. Parse the RFP table (DYCD lists active discretionary RFPs in a
- *      structured table with columns: RFP #, Title, Released, Due Date).
- *   3. Map to OpportunityInput[].
+ * NEW SOURCE (via the shared PASSPort fetcher):
+ *   https://passport.cityofnewyork.us/page.aspx/en/rfp/request_browse_public
  *
- * Last verified: 2026-05-10. Baseline expected node count: ~10-30 active.
- * If the page structure changes, drift is recorded with `zero_nodes` /
- * `shape_mismatch` and an empty array is returned.
+ * NYC migrated all agency procurements onto PASSPort (Ivalua-hosted). The old
+ * `nyc.gov/site/dycd/funding/rfp-listings.page` URL began returning 404 some
+ * time before May 2026. Rather than build three near-identical agency scrapers
+ * (DYCD, HRA, DOE), we share one HTTP request to PASSPort's public browse page
+ * (see `utils.ts::fetchPassportPage1Cached`) and filter the returned rows by
+ * agency. Each per-agency scraper still owns its own `source` enum value so
+ * the dashboard's filter pills keep working unchanged.
+ *
+ * Pagination caveat: PASSPort's data grid uses ASP.NET `__doPostBack` for
+ * paging behind a session-bound CSRF nonce; raw `fetch()` POSTs don't survive
+ * it. See `utils.ts` for the full diagnosis. THIS SCRAPER ONLY SEES THE FIRST
+ * PAGE (15 rows across all NYC agencies). DYCD-specific records on later
+ * pages are not picked up until Playwright pagination lands in a later phase.
+ *
+ * If PASSPort returns 0 DYCD rows but does return rows for other agencies, we
+ * treat that as a normal "no DYCD opps currently on page 1" condition and
+ * return [] without firing drift — the source itself is healthy.
  */
 
 import { recordDrift } from "./drift";
@@ -21,120 +31,123 @@ import type { OpportunityInput } from "./types";
 import {
   decodeEntities,
   fallbackSourceId,
-  fetchHtml,
+  fetchPassportPage1Cached,
+  isDycdAgency,
   normalizeKeywords,
-  stripTags,
+  toAmount,
   toIsoDate,
+  type PassportRow,
 } from "./utils";
 
 const SOURCE = "nyc_dycd" as const;
 
-const BASE_URL = "https://www.nyc.gov/site/dycd/funding/rfp-listings.page";
+const PASSPORT_BROWSE_URL =
+  "https://passport.cityofnewyork.us/page.aspx/en/rfp/request_browse_public";
 
 export async function fetchNycDycdOpportunities(): Promise<OpportunityInput[]> {
-  let resp: Awaited<ReturnType<typeof fetchHtml>>;
+  let result: Awaited<ReturnType<typeof fetchPassportPage1Cached>>;
   try {
-    resp = await fetchHtml(BASE_URL);
+    result = await fetchPassportPage1Cached();
   } catch (e: unknown) {
     const message = e instanceof Error ? e.message : String(e);
     await recordDrift({
       source: SOURCE,
       reason: "fetch_error",
-      details: { message, url: BASE_URL },
+      details: { message, url: PASSPORT_BROWSE_URL },
     });
     return [];
   }
 
-  if (resp.status >= 400) {
+  if (result.status >= 400) {
     await recordDrift({
       source: SOURCE,
       reason: "http_status",
-      details: { status: resp.status, url: BASE_URL },
+      details: { status: result.status, url: PASSPORT_BROWSE_URL },
     });
     return [];
   }
 
-  const records = parseDycdListing(resp.html, resp.finalUrl);
-
-  if (records.length === 0) {
-    const looksLikeListingPage =
-      /rfp/i.test(resp.html) && /<table[^>]*>/i.test(resp.html);
+  if (result.rows.length === 0) {
+    // The page returned 200 but no parseable rows — PASSPort changed shape.
     await recordDrift({
       source: SOURCE,
-      reason: looksLikeListingPage ? "zero_nodes" : "shape_mismatch",
+      reason: "shape_mismatch",
       details: {
-        url: BASE_URL,
-        html_bytes: resp.html.length,
-        hint: "Verify https://www.nyc.gov/site/dycd/funding/rfp-listings.page still has an RFP listing table.",
+        url: PASSPORT_BROWSE_URL,
+        html_bytes: result.html_bytes,
+        hint: "PASSPort grid `#body_x_grid_grd` returned zero rows; Ivalua may have changed the table structure.",
       },
     });
     return [];
   }
-  return records;
+
+  // Filter to DYCD-sponsored opportunities. Note: on page 1 (15 rows) DYCD
+  // often has 0 hits — we deliberately do NOT record drift for an empty filter
+  // result because PASSPort itself is healthy. The orchestrator's count-anomaly
+  // detector handles long-term silences.
+  return result.rows
+    .filter((row) => isDycdAgency(row.agency))
+    .map(toOpportunityInput);
 }
 
-function parseDycdListing(
-  html: string,
-  finalUrl: string
-): OpportunityInput[] {
-  const records: OpportunityInput[] = [];
-
-  const tableMatches = html.matchAll(
-    /<table[^>]*>([\s\S]*?)<\/table>/gi
-  );
-  for (const tableMatch of tableMatches) {
-    const rowMatches = tableMatch[1].matchAll(
-      /<tr[^>]*>([\s\S]*?)<\/tr>/gi
-    );
-    for (const rowMatch of rowMatches) {
-      const cells = Array.from(
-        rowMatch[1].matchAll(/<t[dh][^>]*>([\s\S]*?)<\/t[dh]>/gi)
-      ).map((m) => stripTags(m[1]));
-      if (cells.length < 2) continue;
-      if (/^(rfp\s*#?|title|name|released|due)/i.test(cells[0])) continue;
-
-      // DYCD pattern: [RFP #, Title, Released Date, Due Date] (column order may vary).
-      const rfpNumber =
-        cells.find((c) => /^[A-Z]+-?[0-9]+/i.test(c)) ??
-        fallbackSourceId([SOURCE, cells.join("|")]);
-      const title =
-        cells.find((c) => c && c.length > 12 && !/^[A-Z]+-?[0-9]+/i.test(c)) ??
-        cells[1] ??
-        cells[0];
-      if (!title) continue;
-
-      const dueCell = cells.find((c) =>
-        /\b(due|close|deadline)\b/i.test(c)
-      );
-      const datedCells = cells.filter((c) =>
-        /\d{4}|\d{1,2}\/\d{1,2}/i.test(c)
-      );
-      const deadlineRaw = dueCell ?? datedCells[datedCells.length - 1] ?? null;
-
-      const linkMatch = /<a[^>]+href="([^"]+)"/i.exec(rowMatch[1]);
-      const url = linkMatch ? absoluteUrl(linkMatch[1], finalUrl) : null;
-
-      records.push({
-        source: SOURCE,
-        source_id: rfpNumber,
-        title: decodeEntities(title),
-        agency: "NYC Department of Youth & Community Development",
-        deadline: toIsoDate(deadlineRaw),
-        url,
-        geo: "NYC",
-        keywords: normalizeKeywords(title.split(/\s+/)),
-        raw_json: { row_cells: cells },
-      });
-    }
-  }
-
-  return records;
+function toOpportunityInput(row: PassportRow): OpportunityInput {
+  const deadline = parsePassportDueDate(row.due_date_raw);
+  return {
+    source: SOURCE,
+    // EPIN is PASSPort's stable unique ID; use it directly when present.
+    source_id:
+      row.epin && row.epin.length >= 4
+        ? row.epin
+        : fallbackSourceId([SOURCE, row.procurement_name, row.agency]),
+    title: decodeEntities(row.procurement_name),
+    agency: "NYC Department of Youth & Community Development",
+    type: row.procurement_method || null,
+    amount_min: toAmount(row.procurement_name),
+    amount_max: null,
+    deadline,
+    posted_at: toIsoDate(row.release_date_raw),
+    brief: buildBrief(row),
+    geo: "NYC",
+    url: PASSPORT_BROWSE_URL,
+    keywords: normalizeKeywords([
+      row.procurement_name,
+      row.program,
+      row.industry,
+      row.main_commodity,
+    ].flatMap((s) => s.split(/[\s,\-–()/]+/))),
+    raw_json: {
+      portal: "passport_nyc",
+      epin: row.epin,
+      agency_raw: row.agency,
+      program: row.program,
+      industry: row.industry,
+      status: row.status,
+      procurement_method: row.procurement_method,
+      release_date_raw: row.release_date_raw,
+      due_date_raw: row.due_date_raw,
+      main_commodity: row.main_commodity,
+    },
+  };
 }
 
-function absoluteUrl(href: string, base: string): string {
-  try {
-    return new URL(href, base).toString();
-  } catch {
-    return href;
-  }
+function buildBrief(row: PassportRow): string {
+  const parts: string[] = [];
+  if (row.program) parts.push(row.program);
+  if (row.industry) parts.push(row.industry);
+  if (row.main_commodity) parts.push(row.main_commodity);
+  if (row.status) parts.push(`Status: ${row.status}`);
+  return parts.join(" • ");
+}
+
+/**
+ * PASSPort displays "12/31/2099 7:00:00 PM" as a sentinel meaning "no formal
+ * due date / rolling submission". We treat that as null. Also "Buyer has not
+ * set a bid due date" appears in some cells (in the "Remaining time" column
+ * but defensively here too).
+ */
+function parsePassportDueDate(raw: string): string | null {
+  if (!raw) return null;
+  if (raw.includes("2099")) return null;
+  if (/buyer has not set/i.test(raw)) return null;
+  return toIsoDate(raw);
 }

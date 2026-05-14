@@ -1,25 +1,33 @@
 /**
- * NY State Grants Gateway scraper.
+ * NY State Grants Gateway scraper (rewritten 2026-05-14).
  *
- * Source: https://grantsmanagement.ny.gov/grant-opportunities (public listing)
- * Auth:   none
- * Throttle: 1 req / sec (REQUEST_DELAY_MS)
+ * OLD SOURCE (broken, HTTP 404 since some time pre-May 2026):
+ *   https://grantsmanagement.ny.gov/grant-opportunities
  *
- * Strategy:
- *   1. Fetch the listing page HTML.
- *   2. Detect grant-opportunity rows. The Grants Gateway uses a table or card
- *      layout where each row exposes a Funding Opportunity ID, Title, Agency,
- *      Deadline, Award Amount range, and a detail link.
- *   3. Extract each row via a regex bounded to the listing block, then parse
- *      the inner cells via per-field regex.
- *   4. Map to OpportunityInput[].
+ * NEW SOURCE:
+ *   https://grantsgateway.ny.gov/IntelliGrants_NYSGG/module/nysgg/goportal.aspx?NavItem1=2
  *
- * If the chosen URL returns 404 or the structure is fundamentally different
- * (no rows match), we record drift (`http_status` or `zero_nodes`) and return
- * []. We never throw — the orchestrator continues with the other sources.
+ * The Grants Gateway public portal was migrated onto Agate Software's
+ * IntelliGrants platform. The "Browse for Opportunities" tab is the public,
+ * un-authenticated landing page for available state grants — it renders a
+ * server-side HTML data grid (`<table id="...dgdGOBrowseResults">`) with
+ * columns:
+ *   Funding Agency | Grant Opportunity | Status | Eligibility |
+ *   Availability Date | Anticipated Release Date | Due Date
  *
- * Last verified: 2026-05-10. Baseline expected node count: ~30-80 (varies by
- * filing window). See README.md for re-verification steps.
+ * The default Browse view filters to status=Available (no pagination required
+ * for the typical record count — observed 5-10 records on 2026-05-14). The
+ * Search tab supports broader queries (including Anticipated and Closed) but
+ * is a real ASP.NET WebForms postback flow with `__VIEWSTATE` and pagination;
+ * that's a future enhancement once we need the broader corpus.
+ *
+ * The portal does not expose a stable "Funding Opportunity ID" in the listing
+ * itself — applicants click through to a detail page (a JavaScript postback)
+ * for the ID. We therefore fall back to a FNV-1a hash of (title + agency) as
+ * the source_id, which is stable across runs as long as the grant title and
+ * sponsoring agency don't change.
+ *
+ * Auth: none. Throttle: 1 req/sec (single GET per run). HTML, not JS-rendered.
  */
 
 import { recordDrift } from "./drift";
@@ -30,13 +38,15 @@ import {
   fetchHtml,
   normalizeKeywords,
   stripTags,
-  toAmount,
   toIsoDate,
 } from "./utils";
 
 const SOURCE = "ny_state" as const;
 
-const BASE_URL = "https://grantsmanagement.ny.gov/grant-opportunities";
+const BASE_URL =
+  "https://grantsgateway.ny.gov/IntelliGrants_NYSGG/module/nysgg/goportal.aspx?NavItem1=2";
+
+const GRID_ID = "ctl00_cphPageContent_wclGOBrowseResults_dgdGOBrowseResults";
 
 export async function fetchNyStateOpportunities(): Promise<OpportunityInput[]> {
   let resp: Awaited<ReturnType<typeof fetchHtml>>;
@@ -61,22 +71,21 @@ export async function fetchNyStateOpportunities(): Promise<OpportunityInput[]> {
     return [];
   }
 
-  const records = parseNyStateListing(resp.html, resp.finalUrl);
+  const records = parseGrantsGatewayGrid(resp.html);
 
   if (records.length === 0) {
-    // Differentiate "we got HTML but couldn't find any rows" from "page is empty".
-    // We only report `zero_nodes` when the page clearly has *some* listing-shaped
-    // markup but our parser missed; otherwise we suspect URL drift.
-    const looksLikeListingPage =
-      /grant-?opportunities/i.test(resp.html) ||
-      /<table[^>]*>/i.test(resp.html);
+    // The page may legitimately be empty (no grants in "Available" status); we
+    // still emit a drift event so a multi-day silence raises an admin alert.
+    const looksLikePortal =
+      resp.html.includes("IntelliGrants") &&
+      resp.html.includes("Grant Opportunity Portal");
     await recordDrift({
       source: SOURCE,
-      reason: looksLikeListingPage ? "zero_nodes" : "shape_mismatch",
+      reason: looksLikePortal ? "zero_nodes" : "shape_mismatch",
       details: {
         url: BASE_URL,
         html_bytes: resp.html.length,
-        hint: "Verify https://grantsmanagement.ny.gov/grant-opportunities still renders the listing table; structure may have changed.",
+        hint: `Verify ${BASE_URL} still renders the dgdGOBrowseResults data grid; Agate may have changed the portal layout.`,
       },
     });
     return [];
@@ -85,112 +94,79 @@ export async function fetchNyStateOpportunities(): Promise<OpportunityInput[]> {
   return records;
 }
 
-/**
- * Parses the NY State Grants Gateway listing page into OpportunityInput[].
- *
- * The Grants Gateway has historically rendered listings in two formats:
- *   1. A `<table>` with one row per opportunity (older).
- *   2. A repeating `<article>` or `<div class="...opportunity...">` card (newer).
- *
- * We try both. Each successful match contributes records; if both yield zero
- * the caller surfaces drift.
- */
-function parseNyStateListing(
-  html: string,
-  finalUrl: string
-): OpportunityInput[] {
+interface ParsedRow {
+  agency: string;
+  title: string;
+  status: string;
+  eligibility: string;
+  availabilityDate: string;
+  anticipatedReleaseDate: string;
+  dueDate: string;
+}
+
+function parseGrantsGatewayGrid(html: string): OpportunityInput[] {
+  // The IntelliGrants portal uses an outer `<table>` for layout AND an inner
+  // `<table>` for the data grid; we target the grid by its ID to avoid matching
+  // the wrapper.
+  const gridRe = new RegExp(
+    `<table[^>]+id="${GRID_ID}"[^>]*>([\\s\\S]*?)</table>`,
+    "i"
+  );
+  const gridMatch = gridRe.exec(html);
+  if (!gridMatch) return [];
+
   const records: OpportunityInput[] = [];
+  const trMatches = gridMatch[1].matchAll(/<tr[^>]*>([\s\S]*?)<\/tr>/gi);
+  for (const tr of trMatches) {
+    const cells = Array.from(
+      tr[1].matchAll(/<td[^>]*>([\s\S]*?)<\/td>/gi)
+    ).map((m) => stripTags(m[1]));
 
-  // -- Attempt 1: table rows --
-  const tableMatch = /<table[^>]*>([\s\S]*?)<\/table>/i.exec(html);
-  if (tableMatch) {
-    const rowMatches = tableMatch[1].matchAll(/<tr[^>]*>([\s\S]*?)<\/tr>/gi);
-    for (const rowMatch of rowMatches) {
-      const cells = Array.from(
-        rowMatch[1].matchAll(/<t[dh][^>]*>([\s\S]*?)<\/t[dh]>/gi)
-      ).map((m) => stripTags(m[1]));
-      // Skip header rows (first cell is "Title" or "Funding Opportunity").
-      if (cells.length < 3) continue;
-      if (/^(title|funding|opportunity|grant\s*name|name)/i.test(cells[0])) {
-        continue;
-      }
+    // Header row has 7 cells starting with "Funding Agency"; pagination row has
+    // a single cell with the page number. Data rows have 7 cells with content.
+    if (cells.length < 7) continue;
+    if (/^funding\s*agency$/i.test(cells[0])) continue;
 
-      const title = cells.find((c) => c && c.length > 8) ?? cells[0];
-      if (!title) continue;
+    const row: ParsedRow = {
+      agency: cells[0],
+      title: cells[1],
+      status: cells[2],
+      eligibility: cells[3],
+      availabilityDate: cells[4],
+      anticipatedReleaseDate: cells[5],
+      dueDate: cells[6],
+    };
 
-      // Try to find a detail link inside the row.
-      const linkMatch = /<a[^>]+href="([^"]+)"/i.exec(rowMatch[1]);
-      const url = linkMatch ? absoluteUrl(linkMatch[1], finalUrl) : null;
+    if (!row.title || row.title.length < 4) continue;
 
-      // Heuristics: deadline cell typically contains "due" or a date pattern,
-      // amount cells contain "$".
-      const deadlineCell = cells.find((c) =>
-        /\b(due|deadline|close|closes|by)\b/i.test(c)
-      );
-      const amountCell = cells.find((c) => /\$/.test(c));
-
-      const id =
-        cells.find((c) => /^[A-Z0-9-]{6,}$/.test(c)) ??
-        fallbackSourceId([SOURCE, title, url ?? ""]);
-
-      records.push({
-        source: SOURCE,
-        source_id: id,
-        title: decodeEntities(title),
-        agency: cells[1] && cells[1] !== title ? cells[1] : null,
-        deadline: toIsoDate(deadlineCell),
-        amount_max: amountCell ? toAmount(amountCell) : null,
-        url,
-        geo: "NY",
-        keywords: normalizeKeywords(title.split(/\s+/)),
-        raw_json: { row_cells: cells },
-      });
-    }
-  }
-
-  // -- Attempt 2: card layout --
-  if (records.length === 0) {
-    const cardMatches = html.matchAll(
-      /<(article|div)[^>]*class="[^"]*(opportunity|grant-listing|funding-card)[^"]*"[^>]*>([\s\S]*?)<\/\1>/gi
-    );
-    for (const cardMatch of cardMatches) {
-      const inner = cardMatch[3];
-      const titleMatch =
-        /<(h[1-4])[^>]*>([\s\S]*?)<\/\1>/i.exec(inner) ??
-        /<a[^>]*>([\s\S]*?)<\/a>/i.exec(inner);
-      if (!titleMatch) continue;
-      const title = stripTags(titleMatch[2] ?? titleMatch[1]);
-      if (!title) continue;
-
-      const linkMatch = /<a[^>]+href="([^"]+)"/i.exec(inner);
-      const url = linkMatch ? absoluteUrl(linkMatch[1], finalUrl) : null;
-      const text = stripTags(inner);
-      const dueMatch = /(deadline|close[ds]?|due)[^A-Za-z0-9]{0,5}([A-Za-z0-9 ,/-]{6,30})/i.exec(
-        text
-      );
-      const dollarMatch = /\$[0-9,]+(?:\.[0-9]{2})?(?:\s*[KMB])?/i.exec(text);
-
-      records.push({
-        source: SOURCE,
-        source_id: fallbackSourceId([SOURCE, title, url ?? ""]),
-        title: decodeEntities(title),
-        deadline: dueMatch ? toIsoDate(dueMatch[2]) : null,
-        amount_max: dollarMatch ? toAmount(dollarMatch[0]) : null,
-        url,
-        geo: "NY",
-        keywords: normalizeKeywords(title.split(/\s+/)),
-        raw_json: { card_html_bytes: inner.length },
-      });
-    }
+    records.push({
+      source: SOURCE,
+      source_id: fallbackSourceId([SOURCE, row.title, row.agency]),
+      title: decodeEntities(row.title),
+      agency: row.agency ? decodeEntities(row.agency) : null,
+      type: row.status || null,
+      deadline:
+        row.dueDate && row.dueDate.trim() && row.dueDate !== " "
+          ? toIsoDate(row.dueDate)
+          : null,
+      posted_at: toIsoDate(row.availabilityDate),
+      brief: row.eligibility
+        ? `Eligibility: ${decodeEntities(row.eligibility)}`
+        : null,
+      geo: "NY",
+      url: BASE_URL,
+      keywords: normalizeKeywords(row.title.split(/[\s,\-–()]+/)),
+      raw_json: {
+        portal: "intelligrants_nysgg",
+        funding_agency: row.agency,
+        status: row.status,
+        eligibility: row.eligibility,
+        availability_date: row.availabilityDate,
+        anticipated_release_date: row.anticipatedReleaseDate,
+        due_date: row.dueDate,
+      },
+    });
   }
 
   return records;
-}
-
-function absoluteUrl(href: string, base: string): string {
-  try {
-    return new URL(href, base).toString();
-  } catch {
-    return href;
-  }
 }
