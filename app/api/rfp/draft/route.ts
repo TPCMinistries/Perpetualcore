@@ -1,18 +1,21 @@
 /**
  * POST /api/rfp/draft
  *
- * Generate a first-pass proposal draft for an opportunity. v1 of the
- * drafting wedge — single Sonnet round, no voice fingerprint, no vault
- * retrieval, no reviewer. Honest framing per `lib/rfp/draft/sections.ts`.
+ * Generate a first-pass proposal draft for an opportunity. Single Sonnet
+ * round, no vault retrieval, no reviewer. As of Voice Fingerprint v1 the
+ * route loads `rfp_orgs.voice_fingerprint` and (when populated) passes the
+ * profile to the drafter, which prepends it to its system prompt. When the
+ * column is empty / unset the drafter behaves exactly as it did pre-voice.
  *
  * Input: { org_id: uuid, opp_id: uuid }
  *
  * Side effects:
  *   - INSERT rfp_proposals (status='drafting' → 'draft')
  *   - INSERT rfp_proposal_sections (one per section, version=1)
- *   - INSERT rfp_agent_sessions (audit row with model/tokens/cost; we do
- *     NOT yet write the encrypted prompt/response — Phase 7 will add that
- *     once an encryption key with bytea handling is wired)
+ *   - INSERT rfp_agent_sessions (audit row with model/tokens/cost AND
+ *     session_id suffix `__voice=<true|false>` so we can read voice_applied
+ *     downstream without a schema change. Encrypted prompt/response in a
+ *     subsequent phase once an encryption key with bytea handling is wired.)
  *
  * Auth + RLS:
  *   - createClient() to authenticate the caller and verify membership in
@@ -31,6 +34,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { createClient, createAdminClient } from "@/lib/supabase/server";
 import { generateDraft } from "@/lib/rfp/draft/generate";
+import { isVoiceFingerprint, type VoiceFingerprint } from "@/lib/rfp/voice/extract";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -54,6 +58,7 @@ interface OrgRow {
   name: string;
   type: "nonprofit" | "forprofit" | "dual";
   capacity_summary: string | null;
+  voice_fingerprint: unknown;
 }
 
 export async function POST(req: Request): Promise<NextResponse> {
@@ -89,15 +94,25 @@ export async function POST(req: Request): Promise<NextResponse> {
   }
 
   // Load the org + opp via admin client (we've already authorized the caller).
+  // We also pull voice_fingerprint to optionally apply at draft time —
+  // Voice Fingerprint v1. When the column is the empty `{}` default it
+  // fails isVoiceFingerprint() and the drafter behaves identically to
+  // pre-voice.
   const admin = createAdminClient();
   const { data: org, error: orgErr } = await admin
     .from("rfp_orgs")
-    .select("name, type, capacity_summary")
+    .select("name, type, capacity_summary, voice_fingerprint")
     .eq("id", body.org_id)
     .maybeSingle<OrgRow>();
   if (orgErr || !org) {
     return NextResponse.json({ error: "org_not_found" }, { status: 404 });
   }
+
+  const voiceFingerprint: VoiceFingerprint | undefined = isVoiceFingerprint(
+    org.voice_fingerprint,
+  )
+    ? org.voice_fingerprint
+    : undefined;
 
   const { data: opp, error: oppErr } = await admin
     .from("rfp_opportunities")
@@ -111,7 +126,15 @@ export async function POST(req: Request): Promise<NextResponse> {
   // Generate.
   let draft;
   try {
-    draft = await generateDraft({ opportunity: opp, org });
+    draft = await generateDraft({
+      opportunity: opp,
+      org: {
+        name: org.name,
+        type: org.type,
+        capacity_summary: org.capacity_summary,
+      },
+      voiceFingerprint,
+    });
   } catch (err) {
     const msg = err instanceof Error ? err.message : "unknown";
     return NextResponse.json(
@@ -163,12 +186,17 @@ export async function POST(req: Request): Promise<NextResponse> {
     );
   }
 
-  // Audit row — model/tokens/cost only for v1; encrypted prompt/response in Phase 7.
+  // Audit row — model/tokens/cost only for v1; encrypted prompt/response in
+  // a subsequent phase. The voice_applied flag is encoded as a session_id
+  // suffix so it's visible without a schema change. Format:
+  //   `<draft.session_id>__voice=<true|false>`
+  // Downstream readers can split on "__voice=" to inspect.
+  const sessionIdWithVoice = `${draft.session_id}__voice=${draft.voice_applied ? "true" : "false"}`;
   await admin.from("rfp_agent_sessions").insert({
     proposal_id: proposal.id,
     org_id: body.org_id,
     agent: "drafter_v1",
-    session_id: draft.session_id,
+    session_id: sessionIdWithVoice,
     model: draft.model,
     tokens_in: draft.tokens_in,
     tokens_out: draft.tokens_out,
@@ -182,5 +210,6 @@ export async function POST(req: Request): Promise<NextResponse> {
     tokens_out: draft.tokens_out,
     cost_usd: draft.cost_usd,
     model: draft.model,
+    voice_applied: draft.voice_applied,
   });
 }

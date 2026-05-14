@@ -4,12 +4,15 @@
  * DraftButton — kicks off a first-pass draft for an opportunity.
  *
  * Lives inside DetailPane. POSTs to /api/rfp/draft and on success routes the
- * user to the new proposal's page. Honest copy: "first-pass draft (preview)"
- * — the voice/vault/reviewer layers aren't shipped yet, so the button label
- * does not promise them.
+ * user to the new proposal's page. Honest copy: when the org has not yet
+ * trained its voice we say "no voice or vault yet"; once Voice Fingerprint
+ * v1 is trained we flip to "voice-trained draft · no vault yet".
+ *
+ * Voice state is fetched once on mount from /api/rfp/orgs/[orgId]/voice.
+ * The endpoint is RLS-checked and cheap (single column read).
  */
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
 interface DraftButtonProps {
@@ -17,10 +20,35 @@ interface DraftButtonProps {
   oppId: string;
 }
 
+interface VoiceState {
+  trained: boolean;
+}
+
 export function DraftButton({ orgId, oppId }: DraftButtonProps) {
   const router = useRouter();
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [voiceTrained, setVoiceTrained] = useState<boolean | null>(null);
+
+  // Lightweight one-shot voice-state fetch. Failures are silent — we just
+  // fall back to the pre-voice copy if we can't tell.
+  useEffect(() => {
+    let cancelled = false;
+    fetch(`/api/rfp/orgs/${encodeURIComponent(orgId)}/voice`)
+      .then(async (res) => {
+        if (!res.ok) throw new Error(`voice_state_${res.status}`);
+        return (await res.json()) as VoiceState;
+      })
+      .then((data) => {
+        if (!cancelled) setVoiceTrained(data.trained);
+      })
+      .catch(() => {
+        if (!cancelled) setVoiceTrained(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [orgId]);
 
   async function onClick() {
     if (busy) return;
@@ -62,7 +90,9 @@ export function DraftButton({ orgId, oppId }: DraftButtonProps) {
         {busy ? "Drafting…" : "Generate first-pass draft"}
       </button>
       <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-zinc-500">
-        Preview · plain draft · no voice or vault yet
+        {voiceTrained
+          ? "Preview · voice-trained draft · no vault yet"
+          : "Preview · plain draft · no voice or vault yet"}
       </p>
       {error ? (
         <p className="text-[12px] text-rose-300">Draft failed: {error}</p>

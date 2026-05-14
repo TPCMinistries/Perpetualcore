@@ -1,24 +1,27 @@
 /**
  * lib/rfp/draft/generate.ts — first-pass drafter.
  *
- * Single round of Sonnet, no reviewer, no vault retrieval, no voice
- * fingerprint. Returns five section drafts plus token/cost metadata so the
- * caller can persist an rfp_agent_sessions audit row. The five sections
- * are defined in ./sections.ts.
+ * Single round of Sonnet, no reviewer, no vault retrieval. As of Voice
+ * Fingerprint v1 the drafter optionally accepts a stylometric profile
+ * (see lib/rfp/voice/extract.ts) and prepends it to the system prompt via
+ * lib/rfp/voice/apply.ts. When no fingerprint is provided we behave
+ * identically to pre-voice behavior.
  *
- * Honest defaults: voice_fingerprint is not yet implemented, so we do not
- * pretend to apply it. capacity_summary is the only org-specific signal the
- * model gets. Anything else org-specific the model writes must be wrapped in
- * `[VERIFY: ...]` markers per the system prompt.
+ * Honest defaults: voice augmentation is system-prompt-level only — not
+ * fine-tuning, not RAG. capacity_summary remains the only org-specific
+ * factual signal. Anything else org-specific the model writes must still
+ * be wrapped in `[VERIFY: ...]` markers per the system prompt.
  *
  * Model: claude-sonnet-4-6. Chosen for cost (~$3/M input, $15/M output) —
- * an Opus reviewer pass will be a separate Phase 7 build. v1 input is
- * ~1500 tokens, output ~2000 tokens → ~$0.03/draft. Cheap enough to
- * dogfood liberally on Uplift submissions.
+ * an Opus reviewer pass is a separate build. v1 input is ~1500 tokens
+ * (+~250 if voice fingerprint applied), output ~2000 tokens →
+ * ~$0.03/draft. Cheap enough to dogfood liberally on Uplift submissions.
  */
 
 import Anthropic from "@anthropic-ai/sdk";
 import { ALL_SECTION_SPECS, SECTION_TYPES, type SectionType } from "./sections";
+import { applyVoiceFingerprint } from "@/lib/rfp/voice/apply";
+import type { VoiceFingerprint } from "@/lib/rfp/voice/extract";
 
 const MODEL = "claude-sonnet-4-6";
 
@@ -42,6 +45,12 @@ export interface DraftInput {
     type: "nonprofit" | "forprofit" | "dual";
     capacity_summary: string | null;
   };
+  /**
+   * Optional Voice Fingerprint v1. When provided we prepend the formatted
+   * voice guidance ahead of the default system prompt. When absent the
+   * drafter behaves exactly as it did pre-voice.
+   */
+  voiceFingerprint?: VoiceFingerprint;
 }
 
 export interface DraftSection {
@@ -56,6 +65,8 @@ export interface DraftResult {
   cost_usd: number;
   model: string;
   session_id: string;
+  /** True iff a VoiceFingerprint was applied to the system prompt. */
+  voice_applied: boolean;
 }
 
 const SYSTEM_PROMPT = `You are a senior grant and proposal writer drafting a first pass for an organization that will then iterate on what you produce. You are explicit and honest about uncertainty.
@@ -132,10 +143,20 @@ export async function generateDraft(input: DraftInput): Promise<DraftResult> {
   const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY! });
   const session_id = `draft_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 8)}`;
 
+  // Voice augmentation — prepend the formatted fingerprint ahead of the
+  // default system prompt when supplied. The order matters: the voice block
+  // sets cadence/lexicon, then the system rules govern structure + section
+  // markers. Separating with two blank lines so the model treats them as
+  // distinct sections of guidance.
+  const voiceApplied = !!input.voiceFingerprint;
+  const system = voiceApplied
+    ? `${applyVoiceFingerprint(input.voiceFingerprint!)}\n\n${SYSTEM_PROMPT}`
+    : SYSTEM_PROMPT;
+
   const res = await client.messages.create({
     model: MODEL,
     max_tokens: 4096,
-    system: SYSTEM_PROMPT,
+    system,
     messages: [{ role: "user", content: buildUserPrompt(input) }],
   });
 
@@ -151,5 +172,13 @@ export async function generateDraft(input: DraftInput): Promise<DraftResult> {
     (tokens_in / 1_000_000) * PRICE_PER_M_INPUT +
     (tokens_out / 1_000_000) * PRICE_PER_M_OUTPUT;
 
-  return { sections, tokens_in, tokens_out, cost_usd, model: MODEL, session_id };
+  return {
+    sections,
+    tokens_in,
+    tokens_out,
+    cost_usd,
+    model: MODEL,
+    session_id,
+    voice_applied: voiceApplied,
+  };
 }
