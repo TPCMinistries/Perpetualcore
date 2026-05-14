@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { EngagementBanner } from "@/components/landing/EngagementBanner";
 
 export default function AgenciesPage() {
   // ROI Calculator State
@@ -30,12 +31,12 @@ export default function AgenciesPage() {
   const [openFaq, setOpenFaq] = useState<number | null>(null);
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-background via-background to-muted/20">
+    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white dark:from-gray-900 dark:to-gray-800">
       {/* Header */}
-      <header className="border-b border-border/50 backdrop-blur-xl bg-background/80 sticky top-0 z-50">
+      <header className="border-b bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm sticky top-0 z-50">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
           <Link href="/" className="flex items-center space-x-2">
-            <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-primary via-purple-600 to-purple-700 flex items-center justify-center text-white font-bold shadow-lg">
+            <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center text-primary-foreground font-bold">
               AI
             </div>
             <span className="text-xl font-bold">Perpetual Core</span>
@@ -53,6 +54,8 @@ export default function AgenciesPage() {
           </div>
         </div>
       </header>
+
+      <EngagementBanner />
 
       {/* Hero Section */}
       <section className="container mx-auto px-4 py-16 md:py-24 relative overflow-hidden">
@@ -711,7 +714,7 @@ export default function AgenciesPage() {
         </div>
 
         <div className="max-w-6xl mx-auto grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-          <Card className="border border-border/50 backdrop-blur-xl bg-card/50 hover:border-primary/40 hover:-translate-y-0.5 hover:shadow-md transition-all duration-300">
+          <Card className="border-2 hover:border-primary transition-colors">
             <CardHeader>
               <FileText className="h-10 w-10 text-primary mb-4" />
               <CardTitle>Content Generation</CardTitle>
@@ -737,7 +740,7 @@ export default function AgenciesPage() {
             </CardContent>
           </Card>
 
-          <Card className="border border-border/50 backdrop-blur-xl bg-card/50 hover:border-primary/40 hover:-translate-y-0.5 hover:shadow-md transition-all duration-300">
+          <Card className="border-2 hover:border-primary transition-colors">
             <CardHeader>
               <Palette className="h-10 w-10 text-primary mb-4" />
               <CardTitle>Creative Assistance</CardTitle>
@@ -763,7 +766,7 @@ export default function AgenciesPage() {
             </CardContent>
           </Card>
 
-          <Card className="border border-border/50 backdrop-blur-xl bg-card/50 hover:border-primary/40 hover:-translate-y-0.5 hover:shadow-md transition-all duration-300">
+          <Card className="border-2 hover:border-primary transition-colors">
             <CardHeader>
               <Briefcase className="h-10 w-10 text-primary mb-4" />
               <CardTitle>Project Organization</CardTitle>
@@ -789,7 +792,7 @@ export default function AgenciesPage() {
             </CardContent>
           </Card>
 
-          <Card className="border border-border/50 backdrop-blur-xl bg-card/50 hover:border-primary/40 hover:-translate-y-0.5 hover:shadow-md transition-all duration-300">
+          <Card className="border-2 hover:border-primary transition-colors">
             <CardHeader>
               <Users className="h-10 w-10 text-primary mb-4" />
               <CardTitle>Client Communication</CardTitle>
@@ -815,7 +818,7 @@ export default function AgenciesPage() {
             </CardContent>
           </Card>
 
-          <Card className="border border-border/50 backdrop-blur-xl bg-card/50 hover:border-primary/40 hover:-translate-y-0.5 hover:shadow-md transition-all duration-300">
+          <Card className="border-2 hover:border-primary transition-colors">
             <CardHeader>
               <Target className="h-10 w-10 text-primary mb-4" />
               <CardTitle>Campaign Management</CardTitle>
@@ -841,7 +844,7 @@ export default function AgenciesPage() {
             </CardContent>
           </Card>
 
-          <Card className="border border-border/50 backdrop-blur-xl bg-card/50 hover:border-primary/40 hover:-translate-y-0.5 hover:shadow-md transition-all duration-300">
+          <Card className="border-2 hover:border-primary transition-colors">
             <CardHeader>
               <Calendar className="h-10 w-10 text-primary mb-4" />
               <CardTitle>Knowledge Base</CardTitle>
@@ -1095,7 +1098,7 @@ export default function AgenciesPage() {
                 Client Confidentiality Protected
               </div>
               <h2 className="text-4xl font-bold mb-4">
-                Bank-Level Security. SOC 2 Certified.
+                Encrypted in transit and at rest. SOC 2 Type I in progress.
               </h2>
               <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
                 Your clients' confidential information is protected with the same security used by major financial institutions.
@@ -1118,8 +1121,8 @@ export default function AgenciesPage() {
                   },
                   {
                     icon: Award,
-                    title: "SOC 2 Type II Certified",
-                    desc: "Annual third-party security audits. Full compliance documentation available to prospective clients."
+                    title: "SOC 2 Type I in progress",
+                    desc: "Type I audit in progress; Type II planned for the following audit window. Security controls operational today; documentation available under NDA."
                   },
                   {
                     icon: Users,
@@ -1483,7 +1486,7 @@ export default function AgenciesPage() {
                 answer: "Enterprise-grade support: (1) Dedicated implementation specialist during onboarding. (2) Priority support with 4-hour response time. (3) Email, chat, and video call support. (4) 24/7 AI Coach for instant help. (5) Regular check-ins with your account manager. (6) Ongoing training and optimization sessions. For larger agencies, we offer on-site training and quarterly business reviews."
               }
             ].map((faq, i) => (
-              <Card key={i} className="border border-border/50 backdrop-blur-xl bg-card/50 hover:border-primary/40 hover:-translate-y-0.5 hover:shadow-md transition-all duration-300">
+              <Card key={i} className="border-2 hover:border-primary transition-colors">
                 <CardHeader
                   className="cursor-pointer select-none"
                   onClick={() => setOpenFaq(openFaq === i ? null : i)}
@@ -1575,7 +1578,7 @@ export default function AgenciesPage() {
           <div className="grid md:grid-cols-4 gap-8 mb-8">
             <div>
               <Link href="/" className="flex items-center space-x-2 mb-4">
-                <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-primary via-purple-600 to-purple-700 flex items-center justify-center text-white font-bold shadow-lg">
+                <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center text-primary-foreground font-bold">
                   AI
                 </div>
                 <span className="text-lg font-bold">Perpetual Core</span>
@@ -1614,7 +1617,7 @@ export default function AgenciesPage() {
           </div>
           <div className="border-t pt-8 text-center text-sm text-muted-foreground">
             <p className="mb-2">
-              © 2024 AI Operating System. All rights reserved. | SOC 2 Type II Certified | GDPR Ready
+              © 2026 AI Operating System. All rights reserved. | SOC 2 Type I in progress | GDPR-aware
             </p>
             <p className="text-xs">
               Perpetual Core is a productivity platform. All AI-generated content should be reviewed by qualified professionals.

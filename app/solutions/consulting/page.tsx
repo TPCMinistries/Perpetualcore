@@ -9,18 +9,19 @@ import {
   XCircle, AlertCircle, Sparkles, MessageSquare, Infinity, Zap, Database, Lock,
   Search, Lightbulb, PresentationIcon, BarChart3, BookOpen, LineChart, Plus, Minus
 } from "lucide-react";
+import { EngagementBanner } from "@/components/landing/EngagementBanner";
 
 export default function ConsultingPage() {
   // FAQ State
   const [openFaq, setOpenFaq] = useState<number | null>(null);
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-background via-background to-muted/20">
+    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white dark:from-gray-900 dark:to-gray-800">
       {/* Header */}
-      <header className="border-b border-border/50 backdrop-blur-xl bg-background/80 sticky top-0 z-50">
+      <header className="border-b bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm sticky top-0 z-10">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
           <Link href="/" className="flex items-center space-x-2">
-            <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-primary via-purple-600 to-purple-700 flex items-center justify-center text-white font-bold shadow-lg">
+            <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center text-primary-foreground font-bold">
               AI
             </div>
             <span className="text-xl font-bold">Perpetual Core</span>
@@ -38,6 +39,8 @@ export default function ConsultingPage() {
           </div>
         </div>
       </header>
+
+      <EngagementBanner />
 
       {/* Hero Section */}
       <section className="container mx-auto px-4 py-20 text-center">
@@ -69,7 +72,7 @@ export default function ConsultingPage() {
       </section>
 
       {/* Stats Section */}
-      <section className="bg-muted/30 py-16">
+      <section className="bg-muted/50 py-16">
         <div className="container mx-auto px-4">
           <div className="grid md:grid-cols-4 gap-8 text-center">
             <div>
@@ -654,7 +657,7 @@ export default function ConsultingPage() {
         </div>
 
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-          <Card className="border border-border/50 backdrop-blur-xl bg-card/50 hover:border-primary/40 hover:-translate-y-0.5 hover:shadow-md transition-all duration-300">
+          <Card className="border-2 hover:border-primary transition-colors">
             <CardHeader>
               <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center mb-4">
                 <Target className="h-6 w-6 text-primary" />
@@ -667,7 +670,7 @@ export default function ConsultingPage() {
             </CardHeader>
           </Card>
 
-          <Card className="border border-border/50 backdrop-blur-xl bg-card/50 hover:border-primary/40 hover:-translate-y-0.5 hover:shadow-md transition-all duration-300">
+          <Card className="border-2 hover:border-primary transition-colors">
             <CardHeader>
               <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center mb-4">
                 <Lightbulb className="h-6 w-6 text-primary" />
@@ -680,7 +683,7 @@ export default function ConsultingPage() {
             </CardHeader>
           </Card>
 
-          <Card className="border border-border/50 backdrop-blur-xl bg-card/50 hover:border-primary/40 hover:-translate-y-0.5 hover:shadow-md transition-all duration-300">
+          <Card className="border-2 hover:border-primary transition-colors">
             <CardHeader>
               <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center mb-4">
                 <PresentationIcon className="h-6 w-6 text-primary" />
@@ -693,7 +696,7 @@ export default function ConsultingPage() {
             </CardHeader>
           </Card>
 
-          <Card className="border border-border/50 backdrop-blur-xl bg-card/50 hover:border-primary/40 hover:-translate-y-0.5 hover:shadow-md transition-all duration-300">
+          <Card className="border-2 hover:border-primary transition-colors">
             <CardHeader>
               <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center mb-4">
                 <BarChart3 className="h-6 w-6 text-primary" />
@@ -706,7 +709,7 @@ export default function ConsultingPage() {
             </CardHeader>
           </Card>
 
-          <Card className="border border-border/50 backdrop-blur-xl bg-card/50 hover:border-primary/40 hover:-translate-y-0.5 hover:shadow-md transition-all duration-300">
+          <Card className="border-2 hover:border-primary transition-colors">
             <CardHeader>
               <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center mb-4">
                 <BookOpen className="h-6 w-6 text-primary" />
@@ -719,7 +722,7 @@ export default function ConsultingPage() {
             </CardHeader>
           </Card>
 
-          <Card className="border border-border/50 backdrop-blur-xl bg-card/50 hover:border-primary/40 hover:-translate-y-0.5 hover:shadow-md transition-all duration-300">
+          <Card className="border-2 hover:border-primary transition-colors">
             <CardHeader>
               <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center mb-4">
                 <Users className="h-6 w-6 text-primary" />
@@ -1200,7 +1203,7 @@ export default function ConsultingPage() {
                 answer: "Yes. During onboarding, we work with your partners to understand your proprietary frameworks and approaches. AI learns your firm's specific terminology, methodologies, and workflow. You can create custom templates, define firm-specific categories, and set up practice area structures that match how your firm operates. Think of Perpetual Core as a platform that adapts to your firm's IP, not a rigid system you must adapt to."
               }
             ].map((faq, i) => (
-              <Card key={i} className="border border-border/50 backdrop-blur-xl bg-card/50 hover:border-primary/40 hover:-translate-y-0.5 hover:shadow-md transition-all duration-300">
+              <Card key={i} className="border-2 hover:border-primary transition-colors">
                 <CardHeader
                   className="cursor-pointer select-none"
                   onClick={() => setOpenFaq(openFaq === i ? null : i)}
@@ -1372,7 +1375,7 @@ export default function ConsultingPage() {
           <div className="grid md:grid-cols-4 gap-8 mb-8">
             <div>
               <Link href="/" className="flex items-center space-x-2 mb-4">
-                <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-primary via-purple-600 to-purple-700 flex items-center justify-center text-white font-bold shadow-lg">
+                <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center text-primary-foreground font-bold">
                   AI
                 </div>
                 <span className="text-lg font-bold">Perpetual Core</span>
@@ -1411,7 +1414,7 @@ export default function ConsultingPage() {
           </div>
           <div className="border-t pt-8 text-center text-sm text-muted-foreground">
             <p className="mb-2">
-              © 2024 AI Operating System. All rights reserved. | SOC 2 Type II Certified | Client Confidentiality Guaranteed
+              © 2026 AI Operating System. All rights reserved. | SOC 2 Type I in progress | Client confidentiality first
             </p>
             <p className="text-xs max-w-3xl mx-auto">
               Perpetual Core is a knowledge management platform designed for consulting firms. Professional judgment and client confidentiality

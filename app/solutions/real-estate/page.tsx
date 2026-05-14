@@ -10,18 +10,19 @@ import {
   Zap, Lock, Building2, XCircle, AlertCircle, Play, ChevronDown, Minus, Plus,
   Sparkles, MessageSquare, Mail, Calendar, MapPin, Key
 } from "lucide-react";
+import { EngagementBanner } from "@/components/landing/EngagementBanner";
 
 export default function RealEstatePage() {
   // FAQ State
   const [openFaq, setOpenFaq] = useState<number | null>(null);
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-background via-background to-muted/20">
+    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white dark:from-gray-900 dark:to-gray-800">
       {/* Header */}
-      <header className="border-b border-border/50 backdrop-blur-xl bg-background/80 sticky top-0 z-50">
+      <header className="border-b bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm sticky top-0 z-50">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
           <Link href="/" className="flex items-center space-x-2">
-            <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-primary via-purple-600 to-purple-700 flex items-center justify-center text-white font-bold shadow-lg">
+            <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center text-primary-foreground font-bold">
               AI
             </div>
             <span className="text-xl font-bold">Perpetual Core</span>
@@ -39,6 +40,8 @@ export default function RealEstatePage() {
           </div>
         </div>
       </header>
+
+      <EngagementBanner />
 
       {/* Hero Section */}
       <section className="container mx-auto px-4 py-16 md:py-24 relative overflow-hidden">
@@ -1142,7 +1145,7 @@ export default function RealEstatePage() {
                 answer: "Great question! ChatGPT forgets everything after each conversation. Perpetual Core remembers every client, property, and conversation forever. Plus, Perpetual Core is built specifically for real estate with features like contract generation, MLS integration, and client tracking. ChatGPT is general-purpose; Perpetual Core is your real estate assistant."
               }
             ].map((faq, i) => (
-              <Card key={i} className="border border-border/50 backdrop-blur-xl bg-card/50 hover:border-primary/40 hover:-translate-y-0.5 hover:shadow-md transition-all duration-300">
+              <Card key={i} className="border-2 hover:border-primary transition-colors">
                 <CardHeader
                   className="cursor-pointer select-none"
                   onClick={() => setOpenFaq(openFaq === i ? null : i)}
@@ -1234,7 +1237,7 @@ export default function RealEstatePage() {
           <div className="grid md:grid-cols-4 gap-8 mb-8">
             <div>
               <Link href="/" className="flex items-center space-x-2 mb-4">
-                <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-primary via-purple-600 to-purple-700 flex items-center justify-center text-white font-bold shadow-lg">
+                <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center text-primary-foreground font-bold">
                   AI
                 </div>
                 <span className="text-lg font-bold">Perpetual Core</span>
@@ -1273,7 +1276,7 @@ export default function RealEstatePage() {
           </div>
           <div className="border-t pt-8 text-center text-sm text-muted-foreground">
             <p className="mb-2">
-              © 2024 AI Operating System. All rights reserved. | SOC 2 Certified | Bank-Level Security
+              © 2026 AI Operating System. All rights reserved. | SOC 2 Type I in progress | Encrypted in transit and at rest
             </p>
             <p className="text-xs">
               Perpetual Core is a software tool designed to assist real estate professionals. Users are responsible for compliance with all applicable real estate laws and regulations.

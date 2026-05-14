@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { EngagementBanner } from "@/components/landing/EngagementBanner";
 
 export default function LawFirmsPage() {
   // ROI Calculator State
@@ -30,12 +31,12 @@ export default function LawFirmsPage() {
   const [openFaq, setOpenFaq] = useState<number | null>(null);
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-background via-background to-muted/20">
+    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white dark:from-gray-900 dark:to-gray-800">
       {/* Header */}
-      <header className="border-b border-border/50 backdrop-blur-xl bg-background/80 sticky top-0 z-50">
+      <header className="border-b bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm sticky top-0 z-50">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
           <Link href="/" className="flex items-center space-x-2">
-            <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-primary via-purple-600 to-purple-700 flex items-center justify-center text-white font-bold shadow-lg">
+            <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center text-primary-foreground font-bold">
               AI
             </div>
             <span className="text-xl font-bold">Perpetual Core</span>
@@ -53,6 +54,8 @@ export default function LawFirmsPage() {
           </div>
         </div>
       </header>
+
+      <EngagementBanner />
 
       {/* Hero Section - Enhanced with Urgency */}
       <section className="container mx-auto px-4 py-16 md:py-24 relative overflow-hidden">
@@ -1063,10 +1066,10 @@ export default function LawFirmsPage() {
                 Attorney-Client Privilege Protected
               </div>
               <h2 className="text-4xl font-bold mb-4">
-                Bank-Level Security. ABA Compliant. SOC 2 Certified.
+                Encrypted in transit and at rest. ABA-conscious. SOC 2 Type I in progress.
               </h2>
               <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-                Your clients' confidential information is protected with the same security used by major financial institutions.
+                Your clients&apos; confidential information is protected with industry-standard encryption and access controls. Formal certification is in progress; pending Lorenzo + counsel review before any compliance attestation.
               </p>
             </div>
 
@@ -1087,12 +1090,12 @@ export default function LawFirmsPage() {
                   {
                     icon: Building2,
                     title: "ABA Ethics Compliant",
-                    desc: "Meets all American Bar Association technology ethics requirements (Model Rule 1.6). Reviewed by legal ethics experts."
+                    desc: "Designed against ABA technology ethics expectations (Model Rule 1.6). Formal ethics review pending Lorenzo + counsel sign-off."
                   },
                   {
                     icon: Award,
-                    title: "SOC 2 Type II Certified",
-                    desc: "Annual third-party security audits. Full compliance documentation available to prospective clients."
+                    title: "SOC 2 Type I in progress",
+                    desc: "Type I audit in progress; Type II planned for the following audit window. Security controls operational today; documentation available under NDA."
                   },
                   {
                     icon: Users,
@@ -1404,7 +1407,7 @@ export default function LawFirmsPage() {
                   deliverable: "Full firm adoption, measurable ROI"
                 }
               ].map((phase, i) => (
-                <Card key={i} className="border border-border/50 backdrop-blur-xl bg-card/50 hover:border-primary/40 hover:-translate-y-0.5 hover:shadow-md transition-all duration-300">
+                <Card key={i} className="border-2 hover:border-primary transition-colors">
                   <CardHeader className="bg-primary/5">
                     <div className="flex items-start justify-between">
                       <div className="flex-1">
@@ -1653,7 +1656,7 @@ export default function LawFirmsPage() {
                 answer: "Yes, 100% money back if you're not satisfied within 60 days. No questions asked. No fine print. No 'gotchas.' We'll even help export your data. We offer this because we're confident in what we've built. If Perpetual Core doesn't deliver value for your firm, you shouldn't pay for it. Simple as that."
               }
             ].map((faq, i) => (
-              <Card key={i} className="border border-border/50 backdrop-blur-xl bg-card/50 hover:border-primary/40 hover:-translate-y-0.5 hover:shadow-md transition-all duration-300">
+              <Card key={i} className="border-2 hover:border-primary transition-colors">
                 <CardHeader
                   className="cursor-pointer select-none"
                   onClick={() => setOpenFaq(openFaq === i ? null : i)}
@@ -1833,7 +1836,7 @@ export default function LawFirmsPage() {
           <div className="grid md:grid-cols-4 gap-8 mb-8">
             <div>
               <Link href="/" className="flex items-center space-x-2 mb-4">
-                <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-primary via-purple-600 to-purple-700 flex items-center justify-center text-white font-bold shadow-lg">
+                <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center text-primary-foreground font-bold">
                   AI
                 </div>
                 <span className="text-lg font-bold">Perpetual Core</span>
@@ -1872,7 +1875,7 @@ export default function LawFirmsPage() {
           </div>
           <div className="border-t pt-8 text-center text-sm text-muted-foreground">
             <p className="mb-2">
-              © 2024 AI Operating System. All rights reserved. | ABA Compliant | SOC 2 Type II Certified | GDPR Ready
+              © 2026 AI Operating System. All rights reserved. | ABA-conscious | SOC 2 Type I in progress | GDPR-aware
             </p>
             <p className="text-xs">
               Perpetual Core is not a law firm and does not provide legal advice. Attorney-client relationships remain between firms and their clients.

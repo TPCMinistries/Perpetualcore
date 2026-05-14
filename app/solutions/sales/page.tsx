@@ -9,18 +9,19 @@ import {
   XCircle, AlertCircle, Sparkles, MessageSquare, Infinity, Database, Lock,
   Search, FileText, Clock, Plus, Minus, ArrowRight
 } from "lucide-react";
+import { EngagementBanner } from "@/components/landing/EngagementBanner";
 
 export default function SalesTeamsPage() {
   // FAQ State
   const [openFaq, setOpenFaq] = useState<number | null>(null);
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-background via-background to-muted/20">
+    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white dark:from-gray-900 dark:to-gray-800">
       {/* Header */}
-      <header className="border-b border-border/50 backdrop-blur-xl bg-background/80 sticky top-0 z-50">
+      <header className="border-b bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm sticky top-0 z-10">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
           <Link href="/" className="flex items-center space-x-2">
-            <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-primary via-purple-600 to-purple-700 flex items-center justify-center text-white font-bold shadow-lg">
+            <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center text-primary-foreground font-bold">
               AI
             </div>
             <span className="text-xl font-bold">Perpetual Core</span>
@@ -38,6 +39,8 @@ export default function SalesTeamsPage() {
           </div>
         </div>
       </header>
+
+      <EngagementBanner />
 
       {/* Hero Section */}
       <section className="container mx-auto px-4 py-20 text-center">
@@ -69,7 +72,7 @@ export default function SalesTeamsPage() {
       </section>
 
       {/* Stats Section */}
-      <section className="bg-muted/30 py-16">
+      <section className="bg-muted/50 py-16">
         <div className="container mx-auto px-4">
           <div className="grid md:grid-cols-4 gap-8 text-center">
             <div>
@@ -445,7 +448,7 @@ export default function SalesTeamsPage() {
 
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
           {/* Team Playbook */}
-          <Card className="border border-border/50 backdrop-blur-xl bg-card/50 hover:border-primary/40 hover:-translate-y-0.5 hover:shadow-md transition-all duration-300">
+          <Card className="border-2 hover:border-primary transition-colors">
             <CardHeader>
               <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center mb-4">
                 <Brain className="h-6 w-6 text-primary" />
@@ -459,7 +462,7 @@ export default function SalesTeamsPage() {
           </Card>
 
           {/* Competitive Intel */}
-          <Card className="border border-border/50 backdrop-blur-xl bg-card/50 hover:border-primary/40 hover:-translate-y-0.5 hover:shadow-md transition-all duration-300">
+          <Card className="border-2 hover:border-primary transition-colors">
             <CardHeader>
               <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center mb-4">
                 <Target className="h-6 w-6 text-primary" />
@@ -473,7 +476,7 @@ export default function SalesTeamsPage() {
           </Card>
 
           {/* Deal Insights */}
-          <Card className="border border-border/50 backdrop-blur-xl bg-card/50 hover:border-primary/40 hover:-translate-y-0.5 hover:shadow-md transition-all duration-300">
+          <Card className="border-2 hover:border-primary transition-colors">
             <CardHeader>
               <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center mb-4">
                 <DollarSign className="h-6 w-6 text-primary" />
@@ -487,7 +490,7 @@ export default function SalesTeamsPage() {
           </Card>
 
           {/* Email Automation */}
-          <Card className="border border-border/50 backdrop-blur-xl bg-card/50 hover:border-primary/40 hover:-translate-y-0.5 hover:shadow-md transition-all duration-300">
+          <Card className="border-2 hover:border-primary transition-colors">
             <CardHeader>
               <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center mb-4">
                 <Zap className="h-6 w-6 text-primary" />
@@ -501,7 +504,7 @@ export default function SalesTeamsPage() {
           </Card>
 
           {/* Onboarding */}
-          <Card className="border border-border/50 backdrop-blur-xl bg-card/50 hover:border-primary/40 hover:-translate-y-0.5 hover:shadow-md transition-all duration-300">
+          <Card className="border-2 hover:border-primary transition-colors">
             <CardHeader>
               <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center mb-4">
                 <Users className="h-6 w-6 text-primary" />
@@ -515,7 +518,7 @@ export default function SalesTeamsPage() {
           </Card>
 
           {/* Security */}
-          <Card className="border border-border/50 backdrop-blur-xl bg-card/50 hover:border-primary/40 hover:-translate-y-0.5 hover:shadow-md transition-all duration-300">
+          <Card className="border-2 hover:border-primary transition-colors">
             <CardHeader>
               <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center mb-4">
                 <Shield className="h-6 w-6 text-primary" />
@@ -1191,7 +1194,7 @@ export default function SalesTeamsPage() {
                 answer: "Great question. ChatGPT is generic—it doesn't know YOUR playbooks, YOUR objection handlers, or YOUR winning deals. Perpetual Core is trained on your team's specific knowledge and integrates with your CRM. Key differences: (1) Searches your sales playbooks and battle cards, not generic internet. (2) Infinite memory of all customer conversations. (3) Team collaboration and knowledge sharing. (4) CRM integration and workflow automation. (5) Enterprise security and compliance. (6) All AI models in one place (GPT-4, Claude, Gemini). Think: ChatGPT meets Salesforce meets your team's collective intelligence."
               }
             ].map((faq, i) => (
-              <Card key={i} className="border border-border/50 backdrop-blur-xl bg-card/50 hover:border-primary/40 hover:-translate-y-0.5 hover:shadow-md transition-all duration-300">
+              <Card key={i} className="border-2 hover:border-primary transition-colors">
                 <CardHeader
                   className="cursor-pointer select-none"
                   onClick={() => setOpenFaq(openFaq === i ? null : i)}
@@ -1243,7 +1246,7 @@ export default function SalesTeamsPage() {
           <div className="grid md:grid-cols-4 gap-8 mb-8">
             <div>
               <Link href="/" className="flex items-center space-x-2 mb-4">
-                <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-primary via-purple-600 to-purple-700 flex items-center justify-center text-white font-bold shadow-lg">
+                <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center text-primary-foreground font-bold">
                   AI
                 </div>
                 <span className="text-lg font-bold">Perpetual Core</span>
@@ -1282,7 +1285,7 @@ export default function SalesTeamsPage() {
           </div>
           <div className="border-t pt-8 text-center text-sm text-muted-foreground">
             <p className="mb-2">
-              © 2024 AI Operating System. All rights reserved. | SOC 2 Type II Certified | GDPR Ready
+              © 2026 AI Operating System. All rights reserved. | SOC 2 Type I in progress | GDPR-aware
             </p>
             <p className="text-xs">
               Your sales data is encrypted and never used to train AI models. Enterprise security built for sales teams.

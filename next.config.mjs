@@ -146,6 +146,48 @@ const nextConfig = {
     return config;
   },
 
+  // 301 redirects for retired routes per BRAND_ARCHITECTURE §7
+  async redirects() {
+    return [
+      {
+        // Legacy "Transformation Stack" page → studio engagements
+        source: "/consulting",
+        destination: "/studio/engagements",
+        permanent: true,
+      },
+      {
+        // Legacy "Guided Implementation" page → studio process
+        // (Session 2 built /studio/process; redirect now points to its
+        // canonical destination.)
+        source: "/consultation",
+        destination: "/studio/process",
+        permanent: true,
+      },
+      {
+        // RFP Engine product card → live RFP marketing surface.
+        // Preserves the live SEO at /rfp (the (rfp-marketing) route
+        // group) while letting /products/rfp-engine be a valid card
+        // target from /products. Per Session 3 brief Step 5: option
+        // (b) chosen so the live live page remains the canonical URL
+        // and we don't fork content. DO NOT touch (rfp-marketing).
+        source: "/products/rfp-engine",
+        destination: "/rfp",
+        permanent: true,
+      },
+      {
+        // /contact alias → existing /contact-sales surface.
+        // The brief specifies CTAs like /contact?product=vellum on
+        // /products/vellum; we don't have a /contact route, so this
+        // 308 forwards to /contact-sales while preserving the
+        // ?product=<slug> query string. If a dedicated /contact page
+        // gets built later, this redirect can be removed.
+        source: "/contact",
+        destination: "/contact-sales",
+        permanent: true,
+      },
+    ];
+  },
+
   // Headers for better caching and security
   async headers() {
     // Security headers applied to all routes

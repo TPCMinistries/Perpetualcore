@@ -9,18 +9,19 @@ import {
   XCircle, AlertCircle, Sparkles, MessageSquare, Infinity, Zap, Database, Lock,
   Search, ClipboardList, Phone, FileCheck, Minus, Plus
 } from "lucide-react";
+import { EngagementBanner } from "@/components/landing/EngagementBanner";
 
 export default function HealthcarePage() {
   // FAQ State
   const [openFaq, setOpenFaq] = useState<number | null>(null);
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-background via-background to-muted/20">
+    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white dark:from-gray-900 dark:to-gray-800">
       {/* Header */}
-      <header className="border-b border-border/50 backdrop-blur-xl bg-background/80 sticky top-0 z-50">
+      <header className="border-b bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm sticky top-0 z-10">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
           <Link href="/" className="flex items-center space-x-2">
-            <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-primary via-purple-600 to-purple-700 flex items-center justify-center text-white font-bold shadow-lg">
+            <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center text-primary-foreground font-bold">
               AI
             </div>
             <span className="text-xl font-bold">Perpetual Core</span>
@@ -38,6 +39,8 @@ export default function HealthcarePage() {
           </div>
         </div>
       </header>
+
+      <EngagementBanner />
 
       {/* Hero Section */}
       <section className="container mx-auto px-4 py-20 text-center">
@@ -69,7 +72,7 @@ export default function HealthcarePage() {
       </section>
 
       {/* Stats Section */}
-      <section className="bg-muted/30 py-16">
+      <section className="bg-muted/50 py-16">
         <div className="container mx-auto px-4">
           <div className="grid md:grid-cols-4 gap-8 text-center">
             <div>
@@ -81,8 +84,8 @@ export default function HealthcarePage() {
               <div className="text-sm text-muted-foreground">AI Coach Available</div>
             </div>
             <div>
-              <div className="text-4xl font-bold text-primary mb-2">100%</div>
-              <div className="text-sm text-muted-foreground">HIPAA Compliant</div>
+              <div className="text-4xl font-bold text-primary mb-2">HIPAA-aware</div>
+              <div className="text-sm text-muted-foreground">Designed for HIPAA workflows; full attestation pending</div>
             </div>
             <div>
               <div className="text-4xl font-bold text-primary mb-2">
@@ -104,7 +107,7 @@ export default function HealthcarePage() {
         </div>
 
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-          <Card className="border border-border/50 backdrop-blur-xl bg-card/50 hover:border-primary/40 hover:-translate-y-0.5 hover:shadow-md transition-all duration-300">
+          <Card className="border-2 hover:border-primary transition-colors">
             <CardHeader>
               <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center mb-4">
                 <FileText className="h-6 w-6 text-primary" />
@@ -117,7 +120,7 @@ export default function HealthcarePage() {
             </CardHeader>
           </Card>
 
-          <Card className="border border-border/50 backdrop-blur-xl bg-card/50 hover:border-primary/40 hover:-translate-y-0.5 hover:shadow-md transition-all duration-300">
+          <Card className="border-2 hover:border-primary transition-colors">
             <CardHeader>
               <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center mb-4">
                 <Users className="h-6 w-6 text-primary" />
@@ -130,7 +133,7 @@ export default function HealthcarePage() {
             </CardHeader>
           </Card>
 
-          <Card className="border border-border/50 backdrop-blur-xl bg-card/50 hover:border-primary/40 hover:-translate-y-0.5 hover:shadow-md transition-all duration-300">
+          <Card className="border-2 hover:border-primary transition-colors">
             <CardHeader>
               <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center mb-4">
                 <Brain className="h-6 w-6 text-primary" />
@@ -143,7 +146,7 @@ export default function HealthcarePage() {
             </CardHeader>
           </Card>
 
-          <Card className="border border-border/50 backdrop-blur-xl bg-card/50 hover:border-primary/40 hover:-translate-y-0.5 hover:shadow-md transition-all duration-300">
+          <Card className="border-2 hover:border-primary transition-colors">
             <CardHeader>
               <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center mb-4">
                 <Shield className="h-6 w-6 text-primary" />
@@ -156,7 +159,7 @@ export default function HealthcarePage() {
             </CardHeader>
           </Card>
 
-          <Card className="border border-border/50 backdrop-blur-xl bg-card/50 hover:border-primary/40 hover:-translate-y-0.5 hover:shadow-md transition-all duration-300">
+          <Card className="border-2 hover:border-primary transition-colors">
             <CardHeader>
               <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center mb-4">
                 <Clock className="h-6 w-6 text-primary" />
@@ -169,7 +172,7 @@ export default function HealthcarePage() {
             </CardHeader>
           </Card>
 
-          <Card className="border border-border/50 backdrop-blur-xl bg-card/50 hover:border-primary/40 hover:-translate-y-0.5 hover:shadow-md transition-all duration-300">
+          <Card className="border-2 hover:border-primary transition-colors">
             <CardHeader>
               <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center mb-4">
                 <Zap className="h-6 w-6 text-primary" />
@@ -414,7 +417,7 @@ export default function HealthcarePage() {
             <div className="text-center mb-16">
               <div className="inline-flex items-center gap-2 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 px-4 py-2 rounded-full text-sm font-semibold mb-4">
                 <Shield className="h-4 w-4" />
-                HIPAA Compliant & Secure
+                HIPAA-aware. Security-first.
               </div>
               <h2 className="text-4xl md:text-5xl font-bold mb-4">
                 Built for Healthcare Security Standards
@@ -431,10 +434,9 @@ export default function HealthcarePage() {
                   <div className="h-12 w-12 rounded-full bg-green-100 dark:bg-green-900/20 flex items-center justify-center mb-4">
                     <Shield className="h-6 w-6 text-green-600 dark:text-green-400" />
                   </div>
-                  <CardTitle>HIPAA Compliant</CardTitle>
+                  <CardTitle>HIPAA-aware architecture</CardTitle>
                   <CardDescription>
-                    Full HIPAA compliance with signed Business Associate Agreement (BAA) included.
-                    All patient data is encrypted and protected according to HIPAA requirements.
+                    Designed for HIPAA-regulated workflows: PHI encrypted in transit and at rest, role-based access, audit logging. BAAs available on engagement-tier contracts. Formal HIPAA attestation in progress — pending review by Lorenzo + counsel.
                   </CardDescription>
                 </CardHeader>
               </Card>
@@ -496,10 +498,9 @@ export default function HealthcarePage() {
                   <div className="h-12 w-12 rounded-full bg-indigo-100 dark:bg-indigo-900/20 flex items-center justify-center mb-4">
                     <CheckCircle2 className="h-6 w-6 text-indigo-600 dark:text-indigo-400" />
                   </div>
-                  <CardTitle>SOC 2 Type II Certified</CardTitle>
+                  <CardTitle>SOC 2 Type I in progress</CardTitle>
                   <CardDescription>
-                    Third-party audited and certified for security, availability, and confidentiality.
-                    Trusted by healthcare systems' IT security teams.
+                    Type I audit in progress; Type II planned for the following audit window. Security controls (encryption, access, monitoring) are operational today; formal certification is pending. Discuss specifics under NDA.
                   </CardDescription>
                 </CardHeader>
               </Card>
@@ -1374,7 +1375,7 @@ export default function HealthcarePage() {
                 answer: "You control what clinical knowledge Perpetual Core uses. Upload your preferred clinical guidelines, treatment protocols, and reference materials. When guidelines are updated (e.g., new AHA or ACC recommendations), simply upload the new versions. Perpetual Core will use the most recent uploads. We don't impose external guidelines—you choose what sources your practice trusts. This ensures you're always following your institution's approved protocols and evidence-based practices."
               }
             ].map((faq, i) => (
-              <Card key={i} className="border border-border/50 backdrop-blur-xl bg-card/50 hover:border-primary/40 hover:-translate-y-0.5 hover:shadow-md transition-all duration-300">
+              <Card key={i} className="border-2 hover:border-primary transition-colors">
                 <CardHeader
                   className="cursor-pointer select-none"
                   onClick={() => setOpenFaq(openFaq === i ? null : i)}
@@ -1426,7 +1427,7 @@ export default function HealthcarePage() {
           <div className="grid md:grid-cols-4 gap-8 mb-8">
             <div>
               <Link href="/" className="flex items-center space-x-2 mb-4">
-                <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-primary via-purple-600 to-purple-700 flex items-center justify-center text-white font-bold shadow-lg">
+                <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center text-primary-foreground font-bold">
                   AI
                 </div>
                 <span className="text-lg font-bold">Perpetual Core</span>
@@ -1465,7 +1466,7 @@ export default function HealthcarePage() {
           </div>
           <div className="border-t pt-8 text-center text-sm text-muted-foreground">
             <p className="mb-2">
-              © 2024 AI Operating System. All rights reserved. | HIPAA Compliant | SOC 2 Type II Certified | GDPR Ready
+              © 2026 AI Operating System. All rights reserved. | HIPAA-aware | SOC 2 Type I in progress | GDPR-aware
             </p>
             <p className="text-xs">
               Perpetual Core is not a healthcare provider and does not provide medical advice. BAA included with all healthcare plans.
