@@ -1,10 +1,16 @@
 # Session Handoff — Perpetual Core v2 (Operating Company)
 
 **Session window:** 2026-05-13 → 2026-05-14
-**Last update:** 2026-05-14
+**Last update:** 2026-05-14 (post safety + cascade pass)
 **Branch:** `feat/studio-repositioning`
-**Latest commit:** `5cee5b1` — feat(repositioning): v2 operating-company frame, Engine-as-standard, 3-band spectrum
-**Status:** v2 ship-ready locally. Not pushed. Awaiting Lorenzo's in-browser verdict + 5 unconfirmed details.
+**Latest commit:** `8f6f16f` — fix(repositioning): consolidate mailtos + soften retainer-credit + cascade /solutions/healthcare
+**Status:** v2 ship-ready locally. Not pushed. Safety pass shipped. 2 flagship verticals cascaded. Awaiting Lorenzo's in-browser verdict + 4 unconfirmed details.
+
+### Session commits (chronological)
+1. `5cee5b1` — v2 operating-company frame, Engine-as-standard, 3-band spectrum
+2. `635d31e` — cascade /solutions/non-profits to v6 + add session handoff
+3. `8f6f16f` — consolidate mailtos + soften retainer-credit + cascade /solutions/healthcare
+4. *(pending)* — cascade education + churches + law-firms (in-progress)
 
 ---
 
@@ -44,7 +50,7 @@ feat/rfp-orgs-invites-cont:  Other Claude session's territory. DO NOT TOUCH.
 
 ---
 
-## 21 routes shipping at v6 visual register
+## 23 routes shipping at v6 visual register
 
 All return 200 on localhost:3002. Dev log clean.
 
@@ -52,7 +58,7 @@ All return 200 on localhost:3002. Dev log clean.
 |---|---|
 | `/` | ✅ v6 — architecture SVG, 5-arm IA, 3-band spectrum, Frontier manifesto, Open Invitation |
 | `/studio` | ✅ v6 — three-band spectrum hero |
-| `/studio/retainers` | ✅ **NEW** — 5 productized programs |
+| `/studio/retainers` | ✅ NEW — 5 productized programs |
 | `/studio/engagements` | ✅ v6 — abundance frame, scarcity removed |
 | `/studio/methodology` | ✅ v6 |
 | `/studio/process` | ✅ v6 |
@@ -66,19 +72,34 @@ All return 200 on localhost:3002. Dev log clean.
 | `/products/platform` | ✅ v6 — pricing teaser links to /pricing |
 | `/products/rfp-sentry` | ✅ v6 — early-list form preserved |
 | `/engine` | ✅ v6 — manifesto + open invitation section |
-| `/engine/spec` | ✅ **NEW** — v1.0 formal spec, citable |
-| `/fund` | ✅ **NEW** — DeepFutures thesis + structural pitch |
-| `/institute` | ✅ **NEW** — IHA programs + Uplift operating arm callout |
+| `/engine/spec` | ✅ NEW — v1.0 formal spec, citable |
+| `/fund` | ✅ NEW — DeepFutures thesis + structural pitch |
+| `/institute` | ✅ NEW — IHA programs + Uplift operating arm callout |
 | `/about` | ✅ v6 — founder, ecosystem, 5 operating principles |
 | `/pricing` | ✅ v6 — full 3-band spectrum, Stripe checkout preserved |
+| `/solutions/non-profits` | ✅ **NEW** — v6 cascade (1094 → 399 lines), 6 use cases, 5 FAQs, Platform Pro $99/staff/mo |
+| `/solutions/healthcare` | ✅ **NEW** — v6 cascade (1408 → 382 lines), $899/provider/mo, BAA + EHR integration list, HIPAA-aware framing |
 
 ---
 
-## Still on older design (deferred this session)
+## Still on older design (deferred)
 
-- `/solutions/non-profits` (1094 lines — flagship industry page; cascading next)
-- 11 other `/solutions/*` industry pages (lower priority)
-- `/rfp` (RFP Engine — other session's territory, do not touch)
+10 `/solutions/*` industry pages — render with new tokens but use older layouts:
+
+| Route | Lines | Ecosystem fit |
+|---|---|---|
+| `/solutions/education` | 1152 | High — IHA Academy + Uplift Workforce |
+| `/solutions/churches` | 1277 | High — TPC Ministries adjacency |
+| `/solutions/real-estate` | 1218 | Medium |
+| `/solutions/sales` | 1227 | Medium |
+| `/solutions/consulting` | 1356 | Medium-high |
+| `/solutions/financial-advisors` | 1348 | Medium |
+| `/solutions/it-services` | 1344 | Medium |
+| `/solutions/agencies` | 1559 | Medium |
+| `/solutions/accountants` | 1698 | Medium |
+| `/solutions/law-firms` | 1817 | High — revenue density |
+
+`/rfp` (RFP Engine — other session's territory, do not touch)
 
 ---
 
@@ -90,10 +111,10 @@ All return 200 on localhost:3002. Dev log clean.
    - Operator Concierge ($10K/mo, 10hrs)
    - Skills Subscription ($5K/mo, one skill/mo)
    - Vellum Institutional ($15K+/mo)
-2. **Mailto routes:** `retainers@perpetualcore.com` · `invest@perpetualcore.com` · `lp@perpetualcore.com` · `lorenzo@perpetualcore.com`. Confirm which exist or consolidate.
-3. **"Retainer fees credit toward engagement"** promise on retainers page — real commercial commitment, needs sign-off.
+2. ~~Mailto routes~~ ✅ Resolved 8f6f16f — all consolidated to `lorenzo@perpetualcore.com` with descriptive subject prefixes. Filters can be set later if dedicated boxes are provisioned.
+3. ~~"Retainer fees credit toward engagement" promise~~ ✅ Resolved 8f6f16f — softened to "we discuss credit toward engagement scope case-by-case, depending on work already shipped."
 4. **Uplift Communities + DeepFutures legal status** — copy is legal-status-agnostic; sharpen once confirmed.
-5. **`/public/images/lorenzo-headshot.jpg`** — verify the path is right for `/about` hero photo.
+5. ~~`/public/images/lorenzo-headshot.jpg`~~ ✅ Confirmed exists (399KB, May 10).
 
 ---
 
@@ -151,4 +172,4 @@ All return 200 on localhost:3002. Dev log clean.
 
 ## One-line summary
 
-v2 strategic + design overhaul complete and committed locally (`5cee5b1`): 4 new pages, 21 cascaded routes, Engine reframed as open standard, 5-arm operating company IA, 3-band Studio offer spectrum, Uplift surfaced as IHA operating arm. Awaiting Lorenzo's verdict + 5 confirmation items before push to Vercel preview.
+v2 strategic + design overhaul shipped locally through `8f6f16f`: 4 new pages, **23 cascaded routes** (added non-profits + healthcare flagships), Engine reframed as open standard, 5-arm operating company IA, 3-band Studio offer spectrum, mailto consolidation + retainer-credit softening shipped. Awaiting Lorenzo's verdict + 2 remaining confirmation items (retainer offer slate, Uplift+DeepFutures legal status) before push to Vercel preview.
