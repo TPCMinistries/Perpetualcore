@@ -14,89 +14,64 @@ import {
   CheckCircle2,
   XCircle,
   Building2,
-  Award,
   Lock,
-  TrendingUp,
 } from "lucide-react";
 
-const features = [
+// Status tags surface what ships today vs. what's in beta.
+// Lorenzo cares about honesty over breathless promises.
+type Stage = "live" | "beta" | "next";
+
+const stageMeta: Record<Stage, { label: string; tone: string }> = {
+  live: { label: "Live", tone: "text-emerald-300 border-emerald-400/30 bg-emerald-400/[0.06]" },
+  beta: { label: "In private beta", tone: "text-amber-200 border-amber-300/30 bg-amber-300/[0.05]" },
+  next: { label: "Next this quarter", tone: "text-zinc-300 border-white/15 bg-white/[0.04]" },
+};
+
+const features: { icon: typeof Search; title: string; desc: string; stage: Stage }[] = [
   {
     icon: Search,
     title: "Discovery, every six hours",
-    desc: "We scan SAM.gov, Grants.gov, state portals, NYC DYCD, foundation directories, and SBIR.gov around the clock — and only surface the opportunities that actually fit your org. Kill the 47 funder newsletters.",
+    desc: "Scrapers across SAM.gov, Grants.gov, NY State, NYC DYCD, foundation directories, and SBIR.gov. Each opportunity is scored against your org profile. You see the fits — not the noise.",
+    stage: "live",
   },
   {
-    icon: Mic,
-    title: "Voice fingerprint",
-    desc: "We train on your past wins, annual reports, and founder letters. Drafts come back sounding like you — not like ChatGPT, not like a vendor, not like a template.",
-  },
-  {
-    icon: FileText,
-    title: "Vault-grounded drafting",
-    desc: "Every claim cites a real artifact in your vault. Anything we can't ground gets a [VERIFY] flag. Hallucinated partners and fabricated outcomes do not ship from this system.",
-  },
-  {
-    icon: ShieldCheck,
-    title: "Compliance gate",
-    desc: "Page limits, font rules, attachments, budget math, eligibility, deadlines with timezones — checked automatically before submit. You ship clean on the first pass.",
-  },
-  {
-    icon: Sparkles,
-    title: "Reviewer agent",
-    desc: "An Opus-powered reviewer reads your draft against the funder's rubric and flags weak theory of change, missing logic models, and evaluation gaps before a human reviewer ever sees it.",
+    icon: Building2,
+    title: "Multi-tenant orgs and invites",
+    desc: "Run one nonprofit, a portfolio of clients, or a dual nonprofit/for-profit stack from one console. Per-org RLS. Invite teammates by email.",
+    stage: "live",
   },
   {
     icon: Lock,
     title: "Audit-grade activity log",
-    desc: "Every prompt, every retrieval, every edit — logged. The disclosure trail federal funders, FOIA requests, and OIG audits are starting to ask for. You get it by default.",
+    desc: "Every prompt, retrieval, and edit lands in an append-only table. Exportable for FOIA, OIG, and funder audits — the disclosure trail federal buyers are starting to require.",
+    stage: "live",
+  },
+  {
+    icon: Mic,
+    title: "Voice fingerprint",
+    desc: "Trained on your past wins, annual reports, and founder letters so drafts read like you, not like a vendor. In private beta with Uplift Communities on DYCD and HHS submissions now.",
+    stage: "beta",
+  },
+  {
+    icon: FileText,
+    title: "Vault-grounded drafting",
+    desc: "Every claim cites a real artifact in your vault. Anything we can't ground gets a [VERIFY] flag. Hallucinated partners and fabricated outcomes do not ship. Private beta this month.",
+    stage: "beta",
+  },
+  {
+    icon: Sparkles,
+    title: "Reviewer + compliance gate",
+    desc: "An Opus reviewer scores your draft against the funder's rubric. A deterministic compliance gate checks page rules, attachments, budget math, and deadlines before submit. Ships after the first paid customer files.",
+    stage: "next",
   },
 ];
 
 const competitors = [
   { name: "Instrumentl", role: "Grant database", gap: "Discovery only. You still write everything." },
   { name: "GovWin / Bloomberg", role: "Federal contract intel", gap: "$15K+/yr, no drafting, for-profits only." },
-  { name: "Submittable", role: "Grant management", gap: "Built for grantmakers, not the people chasing the money." },
-  { name: "ChatGPT / Claude direct", role: "Generic AI", gap: "No voice training, no vault, no compliance, no audit trail." },
+  { name: "Submittable / Bonterra", role: "Grant management", gap: "Built for grantmakers, not the people chasing the money." },
+  { name: "ChatGPT / Claude direct", role: "Generic AI", gap: "No voice training, no vault grounding, no audit trail." },
   { name: "Capture consultants", role: "Human capture-as-a-service", gap: "$150–$400/hr. Doesn't scale. Misses opportunities while waiting on humans." },
-];
-
-const moves = [
-  {
-    icon: Mic,
-    title: "Voice fingerprinting",
-    sub: "Trained on your wins",
-    desc: "The single hardest thing in this category to replicate — and the reason reviewers stop being able to tell who wrote it.",
-  },
-  {
-    icon: FileText,
-    title: "Vault-grounded drafting",
-    sub: "Every claim cites a source",
-    desc: "Every claim cites a real artifact you uploaded. Everything else gets a [VERIFY] marker. Non-negotiable for federal compliance.",
-  },
-  {
-    icon: Building2,
-    title: "Multi-entity native",
-    sub: "Built for portfolios, day one",
-    desc: "Most tools assume one nonprofit. We serve consultants, fiscal sponsors, and dual-mode operators — multiple orgs, multiple voices, one console.",
-  },
-  {
-    icon: Award,
-    title: "Built from inside the work",
-    sub: "Operator-built, not vendor-built",
-    desc: "Every feature is shaped by the people writing real proposals — the staff who lose nights to bad templates, the EDs choosing between delivery and capture. Built for the desk, by the desk.",
-  },
-  {
-    icon: ShieldCheck,
-    title: "Audit-grade by default",
-    sub: "FOIA-ready logs",
-    desc: "Full agent activity logs ready for FOIA, OIG, and funder audits. Federal buyers are starting to require it. You already have it.",
-  },
-  {
-    icon: TrendingUp,
-    title: "Pricing that grows with you",
-    sub: "$299 → $799 → $2,499",
-    desc: "Start at $299. Move to $799 the month after your first win. Scale into Agency or Enterprise once capture becomes a team.",
-  },
 ];
 
 function Eyebrow({ children }: { children: React.ReactNode }) {
@@ -105,6 +80,17 @@ function Eyebrow({ children }: { children: React.ReactNode }) {
       <span className="h-px w-8 bg-zinc-700" />
       {children}
     </div>
+  );
+}
+
+function StageBadge({ stage }: { stage: Stage }) {
+  const meta = stageMeta[stage];
+  return (
+    <span
+      className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 font-mono text-[9.5px] uppercase tracking-[0.18em] ${meta.tone}`}
+    >
+      {meta.label}
+    </span>
   );
 }
 
@@ -119,10 +105,10 @@ export default function RfpEnginePage() {
       {/* HERO */}
       <section className="relative overflow-hidden border-b border-white/5">
         <div className="pointer-events-none absolute inset-0 -z-10">
-          <div className="absolute left-1/2 top-1/2 h-[600px] w-[1100px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[conic-gradient(from_180deg_at_50%_50%,rgba(16,185,129,0.12),rgba(56,189,248,0.05),rgba(244,114,182,0.08),rgba(16,185,129,0.12))] blur-3xl" />
+          <div className="absolute left-1/2 top-1/2 h-[560px] w-[1000px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[radial-gradient(closest-side,rgba(16,185,129,0.10),transparent)] blur-3xl" />
         </div>
 
-        <div className="container mx-auto px-4 pt-20 pb-24 lg:pt-28 lg:pb-28">
+        <div className="container mx-auto px-4 pt-24 pb-24 lg:pt-32 lg:pb-28">
           <motion.div
             initial="hidden"
             animate="visible"
@@ -132,23 +118,23 @@ export default function RfpEnginePage() {
           >
             <div className="mb-8 flex items-center gap-3">
               <span className="relative flex h-2 w-2">
-                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-60" />
                 <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-400" />
               </span>
               <span className="font-mono text-[11px] uppercase tracking-[0.22em] text-zinc-400">
-                The grant + contract + proposal engine
+                Capture operations for nonprofits and small for-profits
               </span>
             </div>
 
             <h1 className="font-semibold tracking-tight text-white">
-              <span className="block text-[clamp(2.5rem,7vw,5.75rem)] leading-[1.02]">
+              <span className="block text-[clamp(2.25rem,6.5vw,5.25rem)] leading-[1.04]">
                 Win the grants
               </span>
-              <span className="block text-[clamp(2.5rem,7vw,5.75rem)] leading-[1.02] text-zinc-400">
+              <span className="block text-[clamp(2.25rem,6.5vw,5.25rem)] leading-[1.04] text-zinc-500">
                 and contracts
               </span>
               <span
-                className="block bg-gradient-to-br from-emerald-200 via-teal-300 to-cyan-300 bg-clip-text pb-2 text-[clamp(2.5rem,7vw,5.75rem)] italic leading-[1.05] text-transparent"
+                className="block bg-gradient-to-br from-emerald-200 via-teal-300 to-cyan-300 bg-clip-text pb-2 text-[clamp(2.25rem,6.5vw,5.25rem)] italic leading-[1.05] text-transparent"
                 style={{ fontFamily: "Georgia, 'Times New Roman', serif" }}
               >
                 you keep missing.
@@ -157,17 +143,17 @@ export default function RfpEnginePage() {
 
             <div className="mt-10 grid gap-10 md:grid-cols-12 md:gap-8">
               <div className="md:col-span-7">
-                <p className="text-lg leading-relaxed text-zinc-300 md:text-xl">
-                  Discovery in the morning. Voice-trained draft by lunch. Compliance check before you submit.
-                  <span className="block mt-3 text-zinc-400">
-                    Three jobs no other product does end-to-end. RFP Engine works the file from the moment a solicitation drops to the moment your PDF is submission-ready.
-                  </span>
+                <p className="text-lg leading-[1.7] text-zinc-300 md:text-xl">
+                  The capture team most nonprofits and small mission-driven companies can&apos;t afford to hire. Discovery now. Voice-trained drafting in private beta. Compliance gate next this quarter.
                 </p>
-                <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+                <p className="mt-4 text-[15px] leading-[1.75] text-zinc-500">
+                  Pressure-tested on real DYCD, HHS, and SBIR submissions from Uplift Communities before we sell it to anyone else.
+                </p>
+                <div className="mt-9 flex flex-col gap-3 sm:flex-row">
                   <Button
                     size="lg"
                     asChild
-                    className="h-12 rounded-md bg-white px-7 text-[14px] font-medium text-zinc-950 shadow-[0_8px_40px_-8px_rgba(255,255,255,0.4)] hover:bg-zinc-100"
+                    className="h-12 rounded-md bg-white px-7 text-[14px] font-medium text-zinc-950 hover:bg-zinc-100"
                   >
                     <Link href="/signup?next=/orgs/new&product=rfp-engine">
                       Start Free Trial
@@ -178,13 +164,13 @@ export default function RfpEnginePage() {
                     size="lg"
                     variant="outline"
                     asChild
-                    className="h-12 rounded-md border-white/15 bg-white/5 px-7 text-[14px] font-medium text-white backdrop-blur hover:bg-white/10"
+                    className="h-12 rounded-md border-white/15 bg-white/5 px-7 text-[14px] font-medium text-white hover:bg-white/10"
                   >
                     <Link href="/contact-sales?product=rfp-engine">Book a Demo</Link>
                   </Button>
                 </div>
-                <p className="mt-6 font-mono text-[11px] uppercase tracking-[0.16em] text-zinc-500">
-                  14-day free trial · No credit card · Live opportunities matched to your org in 60 seconds
+                <p className="mt-6 font-mono text-[11px] uppercase tracking-[0.18em] text-zinc-500">
+                  14-day trial · No credit card · Discovery feed in your inbox tomorrow
                 </p>
               </div>
 
@@ -195,15 +181,15 @@ export default function RfpEnginePage() {
                 transition={{ duration: 0.7, delay: 0.2, ease: [0.22, 1, 0.36, 1] }}
                 className="md:col-span-5"
               >
-                <div className="relative rounded-2xl border border-white/10 bg-gradient-to-br from-white/[0.06] to-white/[0.02] p-6 backdrop-blur-xl">
+                <div className="relative rounded-2xl border border-white/10 bg-gradient-to-br from-white/[0.05] to-white/[0.02] p-6 backdrop-blur-xl">
                   <div className="absolute -top-px left-10 right-10 h-px bg-gradient-to-r from-transparent via-emerald-400/60 to-transparent" />
                   <div className="mb-5 flex items-center justify-between">
                     <span className="font-mono text-[10px] uppercase tracking-[0.22em] text-zinc-400">
-                      Live Capture Feed
+                      Discovery feed
                     </span>
                     <span className="flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-[0.18em] text-emerald-300">
                       <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
-                      Streaming
+                      Sample
                     </span>
                   </div>
                   <div className="space-y-3">
@@ -211,11 +197,10 @@ export default function RfpEnginePage() {
                       { src: "SAM.gov", code: "DOL-ETA-25-014", fit: 94 },
                       { src: "Foundation", code: "RWJF-HE-7821", fit: 88 },
                       { src: "City of NY", code: "DYCD-WLG-2026", fit: 91 },
-                    ].map((row, i) => (
+                    ].map((row) => (
                       <div
                         key={row.code}
                         className="flex items-center justify-between rounded-md border border-white/5 bg-zinc-900/40 px-3 py-2.5"
-                        style={{ animation: `pulse 2.4s ${i * 0.4}s ease-in-out infinite` }}
                       >
                         <div>
                           <div className="font-mono text-[10px] uppercase tracking-[0.16em] text-zinc-500">
@@ -234,6 +219,9 @@ export default function RfpEnginePage() {
                       </div>
                     ))}
                   </div>
+                  <p className="mt-5 font-mono text-[9.5px] uppercase tracking-[0.18em] text-zinc-600">
+                    Illustrative · Live data resumes once SAM.gov reissues our API key
+                  </p>
                 </div>
               </motion.div>
             </div>
@@ -241,7 +229,7 @@ export default function RfpEnginePage() {
         </div>
       </section>
 
-      {/* CATEGORY POSITIONING */}
+      {/* THE WEDGE — pull quote */}
       <section className="relative border-b border-white/5">
         <div className="container mx-auto px-4 py-28">
           <motion.div
@@ -253,21 +241,26 @@ export default function RfpEnginePage() {
             className="mx-auto max-w-4xl"
           >
             <Eyebrow>The wedge</Eyebrow>
-            <h2 className="text-[clamp(2rem,4.5vw,3.5rem)] font-semibold leading-[1.05] tracking-tight text-white">
-              Best-in-class for the three jobs{" "}
-              <span className="text-zinc-500">that decide whether you get funded.</span>
+            <h2 className="text-[clamp(1.85rem,4vw,3rem)] font-semibold leading-[1.1] tracking-tight text-white">
+              Capture is a $90K–$180K human role.{" "}
+              <span className="text-zinc-500">
+                Most organizations under $5M can&apos;t hire one — so capture gets stolen from delivery.
+              </span>
             </h2>
-            <div className="mt-10 grid gap-10 md:grid-cols-12">
-              <p className="text-[15px] leading-[1.75] text-zinc-300 md:col-span-8">
-                <strong className="font-semibold text-white">Find the right RFP. Draft it in your voice. Ship it clean.</strong> Grant databases stop at discovery. Generic AI hallucinates partners and outcomes. Capture consultants bill $300/hour and still miss deadlines. RFP Engine does all three jobs end-to-end — for federal contracts, foundation grants, state solicitations, and everything in between.
+            <div className="mt-12 grid gap-10 md:grid-cols-12">
+              <p className="text-[15px] leading-[1.8] text-zinc-400 md:col-span-7">
+                Below that line, capture happens in the hours an ED steals from their program staff. Deadlines get missed. Funders get the same recycled past performance. Fits go unwritten. We&apos;re closing that gap — discovery now, drafting in private beta, the rest this quarter.
               </p>
-              <div className="md:col-span-4">
-                <div className="border-l-2 border-emerald-400/60 pl-5">
+              <div className="md:col-span-5">
+                <div className="border-l-2 border-emerald-400/60 pl-6">
                   <p
-                    className="text-2xl font-light italic leading-snug text-white md:text-3xl"
+                    className="text-[1.5rem] font-light italic leading-snug text-white md:text-[1.75rem]"
                     style={{ fontFamily: "Georgia, 'Times New Roman', serif" }}
                   >
-                    One engine. Discovery, drafting, and submission-ready output.
+                    Find it. Draft it. Ship it.
+                  </p>
+                  <p className="mt-3 font-mono text-[10px] uppercase tracking-[0.2em] text-zinc-500">
+                    The three jobs that decide whether you get funded
                   </p>
                 </div>
               </div>
@@ -276,49 +269,9 @@ export default function RfpEnginePage() {
         </div>
       </section>
 
-      {/* AUDIENCE-AGNOSTIC */}
+      {/* WHAT SHIPS — features with stage tags */}
       <section className="relative border-b border-white/5 bg-zinc-950">
-        <div className="container mx-auto px-4 py-24">
-          <motion.div
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, margin: "-100px" }}
-            variants={fadeUp}
-            transition={{ duration: 0.6 }}
-            className="mx-auto max-w-3xl text-center"
-          >
-            <Eyebrow>
-              <span className="mx-auto">Who it&apos;s for</span>
-            </Eyebrow>
-            <h2 className="text-[clamp(2rem,4.5vw,3.25rem)] font-semibold leading-[1.05] tracking-tight text-white">
-              If you respond to RFPs,{" "}
-              <span
-                className="italic text-zinc-500"
-                style={{ fontFamily: "Georgia, 'Times New Roman', serif" }}
-              >
-                this is for you.
-              </span>
-            </h2>
-            <p className="mx-auto mt-8 max-w-2xl text-[15px] leading-[1.8] text-zinc-400 md:text-[16px]">
-              Nonprofits chasing federal grants. Mission-driven companies bidding on contracts. Consultants running capture for a dozen clients. The job to be done is the same:{" "}
-              <strong className="font-medium text-zinc-200">find it, draft it, ship it.</strong>{" "}
-              RFP Engine is built for the job — not the job title.
-            </p>
-            <div className="mx-auto mt-10 flex max-w-md items-center justify-center gap-6 font-mono text-[11px] uppercase tracking-[0.18em] text-zinc-600">
-              <span>Find</span>
-              <span className="h-px flex-1 bg-zinc-800" />
-              <span>Draft</span>
-              <span className="h-px flex-1 bg-zinc-800" />
-              <span>Ship</span>
-            </div>
-          </motion.div>
-        </div>
-      </section>
-
-      {/* FEATURES — TIMELINE */}
-      <section className="relative border-b border-white/5">
-        <div className="absolute inset-0 bg-gradient-to-b from-emerald-950/20 via-transparent to-zinc-950" />
-        <div className="container relative mx-auto px-4 py-28">
+        <div className="container mx-auto px-4 py-28">
           <motion.div
             initial="hidden"
             whileInView="visible"
@@ -327,14 +280,12 @@ export default function RfpEnginePage() {
             transition={{ duration: 0.6 }}
             className="mb-16 max-w-3xl"
           >
-            <Eyebrow>The lifecycle</Eyebrow>
-            <h2 className="text-[clamp(2rem,4.5vw,3.5rem)] font-semibold leading-[1.05] tracking-tight text-white">
-              The whole capture lifecycle.
-              <br />
-              <span className="text-zinc-500">One workspace.</span>
+            <Eyebrow>What ships today, what&apos;s next</Eyebrow>
+            <h2 className="text-[clamp(1.85rem,4vw,3rem)] font-semibold leading-[1.1] tracking-tight text-white">
+              The product, honestly labeled.
             </h2>
-            <p className="mt-6 text-[15px] leading-relaxed text-zinc-400">
-              From the moment a solicitation drops to the moment your PDF is submission-ready — six agents work the file with you.
+            <p className="mt-5 max-w-2xl text-[15px] leading-[1.75] text-zinc-400">
+              Three pieces are live for paying users today. Three more are in private beta with Uplift on real DYCD and HHS submissions. Nothing on this page is marketing wishful thinking.
             </p>
           </motion.div>
 
@@ -347,31 +298,32 @@ export default function RfpEnginePage() {
                   initial={{ opacity: 0 }}
                   whileInView={{ opacity: 1 }}
                   viewport={{ once: true }}
-                  transition={{ duration: 0.5, delay: i * 0.06 }}
-                  className="group relative bg-zinc-950 p-8 transition-colors duration-500 hover:bg-zinc-900/60"
+                  transition={{ duration: 0.5, delay: i * 0.05 }}
+                  className="group relative flex flex-col bg-zinc-950 p-8 transition-colors duration-500 hover:bg-zinc-900/60"
                 >
-                  <div className="mb-6 flex items-center justify-between">
-                    <div className="flex h-11 w-11 items-center justify-center rounded-lg bg-gradient-to-br from-emerald-400 to-teal-600 text-zinc-950 shadow-[0_0_30px_-10px_rgba(16,185,129,0.6)]">
-                      <Icon className="h-5 w-5" />
+                  <div className="mb-6 flex items-start justify-between gap-3">
+                    <div className="flex h-11 w-11 items-center justify-center rounded-lg border border-white/10 bg-white/[0.04] transition-colors group-hover:border-emerald-400/40 group-hover:bg-emerald-400/10">
+                      <Icon className="h-5 w-5 text-emerald-300" />
                     </div>
-                    <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-zinc-600">
-                      {String(i + 1).padStart(2, "0")} / 06
-                    </span>
+                    <StageBadge stage={f.stage} />
                   </div>
-                  <h3 className="mb-3 text-xl font-semibold tracking-tight text-white">
+                  <h3 className="mb-3 text-[17px] font-semibold tracking-tight text-white">
                     {f.title}
                   </h3>
                   <p className="text-[13.5px] leading-[1.7] text-zinc-400">{f.desc}</p>
-                  <div className="absolute inset-x-8 bottom-0 h-px origin-left scale-x-0 bg-gradient-to-r from-emerald-400/60 via-teal-400/40 to-transparent transition-transform duration-700 group-hover:scale-x-100" />
                 </motion.div>
               );
             })}
           </div>
+
+          <p className="mx-auto mt-10 max-w-3xl text-center font-mono text-[11px] uppercase tracking-[0.2em] text-zinc-500">
+            We&apos;ll never tell you a feature is live when it isn&apos;t.
+          </p>
         </div>
       </section>
 
       {/* COMPETITIVE */}
-      <section className="relative border-b border-white/5 bg-zinc-950">
+      <section className="relative border-b border-white/5">
         <div className="container mx-auto px-4 py-28">
           <motion.div
             initial="hidden"
@@ -381,13 +333,18 @@ export default function RfpEnginePage() {
             transition={{ duration: 0.6 }}
             className="mx-auto mb-14 max-w-3xl"
           >
-            <Eyebrow>Why nothing else does this</Eyebrow>
-            <h2 className="text-[clamp(2rem,4.5vw,3.5rem)] font-semibold leading-[1.05] tracking-tight text-white">
+            <Eyebrow>Why nothing else does this end-to-end</Eyebrow>
+            <h2 className="text-[clamp(1.85rem,4vw,3rem)] font-semibold leading-[1.1] tracking-tight text-white">
               Half-tools, all{" "}
-              <span className="italic text-zinc-500">around you.</span>
+              <span
+                className="italic text-zinc-500"
+                style={{ fontFamily: "Georgia, 'Times New Roman', serif" }}
+              >
+                around you.
+              </span>
             </h2>
-            <p className="mt-6 text-[15px] leading-relaxed text-zinc-400">
-              Discovery without drafting is half a tool. Drafting without grounding is a liability. Capture without an audit log is a federal compliance problem waiting to happen.
+            <p className="mt-5 text-[15px] leading-[1.75] text-zinc-400">
+              Discovery without drafting is half a tool. Drafting without grounding is a federal liability. Capture without an audit log is a problem waiting to happen.
             </p>
           </motion.div>
 
@@ -399,19 +356,19 @@ export default function RfpEnginePage() {
                 whileInView={{ opacity: 1, x: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.4, delay: i * 0.04 }}
-                className="group flex items-start gap-5 border-b border-white/5 py-5 transition-colors hover:bg-white/[0.02]"
+                className="group flex items-start gap-5 border-b border-white/5 py-5"
               >
                 <div className="mt-0.5 flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full border border-white/10 bg-zinc-900">
                   <XCircle className="h-3.5 w-3.5 text-zinc-600" />
                 </div>
                 <div className="flex flex-1 flex-col gap-1 sm:flex-row sm:items-baseline sm:gap-6">
-                  <div className="min-w-[180px]">
+                  <div className="sm:min-w-[180px]">
                     <p className="text-[15px] font-medium text-white">{c.name}</p>
                     <p className="font-mono text-[10px] uppercase tracking-[0.16em] text-zinc-500">
                       {c.role}
                     </p>
                   </div>
-                  <p className="flex-1 text-[14px] leading-relaxed text-zinc-400">{c.gap}</p>
+                  <p className="flex-1 text-[14px] leading-[1.7] text-zinc-400">{c.gap}</p>
                 </div>
               </motion.div>
             ))}
@@ -420,7 +377,7 @@ export default function RfpEnginePage() {
               initial={{ opacity: 0, x: -10 }}
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
-              transition={{ duration: 0.5, delay: 0.25 }}
+              transition={{ duration: 0.5, delay: 0.2 }}
               className="relative mt-6 flex items-start gap-5 overflow-hidden rounded-xl border border-emerald-400/30 bg-gradient-to-br from-emerald-500/[0.08] via-teal-500/[0.04] to-transparent p-6"
             >
               <div className="absolute -top-px left-10 right-10 h-px bg-gradient-to-r from-transparent via-emerald-400 to-transparent" />
@@ -428,14 +385,14 @@ export default function RfpEnginePage() {
                 <CheckCircle2 className="h-4 w-4 text-emerald-300" />
               </div>
               <div className="flex flex-1 flex-col gap-1 sm:flex-row sm:items-baseline sm:gap-6">
-                <div className="min-w-[180px]">
+                <div className="sm:min-w-[180px]">
                   <p className="text-[15px] font-semibold text-white">RFP Engine</p>
                   <p className="font-mono text-[10px] uppercase tracking-[0.16em] text-emerald-300/80">
-                    grant + contract + proposal engine
+                    capture operations, end-to-end
                   </p>
                 </div>
-                <p className="flex-1 text-[14px] leading-relaxed text-zinc-300">
-                  Discovery, voice-trained drafting, reviewer agent, compliance gate, and audit-grade logs in one workspace. Multi-entity from day one. Built by operators chasing real federal grants — not by a vendor watching from the outside.
+                <p className="flex-1 text-[14px] leading-[1.7] text-zinc-300">
+                  Discovery, voice-trained drafting, reviewer, compliance, and audit log in one workspace. Multi-entity from day one. Built by operators chasing real federal grants — not by a vendor watching from outside.
                 </p>
               </div>
             </motion.div>
@@ -443,8 +400,8 @@ export default function RfpEnginePage() {
         </div>
       </section>
 
-      {/* DEFENSIBILITY — BENTO */}
-      <section className="relative border-b border-white/5">
+      {/* DOGFOOD CALLOUT — remarkable moment */}
+      <section className="relative border-b border-white/5 bg-zinc-950">
         <div className="container mx-auto px-4 py-28">
           <motion.div
             initial="hidden"
@@ -452,65 +409,62 @@ export default function RfpEnginePage() {
             viewport={{ once: true, margin: "-100px" }}
             variants={fadeUp}
             transition={{ duration: 0.6 }}
-            className="mb-16 max-w-3xl"
+            className="mx-auto max-w-5xl"
           >
-            <Eyebrow>The moat</Eyebrow>
-            <h2 className="text-[clamp(2rem,4.5vw,3.5rem)] font-semibold leading-[1.05] tracking-tight text-white">
-              Six moves competitors{" "}
-              <span className="italic text-zinc-500">can&apos;t copy.</span>
-            </h2>
+            <Eyebrow>Dogfooded before sold</Eyebrow>
+            <div className="grid gap-12 md:grid-cols-12 md:items-end">
+              <div className="md:col-span-7">
+                <h2 className="text-[clamp(1.85rem,4vw,3rem)] font-semibold leading-[1.1] tracking-tight text-white">
+                  Five real submissions{" "}
+                  <span
+                    className="italic text-zinc-500"
+                    style={{ fontFamily: "Georgia, 'Times New Roman', serif" }}
+                  >
+                    before any of you pay us a dollar.
+                  </span>
+                </h2>
+                <p className="mt-6 text-[15px] leading-[1.75] text-zinc-400">
+                  The engine is being pressure-tested on Uplift Communities&apos; live federal and city pipeline this quarter before we open it up.
+                </p>
+              </div>
+              <div className="md:col-span-5">
+                <Card className="overflow-hidden border-white/10 bg-gradient-to-br from-white/[0.04] to-transparent">
+                  <CardContent className="p-6">
+                    <p className="mb-4 font-mono text-[10px] uppercase tracking-[0.22em] text-zinc-500">
+                      Q2 dogfood slate
+                    </p>
+                    <ul className="space-y-3 text-[13px] leading-[1.7] text-zinc-300">
+                      <li className="flex items-baseline justify-between gap-4">
+                        <span>NYC DYCD Bridge to Health Careers</span>
+                        <span className="font-mono text-[11px] text-emerald-300">$650K × 3yr</span>
+                      </li>
+                      <li className="flex items-baseline justify-between gap-4">
+                        <span>HHS Healthcare Workforce</span>
+                        <span className="font-mono text-[11px] text-emerald-300">$2.4M</span>
+                      </li>
+                      <li className="flex items-baseline justify-between gap-4">
+                        <span>RWJF Health Equity</span>
+                        <span className="font-mono text-[11px] text-emerald-300">$500K</span>
+                      </li>
+                      <li className="flex items-baseline justify-between gap-4">
+                        <span>US DOE AI in K-12 Pilot</span>
+                        <span className="font-mono text-[11px] text-emerald-300">$1.8M</span>
+                      </li>
+                      <li className="flex items-baseline justify-between gap-4">
+                        <span>NSF SBIR Phase I</span>
+                        <span className="font-mono text-[11px] text-emerald-300">$305K</span>
+                      </li>
+                    </ul>
+                  </CardContent>
+                </Card>
+              </div>
+            </div>
           </motion.div>
-
-          <div className="mx-auto grid max-w-6xl grid-cols-1 gap-4 md:grid-cols-6 md:grid-rows-[auto_auto] lg:grid-cols-12">
-            {moves.map((m, i) => {
-              const spans = [
-                "lg:col-span-5 md:col-span-4",
-                "lg:col-span-4 md:col-span-2",
-                "lg:col-span-3 md:col-span-3",
-                "lg:col-span-3 md:col-span-3",
-                "lg:col-span-4 md:col-span-3",
-                "lg:col-span-5 md:col-span-3",
-              ];
-              const Icon = m.icon;
-              return (
-                <motion.div
-                  key={m.title}
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true, margin: "-50px" }}
-                  transition={{ duration: 0.5, delay: i * 0.05, ease: [0.22, 1, 0.36, 1] }}
-                  className={`group relative ${spans[i]}`}
-                >
-                  <Card className="h-full overflow-hidden border-white/5 bg-gradient-to-br from-white/[0.04] to-transparent transition-all duration-500 hover:border-emerald-400/30 hover:from-emerald-500/[0.06]">
-                    <CardContent className="flex h-full flex-col p-7">
-                      <div className="mb-6 flex items-center gap-3">
-                        <div className="flex h-9 w-9 items-center justify-center rounded-md border border-white/10 bg-white/[0.04] transition-colors group-hover:border-emerald-400/40 group-hover:bg-emerald-400/10">
-                          <Icon className="h-4 w-4 text-emerald-300" />
-                        </div>
-                        <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-zinc-500">
-                          0{i + 1}
-                        </span>
-                      </div>
-                      <h3 className="mb-2 text-lg font-semibold tracking-tight text-white">
-                        {m.title}
-                      </h3>
-                      <p className="mb-4 font-mono text-[11px] uppercase tracking-[0.15em] text-emerald-300/80">
-                        {m.sub}
-                      </p>
-                      <p className="mt-auto text-[13.5px] leading-[1.7] text-zinc-400">
-                        {m.desc}
-                      </p>
-                    </CardContent>
-                  </Card>
-                </motion.div>
-              );
-            })}
-          </div>
         </div>
       </section>
 
       {/* PRICING TEASE */}
-      <section className="relative border-b border-white/5 bg-zinc-950">
+      <section className="relative border-b border-white/5">
         <div className="container mx-auto px-4 py-28">
           <motion.div
             initial="hidden"
@@ -523,17 +477,17 @@ export default function RfpEnginePage() {
             <Eyebrow>
               <span className="mx-auto">Pricing</span>
             </Eyebrow>
-            <h2 className="text-[clamp(2rem,4.5vw,3.5rem)] font-semibold leading-[1.05] tracking-tight text-white">
-              Pricing that grows{" "}
+            <h2 className="text-[clamp(1.85rem,4vw,3rem)] font-semibold leading-[1.1] tracking-tight text-white">
+              $299 to start. $799 once capture is active.{" "}
               <span
                 className="italic text-emerald-300"
                 style={{ fontFamily: "Georgia, 'Times New Roman', serif" }}
               >
-                with your wins.
+                Pay more when you win more.
               </span>
             </h2>
-            <p className="mx-auto mt-8 max-w-2xl text-[15px] leading-relaxed text-zinc-400">
-              $299 to start. $799 once capture is active. $2,499 for agencies running multiple clients. Custom for federal contractors and hospital systems.
+            <p className="mx-auto mt-6 max-w-xl text-[15px] leading-[1.75] text-zinc-400">
+              No long-term contracts at any tier. 25% off for 501(c)(3) under $5M.
             </p>
             <div className="mt-10">
               <Button
@@ -554,16 +508,16 @@ export default function RfpEnginePage() {
       {/* FINAL CTA */}
       <section className="relative overflow-hidden">
         <div className="pointer-events-none absolute inset-0">
-          <div className="absolute left-1/2 top-1/2 h-[700px] w-[1100px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[radial-gradient(closest-side,rgba(16,185,129,0.20),transparent)] blur-3xl" />
+          <div className="absolute left-1/2 top-1/2 h-[600px] w-[1000px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[radial-gradient(closest-side,rgba(16,185,129,0.16),transparent)] blur-3xl" />
         </div>
-        <div className="container relative mx-auto px-4 py-32 text-center">
+        <div className="container relative mx-auto px-4 py-28 text-center">
           <motion.div
-            initial={{ opacity: 0, y: 24 }}
+            initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
           >
-            <h2 className="mx-auto max-w-3xl text-[clamp(2.25rem,5.5vw,4.5rem)] font-semibold leading-[1.02] tracking-tight text-white">
+            <h2 className="mx-auto max-w-3xl text-[clamp(2rem,5vw,4rem)] font-semibold leading-[1.04] tracking-tight text-white">
               Stop missing the funding
               <br />
               <span
@@ -573,14 +527,14 @@ export default function RfpEnginePage() {
                 you should be winning.
               </span>
             </h2>
-            <p className="mx-auto mt-8 max-w-xl text-[15px] leading-relaxed text-zinc-400">
-              14-day free trial. Tenant set up in four minutes. First Discovery feed in your inbox tomorrow morning.
+            <p className="mx-auto mt-8 max-w-xl text-[15px] leading-[1.75] text-zinc-400">
+              14 days free. Tenant set up in four minutes. First Discovery feed in your inbox tomorrow morning.
             </p>
             <div className="mt-10 flex flex-col justify-center gap-3 sm:flex-row">
               <Button
                 size="lg"
                 asChild
-                className="h-12 rounded-md bg-white px-7 text-[14px] font-medium text-zinc-950 shadow-[0_8px_40px_-8px_rgba(255,255,255,0.4)] hover:bg-zinc-100"
+                className="h-12 rounded-md bg-white px-7 text-[14px] font-medium text-zinc-950 hover:bg-zinc-100"
               >
                 <Link href="/signup?next=/orgs/new&product=rfp-engine">
                   Start Free Trial
@@ -591,7 +545,7 @@ export default function RfpEnginePage() {
                 size="lg"
                 variant="outline"
                 asChild
-                className="h-12 rounded-md border-white/15 bg-white/5 px-7 text-[14px] font-medium text-white backdrop-blur hover:bg-white/10"
+                className="h-12 rounded-md border-white/15 bg-white/5 px-7 text-[14px] font-medium text-white hover:bg-white/10"
               >
                 <Link href="/contact-sales?product=rfp-engine">Talk to Sales</Link>
               </Button>
