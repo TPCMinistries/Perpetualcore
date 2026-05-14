@@ -6,10 +6,6 @@
  * the bootstrap insert that must atomically write two RLS-protected tables before
  * the org+membership relationship exists to satisfy those policies.
  *
- * NOTE: rfp_* tables were added to LDC Brain AI in Plan 04-01. They are NOT yet
- * reflected in the generated database.types.ts (would require a `supabase gen types`
- * run against the live project). We use typed interfaces below and cast with `as`.
- * Phase 5 should regenerate database.types.ts once all rfp_* DDL is stable.
  */
 
 import { createClient, createAdminClient } from "@/lib/supabase/server";
@@ -65,8 +61,7 @@ export async function createOrgWithOwner(
   const admin = createAdminClient();
 
   // Step 1: insert the org
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data: org, error: orgErr } = await (admin as any)
+  const { data: org, error: orgErr } = await admin
     .from("rfp_orgs")
     .insert({ name: input.name, type: input.type, naics: input.naics })
     .select()
@@ -77,15 +72,13 @@ export async function createOrgWithOwner(
   }
 
   // Step 2: insert the owner membership
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { error: memErr } = await (admin as any)
+  const { error: memErr } = await admin
     .from("rfp_user_orgs")
     .insert({ user_id: userId, org_id: org.id, role: "owner" });
 
   if (memErr) {
     // Compensating delete — roll back the orphaned org
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await (admin as any).from("rfp_orgs").delete().eq("id", org.id);
+    await admin.from("rfp_orgs").delete().eq("id", org.id);
     throw new Error(`org_membership_failed: ${memErr.message}`);
   }
 
@@ -101,8 +94,7 @@ export async function createOrgWithOwner(
  */
 export async function getOrgForUser(orgId: string): Promise<RfpOrg | null> {
   const supabase = await createClient();
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data } = await (supabase as any)
+  const { data } = await supabase
     .from("rfp_orgs")
     .select("*")
     .eq("id", orgId)
@@ -120,10 +112,9 @@ export async function listUserOrgs(): Promise<
   Array<{ role: OrgRole; rfp_orgs: RfpOrg }>
 > {
   const supabase = await createClient();
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data } = await (supabase as any)
+  const { data } = await supabase
     .from("rfp_user_orgs")
     .select("role, rfp_orgs(id, name, type, naics, created_at, updated_at)")
     .order("created_at", { ascending: false });
-  return (data as Array<{ role: OrgRole; rfp_orgs: RfpOrg }>) ?? [];
+  return (data as unknown as Array<{ role: OrgRole; rfp_orgs: RfpOrg }>) ?? [];
 }

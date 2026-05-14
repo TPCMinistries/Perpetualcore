@@ -72,16 +72,10 @@ export async function POST(req: Request): Promise<NextResponse> {
     return NextResponse.json({ error: "unauthenticated" }, { status: 401 });
   }
 
-  // rfp_* tables are not in the generated database.types.ts yet (see
-  // lib/rfp/orgs.ts comment); cast the client to skip Supabase's typed
-  // overloads which infinite-recurse on unknown table names.
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const sbAny = supabase as any;
-
   // Membership check via RLS-scoped read. If the caller is not a member of
   // org_id, the row is invisible and we return 404 (same shape as the
   // /api/rfp/opps/[id] route).
-  const { data: membership, error: memErr } = await sbAny
+  const { data: membership, error: memErr } = await supabase
     .from("rfp_user_orgs")
     .select("org_id, role")
     .eq("org_id", body.org_id)
@@ -90,32 +84,29 @@ export async function POST(req: Request): Promise<NextResponse> {
   if (memErr || !membership) {
     return NextResponse.json({ error: "not_found" }, { status: 404 });
   }
-  if (!["owner", "writer"].includes((membership as { role: string }).role)) {
+  if (!["owner", "writer"].includes(membership.role)) {
     return NextResponse.json({ error: "forbidden" }, { status: 403 });
   }
 
   // Load the org + opp via admin client (we've already authorized the caller).
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const admin = createAdminClient() as any;
-  const { data: orgRow, error: orgErr } = await admin
+  const admin = createAdminClient();
+  const { data: org, error: orgErr } = await admin
     .from("rfp_orgs")
     .select("name, type, capacity_summary")
     .eq("id", body.org_id)
-    .maybeSingle();
-  if (orgErr || !orgRow) {
+    .maybeSingle<OrgRow>();
+  if (orgErr || !org) {
     return NextResponse.json({ error: "org_not_found" }, { status: 404 });
   }
-  const org = orgRow as OrgRow;
 
-  const { data: oppRow, error: oppErr } = await admin
+  const { data: opp, error: oppErr } = await admin
     .from("rfp_opportunities")
     .select("title, agency, brief, amount_min, amount_max, deadline, url")
     .eq("id", body.opp_id)
-    .maybeSingle();
-  if (oppErr || !oppRow) {
+    .maybeSingle<OppRow>();
+  if (oppErr || !opp) {
     return NextResponse.json({ error: "opp_not_found" }, { status: 404 });
   }
-  const opp = oppRow as OppRow;
 
   // Generate.
   let draft;
@@ -138,7 +129,7 @@ export async function POST(req: Request): Promise<NextResponse> {
 
   // Persist proposal + sections + audit row.
   const proposalTitle = `Draft: ${opp.title.slice(0, 160)}`;
-  const { data: proposalRow, error: pErr } = await admin
+  const { data: proposal, error: pErr } = await admin
     .from("rfp_proposals")
     .insert({
       org_id: body.org_id,
@@ -149,8 +140,7 @@ export async function POST(req: Request): Promise<NextResponse> {
       owner_user_id: user.id,
     })
     .select("id")
-    .single();
-  const proposal = proposalRow as { id: string } | null;
+    .single<{ id: string }>();
   if (pErr || !proposal) {
     return NextResponse.json(
       { error: "proposal_insert_failed", detail: pErr?.message?.slice(0, 200) },

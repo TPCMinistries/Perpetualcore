@@ -66,34 +66,29 @@ export default async function ProposalPage({
 }) {
   const { orgId, proposalId } = await params;
   const supabase = await createClient();
-  // rfp_* tables not in generated database.types.ts — see lib/rfp/orgs.ts
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const sbAny = supabase as any;
 
-  const proposalQuery = await sbAny
+  const { data: proposal } = await supabase
     .from("rfp_proposals")
     .select("id, title, status, due_date, opp_id, created_at")
     .eq("id", proposalId)
     .eq("org_id", orgId)
-    .maybeSingle();
-  const proposal = proposalQuery.data as ProposalRow | null;
+    .maybeSingle<ProposalRow>();
   if (!proposal) notFound();
 
-  const sectionsQuery = await sbAny
+  const { data: sections } = await supabase
     .from("rfp_proposal_sections")
     .select("section_type, content, version, last_drafted_by_agent_at")
     .eq("proposal_id", proposalId)
-    .order("section_type");
-  const sections = sectionsQuery.data as SectionRow[] | null;
+    .order("section_type")
+    .returns<SectionRow[]>();
 
-  const sessionQuery = await sbAny
+  const { data: session } = await supabase
     .from("rfp_agent_sessions")
     .select("agent, model, tokens_in, tokens_out, cost_usd, created_at")
     .eq("proposal_id", proposalId)
     .order("created_at", { ascending: false })
     .limit(1)
-    .maybeSingle();
-  const session = sessionQuery.data as AgentSessionRow | null;
+    .maybeSingle<AgentSessionRow>();
 
   const sectionByType = new Map<string, SectionRow>(
     (sections ?? []).map((s) => [s.section_type, s]),

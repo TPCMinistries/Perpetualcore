@@ -86,8 +86,7 @@ export async function createInvite(input: CreateInviteInput): Promise<RfpOrgInvi
   const expiresAt = new Date(Date.now() + ttlDays * 24 * 60 * 60 * 1000).toISOString();
   const token = generateToken();
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data, error } = await (supabase as any)
+  const { data, error } = await supabase
     .from('rfp_org_invites')
     .insert({
       org_id:     input.orgId,
@@ -117,8 +116,7 @@ export async function createInvite(input: CreateInviteInput): Promise<RfpOrgInvi
 export async function validateToken(token: string): Promise<ValidateTokenResult> {
   const admin = createAdminClient();
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data: invite } = await (admin as any)
+  const { data: invite } = await admin
     .from('rfp_org_invites')
     .select('id, org_id, email, role, status, expires_at, invited_by, message')
     .eq('token', token)
@@ -141,8 +139,7 @@ export async function validateToken(token: string): Promise<ValidateTokenResult>
   }
 
   // Fetch org name for the UI display card
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data: org } = await (admin as any)
+  const { data: org } = await admin
     .from('rfp_orgs')
     .select('name')
     .eq('id', (invite as RfpOrgInvite).org_id)
@@ -176,8 +173,7 @@ export async function acceptInvite(
   const admin = createAdminClient();
 
   // Fetch the invite by token
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data: invite } = await (admin as any)
+  const { data: invite } = await admin
     .from('rfp_org_invites')
     .select('*')
     .eq('token', token)
@@ -194,8 +190,7 @@ export async function acceptInvite(
   }
 
   // Insert membership idempotently — on conflict keep existing role (DO NOTHING)
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { error: memErr } = await (admin as any)
+  const { error: memErr } = await admin
     .from('rfp_user_orgs')
     .upsert(
       { user_id: userId, org_id: inv.org_id, role: inv.role },
@@ -207,8 +202,7 @@ export async function acceptInvite(
   }
 
   // Mark invite as accepted
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  await (admin as any)
+  await admin
     .from('rfp_org_invites')
     .update({ status: 'accepted', accepted_at: new Date().toISOString() })
     .eq('id', inv.id);
