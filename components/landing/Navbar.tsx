@@ -32,7 +32,8 @@ const SOLUTION_LINKS: { label: string; href: string; group: string }[] = [
 ];
 
 const STUDIO_LINKS = [
-  { label: "Engagements", href: "/studio/engagements", description: "$75K floor — install the Engine" },
+  { label: "Retainers", href: "/studio/retainers", description: "$5K–$15K/mo · Productized programs" },
+  { label: "Engagements", href: "/studio/engagements", description: "$75K–$250K+ · Install the Engine" },
   { label: "Methodology", href: "/studio/methodology", description: "Learn → Wire → Automate → Scale" },
   { label: "Process", href: "/studio/process", description: "Day 1 to Month 6 timeline" },
   { label: "Case Studies", href: "/studio/case-studies", description: "Abstracted to sector and constraint" },
@@ -78,9 +79,13 @@ export function Navbar() {
   return (
     <header className="border-b border-border/60 backdrop-blur-md bg-background/90 sticky top-0 z-50">
       <div className="container mx-auto px-6 sm:px-8 py-4 flex items-center justify-between">
-        <Link href="/" className="flex items-center">
-          {/* Wordmark — Newsreader regular at nav scale */}
-          <span className="font-serif text-lg font-normal tracking-tight text-foreground">
+        <Link href="/" className="flex items-center gap-2.5 group">
+          {/* Mark — small filled square in primary, gives wordmark presence */}
+          <span
+            aria-hidden
+            className="block h-[14px] w-[14px] bg-foreground group-hover:bg-primary transition-colors"
+          />
+          <span className="text-[15px] font-semibold tracking-tight text-foreground">
             Perpetual Core
           </span>
         </Link>
@@ -130,7 +135,15 @@ export function Navbar() {
             </DropdownPanel>
           </div>
 
-          {/* Industries dropdown — links into existing /solutions/* pages */}
+          <Link href="/fund" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
+            Fund
+          </Link>
+
+          <Link href="/institute" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
+            Institute
+          </Link>
+
+          {/* Industries dropdown — kept but moved to lower priority */}
           <div className="relative group">
             <Link
               href="/solutions"
@@ -165,9 +178,6 @@ export function Navbar() {
             </DropdownPanel>
           </div>
 
-          <Link href="/pricing" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
-            Pricing
-          </Link>
           <Link href="/about" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
             About
           </Link>
@@ -175,16 +185,24 @@ export function Navbar() {
 
         <div className="hidden md:flex items-center gap-5">
           <Link href="/login" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
-            Sign In
+            Sign in
           </Link>
-          <Button asChild size="sm" className="text-sm px-5 h-9 shadow-none">
-            <Link href="/studio/engagements">Start Engagement</Link>
+          <Button
+            asChild
+            size="sm"
+            className="text-sm px-5 h-9 shadow-none bg-foreground text-background hover:bg-foreground/90"
+          >
+            <Link href="/studio/engagements">Start engagement</Link>
           </Button>
         </div>
 
         <div className="md:hidden flex items-center gap-2">
           <PublicMobileNav />
-          <Button size="sm" asChild className="h-9 px-4 text-sm font-medium shadow-none">
+          <Button
+            size="sm"
+            asChild
+            className="h-9 px-4 text-sm font-medium shadow-none bg-foreground text-background hover:bg-foreground/90"
+          >
             <Link href="/studio/engagements">Start</Link>
           </Button>
         </div>

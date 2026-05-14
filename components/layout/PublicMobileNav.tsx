@@ -30,8 +30,9 @@ export function PublicMobileNav() {
         <div className="flex h-full flex-col bg-background">
           {/* Wordmark */}
           <div className="border-b border-border/60 px-6 py-5">
-            <Link href="/" className="flex items-center" onClick={close}>
-              <span className="font-serif text-base font-normal tracking-tight text-foreground">
+            <Link href="/" className="flex items-center gap-2.5" onClick={close}>
+              <span aria-hidden className="block h-3 w-3 bg-foreground" />
+              <span className="text-[15px] font-semibold tracking-tight text-foreground">
                 Perpetual Core
               </span>
             </Link>
@@ -46,8 +47,11 @@ export function PublicMobileNav() {
               <Link href="/studio" onClick={close} className="block px-4 py-2.5 text-sm font-medium text-foreground hover:bg-accent rounded-sm transition-colors">
                 Overview
               </Link>
+              <Link href="/studio/retainers" onClick={close} className="block px-4 py-2.5 text-sm text-muted-foreground hover:text-foreground hover:bg-accent rounded-sm transition-colors">
+                Retainers <span className="text-xs font-mono ml-2">$5K–$15K/mo</span>
+              </Link>
               <Link href="/studio/engagements" onClick={close} className="block px-4 py-2.5 text-sm text-muted-foreground hover:text-foreground hover:bg-accent rounded-sm transition-colors">
-                Engagements
+                Engagements <span className="text-xs font-mono ml-2">$75K+</span>
               </Link>
               <Link href="/studio/methodology" onClick={close} className="block px-4 py-2.5 text-sm text-muted-foreground hover:text-foreground hover:bg-accent rounded-sm transition-colors">
                 Methodology
@@ -89,17 +93,25 @@ export function PublicMobileNav() {
               </Link>
 
               <div className="border-t border-border/60 my-3" />
-              <Link href="/solutions" onClick={close} className="block px-4 py-2.5 text-sm font-medium text-foreground hover:bg-accent rounded-sm transition-colors">
-                Industries
+              <Link href="/fund" onClick={close} className="block px-4 py-2.5 text-sm font-medium text-foreground hover:bg-accent rounded-sm transition-colors">
+                Fund <span className="text-xs font-mono text-muted-foreground ml-2">DeepFutures</span>
               </Link>
-              <Link href="/pricing" onClick={close} className="block px-4 py-2.5 text-sm font-medium text-foreground hover:bg-accent rounded-sm transition-colors">
-                Pricing
-              </Link>
-              <Link href="/about" onClick={close} className="block px-4 py-2.5 text-sm font-medium text-foreground hover:bg-accent rounded-sm transition-colors">
-                About
+              <Link href="/institute" onClick={close} className="block px-4 py-2.5 text-sm font-medium text-foreground hover:bg-accent rounded-sm transition-colors">
+                Institute <span className="text-xs font-mono text-muted-foreground ml-2">IHA</span>
               </Link>
               <Link href="/engine" onClick={close} className="block px-4 py-2.5 text-sm font-medium text-foreground hover:bg-accent rounded-sm transition-colors">
-                The Perpetual Engine
+                The Engine
+              </Link>
+
+              <div className="border-t border-border/60 my-3" />
+              <Link href="/solutions" onClick={close} className="block px-4 py-2.5 text-sm text-muted-foreground hover:text-foreground hover:bg-accent rounded-sm transition-colors">
+                Industries
+              </Link>
+              <Link href="/pricing" onClick={close} className="block px-4 py-2.5 text-sm text-muted-foreground hover:text-foreground hover:bg-accent rounded-sm transition-colors">
+                Pricing
+              </Link>
+              <Link href="/about" onClick={close} className="block px-4 py-2.5 text-sm text-muted-foreground hover:text-foreground hover:bg-accent rounded-sm transition-colors">
+                About
               </Link>
 
               <div className="border-t border-border/60 my-3" />

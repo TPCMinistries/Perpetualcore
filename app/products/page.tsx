@@ -1,133 +1,134 @@
 /**
- * /products — portfolio overview.
+ * /products — portfolio overview (arm 02 of the company).
+ * Seven products with status pills, mono indices, hairline grid.
+ * Visual register matches homepage v5.
  *
- * Per COPY_PRODUCTS.md /products page intro + the 7-card grid + UI
- * audit §5 sharpening levers (mono-violet card family, no per-card
- * gradient variation).
- *
- * Card grid order per BRAND_ARCHITECTURE §5.6:
+ * Order per BRAND_ARCHITECTURE §5.6:
  *   Atlas → Sentinel → Sage → Vellum → RFP Engine → RFP Sentry → Platform.
- *
- * Atlas card: NO pricing (deliberate scarcity per §5.2).
- * Vellum + Platform cards: SHOW pricing on card (per §5.2 + §8 lock).
- *
- * Sharpening levers from UI audit §5: font-semibold, gradient text on
- * H1 only, mono-violet icon family, max-w-3xl prose columns.
- *
- * Detail product pages (/products/atlas, /products/sentinel, etc.) are
- * Session 3 scope — they 404 until built. /products/platform is built
- * in Session 2 Step 6.
  */
 
 import Link from "next/link";
-import {
-  ArrowRight,
-  Building2,
-  ShieldCheck,
-  Heart,
-  BookOpenText,
-  FileText,
-  ScanSearch,
-  Layers,
-} from "lucide-react";
-import type { LucideIcon } from "lucide-react";
+import { ArrowRight, ArrowUpRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 import { Navbar } from "@/components/landing/Navbar";
 import { Footer } from "@/components/landing/Footer";
 
 export const metadata = {
   title: "Products — Perpetual Core",
   description:
-    "Seven products. Each one shipped in an engagement. Each one still running. The portfolio is the proof; the engagement is the work.",
+    "Seven AI-native products. Each one shipped in an engagement. Each one still running. The portfolio is the proof; the engagement is the work.",
 };
 
 type Product = {
+  index: string;
   name: string;
+  status: string;
+  statusColor: "live" | "pilot" | "invite";
   headline: string;
-  line1: string;
-  line2: string;
-  cta: { label: string; href: string };
+  body: string;
   pricing?: string;
-  icon: LucideIcon;
+  cta: { label: string; href: string; external?: boolean };
 };
 
-// Order locked per BRAND_ARCHITECTURE §5.6:
-// Atlas → Sentinel → Sage → Vellum → RFP Engine → RFP Sentry → Platform.
 const PRODUCTS: Product[] = [
   {
+    index: "01",
     name: "Atlas",
-    headline: "Atlas — AI-native COO for fund-backed portfolio companies.",
-    line1:
-      "For PE Operating Partners and fund Ops leads installing an AI operating system across a portco in 6 to 10 weeks, before the next quarterly board meeting.",
-    line2: "In pilot with select funds — by introduction only.",
+    status: "IN PILOT",
+    statusColor: "pilot",
+    headline: "AI-native COO for fund-backed portfolio companies.",
+    body:
+      "For PE Operating Partners and fund Ops leads installing an AI operating system across a portco in 6 to 10 weeks, before the next quarterly board meeting. In pilot with select funds — by introduction only.",
     cta: { label: "Request introduction", href: "/products/atlas" },
-    icon: Building2,
-    // No pricing per §5.2 — deliberate scarcity framing.
   },
   {
+    index: "02",
     name: "Sentinel",
-    headline: "Sentinel — due diligence and intel for the people Kroll won't take calls from.",
-    line1:
-      "For attorneys, investigators, journalists, and operators running pre-deal or pre-hire diligence on subjects the legacy CRAs decline to touch.",
-    line2:
-      "Live at sentinel.perpetualcore.com. Production-grade. The first product we shipped from an engagement and kept running.",
-    cta: { label: "Run a vet", href: "https://sentinel.perpetualcore.com" },
-    icon: ShieldCheck,
+    status: "LIVE",
+    statusColor: "live",
+    headline: "Due diligence and intel for the people Kroll won't take calls from.",
+    body:
+      "For attorneys, investigators, journalists, and operators running pre-deal or pre-hire diligence on subjects the legacy CRAs decline to touch. Production-grade. The first product we shipped from an engagement and kept running.",
+    cta: { label: "Run a vet", href: "https://sentinel.perpetualcore.com", external: true },
   },
   {
+    index: "03",
     name: "Sage",
-    headline: "Sage — the coach and chief of staff who never forgets you.",
-    line1:
-      "For operators who run two or more entities, live in voice memos, and want a relational AI partner — not a chatbot you re-explain yourself to every morning.",
-    line2:
-      "Lives wherever you do. Telegram, voice, web. 15% of every Sage subscription funds the Institute for Human Advancement.",
-    cta: { label: "Meet Sage", href: "https://sage.perpetualcore.com" },
-    icon: Heart,
+    status: "BUILD",
+    statusColor: "invite",
+    headline: "The coach and chief of staff who never forgets you.",
+    body:
+      "For operators who run two or more entities, live in voice memos, and want a relational AI partner — not a chatbot you re-explain yourself to every morning. Lives wherever you do. Telegram, voice, web. 15% of every Sage subscription funds the Institute for Human Advancement.",
+    cta: { label: "Meet Sage", href: "https://sage.perpetualcore.com", external: true },
   },
   {
+    index: "04",
     name: "Vellum",
-    headline: "Vellum by Perpetual Core — institutional memory for organizations.",
-    line1:
-      "For executive directors, founders, and program directors whose calls, docs, voice notes, and Slack channels need to be one queryable mind — not seventeen disconnected sources.",
-    line2:
-      "30% mission-driven discount on Operator and Team for verified 501(c)(3)s.",
-    pricing: "Free / $49 Operator / $249 Team / Institution Contact us",
+    status: "BUILD",
+    statusColor: "invite",
+    headline: "Institutional memory for organizations.",
+    body:
+      "For executive directors, founders, and program directors whose calls, docs, voice notes, and Slack channels need to be one queryable mind — not seventeen disconnected sources. 30% mission-driven discount on Operator and Team for verified 501(c)(3)s.",
+    pricing: "Free / $49 Operator / $249 Team / Institution Contact",
     cta: { label: "See Vellum", href: "/products/vellum" },
-    icon: BookOpenText,
   },
   {
+    index: "05",
     name: "RFP Engine",
-    headline: "RFP Engine — find the right RFP. Draft it in your voice. Ship it clean.",
-    line1:
-      "For grant writers, capture managers, and EDs responding to federal, state, and foundation RFPs at capture-grade quality.",
-    line2:
-      "Live at perpetualcore.com/rfp. Discovery every 6 hours. Drafting in your voice, not generic AI prose.",
+    status: "LIVE",
+    statusColor: "live",
+    headline: "Find the right RFP. Draft it in your voice. Ship it clean.",
+    body:
+      "For grant writers, capture managers, and EDs responding to federal, state, and foundation RFPs at capture-grade quality. Discovery every 6 hours. Drafting in your voice, not generic AI prose.",
     cta: { label: "See RFP Engine", href: "/products/rfp-engine" },
-    icon: FileText,
   },
   {
+    index: "06",
     name: "RFP Sentry",
-    headline: "RFP Sentry — bid intelligence and compliance gate.",
-    line1:
-      "For capture teams who'd rather lose a deal at the bid/no-bid step than after writing the proposal. Sister product to RFP Engine.",
-    line2:
-      "In build. Score RFPs for fit before you write. Compliance flags surface before submission, not after a debrief.",
+    status: "BUILD",
+    statusColor: "invite",
+    headline: "Bid intelligence and compliance gate.",
+    body:
+      "For capture teams who'd rather lose a deal at the bid/no-bid step than after writing the proposal. Sister product to RFP Engine. Score RFPs for fit before you write. Compliance flags surface before submission, not after a debrief.",
     cta: { label: "Join the early list", href: "/products/rfp-sentry" },
-    icon: ScanSearch,
   },
   {
+    index: "07",
     name: "Platform",
-    headline: "Platform — the AI OS for individuals and small teams.",
-    line1:
-      "For solo operators and 5-to-50-person teams who need 11-model routing, persistent memory, and AI executive advisors in one workspace.",
-    line2:
-      "The catch-all for buyers under the engagement floor — the on-ramp, not the destination.",
+    status: "LIVE",
+    statusColor: "live",
+    headline: "The AI OS for individuals and small teams.",
+    body:
+      "For solo operators and 5-to-50-person teams who need 11-model routing, persistent memory, and AI executive advisors in one workspace. The catch-all for buyers under the engagement floor — the on-ramp, not the destination.",
     pricing: "Free / $49 Starter / $99 Pro",
     cta: { label: "Try the Platform", href: "/products/platform" },
-    icon: Layers,
   },
 ];
+
+function StatusPill({ status, color }: { status: string; color: "live" | "pilot" | "invite" }) {
+  const dot = {
+    live: "bg-status-live",
+    pilot: "bg-status-pilot",
+    invite: "bg-status-invite",
+  }[color];
+  return (
+    <span className="inline-flex items-center gap-1.5 font-mono text-[10px] tracking-[0.18em] uppercase text-muted-foreground">
+      <span
+        className={`block h-1.5 w-1.5 rounded-full ${dot} ${color === "live" ? "animate-pulse-dot" : ""}`}
+      />
+      {status}
+    </span>
+  );
+}
+
+function SectionRail({ index, label }: { index: string; label: string }) {
+  return (
+    <div>
+      <p className="eyebrow mb-3">§ {index}</p>
+      <h2 className="text-xs uppercase tracking-[0.18em] font-mono text-foreground">{label}</h2>
+    </div>
+  );
+}
 
 export default function ProductsPage() {
   return (
@@ -135,108 +136,145 @@ export default function ProductsPage() {
       <Navbar />
 
       {/* Hero */}
-      <section className="container mx-auto px-4 pt-24 pb-20 sm:pt-32">
-        <div className="max-w-3xl">
-          <p className="text-sm italic text-muted-foreground tracking-wide mb-6">
-            The portfolio.
-          </p>
-          <h1 className="text-5xl sm:text-6xl font-semibold tracking-tight leading-[1.1] mb-8">
+      <section className="container mx-auto px-6 sm:px-8 pt-20 pb-20 sm:pt-28 sm:pb-28">
+        <div className="max-w-5xl">
+          <div className="flex items-center gap-3 mb-12">
+            <span aria-hidden className="block h-1.5 w-1.5 bg-foreground" />
+            <p className="eyebrow !text-foreground/70">§ 02 · Portfolio</p>
+          </div>
+
+          <h1 className="display-hero text-[40px] sm:text-[56px] lg:text-[76px] text-foreground mb-12 max-w-5xl leading-[1.05]">
             Seven products. Each one{" "}
-            <span className="bg-gradient-to-r from-primary to-purple-600 bg-clip-text text-transparent">
-              shipped in an engagement
-            </span>
-            . Each one still running.
+            <span className="italic text-foreground/85">shipped in an engagement.</span> Each one
+            still running.
           </h1>
-          <p className="text-xl text-muted-foreground leading-relaxed mb-6">
-            Every product on this site is a working installation we built for a client and kept operating. The portfolio is the proof; the engagement is the work.
-          </p>
-          <p className="text-lg text-muted-foreground leading-relaxed mb-10">
-            We don&apos;t sell features. We install operating systems, and the products are what falls out — public demonstrations of capability that other organizations can also use. If a product on this list looks like the thing you&apos;d want installed in your org, the engagement is how that happens. The product is how you can see it run before you commit.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-3">
-            <Button size="lg" asChild className="text-base px-7">
+
+          <div className="space-y-5 text-lg sm:text-xl text-muted-foreground leading-[1.55] mb-12 max-w-3xl">
+            <p>
+              Every product on this site is a working installation we built for a client and kept
+              operating. The portfolio is the proof; the engagement is the work.
+            </p>
+            <p>
+              We don&apos;t sell features. We install operating systems, and the products are what
+              falls out — public demonstrations of capability that other organizations can also
+              use. If a product on this list looks like the thing you&apos;d want installed in your
+              org, the engagement is how that happens.
+            </p>
+          </div>
+
+          <div className="flex flex-col sm:flex-row items-start gap-4">
+            <Button
+              size="lg"
+              asChild
+              className="text-sm font-medium px-7 h-11 shadow-none bg-foreground text-background hover:bg-foreground/90 rounded-[6px]"
+            >
               <Link href="/studio/engagements">
                 Start an engagement <ArrowRight className="ml-2 h-4 w-4" />
               </Link>
             </Button>
-            <Button size="lg" variant="outline" asChild className="text-base px-7">
-              <Link href="/studio/methodology">Read the methodology</Link>
-            </Button>
+            <Link
+              href="/studio/methodology"
+              className="inline-flex items-center text-sm font-medium text-foreground hover:text-primary transition-colors py-3 border-b border-foreground/20 hover:border-primary"
+            >
+              Read the methodology <ArrowRight className="ml-1.5 h-3.5 w-3.5" />
+            </Link>
           </div>
         </div>
       </section>
 
-      {/* 7-card portfolio grid — mono-violet family per UI audit §5 */}
-      <section className="container mx-auto px-4 py-24 border-t border-border/40">
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {PRODUCTS.map((product) => {
-            const Icon = product.icon;
-            const isExternal = product.cta.href.startsWith("http");
-            return (
-              <Card
-                key={product.name}
-                className="border-border/60 hover:border-primary/40 transition-colors flex flex-col"
-              >
-                <CardContent className="p-7 flex flex-col h-full">
-                  {/* Mono-violet icon family — no per-card gradient variation */}
-                  <div className="h-11 w-11 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center mb-5">
-                    <Icon className="h-5 w-5 text-primary" />
+      {/* Portfolio grid */}
+      <section className="border-t border-border py-24 sm:py-32 bg-surface-hover/40">
+        <div className="container mx-auto px-6 sm:px-8">
+          <div className="grid lg:grid-cols-[280px_1fr] gap-12 lg:gap-20 mb-12">
+            <SectionRail index="—" label="In production" />
+            <div className="max-w-2xl">
+              <h3 className="text-3xl sm:text-4xl lg:text-5xl font-semibold leading-[1.1] tracking-[-0.025em] text-foreground">
+                Seven products in the portfolio.
+              </h3>
+            </div>
+          </div>
+
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 border border-border bg-card divide-y sm:divide-y-0 sm:divide-x divide-border">
+            {PRODUCTS.map((p, idx) => {
+              const className = `group block p-6 sm:p-7 hover:bg-surface-hover transition-colors flex flex-col border-border ${
+                idx >= 2 ? "sm:border-t" : ""
+              } ${idx >= 3 ? "lg:border-t-0 xl:border-t-0" : ""} ${idx >= 4 ? "xl:border-t" : ""}`;
+              const inner = (
+                <>
+                  <div className="flex items-center justify-between mb-10">
+                    <span className="font-mono text-[10px] text-muted-foreground tracking-[0.18em]">
+                      {p.index}
+                    </span>
+                    <StatusPill status={p.status} color={p.statusColor} />
                   </div>
-                  <h3 className="text-lg font-semibold leading-snug mb-3">
-                    {product.headline}
-                  </h3>
-                  <p className="text-sm text-muted-foreground leading-relaxed mb-3">
-                    {product.line1}
+                  <h4 className="text-[11px] font-mono uppercase tracking-[0.22em] text-primary mb-3">
+                    {p.name}
+                  </h4>
+                  <p className="text-base font-semibold leading-[1.3] tracking-[-0.01em] text-foreground mb-4">
+                    {p.headline}
                   </p>
-                  <p className="text-sm text-muted-foreground leading-relaxed mb-4">
-                    {product.line2}
+                  <p className="text-sm text-muted-foreground leading-[1.6] mb-6 flex-1">
+                    {p.body}
                   </p>
-                  {product.pricing && (
-                    <p className="text-sm font-medium text-foreground mb-6 pt-3 border-t border-border/40">
-                      {product.pricing}
+                  {p.pricing && (
+                    <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-foreground pt-3 mt-auto border-t border-border/60 mb-4">
+                      {p.pricing}
                     </p>
                   )}
-                  <div className="mt-auto">
-                    <Button variant="outline" size="sm" asChild>
-                      {isExternal ? (
-                        <a href={product.cta.href} target="_blank" rel="noopener noreferrer">
-                          {product.cta.label} <ArrowRight className="ml-2 h-3.5 w-3.5" />
-                        </a>
-                      ) : (
-                        <Link href={product.cta.href}>
-                          {product.cta.label} <ArrowRight className="ml-2 h-3.5 w-3.5" />
-                        </Link>
-                      )}
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            );
-          })}
+                  <span className="inline-flex items-center text-xs font-medium text-muted-foreground group-hover:text-foreground transition-colors mt-auto">
+                    {p.cta.label}
+                    {p.cta.external ? (
+                      <ArrowUpRight className="ml-1 h-3 w-3 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+                    ) : (
+                      <ArrowRight className="ml-1 h-3 w-3 transition-transform group-hover:translate-x-0.5" />
+                    )}
+                  </span>
+                </>
+              );
+              return p.cta.external ? (
+                <a key={p.name} href={p.cta.href} target="_blank" rel="noopener noreferrer" className={className}>
+                  {inner}
+                </a>
+              ) : (
+                <Link key={p.name} href={p.cta.href} className={className}>
+                  {inner}
+                </Link>
+              );
+            })}
+          </div>
         </div>
       </section>
 
       {/* Final CTA */}
-      <section className="container mx-auto px-4 py-32 border-t border-border/40">
-        <div className="max-w-3xl">
-          <p className="text-sm italic text-muted-foreground tracking-wide mb-4">
-            The studio is the work.
-          </p>
-          <h2 className="text-3xl sm:text-4xl font-semibold tracking-tight leading-tight mb-6">
-            If you want one of these installed in your org, the engagement is how that happens.
-          </h2>
-          <p className="text-lg text-muted-foreground leading-relaxed mb-10">
-            Engagements start at $75,000. We take a limited number per quarter.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-3">
-            <Button size="lg" asChild className="text-base px-7">
-              <Link href="/studio/engagements">
-                Start an engagement <ArrowRight className="ml-2 h-4 w-4" />
-              </Link>
-            </Button>
-            <Button size="lg" variant="outline" asChild className="text-base px-7">
-              <Link href="/contact-sales">Book an intake call</Link>
-            </Button>
+      <section className="border-t border-border py-24 sm:py-32">
+        <div className="container mx-auto px-6 sm:px-8">
+          <div className="grid lg:grid-cols-[280px_1fr] gap-12 lg:gap-20">
+            <SectionRail index="—" label="The work" />
+            <div className="max-w-2xl">
+              <h3 className="text-3xl sm:text-4xl lg:text-5xl font-semibold leading-[1.1] tracking-[-0.025em] text-foreground mb-6">
+                If you want one of these installed in your org, the engagement is how that happens.
+              </h3>
+              <p className="text-base text-muted-foreground leading-[1.7] mb-10">
+                Engagements start at $75,000. We take a limited number per quarter.
+              </p>
+              <div className="flex flex-col sm:flex-row items-start gap-5">
+                <Button
+                  size="lg"
+                  asChild
+                  className="text-sm font-medium h-11 px-7 shadow-none bg-foreground text-background hover:bg-foreground/90 rounded-[6px]"
+                >
+                  <Link href="/studio/engagements">
+                    Start an engagement <ArrowRight className="ml-2 h-4 w-4" />
+                  </Link>
+                </Button>
+                <Link
+                  href="/contact-sales"
+                  className="inline-flex items-center text-sm font-medium text-foreground hover:text-primary transition-colors py-3"
+                >
+                  Book an intake call <ArrowRight className="ml-1.5 h-3.5 w-3.5" />
+                </Link>
+              </div>
+            </div>
           </div>
         </div>
       </section>

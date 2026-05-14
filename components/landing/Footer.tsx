@@ -11,6 +11,7 @@ import Link from "next/link";
 
 const STUDIO_LINKS = [
   { label: "Studio overview", href: "/studio" },
+  { label: "Retainers", href: "/studio/retainers" },
   { label: "Engagements", href: "/studio/engagements" },
   { label: "Methodology", href: "/studio/methodology" },
   { label: "Process", href: "/studio/process" },
@@ -29,9 +30,24 @@ const PRODUCT_LINKS = [
   { label: "RFP Sentry", href: "/products/rfp-sentry" },
 ];
 
-const RESOURCES_LINKS = [
-  { label: "Pricing", href: "/pricing" },
+const FUND_LINKS = [
+  { label: "DeepFutures overview", href: "/fund" },
+  { label: "Thesis", href: "/fund#thesis" },
+  { label: "For founders", href: "mailto:invest@perpetualcore.com" },
+  { label: "For LPs", href: "mailto:lp@perpetualcore.com" },
+];
+
+const INSTITUTE_LINKS = [
+  { label: "The Institute (IHA)", href: "/institute" },
+  { label: "Uplift Communities", href: "https://upliftcommunities.com", external: true },
+  { label: "Founders 1,000", href: "https://theiha.org/founders", external: true },
+  { label: "Academy", href: "https://academy.theiha.org", external: true },
+  { label: "Visit theiha.org", href: "https://theiha.org", external: true },
+];
+
+const COMPANY_LINKS = [
   { label: "About", href: "/about" },
+  { label: "Pricing", href: "/pricing" },
   { label: "Industries", href: "/solutions" },
   { label: "Contact", href: "/contact-sales" },
 ];
@@ -47,12 +63,12 @@ export function Footer() {
   return (
     <footer className="border-t border-border/60 bg-background py-16">
       <div className="container mx-auto px-6 sm:px-8">
-        <div className="grid md:grid-cols-5 gap-8 mb-10">
+        <div className="grid md:grid-cols-6 gap-8 mb-10">
           {/* Brand column */}
           <div className="md:col-span-1">
-            <div className="mb-4">
-              {/* Wordmark — Newsreader regular */}
-              <span className="font-serif text-base font-normal tracking-tight text-foreground">
+            <div className="mb-4 flex items-center gap-2.5">
+              <span aria-hidden className="block h-3 w-3 bg-foreground" />
+              <span className="text-[15px] font-semibold tracking-tight text-foreground">
                 Perpetual Core
               </span>
             </div>
@@ -63,7 +79,7 @@ export function Footer() {
 
           {/* Studio column — new per BRIEF_RECONCILED A4 */}
           <div>
-            <h4 className="font-semibold mb-4 text-sm">Studio</h4>
+            <h4 className="eyebrow mb-4">Studio</h4>
             <ul className="space-y-2 text-sm text-muted-foreground">
               {STUDIO_LINKS.map((link) => (
                 <li key={link.href}>
@@ -77,7 +93,7 @@ export function Footer() {
 
           {/* Products column */}
           <div>
-            <h4 className="font-semibold mb-4 text-sm">Products</h4>
+            <h4 className="eyebrow mb-4">Products</h4>
             <ul className="space-y-2 text-sm text-muted-foreground">
               {PRODUCT_LINKS.map((link) => (
                 <li key={link.href}>
@@ -89,11 +105,56 @@ export function Footer() {
             </ul>
           </div>
 
-          {/* Resources column */}
+          {/* Fund column — new arm 03 */}
           <div>
-            <h4 className="font-semibold mb-4 text-sm">Resources</h4>
+            <h4 className="eyebrow mb-4">Fund</h4>
             <ul className="space-y-2 text-sm text-muted-foreground">
-              {RESOURCES_LINKS.map((link) => (
+              {FUND_LINKS.map((link) => (
+                <li key={link.href}>
+                  {link.href.startsWith("mailto:") ? (
+                    <a href={link.href} className="hover:text-primary transition">
+                      {link.label}
+                    </a>
+                  ) : (
+                    <Link href={link.href} className="hover:text-primary transition">
+                      {link.label}
+                    </Link>
+                  )}
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Institute column — new arm 04 */}
+          <div>
+            <h4 className="eyebrow mb-4">Institute</h4>
+            <ul className="space-y-2 text-sm text-muted-foreground">
+              {INSTITUTE_LINKS.map((link) => (
+                <li key={link.href}>
+                  {link.external ? (
+                    <a
+                      href={link.href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="hover:text-primary transition"
+                    >
+                      {link.label}
+                    </a>
+                  ) : (
+                    <Link href={link.href} className="hover:text-primary transition">
+                      {link.label}
+                    </Link>
+                  )}
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Company column — about/pricing/industries/contact */}
+          <div>
+            <h4 className="eyebrow mb-4">Company</h4>
+            <ul className="space-y-2 text-sm text-muted-foreground">
+              {COMPANY_LINKS.map((link) => (
                 <li key={link.href}>
                   <Link href={link.href} className="hover:text-primary transition">
                     {link.label}
@@ -105,7 +166,7 @@ export function Footer() {
 
           {/* Legal column */}
           <div>
-            <h4 className="font-semibold mb-4 text-sm">Legal</h4>
+            <h4 className="eyebrow mb-4">Legal</h4>
             <ul className="space-y-2 text-sm text-muted-foreground">
               {LEGAL_LINKS.map((link) => (
                 <li key={link.href}>

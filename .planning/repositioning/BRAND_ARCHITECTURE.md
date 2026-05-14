@@ -1,6 +1,21 @@
 # Perpetual Core — Brand Architecture
 
-**Status: v1.0 LOCKED — 2026-05-10. Do not re-derive.**
+**Status: v2.0 — 2026-05-14. Updated for Engine-as-standard frame + 5-arm IA + 3-band spectrum.**
+
+## v2.0 ADDENDUM (2026-05-14) — read this first
+
+Three strategic shifts that override anything inconsistent below:
+
+1. **Engine as global standard, not moat.** Perpetual Core is the *reference implementation* of the Perpetual Engine — a structural standard published as v1.0 at `/engine/spec`. Drop "structurally non-replicable / no competitor can do this / our moat" language entirely. Replace with "high structural bar — adoptable by anyone who builds for it from day one." See [perpetual-engine-as-standard.md](~/.claude/projects/-Users-lorenzodaughtry-chambers/memory/perpetual-engine-as-standard.md) memory note.
+
+2. **5-arm operating company, not consultancy.** Perpetual Core represents itself as a venture with five co-equal arms: Studio · Products · Fund (DeepFutures) · Institute (IHA) · Engine. Old framing as "AI-first studio that installs operating systems" is too narrow. Homepage architecture diagram shows 4 customer-facing arms sitting on the Engine substrate. Uplift Communities is positioned as IHA's operating arm (not a 5th top-level arm).
+
+3. **3-band Studio spectrum.** Engagements stop being the only door. Studio now offers three bands: Products ($0–$249/mo self-serve SaaS), Retainers ($5K–$15K/mo productized programs), Engagements ($75K–$250K+ installs). Retainers live at `/studio/retainers` with five named programs. "Limited engagements per quarter" scarcity framing has been removed — engagements are the studio's normal cadence.
+
+**Old §5–§9 below is the source-of-record for COPY but DO NOT trust the moat language.** When in doubt, the homepage `app/page.tsx`, `/studio` overview, `/engine/spec`, and `/studio/retainers` are the canonical ship surfaces.
+
+---
+
 Wave-3 copywriter and build agents operate on this document. Anything ambiguous here costs the copywriter tokens later — if you're a downstream agent and you find a gap, raise it in §8 and ask Lorenzo, do not invent.
 
 ---

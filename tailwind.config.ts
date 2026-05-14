@@ -19,7 +19,8 @@ const config: Config = {
     extend: {
       fontFamily: {
         sans: ["var(--font-inter)", "system-ui", "sans-serif"],
-        serif: ["var(--font-newsreader)", "Georgia", "serif"],
+        mono: ["var(--font-mono)", "ui-monospace", "SFMono-Regular", "Menlo", "monospace"],
+        display: ["var(--font-display)", "Iowan Old Style", "Georgia", "serif"],
       },
       colors: {
         border: "hsl(var(--border))",
@@ -64,11 +65,15 @@ const config: Config = {
           DEFAULT: "hsl(var(--ink))",
           muted: "hsl(var(--ink-muted))",
         },
-        parchment: "hsl(var(--parchment))",
         surface: {
           DEFAULT: "hsl(var(--surface))",
           hover: "hsl(var(--surface-hover))",
           dark: "hsl(var(--surface-dark))",
+        },
+        status: {
+          live: "hsl(var(--status-live))",
+          pilot: "hsl(var(--status-pilot))",
+          invite: "hsl(var(--status-invite))",
         },
       },
       borderRadius: {

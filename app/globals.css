@@ -4,95 +4,95 @@
 
 @layer base {
   :root {
-    /* ── Parchment background system (Editorial Gravity v2) ── */
-    --background: 40 20% 97%;        /* #F9F7F4 — parchment, not pure white */
-    --foreground: 30 10% 9%;         /* #1A1714 — near-black with warmth */
+    /* Confident-corporate — Anthropic/Linear/Vercel register
+       Pure-white surfaces. Cool neutral grays. Near-black ink.
+       Violet appears sparingly as accent, never as the default button color. */
 
-    /* ── Surface tokens ── */
-    --card: 0 0% 100%;               /* #FFFFFF — cards pop off parchment */
-    --card-foreground: 30 10% 9%;
+    --background: 0 0% 100%;          /* pure white */
+    --foreground: 220 13% 11%;        /* near-black, cool */
+
+    --card: 0 0% 100%;
+    --card-foreground: 220 13% 11%;
     --popover: 0 0% 100%;
-    --popover-foreground: 30 10% 9%;
+    --popover-foreground: 220 13% 11%;
 
-    /* ── Desaturated violet primary (authority, not brightness) ── */
-    --primary: 256 46% 45%;          /* #5B3FA8 — muted authority violet */
+    /* Violet accent — used on links, small marks, focus rings.
+       Buttons use --foreground (near-black), not --primary. */
+    --primary: 258 50% 50%;
     --primary-foreground: 0 0% 100%;
 
-    /* ── Secondary / muted ── */
-    --secondary: 30 10% 93%;
-    --secondary-foreground: 30 10% 9%;
-    --muted: 40 14% 93%;
-    --muted-foreground: 30 8% 40%;   /* #6B6560 — warm mid-gray */
-    --accent: 40 16% 93%;            /* #F2EFE9 — hover tint */
-    --accent-foreground: 30 10% 9%;
+    --secondary: 220 14% 96%;
+    --secondary-foreground: 220 13% 11%;
+    --muted: 220 14% 96%;
+    --muted-foreground: 220 9% 46%;
+    --accent: 220 14% 96%;
+    --accent-foreground: 220 13% 11%;
 
-    /* ── System ── */
-    --destructive: 0 84.2% 60.2%;
+    --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
-    --border: 30 14% 88%;            /* #E5E0DA — warm border */
-    --input: 30 14% 88%;
-    --ring: 256 46% 45%;
-    --radius: 0.375rem;              /* Tighter radius — editorial crispness */
+    --border: 220 13% 91%;
+    --input: 220 13% 91%;
+    --ring: 258 50% 50%;
+    --radius: 0.25rem;
 
-    /* ── Extended semantic tokens ── */
-    --ink: 30 10% 9%;                /* Alias for --foreground */
-    --ink-muted: 30 8% 40%;          /* Alias for --muted-foreground */
-    --parchment: 40 20% 97%;         /* Named parchment token */
-    --surface: 0 0% 100%;            /* Card surface */
-    --surface-hover: 40 16% 93%;     /* Card hover bg */
-    --surface-dark: 30 10% 9%;       /* Engine commitment dark block */
+    /* Semantic surfaces */
+    --ink: 220 13% 11%;
+    --ink-muted: 220 9% 46%;
+    --surface: 0 0% 100%;
+    --surface-hover: 220 14% 97%;
+    --surface-dark: 220 18% 9%;       /* cool near-black for engine block */
+    --surface-dark-foreground: 0 0% 100%;
 
-    /* ── Sidebar ── */
-    --sidebar-bg: 260 30% 10%;
-    --sidebar-hover: 256 30% 18%;
-    --sidebar-active: 256 46% 45%;
+    --sidebar-bg: 220 18% 9%;
+    --sidebar-hover: 220 14% 16%;
+    --sidebar-active: 258 50% 50%;
 
-    /* ── Glow tokens (used sparingly) ── */
-    --glow-primary: 256 46% 45% / 0.15;
-    --shadow-colored: 256 46% 45% / 0.08;
+    --glow-primary: 258 50% 50% / 0.12;
+    --shadow-colored: 258 50% 50% / 0.06;
 
-    /* ── Gradient text colors (for .text-gradient utility — H1 only) ── */
-    --gradient-from: 256 46% 45%;
-    --gradient-to: 256 46% 35%;
+    /* Status colors for product pills */
+    --status-live: 142 50% 38%;        /* green for LIVE */
+    --status-pilot: 38 78% 44%;        /* amber for PILOT */
+    --status-invite: 220 9% 46%;       /* neutral for BY INVITATION */
   }
 
   .dark {
-    --background: 260 30% 6%;
-    --foreground: 40 20% 95%;
-    --card: 260 25% 9%;
-    --card-foreground: 40 20% 95%;
-    --popover: 260 25% 9%;
-    --popover-foreground: 40 20% 95%;
-    --primary: 256 60% 62%;          /* Slightly less saturated than previous 80% */
-    --primary-foreground: 0 0% 100%;
-    --secondary: 256 20% 15%;
-    --secondary-foreground: 40 20% 95%;
-    --muted: 256 15% 15%;
-    --muted-foreground: 30 8% 55%;
-    --accent: 256 30% 18%;
-    --accent-foreground: 40 20% 95%;
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 40 20% 95%;
-    --border: 256 15% 20%;
-    --input: 256 15% 20%;
-    --ring: 256 60% 62%;
+    --background: 220 18% 7%;
+    --foreground: 220 14% 96%;
+    --card: 220 18% 10%;
+    --card-foreground: 220 14% 96%;
+    --popover: 220 18% 10%;
+    --popover-foreground: 220 14% 96%;
+    --primary: 258 65% 68%;
+    --primary-foreground: 220 18% 9%;
+    --secondary: 220 14% 14%;
+    --secondary-foreground: 220 14% 96%;
+    --muted: 220 14% 14%;
+    --muted-foreground: 220 9% 60%;
+    --accent: 220 14% 18%;
+    --accent-foreground: 220 14% 96%;
+    --destructive: 0 62% 35%;
+    --destructive-foreground: 220 14% 96%;
+    --border: 220 14% 18%;
+    --input: 220 14% 18%;
+    --ring: 258 65% 68%;
 
-    --ink: 40 20% 95%;
-    --ink-muted: 30 8% 55%;
-    --parchment: 260 30% 6%;
-    --surface: 260 25% 9%;
-    --surface-hover: 256 20% 14%;
-    --surface-dark: 260 35% 4%;
+    --ink: 220 14% 96%;
+    --ink-muted: 220 9% 60%;
+    --surface: 220 18% 10%;
+    --surface-hover: 220 14% 14%;
+    --surface-dark: 220 18% 5%;
 
-    --sidebar-bg: 260 30% 6%;
-    --sidebar-hover: 256 25% 15%;
-    --sidebar-active: 256 60% 62%;
+    --sidebar-bg: 220 18% 7%;
+    --sidebar-hover: 220 14% 14%;
+    --sidebar-active: 258 65% 68%;
 
-    --glow-primary: 256 60% 62% / 0.25;
-    --shadow-colored: 256 60% 62% / 0.12;
+    --glow-primary: 258 65% 68% / 0.18;
+    --shadow-colored: 258 65% 68% / 0.10;
 
-    --gradient-from: 256 60% 65%;
-    --gradient-to: 256 60% 50%;
+    --status-live: 142 50% 50%;
+    --status-pilot: 38 78% 56%;
+    --status-invite: 220 9% 60%;
   }
 }
 
@@ -102,27 +102,29 @@
   }
   body {
     @apply bg-background text-foreground;
-    font-feature-settings: "rlig" 1, "calt" 1;
+    font-feature-settings: "rlig" 1, "calt" 1, "ss01" 1;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
 }
 
 @layer utilities {
-  /* ── Serif display (Newsreader) ── */
-  .font-display {
-    font-family: var(--font-newsreader), Georgia, serif;
+  /* Mono eyebrow — small, uppercase, tracking-widest, JetBrains Mono.
+     The strongest typographic differentiator vs. consumer SaaS. */
+  .eyebrow {
+    font-family: var(--font-mono), ui-monospace, SFMono-Regular, Menlo, monospace;
+    @apply text-[11px] uppercase tracking-[0.18em] font-medium text-muted-foreground;
   }
 
-  /* ── Typography Scale (shared across app) ── */
+  /* Typography scale — shared across app */
   .typo-page-title {
-    @apply text-2xl font-semibold text-foreground;
+    @apply text-2xl font-semibold tracking-tight text-foreground;
   }
   .typo-section-title {
-    @apply text-xl font-semibold text-foreground;
+    @apply text-xl font-semibold tracking-tight text-foreground;
   }
   .typo-card-title {
-    @apply text-lg font-semibold text-foreground;
+    @apply text-lg font-semibold tracking-tight text-foreground;
   }
   .typo-label {
     @apply text-sm font-medium text-foreground;
@@ -134,51 +136,95 @@
     @apply text-xs text-muted-foreground;
   }
   .typo-stat {
-    @apply text-2xl font-bold text-foreground;
+    @apply text-3xl font-semibold tracking-tight text-foreground;
   }
   .typo-badge {
     @apply text-xs font-medium;
   }
 
-  /* ── Eyebrow (uppercase small caps — editorial register) ── */
-  .eyebrow {
-    @apply text-xs uppercase tracking-widest font-medium text-muted-foreground;
-  }
-
-  /* ── Animation delays ── */
-  .animation-delay-2000 {
-    animation-delay: 2s;
-  }
-  .animation-delay-4000 {
-    animation-delay: 4s;
-  }
-  .animation-delay-6000 {
-    animation-delay: 6s;
-  }
+  .animation-delay-2000 { animation-delay: 2s; }
+  .animation-delay-4000 { animation-delay: 4s; }
+  .animation-delay-6000 { animation-delay: 6s; }
 }
 
-/* Shadow utilities */
+/* Soft shadow utilities — used sparingly; the system trusts hairlines over shadows */
 .shadow-soft {
-  box-shadow: 0 1px 4px -1px rgba(26, 23, 20, 0.04),
-              0 4px 12px -4px rgba(26, 23, 20, 0.06);
+  box-shadow: 0 1px 2px rgba(15, 17, 21, 0.04),
+              0 2px 6px -2px rgba(15, 17, 21, 0.05);
 }
 .shadow-soft-lg {
-  box-shadow: 0 2px 8px -2px rgba(26, 23, 20, 0.05),
-              0 8px 24px -8px rgba(26, 23, 20, 0.08);
+  box-shadow: 0 2px 6px -1px rgba(15, 17, 21, 0.06),
+              0 8px 24px -8px rgba(15, 17, 21, 0.10);
 }
-
-/* Editorial card — subtle lift, no glow */
 .shadow-card {
-  box-shadow: 0 1px 3px rgba(26, 23, 20, 0.06),
-              0 4px 16px -4px rgba(26, 23, 20, 0.08);
+  box-shadow: 0 1px 3px rgba(15, 17, 21, 0.05),
+              0 4px 12px -4px rgba(15, 17, 21, 0.06);
 }
 
-/* Gradient text — H1 only, single-stop monochrome violet */
+/* Gradient text — reserved for the engine block stat row only, single-stop violet */
 .text-gradient {
-  background: linear-gradient(150deg, hsl(var(--gradient-from)), hsl(var(--gradient-to)));
+  background: linear-gradient(150deg, hsl(258 50% 55%), hsl(258 50% 40%));
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
 
-/* Keyframes kept for accordion and any product-page animations */
+/* Subtle SVG grain overlay — gives dark sections material feel */
+.grain::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.04;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml;utf8,<svg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%25' height='100%25' filter='url(%23n)' opacity='0.9'/></svg>");
+}
+
+/* Pulse — used on LIVE status dots */
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.55; transform: scale(0.85); }
+}
+.animate-pulse-dot {
+  animation: pulse-dot 2.4s ease-in-out infinite;
+}
+
+/* Flow — used on engine-architecture connection lines (subtle flow effect) */
+@keyframes flow-down {
+  0% { stroke-dashoffset: 0; opacity: 0.25; }
+  50% { opacity: 0.7; }
+  100% { stroke-dashoffset: -20; opacity: 0.25; }
+}
+.animate-flow {
+  stroke-dasharray: 4 3;
+  animation: flow-down 4s linear infinite;
+}
+
+/* Scroll reveal — fade-up on viewport enter via IntersectionObserver class swap */
+.reveal-init {
+  opacity: 0;
+  transform: translateY(16px);
+}
+.reveal-on {
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 0.7s ease-out, transform 0.7s ease-out;
+}
+@media (prefers-reduced-motion: reduce) {
+  .reveal-init { opacity: 1; transform: none; }
+  .animate-pulse-dot { animation: none; }
+  .animate-flow { animation: none; }
+}
+
+/* Display serif — Instrument Serif at large display scale.
+   Use on hero h1 only; pair with sans body for contrast. */
+.font-display {
+  font-family: var(--font-display), "Iowan Old Style", Georgia, serif;
+  font-feature-settings: "kern" 1, "liga" 1;
+}
+.display-hero {
+  font-family: var(--font-display), "Iowan Old Style", Georgia, serif;
+  letter-spacing: -0.025em;
+  line-height: 1;
+  font-weight: 400;
+}

@@ -1,44 +1,41 @@
 /**
- * /studio/engagements — engagement detail page.
- *
- * Per COPY_STUDIO.md (Engagements section) and UI audit §7 (reuse
- * /consulting layout as scaffold; replace copy). Three engagement
- * bands ($75K floor, $150K, $250K+), retainer band, what's included
- * block, intake CTA. Exact pricing strings preserved.
- *
- * Replaces /consulting (which 301-redirects here per next.config.mjs).
+ * /studio/engagements — engagement detail (arm 01 deep).
+ * Three bands, retainer, what's included, 6-phase arc.
+ * Visual register matches homepage v6.
  */
 
 import Link from "next/link";
-import { ArrowRight, Database, Sparkles, FileText, GraduationCap, Heart } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 import { Navbar } from "@/components/landing/Navbar";
 import { Footer } from "@/components/landing/Footer";
 
 export const metadata = {
   title: "Engagements — Perpetual Core",
   description:
-    "Engagements start at $75,000. A 90 to 180 day engagement that audits your operations, installs the Perpetual Engine, and hands you a system your team owns.",
+    "Engagements start at $75,000. A 90–180 day install of the Perpetual Engine across your operations. Three bands. Documented, trained, handed over.",
 };
 
 const BANDS = [
   {
-    name: "Foundations engagement",
+    index: "01",
+    name: "Foundations",
     price: "$75,000",
     duration: "90 days · Single department",
-    body: "Eight-registry install scoped to one operational surface (e.g., intake + case management for a workforce program; or grants + reporting for a foundation; or a single clinical workflow for a health system).",
+    body: "Eight-registry install scoped to one operational surface — intake + case management for a workforce program; grants + reporting for a foundation; a single clinical workflow for a health system.",
     featured: true,
   },
   {
-    name: "Operations engagement",
+    index: "02",
+    name: "Operations",
     price: "$150,000",
     duration: "120–150 days · Cross-department",
-    body: "Eight-registry install across three to five departments. AI-First Framework applied end-to-end. Skills library populated with 15 to 30 production skills.",
+    body: "Eight-registry install across 3–5 departments. AI-First Framework applied end-to-end. Skills library populated with 15–30 production skills.",
     featured: false,
   },
   {
-    name: "Institutional engagement",
+    index: "03",
+    name: "Institutional",
     price: "$250,000+",
     duration: "180 days · Whole-org",
     body: "Engine installed at the operating-system layer. Custom skills, multi-tenant configuration, training cohort for your operators. Includes 90 days of post-handover support.",
@@ -47,46 +44,31 @@ const BANDS = [
 ];
 
 const ARC = [
-  {
-    week: "Week 1–2",
-    title: "Intake and audit",
-    body: "We show up, ask questions, sit in meetings. You get a written audit at the end of week 2 — what we found, what we'd install first, what we'd leave alone. If the audit doesn't land, you don't proceed. No retainer claimed.",
-  },
-  {
-    week: "Week 3–6",
-    title: "Registry install",
-    body: "The eight registries go into your Supabase. Your operators are already querying live data by week 5.",
-  },
-  {
-    week: "Week 7–14",
-    title: "Skills build",
-    body: "We build production skills against the workflows the audit identified. You see weekly demos. You can pull the plug at any phase boundary.",
-  },
-  {
-    week: "Week 15–20",
-    title: "Training and handover",
-    body: "Your team operates the system in production. We sit in. We coach. We answer questions. The skills library has 15 to 30 working units by handover.",
-  },
-  {
-    week: "Week 21–24",
-    title: "Post-handover",
-    body: "We're available, not embedded. Your team runs the system. We show up for the questions that don't have obvious answers.",
-  },
-  {
-    week: "Month 7+",
-    title: "Retainer (optional)",
-    body: "$5,000–$15,000/month, scoped to engagement. We stay close on what you build next. Or we don't. Your call.",
-  },
+  { week: "Week 1–2", title: "Intake and audit", body: "We show up, ask questions, sit in meetings. Written audit at the end of week 2 — what we found, what we'd install first. If the audit doesn't land, you don't proceed. No retainer claimed." },
+  { week: "Week 3–6", title: "Registry install", body: "The eight registries go into your Supabase. Operators are querying live data by week 5." },
+  { week: "Week 7–14", title: "Skills build", body: "Production skills built against the workflows the audit identified. Weekly demos. Pull the plug at any phase boundary." },
+  { week: "Week 15–20", title: "Training and handover", body: "Your team operates the system in production. We coach. The skills library has 15–30 working units by handover." },
+  { week: "Week 21–24", title: "Post-handover", body: "We're available, not embedded. Your team runs the system. We show up for the questions that don't have obvious answers." },
+  { week: "Month 7+", title: "Retainer (optional)", body: "$5,000–$15,000/month, scoped to engagement. We stay close on what you build next. Cancellable any month." },
 ];
 
 const INCLUDED = [
-  { icon: Database, label: "The eight registries", detail: "installed in your Supabase: entities, people, projects, work items, knowledge, agents, workflows, events." },
-  { icon: Sparkles, label: "The AI-First Framework", detail: "applied to your real workflows." },
-  { icon: FileText, label: "A compounding skills library", detail: "in the Anthropic SKILL.md format, with per-portco JSON config." },
-  { icon: FileText, label: "Documentation", detail: "written for your operators, not for us." },
-  { icon: GraduationCap, label: "Training", detail: "in-person or remote, for the team that has to keep this running." },
-  { icon: Heart, label: "The Perpetual Engine commitment", detail: "10% of every engagement — $7,500 to $25,000+ per client — funds the Institute for Human Advancement." },
+  { name: "The eight registries", body: "Installed in your Supabase: entities, people, projects, work items, knowledge, agents, workflows, events." },
+  { name: "The AI-First Framework", body: "Applied to your real workflows. Learn → Wire → Automate → Scale." },
+  { name: "A compounding skills library", body: "Anthropic SKILL.md format, per-org JSON config. Versioned, auditable, yours." },
+  { name: "Documentation", body: "Written for your operators, not for us. The system is documented to be operated and extended by your team." },
+  { name: "Training", body: "In-person or remote, for the team that has to keep this running. Real workflows, not slideware." },
+  { name: "The Engine commitment", body: "10% of every engagement — $7,500 to $25,000+ — funds the Institute for Human Advancement." },
 ];
+
+function SectionRail({ index, label }: { index: string; label: string }) {
+  return (
+    <div>
+      <p className="eyebrow mb-3">§ {index}</p>
+      <h2 className="text-xs uppercase tracking-[0.18em] font-mono text-foreground">{label}</h2>
+    </div>
+  );
+}
 
 export default function StudioEngagementsPage() {
   return (
@@ -94,166 +76,217 @@ export default function StudioEngagementsPage() {
       <Navbar />
 
       {/* Hero */}
-      <section className="container mx-auto px-4 pt-24 pb-20 sm:pt-32">
-        <div className="max-w-3xl">
-          <p className="text-sm italic text-muted-foreground tracking-wide mb-6">Engagements.</p>
-          <h1 className="text-5xl sm:text-6xl font-semibold tracking-tight leading-[1.1] mb-8">
-            <span className="bg-gradient-to-r from-primary to-purple-600 bg-clip-text text-transparent">
-              Engagements start at $75,000.
-            </span>
+      <section className="container mx-auto px-6 sm:px-8 pt-20 pb-20 sm:pt-28 sm:pb-28">
+        <div className="max-w-5xl">
+          <div className="flex items-center gap-3 mb-12">
+            <span aria-hidden className="block h-1.5 w-1.5 bg-foreground" />
+            <p className="eyebrow !text-foreground/70">§ 01 · Studio · Engagements</p>
+          </div>
+
+          <h1 className="display-hero text-[40px] sm:text-[56px] lg:text-[80px] text-foreground mb-12 max-w-5xl leading-[1.05]">
+            Engagements start at{" "}
+            <span className="italic text-foreground/85">$75,000.</span>
           </h1>
-          <p className="text-xl text-muted-foreground leading-relaxed mb-8">
-            A 90 to 180 day engagement that audits your operations, installs the Perpetual Engine across your departments, and hands you a system your team owns.
-          </p>
-          <p className="text-lg text-muted-foreground leading-relaxed mb-10">
-            Three engagement bands, depending on the surface area you need installed. Each ends the same way: documented, trained, handed over. No SOW extensions to keep the lights on. No vendor lock-in. The Engine is yours after we leave.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-3">
-            <Button size="lg" asChild className="text-base px-7">
+
+          <div className="space-y-5 text-lg sm:text-xl text-muted-foreground leading-[1.55] mb-12 max-w-3xl">
+            <p>
+              A 90 to 180 day engagement that audits your operations, installs the Perpetual Engine
+              across your departments, and hands you a system your team owns. We run engagements
+              continuously — this is the studio&apos;s normal cadence, not a velvet rope.
+            </p>
+            <p>
+              Three bands depending on the surface area. Each ends the same way: documented,
+              trained, handed over. No SOW extensions to keep the lights on. No vendor lock-in.
+            </p>
+            <p>
+              Not ready to install? See{" "}
+              <Link
+                href="/studio/retainers"
+                className="text-foreground underline underline-offset-4 hover:text-primary"
+              >
+                Retainers
+              </Link>{" "}
+              — productized programs at $5K–$15K/mo that roll into an engagement when the work
+              scales.
+            </p>
+          </div>
+
+          <div className="flex flex-col sm:flex-row items-start gap-4">
+            <Button size="lg" asChild className="text-sm font-medium px-7 h-11 shadow-none bg-foreground text-background hover:bg-foreground/90 rounded-[6px]">
               <Link href="/contact-sales">
                 Book an intake call <ArrowRight className="ml-2 h-4 w-4" />
               </Link>
             </Button>
-            <Button size="lg" variant="outline" asChild className="text-base px-7">
-              <Link href="/studio/methodology">Read the methodology</Link>
-            </Button>
+            <Link href="/studio/retainers" className="inline-flex items-center text-sm font-medium text-foreground hover:text-primary transition-colors py-3 border-b border-foreground/20 hover:border-primary">
+              Or see Retainers <ArrowRight className="ml-1.5 h-3.5 w-3.5" />
+            </Link>
           </div>
         </div>
       </section>
 
-      {/* Three engagement bands */}
-      <section className="container mx-auto px-4 py-24 border-t border-border/40">
-        <div className="max-w-3xl mb-12">
-          <p className="text-sm italic text-muted-foreground tracking-wide mb-4">Pricing.</p>
-          <h2 className="text-3xl sm:text-4xl font-semibold tracking-tight leading-tight">
-            Three bands. Pick the one your operations need.
-          </h2>
-        </div>
+      {/* Three bands — table layout, mono pricing */}
+      <section className="border-t border-border py-24 sm:py-32 bg-surface-hover/40">
+        <div className="container mx-auto px-6 sm:px-8">
+          <div className="grid lg:grid-cols-[280px_1fr] gap-12 lg:gap-20 mb-12">
+            <SectionRail index="01" label="Pricing" />
+            <div className="max-w-2xl">
+              <h3 className="text-3xl sm:text-4xl lg:text-5xl font-semibold leading-[1.1] tracking-[-0.025em] text-foreground">
+                Three bands. Pick the one your operations need.
+              </h3>
+            </div>
+          </div>
 
-        <div className="grid lg:grid-cols-3 gap-6 mb-10">
-          {BANDS.map((band) => (
-            <Card
-              key={band.name}
-              className={`flex flex-col ${band.featured ? "border-primary/60" : "border-border/60"}`}
-            >
-              <CardContent className="p-7 flex flex-col h-full">
-                <div className="mb-6">
-                  <h3 className="text-xl font-semibold mb-1">{band.name}</h3>
-                  <p className="text-sm text-muted-foreground">{band.duration}</p>
+          <div className="grid sm:grid-cols-3 border border-border bg-card divide-y sm:divide-y-0 sm:divide-x divide-border">
+            {BANDS.map((band) => (
+              <div key={band.name} className="p-6 sm:p-7 flex flex-col">
+                <div className="flex items-center justify-between mb-10">
+                  <span className="font-mono text-[10px] text-muted-foreground tracking-[0.18em]">
+                    {band.index}
+                  </span>
+                  {band.featured && (
+                    <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-primary">
+                      Most common
+                    </span>
+                  )}
                 </div>
-                <div className="mb-6">
-                  <div className="text-4xl font-semibold tracking-tight mb-1">{band.price}</div>
-                </div>
-                <p className="text-base text-muted-foreground leading-relaxed mb-auto">{band.body}</p>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+                <h4 className="text-[11px] font-mono uppercase tracking-[0.22em] text-primary mb-3">
+                  {band.name}
+                </h4>
+                <p className="text-3xl sm:text-4xl font-semibold tracking-[-0.025em] text-foreground mb-3">
+                  {band.price}
+                </p>
+                <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground mb-6">
+                  {band.duration}
+                </p>
+                <p className="text-sm text-muted-foreground leading-[1.65] flex-1">
+                  {band.body}
+                </p>
+              </div>
+            ))}
+          </div>
 
-        <Card className="border-border/60 bg-muted/30">
-          <CardContent className="p-7">
-            <h3 className="text-lg font-semibold mb-2">
-              Retainer (optional, all bands): $5,000–$15,000/month, scoped to engagement.
-            </h3>
-            <p className="text-base text-muted-foreground leading-relaxed">
-              For the operators who&apos;d rather we stay in the loop on what comes next. Cancellable any month. We don&apos;t need it; you might.
+          {/* Retainer row */}
+          <div className="border border-t-0 border-border bg-card p-6 sm:p-7 grid sm:grid-cols-[200px_1fr_auto] gap-6 sm:gap-10 items-baseline">
+            <div>
+              <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground mb-2">
+                Optional · all bands
+              </p>
+              <p className="text-xl font-semibold tracking-[-0.015em] text-foreground">
+                Retainer
+              </p>
+            </div>
+            <p className="text-sm text-muted-foreground leading-[1.65]">
+              <span className="text-foreground font-medium">$5,000–$15,000/month</span>, scoped to
+              engagement. For operators who&apos;d rather we stay in the loop on what comes next.
+              Cancellable any month. We don&apos;t need it; you might.
             </p>
-          </CardContent>
-        </Card>
-
-        <div className="mt-10">
-          <Button asChild>
-            <Link href="/contact-sales">
-              Book an intake call <ArrowRight className="ml-2 h-4 w-4" />
+            <Link
+              href="/contact-sales"
+              className="inline-flex items-center font-mono text-[10px] uppercase tracking-[0.18em] text-foreground hover:text-primary transition-colors whitespace-nowrap"
+            >
+              Book intake
+              <ArrowRight className="ml-2 h-3 w-3" />
             </Link>
-          </Button>
+          </div>
         </div>
       </section>
 
       {/* What's included */}
-      <section className="container mx-auto px-4 py-24 border-t border-border/40">
-        <div className="max-w-3xl mb-12">
-          <h2 className="text-3xl sm:text-4xl font-semibold tracking-tight leading-tight">
-            Every engagement.
-          </h2>
-        </div>
+      <section className="border-t border-border py-24 sm:py-32">
+        <div className="container mx-auto px-6 sm:px-8">
+          <div className="grid lg:grid-cols-[280px_1fr] gap-12 lg:gap-20 mb-12">
+            <SectionRail index="02" label="Included in every engagement" />
+            <div className="max-w-2xl">
+              <h3 className="text-3xl sm:text-4xl lg:text-5xl font-semibold leading-[1.1] tracking-[-0.025em] text-foreground">
+                Every engagement ships the same six things.
+              </h3>
+            </div>
+          </div>
 
-        <div className="grid md:grid-cols-2 gap-x-10 gap-y-7 max-w-5xl">
-          {INCLUDED.map((item) => {
-            const Icon = item.icon;
-            return (
-              <div key={item.label} className="flex gap-4">
-                <div className="flex-shrink-0 h-9 w-9 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center">
-                  <Icon className="h-4 w-4 text-primary" />
-                </div>
-                <div>
-                  <p className="text-base leading-relaxed">
-                    <span className="font-semibold">{item.label}</span>
-                    <span className="text-muted-foreground">, {item.detail}</span>
+          <div className="grid lg:grid-cols-[280px_1fr] gap-12 lg:gap-20">
+            <div />
+            <div className="max-w-3xl border-t border-border">
+              {INCLUDED.map((item, i) => (
+                <div key={item.name} className="grid grid-cols-[60px_1fr] sm:grid-cols-[60px_240px_1fr] gap-6 py-6 border-b border-border items-baseline">
+                  <span className="font-mono text-[10px] tracking-[0.18em] text-muted-foreground pt-1">
+                    0{i + 1}
+                  </span>
+                  <h4 className="text-base font-semibold tracking-tight text-foreground">
+                    {item.name}
+                  </h4>
+                  <p className="text-sm text-muted-foreground leading-[1.65] col-span-3 sm:col-auto">
+                    {item.body}
                   </p>
                 </div>
-              </div>
-            );
-          })}
-        </div>
-
-        <div className="mt-12">
-          <Button variant="outline" asChild>
-            <Link href="/engine">
-              Read the Engine commitment <ArrowRight className="ml-2 h-4 w-4" />
-            </Link>
-          </Button>
+              ))}
+            </div>
+          </div>
         </div>
       </section>
 
-      {/* Engagement arc — table-of-phases */}
-      <section className="container mx-auto px-4 py-24 border-t border-border/40">
-        <div className="max-w-3xl mb-12">
-          <p className="text-sm italic text-muted-foreground tracking-wide mb-4">The arc.</p>
-          <h2 className="text-3xl sm:text-4xl font-semibold tracking-tight leading-tight mb-4">
-            180 days, broken honestly.
-          </h2>
-          <p className="text-base text-muted-foreground leading-relaxed">
-            A timeline you can show your board. We&apos;d rather you see the work than read the deck.
-          </p>
-        </div>
-
-        <div className="border-t border-border/40 max-w-4xl">
-          {ARC.map((phase) => (
-            <div
-              key={phase.week}
-              className="grid md:grid-cols-[180px_1fr] gap-6 py-7 border-b border-border/40"
-            >
-              <div>
-                <p className="text-sm font-medium text-primary tracking-wide">{phase.week}</p>
-                <p className="text-base font-semibold mt-1">{phase.title}</p>
-              </div>
-              <p className="text-base text-muted-foreground leading-relaxed">{phase.body}</p>
+      {/* Engagement arc — 180-day timeline */}
+      <section className="border-t border-border py-24 sm:py-32 bg-surface-hover/40">
+        <div className="container mx-auto px-6 sm:px-8">
+          <div className="grid lg:grid-cols-[280px_1fr] gap-12 lg:gap-20 mb-12">
+            <SectionRail index="03" label="The arc" />
+            <div className="max-w-2xl">
+              <h3 className="text-3xl sm:text-4xl lg:text-5xl font-semibold leading-[1.1] tracking-[-0.025em] text-foreground mb-6">
+                180 days, broken honestly.
+              </h3>
+              <p className="text-base text-muted-foreground leading-[1.7]">
+                A timeline you can show your board. We&apos;d rather you see the work than read the deck.
+              </p>
             </div>
-          ))}
+          </div>
+
+          <div className="grid lg:grid-cols-[280px_1fr] gap-12 lg:gap-20">
+            <div />
+            <div className="max-w-3xl border-t border-border">
+              {ARC.map((phase, i) => (
+                <div key={phase.week} className="grid grid-cols-[60px_1fr] sm:grid-cols-[80px_200px_1fr] gap-6 py-7 border-b border-border items-baseline">
+                  <span className="font-mono text-[10px] tracking-[0.18em] text-muted-foreground pt-1">
+                    0{i + 1}
+                  </span>
+                  <div>
+                    <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-primary mb-1">
+                      {phase.week}
+                    </p>
+                    <p className="text-base font-semibold tracking-tight text-foreground">
+                      {phase.title}
+                    </p>
+                  </div>
+                  <p className="text-sm text-muted-foreground leading-[1.65] col-span-2 sm:col-auto">
+                    {phase.body}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
       </section>
 
       {/* Final CTA */}
-      <section className="container mx-auto px-4 py-32 border-t border-border/40">
-        <div className="max-w-3xl">
-          <h2 className="text-3xl sm:text-4xl font-semibold tracking-tight leading-tight mb-6">
-            <span className="bg-gradient-to-r from-primary to-purple-600 bg-clip-text text-transparent">
-              Engagements start at $75,000.
-            </span>
-          </h2>
-          <p className="text-lg text-muted-foreground leading-relaxed mb-10">
-            We take a limited number of engagements per quarter. Intake calls are 30 minutes; we&apos;ll tell you within a week if it&apos;s a fit.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-3">
-            <Button size="lg" asChild className="text-base px-7">
-              <Link href="/contact-sales">
-                Book an intake call <ArrowRight className="ml-2 h-4 w-4" />
-              </Link>
-            </Button>
-            <Button size="lg" variant="outline" asChild className="text-base px-7">
-              <Link href="/about">Talk to the founder</Link>
-            </Button>
+      <section className="border-t border-border py-24 sm:py-32">
+        <div className="container mx-auto px-6 sm:px-8">
+          <div className="grid lg:grid-cols-[280px_1fr] gap-12 lg:gap-20">
+            <SectionRail index="—" label="Book intake" />
+            <div className="max-w-2xl">
+              <h3 className="text-3xl sm:text-4xl lg:text-5xl font-semibold leading-[1.1] tracking-[-0.025em] text-foreground mb-6">
+                Engagements run continuously. Yours can start in two weeks.
+              </h3>
+              <p className="text-base text-muted-foreground leading-[1.7] mb-10">
+                Intake calls are 30 minutes. We&apos;ll tell you within a week if it&apos;s a fit
+                and what band lines up with your operation.
+              </p>
+              <div className="flex flex-col sm:flex-row items-start gap-5">
+                <Button size="lg" asChild className="text-sm font-medium h-11 px-7 shadow-none bg-foreground text-background hover:bg-foreground/90 rounded-[6px]">
+                  <Link href="/contact-sales">Book an intake call <ArrowRight className="ml-2 h-4 w-4" /></Link>
+                </Button>
+                <Link href="/about" className="inline-flex items-center text-sm font-medium text-foreground hover:text-primary transition-colors py-3">
+                  Talk to the founder <ArrowRight className="ml-1.5 h-3.5 w-3.5" />
+                </Link>
+              </div>
+            </div>
           </div>
         </div>
       </section>

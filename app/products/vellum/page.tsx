@@ -1,46 +1,12 @@
 /**
- * /products/vellum — Vellum by Perpetual Core, institutional memory
- * for organizations.
- *
- * Per COPY_PRODUCTS.md Card 4 + BRAND_ARCHITECTURE §8 pricing lock +
- * Session 3 brief Step 4.
- *
- * Hard rules enforced here:
- *   - "Vellum by Perpetual Core" — always qualified in body copy.
- *   - Pricing tiers (locked exactly):
- *       Free $0           — 1 user, 100 sources, basic synthesis
- *       Operator $49/mo   — 1 user, unlimited sources, voice + channels, 30-day retention
- *       Team $249/mo      — 5 users, all channels + integrations, 1-year retention
- *       Institution       — Contact us. 25+ users, SSO, custom retention, on-prem option.
- *   - 30% mission-driven discount call-out for verified 501(c)(3)s on
- *     Operator + Team. Negotiated on Institution.
- *   - 10% to IHA call-out in pricing footer with unconditional IHA hyperlink
- *     (Plan 12-05 owns STUDIO-LK-01 vellum coverage — added unconditionally per plan).
- *   - 4–6 paragraph value prop section before pricing — institutional
- *     memory framing, not consumer note-taking. References the eight
- *     registries (Vellum operates on Knowledge per /engine §2).
- *   - Hero CTAs scroll to #early-access (Plan 12-05 replaces /signup + /contact).
- *
- * Plan 12-05 changes (Wave 2):
- *   - Hero "Start free" → anchor scroll to #early-access (was signup route)
- *   - Hero "Talk to us" → anchor scroll to #early-access (was contact route)
- *   - Pricing card CTAs → anchor scroll to #early-access
- *   - New #early-access section with EarlyAccessForm embedded
- *   - Unconditional IHA hyperlink added to 10% callout (STUDIO-LK-01 closure for vellum)
+ * /products/vellum — Vellum by Perpetual Core: institutional memory.
+ * Free / $49 Operator / $249 Team / Institution. 30% mission discount.
+ * Visual register matches homepage v6. EarlyAccessForm preserved.
  */
 
 import Link from "next/link";
-import {
-  ArrowRight,
-  BookOpenText,
-  Layers,
-  Mic,
-  Search,
-  Lock,
-  Sparkles,
-} from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 import { Navbar } from "@/components/landing/Navbar";
 import { Footer } from "@/components/landing/Footer";
 import { EarlyAccessForm } from "@/components/vellum/EarlyAccessForm";
@@ -48,7 +14,7 @@ import { EarlyAccessForm } from "@/components/vellum/EarlyAccessForm";
 export const metadata = {
   title: "Vellum by Perpetual Core — institutional memory",
   description:
-    "Institutional memory for organizations. Calls, docs, voice notes, and channels — one queryable mind. Free / $49 Operator / $249 Team / Institution Contact us. 30% mission-driven discount for verified 501(c)(3)s.",
+    "Institutional memory for organizations. Calls, docs, voice notes, channels — one queryable mind. Free / $49 Operator / $249 Team / Institution. 30% mission-driven discount for verified 501(c)(3)s.",
 };
 
 const PRICING_TIERS = [
@@ -56,62 +22,48 @@ const PRICING_TIERS = [
     name: "Free",
     price: "$0",
     cadence: null,
-    body: "1 user, 100 sources, basic synthesis. The on-ramp — bring a small corpus, see if it thinks the way your team thinks before you pay anything.",
-    cta: { label: "Reserve early access", href: "#early-access" },
-    featured: false,
+    body: "1 user, 100 sources, basic synthesis. The on-ramp — bring a small corpus, see if Vellum thinks the way your team thinks.",
     discountEligible: false,
   },
   {
     name: "Operator",
     price: "$49",
     cadence: "/month",
-    body: "1 user, unlimited sources, voice + channels (Telegram, web), 30-day retention. The single-operator tier — built for the founder, ED, or program lead who carries the org's memory in their head.",
-    cta: { label: "Reserve early access", href: "#early-access" },
-    featured: true,
+    body: "1 user, unlimited sources, voice + channels, 30-day retention. The single-operator tier — built for the founder, ED, or program lead who carries the org's memory.",
     discountEligible: true,
+    featured: true,
   },
   {
     name: "Team",
     price: "$249",
     cadence: "/month",
-    body: "5 users, all channels + integrations, 1-year retention. The small-team tier — for organizations that need shared memory across an executive team or program staff, not just one operator.",
-    cta: { label: "Reserve early access", href: "#early-access" },
-    featured: false,
+    body: "5 users, all channels + integrations, 1-year retention. The small-team tier — shared memory across an executive team without paying for 100 Glean seats.",
     discountEligible: true,
   },
   {
     name: "Institution",
-    price: "Contact us",
+    price: "Contact",
     cadence: null,
     body: "25+ users, SSO, custom retention, on-prem option. For institutions whose data can't leave their own infrastructure or whose compliance team needs every retention parameter on the table.",
-    cta: { label: "Talk to us", href: "#early-access" },
-    featured: false,
     discountEligible: false,
   },
 ];
 
-const FEATURE_PILLARS = [
-  {
-    icon: Layers,
-    title: "Every source, one mind.",
-    body: "Calls, board docs, Slack channels, voice memos, Google Drive, transcripts. Vellum reads them, indexes them, and answers across them — not from one of them.",
-  },
-  {
-    icon: Search,
-    title: "Synthesis, not search.",
-    body: "Most knowledge tools surface a list of links. Vellum reads the full corpus and writes the answer with citations to the source documents. The answer is the deliverable.",
-  },
-  {
-    icon: Mic,
-    title: "Voice in. Voice out.",
-    body: "Walk-and-talk briefings. Phone-call transcripts that flow back in as queryable memory. The voice channel isn't an afterthought — it's a first-class input and output.",
-  },
-  {
-    icon: Lock,
-    title: "Retention you control.",
-    body: "30-day, 1-year, or custom retention windows depending on tier. Operator-grade memory without the audit risk of forever-storage. Per-source retention overrides on Institution.",
-  },
+const FEATURES = [
+  { name: "Every source, one mind", body: "Calls, board docs, Slack channels, voice memos, Google Drive, transcripts. Vellum reads them, indexes them, and answers across them — not from one of them." },
+  { name: "Synthesis, not search", body: "Most knowledge tools surface a list of links. Vellum reads the full corpus and writes the answer with citations to the source documents. The answer is the deliverable." },
+  { name: "Voice in. Voice out.", body: "Walk-and-talk briefings. Phone-call transcripts that flow back in as queryable memory. The voice channel isn't an afterthought — it's a first-class input and output." },
+  { name: "Retention you control", body: "30-day, 1-year, or custom retention windows depending on tier. Operator-grade memory without the audit risk of forever-storage. Per-source overrides on Institution." },
 ];
+
+function SectionRail({ index, label }: { index: string; label: string }) {
+  return (
+    <div>
+      <p className="eyebrow mb-3">§ {index}</p>
+      <h2 className="text-xs uppercase tracking-[0.18em] font-mono text-foreground">{label}</h2>
+    </div>
+  );
+}
 
 export default function VellumPage() {
   return (
@@ -119,221 +71,231 @@ export default function VellumPage() {
       <Navbar />
 
       {/* Hero */}
-      <section className="container mx-auto px-4 pt-24 pb-24 sm:pt-32 sm:pb-32">
-        <div className="max-w-3xl">
-          <p className="text-sm italic text-muted-foreground tracking-wide mb-6">
-            Vellum by Perpetual Core.
-          </p>
-          <h1 className="text-5xl sm:text-6xl font-semibold tracking-tight leading-[1.1] mb-8">
+      <section className="container mx-auto px-6 sm:px-8 pt-20 pb-20 sm:pt-28 sm:pb-28">
+        <div className="max-w-5xl">
+          <div className="flex items-center gap-3 mb-12">
+            <span aria-hidden className="block h-1.5 w-1.5 bg-status-invite" />
+            <p className="eyebrow !text-foreground/70">§ 02 · Products · Vellum by Perpetual Core</p>
+          </div>
+
+          <h1 className="display-hero text-[40px] sm:text-[56px] lg:text-[80px] text-foreground mb-12 max-w-5xl leading-[1.05]">
             Institutional memory for{" "}
-            <span className="bg-gradient-to-r from-primary to-purple-600 bg-clip-text text-transparent">
-              organizations
-            </span>
-            .
+            <span className="italic text-foreground/85">organizations.</span>
           </h1>
-          <p className="text-xl text-muted-foreground leading-relaxed mb-6">
-            For executive directors, founders, and program directors whose calls, docs, voice notes, and Slack channels need to be one queryable mind — not seventeen disconnected sources.
-          </p>
-          <p className="text-lg text-muted-foreground leading-relaxed mb-10">
-            30% mission-driven discount on Operator and Team for verified 501(c)(3)s.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-3">
-            <Button size="lg" asChild className="text-base px-7">
-              <Link href="#early-access">
-                Reserve early access <ArrowRight className="ml-2 h-4 w-4" />
-              </Link>
+
+          <div className="space-y-5 text-lg sm:text-xl text-muted-foreground leading-[1.55] mb-12 max-w-3xl">
+            <p>
+              For executive directors, founders, and program directors whose calls, docs, voice
+              notes, and Slack channels need to be one queryable mind — not seventeen disconnected
+              sources.
+            </p>
+            <p>
+              <span className="text-foreground font-medium">30% mission-driven discount</span>{" "}
+              on Operator and Team for verified 501(c)(3)s.
+            </p>
+          </div>
+
+          <div className="flex flex-col sm:flex-row items-start gap-4">
+            <Button size="lg" asChild className="text-sm font-medium px-7 h-11 shadow-none bg-foreground text-background hover:bg-foreground/90 rounded-[6px]">
+              <Link href="#early-access">Reserve early access <ArrowRight className="ml-2 h-4 w-4" /></Link>
             </Button>
-            <Button size="lg" variant="outline" asChild className="text-base px-7">
-              <Link href="#early-access">Talk to us</Link>
-            </Button>
+            <Link href="#pricing" className="inline-flex items-center text-sm font-medium text-foreground hover:text-primary transition-colors py-3 border-b border-foreground/20 hover:border-primary">
+              See pricing <ArrowRight className="ml-1.5 h-3.5 w-3.5" />
+            </Link>
           </div>
         </div>
       </section>
 
-      {/* Value-prop, 4-6 paragraphs, institutional memory framing */}
-      <section className="container mx-auto px-4 py-24 border-t border-border/40">
-        <div className="max-w-3xl">
-          <p className="text-sm italic text-muted-foreground tracking-wide mb-4">
-            Why Vellum exists.
-          </p>
-          <h2 className="text-3xl sm:text-4xl font-semibold tracking-tight leading-tight mb-10">
-            Most organizations lose more knowledge to attrition than to any other failure mode.
-          </h2>
-
-          <div className="space-y-6 text-lg text-muted-foreground leading-relaxed">
-            <p>
-              When an ED leaves, a program director rolls off, or a founder steps back from operations, the institution loses something it never wrote down. Vellum by Perpetual Core is the system that captures that working memory in real time — calls, voice notes, decisions, drafts, and channels — and renders it queryable as one mind, not seventeen disconnected sources.
-            </p>
-            <p>
-              Vellum is not consumer note-taking dressed up in a pricing page. It is institutional memory: the layer that sits underneath an organization&apos;s operating cadence and answers questions that would otherwise require pulling someone off their work. &quot;What did we decide about the audit timeline in February?&quot; &quot;Who&apos;s the program officer at the Hilton Foundation we last spoke to in Q3?&quot; &quot;What did the board flag about pipeline risk that we said we&apos;d address by year-end?&quot;
-            </p>
-            <p>
-              Inside the Perpetual Engine, Vellum operates on the Knowledge registry — one of the eight registries the studio installs in every engagement. The Engine&apos;s registries (identity, knowledge, decisions, work, communications, money, signal, and trust) are how an organization&apos;s state is structured. Vellum is the surface most teams encounter first because Knowledge is the registry where the ROI shows up fastest.
-            </p>
-            <p>
-              The synthesis is the deliverable. Most knowledge tools — Glean, Notion AI, the long tail of internal-search products — return a list of links and let the user do the synthesis themselves. Vellum reads the corpus and writes the answer, with citations the team can verify. That is the difference between a search box and a system that thinks the way the institution thinks.
-            </p>
-            <p>
-              Voice is a first-class input. Operators don&apos;t live in front of keyboards; they live in cars, hallways, and the four minutes between meetings. Vellum captures voice memos and call transcripts as queryable memory on the same indexing path as documents. The voice channel is not a feature; it is one of the three primary surfaces Vellum runs on.
-            </p>
-            <p>
-              Pricing is anchored to the buyer, not to per-seat enterprise math. The single-operator tier exists because most organizational memory is carried by one or two people. The team tier exists because some organizations need shared memory across an executive team without paying for a hundred Glean seats they&apos;ll never use. The institution tier exists because some organizations need on-prem deployment, custom retention, and SSO before legal will let the system touch their data — and that conversation belongs in a contract, not on a pricing page.
-            </p>
+      {/* Why Vellum */}
+      <section className="border-t border-border py-24 sm:py-32 bg-surface-hover/40">
+        <div className="container mx-auto px-6 sm:px-8">
+          <div className="grid lg:grid-cols-[280px_1fr] gap-12 lg:gap-20">
+            <SectionRail index="01" label="Why Vellum" />
+            <div className="max-w-2xl">
+              <h3 className="text-3xl sm:text-4xl lg:text-5xl font-semibold leading-[1.1] tracking-[-0.025em] text-foreground mb-10">
+                Most organizations lose more knowledge to attrition than to any other failure mode.
+              </h3>
+              <div className="space-y-5 text-base text-muted-foreground leading-[1.7]">
+                <p>
+                  When an ED leaves, a program director rolls off, or a founder steps back from
+                  operations, the institution loses something it never wrote down. Vellum captures
+                  that working memory in real time — calls, voice notes, decisions, drafts, channels
+                  — and renders it queryable as one mind.
+                </p>
+                <p>
+                  Vellum is not consumer note-taking dressed up in a pricing page. It is
+                  institutional memory: the layer that sits underneath an organization&apos;s
+                  operating cadence and answers questions that would otherwise require pulling
+                  someone off their work.
+                </p>
+                <p>
+                  Inside the Perpetual Engine, Vellum operates on the Knowledge registry — one of
+                  the eight registries the studio installs in every engagement. Vellum is the
+                  surface most teams encounter first, because Knowledge is the registry where ROI
+                  shows up fastest.
+                </p>
+                <p className="text-foreground font-medium">The synthesis is the deliverable.</p>
+              </div>
+            </div>
           </div>
         </div>
       </section>
 
-      {/* Feature pillars */}
-      <section className="container mx-auto px-4 py-24 border-t border-border/40">
-        <div className="max-w-3xl mb-12">
-          <p className="text-sm italic text-muted-foreground tracking-wide mb-4">
-            What Vellum does.
-          </p>
-          <h2 className="text-3xl sm:text-4xl font-semibold tracking-tight leading-tight">
-            Four surfaces — every one of them in production.
-          </h2>
-        </div>
+      {/* Features */}
+      <section className="border-t border-border py-24 sm:py-32">
+        <div className="container mx-auto px-6 sm:px-8">
+          <div className="grid lg:grid-cols-[280px_1fr] gap-12 lg:gap-20 mb-12">
+            <SectionRail index="02" label="What Vellum does" />
+            <div className="max-w-2xl">
+              <h3 className="text-3xl sm:text-4xl lg:text-5xl font-semibold leading-[1.1] tracking-[-0.025em] text-foreground">
+                Four surfaces — every one of them in production.
+              </h3>
+            </div>
+          </div>
 
-        <div className="grid md:grid-cols-2 gap-6">
-          {FEATURE_PILLARS.map((p) => {
-            const Icon = p.icon;
-            return (
-              <Card key={p.title} className="border-border/60">
-                <CardContent className="p-7">
-                  <div className="h-11 w-11 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center mb-5">
-                    <Icon className="h-5 w-5 text-primary" />
-                  </div>
-                  <h3 className="text-lg font-semibold mb-3">{p.title}</h3>
-                  <p className="text-base text-muted-foreground leading-relaxed">{p.body}</p>
-                </CardContent>
-              </Card>
-            );
-          })}
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 border border-border bg-card divide-y sm:divide-y-0 sm:divide-x divide-border">
+            {FEATURES.map((f, i) => (
+              <div key={f.name} className={`p-6 sm:p-7 flex flex-col ${i >= 2 ? "sm:border-t lg:border-t-0" : ""} border-border`}>
+                <span className="font-mono text-[10px] tracking-[0.18em] text-muted-foreground mb-10">
+                  0{i + 1}
+                </span>
+                <p className="text-base font-semibold leading-[1.3] tracking-[-0.01em] text-foreground mb-4">
+                  {f.name}.
+                </p>
+                <p className="text-sm text-muted-foreground leading-[1.65]">{f.body}</p>
+              </div>
+            ))}
+          </div>
         </div>
       </section>
 
       {/* Pricing */}
-      <section id="pricing" className="container mx-auto px-4 py-24 border-t border-border/40">
-        <div className="max-w-3xl mb-12">
-          <p className="text-sm italic text-muted-foreground tracking-wide mb-4">
-            Pricing.
-          </p>
-          <h2 className="text-3xl sm:text-4xl font-semibold tracking-tight leading-tight mb-6">
-            Free / $49 / $249 / Contact us.
-          </h2>
-          <p className="text-lg text-muted-foreground leading-relaxed">
-            30% mission-driven discount on Operator and Team for verified 501(c)(3)s. Discount applied at checkout after verification. Negotiated on Institution.
-          </p>
-        </div>
+      <section id="pricing" className="border-t border-border py-24 sm:py-32 bg-surface-hover/40">
+        <div className="container mx-auto px-6 sm:px-8">
+          <div className="grid lg:grid-cols-[280px_1fr] gap-12 lg:gap-20 mb-12">
+            <SectionRail index="03" label="Pricing" />
+            <div className="max-w-2xl">
+              <h3 className="text-3xl sm:text-4xl lg:text-5xl font-semibold leading-[1.1] tracking-[-0.025em] text-foreground mb-6">
+                Free / $49 / $249 / Contact.
+              </h3>
+              <p className="text-base text-muted-foreground leading-[1.7]">
+                30% mission-driven discount on Operator and Team for verified 501(c)(3)s. Applied
+                at checkout after verification. Negotiated on Institution.
+              </p>
+            </div>
+          </div>
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-5">
-          {PRICING_TIERS.map((tier) => (
-            <Card
-              key={tier.name}
-              className={`flex flex-col ${tier.featured ? "border-primary/60" : "border-border/60"}`}
-            >
-              <CardContent className="p-6 flex flex-col h-full">
-                <div className="mb-5">
-                  <h3 className="text-lg font-semibold mb-2">{tier.name}</h3>
-                  <div className="flex items-baseline gap-1">
-                    <span className="text-3xl font-semibold tracking-tight">{tier.price}</span>
-                    {tier.cadence && (
-                      <span className="text-sm text-muted-foreground">{tier.cadence}</span>
-                    )}
-                  </div>
-                  {tier.discountEligible && (
-                    <p className="text-xs text-primary mt-2 font-medium">
-                      30% off for verified 501(c)(3)s
-                    </p>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 border border-border bg-card divide-y sm:divide-y-0 sm:divide-x divide-border">
+            {PRICING_TIERS.map((tier, i) => (
+              <div key={tier.name} className={`p-6 sm:p-7 flex flex-col ${i >= 2 ? "sm:border-t lg:border-t-0" : ""} border-border`}>
+                <div className="flex items-center justify-between mb-10">
+                  <span className="font-mono text-[10px] tracking-[0.18em] text-muted-foreground">
+                    0{i + 1}
+                  </span>
+                  {tier.featured && (
+                    <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-primary">
+                      Most common
+                    </span>
                   )}
                 </div>
-                <p className="text-sm text-muted-foreground leading-relaxed mb-6 flex-1">
+                <h4 className="text-[11px] font-mono uppercase tracking-[0.22em] text-primary mb-3">
+                  {tier.name}
+                </h4>
+                <div className="flex items-baseline gap-1 mb-4">
+                  <span className="text-3xl font-semibold tracking-[-0.025em] text-foreground">
+                    {tier.price}
+                  </span>
+                  {tier.cadence && (
+                    <span className="text-sm text-muted-foreground font-mono">{tier.cadence}</span>
+                  )}
+                </div>
+                {tier.discountEligible && (
+                  <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-primary mb-4">
+                    30% off for 501(c)(3)s
+                  </p>
+                )}
+                <p className="text-sm text-muted-foreground leading-[1.65] mb-6 flex-1">
                   {tier.body}
                 </p>
-                <Button
-                  variant={tier.featured ? "default" : "outline"}
-                  size="sm"
-                  asChild
-                  className="w-full"
+                <Link
+                  href="#early-access"
+                  className="inline-flex items-center text-xs font-medium text-foreground hover:text-primary transition-colors mt-auto"
                 >
-                  <Link href={tier.cta.href}>
-                    {tier.cta.label} <ArrowRight className="ml-2 h-3.5 w-3.5" />
-                  </Link>
-                </Button>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+                  Reserve <ArrowRight className="ml-1 h-3 w-3" />
+                </Link>
+              </div>
+            ))}
+          </div>
 
-        {/* Pricing footer — IHA giving call-out — STUDIO-LK-01 vellum coverage (Plan 12-05, unconditional) */}
-        <div className="max-w-3xl mt-12 p-6 rounded-lg border border-border/60 bg-muted/20">
-          <div className="flex items-start gap-4">
-            <div className="h-9 w-9 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center flex-shrink-0">
-              <Sparkles className="h-4 w-4 text-primary" />
-            </div>
-            <div>
-              <p className="text-sm font-semibold mb-2">
+          {/* IHA callout */}
+          <div className="border border-t-0 border-border bg-card p-6 sm:p-8 grid sm:grid-cols-[200px_1fr] gap-6 items-baseline">
+            <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-primary">
+              10% to IHA
+            </p>
+            <p className="text-sm text-muted-foreground leading-[1.7]">
+              <span className="text-foreground font-medium">
                 10% of every Vellum subscription funds the{" "}
-                <a href="https://theiha.org" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline underline-offset-4">Institute for Human Advancement</a>.
+                <a href="https://theiha.org" target="_blank" rel="noopener noreferrer" className="underline underline-offset-4 hover:text-primary">
+                  Institute for Human Advancement
+                </a>
+                .
+              </span>{" "}
+              Vellum sits at the base 10% line — Sage, the personal product, sits at the elevated
+              15% rate. Both follow the{" "}
+              <Link href="/engine/spec" className="underline underline-offset-4 hover:text-primary">
+                Engine spec
+              </Link>{" "}
+              giving floor.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      {/* Early access form */}
+      <section id="early-access" className="border-t border-border py-24 sm:py-32">
+        <div className="container mx-auto px-6 sm:px-8">
+          <div className="grid lg:grid-cols-[280px_1fr] gap-12 lg:gap-20">
+            <SectionRail index="04" label="Early access" />
+            <div className="max-w-2xl">
+              <h3 className="text-3xl sm:text-4xl lg:text-5xl font-semibold leading-[1.1] tracking-[-0.025em] text-foreground mb-6">
+                Reserve a tier. We&apos;ll reach out when invitations open.
+              </h3>
+              <p className="text-base text-muted-foreground leading-[1.7] mb-10">
+                Vellum by Perpetual Core is in early access. Pick the tier you&apos;d use. For
+                Operator and Team we capture a payment method via Stripe so you&apos;re ready when
+                invitations open.{" "}
+                <span className="text-foreground font-medium">No charge today.</span>
               </p>
-              <p className="text-sm text-muted-foreground leading-relaxed">
-                Per the studio commitment: 10–15% of every revenue dollar Perpetual Core earns funds workforce development through the{" "}
-                <a href="https://theiha.org" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline underline-offset-4">Institute for Human Advancement</a>. Vellum sits at the base 10% line — Sage, the personal product, sits at the elevated 15% rate.
-              </p>
+              <EarlyAccessForm />
             </div>
           </div>
         </div>
       </section>
 
-      {/* Early Access — EarlyAccessForm (Plan 12-05 STUDIO-VW-01) */}
-      <section
-        id="early-access"
-        className="container mx-auto px-4 py-32 border-t border-border/40"
-      >
-        <div className="max-w-2xl mx-auto">
-          <p className="text-sm italic text-muted-foreground tracking-wide mb-6">
-            Early access.
-          </p>
-          <h2 className="text-3xl sm:text-4xl font-semibold tracking-tight leading-tight mb-6">
-            Reserve a tier. We&apos;ll reach out when invitations open.
-          </h2>
-          <p className="text-lg text-muted-foreground leading-relaxed mb-10">
-            Vellum by Perpetual Core is in early access. Pick the tier you&apos;d
-            use — Free, Operator at $49/month, Team at $249/month, or
-            Institution. For Operator and Team we capture a payment method via
-            Stripe so you&apos;re ready when invitations open.{" "}
-            <strong>No charge today.</strong>
-          </p>
-          <EarlyAccessForm />
-        </div>
-      </section>
-
-      {/* Closing — install vs subscribe */}
-      <section className="container mx-auto px-4 py-32 border-t border-border/40">
-        <div className="max-w-3xl">
-          <p className="text-sm italic text-muted-foreground tracking-wide mb-4">
-            Subscribe, or install.
-          </p>
-          <h2 className="text-3xl sm:text-4xl font-semibold tracking-tight leading-tight mb-6">
-            Vellum is the surface most teams meet first.
-          </h2>
-          <p className="text-lg text-muted-foreground leading-relaxed mb-10">
-            If your organization wants the full eight-registry Engine installed — not just the Knowledge surface — that is an engagement. Engagements start at $75,000. Vellum subscribers who outgrow the SaaS tier and want the rest of the Engine installed get an introduction to the studio engagement process; we don&apos;t double-charge for what you&apos;ve already paid for.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-3">
-            <Button size="lg" asChild className="text-base px-7">
-              <Link href="#early-access">
-                Reserve early access <ArrowRight className="ml-2 h-4 w-4" />
-              </Link>
-            </Button>
-            <Button size="lg" variant="outline" asChild className="text-base px-7">
-              <Link href="/studio/engagements">See engagements</Link>
-            </Button>
-            <Button size="lg" variant="outline" asChild className="text-base px-7">
-              <Link href="/engine">
-                <BookOpenText className="mr-2 h-4 w-4" /> Read the Engine
-              </Link>
-            </Button>
+      {/* Subscribe or install */}
+      <section className="border-t border-border py-24 sm:py-32 bg-surface-hover/40">
+        <div className="container mx-auto px-6 sm:px-8">
+          <div className="grid lg:grid-cols-[280px_1fr] gap-12 lg:gap-20">
+            <SectionRail index="—" label="Subscribe or install" />
+            <div className="max-w-2xl">
+              <h3 className="text-3xl sm:text-4xl lg:text-5xl font-semibold leading-[1.1] tracking-[-0.025em] text-foreground mb-6">
+                Vellum is the surface most teams meet first.
+              </h3>
+              <p className="text-base text-muted-foreground leading-[1.7] mb-10">
+                If your organization wants the full eight-registry Engine installed — not just the
+                Knowledge surface — that&apos;s an engagement. Engagements start at $75,000. Vellum
+                subscribers who outgrow the SaaS tier get an introduction to the studio process;
+                we don&apos;t double-charge for what you&apos;ve already paid for.
+              </p>
+              <div className="flex flex-col sm:flex-row items-start gap-5">
+                <Button asChild className="text-sm font-medium h-10 px-5 shadow-none bg-foreground text-background hover:bg-foreground/90 rounded-[6px]">
+                  <Link href="/studio/engagements">See engagements <ArrowRight className="ml-2 h-3.5 w-3.5" /></Link>
+                </Button>
+                <Link href="/engine" className="inline-flex items-center text-sm font-medium text-foreground hover:text-primary transition-colors py-2">
+                  Read the Engine <ArrowRight className="ml-1.5 h-3.5 w-3.5" />
+                </Link>
+              </div>
+            </div>
           </div>
         </div>
       </section>

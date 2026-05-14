@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Inter, Newsreader } from "next/font/google";
+import { Inter, JetBrains_Mono, Instrument_Serif } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
 import { QueryProvider } from "@/lib/providers/query-provider";
@@ -12,12 +12,21 @@ const inter = Inter({
   display: "swap",
 });
 
-const newsreader = Newsreader({
+const jetbrainsMono = JetBrains_Mono({
   subsets: ["latin"],
-  variable: "--font-newsreader",
+  variable: "--font-mono",
+  display: "swap",
+  weight: ["400", "500"],
+});
+
+// Display serif — used only for hero h1s and rare editorial moments.
+// One distinctive voice in an otherwise sans-corporate page.
+const instrumentSerif = Instrument_Serif({
+  subsets: ["latin"],
+  variable: "--font-display",
   display: "swap",
   style: ["normal", "italic"],
-  weight: ["300", "400", "500"],
+  weight: ["400"],
 });
 
 export const viewport: Viewport = {
@@ -108,7 +117,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning className={`${inter.variable} ${newsreader.variable}`}>
+    <html lang="en" suppressHydrationWarning className={`${inter.variable} ${jetbrainsMono.variable} ${instrumentSerif.variable}`}>
       <body className={inter.className}>
         <QueryProvider>
           <ThemeProvider
