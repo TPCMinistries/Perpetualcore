@@ -20,6 +20,7 @@
 
 import { useEffect, useState } from "react";
 import { FitScoreChip } from "./FitScoreChip";
+import { DraftButton } from "@/components/rfp/DraftButton";
 import type { FeedRow } from "@/lib/rfp/feed";
 
 interface DetailPaneProps {
@@ -195,9 +196,10 @@ export function DetailPane({ orgId, selected }: DetailPaneProps) {
         </section>
       )}
 
-      {/* Source link */}
-      {row.url && (
-        <section className="mt-8 pt-6 border-t border-zinc-900">
+      {/* Action row — draft + source */}
+      <section className="mt-8 pt-6 border-t border-zinc-900 flex flex-col gap-4">
+        <DraftButton orgId={orgId} oppId={row.opp_id} />
+        {row.url && (
           <a
             href={row.url}
             target="_blank"
@@ -206,8 +208,8 @@ export function DetailPane({ orgId, selected }: DetailPaneProps) {
           >
             Open at source <span aria-hidden="true">↗</span>
           </a>
-        </section>
-      )}
+        )}
+      </section>
 
       {/* Loading / error overlays */}
       {loading && !detail && (
