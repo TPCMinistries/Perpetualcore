@@ -104,7 +104,7 @@ const fadeUp = {
 const faqs = [
   {
     q: "What ships today vs. later?",
-    a: "Discovery, multi-tenant orgs and invites, audit logs, and Stripe billing are live. Voice fingerprinting and vault-grounded drafting are in private beta with Uplift Communities right now. Reviewer and compliance gate ship this quarter. We label every feature on the plans so you know what you&apos;re paying for.",
+    a: "Discovery, multi-tenant orgs and invites, audit logs, and Stripe billing are live. Voice fingerprinting and vault-grounded drafting are in private beta right now. Reviewer and compliance gate ship this quarter. We label every feature on the plans so you know what you&apos;re paying for.",
   },
   {
     q: "What&apos;s the free trial?",
@@ -286,7 +286,7 @@ export default function RfpPricingPage() {
               <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" /> Live today
             </span>
             <span className="inline-flex items-center gap-2">
-              <span className="h-1.5 w-1.5 rounded-full bg-amber-300" /> Private beta with Uplift
+              <span className="h-1.5 w-1.5 rounded-full bg-amber-300" /> Private beta
             </span>
             <span className="inline-flex items-center gap-2">
               <span className="h-1.5 w-1.5 rounded-full bg-zinc-500" /> Next this quarter

@@ -5,7 +5,7 @@ import { FileText } from "lucide-react";
 export const metadata = {
   title: "RFP Engine — The Grant + Contract + Proposal Engine | Perpetual Core",
   description:
-    "Find the right RFPs, draft them in your voice, and ship them clean. The first commercial product from Perpetual Core — pressure-tested on real federal submissions.",
+    "Find the right RFPs, draft them in your voice, and ship them clean. The first commercial product from Perpetual Core.",
 };
 
 export default function RfpMarketingLayout({

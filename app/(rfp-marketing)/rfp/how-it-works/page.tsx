@@ -297,7 +297,7 @@ export default function HowItWorksPage() {
               </span>
             </h1>
             <p className="mt-10 max-w-2xl text-lg leading-[1.7] text-zinc-300">
-              Six agents. One workspace. Three live today, three in private beta with Uplift. Below: what each one does, what it touches, what it doesn&apos;t, and what stays in your hands.
+              Six agents. One workspace. Three live today, three in private beta. Below: what each one does, what it touches, what it doesn&apos;t, and what stays in your hands.
             </p>
           </motion.div>
         </div>

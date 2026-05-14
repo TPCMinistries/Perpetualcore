@@ -49,7 +49,7 @@ const features: { icon: typeof Search; title: string; desc: string; stage: Stage
   {
     icon: Mic,
     title: "Voice fingerprint",
-    desc: "Trained on your past wins, annual reports, and founder letters so drafts read like you, not like a vendor. In private beta with Uplift Communities on DYCD and HHS submissions now.",
+    desc: "Trained on your past wins, annual reports, and founder letters so drafts read like you, not like a vendor. In private beta now.",
     stage: "beta",
   },
   {
@@ -145,9 +145,6 @@ export default function RfpEnginePage() {
               <div className="md:col-span-7">
                 <p className="text-lg leading-[1.7] text-zinc-300 md:text-xl">
                   The capture team most nonprofits and small mission-driven companies can&apos;t afford to hire. Discovery now. Voice-trained drafting in private beta. Compliance gate next this quarter.
-                </p>
-                <p className="mt-4 text-[15px] leading-[1.75] text-zinc-500">
-                  Pressure-tested on real DYCD, HHS, and SBIR submissions from Uplift Communities before we sell it to anyone else.
                 </p>
                 <div className="mt-9 flex flex-col gap-3 sm:flex-row">
                   <Button
@@ -285,7 +282,7 @@ export default function RfpEnginePage() {
               The product, honestly labeled.
             </h2>
             <p className="mt-5 max-w-2xl text-[15px] leading-[1.75] text-zinc-400">
-              Three pieces are live for paying users today. Three more are in private beta with Uplift on real DYCD and HHS submissions. Nothing on this page is marketing wishful thinking.
+              Three pieces are live for paying users today. Three more are in private beta. Nothing on this page is marketing wishful thinking.
             </p>
           </motion.div>
 
@@ -397,69 +394,6 @@ export default function RfpEnginePage() {
               </div>
             </motion.div>
           </div>
-        </div>
-      </section>
-
-      {/* DOGFOOD CALLOUT — remarkable moment */}
-      <section className="relative border-b border-white/5 bg-zinc-950">
-        <div className="container mx-auto px-4 py-28">
-          <motion.div
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, margin: "-100px" }}
-            variants={fadeUp}
-            transition={{ duration: 0.6 }}
-            className="mx-auto max-w-5xl"
-          >
-            <Eyebrow>Dogfooded before sold</Eyebrow>
-            <div className="grid gap-12 md:grid-cols-12 md:items-end">
-              <div className="md:col-span-7">
-                <h2 className="text-[clamp(1.85rem,4vw,3rem)] font-semibold leading-[1.1] tracking-tight text-white">
-                  Five real submissions{" "}
-                  <span
-                    className="italic text-zinc-500"
-                    style={{ fontFamily: "Georgia, 'Times New Roman', serif" }}
-                  >
-                    before any of you pay us a dollar.
-                  </span>
-                </h2>
-                <p className="mt-6 text-[15px] leading-[1.75] text-zinc-400">
-                  The engine is being pressure-tested on Uplift Communities&apos; live federal and city pipeline this quarter before we open it up.
-                </p>
-              </div>
-              <div className="md:col-span-5">
-                <Card className="overflow-hidden border-white/10 bg-gradient-to-br from-white/[0.04] to-transparent">
-                  <CardContent className="p-6">
-                    <p className="mb-4 font-mono text-[10px] uppercase tracking-[0.22em] text-zinc-500">
-                      Q2 dogfood slate
-                    </p>
-                    <ul className="space-y-3 text-[13px] leading-[1.7] text-zinc-300">
-                      <li className="flex items-baseline justify-between gap-4">
-                        <span>NYC DYCD Bridge to Health Careers</span>
-                        <span className="font-mono text-[11px] text-emerald-300">$650K × 3yr</span>
-                      </li>
-                      <li className="flex items-baseline justify-between gap-4">
-                        <span>HHS Healthcare Workforce</span>
-                        <span className="font-mono text-[11px] text-emerald-300">$2.4M</span>
-                      </li>
-                      <li className="flex items-baseline justify-between gap-4">
-                        <span>RWJF Health Equity</span>
-                        <span className="font-mono text-[11px] text-emerald-300">$500K</span>
-                      </li>
-                      <li className="flex items-baseline justify-between gap-4">
-                        <span>US DOE AI in K-12 Pilot</span>
-                        <span className="font-mono text-[11px] text-emerald-300">$1.8M</span>
-                      </li>
-                      <li className="flex items-baseline justify-between gap-4">
-                        <span>NSF SBIR Phase I</span>
-                        <span className="font-mono text-[11px] text-emerald-300">$305K</span>
-                      </li>
-                    </ul>
-                  </CardContent>
-                </Card>
-              </div>
-            </div>
-          </motion.div>
         </div>
       </section>
 

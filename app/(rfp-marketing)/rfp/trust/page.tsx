@@ -101,9 +101,9 @@ const ownership = [
 const log = [
   {
     ts: "2026-05-09 14:22:08Z",
-    actor: "user:liana@uplift",
+    actor: "user:liana@example.org",
     action: "RETRIEVE",
-    target: "vault://uplift/past-perf/dycd-2024-final.pdf",
+    target: "vault://past-perf/dycd-2024-final.pdf",
     note: "rag.k=8 score=0.91",
   },
   {
@@ -122,14 +122,14 @@ const log = [
   },
   {
     ts: "2026-05-09 14:24:02Z",
-    actor: "user:liana@uplift",
+    actor: "user:liana@example.org",
     action: "EDIT.accept",
     target: "draft://need-statement#p3",
     note: "manual_citation_added",
   },
   {
     ts: "2026-05-09 14:31:55Z",
-    actor: "user:liana@uplift",
+    actor: "user:liana@example.org",
     action: "EXPORT.pdf",
     target: "rfp://DOL-ETA-25-014/submission-v3.pdf",
     note: "compliance_gate=passed sha256=9a3f…b201",
@@ -630,7 +630,7 @@ export default function RfpTrustPage() {
               {
                 icon: ShieldCheck,
                 title: "Vault-grounded drafting",
-                desc: "Every claim is generated against retrieved chunks of your vault. The model is constrained to cite or flag — not invent. In private beta with Uplift right now.",
+                desc: "Every claim is generated against retrieved chunks of your vault. The model is constrained to cite or flag — not invent. In private beta right now.",
               },
               {
                 icon: AlertTriangle,
