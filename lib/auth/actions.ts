@@ -5,6 +5,21 @@ import { SignUpInput, SignInInput } from "@/lib/validations/auth";
 import { redirect } from "next/navigation";
 import { headers } from "next/headers";
 
+/**
+ * Derive the origin of the current request so auth redirects work across
+ * subdomains (www.perpetualcore.com, rfp.perpetualcore.com, localhost dev).
+ * Falls back to a sanitized NEXT_PUBLIC_APP_URL when called outside a
+ * request context (build-time, etc).
+ */
+async function getRequestOrigin(): Promise<string> {
+  const h = await headers();
+  const host = h.get("x-forwarded-host") ?? h.get("host");
+  const proto = h.get("x-forwarded-proto") ?? "https";
+  if (host) return `${proto}://${host}`;
+  const envUrl = process.env.NEXT_PUBLIC_APP_URL?.trim();
+  return envUrl || "https://www.perpetualcore.com";
+}
+
 function slugify(text: string): string {
   return text
     .toLowerCase()
@@ -46,6 +61,7 @@ export async function signUp(data: SignUpInput) {
   }
 
   // Create user with Supabase Auth
+  const origin = await getRequestOrigin();
   const { data: authData, error: authError } = await supabase.auth.signUp({
     email: data.email,
     password: data.password,
@@ -56,11 +72,21 @@ export async function signUp(data: SignUpInput) {
         organization_name: data.organizationName,
         beta_tier: betaTier,
       },
-      emailRedirectTo: `${process.env.NEXT_PUBLIC_APP_URL}/auth/callback`,
+      emailRedirectTo: `${origin}/auth/callback`,
     },
   });
 
   if (authError) {
+    // Surface a structured flag for the existing-user case so the UI can
+    // route the user to sign-in instead of showing a generic error.
+    const msg = authError.message.toLowerCase();
+    if (msg.includes("already registered") || msg.includes("user already")) {
+      return {
+        error: "An account with this email already exists.",
+        userExists: true,
+        email: data.email,
+      };
+    }
     return { error: authError.message };
   }
 
@@ -168,7 +194,7 @@ export async function signUp(data: SignUpInput) {
 
   // Send welcome email
   try {
-    await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/email/welcome`, {
+    await fetch(`${origin}/api/email/welcome`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -271,9 +297,10 @@ export async function resetOnboarding() {
 
 export async function requestPasswordReset(email: string) {
   const supabase = await createClient();
+  const origin = await getRequestOrigin();
 
   const { error } = await supabase.auth.resetPasswordForEmail(email, {
-    redirectTo: `${process.env.NEXT_PUBLIC_APP_URL}/auth/update-password`,
+    redirectTo: `${origin}/auth/update-password`,
   });
 
   if (error) {

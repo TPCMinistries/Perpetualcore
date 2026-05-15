@@ -24,6 +24,7 @@ export default function SignUpPage() {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [existingEmail, setExistingEmail] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   const [hasBetaCode, setHasBetaCode] = useState(false);
@@ -45,6 +46,7 @@ export default function SignUpPage() {
 
     setIsLoading(true);
     setError(null);
+    setExistingEmail(null);
     setSuccessMessage(null);
 
     try {
@@ -53,6 +55,9 @@ export default function SignUpPage() {
 
       if (result.error) {
         setError(result.error);
+        if ("userExists" in result && result.userExists && "email" in result) {
+          setExistingEmail(result.email as string);
+        }
         return;
       }
 
@@ -201,11 +206,33 @@ export default function SignUpPage() {
                 </div>
               )}
 
-              {error && (
+              {existingEmail ? (
+                <div className="rounded-md border border-amber-300 bg-amber-50 p-4 text-sm text-amber-900">
+                  <p className="font-medium">Looks like you already have an account.</p>
+                  <p className="mt-1 text-amber-800">
+                    {existingEmail} is registered. Sign in instead, or reset
+                    your password if you don&apos;t remember it.
+                  </p>
+                  <div className="mt-3 flex flex-wrap gap-3">
+                    <Link
+                      href={`/login?email=${encodeURIComponent(existingEmail)}`}
+                      className="inline-flex items-center justify-center rounded-md bg-amber-900 px-3 py-1.5 text-xs font-medium text-amber-50 hover:bg-amber-950"
+                    >
+                      Sign in →
+                    </Link>
+                    <Link
+                      href={`/login?reset=1&email=${encodeURIComponent(existingEmail)}`}
+                      className="inline-flex items-center justify-center rounded-md border border-amber-400 px-3 py-1.5 text-xs font-medium text-amber-900 hover:bg-amber-100"
+                    >
+                      Reset password
+                    </Link>
+                  </div>
+                </div>
+              ) : error ? (
                 <div className="rounded-md bg-destructive/10 p-3 text-sm text-destructive">
                   {error}
                 </div>
-              )}
+              ) : null}
 
               {successMessage && (
                 <div className="rounded-md bg-green-50 border border-green-200 p-3 text-sm text-green-800">
