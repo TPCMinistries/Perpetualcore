@@ -70,9 +70,6 @@ export function PublicMobileNav() {
               <Link href="/products" onClick={close} className="block px-4 py-2.5 text-sm font-medium text-foreground hover:bg-accent rounded-sm transition-colors">
                 Portfolio
               </Link>
-              <Link href="/products/platform" onClick={close} className="block px-4 py-2.5 text-sm text-muted-foreground hover:text-foreground hover:bg-accent rounded-sm transition-colors">
-                Platform
-              </Link>
               <Link href="/products/atlas" onClick={close} className="block px-4 py-2.5 text-sm text-muted-foreground hover:text-foreground hover:bg-accent rounded-sm transition-colors">
                 Atlas
               </Link>

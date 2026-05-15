@@ -3,7 +3,7 @@
 /**
  * /solutions/healthcare — flagship healthcare vertical.
  * Visual register matches homepage v6. HIPAA language hedged per legal review.
- * Platform Pro Healthcare Edition at $899/provider/mo. BAA included.
+ * Healthcare Subscription Edition at $899/provider/mo. BAA included.
  */
 
 import Link from "next/link";
@@ -70,7 +70,7 @@ const FAQS = [
   },
   {
     q: "How is this different from Doximity GPT or general AI chatbots?",
-    a: "Doximity GPT is a feature inside a directory product. We're an operating system: persistent memory across patients (consent-bounded), care-team coordination, prior-auth workflows, quality reporting — all queryable as one mind, not a chat window. The synthesis is the deliverable.",
+    a: "Doximity GPT is a feature inside a directory product. We're an operating system: persistent context across patients (consent-bounded), care-team coordination, prior-auth workflows, quality reporting — all queryable as one archive, not a chat window. The synthesis is the deliverable.",
   },
   {
     q: "How does the giving commitment work?",
@@ -117,7 +117,7 @@ export default function HealthcarePage() {
           <div className="space-y-5 text-lg sm:text-xl text-muted-foreground leading-[1.55] mb-12 max-w-3xl">
             <p>
               Reduce documentation burden. Streamline patient communications. Preserve care-team
-              institutional memory across shift changes and provider transitions.
+              institutional knowledge across shift changes and provider transitions.
             </p>
             <p>
               Built for the regulatory regime healthcare actually operates under — HIPAA-aware,
@@ -204,7 +204,7 @@ export default function HealthcarePage() {
                 Per-provider subscription. Managed retainer. Whole-system install.
               </h3>
               <p className="text-base text-muted-foreground leading-[1.7]">
-                Most independent providers start with Platform Pro Healthcare at $899/provider/mo.
+                Most independent providers start with Healthcare Subscription at $899/provider/mo.
                 Group practices move to a retainer when scaling makes self-serve unwieldy. Multi-site
                 health systems install the full Engine.
               </p>
@@ -214,7 +214,7 @@ export default function HealthcarePage() {
           <div className="grid sm:grid-cols-3 border border-border bg-card divide-y sm:divide-y-0 sm:divide-x divide-border">
             <Link href="#pricing" className="group block p-6 sm:p-7 hover:bg-surface-hover transition-colors flex flex-col">
               <p className="font-mono text-[10px] tracking-[0.18em] text-muted-foreground mb-10">BAND · 01</p>
-              <h4 className="text-[11px] font-mono uppercase tracking-[0.22em] text-primary mb-3">Platform Pro Healthcare</h4>
+              <h4 className="text-[11px] font-mono uppercase tracking-[0.22em] text-primary mb-3">Healthcare Subscription</h4>
               <p className="text-base font-semibold leading-[1.3] tracking-[-0.01em] text-foreground mb-2">$899/provider/mo</p>
               <p className="text-sm text-muted-foreground leading-[1.6] flex-1">
                 BAA included. 14-day trial. Volume discounts at 10+ and 50+ providers.
@@ -244,7 +244,7 @@ export default function HealthcarePage() {
       <section id="pricing" className="border-t border-border py-24 sm:py-32 bg-surface-hover/40">
         <div className="container mx-auto px-6 sm:px-8">
           <div className="grid lg:grid-cols-[280px_1fr] gap-12 lg:gap-20 mb-12">
-            <SectionRail index="03" label="Platform Pro Healthcare" />
+            <SectionRail index="03" label="Healthcare Subscription" />
             <div className="max-w-2xl">
               <h3 className="text-3xl sm:text-4xl lg:text-5xl font-semibold leading-[1.1] tracking-[-0.025em] text-foreground mb-6">
                 $899 per provider per month.

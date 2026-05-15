@@ -32,7 +32,7 @@ const PLATFORM_PLANS = [
     checkoutEnabled: false,
     popular: false,
     features: [
-      "Infinite conversation memory",
+      "Infinite conversation context",
       "Personal knowledge base (RAG)",
       "Gemini model (unlimited)",
       "5 documents",
@@ -179,17 +179,17 @@ export default function PricingPage() {
         </div>
       </section>
 
-      {/* BAND 01 — Products */}
+      {/* BAND 01 — Subscriptions */}
       <section id="products" className="border-t border-border py-24 sm:py-32 bg-surface-hover/40">
         <div className="container mx-auto px-6 sm:px-8">
           <div className="grid lg:grid-cols-[280px_1fr] gap-12 lg:gap-20 mb-12">
-            <SectionRail index="01" label="Products · Self-serve" />
+            <SectionRail index="01" label="Subscriptions · Self-serve" />
             <div className="max-w-2xl">
               <h3 className="text-3xl sm:text-4xl lg:text-5xl font-semibold leading-[1.1] tracking-[-0.025em] text-foreground mb-6">
-                Subscribe to a product. Free / $49 / $99.
+                Subscribe to a tier. Free / $49 / $99.
               </h3>
               <p className="text-base text-muted-foreground leading-[1.7]">
-                The Platform — AI OS for individuals and small teams. The on-ramp before
+                Self-serve subscription tiers for individuals and small teams. The on-ramp before
                 retainers and engagements. 14-day trials, no credit card required.
               </p>
 

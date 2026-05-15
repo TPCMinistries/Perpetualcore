@@ -11,7 +11,7 @@ import { Footer } from "@/components/landing/Footer";
 const USE_CASES = [
   {
     name: "Sermon + teaching archive",
-    body: "Decades of sermons, biblical exposition frameworks, and theological notes preserved as queryable memory. Reuse and build on what your church has already taught. New teaching pastors inherit the depth, not just the title.",
+    body: "Decades of sermons, biblical exposition frameworks, and theological notes preserved as queryable knowledge. Reuse and build on what your church has already taught. New teaching pastors inherit the depth, not just the title.",
   },
   {
     name: "Pastoral care + counseling continuity",
@@ -26,7 +26,7 @@ const USE_CASES = [
     body: "Baptisms, weddings, prayer requests answered, life events walked through together. Preserve the stories of God's faithfulness across years. Make every pastoral conversation informed by the full record.",
   },
   {
-    name: "Operations + governance memory",
+    name: "Operations + governance archive",
     body: "Elder meeting minutes, budget rationale, policy decisions, building maintenance, vendor relationships — institutional wisdom that usually lives in one person's head. Make it queryable for the next generation of leaders.",
   },
   {
@@ -56,7 +56,7 @@ const VOLUME_DISCOUNTS = [
 const FAQS = [
   {
     q: "How is this different from Planning Center or general church management software?",
-    a: "Planning Center tracks attendance and scheduling. We give your church institutional memory that compounds across decades — sermon archives, pastoral wisdom, counseling frameworks, member journeys. The system reads the full corpus and writes the answer. Synthesis on top of, not replacement of, your ChMS.",
+    a: "Planning Center tracks attendance and scheduling. We give your church institutional knowledge that compounds across decades — sermon archives, pastoral wisdom, counseling frameworks, member journeys. The system reads the full corpus and writes the answer. Synthesis on top of, not replacement of, your ChMS.",
   },
   {
     q: "How do you handle pastoral-care confidentiality?",
@@ -68,11 +68,11 @@ const FAQS = [
   },
   {
     q: "Can we start small and scale up?",
-    a: "Yes. Most churches start with pastoral staff on Platform Pro ($99/staff/mo). The 3-band spectrum is designed for movement: subscriptions → retainers ($5K–$15K/mo) → engagements ($75K–$250K+ full installs). We discuss credit toward engagement scope case-by-case if you cross bands. Built from inside a church — the model is designed for ministry economics, not Silicon Valley budgets.",
+    a: "Yes. Most churches start with pastoral staff on Subscription ($99/staff/mo). The 3-band spectrum is designed for movement: subscriptions → retainers ($5K–$15K/mo) → engagements ($75K–$250K+ full installs). We discuss credit toward engagement scope case-by-case if you cross bands. Built from inside a church — the model is designed for ministry economics, not Silicon Valley budgets.",
   },
   {
     q: "What happens when our senior pastor retires?",
-    a: "That's the central design point. The institutional memory layer captures what they know — sermon frameworks, counseling approaches, pastoral wisdom — so it isn't lost when they transition. The incoming pastor inherits the depth of what came before. Plus the underlying Engine was built to be operated by your team after we hand it over. You own the system. We don't disappear, but you don't need us.",
+    a: "That's the central design point. The institutional knowledge layer captures what they know — sermon frameworks, counseling approaches, pastoral wisdom — so it isn't lost when they transition. The incoming pastor inherits the depth of what came before. Plus the underlying Engine was built to be operated by your team after we hand it over. You own the system. We don't disappear, but you don't need us.",
   },
 ];
 
@@ -116,7 +116,7 @@ export default function ChurchesPage() {
             </p>
             <p>
               Built from inside a church. The AI-native operating system for congregations whose
-              data needs to be honored, whose institutional memory deserves to be stewarded, and
+              data needs to be honored, whose institutional knowledge deserves to be stewarded, and
               whose next generation of leaders deserves to inherit the depth.
             </p>
           </div>
@@ -207,7 +207,7 @@ export default function ChurchesPage() {
                 Subscribe. Retain. Or install the full Engine.
               </h3>
               <p className="text-base text-muted-foreground leading-[1.7]">
-                Most churches start with Platform Pro at $99/staff/mo. Some scale to a managed
+                Most churches start with Subscription at $99/staff/mo. Some scale to a managed
                 retainer when sermon-archive, member-care, or operations work needs ongoing
                 cadence. Some go straight to a full engagement that installs the Perpetual Engine
                 across the ministry.
@@ -218,7 +218,7 @@ export default function ChurchesPage() {
           <div className="grid sm:grid-cols-3 border border-border bg-card divide-y sm:divide-y-0 sm:divide-x divide-border">
             <Link href="#pricing" className="group block p-6 sm:p-7 hover:bg-surface-hover transition-colors flex flex-col">
               <p className="font-mono text-[10px] tracking-[0.18em] text-muted-foreground mb-10">BAND · 01</p>
-              <h4 className="text-[11px] font-mono uppercase tracking-[0.22em] text-primary mb-3">Platform Pro</h4>
+              <h4 className="text-[11px] font-mono uppercase tracking-[0.22em] text-primary mb-3">Subscription</h4>
               <p className="text-base font-semibold leading-[1.3] tracking-[-0.01em] text-foreground mb-2">$99/staff/mo</p>
               <p className="text-sm text-muted-foreground leading-[1.6] flex-1">
                 For churches with 2–30 staff. Self-serve. 14-day trial. Volume discounts at 5+ and 15+ seats.
@@ -244,11 +244,11 @@ export default function ChurchesPage() {
         </div>
       </section>
 
-      {/* Platform Pro pricing detail */}
+      {/* Subscription pricing detail */}
       <section id="pricing" className="border-t border-border py-24 sm:py-32 bg-surface-hover/40">
         <div className="container mx-auto px-6 sm:px-8">
           <div className="grid lg:grid-cols-[280px_1fr] gap-12 lg:gap-20 mb-12">
-            <SectionRail index="03" label="Platform Pro pricing" />
+            <SectionRail index="03" label="Subscription pricing" />
             <div className="max-w-2xl">
               <h3 className="text-3xl sm:text-4xl lg:text-5xl font-semibold leading-[1.1] tracking-[-0.025em] text-foreground mb-6">
                 $99 per staff member per month.

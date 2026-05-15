@@ -11,7 +11,7 @@ import { Footer } from "@/components/landing/Footer";
 const USE_CASES = [
   {
     name: "Matter + case-history continuity",
-    body: "Every prior matter, brief, motion, and decision-rationale preserved as queryable memory. New associates inherit how the firm has handled similar issues. Knowledge stops walking out when senior partners retire.",
+    body: "Every prior matter, brief, motion, and decision-rationale preserved as queryable knowledge. New associates inherit how the firm has handled similar issues. Knowledge stops walking out when senior partners retire.",
   },
   {
     name: "Brief + research drafting",
@@ -64,7 +64,7 @@ const FAQS = [
   },
   {
     q: "Will this work with our existing document management system?",
-    a: "Yes. We integrate with NetDocuments, iManage, Worldox, SharePoint, and most major DMS systems. Integration is part of onboarding. We can also ingest legacy archives — decades of briefs, motions, and matter files — so your firm's prior work becomes queryable institutional memory rather than scattered filing-cabinet wisdom.",
+    a: "Yes. We integrate with NetDocuments, iManage, Worldox, SharePoint, and most major DMS systems. Integration is part of onboarding. We can also ingest legacy archives — decades of briefs, motions, and matter files — so your firm's prior work becomes queryable institutional knowledge rather than scattered filing-cabinet wisdom.",
   },
   {
     q: "How does pricing work for growing firms?",
@@ -72,7 +72,7 @@ const FAQS = [
   },
   {
     q: "What happens when a senior partner retires?",
-    a: "That's the central design point. The institutional memory layer captures what they know — deal patterns, counseling instincts, decision rationale — so it isn't lost when they transition. Successor attorneys inherit the depth of what came before. Plus the underlying Engine was built to be operated by your team after we hand it over. You own the system.",
+    a: "That's the central design point. The institutional knowledge layer captures what they know — deal patterns, counseling instincts, decision rationale — so it isn't lost when they transition. Successor attorneys inherit the depth of what came before. Plus the underlying Engine was built to be operated by your team after we hand it over. You own the system.",
   },
 ];
 
@@ -175,7 +175,7 @@ export default function LawFirmsPage() {
               <p className="text-base text-muted-foreground leading-[1.7]">
                 Each one solves a specific pattern of institutional drift — judgment that walks
                 out at retirement, briefs that get re-drafted from scratch, conflict checks that
-                rely on memory. Pick one, see if the system thinks the way your firm thinks.
+                rely on recall. Pick one, see if the system thinks the way your firm thinks.
               </p>
             </div>
           </div>
@@ -211,7 +211,7 @@ export default function LawFirmsPage() {
                 Subscribe. Retain. Or install the full Engine.
               </h3>
               <p className="text-base text-muted-foreground leading-[1.7]">
-                Most firms start with Platform Pro at $999/attorney/mo. Some scale to a managed
+                Most firms start with Subscription at $999/attorney/mo. Some scale to a managed
                 retainer when matter-archive, brief-drafting, or compliance work needs ongoing
                 cadence. Some go straight to a full engagement that installs the Perpetual Engine
                 across the firm.
@@ -222,7 +222,7 @@ export default function LawFirmsPage() {
           <div className="grid sm:grid-cols-3 border border-border bg-card divide-y sm:divide-y-0 sm:divide-x divide-border">
             <Link href="#pricing" className="group block p-6 sm:p-7 hover:bg-surface-hover transition-colors flex flex-col">
               <p className="font-mono text-[10px] tracking-[0.18em] text-muted-foreground mb-10">BAND · 01</p>
-              <h4 className="text-[11px] font-mono uppercase tracking-[0.22em] text-primary mb-3">Platform Pro Legal</h4>
+              <h4 className="text-[11px] font-mono uppercase tracking-[0.22em] text-primary mb-3">Legal Subscription</h4>
               <p className="text-base font-semibold leading-[1.3] tracking-[-0.01em] text-foreground mb-2">$999/attorney/mo</p>
               <p className="text-sm text-muted-foreground leading-[1.6] flex-1">
                 For firms 5–100 attorneys. Self-serve with onboarding. 14-day trial. Volume discounts at 20+ and 50+ seats.
@@ -252,7 +252,7 @@ export default function LawFirmsPage() {
       <section id="pricing" className="border-t border-border py-24 sm:py-32 bg-surface-hover/40">
         <div className="container mx-auto px-6 sm:px-8">
           <div className="grid lg:grid-cols-[280px_1fr] gap-12 lg:gap-20 mb-12">
-            <SectionRail index="03" label="Platform Pro Legal" />
+            <SectionRail index="03" label="Legal Subscription" />
             <div className="max-w-2xl">
               <h3 className="text-3xl sm:text-4xl lg:text-5xl font-semibold leading-[1.1] tracking-[-0.025em] text-foreground mb-6">
                 $999 per attorney per month.

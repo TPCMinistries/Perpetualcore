@@ -1,10 +1,9 @@
 /**
  * /products — portfolio overview (arm 02 of the company).
- * Seven products with status pills, mono indices, hairline grid.
+ * Six products with status pills, mono indices, hairline grid.
  * Visual register matches homepage v5.
  *
- * Order per BRAND_ARCHITECTURE §5.6:
- *   Atlas → Sentinel → Sage → Vellum → RFP Engine → RFP Sentry → Platform.
+ * Order: Atlas → Sentinel → Sage → Vellum → RFP Engine → RFP Sentry.
  */
 
 import Link from "next/link";
@@ -16,7 +15,7 @@ import { Footer } from "@/components/landing/Footer";
 export const metadata = {
   title: "Products — Perpetual Core",
   description:
-    "Seven AI-native products. Each one shipped in an engagement. Each one still running. The portfolio is the proof; the engagement is the work.",
+    "Six AI-native products. Each one shipped in an engagement. Each one still running. The portfolio is the proof; the engagement is the work.",
 };
 
 type Product = {
@@ -56,9 +55,9 @@ const PRODUCTS: Product[] = [
     name: "Sage",
     status: "BUILD",
     statusColor: "invite",
-    headline: "The coach and chief of staff who never forgets you.",
+    headline: "Personal AI OS with ambient context and your voice.",
     body:
-      "For operators who run two or more entities, live in voice memos, and want a relational AI partner — not a chatbot you re-explain yourself to every morning. Lives wherever you do. Telegram, voice, web. 15% of every Sage subscription funds the Institute for Human Advancement.",
+      "For operators who run two or more entities, live in voice memos, and want a relational AI partner — coach, chief of staff, strategist — not a chatbot you re-explain yourself to every morning. Lives wherever you do. Telegram, voice, web. 15% of every Sage subscription funds the Institute for Human Advancement.",
     cta: { label: "Meet Sage", href: "https://sage.perpetualcore.com", external: true },
   },
   {
@@ -66,9 +65,9 @@ const PRODUCTS: Product[] = [
     name: "Vellum",
     status: "BUILD",
     statusColor: "invite",
-    headline: "Institutional memory for organizations.",
+    headline: "Institutional knowledge for organizations.",
     body:
-      "For executive directors, founders, and program directors whose calls, docs, voice notes, and Slack channels need to be one queryable mind — not seventeen disconnected sources. 30% mission-driven discount on Operator and Team for verified 501(c)(3)s.",
+      "For executive directors, founders, and program directors whose calls, docs, voice notes, and Slack channels need to be one queryable archive — not seventeen disconnected sources. 30% mission-driven discount on Operator and Team for verified 501(c)(3)s.",
     pricing: "Free / $49 Operator / $249 Team / Institution Contact",
     cta: { label: "See Vellum", href: "/products/vellum" },
   },
@@ -91,17 +90,6 @@ const PRODUCTS: Product[] = [
     body:
       "For capture teams who'd rather lose a deal at the bid/no-bid step than after writing the proposal. Sister product to RFP Engine. Score RFPs for fit before you write. Compliance flags surface before submission, not after a debrief.",
     cta: { label: "Join the early list", href: "/products/rfp-sentry" },
-  },
-  {
-    index: "07",
-    name: "Platform",
-    status: "LIVE",
-    statusColor: "live",
-    headline: "The AI OS for individuals and small teams.",
-    body:
-      "For solo operators and 5-to-50-person teams who need 11-model routing, persistent memory, and AI executive advisors in one workspace. The catch-all for buyers under the engagement floor — the on-ramp, not the destination.",
-    pricing: "Free / $49 Starter / $99 Pro",
-    cta: { label: "Try the Platform", href: "/products/platform" },
   },
 ];
 
@@ -144,7 +132,7 @@ export default function ProductsPage() {
           </div>
 
           <h1 className="display-hero text-[40px] sm:text-[56px] lg:text-[76px] text-foreground mb-12 max-w-5xl leading-[1.05]">
-            Seven products. Each one{" "}
+            Six products. Each one{" "}
             <span className="italic text-foreground/85">shipped in an engagement.</span> Each one
             still running.
           </h1>
@@ -189,7 +177,7 @@ export default function ProductsPage() {
             <SectionRail index="—" label="In production" />
             <div className="max-w-2xl">
               <h3 className="text-3xl sm:text-4xl lg:text-5xl font-semibold leading-[1.1] tracking-[-0.025em] text-foreground">
-                Seven products in the portfolio.
+                Six products in the portfolio.
               </h3>
             </div>
           </div>

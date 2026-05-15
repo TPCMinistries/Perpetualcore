@@ -1,5 +1,5 @@
 /**
- * /studio/case-studies — three abstracted slot cards.
+ * /studio/case-studies — two abstracted slot cards.
  * No client names. Sector + constraint + install + outcome.
  * Visual register matches homepage v6.
  */
@@ -13,26 +13,19 @@ import { Footer } from "@/components/landing/Footer";
 export const metadata = {
   title: "Case Studies — Perpetual Core",
   description:
-    "We don't publish client names. Three abstracted case studies — sector, constraint regime, install, outcome. The constraints are the credential, not the logo wall.",
+    "We don't publish client names. Two abstracted case studies — sector, constraint regime, install, outcome. The constraints are the credential, not the logo wall.",
 };
 
 const SLOTS = [
   {
     index: "01",
-    sector: "A UN-aligned humanitarian agency operating across East Africa.",
-    constraint: "PEPFAR data-sovereignty, IRB review, zero-cellular-fallback assumptions.",
-    install: "Eight registries scoped to field-officer intake, beneficiary case management, and IRB-compliant consent workflows. Skills built for offline-first data capture syncing on cellular reconnect, PII redaction at the edge, and PEPFAR-compliant export pipelines. Three departments — clinical, M&E, and field ops — running on the same registry layer by week 12.",
-    outcome: "Field officers stopped re-entering patient data across four legacy systems. M&E reports that previously took two weeks now compile from the registry on demand. The system survived a one-week regional connectivity outage during a public-health emergency without data loss — the offline-first install was the install.",
-  },
-  {
-    index: "02",
     sector: "A community-college workforce program in New York.",
     constraint: "FERPA, multi-agency reporting requirements, outcomes-based funding tied to job placement.",
     install: "Eight registries installed across student intake, case management, employer partnerships, and outcomes reporting. Skills built for FERPA-compliant case notes, employer placement tracking with consent-bounded data sharing, and the multi-agency reporting templates the program's funder required quarterly. The case-management workflow that used to live across a CRM, a spreadsheet, and a Google Form now lives in one place.",
     outcome: "Case managers stopped maintaining duplicate records across three systems. Quarterly funder reports compile in hours, not days. The employer-placement registry surfaces students whose certificates align with current open roles. The skills library outlived the engagement; new program coordinators inherit it as the operating model.",
   },
   {
-    index: "03",
+    index: "02",
     sector: "A faith institution with a multi-state network.",
     constraint: "Multi-jurisdictional consent regimes, donor-data sensitivity, offline-first field deployment.",
     install: "Eight registries installed across membership, ministry programs, and donor relations. Skills built for multi-jurisdiction consent capture (different states, different rules), offline-first event check-in for satellite locations, and a knowledge registry that synthesizes leadership voice notes, sermons, and field reports into one queryable archive. The ministry's institutional memory — previously held by three long-tenured staff — became extractable infrastructure.",
@@ -73,9 +66,9 @@ export default function CaseStudiesPage() {
               even when it costs us marketing surface.
             </p>
             <p>
-              Here&apos;s what we built, abstracted to the sector and the constraint regime. The
-              constraints are the credential — not the logo. If your operation runs under one of
-              these, we&apos;ve been there.
+              Here are two installs we built, abstracted to the sector and the constraint regime.
+              The constraints are the credential — not the logo. If your operation runs under one
+              of these, we&apos;ve been there.
             </p>
             <p className="text-base text-muted-foreground/80 italic border-l-2 border-border pl-5">
               Several of the constraint regimes named below were first installed inside{" "}

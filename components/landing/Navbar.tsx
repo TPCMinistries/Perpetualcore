@@ -40,11 +40,10 @@ const STUDIO_LINKS = [
 ];
 
 const PRODUCT_LINKS = [
-  { label: "Platform", href: "/products/platform", description: "AI OS for individuals and small teams" },
   { label: "Atlas", href: "/products/atlas", description: "AI-native COO for fund-backed portcos" },
   { label: "Sentinel", href: "/products/sentinel", description: "Due diligence and intel — live" },
-  { label: "Sage", href: "/products/sage", description: "Coach + chief of staff" },
-  { label: "Vellum", href: "/products/vellum", description: "Institutional memory" },
+  { label: "Sage", href: "/products/sage", description: "Personal AI OS with ambient context + voice" },
+  { label: "Vellum", href: "/products/vellum", description: "Institutional knowledge" },
   { label: "RFP Engine", href: "/products/rfp-engine", description: "Find, draft, ship RFPs" },
   { label: "RFP Sentry", href: "/products/rfp-sentry", description: "Bid intelligence + compliance gate" },
 ];

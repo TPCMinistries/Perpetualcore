@@ -3,7 +3,7 @@
 /**
  * /solutions/non-profits — flagship industry vertical page.
  * Visual register matches homepage v6. Cross-links to 3-band spectrum.
- * Platform Pro at $99/staff/mo with volume discounts preserved.
+ * Subscription at $99/staff/mo with volume discounts preserved.
  */
 
 import Link from "next/link";
@@ -17,7 +17,7 @@ import { Footer } from "@/components/landing/Footer";
 const USE_CASES = [
   {
     name: "Grant writing and renewal",
-    body: "Every successful proposal, rejection feedback, and funder communication preserved as queryable memory. Reuse winning narratives across applications. Increase win rates without re-inventing each cycle.",
+    body: "Every successful proposal, rejection feedback, and funder communication preserved as queryable knowledge. Reuse winning narratives across applications. Increase win rates without re-inventing each cycle.",
   },
   {
     name: "Donor relationship management",
@@ -62,7 +62,7 @@ const VOLUME_DISCOUNTS = [
 const FAQS = [
   {
     q: "How is this different from Notion AI or general chatbots?",
-    a: "Notion AI works with one document at a time. We give your organization institutional memory that compounds across years of work — grant histories, donor relationships, program outcomes, all queryable as one mind. The system reads the full corpus and writes the answer. Synthesis, not search.",
+    a: "Notion AI works with one document at a time. We give your organization institutional knowledge that compounds across years of work — grant histories, donor relationships, program outcomes, all queryable as one mind. The system reads the full corpus and writes the answer. Synthesis, not search.",
   },
   {
     q: "What about data privacy and donor confidentiality?",
@@ -74,11 +74,11 @@ const FAQS = [
   },
   {
     q: "Can we start small and scale up?",
-    a: "Yes. Most orgs start with one or two staff on Platform Pro ($99/mo each). The 3-band spectrum is designed for movement: subscriptions → retainers ($5K–$15K/mo) → engagements ($75K–$250K+ full installs). We discuss credit toward engagement scope case-by-case if you cross bands.",
+    a: "Yes. Most orgs start with one or two staff on Subscription ($99/mo each). The 3-band spectrum is designed for movement: subscriptions → retainers ($5K–$15K/mo) → engagements ($75K–$250K+ full installs). We discuss credit toward engagement scope case-by-case if you cross bands.",
   },
   {
     q: "Will you actually be there when our ED leaves?",
-    a: "That's the central design point. The institutional memory layer captures what your ED knows so it isn't lost when they go. Plus the underlying Engine — the eight registries, the AI-First Framework, the skills library — was built to be operated by your team after we hand it over. You own the system. We don't disappear, but you don't need us.",
+    a: "That's the central design point. The institutional knowledge layer captures what your ED knows so it isn't lost when they go. Plus the underlying Engine — the eight registries, the AI-First Framework, the skills library — was built to be operated by your team after we hand it over. You own the system. We don't disappear, but you don't need us.",
   },
 ];
 
@@ -117,7 +117,7 @@ export default function NonProfitsPage() {
           <div className="space-y-5 text-lg sm:text-xl text-muted-foreground leading-[1.55] mb-12 max-w-3xl">
             <p>
               Preserve grant strategies, track donor relationships, organize program wisdom, and
-              maintain institutional memory when staff transitions happen.
+              maintain institutional knowledge when staff transitions happen.
             </p>
             <p>
               The AI-native operating system for non-profits whose data needs to be sovereign,
@@ -212,7 +212,7 @@ export default function NonProfitsPage() {
                 Subscribe. Retain. Or install the full Engine.
               </h3>
               <p className="text-base text-muted-foreground leading-[1.7]">
-                Most non-profits start with Platform Pro at $99/staff/mo. Some scale to a managed
+                Most non-profits start with Subscription at $99/staff/mo. Some scale to a managed
                 retainer when work needs ongoing operating cadence. Some go straight to a full
                 engagement that installs the Perpetual Engine across the organization.
               </p>
@@ -222,7 +222,7 @@ export default function NonProfitsPage() {
           <div className="grid sm:grid-cols-3 border border-border bg-card divide-y sm:divide-y-0 sm:divide-x divide-border">
             <Link href="#pricing" className="group block p-6 sm:p-7 hover:bg-surface-hover transition-colors flex flex-col">
               <p className="font-mono text-[10px] tracking-[0.18em] text-muted-foreground mb-10">BAND · 01</p>
-              <h4 className="text-[11px] font-mono uppercase tracking-[0.22em] text-primary mb-3">Platform Pro</h4>
+              <h4 className="text-[11px] font-mono uppercase tracking-[0.22em] text-primary mb-3">Subscription</h4>
               <p className="text-base font-semibold leading-[1.3] tracking-[-0.01em] text-foreground mb-2">$99/staff/mo</p>
               <p className="text-sm text-muted-foreground leading-[1.6] flex-1">
                 For non-profits 2–50 staff. Self-serve. 14-day trial. Volume discounts at 10+ and 25+ seats.
@@ -248,11 +248,11 @@ export default function NonProfitsPage() {
         </div>
       </section>
 
-      {/* Platform Pro pricing detail */}
+      {/* Subscription pricing detail */}
       <section id="pricing" className="border-t border-border py-24 sm:py-32 bg-surface-hover/40">
         <div className="container mx-auto px-6 sm:px-8">
           <div className="grid lg:grid-cols-[280px_1fr] gap-12 lg:gap-20 mb-12">
-            <SectionRail index="03" label="Platform Pro pricing" />
+            <SectionRail index="03" label="Subscription pricing" />
             <div className="max-w-2xl">
               <h3 className="text-3xl sm:text-4xl lg:text-5xl font-semibold leading-[1.1] tracking-[-0.025em] text-foreground mb-6">
                 $99 per staff member per month.
@@ -364,7 +364,7 @@ export default function NonProfitsPage() {
             <SectionRail index="—" label="Ready to amplify your impact" />
             <div className="max-w-2xl">
               <h3 className="display-hero text-3xl sm:text-4xl lg:text-[52px] text-foreground mb-10 leading-[1.05]">
-                Build institutional memory that{" "}
+                Build institutional knowledge that{" "}
                 <span className="italic">compounds over time.</span>
               </h3>
               <p className="text-base text-muted-foreground leading-[1.7] mb-10">
