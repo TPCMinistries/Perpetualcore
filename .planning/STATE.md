@@ -2,18 +2,23 @@
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-05-09)
+See: .planning/PROJECT.md (updated 2026-05-15 — v4.0 milestone opened)
 
 **Core value:** The AI operating system brain — if this breaks, everything downstream breaks
-**Current focus:** v2.0 RFP & Proposal Engine — Phase 5 (Discovery)
+**Current focus:** v4.0 Business Operations & Revenue Plumbing — Phase 13 (defining requirements)
 
 ## Current Position
 
-**Milestone:** v2.0 RFP & Proposal Engine
-**Phase:** 5 of 11 (Phase 5: Discovery)
-**Plan:** 1 of 7 complete (05-01: Federal Discovery ingestion)
-**Status:** In progress — Phase 4 closed; Phase 5 Plan 01 complete; Plans 02-07 remaining
-**Progress:** [████░░░░░░] 40%
+**Active milestones (parallel):**
+- **v4.0 Business Operations & Revenue Plumbing** — Phase 13 of 22 (defining requirements)
+- **v3.0 Studio Polish & Launch** — Phase 12 partial (5 plans complete, awaiting closeouts)
+- **v2.0 RFP & Proposal Engine** — Phase 5 of 11 (Plan 01 complete, 02-07 remaining)
+
+**Primary focus (lead session):** v4.0 milestone setup → roadmap → Phase 13 (lead capture audit)
+**Phase:** Not started (defining requirements)
+**Plan:** —
+**Status:** Defining requirements
+**Last activity:** 2026-05-15 — Milestone v4.0 started; PROJECT.md updated to reflect 3 parallel milestones
 
 Last activity: 2026-05-10 — 12-05 checkpoint (Tasks 1-3 of 4 complete): EarlyAccessForm with Stripe Elements + 3DS-resume logic built (f2bfb61); /products/vellum updated with #early-access section + unconditional IHA hyperlink, STUDIO-LK-01 closed (1c0bd3a); /admin/vellum-waitlist server component with auth gate + CSV export built (051ecc0). Task 4 awaiting Lorenzo 6-signup Stripe test verification before STUDIO-VW-01 can close.
 

@@ -59,7 +59,40 @@
 | 2026-05-09 | Salvage from `ldc-command-center` | Prior built-but-unused v0 contains reusable RFP UI, agents, schema, API integrations; port file-by-file rather than rebuild |
 | 2026-05-09 | RFP Engine lives inside Perpetual Core repo | Spec confirms `rfp_*` table prefix on existing schema; brand house consolidation; one auth, one billing |
 
-## Current Milestone: v2.0 RFP & Proposal Engine
+## Current Milestones (Parallel)
+
+Three milestones running concurrently from 2026-05-15. Coordinated via agent teams + `cs` worktrees to avoid file conflicts. Lead session does cross-cutting work and review; teammates own milestone-specific phases.
+
+### v4.0 — Business Operations & Revenue Plumbing (NEW)
+
+**Goal:** Make perpetualcore.com a functioning business, not just a brochure. Wire lead capture → CRM, verify Stripe end-to-end, install calendar booking, decide subscription tier identity, add social proof, instrument funnel analytics, finish industry cascade, audit ecosystem interop, build SEO foundation, audit subdomain products. Framed from a business manager's perspective on operating the site as the front door for the broader IHA / Uplift / DeepFutures / TPC / Sage SaaS ecosystem.
+
+**Phases:** 13-22 (10 phases — see ROADMAP.md). Rough sequencing 13 → 14 → 15/16 (parallel) → 17/18 (parallel) → 19/20/21/22 (parallel).
+
+**Target features:**
+- Lead capture audit + CRM wire-up (test every form, route to inbox/CRM)
+- Stripe end-to-end + post-signup activation experience (decide what the dashboard becomes)
+- Calendar booking + intake flow (Cal.com / SavvyCal on /contact-sales)
+- Subscription tier identity (Free / $49 / $99 currently orphaned — rebrand or kill)
+- Social proof + testimonials (named client + quantified outcome)
+- Funnel analytics — revive ANLYT-01/02/03 from v1.0 deferred (PostHog / Plausible + UTM)
+- Industry pages cascade — remaining 7 verticals to v6 register
+- Ecosystem interop audit — how PC interops with IHA, Uplift, TPC, DeepFutures, Sage SaaS; cross-org lead routing; 10/15% giving cash-flow trace
+- SEO/discovery foundation — blog infra, sitemap, structured data, 3 cornerstone articles
+- Subdomain product audit — atlas/sentinel/sage/rfp.perpetualcore.com functionality, conversion paths, cross-link integrity
+
+**Parallelization notes:**
+- v4.0 BizOps phases touch marketing surface, lead pipelines, billing — coordinate with v3.0 Studio Polish (Phase 12 still partial).
+- v2.0 RFP Engine work in `lib/rfp/`, `app/(rfp-marketing)/`, `components/rfp/`, `app/api/cron/` — separate territory, low conflict risk.
+
+### v3.0 — Studio Polish & Launch (ACTIVE — partial)
+
+**Goal:** Polish the Studio Repositioning sprint (rebased and merged as `feat/studio-repositioning`) into ship-ready state. The v6 register + 5 industry verticals + Sage reposition + product subdomain wiring are shipped through commit `9e8edd5` but Phase 12 plans for case studies, Atlas Discovery, IHA↔PC links, and Vellum waitlist remain partially open.
+
+**Open work:**
+- Phase 12 closeouts (Vellum 6-signup Stripe test verification → close STUDIO-VW-01; IHA cross-brand commit `0194213` push)
+
+### v2.0 — RFP & Proposal Engine (ACTIVE)
 
 **Goal:** Ship a multi-tenant SaaS RFP & Proposal Engine — discovers federal, state, city, and foundation opportunities; ingests an org's vault to extract a voice fingerprint; drafts proposal sections grounded in past wins; reviews against funder rubrics; runs a compliance gate before submit. Internally dogfooded on Uplift, IHA, and Perpetual Core; sold externally to nonprofits, mission-driven for-profits, and capture agencies.
 
