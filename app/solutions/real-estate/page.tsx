@@ -309,7 +309,7 @@ export default function RealEstatePage() {
               <h3 className="text-3xl font-bold">Ask Anything, Anytime</h3>
               <p className="text-muted-foreground leading-relaxed">
                 Need to pull property details? Can't remember what a client said last week? Want to draft a follow-up email?
-                Just ask your AI Coach. It understands natural language and has perfect memory of every conversation and listing.
+                Just ask your AI Coach. It understands natural language and has complete context of every conversation and listing.
               </p>
 
               <div className="space-y-4">
@@ -979,7 +979,7 @@ export default function RealEstatePage() {
               <CardContent className="p-8">
                 <div className="grid md:grid-cols-2 gap-x-8 gap-y-3 mb-8">
                   {[
-                    "Infinite conversation memory",
+                    "Infinite conversation context",
                     "24/7 AI Coach",
                     "Smart listing creator",
                     "Client relationship manager",
@@ -1083,7 +1083,7 @@ export default function RealEstatePage() {
               },
               {
                 question: "What if I already use a CRM like Follow Up Boss?",
-                answer: "Great! Perpetual Core can work alongside your existing CRM or replace it entirely—your choice. Many agents use Perpetual Core as their primary system because it has smarter memory and better automation. But if you love your current CRM, Perpetual Core can integrate with it and add AI superpowers on top."
+                answer: "Great! Perpetual Core can work alongside your existing CRM or replace it entirely—your choice. Many agents use Perpetual Core as their primary system because it has smarter context and better automation. But if you love your current CRM, Perpetual Core can integrate with it and add AI superpowers on top."
               },
               {
                 question: "Will this replace my transaction coordinator or assistant?",
@@ -1095,7 +1095,7 @@ export default function RealEstatePage() {
               },
               {
                 question: "What if I'm working with multiple clients at the same time?",
-                answer: "That's exactly what Perpetual Core is built for! It tracks every client separately with perfect memory. Switch between clients instantly—AI knows exactly where you left off with each one. No more confusion or mixing up details."
+                answer: "That's exactly what Perpetual Core is built for! It tracks every client separately with complete context. Switch between clients instantly—AI knows exactly where you left off with each one. No more confusion or mixing up details."
               },
               {
                 question: "Do you offer training or onboarding?",

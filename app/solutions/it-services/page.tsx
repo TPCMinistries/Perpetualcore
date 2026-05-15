@@ -844,7 +844,7 @@ export default function ITServicesPage() {
                   </div>
                   <div className="flex items-start gap-2">
                     <CheckCircle2 className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
-                    <span>Build institutional memory that compounds over time</span>
+                    <span>Build institutional knowledge that compounds over time</span>
                   </div>
                 </div>
               </CardContent>

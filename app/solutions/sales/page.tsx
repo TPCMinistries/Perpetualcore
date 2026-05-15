@@ -187,7 +187,7 @@ export default function SalesTeamsPage() {
                 <ul className="space-y-2 text-sm text-muted-foreground">
                   <li className="flex items-start gap-2">
                     <CheckCircle2 className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
-                    <span>Infinite memory of all conversations</span>
+                    <span>Infinite context across all conversations</span>
                   </li>
                   <li className="flex items-start gap-2">
                     <CheckCircle2 className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
@@ -1045,7 +1045,7 @@ export default function SalesTeamsPage() {
                   {
                     feature: "Team Collaboration",
                     old: "Knowledge buried in inboxes and drives",
-                    new: "Searchable knowledge base with infinite memory"
+                    new: "Searchable knowledge base with infinite context"
                   }
                 ].map((row, i) => (
                   <tr key={i} className={`border-b ${row.highlight ? 'bg-primary/5' : ''}`}>
@@ -1172,7 +1172,7 @@ export default function SalesTeamsPage() {
               },
               {
                 question: "How is this different from just using ChatGPT for sales?",
-                answer: "Great question. ChatGPT is generic—it doesn't know YOUR playbooks, YOUR objection handlers, or YOUR winning deals. Perpetual Core is trained on your team's specific knowledge and integrates with your CRM. Key differences: (1) Searches your sales playbooks and battle cards, not generic internet. (2) Infinite memory of all customer conversations. (3) Team collaboration and knowledge sharing. (4) CRM integration and workflow automation. (5) Enterprise security and compliance. (6) All AI models in one place (GPT-4, Claude, Gemini). Think: ChatGPT meets Salesforce meets your team's collective intelligence."
+                answer: "Great question. ChatGPT is generic—it doesn't know YOUR playbooks, YOUR objection handlers, or YOUR winning deals. Perpetual Core is trained on your team's specific knowledge and integrates with your CRM. Key differences: (1) Searches your sales playbooks and battle cards, not generic internet. (2) Infinite context across all customer conversations. (3) Team collaboration and knowledge sharing. (4) CRM integration and workflow automation. (5) Enterprise security and compliance. (6) All AI models in one place (GPT-4, Claude, Gemini). Think: ChatGPT meets Salesforce meets your team's collective intelligence."
               }
             ].map((faq, i) => (
               <Card key={i} className="border-2 hover:border-primary transition-colors">

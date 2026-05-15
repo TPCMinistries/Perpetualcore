@@ -1062,7 +1062,7 @@ export default function FinancialAdvisorsPage() {
                   {
                     feature: "CRM Integration",
                     old: "CRM has facts but no context or reasoning",
-                    new: "AI adds institutional memory and decision context"
+                    new: "AI adds institutional knowledge and decision context"
                   },
                   {
                     feature: "Regulatory Compliance",
@@ -1132,7 +1132,7 @@ export default function FinancialAdvisorsPage() {
               },
               {
                 question: "Does Perpetual Core integrate with our CRM (Salesforce, Redtail, Wealthbox)?",
-                answer: "Yes. Perpetual Core integrates with major advisor CRMs including Salesforce, Redtail, Wealthbox, and Junxure. We can pull basic client data from your CRM and sync activities back. The key difference: your CRM handles facts (name, account values, transactions) while Perpetual Core captures context (investment rationale, relationship history, preferences). They work together—CRM as your source of truth for data, Perpetual Core as institutional memory for knowledge. Integration setup takes 30-45 minutes during onboarding."
+                answer: "Yes. Perpetual Core integrates with major advisor CRMs including Salesforce, Redtail, Wealthbox, and Junxure. We can pull basic client data from your CRM and sync activities back. The key difference: your CRM handles facts (name, account values, transactions) while Perpetual Core captures context (investment rationale, relationship history, preferences). They work together—CRM as your source of truth for data, Perpetual Core as institutional knowledge for knowledge. Integration setup takes 30-45 minutes during onboarding."
               },
               {
                 question: "How does Perpetual Core help with succession planning and practice sales?",
@@ -1160,7 +1160,7 @@ export default function FinancialAdvisorsPage() {
               },
               {
                 question: "How is this different from just keeping good CRM notes?",
-                answer: "Great question. CRM notes are great for basic facts but terrible for context and reasoning. Key differences: (1) Perpetual Core has infinite memory—search decades of history instantly, not just recent CRM entries. (2) Captures 'why' not just 'what'—investment rationales, relationship context, decision reasoning. (3) Natural language search—ask questions conversationally, not field-by-field CRM queries. (4) Institutional knowledge transfer—successors get complete context, not just data fields. Think: CRM handles transactions and facts, Perpetual Core handles relationships and reasoning."
+                answer: "Great question. CRM notes are great for basic facts but terrible for context and reasoning. Key differences: (1) Perpetual Core has infinite context—search decades of history instantly, not just recent CRM entries. (2) Captures 'why' not just 'what'—investment rationales, relationship context, decision reasoning. (3) Natural language search—ask questions conversationally, not field-by-field CRM queries. (4) Institutional knowledge transfer—successors get complete context, not just data fields. Think: CRM handles transactions and facts, Perpetual Core handles relationships and reasoning."
               },
               {
                 question: "What if clients ask how their information is being used?",

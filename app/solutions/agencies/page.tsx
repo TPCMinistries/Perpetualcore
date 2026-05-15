@@ -1218,7 +1218,7 @@ export default function AgenciesPage() {
                   "Unlimited AI content assistance",
                   "Your agency's knowledge base",
                   "Creative brief templates",
-                  "Infinite conversation memory",
+                  "Infinite conversation context",
                   "Campaign & project tracking",
                   "All AI models (GPT-4, Claude, Gemini)",
                   "Asset organization & search",
@@ -1456,7 +1456,7 @@ export default function AgenciesPage() {
               },
               {
                 question: "How is Perpetual Core different from just using ChatGPT?",
-                answer: "Perpetual Core is specifically built for agencies with features ChatGPT doesn't have: (1) Your agency's knowledge base—AI searches YOUR campaigns and assets, not just public data. (2) Client confidentiality protection with SOC 2 compliance. (3) Infinite conversation memory that never expires. (4) Agency-specific templates and workflows. (5) Team collaboration with role-based access. (6) All AI models in one place (GPT-4, Claude, Gemini). Think of it as ChatGPT meets your agency's shared drive—but infinitely more powerful."
+                answer: "Perpetual Core is specifically built for agencies with features ChatGPT doesn't have: (1) Your agency's knowledge base—AI searches YOUR campaigns and assets, not just public data. (2) Client confidentiality protection with SOC 2 compliance. (3) Infinite conversation context that never expires. (4) Agency-specific templates and workflows. (5) Team collaboration with role-based access. (6) All AI models in one place (GPT-4, Claude, Gemini). Think of it as ChatGPT meets your agency's shared drive—but infinitely more powerful."
               },
               {
                 question: "Can we try it with a small team first?",

@@ -1472,7 +1472,7 @@ export default function AccountantsPage() {
               },
               {
                 question: "How is Perpetual Core different from just using ChatGPT?",
-                answer: "Great question. Perpetual Core is specifically built for accounting firms with critical features ChatGPT doesn't have: (1) Your firm's institutional knowledge base—AI searches YOUR client files and workpapers, not just public data. (2) IRS compliance and client confidentiality protection with SOC 2 certification. (3) Infinite conversation memory that never expires. (4) Tax-specific features like code lookups, client communication templates, and deadline tracking. (5) Team collaboration with role-based access. (6) Integration with tax software. (7) All AI models in one place (GPT-4, Claude, Gemini). Think of it as ChatGPT meets Thomson Reuters meets your firm's shared drive—but 10x more powerful."
+                answer: "Great question. Perpetual Core is specifically built for accounting firms with critical features ChatGPT doesn't have: (1) Your firm's institutional knowledge base—AI searches YOUR client files and workpapers, not just public data. (2) IRS compliance and client confidentiality protection with SOC 2 certification. (3) Infinite conversation context that never expires. (4) Tax-specific features like code lookups, client communication templates, and deadline tracking. (5) Team collaboration with role-based access. (6) Integration with tax software. (7) All AI models in one place (GPT-4, Claude, Gemini). Think of it as ChatGPT meets Thomson Reuters meets your firm's shared drive—but 10x more powerful."
               },
               {
                 question: "Will this replace our tax research subscriptions?",
@@ -1583,7 +1583,7 @@ export default function AccountantsPage() {
                     "Unlimited tax research and code lookups",
                     "Your firm's institutional knowledge base",
                     "Client communication templates",
-                    "Infinite conversation memory",
+                    "Infinite conversation context",
                     "Engagement letter & organizer automation",
                     "All AI models (GPT-4, Claude, Gemini)",
                     "Deadline tracking and reminders",
