@@ -1,13 +1,14 @@
 /**
  * lib/rfp/review/generate.ts — Reviewer Agent v1 orchestrator.
  *
- * Single Opus pass that reads the five drafted sections against the funder's
+ * Single GPT-4o pass that reads the five drafted sections against the funder's
  * opportunity brief and emits structured findings + an overall score + an
  * executive summary. No streaming, no inline annotation, no iterative critique
  * — those are Phase 2.
  *
- * Cost: ~$0.50-1.00/run at typical proposal size. Opus pricing $15/M input +
- * $75/M output. The route persists the actual measured cost on the audit row.
+ * Cost: ~$0.10-0.25/run at typical proposal size. GPT-4o pricing $2.50/M input
+ * + $10/M output. The route persists the actual measured cost on the audit row.
+ * JSON-mode is enforced so the structured output is reliably parseable.
  *
  * Honest defaults:
  *  - If the model returns malformed JSON we throw rather than persist garbage.
@@ -16,7 +17,7 @@
  *    the MAX_PERSISTED_BYTES ceiling.
  */
 
-import Anthropic from "@anthropic-ai/sdk";
+import OpenAI from "openai";
 import {
   buildReviewerUserPrompt,
   REVIEWER_SYSTEM_PROMPT,
@@ -26,12 +27,12 @@ import {
   type ReviewerFinding,
 } from "./rubric";
 
-const MODEL = "claude-opus-4-7";
+const MODEL = "gpt-4o";
 
-// Opus 4 pricing (USD per million tokens). Keep in sync with
-// lib/ai/model-selector.ts which uses the same per-1M numbers.
-const PRICE_PER_M_INPUT = 15.0;
-const PRICE_PER_M_OUTPUT = 75.0;
+// GPT-4o pricing (USD per million tokens). Keep in sync with
+// lib/rfp/voice/extract.ts and lib/rfp/draft/generate.ts.
+const PRICE_PER_M_INPUT = 2.5;
+const PRICE_PER_M_OUTPUT = 10.0;
 
 // Defensive cap for excerpt length before persistence. Keeps the persisted
 // JSON well under MAX_PERSISTED_BYTES even with ~15 findings.
@@ -59,29 +60,29 @@ function truncateExcerpt(f: ReviewerFinding): ReviewerFinding {
 export async function generateReview(
   input: ReviewerInput,
 ): Promise<ReviewerResult> {
-  const apiKey = process.env.ANTHROPIC_API_KEY;
+  const apiKey = process.env.OPENAI_API_KEY;
   if (!apiKey) {
-    throw new Error("ANTHROPIC_API_KEY not set");
+    throw new Error("OPENAI_API_KEY not set");
   }
 
-  const client = new Anthropic({ apiKey });
+  const client = new OpenAI({ apiKey });
   const session_id = `review_${Date.now().toString(36)}_${Math.random()
     .toString(36)
     .slice(2, 8)}`;
 
-  const res = await client.messages.create({
+  const res = await client.chat.completions.create({
     model: MODEL,
     // Reviews are bounded — ~15 findings * ~300 chars + summary fits in <3k tokens.
     // 4096 leaves headroom without enabling rambling.
     max_tokens: 4096,
-    system: REVIEWER_SYSTEM_PROMPT,
-    messages: [{ role: "user", content: buildReviewerUserPrompt(input) }],
+    response_format: { type: "json_object" },
+    messages: [
+      { role: "system", content: REVIEWER_SYSTEM_PROMPT },
+      { role: "user", content: buildReviewerUserPrompt(input) },
+    ],
   });
 
-  const text = res.content
-    .filter((b): b is Anthropic.TextBlock => b.type === "text")
-    .map((b) => b.text)
-    .join("");
+  const text = res.choices[0]?.message?.content ?? "";
 
   if (!text.trim()) {
     throw new Error("reviewer model returned empty content");
@@ -98,8 +99,8 @@ export async function generateReview(
 
   const findings = parsed.findings.map(truncateExcerpt);
 
-  const tokens_in = res.usage.input_tokens;
-  const tokens_out = res.usage.output_tokens;
+  const tokens_in = res.usage?.prompt_tokens ?? 0;
+  const tokens_out = res.usage?.completion_tokens ?? 0;
   const cost_usd =
     (tokens_in / 1_000_000) * PRICE_PER_M_INPUT +
     (tokens_out / 1_000_000) * PRICE_PER_M_OUTPUT;

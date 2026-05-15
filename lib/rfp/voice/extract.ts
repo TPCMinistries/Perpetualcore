@@ -1,17 +1,18 @@
 /**
  * lib/rfp/voice/extract.ts — Voice Fingerprint v1 extractor.
  *
- * Single Opus pass over 3–10 user-supplied past proposals / annual reports /
+ * Single GPT-4o pass over 3–10 user-supplied past proposals / annual reports /
  * founder letters. Produces a structured stylometric profile the drafter
  * prepends to its system prompt. This is NOT model fine-tuning, NOT RAG-
  * grounded retrieval, NOT a reviewer — it is a deterministic, structured
  * voice profile applied as system-prompt context. Subsequent phases (vault
  * grounding, reviewer, true fine-tuning) layer on top.
  *
- * Cost: Opus 4 pricing $15/M input + $75/M output. v1 input ~6K–25K tokens
+ * Cost: GPT-4o pricing $2.50/M input + $10/M output. v1 input ~6K–25K tokens
  * (depending on doc count + length) and ~1.2K tokens output → measured
- * cost falls in $0.15–$0.40 per extraction. Cheap enough to re-run on each
- * org as their past work grows.
+ * cost falls in $0.03–$0.10 per extraction. Cheap enough to re-run on each
+ * org as their past work grows. JSON-mode is enforced so we never have to
+ * fight code fences in the output.
  *
  * Honest defaults:
  *  - If the model returns malformed JSON we throw rather than persist garbage.
@@ -22,7 +23,7 @@
  *    nothing speculative. Adding fields later is cheap; removing them costs us.
  */
 
-import Anthropic from "@anthropic-ai/sdk";
+import OpenAI from "openai";
 
 /** Per-document cap before truncation. Keeps the worst-case input bounded. */
 export const MAX_DOC_CHARS = 50_000;
@@ -33,12 +34,12 @@ export const MAX_DOCS = 10;
 
 export const VOICE_FINGERPRINT_VERSION = 1 as const;
 
-const MODEL = "claude-opus-4-7";
+const MODEL = "gpt-4o";
 
-// Opus 4 pricing (USD per million tokens). Keep in sync with
-// lib/rfp/review/generate.ts which uses the same per-1M numbers.
-const PRICE_PER_M_INPUT = 15.0;
-const PRICE_PER_M_OUTPUT = 75.0;
+// GPT-4o pricing (USD per million tokens). Keep in sync with
+// lib/rfp/review/generate.ts and lib/rfp/draft/generate.ts.
+const PRICE_PER_M_INPUT = 2.5;
+const PRICE_PER_M_OUTPUT = 10.0;
 
 const MAX_OUTPUT_TOKENS = 3000;
 
@@ -235,20 +236,20 @@ export async function extractVoiceFingerprint(
     );
   }
 
-  const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY! });
+  const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY! });
   const session_id = `voice_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 8)}`;
 
-  const res = await client.messages.create({
+  const res = await client.chat.completions.create({
     model: MODEL,
     max_tokens: MAX_OUTPUT_TOKENS,
-    system: SYSTEM_PROMPT,
-    messages: [{ role: "user", content: buildUserPrompt(documents) }],
+    response_format: { type: "json_object" },
+    messages: [
+      { role: "system", content: SYSTEM_PROMPT },
+      { role: "user", content: buildUserPrompt(documents) },
+    ],
   });
 
-  const text = res.content
-    .filter((b) => b.type === "text")
-    .map((b) => (b.type === "text" ? b.text : ""))
-    .join("");
+  const text = res.choices[0]?.message?.content ?? "";
 
   let parsed: unknown;
   try {
@@ -268,8 +269,8 @@ export async function extractVoiceFingerprint(
     ...validated,
   };
 
-  const tokens_in = res.usage.input_tokens;
-  const tokens_out = res.usage.output_tokens;
+  const tokens_in = res.usage?.prompt_tokens ?? 0;
+  const tokens_out = res.usage?.completion_tokens ?? 0;
   const cost_usd =
     (tokens_in / 1_000_000) * PRICE_PER_M_INPUT +
     (tokens_out / 1_000_000) * PRICE_PER_M_OUTPUT;

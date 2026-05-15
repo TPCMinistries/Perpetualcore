@@ -1,7 +1,7 @@
 /**
  * lib/rfp/draft/generate.ts — first-pass drafter.
  *
- * Single round of Sonnet, no reviewer, no vault retrieval. As of Voice
+ * Single round of GPT-4o, no reviewer, no vault retrieval. As of Voice
  * Fingerprint v1 the drafter optionally accepts a stylometric profile
  * (see lib/rfp/voice/extract.ts) and prepends it to the system prompt via
  * lib/rfp/voice/apply.ts. When no fingerprint is provided we behave
@@ -12,23 +12,22 @@
  * factual signal. Anything else org-specific the model writes must still
  * be wrapped in `[VERIFY: ...]` markers per the system prompt.
  *
- * Model: claude-sonnet-4-6. Chosen for cost (~$3/M input, $15/M output) —
- * an Opus reviewer pass is a separate build. v1 input is ~1500 tokens
+ * Model: gpt-4o. Cost ($2.50/M input + $10/M output). v1 input ~1500 tokens
  * (+~250 if voice fingerprint applied), output ~2000 tokens →
- * ~$0.03/draft. Cheap enough to dogfood liberally on Uplift submissions.
+ * ~$0.02/draft. Cheap enough to dogfood liberally.
  */
 
-import Anthropic from "@anthropic-ai/sdk";
+import OpenAI from "openai";
 import { ALL_SECTION_SPECS, SECTION_TYPES, type SectionType } from "./sections";
 import { applyVoiceFingerprint } from "@/lib/rfp/voice/apply";
 import type { VoiceFingerprint } from "@/lib/rfp/voice/extract";
 
-const MODEL = "claude-sonnet-4-6";
+const MODEL = "gpt-4o";
 
-// Sonnet 4.6 pricing (USD per million tokens) — keep in sync with
-// lib/agents/executor/planner.ts if/when that file is unified.
-const PRICE_PER_M_INPUT = 3.0;
-const PRICE_PER_M_OUTPUT = 15.0;
+// GPT-4o pricing (USD per million tokens). Keep in sync with
+// lib/rfp/voice/extract.ts and lib/rfp/review/generate.ts.
+const PRICE_PER_M_INPUT = 2.5;
+const PRICE_PER_M_OUTPUT = 10.0;
 
 export interface DraftInput {
   opportunity: {
@@ -140,7 +139,7 @@ function parseSections(raw: string): DraftSection[] {
 }
 
 export async function generateDraft(input: DraftInput): Promise<DraftResult> {
-  const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY! });
+  const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY! });
   const session_id = `draft_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 8)}`;
 
   // Voice augmentation — prepend the formatted fingerprint ahead of the
@@ -153,21 +152,20 @@ export async function generateDraft(input: DraftInput): Promise<DraftResult> {
     ? `${applyVoiceFingerprint(input.voiceFingerprint!)}\n\n${SYSTEM_PROMPT}`
     : SYSTEM_PROMPT;
 
-  const res = await client.messages.create({
+  const res = await client.chat.completions.create({
     model: MODEL,
     max_tokens: 4096,
-    system,
-    messages: [{ role: "user", content: buildUserPrompt(input) }],
+    messages: [
+      { role: "system", content: system },
+      { role: "user", content: buildUserPrompt(input) },
+    ],
   });
 
-  const text = res.content
-    .filter((b) => b.type === "text")
-    .map((b) => (b.type === "text" ? b.text : ""))
-    .join("");
+  const text = res.choices[0]?.message?.content ?? "";
 
   const sections = parseSections(text);
-  const tokens_in = res.usage.input_tokens;
-  const tokens_out = res.usage.output_tokens;
+  const tokens_in = res.usage?.prompt_tokens ?? 0;
+  const tokens_out = res.usage?.completion_tokens ?? 0;
   const cost_usd =
     (tokens_in / 1_000_000) * PRICE_PER_M_INPUT +
     (tokens_out / 1_000_000) * PRICE_PER_M_OUTPUT;
