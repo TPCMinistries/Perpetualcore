@@ -1,7 +1,9 @@
 # Requirements: Perpetual Core
 
-**Defined:** 2026-02-23 (v1.0) · 2026-05-09 (v2.0)
+**Defined:** 2026-02-23 (v1.0) · 2026-05-09 (v2.0) · 2026-05-15 (v4.0)
 **Core Value:** The AI operating system brain — if this breaks, everything downstream breaks
+
+*Note (2026-05-15): Milestone v3.0 (Studio Polish & Launch — Phase 12) is tracked in ROADMAP.md but didn't add new REQ-IDs; its scope was a polish pass over v2.0 surfaces + repositioning copy. v4.0 supersedes ANLYT-01/02/03 from v1.0 Deferred into active Phase 18.*
 
 ---
 
@@ -107,17 +109,106 @@ Multi-tenant SaaS RFP & Proposal Engine: Discovery → Capture Profile → Draft
 
 ---
 
+## v4.0 Requirements (Business Operations & Revenue Plumbing)
+
+Goal: make perpetualcore.com a functioning business — leads captured + routed, payments verified end-to-end, calendar booking installed, subscription tier identity resolved, social proof published, funnel instrumented, industry pages cascade finished, ecosystem interop documented, SEO foundation laid, subdomain products audited.
+
+Frame: business manager's perspective on operating perpetualcore.com as the front door for the broader IHA / Uplift / DeepFutures / TPC / Sage SaaS ecosystem.
+
+### Lead Capture + CRM (Phase 13)
+
+- [ ] **LEAD-01**: Every form on the marketing site (`/contact-sales`, Vellum waitlist, RFP Sentry early-list, Atlas intake, any other) is verified to deliver to a known destination — CRM, inbox, or Supabase table — with no submission silently dropped
+- [ ] **LEAD-02**: New lead submission triggers an email notification to `lorenzo@perpetualcore.com` within 60 seconds with full submission payload + source page
+- [ ] **LEAD-03**: Each lead row captures source page URL, UTM parameters (utm_source, utm_medium, utm_campaign), referrer, and timestamp
+- [ ] **LEAD-04**: A single canonical lead destination is chosen (CRM tool — HubSpot Free, Pipedrive, or custom Supabase table + Resend pipeline) and all forms route to it
+- [ ] **LEAD-05**: Lead status field (new → contacted → qualified → closed-won / closed-lost) is trackable in the canonical destination with manual update by Lorenzo
+
+### Stripe E2E + Activation (Phase 14)
+
+- [ ] **PAY-01**: Signup → Stripe checkout → return-to-app loop is verified end-to-end for each subscription tier (Free / $49 / $99) — including a real successful payment via Stripe test card
+- [ ] **PAY-02**: Post-payment landing experience is coherent — decision documented and implemented (keep deprecated `/dashboard/*`, build new onboarding, or redirect to Sage SaaS at sage.perpetualcore.com)
+- [ ] **PAY-03**: Stripe webhooks (`checkout.session.completed`, `customer.subscription.updated`, `customer.subscription.deleted`, `invoice.paid`, `invoice.payment_failed`) are verified to fire and correctly update Supabase tenant state
+- [ ] **PAY-04**: Failed-payment recovery flow is documented: dunning emails, grace period, downgrade-to-free behavior all verified
+- [ ] **PAY-05**: Every Stripe object (customer, subscription, invoice) is tagged with `metadata.product` so downstream revenue can be attributed to perpetualcore.com vs Sage SaaS vs Atlas vs other products under the same PC LLC Stripe account (`acct_1PaRTgIwAPnWjXP`)
+
+### Calendar + Intake Flow (Phase 15)
+
+- [ ] **INTAKE-01**: A calendar booking widget (Cal.com or SavvyCal — selection documented) is embedded on `/contact-sales` and any other "Schedule a demo" CTA destination
+- [ ] **INTAKE-02**: Pre-call qualifying questions are captured before booking confirmation (organization, role, budget band, timeline, what you're hoping to learn)
+- [ ] **INTAKE-03**: Lorenzo receives a calendar invite + lead-summary email within 60 seconds of every booking
+- [ ] **INTAKE-04**: Confirmation email goes to the prospect with prep materials (case studies, methodology PDF, what to expect on the call)
+- [ ] **INTAKE-05**: A 24-hour-before reminder + a 1-hour-before reminder are sent automatically to the prospect
+
+### Subscription Tier Identity (Phase 16)
+
+- [ ] **TIER-01**: A documented decision exists for what the Free/$49/$99 subscription tiers represent — Sage tiers, perpetualcore.com personal subscription, or self-serve killed entirely (decision captured in `.planning/decisions/TIER-IDENTITY.md`)
+- [ ] **TIER-02**: `/pricing` copy reflects the decision — tier names match the product they belong to; no orphan "Subscription" labels with unattributed pricing
+- [ ] **TIER-03**: Signup flow routes to the correct destination product (e.g. if tiers are folded into Sage, signup CTAs redirect to sage.perpetualcore.com signup)
+- [ ] **TIER-04**: Stripe products/prices are renamed/migrated to match new tier identity; legacy SKUs deprecated in Stripe dashboard with metadata pointing to successors
+
+### Social Proof + Testimonials (Phase 17)
+
+- [ ] **PROOF-05**: At least one named client and one quantified outcome is published on the homepage above the fold (with written client permission)
+- [ ] **PROOF-06**: At least one full named case study with direct quotes is published at `/studio/case-studies` (replacing or supplementing the abstracted slots)
+- [ ] **PROOF-07**: Founder photo on `/about` is real (already shipped — confirm); organization counter on landing page reflects real partnerships, not placeholders
+- [ ] **PROOF-08**: Press / publication / podcast mentions (if any) appear as a logo strip on homepage or `/about`
+
+### Funnel Analytics (Phase 18)
+
+- [ ] **ANLYT-01** (revived from v1.0): Conversion funnel tracks drop-off at each step — page view → CTA click → signup OR form submit → first activation event (chat, vellum signup, contact-sales submission, intake-call booked)
+- [ ] **ANLYT-02** (revived from v1.0): UTM parameters are captured at first touch and persisted with every signup/lead record for downstream attribution
+- [ ] **ANLYT-03** (revived from v1.0): Admin dashboard surfaces funnel metrics (weekly cohort, conversion rate per step, top sources by signup volume) for Lorenzo's weekly review
+- [ ] **ANLYT-04**: An analytics tool is selected (PostHog self-host or cloud, Plausible, or Vercel Web Analytics + custom Supabase event log) and instrumented site-wide via a `track-event.ts` wrapper
+- [ ] **ANLYT-05**: Five key business events fire as custom events: `form_submitted`, `stripe_checkout_started`, `stripe_checkout_completed`, `intake_call_booked`, `subscription_activated`
+
+### Industry Pages Cascade (Phase 19)
+
+- [ ] **CASCADE-01**: `/solutions/accountants` cascaded to v6 register (template applied, $X/CPA/mo tier, FAQ, 3-band cross-link, final CTA)
+- [ ] **CASCADE-02**: `/solutions/agencies` cascaded to v6 register
+- [ ] **CASCADE-03**: `/solutions/consulting` cascaded to v6 register
+- [ ] **CASCADE-04**: `/solutions/financial-advisors` cascaded to v6 register (preserve $999/advisor/mo if applicable, SEC compliance hedge)
+- [ ] **CASCADE-05**: `/solutions/it-services` cascaded to v6 register
+- [ ] **CASCADE-06**: `/solutions/real-estate` cascaded to v6 register
+- [ ] **CASCADE-07**: `/solutions/sales` cascaded to v6 register
+
+### Ecosystem Interop Audit (Phase 20)
+
+- [ ] **ECO-01**: A map of how perpetualcore.com leads route to / from other ecosystem entities (IHA, Uplift, TPC, DeepFutures, Sage SaaS, lorenzodc.com, Streams of Grace, IHA Academy) is documented in `.planning/ECOSYSTEM-INTEROP.md`
+- [ ] **ECO-02**: The 10/15% giving cash-flow is traced from invoice → revenue → IHA bank transfer; documented in `.planning/GIVING-FLOW.md` with any gaps flagged for resolution
+- [ ] **ECO-03**: Cross-org lead routing path is documented — e.g. theiha.org visitor wanting Perpetual Core engagement, lorenzodc.com Catalyst customer wanting Sage SaaS, DeepFutures inquiry on perpetualcore.com routed to fund pipeline
+- [ ] **ECO-04**: Shared founder/identity surfaces are consistent — same headshot, bio fingerprint, link strategy — across perpetualcore.com, theiha.org, lorenzodc.com (audit + fix list)
+- [ ] **ECO-05**: Sage SaaS billing operates under Perpetual Core LLC's existing Stripe account per `[[sage-saas-legal-entity]]` memory — verify metadata.product tagging is consistent, customer migration path from PC subscription → Sage SaaS is documented
+
+### SEO + Discovery Foundation (Phase 21)
+
+- [ ] **SEO-01**: Blog / articles infrastructure exists at `/blog` (or `/writing`) — Next.js MDX or Supabase-backed, with at least 3 published cornerstone articles at milestone close
+- [ ] **SEO-02**: JSON-LD structured data (Organization, FounderPerson, Article, Service) is rendered on every public page
+- [ ] **SEO-03**: `sitemap.xml` is auto-generated from routes + blog index, submitted to Google Search Console, and refreshes on every deploy
+- [ ] **SEO-04**: Open Graph + Twitter Card metadata is verified on every public route (`/`, `/studio/*`, `/products/*`, `/solutions/*`, `/blog/*`, `/about`, `/engine`, `/fund`, `/institute`)
+- [ ] **SEO-05**: Internal linking from industry pages → cornerstone articles is wired (each industry page references at least 1 relevant cornerstone)
+- [ ] **SEO-06**: Three cornerstone articles published — topics covering one industry deep-dive (e.g. "AI for non-profits in 2026"), one competitive comparison (e.g. "Perpetual Core vs Notion AI vs the model labs"), and one methodology deep-dive (the Eight Registries explained)
+
+### Subdomain Product Audit (Phase 22)
+
+- [ ] **SUBDOMAIN-01**: `atlas.perpetualcore.com` audited — landing page state, conversion path documented, broken links flagged, cross-link integrity to/from main site verified
+- [ ] **SUBDOMAIN-02**: `sentinel.perpetualcore.com` — same audit (Phases 1-11 BUILT per [[sentinel-project]] memory; deploy state verified)
+- [ ] **SUBDOMAIN-03**: `sage.perpetualcore.com` — same audit; coordination with Sage SaaS Phase 1 (Shell Port) documented; signup flow from perpetualcore.com → sage.perpetualcore.com tested
+- [ ] **SUBDOMAIN-04**: `rfp.perpetualcore.com` — same audit; coordination with v2.0 RFP Engine roadmap documented; planned launch state vs current state delta surfaced
+- [ ] **SUBDOMAIN-05**: Cross-link integrity from main site → all 4 subdomains is verified — every "Visit X" CTA tested, broken or stale destinations flagged for fix
+
+---
+
 ## Deferred
 
 Carried forward but not in any active roadmap.
 
-### Conversion Analytics (from v1.0)
+### Conversion Analytics (from v1.0 — REVIVED in v4.0 Phase 18)
 
-- **ANLYT-01**: Custom events track full funnel: page view → CTA click → signup → first chat → activation
-- **ANLYT-02**: Admin dashboard displays conversion funnel visualization with drop-off rates
-- **ANLYT-03**: UTM parameter tracking captures marketing campaign attribution
+- ~~**ANLYT-01**~~ — Now active in v4.0 Phase 18
+- ~~**ANLYT-02**~~ — Now active in v4.0 Phase 18 (renamed ANLYT-03 in new scoping)
+- ~~**ANLYT-03**~~ — Now active in v4.0 Phase 18 (renamed ANLYT-02 in new scoping)
 
-*Reason: needs real funnel traffic to be meaningful. Revisit post-RFP-Engine launch.*
+*Resolved 2026-05-15: revived into v4.0 milestone alongside fresh analytics infrastructure work (ANLYT-04 tool selection, ANLYT-05 key events).*
 
 ### v2.x Candidates
 
