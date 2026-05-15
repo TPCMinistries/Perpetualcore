@@ -1,16 +1,21 @@
 # Session Handoff — Perpetual Core v2 (Operating Company)
 
-**Session window:** 2026-05-13 → 2026-05-14
-**Last update:** 2026-05-14 (post safety + cascade pass)
-**Branch:** `feat/studio-repositioning`
-**Latest commit:** `8f6f16f` — fix(repositioning): consolidate mailtos + soften retainer-credit + cascade /solutions/healthcare
-**Status:** v2 ship-ready locally. Not pushed. Safety pass shipped. 2 flagship verticals cascaded. Awaiting Lorenzo's in-browser verdict + 4 unconfirmed details.
+**Session window:** 2026-05-13 → 2026-05-15
+**Last update:** 2026-05-15 (post-push)
+**Branch:** `feat/studio-repositioning` — **pushed to origin at e4be561**
+**Latest commit:** `e4be561` — feat(repositioning): cascade /solutions/law-firms to v6
+**Status:** 13 commits pushed to origin. Vercel preview redeploy in flight. 5 industry verticals cascaded. 7 industry pages still on older layouts. Awaiting Lorenzo's in-browser verdict + 2 unconfirmed details.
 
 ### Session commits (chronological)
 1. `5cee5b1` — v2 operating-company frame, Engine-as-standard, 3-band spectrum
 2. `635d31e` — cascade /solutions/non-profits to v6 + add session handoff
 3. `8f6f16f` — consolidate mailtos + soften retainer-credit + cascade /solutions/healthcare
-4. *(pending)* — cascade education + churches + law-firms (in-progress)
+4. `f968890` — cascade /solutions/education to v6 + sync handoff
+5. `88169b6` — cascade /solutions/churches to v6
+6. `e4be561` — cascade /solutions/law-firms to v6
+
+### Push details (2026-05-15)
+Pushed `feat/studio-repositioning`: `9377e96..e4be561` (13 commits delivered). Vercel preview redeploy triggered automatically. Stakeholder-shareable URL refreshes when build completes.
 
 ---
 
@@ -50,7 +55,7 @@ feat/rfp-orgs-invites-cont:  Other Claude session's territory. DO NOT TOUCH.
 
 ---
 
-## 23 routes shipping at v6 visual register
+## 25 routes shipping at v6 visual register
 
 All return 200 on localhost:3002. Dev log clean.
 
@@ -77,19 +82,20 @@ All return 200 on localhost:3002. Dev log clean.
 | `/institute` | ✅ NEW — IHA programs + Uplift operating arm callout |
 | `/about` | ✅ v6 — founder, ecosystem, 5 operating principles |
 | `/pricing` | ✅ v6 — full 3-band spectrum, Stripe checkout preserved |
-| `/solutions/non-profits` | ✅ **NEW** — v6 cascade (1094 → 399 lines), 6 use cases, 5 FAQs, Platform Pro $99/staff/mo |
-| `/solutions/healthcare` | ✅ **NEW** — v6 cascade (1408 → 382 lines), $899/provider/mo, BAA + EHR integration list, HIPAA-aware framing |
+| `/solutions/non-profits` | ✅ v6 cascade (1094 → 399 lines), 6 use cases, 5 FAQs, Platform Pro $99/staff/mo |
+| `/solutions/healthcare` | ✅ v6 cascade (1408 → 382 lines), $899/provider/mo, BAA + EHR integration list, HIPAA-aware framing |
+| `/solutions/education` | ✅ **NEW** — v6 cascade (1152 → 395 lines), $99/educator/mo, FERPA + SOC 2, SIS/LMS integration list |
+| `/solutions/churches` | ✅ **NEW** — v6 cascade (1277 → 396 lines), $99/staff/mo, ChMS integration list, "built from inside a church" |
+| `/solutions/law-firms` | ✅ **NEW** — v6 cascade (1817 → 401 lines), $999/attorney/mo, ABA Rule 1.6 aware (counsel review pending), DMS integration list |
 
 ---
 
 ## Still on older design (deferred)
 
-10 `/solutions/*` industry pages — render with new tokens but use older layouts:
+7 `/solutions/*` industry pages — render with new tokens but use older layouts:
 
 | Route | Lines | Ecosystem fit |
 |---|---|---|
-| `/solutions/education` | 1152 | High — IHA Academy + Uplift Workforce |
-| `/solutions/churches` | 1277 | High — TPC Ministries adjacency |
 | `/solutions/real-estate` | 1218 | Medium |
 | `/solutions/sales` | 1227 | Medium |
 | `/solutions/consulting` | 1356 | Medium-high |
@@ -97,7 +103,6 @@ All return 200 on localhost:3002. Dev log clean.
 | `/solutions/it-services` | 1344 | Medium |
 | `/solutions/agencies` | 1559 | Medium |
 | `/solutions/accountants` | 1698 | Medium |
-| `/solutions/law-firms` | 1817 | High — revenue density |
 
 `/rfp` (RFP Engine — other session's territory, do not touch)
 
@@ -172,4 +177,4 @@ All return 200 on localhost:3002. Dev log clean.
 
 ## One-line summary
 
-v2 strategic + design overhaul shipped locally through `8f6f16f`: 4 new pages, **23 cascaded routes** (added non-profits + healthcare flagships), Engine reframed as open standard, 5-arm operating company IA, 3-band Studio offer spectrum, mailto consolidation + retainer-credit softening shipped. Awaiting Lorenzo's verdict + 2 remaining confirmation items (retainer offer slate, Uplift+DeepFutures legal status) before push to Vercel preview.
+v2 strategic + design overhaul **pushed to origin through `e4be561`**: 4 new pages, **25 cascaded routes** (added non-profits, healthcare, education, churches, law-firms — 5 industry verticals), Engine reframed as open standard, 5-arm operating company IA, 3-band Studio offer spectrum, mailto consolidation + retainer-credit softening shipped. Vercel preview redeploy in flight. Awaiting Lorenzo's in-browser verdict + 2 remaining confirmation items (retainer offer slate, Uplift+DeepFutures legal status). 7 industry pages still on older layouts (mechanical to cascade — same template).
