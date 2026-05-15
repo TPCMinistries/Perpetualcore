@@ -20,13 +20,13 @@ const STUDIO_LINKS = [
 ];
 
 const PRODUCT_LINKS = [
-  { label: "Atlas", href: "/products/atlas" },
-  { label: "Atlas Discovery", href: "/products/atlas-discovery" },
-  { label: "Sentinel", href: "/products/sentinel" },
-  { label: "Sage", href: "/products/sage" },
-  { label: "Vellum", href: "/products/vellum" },
-  { label: "RFP Engine", href: "/products/rfp-engine" },
-  { label: "RFP Sentry", href: "/products/rfp-sentry" },
+  { label: "Atlas", href: "/products/atlas", external: false },
+  { label: "Atlas Discovery", href: "/products/atlas-discovery", external: false },
+  { label: "Sentinel", href: "/products/sentinel", external: false },
+  { label: "Sage", href: "/products/sage", external: false },
+  { label: "Vellum", href: "/products/vellum", external: false },
+  { label: "RFP Engine", href: "https://rfp.perpetualcore.com", external: true },
+  { label: "RFP Sentry", href: "/products/rfp-sentry", external: false },
 ];
 
 const FUND_LINKS = [
@@ -96,9 +96,15 @@ export function Footer() {
             <ul className="space-y-2 text-sm text-muted-foreground">
               {PRODUCT_LINKS.map((link) => (
                 <li key={link.href}>
-                  <Link href={link.href} className="hover:text-primary transition">
-                    {link.label}
-                  </Link>
+                  {link.external ? (
+                    <a href={link.href} target="_blank" rel="noopener noreferrer" className="hover:text-primary transition">
+                      {link.label}
+                    </a>
+                  ) : (
+                    <Link href={link.href} className="hover:text-primary transition">
+                      {link.label}
+                    </Link>
+                  )}
                 </li>
               ))}
             </ul>

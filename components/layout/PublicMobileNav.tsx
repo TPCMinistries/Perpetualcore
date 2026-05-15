@@ -82,9 +82,9 @@ export function PublicMobileNav() {
               <Link href="/products/vellum" onClick={close} className="block px-4 py-2.5 text-sm text-muted-foreground hover:text-foreground hover:bg-accent rounded-sm transition-colors">
                 Vellum
               </Link>
-              <Link href="/products/rfp-engine" onClick={close} className="block px-4 py-2.5 text-sm text-muted-foreground hover:text-foreground hover:bg-accent rounded-sm transition-colors">
-                RFP Engine
-              </Link>
+              <a href="https://rfp.perpetualcore.com" target="_blank" rel="noopener noreferrer" onClick={close} className="block px-4 py-2.5 text-sm text-muted-foreground hover:text-foreground hover:bg-accent rounded-sm transition-colors">
+                RFP Engine ↗
+              </a>
               <Link href="/products/rfp-sentry" onClick={close} className="block px-4 py-2.5 text-sm text-muted-foreground hover:text-foreground hover:bg-accent rounded-sm transition-colors">
                 RFP Sentry
               </Link>

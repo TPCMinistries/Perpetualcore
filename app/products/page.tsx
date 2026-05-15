@@ -38,7 +38,7 @@ const PRODUCTS: Product[] = [
     headline: "AI-native COO for fund-backed portfolio companies.",
     body:
       "For PE Operating Partners and fund Ops leads installing an AI operating system across a portco in 6 to 10 weeks, before the next quarterly board meeting. In pilot with select funds — by introduction only.",
-    cta: { label: "Request introduction", href: "/products/atlas" },
+    cta: { label: "Visit Atlas", href: "https://atlas.perpetualcore.com", external: true },
   },
   {
     index: "02",
@@ -79,7 +79,7 @@ const PRODUCTS: Product[] = [
     headline: "Find the right RFP. Draft it in your voice. Ship it clean.",
     body:
       "For grant writers, capture managers, and EDs responding to federal, state, and foundation RFPs at capture-grade quality. Discovery every 6 hours. Drafting in your voice, not generic AI prose.",
-    cta: { label: "See RFP Engine", href: "/products/rfp-engine" },
+    cta: { label: "Visit RFP Engine", href: "https://rfp.perpetualcore.com", external: true },
   },
   {
     index: "06",

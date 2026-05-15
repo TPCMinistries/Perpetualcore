@@ -44,7 +44,7 @@ const PRODUCT_LINKS = [
   { label: "Sentinel", href: "/products/sentinel", description: "Due diligence and intel — live" },
   { label: "Sage", href: "/products/sage", description: "Personal AI OS with ambient context + voice" },
   { label: "Vellum", href: "/products/vellum", description: "Institutional knowledge" },
-  { label: "RFP Engine", href: "/products/rfp-engine", description: "Find, draft, ship RFPs" },
+  { label: "RFP Engine", href: "https://rfp.perpetualcore.com", description: "Find, draft, ship RFPs", external: true },
   { label: "RFP Sentry", href: "/products/rfp-sentry", description: "Bid intelligence + compliance gate" },
 ];
 
@@ -121,16 +121,34 @@ export function Navbar() {
               Products <ChevronDown className="h-4 w-4 group-hover:rotate-180 transition-transform" />
             </Link>
             <DropdownPanel width="w-80">
-              {PRODUCT_LINKS.map((link) => (
-                <Link
-                  key={link.href}
-                  href={link.href}
-                  className="block px-3 py-2.5 text-sm hover:bg-accent rounded-md transition"
-                >
-                  <div className="font-medium">{link.label}</div>
-                  <div className="text-xs text-muted-foreground">{link.description}</div>
-                </Link>
-              ))}
+              {PRODUCT_LINKS.map((link) => {
+                const isExternal = "external" in link && link.external;
+                const inner = (
+                  <>
+                    <div className="font-medium">{link.label}</div>
+                    <div className="text-xs text-muted-foreground">{link.description}</div>
+                  </>
+                );
+                return isExternal ? (
+                  <a
+                    key={link.href}
+                    href={link.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="block px-3 py-2.5 text-sm hover:bg-accent rounded-md transition"
+                  >
+                    {inner}
+                  </a>
+                ) : (
+                  <Link
+                    key={link.href}
+                    href={link.href}
+                    className="block px-3 py-2.5 text-sm hover:bg-accent rounded-md transition"
+                  >
+                    {inner}
+                  </Link>
+                );
+              })}
             </DropdownPanel>
           </div>
 

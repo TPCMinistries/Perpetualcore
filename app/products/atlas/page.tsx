@@ -8,7 +8,7 @@
 
 import Link from "next/link";
 import { useState, type FormEvent } from "react";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, ArrowUpRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -101,10 +101,12 @@ export default function AtlasPage() {
 
           <div className="flex flex-col sm:flex-row items-start gap-4">
             <Button size="lg" asChild className="text-sm font-medium px-7 h-11 shadow-none bg-foreground text-background hover:bg-foreground/90 rounded-[6px]">
-              <Link href="#intake">Request introduction <ArrowRight className="ml-2 h-4 w-4" /></Link>
+              <a href="https://atlas.perpetualcore.com" target="_blank" rel="noopener noreferrer">
+                Visit Atlas <ArrowUpRight className="ml-2 h-4 w-4" />
+              </a>
             </Button>
-            <Link href="/products/atlas-discovery" className="inline-flex items-center text-sm font-medium text-foreground hover:text-primary transition-colors py-3 border-b border-foreground/20 hover:border-primary">
-              See Atlas Discovery <ArrowRight className="ml-1.5 h-3.5 w-3.5" />
+            <Link href="#intake" className="inline-flex items-center text-sm font-medium text-foreground hover:text-primary transition-colors py-3 border-b border-foreground/20 hover:border-primary">
+              Request introduction <ArrowRight className="ml-1.5 h-3.5 w-3.5" />
             </Link>
           </div>
         </div>
