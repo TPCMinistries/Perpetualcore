@@ -6,6 +6,8 @@ Milestone v1.0 Conversion Optimization takes a fully-built product and optimizes
 
 Milestone v2.0 RFP & Proposal Engine layers a multi-tenant SaaS product on top of Perpetual Core. It automates the full capture lifecycle — discover opportunities, profile the org, draft proposals in voice, review against funder rubrics, and gate compliance before submit — starting with Uplift/IHA/Perpetual Core as internal dogfood before opening to external customers.
 
+Milestone v4.0 Business Operations & Revenue Plumbing makes perpetualcore.com a functioning business. Lead capture is verified and routed. Stripe is tested end-to-end. Calendar booking is installed. Subscription tiers get a real identity. Social proof moves from placeholder to named client. Funnel analytics revive the deferred ANLYT work. Remaining 7 industry pages cascade to the v6 register. Ecosystem interop is documented. SEO and blog infrastructure are laid. Subdomain products are audited.
+
 ## Phases
 
 **Phase Numbering:**
@@ -23,12 +25,6 @@ Decimal phases appear between their surrounding integers in numeric order.
 ### Milestone v2.0 — RFP & Proposal Engine
 
 - [ ] **Phase 4: Foundations & Salvage Port** - Schema migration, workspace/auth scaffolding ported from ldc-command-center, and external API keys provisioned
-
-### Milestone v3.0 — Studio Polish & Launch
-
-The v3.0 milestone polishes the Studio Repositioning sprint (rebased and ready to merge as 25 commits on `feat/studio-repositioning`) into ship-ready state. Strategy + 5 copy docs + 3 build sessions landed 2026-05-10; v3.0 closes the gaps the build agents flagged.
-
-- [ ] **Phase 12: Studio Repositioning v1.1** - Real abstracted case studies, Atlas Discovery audit landing page, IHA↔PC bidirectional links, Vellum early-access waitlist, MERGE_PLAN.md deferred items closed
 - [ ] **Phase 5: Discovery** - Always-on opportunity scanner across 6 sources with fit scoring, org setup, feed UI, and URL importer
 - [ ] **Phase 6: Capture Profile** - Vault ingestion, voice fingerprinting, PII redaction, embeddings, and profile editor
 - [ ] **Phase 7: Drafting Agent** - Section generation grounded in org vault, both nonprofit and for-profit conventions, with [VERIFY] markers
@@ -36,6 +32,25 @@ The v3.0 milestone polishes the Studio Repositioning sprint (rebased and ready t
 - [ ] **Phase 9: Compliance Gate** - Pre-submit checks: page limits, formatting, attachments, budget math, eligibility, forms, and deadline buffer
 - [ ] **Phase 10: Multi-Tenant Productization** - Stripe plan gating, audit logs, GHL provisioning, outbound webhooks, and public pricing page
 - [ ] **Phase 11: Launch (Beta + Public)** - Dogfood gate, 15 design partners, first case study, affiliate program, and public landing page
+
+### Milestone v3.0 — Studio Polish & Launch
+
+The v3.0 milestone polishes the Studio Repositioning sprint (rebased and ready to merge as 25 commits on `feat/studio-repositioning`) into ship-ready state. Strategy + 5 copy docs + 3 build sessions landed 2026-05-10; v3.0 closes the gaps the build agents flagged.
+
+- [ ] **Phase 12: Studio Repositioning v1.1** - Real abstracted case studies, Atlas Discovery audit landing page, IHA↔PC bidirectional links, Vellum early-access waitlist, MERGE_PLAN.md deferred items closed
+
+### Milestone v4.0 — Business Operations & Revenue Plumbing
+
+- [ ] **Phase 13: Lead Capture + CRM** - Audit every form on the marketing site, route all submissions to a canonical CRM with email alerts and UTM attribution
+- [ ] **Phase 14: Stripe E2E + Activation** - Verify the full signup → checkout → return loop for all tiers, confirm webhook handlers, and define post-payment destination
+- [ ] **Phase 15: Calendar + Intake Flow** - Embed calendar booking on /contact-sales with qualifying pre-questions, confirmation email, and automated reminders
+- [ ] **Phase 16: Subscription Tier Identity** - Document and implement a decision on what Free/$49/$99 tiers represent; rename Stripe products accordingly
+- [ ] **Phase 17: Social Proof + Testimonials** - Publish at least one named client and quantified outcome on the homepage; add one full case study to /studio/case-studies
+- [ ] **Phase 18: Funnel Analytics** - Select and instrument an analytics tool site-wide; revive ANLYT-01/02/03; track five key business events
+- [ ] **Phase 19: Industry Pages Cascade** - Cascade remaining 7 industry verticals (/solutions/*) to v6 register with pricing band, FAQ, and cross-links
+- [ ] **Phase 20: Ecosystem Interop Audit** - Document cross-org lead routing, giving cash-flow trace, shared identity surfaces, and Sage SaaS billing coordination
+- [ ] **Phase 21: SEO + Discovery Foundation** - Build blog infrastructure, publish 3 cornerstone articles, add JSON-LD + sitemap + OG metadata across all public routes
+- [ ] **Phase 22: Subdomain Product Audit** - Audit atlas/sentinel/sage/rfp.perpetualcore.com for landing page state, conversion paths, and cross-link integrity
 
 ---
 
@@ -275,10 +290,181 @@ Plans:
 
 ---
 
+### Phase 13: Lead Capture + CRM
+**Goal**: Every form on perpetualcore.com delivers its submission to a known destination, Lorenzo receives email alerts within 60 seconds, and every lead is attributed to a source with UTM parameters
+**Depends on**: Nothing within v4.0 — can run in parallel with all other milestones; first in v4.0 sequence because no business automation is meaningful without capturing leads
+**Requirements**: LEAD-01, LEAD-02, LEAD-03, LEAD-04, LEAD-05
+**Success Criteria** (what must be TRUE):
+  1. Lorenzo receives an email at `lorenzo@perpetualcore.com` within 60 seconds when any form on the marketing site is submitted (/contact-sales, Vellum waitlist, RFP Sentry early-list, Atlas intake, or any other), and the email contains the full submission payload plus the source page URL
+  2. Each lead record in the canonical destination captures utm_source, utm_medium, utm_campaign, referrer, and timestamp — visible without querying the database directly
+  3. A single canonical lead destination is chosen and documented; all forms route to it with no submission silently dropped (verified by a test submission from each form)
+  4. Lorenzo can update a lead's status (new → contacted → qualified → closed-won / closed-lost) in the canonical destination without opening a code editor
+**Plans**: TBD
+
+**Coordination notes:**
+- Low conflict risk with v2.0 (RFP Engine) or v3.0 (Studio Polish)
+- The `/contact-sales` form and Atlas intake form already exist from Phase 12 (12-02-PLAN.md wired `/products/atlas-discovery` intake to `sales_contacts` table) — audit rather than rebuild
+- LEAD-03 UTM attribution prepares data that Phase 18 (ANLYT) will consume; design the schema column names here so Phase 18 doesn't require a migration
+
+---
+
+### Phase 14: Stripe E2E + Activation
+**Goal**: The complete signup → Stripe checkout → return-to-app loop is verified for every tier, webhooks correctly update Supabase state, and the post-payment destination is decided and implemented
+**Depends on**: Phase 13 (LEAD work reveals current state of CTAs and signup flows, informing what needs to be fixed here); can partially run in parallel
+**Requirements**: PAY-01, PAY-02, PAY-03, PAY-04, PAY-05
+**Success Criteria** (what must be TRUE):
+  1. A real Stripe test card completes the Free/$49/$99 signup loop and lands the user at a coherent, intentional post-payment destination — not a blank dashboard or 404
+  2. All five Stripe webhooks (`checkout.session.completed`, `customer.subscription.updated`, `customer.subscription.deleted`, `invoice.paid`, `invoice.payment_failed`) fire in test mode and the corresponding Supabase tenant state updates are verified by direct DB inspection
+  3. A simulated failed payment triggers documented dunning behavior: the user receives a recovery email, a grace period is respected, and a non-paying account downgrades to free after the grace window
+  4. Every Stripe customer, subscription, and invoice created under the PC LLC account (`acct_1PaRTgIwAPnWjXP`) carries a `metadata.product` tag so revenue can be attributed by product in the Stripe dashboard — verified for at least one test transaction per product (perpetualcore.com, Sage SaaS, Atlas)
+
+**Coordination notes:**
+- Coordinate with Sage SaaS Phase 1 (Shell Port) on Stripe product/price ID naming: both PC and Sage SaaS share the same Stripe account (`acct_1PaRTgIwAPnWjXP`); `metadata.product` tagging strategy (PAY-05) must be agreed before either phase runs Stripe migrations
+- PAY-02 post-payment destination decision is a prerequisite for Phase 16 (TIER-03); document the decision in `.planning/decisions/TIER-IDENTITY.md` so Phase 16 can reference it
+- No conflict with v2.0 RFP Engine Stripe code — v2.0 uses separate Stripe products ($299/$799/$2,499/Enterprise); PAY-05 metadata tagging applies to both without code conflict
+
+---
+
+### Phase 15: Calendar + Intake Flow
+**Goal**: A qualified prospect can book a call with Lorenzo directly from the marketing site, with pre-call questions, confirmation materials, and automated reminders handled without manual intervention
+**Depends on**: Phase 13 (lead destination canonical — intake bookings should route to the same CRM); Phase 14 can run in parallel
+**Requirements**: INTAKE-01, INTAKE-02, INTAKE-03, INTAKE-04, INTAKE-05
+**Success Criteria** (what must be TRUE):
+  1. A prospect visits `/contact-sales` (or any "Schedule a demo" CTA destination), completes a pre-booking qualification form (org, role, budget band, timeline, goal), and successfully books a time slot — without emailing Lorenzo manually
+  2. Lorenzo receives a calendar invite and a lead-summary email within 60 seconds of every booking, with the pre-call qualifying answers included
+  3. The prospect receives a confirmation email with prep materials (case study, methodology PDF, what to expect) immediately after booking
+  4. The prospect receives a 24-hour reminder and a 1-hour reminder automatically, without Lorenzo manually sending them
+
+**Coordination notes:**
+- Low file-conflict risk with v2.0 or v3.0
+- Cal.com or SavvyCal selection decision should be documented in `.planning/decisions/CALENDAR-TOOL.md`
+- If Cal.com is selected, prefer Cal.com embed (not redirect) to keep the user on perpetualcore.com for conversion tracking
+
+---
+
+### Phase 16: Subscription Tier Identity
+**Goal**: The Free/$49/$99 subscription tiers on perpetualcore.com have a documented, implemented identity — users who sign up arrive at a product that matches what was advertised, with no orphaned "Subscription" labels
+**Depends on**: Phase 14 (PAY-02 post-payment destination decision feeds directly into TIER-03 routing decision)
+**Requirements**: TIER-01, TIER-02, TIER-03, TIER-04
+**Success Criteria** (what must be TRUE):
+  1. A written decision document exists at `.planning/decisions/TIER-IDENTITY.md` stating what the three tiers represent (Sage SaaS tiers, PC personal OS tiers, or self-serve killed) — with rationale
+  2. The `/pricing` page copy matches the decision: tier names, descriptions, and feature bullets accurately reflect the product a buyer is purchasing; no copy reads "Subscription" without a product name
+  3. A user who clicks any "Get Started" or "Subscribe" CTA and completes the flow arrives at the correct destination product — if tiers are Sage, the flow routes to sage.perpetualcore.com; if PC OS, the user lands in the PC dashboard
+  4. Legacy Stripe SKUs that no longer map to the new identity are deprecated in the Stripe dashboard with `metadata.successor_price_id` pointing to the current price
+
+**Coordination notes:**
+- TIER-04 Stripe SKU migration must coordinate with PAY-05 (Phase 14) metadata tagging — sequence: PAY-05 tagging first, then TIER-04 deprecation
+- If tiers fold into Sage SaaS, coordinate with Sage SaaS Phase 1 on signup URL and Stripe product configuration before TIER-03 routing is committed
+
+---
+
+### Phase 17: Social Proof + Testimonials
+**Goal**: At least one named client with a quantified outcome is visible above the fold on the homepage, and one full case study with direct quotes is published — replacing placeholders with real evidence
+**Depends on**: Nothing within v4.0 — can run in parallel once Phase 13 is underway (lead capture context helps identify who to ask for testimonials); independent of Stripe and calendar work
+**Requirements**: PROOF-05, PROOF-06, PROOF-07, PROOF-08
+**Success Criteria** (what must be TRUE):
+  1. A visitor to the homepage can read at least one named client testimonial with a specific quantified outcome (e.g. "saved X hours/week" or "won $X in grants") above the fold — not behind a scroll or click
+  2. A full case study is published at `/studio/case-studies` with a client name, direct quotes, challenge/approach/outcome structure, and written client permission on file
+  3. The "trusted by X organizations" counter and org logos on the homepage reflect real partnerships; the founder photo on `/about` is a real, current photo — no placeholders
+  4. Any press, podcast, or publication mentions that exist appear as a logo strip on the homepage or `/about` page (if none exist, this criterion is marked N/A and documented)
+
+**Coordination notes:**
+- Phase 17 feeds Phase 18 (ANLYT): once real social proof is live, the analytics events `form_submitted` and `stripe_checkout_started` become meaningful to measure conversion impact
+- No file-conflict risk with v2.0 or v3.0
+
+---
+
+### Phase 18: Funnel Analytics
+**Goal**: An analytics tool is live site-wide tracking the full visitor → lead → customer funnel, five key business events fire correctly, and Lorenzo has a weekly dashboard showing conversion rates and top acquisition sources
+**Depends on**: Phases 13–17 should be underway or complete so the funnel events are meaningful; Phase 15 (intake booking) and Phase 13 (form submit) produce the events being tracked
+**Requirements**: ANLYT-01, ANLYT-02, ANLYT-03, ANLYT-04, ANLYT-05
+**Success Criteria** (what must be TRUE):
+  1. Lorenzo can open a dashboard (PostHog, Plausible, Vercel Web Analytics, or equivalent) and see a funnel visualization showing drop-off rates from page view → CTA click → form submit or signup → first activation event
+  2. All five custom business events fire correctly in the selected analytics tool: `form_submitted`, `stripe_checkout_started`, `stripe_checkout_completed`, `intake_call_booked`, `subscription_activated` — verifiable by triggering each action in a browser and seeing the event appear in the analytics dashboard within 60 seconds
+  3. UTM parameters from a test campaign link are captured at first touch and associated with the resulting signup or lead record in Supabase — visible in the admin dashboard without a SQL query
+  4. The admin dashboard surfaces weekly funnel metrics: cohort conversion rate per step, top sources by signup volume — ready for Lorenzo's weekly review
+
+**Note on ANLYT-01/02/03 revival:** These requirements were deferred from v1.0 Phase 3 and are now active in v4.0 Phase 18. The v4.0 scoping adds ANLYT-04 (tool selection + `track-event.ts` wrapper) and ANLYT-05 (five key events) as prerequisites that the v1.0 deferred scope assumed would already exist. Phase 18 closes v1.0 Phase 3 permanently.
+
+**Coordination notes:**
+- No file-conflict risk with v2.0 RFP Engine territory (`lib/rfp/`, `app/(rfp-marketing)/`, `app/api/cron/`)
+- Analytics instrumentation touches marketing pages and the signup/checkout flow — coordinate with Phase 14 (Stripe) to ensure `stripe_checkout_started` fires before the Stripe redirect, not after
+
+---
+
+### Phase 19: Industry Pages Cascade
+**Goal**: All 7 remaining `/solutions/*` industry verticals are cascaded to the v6 register — same template, pricing band, FAQ, and cross-links as the 5 verticals shipped in v3.0
+**Depends on**: Phase 12 (v3.0 Studio Repositioning v1.1) establishes the v6 register template that all cascade pages must match; v6 template must be finalized before cascade begins
+**Requirements**: CASCADE-01, CASCADE-02, CASCADE-03, CASCADE-04, CASCADE-05, CASCADE-06, CASCADE-07
+**Success Criteria** (what must be TRUE):
+  1. All 7 pages (`/solutions/accountants`, `/solutions/agencies`, `/solutions/consulting`, `/solutions/financial-advisors`, `/solutions/it-services`, `/solutions/real-estate`, `/solutions/sales`) render without errors, match the v6 register template (pricing band, FAQ block, 3-band cross-link, final CTA), and link to at least one relevant SEO cornerstone article (Phase 21)
+  2. `/solutions/financial-advisors` retains the $999/advisor/mo pricing and SEC compliance hedge language if applicable — pricing decision documented in the page's frontmatter or a comment
+  3. A grep or automated check confirms no `/solutions/*` page is still on a pre-v6 template (no stale hero text, no missing pricing band)
+
+**Coordination notes:**
+- Phase 19 touches `app/solutions/*` — coordinate with any open v3.0 Studio Polish work still on the `feat/studio-repositioning` branch to avoid merge conflicts
+- Phase 19 links to Phase 21 cornerstone articles; if Phase 21 runs in parallel, stub the article URLs first and update cross-links after publish
+- This phase is independent of v2.0 RFP Engine territory; no conflict risk
+
+---
+
+### Phase 20: Ecosystem Interop Audit
+**Goal**: The cross-org relationships between perpetualcore.com and the broader ecosystem are documented — lead routing paths, giving cash-flow trace, shared identity surfaces, and Sage SaaS billing coordination
+**Depends on**: Phase 14 (PAY-05 Stripe metadata tagging informs ECO-05 Sage SaaS billing coordination); otherwise independent
+**Requirements**: ECO-01, ECO-02, ECO-03, ECO-04, ECO-05
+**Success Criteria** (what must be TRUE):
+  1. `.planning/ECOSYSTEM-INTEROP.md` exists and maps how leads route to and from perpetualcore.com across all 8 ecosystem entities (IHA, Uplift, TPC, DeepFutures, Sage SaaS, lorenzodc.com, Streams of Grace, IHA Academy) — including the "theiha.org visitor wanting PC engagement" and "DeepFutures inquiry on PC" routing scenarios
+  2. `.planning/GIVING-FLOW.md` traces the 10/15% giving cash-flow from invoice → revenue → IHA bank transfer; any gap (missing step, undocumented trigger, unverified transfer) is flagged with a resolution action item
+  3. A single audit document confirms that Lorenzo's headshot, bio fingerprint, and link strategy are consistent (or flags the delta) across perpetualcore.com, theiha.org, and lorenzodc.com
+  4. Sage SaaS billing under the PC LLC Stripe account is confirmed consistent with `metadata.product` tagging from Phase 14 (PAY-05); the customer migration path from a PC subscription to Sage SaaS is documented
+
+**Coordination notes:**
+- Phase 20 is a documentation-and-audit phase — zero file-conflict risk with v2.0 or v3.0 code
+- ECO-05 requires PAY-05 (Phase 14) to be complete or at least decided before the Sage SaaS billing coordination can be documented accurately
+- Outputs (ECOSYSTEM-INTEROP.md, GIVING-FLOW.md) live in `.planning/` — no production code changes
+
+---
+
+### Phase 21: SEO + Discovery Foundation
+**Goal**: perpetualcore.com has a blog/articles infrastructure with 3 cornerstone articles published, JSON-LD structured data on every public page, an auto-generated sitemap, and verified OG metadata across all routes
+**Depends on**: Phase 19 (industry pages need cross-links wired to cornerstone articles — parallel is fine if stubs are placed first); otherwise independent
+**Requirements**: SEO-01, SEO-02, SEO-03, SEO-04, SEO-05, SEO-06
+**Success Criteria** (what must be TRUE):
+  1. A blog or articles section exists at `/blog` (or `/writing`) — navigable from the main site nav — with at least 3 published cornerstone articles visible without authentication
+  2. Google Search Console confirms `sitemap.xml` is submitted and the index includes marketing routes (`/`, `/studio/*`, `/products/*`, `/solutions/*`, `/blog/*`, `/about`, `/engine`, `/fund`, `/institute`)
+  3. A spot-check of 5 arbitrary public routes using a browser extension or `curl` confirms JSON-LD structured data (Organization, FounderPerson, Article where applicable, Service) is present and valid
+  4. Open Graph and Twitter Card metadata is verified on every public route — a share to social media produces a correct title, description, and image preview (not a blank card or the site default)
+  5. Each of the 7 industry pages links to at least 1 relevant cornerstone article in its body content
+
+**Coordination notes:**
+- `/blog` infrastructure may introduce new Next.js routes — no conflict with v2.0 RFP Engine routes (`app/(rfp-marketing)/`, `lib/rfp/`)
+- Phase 21 runs in parallel with Phase 19; stub article URLs first, then update cross-links after publish
+
+---
+
+### Phase 22: Subdomain Product Audit
+**Goal**: All four subdomain products (atlas, sentinel, sage, rfp.perpetualcore.com) are audited for landing page state, conversion path integrity, and cross-link health from the main site
+**Depends on**: Phases 13–21 can inform what the audit finds, but the audit itself is independent — can run at any point in v4.0
+**Requirements**: SUBDOMAIN-01, SUBDOMAIN-02, SUBDOMAIN-03, SUBDOMAIN-04, SUBDOMAIN-05
+**Success Criteria** (what must be TRUE):
+  1. A written audit report (`.planning/SUBDOMAIN-AUDIT.md`) exists for each of the four subdomains covering: current landing page state (live / placeholder / broken), conversion path (sign up / contact / waitlist — does it work?), and cross-link integrity to/from main site
+  2. Every "Visit X" CTA on the main site that points to a subdomain resolves correctly — no 404s, no redirect loops, no stale destinations; broken CTAs are flagged with a fix action item
+  3. `sage.perpetualcore.com` signup flow from perpetualcore.com is tested end-to-end and the coordination with Sage SaaS Phase 1 (Shell Port) is documented — including what changes when Sage SaaS Phase 1 completes
+  4. `sentinel.perpetualcore.com` deploy state is verified (Phases 1–11 are built per memory note); if not yet deployed, the gap between built state and live state is flagged as a blocker
+
+**Coordination notes:**
+- Phase 22 is an audit-and-documentation phase — no production code changes except fixing broken CTAs on the main site
+- Coordination with Sage SaaS Phase 1 (Shell Port) is documentation-level: note what will change when that phase runs, so the audit isn't invalidated
+- `rfp.perpetualcore.com` audit coordinates with v2.0 Phase 11 (Launch) timeline — document planned vs. current state delta, not a blocker for this phase
+
+---
+
 ## Progress
 
 **Execution Order:**
-Phases execute in numeric order: 1 → 2 → 3 (deferred) → 4 → 5 → 6 → 7 → 8 → 9 → 10 → 11 → 12
+v1.0/v2.0/v3.0: Phases execute in numeric order: 1 → 2 → 3 (deferred) → 4 → 5 → 6 → 7 → 8 → 9 → 10 → 11 → 12
+
+v4.0 sequencing: 13 → 14 → 15/16 (parallel) → 17/18 (parallel) → 19/20/21/22 (parallel)
 
 Phase 5 and Phase 6 may run partially in parallel (Discovery cron runs while vault collection happens).
 
@@ -288,7 +474,7 @@ Phase 5 and Phase 6 may run partially in parallel (Discovery cron runs while vau
 | 2. Onboarding Optimization | 2/2 | Complete | 2026-02-23 |
 | 3. Conversion Analytics | 0/TBD | Deferred | - |
 | 4. Foundations & Salvage Port | 2/4 | In Progress|  |
-| 5. Discovery | 0/7 | Planned | - |
+| 5. Discovery | 2/7 | In Progress | - |
 | 6. Capture Profile | 0/TBD | Not started | - |
 | 7. Drafting Agent | 0/TBD | Not started | - |
 | 8. Reviewer Agent | 0/TBD | Not started | - |
@@ -296,3 +482,13 @@ Phase 5 and Phase 6 may run partially in parallel (Discovery cron runs while vau
 | 10. Multi-Tenant Productization | 0/TBD | Not started | - |
 | 11. Launch (Beta + Public) | 0/TBD | Not started | - |
 | 12. Studio Repositioning v1.1 | 5/6 | In Progress|  |
+| 13. Lead Capture + CRM | 0/TBD | Not started | - |
+| 14. Stripe E2E + Activation | 0/TBD | Not started | - |
+| 15. Calendar + Intake Flow | 0/TBD | Not started | - |
+| 16. Subscription Tier Identity | 0/TBD | Not started | - |
+| 17. Social Proof + Testimonials | 0/TBD | Not started | - |
+| 18. Funnel Analytics | 0/TBD | Not started | - |
+| 19. Industry Pages Cascade | 0/TBD | Not started | - |
+| 20. Ecosystem Interop Audit | 0/TBD | Not started | - |
+| 21. SEO + Discovery Foundation | 0/TBD | Not started | - |
+| 22. Subdomain Product Audit | 0/TBD | Not started | - |

@@ -5,22 +5,22 @@
 See: .planning/PROJECT.md (updated 2026-05-15 — v4.0 milestone opened)
 
 **Core value:** The AI operating system brain — if this breaks, everything downstream breaks
-**Current focus:** v4.0 Business Operations & Revenue Plumbing — Phase 13 (defining requirements)
+**Current focus:** v4.0 Business Operations & Revenue Plumbing — Phase 13 (Lead Capture + CRM)
 
 ## Current Position
 
 **Active milestones (parallel):**
-- **v4.0 Business Operations & Revenue Plumbing** — Phase 13 of 22 (defining requirements)
+- **v4.0 Business Operations & Revenue Plumbing** — Phase 13 of 22 (ready to plan)
 - **v3.0 Studio Polish & Launch** — Phase 12 partial (5 plans complete, awaiting closeouts)
-- **v2.0 RFP & Proposal Engine** — Phase 5 of 11 (Plan 01 complete, 02-07 remaining)
+- **v2.0 RFP & Proposal Engine** — Phase 5 of 11 (Plan 01+02 complete, 03-07 remaining)
 
-**Primary focus (lead session):** v4.0 milestone setup → roadmap → Phase 13 (lead capture audit)
-**Phase:** Not started (defining requirements)
-**Plan:** —
-**Status:** Defining requirements
-**Last activity:** 2026-05-15 — Milestone v4.0 started; PROJECT.md updated to reflect 3 parallel milestones
+**Primary focus (lead session):** v4.0 Phase 13 — Lead Capture + CRM audit
+**Phase:** 13 of 22
+**Plan:** 0 of TBD
+**Status:** Ready to plan
+**Last activity:** 2026-05-15 — v4.0 roadmap created; Phases 13-22 mapped; 51 requirements traced; ROADMAP.md + REQUIREMENTS.md + STATE.md written
 
-Last activity: 2026-05-10 — 12-05 checkpoint (Tasks 1-3 of 4 complete): EarlyAccessForm with Stripe Elements + 3DS-resume logic built (f2bfb61); /products/vellum updated with #early-access section + unconditional IHA hyperlink, STUDIO-LK-01 closed (1c0bd3a); /admin/vellum-waitlist server component with auth gate + CSV export built (051ecc0). Task 4 awaiting Lorenzo 6-signup Stripe test verification before STUDIO-VW-01 can close.
+Last activity (prior): 2026-05-10 — 12-05 checkpoint (Tasks 1-3 of 4 complete): EarlyAccessForm with Stripe Elements + 3DS-resume logic built (f2bfb61); /products/vellum updated with #early-access section + unconditional IHA hyperlink, STUDIO-LK-01 closed (1c0bd3a); /admin/vellum-waitlist server component with auth gate + CSV export built (051ecc0). Task 4 awaiting Lorenzo 6-signup Stripe test verification before STUDIO-VW-01 can close.
 
 Previous: 2026-05-10 — 12-02 complete (studio repositioning, Atlas Discovery): /products/atlas-discovery page with hero/what's-included/pricing/intake form; cross-links from /products/atlas and footer; /api/contact-sales extended with optional product field + createAdminClient() switch; sales_contacts table created in LDC Brain AI Supabase (was missing from remote); dual-filter routing (product='atlas-discovery' OR message ILIKE '%Atlas Discovery intake%') verified live.
 
@@ -77,6 +77,17 @@ Decisions are logged in PROJECT.md Key Decisions table. Notable carries:
 - Phase 5 (Discovery) and Phase 6 (Capture Profile) can partially overlap — cron runs while vault docs are being collected
 - No auto-submission ever — final submit is always human (legal protection + TOS)
 
+### v4.0 Decisions
+
+- Roadmap created 2026-05-15; Phases 13-22 mapped; 51 requirements across 10 phases, all traced
+- Sequencing: 13 → 14 → 15/16 (parallel) → 17/18 (parallel) → 19/20/21/22 (parallel, can be teamed)
+- Phase 13 is the blocking first step — no business automation is meaningful without verified lead capture
+- Phase 14 PAY-05 metadata.product tagging must be agreed with Sage SaaS Phase 1 before either runs Stripe migrations (shared Stripe account acct_1PaRTgIwAPnWjXP)
+- Phase 16 TIER-04 deprecation sequences after Phase 14 PAY-05 tagging
+- Phase 19 (CASCADE) touches app/solutions/* — coordinate with any open v3.0 feat/studio-repositioning work before starting
+- ANLYT-01/02/03 (v1.0 deferred) are closed permanently by Phase 18; Phase 3 (v1.0) is superseded
+- Phase 20 + 22 are documentation/audit phases — zero production file changes except flagged CTA fixes
+
 ### Pending Todos
 
 - (Lorenzo, today) Re-register SAM.gov API key under The Perpetual Core LLC — ~10-day wait
@@ -84,18 +95,20 @@ Decisions are logged in PROJECT.md Key Decisions table. Notable carries:
 - (Lorenzo, this week) Vault collection per `VAULT-CHECKLIST.md` for Uplift, IHA, Perpetual Core — gates Phase 6
 - Replace FounderStory photo placeholder with Lorenzo's real headshot (carried from v1.0)
 - Swap industry logo placeholders in SocialProofBanner with real partner logos as partnerships signed (carried from v1.0)
+- (v4.0 Phase 16) Make TIER-IDENTITY decision before Phase 14 closes — PAY-02 and TIER-03 are coupled
 
 ### Blockers/Concerns
 
 - SAM.gov key lapsed — federal-contract leg of Discovery (DISC-01 partial) waits ~10 business days; Grants.gov, SBIR, and Simpler Grants unblock Phase 5 earlier
 - Vault docs not yet collected — Phase 6 (Capture Profile) gated on MV-bar document collection per `VAULT-CHECKLIST.md`
+- v4.0 Phase 14 (Stripe E2E) and Sage SaaS Phase 1 (Shell Port) share Stripe account — metadata.product tagging strategy must be coordinated before either phase runs; no blocker yet but flag for pre-planning
 
 ## Session Continuity
 
-Last session: 2026-05-10
-Stopped at: 12-06-PLAN.md Task 3 checkpoint (human-verify: mobile-qa) — Tasks 1+2 committed (221aeae, 1ceca4a); Tasks 3+4 at human checkpoints
+Last session: 2026-05-15
+Stopped at: v4.0 roadmap written (ROADMAP.md Phases 13-22, REQUIREMENTS.md v4.0 traceability, STATE.md updated)
 Resume file: None
-Next action: Lorenzo signals mobile-qa-pass or mobile-qa-fix-needed (Task 3), then logo-real or logo-placeholder-v1.2 (Task 4). After both resolved, Phase 12 is merge-ready.
+Next action: `/gsd:plan-phase 13` — Lead Capture + CRM audit
 
 ### Phase 12 Studio Repositioning Key Decisions (Plan 06)
 

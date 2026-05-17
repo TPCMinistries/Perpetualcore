@@ -323,7 +323,68 @@ Explicit exclusions with reasoning. Documented to prevent scope creep.
 
 *Note: The instructions listed 47 requirements; actual count from the file is 51 (FOUND 3 + DISC 7 + ORG 4 + CAP 6 + DRAFT 7 + REV 4 + COMP 8 + SAAS 7 + LAUNCH 5 = 51). All 51 are mapped.*
 
+### v4.0 (active — 2026-05-15)
+
+| Requirement | Phase | Status |
+|-------------|-------|--------|
+| LEAD-01 | Phase 13 | Pending |
+| LEAD-02 | Phase 13 | Pending |
+| LEAD-03 | Phase 13 | Pending |
+| LEAD-04 | Phase 13 | Pending |
+| LEAD-05 | Phase 13 | Pending |
+| PAY-01 | Phase 14 | Pending |
+| PAY-02 | Phase 14 | Pending |
+| PAY-03 | Phase 14 | Pending |
+| PAY-04 | Phase 14 | Pending |
+| PAY-05 | Phase 14 | Pending |
+| INTAKE-01 | Phase 15 | Pending |
+| INTAKE-02 | Phase 15 | Pending |
+| INTAKE-03 | Phase 15 | Pending |
+| INTAKE-04 | Phase 15 | Pending |
+| INTAKE-05 | Phase 15 | Pending |
+| TIER-01 | Phase 16 | Pending |
+| TIER-02 | Phase 16 | Pending |
+| TIER-03 | Phase 16 | Pending |
+| TIER-04 | Phase 16 | Pending |
+| PROOF-05 | Phase 17 | Pending |
+| PROOF-06 | Phase 17 | Pending |
+| PROOF-07 | Phase 17 | Pending |
+| PROOF-08 | Phase 17 | Pending |
+| ANLYT-01 | Phase 18 | Pending |
+| ANLYT-02 | Phase 18 | Pending |
+| ANLYT-03 | Phase 18 | Pending |
+| ANLYT-04 | Phase 18 | Pending |
+| ANLYT-05 | Phase 18 | Pending |
+| CASCADE-01 | Phase 19 | Pending |
+| CASCADE-02 | Phase 19 | Pending |
+| CASCADE-03 | Phase 19 | Pending |
+| CASCADE-04 | Phase 19 | Pending |
+| CASCADE-05 | Phase 19 | Pending |
+| CASCADE-06 | Phase 19 | Pending |
+| CASCADE-07 | Phase 19 | Pending |
+| ECO-01 | Phase 20 | Pending |
+| ECO-02 | Phase 20 | Pending |
+| ECO-03 | Phase 20 | Pending |
+| ECO-04 | Phase 20 | Pending |
+| ECO-05 | Phase 20 | Pending |
+| SEO-01 | Phase 21 | Pending |
+| SEO-02 | Phase 21 | Pending |
+| SEO-03 | Phase 21 | Pending |
+| SEO-04 | Phase 21 | Pending |
+| SEO-05 | Phase 21 | Pending |
+| SEO-06 | Phase 21 | Pending |
+| SUBDOMAIN-01 | Phase 22 | Pending |
+| SUBDOMAIN-02 | Phase 22 | Pending |
+| SUBDOMAIN-03 | Phase 22 | Pending |
+| SUBDOMAIN-04 | Phase 22 | Pending |
+| SUBDOMAIN-05 | Phase 22 | Pending |
+
+**Coverage:**
+- v4.0 requirements: 51 total
+- Mapped to phases: 51
+- Unmapped: 0
+
 ---
 
-*Requirements defined: 2026-02-23 (v1.0) · 2026-05-09 (v2.0)*
-*Last updated: 2026-05-09 — v2.0 traceability filled by roadmapper*
+*Requirements defined: 2026-02-23 (v1.0) · 2026-05-09 (v2.0) · 2026-05-15 (v4.0)*
+*Last updated: 2026-05-15 — v4.0 traceability filled by roadmapper*
