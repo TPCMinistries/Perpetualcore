@@ -163,7 +163,7 @@ export default function RfpEnginePage() {
                     asChild
                     className="h-12 rounded-md border-white/15 bg-white/5 px-7 text-[14px] font-medium text-white hover:bg-white/10"
                   >
-                    <Link href="/contact-sales?product=rfp-engine">Book a Demo</Link>
+                    <Link href="/contact-sales/rfp-engine">Book a Demo</Link>
                   </Button>
                 </div>
                 <p className="mt-6 font-mono text-[11px] uppercase tracking-[0.18em] text-zinc-500">
@@ -481,7 +481,7 @@ export default function RfpEnginePage() {
                 asChild
                 className="h-12 rounded-md border-white/15 bg-white/5 px-7 text-[14px] font-medium text-white hover:bg-white/10"
               >
-                <Link href="/contact-sales?product=rfp-engine">Talk to Sales</Link>
+                <Link href="/contact-sales/rfp-engine">Talk to Sales</Link>
               </Button>
             </div>
           </motion.div>

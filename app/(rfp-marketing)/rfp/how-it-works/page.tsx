@@ -758,7 +758,7 @@ export default function HowItWorksPage() {
                 asChild
                 className="h-12 rounded-md border-white/15 bg-white/5 px-7 text-[14px] font-medium text-white hover:bg-white/10"
               >
-                <Link href="/contact-sales?product=rfp-engine">Book a Demo</Link>
+                <Link href="/contact-sales/rfp-engine">Book a Demo</Link>
               </Button>
             </div>
           </motion.div>

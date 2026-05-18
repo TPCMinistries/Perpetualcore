@@ -82,7 +82,7 @@ const plans: Plan[] = [
     period: "",
     tagline: "Hospital systems, workforce boards, and federal contractors with procurement.",
     cta: "Talk to Sales",
-    href: "/contact-sales?product=rfp-engine&plan=enterprise",
+    href: "/contact-sales/rfp-engine?plan=enterprise",
     featured: false,
     features: [
       { text: "Unlimited orgs and users" },
@@ -336,7 +336,7 @@ export default function RfpPricingPage() {
                     variant="outline"
                     className="mt-6 h-10 rounded-md border-white/15 bg-white/5 px-5 text-[13px] text-white hover:bg-white/10"
                   >
-                    <Link href="/contact-sales?product=rfp-engine&topic=win-fee">
+                    <Link href="/contact-sales/rfp-engine?topic=win-fee">
                       Discuss Win Fee Terms
                       <ArrowRight className="ml-2 h-4 w-4" />
                     </Link>
@@ -428,7 +428,7 @@ export default function RfpPricingPage() {
                 asChild
                 className="h-12 rounded-md border-white/15 bg-white/5 px-7 text-[14px] font-medium text-white hover:bg-white/10"
               >
-                <Link href="/contact-sales?product=rfp-engine">Book a Demo</Link>
+                <Link href="/contact-sales/rfp-engine">Book a Demo</Link>
               </Button>
             </div>
           </motion.div>

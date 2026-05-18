@@ -65,7 +65,7 @@ export default function RfpMarketingLayout({
               Trust
             </Link>
             <Link
-              href="/contact-sales?product=rfp-engine"
+              href="/contact-sales/rfp-engine"
               className="hidden text-[13px] font-medium text-zinc-400 transition-colors hover:text-white lg:inline"
             >
               Talk to Sales
@@ -151,7 +151,7 @@ export default function RfpMarketingLayout({
                 </li>
                 <li>
                   <Link
-                    href="/contact-sales?product=rfp-engine"
+                    href="/contact-sales/rfp-engine"
                     className="transition-colors hover:text-white"
                   >
                     Contact Sales

@@ -205,7 +205,7 @@ export default function RfpTrustPage() {
                 </p>
                 <div className="mt-8 flex flex-wrap items-center gap-x-6 gap-y-3 font-mono text-[11px] uppercase tracking-[0.18em] text-zinc-500">
                   <Link
-                    href="/contact-sales?product=rfp-engine&intent=security-packet"
+                    href="/contact-sales/rfp-engine?intent=security-packet"
                     className="inline-flex items-center gap-2 text-emerald-300 transition-colors hover:text-emerald-200"
                   >
                     <span className="h-px w-6 bg-emerald-400/60" />
@@ -933,7 +933,7 @@ export default function RfpTrustPage() {
                 asChild
                 className="h-12 rounded-md bg-white px-7 text-[14px] font-medium text-zinc-950 hover:bg-zinc-100"
               >
-                <Link href="/contact-sales?product=rfp-engine&intent=security-packet">
+                <Link href="/contact-sales/rfp-engine?intent=security-packet">
                   Request our security packet
                   <ArrowRight className="ml-2 h-4 w-4" />
                 </Link>
@@ -944,7 +944,7 @@ export default function RfpTrustPage() {
                 asChild
                 className="h-12 rounded-md border-white/15 bg-white/5 px-7 text-[14px] font-medium text-white hover:bg-white/10"
               >
-                <Link href="/contact-sales?product=rfp-engine&intent=security-call">
+                <Link href="/contact-sales/rfp-engine?intent=security-call">
                   <Mail className="mr-2 h-4 w-4" />
                   Talk to our security lead
                 </Link>
