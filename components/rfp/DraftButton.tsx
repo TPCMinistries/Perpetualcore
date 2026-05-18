@@ -3,13 +3,16 @@
 /**
  * DraftButton — kicks off a first-pass draft for an opportunity.
  *
- * Lives inside DetailPane. POSTs to /api/rfp/draft and on success routes the
- * user to the new proposal's page. Honest copy: when the org has not yet
- * trained its voice we say "no voice or vault yet"; once Voice Fingerprint
- * v1 is trained we flip to "voice-trained draft · no vault yet".
+ * Lives inside DetailPane. POSTs to /api/rfp/draft and on success routes
+ * the user to the new proposal's page. The subtitle reflects which
+ * augmentations are available for the org:
+ *  - voice-trained draft · vault-grounded
+ *  - voice-trained draft · no vault yet
+ *  - plain draft · vault-grounded
+ *  - plain draft · no voice or vault yet
  *
- * Voice state is fetched once on mount from /api/rfp/orgs/[orgId]/voice.
- * The endpoint is RLS-checked and cheap (single column read).
+ * Voice + vault state are fetched once on mount. Failures are silent and
+ * we fall back to the pre-augmentation copy.
  */
 
 import { useEffect, useState } from "react";
@@ -24,14 +27,19 @@ interface VoiceState {
   trained: boolean;
 }
 
+interface VaultListResponse {
+  docs?: unknown[];
+}
+
 export function DraftButton({ orgId, oppId }: DraftButtonProps) {
   const router = useRouter();
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [voiceTrained, setVoiceTrained] = useState<boolean | null>(null);
+  const [vaultPopulated, setVaultPopulated] = useState<boolean | null>(null);
 
-  // Lightweight one-shot voice-state fetch. Failures are silent — we just
-  // fall back to the pre-voice copy if we can't tell.
+  // Lightweight one-shot voice + vault state fetch. Failures are silent —
+  // we fall back to the pre-augmentation copy if we can't tell.
   useEffect(() => {
     let cancelled = false;
     fetch(`/api/rfp/orgs/${encodeURIComponent(orgId)}/voice`)
@@ -44,6 +52,17 @@ export function DraftButton({ orgId, oppId }: DraftButtonProps) {
       })
       .catch(() => {
         if (!cancelled) setVoiceTrained(false);
+      });
+    fetch(`/api/rfp/orgs/${encodeURIComponent(orgId)}/vault/list`)
+      .then(async (res) => {
+        if (!res.ok) throw new Error(`vault_state_${res.status}`);
+        return (await res.json()) as VaultListResponse;
+      })
+      .then((data) => {
+        if (!cancelled) setVaultPopulated((data.docs?.length ?? 0) > 0);
+      })
+      .catch(() => {
+        if (!cancelled) setVaultPopulated(false);
       });
     return () => {
       cancelled = true;
@@ -90,9 +109,11 @@ export function DraftButton({ orgId, oppId }: DraftButtonProps) {
         {busy ? "Drafting…" : "Generate first-pass draft"}
       </button>
       <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-zinc-500">
-        {voiceTrained
-          ? "Preview · voice-trained draft · no vault yet"
-          : "Preview · plain draft · no voice or vault yet"}
+        {[
+          "Preview",
+          voiceTrained ? "voice-trained draft" : "plain draft",
+          vaultPopulated ? "vault-grounded" : "no vault yet",
+        ].join(" · ")}
       </p>
       {error ? (
         <p className="text-[12px] text-rose-300">Draft failed: {error}</p>

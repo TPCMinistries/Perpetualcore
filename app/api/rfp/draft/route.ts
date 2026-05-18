@@ -35,6 +35,7 @@ import { z } from "zod";
 import { createClient, createAdminClient } from "@/lib/supabase/server";
 import { generateDraft } from "@/lib/rfp/draft/generate";
 import { isVoiceFingerprint, type VoiceFingerprint } from "@/lib/rfp/voice/extract";
+import { retrieveVaultChunks } from "@/lib/rfp/vault/retrieve";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -123,6 +124,23 @@ export async function POST(req: Request): Promise<NextResponse> {
     return NextResponse.json({ error: "opp_not_found" }, { status: 404 });
   }
 
+  // Vault grounding — retrieve top-K chunks against the opportunity title +
+  // brief. Best-effort: if the org has no vault rows or retrieval fails we
+  // proceed with no chunks (drafter behaves identically to pre-vault).
+  const vaultQuery = [opp.title, opp.agency, opp.brief?.slice(0, 800)]
+    .filter(Boolean)
+    .join(" — ");
+  let vaultChunks: Awaited<ReturnType<typeof retrieveVaultChunks>> = [];
+  try {
+    vaultChunks = await retrieveVaultChunks(body.org_id, vaultQuery, { k: 6 });
+  } catch (err) {
+    // Non-fatal — log shape only, no PII.
+    console.warn(
+      "[draft] vault retrieval skipped:",
+      err instanceof Error ? err.message.slice(0, 120) : "unknown",
+    );
+  }
+
   // Generate.
   let draft;
   try {
@@ -134,6 +152,7 @@ export async function POST(req: Request): Promise<NextResponse> {
         capacity_summary: org.capacity_summary,
       },
       voiceFingerprint,
+      vaultChunks,
     });
   } catch (err) {
     const msg = err instanceof Error ? err.message : "unknown";
@@ -187,16 +206,17 @@ export async function POST(req: Request): Promise<NextResponse> {
   }
 
   // Audit row — model/tokens/cost only for v1; encrypted prompt/response in
-  // a subsequent phase. The voice_applied flag is encoded as a session_id
-  // suffix so it's visible without a schema change. Format:
-  //   `<draft.session_id>__voice=<true|false>`
-  // Downstream readers can split on "__voice=" to inspect.
-  const sessionIdWithVoice = `${draft.session_id}__voice=${draft.voice_applied ? "true" : "false"}`;
+  // a subsequent phase. The voice_applied + vault_chunks_used flags are
+  // encoded as session_id suffixes so they're visible without a schema
+  // change. Format:
+  //   `<draft.session_id>__voice=<true|false>__vault=<N>`
+  // Downstream readers can parse `/__voice=(true|false)/` and `/__vault=(\d+)/`.
+  const sessionIdWithFlags = `${draft.session_id}__voice=${draft.voice_applied ? "true" : "false"}__vault=${draft.vault_chunks_used}`;
   await admin.from("rfp_agent_sessions").insert({
     proposal_id: proposal.id,
     org_id: body.org_id,
     agent: "drafter_v1",
-    session_id: sessionIdWithVoice,
+    session_id: sessionIdWithFlags,
     model: draft.model,
     tokens_in: draft.tokens_in,
     tokens_out: draft.tokens_out,
@@ -211,5 +231,7 @@ export async function POST(req: Request): Promise<NextResponse> {
     cost_usd: draft.cost_usd,
     model: draft.model,
     voice_applied: draft.voice_applied,
+    vault_applied: draft.vault_applied,
+    vault_chunks_used: draft.vault_chunks_used,
   });
 }

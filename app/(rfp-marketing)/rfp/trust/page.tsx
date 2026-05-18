@@ -630,7 +630,7 @@ export default function RfpTrustPage() {
               {
                 icon: ShieldCheck,
                 title: "Vault-grounded drafting",
-                desc: "Every claim is generated against retrieved chunks of your vault. The model is constrained to cite or flag — not invent. In private beta right now.",
+                desc: "Every claim is generated against retrieved chunks of your vault. The model is constrained to cite (with [CITE: vault-N] markers) or flag (with [VERIFY: …] markers) — never invent. Preview.",
               },
               {
                 icon: AlertTriangle,

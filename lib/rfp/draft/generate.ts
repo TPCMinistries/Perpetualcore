@@ -1,26 +1,31 @@
 /**
  * lib/rfp/draft/generate.ts — first-pass drafter.
  *
- * Single round of GPT-4o, no reviewer, no vault retrieval. As of Voice
- * Fingerprint v1 the drafter optionally accepts a stylometric profile
- * (see lib/rfp/voice/extract.ts) and prepends it to the system prompt via
- * lib/rfp/voice/apply.ts. When no fingerprint is provided we behave
- * identically to pre-voice behavior.
+ * Single round of GPT-4o. As of Voice Fingerprint v1 the drafter optionally
+ * accepts a stylometric profile (see lib/rfp/voice/extract.ts) and prepends
+ * it to the system prompt via lib/rfp/voice/apply.ts. As of Vault Grounding
+ * v1 the drafter optionally accepts retrieved vault chunks (see
+ * lib/rfp/vault/retrieve.ts) and inserts them as "Vault facts" with
+ * citation instructions. When neither is provided the drafter behaves
+ * identically to pre-augmentation.
  *
  * Honest defaults: voice augmentation is system-prompt-level only — not
- * fine-tuning, not RAG. capacity_summary remains the only org-specific
- * factual signal. Anything else org-specific the model writes must still
- * be wrapped in `[VERIFY: ...]` markers per the system prompt.
+ * fine-tuning. Vault grounding is single-shot retrieval-before-generation;
+ * not multi-hop RAG, not agentic browsing. Anything the model would
+ * otherwise invent that is NOT in the provided vault chunks must still be
+ * wrapped in [VERIFY: ...] markers — the system prompt enforces this and
+ * adds [CITE: vault-N] markers to claims that DO come from a vault chunk.
  *
- * Model: gpt-4o. Cost ($2.50/M input + $10/M output). v1 input ~1500 tokens
- * (+~250 if voice fingerprint applied), output ~2000 tokens →
- * ~$0.02/draft. Cheap enough to dogfood liberally.
+ * Model: gpt-4o. Cost ($2.50/M input + $10/M output). v1 input is ~1500
+ * tokens base (+~250 with voice, +~600-1600 with vault depending on k and
+ * chunk size), output ~2000 tokens → typical cost $0.02-0.05/draft.
  */
 
 import OpenAI from "openai";
 import { ALL_SECTION_SPECS, SECTION_TYPES, type SectionType } from "./sections";
 import { applyVoiceFingerprint } from "@/lib/rfp/voice/apply";
 import type { VoiceFingerprint } from "@/lib/rfp/voice/extract";
+import type { RetrievedChunk } from "@/lib/rfp/vault/retrieve";
 
 const MODEL = "gpt-4o";
 
@@ -50,6 +55,14 @@ export interface DraftInput {
    * drafter behaves exactly as it did pre-voice.
    */
   voiceFingerprint?: VoiceFingerprint;
+  /**
+   * Optional Vault Grounding v1. Caller retrieves top-K chunks via
+   * lib/rfp/vault/retrieve.ts and passes them here. The drafter inserts
+   * them as a numbered facts block and instructs the model to cite them
+   * inline as [CITE: vault-N]. Anything outside the chunks remains a
+   * [VERIFY: ...] marker.
+   */
+  vaultChunks?: RetrievedChunk[];
 }
 
 export interface DraftSection {
@@ -66,6 +79,10 @@ export interface DraftResult {
   session_id: string;
   /** True iff a VoiceFingerprint was applied to the system prompt. */
   voice_applied: boolean;
+  /** True iff vault chunks were injected as citation material. */
+  vault_applied: boolean;
+  /** Count of vault chunks injected (0 when none). */
+  vault_chunks_used: number;
 }
 
 const SYSTEM_PROMPT = `You are a senior grant and proposal writer drafting a first pass for an organization that will then iterate on what you produce. You are explicit and honest about uncertainty.
@@ -78,10 +95,23 @@ Style rules — non-negotiable:
 
 You will produce exactly five sections in the order specified, separated by the literal line "---SECTION:<type>---" before each section's content (no other formatting around that marker). Do not produce any preamble, postscript, commentary, or section index. Begin your response with the first section marker.
 
-The user message contains the funder opportunity and the applicant organization context. The applicant's "capacity_summary" is the only org-specific information you have — anything more specific must be a [VERIFY] marker.`;
+The user message contains the funder opportunity and the applicant organization context. The applicant's "capacity_summary" is one source of org-specific information. If a "Vault facts" block is present, those are additional verified org-specific facts you may cite directly — when you state a claim drawn from a Vault fact, append [CITE: vault-N] where N is the fact's number. Facts not in the Vault must remain [VERIFY: ...] markers — never promote a [VERIFY] to a [CITE] without a backing chunk.`;
+
+function buildVaultBlock(chunks: RetrievedChunk[]): string {
+  if (chunks.length === 0) return "";
+  const lines = chunks.map((c, i) => {
+    const idx = i + 1;
+    const head = `[vault-${idx}] (${c.doc_type} — "${c.doc_title}", chunk ${c.chunk_index + 1}, similarity ${c.similarity_score.toFixed(2)}):`;
+    // Compact whitespace so each chunk reads as one block.
+    const body = c.text.replace(/\s+/g, " ").trim();
+    return `${head}\n${body}`;
+  });
+  return `# Vault facts (cite as [CITE: vault-N] when used)\n\n${lines.join("\n\n")}\n\n`;
+}
 
 function buildUserPrompt(input: DraftInput): string {
-  const { opportunity: opp, org } = input;
+  const { opportunity: opp, org, vaultChunks } = input;
+  const vaultBlock = buildVaultBlock(vaultChunks ?? []);
   const amount =
     opp.amount_min && opp.amount_max
       ? `$${opp.amount_min.toLocaleString()}–$${opp.amount_max.toLocaleString()}`
@@ -96,7 +126,7 @@ function buildUserPrompt(input: DraftInput): string {
       `  - ${s.type} ("${s.label}", target ~${s.target_words} words): ${s.guidance}`,
   ).join("\n");
 
-  return `# Funder opportunity
+  return `${vaultBlock}# Funder opportunity
 
 Title: ${opp.title}
 Agency: ${opp.agency ?? "[VERIFY: agency]"}
@@ -170,6 +200,7 @@ export async function generateDraft(input: DraftInput): Promise<DraftResult> {
     (tokens_in / 1_000_000) * PRICE_PER_M_INPUT +
     (tokens_out / 1_000_000) * PRICE_PER_M_OUTPUT;
 
+  const vaultChunks = input.vaultChunks ?? [];
   return {
     sections,
     tokens_in,
@@ -178,5 +209,7 @@ export async function generateDraft(input: DraftInput): Promise<DraftResult> {
     model: MODEL,
     session_id,
     voice_applied: voiceApplied,
+    vault_applied: vaultChunks.length > 0,
+    vault_chunks_used: vaultChunks.length,
   };
 }

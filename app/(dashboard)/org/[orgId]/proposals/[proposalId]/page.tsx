@@ -18,6 +18,7 @@ import { createClient } from "@/lib/supabase/server";
 import { SECTION_SPECS, SECTION_TYPES, type SectionType } from "@/lib/rfp/draft/sections";
 import { ReviewButton } from "@/components/rfp/ReviewButton";
 import { ReviewerFindingsPanel } from "@/components/rfp/ReviewerFindingsPanel";
+import { ProposalSectionEditor } from "@/components/rfp/ProposalSectionEditor";
 import {
   REVIEWER_FINDINGS_SECTION_TYPE,
   ReviewerResultSchema,
@@ -34,6 +35,7 @@ interface ProposalRow {
 }
 
 interface SectionRow {
+  id: string;
   section_type: string;
   content: string | null;
   version: number;
@@ -58,9 +60,23 @@ interface AgentSessionRow {
  */
 function readVoiceApplied(session_id: string | null): boolean | null {
   if (!session_id) return null;
-  const m = session_id.match(/__voice=(true|false)$/);
+  // Accept both "__voice=X" (legacy) and "__voice=X__vault=N" (current).
+  const m = session_id.match(/__voice=(true|false)(?:__|$)/);
   if (!m) return null;
   return m[1] === "true";
+}
+
+/**
+ * Parse the vault chunks used count from a drafter session_id suffix.
+ * Format: "<orig>__voice=<true|false>__vault=<N>". Returns 0 when no suffix
+ * is present (pre Vault Grounding v1 rows).
+ */
+function readVaultChunksUsed(session_id: string | null): number {
+  if (!session_id) return 0;
+  const m = session_id.match(/__vault=(\d+)/);
+  if (!m) return 0;
+  const n = parseInt(m[1], 10);
+  return Number.isFinite(n) && n >= 0 ? n : 0;
 }
 
 function fmtCost(c: number | string | null): string {
@@ -98,20 +114,25 @@ export default async function ProposalPage({
 
   const { data: sections } = await supabase
     .from("rfp_proposal_sections")
-    .select("section_type, content, version, last_drafted_by_agent_at")
+    .select("id, section_type, content, version, last_drafted_by_agent_at")
     .eq("proposal_id", proposalId)
     .order("section_type")
     .returns<SectionRow[]>();
 
+  // Pull the most recent DRAFTER session specifically — proposal_editor_v1
+  // rows would otherwise win the limit(1) ordering after any human edit and
+  // collapse the voice/vault metadata badges back to null.
   const { data: session } = await supabase
     .from("rfp_agent_sessions")
     .select("agent, model, tokens_in, tokens_out, cost_usd, created_at, session_id")
     .eq("proposal_id", proposalId)
+    .eq("agent", "drafter_v1")
     .order("created_at", { ascending: false })
     .limit(1)
     .maybeSingle<AgentSessionRow>();
 
   const voiceApplied = readVoiceApplied(session?.session_id ?? null);
+  const vaultChunksUsed = readVaultChunksUsed(session?.session_id ?? null);
 
   const sectionByType = new Map<string, SectionRow>(
     (sections ?? []).map((s) => [s.section_type, s]),
@@ -154,33 +175,48 @@ export default async function ProposalPage({
           {proposal.title}
         </h1>
 
-        {/* Honesty banner — voice state reflects whether the drafter used
-            the org's Voice Fingerprint v1 profile. voiceApplied===null
-            means this draft predates voice tracking (older row). */}
+        {/* Honesty banner — voice + vault state reflect whether the drafter
+            used the org's Voice Fingerprint v1 profile and/or any vault
+            chunks. voiceApplied===null + vaultChunksUsed===0 means this
+            draft predates the tracking suffixes. */}
         <div className="mt-6 rounded-md border border-amber-500/30 bg-amber-500/5 p-4">
           <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-amber-300">
-            {voiceApplied === true
-              ? "First-pass draft · voice-trained · preview"
-              : "First-pass draft · preview"}
+            {[
+              "First-pass draft",
+              voiceApplied === true ? "voice-trained" : null,
+              vaultChunksUsed > 0
+                ? `vault-grounded (${vaultChunksUsed} chunks)`
+                : null,
+              "preview",
+            ]
+              .filter(Boolean)
+              .join(" · ")}
           </p>
           <p className="mt-2 text-sm text-zinc-300">
-            {voiceApplied === true ? (
+            {voiceApplied === true || vaultChunksUsed > 0 ? (
               <>
-                This first pass used your trained voice fingerprint
-                (stylometric profile applied to the drafter&apos;s system
-                prompt — not fine-tuning). It is not vault-grounded and the
-                reviewer below is a single Opus critique against the funder
-                brief, not a rewriter. Every [VERIFY: …] marker is still a
-                placeholder you need to confirm or replace.
+                This first pass applied{" "}
+                {voiceApplied === true ? "your trained voice fingerprint" : null}
+                {voiceApplied === true && vaultChunksUsed > 0 ? " and " : null}
+                {vaultChunksUsed > 0
+                  ? `${vaultChunksUsed} retrieved vault chunks as cited evidence`
+                  : null}
+                . Voice is system-prompt augmentation (not fine-tuning); vault
+                grounding is single-shot retrieval (not multi-hop RAG). Claims
+                drawn from a chunk should carry a [CITE: vault-N] marker. The
+                reviewer pass below is a single Opus critique against the
+                funder brief, not a rewriter. Every [VERIFY: …] marker that
+                remains is still a placeholder you need to confirm.
               </>
             ) : (
               <>
                 This is a plain first pass — no voice fingerprint and no
                 vault grounding yet. Treat every [VERIFY: …] marker as a
                 placeholder you need to confirm or replace. Train your voice
-                in Settings to apply a stylometric profile to future drafts.
-                The reviewer pass below is a single Opus critique against the
-                funder brief, not a rewriter.
+                in Settings → Voice and upload past docs in Settings → Vault
+                to apply stylometric and grounding augmentation to future
+                drafts. The reviewer pass below is a single Opus critique
+                against the funder brief, not a rewriter.
               </>
             )}
           </p>
@@ -231,20 +267,28 @@ export default async function ProposalPage({
           {SECTION_TYPES.map((type: SectionType) => {
             const sec = sectionByType.get(type);
             const spec = SECTION_SPECS[type];
+            if (sec?.id && typeof sec.content === "string") {
+              return (
+                <ProposalSectionEditor
+                  key={type}
+                  proposalId={proposalId}
+                  sectionId={sec.id}
+                  sectionType={type}
+                  sectionLabel={spec.label}
+                  initialContent={sec.content}
+                  initialVersion={sec.version}
+                  lastDraftedByAgentAt={sec.last_drafted_by_agent_at}
+                />
+              );
+            }
             return (
               <section key={type}>
                 <h2 className="font-mono text-[10px] uppercase tracking-[0.25em] text-zinc-500">
                   {spec.label}
                 </h2>
-                {sec?.content ? (
-                  <div className="mt-3 whitespace-pre-wrap text-[15px] leading-relaxed text-zinc-200">
-                    {sec.content}
-                  </div>
-                ) : (
-                  <p className="mt-3 italic text-zinc-500">
-                    No content generated for this section.
-                  </p>
-                )}
+                <p className="mt-3 italic text-zinc-500">
+                  No content generated for this section.
+                </p>
               </section>
             );
           })}
