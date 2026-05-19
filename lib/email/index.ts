@@ -804,7 +804,11 @@ export async function sendTeamInvitationEmail(data: {
   role: string;
   inviteToken: string;
 }): Promise<{ success: boolean; error?: string }> {
-  const inviteUrl = `${process.env.NEXT_PUBLIC_APP_URL}/invite/accept?token=${data.inviteToken}`;
+  // The accept page is the dynamic route /invite/[token]; the token sits in
+  // the path segment, NOT a `?token=` query string. (Earlier this was wrongly
+  // emitted as `/invite/accept?token=...`, which matched the dynamic route
+  // with params.token = "accept" and silently broke the flow.)
+  const inviteUrl = `${process.env.NEXT_PUBLIC_APP_URL}/invite/${data.inviteToken}`;
 
   const html = `
 <!DOCTYPE html>
