@@ -18,6 +18,7 @@ import { ArrowRight, ArrowUpRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Navbar } from "@/components/landing/Navbar";
 import { Footer } from "@/components/landing/Footer";
+import { NewsletterCapture } from "@/components/landing/NewsletterCapture";
 import { Reveal } from "@/components/landing/Reveal";
 import { PageViewTracker } from "@/components/analytics/PageViewTracker";
 
@@ -920,6 +921,34 @@ export default function HomePage() {
           </div>
         </div>
       </Reveal>
+
+      {/* Newsletter — passive lead capture before footer */}
+      <section className="border-t border-border bg-background py-20 sm:py-24">
+        <div className="container mx-auto px-6 sm:px-8">
+          <div className="grid lg:grid-cols-[280px_1fr] gap-12 lg:gap-20">
+            <div className="flex items-baseline gap-3 text-muted-foreground">
+              <span className="font-mono text-[10px] uppercase tracking-[0.22em]">—</span>
+              <span className="font-mono text-[10px] uppercase tracking-[0.22em]">
+                Notes from the operating layer
+              </span>
+            </div>
+            <div className="max-w-2xl">
+              <h2 className="text-3xl sm:text-4xl lg:text-5xl font-semibold leading-[1.1] tracking-[-0.025em] text-foreground mb-6">
+                Stay close to the work.
+              </h2>
+              <p className="text-base text-muted-foreground leading-[1.7] mb-8">
+                Occasional dispatches on AI installs, the Engine commitment, and
+                what we're shipping. Written by Lorenzo. Read by operators, fund
+                partners, and mission leads. Unsubscribe any time.
+              </p>
+              <NewsletterCapture variant="inline" source="home_inline" />
+              <p className="mt-4 text-xs text-muted-foreground">
+                No spam. No funnel tricks. Welcome email arrives within a minute.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
 
       <Footer />
     </div>

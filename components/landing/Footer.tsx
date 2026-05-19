@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { NewsletterCapture } from "./NewsletterCapture";
 
 /**
  * Studio-frame footer — single source of truth for all public marketing
@@ -62,6 +63,19 @@ export function Footer() {
   return (
     <footer className="border-t border-border/60 bg-background py-16">
       <div className="container mx-auto px-6 sm:px-8">
+        {/* Newsletter strip */}
+        <div className="grid md:grid-cols-[1fr_auto] gap-6 md:items-center pb-10 mb-10 border-b border-border/60">
+          <div>
+            <p className="text-sm font-medium text-foreground mb-1">
+              Notes from the operating layer.
+            </p>
+            <p className="text-xs text-muted-foreground leading-relaxed max-w-md">
+              Occasional dispatches on AI installs, the engine commitment, and what we're shipping. No spam, no funnel tricks. Unsubscribe any time.
+            </p>
+          </div>
+          <NewsletterCapture variant="footer" source="footer" />
+        </div>
+
         <div className="grid md:grid-cols-6 gap-8 mb-10">
           {/* Brand column */}
           <div className="md:col-span-1">
