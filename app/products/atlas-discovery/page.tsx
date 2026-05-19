@@ -15,6 +15,9 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Navbar } from "@/components/landing/Navbar";
 import { Footer } from "@/components/landing/Footer";
+import { JsonLd } from "@/components/seo/JsonLd";
+import { productSchema } from "@/lib/seo/structured-data";
+import { PC_PRODUCTS } from "@/lib/seo/products";
 
 type SubmitState = "idle" | "submitting" | "success" | "error";
 
@@ -79,6 +82,7 @@ export default function AtlasDiscoveryPage() {
 
   return (
     <div className="min-h-screen bg-background">
+      <JsonLd data={productSchema(PC_PRODUCTS["atlas-discovery"])} />
       <Navbar />
 
       {/* Hero */}

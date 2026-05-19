@@ -22,6 +22,41 @@ import { Navbar } from "@/components/landing/Navbar";
 import { Footer } from "@/components/landing/Footer";
 import { PageViewTracker } from "@/components/analytics/PageViewTracker";
 import { trackClientEvent } from "@/lib/analytics/track-event";
+import { JsonLd } from "@/components/seo/JsonLd";
+import { faqSchema } from "@/lib/seo/structured-data";
+
+const PRICING_FAQ = [
+  {
+    question: "What's included in the free tier?",
+    answer:
+      "The free tier includes 1 user, basic AI chat with GPT-4o Mini, document upload up to 100 sources, and access to a curated subset of the 15 AI advisors. No credit card required. Upgrade any time without losing your context.",
+  },
+  {
+    question: "How is Perpetual Core different from ChatGPT Teams or Claude Pro?",
+    answer:
+      "Perpetual Core routes across 11 models (Claude, GPT-4o, Gemini, plus open-source) based on task type, persists organizational memory across sessions, and includes 15 industry-specific AI advisors. ChatGPT and Claude give you one model and no shared organizational context. We're an operating system; they're a model.",
+  },
+  {
+    question: "What does an engagement include?",
+    answer:
+      "Engagements start at $75,000 and include a 6-to-10-week install: operational audit, AI opportunity ranking, outcome-eval scope, and a co-signed contract framework. We sit in your operations the way an operator does — calls, docs, voice notes — then ship the AI workflows that move the metrics that matter.",
+  },
+  {
+    question: "Do you offer mission-driven discounts?",
+    answer:
+      "Yes. Verified 501(c)(3) organizations get a 30% discount on Vellum subscriptions, and 10–15% of every revenue dollar across Perpetual Core funds the Institute for Human Advancement directly. The mission is the substrate, not a marketing layer.",
+  },
+  {
+    question: "Can I cancel my subscription any time?",
+    answer:
+      "Yes. All product subscriptions ($49 Starter / $99 Pro) and retainers ($5,000–$15,000/month) cancel any month. Engagements are scoped fixed-fee with milestone payments — no auto-renewing surprises.",
+  },
+  {
+    question: "How does billing work for engagements over $75,000?",
+    answer:
+      "Engagements bill in milestones: 33% on signature, 33% at midpoint review, 34% at delivery. Invoices are line-itemed and include the Engine commitment (10–15% to the Institute) as a separate audited line. Net-30 terms standard; ACH or wire.",
+  },
+];
 
 const PLATFORM_PLANS = [
   {
@@ -147,6 +182,7 @@ export default function PricingPage() {
 
   return (
     <div className="min-h-screen bg-background">
+      <JsonLd data={faqSchema(PRICING_FAQ)} />
       <PageViewTracker />
       <Navbar />
 
@@ -415,6 +451,40 @@ export default function PricingPage() {
               Book intake
               <ArrowRight className="ml-2 h-3 w-3" />
             </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* FAQ — for SEO + buyer reassurance */}
+      <section className="border-t border-border py-24 sm:py-32">
+        <div className="container mx-auto px-6 sm:px-8">
+          <div className="grid lg:grid-cols-[280px_1fr] gap-12 lg:gap-20">
+            <SectionRail index="—" label="Common questions" />
+            <div className="max-w-3xl">
+              <h3 className="text-3xl sm:text-4xl lg:text-5xl font-semibold leading-[1.1] tracking-[-0.025em] text-foreground mb-12">
+                Pricing, in plain English.
+              </h3>
+              <dl className="divide-y divide-border border-y border-border">
+                {PRICING_FAQ.map((item) => (
+                  <details key={item.question} className="group py-6">
+                    <summary className="flex cursor-pointer items-start justify-between gap-6 list-none">
+                      <dt className="text-base sm:text-lg font-medium text-foreground leading-snug">
+                        {item.question}
+                      </dt>
+                      <span
+                        className="font-mono text-xs text-muted-foreground mt-1 transition-transform group-open:rotate-45"
+                        aria-hidden
+                      >
+                        +
+                      </span>
+                    </summary>
+                    <dd className="mt-4 text-sm sm:text-base text-muted-foreground leading-[1.7]">
+                      {item.answer}
+                    </dd>
+                  </details>
+                ))}
+              </dl>
+            </div>
           </div>
         </div>
       </section>

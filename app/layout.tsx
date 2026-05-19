@@ -5,6 +5,8 @@ import { ThemeProvider } from "@/components/theme-provider";
 import { QueryProvider } from "@/lib/providers/query-provider";
 import { Analytics } from "@vercel/analytics/react";
 import { SpeedInsights } from "@vercel/speed-insights/next";
+import { JsonLd } from "@/components/seo/JsonLd";
+import { organizationSchema, websiteSchema } from "@/lib/seo/structured-data";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -118,6 +120,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning className={`${inter.variable} ${jetbrainsMono.variable} ${instrumentSerif.variable}`}>
+      <head>
+        <JsonLd id="ld-org" data={organizationSchema()} />
+        <JsonLd id="ld-website" data={websiteSchema()} />
+      </head>
       <body className={inter.className}>
         <QueryProvider>
           <ThemeProvider
