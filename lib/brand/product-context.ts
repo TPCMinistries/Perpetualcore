@@ -40,6 +40,10 @@ export interface ProductBrand {
   contactTitle: string;
   /** Contact-sales subhead. */
   contactSubtitle: string;
+  /** Create-org headline. */
+  createOrgTitle: string;
+  /** Create-org subhead. */
+  createOrgSubtitle: string;
   /** "What to expect" enterprise list — pairs (label, body). */
   expect: ReadonlyArray<{ label: string; body: string }>;
 }
@@ -56,6 +60,9 @@ const RFP: ProductBrand = {
   contactTitle: "Talk to the RFP Engine team",
   contactSubtitle:
     "Capture cohort onboarding, voice training, vault setup. We'll reach out within one business day.",
+  createOrgTitle: "Create your first capture org",
+  createOrgSubtitle:
+    "This scopes Discovery, Voice, Vault, Drafts, and Compliance to your team. You can create more orgs any time — one per entity or funding stack.",
   expect: [
     {
       label: "Capture cohort onboarding",
@@ -86,6 +93,9 @@ const DEFAULT: ProductBrand = {
   contactTitle: "Let's Build Something Amazing Together",
   contactSubtitle:
     "Our enterprise team will help you transform your business with AI. Fill out the form and we'll be in touch within 24 hours.",
+  createOrgTitle: "Create an organization",
+  createOrgSubtitle:
+    "Set up your tenant — this scopes your workspace, data, and team to one organization.",
   expect: [
     {
       label: "24-Hour Response",

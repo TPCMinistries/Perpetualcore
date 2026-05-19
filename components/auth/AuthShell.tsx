@@ -26,6 +26,8 @@ import {
   type ProductId,
 } from "@/lib/brand/product-context";
 
+type ShellMaxWidth = "md" | "lg" | "xl" | "2xl";
+
 interface AuthShellProps {
   /** Big headline. */
   title: string;
@@ -41,8 +43,20 @@ interface AuthShellProps {
    * signup) prefer the override-from-brand variant; pages that are
    * truly generic (reset-password) leave it unset.
    */
-  productCopyKey?: "signIn" | "signUp";
+  productCopyKey?: "signIn" | "signUp" | "createOrg";
+  /**
+   * Content column max-width. Auth forms (email/password) want "md";
+   * org creation (multi-field, NAICS chips) wants "lg".
+   */
+  maxWidth?: ShellMaxWidth;
 }
+
+const MAX_WIDTH_CLASSES: Record<ShellMaxWidth, string> = {
+  md: "max-w-md",
+  lg: "max-w-lg",
+  xl: "max-w-xl",
+  "2xl": "max-w-2xl",
+};
 
 export function AuthShell({
   title,
@@ -50,6 +64,7 @@ export function AuthShell({
   children,
   footer,
   productCopyKey,
+  maxWidth = "md",
 }: AuthShellProps) {
   const [productId, setProductId] = useState<ProductId>("perpetual-core");
 
@@ -69,18 +84,24 @@ export function AuthShell({
       ? brand.signInTitle
       : productCopyKey === "signUp"
         ? brand.signUpTitle
-        : title;
+        : productCopyKey === "createOrg"
+          ? brand.createOrgTitle
+          : title;
   const finalSubtitle =
     productCopyKey === "signIn"
       ? brand.signInSubtitle
       : productCopyKey === "signUp"
         ? brand.signUpSubtitle
-        : subtitle;
+        : productCopyKey === "createOrg"
+          ? brand.createOrgSubtitle
+          : subtitle;
+
+  const widthClass = MAX_WIDTH_CLASSES[maxWidth];
 
   if (brand.id === "rfp") {
-    return <RfpShell title={finalTitle} subtitle={finalSubtitle} brand={brand} footer={footer}>{children}</RfpShell>;
+    return <RfpShell title={finalTitle} subtitle={finalSubtitle} brand={brand} footer={footer} widthClass={widthClass}>{children}</RfpShell>;
   }
-  return <DefaultShell title={finalTitle} subtitle={finalSubtitle} brand={brand} footer={footer}>{children}</DefaultShell>;
+  return <DefaultShell title={finalTitle} subtitle={finalSubtitle} brand={brand} footer={footer} widthClass={widthClass}>{children}</DefaultShell>;
 }
 
 function RfpShell({
@@ -89,15 +110,17 @@ function RfpShell({
   brand,
   children,
   footer,
+  widthClass,
 }: {
   title: string;
   subtitle?: string;
   brand: ProductBrand;
   children: ReactNode;
   footer?: ReactNode;
+  widthClass: string;
 }) {
   return (
-    <div className="relative min-h-screen bg-zinc-950 text-zinc-100 antialiased selection:bg-emerald-300/30 selection:text-emerald-100">
+    <div className="dark relative min-h-screen bg-zinc-950 text-zinc-100 antialiased selection:bg-emerald-300/30 selection:text-emerald-100">
       {/* Ambient field — same motif as the rfp marketing pages */}
       <div className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
         <div className="absolute -top-40 left-1/2 h-[700px] w-[1200px] -translate-x-1/2 rounded-full bg-[radial-gradient(closest-side,rgba(16,185,129,0.18),transparent)] blur-3xl" />
@@ -128,7 +151,7 @@ function RfpShell({
       </header>
 
       <main className="container mx-auto flex min-h-[calc(100vh-5rem)] items-center justify-center px-4 py-16">
-        <div className="w-full max-w-md">
+        <div className={`w-full ${widthClass}`}>
           <div className="mb-6 flex items-center gap-3">
             <span className="h-px w-8 bg-zinc-700" />
             <span className="font-mono text-[10px] uppercase tracking-[0.25em] text-zinc-500">
@@ -165,20 +188,19 @@ function DefaultShell({
   brand,
   children,
   footer,
+  widthClass,
 }: {
   title: string;
   subtitle?: string;
   brand: ProductBrand;
   children: ReactNode;
   footer?: ReactNode;
+  widthClass: string;
 }) {
-  // Match the existing perpetual-core auth card chrome so the rest of
-  // the suite (www, sentinel, atlas, sage) keeps its current look until
-  // each one ships its own variant.
   void brand;
   return (
     <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 p-4">
-      <div className="w-full max-w-md rounded-xl border bg-card text-card-foreground shadow-lg">
+      <div className={`w-full ${widthClass} rounded-xl border bg-card text-card-foreground shadow-lg`}>
         <div className="flex flex-col space-y-1.5 p-6 text-center">
           <h2 className="text-2xl font-semibold leading-none tracking-tight">{title}</h2>
           {subtitle ? (
