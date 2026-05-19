@@ -299,8 +299,12 @@ export async function requestPasswordReset(email: string) {
   const supabase = await createClient();
   const origin = await getRequestOrigin();
 
+  // Route through /auth/callback so the PKCE ?code= from the email is
+  // exchanged for a session BEFORE the user lands on the update-password
+  // form. Without this hop, the form's server action runs with no session
+  // and Supabase returns "Auth session missing!".
   const { error } = await supabase.auth.resetPasswordForEmail(email, {
-    redirectTo: `${origin}/auth/update-password`,
+    redirectTo: `${origin}/auth/callback?next=/auth/update-password`,
   });
 
   if (error) {
