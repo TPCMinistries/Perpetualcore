@@ -33,7 +33,9 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { path: "/marketplace", priority: 0.7, changeFrequency: "weekly" },
     { path: "/partners", priority: 0.6, changeFrequency: "monthly" },
     { path: "/partners/apply", priority: 0.5, changeFrequency: "monthly" },
-    { path: "/consultation", priority: 0.7, changeFrequency: "monthly" },
+    // NOTE: /consultation and /consulting omitted — both 301 to studio routes
+    // (see next.config.mjs redirects). Including redirecting URLs in sitemaps
+    // is an SEO anti-pattern.
     { path: "/contact-sales", priority: 0.7, changeFrequency: "monthly" },
     { path: "/enterprise-demo", priority: 0.7, changeFrequency: "monthly" },
     { path: "/roi-calculator", priority: 0.7, changeFrequency: "monthly" },

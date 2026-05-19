@@ -148,7 +148,31 @@ const nextConfig = {
 
   // 301 redirects for retired routes per BRAND_ARCHITECTURE §7
   async redirects() {
+    // /industries/* → /solutions/* canonical. The site previously had two
+    // URL patterns for the same vertical pages (e.g. /industries/law-firm
+    // and /solutions/law-firms), causing keyword cannibalization. We've
+    // designated /solutions/* as canonical; /industries/* now 301s here.
+    const industryToSolution = [
+      ["law-firm", "law-firms"],
+      ["healthcare", "healthcare"],
+      ["sales", "sales"],
+      ["consulting", "consulting"],
+      ["education", "education"],
+      ["real-estate", "real-estate"],
+      ["accounting", "accountants"],
+      ["marketing-agency", "agencies"],
+      ["it-services", "it-services"],
+      ["financial-advisory", "financial-advisors"],
+      ["non-profit", "non-profits"],
+      ["church", "churches"],
+    ];
+
     return [
+      ...industryToSolution.map(([from, to]) => ({
+        source: `/industries/${from}`,
+        destination: `/solutions/${to}`,
+        permanent: true,
+      })),
       {
         // Legacy "Transformation Stack" page → studio engagements
         source: "/consulting",
