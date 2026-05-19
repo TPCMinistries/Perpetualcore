@@ -1,9 +1,11 @@
-"use client";
-
 /**
  * AuthShell — shared chrome for /login, /signup, /reset-password,
- * /accept-invite. Detects the current product from the hostname on
- * mount and renders one of two visual variants:
+ * /accept-invite, /orgs/new, /auth/update-password.
+ *
+ * Server component. Resolves the active product from the request's host
+ * header (`x-forwarded-host` set by Vercel, falling back to `host` for
+ * local dev) so the correct variant is in the SSR HTML — no FOUC on
+ * rfp.* or other product subdomains. Two variants:
  *
  *  - "rfp": dark zinc-950 + emerald accents, matches the rfp.perpetualcore.com
  *    marketing aesthetic. Mono uppercase eyebrow wordmark, editorial title,
@@ -13,17 +15,17 @@
  *    Preserves backward compatibility for www / parent app / other
  *    subdomains until each gets its own variant.
  *
- * The form itself (passed via children) renders inside the variant. No
- * change to auth logic, validation, or routing.
+ * AuthShell has no client interactivity; children can be either server
+ * or client components.
  */
 
-import { useEffect, useState, type ReactNode } from "react";
+import { headers } from "next/headers";
+import type { ReactNode } from "react";
 import Link from "next/link";
 import {
   detectProductFromHost,
   productBrand,
   type ProductBrand,
-  type ProductId,
 } from "@/lib/brand/product-context";
 
 type ShellMaxWidth = "md" | "lg" | "xl" | "2xl";
@@ -58,7 +60,7 @@ const MAX_WIDTH_CLASSES: Record<ShellMaxWidth, string> = {
   "2xl": "max-w-2xl",
 };
 
-export function AuthShell({
+export async function AuthShell({
   title,
   subtitle,
   children,
@@ -66,15 +68,9 @@ export function AuthShell({
   productCopyKey,
   maxWidth = "md",
 }: AuthShellProps) {
-  const [productId, setProductId] = useState<ProductId>("perpetual-core");
-
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      setProductId(detectProductFromHost(window.location.hostname));
-    }
-  }, []);
-
-  const brand = productBrand(productId);
+  const h = await headers();
+  const host = h.get("x-forwarded-host") ?? h.get("host") ?? "";
+  const brand = productBrand(detectProductFromHost(host));
 
   // For login/signup, the page can override its title/subtitle with the
   // brand's product-specific copy (e.g., "Sign in to RFP Engine" instead
