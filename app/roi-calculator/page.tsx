@@ -7,7 +7,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { TrendingUp, DollarSign, Clock, CheckCircle2, ArrowRight } from "lucide-react";
+import { TrendingUp, DollarSign, CheckCircle2, ArrowRight } from "lucide-react";
+import { Navbar } from "@/components/landing/Navbar";
+import { Footer } from "@/components/landing/Footer";
 
 type Vertical = "law" | "healthcare" | "realestate" | "agency";
 
@@ -78,7 +80,7 @@ export default function ROICalculatorPage() {
         // 40% more billable hours (from 80% admin reduction = 8 more hours/week)
         const hoursGainedPerWeek = 8;
         const annualRevenue = attorneys * hoursGainedPerWeek * billableRate * 52;
-        const cost = attorneys * 999 * 12;
+        const cost = attorneys * 99 * 12;
         const savings = annualRevenue - cost;
         const roiPercent = ((savings / cost) * 100).toFixed(0);
         const paybackMonths = (cost / (annualRevenue / 12)).toFixed(1);
@@ -103,7 +105,7 @@ export default function ROICalculatorPage() {
         const hoursSavedPerDay = adminHoursPerDay * 0.75;
         const hourlyWage = avgSalary / (8 * 5 * 52); // Assuming 8 hours/day, 5 days/week
         const annualSavings = providers * hoursSavedPerDay * hourlyWage * 5 * 52;
-        const cost = providers * 899 * 12;
+        const cost = providers * 99 * 12;
         const netSavings = annualSavings - cost;
         const roiPercent = ((netSavings / cost) * 100).toFixed(0);
         const paybackMonths = (cost / (annualSavings / 12)).toFixed(1);
@@ -127,7 +129,7 @@ export default function ROICalculatorPage() {
         // 50% more deals closed
         const extraDealsPerMonth = dealsPerMonth * 0.5;
         const annualRevenue = agents * extraDealsPerMonth * avgCommission * 12;
-        const cost = agents * 499 * 12;
+        const cost = agents * 99 * 12;
         const netProfit = annualRevenue - cost;
         const roiPercent = ((netProfit / cost) * 100).toFixed(0);
         const paybackMonths = (cost / (annualRevenue / 12)).toFixed(1);
@@ -154,7 +156,7 @@ export default function ROICalculatorPage() {
         const annualLaborSavings = savingsPerProject * projectsPerMonth * 12;
         const whitelabelRevenue = whitelabelClients * 2000 * 12;
         const totalSavings = annualLaborSavings + whitelabelRevenue;
-        const cost = teamMembers * 799 * 12;
+        const cost = teamMembers * 99 * 12;
         const netProfit = totalSavings - cost;
         const roiPercent = ((netProfit / cost) * 100).toFixed(0);
         const paybackMonths = (cost / (totalSavings / 12)).toFixed(1);
@@ -195,29 +197,8 @@ export default function ROICalculatorPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white dark:from-gray-900 dark:to-gray-800">
-      {/* Header */}
-      <header className="border-b bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm sticky top-0 z-10">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <Link href="/" className="flex items-center space-x-2">
-            <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center text-primary-foreground font-bold">
-              AI
-            </div>
-            <span className="text-xl font-bold">Perpetual Core</span>
-          </Link>
-          <div className="flex items-center gap-4">
-            <Link href="/pricing" className="text-sm font-medium hover:underline">
-              Pricing
-            </Link>
-            <Link href="/contact-sales" className="text-sm font-medium hover:underline">
-              Contact Sales
-            </Link>
-            <Button asChild>
-              <Link href="/signup">Get Started</Link>
-            </Button>
-          </div>
-        </div>
-      </header>
+    <div className="min-h-screen bg-background">
+      <Navbar />
 
       {/* Hero Section */}
       <section className="container mx-auto px-4 py-12 text-center">
@@ -536,6 +517,24 @@ export default function ROICalculatorPage() {
           </div>
         </div>
       </section>
+
+      {/* Estimate disclaimer */}
+      <section className="container mx-auto px-4 pb-16">
+        <div className="max-w-6xl mx-auto">
+          <p className="text-xs text-muted-foreground text-center leading-[1.7]">
+            This is an estimate based on industry averages and the Pro tier at
+            $99/user/month. Engagement installs (starting at $75,000) produce
+            different — typically larger — outcomes. For a numbers-backed
+            proposal,{" "}
+            <Link href="/contact-sales?plan=exploring" className="underline hover:text-foreground">
+              talk to the team
+            </Link>
+            .
+          </p>
+        </div>
+      </section>
+
+      <Footer />
     </div>
   );
 }
