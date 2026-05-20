@@ -16,10 +16,47 @@ import { Textarea } from "@/components/ui/textarea";
 import { Navbar } from "@/components/landing/Navbar";
 import { Footer } from "@/components/landing/Footer";
 import { JsonLd } from "@/components/seo/JsonLd";
-import { productSchema, breadcrumbSchema } from "@/lib/seo/structured-data";
+import { productSchema, breadcrumbSchema, faqSchema } from "@/lib/seo/structured-data";
 import { PC_PRODUCTS } from "@/lib/seo/products";
 
 type SubmitState = "idle" | "submitting" | "success" | "error";
+
+const FIT_GOOD = [
+  "Fund-backed portcos with $5M–$100M ARR where the OP team owns AI rollout decisions",
+  "PE Operating Partners running 5+ portcos who need a standardized install playbook",
+  "Founders/CEOs whose calendar is fully consumed by ops and who can co-sign an AI scope",
+  "Companies with a named operator who'll inherit the install (not 'we'll figure it out')",
+];
+
+const FIT_NOT = [
+  "Pre-revenue startups — wait until you have a workflow stable enough to measure",
+  "Organizations mid-merger or in active exec rotation — Discovery is wasted during turbulence",
+  "Buyers shopping for the cheapest provider — we're not the floor, we're the floor that ships",
+  "Teams that want a deck, not an install — we don't write decks",
+];
+
+const FAQ = [
+  {
+    q: "How long does Discovery take, end to end?",
+    a: "Two weeks. Week 1 is in-operations work — sitting in calls, reading docs, mapping workflows. Week 2 is synthesis — ranking the install candidates and writing the outcome-eval scope and contract framework. We hand over a written deliverable; no PowerPoint.",
+  },
+  {
+    q: "What's the difference between $5K and $15K?",
+    a: "Scope. The $5K floor is one portco, one workflow cluster, one outcome-eval scope. The $15K ceiling is fund-wide — multiple portcos, the install-prioritization playbook your OP team uses across the portfolio. Most engagements land in the $7,500–$10,000 band.",
+  },
+  {
+    q: "Is the Discovery fee credited toward a full engagement?",
+    a: "Yes. If you proceed to an Atlas install within 90 days of Discovery delivery, the full Discovery fee credits against the engagement floor. We've structured it so Discovery is genuinely useful even if you don't proceed — but if you do, you don't pay twice.",
+  },
+  {
+    q: "What if Discovery surfaces nothing worth installing?",
+    a: "That's a real answer. About 1 in 5 Discoveries we run ends with 'don't install AI in this workflow yet — here's why.' You still get the operational map and the ranked-opportunities document, both of which tend to be useful for non-AI ops planning.",
+  },
+  {
+    q: "Can we do Discovery under NDA?",
+    a: "Yes — we sign mutual NDAs as standard practice. Healthcare and regulated-industry portcos additionally get a BAA-equivalent scope agreement. Talk to us about anything sensitive before the kickoff call.",
+  },
+];
 
 const DELIVERABLES = [
   { name: "Operational map", body: "We sit in the portco's operations the way an operator does. Calls, docs, voice notes, the channels where decisions actually happen. Two weeks, no PowerPoint. We come out with a written map of every workflow, every handoff, and every gap." },
@@ -90,6 +127,7 @@ export default function AtlasDiscoveryPage() {
             { name: "Products", path: "/products" },
             { name: "Atlas Discovery", path: "/products/atlas-discovery" },
           ]),
+          faqSchema(FAQ.map((item) => ({ question: item.q, answer: item.a }))),
         ]}
       />
       <Navbar />
@@ -202,6 +240,51 @@ export default function AtlasDiscoveryPage() {
                   </div>
                 </div>
               ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Fit check */}
+      <section className="border-t border-border py-24 sm:py-32">
+        <div className="container mx-auto px-6 sm:px-8">
+          <div className="grid lg:grid-cols-[280px_1fr] gap-12 lg:gap-20">
+            <SectionRail index="03" label="Fit check" />
+            <div className="max-w-3xl">
+              <h3 className="text-3xl sm:text-4xl lg:text-5xl font-semibold leading-[1.1] tracking-[-0.025em] text-foreground mb-12">
+                Who Discovery is — and isn't — for.
+              </h3>
+              <div className="grid sm:grid-cols-2 gap-px bg-border border border-border">
+                <div className="bg-card p-7">
+                  <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-emerald-700 dark:text-emerald-400 mb-5">
+                    A good fit
+                  </p>
+                  <ul className="space-y-4">
+                    {FIT_GOOD.map((item) => (
+                      <li key={item} className="text-sm sm:text-base text-muted-foreground leading-[1.65] flex items-start gap-3">
+                        <span className="text-emerald-600 flex-shrink-0 mt-0.5">+</span>
+                        <span>{item}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+                <div className="bg-card p-7">
+                  <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-amber-700 dark:text-amber-400 mb-5">
+                    Not a fit (yet)
+                  </p>
+                  <ul className="space-y-4">
+                    {FIT_NOT.map((item) => (
+                      <li key={item} className="text-sm sm:text-base text-muted-foreground leading-[1.65] flex items-start gap-3">
+                        <span className="text-amber-600 flex-shrink-0 mt-0.5">−</span>
+                        <span>{item}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+              <p className="mt-8 text-sm text-muted-foreground leading-[1.7]">
+                On any "not a fit" signal, we'll tell you on the intake call — we'd rather defer or refer than sell you Discovery you'll regret.
+              </p>
             </div>
           </div>
         </div>
@@ -322,6 +405,37 @@ export default function AtlasDiscoveryPage() {
                   Talk to the founder <ArrowRight className="ml-1.5 h-3.5 w-3.5" />
                 </a>
               </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* FAQ */}
+      <section className="border-t border-border py-24 sm:py-32">
+        <div className="container mx-auto px-6 sm:px-8">
+          <div className="grid lg:grid-cols-[280px_1fr] gap-12 lg:gap-20">
+            <SectionRail index="—" label="Common questions" />
+            <div className="max-w-3xl">
+              <dl className="divide-y divide-border border-y border-border">
+                {FAQ.map((item) => (
+                  <details key={item.q} className="group py-6">
+                    <summary className="flex cursor-pointer items-start justify-between gap-6 list-none">
+                      <dt className="text-base sm:text-lg font-medium text-foreground leading-snug">
+                        {item.q}
+                      </dt>
+                      <span
+                        className="font-mono text-xs text-muted-foreground mt-1 transition-transform group-open:rotate-45"
+                        aria-hidden
+                      >
+                        +
+                      </span>
+                    </summary>
+                    <dd className="mt-4 text-sm sm:text-base text-muted-foreground leading-[1.7]">
+                      {item.a}
+                    </dd>
+                  </details>
+                ))}
+              </dl>
             </div>
           </div>
         </div>
