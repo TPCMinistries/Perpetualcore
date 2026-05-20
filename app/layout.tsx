@@ -126,6 +126,12 @@ export default function RootLayout({
       <head>
         <JsonLd id="ld-org" data={organizationSchema()} />
         <JsonLd id="ld-website" data={websiteSchema()} />
+        <link
+          rel="alternate"
+          type="application/rss+xml"
+          title="Perpetual Core — Notes"
+          href="/blog/rss.xml"
+        />
       </head>
       <body className={inter.className}>
         <QueryProvider>
