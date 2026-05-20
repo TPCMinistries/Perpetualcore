@@ -13,8 +13,10 @@
  */
 
 import Link from "next/link";
-import type { OnboardingState } from "@/lib/rfp/onboarding";
-import { VAULT_SEEDED_TARGET } from "@/lib/rfp/onboarding";
+import {
+  VAULT_SEEDED_TARGET,
+  type OnboardingState,
+} from "@/lib/rfp/onboarding-shared";
 
 interface OnboardingChecklistProps {
   orgId: string;

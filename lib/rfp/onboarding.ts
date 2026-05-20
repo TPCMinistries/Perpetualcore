@@ -20,19 +20,12 @@
  */
 
 import { createAdminClient } from "@/lib/supabase/server";
+import { VAULT_SEEDED_TARGET, type OnboardingState } from "./onboarding-shared";
 
-export interface OnboardingState {
-  org_created: boolean;
-  voice_trained: boolean;
-  vault_seeded: boolean;
-  first_draft: boolean;
-  first_review: boolean;
-  vault_chunk_count: number;
-  proposal_count: number;
-  all_complete: boolean;
-}
+export type { OnboardingState } from "./onboarding-shared";
+export { VAULT_SEEDED_TARGET } from "./onboarding-shared";
 
-const VAULT_SEEDED_THRESHOLD = 3;
+const VAULT_SEEDED_THRESHOLD = VAULT_SEEDED_TARGET;
 
 /**
  * Whether the org's voice_fingerprint jsonb has any non-empty payload.
@@ -101,5 +94,3 @@ export async function getOnboardingState(
 
   return state;
 }
-
-export const VAULT_SEEDED_TARGET = VAULT_SEEDED_THRESHOLD;
