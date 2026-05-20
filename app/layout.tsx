@@ -9,6 +9,7 @@ import { JsonLd } from "@/components/seo/JsonLd";
 import { organizationSchema, websiteSchema } from "@/lib/seo/structured-data";
 import { CookieConsent } from "@/components/landing/CookieConsent";
 import { CrispChat } from "@/components/landing/CrispChat";
+import { ExitIntent } from "@/components/landing/ExitIntent";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -139,6 +140,7 @@ export default function RootLayout({
         </QueryProvider>
         <CookieConsent />
         <CrispChat />
+        <ExitIntent />
         <Analytics />
         <SpeedInsights />
       </body>
