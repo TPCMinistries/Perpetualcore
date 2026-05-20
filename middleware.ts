@@ -61,6 +61,10 @@ function isRfpAppPath(pathname: string): boolean {
     pathname.startsWith('/accept-invite') ||
     pathname.startsWith('/orgs') ||
     pathname.startsWith('/org/') ||
+    // `/admin/rfp` ONLY — not `/admin/` broadly, which would re-expose the
+    // legacy Perpetual Core admin surface on the RFP host.
+    pathname === '/admin/rfp' ||
+    pathname.startsWith('/admin/rfp/') ||
     pathname.startsWith('/contact-sales') ||
     pathname === '/privacy' ||
     pathname === '/terms' ||
