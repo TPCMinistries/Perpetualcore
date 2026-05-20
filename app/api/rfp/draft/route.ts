@@ -170,6 +170,22 @@ export async function POST(req: Request): Promise<NextResponse> {
   }
 
   // Persist proposal + sections + audit row.
+  //
+  // vaultChunksUsed shape (ordered, 1-indexed in [CITE: vault-N] markers):
+  //   [{ id, doc_id, doc_title, doc_type, chunk_index, text_preview,
+  //      similarity_score }]
+  // Text is truncated to ~400 chars so the row stays small; full chunk
+  // bodies remain in rfp_vault_artifacts for any deep-dive lookup.
+  const vaultChunksUsed = vaultChunks.map((c) => ({
+    id: c.id,
+    doc_id: c.doc_id,
+    doc_title: c.doc_title,
+    doc_type: c.doc_type,
+    chunk_index: c.chunk_index,
+    text_preview: c.text.length > 400 ? `${c.text.slice(0, 400)}…` : c.text,
+    similarity_score: Math.round(c.similarity_score * 10000) / 10000,
+  }));
+
   const proposalTitle = `Draft: ${opp.title.slice(0, 160)}`;
   const { data: proposal, error: pErr } = await admin
     .from("rfp_proposals")
@@ -180,6 +196,7 @@ export async function POST(req: Request): Promise<NextResponse> {
       status: "draft",
       due_date: opp.deadline,
       owner_user_id: user.id,
+      vault_chunks_used: vaultChunksUsed,
     })
     .select("id")
     .single<{ id: string }>();

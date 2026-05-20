@@ -21,7 +21,9 @@
  */
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { VerifyMarkerHighlights } from "./VerifyMarkerHighlights";
+import { MarkupRenderer, type CitationChunk } from "./MarkupRenderer";
+import { SectionFindings } from "./SectionFindings";
+import type { ReviewerFinding } from "@/lib/rfp/review/rubric";
 
 export interface ProposalSectionEditorProps {
   proposalId: string;
@@ -31,6 +33,19 @@ export interface ProposalSectionEditorProps {
   initialContent: string;
   initialVersion: number;
   lastDraftedByAgentAt: string | null;
+  /**
+   * Ordered vault chunks used at draft time. Array position + 1 = N in
+   * `[CITE: vault-N]` markers inside `content`. Optional: older proposals
+   * predating Wave 1 of "Best-Site Plan" have no persisted chunks, in which
+   * case citation pills render in the "source unavailable" state.
+   */
+  vaultChunks?: CitationChunk[];
+  /**
+   * Reviewer findings filtered to this section_type (the parent page does
+   * the filtering). Empty array renders nothing — the panel is fully
+   * collapsed away for sections with no findings.
+   */
+  findings?: ReviewerFinding[];
 }
 
 interface PatchResponse {
@@ -51,6 +66,8 @@ export function ProposalSectionEditor({
   initialContent,
   initialVersion,
   lastDraftedByAgentAt,
+  vaultChunks,
+  findings,
 }: ProposalSectionEditorProps) {
   const [content, setContent] = useState<string>(initialContent);
   const [draft, setDraft] = useState<string>(initialContent);
@@ -185,9 +202,14 @@ export function ProposalSectionEditor({
           </div>
         </div>
       ) : (
-        <div className="mt-3 whitespace-pre-wrap text-[15px] leading-relaxed text-zinc-200">
-          <VerifyMarkerHighlights text={content} />
-        </div>
+        <>
+          <div className="mt-3 whitespace-pre-wrap text-[15px] leading-relaxed text-zinc-200">
+            <MarkupRenderer text={content} vaultChunks={vaultChunks} />
+          </div>
+          {findings && findings.length > 0 ? (
+            <SectionFindings findings={findings} />
+          ) : null}
+        </>
       )}
     </section>
   );

@@ -27,6 +27,8 @@
 
 import { buildFeedQuery } from "@/lib/rfp/feed";
 import { getOrgForUser, listUserOrgs } from "@/lib/rfp/orgs";
+import { getOnboardingState } from "@/lib/rfp/onboarding";
+import { OnboardingChecklist } from "@/components/rfp/OnboardingChecklist";
 import { notFound } from "next/navigation";
 import { DiscoveryClient } from "./DiscoveryClient";
 import type { FilterValues, ModeFilter } from "./parts/FilterPills";
@@ -138,14 +140,26 @@ export default async function DiscoveryPage({
     }
   }
 
+  // First-run checklist — auto-hides when all 5 steps complete. Cheap to
+  // compute (4 parallel HEAD counts) and the page is already an SSR critical
+  // path, so we keep it in the same request.
+  const onboarding = await getOnboardingState(orgId);
+
   return (
-    <DiscoveryClient
-      org={org}
-      initialRows={initialRows}
-      initialCursor={initialCursor}
-      initialFilters={initialFilters}
-      initialMode={initialMode}
-      initialEmptyReason={initialEmptyReason}
-    />
+    <>
+      {onboarding.all_complete ? null : (
+        <div className="mx-auto mb-6 max-w-5xl px-6">
+          <OnboardingChecklist orgId={orgId} state={onboarding} />
+        </div>
+      )}
+      <DiscoveryClient
+        org={org}
+        initialRows={initialRows}
+        initialCursor={initialCursor}
+        initialFilters={initialFilters}
+        initialMode={initialMode}
+        initialEmptyReason={initialEmptyReason}
+      />
+    </>
   );
 }

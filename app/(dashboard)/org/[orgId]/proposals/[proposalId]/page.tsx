@@ -19,9 +19,11 @@ import { SECTION_SPECS, SECTION_TYPES, type SectionType } from "@/lib/rfp/draft/
 import { ReviewButton } from "@/components/rfp/ReviewButton";
 import { ReviewerFindingsPanel } from "@/components/rfp/ReviewerFindingsPanel";
 import { ProposalSectionEditor } from "@/components/rfp/ProposalSectionEditor";
+import type { CitationChunk } from "@/components/rfp/MarkupRenderer";
 import {
   REVIEWER_FINDINGS_SECTION_TYPE,
   ReviewerResultSchema,
+  type ReviewerFinding,
   type ReviewerResult,
 } from "@/lib/rfp/review/rubric";
 
@@ -32,6 +34,36 @@ interface ProposalRow {
   due_date: string | null;
   opp_id: string | null;
   created_at: string;
+  vault_chunks_used: unknown;
+}
+
+/**
+ * Drafter persists vault_chunks_used as an ordered jsonb array. We treat
+ * unknown shapes as "no citations available" rather than 500 the page —
+ * resilient to schema changes and to proposals drafted before Wave 1.
+ */
+function parseVaultChunks(raw: unknown): CitationChunk[] {
+  if (!Array.isArray(raw)) return [];
+  const out: CitationChunk[] = [];
+  for (const item of raw) {
+    if (!item || typeof item !== "object") continue;
+    const o = item as Record<string, unknown>;
+    if (typeof o.doc_title !== "string" || typeof o.text_preview !== "string") {
+      continue;
+    }
+    out.push({
+      id: typeof o.id === "string" ? o.id : undefined,
+      doc_id: typeof o.doc_id === "string" ? o.doc_id : undefined,
+      doc_title: o.doc_title,
+      doc_type: typeof o.doc_type === "string" ? o.doc_type : "document",
+      chunk_index:
+        typeof o.chunk_index === "number" ? o.chunk_index : undefined,
+      text_preview: o.text_preview,
+      similarity_score:
+        typeof o.similarity_score === "number" ? o.similarity_score : undefined,
+    });
+  }
+  return out;
 }
 
 interface SectionRow {
@@ -106,11 +138,13 @@ export default async function ProposalPage({
 
   const { data: proposal } = await supabase
     .from("rfp_proposals")
-    .select("id, title, status, due_date, opp_id, created_at")
+    .select("id, title, status, due_date, opp_id, created_at, vault_chunks_used")
     .eq("id", proposalId)
     .eq("org_id", orgId)
     .maybeSingle<ProposalRow>();
   if (!proposal) notFound();
+
+  const vaultChunks = parseVaultChunks(proposal.vault_chunks_used);
 
   const { data: sections } = await supabase
     .from("rfp_proposal_sections")
@@ -150,6 +184,25 @@ export default async function ProposalPage({
       reviewerResult = null;
     }
   }
+
+  // Split findings into global vs per-section. Global findings keep their
+  // home in the top ReviewerFindingsPanel (alongside the score + summary);
+  // section-specific findings render inline under each section. This
+  // eliminates the redundancy of showing the same finding twice.
+  const findingsBySection = new Map<string, ReviewerFinding[]>();
+  const globalFindings: ReviewerFinding[] = [];
+  for (const f of reviewerResult?.findings ?? []) {
+    if (f.section_type === "global") {
+      globalFindings.push(f);
+    } else {
+      const arr = findingsBySection.get(f.section_type) ?? [];
+      arr.push(f);
+      findingsBySection.set(f.section_type, arr);
+    }
+  }
+  const reviewerResultGlobalOnly: ReviewerResult | null = reviewerResult
+    ? { ...reviewerResult, findings: globalFindings }
+    : null;
 
   return (
     <div className="min-h-screen bg-zinc-950 text-zinc-100">
@@ -258,8 +311,8 @@ export default async function ProposalPage({
         <div className="mt-8">
           <ReviewButton orgId={orgId} proposalId={proposalId} />
         </div>
-        {reviewerResult ? (
-          <ReviewerFindingsPanel result={reviewerResult} />
+        {reviewerResultGlobalOnly ? (
+          <ReviewerFindingsPanel result={reviewerResultGlobalOnly} />
         ) : null}
 
         {/* Sections in canonical order */}
@@ -278,6 +331,8 @@ export default async function ProposalPage({
                   initialContent={sec.content}
                   initialVersion={sec.version}
                   lastDraftedByAgentAt={sec.last_drafted_by_agent_at}
+                  vaultChunks={vaultChunks}
+                  findings={findingsBySection.get(type) ?? []}
                 />
               );
             }

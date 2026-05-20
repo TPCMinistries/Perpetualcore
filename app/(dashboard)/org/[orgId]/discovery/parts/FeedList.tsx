@@ -76,13 +76,15 @@ export function FeedList({
   if (rows.length === 0 && !loading) {
     return (
       <div className="flex h-full items-center justify-center p-8">
-        <div className="text-center max-w-xs">
-          <p className="font-serif italic text-zinc-300 text-lg">
-            No opportunities yet.
+        <div className="max-w-sm text-center">
+          <p className="font-serif text-lg italic text-zinc-300">
+            No opportunities match these filters.
           </p>
-          <p className="mt-2 text-xs text-zinc-500">
-            The cron scans for new RFPs every six hours. Adjust your filters or
-            check back soon.
+          <p className="mt-2 text-xs leading-relaxed text-zinc-500">
+            Discovery scans federal, state, and city sources every six hours.
+            New rows land here automatically as they show up upstream — or seed
+            your feed right now by pasting any RFP URL into the import bar at
+            the top of this page.
           </p>
         </div>
       </div>
