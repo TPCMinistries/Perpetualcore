@@ -44,6 +44,12 @@ function isRfpHost(host: string | null): boolean {
 
 // Paths the RFP subdomain serves directly (post-auth product routes).
 // Anything not matched here gets rewritten under /rfp/* for the marketing surface.
+//
+// `/dashboard` is INTENTIONALLY OMITTED: that is the legacy Perpetual Core
+// SaaS dashboard (purple gradient "Simple/Full Mode" onboarding, Atlas exec
+// assistant, etc.) and must never render on the RFP product host. The
+// post-login redirect target for rfp.* is `/orgs`, which routes to the
+// caller's first org's discovery feed (or /orgs/new for net-new users).
 function isRfpAppPath(pathname: string): boolean {
   return (
     pathname.startsWith('/api/') ||
@@ -55,7 +61,6 @@ function isRfpAppPath(pathname: string): boolean {
     pathname.startsWith('/accept-invite') ||
     pathname.startsWith('/orgs') ||
     pathname.startsWith('/org/') ||
-    pathname.startsWith('/dashboard') ||
     pathname.startsWith('/contact-sales') ||
     pathname === '/privacy' ||
     pathname === '/terms' ||
@@ -66,6 +71,17 @@ function isRfpAppPath(pathname: string): boolean {
 export async function middleware(request: NextRequest) {
   const host = request.headers.get('host');
   const pathname = request.nextUrl.pathname;
+
+  // ── RFP host: redirect legacy /dashboard/* to /orgs ──
+  // Bookmarked or auto-redirected requests to /dashboard land in the legacy
+  // Perpetual Core SaaS, which is not the RFP product. Send them to /orgs
+  // which routes to their first org or /orgs/new.
+  if (isRfpHost(host) && pathname.startsWith('/dashboard')) {
+    const url = request.nextUrl.clone();
+    url.pathname = '/orgs';
+    url.search = '';
+    return NextResponse.redirect(url, 307);
+  }
 
   // ── Subdomain rewrite: rfp.* serves the RFP Engine product surface ──
   // Marketing routes get rewritten under /rfp/* so they share the RFP layout.

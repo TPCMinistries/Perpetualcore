@@ -62,7 +62,11 @@ export function SignupForm() {
         return;
       }
 
-      router.push("/dashboard");
+      // Host-aware landing — rfp.* → /orgs, otherwise legacy /dashboard.
+      const isRfpHost =
+        typeof window !== "undefined" &&
+        /^rfp\.(perpetualcore\.com|localhost)/i.test(window.location.host);
+      router.push(isRfpHost ? "/orgs" : "/dashboard");
       router.refresh();
     } catch {
       setError("Something went wrong. Please try again.");

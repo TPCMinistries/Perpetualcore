@@ -26,7 +26,14 @@ export async function GET(request: NextRequest) {
   const tokenHash = searchParams.get("token_hash");
   const type = searchParams.get("type");
   const code = searchParams.get("code");
-  const next = searchParams.get("next") || "/dashboard";
+  // Host-aware default landing. On rfp.perpetualcore.com we route through
+  // /orgs (which resolves to the caller's first org's discovery feed),
+  // never the legacy Perpetual Core SaaS /dashboard. Other hosts keep the
+  // legacy /dashboard default.
+  const requestHost = (request.headers.get("host") || "").toLowerCase().split(":")[0];
+  const isRfpHost = requestHost === "rfp.perpetualcore.com" || requestHost === "rfp.localhost";
+  const defaultNext = isRfpHost ? "/orgs" : "/dashboard";
+  const next = searchParams.get("next") || defaultNext;
   const error = searchParams.get("error");
   const errorDescription = searchParams.get("error_description");
 
