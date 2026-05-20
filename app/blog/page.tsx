@@ -24,6 +24,14 @@ export const metadata = {
 
 const PUBLISHED_POSTS = [
   {
+    slug: "outcome-eval-the-line-item-every-ai-install-skips",
+    title: "Outcome-eval, the line item every AI install skips",
+    subtitle:
+      "Without it, you don't have an install — you have a demo that ran once.",
+    date: "2026-05-20",
+    readMinutes: 5,
+  },
+  {
     slug: "what-an-ai-install-actually-costs",
     title: "What an AI install actually costs",
     subtitle: "And why we price engagements at $75,000",

@@ -21,6 +21,14 @@ type Post = {
 
 const POSTS: Post[] = [
   {
+    slug: "outcome-eval-the-line-item-every-ai-install-skips",
+    title: "Outcome-eval, the line item every AI install skips",
+    subtitle:
+      "Without it, you don't have an install — you have a demo that ran once. Why outcome evaluation is the most-skipped and most-load-bearing line item in any production AI engagement.",
+    date: "2026-05-20",
+    author: "Lorenzo Daughtry-Chambers",
+  },
+  {
     slug: "what-an-ai-install-actually-costs",
     title: "What an AI install actually costs",
     subtitle:
