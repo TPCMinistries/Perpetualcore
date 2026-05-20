@@ -180,6 +180,13 @@ const nextConfig = {
         permanent: true,
       },
       {
+        // /productivity-guide consolidated into /lead-magnet
+        // (one opt-in surface, one promised deliverable: the buyer's guide)
+        source: "/productivity-guide",
+        destination: "/lead-magnet",
+        permanent: true,
+      },
+      {
         // Legacy "Guided Implementation" page → studio process
         // (Session 2 built /studio/process; redirect now points to its
         // canonical destination.)
