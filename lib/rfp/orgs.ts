@@ -9,6 +9,7 @@
  */
 
 import { createClient, createAdminClient } from "@/lib/supabase/server";
+import { enrollInSequence } from "./sequences";
 
 // ── RFP domain types ─────────────────────────────────────────────────────────
 
@@ -80,6 +81,28 @@ export async function createOrgWithOwner(
     // Compensating delete — roll back the orphaned org
     await admin.from("rfp_orgs").delete().eq("id", org.id);
     throw new Error(`org_membership_failed: ${memErr.message}`);
+  }
+
+  // Enroll the owner in the trial-onboarding sequence. Best-effort — a
+  // failure here does NOT block org creation; the user can be enrolled
+  // later by re-running this code path or via a backfill script.
+  try {
+    const { data: userResp } = await admin.auth.admin.getUserById(userId);
+    const email = userResp?.user?.email;
+    if (email) {
+      await enrollInSequence({
+        email,
+        sequenceKey: "trial-onboarding",
+        userId,
+        orgId: org.id,
+        orgName: org.name,
+      });
+    }
+  } catch (err) {
+    console.warn(
+      "[orgs] trial-onboarding enroll skipped:",
+      err instanceof Error ? err.message.slice(0, 120) : "unknown",
+    );
   }
 
   return org as RfpOrg;

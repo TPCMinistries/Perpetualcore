@@ -66,6 +66,7 @@ function isRfpAppPath(pathname: string): boolean {
     pathname === '/admin/rfp' ||
     pathname.startsWith('/admin/rfp/') ||
     pathname.startsWith('/contact-sales') ||
+    pathname.startsWith('/unsubscribe') ||
     pathname === '/privacy' ||
     pathname === '/terms' ||
     pathname.startsWith('/rfp')
