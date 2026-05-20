@@ -34,7 +34,7 @@ const PRICING_FAQ = [
   {
     question: "How is Perpetual Core different from ChatGPT Teams or Claude Pro?",
     answer:
-      "Perpetual Core routes across 11 models (Claude, GPT-4o, Gemini, plus open-source) based on task type, persists organizational memory across sessions, and includes 15 industry-specific AI advisors. ChatGPT and Claude give you one model and no shared organizational context. We're an operating system; they're a model.",
+      "Short version: we're a multi-model operating system with persistent organizational memory and 15 industry advisors. ChatGPT and Claude give you one model and a chat window. Many of our customers run both. See /compare for a feature-by-feature matrix.",
   },
   {
     question: "What does an engagement include?",
