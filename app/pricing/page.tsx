@@ -108,6 +108,22 @@ const PLATFORM_PLANS = [
       "Priority support (4-hour response)",
     ],
   },
+  {
+    id: "teams",
+    name: "Teams",
+    price: null, // contact-sales tier; price varies with seat count
+    description: "For teams that need shared context",
+    checkoutEnabled: false,
+    popular: false,
+    features: [
+      "Everything in Pro, for everyone on the team",
+      "Shared knowledge base + organizational memory",
+      "SSO / SAML, audit log, RBAC",
+      "Volume pricing from 5 seats",
+      "Dedicated success manager",
+      "Custom SLA",
+    ],
+  },
 ];
 
 const RETAINER_PROGRAMS = [
@@ -256,11 +272,12 @@ export default function PricingPage() {
             </div>
           </div>
 
-          <div className="grid sm:grid-cols-3 border border-border bg-card divide-y sm:divide-y-0 sm:divide-x divide-border">
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 border border-border bg-card divide-y sm:divide-y-0 lg:divide-x divide-border">
             {PLATFORM_PLANS.map((plan, i) => {
               const yearlyPrice = plan.price ? Math.floor(plan.price * 12 * 0.8) : null;
               const displayPrice =
                 billingInterval === "yearly" && yearlyPrice ? Math.floor(yearlyPrice / 12) : plan.price;
+              const isCustomPrice = plan.price === null;
               return (
                 <div key={plan.id} className="p-6 sm:p-7 flex flex-col">
                   <div className="flex items-center justify-between mb-10">
@@ -281,6 +298,15 @@ export default function PricingPage() {
                   <div className="mb-6">
                     {plan.price === 0 ? (
                       <div className="text-3xl font-semibold tracking-[-0.025em] text-foreground">Free</div>
+                    ) : isCustomPrice ? (
+                      <div>
+                        <span className="text-3xl font-semibold tracking-[-0.025em] text-foreground">
+                          Custom
+                        </span>
+                        <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground mt-2">
+                          Volume pricing
+                        </p>
+                      </div>
                     ) : (
                       <div>
                         <span className="text-3xl font-semibold tracking-[-0.025em] text-foreground">
@@ -305,7 +331,13 @@ export default function PricingPage() {
                     onClick={() => handleSubscribe(plan.id, plan.checkoutEnabled)}
                     disabled={isLoading === plan.id}
                   >
-                    {isLoading === plan.id ? "Loading…" : plan.id === "free" ? "Get started free" : "Start free trial"}
+                    {isLoading === plan.id
+                      ? "Loading…"
+                      : plan.id === "free"
+                      ? "Get started free"
+                      : isCustomPrice
+                      ? "Talk to sales"
+                      : "Start free trial"}
                     {isLoading !== plan.id && plan.id !== "free" && <ArrowRight className="ml-2 h-4 w-4" />}
                   </Button>
 
