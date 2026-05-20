@@ -8,6 +8,7 @@ import { SpeedInsights } from "@vercel/speed-insights/next";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { organizationSchema, websiteSchema } from "@/lib/seo/structured-data";
 import { CookieConsent } from "@/components/landing/CookieConsent";
+import { CrispChat } from "@/components/landing/CrispChat";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -137,6 +138,7 @@ export default function RootLayout({
           </ThemeProvider>
         </QueryProvider>
         <CookieConsent />
+        <CrispChat />
         <Analytics />
         <SpeedInsights />
       </body>
