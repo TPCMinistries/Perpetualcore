@@ -52,6 +52,14 @@ const COMPANY_LINKS = [
   { label: "Contact", href: "/contact-sales" },
 ];
 
+const RESOURCE_LINKS = [
+  { label: "Notes", href: "/blog" },
+  { label: "Help", href: "/help" },
+  { label: "Docs", href: "/docs" },
+  { label: "Status", href: "/status" },
+  { label: "Developers", href: "/developers" },
+];
+
 const LEGAL_LINKS = [
   { label: "Terms", href: "/terms" },
   { label: "Privacy", href: "/privacy" },
@@ -76,7 +84,7 @@ export function Footer() {
           <NewsletterCapture variant="footer" source="footer" />
         </div>
 
-        <div className="grid md:grid-cols-6 gap-8 mb-10">
+        <div className="grid md:grid-cols-7 gap-8 mb-10">
           {/* Brand column */}
           <div className="md:col-span-1">
             <div className="mb-4 flex items-center gap-2.5">
@@ -174,6 +182,20 @@ export function Footer() {
             <h4 className="eyebrow mb-4">Company</h4>
             <ul className="space-y-2 text-sm text-muted-foreground">
               {COMPANY_LINKS.map((link) => (
+                <li key={link.href}>
+                  <Link href={link.href} className="hover:text-primary transition">
+                    {link.label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Resources column — notes, help, docs, status */}
+          <div>
+            <h4 className="eyebrow mb-4">Resources</h4>
+            <ul className="space-y-2 text-sm text-muted-foreground">
+              {RESOURCE_LINKS.map((link) => (
                 <li key={link.href}>
                   <Link href={link.href} className="hover:text-primary transition">
                     {link.label}
