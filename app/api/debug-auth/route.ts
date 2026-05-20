@@ -6,7 +6,7 @@ import { cookies } from "next/headers";
  * Diagnostic endpoint that surfaces cookie names and auth state.
  * Leaks operational info; gated to non-production environments only.
  */
-export async function GET(req: NextRequest) {
+export async function GET(_req: NextRequest) {
   if (process.env.NODE_ENV === "production") {
     return NextResponse.json({ error: "Not found" }, { status: 404 });
   }
