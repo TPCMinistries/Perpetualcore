@@ -107,6 +107,9 @@ export function PublicMobileNav() {
               <Link href="/pricing" onClick={close} className="block px-4 py-2.5 text-sm text-muted-foreground hover:text-foreground hover:bg-accent rounded-sm transition-colors">
                 Pricing
               </Link>
+              <Link href="/compare" onClick={close} className="block px-4 py-2.5 text-sm text-muted-foreground hover:text-foreground hover:bg-accent rounded-sm transition-colors">
+                Compare
+              </Link>
               <Link href="/about" onClick={close} className="block px-4 py-2.5 text-sm text-muted-foreground hover:text-foreground hover:bg-accent rounded-sm transition-colors">
                 About
               </Link>

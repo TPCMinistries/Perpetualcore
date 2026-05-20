@@ -195,6 +195,14 @@ export function Navbar() {
             </DropdownPanel>
           </div>
 
+          <Link href="/pricing" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
+            Pricing
+          </Link>
+
+          <Link href="/compare" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
+            Compare
+          </Link>
+
           <Link href="/about" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
             About
           </Link>
