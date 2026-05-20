@@ -47,6 +47,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { path: "/enterprise-demo", priority: 0.7, changeFrequency: "monthly" },
     { path: "/roi-calculator", priority: 0.7, changeFrequency: "monthly" },
     { path: "/lead-magnet", priority: 0.7, changeFrequency: "monthly" },
+    { path: "/start", priority: 0.9, changeFrequency: "monthly" },
     // /productivity-guide retired — 301 to /lead-magnet via next.config
     { path: "/professional-services", priority: 0.7, changeFrequency: "monthly" },
     { path: "/executive-suite", priority: 0.7, changeFrequency: "monthly" },

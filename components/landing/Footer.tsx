@@ -53,6 +53,9 @@ const COMPANY_LINKS = [
 ];
 
 const RESOURCE_LINKS = [
+  { label: "How to start", href: "/start" },
+  { label: "Buyer's guide", href: "/guide/ai-implementation-buyers-guide" },
+  { label: "Compare", href: "/compare" },
   { label: "Notes", href: "/blog" },
   { label: "Help", href: "/help" },
   { label: "Docs", href: "/docs" },
