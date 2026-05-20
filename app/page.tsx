@@ -327,6 +327,61 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* ─── 1.5 TRUST STRIP — what we operate, who we fund, who we're built under ───── */}
+      <section className="border-y border-border bg-card/40 py-10 sm:py-12">
+        <div className="container mx-auto px-6 sm:px-8">
+          <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground mb-6 text-center">
+            One operating company · four arms · audited annually
+          </p>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-12 items-center text-center">
+            <div className="space-y-1">
+              <p className="text-base sm:text-lg font-semibold tracking-[-0.01em] text-foreground">
+                Perpetual Core
+              </p>
+              <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
+                Studio · 6 products
+              </p>
+            </div>
+            <a
+              href="https://theiha.org"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="space-y-1 hover:opacity-80 transition"
+            >
+              <p className="text-base sm:text-lg font-semibold tracking-[-0.01em] text-foreground inline-flex items-center justify-center gap-1">
+                Institute for Human Advancement
+                <ArrowUpRight className="h-3.5 w-3.5" aria-hidden />
+              </p>
+              <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
+                501(c)(3) · 10–15% of revenue
+              </p>
+            </a>
+            <a
+              href="https://upliftcommunities.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="space-y-1 hover:opacity-80 transition"
+            >
+              <p className="text-base sm:text-lg font-semibold tracking-[-0.01em] text-foreground inline-flex items-center justify-center gap-1">
+                Uplift Communities
+                <ArrowUpRight className="h-3.5 w-3.5" aria-hidden />
+              </p>
+              <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
+                Operating arm · workforce + founders
+              </p>
+            </a>
+            <div className="space-y-1">
+              <p className="text-base sm:text-lg font-semibold tracking-[-0.01em] text-foreground">
+                DeepFutures
+              </p>
+              <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
+                Pre-seed fund · by introduction
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* ─── 2. THE COMPANY — architecture diagram + arms ─────────────── */}
       <Reveal as="section" className="border-y border-border" >
         <div id="company" className="container mx-auto px-6 sm:px-8 py-20 sm:py-24">
