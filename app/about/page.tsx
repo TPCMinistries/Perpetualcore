@@ -9,6 +9,12 @@ import { ArrowRight, ArrowUpRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Navbar } from "@/components/landing/Navbar";
 import { Footer } from "@/components/landing/Footer";
+import { JsonLd } from "@/components/seo/JsonLd";
+import {
+  aboutPageSchema,
+  personSchema,
+  breadcrumbSchema,
+} from "@/lib/seo/structured-data";
 
 export const metadata = {
   title: "About — Perpetual Core",
@@ -82,6 +88,16 @@ function SectionRail({ index, label }: { index: string; label: string }) {
 export default function AboutPage() {
   return (
     <div className="min-h-screen bg-background">
+      <JsonLd
+        data={[
+          aboutPageSchema(),
+          personSchema(),
+          breadcrumbSchema([
+            { name: "Home", path: "/" },
+            { name: "About", path: "/about" },
+          ]),
+        ]}
+      />
       <Navbar />
 
       {/* Hero */}

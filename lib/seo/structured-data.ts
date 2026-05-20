@@ -148,6 +148,45 @@ type ServiceInput = {
   priceFrom?: string;
 };
 
+export function aboutPageSchema() {
+  const baseUrl = getBaseUrl();
+  return {
+    "@context": "https://schema.org",
+    "@type": "AboutPage",
+    "@id": `${baseUrl}/about#aboutpage`,
+    url: `${baseUrl}/about`,
+    name: `About ${ORG_NAME}`,
+    description:
+      "A studio, fund, and institute built to fund a mission. Lorenzo Daughtry-Chambers and the Institute for Human Advancement.",
+    mainEntity: { "@id": `${baseUrl}/#organization` },
+    about: { "@id": `${baseUrl}/#organization` },
+  };
+}
+
+export function personSchema() {
+  return {
+    "@context": "https://schema.org",
+    "@type": "Person",
+    name: "Lorenzo Daughtry-Chambers",
+    url: "https://lorenzodc.com",
+    jobTitle: "Founder",
+    worksFor: { "@type": "Organization", name: ORG_NAME, url: getBaseUrl() },
+    affiliation: [
+      {
+        "@type": "NGO",
+        name: "Institute for Human Advancement",
+        url: "https://theiha.org",
+      },
+      {
+        "@type": "Organization",
+        name: "Uplift Communities",
+        url: "https://upliftcommunities.com",
+      },
+    ],
+    sameAs: ["https://lorenzodc.com"],
+  };
+}
+
 export function serviceSchema(s: ServiceInput) {
   const baseUrl = getBaseUrl();
   return {
