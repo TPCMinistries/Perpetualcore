@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Navbar } from "@/components/landing/Navbar";
 import { Footer } from "@/components/landing/Footer";
 import { JsonLd } from "@/components/seo/JsonLd";
-import { productSchema } from "@/lib/seo/structured-data";
+import { productSchema, breadcrumbSchema } from "@/lib/seo/structured-data";
 import { PC_PRODUCTS } from "@/lib/seo/products";
 
 export const metadata = {
@@ -46,7 +46,16 @@ function SectionRail({ index, label }: { index: string; label: string }) {
 export default function SentinelPage() {
   return (
     <div className="min-h-screen bg-background">
-      <JsonLd data={productSchema(PC_PRODUCTS.sentinel)} />
+      <JsonLd
+        data={[
+          productSchema(PC_PRODUCTS.sentinel),
+          breadcrumbSchema([
+            { name: "Home", path: "/" },
+            { name: "Products", path: "/products" },
+            { name: "Sentinel", path: "/products/sentinel" },
+          ]),
+        ]}
+      />
       <Navbar />
 
       {/* Hero */}

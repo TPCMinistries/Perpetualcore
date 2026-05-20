@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Navbar } from "@/components/landing/Navbar";
 import { Footer } from "@/components/landing/Footer";
 import { JsonLd } from "@/components/seo/JsonLd";
-import { productSchema } from "@/lib/seo/structured-data";
+import { productSchema, breadcrumbSchema } from "@/lib/seo/structured-data";
 import { PC_PRODUCTS } from "@/lib/seo/products";
 
 export const metadata = {
@@ -66,7 +66,16 @@ function SectionRail({ index, label }: { index: string; label: string }) {
 export default function SagePage() {
   return (
     <div className="min-h-screen bg-background">
-      <JsonLd data={productSchema(PC_PRODUCTS.sage)} />
+      <JsonLd
+        data={[
+          productSchema(PC_PRODUCTS.sage),
+          breadcrumbSchema([
+            { name: "Home", path: "/" },
+            { name: "Products", path: "/products" },
+            { name: "Sage", path: "/products/sage" },
+          ]),
+        ]}
+      />
       <Navbar />
 
       {/* Hero */}

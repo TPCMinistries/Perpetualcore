@@ -16,7 +16,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Navbar } from "@/components/landing/Navbar";
 import { Footer } from "@/components/landing/Footer";
 import { JsonLd } from "@/components/seo/JsonLd";
-import { productSchema } from "@/lib/seo/structured-data";
+import { productSchema, breadcrumbSchema } from "@/lib/seo/structured-data";
 import { PC_PRODUCTS } from "@/lib/seo/products";
 
 type SubmitState = "idle" | "submitting" | "success" | "error";
@@ -76,7 +76,16 @@ export default function AtlasPage() {
 
   return (
     <div className="min-h-screen bg-background">
-      <JsonLd data={productSchema(PC_PRODUCTS.atlas)} />
+      <JsonLd
+        data={[
+          productSchema(PC_PRODUCTS.atlas),
+          breadcrumbSchema([
+            { name: "Home", path: "/" },
+            { name: "Products", path: "/products" },
+            { name: "Atlas", path: "/products/atlas" },
+          ]),
+        ]}
+      />
       <Navbar />
 
       {/* Hero — scarcity register */}

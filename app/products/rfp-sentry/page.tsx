@@ -14,7 +14,7 @@ import { Label } from "@/components/ui/label";
 import { Navbar } from "@/components/landing/Navbar";
 import { Footer } from "@/components/landing/Footer";
 import { JsonLd } from "@/components/seo/JsonLd";
-import { productSchema } from "@/lib/seo/structured-data";
+import { productSchema, breadcrumbSchema } from "@/lib/seo/structured-data";
 import { PC_PRODUCTS } from "@/lib/seo/products";
 
 type SubmitState = "idle" | "submitting" | "success" | "error";
@@ -71,7 +71,16 @@ export default function RfpSentryPage() {
 
   return (
     <div className="min-h-screen bg-background">
-      <JsonLd data={productSchema(PC_PRODUCTS["rfp-sentry"])} />
+      <JsonLd
+        data={[
+          productSchema(PC_PRODUCTS["rfp-sentry"]),
+          breadcrumbSchema([
+            { name: "Home", path: "/" },
+            { name: "Products", path: "/products" },
+            { name: "RFP Sentry", path: "/products/rfp-sentry" },
+          ]),
+        ]}
+      />
       <Navbar />
 
       {/* Hero */}
