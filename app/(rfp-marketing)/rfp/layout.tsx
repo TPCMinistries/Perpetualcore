@@ -1,11 +1,121 @@
 import Link from "next/link";
+import type { Metadata } from "next";
 import { Button } from "@/components/ui/button";
 import { FileText } from "lucide-react";
 
-export const metadata = {
-  title: "RFP Engine — The Grant + Contract + Proposal Engine | Perpetual Core",
+const SITE = "https://rfp.perpetualcore.com";
+const OG_IMAGE = `${SITE}/og/rfp-engine.png`;
+
+export const metadata: Metadata = {
+  metadataBase: new URL(SITE),
+  title: {
+    default:
+      "RFP Engine — AI capture operations for grants and contracts | Perpetual Core",
+    template: "%s — RFP Engine | Perpetual Core",
+  },
   description:
-    "Find the right RFPs, draft them in your voice, and ship them clean. The first commercial product from Perpetual Core.",
+    "Discover federal, state, foundation, and city RFPs every six hours. Draft proposals in your org's voice. Ground every claim in your vault. Reviewer-checked before you submit. The first commercial product from Perpetual Core.",
+  keywords: [
+    "AI grant writing software",
+    "RFP discovery tool",
+    "capture management nonprofit",
+    "AI proposal drafting",
+    "grant management software",
+    "federal RFP automation",
+    "nonprofit grant writer AI",
+  ],
+  alternates: {
+    canonical: SITE,
+  },
+  openGraph: {
+    type: "website",
+    url: SITE,
+    siteName: "RFP Engine by Perpetual Core",
+    title: "RFP Engine — AI capture operations for grants and contracts",
+    description:
+      "Find the right RFPs, draft them in your voice, and ship them clean. Discovery + voice-trained drafting + vault grounding + reviewer agent.",
+    images: [{ url: OG_IMAGE, width: 1200, height: 630, alt: "RFP Engine by Perpetual Core" }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "RFP Engine — AI capture operations for grants and contracts",
+    description:
+      "Find the right RFPs, draft them in your voice, and ship them clean.",
+    images: [OG_IMAGE],
+  },
+  robots: { index: true, follow: true },
+};
+
+/**
+ * JSON-LD structured data. Two graphs:
+ *  - Organization (Perpetual Core, the parent)
+ *  - SoftwareApplication (RFP Engine, the product)
+ * Both surface as `<script type="application/ld+json">` so Google sees them
+ * but the page DOM stays uncluttered.
+ */
+const STRUCTURED_DATA = {
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Organization",
+      "@id": "https://www.perpetualcore.com/#organization",
+      name: "Perpetual Core",
+      url: "https://www.perpetualcore.com",
+      logo: "https://www.perpetualcore.com/logo.png",
+      sameAs: [
+        "https://github.com/TPCMinistries",
+      ],
+    },
+    {
+      "@type": "SoftwareApplication",
+      "@id": `${SITE}/#software`,
+      name: "RFP Engine",
+      url: SITE,
+      applicationCategory: "BusinessApplication",
+      operatingSystem: "Web",
+      description:
+        "AI-native capture operations for nonprofits, mission-driven for-profits, and capture consultants. Discovery + voice-trained drafting + vault grounding + reviewer agent + audit-grade activity log.",
+      offers: [
+        {
+          "@type": "Offer",
+          name: "Starter",
+          price: "299",
+          priceCurrency: "USD",
+          priceSpecification: {
+            "@type": "UnitPriceSpecification",
+            price: "299",
+            priceCurrency: "USD",
+            referenceQuantity: { "@type": "QuantitativeValue", value: "1", unitCode: "MON" },
+          },
+        },
+        {
+          "@type": "Offer",
+          name: "Pro",
+          price: "799",
+          priceCurrency: "USD",
+          priceSpecification: {
+            "@type": "UnitPriceSpecification",
+            price: "799",
+            priceCurrency: "USD",
+            referenceQuantity: { "@type": "QuantitativeValue", value: "1", unitCode: "MON" },
+          },
+        },
+        {
+          "@type": "Offer",
+          name: "Agency",
+          price: "2499",
+          priceCurrency: "USD",
+          priceSpecification: {
+            "@type": "UnitPriceSpecification",
+            price: "2499",
+            priceCurrency: "USD",
+            referenceQuantity: { "@type": "QuantitativeValue", value: "1", unitCode: "MON" },
+          },
+        },
+      ],
+      provider: { "@id": "https://www.perpetualcore.com/#organization" },
+    },
+  ],
 };
 
 export default function RfpMarketingLayout({
@@ -15,6 +125,11 @@ export default function RfpMarketingLayout({
 }) {
   return (
     <div className="relative min-h-screen bg-zinc-950 text-zinc-100 antialiased selection:bg-emerald-300/30 selection:text-emerald-100">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(STRUCTURED_DATA) }}
+      />
+
       {/* Ambient field */}
       <div className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
         <div className="absolute -top-40 left-1/2 h-[700px] w-[1200px] -translate-x-1/2 rounded-full bg-[radial-gradient(closest-side,rgba(16,185,129,0.18),transparent)] blur-3xl" />
@@ -57,6 +172,18 @@ export default function RfpMarketingLayout({
               className="hidden text-[13px] font-medium text-zinc-400 transition-colors hover:text-white sm:inline"
             >
               Pricing
+            </Link>
+            <Link
+              href="/rfp/vs"
+              className="hidden text-[13px] font-medium text-zinc-400 transition-colors hover:text-white lg:inline"
+            >
+              Compare
+            </Link>
+            <Link
+              href="/rfp/roadmap"
+              className="hidden text-[13px] font-medium text-zinc-400 transition-colors hover:text-white lg:inline"
+            >
+              Roadmap
             </Link>
             <Link
               href="/rfp/trust"
@@ -111,6 +238,21 @@ export default function RfpMarketingLayout({
                 <li>
                   <Link href="/rfp/pricing" className="transition-colors hover:text-white">
                     Pricing
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/rfp/roi" className="transition-colors hover:text-white">
+                    ROI Calculator
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/rfp/vs" className="transition-colors hover:text-white">
+                    Compare
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/rfp/roadmap" className="transition-colors hover:text-white">
+                    Roadmap
                   </Link>
                 </li>
                 <li>

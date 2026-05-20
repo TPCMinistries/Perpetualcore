@@ -1,5 +1,21 @@
 import { MetadataRoute } from "next";
 
+const RFP_BASE = "https://rfp.perpetualcore.com";
+
+// RFP Engine — separate subdomain, own sitemap entries. Listed inline with
+// absolute URLs so they get the correct host even when NEXT_PUBLIC_APP_URL
+// points at the parent (www.perpetualcore.com / perpetualcore.ai).
+const rfpPages: MetadataRoute.Sitemap = [
+  { url: `${RFP_BASE}/rfp`, priority: 1.0, changeFrequency: "weekly", lastModified: new Date() },
+  { url: `${RFP_BASE}/rfp/how-it-works`, priority: 0.9, changeFrequency: "monthly", lastModified: new Date() },
+  { url: `${RFP_BASE}/rfp/pricing`, priority: 0.9, changeFrequency: "monthly", lastModified: new Date() },
+  { url: `${RFP_BASE}/rfp/trust`, priority: 0.7, changeFrequency: "monthly", lastModified: new Date() },
+  { url: `${RFP_BASE}/rfp/vs`, priority: 0.7, changeFrequency: "monthly", lastModified: new Date() },
+  { url: `${RFP_BASE}/rfp/roadmap`, priority: 0.7, changeFrequency: "weekly", lastModified: new Date() },
+  { url: `${RFP_BASE}/rfp/roi`, priority: 0.8, changeFrequency: "monthly", lastModified: new Date() },
+  { url: `${RFP_BASE}/contact-sales/rfp-engine`, priority: 0.8, changeFrequency: "monthly", lastModified: new Date() },
+];
+
 export default function sitemap(): MetadataRoute.Sitemap {
   const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://perpetualcore.ai";
 
@@ -63,10 +79,13 @@ export default function sitemap(): MetadataRoute.Sitemap {
 
   const allPages = [...mainPages, ...solutionPages, ...industryPages];
 
-  return allPages.map((page) => ({
-    url: `${baseUrl}${page.path}`,
-    lastModified: new Date(),
-    changeFrequency: page.changeFrequency,
-    priority: page.priority,
-  }));
+  return [
+    ...allPages.map((page) => ({
+      url: `${baseUrl}${page.path}`,
+      lastModified: new Date(),
+      changeFrequency: page.changeFrequency,
+      priority: page.priority,
+    })),
+    ...rfpPages,
+  ];
 }
