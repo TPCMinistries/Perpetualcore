@@ -33,6 +33,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { path: "/blog", priority: 0.6, changeFrequency: "weekly" },
     { path: "/blog/what-an-ai-install-actually-costs", priority: 0.7, changeFrequency: "monthly" },
     { path: "/blog/outcome-eval-the-line-item-every-ai-install-skips", priority: 0.7, changeFrequency: "monthly" },
+    { path: "/guide/ai-implementation-buyers-guide", priority: 0.8, changeFrequency: "monthly" },
     { path: "/docs", priority: 0.6, changeFrequency: "monthly" },
     { path: "/help", priority: 0.6, changeFrequency: "monthly" },
     { path: "/agents", priority: 0.7, changeFrequency: "weekly" },
