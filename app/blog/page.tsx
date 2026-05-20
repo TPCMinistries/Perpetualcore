@@ -22,6 +22,16 @@ export const metadata = {
     "Occasional dispatches from the studio. AI installs, the Engine commitment, what we're shipping. Subscribe for first dispatch.",
 };
 
+const PUBLISHED_POSTS = [
+  {
+    slug: "what-an-ai-install-actually-costs",
+    title: "What an AI install actually costs",
+    subtitle: "And why we price engagements at $75,000",
+    date: "2026-05-20",
+    readMinutes: 6,
+  },
+];
+
 const PLACEHOLDER_TOPICS = [
   {
     label: "On the Engine",
@@ -73,11 +83,46 @@ export default function BlogPage() {
         </div>
       </section>
 
+      {/* Published posts */}
+      <section className="border-t border-border py-16 sm:py-20">
+        <div className="container mx-auto px-6 sm:px-8">
+          <div className="grid lg:grid-cols-[280px_1fr] gap-12 lg:gap-20">
+            <SectionRail index="01" label="Published" />
+            <div className="max-w-3xl">
+              <ul className="divide-y divide-border border-y border-border">
+                {PUBLISHED_POSTS.map((post) => (
+                  <li key={post.slug}>
+                    <Link
+                      href={`/blog/${post.slug}`}
+                      className="group block py-6 hover:opacity-80 transition"
+                    >
+                      <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground mb-3">
+                        {post.date} · {post.readMinutes} min read
+                      </p>
+                      <h3 className="text-2xl sm:text-3xl font-semibold tracking-[-0.015em] text-foreground mb-2 group-hover:underline">
+                        {post.title}
+                      </h3>
+                      <p className="text-base text-muted-foreground leading-[1.65]">
+                        {post.subtitle}
+                      </p>
+                      <p className="mt-4 font-mono text-[10px] uppercase tracking-[0.22em] text-foreground inline-flex items-center gap-2">
+                        Read
+                        <ArrowRight className="h-3 w-3" />
+                      </p>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Newsletter capture */}
       <section className="border-t border-border py-16 sm:py-20">
         <div className="container mx-auto px-6 sm:px-8">
           <div className="grid lg:grid-cols-[280px_1fr] gap-12 lg:gap-20">
-            <SectionRail index="01" label="Get the next one" />
+            <SectionRail index="02" label="Get the next one" />
             <div className="max-w-2xl">
               <NewsletterCapture variant="inline" source="blog_index" />
               <p className="mt-4 text-xs text-muted-foreground">
@@ -92,7 +137,7 @@ export default function BlogPage() {
       <section className="border-t border-border py-20 sm:py-24">
         <div className="container mx-auto px-6 sm:px-8">
           <div className="grid lg:grid-cols-[280px_1fr] gap-12 lg:gap-20">
-            <SectionRail index="02" label="What's queued" />
+            <SectionRail index="03" label="What's queued" />
             <div className="max-w-3xl">
               <p className="text-base text-muted-foreground leading-[1.7] mb-12 max-w-2xl">
                 A preview of upcoming dispatches. Subscribe above and they

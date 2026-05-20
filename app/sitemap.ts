@@ -31,6 +31,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { path: "/about", priority: 0.7, changeFrequency: "monthly" },
     { path: "/compare", priority: 0.8, changeFrequency: "weekly" },
     { path: "/blog", priority: 0.6, changeFrequency: "weekly" },
+    { path: "/blog/what-an-ai-install-actually-costs", priority: 0.7, changeFrequency: "monthly" },
     { path: "/docs", priority: 0.6, changeFrequency: "monthly" },
     { path: "/help", priority: 0.6, changeFrequency: "monthly" },
     { path: "/agents", priority: 0.7, changeFrequency: "weekly" },
