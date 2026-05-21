@@ -51,8 +51,20 @@ export default async function OrgLayout({ children, params }: OrgLayoutProps) {
             </span>
           </div>
 
-          {/* Real org switcher (ORG-03) + Settings link */}
-          <div className="flex items-center gap-3">
+          {/* Nav + org switcher (ORG-03) */}
+          <div className="flex items-center gap-4">
+            <Link
+              href={`/org/${orgId}/discovery`}
+              className="font-mono text-[10px] uppercase tracking-[0.22em] text-zinc-500 transition hover:text-zinc-300"
+            >
+              Discovery
+            </Link>
+            <Link
+              href={`/org/${orgId}/proposals`}
+              className="font-mono text-[10px] uppercase tracking-[0.22em] text-zinc-500 transition hover:text-zinc-300"
+            >
+              Proposals
+            </Link>
             <Link
               href={`/org/${orgId}/settings`}
               className="font-mono text-[10px] uppercase tracking-[0.22em] text-zinc-500 transition hover:text-zinc-300"
