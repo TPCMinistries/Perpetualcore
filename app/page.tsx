@@ -1,1385 +1,1011 @@
-"use client";
+/**
+ * Perpetual Core — Studio homepage, v6
+ *
+ * Frame: "We build the AI operating systems — and the founders who run them."
+ * Five arms presented as architectural diagram. Engine reframed as a structural
+ * standard — published spec, not a proprietary moat.
+ *
+ * Visual signature: Instrument Serif display H1, JetBrains Mono labels, near-black
+ * ink on pure white, single violet accent, hairline grids. New in v6:
+ *   - Engine architecture SVG (visual signature of the company shape)
+ *   - Dramatic black-bg Frontier manifesto (full-bleed display register)
+ *   - Scroll-reveal fade-up on sections
+ *   - Open Invitation 4-row table with Mission orgs
+ */
 
-import { useState, useEffect } from "react";
 import Link from "next/link";
+import { ArrowRight, ArrowUpRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import {
-  Sparkles,
-  Zap,
-  Shield,
-  MessageSquare,
-  FileText,
-  Calendar,
-  Mail,
-  CheckSquare,
-  Bot,
-  Users,
-  TrendingUp,
-  Clock,
-  Check,
-  ArrowRight,
-  Star,
-  Brain,
-  Database,
-  Workflow,
-  GraduationCap,
-  Infinity,
-  Briefcase,
-  Play,
-  ChevronDown,
-  Send,
-  Building2,
-} from "lucide-react";
-import { INDUSTRY_CONFIGS } from "@/lib/dashboard/industry-config";
-import { PublicMobileNav } from "@/components/layout/PublicMobileNav";
-import { SocialProofBanner } from "@/components/landing/SocialProofBanner";
-import { ComparisonTable } from "@/components/landing/ComparisonTable";
-import { TrustBadges } from "@/components/landing/TrustBadges";
-import { FounderStory } from "@/components/landing/FounderStory";
+import { Navbar } from "@/components/landing/Navbar";
+import { Footer } from "@/components/landing/Footer";
+import { NewsletterCapture } from "@/components/landing/NewsletterCapture";
+import { Reveal } from "@/components/landing/Reveal";
 import { PageViewTracker } from "@/components/analytics/PageViewTracker";
-import { trackClientEvent } from "@/lib/analytics/track-event";
 
-// Demo chat messages
-const DEMO_MESSAGES = [
+export const metadata = {
+  title: "Perpetual Core — Studio, fund, and institute building AI-native operating systems",
+  description:
+    "We build the AI operating systems — and the founders who run them. A studio installing AI-native systems for mission-driven organizations, a fund investing in the founders building the next wave, and an institute training the operators running them. The Perpetual Engine — published as a structural standard for AI ventures.",
+};
+
+const ARMS = [
   {
-    type: "user",
-    text: "What did we discuss about the Johnson contract last month?",
+    index: "01",
+    name: "Studio",
+    summary: "Engagements that install the Perpetual Engine across your organization.",
+    meta: "$75,000 floor",
+    href: "/studio",
   },
   {
-    type: "ai",
-    text: "Based on our conversation on January 15th, you mentioned three key concerns about the Johnson contract: the 90-day payment terms, the liability cap at $500K, and the non-compete clause. You wanted to negotiate these before signing.",
+    index: "02",
+    name: "Products",
+    summary: "Seven AI-native products in production — from due diligence to portfolio COO.",
+    meta: "7 in portfolio",
+    href: "/products",
   },
   {
-    type: "user",
-    text: "Perfect! Can you draft a follow-up email using those points?",
+    index: "03",
+    name: "Fund",
+    summary: "DeepFutures backs AI-native companies. We invest where we install.",
+    meta: "Pre-seed · by intro",
+    href: "/fund",
   },
   {
-    type: "ai",
-    text: "Absolutely! I've drafted an email addressing all three concerns. I'm referencing your preferred negotiation style from our previous discussions and the template you liked from the Wilson deal. Would you like me to make any adjustments?",
+    index: "04",
+    name: "Institute",
+    summary: "IHA — workforce, founder training, AI education, field health programs.",
+    meta: "501(c)(3) · theiha.org",
+    href: "/institute",
+  },
+] as const;
+
+const PRODUCTS = [
+  { index: "01", name: "Atlas", status: "IN PILOT", statusColor: "pilot" as const, tagline: "AI-native COO for fund-backed portcos.", href: "/products/atlas", external: false },
+  { index: "02", name: "Sentinel", status: "LIVE", statusColor: "live" as const, tagline: "Due diligence and intel for the people Kroll won't take calls from.", href: "https://sentinel.perpetualcore.com", external: true },
+  { index: "03", name: "Sage", status: "BUILD", statusColor: "invite" as const, tagline: "Personal AI OS with ambient context and your voice.", href: "/products/sage", external: false },
+  { index: "04", name: "Vellum", status: "BUILD", statusColor: "invite" as const, tagline: "Institutional knowledge — calls, docs, voice notes, channels.", href: "/products/vellum", external: false },
+  { index: "05", name: "RFP Engine", status: "LIVE", statusColor: "live" as const, tagline: "Find the right RFP. Draft it in your voice. Ship it clean.", href: "https://rfp.perpetualcore.com", external: true },
+  { index: "06", name: "RFP Sentry", status: "BUILD", statusColor: "invite" as const, tagline: "Bid intelligence + compliance gate. Sister to RFP Engine.", href: "/products/rfp-sentry", external: false },
+] as const;
+
+const PHASES = [
+  { step: "Learn", body: "We read your org the way an operator does. Calls, docs, voice notes, the channels where decisions actually happen. Two weeks, no PowerPoint." },
+  { step: "Wire", body: "We install the eight registries — entities, people, projects, work items, knowledge, agents, workflows, events — in your Supabase, your storage, your stack." },
+  { step: "Automate", body: "Skills get built against your real workflows. The Anthropic SKILL.md format, per-portco JSON. Versioned, auditable, yours." },
+  { step: "Scale", body: "Your team operates and extends the system. We document, train, and hand over. You own it." },
+];
+
+const ENGINE_STATS = [
+  { value: "$7,500", label: "Engagement minimum to IHA" },
+  { value: "$25,000+", label: "Engagement maximum to IHA" },
+  { value: "10–15%", label: "Of every revenue dollar" },
+];
+
+const INSTITUTE_PROGRAMS = [
+  { name: "IHA Founders 1,000", body: "AI-native founder training. Pilot cohort June 2026. Emerging markets focus." },
+  { name: "IHA Academy", body: "AI literacy and applied skills for non-technical operators." },
+  { name: "IHA Advance", body: "Kenya delegation and East Africa field programs." },
+  { name: "Workforce", body: "Healthcare and community workforce development for low-income New Yorkers." },
+];
+
+const INVITATION_ROWS = [
+  {
+    tag: "Founders",
+    title: "Structure your AI venture on the Engine.",
+    body: "If you're building from day one, you can adopt the same shape: registry-first substrate, structural giving floor, operator-owned methodology. We'll show you ours.",
+    cta: "Read the spec",
+    href: "/engine/spec",
   },
   {
-    type: "user",
-    text: "This is exactly what I needed. Send it.",
+    tag: "Investors",
+    title: "Back Engine-aligned ventures.",
+    body: "If you fund AI companies, demand this structure of the next ones you back. We're happy to compare notes on what works and what doesn't. The category needs aligned capital.",
+    cta: "Talk to DeepFutures",
+    href: "/fund",
+  },
+  {
+    tag: "Practitioners",
+    title: "Implement your own reference.",
+    body: "If you build AI systems for clients, the eight registries and the AI-First Framework are documented. Adopt, fork, extend — the spec is the contribution, not the company.",
+    cta: "See the methodology",
+    href: "/studio/methodology",
+  },
+  {
+    tag: "Mission orgs",
+    title: "Require Engine-alignment in your vendors.",
+    body: "Foundation program officers, executive directors, fund OPs — if you're screening AI vendors, the Engine gives you a structural criterion: does the venture you're considering fund its mission, or extract from it?",
+    cta: "Use the criterion",
+    href: "/engine",
   },
 ];
 
-// Interactive Chat Demo Component - Premium Styling
-function ChatDemo() {
+function StatusPill({ status, color }: { status: string; color: "live" | "pilot" | "invite" }) {
+  const dot = { live: "bg-status-live", pilot: "bg-status-pilot", invite: "bg-status-invite" }[color];
   return (
-    <>
-      {DEMO_MESSAGES.map((message, index) => (
-        <div
-          key={index}
-          className={`flex ${message.type === "user" ? "justify-end" : "justify-start"}`}
-        >
-          <div
-            className={`max-w-[85%] rounded-3xl px-6 py-4 ${
-              message.type === "user"
-                ? "bg-gradient-to-br from-primary via-purple-600 to-purple-700 text-primary-foreground shadow-2xl shadow-primary/20"
-                : "backdrop-blur-2xl bg-muted/60 border-2 border-border/50 shadow-xl"
-            }`}
-          >
-            {message.type === "ai" && (
-              <div className="flex items-center gap-3 mb-3">
-                <div className="h-7 w-7 rounded-xl bg-gradient-to-br from-primary via-purple-600 to-purple-700 flex items-center justify-center shadow-lg">
-                  <Brain className="h-4 w-4 text-white" />
-                </div>
-                <span className="text-sm font-bold text-primary">Perpetual Core</span>
-              </div>
-            )}
-            <p className={`text-base leading-relaxed ${message.type === "user" ? "font-medium" : ""}`}>
-              {message.text}
-            </p>
-          </div>
-        </div>
-      ))}
-    </>
+    <span className="inline-flex items-center gap-1.5 font-mono text-[10px] tracking-[0.18em] uppercase text-muted-foreground">
+      <span className={`block h-1.5 w-1.5 rounded-full ${dot} ${color === "live" ? "animate-pulse-dot" : ""}`} />
+      {status}
+    </span>
   );
 }
 
-export default function HomePage() {
-  const [scrollY, setScrollY] = useState(0);
-
-  useEffect(() => {
-    const handleScroll = () => setScrollY(window.scrollY);
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
-
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            entry.target.classList.add("animate-fade-in");
-          }
-        });
-      },
-      { threshold: 0.1 }
-    );
-
-    document.querySelectorAll(".animate-on-scroll").forEach((el) => observer.observe(el));
-
-    return () => observer.disconnect();
-  }, []);
-
-  // Map industry config keys to solutions URLs
-  const solutionUrls: { [key: string]: string } = {
-    "law-firm": "/solutions/law-firms",
-    healthcare: "/solutions/healthcare",
-    sales: "/solutions/sales",
-    "real-estate": "/solutions/real-estate",
-    agency: "/solutions/agencies",
-    accounting: "/solutions/accountants",
-    church: "/solutions/churches",
-    consulting: "/solutions/consulting",
-    "financial-advisor": "/solutions/financial-advisors",
-    "it-services": "/solutions/it-services",
-    "non-profit": "/solutions/non-profits",
-    education: "/solutions/education",
-  };
-
+function SectionRail({ index, label }: { index: string; label: string }) {
   return (
-    <div className="min-h-screen bg-gradient-to-b from-background via-background to-muted/20">
-      <PageViewTracker />
-      <style jsx global>{`
-        @keyframes fadeIn {
-          from {
-            opacity: 0;
-            transform: translateY(20px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-        .animate-fade-in {
-          animation: fadeIn 0.6s ease-out forwards;
-        }
-        .animate-on-scroll {
-          opacity: 0;
-        }
-        @keyframes float {
-          0%, 100% {
-            transform: translateY(0px);
-          }
-          50% {
-            transform: translateY(-10px);
-          }
-        }
-        .animate-float {
-          animation: float 3s ease-in-out infinite;
-        }
-      `}</style>
-
-      {/* Navigation */}
-      <header className="border-b backdrop-blur-2xl bg-card/80 sticky top-0 z-50 shadow-sm">
-        <div className="container mx-auto px-3 sm:px-4 py-3 sm:py-4 flex items-center justify-between">
-          <Link href="/" className="flex items-center space-x-2">
-            <div className="h-8 w-8 sm:h-8 sm:w-8 rounded-lg bg-gradient-to-br from-primary to-purple-600 flex items-center justify-center text-primary-foreground font-bold shadow-lg">
-              AI
-            </div>
-            <span className="text-lg sm:text-xl font-bold">Perpetual Core</span>
-          </Link>
-          <nav className="hidden md:flex items-center gap-8">
-            <div className="relative group">
-              <Link href="/solutions" className="text-sm font-medium hover:text-primary transition flex items-center gap-1">
-                Solutions <ChevronDown className="h-4 w-4 group-hover:rotate-180 transition-transform" />
-              </Link>
-              <div className="absolute top-full left-0 mt-2 w-56 backdrop-blur-2xl bg-card/95 border border-border rounded-lg shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
-                <div className="p-2">
-                  <div className="px-3 py-2 text-xs font-semibold text-muted-foreground">Professional Services</div>
-                  <Link href={solutionUrls["law-firm"]} className="block px-3 py-2 text-sm hover:bg-accent rounded-md transition">Law Firms</Link>
-                  <Link href={solutionUrls.accounting} className="block px-3 py-2 text-sm hover:bg-accent rounded-md transition">Accounting</Link>
-                  <Link href={solutionUrls.consulting} className="block px-3 py-2 text-sm hover:bg-accent rounded-md transition">Consulting</Link>
-                  <Link href={solutionUrls["financial-advisor"]} className="block px-3 py-2 text-sm hover:bg-accent rounded-md transition">Financial Advisors</Link>
-
-                  <div className="border-t border-border my-2" />
-                  <div className="px-3 py-2 text-xs font-semibold text-muted-foreground">Service Industries</div>
-                  <Link href={solutionUrls.healthcare} className="block px-3 py-2 text-sm hover:bg-accent rounded-md transition">Healthcare</Link>
-                  <Link href={solutionUrls["real-estate"]} className="block px-3 py-2 text-sm hover:bg-accent rounded-md transition">Real Estate</Link>
-                  <Link href={solutionUrls["it-services"]} className="block px-3 py-2 text-sm hover:bg-accent rounded-md transition">IT Services</Link>
-                  <Link href={solutionUrls.sales} className="block px-3 py-2 text-sm hover:bg-accent rounded-md transition">Sales Teams</Link>
-
-                  <div className="border-t border-border my-2" />
-                  <div className="px-3 py-2 text-xs font-semibold text-muted-foreground">Organizations</div>
-                  <Link href={solutionUrls.agency} className="block px-3 py-2 text-sm hover:bg-accent rounded-md transition">Creative Agencies</Link>
-                  <Link href={solutionUrls.church} className="block px-3 py-2 text-sm hover:bg-accent rounded-md transition">Churches</Link>
-                  <Link href={solutionUrls["non-profit"]} className="block px-3 py-2 text-sm hover:bg-accent rounded-md transition">Non-Profits</Link>
-                  <Link href={solutionUrls.education} className="block px-3 py-2 text-sm hover:bg-accent rounded-md transition">Education</Link>
-
-                  <div className="border-t border-border my-2" />
-                  <Link href="/solutions" className="block px-3 py-2 text-sm font-medium text-primary hover:bg-accent rounded-md transition">View All Solutions →</Link>
-                </div>
-              </div>
-            </div>
-            <div className="relative group">
-              <button className="text-sm font-medium hover:text-primary transition flex items-center gap-1">
-                Features <ChevronDown className="h-4 w-4 group-hover:rotate-180 transition-transform" />
-              </button>
-              <div className="absolute top-full left-0 mt-2 w-64 backdrop-blur-2xl bg-card/95 border border-border rounded-lg shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
-                <div className="p-2">
-                  <Link href="/features/intelligence" className="block px-3 py-2.5 text-sm hover:bg-accent rounded-md transition">
-                    <div className="font-medium">Intelligence System</div>
-                    <div className="text-xs text-muted-foreground">Adaptive learning & insights</div>
-                  </Link>
-                  <Link href="/agents" className="block px-3 py-2.5 text-sm hover:bg-accent rounded-md transition">
-                    <div className="font-medium">Agents Library</div>
-                    <div className="text-xs text-muted-foreground">30+ pre-built AI agents</div>
-                  </Link>
-                  <Link href="#features" className="block px-3 py-2.5 text-sm hover:bg-accent rounded-md transition">
-                    <div className="font-medium">All Features</div>
-                    <div className="text-xs text-muted-foreground">Complete feature list</div>
-                  </Link>
-                </div>
-              </div>
-            </div>
-            <Link href="#how-it-works" className="text-sm font-medium hover:text-primary transition">
-              How It Works
-            </Link>
-            <Link href="/pricing" className="text-sm font-medium hover:text-primary transition">
-              Pricing
-            </Link>
-            <div className="relative group">
-              <button className="text-sm font-medium hover:text-primary transition flex items-center gap-1">
-                Enterprise <ChevronDown className="h-4 w-4 group-hover:rotate-180 transition-transform" />
-              </button>
-              <div className="absolute top-full right-0 mt-2 w-64 backdrop-blur-2xl bg-card/95 border border-border rounded-lg shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
-                <div className="p-2">
-                  <Link href="/consulting" className="block px-3 py-2.5 text-sm hover:bg-accent rounded-md transition">
-                    <div className="font-medium">Transformation Stack</div>
-                    <div className="text-xs text-muted-foreground">Complete consulting & implementation</div>
-                  </Link>
-                  <Link href="/consultation" className="block px-3 py-2.5 text-sm hover:bg-accent rounded-md transition">
-                    <div className="font-medium">Guided Implementation</div>
-                    <div className="text-xs text-muted-foreground">For teams of 10-100</div>
-                  </Link>
-                  <Link href="/enterprise-demo" className="block px-3 py-2.5 text-sm hover:bg-accent rounded-md transition">
-                    <div className="font-medium">Enterprise Solutions</div>
-                    <div className="text-xs text-muted-foreground">White-glove for 100+ employees</div>
-                  </Link>
-                </div>
-              </div>
-            </div>
-            <Link href="/login" className="text-sm font-medium hover:underline">
-              Sign In
-            </Link>
-            <Button asChild className="shadow-lg hover:shadow-xl transition-shadow">
-              <Link href="/signup">Get Started Free</Link>
-            </Button>
-          </nav>
-          <div className="md:hidden flex items-center gap-2">
-            <PublicMobileNav />
-            <Button size="sm" asChild className="h-9 px-4 text-sm font-semibold shadow-md active:scale-95 transition-all">
-              <Link href="/signup">Start Free</Link>
-            </Button>
-          </div>
-        </div>
-      </header>
-
-      {/* Hero Section - Premium Redesign */}
-      <section className="container mx-auto px-4 pt-16 pb-20 sm:pt-24 sm:pb-32 md:pt-32 md:pb-48 relative overflow-hidden">
-        {/* Subtle animated background */}
-        <div
-          className="absolute inset-0 bg-gradient-to-br from-primary/5 via-purple-500/5 to-blue-500/5 opacity-40 transition-all duration-1000"
-          style={{
-            backgroundPosition: `${scrollY * 0.3}px ${scrollY * 0.2}px`,
-          }}
-        ></div>
-
-        <div className="max-w-6xl mx-auto relative z-10">
-          {/* Badge */}
-          <div className="flex justify-center mb-8 sm:mb-12 animate-on-scroll">
-            <div className="inline-flex items-center gap-2 sm:gap-3 px-4 sm:px-5 py-2 sm:py-2.5 rounded-full backdrop-blur-2xl bg-primary/10 border border-primary/20 text-primary text-xs sm:text-sm font-semibold shadow-lg">
-              <div className="h-2 w-2 rounded-full bg-primary animate-pulse" />
-              <span className="tracking-wide">AI That Never Forgets</span>
-            </div>
-          </div>
-
-          {/* Massive Headline */}
-          <h1 className="text-center text-5xl sm:text-6xl md:text-7xl lg:text-9xl font-black tracking-tighter mb-8 sm:mb-12 leading-[0.95] animate-on-scroll px-2">
-            <span className="block bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900 dark:from-white dark:via-gray-100 dark:to-white bg-clip-text text-transparent">
-              Your Second Brain
-            </span>
-            <span className="block mt-2 bg-gradient-to-r from-primary via-purple-600 to-primary bg-clip-text text-transparent">
-              Powered by AI
-            </span>
-          </h1>
-
-          {/* Subtitle with more breathing room */}
-          <p className="text-center text-base sm:text-xl md:text-2xl lg:text-3xl text-muted-foreground/80 mb-10 sm:mb-16 max-w-4xl mx-auto leading-relaxed font-light animate-on-scroll px-4">
-            ChatGPT forgets after 200 messages. <span className="font-semibold text-foreground">Perpetual Core never forgets</span>.
-            <br className="hidden sm:block" />
-            GPT-4, Claude & Gemini in one place. Your documents. Your team's knowledge. <span className="font-semibold text-foreground">All connected</span>.
-          </p>
-
-          {/* CTA Buttons - Mobile optimized */}
-          <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 justify-center mb-12 sm:mb-20 animate-on-scroll px-4">
-            <Button
-              size="lg"
-              asChild
-              className="text-base sm:text-xl px-8 sm:px-12 py-6 sm:py-8 h-auto rounded-2xl shadow-2xl hover:shadow-3xl transition-all bg-gradient-to-r from-primary to-purple-600 hover:from-primary/90 hover:to-purple-600/90 active:scale-95 touch-manipulation"
-            >
-              <Link href="/signup" onClick={() => trackClientEvent("cta_click", { event_name: "hero_get_started" })}>
-                Start Free Trial <ArrowRight className="ml-2 sm:ml-3 h-5 sm:h-6 w-5 sm:w-6" />
-              </Link>
-            </Button>
-            <Button
-              size="lg"
-              variant="outline"
-              asChild
-              className="text-base sm:text-xl px-8 sm:px-12 py-6 sm:py-8 h-auto rounded-2xl backdrop-blur-2xl bg-transparent border-2 hover:bg-accent/50 shadow-xl hover:shadow-2xl transition-all active:scale-95 touch-manipulation"
-            >
-              <Link href="/pricing" onClick={() => trackClientEvent("cta_click", { event_name: "hero_view_pricing" })}>View Pricing</Link>
-            </Button>
-          </div>
-
-          {/* Trust indicators - Mobile optimized */}
-          <div className="flex flex-wrap items-center justify-center gap-4 sm:gap-8 text-xs sm:text-sm text-muted-foreground/60 mb-12 sm:mb-24 animate-on-scroll px-4">
-            <div className="flex items-center gap-2">
-              <Check className="h-4 w-4 text-green-600 flex-shrink-0" />
-              <span>14-day free trial</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <Check className="h-4 w-4 text-green-600 flex-shrink-0" />
-              <span className="hidden sm:inline">No credit card required</span>
-              <span className="sm:hidden">No credit card</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <Check className="h-4 w-4 text-green-600 flex-shrink-0" />
-              <span>Cancel anytime</span>
-            </div>
-          </div>
-
-          {/* Model Pills - Mobile optimized */}
-          <div className="flex flex-wrap items-center justify-center gap-3 sm:gap-4 animate-on-scroll px-4">
-            <div className="px-4 sm:px-6 py-2.5 sm:py-3 rounded-2xl backdrop-blur-2xl bg-blue-500/10 border border-blue-500/20 text-blue-700 dark:text-blue-400 text-sm sm:text-base font-semibold shadow-lg hover:shadow-xl transition-all active:scale-95 touch-manipulation">
-              <MessageSquare className="inline h-4 w-4 mr-2" />
-              GPT-4
-            </div>
-            <div className="px-4 sm:px-6 py-2.5 sm:py-3 rounded-2xl backdrop-blur-2xl bg-purple-500/10 border border-purple-500/20 text-purple-700 dark:text-purple-400 text-sm sm:text-base font-semibold shadow-lg hover:shadow-xl transition-all active:scale-95 touch-manipulation">
-              <Brain className="inline h-4 w-4 mr-2" />
-              Claude
-            </div>
-            <div className="px-4 sm:px-6 py-2.5 sm:py-3 rounded-2xl backdrop-blur-2xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-700 dark:text-emerald-400 text-sm sm:text-base font-semibold shadow-lg hover:shadow-xl transition-all active:scale-95 touch-manipulation">
-              <Sparkles className="inline h-4 w-4 mr-2" />
-              Gemini
-            </div>
-            <div className="px-4 sm:px-6 py-2.5 sm:py-3 rounded-2xl backdrop-blur-2xl bg-orange-500/10 border border-orange-500/20 text-orange-700 dark:text-orange-400 text-sm sm:text-base font-semibold shadow-lg hover:shadow-xl transition-all active:scale-95 touch-manipulation">
-              <Infinity className="inline h-4 w-4 mr-2" />
-              <span className="hidden sm:inline">Infinite Memory</span>
-              <span className="sm:hidden">Infinite</span>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Social Proof Banner - Trusted by Organizations */}
-      <SocialProofBanner />
-
-      {/* Value Proposition Banner - Above Chat Demo */}
-      <section className="bg-gradient-to-r from-slate-900 to-slate-800 dark:from-slate-800 dark:to-slate-900 py-12 sm:py-16 animate-on-scroll">
-        <div className="container mx-auto px-4">
-          <div className="text-center text-white max-w-4xl mx-auto">
-            <h2 className="text-3xl sm:text-4xl font-bold mb-6">
-              Stop Losing Context. Stop Repeating Yourself.
-            </h2>
-            <p className="text-lg sm:text-xl text-slate-200 mb-8">
-              ChatGPT forgets after 200 messages. Your AI should remember everything. Perpetual Core gives you infinite memory, all AI models in one place, and your documents searchable by AI.
-            </p>
-            <div className="grid md:grid-cols-3 gap-6 sm:gap-8 text-center">
-              <div>
-                <div className="text-4xl font-bold text-green-400 mb-2">Infinite</div>
-                <div className="text-slate-300">Conversation memory</div>
-              </div>
-              <div>
-                <div className="text-4xl font-bold text-green-400 mb-2">4 Models</div>
-                <div className="text-slate-300">GPT-4, Claude, Gemini, DeepSeek</div>
-              </div>
-              <div>
-                <div className="text-4xl font-bold text-green-400 mb-2">RAG</div>
-                <div className="text-slate-300">Search your documents with AI</div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Visitor Segmentation - Who is this for? */}
-      <section className="container mx-auto px-4 py-16 sm:py-20 animate-on-scroll">
-        <div className="text-center mb-12">
-          <h2 className="text-3xl sm:text-4xl font-bold mb-4">Choose Your Path</h2>
-          <p className="text-lg sm:text-xl text-muted-foreground max-w-2xl mx-auto">
-            Whether you're an individual, small team, or enterprise—we have a solution designed for you
-          </p>
-        </div>
-
-        <div className="grid md:grid-cols-3 gap-6 max-w-6xl mx-auto">
-          {/* Individual / DIY */}
-          <Card className="relative overflow-hidden border-2 border-border hover:border-primary/50 hover:shadow-2xl transition-all group cursor-pointer">
-            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-500 to-cyan-500" />
-            <CardContent className="p-8">
-              <div className="h-14 w-14 rounded-xl bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center mb-6">
-                <Sparkles className="h-7 w-7 text-white" />
-              </div>
-              <h3 className="text-2xl font-bold mb-3">Individuals & Freelancers</h3>
-              <p className="text-muted-foreground mb-6 leading-relaxed">
-                Get started on your own. Perfect for professionals who want powerful AI without the overhead.
-              </p>
-              <div className="space-y-3 mb-6">
-                <div className="flex items-start gap-2">
-                  <Check className="h-5 w-5 text-green-500 flex-shrink-0 mt-0.5" />
-                  <span className="text-sm">All AI models in one place</span>
-                </div>
-                <div className="flex items-start gap-2">
-                  <Check className="h-5 w-5 text-green-500 flex-shrink-0 mt-0.5" />
-                  <span className="text-sm">Infinite conversation memory</span>
-                </div>
-                <div className="flex items-start gap-2">
-                  <Check className="h-5 w-5 text-green-500 flex-shrink-0 mt-0.5" />
-                  <span className="text-sm">Self-service setup</span>
-                </div>
-              </div>
-              <div className="text-center">
-                <div className="text-3xl font-bold mb-1">$49<span className="text-lg text-muted-foreground font-normal">/month</span></div>
-                <Button asChild className="w-full mt-4 shadow-lg">
-                  <Link href="/signup">Start Free Trial</Link>
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Mid-Market / Teams */}
-          <Card className="relative overflow-hidden border-2 border-primary shadow-2xl scale-105 cursor-pointer">
-            <div className="absolute top-0 right-0 bg-primary text-primary-foreground px-4 py-1 text-xs font-semibold">
-              MOST POPULAR
-            </div>
-            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-purple-500 to-pink-500" />
-            <CardContent className="p-8">
-              <div className="h-14 w-14 rounded-xl bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center mb-6">
-                <Users className="h-7 w-7 text-white" />
-              </div>
-              <h3 className="text-2xl font-bold mb-3">Teams (10-50 employees)</h3>
-              <p className="text-muted-foreground mb-6 leading-relaxed">
-                Guided implementation with hands-on training. We set everything up and ensure your team adopts it.
-              </p>
-              <div className="space-y-3 mb-6">
-                <div className="flex items-start gap-2">
-                  <Check className="h-5 w-5 text-green-500 flex-shrink-0 mt-0.5" />
-                  <span className="text-sm">Team tier: $499/mo (10 users)</span>
-                </div>
-                <div className="flex items-start gap-2">
-                  <Check className="h-5 w-5 text-green-500 flex-shrink-0 mt-0.5" />
-                  <span className="text-sm">Business tier: $1,999/mo (50 users)</span>
-                </div>
-                <div className="flex items-start gap-2">
-                  <Check className="h-5 w-5 text-green-500 flex-shrink-0 mt-0.5" />
-                  <span className="text-sm">Implementation call included</span>
-                </div>
-              </div>
-              <div className="text-center">
-                <div className="text-3xl font-bold mb-1">From $499<span className="text-lg text-muted-foreground font-normal">/month</span></div>
-                <div className="text-sm text-muted-foreground mb-3">Team (10) or Business (50 users)</div>
-                <Button asChild className="w-full mt-4 shadow-lg bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700">
-                  <Link href="/consultation">Book Strategy Call</Link>
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Enterprise */}
-          <Card className="relative overflow-hidden border-2 border-border hover:border-primary/50 hover:shadow-2xl transition-all group cursor-pointer">
-            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-orange-500 to-red-500" />
-            <CardContent className="p-8">
-              <div className="h-14 w-14 rounded-xl bg-gradient-to-br from-orange-500 to-red-500 flex items-center justify-center mb-6">
-                <Building2 className="h-7 w-7 text-white" />
-              </div>
-              <h3 className="text-2xl font-bold mb-3">Enterprise (100+ employees)</h3>
-              <p className="text-muted-foreground mb-6 leading-relaxed">
-                Custom implementation for large organizations. Dedicated support and tailored solutions.
-              </p>
-              <div className="space-y-3 mb-6">
-                <div className="flex items-start gap-2">
-                  <Check className="h-5 w-5 text-green-500 flex-shrink-0 mt-0.5" />
-                  <span className="text-sm">$9,999/mo for 250 users</span>
-                </div>
-                <div className="flex items-start gap-2">
-                  <Check className="h-5 w-5 text-green-500 flex-shrink-0 mt-0.5" />
-                  <span className="text-sm">Dedicated account manager</span>
-                </div>
-                <div className="flex items-start gap-2">
-                  <Check className="h-5 w-5 text-green-500 flex-shrink-0 mt-0.5" />
-                  <span className="text-sm">Custom onboarding & training</span>
-                </div>
-              </div>
-              <div className="text-center">
-                <div className="text-3xl font-bold mb-1">$9,999<span className="text-lg text-muted-foreground font-normal">/month</span></div>
-                <div className="text-sm text-muted-foreground mb-3">Contact for custom pricing</div>
-                <Button asChild variant="outline" className="w-full mt-4 shadow-lg">
-                  <Link href="/contact-sales">Contact Sales</Link>
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-      </section>
-
-      {/* Interactive Chat Demo - THE Centerpiece */}
-      <section className="container mx-auto px-4 py-16 sm:py-24 md:py-40 relative animate-on-scroll">
-        <div className="max-w-7xl mx-auto">
-          {/* Section Header */}
-          <div className="text-center mb-12 sm:mb-20">
-            <h2 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black tracking-tight mb-4 sm:mb-6 bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900 dark:from-white dark:via-gray-100 dark:to-white bg-clip-text text-transparent px-4">
-              See The Magic
-            </h2>
-            <p className="text-lg sm:text-xl md:text-2xl lg:text-3xl text-muted-foreground/80 font-light max-w-3xl mx-auto px-4">
-              Watch how Perpetual Core remembers context from weeks ago
-            </p>
-          </div>
-
-          {/* Massive Chat Interface */}
-          <div className="relative group">
-            {/* Dramatic glow effect */}
-            <div className="absolute -inset-2 sm:-inset-4 bg-gradient-to-r from-primary/30 via-purple-500/30 to-pink-500/30 rounded-2xl sm:rounded-[3rem] opacity-20 group-hover:opacity-30 blur-3xl transition-all duration-700"></div>
-
-            <div className="relative backdrop-blur-3xl bg-card/90 border-2 border-border/50 rounded-2xl sm:rounded-[2.5rem] shadow-[0_20px_70px_-15px_rgba(0,0,0,0.3)] dark:shadow-[0_20px_70px_-15px_rgba(0,0,0,0.6)] overflow-hidden">
-              {/* Chat Header - Mobile optimized */}
-              <div className="border-b border-border/50 bg-gradient-to-b from-muted/40 to-muted/20 px-4 sm:px-8 py-4 sm:py-6">
-                <div className="flex items-center justify-between gap-2">
-                  <div className="flex items-center gap-2 sm:gap-4 flex-1 min-w-0">
-                    <div className="h-10 w-10 sm:h-14 sm:w-14 rounded-xl sm:rounded-2xl bg-gradient-to-br from-primary via-purple-600 to-purple-700 flex items-center justify-center shadow-xl flex-shrink-0">
-                      <Brain className="h-5 w-5 sm:h-7 sm:w-7 text-white" />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <h3 className="text-sm sm:text-lg font-bold truncate">Perpetual Core Assistant</h3>
-                      <p className="text-xs sm:text-sm text-muted-foreground hidden sm:block">Infinite memory • Always in context</p>
-                      <p className="text-xs text-muted-foreground sm:hidden truncate">Always in context</p>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-2 sm:gap-3 px-2 sm:px-4 py-1.5 sm:py-2 rounded-full bg-green-500/10 border border-green-500/20 flex-shrink-0">
-                    <div className="h-2 w-2 sm:h-2.5 sm:w-2.5 rounded-full bg-green-500 animate-pulse shadow-lg shadow-green-500/50"></div>
-                    <span className="text-xs sm:text-sm font-semibold text-green-700 dark:text-green-400">Active</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Chat Messages - Mobile optimized */}
-              <div className="p-4 sm:p-10 space-y-4 sm:space-y-6 min-h-[400px] sm:min-h-[500px] max-h-[500px] sm:max-h-[600px] overflow-y-auto bg-gradient-to-b from-background/30 via-background/50 to-muted/20">
-                <ChatDemo />
-              </div>
-
-              {/* Chat Input - Mobile optimized */}
-              <div className="border-t border-border/50 bg-gradient-to-b from-muted/20 to-muted/40 px-4 sm:px-8 py-4 sm:py-6">
-                <div className="flex items-center gap-2 sm:gap-4">
-                  <div className="flex-1 backdrop-blur-2xl bg-background/60 border-2 border-border/50 rounded-xl sm:rounded-2xl px-4 sm:px-6 py-3 sm:py-4 text-sm sm:text-base text-muted-foreground hover:border-primary/30 transition-colors">
-                    <span className="hidden sm:inline">Ask anything... your AI never forgets</span>
-                    <span className="sm:hidden">Ask anything...</span>
-                  </div>
-                  <Button size="lg" className="h-11 w-11 sm:h-14 sm:w-14 rounded-xl sm:rounded-2xl shadow-xl bg-gradient-to-r from-primary to-purple-600 hover:from-primary/90 hover:to-purple-600/90 active:scale-95 touch-manipulation">
-                    <Send className="h-4 w-4 sm:h-5 sm:w-5" />
-                  </Button>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Feature Callouts - Larger, more impactful */}
-          <div className="mt-20 grid md:grid-cols-3 gap-10">
-            <div className="text-center group">
-              <div className="h-20 w-20 rounded-3xl bg-gradient-to-br from-blue-600 to-cyan-600 flex items-center justify-center mx-auto mb-6 shadow-2xl group-hover:scale-110 transition-transform duration-300">
-                <Infinity className="h-10 w-10 text-white" />
-              </div>
-              <h4 className="text-xl font-bold mb-3">Infinite Context</h4>
-              <p className="text-base text-muted-foreground leading-relaxed">Remembers every conversation forever. Pick up exactly where you left off.</p>
-            </div>
-            <div className="text-center group">
-              <div className="h-20 w-20 rounded-3xl bg-gradient-to-br from-purple-600 to-pink-600 flex items-center justify-center mx-auto mb-6 shadow-2xl group-hover:scale-110 transition-transform duration-300">
-                <Sparkles className="h-10 w-10 text-white" />
-              </div>
-              <h4 className="text-xl font-bold mb-3">All AI Models</h4>
-              <p className="text-base text-muted-foreground leading-relaxed">GPT-4, Claude, Gemini in one place. Switch models instantly.</p>
-            </div>
-            <div className="text-center group">
-              <div className="h-20 w-20 rounded-3xl bg-gradient-to-br from-emerald-600 to-green-600 flex items-center justify-center mx-auto mb-6 shadow-2xl group-hover:scale-110 transition-transform duration-300">
-                <Database className="h-10 w-10 text-white" />
-              </div>
-              <h4 className="text-xl font-bold mb-3">Your Knowledge</h4>
-              <p className="text-base text-muted-foreground leading-relaxed">Searches all your documents, notes, and conversations.</p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Core Value Props - What Makes Perpetual Core Different */}
-      <section className="container mx-auto px-4 py-20 animate-on-scroll">
-        <div className="text-center mb-16">
-          <h2 className="text-4xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-gray-900 via-primary to-purple-600 dark:from-white dark:via-primary dark:to-purple-400 bg-clip-text text-transparent">
-            An AI Operating System, Not Just Chat
-          </h2>
-          <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-            ChatGPT forgets after 200 messages. We never forget. Plus team collaboration, automation, and your entire knowledge base in one place.
-          </p>
-        </div>
-
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto mb-12">
-          {/* Infinite Memory */}
-          <Card className="backdrop-blur-2xl bg-card/80 border-2 border-border hover:border-primary/50 transition-all duration-300 hover:shadow-2xl group shadow-xl">
-            <CardContent className="p-8">
-              <div className="h-16 w-16 rounded-2xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300 shadow-lg">
-                <Infinity className="h-8 w-8 text-white" />
-              </div>
-              <h3 className="text-2xl font-bold mb-3">Never Lose Context</h3>
-              <p className="text-muted-foreground leading-relaxed">
-                Your conversations never expire. Pick up exactly where you left off—days, weeks, or months later. Your
-                AI brain remembers everything you've ever discussed.
-              </p>
-            </CardContent>
-          </Card>
-
-          {/* All Models */}
-          <Card className="backdrop-blur-2xl bg-card/80 border-2 border-border hover:border-primary/50 transition-all duration-300 hover:shadow-2xl group shadow-xl">
-            <CardContent className="p-8">
-              <div className="h-16 w-16 rounded-2xl bg-gradient-to-br from-purple-500 to-pink-600 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300 shadow-lg">
-                <Brain className="h-8 w-8 text-white" />
-              </div>
-              <h3 className="text-2xl font-bold mb-3">All AI Models, One Place</h3>
-              <p className="text-muted-foreground leading-relaxed">
-                Access GPT-4, Claude, and Gemini in a single conversation. Switch models instantly. Get the best answer
-                every time—no more juggling multiple subscriptions.
-              </p>
-            </CardContent>
-          </Card>
-
-          {/* Knowledge Hub */}
-          <Card className="backdrop-blur-2xl bg-card/80 border-2 border-border hover:border-primary/50 transition-all duration-300 hover:shadow-2xl group shadow-xl">
-            <CardContent className="p-8">
-              <div className="h-16 w-16 rounded-2xl bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300 shadow-lg">
-                <Database className="h-8 w-8 text-white" />
-              </div>
-              <h3 className="text-2xl font-bold mb-3">Your Knowledge Hub</h3>
-              <p className="text-muted-foreground leading-relaxed">
-                Upload documents, notes, and data. Your AI searches across everything you've stored. One brain that
-                knows your entire information universe.
-              </p>
-            </CardContent>
-          </Card>
-
-          {/* Team Collaboration */}
-          <Card className="backdrop-blur-2xl bg-card/80 border-2 border-border hover:border-primary/50 transition-all duration-300 hover:shadow-2xl group shadow-xl">
-            <CardContent className="p-8">
-              <div className="h-16 w-16 rounded-2xl bg-gradient-to-br from-orange-500 to-red-600 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300 shadow-lg">
-                <Users className="h-8 w-8 text-white" />
-              </div>
-              <h3 className="text-2xl font-bold mb-3">Team Knowledge Bases</h3>
-              <p className="text-muted-foreground leading-relaxed">
-                Sales teams share playbooks. Legal teams share templates. Support teams share solutions. Everyone gets
-                accurate answers from your team's collective expertise—instantly.
-              </p>
-            </CardContent>
-          </Card>
-
-          {/* Programmable Agents */}
-          <Card className="backdrop-blur-2xl bg-card/80 border-2 border-border hover:border-primary/50 transition-all duration-300 hover:shadow-2xl group shadow-xl">
-            <CardContent className="p-8">
-              <div className="h-16 w-16 rounded-2xl bg-gradient-to-br from-indigo-500 to-blue-600 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300 shadow-lg">
-                <Workflow className="h-8 w-8 text-white" />
-              </div>
-              <h3 className="text-2xl font-bold mb-3">Programmable Automation</h3>
-              <p className="text-muted-foreground leading-relaxed">
-                Create AI agents that work 24/7. Automate workflows, schedule tasks, and build custom solutions. Your
-                AI does the work while you sleep.
-              </p>
-            </CardContent>
-          </Card>
-
-          {/* AI Coach */}
-          <Card className="backdrop-blur-2xl bg-gradient-to-br from-primary/5 to-purple-500/5 border-2 border-border hover:border-primary/50 transition-all duration-300 hover:shadow-2xl group shadow-xl">
-            <CardContent className="p-8">
-              <div className="h-16 w-16 rounded-2xl bg-gradient-to-br from-yellow-500 to-orange-600 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300 shadow-lg">
-                <GraduationCap className="h-8 w-8 text-white" />
-              </div>
-              <h3 className="text-2xl font-bold mb-3">AI Coach & Learning</h3>
-              <p className="text-muted-foreground leading-relaxed">
-                Don't know how to do something? Your personal AI coach guides you step-by-step. Learn new skills and
-                master the platform with intelligent assistance.
-              </p>
-              <div className="mt-4">
-                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full backdrop-blur-2xl bg-yellow-500/20 border border-yellow-500/30 text-yellow-700 dark:text-yellow-300 text-xs font-semibold shadow-lg">
-                  <Sparkles className="h-3 w-3" />
-                  NEW FEATURE
-                </span>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-      </section>
-
-      {/* Comparison Table - How Perpetual Core Compares */}
-      <ComparisonTable />
-
-      {/* AI Executive Suite - NEW FEATURE SHOWCASE */}
-      <section className="container mx-auto px-4 py-20 sm:py-32 animate-on-scroll bg-gradient-to-b from-background via-muted/10 to-background">
-        <div className="max-w-6xl mx-auto">
-          {/* Section Badge & Header */}
-          <div className="text-center mb-16">
-            <div className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full backdrop-blur-2xl bg-gradient-to-r from-blue-500/20 to-purple-500/20 border-2 border-blue-500/30 text-blue-700 dark:text-blue-300 text-sm font-semibold mb-6 shadow-xl">
-              <Users className="h-4 w-4" />
-              <span>NEW: AI Executive Suite</span>
-            </div>
-            <h2 className="text-4xl md:text-5xl lg:text-6xl font-black tracking-tight mb-6 bg-gradient-to-r from-gray-900 via-blue-600 to-purple-600 dark:from-white dark:via-blue-400 dark:to-purple-400 bg-clip-text text-transparent">
-              Build Your AI Executive Team
-            </h2>
-            <p className="text-xl md:text-2xl text-muted-foreground/90 max-w-3xl mx-auto leading-relaxed">
-              Get instant access to 15 executive-level AI specialists—CEO, CFO, Legal, HR, Sales, Marketing, Social Media, Operations, and more. One click builds your entire C-suite.
-            </p>
-          </div>
-
-          {/* Executive Team Grid - 3 columns */}
-          <div className="grid md:grid-cols-3 gap-6 mb-12">
-            {/* Strategic Leadership */}
-            <Card className="backdrop-blur-2xl bg-gradient-to-br from-blue-500/5 to-cyan-500/5 border-2 border-border hover:border-blue-500/50 transition-all duration-300 hover:shadow-2xl group">
-              <CardContent className="p-6">
-                <div className="h-14 w-14 rounded-2xl bg-gradient-to-br from-blue-500 to-cyan-600 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300 shadow-lg">
-                  <Briefcase className="h-7 w-7 text-white" />
-                </div>
-                <h3 className="text-lg font-bold mb-2 text-slate-900 dark:text-slate-100">Strategic Leadership</h3>
-                <p className="text-sm text-muted-foreground leading-relaxed">
-                  CEO, CFO, Legal & Contracts, Operations Director
-                </p>
-              </CardContent>
-            </Card>
-
-            {/* Revenue & Growth */}
-            <Card className="backdrop-blur-2xl bg-gradient-to-br from-purple-500/5 to-pink-500/5 border-2 border-border hover:border-purple-500/50 transition-all duration-300 hover:shadow-2xl group">
-              <CardContent className="p-6">
-                <div className="h-14 w-14 rounded-2xl bg-gradient-to-br from-purple-500 to-pink-600 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300 shadow-lg">
-                  <TrendingUp className="h-7 w-7 text-white" />
-                </div>
-                <h3 className="text-lg font-bold mb-2 text-slate-900 dark:text-slate-100">Revenue & Growth</h3>
-                <p className="text-sm text-muted-foreground leading-relaxed">
-                  Sales, Marketing, Social Media Creator, BizDev, Customer Success
-                </p>
-              </CardContent>
-            </Card>
-
-            {/* Product & Innovation */}
-            <Card className="backdrop-blur-2xl bg-gradient-to-br from-emerald-500/5 to-green-500/5 border-2 border-border hover:border-emerald-500/50 transition-all duration-300 hover:shadow-2xl group">
-              <CardContent className="p-6">
-                <div className="h-14 w-14 rounded-2xl bg-gradient-to-br from-emerald-500 to-green-600 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300 shadow-lg">
-                  <Sparkles className="h-7 w-7 text-white" />
-                </div>
-                <h3 className="text-lg font-bold mb-2 text-slate-900 dark:text-slate-100">Product & Innovation</h3>
-                <p className="text-sm text-muted-foreground leading-relaxed">
-                  Product Manager, Technical Architecture, Innovation & Trends
-                </p>
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* Key Features & CTA */}
-          <div className="bg-gradient-to-br from-slate-900 to-slate-800 dark:from-slate-800 dark:to-slate-900 rounded-3xl p-8 sm:p-12 text-white shadow-2xl">
-            <div className="grid md:grid-cols-2 gap-8 items-center">
-              <div>
-                <h3 className="text-2xl sm:text-3xl font-bold mb-4">Why Teams Love This</h3>
-                <div className="space-y-3">
-                  <div className="flex items-start gap-3">
-                    <Check className="h-5 w-5 text-green-400 flex-shrink-0 mt-0.5" />
-                    <span className="text-slate-200"><strong className="text-white">Crystal clear expertise:</strong> Each advisor has specific "Use me for" instructions—no guesswork</span>
-                  </div>
-                  <div className="flex items-start gap-3">
-                    <Check className="h-5 w-5 text-green-400 flex-shrink-0 mt-0.5" />
-                    <span className="text-slate-200"><strong className="text-white">Social Media Creator writes your posts:</strong> LinkedIn, Twitter, Instagram—ready to publish</span>
-                  </div>
-                  <div className="flex items-start gap-3">
-                    <Check className="h-5 w-5 text-green-400 flex-shrink-0 mt-0.5" />
-                    <span className="text-slate-200"><strong className="text-white">One-click setup:</strong> Build your entire executive team in seconds, customize later</span>
-                  </div>
-                  <div className="flex items-start gap-3">
-                    <Check className="h-5 w-5 text-green-400 flex-shrink-0 mt-0.5" />
-                    <span className="text-slate-200"><strong className="text-white">24/7 availability:</strong> Access CEO strategy, legal review, or social posts anytime</span>
-                  </div>
-                </div>
-              </div>
-              <div className="text-center md:text-right">
-                <div className="inline-block">
-                  <div className="text-5xl sm:text-6xl font-black mb-2 bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">15</div>
-                  <div className="text-lg text-slate-300 mb-6">Executive Advisors</div>
-                  <Button size="lg" asChild className="bg-white text-slate-900 hover:bg-slate-100 shadow-xl hover:shadow-2xl transition-all text-lg px-8 py-6 h-auto">
-                    <Link href="/signup">
-                      Start Free Trial <ArrowRight className="ml-2 h-5 w-5" />
-                    </Link>
-                  </Button>
-                  <p className="text-xs text-slate-400 mt-3">Available on all plans</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Who It's For - Universal Use Cases */}
-      <section id="use-cases" className="container mx-auto px-4 py-20 animate-on-scroll">
-        <div className="text-center mb-16">
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full backdrop-blur-2xl bg-gradient-to-r from-primary/20 to-purple-500/20 border-2 border-primary/30 text-primary text-sm font-medium mb-6 shadow-xl">
-            <Users className="h-4 w-4" />
-            <span className="font-semibold">Built For Everyone</span>
-          </div>
-          <h2 className="text-4xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-gray-900 via-primary to-purple-600 dark:from-white dark:via-primary dark:to-purple-400 bg-clip-text text-transparent">
-            Your AI Brain, Your Way
-          </h2>
-          <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-            Whether you're building a business, creating content, or managing complex projects—we adapt to you
-          </p>
-        </div>
-
-        {/* Universal Use Cases */}
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-5xl mx-auto mb-12">
-          {[
-            {
-              id: "entrepreneurs",
-              icon: Zap,
-              name: "Entrepreneurs & Founders",
-              description: "Build your business brain. Organize research, track decisions, and never lose an idea.",
-              gradient: "from-orange-500 to-red-500",
-            },
-            {
-              id: "professionals",
-              icon: Briefcase,
-              name: "Working Professionals",
-              description: "Stay on top of projects, prepare for meetings, and recall any conversation instantly.",
-              gradient: "from-blue-500 to-indigo-600",
-            },
-            {
-              id: "creators",
-              icon: Sparkles,
-              name: "Creators & Writers",
-              description: "Capture ideas, research deeply, and create content faster with AI that knows your style.",
-              gradient: "from-pink-500 to-rose-500",
-            },
-            {
-              id: "developers",
-              icon: Bot,
-              name: "Developers & Technical",
-              description: "Document code knowledge, debug faster, and build a searchable technical brain.",
-              gradient: "from-cyan-500 to-blue-500",
-            },
-            {
-              id: "researchers",
-              icon: FileText,
-              name: "Researchers & Analysts",
-              description: "Organize papers, synthesize findings, and build a knowledge base that grows with you.",
-              gradient: "from-purple-500 to-pink-500",
-            },
-            {
-              id: "teams",
-              icon: Users,
-              name: "Teams & Organizations",
-              description: "Preserve institutional knowledge. Onboard faster. Never lose expertise when people leave.",
-              gradient: "from-emerald-500 to-teal-500",
-            },
-          ].map((useCase) => {
-            const Icon = useCase.icon;
-            return (
-              <Link key={useCase.id} href="/signup" className="group relative block">
-                <div
-                  className={`absolute -inset-0.5 bg-gradient-to-r ${useCase.gradient} rounded-2xl opacity-0 group-hover:opacity-20 blur transition-opacity duration-500`}
-                />
-                <Card className="relative h-full backdrop-blur-2xl bg-card/80 border-2 border-border hover:border-primary/50 transition-all duration-300 shadow-xl hover:shadow-2xl">
-                  <CardContent className="p-6 text-center">
-                    <div
-                      className={`h-16 w-16 rounded-xl bg-gradient-to-br ${useCase.gradient} flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-300 shadow-lg`}
-                    >
-                      <Icon className="h-8 w-8 text-white" />
-                    </div>
-                    <h3 className="text-lg font-bold mb-2 text-foreground group-hover:text-primary transition-colors">
-                      {useCase.name}
-                    </h3>
-                    <p className="text-sm text-muted-foreground">{useCase.description}</p>
-                  </CardContent>
-                </Card>
-              </Link>
-            );
-          })}
-        </div>
-
-        <div className="text-center">
-          <p className="text-muted-foreground mb-4">Don't see your use case? Tell us what you need—AI will personalize your experience</p>
-          <Button size="lg" asChild className="bg-gradient-to-r from-primary to-purple-600 hover:from-primary/90 hover:to-purple-700 shadow-xl hover:shadow-2xl transition-all">
-            <Link href="/signup">
-              Get Started Free <ArrowRight className="ml-2 h-5 w-5" />
-            </Link>
-          </Button>
-        </div>
-      </section>
-
-      {/* Security & Privacy Section - Enhanced Glassmorphic */}
-      <section className="container mx-auto px-4 py-20 animate-on-scroll">
-        <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-16">
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full backdrop-blur-2xl bg-green-500/20 border-2 border-green-500/30 text-green-700 dark:text-green-300 text-sm font-semibold mb-4 shadow-xl">
-              <Shield className="h-4 w-4" />
-              <span>Enterprise-Grade Security</span>
-            </div>
-            <h2 className="text-4xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-gray-900 via-primary to-purple-600 dark:from-white dark:via-primary dark:to-purple-400 bg-clip-text text-transparent">
-              Your Data Stays Yours
-            </h2>
-            <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-              Complete privacy and security. Your personal AI brain that nobody else can access.
-            </p>
-          </div>
-
-          <div className="grid md:grid-cols-2 gap-12 mb-12">
-            {/* Left: Security Features */}
-            <div className="space-y-6">
-              <div className="flex gap-4">
-                <div className="h-12 w-12 rounded-xl backdrop-blur-2xl bg-green-500/20 border border-green-500/30 flex items-center justify-center flex-shrink-0 shadow-lg">
-                  <Shield className="h-6 w-6 text-green-600 dark:text-green-400" />
-                </div>
-                <div>
-                  <h3 className="text-xl font-bold mb-2">100% Private & Secure</h3>
-                  <p className="text-muted-foreground">
-                    Your data is encrypted at rest and in transit. Row-level security ensures only you can access your
-                    information. Other users cannot see or access your conversations or documents.
-                  </p>
-                </div>
-              </div>
-
-              <div className="flex gap-4">
-                <div className="h-12 w-12 rounded-xl backdrop-blur-2xl bg-blue-500/20 border border-blue-500/30 flex items-center justify-center flex-shrink-0 shadow-lg">
-                  <Shield className="h-6 w-6 text-blue-600 dark:text-blue-400" />
-                </div>
-                <div>
-                  <h3 className="text-xl font-bold mb-2">Never Used for Training</h3>
-                  <p className="text-muted-foreground">
-                    Your data is NEVER used to train GPT-4, Claude, or Gemini. These AI companies have strict policies
-                    against using customer data for model training.
-                  </p>
-                </div>
-              </div>
-
-              <div className="flex gap-4">
-                <div className="h-12 w-12 rounded-xl backdrop-blur-2xl bg-purple-500/20 border border-purple-500/30 flex items-center justify-center flex-shrink-0 shadow-lg">
-                  <Database className="h-6 w-6 text-purple-600 dark:text-purple-400" />
-                </div>
-                <div>
-                  <h3 className="text-xl font-bold mb-2">Your Personal AI Brain</h3>
-                  <p className="text-muted-foreground">
-                    We use advanced RAG (Retrieval Augmented Generation) to make AI aware of YOUR documents without
-                    retraining models. Your knowledge stays in your secure vault.
-                  </p>
-                </div>
-              </div>
-
-              <div className="flex gap-4">
-                <div className="h-12 w-12 rounded-xl backdrop-blur-2xl bg-orange-500/20 border border-orange-500/30 flex items-center justify-center flex-shrink-0 shadow-lg">
-                  <Users className="h-6 w-6 text-orange-600 dark:text-orange-400" />
-                </div>
-                <div>
-                  <h3 className="text-xl font-bold mb-2">You Control Sharing</h3>
-                  <p className="text-muted-foreground">
-                    Team collaboration is opt-in. You decide exactly what to share with teammates and what stays
-                    private. Full audit logs show who accessed what.
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            {/* Right: Compliance Badges */}
-            <div className="flex items-center justify-center">
-              <Card className="p-8 backdrop-blur-2xl bg-card/80 border-2 border-border w-full shadow-2xl">
-                <div className="text-center mb-6">
-                  <h3 className="text-2xl font-bold mb-2">Trusted Security</h3>
-                  <p className="text-muted-foreground">Enterprise-grade protection for your peace of mind</p>
-                </div>
-                <div className="space-y-4">
-                  <div className="flex items-center gap-3 p-4 rounded-lg backdrop-blur-2xl bg-muted/50 border border-border shadow-lg">
-                    <Check className="h-6 w-6 text-green-500 flex-shrink-0" />
-                    <div>
-                      <div className="font-semibold">Row-Level Security</div>
-                      <div className="text-sm text-muted-foreground">Your data is isolated and protected</div>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-3 p-4 rounded-lg backdrop-blur-2xl bg-muted/50 border border-border shadow-lg">
-                    <Check className="h-6 w-6 text-green-500 flex-shrink-0" />
-                    <div>
-                      <div className="font-semibold">Encrypted at Rest & Transit</div>
-                      <div className="text-sm text-muted-foreground">Industry-standard encryption</div>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-3 p-4 rounded-lg backdrop-blur-2xl bg-muted/50 border border-border shadow-lg">
-                    <Check className="h-6 w-6 text-green-500 flex-shrink-0" />
-                    <div>
-                      <div className="font-semibold">Never Used for Training</div>
-                      <div className="text-sm text-muted-foreground">Your data stays private</div>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-3 p-4 rounded-lg backdrop-blur-2xl bg-muted/50 border border-border shadow-lg">
-                    <Check className="h-6 w-6 text-green-500 flex-shrink-0" />
-                    <div>
-                      <div className="font-semibold">Hosted on Vercel & Supabase</div>
-                      <div className="text-sm text-muted-foreground">Enterprise-grade infrastructure</div>
-                    </div>
-                  </div>
-                </div>
-              </Card>
-            </div>
-          </div>
-
-          {/* Bottom CTA */}
-          <div className="text-center backdrop-blur-2xl bg-gradient-to-r from-green-500/10 to-blue-500/10 rounded-2xl p-8 border-2 border-green-500/20 shadow-xl">
-            <h3 className="text-2xl font-bold mb-2">Your AI. Your Data. Your Control.</h3>
-            <p className="text-muted-foreground mb-4">
-              Experience the power of AI without compromising your privacy.
-            </p>
-            <Button size="lg" variant="default" asChild className="shadow-lg hover:shadow-xl transition-shadow">
-              <Link href="/signup">
-                Start Free Trial <ArrowRight className="ml-2 h-5 w-5" />
-              </Link>
-            </Button>
-          </div>
-        </div>
-      </section>
-
-      {/* Trust Badges - SOC 2, SSO, Uptime */}
-      <TrustBadges />
-
-      {/* Features Grid - Enhanced Glassmorphic */}
-      <section id="features" className="container mx-auto px-4 py-20 animate-on-scroll">
-        <div className="text-center mb-16">
-          <h2 className="text-4xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-gray-900 via-primary to-purple-600 dark:from-white dark:via-primary dark:to-purple-400 bg-clip-text text-transparent">
-            Everything you need to work smarter
-          </h2>
-          <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-            A complete suite of AI-powered tools to transform how you work
-          </p>
-        </div>
-
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
-          {features.map((feature) => {
-            const Icon = feature.icon;
-            return (
-              <Card
-                key={feature.title}
-                className="backdrop-blur-2xl bg-card/80 border-2 border-border hover:border-primary/50 transition-all duration-300 shadow-xl hover:shadow-2xl"
-              >
-                <CardContent className="p-6">
-                  <div className="h-12 w-12 rounded-lg backdrop-blur-2xl bg-primary/20 border border-primary/30 flex items-center justify-center mb-4 shadow-lg">
-                    <Icon className="h-6 w-6 text-primary" />
-                  </div>
-                  <h3 className="text-xl font-bold mb-2">{feature.title}</h3>
-                  <p className="text-muted-foreground">{feature.description}</p>
-                </CardContent>
-              </Card>
-            );
-          })}
-        </div>
-      </section>
-
-      {/* How It Works */}
-      <section id="how-it-works" className="container mx-auto px-4 py-20 animate-on-scroll">
-        <div className="text-center mb-16">
-          <h2 className="text-4xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-gray-900 via-primary to-purple-600 dark:from-white dark:via-primary dark:to-purple-400 bg-clip-text text-transparent">
-            Get started in minutes
-          </h2>
-          <p className="text-xl text-muted-foreground">Simple setup, powerful results</p>
-        </div>
-
-        <div className="grid md:grid-cols-3 gap-12 max-w-5xl mx-auto">
-          {steps.map((step, index) => (
-            <div key={step.title} className="text-center">
-              <div className="h-16 w-16 rounded-full bg-gradient-to-br from-primary to-purple-600 text-primary-foreground flex items-center justify-center text-2xl font-bold mx-auto mb-4 shadow-xl">
-                {index + 1}
-              </div>
-              <h3 className="text-xl font-bold mb-2">{step.title}</h3>
-              <p className="text-muted-foreground">{step.description}</p>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* Benefits Section */}
-      <section className="container mx-auto px-4 py-20 animate-on-scroll">
-        <div className="max-w-6xl mx-auto">
-          <h2 className="text-4xl md:text-5xl font-bold mb-6 text-center bg-gradient-to-r from-gray-900 via-primary to-purple-600 dark:from-white dark:via-primary dark:to-purple-400 bg-clip-text text-transparent">
-            Why teams choose Perpetual Core
-          </h2>
-          <div className="grid md:grid-cols-2 gap-6 max-w-4xl mx-auto mt-12">
-            {benefits.map((benefit) => (
-              <div key={benefit} className="flex items-start gap-3">
-                <Check className="h-6 w-6 text-green-500 flex-shrink-0 mt-0.5" />
-                <p className="text-lg">{benefit}</p>
-              </div>
-            ))}
-          </div>
-          <div className="text-center mt-12">
-            <Button size="lg" asChild className="shadow-lg hover:shadow-xl transition-shadow">
-              <Link href="/signup">
-                Start Your Free Trial <ArrowRight className="ml-2 h-5 w-5" />
-              </Link>
-            </Button>
-          </div>
-        </div>
-      </section>
-
-      {/* Founder Story - Built By a Builder */}
-      <FounderStory />
-
-      {/* Pricing Teaser - Enhanced Glassmorphic */}
-      <section className="container mx-auto px-4 py-20 animate-on-scroll">
-        <div className="max-w-4xl mx-auto text-center">
-          <h2 className="text-4xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-gray-900 via-primary to-purple-600 dark:from-white dark:via-primary dark:to-purple-400 bg-clip-text text-transparent">
-            Simple, transparent pricing
-          </h2>
-          <p className="text-xl text-muted-foreground mb-12">Choose the plan that&apos;s right for your team</p>
-
-          <div className="grid md:grid-cols-3 gap-8">
-            {pricingTiers.map((tier) => (
-              <Card
-                key={tier.name}
-                className={
-                  tier.popular
-                    ? "backdrop-blur-2xl bg-card/80 border-2 border-primary shadow-2xl"
-                    : "backdrop-blur-2xl bg-card/80 border-2 border-border shadow-xl hover:shadow-2xl transition-all duration-300"
-                }
-              >
-                {tier.popular && (
-                  <div className="bg-gradient-to-r from-primary to-purple-600 text-primary-foreground text-sm font-medium py-1 text-center">
-                    Most Popular
-                  </div>
-                )}
-                <CardContent className="p-6">
-                  <h3 className="text-2xl font-bold mb-2">{tier.name}</h3>
-                  <div className="mb-4">
-                    <span className="text-4xl font-bold">${tier.price}</span>
-                    {tier.price > 0 && <span className="text-muted-foreground">/month</span>}
-                  </div>
-                  <p className="text-muted-foreground mb-2">{tier.description}</p>
-                  <p className="text-sm font-semibold text-primary mb-6">{tier.features}</p>
-                  <Button
-                    className="w-full shadow-lg hover:shadow-xl transition-shadow"
-                    variant={tier.popular ? "default" : "outline"}
-                    asChild
-                  >
-                    <Link href="/signup">Get Started</Link>
-                  </Button>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-
-          <div className="mt-12">
-            <Link href="/pricing" className="text-primary font-medium hover:underline">
-              View detailed pricing and features →
-            </Link>
-          </div>
-        </div>
-      </section>
-
-      {/* Final CTA */}
-      <section className="container mx-auto px-4 py-20 animate-on-scroll">
-        <Card className="max-w-4xl mx-auto bg-gradient-to-r from-primary to-purple-600 text-primary-foreground border-0 shadow-2xl">
-          <CardContent className="p-12 text-center">
-            <h2 className="text-4xl md:text-5xl font-bold mb-4">Ready to transform your workflow?</h2>
-            <p className="text-xl mb-8 opacity-90">
-              The AI platform that never forgets—infinite memory, all models, your knowledge
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button size="lg" variant="secondary" asChild className="text-lg px-8 shadow-xl hover:shadow-2xl transition-shadow">
-                <Link href="/signup">
-                  Start Free Trial <ArrowRight className="ml-2 h-5 w-5" />
-                </Link>
-              </Button>
-              <Button
-                size="lg"
-                variant="outline"
-                asChild
-                className="text-lg px-8 bg-transparent border-white text-white hover:bg-white/10 shadow-xl hover:shadow-2xl transition-all"
-              >
-                <Link href="/pricing">View Pricing</Link>
-              </Button>
-            </div>
-            <p className="mt-6 text-sm opacity-75">No credit card required • 14-day free trial • Cancel anytime</p>
-          </CardContent>
-        </Card>
-      </section>
-
-      {/* Footer */}
-      <footer className="border-t backdrop-blur-2xl bg-card/80 py-12">
-        <div className="container mx-auto px-4">
-          <div className="grid md:grid-cols-4 gap-8 mb-8">
-            <div>
-              <div className="flex items-center space-x-2 mb-4">
-                <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-primary to-purple-600 flex items-center justify-center text-primary-foreground font-bold shadow-lg">
-                  AI
-                </div>
-                <span className="text-lg font-bold">Perpetual Core</span>
-              </div>
-              <p className="text-sm text-muted-foreground">
-                The AI operating system that never forgets. Infinite memory, all models, your knowledge.
-              </p>
-            </div>
-            <div>
-              <h4 className="font-semibold mb-4">Product</h4>
-              <ul className="space-y-2 text-sm text-muted-foreground">
-                <li>
-                  <Link href="#features" className="hover:text-primary transition">
-                    Features
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/pricing" className="hover:text-primary transition">
-                    Pricing
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/dashboard/changelog" className="hover:text-primary transition">
-                    Changelog
-                  </Link>
-                </li>
-              </ul>
-            </div>
-            <div>
-              <h4 className="font-semibold mb-4">Company</h4>
-              <ul className="space-y-2 text-sm text-muted-foreground">
-                <li>
-                  <Link href="/contact-sales" className="hover:text-primary transition">
-                    Contact Sales
-                  </Link>
-                </li>
-              </ul>
-            </div>
-            <div>
-              <h4 className="font-semibold mb-4">Legal</h4>
-              <ul className="space-y-2 text-sm text-muted-foreground">
-                <li>
-                  <Link href="/terms" className="hover:text-primary transition">
-                    Terms
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/privacy" className="hover:text-primary transition">
-                    Privacy
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/cookies" className="hover:text-primary transition">
-                    Cookies
-                  </Link>
-                </li>
-              </ul>
-            </div>
-          </div>
-          <div className="border-t pt-8 text-center text-sm text-muted-foreground">
-            <p>© 2025 Perpetual Core. All rights reserved.</p>
-          </div>
-        </div>
-      </footer>
+    <div>
+      <p className="eyebrow mb-3">§ {index}</p>
+      <h2 className="text-xs uppercase tracking-[0.18em] font-mono text-foreground">{label}</h2>
     </div>
   );
 }
 
-const features = [
-  {
-    title: "AI Chat",
-    description:
-      "Interact with Claude, GPT-4, and Gemini. Get instant answers, brainstorm ideas, and solve complex problems.",
-    icon: MessageSquare,
-  },
-  {
-    title: "Smart Documents",
-    description: "Upload, analyze, and extract insights from any document with AI-powered intelligence.",
-    icon: FileText,
-  },
-  {
-    title: "Calendar Integration",
-    description: "Sync your calendar and let AI manage scheduling, meetings, and reminders automatically.",
-    icon: Calendar,
-  },
-  {
-    title: "Email Assistant",
-    description: "Draft, review, and send emails with AI. Get smart replies and email templates instantly.",
-    icon: Mail,
-  },
-  {
-    title: "Task Automation",
-    description: "Auto-extract tasks from conversations and emails. Set up smart workflows and reminders.",
-    icon: CheckSquare,
-  },
-  {
-    title: "AI Workflows",
-    description: "Build custom automation with if-then rules. Connect your tools and eliminate repetitive work.",
-    icon: Zap,
-  },
-  {
-    title: "AI Agents",
-    description: "Deploy autonomous AI agents to handle complex tasks while you focus on what matters.",
-    icon: Bot,
-  },
-  {
-    title: "Team Collaboration",
-    description: "Real-time collaboration with your team. Share documents, tasks, and AI conversations.",
-    icon: Users,
-  },
-  {
-    title: "Analytics & Insights",
-    description: "Track productivity, measure AI usage, and get actionable insights for your team.",
-    icon: TrendingUp,
-  },
-];
+/**
+ * Engine Architecture — visual signature of the company shape.
+ * Four arms (numbered nodes) flow down into one wide Engine substrate bar.
+ * Mono-styled, hairlines, subtle flow animation on connector lines.
+ */
+function EngineArchitecture() {
+  // X positions for 4 arms across a 700-wide viewport
+  const arms = [
+    { x: 100, label: "01 · STUDIO" },
+    { x: 280, label: "02 · PRODUCTS" },
+    { x: 460, label: "03 · FUND" },
+    { x: 640, label: "04 · INSTITUTE" },
+  ];
 
-const steps = [
-  {
-    title: "Sign Up Free",
-    description: "Create your account in seconds. No credit card required for the 14-day trial.",
-  },
-  {
-    title: "Upload Your Knowledge",
-    description: "Add documents, notes, and data. Your AI will learn and search across everything.",
-  },
-  {
-    title: "Start Chatting",
-    description: "Ask questions, get answers from your documents, and never lose context again.",
-  },
-];
+  return (
+    <figure className="my-4">
+      <svg
+        viewBox="0 0 740 240"
+        className="w-full max-w-3xl mx-auto text-foreground"
+        role="img"
+        aria-label="Architecture: four arms (Studio, Products, Fund, Institute) flowing into the Engine substrate."
+      >
+        {/* Labels above each arm */}
+        {arms.map((a) => (
+          <text
+            key={`lbl-${a.label}`}
+            x={a.x}
+            y={28}
+            textAnchor="middle"
+            className="fill-current font-mono"
+            fontSize="9"
+            letterSpacing="1.5"
+            style={{ fontFamily: "var(--font-mono), monospace" }}
+          >
+            {a.label}
+          </text>
+        ))}
 
-const benefits = [
-  "Never lose context—infinite conversation memory",
-  "Access GPT-4, Claude, Gemini, and DeepSeek in one place",
-  "Search your documents with AI-powered RAG",
-  "Team knowledge bases for shared expertise",
-  "Connect with Google Calendar, Gmail, Slack, and GitHub",
-  "Your data is never used for AI model training",
-];
+        {/* Arm nodes — small filled squares */}
+        {arms.map((a) => (
+          <g key={`node-${a.label}`}>
+            <rect
+              x={a.x - 14}
+              y={42}
+              width="28"
+              height="28"
+              className="fill-background stroke-foreground"
+              strokeWidth="1.25"
+            />
+            <rect
+              x={a.x - 5}
+              y={51}
+              width="10"
+              height="10"
+              className="fill-foreground"
+            />
+          </g>
+        ))}
 
-const pricingTiers = [
-  {
-    name: "Starter",
-    price: 49,
-    description: "For individuals",
-    features: "Unlimited AI • Infinite memory • 1 user",
-    popular: false,
-  },
-  {
-    name: "Pro",
-    price: 99,
-    description: "For power users",
-    features: "Everything in Starter • Priority support",
-    popular: true,
-  },
-  {
-    name: "Team",
-    price: 499,
-    description: "For teams (up to 10 users)",
-    features: "Team knowledge base • Collaboration",
-    popular: false,
-  },
-];
+        {/* Connector lines flowing down to Engine substrate */}
+        {arms.map((a) => (
+          <line
+            key={`line-${a.label}`}
+            x1={a.x}
+            y1={70}
+            x2={a.x}
+            y2={170}
+            stroke="currentColor"
+            strokeWidth="1"
+            className="animate-flow text-foreground/60"
+          />
+        ))}
+
+        {/* Junction dots */}
+        {arms.map((a) => (
+          <circle
+            key={`dot-${a.label}`}
+            cx={a.x}
+            cy={170}
+            r="2"
+            className="fill-foreground"
+          />
+        ))}
+
+        {/* Engine substrate bar — wide, filled */}
+        <rect x="40" y="170" width="660" height="40" className="fill-foreground" />
+
+        {/* Engine label inside bar */}
+        <text
+          x={370}
+          y={195}
+          textAnchor="middle"
+          className="fill-background font-mono"
+          fontSize="11"
+          letterSpacing="2"
+          fontWeight="500"
+          style={{ fontFamily: "var(--font-mono), monospace" }}
+        >
+          § 05 · THE ENGINE · STRUCTURAL STANDARD
+        </text>
+
+        {/* Bracketed end marks on the bar */}
+        <line x1="40" y1="165" x2="40" y2="215" stroke="currentColor" strokeWidth="1" className="text-foreground/50" />
+        <line x1="700" y1="165" x2="700" y2="215" stroke="currentColor" strokeWidth="1" className="text-foreground/50" />
+
+        {/* Caption line below */}
+        <text
+          x={370}
+          y={232}
+          textAnchor="middle"
+          className="fill-current font-mono opacity-50"
+          fontSize="8.5"
+          letterSpacing="1.5"
+          style={{ fontFamily: "var(--font-mono), monospace" }}
+        >
+          THE FOUR ARMS REST ON ONE SUBSTRATE — PUBLISHED AS AN OPEN STANDARD
+        </text>
+      </svg>
+    </figure>
+  );
+}
+
+export default function HomePage() {
+  return (
+    <div className="min-h-screen bg-background">
+      <PageViewTracker />
+      <Navbar />
+
+      {/* ─── 1. Hero ─────────────────────────────────────────────────── */}
+      <section className="container mx-auto px-6 sm:px-8 pt-20 pb-20 sm:pt-28 sm:pb-28">
+        <div className="max-w-5xl">
+          <div className="flex items-center gap-3 mb-12">
+            <span aria-hidden className="block h-1.5 w-1.5 bg-foreground" />
+            <p className="eyebrow !text-foreground/70">
+              Perpetual Core · An AI-native operating company
+            </p>
+          </div>
+
+          <h1 className="display-hero text-[44px] sm:text-[60px] lg:text-[92px] text-foreground mb-12 max-w-5xl leading-[1.02]">
+            We build the AI operating systems —{" "}
+            <span className="italic text-foreground/85">and the founders who run them.</span>
+          </h1>
+
+          <p className="text-lg sm:text-xl text-muted-foreground leading-[1.5] mb-12 max-w-3xl">
+            Perpetual Core is a studio, a fund, and an institute — the reference implementation
+            of the <span className="text-foreground font-medium">Perpetual Engine</span>: a
+            structural standard for AI-native ventures that fund their mission. We built the
+            first one. We hope it becomes a category.
+          </p>
+
+          <div className="flex flex-col sm:flex-row items-start gap-4 mb-16">
+            <Button
+              size="lg"
+              asChild
+              className="text-sm font-medium px-7 h-11 shadow-none bg-foreground text-background hover:bg-foreground/90 rounded-[6px]"
+            >
+              <Link href="/studio/engagements">
+                Start an engagement <ArrowRight className="ml-2 h-4 w-4" />
+              </Link>
+            </Button>
+            <Link
+              href="/engine/spec"
+              className="inline-flex items-center text-sm font-medium text-foreground hover:text-primary transition-colors py-3 border-b border-foreground/20 hover:border-primary"
+            >
+              Read the Engine spec
+              <ArrowRight className="ml-1.5 h-3.5 w-3.5" />
+            </Link>
+          </div>
+
+          {/* Live signal block */}
+          <div className="border-t border-border pt-6 flex flex-wrap items-center gap-x-6 gap-y-2 font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
+            <span className="flex items-center gap-2">
+              <span aria-hidden className="block h-1.5 w-1.5 rounded-full bg-status-live animate-pulse-dot" />
+              System operating
+            </span>
+            <span className="hidden sm:inline text-muted-foreground/40">·</span>
+            <span>Since 2024</span>
+            <span className="hidden sm:inline text-muted-foreground/40">·</span>
+            <span>Reference implementation</span>
+            <span className="hidden sm:inline text-muted-foreground/40">·</span>
+            <span>Engine spec · v1</span>
+            <span className="hidden sm:inline text-muted-foreground/40">·</span>
+            <Link href="/engine/spec" className="underline-offset-4 hover:text-foreground transition-colors">
+              Open invitation to adopt
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* ─── 1.5 TRUST STRIP — what we operate, who we fund, who we're built under ───── */}
+      <section className="border-y border-border bg-card/40 py-10 sm:py-12">
+        <div className="container mx-auto px-6 sm:px-8">
+          <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground mb-6 text-center">
+            One operating company · four arms · audited annually
+          </p>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-12 items-center text-center">
+            <div className="space-y-1">
+              <p className="text-base sm:text-lg font-semibold tracking-[-0.01em] text-foreground">
+                Perpetual Core
+              </p>
+              <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
+                Studio · 6 products
+              </p>
+            </div>
+            <a
+              href="https://theiha.org"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="space-y-1 hover:opacity-80 transition"
+            >
+              <p className="text-base sm:text-lg font-semibold tracking-[-0.01em] text-foreground inline-flex items-center justify-center gap-1">
+                Institute for Human Advancement
+                <ArrowUpRight className="h-3.5 w-3.5" aria-hidden />
+              </p>
+              <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
+                501(c)(3) · 10–15% of revenue
+              </p>
+            </a>
+            <a
+              href="https://upliftcommunities.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="space-y-1 hover:opacity-80 transition"
+            >
+              <p className="text-base sm:text-lg font-semibold tracking-[-0.01em] text-foreground inline-flex items-center justify-center gap-1">
+                Uplift Communities
+                <ArrowUpRight className="h-3.5 w-3.5" aria-hidden />
+              </p>
+              <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
+                Operating arm · workforce + founders
+              </p>
+            </a>
+            <div className="space-y-1">
+              <p className="text-base sm:text-lg font-semibold tracking-[-0.01em] text-foreground">
+                DeepFutures
+              </p>
+              <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
+                Pre-seed fund · by introduction
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ─── 2. THE COMPANY — architecture diagram + arms ─────────────── */}
+      <Reveal as="section" className="border-y border-border" >
+        <div id="company" className="container mx-auto px-6 sm:px-8 py-20 sm:py-24">
+          <div className="max-w-4xl mb-14">
+            <p className="eyebrow mb-3">§ The structure</p>
+            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-semibold leading-[1.1] tracking-[-0.025em] text-foreground mb-6">
+              One operating company. Four arms. One engine — the standard we built to share.
+            </h2>
+            <p className="text-base sm:text-lg text-muted-foreground leading-[1.6] max-w-2xl">
+              The structure is the argument. Every arm contributes to one substrate. The substrate
+              funds the mission. The Engine is published as a standard for AI-native ventures —
+              we built the reference implementation, and we&apos;re inviting others to build theirs.
+            </p>
+          </div>
+
+          {/* Architecture SVG — visual signature */}
+          <div className="border border-border bg-card p-8 sm:p-12 mb-10">
+            <EngineArchitecture />
+          </div>
+
+          {/* Arms grid */}
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 border border-border bg-card divide-y sm:divide-y-0 sm:divide-x divide-border">
+            {ARMS.map((arm) => (
+              <Link
+                key={arm.name}
+                href={arm.href}
+                className="group block p-6 sm:p-7 hover:bg-surface-hover transition-colors flex flex-col"
+              >
+                <div className="flex items-center justify-between mb-12">
+                  <span className="font-mono text-[10px] tracking-[0.18em] text-muted-foreground">
+                    § {arm.index}
+                  </span>
+                  <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground/70">
+                    {arm.meta}
+                  </span>
+                </div>
+                <h3 className="text-2xl sm:text-3xl font-semibold tracking-[-0.02em] text-foreground mb-4 group-hover:text-primary transition-colors">
+                  {arm.name}.
+                </h3>
+                <p className="text-sm text-muted-foreground leading-[1.6] mb-8 flex-1">
+                  {arm.summary}
+                </p>
+                <span className="inline-flex items-center text-xs font-medium text-foreground group-hover:text-primary transition-colors mt-auto">
+                  Enter
+                  <ArrowRight className="ml-1 h-3 w-3 transition-transform group-hover:translate-x-0.5" />
+                </span>
+              </Link>
+            ))}
+          </div>
+
+          {/* Engine substrate bar */}
+          <Link
+            href="/engine"
+            className="group relative block border border-t-0 border-border overflow-hidden text-white hover:opacity-95 transition-opacity"
+            style={{ backgroundColor: "hsl(var(--surface-dark))" }}
+          >
+            <div className="grain" />
+            <div className="relative p-6 sm:p-8 grid sm:grid-cols-[80px_1fr_auto] gap-6 sm:gap-10 items-center">
+              <div className="flex items-center gap-3">
+                <span aria-hidden className="block h-1.5 w-1.5 bg-white" />
+                <span className="font-mono text-[10px] tracking-[0.18em] text-white/60">§ 05</span>
+              </div>
+              <div>
+                <h3 className="text-xl sm:text-2xl font-semibold tracking-[-0.015em] text-white mb-1 group-hover:text-white/95">
+                  The Engine.
+                </h3>
+                <p className="text-sm sm:text-base text-white/65 leading-[1.55]">
+                  10–15% of every revenue dollar funds the Institute. The substrate every arm
+                  sits on top of — and the standard we&apos;re inviting other AI ventures to adopt.
+                </p>
+              </div>
+              <span className="hidden sm:inline-flex items-center font-mono text-[10px] uppercase tracking-[0.18em] text-white/70 whitespace-nowrap">
+                How it works
+                <ArrowRight className="ml-3 h-3 w-3 transition-transform group-hover:translate-x-0.5" />
+              </span>
+            </div>
+          </Link>
+        </div>
+      </Reveal>
+
+      {/* ─── 3. The Studio (arm 01 detail) — three-band framing ──────── */}
+      <Reveal as="section" className="container mx-auto px-6 sm:px-8 py-24 sm:py-32">
+        <div className="grid lg:grid-cols-[280px_1fr] gap-12 lg:gap-20 mb-12">
+          <SectionRail index="01" label="Studio" />
+          <div className="max-w-2xl">
+            <h3 className="text-3xl sm:text-4xl lg:text-5xl font-semibold leading-[1.1] tracking-[-0.025em] text-foreground mb-10">
+              We don&apos;t write decks. We meet you at the band that fits the work.
+            </h3>
+            <div className="space-y-5 text-base text-muted-foreground leading-[1.7] mb-10">
+              <p>
+                Three ways in: subscribe to a product, hire a productized retainer, or install the
+                full Engine in an engagement. Same studio, same operator-grade methodology — three
+                cadences, three commitment levels.
+              </p>
+              <p>
+                Most orgs cross bands over time. Subscriptions become retainers when the work
+                scales. Retainers roll into engagements when the org commits to installing the
+                substrate. We discuss credit case-by-case when you cross a band.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Three-band mini-spectrum */}
+        <div className="grid lg:grid-cols-[280px_1fr] gap-12 lg:gap-20">
+          <div />
+          <div className="max-w-4xl border border-border bg-card">
+            <Link
+              href="/products"
+              className="group grid grid-cols-[60px_1fr_auto] sm:grid-cols-[60px_140px_1fr_140px] gap-x-6 sm:gap-x-10 gap-y-2 py-6 px-6 sm:px-8 border-b border-border hover:bg-surface-hover transition-colors items-baseline"
+            >
+              <span className="font-mono text-[10px] tracking-[0.18em] text-muted-foreground pt-1">
+                01
+              </span>
+              <span className="font-mono text-[11px] uppercase tracking-[0.22em] text-primary col-span-1 sm:col-auto">
+                Products
+              </span>
+              <p className="text-base text-foreground col-span-3 sm:col-auto">
+                <span className="font-semibold">Subscribe to a product.</span>{" "}
+                <span className="text-muted-foreground">
+                  Self-serve SaaS. Operator drives.
+                </span>
+              </p>
+              <span className="hidden sm:inline-flex items-center justify-end font-mono text-[10px] uppercase tracking-[0.18em] text-foreground whitespace-nowrap">
+                $0 → $249/mo
+                <ArrowRight className="ml-2 h-3 w-3 transition-transform group-hover:translate-x-0.5" />
+              </span>
+            </Link>
+
+            <Link
+              href="/studio/retainers"
+              className="group grid grid-cols-[60px_1fr_auto] sm:grid-cols-[60px_140px_1fr_140px] gap-x-6 sm:gap-x-10 gap-y-2 py-6 px-6 sm:px-8 border-b border-border hover:bg-surface-hover transition-colors items-baseline"
+            >
+              <span className="font-mono text-[10px] tracking-[0.18em] text-muted-foreground pt-1">
+                02
+              </span>
+              <span className="font-mono text-[11px] uppercase tracking-[0.22em] text-primary col-span-1 sm:col-auto">
+                Retainers
+              </span>
+              <p className="text-base text-foreground col-span-3 sm:col-auto">
+                <span className="font-semibold">Hire a productized program.</span>{" "}
+                <span className="text-muted-foreground">
+                  We operate the agent. You receive the output.
+                </span>
+              </p>
+              <span className="hidden sm:inline-flex items-center justify-end font-mono text-[10px] uppercase tracking-[0.18em] text-foreground whitespace-nowrap">
+                $5K → $15K/mo
+                <ArrowRight className="ml-2 h-3 w-3 transition-transform group-hover:translate-x-0.5" />
+              </span>
+            </Link>
+
+            <Link
+              href="/studio/engagements"
+              className="group grid grid-cols-[60px_1fr_auto] sm:grid-cols-[60px_140px_1fr_140px] gap-x-6 sm:gap-x-10 gap-y-2 py-6 px-6 sm:px-8 hover:bg-surface-hover transition-colors items-baseline"
+            >
+              <span className="font-mono text-[10px] tracking-[0.18em] text-muted-foreground pt-1">
+                03
+              </span>
+              <span className="font-mono text-[11px] uppercase tracking-[0.22em] text-primary col-span-1 sm:col-auto">
+                Engagements
+              </span>
+              <p className="text-base text-foreground col-span-3 sm:col-auto">
+                <span className="font-semibold">Install the Engine.</span>{" "}
+                <span className="text-muted-foreground">
+                  90–180 day install. Documented, trained, handed over.
+                </span>
+              </p>
+              <span className="hidden sm:inline-flex items-center justify-end font-mono text-[10px] uppercase tracking-[0.18em] text-foreground whitespace-nowrap">
+                $75K → $250K+
+                <ArrowRight className="ml-2 h-3 w-3 transition-transform group-hover:translate-x-0.5" />
+              </span>
+            </Link>
+          </div>
+        </div>
+      </Reveal>
+
+      {/* ─── 4. Portfolio (arm 02 detail) ────────────────────────────── */}
+      <Reveal as="section" className="border-t border-border py-24 sm:py-32">
+        <div className="container mx-auto px-6 sm:px-8">
+          <div className="grid lg:grid-cols-[280px_1fr] gap-12 lg:gap-20 mb-14">
+            <SectionRail index="02" label="Portfolio" />
+            <div className="max-w-2xl">
+              <h3 className="text-3xl sm:text-4xl lg:text-5xl font-semibold leading-[1.1] tracking-[-0.025em] text-foreground mb-6">
+                Six products in production.
+              </h3>
+              <p className="text-base text-muted-foreground leading-[1.7]">
+                The portfolio is the proof. Each is a working installation we shipped in an
+                engagement and kept running. Live answers to &ldquo;have you actually shipped
+                this kind of system before, and does it still run?&rdquo;
+              </p>
+            </div>
+          </div>
+
+          <div className="grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 border border-border bg-card divide-y sm:divide-y-0 sm:divide-x divide-border">
+            {PRODUCTS.map((product, idx) => {
+              const className = `group block p-6 sm:p-7 hover:bg-surface-hover transition-colors flex flex-col ${idx >= 4 ? "sm:border-t" : ""} border-border`;
+              const inner = (
+                <>
+                  <div className="flex items-center justify-between mb-10">
+                    <span className="font-mono text-[10px] text-muted-foreground tracking-[0.18em]">
+                      {product.index}
+                    </span>
+                    <StatusPill status={product.status} color={product.statusColor} />
+                  </div>
+                  <h4 className="text-[11px] font-mono uppercase tracking-[0.22em] text-primary mb-3">
+                    {product.name}
+                  </h4>
+                  <p className="text-base font-semibold leading-[1.3] tracking-[-0.01em] text-foreground mb-5 flex-1">
+                    {product.tagline}
+                  </p>
+                  <span className="inline-flex items-center text-xs font-medium text-muted-foreground group-hover:text-foreground transition-colors mt-auto">
+                    Open
+                    {product.external ? (
+                      <ArrowUpRight className="ml-1 h-3 w-3 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+                    ) : (
+                      <ArrowRight className="ml-1 h-3 w-3 transition-transform group-hover:translate-x-0.5" />
+                    )}
+                  </span>
+                </>
+              );
+              return product.external ? (
+                <a key={product.name} href={product.href} target="_blank" rel="noopener noreferrer" className={className}>
+                  {inner}
+                </a>
+              ) : (
+                <Link key={product.name} href={product.href} className={className}>
+                  {inner}
+                </Link>
+              );
+            })}
+            <Link href="/products" className="group block p-6 sm:p-7 hover:bg-surface-hover transition-colors border-t border-border sm:border-t flex flex-col justify-between">
+              <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground mb-3">More</p>
+              <div className="mt-auto">
+                <p className="text-base font-semibold leading-[1.3] tracking-[-0.01em] text-foreground mb-2">
+                  Full portfolio →
+                </p>
+                <p className="text-xs text-muted-foreground">Specs, pricing, status per product.</p>
+              </div>
+            </Link>
+          </div>
+        </div>
+      </Reveal>
+
+      {/* ─── 5. The Fund (arm 03) ────────────────────────────────────── */}
+      <Reveal as="section" className="border-t border-border py-24 sm:py-32 bg-surface-hover/40">
+        <div className="container mx-auto px-6 sm:px-8">
+          <div className="grid lg:grid-cols-[280px_1fr] gap-12 lg:gap-20">
+            <SectionRail index="03" label="Fund" />
+            <div className="max-w-2xl">
+              <p className="text-[11px] font-mono uppercase tracking-[0.22em] text-primary mb-4">
+                DeepFutures
+              </p>
+              <h3 className="text-3xl sm:text-4xl lg:text-5xl font-semibold leading-[1.1] tracking-[-0.025em] text-foreground mb-8">
+                We invest where we install.
+              </h3>
+              <div className="space-y-5 text-base text-muted-foreground leading-[1.7] mb-10">
+                <p>
+                  DeepFutures backs AI-native companies — pre-seed and seed, by introduction.
+                  Operator-owned systems, vertical AI agents, infrastructure for AI ventures built
+                  the same way we are.
+                </p>
+                <p>
+                  Portfolio companies get more than capital: an installable reference architecture
+                  shipped at production scale, the methodology documented, and the operator network
+                  that comes from being in the field, not at the deck.
+                </p>
+              </div>
+
+              <div className="grid grid-cols-3 border-y border-border mb-10">
+                <div className="py-5 pr-5">
+                  <p className="text-xl font-semibold tracking-[-0.015em] text-foreground mb-1">Pre-seed / Seed</p>
+                  <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">Stage</p>
+                </div>
+                <div className="py-5 px-5 border-l border-border">
+                  <p className="text-xl font-semibold tracking-[-0.015em] text-foreground mb-1">$50K–$250K</p>
+                  <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">Check size</p>
+                </div>
+                <div className="py-5 pl-5 border-l border-border">
+                  <p className="text-xl font-semibold tracking-[-0.015em] text-foreground mb-1">By introduction</p>
+                  <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">Access</p>
+                </div>
+              </div>
+
+              <div className="flex flex-col sm:flex-row items-start gap-5">
+                <Button asChild className="text-sm font-medium h-10 px-5 shadow-none bg-foreground text-background hover:bg-foreground/90 rounded-[6px]">
+                  <Link href="/fund">Read the thesis <ArrowRight className="ml-2 h-3.5 w-3.5" /></Link>
+                </Button>
+                <a href="mailto:lorenzo@perpetualcore.com?subject=DeepFutures%20inquiry" className="inline-flex items-center text-sm font-medium text-foreground hover:text-primary transition-colors py-2">
+                  Founders apply <ArrowRight className="ml-1.5 h-3.5 w-3.5" />
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </Reveal>
+
+      {/* ─── 6. The Institute (arm 04) ───────────────────────────────── */}
+      <Reveal as="section" className="border-t border-border py-24 sm:py-32">
+        <div className="container mx-auto px-6 sm:px-8">
+          <div className="grid lg:grid-cols-[280px_1fr] gap-12 lg:gap-20">
+            <SectionRail index="04" label="Institute" />
+            <div className="max-w-2xl">
+              <p className="text-[11px] font-mono uppercase tracking-[0.22em] text-primary mb-4">
+                The Institute for Human Advancement
+              </p>
+              <h3 className="text-3xl sm:text-4xl lg:text-5xl font-semibold leading-[1.1] tracking-[-0.025em] text-foreground mb-8">
+                The 501(c)(3) parent. The reason any of this exists.
+              </h3>
+              <p className="text-base text-muted-foreground leading-[1.7] mb-10">
+                IHA runs workforce development for low-income New Yorkers, AI-native founder
+                training across emerging markets, AI literacy programs, and field health programs
+                in East Africa. Every Perpetual Core arm funds it.
+              </p>
+
+              <div className="border-t border-border mb-10">
+                {INSTITUTE_PROGRAMS.map((p, i) => (
+                  <div key={p.name} className="grid grid-cols-[60px_180px_1fr] sm:grid-cols-[60px_220px_1fr] gap-6 py-5 border-b border-border items-baseline">
+                    <span className="font-mono text-[10px] tracking-[0.18em] text-muted-foreground pt-1">0{i + 1}</span>
+                    <h4 className="text-base font-semibold tracking-tight text-foreground">{p.name}</h4>
+                    <p className="text-sm text-muted-foreground leading-[1.6] col-span-3 sm:col-auto">{p.body}</p>
+                  </div>
+                ))}
+              </div>
+
+              <div className="flex flex-col sm:flex-row items-start gap-5">
+                <Button asChild className="text-sm font-medium h-10 px-5 shadow-none bg-foreground text-background hover:bg-foreground/90 rounded-[6px]">
+                  <Link href="/institute">Institute overview <ArrowRight className="ml-2 h-3.5 w-3.5" /></Link>
+                </Button>
+                <a href="https://theiha.org" target="_blank" rel="noopener noreferrer" className="inline-flex items-center text-sm font-medium text-foreground hover:text-primary transition-colors py-2">
+                  Visit theiha.org <ArrowUpRight className="ml-1.5 h-3.5 w-3.5" />
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </Reveal>
+
+      {/* ─── 7. Framework ────────────────────────────────────────────── */}
+      <Reveal as="section" className="border-t border-border py-24 sm:py-32 bg-surface-hover/40">
+        <div className="container mx-auto px-6 sm:px-8">
+          <div className="grid lg:grid-cols-[280px_1fr] gap-12 lg:gap-20 mb-14">
+            <SectionRail index="—" label="The Framework" />
+            <div className="max-w-2xl">
+              <h3 className="text-3xl sm:text-4xl lg:text-5xl font-semibold leading-[1.1] tracking-[-0.025em] text-foreground">
+                Four phases. One framework. Yours at the end.
+              </h3>
+            </div>
+          </div>
+
+          <div className="border-t border-border">
+            {PHASES.map((phase, i) => (
+              <div key={phase.step} className="grid grid-cols-[60px_1fr] sm:grid-cols-[80px_200px_1fr] gap-6 sm:gap-12 py-8 border-b border-border">
+                <span className="font-mono text-[11px] text-muted-foreground tracking-[0.18em] pt-1">0{i + 1}</span>
+                <h4 className="text-lg sm:text-xl font-semibold tracking-tight text-foreground col-span-1 sm:col-auto">{phase.step}.</h4>
+                <p className="text-base text-muted-foreground leading-[1.7] col-span-2 sm:col-auto">{phase.body}</p>
+              </div>
+            ))}
+          </div>
+
+          <div className="mt-10">
+            <Link href="/studio/methodology" className="inline-flex items-center text-sm font-medium text-foreground hover:text-primary transition-colors">
+              Read the full methodology <ArrowRight className="ml-1.5 h-3.5 w-3.5" />
+            </Link>
+          </div>
+        </div>
+      </Reveal>
+
+      {/* ─── 8. Engine commitment — dark block with grain ────────────── */}
+      <Reveal as="section" className="relative py-24 sm:py-32 text-white overflow-hidden" >
+        <div className="absolute inset-0" style={{ backgroundColor: "hsl(var(--surface-dark))" }} />
+        <div className="grain" />
+        <div className="relative container mx-auto px-6 sm:px-8">
+          <div className="grid lg:grid-cols-[280px_1fr] gap-12 lg:gap-20">
+            <div>
+              <p className="eyebrow !text-white/40 mb-3">§ 05</p>
+              <h2 className="text-xs uppercase tracking-[0.18em] font-mono text-white">The Engine</h2>
+            </div>
+            <div className="max-w-2xl">
+              <h3 className="text-3xl sm:text-4xl lg:text-5xl font-semibold leading-[1.1] tracking-[-0.025em] text-white mb-12">
+                A structural standard for AI ventures that fund their mission.
+              </h3>
+
+              <div className="grid grid-cols-3 border-y border-white/10 mb-10">
+                {ENGINE_STATS.map((stat, i) => (
+                  <div key={stat.label} className={`py-6 ${i > 0 ? "border-l border-white/10 pl-6" : "pr-6"}`}>
+                    <p className="text-2xl sm:text-3xl font-semibold tracking-[-0.015em] text-white mb-2">{stat.value}</p>
+                    <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-white/50">{stat.label}</p>
+                  </div>
+                ))}
+              </div>
+
+              <div className="space-y-5 text-base leading-[1.7] text-white/65 mb-12">
+                <p>
+                  A high structural bar — not a moat. VC-backed companies struggle to meet it;
+                  their cap tables resist double-digit revenue commitments to a 501(c)(3). JVs
+                  face the same constraint from their LPs. AI-native ventures structured this
+                  way from day one don&apos;t.
+                </p>
+                <p>
+                  Engagements give 10%. Sage gives 15%. Every other product gives 10% by default.
+                  Audited annually, line-itemed on every invoice. We&apos;re publishing the math,
+                  the methodology, and the registry schemas. The reference implementation is the
+                  company you&apos;re reading about.
+                </p>
+                <p className="text-white font-medium">
+                  We are not the only company that should be built this way. We hope we&apos;re
+                  the first of many.
+                </p>
+              </div>
+
+              <div className="flex flex-col sm:flex-row items-start gap-5">
+                <Button asChild className="text-sm font-medium h-10 px-5 shadow-none bg-white text-foreground hover:bg-white/90 rounded-[6px]">
+                  <Link href="/engine">How the Engine works <ArrowRight className="ml-2 h-3.5 w-3.5" /></Link>
+                </Button>
+                <Link href="/engine/spec" className="inline-flex items-center text-sm font-medium text-white/70 hover:text-white transition-colors py-2 border-b border-white/20 hover:border-white">
+                  Read the spec <ArrowRight className="ml-1.5 h-3.5 w-3.5" />
+                </Link>
+              </div>
+            </div>
+          </div>
+        </div>
+      </Reveal>
+
+      {/* ─── 9. The Frontier — DRAMATIC full-bleed black manifesto ───── */}
+      <Reveal
+        as="section"
+        className="relative border-t border-border py-32 sm:py-44 overflow-hidden"
+      >
+        <div
+          className="absolute inset-0"
+          style={{ backgroundColor: "hsl(var(--surface-dark))" }}
+        />
+        <div className="grain" />
+        <div className="relative container mx-auto px-6 sm:px-8">
+          <div className="max-w-5xl mx-auto">
+            <p className="eyebrow !text-white/40 mb-12 inline-flex items-center gap-3">
+              <span aria-hidden className="block h-1 w-1 bg-white" />
+              The Frontier
+            </p>
+
+            <h2 className="display-hero text-[44px] sm:text-[68px] lg:text-[104px] text-white mb-16 leading-[0.98]">
+              The next decade of AI is{" "}
+              <span className="italic text-white/85">operator-owned.</span>
+              <br />
+              We&apos;re building for it.
+            </h2>
+
+            <div className="grid lg:grid-cols-2 gap-12 lg:gap-20 max-w-5xl">
+              <div className="space-y-5 text-base sm:text-lg text-white/65 leading-[1.7]">
+                <p>
+                  The platforms are converging — five model labs, three clouds, two app-store
+                  dynamics. The operators using them are not. They run organizations with IRB
+                  rules, local consent, offline reality, vertical workflows, and constraints
+                  the platform companies will never optimize for.
+                </p>
+                <p>
+                  The next decade belongs to AI systems the operators own — installed in their
+                  stack, governed by their rules, sovereign to their mission. Vertical agents,
+                  not generic chat. Institutional memory, not retrieval-as-a-service.
+                  Engagements that hand over the keys, not consultancy that keeps them.
+                </p>
+              </div>
+              <div className="space-y-5 text-base sm:text-lg text-white/65 leading-[1.7]">
+                <p className="text-white font-medium">
+                  We build for that future. The studio installs it. The portfolio carries it.
+                  The fund invests in it. The institute trains the people building it. The
+                  engine keeps the mission funded while we do.
+                </p>
+                <p>
+                  We&apos;re not asking to be the only company shaped this way. We&apos;re
+                  publishing the Engine as a standard, naming the math, and inviting other
+                  AI-native ventures to adopt it. The reference implementation is here. The
+                  category is what we&apos;re trying to create.
+                </p>
+              </div>
+            </div>
+
+            {/* Founder signature — on dark */}
+            <div className="border-t border-white/15 pt-10 mt-20 flex items-center gap-4">
+              <div className="flex-shrink-0">
+                <span aria-hidden className="block h-9 w-9 bg-white" />
+              </div>
+              <div>
+                <p className="text-sm font-semibold tracking-tight text-white">
+                  Lorenzo Daughtry-Chambers
+                </p>
+                <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-white/50 mt-0.5">
+                  Founder · Perpetual Core
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </Reveal>
+
+      {/* ─── 10. Open Invitation — 4 audiences ───────────────────────── */}
+      <Reveal as="section" className="relative border-t border-border py-24 sm:py-32 overflow-hidden">
+        <div className="container mx-auto px-6 sm:px-8">
+          <div className="max-w-4xl mx-auto text-center mb-16">
+            <p className="eyebrow mb-6 inline-flex items-center gap-2 justify-center">
+              <span aria-hidden className="block h-1 w-1 bg-foreground" />
+              An open invitation
+              <span aria-hidden className="block h-1 w-1 bg-foreground" />
+            </p>
+            <h2 className="display-hero text-[36px] sm:text-[52px] lg:text-[72px] text-foreground mb-10 leading-[1.05]">
+              The Engine is meant to be{" "}
+              <span className="italic">adopted.</span>
+            </h2>
+            <p className="text-base sm:text-lg text-muted-foreground leading-[1.65] max-w-2xl mx-auto">
+              We built the first one because we needed it. We&apos;re publishing it as a standard
+              because we hope others build theirs. The math, the methodology, the registry
+              schemas, the giving substrate — all of it open. Perpetual Core is the reference
+              implementation, not the only one.
+            </p>
+          </div>
+
+          {/* Four audiences */}
+          <div className="max-w-5xl mx-auto border-t border-border">
+            {INVITATION_ROWS.map((row, i) => (
+              <Link
+                key={row.tag}
+                href={row.href}
+                className="group grid grid-cols-[40px_1fr] sm:grid-cols-[80px_180px_1fr_auto] gap-x-6 sm:gap-x-10 gap-y-2 py-8 border-b border-border hover:bg-surface-hover transition-colors items-baseline"
+              >
+                <span className="font-mono text-[11px] tracking-[0.18em] text-muted-foreground pt-1">
+                  0{i + 1}
+                </span>
+                <span className="font-mono text-[11px] uppercase tracking-[0.22em] text-primary col-span-1 sm:col-auto">
+                  {row.tag}
+                </span>
+                <div className="col-span-2 sm:col-auto">
+                  <p className="text-base sm:text-lg font-semibold tracking-[-0.01em] text-foreground mb-2 group-hover:text-primary transition-colors">
+                    {row.title}
+                  </p>
+                  <p className="text-sm text-muted-foreground leading-[1.65]">
+                    {row.body}
+                  </p>
+                </div>
+                <span className="hidden sm:inline-flex items-center font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground/70 whitespace-nowrap pt-1">
+                  {row.cta}
+                  <ArrowRight className="ml-3 h-3 w-3 transition-transform group-hover:translate-x-0.5" />
+                </span>
+              </Link>
+            ))}
+          </div>
+
+          <div className="text-center mt-14">
+            <Button size="lg" asChild className="text-sm font-medium px-7 h-11 shadow-none bg-foreground text-background hover:bg-foreground/90 rounded-[6px]">
+              <Link href="/engine/spec">
+                Read the Engine spec <ArrowRight className="ml-2 h-4 w-4" />
+              </Link>
+            </Button>
+          </div>
+        </div>
+      </Reveal>
+
+      {/* ─── 11. Multi-path CTA ──────────────────────────────────────── */}
+      <Reveal as="section" className="border-t border-border py-24 sm:py-32 bg-surface-hover/40">
+        <div className="container mx-auto px-6 sm:px-8">
+          <div className="grid lg:grid-cols-[280px_1fr] gap-12 lg:gap-20">
+            <SectionRail index="—" label="Start here" />
+            <div className="max-w-3xl">
+              <h3 className="text-3xl sm:text-4xl lg:text-5xl font-semibold leading-[1.1] tracking-[-0.025em] text-foreground mb-10">
+                Four doors. Pick yours.
+              </h3>
+
+              <div className="grid sm:grid-cols-2 gap-px bg-border border border-border">
+                <Link href="/studio/engagements" className="group bg-card p-6 sm:p-7 hover:bg-surface-hover transition-colors">
+                  <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-primary mb-3">For organizations</p>
+                  <p className="text-lg font-semibold tracking-[-0.01em] text-foreground mb-2">Start an engagement →</p>
+                  <p className="text-sm text-muted-foreground leading-[1.6]">Install the Perpetual Engine in your stack. $75,000 floor.</p>
+                </Link>
+                <Link href="/products" className="group bg-card p-6 sm:p-7 hover:bg-surface-hover transition-colors">
+                  <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-primary mb-3">For operators</p>
+                  <p className="text-lg font-semibold tracking-[-0.01em] text-foreground mb-2">See the portfolio →</p>
+                  <p className="text-sm text-muted-foreground leading-[1.6]">Six products in production. Use them, or have us install them.</p>
+                </Link>
+                <a href="mailto:lorenzo@perpetualcore.com?subject=DeepFutures%20inquiry" className="group bg-card p-6 sm:p-7 hover:bg-surface-hover transition-colors">
+                  <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-primary mb-3">For founders</p>
+                  <p className="text-lg font-semibold tracking-[-0.01em] text-foreground mb-2">Talk to the fund →</p>
+                  <p className="text-sm text-muted-foreground leading-[1.6]">DeepFutures invests where we install. Pre-seed, by introduction.</p>
+                </a>
+                <a href="https://theiha.org" target="_blank" rel="noopener noreferrer" className="group bg-card p-6 sm:p-7 hover:bg-surface-hover transition-colors">
+                  <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-primary mb-3">For mission partners</p>
+                  <p className="text-lg font-semibold tracking-[-0.01em] text-foreground mb-2 inline-flex items-center">
+                    Join the Institute <ArrowUpRight className="ml-1 h-4 w-4" />
+                  </p>
+                  <p className="text-sm text-muted-foreground leading-[1.6]">IHA runs the programs. Workforce, founders, Kenya, academy.</p>
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </Reveal>
+
+      {/* Newsletter — passive lead capture before footer */}
+      <section className="border-t border-border bg-background py-20 sm:py-24">
+        <div className="container mx-auto px-6 sm:px-8">
+          <div className="grid lg:grid-cols-[280px_1fr] gap-12 lg:gap-20">
+            <div className="flex items-baseline gap-3 text-muted-foreground">
+              <span className="font-mono text-[10px] uppercase tracking-[0.22em]">—</span>
+              <span className="font-mono text-[10px] uppercase tracking-[0.22em]">
+                Notes from the operating layer
+              </span>
+            </div>
+            <div className="max-w-2xl">
+              <h2 className="text-3xl sm:text-4xl lg:text-5xl font-semibold leading-[1.1] tracking-[-0.025em] text-foreground mb-6">
+                Stay close to the work.
+              </h2>
+              <p className="text-base text-muted-foreground leading-[1.7] mb-8">
+                Occasional dispatches on AI installs, the Engine commitment, and
+                what we're shipping. Written by Lorenzo. Read by operators, fund
+                partners, and mission leads. Unsubscribe any time.
+              </p>
+              <NewsletterCapture variant="inline" source="home_inline" />
+              <p className="mt-4 text-xs text-muted-foreground">
+                No spam. No funnel tricks. Welcome email arrives within a minute.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <Footer />
+    </div>
+  );
+}

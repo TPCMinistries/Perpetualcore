@@ -23,6 +23,7 @@ import {
 } from "lucide-react";
 import { MarketplacePageSkeleton } from "@/components/ui/skeletons";
 import { cn } from "@/lib/utils";
+import { NewsletterCapture } from "@/components/landing/NewsletterCapture";
 
 interface MarketplaceItem {
   id: string;
@@ -250,6 +251,30 @@ export default function MarketplacePage() {
           </div>
         </div>
       </header>
+
+      {/* Pre-launch banner — shows while marketplace is gathering its first cohort
+          of agent/workflow listings. Trending items + skills surface stays live below. */}
+      {!loading && marketplaceItems.length === 0 && trendingItems.length === 0 && !debouncedQuery && (
+        <section className="border-b border-amber-200/60 bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-950/30 dark:to-orange-950/20 py-8">
+          <div className="container mx-auto px-4">
+            <div className="max-w-3xl mx-auto text-center">
+              <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-amber-700 dark:text-amber-300 mb-3">
+                Marketplace · pre-launch
+              </p>
+              <h2 className="text-2xl sm:text-3xl font-semibold tracking-[-0.015em] mb-3">
+                Agents and workflows are landing soon.
+              </h2>
+              <p className="text-sm sm:text-base text-muted-foreground mb-6 max-w-xl mx-auto leading-relaxed">
+                The first cohort of community-built agents is going through security review.
+                Be first in line — and get an early-bird discount on day one.
+              </p>
+              <div className="max-w-xl mx-auto">
+                <NewsletterCapture variant="inline" source="marketplace_waitlist" />
+              </div>
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* Hero Section */}
       <section className="bg-gradient-to-r from-primary/10 to-primary/5 py-16">

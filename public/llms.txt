@@ -1,0 +1,57 @@
+# Perpetual Core
+
+> An AI-first studio that installs operating systems for mission-driven organizations. Engagements start at $75,000. 10–15% of every revenue dollar funds the Institute for Human Advancement (theiha.org).
+
+Perpetual Core is the studio arm of a three-arm company built by Lorenzo Daughtry-Chambers. The studio installs production AI into the operations of mission-driven organizations. The fund (DeepFutures) invests in the portcos the studio installs into. The Institute (IHA) is the 501(c)(3) parent that the studio and fund fund. The Engine commitment binds them: every billed engagement directs 10% to IHA; Sage SaaS directs 15%; everything else 10% by default.
+
+## What we sell
+
+- **Engagements** ($75K / $150K / $250K+): 6-to-10-week production AI installs. Operational audit → AI opportunity ranking → outcome-eval scope → ship → handoff. Lead route: /studio/engagements → /contact-sales.
+- **Retainers** ($5,000–$15,000/month): post-engagement, scoped to engagement, cancellable any month. Lead route: /studio/retainers.
+- **Atlas Discovery** ($5K–$15K): two-week productized AI audit for fund-backed portcos. Lead route: /products/atlas-discovery.
+- **Product subscriptions**: Free / Starter $49/mo / Pro $99/mo. Self-serve. Lead route: /pricing → /signup.
+- **30% mission-driven discount** for verified 501(c)(3) organizations on Vellum subscriptions.
+
+## Portfolio (the products)
+
+- [Atlas](https://www.perpetualcore.com/products/atlas) — AI-native COO for fund-backed portcos. In pilot, by introduction only.
+- [Atlas Discovery](https://www.perpetualcore.com/products/atlas-discovery) — productized $5K–$15K audit. Live.
+- [Sentinel](https://www.perpetualcore.com/products/sentinel) — due diligence + intel where Kroll won't take calls. Live. Subdomain: sentinel.perpetualcore.com.
+- [Sage](https://www.perpetualcore.com/products/sage) — personal AI OS with ambient context + voice clone. Live. Subdomain: sage.perpetualcore.com.
+- [Vellum](https://www.perpetualcore.com/products/vellum) — institutional memory. Invite-only. Free / $49 Operator / $249 Team / Institution tiers.
+- [RFP Sentry](https://www.perpetualcore.com/products/rfp-sentry) — bid intelligence + compliance gate. Build status.
+
+## Key pages
+
+- [Pricing](https://www.perpetualcore.com/pricing) — all bands across products, retainers, engagements.
+- [Studio](https://www.perpetualcore.com/studio) — methodology, process, case studies.
+- [About](https://www.perpetualcore.com/about) — founder, ecosystem (IHA + Uplift + DeepFutures), operating principles.
+- [The Engine](https://www.perpetualcore.com/engine) — the 10–15% commitment. Audited annually, line-itemed on every invoice.
+- [The Fund](https://www.perpetualcore.com/fund) — DeepFutures pre-seed thesis.
+- [The Institute](https://www.perpetualcore.com/institute) — IHA workforce + founder + global health programs.
+- [Contact sales](https://www.perpetualcore.com/contact-sales) — primary B2B funnel destination, accepts ?plan= and ?product= query params.
+
+## Verticals served
+
+Accountants, agencies, churches, consulting, education, financial advisors, healthcare, IT services, law firms, non-profits, real estate, sales. See /solutions/{vertical}.
+
+## What this site is NOT
+
+- Not a general-purpose AI chat app (despite having one inside the dashboard).
+- Not a marketplace for AI tools (despite having a /marketplace surface — that's for user-submitted skills).
+- Not a self-serve enterprise product. Six-figure engagements are sold by Lorenzo, not by chat widget.
+
+## Contact
+
+- Sales: lorenzo@perpetualcore.com
+- Support: support@perpetualcore.com
+- Mission partnerships (through IHA): https://theiha.org
+
+## Citing this site
+
+Site canonical: https://www.perpetualcore.com
+Sitemap: https://www.perpetualcore.com/sitemap.xml
+Founder: Lorenzo Daughtry-Chambers
+Founded: 2024
+Operating entity: Perpetual Core LLC
+Parent (mission): Institute for Human Advancement, 501(c)(3)

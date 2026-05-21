@@ -137,36 +137,44 @@ export async function middleware(request: NextRequest) {
   const { data: { user } } = await supabase.auth.getUser();
 
   // --- Analytics: UTM capture + anonymous/session ID cookies ---
-  // Capture UTM params from URL on first visit (don't overwrite existing)
-  const utmParams = extractUTMFromURL(request.nextUrl);
-  if (utmParams && !request.cookies.get(UTM_COOKIE_NAME)?.value) {
-    const referer = request.headers.get('referer') || undefined;
-    response.cookies.set(UTM_COOKIE_NAME, serializeUTM({ ...utmParams, referrer: referer }), {
-      maxAge: UTM_MAX_AGE,
-      path: '/',
-      sameSite: 'lax',
-      secure: process.env.NODE_ENV === 'production',
-      httpOnly: true,
-    });
-  }
+  // Gated on cookie consent (GDPR / UK PECR). The pc_consent cookie is set
+  // by components/landing/CookieConsent.tsx. We treat presence of a logged-in
+  // user as implied consent (they have explicit account context).
+  const consent = request.cookies.get('pc_consent')?.value;
+  const analyticsAllowed = consent === 'accepted' || !!user;
 
-  // Ensure anonymous ID cookie exists for visitor tracking
-  if (!request.cookies.get(ANON_COOKIE_NAME)?.value) {
-    response.cookies.set(ANON_COOKIE_NAME, generateAnonymousId(), {
-      maxAge: UTM_MAX_AGE,
-      path: '/',
-      sameSite: 'lax',
-      secure: process.env.NODE_ENV === 'production',
-    });
-  }
+  if (analyticsAllowed) {
+    // Capture UTM params from URL on first visit (don't overwrite existing)
+    const utmParams = extractUTMFromURL(request.nextUrl);
+    if (utmParams && !request.cookies.get(UTM_COOKIE_NAME)?.value) {
+      const referer = request.headers.get('referer') || undefined;
+      response.cookies.set(UTM_COOKIE_NAME, serializeUTM({ ...utmParams, referrer: referer }), {
+        maxAge: UTM_MAX_AGE,
+        path: '/',
+        sameSite: 'lax',
+        secure: process.env.NODE_ENV === 'production',
+        httpOnly: true,
+      });
+    }
 
-  // Ensure session ID cookie exists (expires with browser session)
-  if (!request.cookies.get(SESSION_COOKIE_NAME)?.value) {
-    response.cookies.set(SESSION_COOKIE_NAME, generateSessionId(), {
-      path: '/',
-      sameSite: 'lax',
-      secure: process.env.NODE_ENV === 'production',
-    });
+    // Ensure anonymous ID cookie exists for visitor tracking
+    if (!request.cookies.get(ANON_COOKIE_NAME)?.value) {
+      response.cookies.set(ANON_COOKIE_NAME, generateAnonymousId(), {
+        maxAge: UTM_MAX_AGE,
+        path: '/',
+        sameSite: 'lax',
+        secure: process.env.NODE_ENV === 'production',
+      });
+    }
+
+    // Ensure session ID cookie exists (expires with browser session)
+    if (!request.cookies.get(SESSION_COOKIE_NAME)?.value) {
+      response.cookies.set(SESSION_COOKIE_NAME, generateSessionId(), {
+        path: '/',
+        sameSite: 'lax',
+        secure: process.env.NODE_ENV === 'production',
+      });
+    }
   }
 
   // IP Whitelist + Session Duration checks for authenticated users

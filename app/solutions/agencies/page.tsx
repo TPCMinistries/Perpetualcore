@@ -12,6 +12,9 @@ import {
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { EngagementBanner } from "@/components/landing/EngagementBanner";
+import { Navbar } from "@/components/landing/Navbar";
+import { Footer } from "@/components/landing/Footer";
 
 export default function AgenciesPage() {
   // ROI Calculator State
@@ -31,28 +34,9 @@ export default function AgenciesPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white dark:from-gray-900 dark:to-gray-800">
-      {/* Header */}
-      <header className="border-b bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm sticky top-0 z-50">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <Link href="/" className="flex items-center space-x-2">
-            <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center text-primary-foreground font-bold">
-              AI
-            </div>
-            <span className="text-xl font-bold">Perpetual Core</span>
-          </Link>
-          <div className="flex items-center gap-4">
-            <Link href="#roi-calculator" className="text-sm font-medium hover:underline hidden md:inline">
-              ROI Calculator
-            </Link>
-            <Link href="#features" className="text-sm font-medium hover:underline hidden md:inline">
-              Features
-            </Link>
-            <Button asChild size="sm" className="md:size-default bg-gradient-to-r from-purple-500 to-pink-600 hover:from-purple-600 hover:to-pink-700">
-              <Link href="/contact-sales?plan=agency">Schedule Demo →</Link>
-            </Button>
-          </div>
-        </div>
-      </header>
+      <Navbar />
+
+      <EngagementBanner />
 
       {/* Hero Section */}
       <section className="container mx-auto px-4 py-16 md:py-24 relative overflow-hidden">
@@ -1095,7 +1079,7 @@ export default function AgenciesPage() {
                 Client Confidentiality Protected
               </div>
               <h2 className="text-4xl font-bold mb-4">
-                Bank-Level Security. SOC 2 Certified.
+                Encrypted in transit and at rest. SOC 2 Type I in progress.
               </h2>
               <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
                 Your clients' confidential information is protected with the same security used by major financial institutions.
@@ -1118,8 +1102,8 @@ export default function AgenciesPage() {
                   },
                   {
                     icon: Award,
-                    title: "SOC 2 Type II Certified",
-                    desc: "Annual third-party security audits. Full compliance documentation available to prospective clients."
+                    title: "SOC 2 Type I in progress",
+                    desc: "Type I audit in progress; Type II planned for the following audit window. Security controls operational today; documentation available under NDA."
                   },
                   {
                     icon: Users,
@@ -1234,7 +1218,7 @@ export default function AgenciesPage() {
                   "Unlimited AI content assistance",
                   "Your agency's knowledge base",
                   "Creative brief templates",
-                  "Infinite conversation memory",
+                  "Infinite conversation context",
                   "Campaign & project tracking",
                   "All AI models (GPT-4, Claude, Gemini)",
                   "Asset organization & search",
@@ -1472,7 +1456,7 @@ export default function AgenciesPage() {
               },
               {
                 question: "How is Perpetual Core different from just using ChatGPT?",
-                answer: "Perpetual Core is specifically built for agencies with features ChatGPT doesn't have: (1) Your agency's knowledge base—AI searches YOUR campaigns and assets, not just public data. (2) Client confidentiality protection with SOC 2 compliance. (3) Infinite conversation memory that never expires. (4) Agency-specific templates and workflows. (5) Team collaboration with role-based access. (6) All AI models in one place (GPT-4, Claude, Gemini). Think of it as ChatGPT meets your agency's shared drive—but infinitely more powerful."
+                answer: "Perpetual Core is specifically built for agencies with features ChatGPT doesn't have: (1) Your agency's knowledge base—AI searches YOUR campaigns and assets, not just public data. (2) Client confidentiality protection with SOC 2 compliance. (3) Infinite conversation context that never expires. (4) Agency-specific templates and workflows. (5) Team collaboration with role-based access. (6) All AI models in one place (GPT-4, Claude, Gemini). Think of it as ChatGPT meets your agency's shared drive—but infinitely more powerful."
               },
               {
                 question: "Can we try it with a small team first?",
@@ -1569,59 +1553,7 @@ export default function AgenciesPage() {
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="border-t py-12 bg-muted/30">
-        <div className="container mx-auto px-4">
-          <div className="grid md:grid-cols-4 gap-8 mb-8">
-            <div>
-              <Link href="/" className="flex items-center space-x-2 mb-4">
-                <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center text-primary-foreground font-bold">
-                  AI
-                </div>
-                <span className="text-lg font-bold">Perpetual Core</span>
-              </Link>
-              <p className="text-sm text-muted-foreground">
-                The AI-powered knowledge platform built for creative agencies.
-              </p>
-            </div>
-            <div>
-              <h3 className="font-semibold mb-4">Product</h3>
-              <ul className="space-y-2 text-sm text-muted-foreground">
-                <li><Link href="/features" className="hover:underline">Features</Link></li>
-                <li><Link href="/pricing" className="hover:underline">Pricing</Link></li>
-                <li><Link href="/security" className="hover:underline">Security</Link></li>
-                <li><Link href="/integrations" className="hover:underline">Integrations</Link></li>
-              </ul>
-            </div>
-            <div>
-              <h3 className="font-semibold mb-4">Resources</h3>
-              <ul className="space-y-2 text-sm text-muted-foreground">
-                <li><Link href="/case-studies" className="hover:underline">Case Studies</Link></li>
-                <li><Link href="/blog" className="hover:underline">Blog</Link></li>
-                <li><Link href="/webinars" className="hover:underline">Webinars</Link></li>
-                <li><Link href="/support" className="hover:underline">Support</Link></li>
-              </ul>
-            </div>
-            <div>
-              <h3 className="font-semibold mb-4">Company</h3>
-              <ul className="space-y-2 text-sm text-muted-foreground">
-                <li><Link href="/about" className="hover:underline">About</Link></li>
-                <li><Link href="/contact-sales" className="hover:underline">Contact Sales</Link></li>
-                <li><Link href="/careers" className="hover:underline">Careers</Link></li>
-                <li><Link href="/legal" className="hover:underline">Legal</Link></li>
-              </ul>
-            </div>
-          </div>
-          <div className="border-t pt-8 text-center text-sm text-muted-foreground">
-            <p className="mb-2">
-              © 2024 AI Operating System. All rights reserved. | SOC 2 Type II Certified | GDPR Ready
-            </p>
-            <p className="text-xs">
-              Perpetual Core is a productivity platform. All AI-generated content should be reviewed by qualified professionals.
-            </p>
-          </div>
-        </div>
-      </footer>
+      <Footer />
     </div>
   );
 }

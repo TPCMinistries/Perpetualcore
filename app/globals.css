@@ -4,78 +4,95 @@
 
 @layer base {
   :root {
-    --background: 40 20% 98%;
-    --foreground: 222.2 84% 4.9%;
+    /* Confident-corporate — Anthropic/Linear/Vercel register
+       Pure-white surfaces. Cool neutral grays. Near-black ink.
+       Violet appears sparingly as accent, never as the default button color. */
+
+    --background: 0 0% 100%;          /* pure white */
+    --foreground: 220 13% 11%;        /* near-black, cool */
+
     --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    --card-foreground: 220 13% 11%;
     --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
-    /* Blue-violet primary */
-    --primary: 256 67% 55%;
+    --popover-foreground: 220 13% 11%;
+
+    /* Violet accent — used on links, small marks, focus rings.
+       Buttons use --foreground (near-black), not --primary. */
+    --primary: 258 50% 50%;
     --primary-foreground: 0 0% 100%;
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
-    --muted: 256 20% 95%;
-    --muted-foreground: 215.4 16.3% 46.9%;
-    --accent: 256 40% 96%;
-    --accent-foreground: 222.2 47.4% 11.2%;
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 220 20% 91%;
-    --input: 220 20% 91%;
-    --ring: 256 67% 55%;
-    --radius: 0.75rem;
 
-    /* Sidebar */
-    --sidebar-bg: 260 30% 10%;
-    --sidebar-hover: 256 30% 18%;
-    --sidebar-active: 256 67% 55%;
+    --secondary: 220 14% 96%;
+    --secondary-foreground: 220 13% 11%;
+    --muted: 220 14% 96%;
+    --muted-foreground: 220 9% 46%;
+    --accent: 220 14% 96%;
+    --accent-foreground: 220 13% 11%;
 
-    /* Glow tokens */
-    --glow-primary: 256 67% 55% / 0.25;
-    --shadow-colored: 256 67% 55% / 0.12;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 220 13% 91%;
+    --input: 220 13% 91%;
+    --ring: 258 50% 50%;
+    --radius: 0.25rem;
 
-    /* Gradient text colors */
-    --gradient-from: 256 67% 55%;
-    --gradient-via: 220 80% 55%;
-    --gradient-to: 190 80% 50%;
+    /* Semantic surfaces */
+    --ink: 220 13% 11%;
+    --ink-muted: 220 9% 46%;
+    --surface: 0 0% 100%;
+    --surface-hover: 220 14% 97%;
+    --surface-dark: 220 18% 9%;       /* cool near-black for engine block */
+    --surface-dark-foreground: 0 0% 100%;
+
+    --sidebar-bg: 220 18% 9%;
+    --sidebar-hover: 220 14% 16%;
+    --sidebar-active: 258 50% 50%;
+
+    --glow-primary: 258 50% 50% / 0.12;
+    --shadow-colored: 258 50% 50% / 0.06;
+
+    /* Status colors for product pills */
+    --status-live: 142 50% 38%;        /* green for LIVE */
+    --status-pilot: 38 78% 44%;        /* amber for PILOT */
+    --status-invite: 220 9% 46%;       /* neutral for BY INVITATION */
   }
 
   .dark {
-    --background: 260 30% 6%;
-    --foreground: 210 40% 98%;
-    --card: 260 25% 9%;
-    --card-foreground: 210 40% 98%;
-    --popover: 260 25% 9%;
-    --popover-foreground: 210 40% 98%;
-    /* Luminous violet in dark mode */
-    --primary: 256 80% 68%;
-    --primary-foreground: 0 0% 100%;
-    --secondary: 256 20% 15%;
-    --secondary-foreground: 210 40% 98%;
-    --muted: 256 15% 15%;
-    --muted-foreground: 215 20.2% 65.1%;
-    --accent: 256 30% 18%;
-    --accent-foreground: 210 40% 98%;
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 256 15% 18%;
-    --input: 256 15% 18%;
-    --ring: 256 80% 68%;
+    --background: 220 18% 7%;
+    --foreground: 220 14% 96%;
+    --card: 220 18% 10%;
+    --card-foreground: 220 14% 96%;
+    --popover: 220 18% 10%;
+    --popover-foreground: 220 14% 96%;
+    --primary: 258 65% 68%;
+    --primary-foreground: 220 18% 9%;
+    --secondary: 220 14% 14%;
+    --secondary-foreground: 220 14% 96%;
+    --muted: 220 14% 14%;
+    --muted-foreground: 220 9% 60%;
+    --accent: 220 14% 18%;
+    --accent-foreground: 220 14% 96%;
+    --destructive: 0 62% 35%;
+    --destructive-foreground: 220 14% 96%;
+    --border: 220 14% 18%;
+    --input: 220 14% 18%;
+    --ring: 258 65% 68%;
 
-    /* Sidebar - dark */
-    --sidebar-bg: 260 30% 6%;
-    --sidebar-hover: 256 25% 15%;
-    --sidebar-active: 256 80% 68%;
+    --ink: 220 14% 96%;
+    --ink-muted: 220 9% 60%;
+    --surface: 220 18% 10%;
+    --surface-hover: 220 14% 14%;
+    --surface-dark: 220 18% 5%;
 
-    /* Glow tokens - dark */
-    --glow-primary: 256 80% 68% / 0.35;
-    --shadow-colored: 256 80% 68% / 0.15;
+    --sidebar-bg: 220 18% 7%;
+    --sidebar-hover: 220 14% 14%;
+    --sidebar-active: 258 65% 68%;
 
-    /* Gradient text colors - brighter for dark */
-    --gradient-from: 256 80% 72%;
-    --gradient-via: 220 80% 65%;
-    --gradient-to: 190 80% 60%;
+    --glow-primary: 258 65% 68% / 0.18;
+    --shadow-colored: 258 65% 68% / 0.10;
+
+    --status-live: 142 50% 50%;
+    --status-pilot: 38 78% 56%;
+    --status-invite: 220 9% 60%;
   }
 }
 
@@ -85,29 +102,29 @@
   }
   body {
     @apply bg-background text-foreground;
+    font-feature-settings: "rlig" 1, "calt" 1, "ss01" 1;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
 }
 
 @layer utilities {
-  .animation-delay-2000 {
-    animation-delay: 2s;
-  }
-  .animation-delay-4000 {
-    animation-delay: 4s;
-  }
-  .animation-delay-6000 {
-    animation-delay: 6s;
+  /* Mono eyebrow — small, uppercase, tracking-widest, JetBrains Mono.
+     The strongest typographic differentiator vs. consumer SaaS. */
+  .eyebrow {
+    font-family: var(--font-mono), ui-monospace, SFMono-Regular, Menlo, monospace;
+    @apply text-[11px] uppercase tracking-[0.18em] font-medium text-muted-foreground;
   }
 
-  /* ── Typography Scale ── */
+  /* Typography scale — shared across app */
   .typo-page-title {
-    @apply text-2xl font-semibold text-foreground;
+    @apply text-2xl font-semibold tracking-tight text-foreground;
   }
   .typo-section-title {
-    @apply text-xl font-semibold text-foreground;
+    @apply text-xl font-semibold tracking-tight text-foreground;
   }
   .typo-card-title {
-    @apply text-lg font-semibold text-foreground;
+    @apply text-lg font-semibold tracking-tight text-foreground;
   }
   .typo-label {
     @apply text-sm font-medium text-foreground;
@@ -119,37 +136,130 @@
     @apply text-xs text-muted-foreground;
   }
   .typo-stat {
-    @apply text-2xl font-bold text-foreground;
+    @apply text-3xl font-semibold tracking-tight text-foreground;
   }
   .typo-badge {
     @apply text-xs font-medium;
   }
+
+  .animation-delay-2000 { animation-delay: 2s; }
+  .animation-delay-4000 { animation-delay: 4s; }
+  .animation-delay-6000 { animation-delay: 6s; }
 }
 
-/* Shadow utilities — outside @layer so they work as plain classes */
+/* Article/blog typography — used by /blog/[slug] pages */
+.prose-content {
+  @apply text-foreground;
+}
+.prose-content p {
+  @apply text-base sm:text-[17px] leading-[1.75] text-muted-foreground mb-6;
+}
+.prose-content h2 {
+  @apply text-2xl sm:text-3xl font-semibold tracking-[-0.015em] text-foreground mt-12 mb-4;
+}
+.prose-content h3 {
+  @apply text-xl font-semibold tracking-[-0.01em] text-foreground mt-10 mb-3;
+}
+.prose-content a {
+  @apply transition;
+}
+.prose-content em {
+  @apply italic;
+}
+.prose-content strong {
+  @apply text-foreground font-medium;
+}
+.prose-content ul {
+  @apply text-base sm:text-[17px] leading-[1.75] text-muted-foreground mb-6 ml-6 list-disc;
+}
+.prose-content ol {
+  @apply text-base sm:text-[17px] leading-[1.75] text-muted-foreground mb-6 ml-6 list-decimal;
+}
+.prose-content li {
+  @apply mb-2;
+}
+.prose-content blockquote {
+  @apply border-l-2 border-foreground/20 pl-4 italic text-muted-foreground my-6;
+}
+
+/* Soft shadow utilities — used sparingly; the system trusts hairlines over shadows */
 .shadow-soft {
-  box-shadow: 0 2px 8px -2px rgba(0, 0, 0, 0.05),
-              0 4px 16px -4px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 1px 2px rgba(15, 17, 21, 0.04),
+              0 2px 6px -2px rgba(15, 17, 21, 0.05);
 }
 .shadow-soft-lg {
-  box-shadow: 0 4px 12px -2px rgba(0, 0, 0, 0.06),
-              0 8px 32px -8px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 2px 6px -1px rgba(15, 17, 21, 0.06),
+              0 8px 24px -8px rgba(15, 17, 21, 0.10);
+}
+.shadow-card {
+  box-shadow: 0 1px 3px rgba(15, 17, 21, 0.05),
+              0 4px 12px -4px rgba(15, 17, 21, 0.06);
 }
 
-/* Colored glow */
-.shadow-glow {
-  box-shadow: 0 0 24px hsl(var(--glow-primary)),
-              0 0 48px hsl(var(--shadow-colored));
-}
-.shadow-glow-sm {
-  box-shadow: 0 0 16px hsl(var(--glow-primary)),
-              0 2px 8px hsl(var(--shadow-colored));
-}
-
-/* Gradient text — uses CSS variables so it auto-switches in dark mode */
+/* Gradient text — reserved for the engine block stat row only, single-stop violet */
 .text-gradient {
-  background: linear-gradient(135deg, hsl(var(--gradient-from)), hsl(var(--gradient-via)), hsl(var(--gradient-to)));
+  background: linear-gradient(150deg, hsl(258 50% 55%), hsl(258 50% 40%));
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
+}
+
+/* Subtle SVG grain overlay — gives dark sections material feel */
+.grain::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.04;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml;utf8,<svg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%25' height='100%25' filter='url(%23n)' opacity='0.9'/></svg>");
+}
+
+/* Pulse — used on LIVE status dots */
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.55; transform: scale(0.85); }
+}
+.animate-pulse-dot {
+  animation: pulse-dot 2.4s ease-in-out infinite;
+}
+
+/* Flow — used on engine-architecture connection lines (subtle flow effect) */
+@keyframes flow-down {
+  0% { stroke-dashoffset: 0; opacity: 0.25; }
+  50% { opacity: 0.7; }
+  100% { stroke-dashoffset: -20; opacity: 0.25; }
+}
+.animate-flow {
+  stroke-dasharray: 4 3;
+  animation: flow-down 4s linear infinite;
+}
+
+/* Scroll reveal — fade-up on viewport enter via IntersectionObserver class swap */
+.reveal-init {
+  opacity: 0;
+  transform: translateY(16px);
+}
+.reveal-on {
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 0.7s ease-out, transform 0.7s ease-out;
+}
+@media (prefers-reduced-motion: reduce) {
+  .reveal-init { opacity: 1; transform: none; }
+  .animate-pulse-dot { animation: none; }
+  .animate-flow { animation: none; }
+}
+
+/* Display serif — Instrument Serif at large display scale.
+   Use on hero h1 only; pair with sans body for contrast. */
+.font-display {
+  font-family: var(--font-display), "Iowan Old Style", Georgia, serif;
+  font-feature-settings: "kern" 1, "liga" 1;
+}
+.display-hero {
+  font-family: var(--font-display), "Iowan Old Style", Georgia, serif;
+  letter-spacing: -0.025em;
+  line-height: 1;
+  font-weight: 400;
 }

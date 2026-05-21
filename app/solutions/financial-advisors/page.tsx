@@ -9,6 +9,9 @@ import {
   XCircle, AlertCircle, Sparkles, MessageSquare, Infinity, Database, Lock,
   Search, Clock, Zap, Target, Building2, Plus, Minus, ArrowRight
 } from "lucide-react";
+import { EngagementBanner } from "@/components/landing/EngagementBanner";
+import { Navbar } from "@/components/landing/Navbar";
+import { Footer } from "@/components/landing/Footer";
 
 export default function FinancialAdvisorsPage() {
   // FAQ State
@@ -16,28 +19,9 @@ export default function FinancialAdvisorsPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white dark:from-gray-900 dark:to-gray-800">
-      {/* Header */}
-      <header className="border-b bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm sticky top-0 z-10">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <Link href="/" className="flex items-center space-x-2">
-            <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center text-primary-foreground font-bold">
-              AI
-            </div>
-            <span className="text-xl font-bold">Perpetual Core</span>
-          </Link>
-          <div className="flex items-center gap-4">
-            <Link href="/pricing" className="text-sm font-medium hover:underline">
-              Pricing
-            </Link>
-            <Link href="/contact-sales" className="text-sm font-medium hover:underline">
-              Contact Sales
-            </Link>
-            <Button asChild>
-              <Link href="/signup?plan=financial-advisors">Start Free Trial</Link>
-            </Button>
-          </div>
-        </div>
-      </header>
+      <Navbar />
+
+      <EngagementBanner />
 
       {/* Hero Section */}
       <section className="container mx-auto px-4 py-20 text-center">
@@ -1078,7 +1062,7 @@ export default function FinancialAdvisorsPage() {
                   {
                     feature: "CRM Integration",
                     old: "CRM has facts but no context or reasoning",
-                    new: "AI adds institutional memory and decision context"
+                    new: "AI adds institutional knowledge and decision context"
                   },
                   {
                     feature: "Regulatory Compliance",
@@ -1148,7 +1132,7 @@ export default function FinancialAdvisorsPage() {
               },
               {
                 question: "Does Perpetual Core integrate with our CRM (Salesforce, Redtail, Wealthbox)?",
-                answer: "Yes. Perpetual Core integrates with major advisor CRMs including Salesforce, Redtail, Wealthbox, and Junxure. We can pull basic client data from your CRM and sync activities back. The key difference: your CRM handles facts (name, account values, transactions) while Perpetual Core captures context (investment rationale, relationship history, preferences). They work together—CRM as your source of truth for data, Perpetual Core as institutional memory for knowledge. Integration setup takes 30-45 minutes during onboarding."
+                answer: "Yes. Perpetual Core integrates with major advisor CRMs including Salesforce, Redtail, Wealthbox, and Junxure. We can pull basic client data from your CRM and sync activities back. The key difference: your CRM handles facts (name, account values, transactions) while Perpetual Core captures context (investment rationale, relationship history, preferences). They work together—CRM as your source of truth for data, Perpetual Core as institutional knowledge for knowledge. Integration setup takes 30-45 minutes during onboarding."
               },
               {
                 question: "How does Perpetual Core help with succession planning and practice sales?",
@@ -1176,7 +1160,7 @@ export default function FinancialAdvisorsPage() {
               },
               {
                 question: "How is this different from just keeping good CRM notes?",
-                answer: "Great question. CRM notes are great for basic facts but terrible for context and reasoning. Key differences: (1) Perpetual Core has infinite memory—search decades of history instantly, not just recent CRM entries. (2) Captures 'why' not just 'what'—investment rationales, relationship context, decision reasoning. (3) Natural language search—ask questions conversationally, not field-by-field CRM queries. (4) Institutional knowledge transfer—successors get complete context, not just data fields. Think: CRM handles transactions and facts, Perpetual Core handles relationships and reasoning."
+                answer: "Great question. CRM notes are great for basic facts but terrible for context and reasoning. Key differences: (1) Perpetual Core has infinite context—search decades of history instantly, not just recent CRM entries. (2) Captures 'why' not just 'what'—investment rationales, relationship context, decision reasoning. (3) Natural language search—ask questions conversationally, not field-by-field CRM queries. (4) Institutional knowledge transfer—successors get complete context, not just data fields. Think: CRM handles transactions and facts, Perpetual Core handles relationships and reasoning."
               },
               {
                 question: "What if clients ask how their information is being used?",
@@ -1358,60 +1342,7 @@ export default function FinancialAdvisorsPage() {
         </Card>
       </section>
 
-      {/* Footer */}
-      <footer className="border-t py-12 bg-muted/30">
-        <div className="container mx-auto px-4">
-          <div className="grid md:grid-cols-4 gap-8 mb-8">
-            <div>
-              <Link href="/" className="flex items-center space-x-2 mb-4">
-                <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center text-primary-foreground font-bold">
-                  AI
-                </div>
-                <span className="text-lg font-bold">Perpetual Core</span>
-              </Link>
-              <p className="text-sm text-muted-foreground">
-                The AI-powered knowledge platform built for financial advisors.
-              </p>
-            </div>
-            <div>
-              <h3 className="font-semibold mb-4">Product</h3>
-              <ul className="space-y-2 text-sm text-muted-foreground">
-                <li><Link href="/features" className="hover:underline">Features</Link></li>
-                <li><Link href="/pricing" className="hover:underline">Pricing</Link></li>
-                <li><Link href="/security" className="hover:underline">Security</Link></li>
-                <li><Link href="/integrations" className="hover:underline">Integrations</Link></li>
-              </ul>
-            </div>
-            <div>
-              <h3 className="font-semibold mb-4">Resources</h3>
-              <ul className="space-y-2 text-sm text-muted-foreground">
-                <li><Link href="/case-studies" className="hover:underline">Case Studies</Link></li>
-                <li><Link href="/blog" className="hover:underline">Blog</Link></li>
-                <li><Link href="/webinars" className="hover:underline">Webinars</Link></li>
-                <li><Link href="/support" className="hover:underline">Support</Link></li>
-              </ul>
-            </div>
-            <div>
-              <h3 className="font-semibold mb-4">Company</h3>
-              <ul className="space-y-2 text-sm text-muted-foreground">
-                <li><Link href="/about" className="hover:underline">About</Link></li>
-                <li><Link href="/contact-sales" className="hover:underline">Contact Sales</Link></li>
-                <li><Link href="/careers" className="hover:underline">Careers</Link></li>
-                <li><Link href="/legal" className="hover:underline">Legal</Link></li>
-              </ul>
-            </div>
-          </div>
-          <div className="border-t pt-8 text-center text-sm text-muted-foreground">
-            <p className="mb-2">
-              © 2024 AI Operating System. All rights reserved. | SOC 2 Type II Certified | SEC Compliant
-            </p>
-            <p className="text-xs max-w-3xl mx-auto">
-              Perpetual Core is a practice management tool. Investment advice and fiduciary responsibilities remain with registered advisors.
-              Your client data is encrypted and never used to train AI models.
-            </p>
-          </div>
-        </div>
-      </footer>
+      <Footer />
     </div>
   );
 }

@@ -43,6 +43,16 @@ const serverEnvSchema = z.object({
 
   // Sentry - Optional
   NEXT_PUBLIC_SENTRY_DSN: z.string().url().optional().or(z.literal("")),
+
+  // RFP & Proposal Engine — Discovery sources (Phase 5)
+  // Auth-required keys are optional so the app doesn't crash during re-registration wait periods.
+  SAM_GOV_API_KEY: z.string().optional(),
+  SIMPLER_GRANTS_API_KEY: z.string().optional(),
+  // Base URLs have stable defaults; override only if the API moves.
+  SAM_GOV_BASE_URL: z.string().url().default("https://api.sam.gov/prod/opportunities/v2"),
+  GRANTS_GOV_BASE_URL: z.string().url().default("https://api.grants.gov/v1/api"),
+  SIMPLER_GRANTS_BASE_URL: z.string().url().default("https://api.simpler.grants.gov/v1"),
+  SBIR_GOV_BASE_URL: z.string().url().default("https://www.sbir.gov/api"),
 });
 
 /**

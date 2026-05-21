@@ -27,9 +27,13 @@ jobs:
 
       - name: TypeScript type check
         run: npm run type-check
+        env:
+          NODE_OPTIONS: --max-old-space-size=6144
 
       - name: ESLint
         run: npm run lint
+        env:
+          NODE_OPTIONS: --max-old-space-size=6144
 
   build:
     name: Build
@@ -49,6 +53,7 @@ jobs:
       - name: Build
         run: npm run build
         env:
+          NODE_OPTIONS: --max-old-space-size=6144
           NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
           NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
           NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: ${{ secrets.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY }}

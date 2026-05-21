@@ -74,6 +74,10 @@
     {
       "path": "/api/cron/refresh-funnel",
       "schedule": "0 * * * *"
+    },
+    {
+      "path": "/api/cron/rfp-discovery-federal",
+      "schedule": "0 */6 * * *"
     }
   ]
 }

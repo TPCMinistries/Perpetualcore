@@ -32,7 +32,7 @@ export default function EnterpriseDemoPage() {
             <div className="mt-8 flex flex-wrap items-center justify-center gap-8 text-sm text-slate-300">
               <div className="flex items-center gap-2">
                 <Shield className="h-5 w-5 text-green-400" />
-                <span>SOC 2 Type II Certified</span>
+                <span>SOC 2 Type I in progress</span>
               </div>
               <div className="flex items-center gap-2">
                 <Lock className="h-5 w-5 text-green-400" />
@@ -106,7 +106,7 @@ export default function EnterpriseDemoPage() {
               </h2>
               <div className="grid grid-cols-2 gap-6">
                 {[
-                  { icon: Lock, text: "SOC 2 Type II Certified" },
+                  { icon: Lock, text: "SOC 2 Type I in progress" },
                   { icon: Shield, text: "SAML/SSO Integration" },
                   { icon: Building2, text: "Dedicated Cloud Instance" },
                   { icon: Users, text: "Unlimited Users" },

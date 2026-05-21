@@ -12,6 +12,9 @@ import {
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { EngagementBanner } from "@/components/landing/EngagementBanner";
+import { Navbar } from "@/components/landing/Navbar";
+import { Footer } from "@/components/landing/Footer";
 
 export default function AccountantsPage() {
   // ROI Calculator State
@@ -31,28 +34,9 @@ export default function AccountantsPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white dark:from-gray-900 dark:to-gray-800">
-      {/* Header */}
-      <header className="border-b bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm sticky top-0 z-50">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <Link href="/" className="flex items-center space-x-2">
-            <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center text-primary-foreground font-bold">
-              AI
-            </div>
-            <span className="text-xl font-bold">Perpetual Core</span>
-          </Link>
-          <div className="flex items-center gap-4">
-            <Link href="#roi-calculator" className="text-sm font-medium hover:underline hidden md:inline">
-              ROI Calculator
-            </Link>
-            <Link href="#how-it-works" className="text-sm font-medium hover:underline hidden md:inline">
-              How It Works
-            </Link>
-            <Button asChild size="sm" className="md:size-default bg-gradient-to-r from-orange-500 to-red-600 hover:from-orange-600 hover:to-red-700">
-              <Link href="/contact-sales?plan=accounting">Schedule Demo →</Link>
-            </Button>
-          </div>
-        </div>
-      </header>
+      <Navbar />
+
+      <EngagementBanner />
 
       {/* Hero Section */}
       <section className="container mx-auto px-4 py-16 md:py-24 relative overflow-hidden">
@@ -1488,7 +1472,7 @@ export default function AccountantsPage() {
               },
               {
                 question: "How is Perpetual Core different from just using ChatGPT?",
-                answer: "Great question. Perpetual Core is specifically built for accounting firms with critical features ChatGPT doesn't have: (1) Your firm's institutional knowledge base—AI searches YOUR client files and workpapers, not just public data. (2) IRS compliance and client confidentiality protection with SOC 2 certification. (3) Infinite conversation memory that never expires. (4) Tax-specific features like code lookups, client communication templates, and deadline tracking. (5) Team collaboration with role-based access. (6) Integration with tax software. (7) All AI models in one place (GPT-4, Claude, Gemini). Think of it as ChatGPT meets Thomson Reuters meets your firm's shared drive—but 10x more powerful."
+                answer: "Great question. Perpetual Core is specifically built for accounting firms with critical features ChatGPT doesn't have: (1) Your firm's institutional knowledge base—AI searches YOUR client files and workpapers, not just public data. (2) IRS compliance and client confidentiality protection with SOC 2 certification. (3) Infinite conversation context that never expires. (4) Tax-specific features like code lookups, client communication templates, and deadline tracking. (5) Team collaboration with role-based access. (6) Integration with tax software. (7) All AI models in one place (GPT-4, Claude, Gemini). Think of it as ChatGPT meets Thomson Reuters meets your firm's shared drive—but 10x more powerful."
               },
               {
                 question: "Will this replace our tax research subscriptions?",
@@ -1599,7 +1583,7 @@ export default function AccountantsPage() {
                     "Unlimited tax research and code lookups",
                     "Your firm's institutional knowledge base",
                     "Client communication templates",
-                    "Infinite conversation memory",
+                    "Infinite conversation context",
                     "Engagement letter & organizer automation",
                     "All AI models (GPT-4, Claude, Gemini)",
                     "Deadline tracking and reminders",
@@ -1708,59 +1692,7 @@ export default function AccountantsPage() {
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="border-t py-12 bg-muted/30">
-        <div className="container mx-auto px-4">
-          <div className="grid md:grid-cols-4 gap-8 mb-8">
-            <div>
-              <Link href="/" className="flex items-center space-x-2 mb-4">
-                <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center text-primary-foreground font-bold">
-                  AI
-                </div>
-                <span className="text-lg font-bold">Perpetual Core</span>
-              </Link>
-              <p className="text-sm text-muted-foreground">
-                The AI-powered knowledge platform built for accounting firms and CPAs.
-              </p>
-            </div>
-            <div>
-              <h3 className="font-semibold mb-4">Product</h3>
-              <ul className="space-y-2 text-sm text-muted-foreground">
-                <li><Link href="/features" className="hover:underline">Features</Link></li>
-                <li><Link href="/pricing" className="hover:underline">Pricing</Link></li>
-                <li><Link href="/security" className="hover:underline">Security</Link></li>
-                <li><Link href="/integrations" className="hover:underline">Integrations</Link></li>
-              </ul>
-            </div>
-            <div>
-              <h3 className="font-semibold mb-4">Resources</h3>
-              <ul className="space-y-2 text-sm text-muted-foreground">
-                <li><Link href="/case-studies" className="hover:underline">Case Studies</Link></li>
-                <li><Link href="/blog" className="hover:underline">Blog</Link></li>
-                <li><Link href="/webinars" className="hover:underline">Webinars</Link></li>
-                <li><Link href="/support" className="hover:underline">Support</Link></li>
-              </ul>
-            </div>
-            <div>
-              <h3 className="font-semibold mb-4">Company</h3>
-              <ul className="space-y-2 text-sm text-muted-foreground">
-                <li><Link href="/about" className="hover:underline">About</Link></li>
-                <li><Link href="/contact-sales" className="hover:underline">Contact Sales</Link></li>
-                <li><Link href="/careers" className="hover:underline">Careers</Link></li>
-                <li><Link href="/legal" className="hover:underline">Legal</Link></li>
-              </ul>
-            </div>
-          </div>
-          <div className="border-t pt-8 text-center text-sm text-muted-foreground">
-            <p className="mb-2">
-              © 2024 AI Operating System. All rights reserved. | IRS Compliant | SOC 2 Type II Certified | GDPR Ready
-            </p>
-            <p className="text-xs">
-              Perpetual Core is not a CPA firm and does not provide tax, accounting, or audit services. Professional relationships remain between firms and their clients.
-            </p>
-          </div>
-        </div>
-      </footer>
+      <Footer />
     </div>
   );
 }

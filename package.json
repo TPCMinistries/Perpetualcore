@@ -15,7 +15,8 @@
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",
     "test:e2e:headed": "playwright test --headed",
-    "playwright:install": "playwright install"
+    "playwright:install": "playwright install",
+    "smoke:rfp-apis": "tsx scripts/smoke-test-rfp-apis.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.67.0",
@@ -54,6 +55,8 @@
     "@sentry/nextjs": "^10.29.0",
     "@slack/events-api": "^3.0.1",
     "@slack/web-api": "^7.13.0",
+    "@stripe/react-stripe-js": "^6.3.0",
+    "@stripe/stripe-js": "^9.4.0",
     "@supabase/auth-helpers-nextjs": "^0.10.0",
     "@supabase/ssr": "^0.7.0",
     "@supabase/storage-js": "^2.75.1",
@@ -129,6 +132,7 @@
     "jsdom": "^27.2.0",
     "postcss": "^8.5.6",
     "tailwindcss": "^3.4.18",
+    "tsx": "^4.21.0",
     "typescript": "^5.9.3",
     "vitest": "^4.0.15"
   }

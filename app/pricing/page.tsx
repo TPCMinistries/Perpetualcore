@@ -1,248 +1,153 @@
 "use client";
 
+/**
+ * /pricing — unified pricing page across the 3-band spectrum.
+ *
+ * Bands:
+ *   1. Products ($0 / $49 / $99) — Stripe checkout preserved
+ *   2. Retainers ($5K–$15K/mo productized) — link to /studio/retainers
+ *   3. Engagements ($75K / $150K / $250K+) — link to /studio/engagements
+ *
+ * Stripe checkout flow + billing-interval toggle preserved from prior version.
+ * Visual register matches homepage v6.
+ */
+
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Check, Zap, Crown, Building2, Sparkles, ArrowRight, Users, Briefcase, Rocket } from "lucide-react";
+import { ArrowRight, Check } from "lucide-react";
 import { toast } from "sonner";
-import { PublicMobileNav } from "@/components/layout/PublicMobileNav";
+import { Button } from "@/components/ui/button";
+import { Navbar } from "@/components/landing/Navbar";
+import { Footer } from "@/components/landing/Footer";
 import { PageViewTracker } from "@/components/analytics/PageViewTracker";
 import { trackClientEvent } from "@/lib/analytics/track-event";
+import { JsonLd } from "@/components/seo/JsonLd";
+import { faqSchema } from "@/lib/seo/structured-data";
 
-const PLANS = [
+const PRICING_FAQ = [
+  {
+    question: "What's included in the free tier?",
+    answer:
+      "The free tier includes 1 user, basic AI chat with GPT-4o Mini, document upload up to 100 sources, and access to a curated subset of the 15 AI advisors. No credit card required. Upgrade any time without losing your context.",
+  },
+  {
+    question: "How is Perpetual Core different from ChatGPT Teams or Claude Pro?",
+    answer:
+      "Short version: we're a multi-model operating system with persistent organizational memory and 15 industry advisors. ChatGPT and Claude give you one model and a chat window. Many of our customers run both. See /compare for a feature-by-feature matrix.",
+  },
+  {
+    question: "What does an engagement include?",
+    answer:
+      "Engagements start at $75,000 and include a 6-to-10-week install: operational audit, AI opportunity ranking, outcome-eval scope, and a co-signed contract framework. We sit in your operations the way an operator does — calls, docs, voice notes — then ship the AI workflows that move the metrics that matter.",
+  },
+  {
+    question: "Do you offer mission-driven discounts?",
+    answer:
+      "Yes. Verified 501(c)(3) organizations get a 30% discount on Vellum subscriptions, and 10–15% of every revenue dollar across Perpetual Core funds the Institute for Human Advancement directly. The mission is the substrate, not a marketing layer.",
+  },
+  {
+    question: "Can I cancel my subscription any time?",
+    answer:
+      "Yes. All product subscriptions ($49 Starter / $99 Pro) and retainers ($5,000–$15,000/month) cancel any month. Engagements are scoped fixed-fee with milestone payments — no auto-renewing surprises.",
+  },
+  {
+    question: "How does billing work for engagements over $75,000?",
+    answer:
+      "Engagements bill in milestones: 33% on signature, 33% at midpoint review, 34% at delivery. Invoices are line-itemed and include the Engine commitment (10–15% to the Institute) as a separate audited line. Net-30 terms standard; ACH or wire.",
+  },
+];
+
+const PLATFORM_PLANS = [
   {
     id: "free",
     name: "Free",
-    description: "Perfect for trying out Perpetual Core",
     price: 0,
+    description: "For trying out Perpetual Core",
     checkoutEnabled: false,
-    interval: "forever",
-    icon: Sparkles,
     popular: false,
-    badge: null,
     features: [
-      "Infinite conversation memory",
+      "Infinite conversation context",
       "Personal knowledge base (RAG)",
       "Gemini model (unlimited)",
       "5 documents",
       "1 GB storage",
-      "5 basic automations",
       "Community support",
     ],
-    limits: {
-      ai_messages: -1,
-      documents: 5,
-      storage_gb: 1,
-      team_members: 1,
-    },
   },
   {
     id: "starter",
     name: "Starter",
-    description: "For individuals and professionals",
     price: 49,
+    description: "For individuals and professionals",
     checkoutEnabled: true,
-    interval: "per month",
-    icon: Zap,
     popular: true,
-    badge: "Most Popular",
     features: [
       "Everything in Free, plus:",
       "GPT-4o Mini (unlimited)",
-      "100 premium model messages/mo (Claude, GPT-4)",
-      "Unlimited documents & knowledge base",
+      "100 premium model messages/mo",
+      "Unlimited documents and knowledge base",
       "10 GB storage",
-      "Email & Calendar integration",
-      "Unlimited automations & workflows",
+      "Email and Calendar integration",
       "Priority email support",
     ],
-    limits: {
-      ai_messages: -1,
-      documents: -1,
-      storage_gb: 10,
-      team_members: 1,
-    },
   },
   {
     id: "pro",
     name: "Pro",
-    description: "Power users who need unlimited AI",
     price: 99,
+    description: "Power users who need unlimited AI",
     checkoutEnabled: true,
-    interval: "per month",
-    icon: Crown,
     popular: false,
-    badge: null,
     features: [
       "Everything in Starter, plus:",
       "Unlimited premium models (Claude, GPT-4, o1)",
-      "Advanced workflows & automations",
+      "Advanced workflows and automations",
       "50 GB storage",
       "API access",
       "Priority support (4-hour response)",
-      "Early access to new features",
     ],
-    limits: {
-      ai_messages: -1,
-      documents: -1,
-      storage_gb: 50,
-      team_members: 1,
-    },
   },
   {
-    id: "team",
-    name: "Team",
-    description: "For small teams (up to 10 people)",
-    price: 499,
+    id: "teams",
+    name: "Teams",
+    price: null, // contact-sales tier; price varies with seat count
+    description: "For teams that need shared context",
     checkoutEnabled: false,
-    interval: "per month",
-    icon: Users,
     popular: false,
-    badge: "Best Value",
     features: [
-      "Everything in Pro, plus:",
-      "Up to 10 team members",
-      "Shared team knowledge base",
-      "Team automation library",
-      "Slack/Teams integration",
-      "Role-based access control",
-      "Team analytics dashboard",
-      "Implementation call included",
+      "Everything in Pro, for everyone on the team",
+      "Shared knowledge base + organizational memory",
+      "SSO / SAML, audit log, RBAC",
+      "Volume pricing from 5 seats",
       "Dedicated success manager",
+      "Custom SLA",
     ],
-    limits: {
-      ai_messages: -1,
-      documents: -1,
-      storage_gb: 500,
-      team_members: 10,
-    },
-  },
-  {
-    id: "business",
-    name: "Business",
-    description: "For growing companies (up to 50 people)",
-    price: 1999,
-    checkoutEnabled: false,
-    interval: "per month",
-    icon: Briefcase,
-    popular: false,
-    badge: null,
-    features: [
-      "Everything in Team, plus:",
-      "Up to 50 team members",
-      "SSO & SAML authentication",
-      "Custom AI training on your data",
-      "Advanced security controls",
-      "Unlimited storage",
-      "Priority phone support (2-hour response)",
-      "Quarterly business reviews",
-      "Dedicated success manager",
-    ],
-    limits: {
-      ai_messages: -1,
-      documents: -1,
-      storage_gb: -1,
-      team_members: 50,
-    },
-  },
-  {
-    id: "enterprise",
-    name: "Enterprise",
-    description: "For large organizations (100-250 people)",
-    price: 9999,
-    checkoutEnabled: false,
-    interval: "per month",
-    icon: Building2,
-    popular: false,
-    badge: null,
-    features: [
-      "Everything in Business, plus:",
-      "Up to 250 team members",
-      "White-glove implementation ($7,500)",
-      "Custom deployment options",
-      "Enterprise security (SOC 2 infrastructure)",
-      "White-label capabilities",
-      "Dedicated account team",
-      "Priority support with escalation path",
-      "Custom development available",
-    ],
-    limits: {
-      ai_messages: -1,
-      documents: -1,
-      storage_gb: -1,
-      team_members: 250,
-    },
-    borderColor: "border-purple-200 dark:border-purple-800",
-    bgColor: "bg-purple-50/50 dark:bg-purple-950/20",
-  },
-  {
-    id: "custom",
-    name: "Custom",
-    description: "For enterprises (250+ people)",
-    price: null,
-    checkoutEnabled: false,
-    interval: "custom",
-    icon: Rocket,
-    popular: false,
-    badge: "Contact Sales",
-    features: [
-      "Everything in Enterprise, plus:",
-      "Unlimited team members",
-      "On-premise deployment options",
-      "Custom SLAs & guarantees",
-      "Dedicated infrastructure",
-      "Custom integrations & development",
-      "Executive business reviews",
-      "Custom contract terms",
-      "Volume pricing available",
-    ],
-    limits: {
-      ai_messages: -1,
-      documents: -1,
-      storage_gb: -1,
-      team_members: -1,
-    },
-    borderColor: "border-amber-200 dark:border-amber-800",
-    bgColor: "bg-gradient-to-br from-amber-50 to-yellow-50 dark:from-amber-950/20 dark:to-yellow-950/20",
   },
 ];
 
-const FAQ_ITEMS = [
-  {
-    question: "How does the 'unlimited' AI work? Won't I get a surprise bill?",
-    answer: "No surprise bills! Starter includes unlimited GPT-4o Mini + 100 premium model messages (Claude, GPT-4). If you hit the 100 premium limit, you can still use GPT-4o Mini unlimited. Pro includes truly unlimited everything. We built this specifically to avoid surprise bills—you know exactly what you're paying.",
-  },
-  {
-    question: "What's the difference between GPT-4o Mini and premium models?",
-    answer: "GPT-4o Mini is fast, cheap, and great for 90% of tasks (writing emails, quick questions, summarization). Premium models (Claude Sonnet, GPT-4, o1) are more powerful for complex reasoning, coding, and analysis. Most users find Mini handles their daily work, and save premium messages for when they really need it.",
-  },
-  {
-    question: "How does team pricing work?",
-    answer: "Team plans ($499/mo for up to 10 users = $49.90/user), Business ($1,999/mo for up to 50 users = $39.98/user), Enterprise ($9,999/mo for up to 250 users = $39.99/user). Everyone on the team gets full access to all features. No per-user billing—one flat monthly price.",
-  },
-  {
-    question: "What's included in Enterprise implementation?",
-    answer: "Enterprise includes a one-time $7,500 white-glove implementation: custom deployment, SSO setup, team training (virtual or on-site), change management support, 90-day optimization period, and dedicated success manager. We ensure your team actually adopts it.",
-  },
-  {
-    question: "Can I change plans later?",
-    answer: "Yes! You can upgrade or downgrade anytime. Upgrades take effect immediately. Downgrades take effect at your next billing cycle. We prorate everything fairly.",
-  },
-  {
-    question: "What payment methods do you accept?",
-    answer: "All major credit cards (Visa, MasterCard, Amex) via Stripe. Business and Enterprise plans can pay via invoice (NET 30). Annual plans get 20% off and can pay via wire transfer.",
-  },
-  {
-    question: "Is there a free trial?",
-    answer: "Yes! Starter and Pro get 14-day free trials (no credit card required). Team, Business, and Enterprise get 30-day pilots with dedicated onboarding. Free plan is free forever.",
-  },
-  {
-    question: "What makes this different from ChatGPT?",
-    answer: "ChatGPT forgets. Perpetual Core never forgets—infinite conversation history, personal knowledge base (RAG on your docs), team collaboration, automation/workflows, and integrations (email, calendar, Slack). We're an AI Operating System, not just chat.",
-  },
+const RETAINER_PROGRAMS = [
+  { name: "Sentinel on Retainer", price: "$5,000", body: "Unlimited DD vets, 48h SLA." },
+  { name: "Capture Pipeline", price: "$7,500", body: "Managed RFP discovery + drafting." },
+  { name: "Operator Concierge", price: "$10,000", body: "10 hrs/mo AI ops review + QBR." },
+  { name: "Skills Subscription", price: "$5,000", body: "One production skill per month." },
+  { name: "Vellum Institutional", price: "$15,000+", body: "Managed Vellum + SSO + on-prem." },
 ];
+
+const ENGAGEMENT_BANDS = [
+  { name: "Foundations", price: "$75,000", duration: "90 days", body: "Single department, eight-registry install." },
+  { name: "Operations", price: "$150,000", duration: "120–150 days", body: "Three to five departments. 15–30 production skills.", featured: true },
+  { name: "Institutional", price: "$250,000+", duration: "180 days", body: "Whole-org install + 90 days post-handover." },
+];
+
+function SectionRail({ index, label }: { index: string; label: string }) {
+  return (
+    <div>
+      <p className="eyebrow mb-3">§ {index}</p>
+      <h2 className="text-xs uppercase tracking-[0.18em] font-mono text-foreground">{label}</h2>
+    </div>
+  );
+}
 
 export default function PricingPage() {
   const router = useRouter();
@@ -250,31 +155,16 @@ export default function PricingPage() {
   const [isLoading, setIsLoading] = useState<string | null>(null);
 
   async function handleSubscribe(planId: string, checkoutEnabled: boolean) {
-    // Track CTA click
     trackClientEvent("cta_click", {
       event_name: `pricing_${planId}_start`,
       metadata: { plan_id: planId, billing_interval: billingInterval },
     });
 
-    // Handle free plan
     if (planId === "free") {
       router.push("/signup?plan=free");
       return;
     }
 
-    // Handle team/business - direct to consultation
-    if (planId === "team" || planId === "business") {
-      router.push("/consultation");
-      return;
-    }
-
-    // Handle enterprise/custom - direct to enterprise demo
-    if (planId === "enterprise" || planId === "custom") {
-      router.push("/enterprise-demo");
-      return;
-    }
-
-    // Self-serve checkout (starter, pro) — server resolves price IDs
     if (!checkoutEnabled) {
       router.push("/contact-sales?plan=" + planId);
       return;
@@ -307,306 +197,353 @@ export default function PricingPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white dark:from-gray-900 dark:to-gray-800">
+    <div className="min-h-screen bg-background">
+      <JsonLd data={faqSchema(PRICING_FAQ)} />
       <PageViewTracker />
-      {/* Header */}
-      <header className="border-b bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm sticky top-0 z-10">
-        <div className="container mx-auto px-3 sm:px-4 py-3 sm:py-4 flex items-center justify-between">
-          <Link href="/" className="flex items-center space-x-2">
-            <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center text-primary-foreground font-bold shadow-lg">
-              AI
-            </div>
-            <span className="text-lg sm:text-xl font-bold">Perpetual Core</span>
-          </Link>
-          <div className="flex items-center gap-2">
-            <div className="hidden sm:block">
-              <Link href="/login" className="text-sm font-medium hover:underline">
-                Sign In
-              </Link>
-            </div>
-            <div className="md:hidden">
-              <PublicMobileNav />
-            </div>
-            <Button asChild size="sm" className="h-9 shadow-md active:scale-95 transition-all">
-              <Link href="/signup">Get Started</Link>
-            </Button>
-          </div>
-        </div>
-      </header>
+      <Navbar />
 
-      <div className="container mx-auto px-4 py-12 sm:py-16">
-        {/* Hero Section */}
-        <div className="text-center mb-12 sm:mb-16">
-          <h1 className="text-4xl sm:text-5xl font-bold tracking-tight mb-4 px-4">
-            Simple, Transparent Pricing
+      {/* Hero */}
+      <section className="container mx-auto px-6 sm:px-8 pt-20 pb-20 sm:pt-28 sm:pb-28">
+        <div className="max-w-5xl">
+          <div className="flex items-center gap-3 mb-12">
+            <span aria-hidden className="block h-1.5 w-1.5 bg-foreground" />
+            <p className="eyebrow !text-foreground/70">Pricing · Three bands · $0 → $250K+</p>
+          </div>
+
+          <h1 className="display-hero text-[40px] sm:text-[56px] lg:text-[80px] text-foreground mb-12 max-w-5xl leading-[1.05]">
+            Three bands. Pick the one{" "}
+            <span className="italic text-foreground/85">that fits the work.</span>
           </h1>
-          <p className="text-base sm:text-xl text-muted-foreground max-w-2xl mx-auto mb-6 sm:mb-8 px-4">
-            Choose the perfect plan for your needs. All plans include a 14-day free trial.
+
+          <p className="text-lg sm:text-xl text-muted-foreground leading-[1.55] mb-12 max-w-3xl">
+            Products subscribe. Retainers operate. Engagements install. Every band crosses the
+            same Engine, the same methodology, the same 10–15% giving floor.
           </p>
 
-          {/* Billing Toggle */}
-          <div className="inline-flex items-center gap-2 sm:gap-4 p-1 bg-muted rounded-lg touch-manipulation">
-            <button
-              onClick={() => setBillingInterval("monthly")}
-              className={`px-4 sm:px-6 py-2 rounded-md font-medium transition active:scale-95 ${
-                billingInterval === "monthly"
-                  ? "bg-white dark:bg-gray-800 shadow"
-                  : "text-muted-foreground"
-              }`}
-            >
-              Monthly
-            </button>
-            <button
-              onClick={() => setBillingInterval("yearly")}
-              className={`px-4 sm:px-6 py-2 rounded-md font-medium transition active:scale-95 relative ${
-                billingInterval === "yearly"
-                  ? "bg-white dark:bg-gray-800 shadow"
-                  : "text-muted-foreground"
-              }`}
-            >
-              Yearly
-              <span className="absolute -top-2 -right-2 bg-green-500 text-white text-xs px-2 py-0.5 rounded-full shadow-md">
-                Save 20%
-              </span>
-            </button>
-          </div>
-
-          {/* Guarantees */}
-          <div className="mt-8 flex flex-wrap items-center justify-center gap-6 sm:gap-8 text-sm text-muted-foreground">
-            <div className="flex items-center gap-2">
-              <Check className="h-5 w-5 text-green-500" />
-              <span className="font-medium text-foreground">14-day free trial</span>
-            </div>
-            <div className="hidden sm:block h-4 w-px bg-border" />
-            <div className="flex items-center gap-2">
-              <Check className="h-5 w-5 text-green-500" />
-              <span className="font-medium text-foreground">No credit card required</span>
-            </div>
-            <div className="hidden sm:block h-4 w-px bg-border" />
-            <div className="flex items-center gap-2">
-              <Check className="h-5 w-5 text-green-500" />
-              <span className="font-medium text-foreground">Cancel anytime</span>
-            </div>
+          <div className="flex flex-col sm:flex-row items-start gap-4">
+            <Button size="lg" asChild className="text-sm font-medium px-7 h-11 shadow-none bg-foreground text-background hover:bg-foreground/90 rounded-[6px]">
+              <Link href="#products">See products <ArrowRight className="ml-2 h-4 w-4" /></Link>
+            </Button>
+            <Link href="#engagements" className="inline-flex items-center text-sm font-medium text-foreground hover:text-primary transition-colors py-3 border-b border-foreground/20 hover:border-primary">
+              Skip to engagements <ArrowRight className="ml-1.5 h-3.5 w-3.5" />
+            </Link>
           </div>
         </div>
+      </section>
 
-        {/* Pricing Cards */}
-        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8 mb-12 sm:mb-16">
-          {PLANS.map((plan) => {
-            const Icon = plan.icon;
-            const yearlyPrice = plan.price ? Math.floor(plan.price * 12 * 0.8) : null;
-            const displayPrice =
-              billingInterval === "yearly" && yearlyPrice
-                ? Math.floor(yearlyPrice / 12)
-                : plan.price;
+      {/* BAND 01 — Subscriptions */}
+      <section id="products" className="border-t border-border py-24 sm:py-32 bg-surface-hover/40">
+        <div className="container mx-auto px-6 sm:px-8">
+          <div className="grid lg:grid-cols-[280px_1fr] gap-12 lg:gap-20 mb-12">
+            <SectionRail index="01" label="Subscriptions · Self-serve" />
+            <div className="max-w-2xl">
+              <h3 className="text-3xl sm:text-4xl lg:text-5xl font-semibold leading-[1.1] tracking-[-0.025em] text-foreground mb-6">
+                Subscribe to a tier. Free / $49 / $99.
+              </h3>
+              <p className="text-base text-muted-foreground leading-[1.7]">
+                Self-serve subscription tiers for individuals and small teams. The on-ramp before
+                retainers and engagements. 14-day trials, no credit card required.
+              </p>
 
-            const monthlySavings = plan.price && yearlyPrice ? plan.price - Math.floor(yearlyPrice / 12) : 0;
+              {/* Billing toggle */}
+              <div className="inline-flex items-center gap-2 p-1 mt-8 border border-border bg-card rounded-[6px]">
+                <button
+                  type="button"
+                  onClick={() => setBillingInterval("monthly")}
+                  className={`px-5 py-2 rounded-[4px] text-sm font-medium transition ${
+                    billingInterval === "monthly" ? "bg-foreground text-background" : "text-muted-foreground"
+                  }`}
+                >
+                  Monthly
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setBillingInterval("yearly")}
+                  className={`px-5 py-2 rounded-[4px] text-sm font-medium transition relative ${
+                    billingInterval === "yearly" ? "bg-foreground text-background" : "text-muted-foreground"
+                  }`}
+                >
+                  Yearly
+                  <span className="ml-2 font-mono text-[10px] text-primary uppercase tracking-[0.18em]">
+                    Save 20%
+                  </span>
+                </button>
+              </div>
+            </div>
+          </div>
 
-            return (
-              <Card
-                key={plan.id}
-                className={`relative ${
-                  plan.popular
-                    ? "border-primary shadow-lg scale-105"
-                    : (plan as any).borderColor || "border-border"
-                } ${(plan as any).bgColor || ""}`}
-              >
-                {(plan.popular || plan.badge) && (
-                  <div className="absolute -top-4 left-0 right-0 flex justify-center">
-                    <span className={`${plan.popular ? 'bg-primary text-primary-foreground' : 'bg-gradient-to-r from-amber-500 to-orange-500 text-white'} text-sm font-medium px-4 py-1 rounded-full shadow-lg`}>
-                      {plan.badge || "Most Popular"}
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 border border-border bg-card divide-y sm:divide-y-0 lg:divide-x divide-border">
+            {PLATFORM_PLANS.map((plan, i) => {
+              const yearlyPrice = plan.price ? Math.floor(plan.price * 12 * 0.8) : null;
+              const displayPrice =
+                billingInterval === "yearly" && yearlyPrice ? Math.floor(yearlyPrice / 12) : plan.price;
+              const isCustomPrice = plan.price === null;
+              return (
+                <div key={plan.id} className="p-6 sm:p-7 flex flex-col">
+                  <div className="flex items-center justify-between mb-10">
+                    <span className="font-mono text-[10px] tracking-[0.18em] text-muted-foreground">
+                      0{i + 1}
                     </span>
-                  </div>
-                )}
-
-                <CardHeader className="text-center pb-8">
-                  <div className="mx-auto w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mb-4">
-                    <Icon className="h-6 w-6 text-primary" />
-                  </div>
-                  <CardTitle className="text-2xl">{plan.name}</CardTitle>
-                  <CardDescription>{plan.description}</CardDescription>
-
-                  <div className="mt-4">
-                    {plan.price === null ? (
-                      <div className="text-3xl font-bold">Custom</div>
-                    ) : plan.price === 0 ? (
-                      <div className="text-3xl font-bold">Free</div>
-                    ) : (
-                      <>
-                        <div className="text-4xl font-bold">
-                          ${displayPrice}
-                          <span className="text-lg text-muted-foreground font-normal">
-                            /month
-                          </span>
-                        </div>
-                        {billingInterval === "yearly" && yearlyPrice ? (
-                          <div className="text-sm mt-2">
-                            <div className="text-muted-foreground">
-                              ${yearlyPrice}/year (billed annually)
-                            </div>
-                            <div className="text-green-600 dark:text-green-400 font-semibold mt-1">
-                              Save ${monthlySavings * 12}/year
-                            </div>
-                          </div>
-                        ) : null}
-                      </>
+                    {plan.popular && (
+                      <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-primary">
+                        Most common
+                      </span>
                     )}
                   </div>
-                </CardHeader>
+                  <h4 className="text-[11px] font-mono uppercase tracking-[0.22em] text-primary mb-3">
+                    {plan.name}
+                  </h4>
+                  <p className="text-sm text-muted-foreground mb-4">{plan.description}</p>
 
-                <CardContent>
+                  <div className="mb-6">
+                    {plan.price === 0 ? (
+                      <div className="text-3xl font-semibold tracking-[-0.025em] text-foreground">Free</div>
+                    ) : isCustomPrice ? (
+                      <div>
+                        <span className="text-3xl font-semibold tracking-[-0.025em] text-foreground">
+                          Custom
+                        </span>
+                        <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground mt-2">
+                          Volume pricing
+                        </p>
+                      </div>
+                    ) : (
+                      <div>
+                        <span className="text-3xl font-semibold tracking-[-0.025em] text-foreground">
+                          ${displayPrice}
+                        </span>
+                        <span className="text-sm font-mono text-muted-foreground ml-2">/month</span>
+                        {billingInterval === "yearly" && yearlyPrice && (
+                          <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground mt-2">
+                            ${yearlyPrice}/yr billed annually
+                          </p>
+                        )}
+                      </div>
+                    )}
+                  </div>
+
                   <Button
-                    className={`w-full mb-6 ${
+                    className={`w-full mb-6 text-sm font-medium h-10 shadow-none rounded-[6px] ${
                       plan.popular
-                        ? "bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 shadow-lg"
-                        : plan.id === "custom"
-                        ? "bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white shadow-lg"
-                        : ""
+                        ? "bg-foreground text-background hover:bg-foreground/90"
+                        : "bg-background text-foreground border border-foreground/20 hover:bg-surface-hover"
                     }`}
-                    variant={plan.popular || plan.id === "custom" ? "default" : "outline"}
                     onClick={() => handleSubscribe(plan.id, plan.checkoutEnabled)}
                     disabled={isLoading === plan.id}
                   >
-                    {isLoading === plan.id ? (
-                      "Loading..."
-                    ) : plan.id === "enterprise" || plan.id === "custom" ? (
-                      "Contact Sales"
-                    ) : plan.id === "free" ? (
-                      "Get Started Free"
-                    ) : (
-                      <>
-                        Start Free Trial <ArrowRight className="ml-2 h-4 w-4" />
-                      </>
-                    )}
+                    {isLoading === plan.id
+                      ? "Loading…"
+                      : plan.id === "free"
+                      ? "Get started free"
+                      : isCustomPrice
+                      ? "Talk to sales"
+                      : "Start free trial"}
+                    {isLoading !== plan.id && plan.id !== "free" && <ArrowRight className="ml-2 h-4 w-4" />}
                   </Button>
 
-                  <ul className="space-y-3">
-                    {plan.features.map((feature, index) => (
-                      <li key={index} className="flex items-start gap-2">
-                        <Check className="h-5 w-5 text-green-500 flex-shrink-0 mt-0.5" />
-                        <span className="text-sm">{feature}</span>
+                  <ul className="space-y-2 text-sm text-muted-foreground leading-[1.6]">
+                    {plan.features.map((feature) => (
+                      <li key={feature} className="flex items-start gap-2">
+                        <Check className="h-3.5 w-3.5 text-foreground/40 flex-shrink-0 mt-1" />
+                        <span>{feature}</span>
                       </li>
                     ))}
                   </ul>
-                </CardContent>
-              </Card>
-            );
-          })}
+                </div>
+              );
+            })}
+          </div>
         </div>
+      </section>
 
-        {/* Feature Comparison Table */}
-        <div className="mb-16">
-          <h2 className="text-3xl font-bold text-center mb-8">Compare Plans</h2>
-          <Card>
-            <CardContent className="p-0">
-              <div className="overflow-x-auto">
-                <table className="w-full">
-                  <thead className="border-b">
-                    <tr>
-                      <th className="text-left p-4 font-semibold">Features</th>
-                      {PLANS.map((plan) => (
-                        <th key={plan.id} className="text-center p-4 font-semibold">
-                          {plan.name}
-                        </th>
-                      ))}
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr className="border-b">
-                      <td className="p-4">AI Messages</td>
-                      {PLANS.map((plan) => (
-                        <td key={plan.id} className="text-center p-4">
-                          {plan.limits.ai_messages === -1
-                            ? "Unlimited"
-                            : plan.limits.ai_messages.toLocaleString()}
-                        </td>
-                      ))}
-                    </tr>
-                    <tr className="border-b">
-                      <td className="p-4">Documents</td>
-                      {PLANS.map((plan) => (
-                        <td key={plan.id} className="text-center p-4">
-                          {plan.limits.documents === -1
-                            ? "Unlimited"
-                            : plan.limits.documents.toLocaleString()}
-                        </td>
-                      ))}
-                    </tr>
-                    <tr className="border-b">
-                      <td className="p-4">Storage</td>
-                      {PLANS.map((plan) => (
-                        <td key={plan.id} className="text-center p-4">
-                          {plan.limits.storage_gb === -1
-                            ? "Unlimited"
-                            : `${plan.limits.storage_gb} GB`}
-                        </td>
-                      ))}
-                    </tr>
-                    <tr className="border-b">
-                      <td className="p-4">Team Members</td>
-                      {PLANS.map((plan) => (
-                        <td key={plan.id} className="text-center p-4">
-                          {plan.limits.team_members === -1
-                            ? "Unlimited"
-                            : plan.limits.team_members}
-                        </td>
-                      ))}
-                    </tr>
-                  </tbody>
-                </table>
+      {/* BAND 02 — Retainers */}
+      <section id="retainers" className="border-t border-border py-24 sm:py-32">
+        <div className="container mx-auto px-6 sm:px-8">
+          <div className="grid lg:grid-cols-[280px_1fr] gap-12 lg:gap-20 mb-12">
+            <SectionRail index="02" label="Retainers · Productized" />
+            <div className="max-w-2xl">
+              <h3 className="text-3xl sm:text-4xl lg:text-5xl font-semibold leading-[1.1] tracking-[-0.025em] text-foreground mb-6">
+                Hire a productized program. $5K–$15K/month.
+              </h3>
+              <p className="text-base text-muted-foreground leading-[1.7]">
+                Five named programs. We operate the agents; you receive the output. Cancellable
+                monthly. Fees credit toward a full engagement when work scales.
+              </p>
+            </div>
+          </div>
+
+          <div className="grid lg:grid-cols-[280px_1fr] gap-12 lg:gap-20">
+            <div />
+            <div className="max-w-3xl border-t border-border">
+              {RETAINER_PROGRAMS.map((p, i) => (
+                <Link
+                  key={p.name}
+                  href="/studio/retainers"
+                  className="group grid grid-cols-[60px_1fr_auto] gap-x-6 py-6 border-b border-border hover:bg-surface-hover transition-colors items-baseline"
+                >
+                  <span className="font-mono text-[10px] tracking-[0.18em] text-muted-foreground pt-1">
+                    0{i + 1}
+                  </span>
+                  <div>
+                    <h4 className="text-base font-semibold tracking-tight text-foreground mb-1 group-hover:text-primary transition-colors">
+                      {p.name}
+                    </h4>
+                    <p className="text-sm text-muted-foreground">{p.body}</p>
+                  </div>
+                  <span className="font-mono text-base font-semibold text-foreground whitespace-nowrap">
+                    {p.price}
+                    <span className="font-mono text-[10px] text-muted-foreground ml-1">/mo</span>
+                  </span>
+                </Link>
+              ))}
+            </div>
+          </div>
+
+          <div className="mt-10 grid lg:grid-cols-[280px_1fr] gap-12 lg:gap-20">
+            <div />
+            <Link
+              href="/studio/retainers"
+              className="inline-flex items-center text-sm font-medium text-foreground hover:text-primary transition-colors"
+            >
+              See full Retainers detail <ArrowRight className="ml-1.5 h-3.5 w-3.5" />
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* BAND 03 — Engagements */}
+      <section id="engagements" className="border-t border-border py-24 sm:py-32 bg-surface-hover/40">
+        <div className="container mx-auto px-6 sm:px-8">
+          <div className="grid lg:grid-cols-[280px_1fr] gap-12 lg:gap-20 mb-12">
+            <SectionRail index="03" label="Engagements · The install" />
+            <div className="max-w-2xl">
+              <h3 className="text-3xl sm:text-4xl lg:text-5xl font-semibold leading-[1.1] tracking-[-0.025em] text-foreground mb-6">
+                Install the Engine. $75K–$250K+.
+              </h3>
+              <p className="text-base text-muted-foreground leading-[1.7]">
+                90 to 180 day install. Three bands depending on the surface area. Each ends the
+                same way: documented, trained, handed over. You own the system.
+              </p>
+            </div>
+          </div>
+
+          <div className="grid sm:grid-cols-3 border border-border bg-card divide-y sm:divide-y-0 sm:divide-x divide-border">
+            {ENGAGEMENT_BANDS.map((band, i) => (
+              <div key={band.name} className="p-6 sm:p-7 flex flex-col">
+                <div className="flex items-center justify-between mb-10">
+                  <span className="font-mono text-[10px] tracking-[0.18em] text-muted-foreground">
+                    0{i + 1}
+                  </span>
+                  {band.featured && (
+                    <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-primary">
+                      Most common
+                    </span>
+                  )}
+                </div>
+                <h4 className="text-[11px] font-mono uppercase tracking-[0.22em] text-primary mb-3">
+                  {band.name}
+                </h4>
+                <p className="text-3xl sm:text-4xl font-semibold tracking-[-0.025em] text-foreground mb-3">
+                  {band.price}
+                </p>
+                <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground mb-6">
+                  {band.duration}
+                </p>
+                <p className="text-sm text-muted-foreground leading-[1.65] flex-1 mb-6">
+                  {band.body}
+                </p>
+                <Link
+                  href="/studio/engagements"
+                  className="inline-flex items-center text-xs font-medium text-foreground hover:text-primary transition-colors mt-auto"
+                >
+                  See engagements <ArrowRight className="ml-1 h-3 w-3" />
+                </Link>
               </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* FAQ Section */}
-        <div className="max-w-3xl mx-auto">
-          <h2 className="text-3xl font-bold text-center mb-8">
-            Frequently Asked Questions
-          </h2>
-          <div className="space-y-4">
-            {FAQ_ITEMS.map((item, index) => (
-              <Card key={index}>
-                <CardHeader>
-                  <CardTitle className="text-lg">{item.question}</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-muted-foreground">{item.answer}</p>
-                </CardContent>
-              </Card>
             ))}
           </div>
-        </div>
 
-        {/* CTA Section */}
-        <div className="mt-16 text-center">
-          <Card className="max-w-2xl mx-auto bg-primary text-primary-foreground">
-            <CardContent className="p-8">
-              <h2 className="text-3xl font-bold mb-4">Ready to get started?</h2>
-              <p className="text-lg mb-6 opacity-90">
-                Start your 14-day free trial and experience AI that never forgets.
+          {/* Retainer attached to engagements */}
+          <div className="border border-t-0 border-border bg-card p-6 sm:p-7 grid sm:grid-cols-[200px_1fr_auto] gap-6 sm:gap-10 items-baseline">
+            <div>
+              <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground mb-2">
+                Optional · all bands
               </p>
-              <Button size="lg" variant="secondary" asChild>
-                <Link href="/signup" onClick={() => trackClientEvent("cta_click", { event_name: "pricing_bottom_start_trial" })}>
-                  Start Free Trial <ArrowRight className="ml-2 h-5 w-5" />
-                </Link>
-              </Button>
-            </CardContent>
-          </Card>
-        </div>
-      </div>
-
-      {/* Footer */}
-      <footer className="border-t mt-16 py-8">
-        <div className="container mx-auto px-4 text-center text-sm text-muted-foreground">
-          <p>© 2025 Perpetual Core. All rights reserved.</p>
-          <div className="flex justify-center gap-6 mt-4">
-            <Link href="/terms" className="hover:underline">Terms</Link>
-            <Link href="/privacy" className="hover:underline">Privacy</Link>
-            <Link href="/cookies" className="hover:underline">Cookies</Link>
+              <p className="text-xl font-semibold tracking-[-0.015em] text-foreground">
+                Post-engagement retainer
+              </p>
+            </div>
+            <p className="text-sm text-muted-foreground leading-[1.65]">
+              <span className="text-foreground font-medium">$5,000–$15,000/month</span>, scoped to
+              engagement. For operators who&apos;d rather we stay in the loop. Cancellable any month.
+            </p>
+            <Link
+              href="/studio/engagements"
+              className="inline-flex items-center font-mono text-[10px] uppercase tracking-[0.18em] text-foreground hover:text-primary transition-colors whitespace-nowrap"
+            >
+              Book intake
+              <ArrowRight className="ml-2 h-3 w-3" />
+            </Link>
           </div>
         </div>
-      </footer>
+      </section>
+
+      {/* FAQ — for SEO + buyer reassurance */}
+      <section className="border-t border-border py-24 sm:py-32">
+        <div className="container mx-auto px-6 sm:px-8">
+          <div className="grid lg:grid-cols-[280px_1fr] gap-12 lg:gap-20">
+            <SectionRail index="—" label="Common questions" />
+            <div className="max-w-3xl">
+              <h3 className="text-3xl sm:text-4xl lg:text-5xl font-semibold leading-[1.1] tracking-[-0.025em] text-foreground mb-12">
+                Pricing, in plain English.
+              </h3>
+              <dl className="divide-y divide-border border-y border-border">
+                {PRICING_FAQ.map((item) => (
+                  <details key={item.question} className="group py-6">
+                    <summary className="flex cursor-pointer items-start justify-between gap-6 list-none">
+                      <dt className="text-base sm:text-lg font-medium text-foreground leading-snug">
+                        {item.question}
+                      </dt>
+                      <span
+                        className="font-mono text-xs text-muted-foreground mt-1 transition-transform group-open:rotate-45"
+                        aria-hidden
+                      >
+                        +
+                      </span>
+                    </summary>
+                    <dd className="mt-4 text-sm sm:text-base text-muted-foreground leading-[1.7]">
+                      {item.answer}
+                    </dd>
+                  </details>
+                ))}
+              </dl>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Engine commitment */}
+      <section className="border-t border-border py-24 sm:py-32">
+        <div className="container mx-auto px-6 sm:px-8">
+          <div className="grid lg:grid-cols-[280px_1fr] gap-12 lg:gap-20">
+            <SectionRail index="—" label="The Engine commitment" />
+            <div className="max-w-2xl">
+              <h3 className="text-3xl sm:text-4xl lg:text-5xl font-semibold leading-[1.1] tracking-[-0.025em] text-foreground mb-6">
+                Every band gives. 10–15% of revenue funds the Institute.
+              </h3>
+              <p className="text-base text-muted-foreground leading-[1.7] mb-10">
+                Engagements give 10% ($7,500 to $25,000+ per client). Sage SaaS gives 15%.
+                Everything else gives 10% by default. Audited annually. Line-itemed on every
+                invoice. The mission is the substrate.
+              </p>
+              <Button asChild className="text-sm font-medium h-10 px-5 shadow-none bg-foreground text-background hover:bg-foreground/90 rounded-[6px]">
+                <Link href="/engine">Read the Engine commitment <ArrowRight className="ml-2 h-3.5 w-3.5" /></Link>
+              </Button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <Footer />
     </div>
   );
 }
