@@ -336,6 +336,69 @@ export default function ComparePage() {
         </div>
       </section>
 
+      {/* Deep-dive comparisons */}
+      <section className="border-t border-border py-20 sm:py-24">
+        <div className="container mx-auto px-6 sm:px-8">
+          <div className="grid lg:grid-cols-[280px_1fr] gap-12 lg:gap-20">
+            <SectionRail index="04" label="Deep dives" />
+            <div className="max-w-3xl">
+              <h3 className="text-2xl sm:text-3xl font-semibold tracking-[-0.015em] text-foreground mb-6">
+                One competitor at a time.
+              </h3>
+              <p className="text-sm sm:text-base text-muted-foreground leading-[1.7] mb-8">
+                The table above is the overview. If you&apos;re actively evaluating
+                a specific tool, the head-to-head pages go deeper on pricing math,
+                migration path, and where each one actually wins.
+              </p>
+              <div className="grid sm:grid-cols-3 gap-4">
+                <Link
+                  href="/compare/vs-chatgpt-teams"
+                  className="block border border-border rounded-[6px] p-5 hover:border-foreground/40 transition-colors"
+                >
+                  <div className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground mb-2">
+                    01
+                  </div>
+                  <div className="text-base font-medium text-foreground mb-1">
+                    vs ChatGPT Teams
+                  </div>
+                  <div className="text-xs text-muted-foreground leading-snug">
+                    $25/user/mo · OpenAI-only · custom GPTs
+                  </div>
+                </Link>
+                <Link
+                  href="/compare/vs-claude-for-teams"
+                  className="block border border-border rounded-[6px] p-5 hover:border-foreground/40 transition-colors"
+                >
+                  <div className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground mb-2">
+                    02
+                  </div>
+                  <div className="text-base font-medium text-foreground mb-1">
+                    vs Claude for Teams
+                  </div>
+                  <div className="text-xs text-muted-foreground leading-snug">
+                    $30/user/mo · Anthropic-only · Projects
+                  </div>
+                </Link>
+                <Link
+                  href="/compare/vs-microsoft-copilot"
+                  className="block border border-border rounded-[6px] p-5 hover:border-foreground/40 transition-colors"
+                >
+                  <div className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground mb-2">
+                    03
+                  </div>
+                  <div className="text-base font-medium text-foreground mb-1">
+                    vs Microsoft Copilot
+                  </div>
+                  <div className="text-xs text-muted-foreground leading-snug">
+                    $30/user/mo + M365 · OpenAI via MSFT · Office-locked
+                  </div>
+                </Link>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* CTA */}
       <section className="border-t border-border py-20 sm:py-24">
         <div className="container mx-auto px-6 sm:px-8">

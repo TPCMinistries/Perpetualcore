@@ -11,6 +11,7 @@ import { ArrowRight, ArrowUpRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Navbar } from "@/components/landing/Navbar";
 import { Footer } from "@/components/landing/Footer";
+import { DecisionTree } from "@/components/products/DecisionTree";
 
 export const metadata = {
   title: "Products — Perpetual Core",
@@ -166,6 +167,25 @@ export default function ProductsPage() {
             >
               Read the methodology <ArrowRight className="ml-1.5 h-3.5 w-3.5" />
             </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* Decision tree — which product do I need? */}
+      <section className="border-t border-border py-20 sm:py-24">
+        <div className="container mx-auto px-6 sm:px-8">
+          <div className="grid lg:grid-cols-[280px_1fr] gap-12 lg:gap-20">
+            <SectionRail index="—" label="Pick the right one" />
+            <div className="max-w-3xl">
+              <h3 className="text-2xl sm:text-3xl font-semibold tracking-[-0.015em] text-foreground mb-3">
+                Not sure which one you need?
+              </h3>
+              <p className="text-sm sm:text-base text-muted-foreground leading-[1.7] mb-8">
+                Two questions, one honest recommendation. You can still browse the
+                full portfolio below.
+              </p>
+              <DecisionTree />
+            </div>
           </div>
         </div>
       </section>
