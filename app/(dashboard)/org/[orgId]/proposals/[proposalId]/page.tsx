@@ -19,6 +19,7 @@ import { SECTION_SPECS, SECTION_TYPES, type SectionType } from "@/lib/rfp/draft/
 import { ReviewButton } from "@/components/rfp/ReviewButton";
 import { ReviewerFindingsPanel } from "@/components/rfp/ReviewerFindingsPanel";
 import { ProposalSectionEditor } from "@/components/rfp/ProposalSectionEditor";
+import { ProposalStatusControl } from "@/components/rfp/ProposalStatusControl";
 import type { CitationChunk } from "@/components/rfp/MarkupRenderer";
 import {
   REVIEWER_FINDINGS_SECTION_TYPE,
@@ -146,6 +147,23 @@ export default async function ProposalPage({
 
   const vaultChunks = parseVaultChunks(proposal.vault_chunks_used);
 
+  // Resolve caller's role on this org so we can gate the status control.
+  // Owners and writers can mark submitted/won/lost/withdrawn; reviewers
+  // and viewers see status read-only.
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  const { data: membership } = user
+    ? await supabase
+        .from("rfp_user_orgs")
+        .select("role")
+        .eq("org_id", orgId)
+        .eq("user_id", user.id)
+        .maybeSingle()
+    : { data: null };
+  const role = (membership as { role: string } | null)?.role ?? null;
+  const canEditStatus = role === "owner" || role === "writer";
+
   const { data: sections } = await supabase
     .from("rfp_proposal_sections")
     .select("id, section_type, content, version, last_drafted_by_agent_at")
@@ -215,10 +233,17 @@ export default async function ProposalPage({
           ← Discovery
         </Link>
 
-        {/* Eyebrow */}
-        <div className="mt-6 font-mono text-[10px] uppercase tracking-[0.25em] text-zinc-500">
-          Proposal · {proposal.status} · drafted {fmtDate(proposal.created_at)}
-          {proposal.due_date ? ` · due ${fmtDate(proposal.due_date)}` : ""}
+        {/* Eyebrow + status pill */}
+        <div className="mt-6 flex flex-wrap items-center gap-3">
+          <span className="font-mono text-[10px] uppercase tracking-[0.25em] text-zinc-500">
+            Proposal · drafted {fmtDate(proposal.created_at)}
+            {proposal.due_date ? ` · due ${fmtDate(proposal.due_date)}` : ""}
+          </span>
+          <ProposalStatusControl
+            proposalId={proposalId}
+            initialStatus={proposal.status}
+            canEdit={canEditStatus}
+          />
         </div>
 
         <h1

@@ -262,10 +262,55 @@ const activationReengagement: Sequence = {
   ],
 };
 
+const winLossSurvey: Sequence = {
+  key: "win-loss-survey",
+  description:
+    "Fires when an org marks a proposal won or lost. One ask + one nudge if no reply. Replies feed the product memory — what helped, what would have helped more.",
+  steps: [
+    {
+      delay_days: 1,
+      subject: "Two questions about your latest proposal outcome",
+      buildHtml: (ctx) =>
+        emailFrame({
+          unsubscribeHref: unsubscribeUrl(ctx),
+          preheader:
+            "Reply with two sentences. Lorenzo reads every one — and this is how the next version gets better.",
+          body: `
+            <p>You just marked a proposal as won or lost on${ctx.orgName ? ` ${ctx.orgName}'s` : ""} RFP Engine dashboard.</p>
+            <p>Outcomes are the actual signal — drafts and reviewer scores are just leading indicators. Two questions, one reply:</p>
+            <ol style="color:#d4d4d8;padding-left:20px;line-height:1.7;">
+              <li><strong>What helped most</strong> in the engine for this one? (or: what did you ignore that you wish you hadn't?)</li>
+              <li><strong>What would've helped more</strong> that the engine doesn't do today? Be specific — "better budget narrative templates" beats "improve the draft."</li>
+            </ol>
+            <p>This is how the next version gets calibrated. Replies go straight to me, not into a form.</p>
+            <p style="color:#a1a1aa;font-size:13px;">— Lorenzo<br>lorenzo@tpcmin.org</p>
+          `,
+        }),
+    },
+    {
+      delay_days: 7,
+      subject: "Quick follow-up — even one sentence helps",
+      buildHtml: (ctx) =>
+        emailFrame({
+          unsubscribeHref: unsubscribeUrl(ctx),
+          preheader:
+            "If you've got 30 seconds: what helped, what didn't.",
+          body: `
+            <p>Following up on the two-question email from last week.</p>
+            <p>If you have 30 seconds, even a one-line reply on what worked or didn't is useful. The product roadmap genuinely moves around named customer feedback.</p>
+            <p>If you'd rather skip — totally fine, no more nudges on this proposal.</p>
+            <p style="color:#a1a1aa;font-size:13px;">— Lorenzo</p>
+          `,
+        }),
+    },
+  ],
+};
+
 export const SEQUENCES: Record<string, Sequence> = {
   [trialOnboarding.key]: trialOnboarding,
   [leadCapture.key]: leadCapture,
   [activationReengagement.key]: activationReengagement,
+  [winLossSurvey.key]: winLossSurvey,
 };
 
 // ── Dispatch helpers ────────────────────────────────────────────────────────
