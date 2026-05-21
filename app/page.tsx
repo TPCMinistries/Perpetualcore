@@ -266,63 +266,104 @@ export default function HomePage() {
       <PageViewTracker />
       <Navbar />
 
-      {/* ─── 1. Hero ─────────────────────────────────────────────────── */}
+      {/* ─── 1. Hero — outcome-led, single CTA ────────────────────────────
+       *  Conversion rebuild 2026-05-21. Previous hero ("We build the AI
+       *  operating systems — and the founders who run them.") is preserved
+       *  in git history at c110157 if rollback needed. Rationale: that hero
+       *  was positioning, not promise; B2B SaaS buyers respond to outcome
+       *  promises (6-10 weeks vs the usual six months), not philosophy.
+       *  ──────────────────────────────────────────────────────────────── */}
       <section className="container mx-auto px-6 sm:px-8 pt-20 pb-20 sm:pt-28 sm:pb-28">
         <div className="max-w-5xl">
-          <div className="flex items-center gap-3 mb-12">
+          <div className="flex items-center gap-3 mb-10">
             <span aria-hidden className="block h-1.5 w-1.5 bg-foreground" />
             <p className="eyebrow !text-foreground/70">
               Perpetual Core · An AI-native operating company
             </p>
           </div>
 
-          <h1 className="display-hero text-[44px] sm:text-[60px] lg:text-[92px] text-foreground mb-12 max-w-5xl leading-[1.02]">
-            We build the AI operating systems —{" "}
-            <span className="italic text-foreground/85">and the founders who run them.</span>
+          <h1 className="display-hero text-[44px] sm:text-[60px] lg:text-[92px] text-foreground mb-10 max-w-5xl leading-[1.02]">
+            AI shouldn&apos;t take{" "}
+            <span className="italic text-foreground/85">six months to install.</span>
           </h1>
 
-          <p className="text-lg sm:text-xl text-muted-foreground leading-[1.5] mb-12 max-w-3xl">
-            Perpetual Core is a studio, a fund, and an institute — the reference implementation
-            of the <span className="text-foreground font-medium">Perpetual Engine</span>: a
-            structural standard for AI-native ventures that fund their mission. We built the
-            first one. We hope it becomes a category.
+          <p className="text-lg sm:text-xl text-muted-foreground leading-[1.55] mb-10 max-w-3xl">
+            Perpetual Core installs an AI operating system across your organization in{" "}
+            <span className="text-foreground font-medium">6 to 10 weeks</span> — multi-model
+            routing, persistent organizational memory, and the industry advisors your team
+            actually needs.{" "}
+            <span className="text-foreground font-medium">
+              10–15% of every revenue dollar funds the Institute for Human Advancement.
+            </span>
           </p>
 
-          <div className="flex flex-col sm:flex-row items-start gap-4 mb-16">
+          <div className="flex flex-col sm:flex-row items-start gap-5 mb-14">
             <Button
               size="lg"
               asChild
               className="text-sm font-medium px-7 h-11 shadow-none bg-foreground text-background hover:bg-foreground/90 rounded-[6px]"
             >
-              <Link href="/studio/engagements">
-                Start an engagement <ArrowRight className="ml-2 h-4 w-4" />
+              <Link href="/start">
+                See how installs work <ArrowRight className="ml-2 h-4 w-4" />
               </Link>
             </Button>
             <Link
-              href="/engine/spec"
-              className="inline-flex items-center text-sm font-medium text-foreground hover:text-primary transition-colors py-3 border-b border-foreground/20 hover:border-primary"
+              href="/compare"
+              className="inline-flex items-center text-sm font-medium text-muted-foreground hover:text-foreground transition-colors py-3"
             >
-              Read the Engine spec
+              Or compare against ChatGPT Teams, Claude, Copilot
               <ArrowRight className="ml-1.5 h-3.5 w-3.5" />
             </Link>
           </div>
 
-          {/* Live signal block */}
-          <div className="border-t border-border pt-6 flex flex-wrap items-center gap-x-6 gap-y-2 font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
-            <span className="flex items-center gap-2">
-              <span aria-hidden className="block h-1.5 w-1.5 rounded-full bg-status-live animate-pulse-dot" />
-              System operating
-            </span>
-            <span className="hidden sm:inline text-muted-foreground/40">·</span>
-            <span>Since 2024</span>
-            <span className="hidden sm:inline text-muted-foreground/40">·</span>
-            <span>Reference implementation</span>
-            <span className="hidden sm:inline text-muted-foreground/40">·</span>
-            <span>Engine spec · v1</span>
-            <span className="hidden sm:inline text-muted-foreground/40">·</span>
-            <Link href="/engine/spec" className="underline-offset-4 hover:text-foreground transition-colors">
-              Open invitation to adopt
-            </Link>
+          {/* Proof strip — 4 honest, current data points. Last reviewed 2026-05-21.
+              Swap in real customer numbers as they come available (e.g. fund AUM,
+              named portcos, $XXX,XXX to IHA YTD). */}
+          <div className="border-t border-border pt-8 grid grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-10">
+            <div>
+              <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground mb-2">
+                Products live
+              </p>
+              <p className="text-2xl sm:text-3xl font-semibold tracking-[-0.02em] text-foreground mb-1">
+                Six
+              </p>
+              <p className="text-xs text-muted-foreground leading-snug">
+                Atlas · Sentinel · Sage · Vellum · RFP Engine · RFP Sentry
+              </p>
+            </div>
+            <div>
+              <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground mb-2">
+                Discovery cadence
+              </p>
+              <p className="text-2xl sm:text-3xl font-semibold tracking-[-0.02em] text-foreground mb-1">
+                Every 6 hours
+              </p>
+              <p className="text-xs text-muted-foreground leading-snug">
+                Federal + state RFPs sourced + drafted in your voice on RFP Engine.
+              </p>
+            </div>
+            <div>
+              <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground mb-2">
+                Personal AI OS
+              </p>
+              <p className="text-2xl sm:text-3xl font-semibold tracking-[-0.02em] text-foreground mb-1">
+                Sage v1.0
+              </p>
+              <p className="text-xs text-muted-foreground leading-snug">
+                Multi-tenant, voice + Telegram, shipped May 2026.
+              </p>
+            </div>
+            <div>
+              <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground mb-2">
+                To the institute
+              </p>
+              <p className="text-2xl sm:text-3xl font-semibold tracking-[-0.02em] text-foreground mb-1">
+                10–15%
+              </p>
+              <p className="text-xs text-muted-foreground leading-snug">
+                Of every revenue dollar funds IHA. Structural floor, not pledge.
+              </p>
+            </div>
           </div>
         </div>
       </section>
