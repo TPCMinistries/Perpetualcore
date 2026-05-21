@@ -29,6 +29,7 @@ import { buildFeedQuery } from "@/lib/rfp/feed";
 import { getOrgForUser, listUserOrgs } from "@/lib/rfp/orgs";
 import { getOnboardingState } from "@/lib/rfp/onboarding";
 import { OnboardingChecklist } from "@/components/rfp/OnboardingChecklist";
+import { DeadlineTracker } from "@/components/rfp/DeadlineTracker";
 import { notFound } from "next/navigation";
 import { DiscoveryClient } from "./DiscoveryClient";
 import type { FilterValues, ModeFilter } from "./parts/FilterPills";
@@ -152,6 +153,15 @@ export default async function DiscoveryPage({
           <OnboardingChecklist orgId={orgId} state={onboarding} />
         </div>
       )}
+      <DeadlineTracker
+        orgId={orgId}
+        rows={initialRows.map((r) => ({
+          opp_id: r.opp_id,
+          title: r.title,
+          agency: r.agency,
+          deadline: r.deadline,
+        }))}
+      />
       <DiscoveryClient
         org={org}
         initialRows={initialRows}
