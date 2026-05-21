@@ -86,6 +86,10 @@
     {
       "path": "/api/cron/rfp-sequences",
       "schedule": "0 14 * * *"
+    },
+    {
+      "path": "/api/cron/rfp-weekly-report",
+      "schedule": "0 14 * * 0"
     }
   ]
 }
