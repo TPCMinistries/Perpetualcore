@@ -16,7 +16,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/server";
 import { resend, EMAIL_CONFIG } from "@/lib/email/config";
-import { SEQUENCES, type SequenceContext } from "@/lib/rfp/sequences";
+import {
+  SEQUENCES,
+  enrollInSequence,
+  type SequenceContext,
+} from "@/lib/rfp/sequences";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -50,6 +54,66 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
 
   const admin = createAdminClient();
   const now = new Date().toISOString();
+
+  // ── Activation re-engagement enrollment ─────────────────────────────────
+  // Scan for orgs created ≥7 days ago with 0 proposals. Enroll the owner
+  // (or every member with an email if multiple) once — enrollInSequence is
+  // idempotent on (email, sequence_key). Best-effort: failure here does
+  // NOT block the main sequence dispatch loop below.
+  let activation_enrolled = 0;
+  try {
+    const sevenDaysAgo = new Date(
+      Date.now() - 7 * 24 * 60 * 60 * 1000,
+    ).toISOString();
+
+    // Pull candidate orgs: created ≥7d ago, name + id + owner mapping.
+    // We re-resolve owner email below so a deleted user doesn't 500 us.
+    const { data: candidateOrgs } = await admin
+      .from("rfp_orgs")
+      .select("id, name, created_at")
+      .lte("created_at", sevenDaysAgo)
+      .returns<{ id: string; name: string; created_at: string }[]>();
+
+    for (const org of candidateOrgs ?? []) {
+      // Has any proposals? Skip if yes.
+      const { count: pCount } = await admin
+        .from("rfp_proposals")
+        .select("id", { count: "exact", head: true })
+        .eq("org_id", org.id);
+      if ((pCount ?? 0) > 0) continue;
+
+      // Resolve owner email. We try the first owner row; if multiple
+      // owners exist this will pick one deterministically by created_at.
+      const { data: ownerMembership } = await admin
+        .from("rfp_user_orgs")
+        .select("user_id")
+        .eq("org_id", org.id)
+        .eq("role", "owner")
+        .order("created_at", { ascending: true })
+        .limit(1)
+        .maybeSingle<{ user_id: string }>();
+      if (!ownerMembership?.user_id) continue;
+
+      const { data: userResp } =
+        await admin.auth.admin.getUserById(ownerMembership.user_id);
+      const email = userResp?.user?.email;
+      if (!email) continue;
+
+      const result = await enrollInSequence({
+        email,
+        sequenceKey: "activation-reengagement",
+        userId: ownerMembership.user_id,
+        orgId: org.id,
+        orgName: org.name,
+      });
+      if (result?.created) activation_enrolled++;
+    }
+  } catch (err) {
+    console.warn(
+      "[rfp-sequences] activation scan skipped:",
+      err instanceof Error ? err.message.slice(0, 120) : "unknown",
+    );
+  }
 
   const { data: due, error } = await admin
     .from("rfp_email_enrollments")
@@ -184,5 +248,6 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
     sent,
     failed,
     completed,
+    activation_enrolled,
   });
 }

@@ -153,6 +153,26 @@ export async function GET(request: NextRequest) {
             userEmail: user.email,
           }),
         }).catch((err) => console.error("[AuthCallback] Welcome email failed:", err));
+
+        // RFP lead-capture: best-effort enroll only on the RFP host so the
+        // legacy PC SaaS signup flow stays untouched. The sequence's Day 0
+        // step ships ~immediately (delay_days: 0); the cron picks it up on
+        // its next run.
+        if (isRfpHost) {
+          try {
+            const { enrollInSequence } = await import("@/lib/rfp/sequences");
+            await enrollInSequence({
+              email: user.email,
+              sequenceKey: "lead-capture",
+              userId: user.id,
+            });
+          } catch (err) {
+            console.warn(
+              "[AuthCallback] RFP lead-capture enroll skipped:",
+              err instanceof Error ? err.message.slice(0, 120) : "unknown",
+            );
+          }
+        }
       }
     }
 

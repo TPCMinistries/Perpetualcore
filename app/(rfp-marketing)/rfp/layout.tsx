@@ -256,6 +256,11 @@ export default function RfpMarketingLayout({
                   </Link>
                 </li>
                 <li>
+                  <Link href="/rfp/changelog" className="transition-colors hover:text-white">
+                    Changelog
+                  </Link>
+                </li>
+                <li>
                   <Link href="/rfp/trust" className="transition-colors hover:text-white">
                     Trust &amp; Security
                   </Link>

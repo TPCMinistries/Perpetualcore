@@ -15,6 +15,7 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { listUserOrgs } from "@/lib/rfp/orgs";
+import { enrollInSequence } from "@/lib/rfp/sequences";
 
 export const dynamic = "force-dynamic";
 
@@ -29,6 +30,25 @@ export default async function OrgsIndexPage() {
   }
 
   const memberships = await listUserOrgs();
+
+  // Best-effort lead-capture enrollment: fires on the first /orgs visit
+  // for any signed-in user. enrollInSequence upserts on (email, sequence_key)
+  // so repeat visits are a no-op. Covers both the email-confirmation flow
+  // (which hits /auth/callback) and the direct-signup flow (which doesn't).
+  // Wrapped because a Supabase blip should NEVER block a logged-in user
+  // from reaching their org.
+  if (user.email) {
+    try {
+      await enrollInSequence({
+        email: user.email,
+        sequenceKey: "lead-capture",
+        userId: user.id,
+      });
+    } catch {
+      // intentionally silent — see above
+    }
+  }
+
   if (memberships.length === 0) {
     redirect("/orgs/new");
   }

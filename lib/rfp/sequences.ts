@@ -167,8 +167,105 @@ const trialOnboarding: Sequence = {
   ],
 };
 
+const leadCapture: Sequence = {
+  key: "lead-capture",
+  description:
+    "Triggers on signup. Educates the lead about the product before they hit org-create, so when they arrive in the dashboard they already know the wedge.",
+  steps: [
+    {
+      delay_days: 0,
+      subject: "Welcome to RFP Engine — here's how it actually works",
+      buildHtml: (ctx) =>
+        emailFrame({
+          unsubscribeHref: unsubscribeUrl(ctx),
+          preheader:
+            "Discovery + voice-trained drafting + vault grounding + reviewer agent. Honest framing, no hype.",
+          body: `
+            <p>You just created an account on rfp.perpetualcore.com. Welcome.</p>
+            <p>Before you dive into the dashboard, here's the 90-second version of what the engine does, in order:</p>
+            <ol style="color:#d4d4d8;padding-left:20px;line-height:1.7;">
+              <li><strong>Discovery</strong> — we scan NY State, NYC PASSPort, NYC HRA every six hours. Federal sources (SAM.gov, Grants.gov, SBIR) restore the week our SAM key reissues.</li>
+              <li><strong>Voice fingerprint</strong> — train it once from 3-10 past proposals; future drafts read like you, not like a vendor template.</li>
+              <li><strong>Vault grounding</strong> — upload past docs; every claim cites a real chunk; [VERIFY] markers flag anything we can't ground.</li>
+              <li><strong>Reviewer agent</strong> — Opus pass against the funder brief, 0-100 score, severity-graded findings.</li>
+            </ol>
+            <p>Your first move from here is to create an org. Takes 60 seconds. Then we walk you through the four steps above.</p>
+            <p style="margin:24px 0;">${cta("https://rfp.perpetualcore.com/orgs/new", "Create your first org")}</p>
+            <p style="color:#a1a1aa;font-size:13px;">— Lorenzo<br>Founder, Perpetual Core</p>
+          `,
+        }),
+    },
+    {
+      delay_days: 3,
+      subject: "Why voice training matters more than you'd guess",
+      buildHtml: (ctx) =>
+        emailFrame({
+          unsubscribeHref: unsubscribeUrl(ctx),
+          preheader:
+            "An AI draft that doesn't sound like your org is a cut-down job, not a head-start.",
+          body: `
+            <p>Three days in.</p>
+            <p>The single biggest reason AI proposal drafting fails for nonprofits and capture teams is that the output reads like a generic vendor brochure. You spend more time re-writing in your voice than you would have spent writing from scratch.</p>
+            <p>Voice fingerprint solves this directly. We extract a stylometric profile — sentence rhythm, signature phrases, framing patterns, terms you avoid — from 3-10 past proposals. Then we feed it to every future draft.</p>
+            <p>It's not fine-tuning. It's a structured profile that lives in the drafter's system prompt. You can train it in 5 minutes and re-train it any time.</p>
+            <p style="margin:24px 0;">${cta("https://rfp.perpetualcore.com/orgs", "Go to your dashboard")}</p>
+            <p style="color:#a1a1aa;font-size:13px;">— Lorenzo</p>
+          `,
+        }),
+    },
+    {
+      delay_days: 4, // Day 7 from enrollment (0+3+4)
+      subject: "Want a 15-minute capture session?",
+      buildHtml: (ctx) =>
+        emailFrame({
+          unsubscribeHref: unsubscribeUrl(ctx),
+          preheader:
+            "I'll walk through the engine on your actual funding pipeline. Useful for the first 5-10 customers, not a sales call.",
+          body: `
+            <p>Week one is when most teams either go all-in on a new tool or quietly stop opening it.</p>
+            <p>If you're somewhere between, I'll do a 15-minute working session with you — pull up your dashboard, train your voice fingerprint together, generate a draft on a real upcoming opportunity, and run the reviewer.</p>
+            <p>No sales pitch. The pricing page already exists. The session is useful because the engine is faster when you've seen it work end-to-end on your own data once.</p>
+            <p>Reply to this email with a few times that work, or paste in a calendar link, and we'll grab 15 minutes.</p>
+            <p style="color:#a1a1aa;font-size:13px;">— Lorenzo<br>lorenzo@tpcmin.org</p>
+          `,
+        }),
+    },
+  ],
+};
+
+const activationReengagement: Sequence = {
+  key: "activation-reengagement",
+  description:
+    "Fires when an org has existed for 7+ days with zero proposals. Single step — a nudge with concrete next-action options, not a generic check-in.",
+  steps: [
+    {
+      delay_days: 0,
+      subject: "Stuck on which opportunity to draft first?",
+      buildHtml: (ctx) =>
+        emailFrame({
+          unsubscribeHref: unsubscribeUrl(ctx),
+          preheader:
+            "Three concrete ways to get from zero to first draft this week.",
+          body: `
+            <p>${ctx.orgName ?? "Your org"} has been on the platform for a week and hasn't drafted a proposal yet.</p>
+            <p>That's usually one of three things, and each has a fast fix:</p>
+            <ol style="color:#d4d4d8;padding-left:20px;line-height:1.7;">
+              <li><strong>"None of the opps in my feed are quite right"</strong> — paste any RFP URL into the import bar on Discovery. The engine fetches it, scores it, and you can draft from anything you import even if our scrapers missed it.</li>
+              <li><strong>"I don't trust the draft will be useful yet"</strong> — train your voice fingerprint first (Settings → Voice). One pass with 3 past proposals takes 5 minutes and the drafter immediately sounds 50% more like you.</li>
+              <li><strong>"I want to see it work on a real one before committing time"</strong> — reply to this email with a funder name or NOFO title and I'll send back a sample draft generated with default voice + zero vault so you can see the floor.</li>
+            </ol>
+            <p style="margin:24px 0;">${cta(ctx.orgId ? `https://rfp.perpetualcore.com/org/${ctx.orgId}/discovery` : "https://rfp.perpetualcore.com/orgs", "Open the dashboard")}</p>
+            <p style="color:#a1a1aa;font-size:13px;">— Lorenzo</p>
+          `,
+        }),
+    },
+  ],
+};
+
 export const SEQUENCES: Record<string, Sequence> = {
   [trialOnboarding.key]: trialOnboarding,
+  [leadCapture.key]: leadCapture,
+  [activationReengagement.key]: activationReengagement,
 };
 
 // ── Dispatch helpers ────────────────────────────────────────────────────────

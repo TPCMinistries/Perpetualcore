@@ -13,6 +13,7 @@ const rfpPages: MetadataRoute.Sitemap = [
   { url: `${RFP_BASE}/rfp/vs`, priority: 0.7, changeFrequency: "monthly", lastModified: new Date() },
   { url: `${RFP_BASE}/rfp/roadmap`, priority: 0.7, changeFrequency: "weekly", lastModified: new Date() },
   { url: `${RFP_BASE}/rfp/roi`, priority: 0.8, changeFrequency: "monthly", lastModified: new Date() },
+  { url: `${RFP_BASE}/rfp/changelog`, priority: 0.6, changeFrequency: "weekly", lastModified: new Date() },
   { url: `${RFP_BASE}/contact-sales/rfp-engine`, priority: 0.8, changeFrequency: "monthly", lastModified: new Date() },
 ];
 
