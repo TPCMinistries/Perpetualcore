@@ -166,7 +166,7 @@ export default function RfpEnginePage() {
                     <Link href="/contact-sales/rfp-engine">Book a Demo</Link>
                   </Button>
                 </div>
-                <p className="mt-6 font-mono text-[11px] uppercase tracking-[0.18em] text-zinc-500">
+                <p className="mt-6 font-mono text-[11px] uppercase tracking-[0.18em] text-zinc-400">
                   14-day trial · No credit card · Discovery feed in your inbox tomorrow
                 </p>
               </div>
@@ -216,7 +216,7 @@ export default function RfpEnginePage() {
                       </div>
                     ))}
                   </div>
-                  <p className="mt-5 font-mono text-[9.5px] uppercase tracking-[0.18em] text-zinc-600">
+                  <p className="mt-5 font-mono text-[9.5px] uppercase tracking-[0.18em] text-zinc-400">
                     Illustrative · Live data resumes once SAM.gov reissues our API key
                   </p>
                 </div>
@@ -356,7 +356,7 @@ export default function RfpEnginePage() {
                 className="group flex items-start gap-5 border-b border-white/5 py-5"
               >
                 <div className="mt-0.5 flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full border border-white/10 bg-zinc-900">
-                  <XCircle className="h-3.5 w-3.5 text-zinc-600" />
+                  <XCircle className="h-3.5 w-3.5 text-zinc-400" aria-hidden="true" />
                 </div>
                 <div className="flex flex-1 flex-col gap-1 sm:flex-row sm:items-baseline sm:gap-6">
                   <div className="sm:min-w-[180px]">

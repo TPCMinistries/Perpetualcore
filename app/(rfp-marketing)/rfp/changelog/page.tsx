@@ -10,9 +10,25 @@
  *   - Tags: feat (new capability), fix (bug repair), chore (infra/upkeep)
  */
 
+import type { Metadata } from "next";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
+
+export const metadata: Metadata = {
+  title: "Changelog",
+  description:
+    "What we shipped on RFP Engine, when we shipped it. Hand-curated weekly release log of features, fixes, and infra changes.",
+  alternates: {
+    canonical: "https://rfp.perpetualcore.com/rfp/changelog",
+  },
+  openGraph: {
+    url: "https://rfp.perpetualcore.com/rfp/changelog",
+    title: "Changelog — RFP Engine | Perpetual Core",
+    description:
+      "Weekly release notes. What we shipped, when we shipped it.",
+  },
+};
 
 type Tag = "feat" | "fix" | "chore";
 
@@ -181,9 +197,9 @@ export default function ChangelogPage() {
                         >
                           {meta.label}
                         </span>
-                        <span className="text-[14px] font-medium text-zinc-100">
+                        <h3 className="text-[14px] font-medium text-zinc-100">
                           {entry.title}
-                        </span>
+                        </h3>
                       </div>
                       <p className="mt-2 text-[13px] leading-relaxed text-zinc-400">
                         {entry.body}

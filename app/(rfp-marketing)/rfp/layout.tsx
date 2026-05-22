@@ -125,6 +125,12 @@ export default function RfpMarketingLayout({
 }) {
   return (
     <div className="relative min-h-screen bg-zinc-950 text-zinc-100 antialiased selection:bg-emerald-300/30 selection:text-emerald-100">
+      <a
+        href="#rfp-main"
+        className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[100] focus:rounded-md focus:bg-emerald-400 focus:px-4 focus:py-2 focus:font-mono focus:text-[12px] focus:font-semibold focus:uppercase focus:tracking-[0.18em] focus:text-zinc-950 focus:shadow-lg focus:outline-none focus:ring-2 focus:ring-emerald-300 focus:ring-offset-2 focus:ring-offset-zinc-950"
+      >
+        Skip to main content
+      </a>
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(STRUCTURED_DATA) }}
@@ -155,12 +161,12 @@ export default function RfpMarketingLayout({
               <span className="text-[15px] font-semibold tracking-tight text-white">
                 RFP Engine
               </span>
-              <span className="hidden text-[10px] font-mono uppercase tracking-[0.18em] text-zinc-500 sm:inline">
+              <span className="hidden text-[10px] font-mono uppercase tracking-[0.18em] text-zinc-400 sm:inline">
                 by Perpetual Core
               </span>
             </div>
           </Link>
-          <nav className="flex items-center gap-7">
+          <nav aria-label="Primary" className="flex items-center gap-7">
             <Link
               href="/rfp/how-it-works"
               className="hidden text-[13px] font-medium text-zinc-400 transition-colors hover:text-white md:inline"
@@ -215,13 +221,13 @@ export default function RfpMarketingLayout({
         </div>
       </header>
 
-      {children}
+      <div id="rfp-main">{children}</div>
 
       <footer className="relative border-t border-white/5 bg-zinc-950/60 backdrop-blur-sm">
         <div className="container mx-auto px-4 py-16">
           <div className="mb-12 grid grid-cols-2 gap-10 md:grid-cols-4">
             <div>
-              <h4 className="mb-4 text-[11px] font-mono uppercase tracking-[0.2em] text-zinc-500">
+              <h4 className="mb-4 text-[11px] font-mono uppercase tracking-[0.2em] text-zinc-400">
                 Product
               </h4>
               <ul className="space-y-2.5 text-[13px] text-zinc-400">
@@ -276,7 +282,7 @@ export default function RfpMarketingLayout({
               </ul>
             </div>
             <div>
-              <h4 className="mb-4 text-[11px] font-mono uppercase tracking-[0.2em] text-zinc-500">
+              <h4 className="mb-4 text-[11px] font-mono uppercase tracking-[0.2em] text-zinc-400">
                 Use For
               </h4>
               <ul className="space-y-2.5 text-[13px] text-zinc-400">
@@ -287,7 +293,7 @@ export default function RfpMarketingLayout({
               </ul>
             </div>
             <div>
-              <h4 className="mb-4 text-[11px] font-mono uppercase tracking-[0.2em] text-zinc-500">
+              <h4 className="mb-4 text-[11px] font-mono uppercase tracking-[0.2em] text-zinc-400">
                 Company
               </h4>
               <ul className="space-y-2.5 text-[13px] text-zinc-400">
@@ -307,7 +313,7 @@ export default function RfpMarketingLayout({
               </ul>
             </div>
             <div>
-              <h4 className="mb-4 text-[11px] font-mono uppercase tracking-[0.2em] text-zinc-500">
+              <h4 className="mb-4 text-[11px] font-mono uppercase tracking-[0.2em] text-zinc-400">
                 Legal
               </h4>
               <ul className="space-y-2.5 text-[13px] text-zinc-400">
@@ -324,7 +330,7 @@ export default function RfpMarketingLayout({
               </ul>
             </div>
           </div>
-          <div className="flex flex-col justify-between gap-2 border-t border-white/5 pt-8 text-[12px] text-zinc-500 sm:flex-row">
+          <div className="flex flex-col justify-between gap-2 border-t border-white/5 pt-8 text-[12px] text-zinc-400 sm:flex-row">
             <p>
               &copy; {new Date().getFullYear()} Perpetual Core. RFP Engine is a Perpetual Core product.
             </p>
