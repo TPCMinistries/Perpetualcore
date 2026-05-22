@@ -272,8 +272,16 @@ export async function resetOnboarding() {
 export async function requestPasswordReset(email: string) {
   const supabase = await createClient();
 
+  // Route through /auth/callback so the PKCE ?code= from the email is
+  // exchanged for a session before landing on the update-password form.
+  // Without this hop, the form has no session and Supabase bounces to /login.
+  const h = await headers();
+  const host = h.get("x-forwarded-host") ?? h.get("host");
+  const proto = h.get("x-forwarded-proto") ?? "https";
+  const origin = host ? `${proto}://${host}` : (process.env.NEXT_PUBLIC_APP_URL?.trim() || "https://rfp.perpetualcore.com");
+
   const { error } = await supabase.auth.resetPasswordForEmail(email, {
-    redirectTo: `${process.env.NEXT_PUBLIC_APP_URL}/auth/update-password`,
+    redirectTo: `${origin}/auth/callback?next=/auth/update-password`,
   });
 
   if (error) {
