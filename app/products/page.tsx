@@ -1,9 +1,9 @@
 /**
  * /products — portfolio overview (arm 02 of the company).
- * Six products with status pills, mono indices, hairline grid.
+ * Seven products with status pills, mono indices, hairline grid.
  * Visual register matches homepage v5.
  *
- * Order: Atlas → Sentinel → Sage → Vellum → RFP Engine → RFP Sentry.
+ * Order: Atlas → Sentinel → Sage → Vellum → RFP Engine → RFP Sentry → Janice.
  */
 
 import Link from "next/link";
@@ -16,7 +16,7 @@ import { DecisionTree } from "@/components/products/DecisionTree";
 export const metadata = {
   title: "Products — Perpetual Core",
   description:
-    "Six AI-native products. Each one shipped in an engagement. Each one still running. The portfolio is the proof; the engagement is the work.",
+    "Seven AI-native products. Each one shipped in an engagement. Each one still running. The portfolio is the proof; the engagement is the work.",
 };
 
 type Product = {
@@ -92,6 +92,16 @@ const PRODUCTS: Product[] = [
       "For capture teams who'd rather lose a deal at the bid/no-bid step than after writing the proposal. Sister product to RFP Engine. Score RFPs for fit before you write. Compliance flags surface before submission, not after a debrief.",
     cta: { label: "Join the early list", href: "/products/rfp-sentry" },
   },
+  {
+    index: "07",
+    name: "Janice",
+    status: "LIVE",
+    statusColor: "live",
+    headline: "Hiring and onboarding OS for people-heavy orgs.",
+    body:
+      "For nonprofits, agencies, and ecosystem operators running candidates, interns, staff, and partners through one shared lifecycle — templated intake, e-signature, per-person vaults, multi-tenant by default. Built internal-first for Uplift's intern pipeline and IHA's program staff; productized for external sale. Self-serve from $79/month with a 60-day pilot.",
+    cta: { label: "Visit Janice", href: "https://janice.perpetualcore.com", external: true },
+  },
 ];
 
 function StatusPill({ status, color }: { status: string; color: "live" | "pilot" | "invite" }) {
@@ -133,7 +143,7 @@ export default function ProductsPage() {
           </div>
 
           <h1 className="display-hero text-[40px] sm:text-[56px] lg:text-[76px] text-foreground mb-12 max-w-5xl leading-[1.05]">
-            Six products. Each one{" "}
+            Seven products. Each one{" "}
             <span className="italic text-foreground/85">shipped in an engagement.</span> Each one
             still running.
           </h1>
@@ -197,7 +207,7 @@ export default function ProductsPage() {
             <SectionRail index="—" label="In production" />
             <div className="max-w-2xl">
               <h3 className="text-3xl sm:text-4xl lg:text-5xl font-semibold leading-[1.1] tracking-[-0.025em] text-foreground">
-                Six products in the portfolio.
+                Seven products in the portfolio.
               </h3>
             </div>
           </div>

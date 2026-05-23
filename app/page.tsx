@@ -66,6 +66,7 @@ const PRODUCTS = [
   { index: "04", name: "Vellum", status: "BUILD", statusColor: "invite" as const, tagline: "Institutional knowledge — calls, docs, voice notes, channels.", href: "/products/vellum", external: false },
   { index: "05", name: "RFP Engine", status: "LIVE", statusColor: "live" as const, tagline: "Find the right RFP. Draft it in your voice. Ship it clean.", href: "https://rfp.perpetualcore.com", external: true },
   { index: "06", name: "RFP Sentry", status: "BUILD", statusColor: "invite" as const, tagline: "Bid intelligence + compliance gate. Sister to RFP Engine.", href: "/products/rfp-sentry", external: false },
+  { index: "07", name: "Janice", status: "LIVE", statusColor: "live" as const, tagline: "Hiring and onboarding OS for people-heavy orgs.", href: "https://janice.perpetualcore.com", external: true },
 ] as const;
 
 const PHASES = [
@@ -565,7 +566,7 @@ export default function HomePage() {
             <SectionRail index="02" label="Portfolio" />
             <div className="max-w-2xl">
               <h3 className="text-3xl sm:text-4xl lg:text-5xl font-semibold leading-[1.1] tracking-[-0.025em] text-foreground mb-6">
-                Six products in production.
+                Seven products in production.
               </h3>
               <p className="text-base text-muted-foreground leading-[1.7]">
                 The portfolio is the proof. Each is a working installation we shipped in an
@@ -957,7 +958,7 @@ export default function HomePage() {
                 <Link href="/products" className="group bg-card p-6 sm:p-7 hover:bg-surface-hover transition-colors">
                   <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-primary mb-3">For operators</p>
                   <p className="text-lg font-semibold tracking-[-0.01em] text-foreground mb-2">See the portfolio →</p>
-                  <p className="text-sm text-muted-foreground leading-[1.6]">Six products in production. Use them, or have us install them.</p>
+                  <p className="text-sm text-muted-foreground leading-[1.6]">Seven products in production. Use them, or have us install them.</p>
                 </Link>
                 <a href="mailto:lorenzo@perpetualcore.com?subject=DeepFutures%20inquiry" className="group bg-card p-6 sm:p-7 hover:bg-surface-hover transition-colors">
                   <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-primary mb-3">For founders</p>
