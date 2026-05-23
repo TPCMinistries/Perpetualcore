@@ -21,6 +21,14 @@ type Post = {
 
 const POSTS: Post[] = [
   {
+    slug: "the-75k-floor",
+    title: "Why we don't take engagements under $75,000",
+    subtitle:
+      "Letter #001 of The Install — and what we built for everyone below the floor. An honest accounting of the math, the engineering reality, and why a real install can't be done for less.",
+    date: "2026-05-22",
+    author: "Lorenzo Daughtry-Chambers",
+  },
+  {
     slug: "outcome-eval-the-line-item-every-ai-install-skips",
     title: "Outcome-eval, the line item every AI install skips",
     subtitle:

@@ -24,6 +24,14 @@ export const metadata = {
 
 const PUBLISHED_POSTS = [
   {
+    slug: "the-75k-floor",
+    title: "Why we don't take engagements under $75,000",
+    subtitle:
+      "Letter #001 of The Install — and what we built for everyone below the floor.",
+    date: "2026-05-22",
+    readMinutes: 5,
+  },
+  {
     slug: "outcome-eval-the-line-item-every-ai-install-skips",
     title: "Outcome-eval, the line item every AI install skips",
     subtitle:
