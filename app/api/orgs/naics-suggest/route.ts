@@ -1,12 +1,14 @@
 /**
- * POST /api/orgs/naics-suggest — Suggest NAICS codes from a free-text org description.
+ * POST /api/orgs/naics-suggest — Suggest NAICS codes grouped by program from
+ * a free-text org description.
  *
- * Powers the "Help me pick" assistant on /orgs/new (NaicsAssistantModal).
- * Auth-gated: only logged-in users can hit the model, which both blocks
- * anonymous abuse and keeps cost attribution clean (we know whose run it was
- * if we ever need to audit). The model call is short (gpt-4o-mini, <$0.001
- * per call) so we do not add stricter rate limiting beyond what middleware
- * already applies to /api/*.
+ * Powers the "Help me pick" assistant on /orgs/new (NaicsAssistantModal v2).
+ * Auth-gated: only signed-in users can hit the model, which blocks anonymous
+ * abuse and gives us clean attribution if cost auditing is ever needed. The
+ * blanket /api/* rate limiter in middleware (200/min per IP) is sufficient
+ * additional protection given typical use is a few calls during onboarding.
+ *
+ * Response shape: { programs: NaicsProgram[] } — see lib/rfp/naics/suggest.ts.
  */
 
 import { NextResponse } from "next/server";
@@ -45,7 +47,7 @@ export async function POST(req: Request) {
 
   try {
     const result = await suggestNaicsCodes(body.description);
-    return NextResponse.json({ suggestions: result.suggestions });
+    return NextResponse.json({ programs: result.programs });
   } catch (e) {
     const detail = e instanceof Error ? e.message : String(e);
     return NextResponse.json(
