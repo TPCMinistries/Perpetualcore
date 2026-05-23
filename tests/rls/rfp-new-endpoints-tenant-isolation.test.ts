@@ -375,11 +375,6 @@ describe("RFP new-endpoint tenant isolation", () => {
   // -------------------------------------------------------------------------
   describe("PATCH /api/rfp/proposals/[proposalId]/status", () => {
     it("User A (owner of org A) can mark their own proposal submitted", async () => {
-      // NOTE: We use 'submitted' here (not 'won') because the route's Zod enum
-      // (draft|submitted|won|lost|withdrawn) is wider than the DB CHECK
-      // constraint on rfp_proposals.status (draft|in_review|compliance|
-      // submitted|awarded|lost). 'submitted' + 'lost' + 'draft' are the only
-      // statuses currently in BOTH sets. See test below + report.
       const res = await withToken(userA.access_token, () =>
         callPatchStatus(proposalA, { status: "submitted" }),
       );
@@ -409,21 +404,27 @@ describe("RFP new-endpoint tenant isolation", () => {
       expect(data?.status).toBe("draft");
     });
 
-    it("KNOWN GAP: PATCH status='won' currently 500s due to DB CHECK constraint mismatch", async () => {
-      // The route accepts 'won', 'withdrawn' (per its Zod enum) but the live
-      // rfp_proposals.status CHECK constraint (set in 20260509_rfp_schema.sql)
-      // only permits: draft, in_review, compliance, submitted, awarded, lost.
-      //
-      // Until a migration aligns these vocabularies, marking a proposal as
-      // 'won' from the UI returns 500. This test pins the current behavior
-      // so the failure mode is visible and the fix can flip the assertion.
+    it("PATCH status='won' succeeds (migration 20260522 aligns route Zod with DB CHECK)", async () => {
       const res = await withToken(userA.access_token, () =>
         callPatchStatus(proposalA, { status: "won" }),
       );
-      expect(res.status).toBe(500);
+      expect(res.status).toBe(200);
       const body = await res.json();
-      expect(body.error).toBe("update_failed");
-      expect(body.detail).toMatch(/rfp_proposals_status_check/);
+      expect(body.status).toBe("won");
+
+      // Reset for any later assertions.
+      await admin.from("rfp_proposals").update({ status: "draft" }).eq("id", proposalA);
+    });
+
+    it("PATCH status='withdrawn' succeeds (full lifecycle vocabulary)", async () => {
+      const res = await withToken(userA.access_token, () =>
+        callPatchStatus(proposalA, { status: "withdrawn" }),
+      );
+      expect(res.status).toBe(200);
+      const body = await res.json();
+      expect(body.status).toBe("withdrawn");
+
+      await admin.from("rfp_proposals").update({ status: "draft" }).eq("id", proposalA);
     });
   });
 
