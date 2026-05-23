@@ -2,6 +2,7 @@ import Link from "next/link";
 import type { Metadata } from "next";
 import { Button } from "@/components/ui/button";
 import { FileText } from "lucide-react";
+import { RfpAtmosphere } from "@/components/rfp/RfpAtmosphere";
 
 const SITE = "https://rfp.perpetualcore.com";
 const OG_IMAGE = `${SITE}/og/rfp-engine.png`;
@@ -124,7 +125,7 @@ export default function RfpMarketingLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="relative min-h-screen bg-zinc-950 text-zinc-100 antialiased selection:bg-emerald-300/30 selection:text-emerald-100">
+    <div className="dark relative min-h-screen bg-zinc-950 text-zinc-100 antialiased selection:bg-emerald-300/30 selection:text-emerald-100">
       <a
         href="#rfp-main"
         className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[100] focus:rounded-md focus:bg-emerald-400 focus:px-4 focus:py-2 focus:font-mono focus:text-[12px] focus:font-semibold focus:uppercase focus:tracking-[0.18em] focus:text-zinc-950 focus:shadow-lg focus:outline-none focus:ring-2 focus:ring-emerald-300 focus:ring-offset-2 focus:ring-offset-zinc-950"
@@ -136,20 +137,7 @@ export default function RfpMarketingLayout({
         dangerouslySetInnerHTML={{ __html: JSON.stringify(STRUCTURED_DATA) }}
       />
 
-      {/* Ambient field */}
-      <div className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
-        <div className="absolute -top-40 left-1/2 h-[700px] w-[1200px] -translate-x-1/2 rounded-full bg-[radial-gradient(closest-side,rgba(16,185,129,0.18),transparent)] blur-3xl" />
-        <div className="absolute top-1/3 -right-40 h-[500px] w-[700px] rounded-full bg-[radial-gradient(closest-side,rgba(56,189,248,0.10),transparent)] blur-3xl" />
-        <div className="absolute bottom-0 -left-32 h-[500px] w-[700px] rounded-full bg-[radial-gradient(closest-side,rgba(244,114,182,0.06),transparent)] blur-3xl" />
-        <div
-          className="absolute inset-0 opacity-[0.035]"
-          style={{
-            backgroundImage:
-              "linear-gradient(to right, rgba(255,255,255,1) 1px, transparent 1px), linear-gradient(to bottom, rgba(255,255,255,1) 1px, transparent 1px)",
-            backgroundSize: "64px 64px",
-          }}
-        />
-      </div>
+      <RfpAtmosphere />
 
       <header className="sticky top-0 z-50 border-b border-white/5 bg-zinc-950/70 backdrop-blur-xl">
         <div className="container mx-auto flex items-center justify-between px-4 py-4">
