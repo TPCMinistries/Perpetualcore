@@ -111,6 +111,28 @@ export default function StudioEngagementsPage() {
             </p>
           </div>
 
+          {/* Letter #001 — makes the $75K floor legible inline. The price is asserted in the
+              hero; this is where a buyer who clicks "why $75K specifically?" gets the answer
+              in Lorenzo's voice rather than a marketing rationalization. */}
+          <aside className="border-l-2 border-foreground/15 pl-5 max-w-2xl mb-12">
+            <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground mb-3">
+              № 001 · Letter from the founder
+            </p>
+            <Link
+              href="/blog/the-75k-floor"
+              className="group inline-flex items-baseline gap-2 text-foreground hover:text-primary transition-colors"
+            >
+              <span className="font-display italic text-xl sm:text-[22px] leading-[1.3] tracking-[-0.01em]">
+                Why we don&apos;t take engagements under $75,000.
+              </span>
+              <ArrowRight className="h-3.5 w-3.5 translate-y-0.5 shrink-0 transition-transform group-hover:translate-x-0.5" />
+            </Link>
+            <p className="mt-3 text-sm text-muted-foreground leading-[1.6]">
+              The honest math behind the floor — vendor costs, engineering time, integration debt,
+              outcome evaluation — and what we built for everyone below it. Five-minute read.
+            </p>
+          </aside>
+
           <div className="flex flex-col sm:flex-row items-start gap-4">
             <Button size="lg" asChild className="text-sm font-medium px-7 h-11 shadow-none bg-foreground text-background hover:bg-foreground/90 rounded-[6px]">
               <Link href="/contact-sales">
