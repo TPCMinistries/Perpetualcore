@@ -216,9 +216,24 @@ export default function ProductsPage() {
           <div className="grid lg:grid-cols-[280px_1fr] gap-12 lg:gap-20 mb-12">
             <SectionRail index="—" label="In production" />
             <div className="max-w-2xl">
-              <h3 className="text-3xl sm:text-4xl lg:text-5xl font-semibold leading-[1.1] tracking-[-0.025em] text-foreground">
+              <h3 className="text-3xl sm:text-4xl lg:text-5xl font-semibold leading-[1.1] tracking-[-0.025em] text-foreground mb-8">
                 Eight products in the portfolio.
               </h3>
+              {/* Institutional posture line — echoes the home + /studio/case-studies. */}
+              <div className="border-l-2 border-foreground/15 pl-5 max-w-xl">
+                <p className="text-sm sm:text-[15px] text-foreground leading-[1.65]">
+                  <span className="italic font-display text-foreground/90">
+                    We don&apos;t publish client names.
+                  </span>{" "}
+                  <span className="text-muted-foreground">
+                    Mission-driven buyers — funds, foundations, healthcare networks,
+                    workforce programs — don&apos;t want their data on our website. The
+                    portfolio names <span className="text-foreground">what we built</span>,
+                    not <span className="text-foreground">who we built it for</span>.
+                    Direct introductions on request, by mutual reference.
+                  </span>
+                </p>
+              </div>
             </div>
           </div>
 
@@ -282,8 +297,28 @@ export default function ProductsPage() {
               <h3 className="text-3xl sm:text-4xl lg:text-5xl font-semibold leading-[1.1] tracking-[-0.025em] text-foreground mb-6">
                 If you want one of these installed in your org, the engagement is how that happens.
               </h3>
-              <p className="text-base text-muted-foreground leading-[1.7] mb-10">
-                Engagements start at $75,000. We take a limited number per quarter.
+              <p className="text-base text-muted-foreground leading-[1.7] mb-6">
+                Engagements start at{" "}
+                <Link
+                  href="/blog/the-75k-floor"
+                  className="text-foreground underline underline-offset-4 decoration-foreground/30 hover:decoration-primary hover:text-primary transition-colors"
+                >
+                  $75,000
+                </Link>
+                . We take a limited number per quarter.
+              </p>
+              <p className="text-sm text-muted-foreground leading-[1.65] mb-10 max-w-xl">
+                <span className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground mr-2">
+                  № 001
+                </span>
+                Lorenzo on why the floor sits where it does —{" "}
+                <Link
+                  href="/blog/the-75k-floor"
+                  className="text-foreground hover:text-primary transition-colors underline-offset-4 hover:underline"
+                >
+                  read the letter
+                </Link>
+                .
               </p>
               <div className="flex flex-col sm:flex-row items-start gap-5">
                 <Button
