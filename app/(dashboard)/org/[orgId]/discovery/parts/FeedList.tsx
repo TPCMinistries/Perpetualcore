@@ -16,8 +16,10 @@
  * yet" message so the user knows the feed is intentionally empty (vs broken).
  */
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { FeedRow } from "./FeedRow";
+import { Button } from "@/components/ui/button";
+import { Sparkles, Loader2 } from "lucide-react";
 import type { FeedRow as FeedRowType } from "@/lib/rfp/feed";
 
 interface FeedListProps {
@@ -74,21 +76,7 @@ export function FeedList({
   }, [hasMore, loading, onLoadMore]);
 
   if (rows.length === 0 && !loading) {
-    return (
-      <div className="flex h-full items-center justify-center p-8">
-        <div className="max-w-sm text-center">
-          <p className="font-serif text-lg italic text-zinc-300">
-            No opportunities match these filters.
-          </p>
-          <p className="mt-2 text-xs leading-relaxed text-zinc-500">
-            Discovery scans federal, state, and city sources every six hours.
-            New rows land here automatically as they show up upstream — or seed
-            your feed right now by pasting any RFP URL into the import bar at
-            the top of this page.
-          </p>
-        </div>
-      </div>
-    );
+    return <EmptyFeed orgId={activeOrgId} />;
   }
 
   return (
@@ -119,6 +107,96 @@ export function FeedList({
           End of feed
         </div>
       )}
+    </div>
+  );
+}
+
+/**
+ * EmptyFeed — empty state with a "Find my matches" recompute button.
+ *
+ * The most common cause of an empty feed for a real user is "fresh org, no
+ * scoring run yet" — not "no opps in the database." The button POSTs to
+ * /api/rfp/orgs/{orgId}/recompute-scores which kicks off a fire-and-forget
+ * scoring pass; we then poll the parent's reload by hard-refreshing after a
+ * short delay (scoring is async and idempotent, so the next page load picks
+ * up whatever's landed so far).
+ */
+function EmptyFeed({ orgId }: { orgId?: string }) {
+  const [state, setState] = useState<"idle" | "running" | "error" | "done">(
+    "idle",
+  );
+
+  const runRecompute = async () => {
+    if (!orgId) return;
+    setState("running");
+    try {
+      const res = await fetch(
+        `/api/rfp/orgs/${orgId}/recompute-scores`,
+        { method: "POST", headers: { "Content-Type": "application/json" } },
+      );
+      if (!res.ok && res.status !== 202) {
+        setState("error");
+        return;
+      }
+      setState("done");
+      // Scoring is async; give it a beat to land rows, then reload the feed.
+      window.setTimeout(() => window.location.reload(), 2500);
+    } catch {
+      setState("error");
+    }
+  };
+
+  return (
+    <div className="flex h-full items-center justify-center p-8">
+      <div className="max-w-md text-center space-y-4">
+        <div>
+          <p className="font-serif text-lg italic text-zinc-300">
+            No opportunities match these filters yet.
+          </p>
+          <p className="mt-2 text-xs leading-relaxed text-zinc-500">
+            If this org is new, we haven&apos;t scored its fit against current
+            opportunities yet. Run the matcher to populate your feed.
+          </p>
+        </div>
+
+        {orgId && (
+          <Button
+            type="button"
+            onClick={runRecompute}
+            disabled={state === "running" || state === "done"}
+            className="gap-2"
+          >
+            {state === "running" ? (
+              <>
+                <Loader2 className="h-4 w-4 animate-spin" />
+                Scoring opportunities…
+              </>
+            ) : state === "done" ? (
+              <>
+                <Sparkles className="h-4 w-4" />
+                Reloading feed…
+              </>
+            ) : (
+              <>
+                <Sparkles className="h-4 w-4" />
+                Find my matches
+              </>
+            )}
+          </Button>
+        )}
+
+        {state === "error" && (
+          <p role="alert" className="text-xs text-destructive">
+            Something went wrong. Try again, or paste an RFP URL into the
+            import bar above to seed your feed manually.
+          </p>
+        )}
+
+        <p className="text-[11px] leading-relaxed text-zinc-600">
+          Discovery also scans federal, state, and city sources every six hours.
+          New rows land here automatically as they show up upstream.
+        </p>
+      </div>
     </div>
   );
 }

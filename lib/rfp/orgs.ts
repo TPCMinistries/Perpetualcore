@@ -10,6 +10,7 @@
 
 import { createClient, createAdminClient } from "@/lib/supabase/server";
 import { enrollInSequence } from "./sequences";
+import { recomputeAllForOrg } from "./scoring/recompute";
 
 // ── RFP domain types ─────────────────────────────────────────────────────────
 
@@ -104,6 +105,18 @@ export async function createOrgWithOwner(
       err instanceof Error ? err.message.slice(0, 120) : "unknown",
     );
   }
+
+  // Fire-and-forget: score the org against all current opportunities so the
+  // Discovery feed isn't empty the first time the user lands on it. Idempotent
+  // (upserts by opp_id, org_id) so a serverless timeout mid-pass is safe — a
+  // subsequent recompute resumes cleanly. We swallow errors here so a scoring
+  // failure never blocks org creation.
+  void recomputeAllForOrg(org.id).catch((err) => {
+    console.warn(
+      "[orgs] initial recompute failed:",
+      err instanceof Error ? err.message.slice(0, 200) : "unknown",
+    );
+  });
 
   return org as RfpOrg;
 }
