@@ -11048,6 +11048,7 @@ export type Database = {
       mc_tasks: {
         Row: {
           assigned_agent_id: string | null
+          assigned_to_user_id: string | null
           created_at: string | null
           description: string | null
           due_date: string | null
@@ -11065,6 +11066,7 @@ export type Database = {
         }
         Insert: {
           assigned_agent_id?: string | null
+          assigned_to_user_id?: string | null
           created_at?: string | null
           description?: string | null
           due_date?: string | null
@@ -11082,6 +11084,7 @@ export type Database = {
         }
         Update: {
           assigned_agent_id?: string | null
+          assigned_to_user_id?: string | null
           created_at?: string | null
           description?: string | null
           due_date?: string | null
@@ -11103,6 +11106,13 @@ export type Database = {
             columns: ["assigned_agent_id"]
             isOneToOne: false
             referencedRelation: "mc_agents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mc_tasks_assigned_to_user_id_fkey"
+            columns: ["assigned_to_user_id"]
+            isOneToOne: false
+            referencedRelation: "sage_users"
             referencedColumns: ["id"]
           },
         ]
@@ -11855,6 +11865,36 @@ export type Database = {
           },
         ]
       }
+      mnemo_api_keys: {
+        Row: {
+          created_at: string
+          id: string
+          key_hash: string
+          label: string | null
+          last_used_at: string | null
+          owner_id: string
+          revoked_at: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          key_hash: string
+          label?: string | null
+          last_used_at?: string | null
+          owner_id: string
+          revoked_at?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          key_hash?: string
+          label?: string | null
+          last_used_at?: string | null
+          owner_id?: string
+          revoked_at?: string | null
+        }
+        Relationships: []
+      }
       mnemo_entities: {
         Row: {
           created_at: string
@@ -11864,7 +11904,7 @@ export type Database = {
           kind: string
           name: string
           name_lower: string | null
-          owner_id: string | null
+          owner_id: string
           updated_at: string
         }
         Insert: {
@@ -11875,7 +11915,7 @@ export type Database = {
           kind: string
           name: string
           name_lower?: string | null
-          owner_id?: string | null
+          owner_id?: string
           updated_at?: string
         }
         Update: {
@@ -11886,7 +11926,7 @@ export type Database = {
           kind?: string
           name?: string
           name_lower?: string | null
-          owner_id?: string | null
+          owner_id?: string
           updated_at?: string
         }
         Relationships: []
@@ -11899,8 +11939,9 @@ export type Database = {
           created_at: string
           embedding: string | null
           id: string
-          owner_id: string | null
+          owner_id: string
           raw_metadata: Json
+          reflected_at: string | null
           search_tsv: unknown
           source: string
           superseded_by: string | null
@@ -11915,8 +11956,9 @@ export type Database = {
           created_at?: string
           embedding?: string | null
           id?: string
-          owner_id?: string | null
+          owner_id?: string
           raw_metadata?: Json
+          reflected_at?: string | null
           search_tsv?: unknown
           source: string
           superseded_by?: string | null
@@ -11931,8 +11973,9 @@ export type Database = {
           created_at?: string
           embedding?: string | null
           id?: string
-          owner_id?: string | null
+          owner_id?: string
           raw_metadata?: Json
+          reflected_at?: string | null
           search_tsv?: unknown
           source?: string
           superseded_by?: string | null
@@ -11990,7 +12033,7 @@ export type Database = {
           from_entity: string
           id: string
           kind: string
-          owner_id: string | null
+          owner_id: string
           to_entity: string
         }
         Insert: {
@@ -11999,7 +12042,7 @@ export type Database = {
           from_entity: string
           id?: string
           kind: string
-          owner_id?: string | null
+          owner_id?: string
           to_entity: string
         }
         Update: {
@@ -12008,7 +12051,7 @@ export type Database = {
           from_entity?: string
           id?: string
           kind?: string
-          owner_id?: string | null
+          owner_id?: string
           to_entity?: string
         }
         Relationships: [
@@ -14573,6 +14616,94 @@ export type Database = {
           },
         ]
       }
+      rfp_email_enrollments: {
+        Row: {
+          completed_at: string | null
+          created_at: string
+          current_step: number
+          email: string
+          id: string
+          metadata: Json
+          next_send_at: string | null
+          org_id: string | null
+          sequence_key: string
+          unsubscribed_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string
+          current_step?: number
+          email: string
+          id?: string
+          metadata?: Json
+          next_send_at?: string | null
+          org_id?: string | null
+          sequence_key: string
+          unsubscribed_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string
+          current_step?: number
+          email?: string
+          id?: string
+          metadata?: Json
+          next_send_at?: string | null
+          org_id?: string | null
+          sequence_key?: string
+          unsubscribed_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "rfp_email_enrollments_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "rfp_orgs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      rfp_email_log: {
+        Row: {
+          enrollment_id: string | null
+          error_message: string | null
+          id: string
+          resend_email_id: string | null
+          sent_at: string
+          status: string
+          step: number
+        }
+        Insert: {
+          enrollment_id?: string | null
+          error_message?: string | null
+          id?: string
+          resend_email_id?: string | null
+          sent_at?: string
+          status: string
+          step: number
+        }
+        Update: {
+          enrollment_id?: string | null
+          error_message?: string | null
+          id?: string
+          resend_email_id?: string | null
+          sent_at?: string
+          status?: string
+          step?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "rfp_email_log_enrollment_id_fkey"
+            columns: ["enrollment_id"]
+            isOneToOne: false
+            referencedRelation: "rfp_email_enrollments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       rfp_opp_matches: {
         Row: {
           chips: string[]
@@ -14743,6 +14874,62 @@ export type Database = {
           },
         ]
       }
+      rfp_org_subscriptions: {
+        Row: {
+          cancel_at_period_end: boolean
+          created_at: string
+          current_period_end: string | null
+          id: string
+          metadata: Json
+          org_id: string
+          status: string | null
+          stripe_customer_id: string | null
+          stripe_price_id: string | null
+          stripe_subscription_id: string | null
+          tier: string | null
+          trial_ends_at: string | null
+          updated_at: string
+        }
+        Insert: {
+          cancel_at_period_end?: boolean
+          created_at?: string
+          current_period_end?: string | null
+          id?: string
+          metadata?: Json
+          org_id: string
+          status?: string | null
+          stripe_customer_id?: string | null
+          stripe_price_id?: string | null
+          stripe_subscription_id?: string | null
+          tier?: string | null
+          trial_ends_at?: string | null
+          updated_at?: string
+        }
+        Update: {
+          cancel_at_period_end?: boolean
+          created_at?: string
+          current_period_end?: string | null
+          id?: string
+          metadata?: Json
+          org_id?: string
+          status?: string | null
+          stripe_customer_id?: string | null
+          stripe_price_id?: string | null
+          stripe_subscription_id?: string | null
+          tier?: string | null
+          trial_ends_at?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "rfp_org_subscriptions_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: true
+            referencedRelation: "rfp_orgs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       rfp_orgs: {
         Row: {
           capacity_summary: string | null
@@ -14750,6 +14937,7 @@ export type Database = {
           id: string
           naics: string[]
           name: string
+          onboarding_state: Json
           type: string
           updated_at: string
           voice_fingerprint: Json
@@ -14760,6 +14948,7 @@ export type Database = {
           id?: string
           naics?: string[]
           name: string
+          onboarding_state?: Json
           type: string
           updated_at?: string
           voice_fingerprint?: Json
@@ -14770,6 +14959,7 @@ export type Database = {
           id?: string
           naics?: string[]
           name?: string
+          onboarding_state?: Json
           type?: string
           updated_at?: string
           voice_fingerprint?: Json
@@ -14825,6 +15015,7 @@ export type Database = {
           status: string
           title: string
           updated_at: string
+          vault_chunks_used: Json
         }
         Insert: {
           created_at?: string
@@ -14836,6 +15027,7 @@ export type Database = {
           status?: string
           title: string
           updated_at?: string
+          vault_chunks_used?: Json
         }
         Update: {
           created_at?: string
@@ -14847,6 +15039,7 @@ export type Database = {
           status?: string
           title?: string
           updated_at?: string
+          vault_chunks_used?: Json
         }
         Relationships: [
           {
@@ -15079,6 +15272,39 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      sage_users: {
+        Row: {
+          created_at: string
+          email: string
+          id: string
+          name: string
+          password_hash: string
+          role: string
+          scope: string[] | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id?: string
+          name: string
+          password_hash: string
+          role: string
+          scope?: string[] | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+          name?: string
+          password_hash?: string
+          role?: string
+          scope?: string[] | null
+          updated_at?: string
+        }
+        Relationships: []
       }
       sales_contacts: {
         Row: {
@@ -16197,35 +16423,53 @@ export type Database = {
           duration_ms: number | null
           id: string
           input: Json | null
+          mc_task_id: string | null
           output: Json | null
           skill_id: string
           success: boolean | null
-          tool_name: string
-          user_id: string
+          tool_name: string | null
+          user_id: string | null
         }
         Insert: {
           created_at?: string | null
           duration_ms?: number | null
           id?: string
           input?: Json | null
+          mc_task_id?: string | null
           output?: Json | null
           skill_id: string
           success?: boolean | null
-          tool_name: string
-          user_id: string
+          tool_name?: string | null
+          user_id?: string | null
         }
         Update: {
           created_at?: string | null
           duration_ms?: number | null
           id?: string
           input?: Json | null
+          mc_task_id?: string | null
           output?: Json | null
           skill_id?: string
           success?: boolean | null
-          tool_name?: string
-          user_id?: string
+          tool_name?: string | null
+          user_id?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "skill_executions_mc_task_id_fkey"
+            columns: ["mc_task_id"]
+            isOneToOne: false
+            referencedRelation: "mc_tasks"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "skill_executions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "sage_users"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       skill_installs: {
         Row: {
@@ -16423,6 +16667,36 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      stripe_webhook_events: {
+        Row: {
+          created_at: string
+          error_message: string | null
+          event_id: string
+          event_type: string
+          id: string
+          processed_at: string
+          status: string
+        }
+        Insert: {
+          created_at?: string
+          error_message?: string | null
+          event_id: string
+          event_type: string
+          id?: string
+          processed_at?: string
+          status?: string
+        }
+        Update: {
+          created_at?: string
+          error_message?: string | null
+          event_id?: string
+          event_type?: string
+          id?: string
+          processed_at?: string
+          status?: string
+        }
+        Relationships: []
       }
       subscriptions: {
         Row: {
@@ -22682,6 +22956,7 @@ export type Database = {
         Args: {
           match_count?: number
           q_embedding: string
+          q_owner_id: string
           q_surface?: string
           q_text: string
           recency_half_life_days?: number
@@ -23095,4 +23370,3 @@ export const Constants = {
     Enums: {},
   },
 } as const
-
