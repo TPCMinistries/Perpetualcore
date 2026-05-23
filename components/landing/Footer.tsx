@@ -225,10 +225,10 @@ export function Footer() {
           </div>
         </div>
 
-        <div className="border-t border-border/60 pt-8 flex flex-col md:flex-row md:justify-between md:items-center gap-3 text-sm text-muted-foreground">
+        <div className="border-t border-border/60 pt-8 flex flex-col md:flex-row md:justify-between md:items-start gap-3 text-sm text-muted-foreground">
           <p>© 2026 Perpetual Core. All rights reserved.</p>
-          <p className="text-xs">
-            10% of every engagement funds the{" "}
+          <p className="text-xs md:text-right max-w-md leading-[1.6]">
+            10–15% of every revenue dollar funds the{" "}
             <a
               href="https://theiha.org"
               target="_blank"
@@ -237,7 +237,9 @@ export function Footer() {
             >
               Institute for Human Advancement
             </a>
-            .
+            <span className="text-muted-foreground/80">
+              {" "}· 501(c)(3) · EIN 41-5182519 · Audited annually.
+            </span>
           </p>
         </div>
       </div>
