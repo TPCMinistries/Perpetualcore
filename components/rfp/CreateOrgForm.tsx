@@ -22,6 +22,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { NaicsAssistantModal } from "@/components/rfp/NaicsAssistantModal";
 
 type OrgType = "nonprofit" | "forprofit" | "dual";
 
@@ -40,6 +41,13 @@ export function CreateOrgForm() {
     if (/^\d{2,6}$/.test(code) && !naics.includes(code)) {
       setNaics([...naics, code]);
       setNaicsInput("");
+    }
+  };
+
+  /** Add a NAICS code from the AI assistant. Validates + dedupes here too. */
+  const addNaicsFromAssistant = (code: string) => {
+    if (/^\d{2,6}$/.test(code) && !naics.includes(code)) {
+      setNaics((prev) => [...prev, code]);
     }
   };
 
@@ -112,7 +120,13 @@ export function CreateOrgForm() {
 
       {/* NAICS codes */}
       <div className="space-y-2">
-        <Label htmlFor="org-naics">NAICS codes</Label>
+        <div className="flex items-center justify-between">
+          <Label htmlFor="org-naics">NAICS codes</Label>
+          <NaicsAssistantModal
+            onAdd={addNaicsFromAssistant}
+            existingCodes={naics}
+          />
+        </div>
         <div className="flex gap-2">
           <Input
             id="org-naics"
