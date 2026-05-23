@@ -106,35 +106,6 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
-  // Rate limit API routes, then pass through (skip cron + webhook routes)
-  if (request.nextUrl.pathname.startsWith('/api/')) {
-    if (
-      apiRateLimiter &&
-      !request.nextUrl.pathname.startsWith('/api/cron/') &&
-      !request.nextUrl.pathname.startsWith('/api/webhooks/')
-    ) {
-      const ip = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim()
-        || request.headers.get('x-real-ip')
-        || 'unknown';
-      const result = await apiRateLimiter.limit(`mw:${ip}`);
-      if (!result.success) {
-        const reset = Math.ceil((result.reset - Date.now()) / 1000);
-        return NextResponse.json(
-          { error: 'Too many requests', retryAfter: reset },
-          {
-            status: 429,
-            headers: {
-              'Retry-After': reset.toString(),
-              'X-RateLimit-Limit': result.limit.toString(),
-              'X-RateLimit-Remaining': '0',
-            },
-          }
-        );
-      }
-    }
-    return NextResponse.next();
-  }
-
   let response = NextResponse.next({
     request: {
       headers: request.headers,
@@ -206,8 +177,43 @@ export async function middleware(request: NextRequest) {
     }
   );
 
-  // Refresh session if expired
+  // Refresh session if expired. CRITICAL: this must run for /api/* routes too
+  // (not just rendered pages) — Supabase access tokens last ~1h and route
+  // handlers that call `createClient()` then `supabase.auth.getUser()` only
+  // see the cookie state at request time. Without a refresh here, an expired
+  // access token silently 401s every API call even though the page rendered
+  // immediately before looked signed-in.
   const { data: { user } } = await supabase.auth.getUser();
+
+  // Rate limit API routes (after session refresh so the route handler sees
+  // a valid cookie), then short-circuit before analytics + IP whitelist.
+  if (request.nextUrl.pathname.startsWith('/api/')) {
+    if (
+      apiRateLimiter &&
+      !request.nextUrl.pathname.startsWith('/api/cron/') &&
+      !request.nextUrl.pathname.startsWith('/api/webhooks/')
+    ) {
+      const ip = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim()
+        || request.headers.get('x-real-ip')
+        || 'unknown';
+      const result = await apiRateLimiter.limit(`mw:${ip}`);
+      if (!result.success) {
+        const reset = Math.ceil((result.reset - Date.now()) / 1000);
+        return NextResponse.json(
+          { error: 'Too many requests', retryAfter: reset },
+          {
+            status: 429,
+            headers: {
+              'Retry-After': reset.toString(),
+              'X-RateLimit-Limit': result.limit.toString(),
+              'X-RateLimit-Remaining': '0',
+            },
+          }
+        );
+      }
+    }
+    return response;
+  }
 
   // --- Analytics: UTM capture + anonymous/session ID cookies ---
   // Capture UTM params from URL on first visit (don't overwrite existing)
