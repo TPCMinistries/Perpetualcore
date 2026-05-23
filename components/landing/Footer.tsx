@@ -28,6 +28,7 @@ const PRODUCT_LINKS = [
   { label: "Vellum", href: "/products/vellum", external: false },
   { label: "RFP Engine", href: "https://rfp.perpetualcore.com", external: true },
   { label: "RFP Sentry", href: "/products/rfp-sentry", external: false },
+  { label: "Janice", href: "https://janice.perpetualcore.com", external: true },
 ];
 
 const FUND_LINKS = [
