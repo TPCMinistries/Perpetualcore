@@ -1,17 +1,20 @@
 "use client";
 
 /**
- * NaicsAssistantModal — "Help me pick" AI assistant for the NAICS field on
- * /orgs/new. User describes their organization in one sentence; GPT-4o-mini
- * returns 3–5 NAICS code suggestions with one-line rationales; user clicks
- * "Add" on the ones that fit.
+ * NaicsAssistantModal v2 — "Help me pick" AI assistant for the NAICS field on
+ * /orgs/new. The user describes their organization in plain English; the
+ * model identifies distinct programs (workforce training, case management,
+ * etc.) and returns NAICS codes grouped by program with 2-3 sentence
+ * rationales naming the specific procurement systems each code unlocks.
  *
- * Designed to be a side door, not a replacement: users who already know
- * their codes type them directly into the input. This modal exists to
- * unblock the rest.
+ * Designed to be the first "wow" moment of onboarding: it has to convince
+ * grant-funded orgs on contact that this product knows the federal/state/
+ * city procurement landscape. Cards reveal with a staggered animation,
+ * loading shows multi-step reasoning labels, and a follow-up input lets
+ * the user keep adding programs without leaving the modal.
  */
 
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import {
@@ -22,20 +25,58 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Sparkles, Loader2, Plus, Check } from "lucide-react";
+import { Sparkles, Loader2, Plus, Check, ArrowRight } from "lucide-react";
 
-interface NaicsSuggestion {
+type ProcurementSystem =
+  | "SAM.gov"
+  | "Grants.gov"
+  | "NY State Grants Gateway"
+  | "NYC PASSPort"
+  | "GSA eBuy"
+  | "State procurement portals"
+  | "City/County RFPs"
+  | "Foundation funders";
+
+interface NaicsCode {
   code: string;
   title: string;
   rationale: string;
+  procurement: ProcurementSystem[];
+  confidence: "high" | "medium" | "low";
+}
+
+interface NaicsProgram {
+  name: string;
+  summary: string;
+  codes: NaicsCode[];
 }
 
 interface NaicsAssistantModalProps {
-  /** Called when the user clicks "Add" on a suggestion. Parent dedupes. */
   onAdd: (code: string) => void;
-  /** Codes already in the form, used to render "Added" state instead of "Add". */
   existingCodes: string[];
 }
+
+// Synthetic loading steps that play during the API call. The model itself
+// returns one chunk, but showing the wait as a sequence of steps signals
+// real reasoning rather than a black-box spinner.
+const LOADING_STEPS = [
+  "Reading your description…",
+  "Identifying program areas…",
+  "Mapping to NAICS 2022 taxonomy…",
+  "Matching to procurement systems…",
+] as const;
+
+const CONFIDENCE_STYLES: Record<NaicsCode["confidence"], string> = {
+  high: "bg-emerald-500/15 text-emerald-300 border-emerald-500/30",
+  medium: "bg-amber-500/15 text-amber-300 border-amber-500/30",
+  low: "bg-zinc-500/15 text-zinc-400 border-zinc-500/30",
+};
+
+const CONFIDENCE_LABEL: Record<NaicsCode["confidence"], string> = {
+  high: "Strong match",
+  medium: "Reasonable match",
+  low: "Adjacent — lower priority",
+};
 
 export function NaicsAssistantModal({
   onAdd,
@@ -43,45 +84,95 @@ export function NaicsAssistantModal({
 }: NaicsAssistantModalProps) {
   const [open, setOpen] = useState(false);
   const [description, setDescription] = useState("");
+  const [followup, setFollowup] = useState("");
   const [loading, setLoading] = useState(false);
+  const [loadingStep, setLoadingStep] = useState(0);
   const [error, setError] = useState<string | null>(null);
-  const [suggestions, setSuggestions] = useState<NaicsSuggestion[]>([]);
+  /** All programs collected across queries — appended, never replaced. */
+  const [programs, setPrograms] = useState<NaicsProgram[]>([]);
+  /** True after the first successful query, so we switch from primary input → follow-up input. */
+  const [hasResults, setHasResults] = useState(false);
+
+  const scrollEndRef = useRef<HTMLDivElement | null>(null);
+
+  // Drive the synthetic loading-step cycle during requests.
+  useEffect(() => {
+    if (!loading) {
+      setLoadingStep(0);
+      return;
+    }
+    const id = window.setInterval(() => {
+      setLoadingStep((s) => Math.min(s + 1, LOADING_STEPS.length - 1));
+    }, 600);
+    return () => window.clearInterval(id);
+  }, [loading]);
+
+  // Auto-scroll to the newest program when results land.
+  useEffect(() => {
+    if (programs.length === 0) return;
+    scrollEndRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
+  }, [programs.length]);
 
   const reset = () => {
     setDescription("");
-    setSuggestions([]);
+    setFollowup("");
+    setPrograms([]);
     setError(null);
+    setHasResults(false);
     setLoading(false);
+    setLoadingStep(0);
   };
 
-  const submit = async () => {
+  const runQuery = async (text: string, isFollowup: boolean) => {
     setLoading(true);
     setError(null);
-    setSuggestions([]);
+    setLoadingStep(0);
     try {
       const res = await fetch("/api/orgs/naics-suggest", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ description: description.trim() }),
+        body: JSON.stringify({ description: text.trim() }),
       });
       const data = await res.json();
       if (!res.ok) {
         setError(
           data.error === "invalid_body"
-            ? "Please write 10–500 characters."
+            ? "Please write 10–600 characters."
             : data.error === "unauthorized"
               ? "Please sign in first."
               : "Something went wrong. Try again.",
         );
         return;
       }
-      setSuggestions(data.suggestions ?? []);
+      const newPrograms = (data.programs ?? []) as NaicsProgram[];
+      // Dedupe codes that were already returned in earlier programs.
+      const existingFromPriorQueries = new Set(
+        programs.flatMap((p) => p.codes.map((c) => c.code)),
+      );
+      const cleaned = newPrograms
+        .map((p) => ({
+          ...p,
+          codes: p.codes.filter((c) => !existingFromPriorQueries.has(c.code)),
+        }))
+        .filter((p) => p.codes.length > 0);
+
+      setPrograms((prev) => [...prev, ...cleaned]);
+      setHasResults(true);
+      if (isFollowup) setFollowup("");
     } catch {
       setError("Network error. Try again.");
     } finally {
       setLoading(false);
     }
   };
+
+  const handleAddAll = (program: NaicsProgram) => {
+    for (const c of program.codes) {
+      if (!existingCodes.includes(c.code)) onAdd(c.code);
+    }
+  };
+
+  const totalCodes = programs.reduce((sum, p) => sum + p.codes.length, 0);
 
   return (
     <Dialog
@@ -103,105 +194,332 @@ export function NaicsAssistantModal({
         </Button>
       </DialogTrigger>
 
-      <DialogContent className="sm:max-w-lg">
+      <DialogContent className="sm:max-w-2xl max-h-[85vh] overflow-hidden flex flex-col">
         <DialogHeader>
-          <DialogTitle>Find your NAICS codes</DialogTitle>
+          <DialogTitle className="flex items-center gap-2">
+            <Sparkles className="h-4 w-4 text-emerald-400" />
+            Find your NAICS codes
+          </DialogTitle>
           <DialogDescription>
-            Describe what your organization does in one sentence. We&apos;ll
-            suggest codes that match federal and state RFP filters.
+            Describe what your organization does. We&apos;ll group codes by
+            program and name the procurement systems each one unlocks.
           </DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-2">
-          <Textarea
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            placeholder="e.g. We train young adults in NYC for healthcare careers — CNA, EKG, phlebotomy — and place graduates with hospital partners."
-            rows={3}
-            maxLength={500}
-            disabled={loading}
-          />
-          <div className="flex items-center justify-between">
-            <p className="text-xs text-muted-foreground">
-              {description.length}/500
-            </p>
-            <Button
-              type="button"
-              size="sm"
-              onClick={submit}
-              disabled={loading || description.trim().length < 10}
-            >
-              {loading ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Thinking…
-                </>
-              ) : (
-                <>Suggest codes</>
-              )}
-            </Button>
-          </div>
-        </div>
-
-        {error && (
-          <p role="alert" className="text-sm text-destructive">
-            {error}
-          </p>
-        )}
-
-        {suggestions.length > 0 && (
-          <div className="space-y-2">
-            <h3 className="text-xs font-mono uppercase tracking-[0.18em] text-muted-foreground">
-              Suggestions
-            </h3>
+        <div className="flex-1 overflow-y-auto pr-1 -mr-1 space-y-4">
+          {!hasResults && (
             <div className="space-y-2">
-              {suggestions.map((s) => {
-                const already = existingCodes.includes(s.code);
+              <Textarea
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                placeholder="e.g. We train young adults in NYC for healthcare careers — CNA, EKG, phlebotomy — and provide wraparound case management to keep them in their jobs after placement."
+                rows={4}
+                maxLength={600}
+                disabled={loading}
+                className="resize-none"
+              />
+              <div className="flex items-center justify-between">
+                <p className="text-xs text-muted-foreground">
+                  {description.length}/600
+                </p>
+                <Button
+                  type="button"
+                  onClick={() => runQuery(description, false)}
+                  disabled={loading || description.trim().length < 10}
+                  className="gap-2"
+                >
+                  {loading ? (
+                    <>
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      Thinking…
+                    </>
+                  ) : (
+                    <>
+                      <Sparkles className="h-4 w-4" />
+                      Find my codes
+                    </>
+                  )}
+                </Button>
+              </div>
+            </div>
+          )}
+
+          {loading && (
+            <div className="rounded-lg border border-emerald-500/20 bg-emerald-500/5 p-4 space-y-2">
+              {LOADING_STEPS.map((step, i) => {
+                const status =
+                  i < loadingStep
+                    ? "done"
+                    : i === loadingStep
+                      ? "active"
+                      : "pending";
                 return (
                   <div
-                    key={s.code}
-                    className="rounded-lg border bg-muted/40 p-3"
+                    key={step}
+                    className={
+                      "flex items-center gap-2 text-sm transition-opacity " +
+                      (status === "pending"
+                        ? "opacity-40"
+                        : status === "done"
+                          ? "opacity-70"
+                          : "opacity-100")
+                    }
                   >
-                    <div className="flex items-start justify-between gap-3">
-                      <div className="min-w-0 flex-1">
-                        <div className="flex items-baseline gap-2 flex-wrap">
-                          <span className="font-mono text-sm font-semibold">
-                            {s.code}
-                          </span>
-                          <span className="text-sm">{s.title}</span>
-                        </div>
-                        <p className="text-xs text-muted-foreground mt-1">
-                          {s.rationale}
-                        </p>
-                      </div>
-                      <Button
-                        type="button"
-                        size="sm"
-                        variant={already ? "outline" : "default"}
-                        disabled={already}
-                        onClick={() => onAdd(s.code)}
-                        className="shrink-0 gap-1"
-                      >
-                        {already ? (
-                          <>
-                            <Check className="h-3.5 w-3.5" />
-                            Added
-                          </>
-                        ) : (
-                          <>
-                            <Plus className="h-3.5 w-3.5" />
-                            Add
-                          </>
-                        )}
-                      </Button>
-                    </div>
+                    {status === "done" ? (
+                      <Check className="h-3.5 w-3.5 text-emerald-400" />
+                    ) : status === "active" ? (
+                      <Loader2 className="h-3.5 w-3.5 animate-spin text-emerald-400" />
+                    ) : (
+                      <span className="h-3.5 w-3.5 rounded-full border border-zinc-700" />
+                    )}
+                    <span
+                      className={
+                        status === "active"
+                          ? "text-emerald-200"
+                          : "text-zinc-400"
+                      }
+                    >
+                      {step}
+                    </span>
                   </div>
                 );
               })}
             </div>
+          )}
+
+          {error && (
+            <p
+              role="alert"
+              className="text-sm text-destructive rounded-md border border-destructive/30 bg-destructive/5 px-3 py-2"
+            >
+              {error}
+            </p>
+          )}
+
+          {programs.length > 0 && (
+            <div className="space-y-5">
+              {programs.map((program, pi) => (
+                <ProgramCard
+                  key={`${program.name}-${pi}`}
+                  program={program}
+                  programIndex={pi}
+                  existingCodes={existingCodes}
+                  onAdd={onAdd}
+                  onAddAll={handleAddAll}
+                />
+              ))}
+              <div ref={scrollEndRef} />
+            </div>
+          )}
+
+          {hasResults && !loading && (
+            <div className="rounded-lg border border-dashed border-zinc-700 p-4 space-y-2">
+              <p className="text-xs font-mono uppercase tracking-[0.18em] text-muted-foreground">
+                Need codes for another program?
+              </p>
+              <Textarea
+                value={followup}
+                onChange={(e) => setFollowup(e.target.value)}
+                placeholder="e.g. We also run a re-entry mentoring program for young adults coming home from incarceration."
+                rows={3}
+                maxLength={600}
+                className="resize-none"
+              />
+              <div className="flex items-center justify-end">
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="outline"
+                  onClick={() => runQuery(followup, true)}
+                  disabled={followup.trim().length < 10}
+                  className="gap-2"
+                >
+                  Find more codes
+                  <ArrowRight className="h-3.5 w-3.5" />
+                </Button>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {hasResults && (
+          <div className="flex items-center justify-between border-t border-zinc-800 pt-3 mt-1">
+            <p className="text-xs text-muted-foreground">
+              {totalCodes} code{totalCodes === 1 ? "" : "s"} across{" "}
+              {programs.length} program{programs.length === 1 ? "" : "s"}
+            </p>
+            <Button type="button" variant="ghost" size="sm" onClick={reset}>
+              Start over
+            </Button>
           </div>
         )}
       </DialogContent>
     </Dialog>
+  );
+}
+
+/**
+ * ProgramCard — one program section with header + per-code rows.
+ * Staggered fade-in: each card lands ~120ms after the previous.
+ */
+function ProgramCard({
+  program,
+  programIndex,
+  existingCodes,
+  onAdd,
+  onAddAll,
+}: {
+  program: NaicsProgram;
+  programIndex: number;
+  existingCodes: string[];
+  onAdd: (code: string) => void;
+  onAddAll: (program: NaicsProgram) => void;
+}) {
+  const [visible, setVisible] = useState(false);
+  useEffect(() => {
+    const id = window.setTimeout(() => setVisible(true), programIndex * 120);
+    return () => window.clearTimeout(id);
+  }, [programIndex]);
+
+  const allAdded = program.codes.every((c) => existingCodes.includes(c.code));
+
+  return (
+    <div
+      className={
+        "rounded-xl border border-zinc-800 bg-zinc-900/40 p-4 space-y-3 transition-all duration-500 " +
+        (visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2")
+      }
+    >
+      <div className="flex items-start justify-between gap-3">
+        <div className="min-w-0">
+          <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-emerald-400">
+            Program
+          </p>
+          <h3 className="font-semibold text-zinc-100">{program.name}</h3>
+          {program.summary && (
+            <p className="text-sm text-muted-foreground mt-0.5">
+              {program.summary}
+            </p>
+          )}
+        </div>
+        <Button
+          type="button"
+          size="sm"
+          variant={allAdded ? "outline" : "secondary"}
+          disabled={allAdded}
+          onClick={() => onAddAll(program)}
+          className="shrink-0 gap-1"
+        >
+          {allAdded ? (
+            <>
+              <Check className="h-3.5 w-3.5" />
+              All added
+            </>
+          ) : (
+            <>
+              <Plus className="h-3.5 w-3.5" />
+              Add all
+            </>
+          )}
+        </Button>
+      </div>
+
+      <div className="space-y-2">
+        {program.codes.map((c, ci) => (
+          <CodeCard
+            key={c.code}
+            code={c}
+            delayMs={programIndex * 120 + ci * 60}
+            already={existingCodes.includes(c.code)}
+            onAdd={() => onAdd(c.code)}
+          />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function CodeCard({
+  code,
+  delayMs,
+  already,
+  onAdd,
+}: {
+  code: NaicsCode;
+  delayMs: number;
+  already: boolean;
+  onAdd: () => void;
+}) {
+  const [visible, setVisible] = useState(false);
+  useEffect(() => {
+    const id = window.setTimeout(() => setVisible(true), delayMs);
+    return () => window.clearTimeout(id);
+  }, [delayMs]);
+
+  return (
+    <div
+      className={
+        "rounded-lg border border-zinc-800 bg-zinc-950/60 p-3 transition-all duration-500 " +
+        (visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-1")
+      }
+    >
+      <div className="flex items-start justify-between gap-3">
+        <div className="min-w-0 flex-1 space-y-2">
+          <div className="flex items-baseline gap-2 flex-wrap">
+            <span className="font-mono text-sm font-semibold text-zinc-100">
+              {code.code}
+            </span>
+            <span className="text-sm text-zinc-300">{code.title}</span>
+            <span
+              className={
+                "rounded-full border px-2 py-0.5 font-mono text-[9px] uppercase tracking-[0.16em] " +
+                CONFIDENCE_STYLES[code.confidence]
+              }
+              title={CONFIDENCE_LABEL[code.confidence]}
+            >
+              {code.confidence}
+            </span>
+          </div>
+
+          <p className="text-xs leading-relaxed text-zinc-400">
+            {code.rationale}
+          </p>
+
+          {code.procurement.length > 0 && (
+            <div className="flex flex-wrap gap-1.5 pt-0.5">
+              {code.procurement.map((p) => (
+                <span
+                  key={p}
+                  className="rounded-md border border-zinc-800 bg-zinc-900 px-2 py-0.5 font-mono text-[10px] uppercase tracking-[0.12em] text-zinc-400"
+                >
+                  {p}
+                </span>
+              ))}
+            </div>
+          )}
+        </div>
+
+        <Button
+          type="button"
+          size="sm"
+          variant={already ? "outline" : "default"}
+          disabled={already}
+          onClick={onAdd}
+          className="shrink-0 gap-1"
+        >
+          {already ? (
+            <>
+              <Check className="h-3.5 w-3.5" />
+              Added
+            </>
+          ) : (
+            <>
+              <Plus className="h-3.5 w-3.5" />
+              Add
+            </>
+          )}
+        </Button>
+      </div>
+    </div>
   );
 }
