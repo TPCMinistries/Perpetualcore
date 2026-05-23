@@ -1,9 +1,9 @@
 /**
  * /products — portfolio overview (arm 02 of the company).
- * Seven products with status pills, mono indices, hairline grid.
+ * Eight products with status pills, mono indices, hairline grid.
  * Visual register matches homepage v5.
  *
- * Order: Atlas → Sentinel → Sage → Vellum → RFP Engine → RFP Sentry → Janice.
+ * Order: Atlas → Sentinel → Sage → Atelier → Vellum → RFP Engine → RFP Sentry → Janice.
  */
 
 import Link from "next/link";
@@ -16,7 +16,7 @@ import { DecisionTree } from "@/components/products/DecisionTree";
 export const metadata = {
   title: "Products — Perpetual Core",
   description:
-    "Seven AI-native products. Each one shipped in an engagement. Each one still running. The portfolio is the proof; the engagement is the work.",
+    "Eight AI-native products. Each one shipped in an engagement. Each one still running. The portfolio is the proof; the engagement is the work.",
 };
 
 type Product = {
@@ -54,8 +54,8 @@ const PRODUCTS: Product[] = [
   {
     index: "03",
     name: "Sage",
-    status: "BUILD",
-    statusColor: "invite",
+    status: "LIVE",
+    statusColor: "live",
     headline: "Personal AI OS with ambient context and your voice.",
     body:
       "For operators who run two or more entities, live in voice memos, and want a relational AI partner — coach, chief of staff, strategist — not a chatbot you re-explain yourself to every morning. Lives wherever you do. Telegram, voice, web. 15% of every Sage subscription funds the Institute for Human Advancement.",
@@ -63,6 +63,16 @@ const PRODUCTS: Product[] = [
   },
   {
     index: "04",
+    name: "Atelier",
+    status: "LIVE",
+    statusColor: "live",
+    headline: "Team workspace where staff, interns, and clients run agent-augmented Flows.",
+    body:
+      "For teams that operate across Sage, Atlas, Sentinel, RFP Engine, and Janice — one workspace where Projects hold Flows, and Flows orchestrate every PC product. Sage thinks; Atelier makes. Built internal-first for Uplift Communities and IHA program staff. Self-serve from $99/month.",
+    cta: { label: "Visit Atelier", href: "https://atelier.perpetualcore.com", external: true },
+  },
+  {
+    index: "05",
     name: "Vellum",
     status: "BUILD",
     statusColor: "invite",
@@ -73,7 +83,7 @@ const PRODUCTS: Product[] = [
     cta: { label: "See Vellum", href: "/products/vellum" },
   },
   {
-    index: "05",
+    index: "06",
     name: "RFP Engine",
     status: "LIVE",
     statusColor: "live",
@@ -83,7 +93,7 @@ const PRODUCTS: Product[] = [
     cta: { label: "Visit RFP Engine", href: "https://rfp.perpetualcore.com", external: true },
   },
   {
-    index: "06",
+    index: "07",
     name: "RFP Sentry",
     status: "BUILD",
     statusColor: "invite",
@@ -93,7 +103,7 @@ const PRODUCTS: Product[] = [
     cta: { label: "Join the early list", href: "/products/rfp-sentry" },
   },
   {
-    index: "07",
+    index: "08",
     name: "Janice",
     status: "LIVE",
     statusColor: "live",
@@ -143,7 +153,7 @@ export default function ProductsPage() {
           </div>
 
           <h1 className="display-hero text-[40px] sm:text-[56px] lg:text-[76px] text-foreground mb-12 max-w-5xl leading-[1.05]">
-            Seven products. Each one{" "}
+            Eight products. Each one{" "}
             <span className="italic text-foreground/85">shipped in an engagement.</span> Each one
             still running.
           </h1>
@@ -207,7 +217,7 @@ export default function ProductsPage() {
             <SectionRail index="—" label="In production" />
             <div className="max-w-2xl">
               <h3 className="text-3xl sm:text-4xl lg:text-5xl font-semibold leading-[1.1] tracking-[-0.025em] text-foreground">
-                Seven products in the portfolio.
+                Eight products in the portfolio.
               </h3>
             </div>
           </div>

@@ -25,6 +25,7 @@ const PRODUCT_LINKS = [
   { label: "Atlas Discovery", href: "/products/atlas-discovery", external: false },
   { label: "Sentinel", href: "/products/sentinel", external: false },
   { label: "Sage", href: "/products/sage", external: false },
+  { label: "Atelier", href: "https://atelier.perpetualcore.com", external: true },
   { label: "Vellum", href: "/products/vellum", external: false },
   { label: "RFP Engine", href: "https://rfp.perpetualcore.com", external: true },
   { label: "RFP Sentry", href: "/products/rfp-sentry", external: false },

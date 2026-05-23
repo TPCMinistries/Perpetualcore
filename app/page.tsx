@@ -39,8 +39,8 @@ const ARMS = [
   {
     index: "02",
     name: "Products",
-    summary: "Seven AI-native products in production — from due diligence to portfolio COO.",
-    meta: "7 in portfolio",
+    summary: "Eight AI-native products in production — from due diligence to portfolio COO.",
+    meta: "8 in portfolio",
     href: "/products",
   },
   {
@@ -62,11 +62,12 @@ const ARMS = [
 const PRODUCTS = [
   { index: "01", name: "Atlas", status: "IN PILOT", statusColor: "pilot" as const, tagline: "AI-native COO for fund-backed portcos.", href: "/products/atlas", external: false },
   { index: "02", name: "Sentinel", status: "LIVE", statusColor: "live" as const, tagline: "Due diligence and intel for the people Kroll won't take calls from.", href: "https://sentinel.perpetualcore.com", external: true },
-  { index: "03", name: "Sage", status: "BUILD", statusColor: "invite" as const, tagline: "Personal AI OS with ambient context and your voice.", href: "/products/sage", external: false },
-  { index: "04", name: "Vellum", status: "BUILD", statusColor: "invite" as const, tagline: "Institutional knowledge — calls, docs, voice notes, channels.", href: "/products/vellum", external: false },
-  { index: "05", name: "RFP Engine", status: "LIVE", statusColor: "live" as const, tagline: "Find the right RFP. Draft it in your voice. Ship it clean.", href: "https://rfp.perpetualcore.com", external: true },
-  { index: "06", name: "RFP Sentry", status: "BUILD", statusColor: "invite" as const, tagline: "Bid intelligence + compliance gate. Sister to RFP Engine.", href: "/products/rfp-sentry", external: false },
-  { index: "07", name: "Janice", status: "LIVE", statusColor: "live" as const, tagline: "Hiring and onboarding OS for people-heavy orgs.", href: "https://janice.perpetualcore.com", external: true },
+  { index: "03", name: "Sage", status: "LIVE", statusColor: "live" as const, tagline: "Personal AI OS with ambient context and your voice.", href: "/products/sage", external: false },
+  { index: "04", name: "Atelier", status: "LIVE", statusColor: "live" as const, tagline: "Team workspace where staff, interns, and clients run agent-augmented Flows across every PC product.", href: "https://atelier.perpetualcore.com", external: true },
+  { index: "05", name: "Vellum", status: "BUILD", statusColor: "invite" as const, tagline: "Institutional knowledge — calls, docs, voice notes, channels.", href: "/products/vellum", external: false },
+  { index: "06", name: "RFP Engine", status: "LIVE", statusColor: "live" as const, tagline: "Find the right RFP. Draft it in your voice. Ship it clean.", href: "https://rfp.perpetualcore.com", external: true },
+  { index: "07", name: "RFP Sentry", status: "BUILD", statusColor: "invite" as const, tagline: "Bid intelligence + compliance gate. Sister to RFP Engine.", href: "/products/rfp-sentry", external: false },
+  { index: "08", name: "Janice", status: "LIVE", statusColor: "live" as const, tagline: "Hiring and onboarding OS for people-heavy orgs.", href: "https://janice.perpetualcore.com", external: true },
 ] as const;
 
 const PHASES = [
@@ -88,6 +89,33 @@ const INSTITUTE_PROGRAMS = [
   { name: "IHA Advance", body: "Kenya delegation and East Africa field programs." },
   { name: "Workforce", body: "Healthcare and community workforce development for low-income New Yorkers." },
 ];
+
+const FIELD_NOTES = [
+  {
+    index: "001",
+    date: "2026-05-22",
+    title: "Why we don't take engagements under $75,000.",
+    summary:
+      "Letter #001 of The Install. The honest math behind the floor — and what we built for everyone below it.",
+    href: "/blog/the-75k-floor",
+  },
+  {
+    index: "002",
+    date: "2026-05-20",
+    title: "What an AI install actually costs.",
+    summary:
+      "Vendor subscriptions, engineering time, integration debt, outcome evaluation. The four buckets every honest install carries on its books.",
+    href: "/blog/what-an-ai-install-actually-costs",
+  },
+  {
+    index: "003",
+    date: "2026-05-20",
+    title: "Outcome-eval, the line item every AI install skips.",
+    summary:
+      "Without it, you don't have an install — you have a demo that ran once. Why outcome evaluation is the most load-bearing line item in any engagement.",
+    href: "/blog/outcome-eval-the-line-item-every-ai-install-skips",
+  },
+] as const;
 
 const INVITATION_ROWS = [
   {
@@ -328,57 +356,153 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ─── 1.5 TRUST STRIP — what we operate, who we fund, who we're built under ───── */}
-      <section className="border-y border-border bg-card/40 py-10 sm:py-12">
-        <div className="container mx-auto px-6 sm:px-8">
-          <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground mb-6 text-center">
-            One operating company · four arms · audited annually
-          </p>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-12 items-center text-center">
-            <div className="space-y-1">
-              <p className="text-base sm:text-lg font-semibold tracking-[-0.01em] text-foreground">
-                Perpetual Core
+      {/* ─── 1.5 CHARTER — institutional disclosure block ──────────────
+       *
+       * Replaces a 4-card "logo strip" with a dense, audit-grade
+       * disclosure. The goal is institutional weight, not SaaS trust
+       * signals. Reads as the cover page of an annual report — EIN,
+       * founded date, published standard, regulatory surface, field arms.
+       *
+       * Visual register: hairlines, mono labels, multi-row grid,
+       * single accent line. Black-on-white. No badges, no logos.
+       */}
+      <section className="border-y border-border bg-card/40">
+        <div className="container mx-auto px-6 sm:px-8 py-12 sm:py-14">
+          <div className="flex items-baseline justify-between flex-wrap gap-x-8 gap-y-2 mb-8 pb-6 border-b border-border">
+            <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-foreground">
+              § Charter · audit-grade disclosure
+            </p>
+            <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
+              Established 2017 · Audited annually
+            </p>
+          </div>
+
+          <div className="grid lg:grid-cols-2 gap-x-12 gap-y-8">
+            {/* Parent institution */}
+            <div>
+              <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-primary mb-3">
+                Parent institution
               </p>
-              <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
-                Studio · 6 products
-              </p>
-            </div>
-            <a
-              href="https://theiha.org"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="space-y-1 hover:opacity-80 transition"
-            >
-              <p className="text-base sm:text-lg font-semibold tracking-[-0.01em] text-foreground inline-flex items-center justify-center gap-1">
+              <p className="text-base sm:text-lg font-semibold tracking-[-0.01em] text-foreground mb-1.5 leading-[1.3]">
                 Institute for Human Advancement
-                <ArrowUpRight className="h-3.5 w-3.5" aria-hidden />
               </p>
-              <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
-                501(c)(3) · 10–15% of revenue
+              <p className="font-mono text-[10.5px] uppercase tracking-[0.16em] text-muted-foreground mb-3">
+                501(c)(3) public charity · EIN 41-5182519 · Founded 2017
               </p>
-            </a>
-            <a
-              href="https://upliftcommunities.com"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="space-y-1 hover:opacity-80 transition"
-            >
-              <p className="text-base sm:text-lg font-semibold tracking-[-0.01em] text-foreground inline-flex items-center justify-center gap-1">
-                Uplift Communities
-                <ArrowUpRight className="h-3.5 w-3.5" aria-hidden />
-              </p>
-              <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
-                Operating arm · workforce + founders
-              </p>
-            </a>
-            <div className="space-y-1">
-              <p className="text-base sm:text-lg font-semibold tracking-[-0.01em] text-foreground">
-                DeepFutures
-              </p>
-              <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
-                Pre-seed fund · by introduction
+              <p className="text-sm text-muted-foreground leading-[1.6] max-w-md">
+                The parent institution. Every Perpetual Core arm reports to it
+                — and a fixed share of every revenue dollar flows to it as a
+                structural commitment, not a marketing gesture.
               </p>
             </div>
+
+            {/* Published standard */}
+            <div className="lg:border-l lg:border-border lg:pl-12">
+              <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-primary mb-3">
+                Published standard
+              </p>
+              <Link
+                href="/engine/spec"
+                className="group inline-flex items-baseline gap-2 text-base sm:text-lg font-semibold tracking-[-0.01em] text-foreground mb-1.5 leading-[1.3] hover:text-primary transition-colors"
+              >
+                The Perpetual Engine · Spec v1.0
+                <ArrowUpRight className="h-3.5 w-3.5 translate-y-0.5" aria-hidden />
+              </Link>
+              <p className="font-mono text-[10.5px] uppercase tracking-[0.16em] text-muted-foreground mb-3">
+                Published CC BY 4.0 · Citable · Open to adopt
+              </p>
+              <p className="text-sm text-muted-foreground leading-[1.6] max-w-md">
+                The structural standard the company is built on, released as
+                an open standard for any AI-native venture. We&apos;re the
+                reference implementation — we hope it becomes the category.
+              </p>
+            </div>
+
+            {/* Operating surface */}
+            <div className="lg:pt-2">
+              <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-primary mb-3">
+                Operating surface
+              </p>
+              <div className="grid grid-cols-2 gap-x-6 gap-y-2 max-w-md mb-3">
+                <p className="font-mono text-[11px] uppercase tracking-[0.16em] text-foreground">
+                  Healthcare · HIPAA
+                </p>
+                <p className="font-mono text-[11px] uppercase tracking-[0.16em] text-foreground">
+                  Education · FERPA
+                </p>
+                <p className="font-mono text-[11px] uppercase tracking-[0.16em] text-foreground">
+                  Field health · PEPFAR / IRB
+                </p>
+                <p className="font-mono text-[11px] uppercase tracking-[0.16em] text-foreground">
+                  Capital · KYC / AML
+                </p>
+              </div>
+              <p className="text-sm text-muted-foreground leading-[1.6] max-w-md">
+                The installs that work are the ones built for the regulatory
+                surface they live on. We build for these conditions because
+                this is where our work lives.
+              </p>
+            </div>
+
+            {/* Field arms */}
+            <div className="lg:border-l lg:border-border lg:pl-12 lg:pt-2">
+              <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-primary mb-3">
+                Field arms
+              </p>
+              <ul className="space-y-1.5 mb-3 max-w-md">
+                <li className="flex items-baseline gap-3">
+                  <span aria-hidden className="font-mono text-[10px] text-muted-foreground tracking-[0.18em]">01</span>
+                  <a
+                    href="https://upliftcommunities.com"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="font-mono text-[11px] uppercase tracking-[0.16em] text-foreground inline-flex items-center gap-1 hover:text-primary transition-colors"
+                  >
+                    Uplift Communities · NYC workforce <ArrowUpRight className="h-3 w-3" />
+                  </a>
+                </li>
+                <li className="flex items-baseline gap-3">
+                  <span aria-hidden className="font-mono text-[10px] text-muted-foreground tracking-[0.18em]">02</span>
+                  <span className="font-mono text-[11px] uppercase tracking-[0.16em] text-foreground">
+                    IHA Academy · AI literacy
+                  </span>
+                </li>
+                <li className="flex items-baseline gap-3">
+                  <span aria-hidden className="font-mono text-[10px] text-muted-foreground tracking-[0.18em]">03</span>
+                  <span className="font-mono text-[11px] uppercase tracking-[0.16em] text-foreground">
+                    IHA Advance · Kenya delegation · April 2026
+                  </span>
+                </li>
+                <li className="flex items-baseline gap-3">
+                  <span aria-hidden className="font-mono text-[10px] text-muted-foreground tracking-[0.18em]">04</span>
+                  <span className="font-mono text-[11px] uppercase tracking-[0.16em] text-foreground">
+                    DeepFutures · Pre-seed capital · By introduction
+                  </span>
+                </li>
+              </ul>
+              <p className="text-sm text-muted-foreground leading-[1.6] max-w-md">
+                Four named programs. Each one is the place the work meets
+                the people the work is for.
+              </p>
+            </div>
+          </div>
+
+          {/* Footnote: 10–15% audit floor restated at the bottom for emphasis */}
+          <div className="mt-10 pt-6 border-t border-border flex flex-wrap items-baseline justify-between gap-x-6 gap-y-2">
+            <p className="text-sm text-foreground leading-[1.55] max-w-2xl">
+              <span className="font-semibold">10–15% of every revenue dollar</span>{" "}
+              <span className="text-muted-foreground">
+                flows from the company to the Institute. Audited annually. The same
+                line item every year — not a campaign, a charter commitment.
+              </span>
+            </p>
+            <Link
+              href="/engine"
+              className="inline-flex items-center font-mono text-[10px] uppercase tracking-[0.22em] text-foreground hover:text-primary transition-colors whitespace-nowrap"
+            >
+              How the Engine works
+              <ArrowRight className="ml-2 h-3 w-3" />
+            </Link>
           </div>
         </div>
       </section>
@@ -566,13 +690,27 @@ export default function HomePage() {
             <SectionRail index="02" label="Portfolio" />
             <div className="max-w-2xl">
               <h3 className="text-3xl sm:text-4xl lg:text-5xl font-semibold leading-[1.1] tracking-[-0.025em] text-foreground mb-6">
-                Seven products in production.
+                Eight products in production.
               </h3>
-              <p className="text-base text-muted-foreground leading-[1.7]">
+              <p className="text-base text-muted-foreground leading-[1.7] mb-8">
                 The portfolio is the proof. Each is a working installation we shipped in an
                 engagement and kept running. Live answers to &ldquo;have you actually shipped
                 this kind of system before, and does it still run?&rdquo;
               </p>
+              <div className="border-l-2 border-foreground/15 pl-5 max-w-xl">
+                <p className="text-sm sm:text-[15px] text-foreground leading-[1.65]">
+                  <span className="italic font-display text-foreground/90">
+                    We don&apos;t publish client names.
+                  </span>{" "}
+                  <span className="text-muted-foreground">
+                    Mission-driven buyers — funds, foundations, healthcare networks,
+                    workforce programs — don&apos;t want their data on our website. The
+                    portfolio names <span className="text-foreground">what we built</span>,
+                    not <span className="text-foreground">who we built it for</span>.
+                    Direct introductions on request, by mutual reference.
+                  </span>
+                </p>
+              </div>
             </div>
           </div>
 
@@ -622,6 +760,84 @@ export default function HomePage() {
                 <p className="text-xs text-muted-foreground">Specs, pricing, status per product.</p>
               </div>
             </Link>
+          </div>
+        </div>
+      </Reveal>
+
+      {/* ─── 4.5 FIELD NOTES — founder writing as intellectual leadership ─────
+       *
+       * Founder-presence surface. Three real essays already on the site.
+       * Pattern: A16Z / Stripe / Founders Fund — the brand carries the
+       * weight of the operator's thinking, not just the deliverables.
+       *
+       * Editorial register: Instrument Serif headings, mono index +
+       * date labels, hairline divider rows, single accent on hover.
+       */}
+      <Reveal as="section" className="border-t border-border py-24 sm:py-32">
+        <div className="container mx-auto px-6 sm:px-8">
+          <div className="grid lg:grid-cols-[280px_1fr] gap-12 lg:gap-20 mb-14">
+            <SectionRail index="02b" label="Field notes" />
+            <div className="max-w-2xl">
+              <h3 className="text-3xl sm:text-4xl lg:text-5xl font-semibold leading-[1.1] tracking-[-0.025em] text-foreground mb-6">
+                Field notes from the floor.
+              </h3>
+              <p className="text-base text-muted-foreground leading-[1.7]">
+                The Install is the founder&apos;s open notebook. Letters and notes from
+                the work — what we&apos;re learning, what we&apos;re re-pricing, what
+                we&apos;re willing to say out loud about how AI is actually built in
+                the kinds of organizations we install in.
+              </p>
+            </div>
+          </div>
+
+          <div className="grid lg:grid-cols-[280px_1fr] gap-12 lg:gap-20">
+            <div />
+            <div className="border-t border-border max-w-4xl">
+              {FIELD_NOTES.map((note) => (
+                <Link
+                  key={note.index}
+                  href={note.href}
+                  className="group grid grid-cols-[80px_1fr] sm:grid-cols-[80px_100px_1fr_auto] gap-x-6 sm:gap-x-10 gap-y-2 py-7 px-1 sm:px-3 border-b border-border hover:bg-surface-hover transition-colors items-baseline"
+                >
+                  <span className="font-mono text-[10px] tracking-[0.22em] text-muted-foreground pt-1">
+                    № {note.index}
+                  </span>
+                  <span className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground col-span-1 sm:col-auto hidden sm:inline">
+                    {note.date}
+                  </span>
+                  <div className="col-span-2 sm:col-auto">
+                    <h4 className="font-display text-2xl sm:text-[28px] leading-[1.15] tracking-[-0.015em] text-foreground group-hover:text-primary transition-colors mb-2">
+                      {note.title}
+                    </h4>
+                    <p className="text-sm text-muted-foreground leading-[1.6] max-w-2xl">
+                      {note.summary}
+                    </p>
+                  </div>
+                  <span className="hidden sm:inline-flex items-center justify-end font-mono text-[10px] uppercase tracking-[0.22em] text-foreground whitespace-nowrap mt-2 sm:mt-0 self-start sm:self-baseline">
+                    Read note
+                    <ArrowRight className="ml-2 h-3 w-3 transition-transform group-hover:translate-x-0.5" />
+                  </span>
+                </Link>
+              ))}
+            </div>
+          </div>
+
+          <div className="grid lg:grid-cols-[280px_1fr] gap-12 lg:gap-20 mt-10">
+            <div />
+            <div className="max-w-4xl flex flex-col sm:flex-row items-start gap-5">
+              <Button
+                asChild
+                className="text-sm font-medium h-10 px-5 shadow-none bg-foreground text-background hover:bg-foreground/90 rounded-[6px]"
+              >
+                <Link href="/blog">All field notes <ArrowRight className="ml-2 h-3.5 w-3.5" /></Link>
+              </Button>
+              <a
+                href="/blog/rss.xml"
+                className="inline-flex items-center text-sm font-medium text-foreground hover:text-primary transition-colors py-2"
+              >
+                Subscribe via RSS <ArrowUpRight className="ml-1.5 h-3.5 w-3.5" />
+              </a>
+            </div>
           </div>
         </div>
       </Reveal>
@@ -958,7 +1174,7 @@ export default function HomePage() {
                 <Link href="/products" className="group bg-card p-6 sm:p-7 hover:bg-surface-hover transition-colors">
                   <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-primary mb-3">For operators</p>
                   <p className="text-lg font-semibold tracking-[-0.01em] text-foreground mb-2">See the portfolio →</p>
-                  <p className="text-sm text-muted-foreground leading-[1.6]">Seven products in production. Use them, or have us install them.</p>
+                  <p className="text-sm text-muted-foreground leading-[1.6]">Eight products in production. Use them, or have us install them.</p>
                 </Link>
                 <a href="mailto:lorenzo@perpetualcore.com?subject=DeepFutures%20inquiry" className="group bg-card p-6 sm:p-7 hover:bg-surface-hover transition-colors">
                   <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-primary mb-3">For founders</p>
