@@ -34,6 +34,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { path: "/compare/vs-claude-for-teams", priority: 0.8, changeFrequency: "monthly" },
     { path: "/compare/vs-microsoft-copilot", priority: 0.8, changeFrequency: "monthly" },
     { path: "/blog", priority: 0.6, changeFrequency: "weekly" },
+    { path: "/blog/the-75k-floor", priority: 0.8, changeFrequency: "monthly" },
     { path: "/blog/what-an-ai-install-actually-costs", priority: 0.7, changeFrequency: "monthly" },
     { path: "/blog/outcome-eval-the-line-item-every-ai-install-skips", priority: 0.7, changeFrequency: "monthly" },
     { path: "/guide/ai-implementation-buyers-guide", priority: 0.8, changeFrequency: "monthly" },
