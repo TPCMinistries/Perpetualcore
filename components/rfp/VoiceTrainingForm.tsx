@@ -15,6 +15,7 @@
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import type { VoiceFingerprint } from "@/lib/rfp/voice/extract";
+import { VoiceQuickTrainModal } from "@/components/rfp/VoiceQuickTrainModal";
 
 const MIN_DOCS = 3;
 const MAX_DOCS = 10;
@@ -131,9 +132,12 @@ export function VoiceTrainingForm({ orgId, initialFingerprint }: VoiceTrainingFo
     <div className="flex flex-col gap-10">
       {/* Honest framing block */}
       <div className="rounded-md border border-zinc-800 bg-zinc-950 p-5">
-        <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-zinc-500">
-          Voice training · preview
-        </p>
+        <div className="flex items-start justify-between gap-3">
+          <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-zinc-500">
+            Voice training · preview
+          </p>
+          <VoiceQuickTrainModal orgId={orgId} />
+        </div>
         <p className="mt-3 text-sm leading-relaxed text-zinc-300">
           Paste 3–10 past proposals, annual reports, founder letters, or board
           memos. Better data = better drafts. Opus extracts a stylometric
@@ -142,7 +146,10 @@ export function VoiceTrainingForm({ orgId, initialFingerprint }: VoiceTrainingFo
         </p>
         <p className="mt-2 text-xs text-zinc-500">
           Each document needs at least {MIN_CHARS_PER_DOC} characters and is
-          capped at {MAX_CHARS_PER_DOC.toLocaleString()} characters.
+          capped at {MAX_CHARS_PER_DOC.toLocaleString()} characters. No past
+          docs handy? Use{" "}
+          <span className="text-emerald-400">Or describe your voice</span> at
+          the top to synthesize a starting fingerprint you can replace later.
         </p>
       </div>
 
