@@ -13,6 +13,7 @@
 import { useState } from "react";
 import { VaultUploadForm } from "./VaultUploadForm";
 import { VaultArtifactList } from "./VaultArtifactList";
+import { VaultQuickSeedModal } from "./VaultQuickSeedModal";
 
 interface VaultPanelProps {
   orgId: string;
@@ -25,6 +26,25 @@ export function VaultPanel({ orgId, canWrite, canDelete }: VaultPanelProps) {
 
   return (
     <div className="flex flex-col gap-8">
+      {canWrite && (
+        <div className="rounded-md border border-zinc-900 bg-zinc-950 p-5 flex items-start justify-between gap-3">
+          <div>
+            <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-emerald-400">
+              No past docs handy?
+            </p>
+            <p className="mt-1.5 text-sm text-zinc-300">
+              Describe what your org has actually done — programs, outcomes,
+              partners, geography, history. The AI expands it into a structured
+              capacity narrative and indexes it for retrieval. Good enough to
+              seed drafts now; add real past proposals later.
+            </p>
+          </div>
+          <VaultQuickSeedModal
+            orgId={orgId}
+            onSeeded={() => setRefreshKey((k) => k + 1)}
+          />
+        </div>
+      )}
       {canWrite ? (
         <VaultUploadForm
           orgId={orgId}
