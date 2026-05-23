@@ -72,11 +72,48 @@ export default function InstitutePage() {
             The 501(c)(3) parent. The reason any of this exists.
           </h1>
 
-          <p className="text-lg sm:text-xl text-muted-foreground leading-[1.55] mb-10 max-w-2xl">
+          <p className="text-lg sm:text-xl text-muted-foreground leading-[1.55] mb-8 max-w-2xl">
             IHA runs workforce development for low-income New Yorkers, AI-native founder training
             across emerging markets, AI literacy programs, and field health programs in East
             Africa. Perpetual Core funds it — 10–15% of every revenue dollar, audited annually.
           </p>
+
+          {/* Audit-grade disclosure block — mirrors home CHARTER strip.
+              Surfaces the institutional anchors on the page where they matter most. */}
+          <div className="border-y border-border py-5 mb-10 max-w-3xl grid grid-cols-2 sm:grid-cols-4 gap-4 sm:gap-6">
+            <div>
+              <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground mb-1.5">
+                Tax status
+              </p>
+              <p className="text-sm font-semibold tracking-[-0.005em] text-foreground">
+                501(c)(3) public charity
+              </p>
+            </div>
+            <div>
+              <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground mb-1.5">
+                EIN
+              </p>
+              <p className="font-mono text-sm font-semibold text-foreground">
+                41-5182519
+              </p>
+            </div>
+            <div>
+              <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground mb-1.5">
+                Founded
+              </p>
+              <p className="text-sm font-semibold tracking-[-0.005em] text-foreground">
+                2017
+              </p>
+            </div>
+            <div>
+              <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground mb-1.5">
+                Funded by
+              </p>
+              <p className="text-sm font-semibold tracking-[-0.005em] text-foreground">
+                10–15% of revenue · audited
+              </p>
+            </div>
+          </div>
 
           <div className="flex flex-col sm:flex-row items-start gap-4">
             <Button
