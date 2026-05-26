@@ -1,7 +1,35 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { X, ArrowRight, Brain, Upload, Users, Sparkles, Check, Rocket, Zap, BookOpen, Code, Briefcase, GraduationCap, Palette, TrendingUp, MessageSquare, Loader2, Wand2, LayoutGrid, Bot } from "lucide-react";
+import {
+  X,
+  ArrowRight,
+  Brain,
+  Upload,
+  Users,
+  Sparkles,
+  Check,
+  Rocket,
+  Zap,
+  BookOpen,
+  Code,
+  Briefcase,
+  GraduationCap,
+  Palette,
+  TrendingUp,
+  MessageSquare,
+  Loader2,
+  Wand2,
+  LayoutGrid,
+  Bot,
+  FileText,
+  Database,
+  BarChart3,
+  Presentation,
+  Image,
+  Video,
+  ShieldCheck,
+} from "lucide-react";
 import { DashboardMode } from "@/types/user-experience";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -138,12 +166,12 @@ export function OnboardingFlowV3({ userProfile }: OnboardingFlowV3Props) {
       });
 
       setIsOpen(false);
-      toast.success(`Welcome aboard, ${userContext.preferredName}! 🧠`);
+      toast.success(`Workspace ready, ${userContext.preferredName}.`);
       // Redirect to guided first chat — the persistent memory aha moment
       router.push("/dashboard/chat?guided=true");
     } catch (error) {
       setIsOpen(false);
-      toast.success(`Welcome aboard! 🧠`);
+      toast.success("Workspace ready.");
       console.error("Failed to complete onboarding:", error);
       // Still redirect even on error — onboarding data was likely saved
       router.push("/dashboard/chat?guided=true");
@@ -268,54 +296,54 @@ function WelcomeStep({
 
   return (
     <div className="text-center space-y-6 py-4">
-      <div className="inline-flex h-20 w-20 rounded-full bg-gradient-to-br from-purple-500 via-blue-500 to-indigo-600 items-center justify-center mb-2 shadow-lg">
-        <Brain className="h-10 w-10 text-white animate-pulse" />
+      <div className="inline-flex h-20 w-20 rounded-2xl bg-slate-950 items-center justify-center mb-2 shadow-lg">
+        <ShieldCheck className="h-10 w-10 text-white" />
       </div>
       <div>
-        <h1 className="text-3xl font-bold mb-2 bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
-          Welcome to Perpetual Core!
+        <h1 className="text-3xl font-bold mb-2 text-foreground">
+          Set up your operating workspace
         </h1>
         <p className="text-lg text-muted-foreground">
-          How would you like to get started?
+          Choose the interface your team should see first.
         </p>
       </div>
 
       {/* Mode Selection */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-2xl mx-auto mt-6">
-        {/* Simple Mode */}
+        {/* Guided Workspace */}
         <button
           onClick={() => handleModeSelect("simple")}
           className={`relative p-6 rounded-xl border-2 text-left transition-all ${
             selectedMode === "simple"
-              ? "border-violet-500 bg-violet-50 dark:bg-violet-950/30 ring-2 ring-violet-500/20"
-              : "border-border hover:border-violet-300 hover:bg-violet-50/50 dark:hover:bg-violet-950/20"
+              ? "border-sky-700 bg-sky-50 dark:bg-sky-950/30 ring-2 ring-sky-700/20"
+              : "border-border hover:border-sky-300 hover:bg-sky-50/50 dark:hover:bg-sky-950/20"
           }`}
         >
           {selectedMode === "simple" && (
             <div className="absolute top-3 right-3">
-              <Check className="h-5 w-5 text-violet-600" />
+              <Check className="h-5 w-5 text-sky-700" />
             </div>
           )}
           <div className="flex items-center gap-3 mb-3">
-            <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center">
+            <div className="h-12 w-12 rounded-xl bg-sky-700 flex items-center justify-center">
               <Bot className="h-6 w-6 text-white" />
             </div>
             <div>
-              <h3 className="font-semibold text-lg">Simple Mode</h3>
-              <p className="text-sm text-violet-600 dark:text-violet-400">Recommended for new users</p>
+              <h3 className="font-semibold text-lg">Guided workspace</h3>
+              <p className="text-sm text-sky-700 dark:text-sky-400">Best for first-time operators</p>
             </div>
           </div>
           <p className="text-sm text-muted-foreground mb-3">
-            Meet your AI team of 6 employees who handle tasks for you automatically.
+            A focused command surface for chat, documents, tasks, and the first repeatable workflows.
           </p>
           <div className="flex flex-wrap gap-2">
-            <span className="text-xs px-2 py-1 rounded-full bg-violet-100 dark:bg-violet-900/50 text-violet-700 dark:text-violet-300">Atlas - Exec Assistant</span>
-            <span className="text-xs px-2 py-1 rounded-full bg-violet-100 dark:bg-violet-900/50 text-violet-700 dark:text-violet-300">Echo - Social</span>
-            <span className="text-xs px-2 py-1 rounded-full bg-violet-100 dark:bg-violet-900/50 text-violet-700 dark:text-violet-300">+4 more</span>
+            <span className="text-xs px-2 py-1 rounded-full bg-sky-100 dark:bg-sky-900/50 text-sky-800 dark:text-sky-300">Daily briefing</span>
+            <span className="text-xs px-2 py-1 rounded-full bg-sky-100 dark:bg-sky-900/50 text-sky-800 dark:text-sky-300">Knowledge base</span>
+            <span className="text-xs px-2 py-1 rounded-full bg-sky-100 dark:bg-sky-900/50 text-sky-800 dark:text-sky-300">Tasks</span>
           </div>
         </button>
 
-        {/* Full Mode */}
+        {/* Command Center */}
         <button
           onClick={() => handleModeSelect("full")}
           className={`relative p-6 rounded-xl border-2 text-left transition-all ${
@@ -334,12 +362,12 @@ function WelcomeStep({
               <LayoutGrid className="h-6 w-6 text-white" />
             </div>
             <div>
-              <h3 className="font-semibold text-lg">Full Mode</h3>
-              <p className="text-sm text-blue-600 dark:text-blue-400">For power users</p>
+              <h3 className="font-semibold text-lg">Command center</h3>
+              <p className="text-sm text-blue-600 dark:text-blue-400">For teams and power users</p>
             </div>
           </div>
           <p className="text-sm text-muted-foreground mb-3">
-            Full access to all features: projects, teams, workflows, and advanced AI tools.
+            Full access to CRM, teams, projects, workflows, agents, documents, and executive reporting.
           </p>
           <div className="flex flex-wrap gap-2">
             <span className="text-xs px-2 py-1 rounded-full bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300">Projects</span>
@@ -354,7 +382,7 @@ function WelcomeStep({
         onClick={onNext}
         disabled={isLoading || !selectedMode}
         size="lg"
-        className="mt-6 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
+        className="mt-6 bg-slate-950 text-white hover:bg-slate-800"
       >
         Continue <ArrowRight className="ml-2 h-5 w-5" />
       </Button>
@@ -381,12 +409,12 @@ function PersonalInfoStep({
 
   // Broader, more universal categories
   const roles = [
-    { id: "professional", icon: Briefcase, label: "Working Professional", description: "Employee, manager, or executive", color: "from-blue-500 to-indigo-500" },
-    { id: "entrepreneur", icon: Zap, label: "Entrepreneur / Founder", description: "Building or running a business", color: "from-orange-500 to-red-500" },
-    { id: "creative", icon: Palette, label: "Creative / Creator", description: "Writer, designer, artist, content creator", color: "from-pink-500 to-rose-500" },
-    { id: "technical", icon: Code, label: "Technical / Developer", description: "Engineer, developer, data scientist", color: "from-cyan-500 to-blue-500" },
-    { id: "student_educator", icon: GraduationCap, label: "Student or Educator", description: "Learning or teaching", color: "from-green-500 to-teal-500" },
-    { id: "researcher", icon: BookOpen, label: "Researcher / Analyst", description: "Research, analysis, consulting", color: "from-purple-500 to-pink-500" },
+    { id: "professional", icon: Briefcase, label: "Operator / Executive", description: "Running decisions, meetings, and execution", color: "bg-slate-900" },
+    { id: "entrepreneur", icon: Zap, label: "Founder / Owner", description: "Building or running a business", color: "bg-sky-700" },
+    { id: "creative", icon: Palette, label: "Growth / Content Lead", description: "Publishing, campaigns, and brand systems", color: "bg-emerald-700" },
+    { id: "technical", icon: Code, label: "Technical / Automation Lead", description: "Systems, integrations, data, and workflows", color: "bg-indigo-700" },
+    { id: "student_educator", icon: GraduationCap, label: "Training / Enablement", description: "Teaching teams and documenting processes", color: "bg-amber-700" },
+    { id: "researcher", icon: BookOpen, label: "Research / Strategy", description: "Synthesis, analysis, and institutional memory", color: "bg-cyan-700" },
   ];
 
   const handleRoleSelect = (roleId: string) => {
@@ -443,10 +471,10 @@ function PersonalInfoStep({
     <div className="space-y-6 py-4">
       <div className="text-center">
         <h2 className="text-3xl font-bold mb-2 text-foreground">
-          Tell us about yourself
+          Define the operator
         </h2>
         <p className="text-muted-foreground">
-          This helps us personalize your AI brain
+          This tunes the workspace around the person or team running the system.
         </p>
       </div>
 
@@ -466,7 +494,7 @@ function PersonalInfoStep({
 
         {!showCustomInput ? (
           <div>
-            <Label className="text-sm font-medium mb-3 block">What best describes you?</Label>
+            <Label className="text-sm font-medium mb-3 block">What best describes the primary operator?</Label>
             <div className="grid grid-cols-2 gap-3">
               {roles.map((role) => (
                 <button
@@ -474,11 +502,11 @@ function PersonalInfoStep({
                   onClick={() => handleRoleSelect(role.id)}
                   className={`p-4 rounded-xl border-2 transition-all text-left ${
                     userContext.userRole === role.id
-                      ? "border-purple-500 dark:border-purple-400 bg-purple-50 dark:bg-purple-950/30 shadow-md"
+                      ? "border-sky-700 dark:border-sky-400 bg-sky-50 dark:bg-sky-950/30 shadow-md"
                       : "border-border hover:border-border/80 bg-card"
                   }`}
                 >
-                  <div className={`h-10 w-10 rounded-lg bg-gradient-to-br ${role.color} flex items-center justify-center mb-2`}>
+                  <div className={`h-10 w-10 rounded-lg ${role.color} flex items-center justify-center mb-2`}>
                     <role.icon className="h-5 w-5 text-white" />
                   </div>
                   <h3 className="font-semibold text-sm text-foreground">{role.label}</h3>
@@ -492,16 +520,16 @@ function PersonalInfoStep({
               onClick={handleCustomSelect}
               className={`w-full mt-3 p-4 rounded-xl border-2 border-dashed transition-all text-left flex items-center gap-4 ${
                 userContext.userRole === "custom"
-                  ? "border-purple-500 dark:border-purple-400 bg-purple-50 dark:bg-purple-950/30"
-                  : "border-border hover:border-purple-400 dark:hover:border-purple-500 bg-card"
+                  ? "border-sky-700 dark:border-sky-400 bg-sky-50 dark:bg-sky-950/30"
+                  : "border-border hover:border-sky-400 dark:hover:border-sky-500 bg-card"
               }`}
             >
-              <div className="h-10 w-10 rounded-lg bg-gradient-to-br from-purple-500 to-blue-500 flex items-center justify-center">
+              <div className="h-10 w-10 rounded-lg bg-slate-950 flex items-center justify-center">
                 <Wand2 className="h-5 w-5 text-white" />
               </div>
               <div>
-                <h3 className="font-semibold text-sm text-foreground">Something else? Tell us!</h3>
-                <p className="text-xs text-muted-foreground">AI will personalize your experience</p>
+                <h3 className="font-semibold text-sm text-foreground">Something else?</h3>
+                <p className="text-xs text-muted-foreground">Describe the operating context</p>
               </div>
             </button>
           </div>
@@ -510,7 +538,7 @@ function PersonalInfoStep({
             <div>
               <Label className="text-sm font-medium mb-2 block">Tell us about your needs</Label>
               <Textarea
-                placeholder="Describe what you do and what you want to accomplish. For example: 'I'm a freelance consultant helping small businesses with marketing. I need to organize client research, track projects, and quickly reference past conversations...'"
+                placeholder="Describe the organization, team, and work Perpetual Core should coordinate. Example: 'We are a furniture retailer with sales, warehouse, service, and finance teams. We need one view of follow-ups, inventory exceptions, customer notes, and AI workflows.'"
                 value={customDescription}
                 onChange={(e) => setCustomDescription(e.target.value)}
                 className="min-h-[120px] text-base"
@@ -534,7 +562,7 @@ function PersonalInfoStep({
               <Button
                 onClick={handleAnalyzeNeeds}
                 disabled={isAnalyzing || customDescription.trim().length < 10}
-                className="flex-1 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
+                className="flex-1 bg-slate-950 text-white hover:bg-slate-800"
               >
                 {isAnalyzing ? (
                   <>
@@ -559,7 +587,7 @@ function PersonalInfoStep({
             onClick={onNext}
             disabled={isLoading || !canProceed}
             size="lg"
-            className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
+            className="bg-slate-950 text-white hover:bg-slate-800"
           >
             Continue <ArrowRight className="ml-2 h-4 w-4" />
           </Button>
@@ -583,20 +611,20 @@ function GoalsStep({
   // Goals mapped to new broader categories
   const goals = {
     professional: [
-      { id: "organize_work", label: "Organize work documents and information" },
-      { id: "meeting_prep", label: "Prepare for meetings and presentations" },
-      { id: "email_drafts", label: "Draft emails and communications faster" },
-      { id: "research", label: "Research topics and gather information" },
-      { id: "project_tracking", label: "Track projects and tasks" },
-      { id: "knowledge_retention", label: "Remember important conversations and decisions" },
+      { id: "command_center", label: "Create one daily command center" },
+      { id: "meeting_prep", label: "Prepare for meetings and preserve decisions" },
+      { id: "follow_up", label: "Track follow-ups before they slip" },
+      { id: "project_tracking", label: "See tasks, owners, and blockers clearly" },
+      { id: "knowledge_retention", label: "Build institutional memory" },
+      { id: "executive_reporting", label: "Generate executive summaries" },
     ],
     entrepreneur: [
-      { id: "business_docs", label: "Organize business documents and contracts" },
-      { id: "market_research", label: "Research markets and competitors" },
-      { id: "content_marketing", label: "Create marketing and sales content" },
-      { id: "decision_support", label: "Get AI support for business decisions" },
-      { id: "customer_insights", label: "Understand customers better" },
+      { id: "sales_pipeline", label: "Track leads, contacts, and opportunities" },
+      { id: "operations_map", label: "Map the business operating system" },
+      { id: "customer_insights", label: "Centralize customer and account context" },
+      { id: "decision_support", label: "Make better decisions from live context" },
       { id: "automate_tasks", label: "Automate repetitive business tasks" },
+      { id: "team_visibility", label: "Give the team one operating view" },
     ],
     creative: [
       { id: "ideas", label: "Generate and organize ideas" },
@@ -675,7 +703,7 @@ function GoalsStep({
           Select all that apply - we'll prioritize features for you
         </p>
         {userContext.primaryGoals && userContext.primaryGoals.length > 0 && (
-          <p className="text-sm text-purple-600 dark:text-purple-400 mt-2">
+          <p className="text-sm text-sky-700 dark:text-sky-400 mt-2">
             {userContext.primaryGoals.length} goal{userContext.primaryGoals.length > 1 ? 's' : ''} selected
           </p>
         )}
@@ -690,13 +718,13 @@ function GoalsStep({
               onClick={() => handleGoalToggle(goal.id)}
               className={`w-full p-5 rounded-xl border-2 transition-all text-left flex items-center gap-4 ${
                 isSelected
-                  ? "border-purple-500 dark:border-purple-400 bg-purple-50 dark:bg-purple-950/30 shadow-md"
+                  ? "border-sky-700 dark:border-sky-400 bg-sky-50 dark:bg-sky-950/30 shadow-md"
                   : "border-border hover:border-border/80 bg-card"
               }`}
             >
               <div className={`h-10 w-10 rounded-full flex items-center justify-center flex-shrink-0 ${
                 isSelected
-                  ? "bg-gradient-to-br from-purple-500 to-blue-500"
+                  ? "bg-sky-700"
                   : "bg-muted"
               }`}>
                 {isSelected ? (
@@ -716,7 +744,7 @@ function GoalsStep({
           onClick={onNext}
           disabled={isLoading || !userContext.primaryGoals || userContext.primaryGoals.length === 0}
           size="lg"
-          className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
+          className="bg-slate-950 text-white hover:bg-slate-800"
         >
           Continue <ArrowRight className="ml-2 h-4 w-4" />
         </Button>
@@ -737,13 +765,14 @@ function CustomizeStep({
   isLoading: boolean;
 }) {
   const contentTypes = [
-    { id: "documents", label: "Documents & PDFs", icon: "📄", available: true },
-    { id: "research_papers", label: "Research Papers", icon: "📚", available: true },
-    { id: "code", label: "Code & Tech Docs", icon: "💻", available: true },
-    { id: "spreadsheets", label: "Spreadsheets & Data", icon: "📊", available: true },
-    { id: "presentations", label: "Presentations (PowerPoint)", icon: "📽️", available: true },
-    { id: "images", label: "Images & Diagrams", icon: "🖼️", available: false, comingSoon: true },
-    { id: "videos", label: "Videos & Recordings", icon: "🎥", available: false, comingSoon: true },
+    { id: "documents", label: "Documents & PDFs", icon: FileText, available: true },
+    { id: "research_papers", label: "Research Papers", icon: BookOpen, available: true },
+    { id: "code", label: "Code & Tech Docs", icon: Code, available: true },
+    { id: "spreadsheets", label: "Spreadsheets & Data", icon: BarChart3, available: true },
+    { id: "presentations", label: "Presentations", icon: Presentation, available: true },
+    { id: "records", label: "CRM & Operating Data", icon: Database, available: true },
+    { id: "images", label: "Images & Diagrams", icon: Image, available: false, comingSoon: true },
+    { id: "videos", label: "Videos & Recordings", icon: Video, available: false, comingSoon: true },
   ];
 
   const teamContexts = [
@@ -777,46 +806,49 @@ function CustomizeStep({
           Customize your experience
         </h2>
         <p className="text-muted-foreground">
-          Tell us what you'll work with
+          Tell us what the workspace should organize first.
         </p>
       </div>
 
       <div className="max-w-xl mx-auto space-y-6">
         <div>
           <Label className="text-sm font-medium mb-3 block">
-            What types of content will you upload? (Select all that apply)
+            What should the system ingest first? Select all that apply.
           </Label>
           <div className="grid grid-cols-2 gap-2">
-            {contentTypes.map((type) => (
-              <button
-                key={type.id}
-                onClick={() => type.available !== false && toggleContentType(type.id)}
-                disabled={type.available === false}
-                className={`p-3 rounded-lg border-2 transition-all text-left flex items-center gap-3 relative ${
-                  type.available === false
-                    ? "border-border bg-muted/50 opacity-60 cursor-not-allowed"
-                    : userContext.contentTypes.includes(type.id)
-                    ? "border-purple-500 dark:border-purple-400 bg-purple-50 dark:bg-purple-950/30"
-                    : "border-border hover:border-border/80 bg-card"
-                }`}
-              >
-                <span className="text-2xl">{type.icon}</span>
-                <div className="flex-1">
-                  <span className="text-sm font-medium text-foreground">{type.label}</span>
-                  {type.comingSoon && (
-                    <span className="block text-xs text-muted-foreground mt-0.5">Coming soon</span>
+            {contentTypes.map((type) => {
+              const Icon = type.icon;
+              return (
+                <button
+                  key={type.id}
+                  onClick={() => type.available !== false && toggleContentType(type.id)}
+                  disabled={type.available === false}
+                  className={`p-3 rounded-lg border-2 transition-all text-left flex items-center gap-3 relative ${
+                    type.available === false
+                      ? "border-border bg-muted/50 opacity-60 cursor-not-allowed"
+                      : userContext.contentTypes.includes(type.id)
+                      ? "border-sky-700 dark:border-sky-400 bg-sky-50 dark:bg-sky-950/30"
+                      : "border-border hover:border-border/80 bg-card"
+                  }`}
+                >
+                  <Icon className="h-5 w-5 text-muted-foreground" />
+                  <div className="flex-1">
+                    <span className="text-sm font-medium text-foreground">{type.label}</span>
+                    {type.comingSoon && (
+                      <span className="block text-xs text-muted-foreground mt-0.5">Coming soon</span>
+                    )}
+                  </div>
+                  {userContext.contentTypes.includes(type.id) && (
+                    <Check className="h-4 w-4 text-sky-700 dark:text-sky-400 ml-auto" />
                   )}
-                </div>
-                {userContext.contentTypes.includes(type.id) && (
-                  <Check className="h-4 w-4 text-purple-600 dark:text-purple-400 ml-auto" />
-                )}
-              </button>
-            ))}
+                </button>
+              );
+            })}
           </div>
         </div>
 
         <div>
-          <Label className="text-sm font-medium mb-3 block">How will you use this?</Label>
+          <Label className="text-sm font-medium mb-3 block">Who will use this workspace?</Label>
           <div className="space-y-2">
             {teamContexts.map((context) => (
               <button
@@ -824,7 +856,7 @@ function CustomizeStep({
                 onClick={() => setUserContext({ ...userContext, teamContext: context.id })}
                 className={`w-full p-4 rounded-lg border-2 transition-all text-left ${
                   userContext.teamContext === context.id
-                    ? "border-purple-500 dark:border-purple-400 bg-purple-50 dark:bg-purple-950/30"
+                    ? "border-sky-700 dark:border-sky-400 bg-sky-50 dark:bg-sky-950/30"
                     : "border-border hover:border-border/80 bg-card"
                 }`}
               >
@@ -834,7 +866,7 @@ function CustomizeStep({
                     <p className="text-xs text-muted-foreground">{context.description}</p>
                   </div>
                   {userContext.teamContext === context.id && (
-                    <Check className="h-5 w-5 text-purple-600 dark:text-purple-400" />
+                    <Check className="h-5 w-5 text-sky-700 dark:text-sky-400" />
                   )}
                 </div>
               </button>
@@ -848,7 +880,7 @@ function CustomizeStep({
           onClick={onNext}
           disabled={isLoading || !canProceed}
           size="lg"
-          className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
+          className="bg-slate-950 text-white hover:bg-slate-800"
         >
           Continue <ArrowRight className="ml-2 h-4 w-4" />
         </Button>
@@ -874,15 +906,15 @@ function FirstActionStep({
       return {
         primary: {
           icon: Upload,
-          title: `Upload Your First ${userContext.userRole === "teacher" ? "Course Material" : "Document"}`,
-          description: "Add something and watch your AI brain understand it instantly",
+          title: "Upload your first operating document",
+          description: "Add a file so the workspace has real context to organize and search.",
           action: "/dashboard/library",
           color: "from-blue-600 to-indigo-600",
         },
         secondary: {
           icon: Brain,
-          title: "Start a Conversation",
-          description: `Ask me anything about ${userContext.userRole === "teacher" ? "teaching" : userContext.userRole === "researcher" ? "your research" : "your work"}`,
+          title: "Start a guided workspace conversation",
+          description: "Ask what to configure first based on your role and goals.",
           action: "/dashboard/chat",
         },
       };
@@ -890,15 +922,15 @@ function FirstActionStep({
       return {
         primary: {
           icon: Brain,
-          title: `Chat With Your AI Brain`,
-          description: `Get help with ${userContext.primaryGoal?.replace(/_/g, " ") || "your goals"}`,
+          title: "Start with the command assistant",
+          description: `Turn ${userContext.primaryGoal?.replace(/_/g, " ") || "your first goal"} into an operating plan.`,
           action: "/dashboard/chat",
-          color: "from-purple-600 to-blue-600",
+          color: "from-slate-950 to-sky-800",
         },
         secondary: {
           icon: Upload,
           title: "Upload a Document",
-          description: "Give your AI brain something to remember",
+          description: "Give the workspace source material to index and summarize.",
           action: "/dashboard/library",
         },
       };
@@ -911,10 +943,10 @@ function FirstActionStep({
     <div className="text-center space-y-6 py-4">
       <div>
         <h2 className="text-3xl font-bold mb-3 text-foreground">
-          Ready, {userContext.preferredName}! 🎯
+          Ready, {userContext.preferredName}.
         </h2>
         <p className="text-muted-foreground max-w-lg mx-auto">
-          Let's get you started with your first action
+          Your first action should create useful context, not just open another blank tool.
         </p>
       </div>
 
@@ -939,7 +971,7 @@ function FirstActionStep({
                 className="bg-white text-slate-900 hover:bg-white/90 shadow-lg"
               >
                 <actions.primary.icon className="mr-2 h-5 w-5" />
-                Let's Go!
+                Start here
               </Button>
             </div>
           </div>
@@ -988,20 +1020,20 @@ function CompleteStep({
 
       <div>
         <h2 className="text-4xl font-bold mb-3 text-foreground">
-          Perfect, {userContext.preferredName}! 🎉
+          Workspace configured, {userContext.preferredName}.
         </h2>
         <p className="text-xl text-muted-foreground mb-2">
-          Your AI brain is personalized and ready
+          Your operating workspace is personalized and ready.
         </p>
       </div>
 
-      <Card className="p-6 max-w-xl mx-auto bg-gradient-to-br from-purple-50 to-blue-50 dark:from-purple-950/30 dark:to-blue-950/30 border-purple-200 dark:border-purple-800">
+      <Card className="p-6 max-w-xl mx-auto bg-sky-50/60 dark:bg-sky-950/20 border-sky-200 dark:border-sky-900">
         <h3 className="font-semibold text-lg mb-4 text-foreground">
           Your personalized experience includes:
         </h3>
         <div className="space-y-3 text-left">
           <div className="flex items-start gap-3">
-            <div className="h-6 w-6 rounded-full bg-purple-500 flex items-center justify-center flex-shrink-0 mt-0.5">
+            <div className="h-6 w-6 rounded-full bg-slate-950 flex items-center justify-center flex-shrink-0 mt-0.5">
               <Check className="h-4 w-4 text-white" />
             </div>
             <p className="text-sm text-foreground">
@@ -1017,7 +1049,7 @@ function CompleteStep({
             </p>
           </div>
           <div className="flex items-start gap-3">
-            <div className="h-6 w-6 rounded-full bg-indigo-500 flex items-center justify-center flex-shrink-0 mt-0.5">
+            <div className="h-6 w-6 rounded-full bg-cyan-700 flex items-center justify-center flex-shrink-0 mt-0.5">
               <Check className="h-4 w-4 text-white" />
             </div>
             <p className="text-sm text-foreground">
@@ -1031,10 +1063,10 @@ function CompleteStep({
         onClick={onGetStarted}
         disabled={isLoading}
         size="lg"
-        className="mt-6 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-lg px-8"
+        className="mt-6 bg-slate-950 text-white hover:bg-slate-800 text-lg px-8"
       >
         <Sparkles className="mr-2 h-5 w-5" />
-        Start Your First Conversation
+        Start first operating session
       </Button>
 
       <p className="text-xs text-muted-foreground">

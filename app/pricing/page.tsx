@@ -181,6 +181,15 @@ export default function PricingPage() {
         }),
       });
 
+      if (response.status === 401) {
+        router.push(
+          `/signup?plan=${encodeURIComponent(planId)}&interval=${
+            billingInterval === "yearly" ? "annual" : "monthly"
+          }`
+        );
+        return;
+      }
+
       if (!response.ok) {
         const data = await response.json().catch(() => ({}));
         throw new Error(data.error || "Failed to create checkout session");

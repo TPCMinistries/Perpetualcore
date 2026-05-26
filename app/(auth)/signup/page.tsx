@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { signUpSchema, type SignUpInput } from "@/lib/validations/auth";
@@ -17,16 +17,81 @@ import {
 } from "@/components/ui/form";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { Loader2 } from "lucide-react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { Loader2, CheckCircle2 } from "lucide-react";
+
+const PLAN_SUMMARY: Record<string, { name: string; price: string; description: string; bullets: string[] }> = {
+  free: {
+    name: "Free",
+    price: "$0/month",
+    description: "Start with the core workspace and personal knowledge base.",
+    bullets: ["Personal AI workspace", "Knowledge base", "5 documents"],
+  },
+  starter: {
+    name: "Starter",
+    price: "$49/month",
+    description: "For individuals and operators who want the Engine as a daily tool.",
+    bullets: ["Unlimited knowledge base", "Email and calendar integration", "Priority email support"],
+  },
+  pro: {
+    name: "Pro",
+    price: "$99/month",
+    description: "For power users who need automations, API access, and premium models.",
+    bullets: ["Premium models", "Advanced workflows", "API access"],
+  },
+  teams: {
+    name: "Teams",
+    price: "Custom",
+    description: "For teams that need shared context, controls, and operating memory.",
+    bullets: ["Shared knowledge base", "RBAC and audit logs", "Volume pricing"],
+  },
+  team: {
+    name: "Teams",
+    price: "Custom",
+    description: "For teams that need shared context, controls, and operating memory.",
+    bullets: ["Shared knowledge base", "RBAC and audit logs", "Volume pricing"],
+  },
+};
+
+function SignUpShell() {
+  return (
+    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 p-4">
+      <Card className="w-full max-w-md shadow-lg">
+        <CardHeader className="space-y-1">
+          <CardTitle className="text-2xl font-bold text-center">Create your workspace</CardTitle>
+          <CardDescription className="text-center">
+            Loading your selected plan...
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="flex items-center justify-center py-12">
+            <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
 
 export default function SignUpPage() {
+  return (
+    <Suspense fallback={<SignUpShell />}>
+      <SignUpPageContent />
+    </Suspense>
+  );
+}
+
+function SignUpPageContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   const [hasBetaCode, setHasBetaCode] = useState(false);
+  const selectedPlanId = (searchParams.get("plan") || "free").toLowerCase();
+  const selectedInterval = searchParams.get("interval") === "annual" ? "annual" : "monthly";
+  const selectedPlan = PLAN_SUMMARY[selectedPlanId] || PLAN_SUMMARY.free;
 
   const form = useForm<SignUpInput>({
     resolver: zodResolver(signUpSchema),
@@ -64,6 +129,26 @@ export default function SignUpPage() {
         return;
       }
 
+      if (!["free", "teams", "team"].includes(selectedPlanId)) {
+        const checkout = await fetch("/api/stripe/checkout", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ plan: selectedPlanId, interval: selectedInterval }),
+        });
+
+        if (checkout.ok) {
+          const { url } = await checkout.json();
+          if (url) {
+            window.location.href = url;
+            return;
+          }
+        }
+
+        router.push(`/dashboard/settings/billing?plan=${selectedPlanId}`);
+        router.refresh();
+        return;
+      }
+
       // Success! Redirect to dashboard
       router.push("/dashboard");
       router.refresh();
@@ -80,13 +165,36 @@ export default function SignUpPage() {
       <Card className="w-full max-w-md shadow-lg">
         <CardHeader className="space-y-1">
           <CardTitle className="text-2xl font-bold text-center">
-            Create an account
+            Create your workspace
           </CardTitle>
           <CardDescription className="text-center">
-            Enter your details to get started with Perpetual Core
+            Enter your details to start using Perpetual Core with your organization
           </CardDescription>
         </CardHeader>
         <CardContent>
+          <div className="mb-5 rounded-lg border bg-muted/40 p-4">
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <p className="text-sm font-semibold">{selectedPlan.name} plan</p>
+                <p className="mt-1 text-xs text-muted-foreground">{selectedPlan.description}</p>
+              </div>
+              <p className="text-sm font-bold whitespace-nowrap">{selectedPlan.price}</p>
+            </div>
+            <ul className="mt-3 space-y-2">
+              {selectedPlan.bullets.map((bullet) => (
+                <li key={bullet} className="flex items-center gap-2 text-xs text-muted-foreground">
+                  <CheckCircle2 className="h-3.5 w-3.5 text-primary" />
+                  {bullet}
+                </li>
+              ))}
+            </ul>
+            {selectedPlanId !== "free" && selectedPlanId !== "teams" && selectedPlanId !== "team" && (
+              <p className="mt-3 text-xs text-muted-foreground">
+                After account creation, you will continue to secure checkout.
+              </p>
+            )}
+          </div>
+
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
               <FormField
@@ -97,7 +205,7 @@ export default function SignUpPage() {
                     <FormLabel>Full Name</FormLabel>
                     <FormControl>
                       <Input
-                        placeholder="John Doe"
+                        placeholder="Alex Carter"
                         {...field}
                         disabled={isLoading}
                       />
@@ -116,7 +224,7 @@ export default function SignUpPage() {
                     <FormControl>
                       <Input
                         type="email"
-                        placeholder="john@example.com"
+                        placeholder="alex@company.com"
                         {...field}
                         disabled={isLoading}
                       />
@@ -176,7 +284,7 @@ export default function SignUpPage() {
                       <FormLabel>Organization Name</FormLabel>
                       <FormControl>
                         <Input
-                          placeholder="Acme Inc"
+                          placeholder="Company or organization name"
                           {...field}
                           disabled={isLoading}
                         />
