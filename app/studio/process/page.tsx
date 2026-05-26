@@ -116,12 +116,12 @@ export default function ProcessPage() {
                 Ready to start?
               </h3>
               <p className="text-base text-muted-foreground leading-[1.7] mb-10">
-                Engagements start at $75,000. Intake calls are 30 minutes; we&apos;ll tell you
-                within a week if it&apos;s a fit.
+                Scoped studio engagements can start around $30,000. Intake calls are 30 minutes;
+                we&apos;ll tell you within a week if it&apos;s a fit.
               </p>
               <div className="flex flex-col sm:flex-row items-start gap-5">
                 <Button size="lg" asChild className="text-sm font-medium h-11 px-7 shadow-none bg-foreground text-background hover:bg-foreground/90 rounded-[6px]">
-                  <Link href="/studio/engagements">Start an engagement <ArrowRight className="ml-2 h-4 w-4" /></Link>
+                  <Link href="/contact-sales">Map the first workflow <ArrowRight className="ml-2 h-4 w-4" /></Link>
                 </Button>
                 <Link href="/contact-sales" className="inline-flex items-center text-sm font-medium text-foreground hover:text-primary transition-colors py-3">
                   Book an intake call <ArrowRight className="ml-1.5 h-3.5 w-3.5" />

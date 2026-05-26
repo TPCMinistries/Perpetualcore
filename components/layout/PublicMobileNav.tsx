@@ -51,7 +51,7 @@ export function PublicMobileNav() {
                 Retainers <span className="text-xs font-mono ml-2">$5K–$15K/mo</span>
               </Link>
               <Link href="/studio/engagements" onClick={close} className="block px-4 py-2.5 text-sm text-muted-foreground hover:text-foreground hover:bg-accent rounded-sm transition-colors">
-                Engagements <span className="text-xs font-mono ml-2">$75K+</span>
+                Engagements <span className="text-xs font-mono ml-2">$30K+</span>
               </Link>
               <Link href="/studio/methodology" onClick={close} className="block px-4 py-2.5 text-sm text-muted-foreground hover:text-foreground hover:bg-accent rounded-sm transition-colors">
                 Methodology
@@ -124,11 +124,11 @@ export function PublicMobileNav() {
           <div className="border-t border-border/60 p-4">
             <Button asChild className="w-full text-sm font-medium shadow-none h-10">
               <Link href="/studio/engagements" onClick={close}>
-                Start Engagement
+                Start Studio Intake
               </Link>
             </Button>
             <p className="text-center text-xs text-muted-foreground mt-3">
-              Engagements start at $75,000
+              Scoped studio engagements start around $30K
             </p>
           </div>
         </div>

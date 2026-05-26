@@ -13,24 +13,24 @@ import { Footer } from "@/components/landing/Footer";
 export const metadata = {
   title: "Engagements — Perpetual Core",
   description:
-    "Engagements start at $75,000. A 90–180 day install of the Perpetual Engine across your operations. Three bands. Documented, trained, handed over.",
+    "Scoped studio engagements start around $30,000 and can expand into full Perpetual Engine installs across your operations. Documented, trained, handed over.",
 };
 
 const BANDS = [
   {
     index: "01",
-    name: "Foundations",
-    price: "$75,000",
-    duration: "90 days · Single department",
-    body: "Eight-registry install scoped to one operational surface — intake + case management for a workforce program; grants + reporting for a foundation; a single clinical workflow for a health system.",
+    name: "Studio Sprint",
+    price: "$30,000+",
+    duration: "6-8 weeks · One operating surface",
+    body: "A focused engagement around one high-value workflow: intake, capture, reporting, diligence, onboarding, or knowledge operations. Built to prove the operating case before a larger install.",
     featured: true,
   },
   {
     index: "02",
-    name: "Operations",
-    price: "$150,000",
-    duration: "120–150 days · Cross-department",
-    body: "Eight-registry install across 3–5 departments. AI-First Framework applied end-to-end. Skills library populated with 15–30 production skills.",
+    name: "Engine Install",
+    price: "Custom",
+    duration: "90-150 days · Department or cross-department",
+    body: "Eight-registry install across the operating surface. AI-First Framework applied end-to-end. Skills library populated with production workflows.",
     featured: false,
   },
   {
@@ -58,7 +58,7 @@ const INCLUDED = [
   { name: "A compounding skills library", body: "Anthropic SKILL.md format, per-org JSON config. Versioned, auditable, yours." },
   { name: "Documentation", body: "Written for your operators, not for us. The system is documented to be operated and extended by your team." },
   { name: "Training", body: "In-person or remote, for the team that has to keep this running. Real workflows, not slideware." },
-  { name: "The Engine commitment", body: "10% of every engagement — $7,500 to $25,000+ — funds the Institute for Human Advancement." },
+  { name: "The Engine commitment", body: "10% of every engagement funds the Institute for Human Advancement as a separate audited line item." },
 ];
 
 function SectionRail({ index, label }: { index: string; label: string }) {
@@ -84,15 +84,14 @@ export default function StudioEngagementsPage() {
           </div>
 
           <h1 className="display-hero text-[40px] sm:text-[56px] lg:text-[80px] text-foreground mb-12 max-w-5xl leading-[1.05]">
-            Engagements start at{" "}
-            <span className="italic text-foreground/85">$75,000.</span>
+            Start with a scoped studio engagement.
           </h1>
 
           <div className="space-y-5 text-lg sm:text-xl text-muted-foreground leading-[1.55] mb-12 max-w-3xl">
             <p>
-              A 90 to 180 day engagement that audits your operations, installs the Perpetual Engine
-              across your departments, and hands you a system your team owns. We run engagements
-              continuously — this is the studio&apos;s normal cadence, not a velvet rope.
+              Engagements can start around $30,000 when the scope is narrow and the operating
+              problem is clear. Larger Engine installs are scoped separately, but we do not
+              need to force every buyer through that door first.
             </p>
             <p>
               Three bands depending on the surface area. Each ends the same way: documented,
@@ -111,9 +110,8 @@ export default function StudioEngagementsPage() {
             </p>
           </div>
 
-          {/* Letter #001 — makes the $75K floor legible inline. The price is asserted in the
-              hero; this is where a buyer who clicks "why $75K specifically?" gets the answer
-              in Lorenzo's voice rather than a marketing rationalization. */}
+          {/* Letter #001 — keeps pricing transparent without making the largest install
+              band feel like the only way to begin. */}
           <aside className="border-l-2 border-foreground/15 pl-5 max-w-2xl mb-12">
             <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground mb-3">
               № 001 · Letter from the founder
@@ -123,13 +121,13 @@ export default function StudioEngagementsPage() {
               className="group inline-flex items-baseline gap-2 text-foreground hover:text-primary transition-colors"
             >
               <span className="font-display italic text-xl sm:text-[22px] leading-[1.3] tracking-[-0.01em]">
-                Why we don&apos;t take engagements under $75,000.
+                What a serious AI install actually costs.
               </span>
               <ArrowRight className="h-3.5 w-3.5 translate-y-0.5 shrink-0 transition-transform group-hover:translate-x-0.5" />
             </Link>
             <p className="mt-3 text-sm text-muted-foreground leading-[1.6]">
-              The honest math behind the floor — vendor costs, engineering time, integration debt,
-              outcome evaluation — and what we built for everyone below it. Five-minute read.
+              The honest math behind vendor costs, engineering time, integration debt,
+              and outcome evaluation. Five-minute read.
             </p>
           </aside>
 

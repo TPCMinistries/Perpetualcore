@@ -89,9 +89,9 @@ export function Footer() {
           <NewsletterCapture variant="footer" source="footer" />
         </div>
 
-        <div className="grid md:grid-cols-7 gap-8 mb-10">
+        <div className="grid sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-8 gap-8 mb-10">
           {/* Brand column */}
-          <div className="md:col-span-1">
+          <div>
             <div className="mb-4 flex items-center gap-2.5">
               <span aria-hidden className="block h-3 w-3 bg-foreground" />
               <span className="text-[15px] font-semibold tracking-tight text-foreground">
@@ -99,7 +99,7 @@ export function Footer() {
               </span>
             </div>
             <p className="text-sm text-muted-foreground leading-relaxed">
-              The AI-first studio that installs operating systems for mission-driven organizations.
+              The first-of-its-kind venture studio attached to the Perpetual Engine.
             </p>
           </div>
 

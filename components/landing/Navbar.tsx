@@ -3,7 +3,7 @@
 /**
  * Studio-frame navbar — single source of truth for all public marketing pages.
  *
- * Top-level: Studio | Products | Industries | Pricing | About    [Sign In] [Start Engagement]
+ * Top-level: Engine | Studio | Products | Institute    [Sign In] [Start]
  * Per BRIEF_RECONCILED A3 + BRAND_ARCHITECTURE §7.
  *
  * Replaces three legacy navbar implementations (homepage inline, /consulting,
@@ -33,7 +33,7 @@ const SOLUTION_LINKS: { label: string; href: string; group: string }[] = [
 
 const STUDIO_LINKS = [
   { label: "Retainers", href: "/studio/retainers", description: "$5K–$15K/mo · Productized programs" },
-  { label: "Engagements", href: "/studio/engagements", description: "$75K–$250K+ · Install the Engine" },
+  { label: "Engagements", href: "/studio/engagements", description: "$30K+ · Scoped studio work to full Engine installs" },
   { label: "Methodology", href: "/studio/methodology", description: "Learn → Wire → Automate → Scale" },
   { label: "Process", href: "/studio/process", description: "Day 1 to Month 6 timeline" },
   { label: "Case Studies", href: "/studio/case-studies", description: "Abstracted to sector and constraint" },
@@ -76,20 +76,24 @@ export function Navbar() {
   }
 
   return (
-    <header className="border-b border-border/60 backdrop-blur-md bg-background/90 sticky top-0 z-50">
+    <header className="border-b border-border/60 backdrop-blur-md bg-background/95 sticky top-0 z-50 shadow-[0_1px_0_rgba(10,12,24,0.04)]">
       <div className="container mx-auto px-6 sm:px-8 py-4 flex items-center justify-between">
         <Link href="/" className="flex items-center gap-2.5 group">
           {/* Mark — small filled square in primary, gives wordmark presence */}
           <span
             aria-hidden
-            className="block h-[14px] w-[14px] bg-foreground group-hover:bg-primary transition-colors"
+            className="block h-[14px] w-[14px] bg-primary shadow-[0_0_18px_rgba(75,53,255,0.35)] group-hover:bg-[#00d4ff] transition-colors"
           />
           <span className="text-[15px] font-semibold tracking-tight text-foreground">
             Perpetual Core
           </span>
         </Link>
 
-        <nav className="hidden md:flex items-center gap-8">
+        <nav className="hidden md:flex items-center gap-5 lg:gap-6">
+          <Link href="/engine" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
+            Engine
+          </Link>
+
           {/* Studio dropdown */}
           <div className="relative group">
             <Link
@@ -152,7 +156,7 @@ export function Navbar() {
             </DropdownPanel>
           </div>
 
-          <Link href="/fund" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
+          <Link href="/fund" className="hidden xl:inline-flex text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
             Fund
           </Link>
 
@@ -161,7 +165,7 @@ export function Navbar() {
           </Link>
 
           {/* Industries dropdown — kept but moved to lower priority */}
-          <div className="relative group">
+          <div className="relative group hidden xl:block">
             <Link
               href="/solutions"
               className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1"
@@ -195,29 +199,29 @@ export function Navbar() {
             </DropdownPanel>
           </div>
 
-          <Link href="/pricing" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
+          <Link href="/pricing" className="hidden xl:inline-flex text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
             Pricing
           </Link>
 
-          <Link href="/compare" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
+          <Link href="/compare" className="hidden 2xl:inline-flex text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
             Compare
           </Link>
 
-          <Link href="/about" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
+          <Link href="/about" className="hidden xl:inline-flex text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
             About
           </Link>
         </nav>
 
-        <div className="hidden md:flex items-center gap-5">
+        <div className="hidden md:flex items-center gap-4">
           <Link href="/login" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
             Sign in
           </Link>
           <Button
             asChild
             size="sm"
-            className="text-sm px-5 h-9 shadow-none bg-foreground text-background hover:bg-foreground/90"
+            className="text-sm px-5 h-9 shadow-none bg-primary text-primary-foreground hover:bg-[#3324d9]"
           >
-            <Link href="/studio/engagements">Start engagement</Link>
+            <Link href="/studio/engagements">Start</Link>
           </Button>
         </div>
 
@@ -226,9 +230,9 @@ export function Navbar() {
           <Button
             size="sm"
             asChild
-            className="h-9 px-4 text-sm font-medium shadow-none bg-foreground text-background hover:bg-foreground/90"
+            className="h-9 px-4 text-sm font-medium shadow-none bg-primary text-primary-foreground hover:bg-[#3324d9]"
           >
-            <Link href="/studio/engagements">Start</Link>
+            <Link href="/studio/engagements">Studio</Link>
           </Button>
         </div>
       </div>

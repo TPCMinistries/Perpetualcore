@@ -32,12 +32,14 @@ import { toast } from "sonner";
 type SubmitState = "idle" | "submitting" | "success" | "error";
 
 const PLAN_OPTIONS = [
-  { value: "business", label: "Business — $1,999/mo" },
-  { value: "enterprise", label: "Enterprise — $9,999/mo" },
-  { value: "engagement-75", label: "Engagement — $75K install" },
-  { value: "engagement-150", label: "Engagement — $150K install" },
-  { value: "engagement-250", label: "Engagement — $250K+ install" },
-  { value: "retainer", label: "Post-engagement retainer ($5K–$15K/mo)" },
+  { value: "studio-sprint-30", label: "Scoped studio engagement — $30K+" },
+  { value: "engine-engagement-75", label: "Larger Engine install" },
+  { value: "engine-engagement-150", label: "Operations Engine install — $150K" },
+  { value: "engine-engagement-250", label: "Institutional Engine install — $250K+" },
+  { value: "studio-retainer", label: "Studio retainer — $5K–$15K/mo" },
+  { value: "product-subscription", label: "Product subscription or team product" },
+  { value: "venture-partner", label: "Venture, fund, or ecosystem partnership" },
+  { value: "institute-partner", label: "Institute / mission partnership" },
   { value: "exploring", label: "Just exploring" },
 ];
 
@@ -88,7 +90,7 @@ function ContactSalesForm() {
     company: "",
     phone: "",
     employees: "",
-    plan: planFromUrl || "business",
+    plan: planFromUrl || "studio-sprint-30",
     product: productFromUrl,
     message: "",
   });
@@ -137,7 +139,7 @@ function ContactSalesForm() {
               <Link href="/">Back to home</Link>
             </Button>
             <Button asChild className="text-sm font-medium h-10 px-5 shadow-none bg-foreground text-background hover:bg-foreground/90 rounded-[6px]">
-              <Link href="/products">Read the portfolio <ArrowRight className="ml-2 h-3.5 w-3.5" /></Link>
+              <Link href="/engine">Read the Engine <ArrowRight className="ml-2 h-3.5 w-3.5" /></Link>
             </Button>
           </div>
         </div>
@@ -150,14 +152,16 @@ function ContactSalesForm() {
       {/* Hero */}
       <section className="container mx-auto px-6 sm:px-8 pt-20 pb-12 sm:pt-28 sm:pb-16">
         <div className="grid lg:grid-cols-[280px_1fr] gap-12 lg:gap-20">
-          <SectionRail index="00" label="Contact sales" />
+            <SectionRail index="00" label="Start with the studio" />
           <div className="max-w-3xl">
             <h1 className="font-display text-5xl sm:text-6xl lg:text-7xl leading-[1.05] tracking-[-0.025em] text-foreground">
-              Tell us about your operation.
+              Tell us what the Engine needs to touch.
             </h1>
             <p className="mt-8 text-lg sm:text-xl text-muted-foreground leading-[1.65] max-w-2xl">
-              Engagements start at $75,000 and run 6 to 10 weeks. Subscriptions
-              start at $49/month. Either way, the conversation starts here.
+              Perpetual Core is the venture studio attached to the Perpetual Engine.
+              Scoped studio engagements can start around $30,000 when the problem is
+              focused. Larger Engine installs are available when the operating surface
+              is broader.
               {productFromUrl && (
                 <>
                   {" "}
@@ -256,7 +260,7 @@ function ContactSalesForm() {
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="plan" className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
-                    Interested in *
+                    Best-fit path *
                   </Label>
                   <Select
                     value={formData.plan}
@@ -278,14 +282,15 @@ function ContactSalesForm() {
 
               <div className="space-y-2">
                 <Label htmlFor="message" className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
-                  Describe the operation (optional)
+                  Describe the operation *
                 </Label>
                 <Textarea
                   id="message"
+                  required
                   rows={5}
                   value={formData.message}
                   onChange={(e) => handleChange("message", e.target.value)}
-                  placeholder="What workflows are eating your week? Which metric needs to move? What's been tried?"
+                  placeholder="What workflows, departments, data, decisions, or revenue constraints need the Engine? What has been tried?"
                 />
               </div>
 
@@ -294,7 +299,7 @@ function ContactSalesForm() {
                 disabled={submitState === "submitting"}
                 className="text-sm font-medium h-11 px-6 shadow-none bg-foreground text-background hover:bg-foreground/90 rounded-[6px]"
               >
-                {submitState === "submitting" ? "Sending…" : "Send"}
+                {submitState === "submitting" ? "Sending…" : "Start Studio Intake"}
                 {submitState !== "submitting" && (
                   <ArrowRight className="ml-2 h-3.5 w-3.5" />
                 )}
@@ -355,12 +360,12 @@ function ContactSalesForm() {
             <SectionRail index="—" label="Engagement essentials" />
             <div className="max-w-3xl grid sm:grid-cols-2 gap-x-10 gap-y-6">
               {[
-                "Dedicated operating partner on point",
-                "Outcome-eval scope written before code",
+                "Venture studio partner on point",
+                "Outcome-eval scope written before build",
                 "SSO/SAML and SOC 2 process",
                 "HIPAA, IRB, and GDPR-equivalent handling",
                 "Audit log on every model call",
-                "10–15% of every dollar funds the Institute",
+                "10-15% of every dollar funds the Institute",
                 "Stripe, ACH, or wire — net 30 standard",
                 "Cancellable post-engagement retainers",
               ].map((item) => (
@@ -392,9 +397,9 @@ export default function ContactSalesPage() {
         data={serviceSchema({
           name: "AI Implementation Engagement",
           description:
-            "Production AI installs for mission-driven organizations. 6–10 week engagements starting at $75,000.",
+            "Production AI installs for mission-driven organizations. Scoped studio engagements start around $30,000.",
           category: "AI Implementation Services",
-          priceFrom: "75000",
+          priceFrom: "30000",
         })}
       />
       <Navbar />

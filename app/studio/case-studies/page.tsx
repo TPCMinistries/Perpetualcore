@@ -145,7 +145,8 @@ export default function CaseStudiesPage() {
                 Want to see the work behind the abstraction?
               </h3>
               <p className="text-base text-muted-foreground leading-[1.7] mb-10">
-                We walk through specific installs under NDA on intake calls. Engagements start at $75,000.
+                We walk through specific installs under NDA on intake calls. Scoped studio
+                engagements can start around $30,000 when the operating problem is focused.
               </p>
               <div className="flex flex-col sm:flex-row items-start gap-5">
                 <Button size="lg" asChild className="text-sm font-medium h-11 px-7 shadow-none bg-foreground text-background hover:bg-foreground/90 rounded-[6px]">

@@ -4,9 +4,9 @@
 
 @layer base {
   :root {
-    /* Confident-corporate — Anthropic/Linear/Vercel register
-       Pure-white surfaces. Cool neutral grays. Near-black ink.
-       Violet appears sparingly as accent, never as the default button color. */
+    /* Engine editorial — high-contrast institutional base with electric
+       signal color. The brand should feel like an operating standard, not a
+       generic SaaS landing page. */
 
     --background: 0 0% 100%;          /* pure white */
     --foreground: 220 13% 11%;        /* near-black, cool */
@@ -16,43 +16,41 @@
     --popover: 0 0% 100%;
     --popover-foreground: 220 13% 11%;
 
-    /* Violet accent — used on links, small marks, focus rings.
-       Buttons use --foreground (near-black), not --primary. */
-    --primary: 258 50% 50%;
+    --primary: 247 100% 62%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 220 14% 96%;
+    --secondary: 226 34% 96%;
     --secondary-foreground: 220 13% 11%;
-    --muted: 220 14% 96%;
-    --muted-foreground: 220 9% 46%;
-    --accent: 220 14% 96%;
+    --muted: 226 34% 96%;
+    --muted-foreground: 220 11% 42%;
+    --accent: 247 100% 97%;
     --accent-foreground: 220 13% 11%;
 
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
     --border: 220 13% 91%;
     --input: 220 13% 91%;
-    --ring: 258 50% 50%;
+    --ring: 247 100% 62%;
     --radius: 0.25rem;
 
     /* Semantic surfaces */
     --ink: 220 13% 11%;
     --ink-muted: 220 9% 46%;
     --surface: 0 0% 100%;
-    --surface-hover: 220 14% 97%;
-    --surface-dark: 220 18% 9%;       /* cool near-black for engine block */
+    --surface-hover: 226 34% 96%;
+    --surface-dark: 230 35% 7%;
     --surface-dark-foreground: 0 0% 100%;
 
     --sidebar-bg: 220 18% 9%;
     --sidebar-hover: 220 14% 16%;
-    --sidebar-active: 258 50% 50%;
+    --sidebar-active: 247 100% 62%;
 
-    --glow-primary: 258 50% 50% / 0.12;
-    --shadow-colored: 258 50% 50% / 0.06;
+    --glow-primary: 247 100% 62% / 0.18;
+    --shadow-colored: 247 100% 62% / 0.08;
 
     /* Status colors for product pills */
-    --status-live: 142 50% 38%;        /* green for LIVE */
-    --status-pilot: 38 78% 44%;        /* amber for PILOT */
+    --status-live: 168 88% 34%;        /* teal for LIVE */
+    --status-pilot: 34 96% 48%;        /* amber for PILOT */
     --status-invite: 220 9% 46%;       /* neutral for BY INVITATION */
   }
 
@@ -198,10 +196,26 @@
 
 /* Gradient text — reserved for the engine block stat row only, single-stop violet */
 .text-gradient {
-  background: linear-gradient(150deg, hsl(258 50% 55%), hsl(258 50% 40%));
+  background: linear-gradient(135deg, #4b35ff 0%, #00d4ff 46%, #26f2a8 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
+}
+
+.engine-gradient {
+  background:
+    radial-gradient(circle at 18% 22%, rgba(75, 53, 255, 0.42), transparent 28%),
+    radial-gradient(circle at 74% 18%, rgba(0, 212, 255, 0.28), transparent 30%),
+    radial-gradient(circle at 88% 78%, rgba(38, 242, 168, 0.16), transparent 28%),
+    linear-gradient(135deg, #070914 0%, #101426 48%, #05060b 100%);
+}
+
+.signal-grid {
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.075) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.075) 1px, transparent 1px);
+  background-size: 44px 44px;
+  mask-image: linear-gradient(to bottom, black, transparent 78%);
 }
 
 /* Subtle SVG grain overlay — gives dark sections material feel */

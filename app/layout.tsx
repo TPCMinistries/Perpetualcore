@@ -47,12 +47,15 @@ export const viewport: Viewport = {
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || "https://perpetualcore.com"),
   title: {
-    default: "Perpetual Core — An AI-first studio",
+    default: "Perpetual Core — The venture studio attached to the Perpetual Engine",
     template: "%s | Perpetual Core",
   },
-  description: "We install operating systems for mission-driven organizations. Engagements start at $75,000. Production AI under PEPFAR rules, IRB review, and GDPR-equivalent consent.",
+  description: "Perpetual Core is a first-of-its-kind AI venture studio powered by the Perpetual Engine. We build, install, and scale AI-native operating systems, products, and ventures for mission-driven institutions.",
   keywords: [
+    "AI venture studio",
     "AI implementation studio",
+    "AI-native venture studio",
+    "Perpetual Engine",
     "AI operating system",
     "mission-driven AI",
     "nonprofit AI implementation",
@@ -76,22 +79,22 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     siteName: "Perpetual Core",
-    title: "Perpetual Core — An AI-first studio",
-    description: "We install operating systems for mission-driven organizations. Engagements start at $75,000.",
+    title: "Perpetual Core — The venture studio attached to the Perpetual Engine",
+    description: "A first-of-its-kind AI venture studio building AI-native operating systems, products, and ventures for mission-driven institutions.",
     locale: "en_US",
     images: [
       {
         url: "/og-image.png",
         width: 1200,
         height: 630,
-        alt: "Perpetual Core — An AI-first studio",
+        alt: "Perpetual Core — the venture studio attached to the Perpetual Engine",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Perpetual Core — An AI-first studio",
-    description: "We install operating systems for mission-driven organizations. Engagements start at $75,000.",
+    title: "Perpetual Core — The venture studio attached to the Perpetual Engine",
+    description: "A first-of-its-kind AI venture studio powered by the Perpetual Engine.",
     images: ["/og-image.png"],
   },
   robots: {

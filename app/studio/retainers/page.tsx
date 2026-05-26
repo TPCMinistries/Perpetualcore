@@ -1,80 +1,93 @@
 /**
- * /studio/retainers — the productized middle band.
+ * /studio/retainers
  *
- * Sits between Products (self-serve SaaS) and Engagements (high-touch install).
- * Productized programs at $5K–$15K/mo: ongoing AI capability for orgs that
- * want operator-grade systems without an engagement commitment.
- *
- * Visual register matches homepage v6.
+ * Retainers are no longer positioned as cheaper consulting. They are managed
+ * operating lanes: recurring workflows where the studio runs the AI capability
+ * with the buyer until the pattern is ready to become a product, sprint, or
+ * larger Engine install.
  */
 
 import Link from "next/link";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, ArrowUpRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Navbar } from "@/components/landing/Navbar";
 import { Footer } from "@/components/landing/Footer";
 
 export const metadata = {
-  title: "Retainers — Perpetual Core",
+  title: "Retainers - Managed AI Operating Lanes | Perpetual Core",
   description:
-    "Productized AI programs on monthly retainer — $5K–$15K/mo. Sentinel on retainer, capture pipelines, operator concierge, skills subscriptions. Operator-grade AI capability without a $75K engagement commitment.",
+    "Managed AI operating lanes for recurring work: diligence, capture, knowledge, hiring, and operator support. Products are the front door; retainers are where the studio runs the workflow with you.",
 };
 
-const PROGRAMS = [
+const LANES = [
   {
     index: "01",
-    name: "Sentinel on Retainer",
-    price: "$5,000",
-    cadence: "/month",
-    sla: "Unlimited vets · 48-hour SLA",
-    body: "Production Sentinel run for one organization on a monthly subscription. Unlimited DD vets per month. We operate the agent; you receive the dossiers. For legal teams, investigators, journalists, and operators who need ongoing DD capability — not a one-off vet.",
-    audience: "Legal · Investigations · Journalism",
-    cta: "Start a retainer",
-    href: "mailto:lorenzo@perpetualcore.com?subject=Retainer%20%E2%80%94%20Sentinel%20on%20Retainer",
+    name: "Diligence Lane",
+    product: "Sentinel",
+    price: "From $5K/mo",
+    buyer: "Funds, attorneys, investigators, operators",
+    body: "We run recurring subject, company, and deal diligence with Sentinel as the product layer and studio judgment around the edges.",
+    outcome: "A repeatable diligence desk your team can trust before hires, deals, partnerships, or public exposure.",
+    href: "mailto:lorenzo@perpetualcore.com?subject=Diligence%20Lane",
   },
   {
     index: "02",
-    name: "Capture Pipeline",
-    price: "$7,500",
-    cadence: "/month",
-    sla: "Discovery every 6h · Weekly digest",
-    body: "Managed RFP discovery and drafting. RFP Engine + RFP Sentry run as a service. We surface scored opportunities, deliver draft responses on request, and brief you weekly. For capture teams, EDs, and grant-funded orgs who need pipeline volume without staffing for it.",
-    audience: "Capture teams · Grant orgs · EDs",
-    cta: "Talk to capture",
-    href: "mailto:lorenzo@perpetualcore.com?subject=Retainer%20%E2%80%94%20Capture%20Pipeline",
+    name: "Capture Lane",
+    product: "RFP Engine + RFP Sentry",
+    price: "From $7.5K/mo",
+    buyer: "Grant-funded orgs, capture teams, EDs",
+    body: "We surface opportunities, score fit, prepare first drafts, and keep the capture motion from dying between deadlines.",
+    outcome: "A live opportunity pipeline with fewer missed bids and cleaner go/no-go judgment.",
+    href: "mailto:lorenzo@perpetualcore.com?subject=Capture%20Lane",
   },
   {
     index: "03",
-    name: "Operator Concierge",
-    price: "$10,000",
-    cadence: "/month",
-    sla: "10 hours · Quarterly business review",
-    body: "Productized AI operations review. Ten hours of operator-grade time per month — agent tuning, workflow optimization, skill audits, vendor consolidation. Quarterly business review with your executive team. For orgs who installed AI piecemeal and need ongoing operator oversight.",
-    audience: "Founders · COOs · Operating partners",
-    cta: "Start a concierge",
-    href: "mailto:lorenzo@perpetualcore.com?subject=Retainer%20%E2%80%94%20Operator%20Concierge",
+    name: "Knowledge Lane",
+    product: "Vellum",
+    price: "From $10K/mo",
+    buyer: "Foundations, health systems, multi-program orgs",
+    body: "We turn calls, docs, meeting notes, voice memos, and program history into institutional memory your team can actually query.",
+    outcome: "Less repeated context, faster onboarding, and a cleaner path from scattered knowledge to operating system.",
+    href: "mailto:lorenzo@perpetualcore.com?subject=Knowledge%20Lane",
   },
   {
     index: "04",
-    name: "Skills Subscription",
-    price: "$5,000",
-    cadence: "/month",
-    sla: "One production skill per month",
-    body: "We build one production skill per month against your real workflows — SKILL.md format, per-org JSON config, versioned and auditable. The library compounds; you keep them all. For orgs that want gradual automation without an engagement, and a compounding skills asset that grows month over month.",
-    audience: "Mid-market orgs · Steady-cadence buyers",
-    cta: "Subscribe to skills",
-    href: "mailto:lorenzo@perpetualcore.com?subject=Retainer%20%E2%80%94%20Skills%20Subscription",
+    name: "People Lane",
+    product: "Janice",
+    price: "From $7.5K/mo",
+    buyer: "Workforce orgs, agencies, intern-heavy teams",
+    body: "We manage the candidate, intern, staff, or partner lifecycle with intake, documents, onboarding, and follow-through in one lane.",
+    outcome: "A cleaner people operation where forms, follow-ups, files, and decisions stop living in separate places.",
+    href: "mailto:lorenzo@perpetualcore.com?subject=People%20Lane",
   },
   {
     index: "05",
-    name: "Vellum Institutional",
-    price: "$15,000+",
-    cadence: "/month",
-    sla: "SSO · custom retention · on-prem option",
-    body: "Managed Vellum deployment for institutions whose data can't leave their infrastructure or whose compliance team needs every retention parameter on the table. White-glove install, ongoing tune, dedicated retention engineering. Includes the underlying institutional-memory product.",
-    audience: "Health systems · Foundations · Universities",
-    cta: "Contact for Institutional",
-    href: "mailto:lorenzo@perpetualcore.com?subject=Retainer%20%E2%80%94%20Vellum%20Institutional",
+    name: "Operator Lane",
+    product: "Atelier + Sage",
+    price: "From $10K/mo",
+    buyer: "Founders, COOs, operating partners",
+    body: "We sit beside the operator: tuning workflows, cleaning handoffs, building skills, and reviewing where AI should become process.",
+    outcome: "A monthly operating rhythm that turns scattered AI use into a managed execution layer.",
+    href: "mailto:lorenzo@perpetualcore.com?subject=Operator%20Lane",
+  },
+];
+
+const STEPS = [
+  {
+    title: "Pick the lane",
+    body: "We identify the recurring workflow already costing time, attention, or missed opportunity.",
+  },
+  {
+    title: "Attach the product",
+    body: "We start with the product closest to the work so value appears quickly, not after a long transformation plan.",
+  },
+  {
+    title: "Run it with you",
+    body: "The studio operates the workflow, tunes the agents, and documents what repeats.",
+  },
+  {
+    title: "Decide what it becomes",
+    body: "Stay on retainer, expand into a sprint, install the Engine, or productize the pattern.",
   },
 ];
 
@@ -92,263 +105,164 @@ export default function StudioRetainersPage() {
     <div className="min-h-screen bg-background">
       <Navbar />
 
-      {/* Hero */}
-      <section className="container mx-auto px-6 sm:px-8 pt-20 pb-20 sm:pt-28 sm:pb-28">
-        <div className="max-w-5xl">
-          <div className="flex items-center gap-3 mb-12">
-            <span aria-hidden className="block h-1.5 w-1.5 bg-foreground" />
-            <p className="eyebrow !text-foreground/70">§ 01 · Studio · Retainers</p>
-          </div>
+      <section className="relative overflow-hidden border-b border-border text-white engine-gradient">
+        <div className="signal-grid absolute inset-0 opacity-60" />
+        <div className="relative container mx-auto px-6 sm:px-8 py-20 sm:py-28">
+          <div className="grid lg:grid-cols-[1fr_360px] gap-14 lg:gap-20 items-end">
+            <div className="max-w-5xl">
+              <div className="flex items-center gap-3 mb-10">
+                <span aria-hidden className="block h-2 w-2 bg-[#26f2a8] shadow-[0_0_18px_rgba(38,242,168,0.75)]" />
+                <p className="eyebrow !text-white/70">Studio retainers · Managed operating lanes</p>
+              </div>
+              <h1 className="display-hero text-[52px] sm:text-[76px] lg:text-[106px] text-white leading-[0.96] mb-10 max-w-5xl">
+                We run the workflow until it becomes{" "}
+                <span className="italic text-gradient">a system.</span>
+              </h1>
+              <p className="text-lg sm:text-xl text-white/72 leading-[1.55] max-w-3xl mb-10">
+                Retainers are for recurring work that is already important but not yet ready for a
+                full install. We attach a product, operate the lane with you, and turn what repeats
+                into the next product, sprint, or Engine install.
+              </p>
+              <div className="flex flex-col sm:flex-row items-start gap-4">
+                <Button asChild size="lg" className="h-12 px-7 rounded-[6px] bg-[#26f2a8] text-[#05060b] shadow-none hover:bg-[#7dffd0]">
+                  <Link href="/contact-sales">
+                    Map the first workflow <ArrowRight className="ml-2 h-4 w-4" />
+                  </Link>
+                </Button>
+                <Link href="/products" className="inline-flex items-center py-3 text-sm font-medium text-white border-b border-white/25 hover:border-[#00d4ff] hover:text-[#00d4ff] transition-colors">
+                  See product front doors <ArrowRight className="ml-2 h-3.5 w-3.5" />
+                </Link>
+              </div>
+            </div>
 
-          <h1 className="display-hero text-[40px] sm:text-[56px] lg:text-[80px] text-foreground mb-12 max-w-5xl leading-[1.05]">
-            Productized AI capability —{" "}
-            <span className="italic text-foreground/85">on a monthly retainer.</span>
-          </h1>
-
-          <div className="space-y-5 text-lg sm:text-xl text-muted-foreground leading-[1.55] mb-12 max-w-3xl">
-            <p>
-              The band between subscribing to a product and installing the full Engine. Five
-              productized programs your team uses ongoing, at $5,000–$15,000/month. We operate the
-              agents. Your team gets the output. No engagement commitment required.
-            </p>
-            <p>
-              Retainers run continuously, cancellable monthly. Many orgs start here and roll into
-              a full engagement when the work scales.
-            </p>
-          </div>
-
-          <div className="flex flex-col sm:flex-row items-start gap-4">
-            <Button
-              size="lg"
-              asChild
-              className="text-sm font-medium px-7 h-11 shadow-none bg-foreground text-background hover:bg-foreground/90 rounded-[6px]"
-            >
-              <Link href="#programs">
-                See the programs <ArrowRight className="ml-2 h-4 w-4" />
-              </Link>
-            </Button>
-            <Link
-              href="/studio/engagements"
-              className="inline-flex items-center text-sm font-medium text-foreground hover:text-primary transition-colors py-3 border-b border-foreground/20 hover:border-primary"
-            >
-              See engagements <ArrowRight className="ml-1.5 h-3.5 w-3.5" />
-            </Link>
+            <aside className="border border-white/15 bg-white/[0.06] backdrop-blur-xl p-6">
+              <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-[#00d4ff] mb-6">
+                Best fit
+              </p>
+              <div className="space-y-5 text-sm text-white/68 leading-[1.65]">
+                <p>
+                  You have a recurring workflow that is too important for casual AI use, but too
+                  narrow for a full organizational install.
+                </p>
+                <p>
+                  You want a managed lane with a real operator in the loop, measurable outputs, and
+                  a path to scale if it works.
+                </p>
+              </div>
+            </aside>
           </div>
         </div>
       </section>
 
-      {/* Where retainers sit in the spectrum */}
-      <section className="border-t border-border py-20 sm:py-24 bg-surface-hover/40">
-        <div className="container mx-auto px-6 sm:px-8">
-          <div className="grid lg:grid-cols-[280px_1fr] gap-12 lg:gap-20 mb-10">
-            <SectionRail index="01" label="The spectrum" />
-            <div className="max-w-2xl">
-              <h3 className="text-2xl sm:text-3xl lg:text-4xl font-semibold leading-[1.15] tracking-[-0.02em] text-foreground mb-6">
-                Three bands. Pick the one that fits.
-              </h3>
-              <p className="text-base text-muted-foreground leading-[1.7]">
-                Retainers are the middle band. Below them: self-serve products. Above them: full
-                engagements. The studio meets you at the cadence you need — and you can move
-                between bands as the work grows.
-              </p>
-            </div>
-          </div>
-
-          <div className="grid sm:grid-cols-3 border border-border bg-card divide-y sm:divide-y-0 sm:divide-x divide-border">
-            <Link
-              href="/products"
-              className="group block p-6 sm:p-7 hover:bg-surface-hover transition-colors flex flex-col"
-            >
-              <p className="font-mono text-[10px] tracking-[0.18em] text-muted-foreground mb-10">
-                BAND · 01
-              </p>
-              <h4 className="text-[11px] font-mono uppercase tracking-[0.22em] text-primary mb-3">
-                Products
-              </h4>
-              <p className="text-base font-semibold leading-[1.3] tracking-[-0.01em] text-foreground mb-2">
-                Self-serve
-              </p>
-              <p className="text-sm text-muted-foreground leading-[1.6] mb-6 flex-1">
-                Subscribe to a product. Platform, Vellum, Sage, RFP Engine. $0 to $249/mo. The
-                operator drives.
-              </p>
-              <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-foreground mt-auto">
-                $0 → $249/mo
-              </p>
-            </Link>
-
-            <div className="block p-6 sm:p-7 bg-foreground text-background flex flex-col">
-              <p className="font-mono text-[10px] tracking-[0.18em] text-background/60 mb-10">
-                BAND · 02 · YOU ARE HERE
-              </p>
-              <h4 className="text-[11px] font-mono uppercase tracking-[0.22em] text-background mb-3">
-                Retainers
-              </h4>
-              <p className="text-base font-semibold leading-[1.3] tracking-[-0.01em] text-background mb-2">
-                Productized
-              </p>
-              <p className="text-sm text-background/75 leading-[1.6] mb-6 flex-1">
-                Hire a managed program. We operate. You receive output on a monthly cadence.
-                Cancellable any month.
-              </p>
-              <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-background mt-auto">
-                $5K → $15K/mo
-              </p>
-            </div>
-
-            <Link
-              href="/studio/engagements"
-              className="group block p-6 sm:p-7 hover:bg-surface-hover transition-colors flex flex-col"
-            >
-              <p className="font-mono text-[10px] tracking-[0.18em] text-muted-foreground mb-10">
-                BAND · 03
-              </p>
-              <h4 className="text-[11px] font-mono uppercase tracking-[0.22em] text-primary mb-3">
-                Engagements
-              </h4>
-              <p className="text-base font-semibold leading-[1.3] tracking-[-0.01em] text-foreground mb-2">
-                The install
-              </p>
-              <p className="text-sm text-muted-foreground leading-[1.6] mb-6 flex-1">
-                Install the Engine across your org. 90 to 180 days. Documented, trained, handed
-                over. You own the system after.
-              </p>
-              <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-foreground mt-auto">
-                $75K → $250K+
-              </p>
-            </Link>
-          </div>
-        </div>
-      </section>
-
-      {/* Programs */}
-      <section id="programs" className="border-t border-border py-24 sm:py-32">
-        <div className="container mx-auto px-6 sm:px-8">
-          <div className="grid lg:grid-cols-[280px_1fr] gap-12 lg:gap-20 mb-12">
-            <SectionRail index="02" label="Five programs" />
-            <div className="max-w-2xl">
-              <h3 className="text-3xl sm:text-4xl lg:text-5xl font-semibold leading-[1.1] tracking-[-0.025em] text-foreground mb-6">
-                Each one runs every month. None require a $75K commitment.
-              </h3>
-              <p className="text-base text-muted-foreground leading-[1.7]">
-                Start with one. Move between them. Roll into an engagement when the work justifies
-                it. Or stay on retainer indefinitely — many do.
-              </p>
-            </div>
-          </div>
-
+      <section className="border-b border-border bg-[#f5f7ff]">
+        <div className="container mx-auto px-6 sm:px-8 py-20 sm:py-24">
           <div className="grid lg:grid-cols-[280px_1fr] gap-12 lg:gap-20">
-            <div />
-            <div className="max-w-4xl border-t border-border">
-              {PROGRAMS.map((p) => (
-                <a
-                  key={p.name}
-                  href={p.href}
-                  className="group block py-8 border-b border-border hover:bg-surface-hover transition-colors"
-                >
-                  <div className="grid grid-cols-[60px_1fr] sm:grid-cols-[80px_1fr_180px] gap-x-6 sm:gap-x-10 gap-y-2">
-                    <span className="font-mono text-[11px] tracking-[0.18em] text-muted-foreground pt-1">
-                      {p.index}
-                    </span>
-                    <div>
-                      <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-primary mb-2">
-                        {p.audience}
-                      </p>
-                      <h4 className="text-xl sm:text-2xl font-semibold tracking-[-0.015em] text-foreground mb-3 group-hover:text-primary transition-colors">
-                        {p.name}
-                      </h4>
-                      <p className="text-base text-muted-foreground leading-[1.65] mb-3 max-w-2xl">
-                        {p.body}
-                      </p>
-                      <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground/70">
-                        {p.sla}
-                      </p>
-                    </div>
-                    <div className="text-left sm:text-right col-span-2 sm:col-auto mt-2 sm:mt-0">
-                      <p className="text-2xl sm:text-3xl font-semibold tracking-[-0.025em] text-foreground">
-                        {p.price}
-                        <span className="text-sm font-mono text-muted-foreground ml-1">
-                          {p.cadence}
-                        </span>
-                      </p>
-                      <span className="inline-flex items-center font-mono text-[10px] uppercase tracking-[0.18em] text-foreground group-hover:text-primary transition-colors mt-3">
-                        {p.cta}
-                        <ArrowRight className="ml-2 h-3 w-3 transition-transform group-hover:translate-x-0.5" />
-                      </span>
-                    </div>
+            <SectionRail index="01" label="The offer" />
+            <div>
+              <h2 className="font-display text-4xl sm:text-5xl lg:text-6xl font-normal tracking-[-0.025em] leading-[1.02] text-foreground mb-10 max-w-3xl">
+                A retainer is not hours. It is an operating lane.
+              </h2>
+              <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-px bg-border border border-border">
+                {STEPS.map((step, index) => (
+                  <div key={step.title} className="bg-background p-6">
+                    <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-primary mb-8">
+                      0{index + 1}
+                    </p>
+                    <h3 className="text-lg font-semibold tracking-[-0.01em] text-foreground mb-3">
+                      {step.title}
+                    </h3>
+                    <p className="text-sm text-muted-foreground leading-[1.65]">{step.body}</p>
                   </div>
-                </a>
-              ))}
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* How retainers work */}
-      <section className="border-t border-border py-24 sm:py-32 bg-surface-hover/40">
-        <div className="container mx-auto px-6 sm:px-8">
-          <div className="grid lg:grid-cols-[280px_1fr] gap-12 lg:gap-20">
-            <SectionRail index="03" label="How retainers work" />
-            <div className="max-w-2xl">
-              <h3 className="text-3xl sm:text-4xl lg:text-5xl font-semibold leading-[1.1] tracking-[-0.025em] text-foreground mb-10">
-                Productized means productized.
-              </h3>
-              <div className="space-y-5 text-base text-muted-foreground leading-[1.7]">
-                <p>
-                  Each retainer has a fixed scope and a fixed monthly fee. You know what arrives,
-                  when, and at what cost. No SOW renegotiation. No hourly drift. No surprise
-                  invoices.
-                </p>
-                <p>
-                  We operate the AI capability. You receive the output. The agents, the skills, the
-                  pipelines all run on Perpetual Core&apos;s infrastructure — the same eight-registry
-                  Engine the studio installs in full engagements. You don&apos;t inherit the
-                  substrate (that&apos;s the engagement); you inherit the output it produces.
-                </p>
-                <p>
-                  Cancellable any month, 30 days&apos; notice. Move up to a full engagement at
-                  any point — we discuss retainer credit toward engagement scope on a
-                  case-by-case basis, depending on the work already shipped.
-                </p>
-                <p className="text-foreground font-medium">
-                  Retainers are the studio at production cadence. Engagements are the studio at
-                  installation cadence. Same team. Same Engine. Different surface.
-                </p>
+                ))}
               </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Final CTA */}
-      <section className="border-t border-border py-24 sm:py-32">
-        <div className="container mx-auto px-6 sm:px-8">
+      <section className="border-b border-border">
+        <div className="container mx-auto px-6 sm:px-8 py-20 sm:py-28">
           <div className="grid lg:grid-cols-[280px_1fr] gap-12 lg:gap-20">
-            <SectionRail index="—" label="Start a retainer" />
-            <div className="max-w-2xl">
-              <h3 className="text-3xl sm:text-4xl lg:text-5xl font-semibold leading-[1.1] tracking-[-0.025em] text-foreground mb-6">
-                Tell us what you want operating in 30 days.
-              </h3>
-              <p className="text-base text-muted-foreground leading-[1.7] mb-10">
-                Most retainers start within two weeks of the conversation. Pick a program above, or
-                describe what you want running and we&apos;ll match it.
-              </p>
-              <div className="flex flex-col sm:flex-row items-start gap-5">
-                <Button
-                  size="lg"
-                  asChild
-                  className="text-sm font-medium h-11 px-7 shadow-none bg-foreground text-background hover:bg-foreground/90 rounded-[6px]"
-                >
-                  <a href="mailto:lorenzo@perpetualcore.com?subject=Start%20a%20retainer">
-                    Start a retainer <ArrowRight className="ml-2 h-4 w-4" />
+            <SectionRail index="02" label="Lanes" />
+            <div>
+              <h2 className="font-display text-4xl sm:text-5xl lg:text-6xl font-normal tracking-[-0.025em] leading-[1.02] text-foreground mb-10 max-w-3xl">
+                Choose the workflow you want operating.
+              </h2>
+              <div className="border-y border-border">
+                {LANES.map((lane) => (
+                  <a key={lane.name} href={lane.href} className="group block py-7 border-b border-border last:border-b-0 hover:bg-surface-hover transition-colors">
+                    <div className="grid lg:grid-cols-[70px_220px_180px_1fr_150px] gap-4 lg:gap-8 items-baseline">
+                      <span className="font-mono text-[11px] tracking-[0.18em] text-muted-foreground">{lane.index}</span>
+                      <div>
+                        <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-primary mb-2">
+                          {lane.product}
+                        </p>
+                        <h3 className="text-xl font-semibold tracking-[-0.015em] text-foreground group-hover:text-primary transition-colors">
+                          {lane.name}
+                        </h3>
+                      </div>
+                      <p className="font-mono text-[11px] uppercase tracking-[0.14em] text-foreground">
+                        {lane.price}
+                      </p>
+                      <div>
+                        <p className="text-sm text-muted-foreground leading-[1.65] mb-3">{lane.body}</p>
+                        <p className="text-sm text-foreground leading-[1.55]">{lane.outcome}</p>
+                      </div>
+                      <span className="inline-flex items-center text-xs font-medium text-muted-foreground group-hover:text-primary transition-colors">
+                        Start lane <ArrowUpRight className="ml-1.5 h-3.5 w-3.5" />
+                      </span>
+                    </div>
                   </a>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="border-b border-border bg-[#eef2ff]">
+        <div className="container mx-auto px-6 sm:px-8 py-20 sm:py-28">
+          <div className="grid lg:grid-cols-[280px_1fr] gap-12 lg:gap-20">
+            <SectionRail index="03" label="When to use this" />
+            <div className="grid md:grid-cols-3 gap-px bg-border border border-border">
+              {[
+                ["Too much for self-serve", "The product helps, but the workflow needs ongoing judgment, routing, and follow-through."],
+                ["Too narrow for a full install", "The problem is real, but it does not need the whole operating system on day one."],
+                ["Ready to prove a pattern", "The lane should teach us whether this becomes a sprint, product, install, or venture thesis."],
+              ].map(([title, body]) => (
+                <div key={title} className="bg-background p-6 sm:p-7">
+                  <h3 className="text-lg font-semibold text-foreground mb-3">{title}</h3>
+                  <p className="text-sm text-muted-foreground leading-[1.65]">{body}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="border-b border-border">
+        <div className="container mx-auto px-6 sm:px-8 py-20 sm:py-28">
+          <div className="grid lg:grid-cols-[280px_1fr] gap-12 lg:gap-20">
+            <SectionRail index="04" label="Next step" />
+            <div className="max-w-3xl">
+              <h2 className="font-display text-4xl sm:text-5xl lg:text-6xl font-normal tracking-[-0.025em] leading-[1.02] text-foreground mb-6">
+                Tell us the workflow you want off your team&apos;s back.
+              </h2>
+              <p className="text-base sm:text-lg text-muted-foreground leading-[1.65] mb-10">
+                We will tell you whether it should start as a product, a managed lane, a scoped
+                studio sprint, or a larger Engine install.
+              </p>
+              <div className="flex flex-col sm:flex-row items-start gap-4">
+                <Button asChild size="lg" className="h-11 px-7 rounded-[6px] bg-primary text-primary-foreground shadow-[0_14px_42px_rgba(75,53,255,0.22)] hover:bg-[#3324d9]">
+                  <Link href="/contact-sales">
+                    Map the first workflow <ArrowRight className="ml-2 h-4 w-4" />
+                  </Link>
                 </Button>
-                <Link
-                  href="/studio/engagements"
-                  className="inline-flex items-center text-sm font-medium text-foreground hover:text-primary transition-colors py-3"
-                >
-                  Or see full engagements <ArrowRight className="ml-1.5 h-3.5 w-3.5" />
-                </Link>
+                <Button asChild size="lg" variant="outline" className="h-11 px-7 rounded-[6px] shadow-none">
+                  <Link href="/studio/engagements">
+                    See studio sprints <ArrowRight className="ml-2 h-4 w-4" />
+                  </Link>
+                </Button>
               </div>
             </div>
           </div>

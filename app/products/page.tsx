@@ -16,7 +16,7 @@ import { DecisionTree } from "@/components/products/DecisionTree";
 export const metadata = {
   title: "Products — Perpetual Core",
   description:
-    "Eight AI-native products. Each one shipped in an engagement. Each one still running. The portfolio is the proof; the engagement is the work.",
+    "Eight AI-native products that act as front doors into the Perpetual Core studio: diligence, RFPs, knowledge, hiring, personal OS, and team operations.",
 };
 
 type Product = {
@@ -153,21 +153,19 @@ export default function ProductsPage() {
           </div>
 
           <h1 className="display-hero text-[40px] sm:text-[56px] lg:text-[76px] text-foreground mb-12 max-w-5xl leading-[1.05]">
-            Eight products. Each one{" "}
-            <span className="italic text-foreground/85">shipped in an engagement.</span> Each one
-            still running.
+            Products are the front doors{" "}
+            <span className="italic text-foreground/85">into the studio.</span>
           </h1>
 
           <div className="space-y-5 text-lg sm:text-xl text-muted-foreground leading-[1.55] mb-12 max-w-3xl">
             <p>
-              Every product on this site is a working installation we built for a client and kept
-              operating. The portfolio is the proof; the engagement is the work.
+              Each product gives a buyer a concrete way to start: run diligence, find RFPs,
+              organize knowledge, manage people, coordinate a team, or build a personal operating
+              layer.
             </p>
             <p>
-              We don&apos;t sell features. We install operating systems, and the products are what
-              falls out — public demonstrations of capability that other organizations can also
-              use. If a product on this list looks like the thing you&apos;d want installed in your
-              org, the engagement is how that happens.
+              When a product reveals a bigger workflow, the studio turns that workflow into a
+              managed lane, a sprint, an Engine install, or a venture thesis.
             </p>
           </div>
 
@@ -177,8 +175,8 @@ export default function ProductsPage() {
               asChild
               className="text-sm font-medium px-7 h-11 shadow-none bg-foreground text-background hover:bg-foreground/90 rounded-[6px]"
             >
-              <Link href="/studio/engagements">
-                Start an engagement <ArrowRight className="ml-2 h-4 w-4" />
+              <Link href="/contact-sales">
+                Map the first workflow <ArrowRight className="ml-2 h-4 w-4" />
               </Link>
             </Button>
             <Link
@@ -217,7 +215,7 @@ export default function ProductsPage() {
             <SectionRail index="—" label="In production" />
             <div className="max-w-2xl">
               <h3 className="text-3xl sm:text-4xl lg:text-5xl font-semibold leading-[1.1] tracking-[-0.025em] text-foreground mb-8">
-                Eight products in the portfolio.
+                Pick the job closest to your pain.
               </h3>
               {/* Institutional posture line — echoes the home + /studio/case-studies. */}
               <div className="border-l-2 border-foreground/15 pl-5 max-w-xl">
@@ -226,11 +224,9 @@ export default function ProductsPage() {
                     We don&apos;t publish client names.
                   </span>{" "}
                   <span className="text-muted-foreground">
-                    Mission-driven buyers — funds, foundations, healthcare networks,
-                    workforce programs — don&apos;t want their data on our website. The
-                    portfolio names <span className="text-foreground">what we built</span>,
-                    not <span className="text-foreground">who we built it for</span>.
-                    Direct introductions on request, by mutual reference.
+                    Products are not side projects. They are repeatable workflow surfaces:
+                    diligence, capture, knowledge, hiring, team execution, and personal operating
+                    systems. Start with the surface; scale the pattern when it proves itself.
                   </span>
                 </p>
               </div>
@@ -295,30 +291,11 @@ export default function ProductsPage() {
             <SectionRail index="—" label="The work" />
             <div className="max-w-2xl">
               <h3 className="text-3xl sm:text-4xl lg:text-5xl font-semibold leading-[1.1] tracking-[-0.025em] text-foreground mb-6">
-                If you want one of these installed in your org, the engagement is how that happens.
+                If one of these points at a larger workflow, bring us the workflow.
               </h3>
-              <p className="text-base text-muted-foreground leading-[1.7] mb-6">
-                Engagements start at{" "}
-                <Link
-                  href="/blog/the-75k-floor"
-                  className="text-foreground underline underline-offset-4 decoration-foreground/30 hover:decoration-primary hover:text-primary transition-colors"
-                >
-                  $75,000
-                </Link>
-                . We take a limited number per quarter.
-              </p>
-              <p className="text-sm text-muted-foreground leading-[1.65] mb-10 max-w-xl">
-                <span className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground mr-2">
-                  № 001
-                </span>
-                Lorenzo on why the floor sits where it does —{" "}
-                <Link
-                  href="/blog/the-75k-floor"
-                  className="text-foreground hover:text-primary transition-colors underline-offset-4 hover:underline"
-                >
-                  read the letter
-                </Link>
-                .
+              <p className="text-base text-muted-foreground leading-[1.7] mb-10">
+                The best first conversation is not a package. It is the recurring job your team
+                wants out of the manual layer.
               </p>
               <div className="flex flex-col sm:flex-row items-start gap-5">
                 <Button
@@ -326,8 +303,8 @@ export default function ProductsPage() {
                   asChild
                   className="text-sm font-medium h-11 px-7 shadow-none bg-foreground text-background hover:bg-foreground/90 rounded-[6px]"
                 >
-                  <Link href="/studio/engagements">
-                    Start an engagement <ArrowRight className="ml-2 h-4 w-4" />
+                  <Link href="/contact-sales">
+                    Map the first workflow <ArrowRight className="ml-2 h-4 w-4" />
                   </Link>
                 </Button>
                 <Link

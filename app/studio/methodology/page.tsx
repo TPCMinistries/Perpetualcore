@@ -94,7 +94,7 @@ export default function MethodologyPage() {
 
           <div className="flex flex-col sm:flex-row items-start gap-4">
             <Button size="lg" asChild className="text-sm font-medium px-7 h-11 shadow-none bg-foreground text-background hover:bg-foreground/90 rounded-[6px]">
-              <Link href="/studio/engagements">Start an engagement <ArrowRight className="ml-2 h-4 w-4" /></Link>
+              <Link href="/contact-sales">Map the first workflow <ArrowRight className="ml-2 h-4 w-4" /></Link>
             </Button>
             <Link href="/engine/spec" className="inline-flex items-center text-sm font-medium text-foreground hover:text-primary transition-colors py-3 border-b border-foreground/20 hover:border-primary">
               Read the spec <ArrowRight className="ml-1.5 h-3.5 w-3.5" />
@@ -190,7 +190,7 @@ export default function MethodologyPage() {
               </p>
               <div className="flex flex-col sm:flex-row items-start gap-5">
                 <Button size="lg" asChild className="text-sm font-medium h-11 px-7 shadow-none bg-foreground text-background hover:bg-foreground/90 rounded-[6px]">
-                  <Link href="/studio/engagements">Start an engagement <ArrowRight className="ml-2 h-4 w-4" /></Link>
+                  <Link href="/contact-sales">Map the first workflow <ArrowRight className="ml-2 h-4 w-4" /></Link>
                 </Button>
                 <Link href="/engine/spec" className="inline-flex items-center text-sm font-medium text-foreground hover:text-primary transition-colors py-3">
                   Read the Engine spec <ArrowRight className="ml-1.5 h-3.5 w-3.5" />

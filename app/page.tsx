@@ -1,16 +1,9 @@
 /**
- * Perpetual Core — Studio homepage, v6
+ * Perpetual Core homepage
  *
- * Frame: "We build the AI operating systems — and the founders who run them."
- * Five arms presented as architectural diagram. Engine reframed as a structural
- * standard — published spec, not a proprietary moat.
- *
- * Visual signature: Instrument Serif display H1, JetBrains Mono labels, near-black
- * ink on pure white, single violet accent, hairline grids. New in v6:
- *   - Engine architecture SVG (visual signature of the company shape)
- *   - Dramatic black-bg Frontier manifesto (full-bleed display register)
- *   - Scroll-reveal fade-up on sections
- *   - Open Invitation 4-row table with Mission orgs
+ * Direction: institutional venture studio, not generic SaaS. The page should
+ * read like an operating memo: clear thesis, visible architecture, commercial
+ * paths, product proof, mission commitment, and one clean next step.
  */
 
 import Link from "next/link";
@@ -23,38 +16,38 @@ import { Reveal } from "@/components/landing/Reveal";
 import { PageViewTracker } from "@/components/analytics/PageViewTracker";
 
 export const metadata = {
-  title: "Perpetual Core — Studio, fund, and institute building AI-native operating systems",
+  title: "Perpetual Core - Venture studio attached to the Perpetual Engine",
   description:
-    "We build the AI operating systems — and the founders who run them. A studio installing AI-native systems for mission-driven organizations, a fund investing in the founders building the next wave, and an institute training the operators running them. The Perpetual Engine — published as a structural standard for AI ventures.",
+    "Perpetual Core is a first-of-its-kind AI venture studio powered by the Perpetual Engine. We build, install, and scale AI-native operating systems, products, and ventures for mission-driven institutions.",
 };
 
 const ARMS = [
   {
     index: "01",
     name: "Studio",
-    summary: "Engagements that install the Perpetual Engine across your organization.",
-    meta: "$75,000 floor",
+    summary: "Finds one high-value workflow, installs the operating layer, and expands only when the work proves it.",
+    meta: "Wedge to system",
     href: "/studio",
   },
   {
     index: "02",
     name: "Products",
-    summary: "Eight AI-native products in production — from due diligence to portfolio COO.",
-    meta: "8 in portfolio",
+    summary: "Entry points into the Engine: diligence, RFPs, knowledge, hiring, personal OS, and team operations.",
+    meta: "Front doors",
     href: "/products",
   },
   {
     index: "03",
     name: "Fund",
-    summary: "DeepFutures backs AI-native companies. We invest where we install.",
-    meta: "Pre-seed · by intro",
+    summary: "DeepFutures backs the AI-native companies that emerge from repeatable operating patterns.",
+    meta: "Venture path",
     href: "/fund",
   },
   {
     index: "04",
     name: "Institute",
-    summary: "IHA — workforce, founder training, AI education, field health programs.",
-    meta: "501(c)(3) · theiha.org",
+    summary: "IHA trains the founders, operators, and workforce communities who should own the AI shift.",
+    meta: "501(c)(3)",
     href: "/institute",
   },
 ] as const;
@@ -63,28 +56,28 @@ const PRODUCTS = [
   { index: "01", name: "Atlas", status: "IN PILOT", statusColor: "pilot" as const, tagline: "AI-native COO for fund-backed portcos.", href: "/products/atlas", external: false },
   { index: "02", name: "Sentinel", status: "LIVE", statusColor: "live" as const, tagline: "Due diligence and intel for the people Kroll won't take calls from.", href: "https://sentinel.perpetualcore.com", external: true },
   { index: "03", name: "Sage", status: "LIVE", statusColor: "live" as const, tagline: "Personal AI OS with ambient context and your voice.", href: "/products/sage", external: false },
-  { index: "04", name: "Atelier", status: "LIVE", statusColor: "live" as const, tagline: "Team workspace where staff, interns, and clients run agent-augmented Flows across every PC product.", href: "https://atelier.perpetualcore.com", external: true },
-  { index: "05", name: "Vellum", status: "BUILD", statusColor: "invite" as const, tagline: "Institutional knowledge — calls, docs, voice notes, channels.", href: "/products/vellum", external: false },
+  { index: "04", name: "Atelier", status: "LIVE", statusColor: "live" as const, tagline: "Agent-augmented workspace for teams and clients.", href: "https://atelier.perpetualcore.com", external: true },
+  { index: "05", name: "Vellum", status: "BUILD", statusColor: "invite" as const, tagline: "Institutional memory across calls, docs, voice notes, and channels.", href: "/products/vellum", external: false },
   { index: "06", name: "RFP Engine", status: "LIVE", statusColor: "live" as const, tagline: "Find the right RFP. Draft it in your voice. Ship it clean.", href: "https://rfp.perpetualcore.com", external: true },
-  { index: "07", name: "RFP Sentry", status: "BUILD", statusColor: "invite" as const, tagline: "Bid intelligence + compliance gate. Sister to RFP Engine.", href: "/products/rfp-sentry", external: false },
-  { index: "08", name: "Janice", status: "LIVE", statusColor: "live" as const, tagline: "Hiring and onboarding OS for people-heavy orgs.", href: "https://janice.perpetualcore.com", external: true },
+  { index: "07", name: "RFP Sentry", status: "BUILD", statusColor: "invite" as const, tagline: "Bid intelligence and compliance gate.", href: "/products/rfp-sentry", external: false },
+  { index: "08", name: "Janice", status: "LIVE", statusColor: "live" as const, tagline: "Hiring and onboarding OS for people-heavy organizations.", href: "https://janice.perpetualcore.com", external: true },
 ] as const;
 
 const PHASES = [
-  { step: "Learn", body: "We read your org the way an operator does. Calls, docs, voice notes, the channels where decisions actually happen. Two weeks, no PowerPoint." },
-  { step: "Wire", body: "We install the eight registries — entities, people, projects, work items, knowledge, agents, workflows, events — in your Supabase, your storage, your stack." },
-  { step: "Automate", body: "Skills get built against your real workflows. The Anthropic SKILL.md format, per-portco JSON. Versioned, auditable, yours." },
-  { step: "Scale", body: "Your team operates and extends the system. We document, train, and hand over. You own it." },
+  { step: "Learn", body: "Read the organization through calls, docs, voice notes, channels, constraints, and decision paths." },
+  { step: "Wire", body: "Install the registries: entities, people, projects, work items, knowledge, agents, workflows, and events." },
+  { step: "Automate", body: "Build skills and workflows against live work, not imagined demos." },
+  { step: "Scale", body: "Document, train, evaluate outcomes, and hand the operating layer to the team." },
 ];
 
 const ENGINE_STATS = [
-  { value: "$7,500", label: "Engagement minimum to IHA" },
-  { value: "$25,000+", label: "Engagement maximum to IHA" },
-  { value: "10–15%", label: "Of every revenue dollar" },
+  { value: "$3,000+", label: "Engagement contribution to IHA" },
+  { value: "$25,000+", label: "Upper contribution on large installs" },
+  { value: "10-15%", label: "Of every revenue dollar" },
 ];
 
 const INSTITUTE_PROGRAMS = [
-  { name: "IHA Founders 1,000", body: "AI-native founder training. Pilot cohort June 2026. Emerging markets focus." },
+  { name: "IHA Founders 1,000", body: "AI-native founder training with emerging markets focus." },
   { name: "IHA Academy", body: "AI literacy and applied skills for non-technical operators." },
   { name: "IHA Advance", body: "Kenya delegation and East Africa field programs." },
   { name: "Workforce", body: "Healthcare and community workforce development for low-income New Yorkers." },
@@ -94,57 +87,54 @@ const FIELD_NOTES = [
   {
     index: "001",
     date: "2026-05-22",
-    title: "Why we don't take engagements under $75,000.",
-    summary:
-      "Letter #001 of The Install. The honest math behind the floor — and what we built for everyone below it.",
-    href: "/blog/the-75k-floor",
+    title: "How to start before a full Engine install.",
+    summary: "The practical path from a scoped studio sprint into a larger operating-system install.",
+    href: "/studio/retainers",
   },
   {
     index: "002",
     date: "2026-05-20",
     title: "What an AI install actually costs.",
-    summary:
-      "Vendor subscriptions, engineering time, integration debt, outcome evaluation. The four buckets every honest install carries on its books.",
+    summary: "Vendor subscriptions, engineering time, integration debt, and outcome evaluation.",
     href: "/blog/what-an-ai-install-actually-costs",
   },
   {
     index: "003",
     date: "2026-05-20",
     title: "Outcome-eval, the line item every AI install skips.",
-    summary:
-      "Without it, you don't have an install — you have a demo that ran once. Why outcome evaluation is the most load-bearing line item in any engagement.",
+    summary: "Without it, you have a demo that ran once, not an operating system.",
     href: "/blog/outcome-eval-the-line-item-every-ai-install-skips",
   },
 ] as const;
 
 const INVITATION_ROWS = [
   {
+    tag: "Organizations",
+    title: "Install the Engine in the work you already run.",
+    body: "For institutions ready to make AI part of operations, governance, knowledge, and delivery.",
+    cta: "Start intake",
+    href: "/studio/engagements",
+  },
+  {
+    tag: "Operators",
+    title: "Adopt a product before you need the full studio.",
+    body: "Use the portfolio where a focused product solves the immediate job.",
+    cta: "View products",
+    href: "/products",
+  },
+  {
     tag: "Founders",
-    title: "Structure your AI venture on the Engine.",
-    body: "If you're building from day one, you can adopt the same shape: registry-first substrate, structural giving floor, operator-owned methodology. We'll show you ours.",
-    cta: "Read the spec",
+    title: "Build an Engine-aligned venture.",
+    body: "Structure the company from day one with operating rigor and mission funding built into the model.",
+    cta: "Read spec",
     href: "/engine/spec",
   },
   {
-    tag: "Investors",
-    title: "Back Engine-aligned ventures.",
-    body: "If you fund AI companies, demand this structure of the next ones you back. We're happy to compare notes on what works and what doesn't. The category needs aligned capital.",
-    cta: "Talk to DeepFutures",
-    href: "/fund",
-  },
-  {
-    tag: "Practitioners",
-    title: "Implement your own reference.",
-    body: "If you build AI systems for clients, the eight registries and the AI-First Framework are documented. Adopt, fork, extend — the spec is the contribution, not the company.",
-    cta: "See the methodology",
-    href: "/studio/methodology",
-  },
-  {
-    tag: "Mission orgs",
-    title: "Require Engine-alignment in your vendors.",
-    body: "Foundation program officers, executive directors, fund OPs — if you're screening AI vendors, the Engine gives you a structural criterion: does the venture you're considering fund its mission, or extract from it?",
-    cta: "Use the criterion",
-    href: "/engine",
+    tag: "Mission partners",
+    title: "Train the people who should own this next layer.",
+    body: "Partner with IHA across founders, workforce, AI literacy, and field programs.",
+    cta: "Visit IHA",
+    href: "/institute",
   },
 ];
 
@@ -167,13 +157,7 @@ function SectionRail({ index, label }: { index: string; label: string }) {
   );
 }
 
-/**
- * Engine Architecture — visual signature of the company shape.
- * Four arms (numbered nodes) flow down into one wide Engine substrate bar.
- * Mono-styled, hairlines, subtle flow animation on connector lines.
- */
 function EngineArchitecture() {
-  // X positions for 4 arms across a 700-wide viewport
   const arms = [
     { x: 100, label: "01 · STUDIO" },
     { x: 280, label: "02 · PRODUCTS" },
@@ -182,17 +166,16 @@ function EngineArchitecture() {
   ];
 
   return (
-    <figure className="my-4">
+    <figure>
       <svg
         viewBox="0 0 740 240"
-        className="w-full max-w-3xl mx-auto text-foreground"
+        className="w-full text-foreground"
         role="img"
-        aria-label="Architecture: four arms (Studio, Products, Fund, Institute) flowing into the Engine substrate."
+        aria-label="Four arms flowing into the Perpetual Engine substrate."
       >
-        {/* Labels above each arm */}
         {arms.map((a) => (
           <text
-            key={`lbl-${a.label}`}
+            key={`label-${a.label}`}
             x={a.x}
             y={28}
             textAnchor="middle"
@@ -204,57 +187,15 @@ function EngineArchitecture() {
             {a.label}
           </text>
         ))}
-
-        {/* Arm nodes — small filled squares */}
         {arms.map((a) => (
           <g key={`node-${a.label}`}>
-            <rect
-              x={a.x - 14}
-              y={42}
-              width="28"
-              height="28"
-              className="fill-background stroke-foreground"
-              strokeWidth="1.25"
-            />
-            <rect
-              x={a.x - 5}
-              y={51}
-              width="10"
-              height="10"
-              className="fill-foreground"
-            />
+            <rect x={a.x - 14} y={42} width="28" height="28" className="fill-background stroke-foreground" strokeWidth="1.25" />
+            <rect x={a.x - 5} y={51} width="10" height="10" className="fill-foreground" />
+            <line x1={a.x} y1={70} x2={a.x} y2={170} stroke="currentColor" strokeWidth="1" className="animate-flow text-foreground/55" />
+            <circle cx={a.x} cy={170} r="2" className="fill-foreground" />
           </g>
         ))}
-
-        {/* Connector lines flowing down to Engine substrate */}
-        {arms.map((a) => (
-          <line
-            key={`line-${a.label}`}
-            x1={a.x}
-            y1={70}
-            x2={a.x}
-            y2={170}
-            stroke="currentColor"
-            strokeWidth="1"
-            className="animate-flow text-foreground/60"
-          />
-        ))}
-
-        {/* Junction dots */}
-        {arms.map((a) => (
-          <circle
-            key={`dot-${a.label}`}
-            cx={a.x}
-            cy={170}
-            r="2"
-            className="fill-foreground"
-          />
-        ))}
-
-        {/* Engine substrate bar — wide, filled */}
         <rect x="40" y="170" width="660" height="40" className="fill-foreground" />
-
-        {/* Engine label inside bar */}
         <text
           x={370}
           y={195}
@@ -267,12 +208,8 @@ function EngineArchitecture() {
         >
           § 05 · THE ENGINE · STRUCTURAL STANDARD
         </text>
-
-        {/* Bracketed end marks on the bar */}
-        <line x1="40" y1="165" x2="40" y2="215" stroke="currentColor" strokeWidth="1" className="text-foreground/50" />
-        <line x1="700" y1="165" x2="700" y2="215" stroke="currentColor" strokeWidth="1" className="text-foreground/50" />
-
-        {/* Caption line below */}
+        <line x1="40" y1="165" x2="40" y2="215" stroke="currentColor" strokeWidth="1" className="text-foreground/45" />
+        <line x1="700" y1="165" x2="700" y2="215" stroke="currentColor" strokeWidth="1" className="text-foreground/45" />
         <text
           x={370}
           y={232}
@@ -282,7 +219,7 @@ function EngineArchitecture() {
           letterSpacing="1.5"
           style={{ fontFamily: "var(--font-mono), monospace" }}
         >
-          THE FOUR ARMS REST ON ONE SUBSTRATE — PUBLISHED AS AN OPEN STANDARD
+          ONE SUBSTRATE FOR THE STUDIO, PRODUCTS, FUND, AND INSTITUTE
         </text>
       </svg>
     </figure>
@@ -295,907 +232,315 @@ export default function HomePage() {
       <PageViewTracker />
       <Navbar />
 
-      {/* ─── 1. Hero ─────────────────────────────────────────────────── */}
-      <section className="container mx-auto px-6 sm:px-8 pt-20 pb-20 sm:pt-28 sm:pb-28">
-        <div className="max-w-5xl">
-          <div className="flex items-center gap-3 mb-12">
-            <span aria-hidden className="block h-1.5 w-1.5 bg-foreground" />
-            <p className="eyebrow !text-foreground/70">
-              Perpetual Core · An AI-native operating company
-            </p>
-          </div>
-
-          <h1 className="display-hero text-[44px] sm:text-[60px] lg:text-[92px] text-foreground mb-12 max-w-5xl leading-[1.02]">
-            We build the AI operating systems —{" "}
-            <span className="italic text-foreground/85">and the founders who run them.</span>
-          </h1>
-
-          <p className="text-lg sm:text-xl text-muted-foreground leading-[1.5] mb-12 max-w-3xl">
-            Perpetual Core is a studio, a fund, and an institute — the reference implementation
-            of the <span className="text-foreground font-medium">Perpetual Engine</span>: a
-            structural standard for AI-native ventures that fund their mission. We built the
-            first one. We hope it becomes a category.
-          </p>
-
-          <div className="flex flex-col sm:flex-row items-start gap-4 mb-16">
-            <Button
-              size="lg"
-              asChild
-              className="text-sm font-medium px-7 h-11 shadow-none bg-foreground text-background hover:bg-foreground/90 rounded-[6px]"
-            >
-              <Link href="/studio/engagements">
-                Start an engagement <ArrowRight className="ml-2 h-4 w-4" />
-              </Link>
-            </Button>
-            <Link
-              href="/engine/spec"
-              className="inline-flex items-center text-sm font-medium text-foreground hover:text-primary transition-colors py-3 border-b border-foreground/20 hover:border-primary"
-            >
-              Read the Engine spec
-              <ArrowRight className="ml-1.5 h-3.5 w-3.5" />
-            </Link>
-          </div>
-
-          {/* Live signal block */}
-          <div className="border-t border-border pt-6 flex flex-wrap items-center gap-x-6 gap-y-2 font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
-            <span className="flex items-center gap-2">
-              <span aria-hidden className="block h-1.5 w-1.5 rounded-full bg-status-live animate-pulse-dot" />
-              System operating
-            </span>
-            <span className="hidden sm:inline text-muted-foreground/40">·</span>
-            <span>Since 2024</span>
-            <span className="hidden sm:inline text-muted-foreground/40">·</span>
-            <span>Reference implementation</span>
-            <span className="hidden sm:inline text-muted-foreground/40">·</span>
-            <span>Engine spec · v1</span>
-            <span className="hidden sm:inline text-muted-foreground/40">·</span>
-            <Link href="/engine/spec" className="underline-offset-4 hover:text-foreground transition-colors">
-              Open invitation to adopt
-            </Link>
-          </div>
-        </div>
-      </section>
-
-      {/* ─── 1.5 CHARTER — institutional disclosure block ──────────────
-       *
-       * Replaces a 4-card "logo strip" with a dense, audit-grade
-       * disclosure. The goal is institutional weight, not SaaS trust
-       * signals. Reads as the cover page of an annual report — EIN,
-       * founded date, published standard, regulatory surface, field arms.
-       *
-       * Visual register: hairlines, mono labels, multi-row grid,
-       * single accent line. Black-on-white. No badges, no logos.
-       */}
-      <section className="border-y border-border bg-card/40">
-        <div className="container mx-auto px-6 sm:px-8 py-12 sm:py-14">
-          <div className="flex items-baseline justify-between flex-wrap gap-x-8 gap-y-2 mb-8 pb-6 border-b border-border">
-            <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-foreground">
-              § Charter · audit-grade disclosure
-            </p>
-            <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
-              Established 2017 · Audited annually
-            </p>
-          </div>
-
-          <div className="grid lg:grid-cols-2 gap-x-12 gap-y-8">
-            {/* Parent institution */}
-            <div>
-              <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-primary mb-3">
-                Parent institution
-              </p>
-              <p className="text-base sm:text-lg font-semibold tracking-[-0.01em] text-foreground mb-1.5 leading-[1.3]">
-                Institute for Human Advancement
-              </p>
-              <p className="font-mono text-[10.5px] uppercase tracking-[0.16em] text-muted-foreground mb-3">
-                501(c)(3) public charity · EIN 41-5182519 · Founded 2017
-              </p>
-              <p className="text-sm text-muted-foreground leading-[1.6] max-w-md">
-                The parent institution. Every Perpetual Core arm reports to it
-                — and a fixed share of every revenue dollar flows to it as a
-                structural commitment, not a marketing gesture.
-              </p>
-            </div>
-
-            {/* Published standard */}
-            <div className="lg:border-l lg:border-border lg:pl-12">
-              <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-primary mb-3">
-                Published standard
-              </p>
-              <Link
-                href="/engine/spec"
-                className="group inline-flex items-baseline gap-2 text-base sm:text-lg font-semibold tracking-[-0.01em] text-foreground mb-1.5 leading-[1.3] hover:text-primary transition-colors"
-              >
-                The Perpetual Engine · Spec v1.0
-                <ArrowUpRight className="h-3.5 w-3.5 translate-y-0.5" aria-hidden />
-              </Link>
-              <p className="font-mono text-[10.5px] uppercase tracking-[0.16em] text-muted-foreground mb-3">
-                Published CC BY 4.0 · Citable · Open to adopt
-              </p>
-              <p className="text-sm text-muted-foreground leading-[1.6] max-w-md">
-                The structural standard the company is built on, released as
-                an open standard for any AI-native venture. We&apos;re the
-                reference implementation — we hope it becomes the category.
-              </p>
-            </div>
-
-            {/* Operating surface */}
-            <div className="lg:pt-2">
-              <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-primary mb-3">
-                Operating surface
-              </p>
-              <div className="grid grid-cols-2 gap-x-6 gap-y-2 max-w-md mb-3">
-                <p className="font-mono text-[11px] uppercase tracking-[0.16em] text-foreground">
-                  Healthcare · HIPAA
-                </p>
-                <p className="font-mono text-[11px] uppercase tracking-[0.16em] text-foreground">
-                  Education · FERPA
-                </p>
-                <p className="font-mono text-[11px] uppercase tracking-[0.16em] text-foreground">
-                  Field health · PEPFAR / IRB
-                </p>
-                <p className="font-mono text-[11px] uppercase tracking-[0.16em] text-foreground">
-                  Capital · KYC / AML
-                </p>
+      <section className="relative overflow-hidden border-b border-border text-white engine-gradient">
+        <div className="signal-grid absolute inset-0 opacity-70" />
+        <div className="absolute left-1/2 top-10 h-[420px] w-[420px] -translate-x-1/2 rounded-full bg-[#4b35ff]/25 blur-3xl" />
+        <div className="absolute right-[-140px] top-32 h-[360px] w-[360px] rounded-full bg-[#00d4ff]/20 blur-3xl" />
+        <div className="relative container mx-auto px-6 sm:px-8 min-h-[calc(100vh-73px)] py-16 sm:py-24 flex flex-col justify-between gap-16">
+          <div className="grid lg:grid-cols-[1fr_340px] gap-14 lg:gap-20 items-start">
+            <div className="max-w-5xl">
+              <div className="flex items-center gap-3 mb-10">
+                <span aria-hidden className="block h-2 w-2 bg-[#26f2a8] shadow-[0_0_18px_rgba(38,242,168,0.75)]" />
+                <p className="eyebrow !text-white/70">Perpetual Core · Engine reference studio</p>
               </div>
-              <p className="text-sm text-muted-foreground leading-[1.6] max-w-md">
-                The installs that work are the ones built for the regulatory
-                surface they live on. We build for these conditions because
-                this is where our work lives.
+              <h1 className="display-hero text-[52px] sm:text-[76px] lg:text-[112px] text-white leading-[0.95] mb-10 max-w-5xl">
+                The venture studio attached to the{" "}
+                <span className="italic text-gradient">Perpetual Engine.</span>
+              </h1>
+              <p className="text-lg sm:text-xl text-white/72 leading-[1.55] max-w-3xl mb-10">
+                Start with a product, a workflow, or a venture thesis. We turn the repeatable parts
+                into AI-native operating systems, then into products and companies when the pattern
+                deserves to scale.
               </p>
-            </div>
-
-            {/* Field arms */}
-            <div className="lg:border-l lg:border-border lg:pl-12 lg:pt-2">
-              <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-primary mb-3">
-                Field arms
-              </p>
-              <ul className="space-y-1.5 mb-3 max-w-md">
-                <li className="flex items-baseline gap-3">
-                  <span aria-hidden className="font-mono text-[10px] text-muted-foreground tracking-[0.18em]">01</span>
-                  <a
-                    href="https://upliftcommunities.com"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="font-mono text-[11px] uppercase tracking-[0.16em] text-foreground inline-flex items-center gap-1 hover:text-primary transition-colors"
-                  >
-                    Uplift Communities · NYC workforce <ArrowUpRight className="h-3 w-3" />
-                  </a>
-                </li>
-                <li className="flex items-baseline gap-3">
-                  <span aria-hidden className="font-mono text-[10px] text-muted-foreground tracking-[0.18em]">02</span>
-                  <span className="font-mono text-[11px] uppercase tracking-[0.16em] text-foreground">
-                    IHA Academy · AI literacy
-                  </span>
-                </li>
-                <li className="flex items-baseline gap-3">
-                  <span aria-hidden className="font-mono text-[10px] text-muted-foreground tracking-[0.18em]">03</span>
-                  <span className="font-mono text-[11px] uppercase tracking-[0.16em] text-foreground">
-                    IHA Advance · Kenya delegation · April 2026
-                  </span>
-                </li>
-                <li className="flex items-baseline gap-3">
-                  <span aria-hidden className="font-mono text-[10px] text-muted-foreground tracking-[0.18em]">04</span>
-                  <span className="font-mono text-[11px] uppercase tracking-[0.16em] text-foreground">
-                    DeepFutures · Pre-seed capital · By introduction
-                  </span>
-                </li>
-              </ul>
-              <p className="text-sm text-muted-foreground leading-[1.6] max-w-md">
-                Four named programs. Each one is the place the work meets
-                the people the work is for.
-              </p>
-            </div>
-          </div>
-
-          {/* Footnote: 10–15% audit floor restated at the bottom for emphasis */}
-          <div className="mt-10 pt-6 border-t border-border flex flex-wrap items-baseline justify-between gap-x-6 gap-y-2">
-            <p className="text-sm text-foreground leading-[1.55] max-w-2xl">
-              <span className="font-semibold">10–15% of every revenue dollar</span>{" "}
-              <span className="text-muted-foreground">
-                flows from the company to the Institute. Audited annually. The same
-                line item every year — not a campaign, a charter commitment.
-              </span>
-            </p>
-            <Link
-              href="/engine"
-              className="inline-flex items-center font-mono text-[10px] uppercase tracking-[0.22em] text-foreground hover:text-primary transition-colors whitespace-nowrap"
-            >
-              How the Engine works
-              <ArrowRight className="ml-2 h-3 w-3" />
-            </Link>
-          </div>
-        </div>
-      </section>
-
-      {/* ─── 2. THE COMPANY — architecture diagram + arms ─────────────── */}
-      <Reveal as="section" className="border-y border-border" >
-        <div id="company" className="container mx-auto px-6 sm:px-8 py-20 sm:py-24">
-          <div className="max-w-4xl mb-14">
-            <p className="eyebrow mb-3">§ The structure</p>
-            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-semibold leading-[1.1] tracking-[-0.025em] text-foreground mb-6">
-              One operating company. Four arms. One engine — the standard we built to share.
-            </h2>
-            <p className="text-base sm:text-lg text-muted-foreground leading-[1.6] max-w-2xl">
-              The structure is the argument. Every arm contributes to one substrate. The substrate
-              funds the mission. The Engine is published as a standard for AI-native ventures —
-              we built the reference implementation, and we&apos;re inviting others to build theirs.
-            </p>
-          </div>
-
-          {/* Architecture SVG — visual signature */}
-          <div className="border border-border bg-card p-8 sm:p-12 mb-10">
-            <EngineArchitecture />
-          </div>
-
-          {/* Arms grid */}
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 border border-border bg-card divide-y sm:divide-y-0 sm:divide-x divide-border">
-            {ARMS.map((arm) => (
-              <Link
-                key={arm.name}
-                href={arm.href}
-                className="group block p-6 sm:p-7 hover:bg-surface-hover transition-colors flex flex-col"
-              >
-                <div className="flex items-center justify-between mb-12">
-                  <span className="font-mono text-[10px] tracking-[0.18em] text-muted-foreground">
-                    § {arm.index}
-                  </span>
-                  <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground/70">
-                    {arm.meta}
-                  </span>
-                </div>
-                <h3 className="text-2xl sm:text-3xl font-semibold tracking-[-0.02em] text-foreground mb-4 group-hover:text-primary transition-colors">
-                  {arm.name}.
-                </h3>
-                <p className="text-sm text-muted-foreground leading-[1.6] mb-8 flex-1">
-                  {arm.summary}
-                </p>
-                <span className="inline-flex items-center text-xs font-medium text-foreground group-hover:text-primary transition-colors mt-auto">
-                  Enter
-                  <ArrowRight className="ml-1 h-3 w-3 transition-transform group-hover:translate-x-0.5" />
-                </span>
-              </Link>
-            ))}
-          </div>
-
-          {/* Engine substrate bar */}
-          <Link
-            href="/engine"
-            className="group relative block border border-t-0 border-border overflow-hidden text-white hover:opacity-95 transition-opacity"
-            style={{ backgroundColor: "hsl(var(--surface-dark))" }}
-          >
-            <div className="grain" />
-            <div className="relative p-6 sm:p-8 grid sm:grid-cols-[80px_1fr_auto] gap-6 sm:gap-10 items-center">
-              <div className="flex items-center gap-3">
-                <span aria-hidden className="block h-1.5 w-1.5 bg-white" />
-                <span className="font-mono text-[10px] tracking-[0.18em] text-white/60">§ 05</span>
-              </div>
-              <div>
-                <h3 className="text-xl sm:text-2xl font-semibold tracking-[-0.015em] text-white mb-1 group-hover:text-white/95">
-                  The Engine.
-                </h3>
-                <p className="text-sm sm:text-base text-white/65 leading-[1.55]">
-                  10–15% of every revenue dollar funds the Institute. The substrate every arm
-                  sits on top of — and the standard we&apos;re inviting other AI ventures to adopt.
-                </p>
-              </div>
-              <span className="hidden sm:inline-flex items-center font-mono text-[10px] uppercase tracking-[0.18em] text-white/70 whitespace-nowrap">
-                How it works
-                <ArrowRight className="ml-3 h-3 w-3 transition-transform group-hover:translate-x-0.5" />
-              </span>
-            </div>
-          </Link>
-        </div>
-      </Reveal>
-
-      {/* ─── 3. The Studio (arm 01 detail) — three-band framing ──────── */}
-      <Reveal as="section" className="container mx-auto px-6 sm:px-8 py-24 sm:py-32">
-        <div className="grid lg:grid-cols-[280px_1fr] gap-12 lg:gap-20 mb-12">
-          <SectionRail index="01" label="Studio" />
-          <div className="max-w-2xl">
-            <h3 className="text-3xl sm:text-4xl lg:text-5xl font-semibold leading-[1.1] tracking-[-0.025em] text-foreground mb-10">
-              We don&apos;t write decks. We meet you at the band that fits the work.
-            </h3>
-            <div className="space-y-5 text-base text-muted-foreground leading-[1.7] mb-10">
-              <p>
-                Three ways in: subscribe to a product, hire a productized retainer, or install the
-                full Engine in an engagement. Same studio, same operator-grade methodology — three
-                cadences, three commitment levels.
-              </p>
-              <p>
-                Most orgs cross bands over time. Subscriptions become retainers when the work
-                scales. Retainers roll into engagements when the org commits to installing the
-                substrate. We discuss credit case-by-case when you cross a band.
-              </p>
-            </div>
-          </div>
-        </div>
-
-        {/* Three-band mini-spectrum */}
-        <div className="grid lg:grid-cols-[280px_1fr] gap-12 lg:gap-20">
-          <div />
-          <div className="max-w-4xl border border-border bg-card">
-            <Link
-              href="/products"
-              className="group grid grid-cols-[60px_1fr_auto] sm:grid-cols-[60px_140px_1fr_140px] gap-x-6 sm:gap-x-10 gap-y-2 py-6 px-6 sm:px-8 border-b border-border hover:bg-surface-hover transition-colors items-baseline"
-            >
-              <span className="font-mono text-[10px] tracking-[0.18em] text-muted-foreground pt-1">
-                01
-              </span>
-              <span className="font-mono text-[11px] uppercase tracking-[0.22em] text-primary col-span-1 sm:col-auto">
-                Products
-              </span>
-              <p className="text-base text-foreground col-span-3 sm:col-auto">
-                <span className="font-semibold">Subscribe to a product.</span>{" "}
-                <span className="text-muted-foreground">
-                  Self-serve SaaS. Operator drives.
-                </span>
-              </p>
-              <span className="hidden sm:inline-flex items-center justify-end font-mono text-[10px] uppercase tracking-[0.18em] text-foreground whitespace-nowrap">
-                $0 → $249/mo
-                <ArrowRight className="ml-2 h-3 w-3 transition-transform group-hover:translate-x-0.5" />
-              </span>
-            </Link>
-
-            <Link
-              href="/studio/retainers"
-              className="group grid grid-cols-[60px_1fr_auto] sm:grid-cols-[60px_140px_1fr_140px] gap-x-6 sm:gap-x-10 gap-y-2 py-6 px-6 sm:px-8 border-b border-border hover:bg-surface-hover transition-colors items-baseline"
-            >
-              <span className="font-mono text-[10px] tracking-[0.18em] text-muted-foreground pt-1">
-                02
-              </span>
-              <span className="font-mono text-[11px] uppercase tracking-[0.22em] text-primary col-span-1 sm:col-auto">
-                Retainers
-              </span>
-              <p className="text-base text-foreground col-span-3 sm:col-auto">
-                <span className="font-semibold">Hire a productized program.</span>{" "}
-                <span className="text-muted-foreground">
-                  We operate the agent. You receive the output.
-                </span>
-              </p>
-              <span className="hidden sm:inline-flex items-center justify-end font-mono text-[10px] uppercase tracking-[0.18em] text-foreground whitespace-nowrap">
-                $5K → $15K/mo
-                <ArrowRight className="ml-2 h-3 w-3 transition-transform group-hover:translate-x-0.5" />
-              </span>
-            </Link>
-
-            <Link
-              href="/studio/engagements"
-              className="group grid grid-cols-[60px_1fr_auto] sm:grid-cols-[60px_140px_1fr_140px] gap-x-6 sm:gap-x-10 gap-y-2 py-6 px-6 sm:px-8 hover:bg-surface-hover transition-colors items-baseline"
-            >
-              <span className="font-mono text-[10px] tracking-[0.18em] text-muted-foreground pt-1">
-                03
-              </span>
-              <span className="font-mono text-[11px] uppercase tracking-[0.22em] text-primary col-span-1 sm:col-auto">
-                Engagements
-              </span>
-              <p className="text-base text-foreground col-span-3 sm:col-auto">
-                <span className="font-semibold">Install the Engine.</span>{" "}
-                <span className="text-muted-foreground">
-                  90–180 day install. Documented, trained, handed over.
-                </span>
-              </p>
-              <span className="hidden sm:inline-flex items-center justify-end font-mono text-[10px] uppercase tracking-[0.18em] text-foreground whitespace-nowrap">
-                $75K → $250K+
-                <ArrowRight className="ml-2 h-3 w-3 transition-transform group-hover:translate-x-0.5" />
-              </span>
-            </Link>
-          </div>
-        </div>
-      </Reveal>
-
-      {/* ─── 4. Portfolio (arm 02 detail) ────────────────────────────── */}
-      <Reveal as="section" className="border-t border-border py-24 sm:py-32">
-        <div className="container mx-auto px-6 sm:px-8">
-          <div className="grid lg:grid-cols-[280px_1fr] gap-12 lg:gap-20 mb-14">
-            <SectionRail index="02" label="Portfolio" />
-            <div className="max-w-2xl">
-              <h3 className="text-3xl sm:text-4xl lg:text-5xl font-semibold leading-[1.1] tracking-[-0.025em] text-foreground mb-6">
-                Eight products in production.
-              </h3>
-              <p className="text-base text-muted-foreground leading-[1.7] mb-8">
-                The portfolio is the proof. Each is a working installation we shipped in an
-                engagement and kept running. Live answers to &ldquo;have you actually shipped
-                this kind of system before, and does it still run?&rdquo;
-              </p>
-              <div className="border-l-2 border-foreground/15 pl-5 max-w-xl">
-                <p className="text-sm sm:text-[15px] text-foreground leading-[1.65]">
-                  <span className="italic font-display text-foreground/90">
-                    We don&apos;t publish client names.
-                  </span>{" "}
-                  <span className="text-muted-foreground">
-                    Mission-driven buyers — funds, foundations, healthcare networks,
-                    workforce programs — don&apos;t want their data on our website. The
-                    portfolio names <span className="text-foreground">what we built</span>,
-                    not <span className="text-foreground">who we built it for</span>.
-                    Direct introductions on request, by mutual reference.
-                  </span>
-                </p>
-              </div>
-            </div>
-          </div>
-
-          <div className="grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 border border-border bg-card divide-y sm:divide-y-0 sm:divide-x divide-border">
-            {PRODUCTS.map((product, idx) => {
-              const className = `group block p-6 sm:p-7 hover:bg-surface-hover transition-colors flex flex-col ${idx >= 4 ? "sm:border-t" : ""} border-border`;
-              const inner = (
-                <>
-                  <div className="flex items-center justify-between mb-10">
-                    <span className="font-mono text-[10px] text-muted-foreground tracking-[0.18em]">
-                      {product.index}
-                    </span>
-                    <StatusPill status={product.status} color={product.statusColor} />
-                  </div>
-                  <h4 className="text-[11px] font-mono uppercase tracking-[0.22em] text-primary mb-3">
-                    {product.name}
-                  </h4>
-                  <p className="text-base font-semibold leading-[1.3] tracking-[-0.01em] text-foreground mb-5 flex-1">
-                    {product.tagline}
-                  </p>
-                  <span className="inline-flex items-center text-xs font-medium text-muted-foreground group-hover:text-foreground transition-colors mt-auto">
-                    Open
-                    {product.external ? (
-                      <ArrowUpRight className="ml-1 h-3 w-3 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
-                    ) : (
-                      <ArrowRight className="ml-1 h-3 w-3 transition-transform group-hover:translate-x-0.5" />
-                    )}
-                  </span>
-                </>
-              );
-              return product.external ? (
-                <a key={product.name} href={product.href} target="_blank" rel="noopener noreferrer" className={className}>
-                  {inner}
-                </a>
-              ) : (
-                <Link key={product.name} href={product.href} className={className}>
-                  {inner}
-                </Link>
-              );
-            })}
-            <Link href="/products" className="group block p-6 sm:p-7 hover:bg-surface-hover transition-colors border-t border-border sm:border-t flex flex-col justify-between">
-              <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground mb-3">More</p>
-              <div className="mt-auto">
-                <p className="text-base font-semibold leading-[1.3] tracking-[-0.01em] text-foreground mb-2">
-                  Full portfolio →
-                </p>
-                <p className="text-xs text-muted-foreground">Specs, pricing, status per product.</p>
-              </div>
-            </Link>
-          </div>
-        </div>
-      </Reveal>
-
-      {/* ─── 4.5 FIELD NOTES — founder writing as intellectual leadership ─────
-       *
-       * Founder-presence surface. Three real essays already on the site.
-       * Pattern: A16Z / Stripe / Founders Fund — the brand carries the
-       * weight of the operator's thinking, not just the deliverables.
-       *
-       * Editorial register: Instrument Serif headings, mono index +
-       * date labels, hairline divider rows, single accent on hover.
-       */}
-      <Reveal as="section" className="border-t border-border py-24 sm:py-32">
-        <div className="container mx-auto px-6 sm:px-8">
-          <div className="grid lg:grid-cols-[280px_1fr] gap-12 lg:gap-20 mb-14">
-            <SectionRail index="02b" label="Field notes" />
-            <div className="max-w-2xl">
-              <h3 className="text-3xl sm:text-4xl lg:text-5xl font-semibold leading-[1.1] tracking-[-0.025em] text-foreground mb-6">
-                Field notes from the floor.
-              </h3>
-              <p className="text-base text-muted-foreground leading-[1.7]">
-                The Install is the founder&apos;s open notebook. Letters and notes from
-                the work — what we&apos;re learning, what we&apos;re re-pricing, what
-                we&apos;re willing to say out loud about how AI is actually built in
-                the kinds of organizations we install in.
-              </p>
-            </div>
-          </div>
-
-          <div className="grid lg:grid-cols-[280px_1fr] gap-12 lg:gap-20">
-            <div />
-            <div className="border-t border-border max-w-4xl">
-              {FIELD_NOTES.map((note) => (
-                <Link
-                  key={note.index}
-                  href={note.href}
-                  className="group grid grid-cols-[80px_1fr] sm:grid-cols-[80px_100px_1fr_auto] gap-x-6 sm:gap-x-10 gap-y-2 py-7 px-1 sm:px-3 border-b border-border hover:bg-surface-hover transition-colors items-baseline"
+              <div className="flex flex-col sm:flex-row items-start gap-4">
+                <Button
+                  size="lg"
+                  asChild
+                  className="h-12 px-7 rounded-[6px] bg-[#26f2a8] text-[#05060b] shadow-[0_0_32px_rgba(38,242,168,0.22)] hover:bg-[#7dffd0]"
                 >
-                  <span className="font-mono text-[10px] tracking-[0.22em] text-muted-foreground pt-1">
-                    № {note.index}
-                  </span>
-                  <span className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground col-span-1 sm:col-auto hidden sm:inline">
-                    {note.date}
-                  </span>
-                  <div className="col-span-2 sm:col-auto">
-                    <h4 className="font-display text-2xl sm:text-[28px] leading-[1.15] tracking-[-0.015em] text-foreground group-hover:text-primary transition-colors mb-2">
-                      {note.title}
-                    </h4>
-                    <p className="text-sm text-muted-foreground leading-[1.6] max-w-2xl">
-                      {note.summary}
-                    </p>
-                  </div>
-                  <span className="hidden sm:inline-flex items-center justify-end font-mono text-[10px] uppercase tracking-[0.22em] text-foreground whitespace-nowrap mt-2 sm:mt-0 self-start sm:self-baseline">
-                    Read note
-                    <ArrowRight className="ml-2 h-3 w-3 transition-transform group-hover:translate-x-0.5" />
-                  </span>
-                </Link>
-              ))}
-            </div>
-          </div>
-
-          <div className="grid lg:grid-cols-[280px_1fr] gap-12 lg:gap-20 mt-10">
-            <div />
-            <div className="max-w-4xl flex flex-col sm:flex-row items-start gap-5">
-              <Button
-                asChild
-                className="text-sm font-medium h-10 px-5 shadow-none bg-foreground text-background hover:bg-foreground/90 rounded-[6px]"
-              >
-                <Link href="/blog">All field notes <ArrowRight className="ml-2 h-3.5 w-3.5" /></Link>
-              </Button>
-              <a
-                href="/blog/rss.xml"
-                className="inline-flex items-center text-sm font-medium text-foreground hover:text-primary transition-colors py-2"
-              >
-                Subscribe via RSS <ArrowUpRight className="ml-1.5 h-3.5 w-3.5" />
-              </a>
-            </div>
-          </div>
-        </div>
-      </Reveal>
-
-      {/* ─── 5. The Fund (arm 03) ────────────────────────────────────── */}
-      <Reveal as="section" className="border-t border-border py-24 sm:py-32 bg-surface-hover/40">
-        <div className="container mx-auto px-6 sm:px-8">
-          <div className="grid lg:grid-cols-[280px_1fr] gap-12 lg:gap-20">
-            <SectionRail index="03" label="Fund" />
-            <div className="max-w-2xl">
-              <p className="text-[11px] font-mono uppercase tracking-[0.22em] text-primary mb-4">
-                DeepFutures
-              </p>
-              <h3 className="text-3xl sm:text-4xl lg:text-5xl font-semibold leading-[1.1] tracking-[-0.025em] text-foreground mb-8">
-                We invest where we install.
-              </h3>
-              <div className="space-y-5 text-base text-muted-foreground leading-[1.7] mb-10">
-                <p>
-                  DeepFutures backs AI-native companies — pre-seed and seed, by introduction.
-                  Operator-owned systems, vertical AI agents, infrastructure for AI ventures built
-                  the same way we are.
-                </p>
-                <p>
-                  Portfolio companies get more than capital: an installable reference architecture
-                  shipped at production scale, the methodology documented, and the operator network
-                  that comes from being in the field, not at the deck.
-                </p>
-              </div>
-
-              <div className="grid grid-cols-3 border-y border-border mb-10">
-                <div className="py-5 pr-5">
-                  <p className="text-xl font-semibold tracking-[-0.015em] text-foreground mb-1">Pre-seed / Seed</p>
-                  <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">Stage</p>
-                </div>
-                <div className="py-5 px-5 border-l border-border">
-                  <p className="text-xl font-semibold tracking-[-0.015em] text-foreground mb-1">$50K–$250K</p>
-                  <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">Check size</p>
-                </div>
-                <div className="py-5 pl-5 border-l border-border">
-                  <p className="text-xl font-semibold tracking-[-0.015em] text-foreground mb-1">By introduction</p>
-                  <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">Access</p>
-                </div>
-              </div>
-
-              <div className="flex flex-col sm:flex-row items-start gap-5">
-                <Button asChild className="text-sm font-medium h-10 px-5 shadow-none bg-foreground text-background hover:bg-foreground/90 rounded-[6px]">
-                  <Link href="/fund">Read the thesis <ArrowRight className="ml-2 h-3.5 w-3.5" /></Link>
+                  <Link href="/contact-sales">
+                    Map the first workflow <ArrowRight className="ml-2 h-4 w-4" />
+                  </Link>
                 </Button>
-                <a href="mailto:lorenzo@perpetualcore.com?subject=DeepFutures%20inquiry" className="inline-flex items-center text-sm font-medium text-foreground hover:text-primary transition-colors py-2">
-                  Founders apply <ArrowRight className="ml-1.5 h-3.5 w-3.5" />
-                </a>
+                <Link
+                  href="/products"
+                  className="inline-flex items-center py-3 text-sm font-medium text-white border-b border-white/25 hover:border-[#00d4ff] hover:text-[#00d4ff] transition-colors"
+                >
+                  View the products <ArrowRight className="ml-2 h-3.5 w-3.5" />
+                </Link>
               </div>
             </div>
-          </div>
-        </div>
-      </Reveal>
 
-      {/* ─── 6. The Institute (arm 04) ───────────────────────────────── */}
-      <Reveal as="section" className="border-t border-border py-24 sm:py-32">
-        <div className="container mx-auto px-6 sm:px-8">
-          <div className="grid lg:grid-cols-[280px_1fr] gap-12 lg:gap-20">
-            <SectionRail index="04" label="Institute" />
-            <div className="max-w-2xl">
-              <p className="text-[11px] font-mono uppercase tracking-[0.22em] text-primary mb-4">
-                The Institute for Human Advancement
-              </p>
-              <h3 className="text-3xl sm:text-4xl lg:text-5xl font-semibold leading-[1.1] tracking-[-0.025em] text-foreground mb-8">
-                The 501(c)(3) parent. The reason any of this exists.
-              </h3>
-              <p className="text-base text-muted-foreground leading-[1.7] mb-10">
-                IHA runs workforce development for low-income New Yorkers, AI-native founder
-                training across emerging markets, AI literacy programs, and field health programs
-                in East Africa. Every Perpetual Core arm funds it.
-              </p>
-
-              <div className="border-t border-border mb-10">
-                {INSTITUTE_PROGRAMS.map((p, i) => (
-                  <div key={p.name} className="grid grid-cols-[60px_180px_1fr] sm:grid-cols-[60px_220px_1fr] gap-6 py-5 border-b border-border items-baseline">
-                    <span className="font-mono text-[10px] tracking-[0.18em] text-muted-foreground pt-1">0{i + 1}</span>
-                    <h4 className="text-base font-semibold tracking-tight text-foreground">{p.name}</h4>
-                    <p className="text-sm text-muted-foreground leading-[1.6] col-span-3 sm:col-auto">{p.body}</p>
+            <aside className="border border-white/15 bg-white/[0.06] backdrop-blur-xl shadow-[0_20px_80px_rgba(0,0,0,0.28)]">
+              <div className="p-6 border-b border-white/15">
+                <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-[#00d4ff] mb-4">
+                  Operating status
+                </p>
+                <p className="text-2xl font-semibold tracking-[-0.02em] text-white mb-3">
+                  First reference implementation.
+                </p>
+                <p className="text-sm text-white/62 leading-[1.65]">
+                  A product-and-studio system for moving AI from scattered pilots into operating workflows.
+                </p>
+              </div>
+              <div className="divide-y divide-white/12">
+                {[
+                  ["Best first step", "One workflow"],
+                  ["Product front doors", "8 live/build"],
+                  ["Mission commitment", "10-15%"],
+                  ["Venture path", "Build / back / scale"],
+                ].map(([label, value]) => (
+                  <div key={label} className="flex items-baseline justify-between gap-4 px-6 py-4">
+                    <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-white/45">{label}</span>
+                    <span className="text-sm font-semibold text-white">{value}</span>
                   </div>
                 ))}
               </div>
-
-              <div className="flex flex-col sm:flex-row items-start gap-5">
-                <Button asChild className="text-sm font-medium h-10 px-5 shadow-none bg-foreground text-background hover:bg-foreground/90 rounded-[6px]">
-                  <Link href="/institute">Institute overview <ArrowRight className="ml-2 h-3.5 w-3.5" /></Link>
-                </Button>
-                <a href="https://theiha.org" target="_blank" rel="noopener noreferrer" className="inline-flex items-center text-sm font-medium text-foreground hover:text-primary transition-colors py-2">
-                  Visit theiha.org <ArrowUpRight className="ml-1.5 h-3.5 w-3.5" />
-                </a>
-              </div>
-            </div>
-          </div>
-        </div>
-      </Reveal>
-
-      {/* ─── 7. Framework ────────────────────────────────────────────── */}
-      <Reveal as="section" className="border-t border-border py-24 sm:py-32 bg-surface-hover/40">
-        <div className="container mx-auto px-6 sm:px-8">
-          <div className="grid lg:grid-cols-[280px_1fr] gap-12 lg:gap-20 mb-14">
-            <SectionRail index="—" label="The Framework" />
-            <div className="max-w-2xl">
-              <h3 className="text-3xl sm:text-4xl lg:text-5xl font-semibold leading-[1.1] tracking-[-0.025em] text-foreground">
-                Four phases. One framework. Yours at the end.
-              </h3>
-            </div>
+            </aside>
           </div>
 
-          <div className="border-t border-border">
-            {PHASES.map((phase, i) => (
-              <div key={phase.step} className="grid grid-cols-[60px_1fr] sm:grid-cols-[80px_200px_1fr] gap-6 sm:gap-12 py-8 border-b border-border">
-                <span className="font-mono text-[11px] text-muted-foreground tracking-[0.18em] pt-1">0{i + 1}</span>
-                <h4 className="text-lg sm:text-xl font-semibold tracking-tight text-foreground col-span-1 sm:col-auto">{phase.step}.</h4>
-                <p className="text-base text-muted-foreground leading-[1.7] col-span-2 sm:col-auto">{phase.body}</p>
-              </div>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 border border-white/15 bg-white/[0.055] backdrop-blur-md divide-y sm:divide-y-0 sm:divide-x divide-white/12">
+            {ARMS.map((arm) => (
+              <Link key={arm.name} href={arm.href} className="group p-5 sm:p-6 hover:bg-white/[0.08] transition-colors">
+                <div className="flex items-center justify-between gap-4 mb-10">
+                  <span className="font-mono text-[10px] tracking-[0.18em] text-[#00d4ff]">§ {arm.index}</span>
+                  <span className="font-mono text-[10px] uppercase tracking-[0.16em] text-white/45">{arm.meta}</span>
+                </div>
+                <h2 className="text-2xl font-semibold tracking-[-0.02em] text-white mb-3 group-hover:text-[#26f2a8] transition-colors">
+                  {arm.name}
+                </h2>
+                <p className="text-sm text-white/58 leading-[1.6]">{arm.summary}</p>
+              </Link>
             ))}
           </div>
+        </div>
+      </section>
 
-          <div className="mt-10">
-            <Link href="/studio/methodology" className="inline-flex items-center text-sm font-medium text-foreground hover:text-primary transition-colors">
-              Read the full methodology <ArrowRight className="ml-1.5 h-3.5 w-3.5" />
-            </Link>
+      <Reveal as="section" className="border-b border-border bg-[#f5f7ff]">
+        <div className="container mx-auto px-6 sm:px-8 py-20 sm:py-24">
+          <div className="grid lg:grid-cols-[280px_1fr] gap-12 lg:gap-20 items-start">
+            <SectionRail index="01" label="Architecture" />
+            <div>
+              <div className="max-w-3xl mb-10">
+                <h2 className="font-display text-4xl sm:text-5xl lg:text-6xl font-normal tracking-[-0.025em] leading-[1.02] text-foreground mb-6">
+                  Four commercial arms, one structural substrate.
+                </h2>
+                <p className="text-base sm:text-lg text-muted-foreground leading-[1.65]">
+                  The Engine is not a slogan. It is the registry, workflow, agent, and mission-funding layer that every arm shares.
+                </p>
+              </div>
+              <div className="border border-[#d9ddff] bg-background p-5 sm:p-10 shadow-[0_24px_80px_rgba(75,53,255,0.08)]">
+                <EngineArchitecture />
+              </div>
+            </div>
           </div>
         </div>
       </Reveal>
 
-      {/* ─── 8. Engine commitment — dark block with grain ────────────── */}
-      <Reveal as="section" className="relative py-24 sm:py-32 text-white overflow-hidden" >
-        <div className="absolute inset-0" style={{ backgroundColor: "hsl(var(--surface-dark))" }} />
+      <Reveal as="section" className="border-b border-border">
+        <div className="container mx-auto px-6 sm:px-8 py-20 sm:py-28">
+          <div className="grid lg:grid-cols-[280px_1fr] gap-12 lg:gap-20">
+            <SectionRail index="02" label="How we work" />
+            <div>
+              <h2 className="font-display text-4xl sm:text-5xl lg:text-6xl font-normal tracking-[-0.025em] leading-[1.02] text-foreground mb-10 max-w-3xl">
+                The offer is a ladder, not a wall.
+              </h2>
+              <div className="border-y border-border">
+                {[
+                  ["Use", "Product", "When the job is already clear: diligence, RFPs, knowledge, hiring, personal OS, or team operations.", "/products", "#4b35ff"],
+                  ["Operate", "Retainer", "When your team needs managed AI operations around a recurring lane.", "/studio/retainers", "#00a8ff"],
+                  ["Install", "Studio Sprint", "When one workflow needs to move from manual process to working operating layer.", "/studio/engagements", "#12b981"],
+                  ["Scale", "Engine / Venture", "When the pattern repeats enough to become a full install, a product, or a venture.", "/contact-sales", "#26f2a8"],
+                ].map(([stage, type, body, href, color]) => (
+                  <Link
+                    key={stage}
+                    href={href}
+                    className="group grid sm:grid-cols-[10px_110px_170px_1fr_auto] gap-3 sm:gap-8 py-6 border-b border-border last:border-b-0 hover:bg-surface-hover transition-colors"
+                  >
+                    <span className="hidden sm:block h-full min-h-12 w-1.5" style={{ backgroundColor: color }} aria-hidden />
+                    <span className="font-mono text-[11px] uppercase tracking-[0.16em] text-muted-foreground">{stage}</span>
+                    <span className="text-lg font-semibold tracking-[-0.01em] text-foreground group-hover:text-primary transition-colors">{type}</span>
+                    <span className="text-sm text-muted-foreground leading-[1.65]">{body}</span>
+                    <ArrowRight className="hidden sm:block h-4 w-4 text-muted-foreground mt-1 transition-transform group-hover:translate-x-1 group-hover:text-primary" />
+                  </Link>
+                ))}
+              </div>
+              <div className="grid sm:grid-cols-4 border border-border border-t-0 bg-card divide-y sm:divide-y-0 sm:divide-x divide-border">
+                {PHASES.map((phase, index) => (
+                  <div key={phase.step} className="p-5">
+                    <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-primary mb-4">
+                      0{index + 1}
+                    </p>
+                    <h3 className="text-base font-semibold text-foreground mb-2">{phase.step}</h3>
+                    <p className="text-xs text-muted-foreground leading-[1.6]">{phase.body}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      </Reveal>
+
+      <Reveal as="section" className="border-b border-border bg-[#fbfcff]">
+        <div className="container mx-auto px-6 sm:px-8 py-20 sm:py-28">
+          <div className="grid lg:grid-cols-[280px_1fr] gap-12 lg:gap-20">
+            <SectionRail index="03" label="Portfolio proof" />
+            <div>
+              <div className="max-w-3xl mb-12">
+                <h2 className="font-display text-4xl sm:text-5xl lg:text-6xl font-normal tracking-[-0.025em] leading-[1.02] text-foreground mb-6">
+                  Products are the front doors into the studio.
+                </h2>
+                <p className="text-base sm:text-lg text-muted-foreground leading-[1.65]">
+                  A buyer should not need a full engagement just to touch the Engine. The portfolio
+                  lets operators start with one concrete job, then move into studio work when the
+                  product reveals a larger operating pattern.
+                </p>
+              </div>
+              <div className="grid md:grid-cols-2 gap-px bg-border border border-border shadow-[0_18px_60px_rgba(10,12,24,0.06)]">
+                {PRODUCTS.map((product) => {
+                  const inner = (
+                    <>
+                      <div className="flex items-start justify-between gap-4 mb-10">
+                        <span className="font-mono text-[10px] tracking-[0.18em] text-muted-foreground">§ {product.index}</span>
+                        <StatusPill status={product.status} color={product.statusColor} />
+                      </div>
+                      <h3 className="text-2xl font-semibold tracking-[-0.02em] text-foreground mb-3 group-hover:text-primary transition-colors">
+                        {product.name}
+                      </h3>
+                      <p className="text-sm text-muted-foreground leading-[1.6]">{product.tagline}</p>
+                    </>
+                  );
+
+                  return product.external ? (
+                    <a key={product.name} href={product.href} target="_blank" rel="noopener noreferrer" className="group bg-background p-6 hover:bg-[#f3f5ff] transition-colors">
+                      {inner}
+                    </a>
+                  ) : (
+                    <Link key={product.name} href={product.href} className="group bg-background p-6 hover:bg-[#f3f5ff] transition-colors">
+                      {inner}
+                    </Link>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+        </div>
+      </Reveal>
+
+      <Reveal as="section" className="relative overflow-hidden border-b border-border text-white engine-gradient">
+        <div className="signal-grid absolute inset-0 opacity-50" />
         <div className="grain" />
-        <div className="relative container mx-auto px-6 sm:px-8">
+        <div className="relative container mx-auto px-6 sm:px-8 py-20 sm:py-28">
           <div className="grid lg:grid-cols-[280px_1fr] gap-12 lg:gap-20">
             <div>
-              <p className="eyebrow !text-white/40 mb-3">§ 05</p>
-              <h2 className="text-xs uppercase tracking-[0.18em] font-mono text-white">The Engine</h2>
+              <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-white/45 mb-3">§ 04</p>
+              <h2 className="text-xs uppercase tracking-[0.18em] font-mono text-white">Mission floor</h2>
             </div>
-            <div className="max-w-2xl">
-              <h3 className="text-3xl sm:text-4xl lg:text-5xl font-semibold leading-[1.1] tracking-[-0.025em] text-white mb-12">
-                A structural standard for AI ventures that fund their mission.
-              </h3>
-
-              <div className="grid grid-cols-3 border-y border-white/10 mb-10">
-                {ENGINE_STATS.map((stat, i) => (
-                  <div key={stat.label} className={`py-6 ${i > 0 ? "border-l border-white/10 pl-6" : "pr-6"}`}>
-                    <p className="text-2xl sm:text-3xl font-semibold tracking-[-0.015em] text-white mb-2">{stat.value}</p>
-                    <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-white/50">{stat.label}</p>
+            <div>
+              <h2 className="display-hero text-[40px] sm:text-[58px] lg:text-[82px] leading-[1] text-white mb-10 max-w-4xl">
+                The Engine turns revenue into institutional capacity.
+              </h2>
+              <p className="text-base sm:text-lg text-white/65 leading-[1.7] max-w-3xl mb-12">
+                10-15% of every revenue dollar funds the Institute for Human Advancement. It is not a campaign or a pledge.
+                It is a structural line item that makes the mission harder to forget as the company scales.
+              </p>
+              <div className="grid sm:grid-cols-3 border border-white/15 divide-y sm:divide-y-0 sm:divide-x divide-white/15 mb-12">
+                {ENGINE_STATS.map((stat) => (
+                  <div key={stat.value} className="p-6">
+                    <p className="text-3xl sm:text-4xl font-semibold tracking-[-0.03em] text-white mb-3">{stat.value}</p>
+                    <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-white/45 leading-[1.5]">{stat.label}</p>
                   </div>
                 ))}
               </div>
-
-              <div className="space-y-5 text-base leading-[1.7] text-white/65 mb-12">
-                <p>
-                  A high structural bar — not a moat. VC-backed companies struggle to meet it;
-                  their cap tables resist double-digit revenue commitments to a 501(c)(3). JVs
-                  face the same constraint from their LPs. AI-native ventures structured this
-                  way from day one don&apos;t.
-                </p>
-                <p>
-                  Engagements give 10%. Sage gives 15%. Every other product gives 10% by default.
-                  Audited annually, line-itemed on every invoice. We&apos;re publishing the math,
-                  the methodology, and the registry schemas. The reference implementation is the
-                  company you&apos;re reading about.
-                </p>
-                <p className="text-white font-medium">
-                  We are not the only company that should be built this way. We hope we&apos;re
-                  the first of many.
-                </p>
-              </div>
-
-              <div className="flex flex-col sm:flex-row items-start gap-5">
-                <Button asChild className="text-sm font-medium h-10 px-5 shadow-none bg-white text-foreground hover:bg-white/90 rounded-[6px]">
-                  <Link href="/engine">How the Engine works <ArrowRight className="ml-2 h-3.5 w-3.5" /></Link>
-                </Button>
-                <Link href="/engine/spec" className="inline-flex items-center text-sm font-medium text-white/70 hover:text-white transition-colors py-2 border-b border-white/20 hover:border-white">
-                  Read the spec <ArrowRight className="ml-1.5 h-3.5 w-3.5" />
-                </Link>
+              <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-px bg-white/15 border border-white/15">
+                {INSTITUTE_PROGRAMS.map((program) => (
+                  <div key={program.name} className="bg-[#0d0d12] p-5">
+                    <h3 className="text-sm font-semibold text-white mb-2">{program.name}</h3>
+                    <p className="text-xs text-white/55 leading-[1.6]">{program.body}</p>
+                  </div>
+                ))}
               </div>
             </div>
           </div>
         </div>
       </Reveal>
 
-      {/* ─── 9. The Frontier — DRAMATIC full-bleed black manifesto ───── */}
-      <Reveal
-        as="section"
-        className="relative border-t border-border py-32 sm:py-44 overflow-hidden"
-      >
-        <div
-          className="absolute inset-0"
-          style={{ backgroundColor: "hsl(var(--surface-dark))" }}
-        />
-        <div className="grain" />
-        <div className="relative container mx-auto px-6 sm:px-8">
-          <div className="max-w-5xl mx-auto">
-            <p className="eyebrow !text-white/40 mb-12 inline-flex items-center gap-3">
-              <span aria-hidden className="block h-1 w-1 bg-white" />
-              The Frontier
-            </p>
-
-            <h2 className="display-hero text-[44px] sm:text-[68px] lg:text-[104px] text-white mb-16 leading-[0.98]">
-              The next decade of AI is{" "}
-              <span className="italic text-white/85">operator-owned.</span>
-              <br />
-              We&apos;re building for it.
-            </h2>
-
-            <div className="grid lg:grid-cols-2 gap-12 lg:gap-20 max-w-5xl">
-              <div className="space-y-5 text-base sm:text-lg text-white/65 leading-[1.7]">
-                <p>
-                  The platforms are converging — five model labs, three clouds, two app-store
-                  dynamics. The operators using them are not. They run organizations with IRB
-                  rules, local consent, offline reality, vertical workflows, and constraints
-                  the platform companies will never optimize for.
-                </p>
-                <p>
-                  The next decade belongs to AI systems the operators own — installed in their
-                  stack, governed by their rules, sovereign to their mission. Vertical agents,
-                  not generic chat. Institutional memory, not retrieval-as-a-service.
-                  Engagements that hand over the keys, not consultancy that keeps them.
-                </p>
-              </div>
-              <div className="space-y-5 text-base sm:text-lg text-white/65 leading-[1.7]">
-                <p className="text-white font-medium">
-                  We build for that future. The studio installs it. The portfolio carries it.
-                  The fund invests in it. The institute trains the people building it. The
-                  engine keeps the mission funded while we do.
-                </p>
-                <p>
-                  We&apos;re not asking to be the only company shaped this way. We&apos;re
-                  publishing the Engine as a standard, naming the math, and inviting other
-                  AI-native ventures to adopt it. The reference implementation is here. The
-                  category is what we&apos;re trying to create.
-                </p>
-              </div>
-            </div>
-
-            {/* Founder signature — on dark */}
-            <div className="border-t border-white/15 pt-10 mt-20 flex items-center gap-4">
-              <div className="flex-shrink-0">
-                <span aria-hidden className="block h-9 w-9 bg-white" />
-              </div>
-              <div>
-                <p className="text-sm font-semibold tracking-tight text-white">
-                  Lorenzo Daughtry-Chambers
-                </p>
-                <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-white/50 mt-0.5">
-                  Founder · Perpetual Core
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </Reveal>
-
-      {/* ─── 10. Open Invitation — 4 audiences ───────────────────────── */}
-      <Reveal as="section" className="relative border-t border-border py-24 sm:py-32 overflow-hidden">
-        <div className="container mx-auto px-6 sm:px-8">
-          <div className="max-w-4xl mx-auto text-center mb-16">
-            <p className="eyebrow mb-6 inline-flex items-center gap-2 justify-center">
-              <span aria-hidden className="block h-1 w-1 bg-foreground" />
-              An open invitation
-              <span aria-hidden className="block h-1 w-1 bg-foreground" />
-            </p>
-            <h2 className="display-hero text-[36px] sm:text-[52px] lg:text-[72px] text-foreground mb-10 leading-[1.05]">
-              The Engine is meant to be{" "}
-              <span className="italic">adopted.</span>
-            </h2>
-            <p className="text-base sm:text-lg text-muted-foreground leading-[1.65] max-w-2xl mx-auto">
-              We built the first one because we needed it. We&apos;re publishing it as a standard
-              because we hope others build theirs. The math, the methodology, the registry
-              schemas, the giving substrate — all of it open. Perpetual Core is the reference
-              implementation, not the only one.
-            </p>
-          </div>
-
-          {/* Four audiences */}
-          <div className="max-w-5xl mx-auto border-t border-border">
-            {INVITATION_ROWS.map((row, i) => (
-              <Link
-                key={row.tag}
-                href={row.href}
-                className="group grid grid-cols-[40px_1fr] sm:grid-cols-[80px_180px_1fr_auto] gap-x-6 sm:gap-x-10 gap-y-2 py-8 border-b border-border hover:bg-surface-hover transition-colors items-baseline"
-              >
-                <span className="font-mono text-[11px] tracking-[0.18em] text-muted-foreground pt-1">
-                  0{i + 1}
-                </span>
-                <span className="font-mono text-[11px] uppercase tracking-[0.22em] text-primary col-span-1 sm:col-auto">
-                  {row.tag}
-                </span>
-                <div className="col-span-2 sm:col-auto">
-                  <p className="text-base sm:text-lg font-semibold tracking-[-0.01em] text-foreground mb-2 group-hover:text-primary transition-colors">
-                    {row.title}
-                  </p>
-                  <p className="text-sm text-muted-foreground leading-[1.65]">
-                    {row.body}
-                  </p>
-                </div>
-                <span className="hidden sm:inline-flex items-center font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground/70 whitespace-nowrap pt-1">
-                  {row.cta}
-                  <ArrowRight className="ml-3 h-3 w-3 transition-transform group-hover:translate-x-0.5" />
-                </span>
-              </Link>
-            ))}
-          </div>
-
-          <div className="text-center mt-14">
-            <Button size="lg" asChild className="text-sm font-medium px-7 h-11 shadow-none bg-foreground text-background hover:bg-foreground/90 rounded-[6px]">
-              <Link href="/engine/spec">
-                Read the Engine spec <ArrowRight className="ml-2 h-4 w-4" />
-              </Link>
-            </Button>
-          </div>
-        </div>
-      </Reveal>
-
-      {/* ─── 11. Multi-path CTA ──────────────────────────────────────── */}
-      <Reveal as="section" className="border-t border-border py-24 sm:py-32 bg-surface-hover/40">
-        <div className="container mx-auto px-6 sm:px-8">
+      <Reveal as="section" className="border-b border-border">
+        <div className="container mx-auto px-6 sm:px-8 py-20 sm:py-28">
           <div className="grid lg:grid-cols-[280px_1fr] gap-12 lg:gap-20">
-            <SectionRail index="—" label="Start here" />
-            <div className="max-w-3xl">
-              <h3 className="text-3xl sm:text-4xl lg:text-5xl font-semibold leading-[1.1] tracking-[-0.025em] text-foreground mb-10">
-                Four doors. Pick yours.
-              </h3>
-
-              <div className="grid sm:grid-cols-2 gap-px bg-border border border-border">
-                <Link href="/studio/engagements" className="group bg-card p-6 sm:p-7 hover:bg-surface-hover transition-colors">
-                  <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-primary mb-3">For organizations</p>
-                  <p className="text-lg font-semibold tracking-[-0.01em] text-foreground mb-2">Start an engagement →</p>
-                  <p className="text-sm text-muted-foreground leading-[1.6]">Install the Perpetual Engine in your stack. $75,000 floor.</p>
-                </Link>
-                <Link href="/products" className="group bg-card p-6 sm:p-7 hover:bg-surface-hover transition-colors">
-                  <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-primary mb-3">For operators</p>
-                  <p className="text-lg font-semibold tracking-[-0.01em] text-foreground mb-2">See the portfolio →</p>
-                  <p className="text-sm text-muted-foreground leading-[1.6]">Eight products in production. Use them, or have us install them.</p>
-                </Link>
-                <a href="mailto:lorenzo@perpetualcore.com?subject=DeepFutures%20inquiry" className="group bg-card p-6 sm:p-7 hover:bg-surface-hover transition-colors">
-                  <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-primary mb-3">For founders</p>
-                  <p className="text-lg font-semibold tracking-[-0.01em] text-foreground mb-2">Talk to the fund →</p>
-                  <p className="text-sm text-muted-foreground leading-[1.6]">DeepFutures invests where we install. Pre-seed, by introduction.</p>
-                </a>
-                <a href="https://theiha.org" target="_blank" rel="noopener noreferrer" className="group bg-card p-6 sm:p-7 hover:bg-surface-hover transition-colors">
-                  <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-primary mb-3">For mission partners</p>
-                  <p className="text-lg font-semibold tracking-[-0.01em] text-foreground mb-2 inline-flex items-center">
-                    Join the Institute <ArrowUpRight className="ml-1 h-4 w-4" />
+            <SectionRail index="05" label="Field notes" />
+            <div>
+              <div className="grid lg:grid-cols-[1fr_360px] gap-12">
+                <div>
+                  <h2 className="font-display text-4xl sm:text-5xl lg:text-6xl font-normal tracking-[-0.025em] leading-[1.02] text-foreground mb-8">
+                    Publish the math. Publish the method.
+                  </h2>
+                  <div className="border-y border-border">
+                    {FIELD_NOTES.map((note) => (
+                      <Link key={note.index} href={note.href} className="group block py-6 border-b border-border last:border-b-0 hover:bg-surface-hover transition-colors">
+                        <div className="flex items-baseline gap-4 mb-3">
+                          <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-primary">{note.index}</span>
+                          <span className="font-mono text-[10px] uppercase tracking-[0.16em] text-muted-foreground">{note.date}</span>
+                        </div>
+                        <h3 className="text-lg font-semibold tracking-[-0.01em] text-foreground mb-2 group-hover:text-primary transition-colors">{note.title}</h3>
+                        <p className="text-sm text-muted-foreground leading-[1.6]">{note.summary}</p>
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+                <aside className="border border-border bg-card p-6 self-start">
+                  <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-primary mb-5">
+                    Open invitation
                   </p>
-                  <p className="text-sm text-muted-foreground leading-[1.6]">IHA runs the programs. Workforce, founders, Kenya, academy.</p>
-                </a>
+                  <div className="space-y-5">
+                    {INVITATION_ROWS.map((row) => (
+                      <Link key={row.tag} href={row.href} className="group block border-b border-border pb-5 last:border-b-0 last:pb-0">
+                        <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground mb-2">{row.tag}</p>
+                        <h3 className="text-sm font-semibold text-foreground mb-1.5 group-hover:text-primary transition-colors">{row.title}</h3>
+                        <p className="text-xs text-muted-foreground leading-[1.55] mb-2">{row.body}</p>
+                        <span className="inline-flex items-center text-xs font-medium text-foreground">
+                          {row.cta} <ArrowRight className="ml-1.5 h-3 w-3" />
+                        </span>
+                      </Link>
+                    ))}
+                  </div>
+                </aside>
               </div>
             </div>
           </div>
         </div>
       </Reveal>
 
-      {/* Newsletter — passive lead capture before footer */}
-      <section className="border-t border-border bg-background py-20 sm:py-24">
+      <Reveal as="section" className="border-b border-border bg-[#eef2ff]">
+        <div className="container mx-auto px-6 sm:px-8 py-20 sm:py-28">
+          <div className="grid lg:grid-cols-[280px_1fr] gap-12 lg:gap-20">
+            <SectionRail index="06" label="Start" />
+            <div className="max-w-3xl">
+              <h2 className="font-display text-4xl sm:text-5xl lg:text-6xl font-normal tracking-[-0.025em] leading-[1.02] text-foreground mb-6">
+                Start with the wedge.
+              </h2>
+              <p className="text-base sm:text-lg text-muted-foreground leading-[1.65] mb-10">
+                The best first conversation is not “what package do you want?” It is “which workflow
+                is expensive, recurring, and ready to become software?”
+              </p>
+              <div className="flex flex-col sm:flex-row items-start gap-4">
+                <Button asChild size="lg" className="h-11 px-7 rounded-[6px] bg-primary text-primary-foreground shadow-[0_14px_42px_rgba(75,53,255,0.22)] hover:bg-[#3324d9]">
+                  <Link href="/contact-sales">
+                    Map the first workflow <ArrowRight className="ml-2 h-4 w-4" />
+                  </Link>
+                </Button>
+                <Button asChild size="lg" variant="outline" className="h-11 px-7 rounded-[6px] shadow-none">
+                  <Link href="/products">
+                    View products <ArrowUpRight className="ml-2 h-4 w-4" />
+                  </Link>
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </Reveal>
+
+      <section className="bg-background py-16 sm:py-20">
         <div className="container mx-auto px-6 sm:px-8">
           <div className="grid lg:grid-cols-[280px_1fr] gap-12 lg:gap-20">
             <div className="flex items-baseline gap-3 text-muted-foreground">
@@ -1205,18 +550,13 @@ export default function HomePage() {
               </span>
             </div>
             <div className="max-w-2xl">
-              <h2 className="text-3xl sm:text-4xl lg:text-5xl font-semibold leading-[1.1] tracking-[-0.025em] text-foreground mb-6">
+              <h2 className="text-3xl sm:text-4xl font-semibold leading-[1.1] tracking-[-0.025em] text-foreground mb-5">
                 Stay close to the work.
               </h2>
               <p className="text-base text-muted-foreground leading-[1.7] mb-8">
-                Occasional dispatches on AI installs, the Engine commitment, and
-                what we're shipping. Written by Lorenzo. Read by operators, fund
-                partners, and mission leads. Unsubscribe any time.
+                Occasional dispatches on AI installs, the Engine commitment, and what we are shipping.
               </p>
               <NewsletterCapture variant="inline" source="home_inline" />
-              <p className="mt-4 text-xs text-muted-foreground">
-                No spam. No funnel tricks. Welcome email arrives within a minute.
-              </p>
             </div>
           </div>
         </div>

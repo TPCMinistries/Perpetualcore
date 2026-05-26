@@ -1,12 +1,12 @@
 "use client";
 
 /**
- * /pricing — unified pricing page across the 3-band spectrum.
+ * /pricing — unified commercial page across the Engine spectrum.
  *
  * Bands:
  *   1. Products ($0 / $49 / $99) — Stripe checkout preserved
  *   2. Retainers ($5K–$15K/mo productized) — link to /studio/retainers
- *   3. Engagements ($75K / $150K / $250K+) — link to /studio/engagements
+ *   3. Engagements ($30K+ scoped work to $250K+ installs) — link to /studio/engagements
  *
  * Stripe checkout flow + billing-interval toggle preserved from prior version.
  * Visual register matches homepage v6.
@@ -27,9 +27,9 @@ import { faqSchema } from "@/lib/seo/structured-data";
 
 const PRICING_FAQ = [
   {
-    question: "What's included in the free tier?",
+    question: "Why does a venture studio have product subscriptions?",
     answer:
-      "The free tier includes 1 user, basic AI chat with GPT-4o Mini, document upload up to 100 sources, and access to a curated subset of the 15 AI advisors. No credit card required. Upgrade any time without losing your context.",
+      "Products are the smallest surface area of the Engine. They let individuals and teams touch the operating logic before a retainer or full studio engagement.",
   },
   {
     question: "How is Perpetual Core different from ChatGPT Teams or Claude Pro?",
@@ -39,7 +39,7 @@ const PRICING_FAQ = [
   {
     question: "What does an engagement include?",
     answer:
-      "Engagements start at $75,000 and include a 6-to-10-week install: operational audit, AI opportunity ranking, outcome-eval scope, and a co-signed contract framework. We sit in your operations the way an operator does — calls, docs, voice notes — then ship the AI workflows that move the metrics that matter.",
+      "Scoped studio engagements can start around $30,000 when the operating problem is narrow. Larger Engine installs are scoped separately and include operational audit, AI opportunity ranking, outcome-eval scope, and shipped workflows that move the metrics that matter.",
   },
   {
     question: "Do you offer mission-driven discounts?",
@@ -52,7 +52,7 @@ const PRICING_FAQ = [
       "Yes. All product subscriptions ($49 Starter / $99 Pro) and retainers ($5,000–$15,000/month) cancel any month. Engagements are scoped fixed-fee with milestone payments — no auto-renewing surprises.",
   },
   {
-    question: "How does billing work for engagements over $75,000?",
+    question: "How does billing work for studio engagements?",
     answer:
       "Engagements bill in milestones: 33% on signature, 33% at midpoint review, 34% at delivery. Invoices are line-itemed and include the Engine commitment (10–15% to the Institute) as a separate audited line. Net-30 terms standard; ACH or wire.",
   },
@@ -135,7 +135,7 @@ const RETAINER_PROGRAMS = [
 ];
 
 const ENGAGEMENT_BANDS = [
-  { name: "Foundations", price: "$75,000", duration: "90 days", body: "Single department, eight-registry install." },
+  { name: "Studio Sprint", price: "$30,000+", duration: "6-8 weeks", body: "Focused workflow, operating audit, and first production build." },
   { name: "Operations", price: "$150,000", duration: "120–150 days", body: "Three to five departments. 15–30 production skills.", featured: true },
   { name: "Institutional", price: "$250,000+", duration: "180 days", body: "Whole-org install + 90 days post-handover." },
 ];
@@ -207,25 +207,26 @@ export default function PricingPage() {
         <div className="max-w-5xl">
           <div className="flex items-center gap-3 mb-12">
             <span aria-hidden className="block h-1.5 w-1.5 bg-foreground" />
-            <p className="eyebrow !text-foreground/70">Pricing · Three bands · $0 → $250K+</p>
+            <p className="eyebrow !text-foreground/70">Commercial model · Engine surfaces · $0 to $250K+</p>
           </div>
 
           <h1 className="display-hero text-[40px] sm:text-[56px] lg:text-[80px] text-foreground mb-12 max-w-5xl leading-[1.05]">
-            Three bands. Pick the one{" "}
-            <span className="italic text-foreground/85">that fits the work.</span>
+            One Engine. Three ways{" "}
+            <span className="italic text-foreground/85">to enter the studio.</span>
           </h1>
 
           <p className="text-lg sm:text-xl text-muted-foreground leading-[1.55] mb-12 max-w-3xl">
-            Products subscribe. Retainers operate. Engagements install. Every band crosses the
-            same Engine, the same methodology, the same 10–15% giving floor.
+            Products prove the logic. Retainers operate a named function. Engagements install the
+            Perpetual Engine across the organization. Every band carries the same methodology and
+            the same 10-15% giving floor.
           </p>
 
           <div className="flex flex-col sm:flex-row items-start gap-4">
             <Button size="lg" asChild className="text-sm font-medium px-7 h-11 shadow-none bg-foreground text-background hover:bg-foreground/90 rounded-[6px]">
-              <Link href="#products">See products <ArrowRight className="ml-2 h-4 w-4" /></Link>
+              <Link href="#engagements">Start with engagements <ArrowRight className="ml-2 h-4 w-4" /></Link>
             </Button>
-            <Link href="#engagements" className="inline-flex items-center text-sm font-medium text-foreground hover:text-primary transition-colors py-3 border-b border-foreground/20 hover:border-primary">
-              Skip to engagements <ArrowRight className="ml-1.5 h-3.5 w-3.5" />
+            <Link href="#products" className="inline-flex items-center text-sm font-medium text-foreground hover:text-primary transition-colors py-3 border-b border-foreground/20 hover:border-primary">
+              See products <ArrowRight className="ml-1.5 h-3.5 w-3.5" />
             </Link>
           </div>
         </div>
@@ -235,14 +236,14 @@ export default function PricingPage() {
       <section id="products" className="border-t border-border py-24 sm:py-32 bg-surface-hover/40">
         <div className="container mx-auto px-6 sm:px-8">
           <div className="grid lg:grid-cols-[280px_1fr] gap-12 lg:gap-20 mb-12">
-            <SectionRail index="01" label="Subscriptions · Self-serve" />
+            <SectionRail index="01" label="Products · Proof layer" />
             <div className="max-w-2xl">
               <h3 className="text-3xl sm:text-4xl lg:text-5xl font-semibold leading-[1.1] tracking-[-0.025em] text-foreground mb-6">
-                Subscribe to a tier. Free / $49 / $99.
+                Products are the on-ramp, not the whole company.
               </h3>
               <p className="text-base text-muted-foreground leading-[1.7]">
-                Self-serve subscription tiers for individuals and small teams. The on-ramp before
-                retainers and engagements. 14-day trials, no credit card required.
+                Self-serve product tiers for individuals and small teams. Use them to touch the
+                Engine, validate a workflow, or prepare for a deeper studio conversation.
               </p>
 
               {/* Billing toggle */}
@@ -418,11 +419,11 @@ export default function PricingPage() {
             <SectionRail index="03" label="Engagements · The install" />
             <div className="max-w-2xl">
               <h3 className="text-3xl sm:text-4xl lg:text-5xl font-semibold leading-[1.1] tracking-[-0.025em] text-foreground mb-6">
-                Install the Engine. $75K–$250K+.
+                Start scoped, expand into the Engine.
               </h3>
               <p className="text-base text-muted-foreground leading-[1.7]">
-                90 to 180 day install. Three bands depending on the surface area. Each ends the
-                same way: documented, trained, handed over. You own the system.
+                Studio engagements can begin around $30K for a focused operating surface.
+                Larger Engine installs expand across departments when the work proves it.
               </p>
             </div>
           </div>

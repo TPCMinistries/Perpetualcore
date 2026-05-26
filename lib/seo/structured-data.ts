@@ -22,7 +22,7 @@ export function organizationSchema() {
     url: baseUrl,
     logo: `${baseUrl}/og-image.png`,
     description:
-      "An AI-first studio installing operating systems for mission-driven organizations. Engagements start at $75,000. 10–15% of revenue funds the Institute for Human Advancement.",
+      "A first-of-its-kind AI venture studio attached to the Perpetual Engine. Perpetual Core builds, installs, and scales AI-native operating systems, products, and ventures for mission-driven institutions.",
     founder: {
       "@type": "Person",
       name: "Lorenzo Daughtry-Chambers",
@@ -63,7 +63,7 @@ export function websiteSchema() {
     "@id": `${baseUrl}/#website`,
     url: baseUrl,
     name: ORG_NAME,
-    description: "AI-first studio for mission-driven organizations.",
+    description: "AI venture studio attached to the Perpetual Engine.",
     publisher: { "@id": `${baseUrl}/#organization` },
     inLanguage: "en-US",
   };
