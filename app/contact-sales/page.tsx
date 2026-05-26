@@ -84,6 +84,9 @@ function ContactSalesForm() {
   const searchParams = useSearchParams();
   const planFromUrl = searchParams.get("plan") || "";
   const productFromUrl = searchParams.get("product") || "";
+  const intentFromUrl = searchParams.get("intent") || "";
+  const sessionFromUrl = searchParams.get("session_id") || "";
+  const isPostPaymentIntake = intentFromUrl === "post-payment-intake";
 
   const [formData, setFormData] = useState({
     name: "",
@@ -91,9 +94,11 @@ function ContactSalesForm() {
     company: "",
     phone: "",
     employees: "",
-    plan: planFromUrl || "company-ai-os",
+    plan: planFromUrl || (isPostPaymentIntake ? "guided-setup" : "company-ai-os"),
     product: productFromUrl,
-    message: "",
+    message: isPostPaymentIntake
+      ? `I already completed a Perpetual Core package checkout${sessionFromUrl ? ` (${sessionFromUrl})` : ""}. Here is the operating context we should use for onboarding: `
+      : "",
   });
   const [submitState, setSubmitState] = useState<SubmitState>("idle");
 
@@ -159,10 +164,9 @@ function ContactSalesForm() {
               Tell us where AI needs to touch the company.
             </h1>
             <p className="mt-8 text-lg sm:text-xl text-muted-foreground leading-[1.65] max-w-2xl">
-              Perpetual Core installs AI operating systems across sales, operations,
-              knowledge, customer communication, and leadership visibility. We can start
-              with one high-leverage workflow, but we scope it with the larger company
-              system in view.
+              {isPostPaymentIntake
+                ? "Your payment is in. Use this form to send the operating context we need before the first onboarding call."
+                : "Perpetual Core installs AI operating systems across sales, operations, knowledge, customer communication, and leadership visibility. We can start with one high-leverage workflow, but we scope it with the larger company system in view."}
               {productFromUrl && (
                 <>
                   {" "}

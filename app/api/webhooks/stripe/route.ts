@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/server";
 import {
+  sendEmail,
   sendMarketplacePurchaseEmail,
   sendPaymentReceiptEmail,
   sendPaymentFailedEmail,
@@ -171,9 +172,71 @@ async function handleCheckoutCompleted(
     return;
   }
 
+  if (metadata.type === "perpetual_core_package") {
+    await handlePackageCheckoutCompleted(session, metadata);
+    return;
+  }
+
   // Otherwise, it's a regular subscription checkout
   // The subscription will be handled by customer.subscription.created
   console.log("Checkout completed for subscription:", session.subscription);
+}
+
+async function handlePackageCheckoutCompleted(
+  session: Stripe.Checkout.Session,
+  metadata: Stripe.Metadata
+) {
+  const packageName = metadata.package_name || "Perpetual Core package";
+  const packageId = metadata.package_id || "unknown";
+  const customerEmail = session.customer_details?.email || session.customer_email || "";
+  const customerName = session.customer_details?.name || "Package buyer";
+  const customerPhone = session.customer_details?.phone || "";
+  const formattedAmount = new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: (session.currency || "usd").toUpperCase(),
+  }).format((session.amount_total || 0) / 100);
+  const intakeUrl = `${process.env.NEXT_PUBLIC_APP_URL || "https://www.perpetualcore.com"}/contact-sales?intent=post-payment-intake&session_id=${encodeURIComponent(session.id)}`;
+
+  const salesHtml = `
+    <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; line-height: 1.6; color: #111827;">
+      <h1>Paid Perpetual Core package</h1>
+      <p>A buyer completed checkout for <strong>${packageName}</strong>.</p>
+      <table cellpadding="8" style="border-collapse: collapse;">
+        <tr><td><strong>Amount</strong></td><td>${formattedAmount}</td></tr>
+        <tr><td><strong>Package ID</strong></td><td>${packageId}</td></tr>
+        <tr><td><strong>Name</strong></td><td>${customerName}</td></tr>
+        <tr><td><strong>Email</strong></td><td>${customerEmail || "Not provided"}</td></tr>
+        <tr><td><strong>Phone</strong></td><td>${customerPhone || "Not provided"}</td></tr>
+        <tr><td><strong>Stripe session</strong></td><td>${session.id}</td></tr>
+      </table>
+      <p><a href="${intakeUrl}">Buyer intake link</a></p>
+    </div>
+  `;
+
+  await sendEmail(
+    process.env.SALES_EMAIL || "sales@perpetualcore.com",
+    `Paid package: ${packageName} (${formattedAmount})`,
+    salesHtml
+  );
+
+  if (!customerEmail) return;
+
+  const buyerHtml = `
+    <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; line-height: 1.6; color: #111827;">
+      <h1>Payment received</h1>
+      <p>Hi ${customerName},</p>
+      <p>Your <strong>${packageName}</strong> payment was received.</p>
+      <p>The next step is intake context: company, workflow, data, and outcome details so we can orient the first operating lane.</p>
+      <p>
+        <a href="${intakeUrl}" style="display:inline-block;background:#111827;color:#ffffff;padding:12px 18px;border-radius:6px;text-decoration:none;font-weight:600;">
+          Send intake context
+        </a>
+      </p>
+      <p>You can also reply directly to this email if that is easier.</p>
+    </div>
+  `;
+
+  await sendEmail(customerEmail, "Next steps for your Perpetual Core package", buyerHtml);
 }
 
 /**

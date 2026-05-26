@@ -43,6 +43,32 @@ function isRateLimited(ip: string): boolean {
   return false;
 }
 
+const companySizeValues = [
+  "1-10",
+  "11-50",
+  "51-200",
+  "201-500",
+  "501-1000",
+  "1000+",
+  "1001+",
+] as const;
+
+const planValues = [
+  "guided-setup",
+  "first-workflow",
+  "company-ai-os",
+  "department-ai-os",
+  "studio-sprint-30",
+  "studio-retainer",
+  "product-subscription",
+  "venture-partner",
+  "institute-partner",
+  "exploring",
+  "Pro",
+  "Enterprise",
+  "Custom",
+] as const;
+
 // Zod schema for contact sales form
 const contactSalesSchema = z.object({
   name: z.string()
@@ -63,10 +89,10 @@ const contactSalesSchema = z.object({
     .transform(s => s.trim().replace(/[<>]/g, ""))
     .optional()
     .nullable(),
-  employees: z.enum(["1-10", "11-50", "51-200", "201-500", "501-1000", "1001+"], {
+  employees: z.enum(companySizeValues, {
     errorMap: () => ({ message: "Please select a valid company size" }),
   }),
-  plan: z.enum(["Pro", "Enterprise", "Custom"], {
+  plan: z.enum(planValues, {
     errorMap: () => ({ message: "Please select a valid plan" }),
   }),
   message: z.string()

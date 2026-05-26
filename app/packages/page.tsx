@@ -127,6 +127,21 @@ const DECISION_RULES = [
   },
 ];
 
+const POST_PURCHASE_STEPS = [
+  {
+    title: "Stripe payment",
+    body: "The buyer pays for software access, setup, a first workflow, or the lane deposit.",
+  },
+  {
+    title: "Intake context",
+    body: "They send company, workflow, data, and outcome context from the success page.",
+  },
+  {
+    title: "Operating start",
+    body: "We confirm the first operating lane, onboarding window, and next commercial step.",
+  },
+];
+
 function SectionRail({ index, label }: { index: string; label: string }) {
   return (
     <div>
@@ -306,6 +321,29 @@ export default function PackagesPage() {
                   the software is included as the operating layer underneath the work.
                 </p>
               </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="border-t border-border py-20 sm:py-24">
+        <div className="container mx-auto px-6 sm:px-8">
+          <div className="grid lg:grid-cols-[280px_1fr] gap-12 lg:gap-20">
+            <SectionRail index="04" label="After payment" />
+            <div className="grid gap-4 md:grid-cols-3">
+              {POST_PURCHASE_STEPS.map((step, index) => (
+                <div key={step.title} className="border border-border bg-card p-6">
+                  <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground mb-6">
+                    {String(index + 1).padStart(2, "0")}
+                  </p>
+                  <h3 className="text-lg font-semibold tracking-[-0.015em] text-foreground mb-3">
+                    {step.title}
+                  </h3>
+                  <p className="text-sm text-muted-foreground leading-[1.65]">
+                    {step.body}
+                  </p>
+                </div>
+              ))}
             </div>
           </div>
         </div>
