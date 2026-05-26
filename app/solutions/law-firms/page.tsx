@@ -68,7 +68,7 @@ const FAQS = [
   },
   {
     q: "How does pricing work for growing firms?",
-    a: "$999/attorney/mo. Pay only for active attorneys — add or remove users anytime, no penalties. Volume discounts at 20+ and 50+ attorneys. Annual payment saves 20%. The 3-band spectrum is designed for movement: subscriptions → retainers ($5K–$15K/mo) → engagements ($75K–$250K+ full installs). We discuss credit toward engagement scope case-by-case if you cross bands.",
+    a: "$999/attorney/mo. Pay only for active attorneys — add or remove users anytime, no penalties. Volume discounts at 20+ and 50+ attorneys. Annual payment saves 20%. The 3-band spectrum is designed for movement: subscriptions → retainers ($5K–$15K/mo) → engagements (company-wide installs). We discuss credit toward engagement scope case-by-case if you cross bands.",
   },
   {
     q: "What happens when a senior partner retires?",
@@ -239,7 +239,7 @@ export default function LawFirmsPage() {
             <Link href="/studio/engagements" className="group block p-6 sm:p-7 hover:bg-surface-hover transition-colors flex flex-col">
               <p className="font-mono text-[10px] tracking-[0.18em] text-muted-foreground mb-10">BAND · 03</p>
               <h4 className="text-[11px] font-mono uppercase tracking-[0.22em] text-primary mb-3">Engagement</h4>
-              <p className="text-base font-semibold leading-[1.3] tracking-[-0.01em] text-foreground mb-2">$75K–$250K+</p>
+              <p className="text-base font-semibold leading-[1.3] tracking-[-0.01em] text-foreground mb-2">Custom company-wide install</p>
               <p className="text-sm text-muted-foreground leading-[1.6] flex-1">
                 For mid-size and large firms ready to install the eight-registry Engine across practice groups. 90–180 day install. You own it.
               </p>

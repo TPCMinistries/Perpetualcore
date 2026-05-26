@@ -22,9 +22,9 @@ type Post = {
 const POSTS: Post[] = [
   {
     slug: "the-75k-floor",
-    title: "Why we don't take engagements under $75,000",
+    title: "What an AI operating system actually takes",
     subtitle:
-      "Letter #001 of The Install — and what we built for everyone below the floor. An honest accounting of the math, the engineering reality, and why a real install can't be done for less.",
+      "The real work behind a durable AI install: operating map, data surface, workflow ownership, team adoption, governance, and expansion path.",
     date: "2026-05-22",
     author: "Lorenzo Daughtry-Chambers",
   },
@@ -40,7 +40,7 @@ const POSTS: Post[] = [
     slug: "what-an-ai-install-actually-costs",
     title: "What an AI install actually costs",
     subtitle:
-      "And why we price engagements at $75,000. An honest breakdown of the four cost buckets: vendor subscriptions, engineering time, integration debt, and outcome evaluation.",
+      "An honest breakdown of the four cost buckets: vendor subscriptions, engineering time, integration debt, and outcome evaluation.",
     date: "2026-05-20",
     author: "Lorenzo Daughtry-Chambers",
   },

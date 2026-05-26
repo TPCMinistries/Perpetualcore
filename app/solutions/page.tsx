@@ -53,6 +53,24 @@ export default function SolutionsPage() {
     "it-services": "from-sky-600 to-blue-600",
   };
 
+  const prioritySolutions = [
+    {
+      title: "Furniture, Interiors, and FF&E",
+      body: "AI operating systems for companies coordinating clients, vendors, products, projects, delivery, installs, and service.",
+      href: "/solutions/furniture-ff-e",
+    },
+    {
+      title: "Local Business",
+      body: "Practical AI systems for owner-led companies that need better follow-up, customer response, marketing, and operating visibility.",
+      href: "/solutions/local-business",
+    },
+    {
+      title: "Professional Services",
+      body: "AI operating systems for firms that sell expertise through proposals, client delivery, knowledge reuse, and reporting.",
+      href: "/solutions/professional-services",
+    },
+  ];
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-background via-background to-muted/20">
       {/* Navigation */}
@@ -110,6 +128,33 @@ export default function SolutionsPage() {
               Start Free Trial <ArrowRight className="ml-2 h-4 sm:h-5 w-4 sm:w-5" />
             </Link>
           </Button>
+        </div>
+      </section>
+
+      {/* Priority AI OS pages */}
+      <section className="container mx-auto px-4 pb-8">
+        <div className="max-w-7xl mx-auto">
+          <div className="mb-8">
+            <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-primary mb-3">
+              AI operating-system paths
+            </p>
+            <h2 className="text-3xl sm:text-4xl font-bold tracking-tight text-foreground">
+              Start with the page that sounds most like your company.
+            </h2>
+          </div>
+          <div className="grid md:grid-cols-3 gap-px bg-border border border-border">
+            {prioritySolutions.map((solution) => (
+              <Link key={solution.href} href={solution.href} className="group bg-background p-7 hover:bg-surface-hover transition-colors">
+                <h3 className="text-xl font-semibold tracking-[-0.015em] text-foreground mb-3 group-hover:text-primary transition-colors">
+                  {solution.title}
+                </h3>
+                <p className="text-sm text-muted-foreground leading-[1.65] mb-6">{solution.body}</p>
+                <span className="inline-flex items-center text-sm font-medium text-foreground">
+                  View path <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
+                </span>
+              </Link>
+            ))}
+          </div>
         </div>
       </section>
 

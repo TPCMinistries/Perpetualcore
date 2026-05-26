@@ -1,7 +1,6 @@
 /**
- * Letter #001 of "The Install" — published as a blog post for permalink/SEO.
- * Source: ~/Documents/LDC-Command-Center-Vault/06-Resources/the-install/letter-001-the-75k-floor.md
- * Voice: Lorenzo's, intact. Featured on home as institutional founder-writing surface.
+ * Letter #001 of The Install. URL kept for link stability, narrative updated
+ * away from floor-first pricing and toward AI operating-system implementation.
  */
 
 import Link from "next/link";
@@ -13,21 +12,22 @@ import { JsonLd } from "@/components/seo/JsonLd";
 import { breadcrumbSchema } from "@/lib/seo/structured-data";
 import { NewsletterCapture } from "@/components/landing/NewsletterCapture";
 
-const POST_TITLE = "Why we don't take engagements under $75,000";
-const POST_SUBTITLE = "Letter #001 of The Install — and what we built for everyone below the floor.";
+const POST_TITLE = "What an AI operating system actually takes";
+const POST_SUBTITLE =
+  "Why serious AI work starts with the business map, not the model.";
 const POST_DATE = "2026-05-22";
 const POST_AUTHOR = "Lorenzo Daughtry-Chambers";
-const READ_MINUTES = 5;
+const READ_MINUTES = 6;
 
 export const metadata = {
   title: `${POST_TITLE} — The Install · Perpetual Core`,
   description:
-    "Last year I started turning down work. Not because I had too much — because the math stopped working below $75K. Letter #001 of The Install.",
+    "A practical letter on what it takes to install AI across a company: operating map, data surface, workflow ownership, governance, adoption, and expansion.",
   openGraph: {
     type: "article",
     title: POST_TITLE,
     description:
-      "Why we set a $75,000 floor for institutional engagements — and the four things we built for everyone below it.",
+      "What a durable AI operating-system install requires beyond a chatbot or isolated workflow automation.",
     publishedTime: `${POST_DATE}T00:00:00Z`,
     authors: [POST_AUTHOR],
   },
@@ -42,7 +42,7 @@ function articleSchema() {
     "@type": "Article",
     headline: POST_TITLE,
     description:
-      "Why Perpetual Core sets a $75,000 floor for institutional engagements.",
+      "What a company needs before AI can become part of its operating system.",
     image: `${baseUrl}/og-image.png`,
     datePublished: `${POST_DATE}T00:00:00Z`,
     dateModified: `${POST_DATE}T00:00:00Z`,
@@ -63,6 +63,15 @@ function articleSchema() {
   };
 }
 
+function SectionRail({ index, label }: { index: string; label: string }) {
+  return (
+    <div className="flex items-baseline gap-3 text-muted-foreground">
+      <span className="font-mono text-[10px] uppercase tracking-[0.22em]">{index}</span>
+      <span className="font-mono text-[10px] uppercase tracking-[0.22em]">{label}</span>
+    </div>
+  );
+}
+
 export default function PostPage() {
   return (
     <div className="min-h-screen bg-background">
@@ -71,25 +80,21 @@ export default function PostPage() {
           articleSchema(),
           breadcrumbSchema([
             { name: "Home", path: "/" },
-            { name: "Notes", path: "/blog" },
+            { name: "The Install", path: "/blog" },
             { name: POST_TITLE, path: "/blog/the-75k-floor" },
           ]),
         ]}
       />
       <Navbar />
 
-      {/* Hero */}
       <section className="container mx-auto px-6 sm:px-8 pt-20 pb-12 sm:pt-28 sm:pb-16">
         <div className="max-w-3xl mx-auto">
           <div className="flex flex-wrap items-baseline gap-3 mb-8 text-muted-foreground">
-            <Link
-              href="/blog"
-              className="font-mono text-[10px] uppercase tracking-[0.22em] hover:text-foreground transition"
-            >
-              ← Notes
+            <Link href="/blog" className="font-mono text-[10px] uppercase tracking-[0.22em] hover:text-foreground transition">
+              ← The Install
             </Link>
             <span className="font-mono text-[10px] uppercase tracking-[0.22em]">
-              · {POST_DATE} · {READ_MINUTES} min read · The Install · #001
+              · {POST_DATE} · {READ_MINUTES} min read · #001
             </span>
           </div>
           <h1 className="font-display text-4xl sm:text-5xl lg:text-6xl leading-[1.05] tracking-[-0.025em] text-foreground mb-4">
@@ -104,205 +109,125 @@ export default function PostPage() {
         </div>
       </section>
 
-      {/* Body */}
       <article className="container mx-auto px-6 sm:px-8 pb-20">
         <div className="max-w-2xl mx-auto prose-content">
-          <p>I started turning down work last year.</p>
-
-          <p>Not because I had too much. Because the math stopped working.</p>
-
           <p>
-            Here&apos;s what was happening: a nonprofit director would email me
-            — usually a great human, running something that actually mattered —
-            asking for &ldquo;an AI strategy session, maybe a few hours of your
-            time.&rdquo; They had $3,000 in the budget. Maybe $5,000.
+            Most companies do not have an AI strategy problem. They have an operating-system
+            problem that AI finally makes visible.
           </p>
 
           <p>
-            I&apos;d say yes. I&apos;d show up. I&apos;d build them something
-            genuinely useful. And then six weeks later it would be sitting
-            unused on a shelf, because nobody on their team had the bandwidth
-            or technical fluency to keep it running.
+            The sales team has context in calls and inboxes. Operations has the truth in
+            spreadsheets, project tools, and memory. Leadership has dashboards that lag the work.
+            Customers experience the gaps between those systems as delay, inconsistency, and
+            follow-up that depends on who remembered what.
           </p>
 
           <p>
-            We&apos;d both walk away losing. Me, because I burned a week of
-            capacity. Them, because they paid for something that turned into a
-            paperweight.
+            Dropping a chatbot into that environment may feel modern for a week. It does not change
+            the company. A real install starts by mapping where the business already moves.
+          </p>
+
+          <h2>The first layer is the operating map.</h2>
+
+          <p>
+            Before we build, we need to know how work actually travels: who receives the lead, where
+            the note goes, who writes the proposal, who owns the handoff, what the customer hears,
+            what leadership sees, and where the follow-through breaks.
           </p>
 
           <p>
-            So we set a floor:{" "}
-            <strong>$75,000 for any institutional engagement at Perpetual Core.</strong>
+            This matters for a furniture and interiors company. It matters for a local business. It
+            matters for a professional services firm. The industry changes; the operating question
+            stays stable.
           </p>
 
-          <p>That number isn&apos;t arbitrary. It&apos;s the smallest amount where the math works:</p>
-
-          <ul>
-            <li>90 days of real work, not a &ldquo;deliverable&rdquo;</li>
-            <li>A tenanted instance the client actually owns</li>
-            <li>Training that takes the team from zero to operating it without me</li>
-            <li>An on-call period after launch so the thing doesn&apos;t die in week three</li>
-          </ul>
-
-          <p>Below $75K, I&apos;m not selling AI infrastructure. I&apos;m selling false hope.</p>
-
-          <h2>The honest question</h2>
-
-          <p>So what about everyone below the floor?</p>
-
-          <p>The first answer most people expect is &ldquo;tough luck.&rdquo; It isn&apos;t.</p>
-
-          <p>The second answer most people expect is &ldquo;I&apos;ll make an exception.&rdquo; I won&apos;t.</p>
+          <h2>The second layer is the data surface.</h2>
 
           <p>
-            The real answer is that we built four different things for four
-            different scales, because pretending one product fits everyone is
-            the whole problem with AI consulting right now.
+            AI cannot reason from company knowledge it cannot access. Catalogs, proposals, customer
+            history, project notes, call transcripts, service issues, policies, templates, and
+            prior decisions all need a place in the system.
           </p>
 
           <p>
-            <strong>If you&apos;re a solo operator or small team</strong> —
-            coach, consultant, creator, small business owner —{" "}
-            <Link href="https://lorenzodc.com/catalyst" className="text-foreground underline hover:no-underline">
-              Catalyst
-            </Link>{" "}
-            exists. $2,500 to $15,000. Productized builds: an automation, a
-            portal, an agent. Ships in 2–4 weeks. Same standards. Smaller surface.
+            This does not mean every file goes into one messy folder. It means the company needs a
+            usable memory layer: structured enough to trust, flexible enough to grow.
+          </p>
+
+          <h2>The third layer is workflow ownership.</h2>
+
+          <p>
+            Every useful AI system needs an owner. Someone has to know whether the sales follow-up
+            assistant is helping. Someone has to approve the proposal workflow. Someone has to say
+            what good looks like.
           </p>
 
           <p>
-            <strong>If you&apos;re not sure where you are</strong> — that&apos;s the{" "}
-            <Link href="https://lorenzodc.com/catalyst/diagnostic" className="text-foreground underline hover:no-underline">
-              Diagnostic
-            </Link>
-            . $497 for a real conversation and a written plan. (New this month.
-            I&apos;ll talk about it more in Letter #2.)
+            This is why we usually start with one strong wedge. Not because the ambition is small.
+            Because the first workflow teaches the company how the full system should behave.
+          </p>
+
+          <h2>The fourth layer is adoption.</h2>
+
+          <p>
+            If the team does not use it, it is not installed. It is just software nearby.
+            Installation means the system enters the operating rhythm: intake, review, follow-up,
+            reporting, escalation, and decision-making.
           </p>
 
           <p>
-            <strong>If you&apos;re a nonprofit under $1M operating budget</strong>{" "}
-            — Perpetual Core Studio at 50% off, $174.50/month. The same suite
-            the institutional clients use. Just priced for your math.
+            Training is not a courtesy at the end. It is part of the build.
+          </p>
+
+          <h2>The fifth layer is expansion.</h2>
+
+          <p>
+            A lead follow-up system can become sales intelligence. A proposal workflow can become a
+            knowledge engine. A project visibility layer can become leadership reporting. The point
+            is not to automate one task forever. The point is to build a path from the first win to
+            the company operating system.
           </p>
 
           <p>
-            <strong>If you&apos;re building from inside an existing organization</strong>{" "}
-            —{" "}
-            <Link href="https://academy.theiha.org" className="text-foreground underline hover:no-underline">
-              IHA Academy
-            </Link>{" "}
-            is where you go. Real training. Real cohorts. Real teachers. $99 to
-            $2,500 depending on the track.
+            That is what Perpetual Core is built to do: enter through the strongest operating pain,
+            prove value quickly, and expand the system with discipline.
           </p>
-
-          <p>
-            None of these are &ldquo;lite versions&rdquo; of the $75K
-            engagement. They&apos;re different products for different operating
-            realities. Trying to flatten them into a single &ldquo;AI consulting&rdquo;
-            service is what produces the paperweights.
-          </p>
-
-          <h2>Why I&apos;m telling you this in Letter #1</h2>
-
-          <p>Because the AI advisory market right now is full of two failure modes:</p>
-
-          <ol>
-            <li>
-              <strong>The vapor consultant</strong> — sells you &ldquo;strategy,&rdquo;
-              delivers a 40-page PDF, vanishes.
-            </li>
-            <li>
-              <strong>The free-strategy-call vendor</strong> — pretends to give
-              you advice, actually runs a sales script.
-            </li>
-          </ol>
-
-          <p>
-            Both of them treat pricing as a marketing variable. Move it up,
-            down, bundle it, unbundle it.
-          </p>
-
-          <p>
-            We treat pricing as a <em>constraint on what we can promise</em>.
-            If we can&apos;t ship the install in 90 days, we won&apos;t take
-            the engagement at the price. If you can&apos;t get to $75K, we have
-            something else that fits your reality without lying about what it
-            can do.
-          </p>
-
-          <p>That&apos;s the operating principle. Everything else is downstream.</p>
-
-          <h2>What you can do this week</h2>
-
-          <p>If you&apos;ve been thinking about AI for your org and not sure where to start:</p>
-
-          <p>
-            →{" "}
-            <Link href="https://lorenzodc.com/enterprise-diagnostic" className="text-foreground underline hover:no-underline">
-              Take the free assessment
-            </Link>
-            . 5 minutes. You&apos;ll get a score and a generic roadmap.
-            It&apos;s enough to know if you&apos;re at the &ldquo;yes, do this
-            now&rdquo; stage or &ldquo;wait six months&rdquo; stage.
-          </p>
-
-          <p>
-            →{" "}
-            <Link href="https://lorenzodc.com/catalyst/diagnostic" className="text-foreground underline hover:no-underline">
-              Book a Diagnostic Call
-            </Link>
-            . 60 minutes with me, $497, credited to anything you do next. For
-            when the generic roadmap isn&apos;t enough.
-          </p>
-
-          <p>
-            → Or just reply to this email and tell me what you&apos;re stuck
-            on. I read all of these.
-          </p>
-
-          <p>Talk Tuesday.</p>
-
-          <p>— Lorenzo</p>
         </div>
       </article>
 
-      {/* Newsletter capture */}
       <section className="border-t border-border py-16 sm:py-20 bg-card/40">
         <div className="container mx-auto px-6 sm:px-8 max-w-2xl">
+          <SectionRail index="—" label="Start here" />
+          <h3 className="mt-6 text-2xl sm:text-3xl font-semibold tracking-[-0.015em] text-foreground mb-4">
+            Map the first operating surface.
+          </h3>
+          <p className="text-base text-muted-foreground leading-[1.7] mb-8">
+            If you run a company, the first question is not which model to use. It is where AI
+            should touch sales, operations, knowledge, customers, reporting, and decisions.
+          </p>
+          <div className="flex flex-col sm:flex-row gap-3">
+            <Button asChild className="text-sm font-medium h-10 px-5 shadow-none bg-foreground text-background hover:bg-foreground/90 rounded-[6px]">
+              <Link href="/contact-sales">
+                Map my AI operating system <ArrowRight className="ml-2 h-3.5 w-3.5" />
+              </Link>
+            </Button>
+            <Button asChild variant="outline" className="text-sm font-medium h-10 px-5 shadow-none rounded-[6px]">
+              <Link href="/lead-magnet">Get the checklist</Link>
+            </Button>
+          </div>
+        </div>
+      </section>
+
+      <section className="border-t border-border py-16 sm:py-20">
+        <div className="container mx-auto px-6 sm:px-8 max-w-2xl">
           <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground mb-3">
-            The Install · A weekly letter from Lorenzo
+            The Install · Occasional letters from Lorenzo
           </p>
           <h3 className="text-2xl sm:text-3xl font-semibold tracking-[-0.015em] text-foreground mb-4">
             Field notes from inside the work.
           </h3>
-          <p className="text-base text-muted-foreground leading-[1.7] mb-6">
-            One letter a week. Operator-to-operator. No tactical AI tips, no
-            promotional flotsam. Reply anytime — Lorenzo reads them.
-          </p>
           <NewsletterCapture variant="inline" />
-        </div>
-      </section>
-
-      {/* CTA */}
-      <section className="border-t border-border py-20 sm:py-24">
-        <div className="container mx-auto px-6 sm:px-8 max-w-3xl">
-          <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground mb-3">
-            If you&apos;re at the floor
-          </p>
-          <h3 className="text-2xl sm:text-3xl font-semibold tracking-[-0.015em] text-foreground mb-6">
-            See how an engagement actually goes.
-          </h3>
-          <div className="flex flex-wrap gap-3">
-            <Button asChild className="text-sm font-medium h-10 px-5 shadow-none bg-foreground text-background hover:bg-foreground/90 rounded-[6px]">
-              <Link href="/studio/engagements">
-                Studio engagements <ArrowRight className="ml-2 h-3.5 w-3.5" />
-              </Link>
-            </Button>
-            <Button asChild variant="outline" className="text-sm font-medium h-10 px-5 shadow-none rounded-[6px]">
-              <Link href="/blog">All notes</Link>
-            </Button>
-          </div>
         </div>
       </section>
 

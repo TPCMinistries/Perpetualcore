@@ -78,7 +78,7 @@ const FAQS = [
   },
   {
     q: "We're a multi-state health system. Can we install this across our network?",
-    a: "Yes. The $5K–$15K/mo retainer band or the $75K–$250K+ engagement band exists for organizations that need more than self-serve. An engagement installs the eight-registry Engine across the system: identity, knowledge, decisions, work, comms, claims, signal, trust — all federated to your stack. You own the system after we leave.",
+    a: "Yes. The $5K–$15K/mo retainer band or the Custom company-wide install engagement band exists for organizations that need more than self-serve. An engagement installs the eight-registry Engine across the system: identity, knowledge, decisions, work, comms, claims, signal, trust — all federated to your stack. You own the system after we leave.",
   },
 ];
 
@@ -231,7 +231,7 @@ export default function HealthcarePage() {
             <Link href="/studio/engagements" className="group block p-6 sm:p-7 hover:bg-surface-hover transition-colors flex flex-col">
               <p className="font-mono text-[10px] tracking-[0.18em] text-muted-foreground mb-10">BAND · 03</p>
               <h4 className="text-[11px] font-mono uppercase tracking-[0.22em] text-primary mb-3">Engagement</h4>
-              <p className="text-base font-semibold leading-[1.3] tracking-[-0.01em] text-foreground mb-2">$75K–$250K+</p>
+              <p className="text-base font-semibold leading-[1.3] tracking-[-0.01em] text-foreground mb-2">Custom company-wide install</p>
               <p className="text-sm text-muted-foreground leading-[1.6] flex-1">
                 For health systems ready to install the eight-registry Engine across the network. 90–180 day install. You own it.
               </p>

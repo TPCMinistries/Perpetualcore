@@ -49,13 +49,16 @@ const INSTITUTE_LINKS = [
 
 const COMPANY_LINKS = [
   { label: "About", href: "/about" },
-  { label: "Pricing", href: "/pricing" },
   { label: "Industries", href: "/solutions" },
+  { label: "Furniture / FF&E", href: "/solutions/furniture-ff-e" },
+  { label: "Local business", href: "/solutions/local-business" },
+  { label: "Professional services", href: "/solutions/professional-services" },
   { label: "Contact", href: "/contact-sales" },
 ];
 
 const RESOURCE_LINKS = [
   { label: "How to start", href: "/start" },
+  { label: "AI OS Map", href: "/lead-magnet" },
   { label: "Buyer's guide", href: "/guide/ai-implementation-buyers-guide" },
   { label: "Compare", href: "/compare" },
   { label: "Notes", href: "/blog" },

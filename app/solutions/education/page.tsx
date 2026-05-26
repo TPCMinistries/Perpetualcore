@@ -68,7 +68,7 @@ const FAQS = [
   },
   {
     q: "Can we start small and scale up?",
-    a: "Yes. Most schools start with one grade level or department on Subscription ($99/educator/mo). The 3-band spectrum is designed for movement: subscriptions → retainers ($5K–$15K/mo) → engagements ($75K–$250K+ full installs across the district). We discuss credit toward engagement scope case-by-case if you cross bands.",
+    a: "Yes. Most schools start with one grade level or department on Subscription ($99/educator/mo). The 3-band spectrum is designed for movement: subscriptions → retainers ($5K–$15K/mo) → engagements (company-wide installs across the district). We discuss credit toward engagement scope case-by-case if you cross bands.",
   },
   {
     q: "What happens when a master teacher retires?",
@@ -234,7 +234,7 @@ export default function EducationPage() {
             <Link href="/studio/engagements" className="group block p-6 sm:p-7 hover:bg-surface-hover transition-colors flex flex-col">
               <p className="font-mono text-[10px] tracking-[0.18em] text-muted-foreground mb-10">BAND · 03</p>
               <h4 className="text-[11px] font-mono uppercase tracking-[0.22em] text-primary mb-3">Engagement</h4>
-              <p className="text-base font-semibold leading-[1.3] tracking-[-0.01em] text-foreground mb-2">$75K–$250K+</p>
+              <p className="text-base font-semibold leading-[1.3] tracking-[-0.01em] text-foreground mb-2">Custom company-wide install</p>
               <p className="text-sm text-muted-foreground leading-[1.6] flex-1">
                 For districts and networks ready to install the eight-registry Engine. 90–180 day install. You own it.
               </p>

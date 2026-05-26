@@ -1,10 +1,10 @@
 "use client";
 
 /**
- * /lead-magnet — opt-in surface for the AI Implementation Buyer's Guide.
+ * /lead-magnet — opt-in surface for the AI Operating System Map.
  *
  * Submit posts to /api/leads/capture with source=lead_magnet +
- * leadMagnet=buyers_guide. Triggers the Resend day-1 nurture email + adds
+ * leadMagnet=ai_os_map. Triggers the Resend day-1 nurture email + adds
  * the lead to the 7-day product nurture sequence. On success, redirects
  * straight to /guide/ai-implementation-buyers-guide — we deliver the
  * value, we don't gate it behind their inbox.
@@ -27,28 +27,28 @@ const GUIDE_HREF = "/guide/ai-implementation-buyers-guide";
 const WHAT_IS_INSIDE = [
   {
     label: "01",
-    title: "The four cost buckets",
-    body: "Vendor subscriptions, engineering time, integration debt, outcome-eval. Year-one total is $75K-$250K regardless of who you hire.",
+    title: "10 places to inspect",
+    body: "Sales, follow-up, proposals, customer service, knowledge, delivery, reporting, marketing, leadership visibility, and handoffs.",
   },
   {
     label: "02",
-    title: "Outcome-eval framework",
-    body: "Three questions to answer before any code ships — and the decision rule that prevents the install getting quietly turned off in nine months.",
+    title: "The first-wedge scorecard",
+    body: "A simple way to choose the first workflow: visible pain, clear owner, measurable win, accessible data, and expansion potential.",
   },
   {
     label: "03",
-    title: "Vendor evaluation rubric",
-    body: "Three asks and three smells. Built from the conversations we have on our own first sales calls.",
+    title: "Company-size translation",
+    body: "How the same AI operating-system idea changes for a regional company, an owner-led local business, and a professional services firm.",
   },
   {
     label: "04",
-    title: "Eight contract clauses",
-    body: "Metric-bound milestones, no-train, kill clause, audit-log retention, Engine commitment line item. None are legal advice — bring your counsel.",
+    title: "Questions to bring to the first call",
+    body: "The details that make a diagnostic useful: where work gets lost, who owns it, what tools exist, and what outcome would matter.",
   },
   {
     label: "05",
-    title: "When not to install AI",
-    body: "Four signals that defer or refer is the honest answer. Including from your own vendor.",
+    title: "Expansion map",
+    body: "How a lead follow-up, proposal, knowledge, or reporting workflow can grow into a full company AI operating system.",
   },
 ];
 
@@ -81,8 +81,8 @@ export default function LeadMagnetPage() {
           email: email.trim().toLowerCase(),
           company: company.trim() || undefined,
           source: "lead_magnet",
-          leadMagnet: "buyers_guide",
-          metadata: { magnet: "ai-implementation-buyers-guide" },
+          leadMagnet: "ai_os_map",
+          metadata: { magnet: "ai-operating-system-map" },
         }),
       });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
@@ -103,26 +103,25 @@ export default function LeadMagnetPage() {
       <section className="container mx-auto px-6 sm:px-8 pt-20 pb-12 sm:pt-28 sm:pb-16">
         <div className="grid lg:grid-cols-[1fr_400px] gap-12 lg:gap-20">
           <div>
-            <SectionRail index="00" label="Buyer's guide" />
+            <SectionRail index="00" label="Free checklist" />
             <h1 className="mt-6 font-display text-5xl sm:text-6xl lg:text-7xl leading-[1.05] tracking-[-0.025em] text-foreground">
-              The AI Implementation Buyer's Guide.
+              The AI Operating System Map.
             </h1>
             <p className="mt-8 text-lg sm:text-xl text-muted-foreground leading-[1.65] max-w-2xl">
-              What production AI actually costs, how to evaluate vendors, and
-              when not to install AI at all. Written by the team installing it
-              under PEPFAR rules, IRB review, and the kind of audits where the
-              answer matters.
+              A practical checklist for finding where AI should touch your company first:
+              sales, operations, knowledge, customer communication, reporting, or the
+              handoffs where work keeps getting lost.
             </p>
             <p className="mt-6 text-base text-muted-foreground leading-[1.7] max-w-2xl">
-              Vendor-agnostic. Free to read. Use it to evaluate any vendor —
-              us included.
+              Use it before a call with us, before a call with another vendor, or before
+              your team spends another month experimenting with disconnected tools.
             </p>
           </div>
 
           {/* Form */}
           <aside className="border border-border bg-card p-7 self-start">
             <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground mb-6">
-              Get the guide
+              Get the map
             </p>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
@@ -177,8 +176,8 @@ export default function LeadMagnetPage() {
                 {submitState === "submitting"
                   ? "Sending…"
                   : submitState === "success"
-                  ? "Opening guide…"
-                  : "Read the guide"}
+                  ? "Opening map…"
+                  : "Get the checklist"}
                 {submitState === "idle" && (
                   <ArrowRight className="ml-2 h-3.5 w-3.5" />
                 )}
@@ -193,7 +192,7 @@ export default function LeadMagnetPage() {
                 </p>
               )}
               <p className="text-xs text-muted-foreground leading-[1.6] pt-2">
-                We deliver the guide immediately — no waiting for an email. By
+                We deliver the map immediately — no waiting for an email. By
                 submitting you agree to our{" "}
                 <Link href="/privacy" className="underline hover:no-underline">
                   privacy policy
@@ -209,7 +208,7 @@ export default function LeadMagnetPage() {
                 href={GUIDE_HREF}
                 className="text-sm text-foreground hover:text-primary inline-flex items-center"
               >
-                Read it without subscribing
+                Read the full buyer's guide too
                 <ArrowRight className="ml-2 h-3 w-3" />
               </Link>
             </div>
@@ -252,19 +251,17 @@ export default function LeadMagnetPage() {
             <SectionRail index="—" label="Why we wrote it" />
             <div className="max-w-2xl">
               <h3 className="text-2xl sm:text-3xl lg:text-4xl font-semibold leading-[1.15] tracking-[-0.02em] text-foreground mb-6">
-                The same conversations keep repeating on our own sales calls.
+                Most companies do not need a chatbot. They need a map.
               </h3>
               <p className="text-base text-muted-foreground leading-[1.7] mb-6">
-                Operators come in quoted by a freelancer at $5K, by a Big Four
-                at $200K, by us at $75K — for what looks like the same SOW.
-                They want to know what's real. This guide is what's real, with
-                the parts that hurt us included.
+                The first mistake is usually picking a tool before naming the operating
+                surface. This checklist helps a business owner, operator, or executive
+                see the company clearly enough to choose the first workflow on purpose.
               </p>
               <p className="text-base text-muted-foreground leading-[1.7]">
-                If reading it lands you somewhere other than an engagement
-                with us — including "you don't need AI yet" — that's the right
-                outcome. We'd rather refer you out than sell you something
-                you don't need.
+                If it leads to a full AI operating-system conversation, good. If it only
+                helps you clean up follow-up, proposals, service, or reporting, that is
+                still useful work.
               </p>
             </div>
           </div>

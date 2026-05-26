@@ -17,6 +17,9 @@ import { PublicMobileNav } from "@/components/layout/PublicMobileNav";
 
 // Industries dropdown — links into existing /solutions/* pages
 const SOLUTION_LINKS: { label: string; href: string; group: string }[] = [
+  { label: "Furniture / FF&E", href: "/solutions/furniture-ff-e", group: "Operating" },
+  { label: "Local Business", href: "/solutions/local-business", group: "Operating" },
+  { label: "Professional Services", href: "/solutions/professional-services", group: "Operating" },
   { label: "Healthcare", href: "/solutions/healthcare", group: "Service" },
   { label: "Non-Profits", href: "/solutions/non-profits", group: "Service" },
   { label: "Education", href: "/solutions/education", group: "Service" },
@@ -201,6 +204,10 @@ export function Navbar() {
 
           <Link href="/compare" className="hidden 2xl:inline-flex text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
             Compare
+          </Link>
+
+          <Link href="/lead-magnet" className="hidden xl:inline-flex text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
+            AI OS Map
           </Link>
 
           <Link href="/about" className="hidden xl:inline-flex text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">

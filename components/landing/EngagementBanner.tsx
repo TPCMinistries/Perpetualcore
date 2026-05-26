@@ -23,14 +23,14 @@ export function EngagementBanner() {
           <p className="text-sm text-foreground">
             <span className="font-medium">Looking for an engagement?</span>{" "}
             <span className="text-muted-foreground">
-              Perpetual Core engagements start at $75,000.
+              Map the company first, then choose the strongest workflow to install.
             </span>
           </p>
           <Link
-            href="/studio/engagements"
+            href="/contact-sales"
             className="text-sm font-medium text-primary hover:underline inline-flex items-center gap-1 whitespace-nowrap"
           >
-            See engagements <ArrowRight className="h-3.5 w-3.5" />
+            Map the system <ArrowRight className="h-3.5 w-3.5" />
           </Link>
         </div>
       </div>

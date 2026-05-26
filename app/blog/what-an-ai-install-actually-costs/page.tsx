@@ -16,7 +16,7 @@ import { breadcrumbSchema } from "@/lib/seo/structured-data";
 import { NewsletterCapture } from "@/components/landing/NewsletterCapture";
 
 const POST_TITLE = "What an AI install actually costs";
-const POST_SUBTITLE = "And why we price engagements at $75,000";
+const POST_SUBTITLE = "The hidden work behind a durable AI operating-system install";
 const POST_DATE = "2026-05-20";
 const POST_AUTHOR = "Lorenzo Daughtry-Chambers";
 const READ_MINUTES = 6;
@@ -24,7 +24,7 @@ const READ_MINUTES = 6;
 export const metadata = {
   title: `${POST_TITLE} — Notes from Perpetual Core`,
   description:
-    "An honest breakdown of what production AI implementation costs — vendor subscriptions, engineering time, integration debt, the part nobody quotes. Why our engagements start at $75,000.",
+    "An honest breakdown of what production AI implementation costs — vendor subscriptions, engineering time, integration debt, the part nobody quotes. ",
   openGraph: {
     type: "article",
     title: POST_TITLE,
@@ -189,26 +189,14 @@ export default function PostPage() {
           <h2>The honest total</h2>
 
           <p>
-            Add it up: $75K–$250K to ship one meaningful AI install to
-            production at a real organization, the first time. The next install
+            Add it up: a meaningful AI install requires budget, owner attention, integration time, and a real adoption plan. The next install
             is cheaper because the integration debt and outcome-eval scaffolding
             carries over. But the first one — the one that proves AI works in
-            your operations — is between $75K and $250K of total ownership cost
-            in year one.
+            your operations — is a real operating investment, not a prompt exercise.
           </p>
 
           <p>
-            That's where our pricing comes from. Our engagement bands are{" "}
-            <Link href="/studio/engagements" className="text-foreground underline hover:no-underline">
-              $75K, $150K, and $250K
-            </Link>
-            . Not because the labor costs us $75K — it doesn't — but because
-            that's the floor at which we can ship the four buckets above and
-            have anything left to fund the Institute (
-            <Link href="/engine" className="text-foreground underline hover:no-underline">
-              10% of every engagement
-            </Link>
-            ).
+            That's where our pricing comes from. That is why we scope around the operating surface first. The question is not just what can be automated; it is what has to be installed, owned, measured, and expanded.
           </p>
 
           <h2>What about the $99/month plan?</h2>
@@ -250,7 +238,7 @@ export default function PostPage() {
             board meeting.
           </p>
 
-          <h2>How to spend less than $75K</h2>
+          <h2>How to start smaller</h2>
 
           <p>
             Honestly: don't hire anyone yet. Run a discovery first. We sell{" "}
@@ -268,8 +256,7 @@ export default function PostPage() {
           <h2>The bottom line</h2>
 
           <p>
-            Production AI at an organizational layer costs $75K–$250K in year
-            one, regardless of who you hire. The variable is who pockets the
+            Production AI at an organizational layer is not a weekend tool setup. The variable is who pockets the
             margin: us, an SI, a freelancer, or your existing team's time.
             Pick the route that matches how you want to spend the next 90 days.
           </p>
@@ -315,8 +302,7 @@ export default function PostPage() {
               Want it priced for your operation?
             </h3>
             <p className="text-base text-muted-foreground leading-[1.7] mb-10">
-              Two-week Atlas Discovery from $5K, or full engagement from $75K.
-              Either way, we start with a real conversation — not a deck.
+              Start with the operating map. If the first wedge is clear, we scope the system around it.
             </p>
             <div className="flex flex-wrap gap-3 justify-center">
               <Button asChild className="text-sm font-medium h-10 px-5 shadow-none bg-foreground text-background hover:bg-foreground/90 rounded-[6px]">

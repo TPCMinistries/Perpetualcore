@@ -104,6 +104,18 @@ export function PublicMobileNav() {
               <Link href="/solutions" onClick={close} className="block px-4 py-2.5 text-sm text-muted-foreground hover:text-foreground hover:bg-accent rounded-sm transition-colors">
                 Industries
               </Link>
+              <Link href="/solutions/furniture-ff-e" onClick={close} className="block px-4 py-2.5 text-sm text-muted-foreground hover:text-foreground hover:bg-accent rounded-sm transition-colors">
+                Furniture / FF&E
+              </Link>
+              <Link href="/solutions/local-business" onClick={close} className="block px-4 py-2.5 text-sm text-muted-foreground hover:text-foreground hover:bg-accent rounded-sm transition-colors">
+                Local Business
+              </Link>
+              <Link href="/solutions/professional-services" onClick={close} className="block px-4 py-2.5 text-sm text-muted-foreground hover:text-foreground hover:bg-accent rounded-sm transition-colors">
+                Professional Services
+              </Link>
+              <Link href="/lead-magnet" onClick={close} className="block px-4 py-2.5 text-sm text-muted-foreground hover:text-foreground hover:bg-accent rounded-sm transition-colors">
+                AI OS Map
+              </Link>
               <Link href="/pricing" onClick={close} className="block px-4 py-2.5 text-sm text-muted-foreground hover:text-foreground hover:bg-accent rounded-sm transition-colors">
                 Pricing
               </Link>
