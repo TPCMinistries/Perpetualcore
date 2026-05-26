@@ -1,24 +1,25 @@
 "use client";
 
 /**
- * Exit-intent modal — fires when the cursor leaves the viewport through
- * the top edge (the standard signal for desktop visitors about to switch
- * tabs or close). Single-firing per visitor via localStorage. Touch
- * devices never trigger this (no mouseleave-top semantics on mobile).
+ * AI OS Map capture — appears only after meaningful engagement: scroll depth,
+ * time on page, or desktop exit intent. Single-firing per visitor via
+ * localStorage.
  *
  * Gated to a small set of marketing surfaces (home, pricing, products,
  * studio, solutions). Skipped entirely on /dashboard, /auth, /admin,
  * checkout flows — anywhere a popup would interrupt actual work.
  *
- * Captures email via /api/leads/capture with source=exit_intent.
+ * Captures email via /api/leads/capture with source=ai_os_map_prompt.
  */
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
 
-const STORAGE_KEY = "pc_exit_intent_seen";
+const STORAGE_KEY = "pc_ai_os_map_prompt_seen";
 const TRIGGER_PATHS = ["/", "/pricing", "/products", "/studio", "/solutions"];
-const DELAY_BEFORE_ARMING_MS = 8000; // don't fire on instant bounces
+const TIME_TRIGGER_MS = 42000;
+const EXIT_ARMING_DELAY_MS = 8000;
+const SCROLL_TRIGGER_RATIO = 0.52;
 
 type State = "idle" | "open" | "submitting" | "success" | "error" | "dismissed";
 
@@ -30,31 +31,57 @@ export function ExitIntent() {
   const [state, setState] = useState<State>("idle");
   const [firstName, setFirstName] = useState("");
   const [email, setEmail] = useState("");
+  const [company, setCompany] = useState("");
 
   useEffect(() => {
     if (typeof window === "undefined") return;
     if (!pathMatchesTrigger(window.location.pathname)) return;
     if (window.localStorage.getItem(STORAGE_KEY)) return;
-    // Skip on touch devices — mouseleave doesn't carry the same intent
-    if (window.matchMedia("(pointer: coarse)").matches) return;
 
-    let armed = false;
-    const armTimer = window.setTimeout(() => {
-      armed = true;
-    }, DELAY_BEFORE_ARMING_MS);
+    let exitArmed = false;
+    let opened = false;
 
-    const onMouseLeave = (e: MouseEvent) => {
-      if (!armed) return;
-      // Only fire when leaving through the TOP edge
-      if (e.clientY > 0) return;
+    const openPrompt = () => {
+      if (opened) return;
+      opened = true;
       window.localStorage.setItem(STORAGE_KEY, "1");
       setState("open");
+      window.removeEventListener("scroll", onScroll);
       document.removeEventListener("mouseleave", onMouseLeave);
+      window.clearTimeout(timeTimer);
+      window.clearTimeout(exitArmTimer);
     };
 
-    document.addEventListener("mouseleave", onMouseLeave);
+    const onScroll = () => {
+      const scrollable = document.documentElement.scrollHeight - window.innerHeight;
+      if (scrollable <= 0) return;
+      const ratio = window.scrollY / scrollable;
+      if (ratio >= SCROLL_TRIGGER_RATIO) openPrompt();
+    };
+
+    const onMouseLeave = (e: MouseEvent) => {
+      if (!exitArmed) return;
+      // Only fire when leaving through the TOP edge
+      if (e.clientY > 0) return;
+      openPrompt();
+    };
+
+    const timeTimer = window.setTimeout(openPrompt, TIME_TRIGGER_MS);
+    const exitArmTimer = window.setTimeout(() => {
+      exitArmed = true;
+    }, EXIT_ARMING_DELAY_MS);
+
+    window.addEventListener("scroll", onScroll, { passive: true });
+    // Touch devices do not have useful mouseleave-top semantics, but they can
+    // still trigger by scroll depth or time on page.
+    if (!window.matchMedia("(pointer: coarse)").matches) {
+      document.addEventListener("mouseleave", onMouseLeave);
+    }
+
     return () => {
-      window.clearTimeout(armTimer);
+      window.clearTimeout(timeTimer);
+      window.clearTimeout(exitArmTimer);
+      window.removeEventListener("scroll", onScroll);
       document.removeEventListener("mouseleave", onMouseLeave);
     };
   }, []);
@@ -70,8 +97,14 @@ export function ExitIntent() {
         body: JSON.stringify({
           firstName: firstName.trim(),
           email: email.trim().toLowerCase(),
-          source: "exit_intent",
-          metadata: { path: window.location.pathname },
+          company: company.trim() || undefined,
+          source: "ai_os_map_prompt",
+          leadMagnet: "ai_os_map",
+          metadata: {
+            magnet: "ai-operating-system-map",
+            path: window.location.pathname,
+            prompt: "engagement-triggered",
+          },
         }),
       });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
@@ -108,40 +141,49 @@ export function ExitIntent() {
         {state === "success" ? (
           <>
             <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-emerald-600 mb-3">
-              Got it
+              Sent
             </p>
             <h2
               id="exit-intent-heading"
               className="text-2xl font-semibold tracking-[-0.015em] text-foreground mb-3"
             >
-              You're on the list.
+              The map is yours.
             </h2>
             <p className="text-sm text-muted-foreground leading-[1.65] mb-6">
-              First dispatch lands in your inbox shortly. We write about AI
-              installs that actually move the metric — not vendor demos.
+              I sent the AI Operating System Map to your inbox. You can also
+              open the buyer's guide now and use it before a call.
             </p>
-            <button
-              type="button"
-              onClick={dismiss}
-              className="h-10 px-5 bg-foreground text-background text-sm font-medium hover:bg-foreground/90 transition rounded-[6px]"
-            >
-              Keep reading
-            </button>
+            <div className="flex flex-col sm:flex-row gap-3">
+              <Link
+                href="/guide/ai-implementation-buyers-guide"
+                className="h-10 px-5 bg-foreground text-background text-sm font-medium hover:bg-foreground/90 transition rounded-[6px] inline-flex items-center justify-center"
+              >
+                Open the guide
+              </Link>
+              <button
+                type="button"
+                onClick={dismiss}
+                className="h-10 px-5 border border-border text-foreground text-sm font-medium hover:bg-accent transition rounded-[6px]"
+              >
+                Keep reading
+              </button>
+            </div>
           </>
         ) : (
           <>
             <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground mb-3">
-              Before you go
+              Free operating map
             </p>
             <h2
               id="exit-intent-heading"
               className="text-2xl font-semibold tracking-[-0.015em] text-foreground mb-3"
             >
-              Get notes from the operating layer.
+              Get the AI Operating System Map.
             </h2>
             <p className="text-sm text-muted-foreground leading-[1.65] mb-6">
-              Occasional dispatches on AI installs, the Engine commitment, what
-              we're shipping. Written by Lorenzo. Unsubscribe any time.
+              See where AI should enter your company first across sales,
+              operations, knowledge, customer communication, and leadership
+              visibility.
             </p>
             <form onSubmit={handleSubmit} className="space-y-3">
               <input
@@ -162,12 +204,20 @@ export function ExitIntent() {
                 autoComplete="email"
                 className="w-full h-11 px-4 bg-background border border-border text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-foreground transition rounded-[6px]"
               />
+              <input
+                type="text"
+                value={company}
+                onChange={(e) => setCompany(e.target.value)}
+                placeholder="Company (optional)"
+                autoComplete="organization"
+                className="w-full h-11 px-4 bg-background border border-border text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-foreground transition rounded-[6px]"
+              />
               <button
                 type="submit"
                 disabled={state === "submitting"}
                 className="w-full h-11 px-5 bg-foreground text-background text-sm font-medium hover:bg-foreground/90 transition disabled:opacity-60 rounded-[6px]"
               >
-                {state === "submitting" ? "Sending…" : "Subscribe"}
+                {state === "submitting" ? "Sending…" : "Send me the map"}
               </button>
               {state === "error" && (
                 <p className="text-xs text-red-500">
@@ -175,8 +225,8 @@ export function ExitIntent() {
                 </p>
               )}
               <p className="text-xs text-muted-foreground text-center pt-2">
-                <Link href="/blog" className="underline hover:no-underline">
-                  Read past notes
+                <Link href="/lead-magnet" className="underline hover:no-underline">
+                  Preview what is inside
                 </Link>{" "}
                 ·{" "}
                 <button
