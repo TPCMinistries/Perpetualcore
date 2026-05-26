@@ -25,7 +25,7 @@ export const NurtureDay2: React.FC<NurtureDay2Props> = ({ firstName }) => (
         <Heading style={h1}>Hi {firstName},</Heading>
 
         <Text style={text}>
-          Yesterday, you downloaded our AI Productivity Guide. I hope you found it valuable!
+          Yesterday, you downloaded the AI Operating System Map. I hope it gave you a clearer view of where AI should enter the company first.
         </Text>
 
         <Text style={text}>

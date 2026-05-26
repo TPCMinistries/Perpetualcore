@@ -42,13 +42,13 @@ export async function GET(request: NextRequest) {
         // Replace template variables in subject
         const subject = emailData.subject
           .replace("{FIRST_NAME}", emailData.lead_first_name || "there")
-          .replace("{LEAD_MAGNET_NAME}", "AI Productivity Guide");
+          .replace("{LEAD_MAGNET_NAME}", "AI Operating System Map");
 
         // Render email template using React email templates
         const html = await renderEmailTemplate(emailData.email_template, {
           firstName: emailData.lead_first_name || "there",
-          leadMagnetName: "AI Productivity Guide",
-          leadMagnetUrl: `${process.env.NEXT_PUBLIC_APP_URL}/downloads/ai-productivity-guide.pdf`,
+          leadMagnetName: "AI Operating System Map",
+          leadMagnetUrl: `${process.env.NEXT_PUBLIC_APP_URL}/guide/ai-implementation-buyers-guide`,
         });
 
         // Send email using professional template

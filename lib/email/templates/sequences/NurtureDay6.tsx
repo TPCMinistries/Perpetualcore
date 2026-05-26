@@ -31,7 +31,7 @@ export const NurtureDay6: React.FC<NurtureDay6Props> = ({ firstName }) => (
         </Text>
 
         <Section style={recapBox}>
-          <Text style={recapItem}>✓ The AI Productivity Guide</Text>
+          <Text style={recapItem}>✓ The AI Operating System Map</Text>
           <Text style={recapItem}>✓ Common AI mistakes to avoid</Text>
           <Text style={recapItem}>✓ Real case studies with proven results</Text>
           <Text style={recapItem}>✓ 30-Day Implementation Roadmap</Text>

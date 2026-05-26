@@ -21,8 +21,8 @@ interface TemplateData {
 const templateMap: Record<string, (data: TemplateData) => React.ReactElement> = {
   nurture_day_1: (data) => NurtureDay1({
     firstName: data.firstName,
-    leadMagnetName: data.leadMagnetName || "AI Productivity Guide",
-    leadMagnetUrl: data.leadMagnetUrl || `${process.env.NEXT_PUBLIC_APP_URL}/downloads/ai-productivity-guide.pdf`,
+    leadMagnetName: data.leadMagnetName || "AI Operating System Map",
+    leadMagnetUrl: data.leadMagnetUrl || `${process.env.NEXT_PUBLIC_APP_URL}/guide/ai-implementation-buyers-guide`,
   }),
   nurture_day_2: (data) => NurtureDay2({ firstName: data.firstName }),
   nurture_day_3: (data) => NurtureDay3({ firstName: data.firstName }),
