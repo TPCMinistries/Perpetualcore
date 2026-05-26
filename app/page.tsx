@@ -1,9 +1,9 @@
 /**
  * Perpetual Core homepage
  *
- * Direction: institutional venture studio, not generic SaaS. The page should
- * read like an operating memo: clear thesis, visible architecture, commercial
- * paths, product proof, mission commitment, and one clean next step.
+ * Direction: practical AI operating-system implementation first. The venture
+ * studio and Perpetual Engine are the deeper credibility layer, not the first
+ * thing a buyer has to decode.
  */
 
 import Link from "next/link";
@@ -16,38 +16,38 @@ import { Reveal } from "@/components/landing/Reveal";
 import { PageViewTracker } from "@/components/analytics/PageViewTracker";
 
 export const metadata = {
-  title: "Perpetual Core - Venture studio attached to the Perpetual Engine",
+  title: "Perpetual Core - AI operating systems for complex companies",
   description:
-    "Perpetual Core is a first-of-its-kind AI venture studio powered by the Perpetual Engine. We build, install, and scale AI-native operating systems, products, and ventures for mission-driven institutions.",
+    "Perpetual Core installs AI operating systems across sales, operations, knowledge, customer communication, and executive visibility for growing companies and mission-driven institutions.",
 };
 
 const ARMS = [
   {
     index: "01",
     name: "Studio",
-    summary: "Finds one high-value workflow, installs the operating layer, and expands only when the work proves it.",
-    meta: "Wedge to system",
+    summary: "Maps the company, installs the first operating layer, trains the team, and expands across the business.",
+    meta: "Implementation",
     href: "/studio",
   },
   {
     index: "02",
     name: "Products",
-    summary: "Entry points into the Engine: diligence, RFPs, knowledge, hiring, personal OS, and team operations.",
-    meta: "Front doors",
+    summary: "Specific tools for diligence, proposals, knowledge, hiring, sales support, and team operations.",
+    meta: "Specific jobs",
     href: "/products",
   },
   {
     index: "03",
     name: "Fund",
-    summary: "DeepFutures backs the AI-native companies that emerge from repeatable operating patterns.",
-    meta: "Venture path",
+    summary: "DeepFutures backs venture-shaped patterns that emerge from repeatable operating-system work.",
+    meta: "Scale path",
     href: "/fund",
   },
   {
     index: "04",
     name: "Institute",
-    summary: "IHA trains the founders, operators, and workforce communities who should own the AI shift.",
-    meta: "501(c)(3)",
+    summary: "IHA trains the founders, operators, and workforce communities who should own this AI shift.",
+    meta: "Mission layer",
     href: "/institute",
   },
 ] as const;
@@ -64,16 +64,16 @@ const PRODUCTS = [
 ] as const;
 
 const PHASES = [
-  { step: "Learn", body: "Read the organization through calls, docs, voice notes, channels, constraints, and decision paths." },
-  { step: "Wire", body: "Install the registries: entities, people, projects, work items, knowledge, agents, workflows, and events." },
-  { step: "Automate", body: "Build skills and workflows against live work, not imagined demos." },
-  { step: "Scale", body: "Document, train, evaluate outcomes, and hand the operating layer to the team." },
+  { step: "Map", body: "Understand sales, operations, knowledge, projects, customers, data, and the handoffs where work gets stuck." },
+  { step: "Install", body: "Build the first AI operating layer against live work, not a demo disconnected from the business." },
+  { step: "Train", body: "Put the system into team rituals: intake, follow-up, proposals, reporting, service, and decision review." },
+  { step: "Expand", body: "Move from the first high-leverage workflow into the full company operating system." },
 ];
 
 const ENGINE_STATS = [
-  { value: "$3,000+", label: "Engagement contribution to IHA" },
-  { value: "$25,000+", label: "Upper contribution on large installs" },
-  { value: "10-15%", label: "Of every revenue dollar" },
+  { value: "Sales", label: "Follow-up, proposals, pipeline, and reactivation" },
+  { value: "Ops", label: "Projects, handoffs, delivery, service, and exceptions" },
+  { value: "Intel", label: "Knowledge, reporting, dashboards, and decisions" },
 ];
 
 const INSTITUTE_PROGRAMS = [
@@ -87,8 +87,8 @@ const FIELD_NOTES = [
   {
     index: "001",
     date: "2026-05-22",
-    title: "How to start before a full Engine install.",
-    summary: "The practical path from a scoped studio sprint into a larger operating-system install.",
+    title: "How to start before a full company-wide install.",
+    summary: "Use one workflow as the wedge, then expand into the operating system when the proof is there.",
     href: "/studio/retainers",
   },
   {
@@ -110,15 +110,15 @@ const FIELD_NOTES = [
 const INVITATION_ROWS = [
   {
     tag: "Organizations",
-    title: "Install the Engine in the work you already run.",
-    body: "For institutions ready to make AI part of operations, governance, knowledge, and delivery.",
-    cta: "Start intake",
-    href: "/studio/engagements",
+    title: "Install AI across the company you already run.",
+    body: "For businesses ready to modernize sales, operations, knowledge, customer communication, and reporting.",
+    cta: "Map the system",
+    href: "/contact-sales",
   },
   {
     tag: "Operators",
-    title: "Adopt a product before you need the full studio.",
-    body: "Use the portfolio where a focused product solves the immediate job.",
+    title: "Use a product when the job is already clear.",
+    body: "Start with RFPs, diligence, knowledge, hiring, team operations, or a focused AI assistant.",
     cta: "View products",
     href: "/products",
   },
@@ -244,13 +244,13 @@ export default function HomePage() {
                 <p className="eyebrow !text-white/70">Perpetual Core · Engine reference studio</p>
               </div>
               <h1 className="display-hero text-[52px] sm:text-[76px] lg:text-[112px] text-white leading-[0.95] mb-10 max-w-5xl">
-                The venture studio attached to the{" "}
-                <span className="italic text-gradient">Perpetual Engine.</span>
+                Install an AI operating system{" "}
+                <span className="italic text-gradient">inside your company.</span>
               </h1>
               <p className="text-lg sm:text-xl text-white/72 leading-[1.55] max-w-3xl mb-10">
-                Start with a product, a workflow, or a venture thesis. We turn the repeatable parts
-                into AI-native operating systems, then into products and companies when the pattern
-                deserves to scale.
+                Perpetual Core helps growing companies turn sales, operations, knowledge,
+                customer communication, and leadership reporting into AI-enabled systems. We start
+                where the fastest measurable win lives, then expand across the business.
               </p>
               <div className="flex flex-col sm:flex-row items-start gap-4">
                 <Button
@@ -259,14 +259,14 @@ export default function HomePage() {
                   className="h-12 px-7 rounded-[6px] bg-[#26f2a8] text-[#05060b] shadow-[0_0_32px_rgba(38,242,168,0.22)] hover:bg-[#7dffd0]"
                 >
                   <Link href="/contact-sales">
-                    Map the first workflow <ArrowRight className="ml-2 h-4 w-4" />
+                    Map my AI operating system <ArrowRight className="ml-2 h-4 w-4" />
                   </Link>
                 </Button>
                 <Link
-                  href="/products"
+                  href="/studio"
                   className="inline-flex items-center py-3 text-sm font-medium text-white border-b border-white/25 hover:border-[#00d4ff] hover:text-[#00d4ff] transition-colors"
                 >
-                  View the products <ArrowRight className="ml-2 h-3.5 w-3.5" />
+                  See studio services <ArrowRight className="ml-2 h-3.5 w-3.5" />
                 </Link>
               </div>
             </div>
@@ -274,21 +274,22 @@ export default function HomePage() {
             <aside className="border border-white/15 bg-white/[0.06] backdrop-blur-xl shadow-[0_20px_80px_rgba(0,0,0,0.28)]">
               <div className="p-6 border-b border-white/15">
                 <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-[#00d4ff] mb-4">
-                  Operating status
+                  What we install
                 </p>
                 <p className="text-2xl font-semibold tracking-[-0.02em] text-white mb-3">
-                  First reference implementation.
+                  Whole-company AI infrastructure.
                 </p>
                 <p className="text-sm text-white/62 leading-[1.65]">
-                  A product-and-studio system for moving AI from scattered pilots into operating workflows.
+                  Not random tools. A practical operating layer across the places where revenue,
+                  customers, projects, people, and decisions already move.
                 </p>
               </div>
               <div className="divide-y divide-white/12">
                 {[
-                  ["Best first step", "One workflow"],
-                  ["Product front doors", "8 live/build"],
-                  ["Mission commitment", "10-15%"],
-                  ["Venture path", "Build / back / scale"],
+                  ["For larger companies", "System install"],
+                  ["For smaller companies", "Practical AI ops"],
+                  ["First wedge", "Fastest measurable win"],
+                  ["Scale path", "Department → company"],
                 ].map(([label, value]) => (
                   <div key={label} className="flex items-baseline justify-between gap-4 px-6 py-4">
                     <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-white/45">{label}</span>
@@ -319,18 +320,33 @@ export default function HomePage() {
       <Reveal as="section" className="border-b border-border bg-[#f5f7ff]">
         <div className="container mx-auto px-6 sm:px-8 py-20 sm:py-24">
           <div className="grid lg:grid-cols-[280px_1fr] gap-12 lg:gap-20 items-start">
-            <SectionRail index="01" label="Architecture" />
+            <SectionRail index="01" label="Who this is for" />
             <div>
               <div className="max-w-3xl mb-10">
                 <h2 className="font-display text-4xl sm:text-5xl lg:text-6xl font-normal tracking-[-0.025em] leading-[1.02] text-foreground mb-6">
-                  Four commercial arms, one structural substrate.
+                  Built for companies with real moving parts.
                 </h2>
                 <p className="text-base sm:text-lg text-muted-foreground leading-[1.65]">
-                  The Engine is not a slogan. It is the registry, workflow, agent, and mission-funding layer that every arm shares.
+                  Regional companies, project-based businesses, family-owned operators, professional services firms,
+                  nonprofits, and institutions all share the same problem: knowledge, customers, projects, and decisions
+                  move through too many disconnected places.
                 </p>
               </div>
-              <div className="border border-[#d9ddff] bg-background p-5 sm:p-10 shadow-[0_24px_80px_rgba(75,53,255,0.08)]">
-                <EngineArchitecture />
+              <div className="grid md:grid-cols-2 gap-px bg-[#d9ddff] border border-[#d9ddff] shadow-[0_24px_80px_rgba(75,53,255,0.08)]">
+                {[
+                  ["Complex regional companies", "For businesses coordinating customers, vendors, salespeople, project managers, inventory, delivery, service, and leadership reporting."],
+                  ["Owner-led smaller companies", "For founders and operators who need to sell more, respond faster, organize knowledge, and stop losing work in the cracks."],
+                  ["Project-based teams", "For companies where every win creates handoffs: proposal, scope, vendor coordination, client updates, delivery, and follow-up."],
+                  ["Mission institutions", "For teams that need AI capability with real governance, human context, and durable operating discipline."],
+                ].map(([title, body]) => (
+                  <div key={title} className="bg-background p-6 sm:p-7">
+                    <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-primary mb-4">
+                      Fit
+                    </p>
+                    <h3 className="text-xl font-semibold tracking-[-0.015em] text-foreground mb-3">{title}</h3>
+                    <p className="text-sm text-muted-foreground leading-[1.65]">{body}</p>
+                  </div>
+                ))}
               </div>
             </div>
           </div>
@@ -340,17 +356,17 @@ export default function HomePage() {
       <Reveal as="section" className="border-b border-border">
         <div className="container mx-auto px-6 sm:px-8 py-20 sm:py-28">
           <div className="grid lg:grid-cols-[280px_1fr] gap-12 lg:gap-20">
-            <SectionRail index="02" label="How we work" />
+            <SectionRail index="02" label="Where AI goes" />
             <div>
               <h2 className="font-display text-4xl sm:text-5xl lg:text-6xl font-normal tracking-[-0.025em] leading-[1.02] text-foreground mb-10 max-w-3xl">
-                The offer is a ladder, not a wall.
+                We install AI where the business actually runs.
               </h2>
               <div className="border-y border-border">
                 {[
-                  ["Use", "Product", "When the job is already clear: diligence, RFPs, knowledge, hiring, personal OS, or team operations.", "/products", "#4b35ff"],
-                  ["Operate", "Retainer", "When your team needs managed AI operations around a recurring lane.", "/studio/retainers", "#00a8ff"],
-                  ["Install", "Studio Sprint", "When one workflow needs to move from manual process to working operating layer.", "/studio/engagements", "#12b981"],
-                  ["Scale", "Engine / Venture", "When the pattern repeats enough to become a full install, a product, or a venture.", "/contact-sales", "#26f2a8"],
+                  ["Sales", "Pipeline & follow-up", "Lead response, account notes, proposals, quote drafts, reactivation, handoff to operations, and sales coaching.", "/contact-sales", "#4b35ff"],
+                  ["Operations", "Projects & delivery", "Project coordination, service issues, vendor handoffs, delivery exceptions, internal requests, and team accountability.", "/contact-sales", "#00a8ff"],
+                  ["Knowledge", "Company memory", "Product/vendor knowledge, policies, call notes, SOPs, customer context, onboarding, and searchable institutional memory.", "/products/vellum", "#12b981"],
+                  ["Leadership", "Visibility & decisions", "Dashboards, operating reviews, decision logs, risk signals, bottlenecks, and what needs executive attention.", "/studio", "#26f2a8"],
                 ].map(([stage, type, body, href, color]) => (
                   <Link
                     key={stage}
@@ -384,16 +400,16 @@ export default function HomePage() {
       <Reveal as="section" className="border-b border-border bg-[#fbfcff]">
         <div className="container mx-auto px-6 sm:px-8 py-20 sm:py-28">
           <div className="grid lg:grid-cols-[280px_1fr] gap-12 lg:gap-20">
-            <SectionRail index="03" label="Portfolio proof" />
+            <SectionRail index="03" label="How it starts" />
             <div>
               <div className="max-w-3xl mb-12">
                 <h2 className="font-display text-4xl sm:text-5xl lg:text-6xl font-normal tracking-[-0.025em] leading-[1.02] text-foreground mb-6">
-                  Products are the front doors into the studio.
+                  Start focused. Keep the full system in view.
                 </h2>
                 <p className="text-base sm:text-lg text-muted-foreground leading-[1.65]">
-                  A buyer should not need a full engagement just to touch the Engine. The portfolio
-                  lets operators start with one concrete job, then move into studio work when the
-                  product reveals a larger operating pattern.
+                  A company-wide AI operating system is the destination. The smartest first move is
+                  usually the highest-leverage workflow: the place where speed, quality, revenue, or
+                  visibility improves fast enough for the team to believe.
                 </p>
               </div>
               <div className="grid md:grid-cols-2 gap-px bg-border border border-border shadow-[0_18px_60px_rgba(10,12,24,0.06)]">
@@ -434,15 +450,16 @@ export default function HomePage() {
           <div className="grid lg:grid-cols-[280px_1fr] gap-12 lg:gap-20">
             <div>
               <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-white/45 mb-3">§ 04</p>
-              <h2 className="text-xs uppercase tracking-[0.18em] font-mono text-white">Mission floor</h2>
+              <h2 className="text-xs uppercase tracking-[0.18em] font-mono text-white">The deeper layer</h2>
             </div>
             <div>
               <h2 className="display-hero text-[40px] sm:text-[58px] lg:text-[82px] leading-[1] text-white mb-10 max-w-4xl">
-                The Engine turns revenue into institutional capacity.
+                The Perpetual Engine is the structure behind the work.
               </h2>
               <p className="text-base sm:text-lg text-white/65 leading-[1.7] max-w-3xl mb-12">
-                10-15% of every revenue dollar funds the Institute for Human Advancement. It is not a campaign or a pledge.
-                It is a structural line item that makes the mission harder to forget as the company scales.
+                The homepage sells the practical business outcome first: install AI into the company.
+                Underneath that, the Engine gives the work a repeatable architecture for systems,
+                products, ventures, and mission capacity.
               </p>
               <div className="grid sm:grid-cols-3 border border-white/15 divide-y sm:divide-y-0 sm:divide-x divide-white/15 mb-12">
                 {ENGINE_STATS.map((stat) => (
@@ -517,21 +534,22 @@ export default function HomePage() {
             <SectionRail index="06" label="Start" />
             <div className="max-w-3xl">
               <h2 className="font-display text-4xl sm:text-5xl lg:text-6xl font-normal tracking-[-0.025em] leading-[1.02] text-foreground mb-6">
-                Start with the wedge.
+                Map the operating system.
               </h2>
               <p className="text-base sm:text-lg text-muted-foreground leading-[1.65] mb-10">
-                The best first conversation is not “what package do you want?” It is “which workflow
-                is expensive, recurring, and ready to become software?”
+                The first conversation is not “what package do you want?” It is “where does the
+                company lose time, customers, knowledge, visibility, or follow-through?” From there,
+                we identify the first wedge and the larger system it should grow into.
               </p>
               <div className="flex flex-col sm:flex-row items-start gap-4">
                 <Button asChild size="lg" className="h-11 px-7 rounded-[6px] bg-primary text-primary-foreground shadow-[0_14px_42px_rgba(75,53,255,0.22)] hover:bg-[#3324d9]">
                   <Link href="/contact-sales">
-                    Map the first workflow <ArrowRight className="ml-2 h-4 w-4" />
+                    Map my AI operating system <ArrowRight className="ml-2 h-4 w-4" />
                   </Link>
                 </Button>
                 <Button asChild size="lg" variant="outline" className="h-11 px-7 rounded-[6px] shadow-none">
-                  <Link href="/products">
-                    View products <ArrowUpRight className="ml-2 h-4 w-4" />
+                  <Link href="/studio">
+                    See studio services <ArrowUpRight className="ml-2 h-4 w-4" />
                   </Link>
                 </Button>
               </div>

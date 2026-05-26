@@ -32,11 +32,10 @@ import { toast } from "sonner";
 type SubmitState = "idle" | "submitting" | "success" | "error";
 
 const PLAN_OPTIONS = [
-  { value: "studio-sprint-30", label: "Scoped studio engagement — $30K+" },
-  { value: "engine-engagement-75", label: "Larger Engine install" },
-  { value: "engine-engagement-150", label: "Operations Engine install — $150K" },
-  { value: "engine-engagement-250", label: "Institutional Engine install — $250K+" },
-  { value: "studio-retainer", label: "Studio retainer — $5K–$15K/mo" },
+  { value: "company-ai-os", label: "Company-wide AI operating system" },
+  { value: "department-ai-os", label: "Department or operating unit install" },
+  { value: "studio-sprint-30", label: "First workflow / proof-of-value sprint" },
+  { value: "studio-retainer", label: "Ongoing AI operating partner" },
   { value: "product-subscription", label: "Product subscription or team product" },
   { value: "venture-partner", label: "Venture, fund, or ecosystem partnership" },
   { value: "institute-partner", label: "Institute / mission partnership" },
@@ -90,7 +89,7 @@ function ContactSalesForm() {
     company: "",
     phone: "",
     employees: "",
-    plan: planFromUrl || "studio-sprint-30",
+    plan: planFromUrl || "company-ai-os",
     product: productFromUrl,
     message: "",
   });
@@ -152,16 +151,16 @@ function ContactSalesForm() {
       {/* Hero */}
       <section className="container mx-auto px-6 sm:px-8 pt-20 pb-12 sm:pt-28 sm:pb-16">
         <div className="grid lg:grid-cols-[280px_1fr] gap-12 lg:gap-20">
-            <SectionRail index="00" label="Start with the studio" />
+            <SectionRail index="00" label="Map the operating system" />
           <div className="max-w-3xl">
             <h1 className="font-display text-5xl sm:text-6xl lg:text-7xl leading-[1.05] tracking-[-0.025em] text-foreground">
-              Tell us what the Engine needs to touch.
+              Tell us where AI needs to touch the company.
             </h1>
             <p className="mt-8 text-lg sm:text-xl text-muted-foreground leading-[1.65] max-w-2xl">
-              Perpetual Core is the venture studio attached to the Perpetual Engine.
-              Scoped studio engagements can start around $30,000 when the problem is
-              focused. Larger Engine installs are available when the operating surface
-              is broader.
+              Perpetual Core installs AI operating systems across sales, operations,
+              knowledge, customer communication, and leadership visibility. We can start
+              with one high-leverage workflow, but we scope it with the larger company
+              system in view.
               {productFromUrl && (
                 <>
                   {" "}
@@ -290,7 +289,7 @@ function ContactSalesForm() {
                   rows={5}
                   value={formData.message}
                   onChange={(e) => handleChange("message", e.target.value)}
-                  placeholder="What workflows, departments, data, decisions, or revenue constraints need the Engine? What has been tried?"
+                  placeholder="What departments, workflows, customers, data, handoffs, reports, or revenue constraints need AI support? What has been tried?"
                 />
               </div>
 
@@ -299,7 +298,7 @@ function ContactSalesForm() {
                 disabled={submitState === "submitting"}
                 className="text-sm font-medium h-11 px-6 shadow-none bg-foreground text-background hover:bg-foreground/90 rounded-[6px]"
               >
-                {submitState === "submitting" ? "Sending…" : "Start Studio Intake"}
+                {submitState === "submitting" ? "Sending…" : "Map My AI Operating System"}
                 {submitState !== "submitting" && (
                   <ArrowRight className="ml-2 h-3.5 w-3.5" />
                 )}
@@ -360,14 +359,15 @@ function ContactSalesForm() {
             <SectionRail index="—" label="Engagement essentials" />
             <div className="max-w-3xl grid sm:grid-cols-2 gap-x-10 gap-y-6">
               {[
-                "Venture studio partner on point",
+                "AI operating partner on point",
+                "Company map before build",
+                "First workflow selected for measurable business value",
+                "Expansion path across departments",
                 "Outcome-eval scope written before build",
                 "SSO/SAML and SOC 2 process",
                 "HIPAA, IRB, and GDPR-equivalent handling",
                 "Audit log on every model call",
                 "10-15% of every dollar funds the Institute",
-                "Stripe, ACH, or wire — net 30 standard",
-                "Cancellable post-engagement retainers",
               ].map((item) => (
                 <div key={item} className="flex items-start gap-3">
                   <Check className="h-4 w-4 text-foreground mt-0.5 flex-shrink-0" />
@@ -397,9 +397,8 @@ export default function ContactSalesPage() {
         data={serviceSchema({
           name: "AI Implementation Engagement",
           description:
-            "Production AI installs for mission-driven organizations. Scoped studio engagements start around $30,000.",
+            "AI operating-system implementation for growing companies and mission-driven organizations.",
           category: "AI Implementation Services",
-          priceFrom: "30000",
         })}
       />
       <Navbar />

@@ -32,10 +32,10 @@ const SOLUTION_LINKS: { label: string; href: string; group: string }[] = [
 ];
 
 const STUDIO_LINKS = [
-  { label: "Retainers", href: "/studio/retainers", description: "$5K–$15K/mo · Productized programs" },
-  { label: "Engagements", href: "/studio/engagements", description: "$30K+ · Scoped studio work to full Engine installs" },
-  { label: "Methodology", href: "/studio/methodology", description: "Learn → Wire → Automate → Scale" },
-  { label: "Process", href: "/studio/process", description: "Day 1 to Month 6 timeline" },
+  { label: "Retainers", href: "/studio/retainers", description: "Ongoing AI operating partner" },
+  { label: "Engagements", href: "/studio/engagements", description: "From first workflow to full company install" },
+  { label: "Methodology", href: "/studio/methodology", description: "Map → Install → Train → Expand" },
+  { label: "Process", href: "/studio/process", description: "How the operating system comes online" },
   { label: "Case Studies", href: "/studio/case-studies", description: "Abstracted to sector and constraint" },
 ];
 
@@ -199,10 +199,6 @@ export function Navbar() {
             </DropdownPanel>
           </div>
 
-          <Link href="/pricing" className="hidden xl:inline-flex text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
-            Pricing
-          </Link>
-
           <Link href="/compare" className="hidden 2xl:inline-flex text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
             Compare
           </Link>
@@ -221,7 +217,7 @@ export function Navbar() {
             size="sm"
             className="text-sm px-5 h-9 shadow-none bg-primary text-primary-foreground hover:bg-[#3324d9]"
           >
-            <Link href="/studio/engagements">Start</Link>
+            <Link href="/contact-sales">Start</Link>
           </Button>
         </div>
 
@@ -232,7 +228,7 @@ export function Navbar() {
             asChild
             className="h-9 px-4 text-sm font-medium shadow-none bg-primary text-primary-foreground hover:bg-[#3324d9]"
           >
-            <Link href="/studio/engagements">Studio</Link>
+            <Link href="/contact-sales">Start</Link>
           </Button>
         </div>
       </div>

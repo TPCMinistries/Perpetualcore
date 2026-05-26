@@ -15,21 +15,21 @@ import { Footer } from "@/components/landing/Footer";
 export const metadata = {
   title: "Studio — Perpetual Core",
   description:
-    "The venture studio attached to the Perpetual Engine. Start with one workflow, operate the lane, install the system, then scale the pattern into products and ventures.",
+    "Perpetual Core installs AI operating systems across sales, operations, knowledge, customer communication, and leadership visibility.",
 };
 
 const BUYERS = [
   {
-    title: "Operators with one painful workflow.",
-    body: "The best buyers can name the recurring process that is slow, expensive, messy, and important enough to fix.",
+    title: "Regional companies with complex operations.",
+    body: "They coordinate customers, vendors, projects, delivery, service, sales, and reporting across too many disconnected systems.",
+  },
+  {
+    title: "Owner-led companies ready to modernize.",
+    body: "They do not need another app. They need sales, operations, knowledge, and follow-through to become cleaner and more intelligent.",
   },
   {
     title: "Leaders stuck between pilots and production.",
-    body: "They have tried tools. They need an operating lane that someone owns, measures, improves, and hands over.",
-  },
-  {
-    title: "Funds and portfolio operators.",
-    body: "They need diligence, portfolio operations, knowledge, and reporting workflows to become repeatable assets.",
+    body: "They have tried tools. They need an operating layer that someone owns, measures, improves, and expands.",
   },
   {
     title: "Foundations and mission institutions.",
@@ -87,18 +87,19 @@ export default function StudioOverviewPage() {
           </div>
 
           <h1 className="display-hero text-[40px] sm:text-[56px] lg:text-[76px] text-foreground mb-12 max-w-5xl leading-[1.05]">
-            Start with the workflow.{" "}
-            <span className="italic text-foreground/85">Scale what repeats.</span>
+            Install AI into the company.{" "}
+            <span className="italic text-foreground/85">Start where value appears fastest.</span>
           </h1>
 
           <div className="space-y-5 text-lg sm:text-xl text-muted-foreground leading-[1.55] mb-12 max-w-3xl">
             <p>
-              The Studio is how Perpetual Core turns AI from scattered tool use into operating
-              workflows, then into products and ventures when the pattern deserves to scale.
+              The Studio is how Perpetual Core becomes the AI implementation partner for a company:
+              mapping the business, installing practical AI systems, training the team, and expanding
+              across sales, operations, knowledge, customer communication, and leadership visibility.
             </p>
             <p>
-              Products are the front doors. Retainers run recurring lanes. Studio sprints install
-              one workflow. Larger Engine work scales the system when the proof is there.
+              We often begin with the workflow that creates the fastest measurable win. That is the
+              wedge, not the ceiling. The larger aim is a durable AI operating system.
             </p>
           </div>
 
@@ -116,7 +117,7 @@ export default function StudioOverviewPage() {
               href="/contact-sales"
               className="inline-flex items-center text-sm font-medium text-foreground hover:text-primary transition-colors py-3 border-b border-foreground/20 hover:border-primary"
             >
-              Map the first workflow <ArrowRight className="ml-1.5 h-3.5 w-3.5" />
+              Map my AI operating system <ArrowRight className="ml-1.5 h-3.5 w-3.5" />
             </Link>
           </div>
         </div>
@@ -129,11 +130,11 @@ export default function StudioOverviewPage() {
             <SectionRail index="—" label="The spectrum" />
             <div className="max-w-2xl">
               <h3 className="text-3xl sm:text-4xl lg:text-5xl font-semibold leading-[1.1] tracking-[-0.025em] text-foreground mb-6">
-                Use · Operate · Install · Scale.
+                Map · Install · Train · Expand.
               </h3>
               <p className="text-base text-muted-foreground leading-[1.7]">
-                The Studio is not a menu of consulting packages. It is a ladder for turning one
-                expensive recurring workflow into a managed lane, a working install, or a venture.
+                The Studio is not a menu of small automations. It is the implementation path from
+                one high-value entry point into a company-wide AI operating system.
               </p>
             </div>
           </div>
@@ -157,7 +158,7 @@ export default function StudioOverviewPage() {
                 Products let the buyer touch the Engine before a studio engagement.
               </p>
               <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-foreground mt-auto">
-                $0 → $249/mo
+                Use when the job is specific
               </p>
             </Link>
 
@@ -179,7 +180,7 @@ export default function StudioOverviewPage() {
                 people, or operator support. Cancellable monthly.
               </p>
               <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-foreground mt-auto">
-                $5K → $15K/mo
+                Use when the lane needs an owner
               </p>
             </Link>
 
@@ -201,17 +202,16 @@ export default function StudioOverviewPage() {
                 the pattern across departments when the proof is there.
               </p>
               <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-foreground mt-auto">
-                $30K → $250K+
+                Use when the system must be installed
               </p>
             </Link>
           </div>
 
           <div className="mt-10 max-w-3xl">
             <p className="text-sm text-muted-foreground leading-[1.7] italic">
-              Most orgs cross bands over time. A product subscription becomes a retainer when the
-              work scales. A retainer rolls into an engagement when the org commits to installing
-              the substrate. We discuss credit toward engagement scope case-by-case when you make
-              that move.
+              Most companies should not try to transform every department on day one. We pick the
+              strongest entry point, prove value quickly, and expand with the whole operating system
+              in view.
             </p>
           </div>
         </div>
