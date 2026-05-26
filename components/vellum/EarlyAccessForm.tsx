@@ -3,8 +3,8 @@
 /**
  * EarlyAccessForm — Vellum by Perpetual Core early-access waitlist form.
  *
- * Four-tier capture: Free / Operator $49/mo / Team $249/mo / Institution.
- * - Free: skips Stripe, persists email-only via /api/early-access.
+ * Four-tier capture: Trial / Operator $299/mo / Team $1,500/mo / Institution.
+ * - Trial: skips Stripe, persists email-only via /api/early-access.
  * - Operator + Team: creates Stripe setup_intent via /api/vellum/setup-intent,
  *   collects payment method via Stripe Elements (no charge today).
  * - Institution: persists signup, routes to /contact-sales?product=vellum-institution.
@@ -17,9 +17,8 @@
  * The useEffect on mount reads ?confirmed=1 + sessionStorage PENDING_SIGNUP_KEY and
  * calls persistSignup. Test signup #6 exercises this path.
  *
- * Pricing locked per BRAND_ARCHITECTURE.md §8 (Lorenzo's locks, 2026-05-10).
- * 30% mission-driven discount locked per same §8 lock — do NOT change the number
- * without an explicit Lorenzo decision checkpoint.
+ * Pricing checkpoint updated with Lorenzo on 2026-05-26.
+ * 30% mission-driven discount remains locked per BRAND_ARCHITECTURE.md §8.
  *
  * Plan 12-05 / STUDIO-VW-01.
  */
@@ -49,8 +48,7 @@ const PENDING_SIGNUP_KEY = "vellum-pending-signup-v1";
 
 type Tier = "free" | "operator" | "team" | "institution";
 
-// Tier definitions — locked per BRAND_ARCHITECTURE.md §8 (2026-05-10).
-// Do NOT alter prices or feature copy without a Lorenzo pricing checkpoint.
+// Tier definitions — pricing checkpoint updated with Lorenzo on 2026-05-26.
 const TIERS: Array<{
   id: Tier;
   label: string;
@@ -60,7 +58,7 @@ const TIERS: Array<{
 }> = [
   {
     id: "free",
-    label: "Free",
+    label: "Trial",
     price: "$0",
     blurb: "1 user, 100 sources, basic synthesis.",
     needsPayment: false,
@@ -68,15 +66,15 @@ const TIERS: Array<{
   {
     id: "operator",
     label: "Operator",
-    price: "$49/month",
+    price: "$299/month",
     blurb: "Unlimited sources, voice + channels, 30-day retention.",
     needsPayment: true,
   },
   {
     id: "team",
     label: "Team",
-    price: "$249/month",
-    blurb: "5 users, all integrations, 1-year retention.",
+    price: "$1,500/month",
+    blurb: "Up to 10 users, core integrations, onboarding, 1-year retention.",
     needsPayment: true,
   },
   {
@@ -372,11 +370,11 @@ export function EarlyAccessForm() {
           <p className="text-2xl font-semibold mb-3">You&apos;re on the list.</p>
           <p className="text-muted-foreground">
             {state.tier === "free" &&
-              "We'll email when free-tier accounts open."}
+              "We'll email when trial accounts open."}
             {state.tier === "operator" &&
-              "We've held a spot at the $49/month Operator tier — no charge until you confirm."}
+              "We've held a spot at the $299/month Operator tier — no charge until you confirm."}
             {state.tier === "team" &&
-              "We've held a spot at the $249/month Team tier — no charge until you confirm."}
+              "We've held a spot at the $1,500/month Team tier — no charge until you confirm."}
             {state.tier === "institution" &&
               "We'll reach out within five business days."}
           </p>

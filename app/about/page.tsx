@@ -56,7 +56,7 @@ const ECOSYSTEM = [
 const PRINCIPLES = [
   {
     title: "We take a limited number of engagements per quarter.",
-    body: "Engagements start at $75,000. Retainer $5,000–$15,000/month, scoped to engagement. Capacity is the bottleneck, not lead flow.",
+    body: "Product pilots start small, managed lanes run $5,000–$35,000/month, and studio installs start around $30,000. Capacity is the bottleneck, not lead flow.",
   },
   {
     title: "We don't write decks.",

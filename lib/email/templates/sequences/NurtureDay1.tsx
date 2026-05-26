@@ -139,7 +139,7 @@ export const NurtureDay1: React.FC<NurtureDay1Props> = ({
               <a href={`${SITE_BASE}/products/atlas-discovery`}>
                 Atlas Discovery
               </a>{" "}
-              is — $5K–$15K, two weeks, a real document your CFO can co-sign.
+              is — from $25K, two to three weeks, a real document your CFO can co-sign.
               The discovery fee credits back if you proceed to a full
               engagement.
             </p>

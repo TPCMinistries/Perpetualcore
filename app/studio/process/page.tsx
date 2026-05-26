@@ -21,7 +21,7 @@ const TIMELINE = [
   { week: "Week 7–14", title: "Skills build", body: "Production skills built against the workflows the audit identified. Weekly demos. Pull the plug at any phase boundary." },
   { week: "Week 15–20", title: "Training and handover", body: "Your team operates the system in production. We sit in. We coach. The skills library has 15–30 working units by handover." },
   { week: "Week 21–24", title: "Post-handover", body: "We're available, not embedded. Your team runs the system. We show up for the questions that don't have obvious answers." },
-  { week: "Month 7+", title: "Retainer (optional)", body: "$5,000–$15,000/month, scoped to engagement. We stay close on what you build next. Cancellable any month." },
+  { week: "Month 7+", title: "Retainer (optional)", body: "$5,000–$35,000/month, scoped to engagement. We stay close on what you build next. Cancellable any month." },
 ];
 
 function SectionRail({ index, label }: { index: string; label: string }) {

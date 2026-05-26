@@ -1,6 +1,6 @@
 /**
  * /products/vellum — Vellum by Perpetual Core: institutional memory.
- * Free / $49 Operator / $249 Team / Institution. 30% mission discount.
+ * Free trial / $299 Operator / $1,500 Team / Institution. 30% mission discount.
  * Visual register matches homepage v6. EarlyAccessForm preserved.
  */
 
@@ -17,20 +17,20 @@ import { PC_PRODUCTS } from "@/lib/seo/products";
 export const metadata = {
   title: "Vellum by Perpetual Core — institutional memory",
   description:
-    "Institutional memory for organizations. Calls, docs, voice notes, channels — one queryable mind. Free / $49 Operator / $249 Team / Institution. 30% mission-driven discount for verified 501(c)(3)s.",
+    "Institutional memory for organizations. Calls, docs, voice notes, channels — one queryable mind. Free trial / $299 Operator / $1,500 Team / Institution. 30% mission-driven discount for verified 501(c)(3)s.",
 };
 
 const PRICING_TIERS = [
   {
-    name: "Free",
+    name: "Trial",
     price: "$0",
     cadence: null,
-    body: "1 user, 100 sources, basic synthesis. The on-ramp — bring a small corpus, see if Vellum thinks the way your team thinks.",
+    body: "1 user, 100 sources, basic synthesis. The on-ramp — bring a small corpus, see if Vellum thinks the way your team thinks before you connect the real institution.",
     discountEligible: false,
   },
   {
     name: "Operator",
-    price: "$49",
+    price: "$299",
     cadence: "/month",
     body: "1 user, unlimited sources, voice + channels, 30-day retention. The single-operator tier — built for the founder, ED, or program lead who carries the org's memory.",
     discountEligible: true,
@@ -38,9 +38,9 @@ const PRICING_TIERS = [
   },
   {
     name: "Team",
-    price: "$249",
+    price: "$1,500",
     cadence: "/month",
-    body: "5 users, all channels + integrations, 1-year retention. The small-team tier — shared memory across an executive team without paying for 100 Glean seats.",
+    body: "Up to 10 users, core integrations, 1-year retention, and onboarding. The team tier — shared memory across an executive or program team without turning knowledge work into another unpaid admin job.",
     discountEligible: true,
   },
   {
@@ -189,7 +189,7 @@ export default function VellumPage() {
             <SectionRail index="03" label="Pricing" />
             <div className="max-w-2xl">
               <h3 className="text-3xl sm:text-4xl lg:text-5xl font-semibold leading-[1.1] tracking-[-0.025em] text-foreground mb-6">
-                Free / $49 / $249 / Contact.
+                Trial / $299 / $1,500 / Contact.
               </h3>
               <p className="text-base text-muted-foreground leading-[1.7]">
                 30% mission-driven discount on Operator and Team for verified 501(c)(3)s. Applied
@@ -296,7 +296,7 @@ export default function VellumPage() {
               </h3>
               <p className="text-base text-muted-foreground leading-[1.7] mb-10">
                 If your organization wants the full eight-registry Engine installed — not just the
-                Knowledge surface — that&apos;s an engagement. Engagements start at $75,000. Vellum
+                Knowledge surface — that&apos;s an engagement. Knowledge installs start around $75,000. Vellum
                 subscribers who outgrow the SaaS tier get an introduction to the studio process;
                 we don&apos;t double-charge for what you&apos;ve already paid for.
               </p>

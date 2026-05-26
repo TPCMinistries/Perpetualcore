@@ -83,7 +83,7 @@ export const NurtureDay6: React.FC<NurtureDay6Props> = ({ firstName }) => (
           </Text>
           <Text style={pathTextHighlight}>
             <strong>Implementation:</strong> 2 weeks to full deployment<br />
-            <strong>Cost:</strong> Starting at $99/month (replaces 5+ tools)
+            <strong>Cost:</strong> Product pilots from $499/month; managed implementation scoped separately
           </Text>
         </Section>
 

@@ -20,9 +20,9 @@ function getTierBody(tier: VellumEarlyAccessEmailProps["tierPreference"]): strin
     case "free":
       return "You're set. We'll email when free-tier accounts open.";
     case "operator":
-      return "We've held a spot for the $49/month Operator tier. We'll reach out when invitations go out — no charge until you confirm.";
+      return "We've held a spot for the $299/month Operator tier. We'll reach out when invitations go out — no charge until you confirm.";
     case "team":
-      return "We've held a spot for the $249/month Team tier. We'll reach out when invitations go out — no charge until you confirm.";
+      return "We've held a spot for the $1,500/month Team tier. We'll reach out when invitations go out — no charge until you confirm.";
     case "institution":
       return "We'll reach out within five business days to scope an Institution tier engagement.";
     default:

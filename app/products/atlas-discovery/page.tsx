@@ -1,5 +1,5 @@
 /**
- * /products/atlas-discovery — Atlas Discovery, productized $5K-$15K audit.
+ * /products/atlas-discovery — Atlas Discovery, productized $25K+ audit.
  * Form payload + dual-write pattern preserved per STUDIO-AD-01.
  * Visual register matches homepage v6.
  */
@@ -41,8 +41,8 @@ const FAQ = [
     a: "Two weeks. Week 1 is in-operations work — sitting in calls, reading docs, mapping workflows. Week 2 is synthesis — ranking the install candidates and writing the outcome-eval scope and contract framework. We hand over a written deliverable; no PowerPoint.",
   },
   {
-    q: "What's the difference between $5K and $15K?",
-    a: "Scope. The $5K floor is one portco, one workflow cluster, one outcome-eval scope. The $15K ceiling is fund-wide — multiple portcos, the install-prioritization playbook your OP team uses across the portfolio. Most engagements land in the $7,500–$10,000 band.",
+    q: "What's the difference between $25K and a larger Discovery scope?",
+    a: "Scope. The $25K floor is one portco, one workflow cluster, and one outcome-eval scope. Larger scopes cover multiple portcos, deeper systems review, or the install-prioritization playbook your OP team uses across the portfolio. Most serious fund conversations should start at $25K, not $5K.",
   },
   {
     q: "Is the Discovery fee credited toward a full engagement?",
@@ -177,7 +177,7 @@ export default function AtlasDiscoveryPage() {
             <SectionRail index="01" label="Pricing" />
             <div className="max-w-2xl">
               <h3 className="text-3xl sm:text-4xl lg:text-5xl font-semibold leading-[1.1] tracking-[-0.025em] text-foreground mb-6">
-                $5,000–$15,000. 2–3 weeks. Audit is yours either way.
+                From $25,000. 2–3 weeks. Audit is yours either way.
               </h3>
               <p className="text-base text-muted-foreground leading-[1.7]">
                 Scoped to portco size and operational complexity. We tell you the band on the
@@ -190,7 +190,7 @@ export default function AtlasDiscoveryPage() {
             <div />
             <div className="max-w-3xl border border-border bg-card p-8 sm:p-10">
               <p className="text-5xl font-semibold tracking-[-0.025em] text-foreground mb-3">
-                $5,000 – $15,000
+                $25,000+
               </p>
               <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground mb-8">
                 One-time · 2–3 week diagnostic

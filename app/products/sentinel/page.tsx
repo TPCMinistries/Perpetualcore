@@ -16,7 +16,7 @@ import { PC_PRODUCTS } from "@/lib/seo/products";
 export const metadata = {
   title: "Sentinel — Perpetual Core",
   description:
-    "Due diligence and intel for the people Kroll won't take calls from. Live at sentinel.perpetualcore.com. Pay-per-vet, or hire as a $5K/mo retainer.",
+    "Due diligence and intel for the people Kroll won't take calls from. Live at sentinel.perpetualcore.com. Pay-per-vet, or hire as a scoped managed diligence lane.",
 };
 
 const CAPABILITIES = [
@@ -182,11 +182,11 @@ export default function SentinelPage() {
                   Retainer
                 </p>
                 <p className="text-xl font-semibold tracking-[-0.015em] text-foreground mb-2">
-                  Sentinel on Retainer — $5K/mo
+                  Sentinel on Retainer — $5K-$20K/mo
                 </p>
                 <p className="text-sm text-muted-foreground leading-[1.65] mb-6 flex-1">
-                  Unlimited vets per month, 48-hour SLA, production Sentinel run for one
-                  organization on a monthly subscription. For teams running ongoing DD volume.
+                  Scoped recurring vets, 48-hour SLA options, and production Sentinel run for one
+                  organization on a monthly lane. For teams running ongoing DD volume.
                 </p>
                 <span className="inline-flex items-center text-xs font-medium text-foreground group-hover:text-primary transition-colors mt-auto">
                   See Retainers <ArrowRight className="ml-1 h-3 w-3" />

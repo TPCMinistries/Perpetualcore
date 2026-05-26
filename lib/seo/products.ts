@@ -24,7 +24,7 @@ export const PC_PRODUCTS: Record<string, ProductManifestEntry> = {
     slug: "atlas-discovery",
     name: "Atlas Discovery",
     description:
-      "Productized $5K–$15K AI operational audit. Two-week deliverable: operational map, AI opportunity ranking, outcome-eval scope, OP + CFO co-signed contract framing.",
+      "Productized $25K+ AI operational audit. Two-week deliverable: operational map, AI opportunity ranking, outcome-eval scope, OP + CFO co-signed contract framing.",
     category: "BusinessApplication",
     status: "live",
   },
@@ -32,7 +32,7 @@ export const PC_PRODUCTS: Record<string, ProductManifestEntry> = {
     slug: "sentinel",
     name: "Sentinel",
     description:
-      "Due diligence and intel for the people Kroll won't take calls from. Open-source intelligence, adverse-media synthesis, sanctions checks. Pay-per-vet or $5K/mo retainer.",
+      "Due diligence and intel for the people Kroll won't take calls from. Open-source intelligence, adverse-media synthesis, sanctions checks. Pay-per-vet or managed diligence lane.",
     category: "BusinessApplication",
     status: "live",
   },
@@ -48,7 +48,7 @@ export const PC_PRODUCTS: Record<string, ProductManifestEntry> = {
     slug: "vellum",
     name: "Vellum",
     description:
-      "Institutional memory for organizations. Calls, docs, voice notes, channels — one queryable mind. Free / $49 Operator / $249 Team / Institution. 30% mission-driven discount for verified 501(c)(3)s.",
+      "Institutional memory for organizations. Calls, docs, voice notes, channels — one queryable mind. Trial / $299 Operator / $1,500 Team / Institution. 30% mission-driven discount for verified 501(c)(3)s.",
     category: "BusinessApplication",
     status: "invite",
   },

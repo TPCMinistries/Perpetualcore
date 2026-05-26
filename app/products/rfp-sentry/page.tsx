@@ -112,7 +112,7 @@ export default function RfpSentryPage() {
               <Link href="#early-list">Join the early list <ArrowRight className="ml-2 h-4 w-4" /></Link>
             </Button>
             <Link href="/studio/retainers" className="inline-flex items-center text-sm font-medium text-foreground hover:text-primary transition-colors py-3 border-b border-foreground/20 hover:border-primary">
-              Or hire Capture Pipeline ($7.5K/mo) <ArrowRight className="ml-1.5 h-3.5 w-3.5" />
+              Or hire Capture Pipeline ($7.5K-$35K/mo) <ArrowRight className="ml-1.5 h-3.5 w-3.5" />
             </Link>
           </div>
         </div>
@@ -256,7 +256,7 @@ export default function RfpSentryPage() {
               <p className="text-base text-muted-foreground leading-[1.7] mb-10">
                 Sister products on purpose. RFP Engine is live; RFP Sentry is the missing front
                 half of the same workflow. Use Engine now; subscribe to the early list for Sentry.
-                Or hire both as a managed Capture Pipeline retainer ($7.5K/mo).
+                Or hire both as a managed Capture Pipeline retainer ($7.5K-$35K/mo).
               </p>
               <div className="flex flex-col sm:flex-row items-start gap-5">
                 <Button asChild className="text-sm font-medium h-10 px-5 shadow-none bg-foreground text-background hover:bg-foreground/90 rounded-[6px]">

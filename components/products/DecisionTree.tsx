@@ -87,7 +87,7 @@ const TREE: Branch = {
                 productCode: "01a",
                 href: "/products/atlas-discovery",
                 rationale:
-                  "Two-week paid discovery: $5K-$15K, real document your CFO can co-sign, outcome-eval scope. Credits back if you proceed to a $75K+ engagement. The honest way to start.",
+                  "Paid discovery from $25K, real document your CFO can co-sign, outcome-eval scope. Credits can apply if you proceed to a larger Atlas install. The honest way to start.",
                 alsoConsider: [{ name: "Read the buyer's guide", href: "/guide/ai-implementation-buyers-guide" }],
               },
             },

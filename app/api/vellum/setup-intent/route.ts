@@ -3,7 +3,7 @@
  * paid-tier preference capture.
  *
  * Used by /products/vellum waitlist form (Plan 12-05) when a user picks
- * Operator ($49/mo) or Team ($249/mo) tier preference. Captures payment
+ * Operator ($299/mo) or Team ($1,500/mo) tier preference. Captures payment
  * method without charging. The setup_intent ID is then attached to the
  * vellum_early_access row via /api/early-access (setup_intent_id field).
  *

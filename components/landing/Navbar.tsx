@@ -210,6 +210,10 @@ export function Navbar() {
             AI OS Map
           </Link>
 
+          <Link href="/packages" className="hidden xl:inline-flex text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
+            Packages
+          </Link>
+
           <Link href="/about" className="hidden xl:inline-flex text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
             About
           </Link>

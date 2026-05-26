@@ -68,7 +68,7 @@ const PRODUCTS: Product[] = [
     statusColor: "live",
     headline: "Team workspace where staff, interns, and clients run agent-augmented Flows.",
     body:
-      "For teams that operate across Sage, Atlas, Sentinel, RFP Engine, and Janice — one workspace where Projects hold Flows, and Flows orchestrate every PC product. Sage thinks; Atelier makes. Built internal-first for Uplift Communities and IHA program staff. Self-serve from $99/month.",
+      "For teams that operate across Sage, Atlas, Sentinel, RFP Engine, and Janice — one workspace where Projects hold Flows, and Flows orchestrate every PC product. Sage thinks; Atelier makes. Built internal-first for Uplift Communities and IHA program staff. Product-led pilots start around $1,500/month.",
     cta: { label: "Visit Atelier", href: "https://atelier.perpetualcore.com", external: true },
   },
   {
@@ -79,7 +79,7 @@ const PRODUCTS: Product[] = [
     headline: "Institutional knowledge for organizations.",
     body:
       "For executive directors, founders, and program directors whose calls, docs, voice notes, and Slack channels need to be one queryable archive — not seventeen disconnected sources. 30% mission-driven discount on Operator and Team for verified 501(c)(3)s.",
-    pricing: "Free / $49 Operator / $249 Team / Institution Contact",
+    pricing: "Free trial / $299 Operator / $1,500 Team / Institution Contact",
     cta: { label: "See Vellum", href: "/products/vellum" },
   },
   {
@@ -109,7 +109,7 @@ const PRODUCTS: Product[] = [
     statusColor: "live",
     headline: "Hiring and onboarding OS for people-heavy orgs.",
     body:
-      "For nonprofits, agencies, and ecosystem operators running candidates, interns, staff, and partners through one shared lifecycle — templated intake, e-signature, per-person vaults, multi-tenant by default. Built internal-first for Uplift's intern pipeline and IHA's program staff; productized for external sale. Self-serve from $79/month with a 60-day pilot.",
+      "For nonprofits, agencies, and ecosystem operators running candidates, interns, staff, and partners through one shared lifecycle — templated intake, e-signature, per-person vaults, multi-tenant by default. Built internal-first for Uplift's intern pipeline and IHA's program staff; productized pilots start around $499/month.",
     cta: { label: "Visit Janice", href: "https://janice.perpetualcore.com", external: true },
   },
 ];

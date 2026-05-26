@@ -22,6 +22,9 @@ const CRISP_PATHS_TO_HIDE = [
   "/auth",
   "/login",
   "/signup",
+  "/pricing",
+  "/packages",
+  "/checkout",
 ];
 
 declare global {

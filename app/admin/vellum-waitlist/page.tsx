@@ -52,9 +52,9 @@ function tierLabel(tier: string | null): string {
     case "free":
       return "Free";
     case "operator":
-      return "Operator $49";
+      return "Operator $299";
     case "team":
-      return "Team $249";
+      return "Team $1,500";
     case "institution":
       return "Institution";
     default:

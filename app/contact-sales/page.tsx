@@ -32,6 +32,8 @@ import { toast } from "sonner";
 type SubmitState = "idle" | "submitting" | "success" | "error";
 
 const PLAN_OPTIONS = [
+  { value: "guided-setup", label: "Guided setup package" },
+  { value: "first-workflow", label: "First workflow package" },
   { value: "company-ai-os", label: "Company-wide AI operating system" },
   { value: "department-ai-os", label: "Department or operating unit install" },
   { value: "studio-sprint-30", label: "First workflow / proof-of-value sprint" },

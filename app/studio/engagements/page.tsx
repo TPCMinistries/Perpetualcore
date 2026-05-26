@@ -13,30 +13,30 @@ import { Footer } from "@/components/landing/Footer";
 export const metadata = {
   title: "Engagements — Perpetual Core",
   description:
-    "Scoped studio engagements start around $30,000 and can expand into full Perpetual Engine installs across your operations. Documented, trained, handed over.",
+    "Scoped studio engagements start around $30,000 and can expand into $150K-$500K+ Perpetual Engine installs across your operations. Documented, trained, handed over.",
 };
 
 const BANDS = [
   {
     index: "01",
     name: "Studio Sprint",
-    price: "$30,000+",
+    price: "$30K-$75K",
     duration: "6-8 weeks · One operating surface",
     body: "A focused engagement around one high-value workflow: intake, capture, reporting, diligence, onboarding, or knowledge operations. Built to prove the operating case before a larger install.",
     featured: true,
   },
   {
     index: "02",
-    name: "Engine Install",
-    price: "Custom",
+    name: "Department OS",
+    price: "$75K-$150K",
     duration: "90-150 days · Department or cross-department",
     body: "Eight-registry install across the operating surface. AI-First Framework applied end-to-end. Skills library populated with production workflows.",
     featured: false,
   },
   {
     index: "03",
-    name: "Institutional",
-    price: "$250,000+",
+    name: "Engine Install",
+    price: "$150K-$500K+",
     duration: "180 days · Whole-org",
     body: "Engine installed at the operating-system layer. Custom skills, multi-tenant configuration, training cohort for your operators. Includes 90 days of post-handover support.",
     featured: false,
@@ -49,7 +49,7 @@ const ARC = [
   { week: "Week 7–14", title: "Skills build", body: "Production skills built against the workflows the audit identified. Weekly demos. Pull the plug at any phase boundary." },
   { week: "Week 15–20", title: "Training and handover", body: "Your team operates the system in production. We coach. The skills library has 15–30 working units by handover." },
   { week: "Week 21–24", title: "Post-handover", body: "We're available, not embedded. Your team runs the system. We show up for the questions that don't have obvious answers." },
-  { week: "Month 7+", title: "Retainer (optional)", body: "$5,000–$15,000/month, scoped to engagement. We stay close on what you build next. Cancellable any month." },
+  { week: "Month 7+", title: "Retainer (optional)", body: "$5,000–$35,000/month, scoped to engagement. We stay close on what you build next. Cancellable any month." },
 ];
 
 const INCLUDED = [
@@ -105,7 +105,7 @@ export default function StudioEngagementsPage() {
               >
                 Retainers
               </Link>{" "}
-              — productized programs at $5K–$15K/mo that roll into an engagement when the work
+              — productized programs at $5K–$35K/mo that roll into an engagement when the work
               scales.
             </p>
           </div>
@@ -196,7 +196,7 @@ export default function StudioEngagementsPage() {
               </p>
             </div>
             <p className="text-sm text-muted-foreground leading-[1.65]">
-              <span className="text-foreground font-medium">$5,000–$15,000/month</span>, scoped to
+              <span className="text-foreground font-medium">$5,000–$35,000/month</span>, scoped to
               engagement. For operators who&apos;d rather we stay in the loop on what comes next.
               Cancellable any month. We don&apos;t need it; you might.
             </p>

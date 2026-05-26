@@ -200,7 +200,7 @@ export default function AtlasPage() {
                 Not ready for the full install? Start with Atlas Discovery.
               </h3>
               <p className="text-base text-muted-foreground leading-[1.7] mb-10">
-                Atlas Discovery is a 2–3 week productized audit — $5,000 to $15,000 — that maps
+                Atlas Discovery is a 2–3 week productized audit from $25,000 that maps
                 the portco&apos;s operations, ranks AI opportunities, and produces an OP + CFO
                 co-signable contract framework. Most funds start there before a full install.
               </p>

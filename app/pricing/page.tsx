@@ -1,143 +1,193 @@
-"use client";
-
 /**
- * /pricing — unified commercial page across the Engine spectrum.
+ * /pricing — commercial architecture for the Perpetual Engine.
  *
- * Bands:
- *   1. Products ($0 / $49 / $99) — Stripe checkout preserved
- *   2. Retainers ($5K–$15K/mo productized) — link to /studio/retainers
- *   3. Engagements ($30K+ scoped work to $250K+ installs) — link to /studio/engagements
- *
- * Stripe checkout flow + billing-interval toggle preserved from prior version.
- * Visual register matches homepage v6.
+ * Pricing is intentionally split by buyer intent:
+ *   1. Product surfaces — paid products and pilots.
+ *   2. Managed lanes — recurring operating functions.
+ *   3. Studio installs — scoped custom builds and Engine installs.
  */
 
-import { useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { ArrowRight, Check } from "lucide-react";
-import { toast } from "sonner";
+import { ArrowRight, Check, Layers, ShieldCheck, Workflow } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Navbar } from "@/components/landing/Navbar";
 import { Footer } from "@/components/landing/Footer";
 import { PageViewTracker } from "@/components/analytics/PageViewTracker";
-import { trackClientEvent } from "@/lib/analytics/track-event";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { faqSchema } from "@/lib/seo/structured-data";
 
 const PRICING_FAQ = [
   {
-    question: "Why does a venture studio have product subscriptions?",
+    question: "Why did the old $49 and $99 plans move off the main page?",
     answer:
-      "Products are the smallest surface area of the Engine. They let individuals and teams touch the operating logic before a retainer or full studio engagement.",
+      "Those prices make sense for a narrow personal tool or beta subscription. They do not describe the value of Sentinel, Sage, Atlas, RFP, Vellum, Atelier, Janice, or a custom AI operating system install. The main pricing page now reflects the full commercial architecture.",
   },
   {
-    question: "How is Perpetual Core different from ChatGPT Teams or Claude Pro?",
+    question: "Can a smaller company still work with Perpetual Core?",
     answer:
-      "Short version: we're a multi-model operating system with persistent organizational memory and 15 industry advisors. ChatGPT and Claude give you one model and a chat window. Many of our customers run both. See /compare for a feature-by-feature matrix.",
+      "Yes. Smaller companies usually begin with a paid diagnostic, a product pilot, or a managed lane around one revenue-critical workflow. The first engagement should be narrow enough to approve, but serious enough to create operating leverage.",
   },
   {
-    question: "What does an engagement include?",
+    question: "What should a larger company or portfolio operator buy first?",
     answer:
-      "Scoped studio engagements can start around $30,000 when the operating problem is narrow. Larger Engine installs are scoped separately and include operational audit, AI opportunity ranking, outcome-eval scope, and shipped workflows that move the metrics that matter.",
+      "Start with an AI OS Map or Atlas Discovery if the operating problem is unclear. Start with a managed lane when the workflow is already obvious: diligence, capture, knowledge, people operations, or executive operations. Move to an Engine Install when multiple departments need shared memory, workflows, agents, and governance.",
+  },
+  {
+    question: "How is this different from buying ChatGPT, Claude, HubSpot, or Zapier?",
+    answer:
+      "Those are tools. Perpetual Core installs and operates systems: persistent memory, workflow registries, agent skills, governance, and the human operating rhythm around them. Many clients will still keep the tools they already use; the Engine makes them coherent.",
+  },
+  {
+    question: "Do you publish exact enterprise pricing?",
+    answer:
+      "We publish ranges so buyers know the order of magnitude before a call. Exact pricing depends on the number of workflows, systems, data sources, people, compliance requirements, and whether we are advising, operating, or building.",
   },
   {
     question: "Do you offer mission-driven discounts?",
     answer:
-      "Yes. Verified 501(c)(3) organizations get a 30% discount on Vellum subscriptions, and 10–15% of every revenue dollar across Perpetual Core funds the Institute for Human Advancement directly. The mission is the substrate, not a marketing layer.",
-  },
-  {
-    question: "Can I cancel my subscription any time?",
-    answer:
-      "Yes. All product subscriptions ($49 Starter / $99 Pro) and retainers ($5,000–$15,000/month) cancel any month. Engagements are scoped fixed-fee with milestone payments — no auto-renewing surprises.",
-  },
-  {
-    question: "How does billing work for studio engagements?",
-    answer:
-      "Engagements bill in milestones: 33% on signature, 33% at midpoint review, 34% at delivery. Invoices are line-itemed and include the Engine commitment (10–15% to the Institute) as a separate audited line. Net-30 terms standard; ACH or wire.",
+      "Yes. Verified mission-driven organizations can receive discounted product access or phased implementation scopes. The discount should protect access without underpricing the operating work.",
   },
 ];
 
-const PLATFORM_PLANS = [
+const ENTRY_PATHS = [
   {
-    id: "free",
-    name: "Free",
-    price: 0,
-    description: "For trying out Perpetual Core",
-    checkoutEnabled: false,
-    popular: false,
-    features: [
-      "Infinite conversation context",
-      "Personal knowledge base (RAG)",
-      "Gemini model (unlimited)",
-      "5 documents",
-      "1 GB storage",
-      "Community support",
-    ],
+    name: "Product surfaces",
+    price: "$149-$2.5K/mo",
+    icon: Layers,
+    body: "For individuals, teams, and departments adopting one product surface: Sage, Vellum, Atelier, Janice, Sentinel, or RFP.",
+    points: ["Fastest start", "Product-led pilot", "Can expand into a lane"],
+    href: "#products",
   },
   {
-    id: "starter",
-    name: "Starter",
-    price: 49,
-    description: "For individuals and professionals",
-    checkoutEnabled: true,
-    popular: true,
-    features: [
-      "Everything in Free, plus:",
-      "GPT-4o Mini (unlimited)",
-      "100 premium model messages/mo",
-      "Unlimited documents and knowledge base",
-      "10 GB storage",
-      "Email and Calendar integration",
-      "Priority email support",
-    ],
+    name: "Managed lanes",
+    price: "$5K-$35K/mo",
+    icon: Workflow,
+    body: "For buyers who want us to operate a named function with them: diligence, capture, knowledge, people, or executive operations.",
+    points: ["Monthly operating rhythm", "Defined output", "Credits toward install"],
+    href: "#lanes",
+    featured: true,
   },
   {
-    id: "pro",
-    name: "Pro",
-    price: 99,
-    description: "Power users who need unlimited AI",
-    checkoutEnabled: true,
-    popular: false,
-    features: [
-      "Everything in Starter, plus:",
-      "Unlimited premium models (Claude, GPT-4, o1)",
-      "Advanced workflows and automations",
-      "50 GB storage",
-      "API access",
-      "Priority support (4-hour response)",
-    ],
-  },
-  {
-    id: "teams",
-    name: "Teams",
-    price: null, // contact-sales tier; price varies with seat count
-    description: "For teams that need shared context",
-    checkoutEnabled: false,
-    popular: false,
-    features: [
-      "Everything in Pro, for everyone on the team",
-      "Shared knowledge base + organizational memory",
-      "SSO / SAML, audit log, RBAC",
-      "Volume pricing from 5 seats",
-      "Dedicated success manager",
-      "Custom SLA",
-    ],
+    name: "Studio installs",
+    price: "$30K-$500K+",
+    icon: ShieldCheck,
+    body: "For companies, funds, and institutions installing the Perpetual Engine across departments, workflows, and governance layers.",
+    points: ["Scoped build", "Production workflows", "Training and handoff"],
+    href: "#installs",
   },
 ];
 
-const RETAINER_PROGRAMS = [
-  { name: "Sentinel on Retainer", price: "$5,000", body: "Unlimited DD vets, 48h SLA." },
-  { name: "Capture Pipeline", price: "$7,500", body: "Managed RFP discovery + drafting." },
-  { name: "Operator Concierge", price: "$10,000", body: "10 hrs/mo AI ops review + QBR." },
-  { name: "Skills Subscription", price: "$5,000", body: "One production skill per month." },
-  { name: "Vellum Institutional", price: "$15,000+", body: "Managed Vellum + SSO + on-prem." },
+const PRODUCT_PRICES = [
+  {
+    name: "Sage",
+    price: "From $149/mo",
+    buyer: "Founder, operator, thought leader",
+    body: "Personal AI OS with voice, memory, calendar, writing, coaching, and operating support.",
+  },
+  {
+    name: "Vellum",
+    price: "From $299/mo",
+    buyer: "Teams with institutional knowledge",
+    body: "Queryable organizational memory across documents, calls, voice notes, transcripts, and channels.",
+  },
+  {
+    name: "Atelier",
+    price: "From $1.5K/mo",
+    buyer: "Teams running flows and agents",
+    body: "Shared workspace for projects, flows, approvals, client work, and agent-augmented execution.",
+  },
+  {
+    name: "Sentinel",
+    price: "From $750/vet",
+    buyer: "Diligence-heavy teams",
+    body: "Subject, company, and deal intelligence with clear deliverables and escalation paths.",
+  },
+  {
+    name: "RFP Engine + Sentry",
+    price: "From $499/mo",
+    buyer: "Capture and grant teams",
+    body: "Opportunity monitoring, fit scoring, compliance flags, and first-draft support.",
+  },
+  {
+    name: "Janice",
+    price: "From $499/mo",
+    buyer: "People-heavy organizations",
+    body: "Hiring, onboarding, document collection, lifecycle tracking, and staff/intern operations.",
+  },
+  {
+    name: "Atlas Discovery",
+    price: "From $25K",
+    buyer: "Funds and portcos",
+    body: "A 2-3 week operating audit that maps where an AI-native COO layer should be installed first.",
+  },
+  {
+    name: "Custom product build",
+    price: "From $30K",
+    buyer: "A business with a repeatable pain",
+    body: "A narrow productized workflow or internal tool built from the Engine pattern.",
+  },
 ];
 
-const ENGAGEMENT_BANDS = [
-  { name: "Studio Sprint", price: "$30,000+", duration: "6-8 weeks", body: "Focused workflow, operating audit, and first production build." },
-  { name: "Operations", price: "$150,000", duration: "120–150 days", body: "Three to five departments. 15–30 production skills.", featured: true },
-  { name: "Institutional", price: "$250,000+", duration: "180 days", body: "Whole-org install + 90 days post-handover." },
+const MANAGED_LANES = [
+  {
+    name: "Diligence Lane",
+    product: "Sentinel",
+    price: "$5K-$20K/mo",
+    body: "Recurring vets, company scans, deal screens, and investigation support. No unlimited-vets promise; scope defines volume and SLA.",
+  },
+  {
+    name: "Capture Lane",
+    product: "RFP Engine + Sentry",
+    price: "$7.5K-$35K/mo",
+    body: "RFP discovery, fit scoring, bid/no-bid judgment, drafting support, compliance review, and submission rhythm.",
+    featured: true,
+  },
+  {
+    name: "Knowledge Lane",
+    product: "Vellum",
+    price: "$10K-$30K/mo",
+    body: "Institutional memory ingestion, source governance, answer quality reviews, and recurring team enablement.",
+  },
+  {
+    name: "People Lane",
+    product: "Janice",
+    price: "$7.5K-$25K/mo",
+    body: "Candidate, staff, intern, partner, or client lifecycle operations with intake, documents, follow-up, and reporting.",
+  },
+  {
+    name: "Operator Lane",
+    product: "Atelier + Sage",
+    price: "$10K-$35K/mo",
+    body: "Monthly executive operating support, workflow tuning, skills builds, dashboard review, and AI adoption governance.",
+  },
+];
+
+const INSTALLS = [
+  {
+    name: "AI OS Map",
+    price: "$7.5K-$15K",
+    duration: "1-2 weeks",
+    body: "A paid diagnostic for smaller teams or relationship-led prospects. Identifies the first workflow, economics, and implementation path.",
+  },
+  {
+    name: "Studio Sprint",
+    price: "$30K-$75K",
+    duration: "4-8 weeks",
+    body: "One high-value workflow shipped into production: intake, reporting, capture, diligence, onboarding, or knowledge operations.",
+    featured: true,
+  },
+  {
+    name: "Department OS",
+    price: "$75K-$150K",
+    duration: "8-14 weeks",
+    body: "A department-level AI operating system with memory, workflows, skills, dashboards, training, and handoff.",
+  },
+  {
+    name: "Engine Install",
+    price: "$150K-$500K+",
+    duration: "90-180 days",
+    body: "Multi-department or portfolio implementation of the Perpetual Engine, including governance, training, and post-launch support.",
+  },
 ];
 
 function SectionRail({ index, label }: { index: string; label: string }) {
@@ -150,355 +200,273 @@ function SectionRail({ index, label }: { index: string; label: string }) {
 }
 
 export default function PricingPage() {
-  const router = useRouter();
-  const [billingInterval, setBillingInterval] = useState<"monthly" | "yearly">("monthly");
-  const [isLoading, setIsLoading] = useState<string | null>(null);
-
-  async function handleSubscribe(planId: string, checkoutEnabled: boolean) {
-    trackClientEvent("cta_click", {
-      event_name: `pricing_${planId}_start`,
-      metadata: { plan_id: planId, billing_interval: billingInterval },
-    });
-
-    if (planId === "free") {
-      router.push("/signup?plan=free");
-      return;
-    }
-
-    if (!checkoutEnabled) {
-      router.push("/contact-sales?plan=" + planId);
-      return;
-    }
-
-    setIsLoading(planId);
-    try {
-      const response = await fetch("/api/stripe/checkout", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          plan: planId,
-          interval: billingInterval === "yearly" ? "annual" : "monthly",
-        }),
-      });
-
-      if (response.status === 401) {
-        router.push(
-          `/signup?plan=${encodeURIComponent(planId)}&interval=${
-            billingInterval === "yearly" ? "annual" : "monthly"
-          }`
-        );
-        return;
-      }
-
-      if (!response.ok) {
-        const data = await response.json().catch(() => ({}));
-        throw new Error(data.error || "Failed to create checkout session");
-      }
-
-      const { url } = await response.json();
-      window.location.href = url;
-    } catch (error) {
-      console.error("Checkout error:", error);
-      toast.error("Failed to start checkout. Please try again.");
-    } finally {
-      setIsLoading(null);
-    }
-  }
-
   return (
     <div className="min-h-screen bg-background">
       <JsonLd data={faqSchema(PRICING_FAQ)} />
       <PageViewTracker />
       <Navbar />
 
-      {/* Hero */}
-      <section className="container mx-auto px-6 sm:px-8 pt-20 pb-20 sm:pt-28 sm:pb-28">
+      <section className="container mx-auto px-6 sm:px-8 py-16 sm:py-24">
         <div className="max-w-5xl">
-          <div className="flex items-center gap-3 mb-12">
-            <span aria-hidden className="block h-1.5 w-1.5 bg-foreground" />
-            <p className="eyebrow !text-foreground/70">Commercial model · Engine surfaces · $0 to $250K+</p>
+          <div className="flex items-center gap-3 mb-8">
+            <span aria-hidden className="block h-1.5 w-1.5 bg-primary" />
+            <p className="eyebrow !text-foreground/70">Commercial architecture · Products · Lanes · Installs</p>
           </div>
 
-          <h1 className="display-hero text-[40px] sm:text-[56px] lg:text-[80px] text-foreground mb-12 max-w-5xl leading-[1.05]">
-            One Engine. Three ways{" "}
-            <span className="italic text-foreground/85">to enter the studio.</span>
+          <h1 className="text-5xl sm:text-6xl lg:text-7xl font-semibold tracking-[-0.045em] leading-[0.98] text-foreground mb-8 max-w-5xl">
+            Price the Engine by operating responsibility.
           </h1>
 
-          <p className="text-lg sm:text-xl text-muted-foreground leading-[1.55] mb-12 max-w-3xl">
-            Products prove the logic. Retainers operate a named function. Engagements install the
-            Perpetual Engine across the organization. Every band carries the same methodology and
-            the same 10-15% giving floor.
+          <p className="text-lg sm:text-xl text-muted-foreground leading-[1.6] mb-10 max-w-3xl">
+            Perpetual Core is not a cheap AI seat. It is a product ecosystem and venture studio
+            attached to the Perpetual Engine. Start with a product, hire a managed lane, or install
+            the operating system.
           </p>
 
           <div className="flex flex-col sm:flex-row items-start gap-4">
-            <Button size="lg" asChild className="text-sm font-medium px-7 h-11 shadow-none bg-foreground text-background hover:bg-foreground/90 rounded-[6px]">
-              <Link href="#engagements">Start with engagements <ArrowRight className="ml-2 h-4 w-4" /></Link>
+            <Button size="lg" asChild className="text-sm font-medium px-7 h-11 shadow-none bg-primary text-primary-foreground hover:bg-primary/90 rounded-[6px]">
+              <Link href="/contact-sales?intent=ai-os-map">Map the first workflow <ArrowRight className="ml-2 h-4 w-4" /></Link>
             </Button>
             <Link href="#products" className="inline-flex items-center text-sm font-medium text-foreground hover:text-primary transition-colors py-3 border-b border-foreground/20 hover:border-primary">
-              See products <ArrowRight className="ml-1.5 h-3.5 w-3.5" />
+              Compare entry points <ArrowRight className="ml-1.5 h-3.5 w-3.5" />
+            </Link>
+            <Link href="/packages" className="inline-flex items-center text-sm font-medium text-foreground hover:text-primary transition-colors py-3 border-b border-foreground/20 hover:border-primary">
+              See starter packages <ArrowRight className="ml-1.5 h-3.5 w-3.5" />
             </Link>
           </div>
         </div>
       </section>
 
-      {/* BAND 01 — Subscriptions */}
-      <section id="products" className="border-t border-border py-24 sm:py-32 bg-surface-hover/40">
+      <section className="border-t border-border py-16 sm:py-20 bg-surface-hover/40">
         <div className="container mx-auto px-6 sm:px-8">
-          <div className="grid lg:grid-cols-[280px_1fr] gap-12 lg:gap-20 mb-12">
-            <SectionRail index="01" label="Products · Proof layer" />
-            <div className="max-w-2xl">
-              <h3 className="text-3xl sm:text-4xl lg:text-5xl font-semibold leading-[1.1] tracking-[-0.025em] text-foreground mb-6">
-                Products are the on-ramp, not the whole company.
-              </h3>
-              <p className="text-base text-muted-foreground leading-[1.7]">
-                Self-serve product tiers for individuals and small teams. Use them to touch the
-                Engine, validate a workflow, or prepare for a deeper studio conversation.
-              </p>
-
-              {/* Billing toggle */}
-              <div className="inline-flex items-center gap-2 p-1 mt-8 border border-border bg-card rounded-[6px]">
-                <button
-                  type="button"
-                  onClick={() => setBillingInterval("monthly")}
-                  className={`px-5 py-2 rounded-[4px] text-sm font-medium transition ${
-                    billingInterval === "monthly" ? "bg-foreground text-background" : "text-muted-foreground"
-                  }`}
-                >
-                  Monthly
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setBillingInterval("yearly")}
-                  className={`px-5 py-2 rounded-[4px] text-sm font-medium transition relative ${
-                    billingInterval === "yearly" ? "bg-foreground text-background" : "text-muted-foreground"
-                  }`}
-                >
-                  Yearly
-                  <span className="ml-2 font-mono text-[10px] text-primary uppercase tracking-[0.18em]">
-                    Save 20%
-                  </span>
-                </button>
-              </div>
-            </div>
-          </div>
-
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 border border-border bg-card divide-y sm:divide-y-0 lg:divide-x divide-border">
-            {PLATFORM_PLANS.map((plan, i) => {
-              const yearlyPrice = plan.price ? Math.floor(plan.price * 12 * 0.8) : null;
-              const displayPrice =
-                billingInterval === "yearly" && yearlyPrice ? Math.floor(yearlyPrice / 12) : plan.price;
-              const isCustomPrice = plan.price === null;
+          <div className="grid gap-4 md:grid-cols-3">
+            {ENTRY_PATHS.map((path) => {
+              const Icon = path.icon;
               return (
-                <div key={plan.id} className="p-6 sm:p-7 flex flex-col">
-                  <div className="flex items-center justify-between mb-10">
-                    <span className="font-mono text-[10px] tracking-[0.18em] text-muted-foreground">
-                      0{i + 1}
-                    </span>
-                    {plan.popular && (
+                <Link
+                  key={path.name}
+                  href={path.href}
+                  className={`group border border-border bg-card p-6 sm:p-7 transition-colors hover:border-primary/50 hover:bg-surface-hover ${
+                    path.featured ? "border-primary/40 bg-primary/[0.04]" : ""
+                  }`}
+                >
+                  <div className="flex items-start justify-between gap-6 mb-8">
+                    <Icon className="h-5 w-5 text-primary" />
+                    {path.featured && (
                       <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-primary">
                         Most common
                       </span>
                     )}
                   </div>
-                  <h4 className="text-[11px] font-mono uppercase tracking-[0.22em] text-primary mb-3">
-                    {plan.name}
-                  </h4>
-                  <p className="text-sm text-muted-foreground mb-4">{plan.description}</p>
-
-                  <div className="mb-6">
-                    {plan.price === 0 ? (
-                      <div className="text-3xl font-semibold tracking-[-0.025em] text-foreground">Free</div>
-                    ) : isCustomPrice ? (
-                      <div>
-                        <span className="text-3xl font-semibold tracking-[-0.025em] text-foreground">
-                          Custom
-                        </span>
-                        <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground mt-2">
-                          Volume pricing
-                        </p>
-                      </div>
-                    ) : (
-                      <div>
-                        <span className="text-3xl font-semibold tracking-[-0.025em] text-foreground">
-                          ${displayPrice}
-                        </span>
-                        <span className="text-sm font-mono text-muted-foreground ml-2">/month</span>
-                        {billingInterval === "yearly" && yearlyPrice && (
-                          <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground mt-2">
-                            ${yearlyPrice}/yr billed annually
-                          </p>
-                        )}
-                      </div>
-                    )}
-                  </div>
-
-                  <Button
-                    className={`w-full mb-6 text-sm font-medium h-10 shadow-none rounded-[6px] ${
-                      plan.popular
-                        ? "bg-foreground text-background hover:bg-foreground/90"
-                        : "bg-background text-foreground border border-foreground/20 hover:bg-surface-hover"
-                    }`}
-                    onClick={() => handleSubscribe(plan.id, plan.checkoutEnabled)}
-                    disabled={isLoading === plan.id}
-                  >
-                    {isLoading === plan.id
-                      ? "Loading…"
-                      : plan.id === "free"
-                      ? "Get started free"
-                      : isCustomPrice
-                      ? "Talk to sales"
-                      : "Start free trial"}
-                    {isLoading !== plan.id && plan.id !== "free" && <ArrowRight className="ml-2 h-4 w-4" />}
-                  </Button>
-
-                  <ul className="space-y-2 text-sm text-muted-foreground leading-[1.6]">
-                    {plan.features.map((feature) => (
-                      <li key={feature} className="flex items-start gap-2">
-                        <Check className="h-3.5 w-3.5 text-foreground/40 flex-shrink-0 mt-1" />
-                        <span>{feature}</span>
+                  <h2 className="text-[11px] font-mono uppercase tracking-[0.22em] text-primary mb-3">
+                    {path.name}
+                  </h2>
+                  <p className="text-3xl sm:text-4xl font-semibold tracking-[-0.025em] text-foreground mb-5">
+                    {path.price}
+                  </p>
+                  <p className="text-sm text-muted-foreground leading-[1.65] mb-6">
+                    {path.body}
+                  </p>
+                  <ul className="space-y-2">
+                    {path.points.map((point) => (
+                      <li key={point} className="flex items-start gap-2 text-sm text-muted-foreground">
+                        <Check className="h-3.5 w-3.5 text-foreground/45 mt-1 flex-shrink-0" />
+                        <span>{point}</span>
                       </li>
                     ))}
                   </ul>
-                </div>
+                </Link>
               );
             })}
           </div>
         </div>
       </section>
 
-      {/* BAND 02 — Retainers */}
-      <section id="retainers" className="border-t border-border py-24 sm:py-32">
+      <section id="products" className="border-t border-border py-20 sm:py-28">
         <div className="container mx-auto px-6 sm:px-8">
           <div className="grid lg:grid-cols-[280px_1fr] gap-12 lg:gap-20 mb-12">
-            <SectionRail index="02" label="Retainers · Productized" />
+            <SectionRail index="01" label="Products" />
             <div className="max-w-2xl">
               <h3 className="text-3xl sm:text-4xl lg:text-5xl font-semibold leading-[1.1] tracking-[-0.025em] text-foreground mb-6">
-                Hire a productized program. $5K–$15K/month.
+                Products are the on-ramp, not the ceiling.
               </h3>
               <p className="text-base text-muted-foreground leading-[1.7]">
-                Five named programs. We operate the agents; you receive the output. Cancellable
-                monthly. Fees credit toward a full engagement when work scales.
+                These prices are for focused product access or product-led pilots. When the product
+                becomes operationally important, move it into a managed lane or studio install.
+              </p>
+            </div>
+          </div>
+
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {PRODUCT_PRICES.map((product, index) => (
+              <div
+                key={product.name}
+                className="border border-border bg-card p-6 sm:p-7 flex flex-col"
+              >
+                <span className="font-mono text-[10px] tracking-[0.18em] text-muted-foreground mb-8">
+                  {String(index + 1).padStart(2, "0")}
+                </span>
+                <h4 className="text-[11px] font-mono uppercase tracking-[0.22em] text-primary mb-3">
+                  {product.name}
+                </h4>
+                <p className="text-2xl font-semibold tracking-[-0.025em] text-foreground mb-2">
+                  {product.price}
+                </p>
+                <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground mb-6">
+                  {product.buyer}
+                </p>
+                <p className="text-sm text-muted-foreground leading-[1.65] flex-1">
+                  {product.body}
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section id="lanes" className="border-t border-border py-20 sm:py-28 bg-surface-hover/40">
+        <div className="container mx-auto px-6 sm:px-8">
+          <div className="grid lg:grid-cols-[280px_1fr] gap-12 lg:gap-20 mb-12">
+            <SectionRail index="02" label="Managed lanes" />
+            <div className="max-w-2xl">
+              <h3 className="text-3xl sm:text-4xl lg:text-5xl font-semibold leading-[1.1] tracking-[-0.025em] text-foreground mb-6">
+                Retainers should buy an operating lane, not a bundle of hours.
+              </h3>
+              <p className="text-base text-muted-foreground leading-[1.7]">
+                This is the best fit for companies like regional furniture, healthcare, nonprofit,
+                education, construction, services, and professional firms that need one function to
+                get smarter every month.
               </p>
             </div>
           </div>
 
           <div className="grid lg:grid-cols-[280px_1fr] gap-12 lg:gap-20">
             <div />
-            <div className="max-w-3xl border-t border-border">
-              {RETAINER_PROGRAMS.map((p, i) => (
+            <div className="space-y-4">
+              {MANAGED_LANES.map((lane, index) => (
                 <Link
-                  key={p.name}
-                  href="/studio/retainers"
-                  className="group grid grid-cols-[60px_1fr_auto] gap-x-6 py-6 border-b border-border hover:bg-surface-hover transition-colors items-baseline"
+                  key={lane.name}
+                  href={`/contact-sales?lane=${encodeURIComponent(lane.name.toLowerCase())}`}
+                  className={`group grid gap-5 border border-border bg-card p-6 sm:p-7 md:grid-cols-[56px_1fr_180px] hover:border-primary/50 hover:bg-background transition-colors ${
+                    lane.featured ? "border-primary/40 bg-primary/[0.04]" : ""
+                  }`}
                 >
-                  <span className="font-mono text-[10px] tracking-[0.18em] text-muted-foreground pt-1">
-                    0{i + 1}
+                  <span className="font-mono text-[10px] tracking-[0.18em] text-muted-foreground">
+                    {String(index + 1).padStart(2, "0")}
                   </span>
                   <div>
-                    <h4 className="text-base font-semibold tracking-tight text-foreground mb-1 group-hover:text-primary transition-colors">
-                      {p.name}
-                    </h4>
-                    <p className="text-sm text-muted-foreground">{p.body}</p>
+                    <div className="flex flex-wrap items-center gap-3 mb-2">
+                      <h4 className="text-lg font-semibold tracking-[-0.015em] text-foreground group-hover:text-primary transition-colors">
+                        {lane.name}
+                      </h4>
+                      <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
+                        {lane.product}
+                      </span>
+                    </div>
+                    <p className="text-sm text-muted-foreground leading-[1.65] max-w-2xl">
+                      {lane.body}
+                    </p>
                   </div>
-                  <span className="font-mono text-base font-semibold text-foreground whitespace-nowrap">
-                    {p.price}
-                    <span className="font-mono text-[10px] text-muted-foreground ml-1">/mo</span>
-                  </span>
+                  <p className="font-mono text-sm sm:text-base font-semibold text-foreground md:text-right">
+                    {lane.price}
+                  </p>
                 </Link>
               ))}
             </div>
           </div>
-
-          <div className="mt-10 grid lg:grid-cols-[280px_1fr] gap-12 lg:gap-20">
-            <div />
-            <Link
-              href="/studio/retainers"
-              className="inline-flex items-center text-sm font-medium text-foreground hover:text-primary transition-colors"
-            >
-              See full Retainers detail <ArrowRight className="ml-1.5 h-3.5 w-3.5" />
-            </Link>
-          </div>
         </div>
       </section>
 
-      {/* BAND 03 — Engagements */}
-      <section id="engagements" className="border-t border-border py-24 sm:py-32 bg-surface-hover/40">
+      <section id="installs" className="border-t border-border py-20 sm:py-28">
         <div className="container mx-auto px-6 sm:px-8">
           <div className="grid lg:grid-cols-[280px_1fr] gap-12 lg:gap-20 mb-12">
-            <SectionRail index="03" label="Engagements · The install" />
+            <SectionRail index="03" label="Studio installs" />
             <div className="max-w-2xl">
               <h3 className="text-3xl sm:text-4xl lg:text-5xl font-semibold leading-[1.1] tracking-[-0.025em] text-foreground mb-6">
-                Start scoped, expand into the Engine.
+                Custom builds should be priced like operating leverage.
               </h3>
               <p className="text-base text-muted-foreground leading-[1.7]">
-                Studio engagements can begin around $30K for a focused operating surface.
-                Larger Engine installs expand across departments when the work proves it.
+                The first scope can be small, but the buyer should understand the path: diagnostic,
+                sprint, department OS, then full Engine install when the value is proven.
               </p>
             </div>
           </div>
 
-          <div className="grid sm:grid-cols-3 border border-border bg-card divide-y sm:divide-y-0 sm:divide-x divide-border">
-            {ENGAGEMENT_BANDS.map((band, i) => (
-              <div key={band.name} className="p-6 sm:p-7 flex flex-col">
-                <div className="flex items-center justify-between mb-10">
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {INSTALLS.map((install, index) => (
+              <div
+                key={install.name}
+                className={`border border-border bg-card p-6 sm:p-7 flex flex-col ${
+                  install.featured ? "border-primary/40 bg-primary/[0.04]" : ""
+                }`}
+              >
+                <div className="flex items-center justify-between gap-4 mb-8">
                   <span className="font-mono text-[10px] tracking-[0.18em] text-muted-foreground">
-                    0{i + 1}
+                    {String(index + 1).padStart(2, "0")}
                   </span>
-                  {band.featured && (
+                  {install.featured && (
                     <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-primary">
-                      Most common
+                      Best first paid build
                     </span>
                   )}
                 </div>
                 <h4 className="text-[11px] font-mono uppercase tracking-[0.22em] text-primary mb-3">
-                  {band.name}
+                  {install.name}
                 </h4>
-                <p className="text-3xl sm:text-4xl font-semibold tracking-[-0.025em] text-foreground mb-3">
-                  {band.price}
+                <p className="text-3xl font-semibold tracking-[-0.025em] text-foreground mb-2">
+                  {install.price}
                 </p>
                 <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground mb-6">
-                  {band.duration}
+                  {install.duration}
                 </p>
                 <p className="text-sm text-muted-foreground leading-[1.65] flex-1 mb-6">
-                  {band.body}
+                  {install.body}
                 </p>
                 <Link
-                  href="/studio/engagements"
-                  className="inline-flex items-center text-xs font-medium text-foreground hover:text-primary transition-colors mt-auto"
+                  href="/contact-sales?intent=studio-install"
+                  className="inline-flex items-center text-xs font-medium text-foreground hover:text-primary transition-colors"
                 >
-                  See engagements <ArrowRight className="ml-1 h-3 w-3" />
+                  Scope this <ArrowRight className="ml-1 h-3 w-3" />
                 </Link>
               </div>
             ))}
           </div>
+        </div>
+      </section>
 
-          {/* Retainer attached to engagements */}
-          <div className="border border-t-0 border-border bg-card p-6 sm:p-7 grid sm:grid-cols-[200px_1fr_auto] gap-6 sm:gap-10 items-baseline">
-            <div>
-              <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground mb-2">
-                Optional · all bands
+      <section className="border-t border-border py-20 sm:py-28 bg-surface-hover/40">
+        <div className="container mx-auto px-6 sm:px-8">
+          <div className="grid lg:grid-cols-[280px_1fr] gap-12 lg:gap-20">
+            <SectionRail index="—" label="Recommendation" />
+            <div className="max-w-3xl border-l-2 border-primary/50 pl-6">
+              <h3 className="text-3xl sm:text-4xl lg:text-5xl font-semibold leading-[1.1] tracking-[-0.025em] text-foreground mb-6">
+                For Empire-sized prospects, sell the AI operating partner. For smaller companies,
+                sell the first operating lane.
+              </h3>
+              <p className="text-base text-muted-foreground leading-[1.7] mb-8">
+                Do not lead with a $49 subscription. Lead with the business problem: missed leads,
+                slow quoting, scattered product data, customer follow-up, delivery coordination,
+                hiring, reporting, and executive visibility. The first scope can be modest, but the
+                frame should be whole-system improvement.
               </p>
-              <p className="text-xl font-semibold tracking-[-0.015em] text-foreground">
-                Post-engagement retainer
-              </p>
+              <div className="flex flex-col sm:flex-row gap-3">
+                <Button asChild className="text-sm font-medium h-10 px-5 shadow-none bg-foreground text-background hover:bg-foreground/90 rounded-[6px]">
+                  <Link href="/contact-sales?intent=operating-partner">
+                    Start an operating partner conversation <ArrowRight className="ml-2 h-3.5 w-3.5" />
+                  </Link>
+                </Button>
+                <Button asChild variant="outline" className="text-sm font-medium h-10 px-5 shadow-none rounded-[6px]">
+                  <Link href="/packages">
+                    See starter packages
+                  </Link>
+                </Button>
+              </div>
             </div>
-            <p className="text-sm text-muted-foreground leading-[1.65]">
-              <span className="text-foreground font-medium">$5,000–$15,000/month</span>, scoped to
-              engagement. For operators who&apos;d rather we stay in the loop. Cancellable any month.
-            </p>
-            <Link
-              href="/studio/engagements"
-              className="inline-flex items-center font-mono text-[10px] uppercase tracking-[0.18em] text-foreground hover:text-primary transition-colors whitespace-nowrap"
-            >
-              Book intake
-              <ArrowRight className="ml-2 h-3 w-3" />
-            </Link>
           </div>
         </div>
       </section>
 
-      {/* FAQ — for SEO + buyer reassurance */}
-      <section className="border-t border-border py-24 sm:py-32">
+      <section className="border-t border-border py-20 sm:py-28">
         <div className="container mx-auto px-6 sm:px-8">
           <div className="grid lg:grid-cols-[280px_1fr] gap-12 lg:gap-20">
             <SectionRail index="—" label="Common questions" />
@@ -526,28 +494,6 @@ export default function PricingPage() {
                   </details>
                 ))}
               </dl>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Engine commitment */}
-      <section className="border-t border-border py-24 sm:py-32">
-        <div className="container mx-auto px-6 sm:px-8">
-          <div className="grid lg:grid-cols-[280px_1fr] gap-12 lg:gap-20">
-            <SectionRail index="—" label="The Engine commitment" />
-            <div className="max-w-2xl">
-              <h3 className="text-3xl sm:text-4xl lg:text-5xl font-semibold leading-[1.1] tracking-[-0.025em] text-foreground mb-6">
-                Every band gives. 10–15% of revenue funds the Institute.
-              </h3>
-              <p className="text-base text-muted-foreground leading-[1.7] mb-10">
-                Engagements give 10% ($7,500 to $25,000+ per client). Sage SaaS gives 15%.
-                Everything else gives 10% by default. Audited annually. Line-itemed on every
-                invoice. The mission is the substrate.
-              </p>
-              <Button asChild className="text-sm font-medium h-10 px-5 shadow-none bg-foreground text-background hover:bg-foreground/90 rounded-[6px]">
-                <Link href="/engine">Read the Engine commitment <ArrowRight className="ml-2 h-3.5 w-3.5" /></Link>
-              </Button>
             </div>
           </div>
         </div>

@@ -1,10 +1,10 @@
 /**
  * /start — the canonical "how do I work with you" page.
  *
- * Maps the three-step engagement ladder: Discovery → Engagement → Retainer.
+ * Maps the three-step engagement ladder: Map → Sprint → Lane/Install.
  * Linked from home, footer, /pricing FAQ. The aim is to give a visitor who
- * doesn't yet know what to buy a clean path: read the guide, take Discovery
- * for $5K-$15K, then decide whether to commit to a $75K+ engagement.
+ * doesn't yet know what to buy a clean path: read the guide, scope the first
+ * workflow, then decide whether to buy a lane, sprint, or install.
  *
  * Visual register matches homepage v6.
  */
@@ -20,7 +20,7 @@ import { breadcrumbSchema } from "@/lib/seo/structured-data";
 export const metadata = {
   title: "How to start with Perpetual Core",
   description:
-    "Three steps from cold visitor to installed AI: read the buyer's guide, take Atlas Discovery ($5K-$15K), commit to an engagement ($75K+). The honest map.",
+    "Three steps from cold visitor to installed AI: read the buyer's guide, map the first workflow, then choose a managed lane, sprint, or install.",
 };
 
 const STEPS = [
@@ -37,30 +37,30 @@ const STEPS = [
   {
     index: "02",
     label: "Audit",
-    title: "Atlas Discovery — productized two-week audit",
-    duration: "Two weeks",
-    cost: "$5,000 – $15,000",
-    body: "We sit in your operations the way an operator does. Calls, docs, voice notes, the channels where decisions actually happen. Two weeks, no PowerPoint. Deliverable: operational map, ranked AI install candidates, outcome-eval scope, and a contract framework your CFO can co-sign.",
+    title: "AI OS Map or Atlas Discovery",
+    duration: "1-3 weeks",
+    cost: "$7,500 – $25,000+",
+    body: "We sit in your operations the way an operator does. Calls, docs, voice notes, the channels where decisions actually happen. Deliverable: operational map, ranked AI install candidates, outcome-eval scope, and a contract framework your CFO can co-sign.",
     primaryCta: { label: "Read about Discovery", href: "/products/atlas-discovery" },
-    secondaryCta: { label: "Talk to sales", href: "/contact-sales?product=atlas-discovery" },
-    footnote: "Discovery fee credits 100% toward an engagement if you proceed within 90 days.",
+    secondaryCta: { label: "Talk to sales", href: "/contact-sales?intent=ai-os-map" },
+    footnote: "Qualified Discovery fees can credit toward a sprint or install if you proceed within 90 days.",
   },
   {
     index: "03",
     label: "Install",
-    title: "Engagement — 6 to 10 weeks, written outcome-eval",
-    duration: "6–10 weeks",
-    cost: "$75,000 – $250,000+",
-    body: "Three bands ($75K / $150K / $250K+) scoped to the install scope Discovery ranked. We don't write decks. We ship workflows that move the metric you co-signed in the outcome-eval scope. Every engagement gives 10% to the Institute for Human Advancement, line-itemed on every invoice.",
+    title: "Sprint or Engine Install",
+    duration: "4-24 weeks",
+    cost: "$30,000 – $500,000+",
+    body: "Four bands ($30K-$75K sprint, $75K-$150K department OS, $150K-$500K+ Engine install) scoped to the operating problem. We don't write decks. We ship workflows that move the metric you co-signed in the outcome-eval scope.",
     primaryCta: { label: "See engagement bands", href: "/studio/engagements" },
     secondaryCta: { label: "Read the methodology", href: "/studio/methodology" },
   },
   {
     index: "04",
     label: "Maintain",
-    title: "Post-engagement retainer (optional)",
+    title: "Managed lane or post-install retainer",
     duration: "Monthly",
-    cost: "$5,000 – $15,000/month",
+    cost: "$5,000 – $35,000/month",
     body: "For operators who'd rather we stay in the loop. Scoped to the engagement that shipped, cancellable any month. Includes the outcome-eval recheck cadence (6, 12, 24 weeks post-install) and ad-hoc operator support.",
     primaryCta: { label: "See retainer programs", href: "/studio/retainers" },
     secondaryCta: { label: "Talk to sales", href: "/contact-sales?plan=retainer" },
@@ -70,8 +70,8 @@ const STEPS = [
 const ALTERNATIVES = [
   {
     label: "I just want the SaaS",
-    body: "Self-serve Free ($0), Starter ($49/mo), or Pro ($99/mo). No Discovery required. Skip straight to pricing.",
-    href: "/pricing",
+    body: "Product surfaces start around $149/month. Guided setup and first-workflow packages give you a cleaner way to begin if you want help.",
+    href: "/packages",
   },
   {
     label: "I'm comparing vendors",
