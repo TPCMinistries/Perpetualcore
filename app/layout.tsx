@@ -10,6 +10,7 @@ import { organizationSchema, websiteSchema } from "@/lib/seo/structured-data";
 import { CookieConsent } from "@/components/landing/CookieConsent";
 import { CrispChat } from "@/components/landing/CrispChat";
 import { ExitIntent } from "@/components/landing/ExitIntent";
+import { ServiceWorkerReset } from "@/components/system/ServiceWorkerReset";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -150,6 +151,7 @@ export default function RootLayout({
         <CookieConsent />
         <CrispChat />
         <ExitIntent />
+        <ServiceWorkerReset />
         <Analytics />
         <SpeedInsights />
       </body>

@@ -8,7 +8,7 @@ if (typeof self === 'undefined') {
 const withPWA = withPWAInit({
   dest: 'public',
   disable: process.env.NODE_ENV === 'development', // Enable in production only
-  register: true,
+  register: false,
   skipWaiting: true,
   sw: 'service-worker.js',
   runtimeCaching: [
