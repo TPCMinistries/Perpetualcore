@@ -1,9 +1,5 @@
-import { redirect } from "next/navigation";
+import { OperatingDashboard } from "@/components/operate/OperatingDashboard";
 
-/**
- * Dashboard root redirects to the Perpetual Core operating command center.
- * The daily briefing remains available at /dashboard/home.
- */
 export default function DashboardPage() {
-  redirect("/dashboard/operating");
+  return <OperatingDashboard />;
 }
