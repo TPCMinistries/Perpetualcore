@@ -9,9 +9,11 @@ import {
   CheckCircle2,
   CircleDollarSign,
   ClipboardList,
+  FileText,
   Loader2,
   Network,
   PackageCheck,
+  Send,
   Users,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
@@ -89,6 +91,37 @@ const fallbackData: OperatingDashboardData = {
     { name: "IHA / Engine", role: "Mission gravity", status: "Revenue commitment and legitimacy" },
   ],
 };
+
+const leadRoutes = [
+  {
+    label: "Warm strategic lead",
+    title: "Send the Packages page",
+    detail: "For prospects who understand they need AI implementation but need a clean first step.",
+    href: "/packages",
+    cta: "Open packages",
+  },
+  {
+    label: "Enterprise or complex buyer",
+    title: "Send the AI OS Map",
+    detail: "For operators like Empire who need to see the whole-company operating system before buying.",
+    href: "/lead-magnet",
+    cta: "Open lead magnet",
+  },
+  {
+    label: "Ready to talk",
+    title: "Send the sales intake",
+    detail: "For someone asking what it would take to install AI across their company.",
+    href: "/contact-sales?intent=operating-system-map",
+    cta: "Open intake",
+  },
+];
+
+const operatingRhythm = [
+  "Capture the lead in the CRM with company, source, urgency, and next step.",
+  "Send the right public link: map for enterprise, packages for starter demand, intake for ready buyers.",
+  "Move qualified prospects into one operating lane with a named outcome, kickoff window, and owner.",
+  "Use the first paid package to prove value, then expand into the broader AI operating system.",
+];
 
 function formatDate(value: string | null | undefined) {
   if (!value) return "No date";
@@ -208,6 +241,65 @@ export function OperatingDashboard() {
           {error}
         </div>
       )}
+
+      <div className="grid gap-6 xl:grid-cols-[1.15fr_0.85fr]">
+        <Card className="rounded-lg shadow-none">
+          <CardHeader>
+            <div className="flex items-center justify-between gap-4">
+              <div>
+                <CardTitle className="text-lg">Lead routing</CardTitle>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  Pick the link based on what the prospect is ready to understand or buy.
+                </p>
+              </div>
+              <Send className="h-5 w-5 text-muted-foreground" />
+            </div>
+          </CardHeader>
+          <CardContent className="grid gap-3 md:grid-cols-3">
+            {leadRoutes.map((route) => (
+              <Link
+                key={route.href}
+                href={route.href}
+                className="group rounded-lg border bg-card p-4 transition hover:border-primary/50 hover:bg-primary/[0.03]"
+              >
+                <p className="text-[10px] font-mono uppercase tracking-[0.18em] text-primary">
+                  {route.label}
+                </p>
+                <p className="mt-3 text-sm font-semibold text-foreground">{route.title}</p>
+                <p className="mt-2 min-h-[60px] text-sm leading-5 text-muted-foreground">{route.detail}</p>
+                <span className="mt-4 inline-flex items-center text-sm font-medium text-foreground">
+                  {route.cta}
+                  <ArrowRight className="ml-2 h-4 w-4 transition group-hover:translate-x-0.5" />
+                </span>
+              </Link>
+            ))}
+          </CardContent>
+        </Card>
+
+        <Card className="rounded-lg shadow-none">
+          <CardHeader>
+            <div className="flex items-center justify-between gap-4">
+              <div>
+                <CardTitle className="text-lg">Operating rhythm</CardTitle>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  The weekly motion for turning attention into retained work.
+                </p>
+              </div>
+              <FileText className="h-5 w-5 text-muted-foreground" />
+            </div>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            {operatingRhythm.map((step, index) => (
+              <div key={step} className="flex gap-3 rounded-lg border bg-card p-3">
+                <span className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-md bg-primary text-xs font-semibold text-primary-foreground">
+                  {index + 1}
+                </span>
+                <p className="text-sm leading-6 text-muted-foreground">{step}</p>
+              </div>
+            ))}
+          </CardContent>
+        </Card>
+      </div>
 
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
         {metrics.map((metric) => {
