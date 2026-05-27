@@ -16,11 +16,19 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Loader2 } from "lucide-react";
+
+function safeNext(value: string | null): string | null {
+  if (!value) return null;
+  if (!value.startsWith("/") || value.startsWith("//")) return null;
+  if (value.startsWith("/api/") || value.startsWith("/auth/callback")) return null;
+  return value;
+}
 
 export function SignupForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [existingEmail, setExistingEmail] = useState<string | null>(null);
@@ -45,7 +53,9 @@ export function SignupForm() {
     setSuccessMessage(null);
 
     try {
-      const result = await signUp(values);
+      const requestedNext =
+        safeNext(searchParams.get("next")) ?? safeNext(searchParams.get("redirect"));
+      const result = await signUp(values, requestedNext ?? undefined);
 
       if (result.error) {
         setError(result.error);
@@ -62,11 +72,13 @@ export function SignupForm() {
         return;
       }
 
-      // Host-aware landing — rfp.* → /orgs, otherwise legacy /dashboard.
+      // Preserve product-specific auth intent first. The RFP marketing site
+      // links to /signup?next=/orgs/new, including local /rfp development.
+      // Host-aware fallback: rfp.* → /orgs, otherwise legacy /dashboard.
       const isRfpHost =
         typeof window !== "undefined" &&
         /^rfp\.(perpetualcore\.com|localhost)/i.test(window.location.host);
-      router.push(isRfpHost ? "/orgs" : "/dashboard");
+      router.push(requestedNext ?? (isRfpHost ? "/orgs" : "/dashboard"));
       router.refresh();
     } catch {
       setError("Something went wrong. Please try again.");
@@ -177,7 +189,11 @@ export function SignupForm() {
             </p>
             <div className="mt-3 flex flex-wrap gap-3">
               <Link
-                href={`/login?email=${encodeURIComponent(existingEmail)}`}
+                href={`/login?email=${encodeURIComponent(existingEmail)}${
+                  safeNext(searchParams.get("next"))
+                    ? `&next=${encodeURIComponent(safeNext(searchParams.get("next")) ?? "")}`
+                    : ""
+                }`}
                 className="inline-flex items-center justify-center rounded-md bg-amber-900 px-3 py-1.5 text-xs font-medium text-amber-50 hover:bg-amber-950"
               >
                 Sign in →

@@ -29,7 +29,14 @@ function slugify(text: string): string {
     .trim();
 }
 
-export async function signUp(data: SignUpInput) {
+function safeAuthNext(value: string | undefined): string | null {
+  if (!value) return null;
+  if (!value.startsWith("/") || value.startsWith("//")) return null;
+  if (value.startsWith("/api/") || value.startsWith("/auth/callback")) return null;
+  return value;
+}
+
+export async function signUp(data: SignUpInput, nextPath?: string) {
   const supabase = await createClient();
 
   // Validate beta code if provided
@@ -62,6 +69,10 @@ export async function signUp(data: SignUpInput) {
 
   // Create user with Supabase Auth
   const origin = await getRequestOrigin();
+  const next = safeAuthNext(nextPath);
+  const callbackUrl = new URL("/auth/callback", origin);
+  if (next) callbackUrl.searchParams.set("next", next);
+
   const { data: authData, error: authError } = await supabase.auth.signUp({
     email: data.email,
     password: data.password,
@@ -72,7 +83,7 @@ export async function signUp(data: SignUpInput) {
         organization_name: data.organizationName,
         beta_tier: betaTier,
       },
-      emailRedirectTo: `${origin}/auth/callback`,
+      emailRedirectTo: callbackUrl.toString(),
     },
   });
 
@@ -164,7 +175,7 @@ export async function signUp(data: SignUpInput) {
     // Regular user: create their own organization
     const orgSlug = `${slugify(data.organizationName)}-${Date.now()}`;
 
-    const { data: orgId, error: orgError } = await supabase.rpc(
+    const { error: orgError } = await supabase.rpc(
       "create_organization_and_profile",
       {
         user_id: authData.user.id,

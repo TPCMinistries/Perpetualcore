@@ -20,7 +20,16 @@ import { ReviewButton } from "@/components/rfp/ReviewButton";
 import { ReviewerFindingsPanel } from "@/components/rfp/ReviewerFindingsPanel";
 import { ProposalSectionEditor } from "@/components/rfp/ProposalSectionEditor";
 import { ProposalStatusControl } from "@/components/rfp/ProposalStatusControl";
+import { CaptureReadinessButton } from "@/components/rfp/CaptureReadinessButton";
+import { CaptureCommandCenter } from "@/components/rfp/CaptureCommandCenter";
+import { ExportProposalButton } from "@/components/rfp/ExportProposalButton";
+import { SubmissionReadinessPanel } from "@/components/rfp/SubmissionReadinessPanel";
 import type { CitationChunk } from "@/components/rfp/MarkupRenderer";
+import type {
+  BidNoBidArtifact,
+  ComplianceMatrixArtifact,
+  PacketChecklistArtifact,
+} from "@/lib/rfp/compliance/types";
 import {
   REVIEWER_FINDINGS_SECTION_TYPE,
   ReviewerResultSchema,
@@ -85,6 +94,12 @@ interface AgentSessionRow {
   session_id: string | null;
 }
 
+interface ComplianceCheckRow {
+  check_type: string;
+  details_json: unknown;
+  created_at: string;
+}
+
 /**
  * The drafter encodes voice_applied as a suffix on session_id:
  *   `<short_id>__voice=true` or `__voice=false`.
@@ -127,6 +142,42 @@ function fmtDate(iso: string | null): string {
     day: "numeric",
     year: "numeric",
   });
+}
+
+function isObject(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+function parseBidNoBid(value: unknown): BidNoBidArtifact | null {
+  if (!isObject(value) || value.kind !== "bid_no_bid_v1") return null;
+  if (
+    value.recommendation !== "pursue" &&
+    value.recommendation !== "maybe" &&
+    value.recommendation !== "pass"
+  ) {
+    return null;
+  }
+  if (typeof value.score !== "number") return null;
+  return value as unknown as BidNoBidArtifact;
+}
+
+function parseComplianceMatrix(value: unknown): ComplianceMatrixArtifact | null {
+  if (!isObject(value) || value.kind !== "compliance_matrix_v1") return null;
+  if (!Array.isArray(value.items)) return null;
+  return value as unknown as ComplianceMatrixArtifact;
+}
+
+function parsePacketChecklist(value: unknown): PacketChecklistArtifact | null {
+  if (!isObject(value) || value.kind !== "packet_checklist_v1") return null;
+  if (!Array.isArray(value.items)) return null;
+  return value as unknown as PacketChecklistArtifact;
+}
+
+function countVerifyMarkers(sections: SectionRow[]): number {
+  return sections.reduce((count, section) => {
+    const matches = section.content?.match(/\[VERIFY:/g) ?? [];
+    return count + matches.length;
+  }, 0);
 }
 
 export default async function ProposalPage({
@@ -183,12 +234,42 @@ export default async function ProposalPage({
     .limit(1)
     .maybeSingle<AgentSessionRow>();
 
+  const { data: complianceRows } = await supabase
+    .from("rfp_compliance_checks")
+    .select("check_type, details_json, created_at")
+    .eq("proposal_id", proposalId)
+    .in("check_type", [
+      "bid_no_bid_v1",
+      "compliance_matrix_v1",
+      "packet_checklist_v1",
+    ])
+    .order("created_at", { ascending: false })
+    .returns<ComplianceCheckRow[]>();
+
+  const checksByType = new Map<string, unknown>();
+  for (const row of complianceRows ?? []) {
+    if (!checksByType.has(row.check_type)) {
+      checksByType.set(row.check_type, row.details_json);
+    }
+  }
+  const bidNoBid = parseBidNoBid(checksByType.get("bid_no_bid_v1"));
+  const complianceMatrix = parseComplianceMatrix(
+    checksByType.get("compliance_matrix_v1"),
+  );
+  const packetChecklist = parsePacketChecklist(
+    checksByType.get("packet_checklist_v1"),
+  );
+
   const voiceApplied = readVoiceApplied(session?.session_id ?? null);
   const vaultChunksUsed = readVaultChunksUsed(session?.session_id ?? null);
 
   const sectionByType = new Map<string, SectionRow>(
     (sections ?? []).map((s) => [s.section_type, s]),
   );
+  const visibleSections = (sections ?? []).filter((section) =>
+    SECTION_TYPES.includes(section.section_type as SectionType),
+  );
+  const verifyMarkerCount = countVerifyMarkers(visibleSections);
 
   // Parse persisted reviewer findings, if any. We swallow malformed rows
   // rather than 500 the whole proposal view — the reviewer pass can always
@@ -333,9 +414,24 @@ export default async function ProposalPage({
         ) : null}
 
         {/* Reviewer pass action + findings */}
-        <div className="mt-8">
+        <div className="mt-8 grid gap-4 sm:grid-cols-3">
+          <CaptureReadinessButton proposalId={proposalId} />
           <ReviewButton orgId={orgId} proposalId={proposalId} />
+          <ExportProposalButton proposalId={proposalId} />
         </div>
+        <SubmissionReadinessPanel
+          bidNoBid={bidNoBid}
+          complianceMatrix={complianceMatrix}
+          packetChecklist={packetChecklist}
+          reviewerResult={reviewerResult}
+          verifyMarkerCount={verifyMarkerCount}
+          sectionCount={visibleSections.length}
+        />
+        <CaptureCommandCenter
+          bidNoBid={bidNoBid}
+          complianceMatrix={complianceMatrix}
+          packetChecklist={packetChecklist}
+        />
         {reviewerResultGlobalOnly ? (
           <ReviewerFindingsPanel result={reviewerResultGlobalOnly} />
         ) : null}

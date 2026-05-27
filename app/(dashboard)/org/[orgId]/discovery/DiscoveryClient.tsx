@@ -221,11 +221,15 @@ export function DiscoveryClient({
   const showNoMemberOrgsState =
     isDualMode && emptyReason === "no_member_orgs" && rows.length === 0;
 
+  const handleImported = useCallback(() => {
+    window.location.reload();
+  }, []);
+
   return (
-    <div className="flex flex-col h-[calc(100vh-3.5rem)] bg-zinc-950 text-zinc-100">
+    <div className="flex min-h-[calc(100vh-3.5rem)] flex-col bg-zinc-950 text-zinc-100 lg:h-[calc(100vh-3.5rem)]">
       {/* Header: Quick Import (Plan 05-05) + filter pills */}
-      <div className="shrink-0 px-4 lg:px-6 py-3 border-b border-zinc-900 space-y-3">
-        <QuickImportBar orgId={orgId} />
+      <div className="shrink-0 space-y-3 border-b border-zinc-900 px-4 py-3 lg:px-6">
+        <QuickImportBar orgId={orgId} onImported={handleImported} />
         <FilterPills
           value={filters}
           onChange={setFilters}
@@ -236,8 +240,8 @@ export function DiscoveryClient({
       </div>
 
       {/* Split: list left, detail right */}
-      <div className="flex-1 min-h-0 grid grid-cols-[minmax(360px,40%)_1fr]">
-        <div className="min-h-0 border-r border-zinc-900">
+      <div className="grid min-h-0 flex-1 grid-cols-1 lg:grid-cols-[minmax(360px,40%)_1fr]">
+        <div className="min-h-[360px] border-b border-zinc-900 lg:min-h-0 lg:border-b-0 lg:border-r">
           {showNoMemberOrgsState ? (
             <div className="flex h-full items-center justify-center p-8">
               <div className="text-center max-w-sm">
@@ -271,7 +275,7 @@ export function DiscoveryClient({
             />
           )}
         </div>
-        <div className="min-h-0">
+        <div className="min-h-[520px] lg:min-h-0">
           <DetailPane orgId={orgId} selected={selected} />
         </div>
       </div>

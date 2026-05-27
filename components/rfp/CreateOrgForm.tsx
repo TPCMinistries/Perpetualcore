@@ -3,7 +3,7 @@
 /**
  * CreateOrgForm — Client form for creating a new RFP org (tenant).
  *
- * Submits to POST /api/orgs. On success, redirects to /org/[orgId].
+ * Submits to POST /api/orgs. On success, redirects to the live Discovery feed.
  * Validation:
  *   - name: 2–120 chars, required
  *   - type: one of nonprofit | forprofit | dual, required
@@ -78,8 +78,7 @@ export function CreateOrgForm() {
       return;
     }
 
-    // Redirect to the org-scoped workspace route
-    router.push(`/org/${data.org.id}`);
+    router.push(`/org/${data.org.id}/discovery`);
   };
 
   return (

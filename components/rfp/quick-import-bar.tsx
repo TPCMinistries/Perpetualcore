@@ -310,7 +310,7 @@ export function QuickImportBar({ orgId, onImported }: QuickImportBarProps) {
         : 0;
     return (
       <div
-        className="flex w-full items-center gap-3 overflow-hidden"
+        className="flex w-full flex-wrap items-center gap-2 sm:gap-3"
         role="status"
         aria-live="polite"
       >
@@ -319,7 +319,7 @@ export function QuickImportBar({ orgId, onImported }: QuickImportBarProps) {
           const active = idx === currentIndex && job?.step !== "done";
           const upcoming = idx > currentIndex && job?.step !== "done";
           return (
-            <div key={step.key} className="flex items-center gap-3">
+            <div key={step.key} className="flex items-center gap-2 sm:gap-3">
               <span
                 aria-hidden="true"
                 className={[
@@ -351,7 +351,7 @@ export function QuickImportBar({ orgId, onImported }: QuickImportBarProps) {
                 <span
                   aria-hidden="true"
                   className={[
-                    "h-px w-6",
+                    "hidden h-px w-6 sm:block",
                     completed ? "bg-emerald-400/40" : "bg-white/10",
                   ].join(" ")}
                 />
@@ -367,7 +367,7 @@ export function QuickImportBar({ orgId, onImported }: QuickImportBarProps) {
     const disabled = phase.kind === "submitting";
     return (
       <form
-        className="flex w-full items-center gap-3"
+        className="flex w-full flex-col gap-3 sm:flex-row sm:items-center"
         onSubmit={(e) => {
           e.preventDefault();
           void submit();
@@ -383,7 +383,7 @@ export function QuickImportBar({ orgId, onImported }: QuickImportBarProps) {
           autoComplete="off"
           spellCheck={false}
           placeholder="Paste opportunity URL…"
-          className="flex-1 rounded-md border border-white/10 bg-zinc-950 px-3 py-2 font-mono text-[12px] text-zinc-100 placeholder:text-zinc-600 outline-none transition-colors focus:border-emerald-300/40 focus:ring-1 focus:ring-emerald-300/20"
+          className="w-full flex-1 rounded-md border border-white/10 bg-zinc-950 px-3 py-2 font-mono text-[12px] text-zinc-100 placeholder:text-zinc-600 outline-none transition-colors focus:border-emerald-300/40 focus:ring-1 focus:ring-emerald-300/20"
           value={url}
           onChange={(e) => setUrl(e.target.value)}
           disabled={disabled}
@@ -391,7 +391,7 @@ export function QuickImportBar({ orgId, onImported }: QuickImportBarProps) {
         <button
           type="submit"
           disabled={disabled || url.trim().length === 0}
-          className="rounded-md border border-emerald-300/30 bg-emerald-400/10 px-3 py-2 font-mono text-[10px] uppercase tracking-[0.22em] text-emerald-300 transition-colors hover:border-emerald-300/60 hover:bg-emerald-400/20 disabled:cursor-not-allowed disabled:opacity-40"
+          className="w-full rounded-md border border-emerald-300/30 bg-emerald-400/10 px-3 py-2 font-mono text-[10px] uppercase tracking-[0.22em] text-emerald-300 transition-colors hover:border-emerald-300/60 hover:bg-emerald-400/20 disabled:cursor-not-allowed disabled:opacity-40 sm:w-auto"
         >
           {disabled ? "Submitting…" : "Import"}
         </button>
@@ -402,8 +402,8 @@ export function QuickImportBar({ orgId, onImported }: QuickImportBarProps) {
   const renderSuccess = (oppId: string, needsReview: boolean) => {
     void oppId; // surfaced to parent via onImported; not rendered inline
     return (
-      <div className="flex w-full items-center justify-between gap-4">
-        <div className="flex items-center gap-3">
+      <div className="flex w-full flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
+        <div className="flex flex-wrap items-center gap-3">
           <span
             aria-hidden="true"
             className="inline-flex h-3.5 w-3.5 items-center justify-center rounded-full border border-emerald-400/60 bg-emerald-400/20 text-[10px] leading-none text-emerald-300"
@@ -432,10 +432,10 @@ export function QuickImportBar({ orgId, onImported }: QuickImportBarProps) {
 
   const renderError = (message: string) => (
     <div
-      className="flex w-full items-center justify-between gap-4"
+      className="flex w-full flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4"
       role="alert"
     >
-      <div className="flex items-center gap-3 min-w-0">
+      <div className="flex min-w-0 items-center gap-3">
         <span
           aria-hidden="true"
           className="inline-flex h-3.5 w-3.5 items-center justify-center rounded-full border border-zinc-600 bg-zinc-900/40 text-[10px] leading-none text-zinc-400"

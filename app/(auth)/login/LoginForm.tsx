@@ -16,11 +16,19 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Loader2 } from "lucide-react";
+
+function safeNext(value: string | null): string | null {
+  if (!value) return null;
+  if (!value.startsWith("/") || value.startsWith("//")) return null;
+  if (value.startsWith("/api/") || value.startsWith("/auth/callback")) return null;
+  return value;
+}
 
 export function LoginForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -44,13 +52,19 @@ export function LoginForm() {
         return;
       }
 
-      // Host-aware landing. rfp.perpetualcore.com → /orgs (resolves to the
+      // Preserve product-specific auth intent first. The RFP marketing site
+      // links to /login?next=/orgs/new, including local /rfp development
+      // where the hostname is plain localhost rather than rfp.*.
+      const requestedNext =
+        safeNext(searchParams.get("next")) ?? safeNext(searchParams.get("redirect"));
+
+      // Host-aware fallback. rfp.perpetualcore.com → /orgs (resolves to the
       // user's first org's discovery feed). Other hosts keep the legacy
       // /dashboard SaaS landing.
       const isRfpHost =
         typeof window !== "undefined" &&
         /^rfp\.(perpetualcore\.com|localhost)/i.test(window.location.host);
-      router.push(isRfpHost ? "/orgs" : "/dashboard");
+      router.push(requestedNext ?? (isRfpHost ? "/orgs" : "/dashboard"));
       router.refresh();
     } catch {
       setError("Something went wrong. Please try again.");

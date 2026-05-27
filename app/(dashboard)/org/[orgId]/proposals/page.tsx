@@ -12,6 +12,11 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
+import { SECTION_TYPES, type SectionType } from "@/lib/rfp/draft/sections";
+import {
+  REVIEWER_FINDINGS_SECTION_TYPE,
+  ReviewerResultSchema,
+} from "@/lib/rfp/review/rubric";
 
 export const dynamic = "force-dynamic";
 
@@ -46,6 +51,32 @@ interface ProposalRow {
   updated_at: string;
   created_at: string;
 }
+
+interface SectionSummaryRow {
+  proposal_id: string;
+  section_type: string;
+  content: string | null;
+}
+
+interface ComplianceSummaryRow {
+  proposal_id: string;
+  check_type: string;
+  details_json: unknown;
+  created_at: string;
+}
+
+interface ReadinessSummary {
+  label: string;
+  tone: "ready" | "warn" | "blocked" | "empty";
+  details: string[];
+}
+
+const READINESS_CHIP: Record<ReadinessSummary["tone"], string> = {
+  ready: "border-emerald-500/40 bg-emerald-500/10 text-emerald-200",
+  warn: "border-amber-500/40 bg-amber-500/10 text-amber-200",
+  blocked: "border-rose-500/40 bg-rose-500/10 text-rose-200",
+  empty: "border-zinc-800 bg-zinc-900 text-zinc-400",
+};
 
 function fmtDate(iso: string | null): string {
   if (!iso) return "—";
@@ -82,6 +113,94 @@ function coerceStatus(s: string | undefined): Status | "all" {
     return s;
   }
   return "all";
+}
+
+function countVerifyMarkers(content: string | null): number {
+  return content?.match(/\[VERIFY:/g)?.length ?? 0;
+}
+
+function readNumberField(value: unknown, key: string): number {
+  if (typeof value !== "object" || value === null || Array.isArray(value)) {
+    return 0;
+  }
+  const n = (value as Record<string, unknown>)[key];
+  return typeof n === "number" && Number.isFinite(n) ? n : 0;
+}
+
+function summarizeReadiness(
+  proposalId: string,
+  sectionRows: SectionSummaryRow[],
+  complianceRows: ComplianceSummaryRow[],
+): ReadinessSummary {
+  const sections = sectionRows.filter((row) => row.proposal_id === proposalId);
+  const canonicalSections = sections.filter((row) =>
+    SECTION_TYPES.includes(row.section_type as SectionType),
+  );
+  const sectionCount = canonicalSections.length;
+  const verifyCount = canonicalSections.reduce(
+    (sum, row) => sum + countVerifyMarkers(row.content),
+    0,
+  );
+
+  const checksByType = new Map<string, unknown>();
+  for (const row of complianceRows) {
+    if (row.proposal_id === proposalId && !checksByType.has(row.check_type)) {
+      checksByType.set(row.check_type, row.details_json);
+    }
+  }
+  const hasAllCaptureChecks =
+    checksByType.has("bid_no_bid_v1") &&
+    checksByType.has("compliance_matrix_v1") &&
+    checksByType.has("packet_checklist_v1");
+  const complianceGaps =
+    readNumberField(checksByType.get("compliance_matrix_v1"), "missing_count") +
+    readNumberField(checksByType.get("packet_checklist_v1"), "missing_count");
+  const reviewNeeds =
+    readNumberField(
+      checksByType.get("compliance_matrix_v1"),
+      "needs_review_count",
+    ) +
+    readNumberField(
+      checksByType.get("packet_checklist_v1"),
+      "needs_review_count",
+    );
+
+  const reviewerRow = sections.find(
+    (row) => row.section_type === REVIEWER_FINDINGS_SECTION_TYPE,
+  );
+  let blockerCount = 0;
+  if (reviewerRow?.content) {
+    try {
+      const result = ReviewerResultSchema.parse(JSON.parse(reviewerRow.content));
+      blockerCount = result.findings.filter(
+        (finding) =>
+          finding.severity === "blocker" || finding.severity === "high",
+      ).length;
+    } catch {
+      blockerCount = 0;
+    }
+  }
+
+  const details = [
+    `${sectionCount}/${SECTION_TYPES.length} sections`,
+    verifyCount > 0 ? `${verifyCount} VERIFY` : "no VERIFY",
+    hasAllCaptureChecks ? "capture checked" : "needs capture",
+    blockerCount > 0 ? `${blockerCount} review flags` : "review clear",
+  ];
+
+  if (sectionCount === 0) {
+    return { label: "Needs Draft", tone: "empty", details };
+  }
+  if (!hasAllCaptureChecks) {
+    return { label: "Capture Needed", tone: "warn", details };
+  }
+  if (verifyCount > 0 || complianceGaps > 0 || blockerCount > 0) {
+    return { label: "Blocked", tone: "blocked", details };
+  }
+  if (reviewNeeds > 0) {
+    return { label: "Review Needed", tone: "warn", details };
+  }
+  return { label: "Ready", tone: "ready", details };
 }
 
 export default async function ProposalsListPage({
@@ -121,6 +240,31 @@ export default async function ProposalsListPage({
 
   const { data: proposals } = await query.returns<ProposalRow[]>();
   const rows = proposals ?? [];
+  const proposalIds = rows.map((row) => row.id);
+
+  const { data: sectionSummaries } =
+    proposalIds.length > 0
+      ? await supabase
+          .from("rfp_proposal_sections")
+          .select("proposal_id, section_type, content")
+          .in("proposal_id", proposalIds)
+          .returns<SectionSummaryRow[]>()
+      : { data: [] as SectionSummaryRow[] };
+
+  const { data: complianceSummaries } =
+    proposalIds.length > 0
+      ? await supabase
+          .from("rfp_compliance_checks")
+          .select("proposal_id, check_type, details_json, created_at")
+          .in("proposal_id", proposalIds)
+          .in("check_type", [
+            "bid_no_bid_v1",
+            "compliance_matrix_v1",
+            "packet_checklist_v1",
+          ])
+          .order("created_at", { ascending: false })
+          .returns<ComplianceSummaryRow[]>()
+      : { data: [] as ComplianceSummaryRow[] };
 
   // Count per-status totals for the filter chips (small extra query;
   // a single GROUP BY would be more efficient but PostgREST doesn't
@@ -233,11 +377,16 @@ export default async function ProposalsListPage({
                   ? p.status
                   : "draft"
               ) as Status;
+              const readiness = summarizeReadiness(
+                p.id,
+                sectionSummaries ?? [],
+                complianceSummaries ?? [],
+              );
               return (
                 <li key={p.id}>
                   <Link
                     href={`/org/${orgId}/proposals/${p.id}`}
-                    className="flex items-center gap-4 px-5 py-4 transition hover:bg-white/[0.02]"
+                    className="flex flex-col gap-3 px-5 py-4 transition hover:bg-white/[0.02] sm:flex-row sm:items-center sm:gap-4"
                   >
                     <span
                       className={`shrink-0 inline-flex items-center rounded-md border px-2 py-0.5 font-mono text-[9px] uppercase tracking-[0.18em] ${STATUS_CHIP[status]}`}
@@ -252,6 +401,16 @@ export default async function ProposalsListPage({
                         {p.due_date ? `due ${fmtDate(p.due_date)} · ` : ""}
                         updated {fmtRelative(p.updated_at)}
                       </div>
+                    </div>
+                    <div className="flex shrink-0 flex-wrap items-center gap-2 sm:justify-end">
+                      <span
+                        className={`inline-flex items-center rounded-md border px-2 py-0.5 font-mono text-[9px] uppercase tracking-[0.16em] ${READINESS_CHIP[readiness.tone]}`}
+                      >
+                        {readiness.label}
+                      </span>
+                      <span className="font-mono text-[9px] uppercase tracking-[0.16em] text-zinc-600">
+                        {readiness.details.join(" · ")}
+                      </span>
                     </div>
                   </Link>
                 </li>
