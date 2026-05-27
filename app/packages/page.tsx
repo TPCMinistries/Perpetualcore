@@ -17,9 +17,9 @@ import { breadcrumbSchema } from "@/lib/seo/structured-data";
 import { PackageCheckoutButton } from "@/components/packages/PackageCheckoutButton";
 
 export const metadata = {
-  title: "Starter Packages — Perpetual Core",
+  title: "AI Operating System Packages — Perpetual Core",
   description:
-    "Concrete first-purchase packages for Perpetual Core: software access, guided setup, first workflow package, and managed operating lane.",
+    "Start with Perpetual Core through software access, guided setup, a first workflow package, or a managed 90-day AI operating lane.",
 };
 
 const SOFTWARE_COSTS = [
@@ -169,11 +169,12 @@ export default function PackagesPage() {
             <p className="eyebrow !text-foreground/70">Starter packages · Software + setup · First workflow</p>
           </div>
           <h1 className="text-5xl sm:text-6xl lg:text-7xl font-semibold tracking-[-0.045em] leading-[0.98] text-foreground mb-8">
-            The smallest clean way to start.
+            Start with the right AI operating layer.
           </h1>
           <p className="text-lg sm:text-xl text-muted-foreground leading-[1.6] mb-10 max-w-3xl">
-            The pricing page shows the full value ladder. This page gives a warm buyer a concrete
-            first purchase: software access, guided setup, one workflow, or a 90-day operating lane.
+            Perpetual Core helps companies install practical AI across knowledge, sales,
+            operations, proposals, and executive work. Begin with software, setup, one
+            workflow, or a managed operating lane.
           </p>
           <div className="flex flex-col sm:flex-row items-start gap-4">
             <Button size="lg" asChild className="text-sm font-medium px-7 h-11 shadow-none bg-primary text-primary-foreground hover:bg-primary/90 rounded-[6px]">
@@ -194,11 +195,12 @@ export default function PackagesPage() {
             <SectionRail index="01" label="Software cost" />
             <div className="max-w-2xl">
               <h3 className="text-3xl sm:text-4xl lg:text-5xl font-semibold leading-[1.1] tracking-[-0.025em] text-foreground mb-6">
-                Software is the monthly layer. Setup is the activation layer.
+                Software gives you the system. Setup makes it usable.
               </h3>
               <p className="text-base text-muted-foreground leading-[1.7]">
-                Do not hide the software cost, but do not pretend the software alone is the whole
-                transformation. Most buyers need one of these monthly surfaces plus a setup package.
+                Some teams only need access to a focused AI workspace. Others need help
+                connecting company context, shaping workflows, and training the first users.
+                Choose the entry point that matches the urgency of the business problem.
               </p>
             </div>
           </div>
@@ -227,11 +229,12 @@ export default function PackagesPage() {
             <SectionRail index="02" label="Starter offers" />
             <div className="max-w-2xl">
               <h3 className="text-3xl sm:text-4xl lg:text-5xl font-semibold leading-[1.1] tracking-[-0.025em] text-foreground mb-6">
-                Four packages that make the sale easier.
+                Four ways to begin without overbuilding.
               </h3>
               <p className="text-base text-muted-foreground leading-[1.7]">
-                These are not discounts. They are clean first steps. The buyer can start small
-                without confusing Perpetual Core with a cheap AI subscription.
+                Start with a narrow software surface, configure the first workflow, or bring
+                Perpetual Core into the operating rhythm for 90 days. Each path is designed
+                to create a working result before expanding.
               </p>
             </div>
           </div>
@@ -282,8 +285,8 @@ export default function PackagesPage() {
           </div>
           <div className="mt-8 flex flex-col sm:flex-row gap-3 border border-border bg-surface-hover/40 p-5">
             <p className="text-sm text-muted-foreground leading-[1.65] flex-1">
-              Need a custom invoice, ACH, or a different first payment amount? Use the sales form
-              and we can issue a manual Stripe invoice.
+              Need a custom invoice, ACH, procurement review, or a different first payment
+              amount? Use the sales form and we can issue a manual Stripe invoice.
             </p>
             <Button asChild variant="outline" className="text-sm font-medium h-10 px-5 shadow-none rounded-[6px]">
               <Link href="/contact-sales?intent=manual-invoice">
@@ -316,9 +319,9 @@ export default function PackagesPage() {
               </div>
               <div className="mt-10 border-l-2 border-primary/50 pl-6">
                 <p className="text-base text-muted-foreground leading-[1.7]">
-                  Not sure which path fits? Start with Guided Setup if you need a low-friction
-                  first step, or request an invoice if the buying process needs ACH, procurement,
-                  or a custom scope.
+                  Not sure which path fits? Start with Guided Setup when the need is clear
+                  but the system is not configured yet. Choose the 90-Day Operating Lane when
+                  the company wants Perpetual Core involved as an AI consultant and operator.
                 </p>
               </div>
             </div>

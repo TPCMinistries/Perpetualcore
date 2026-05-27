@@ -123,6 +123,25 @@ const operatingRhythm = [
   "Use the first paid package to prove value, then expand into the broader AI operating system.",
 ];
 
+const workspaceLayers = [
+  {
+    name: "Context",
+    detail: "The client, company, problem, files, notes, calls, and operating history stay attached to the account.",
+  },
+  {
+    name: "Queue",
+    detail: "Every lead, package, workflow, and client lane has a next action instead of disappearing into chat.",
+  },
+  {
+    name: "Production",
+    detail: "Sage, Atlas, Sentinel, RFP, and custom builds become delivery surfaces inside the same workspace.",
+  },
+  {
+    name: "Expansion",
+    detail: "The first paid result becomes the proof point for a larger AI operating system install.",
+  },
+];
+
 function formatDate(value: string | null | undefined) {
   if (!value) return "No date";
   return new Intl.DateTimeFormat("en-US", {
@@ -300,6 +319,36 @@ export function OperatingDashboard() {
           </CardContent>
         </Card>
       </div>
+
+      <Card className="rounded-lg shadow-none">
+        <CardHeader>
+          <div className="flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
+            <div>
+              <CardTitle className="text-lg">Operating workspace model</CardTitle>
+              <p className="mt-1 max-w-2xl text-sm text-muted-foreground">
+                This is the practical version of the atelier idea: persistent context,
+                queued work, productized delivery, and expansion paths in one place.
+              </p>
+            </div>
+            <Button asChild variant="outline" className="rounded-md">
+              <Link href="/dashboard/leads">
+                Work the queue <ArrowRight className="ml-2 h-4 w-4" />
+              </Link>
+            </Button>
+          </div>
+        </CardHeader>
+        <CardContent className="grid gap-3 md:grid-cols-4">
+          {workspaceLayers.map((layer, index) => (
+            <div key={layer.name} className="rounded-lg border bg-card p-4">
+              <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
+                Layer {String(index + 1).padStart(2, "0")}
+              </p>
+              <p className="mt-3 text-sm font-semibold text-foreground">{layer.name}</p>
+              <p className="mt-2 text-sm leading-5 text-muted-foreground">{layer.detail}</p>
+            </div>
+          ))}
+        </CardContent>
+      </Card>
 
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
         {metrics.map((metric) => {
