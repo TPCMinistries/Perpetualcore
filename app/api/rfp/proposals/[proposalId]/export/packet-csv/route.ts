@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { createAdminClient, createClient } from "@/lib/supabase/server";
 import { csvDocument, exportFilename } from "@/lib/rfp/export/csv";
-import type { ComplianceMatrixArtifact } from "@/lib/rfp/compliance/types";
+import type { PacketChecklistArtifact } from "@/lib/rfp/compliance/types";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -20,10 +20,10 @@ function isObject(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
 }
 
-function parseComplianceMatrix(value: unknown): ComplianceMatrixArtifact | null {
-  if (!isObject(value) || value.kind !== "compliance_matrix_v1") return null;
+function parsePacketChecklist(value: unknown): PacketChecklistArtifact | null {
+  if (!isObject(value) || value.kind !== "packet_checklist_v1") return null;
   if (!Array.isArray(value.items)) return null;
-  return value as unknown as ComplianceMatrixArtifact;
+  return value as unknown as PacketChecklistArtifact;
 }
 
 export async function GET(
@@ -64,43 +64,34 @@ export async function GET(
     .from("rfp_compliance_checks")
     .select("details_json")
     .eq("proposal_id", proposalId)
-    .eq("check_type", "compliance_matrix_v1")
+    .eq("check_type", "packet_checklist_v1")
     .order("created_at", { ascending: false })
     .limit(1)
     .maybeSingle<ComplianceCheckRow>();
 
-  const matrix = parseComplianceMatrix(check?.details_json);
-  if (!matrix) {
+  const checklist = parsePacketChecklist(check?.details_json);
+  if (!checklist) {
     return NextResponse.json(
-      { error: "compliance_matrix_not_found" },
+      { error: "packet_checklist_not_found" },
       { status: 404 },
     );
   }
 
-  const header = [
-    "ID",
-    "Category",
-    "Requirement",
-    "Source",
-    "Response status",
-    "Owner section",
-    "Evidence",
-  ];
-  const rows = matrix.items.map((item) => [
+  const header = ["ID", "Packet item", "Status", "Notes", "Due date", "Submission URL"];
+  const rows = checklist.items.map((item) => [
     item.id,
-    item.category,
-    item.requirement,
-    item.source,
-    item.response_status,
-    item.owner_section,
-    item.evidence,
+    item.label,
+    item.status,
+    item.notes,
+    checklist.due_date,
+    checklist.submission_url,
   ]);
   const csv = csvDocument([header, ...rows]);
 
   return new Response(csv, {
     headers: {
       "content-type": "text/csv; charset=utf-8",
-      "content-disposition": `attachment; filename="${exportFilename(proposal.title, "compliance-matrix")}"`,
+      "content-disposition": `attachment; filename="${exportFilename(proposal.title, "submission-packet")}"`,
       "cache-control": "no-store",
     },
   });

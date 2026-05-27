@@ -189,9 +189,17 @@ export function CaptureCommandCenter({
             <h3 className="font-mono text-[10px] uppercase tracking-[0.22em] text-zinc-400">
               Submission packet
             </h3>
-            <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-zinc-500">
-              Due {formatDate(packetChecklist.due_date)}
-            </span>
+            <div className="flex flex-wrap items-center gap-3">
+              <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-zinc-500">
+                Due {formatDate(packetChecklist.due_date)}
+              </span>
+              <a
+                href={`/api/rfp/proposals/${proposalId}/export/packet-csv`}
+                className="rounded-md border border-zinc-700 px-2 py-1 font-mono text-[9px] uppercase tracking-[0.16em] text-zinc-300 transition hover:border-emerald-500/50 hover:text-emerald-200"
+              >
+                Export CSV
+              </a>
+            </div>
           </div>
           <ul className="mt-3 grid gap-2 sm:grid-cols-2">
             {packetChecklist.items.map((item) => (
