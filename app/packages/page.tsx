@@ -108,22 +108,22 @@ const PACKAGES = [
   },
 ];
 
-const DECISION_RULES = [
+const FIT_GUIDE = [
   {
-    signal: "They ask, “Can I just try the software?”",
-    answer: "Send Software Access.",
+    signal: "I want to start using one product surface.",
+    answer: "Software Access",
   },
   {
-    signal: "They trust you but need a small first invoice.",
-    answer: "Send Guided Setup.",
+    signal: "I want help getting the product configured correctly.",
+    answer: "Guided Setup",
   },
   {
-    signal: "They have a workflow costing time or revenue right now.",
-    answer: "Send First Workflow Package.",
+    signal: "I have one workflow costing time, revenue, or clarity.",
+    answer: "First Workflow Package",
   },
   {
-    signal: "They want you as their AI consultant/operator.",
-    answer: "Send 90-Day Operating Lane.",
+    signal: "I want Perpetual Core involved as an operating partner.",
+    answer: "90-Day Operating Lane",
   },
 ];
 
@@ -297,13 +297,13 @@ export default function PackagesPage() {
       <section className="border-t border-border py-20 sm:py-28 bg-surface-hover/40">
         <div className="container mx-auto px-6 sm:px-8">
           <div className="grid lg:grid-cols-[280px_1fr] gap-12 lg:gap-20">
-            <SectionRail index="03" label="Which one to send?" />
+            <SectionRail index="03" label="Choose a path" />
             <div className="max-w-3xl">
               <h3 className="text-3xl sm:text-4xl lg:text-5xl font-semibold leading-[1.1] tracking-[-0.025em] text-foreground mb-8">
-                Use the lead's language to pick the package.
+                Pick the starting point that matches the business problem.
               </h3>
               <div className="space-y-3">
-                {DECISION_RULES.map((rule) => (
+                {FIT_GUIDE.map((rule) => (
                   <div key={rule.signal} className="grid gap-3 border border-border bg-card p-5 sm:grid-cols-[1fr_240px]">
                     <p className="text-sm text-muted-foreground leading-[1.65]">
                       {rule.signal}
@@ -316,9 +316,9 @@ export default function PackagesPage() {
               </div>
               <div className="mt-10 border-l-2 border-primary/50 pl-6">
                 <p className="text-base text-muted-foreground leading-[1.7]">
-                  For a prospect like Empire, do not send software-only first unless they ask for
-                  it. Send the 90-Day Operating Lane or First Workflow Package, then explain that
-                  the software is included as the operating layer underneath the work.
+                  Not sure which path fits? Start with Guided Setup if you need a low-friction
+                  first step, or request an invoice if the buying process needs ACH, procurement,
+                  or a custom scope.
                 </p>
               </div>
             </div>
