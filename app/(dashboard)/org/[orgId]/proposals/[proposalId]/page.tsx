@@ -428,6 +428,7 @@ export default async function ProposalPage({
           sectionCount={visibleSections.length}
         />
         <CaptureCommandCenter
+          proposalId={proposalId}
           bidNoBid={bidNoBid}
           complianceMatrix={complianceMatrix}
           packetChecklist={packetChecklist}

@@ -6,6 +6,7 @@ import type {
 } from "@/lib/rfp/compliance/types";
 
 interface CaptureCommandCenterProps {
+  proposalId: string;
   bidNoBid: BidNoBidArtifact | null;
   complianceMatrix: ComplianceMatrixArtifact | null;
   packetChecklist: PacketChecklistArtifact | null;
@@ -40,6 +41,7 @@ function formatDate(iso: string | null): string {
 }
 
 export function CaptureCommandCenter({
+  proposalId,
   bidNoBid,
   complianceMatrix,
   packetChecklist,
@@ -126,10 +128,18 @@ export function CaptureCommandCenter({
             <h3 className="font-mono text-[10px] uppercase tracking-[0.22em] text-zinc-400">
               Compliance matrix
             </h3>
-            <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-zinc-500">
-              {complianceMatrix.missing_count} missing ·{" "}
-              {complianceMatrix.needs_review_count} needs review
-            </span>
+            <div className="flex flex-wrap items-center gap-3">
+              <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-zinc-500">
+                {complianceMatrix.missing_count} missing ·{" "}
+                {complianceMatrix.needs_review_count} needs review
+              </span>
+              <a
+                href={`/api/rfp/proposals/${proposalId}/export/compliance-csv`}
+                className="rounded-md border border-zinc-700 px-2 py-1 font-mono text-[9px] uppercase tracking-[0.16em] text-zinc-300 transition hover:border-emerald-500/50 hover:text-emerald-200"
+              >
+                Export CSV
+              </a>
+            </div>
           </div>
           <div className="mt-3 overflow-x-auto rounded-md border border-zinc-800">
             <table className="w-full min-w-[760px] text-left text-[13px]">
