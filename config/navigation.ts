@@ -743,6 +743,18 @@ export const NAVIGATION_CONFIG_V2: NavigationSection[] = [
     defaultCollapsed: false,
     items: [
       {
+        name: "Operating",
+        href: "/dashboard/operating",
+        icon: Network,
+        adaptiveConfig: {
+          visibleFor: ["beginner", "intermediate", "advanced"],
+          complexity: "essential",
+          badge: "new",
+          isCore: true,
+          helpText: "Unified Perpetual Core command center for leads, paid packages, client lanes, and next actions",
+        },
+      },
+      {
         name: "Operate",
         href: "/dashboard/operate",
         icon: Building2,
