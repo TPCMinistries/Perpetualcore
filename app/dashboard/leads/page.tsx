@@ -1,29 +1,29 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import Link from "next/link";
+import type { LucideIcon } from "lucide-react";
 import {
   Users,
   Plus,
   Search,
-  Filter,
   MoreHorizontal,
   Phone,
   Mail,
   Building,
   DollarSign,
-  Calendar,
   TrendingUp,
   UserCheck,
   UserX,
   Clock,
   ArrowRight,
-  Edit,
   Trash2,
   Eye,
   Target,
   Sparkles,
-  ChevronRight,
-  X,
+  Send,
+  PackageCheck,
+  Map,
 } from "lucide-react";
 import { useConfirm } from "@/components/ui/confirm-dialog";
 import { Button } from "@/components/ui/button";
@@ -91,7 +91,7 @@ interface Lead {
   notes?: string;
   tags?: string[];
   lead_score?: number;
-  ai_insights?: any;
+  ai_insights?: unknown;
   last_contacted_at?: string;
   next_follow_up_at?: string;
   created_at: string;
@@ -131,7 +131,7 @@ interface PipelineStats {
 }
 
 // Status configuration
-const STATUS_CONFIG: Record<string, { label: string; color: string; icon: any }> = {
+const STATUS_CONFIG: Record<string, { label: string; color: string; icon: LucideIcon }> = {
   new: { label: "New", color: "bg-blue-100 text-blue-700", icon: Sparkles },
   contacted: { label: "Contacted", color: "bg-purple-100 text-purple-700", icon: Phone },
   qualified: { label: "Qualified", color: "bg-cyan-100 text-cyan-700", icon: UserCheck },
@@ -150,6 +150,54 @@ const SOURCE_OPTIONS = [
   { value: "event", label: "Event" },
   { value: "partner", label: "Partner" },
   { value: "other", label: "Other" },
+];
+
+const OFFER_ROUTES = [
+  {
+    label: "AI OS Map",
+    href: "/lead-magnet",
+    detail: "Send when the buyer needs to understand the full company operating system.",
+    icon: Map,
+  },
+  {
+    label: "Packages",
+    href: "/packages",
+    detail: "Send when the buyer wants a clear first purchase or starter lane.",
+    icon: PackageCheck,
+  },
+  {
+    label: "Sales intake",
+    href: "/contact-sales?intent=operating-system-map",
+    detail: "Send when the buyer is ready for scope, invoice, or an implementation call.",
+    icon: Send,
+  },
+];
+
+const STARTER_LEADS = [
+  {
+    label: "Enterprise prospect",
+    company: "Empire Furniture",
+    title: "AI operating system opportunity",
+    value: "30000",
+    notes:
+      "Potential whole-company AI consulting and implementation lead. Start with the AI OS Map, then qualify for a 90-Day Operating Lane or first workflow package.",
+  },
+  {
+    label: "Small business",
+    company: "",
+    title: "Guided setup opportunity",
+    value: "5000",
+    notes:
+      "Warm small-business lead. Qualify one painful workflow, send Packages, and recommend Guided Setup or First Workflow Package.",
+  },
+  {
+    label: "Product-only buyer",
+    company: "",
+    title: "Software access opportunity",
+    value: "299",
+    notes:
+      "Buyer wants to try one product surface first. Start with Software Access, then expand if usage reveals a workflow or team need.",
+  },
 ];
 
 export default function LeadsPage() {
@@ -180,6 +228,20 @@ export default function LeadsPage() {
     notes: "",
   });
   const [saving, setSaving] = useState(false);
+
+  const applyStarterLead = (template: (typeof STARTER_LEADS)[number]) => {
+    setFormData({
+      name: "",
+      email: "",
+      phone: "",
+      company: template.company,
+      title: template.title,
+      source: "referral",
+      estimated_value: template.value,
+      notes: template.notes,
+    });
+    setShowCreateDialog(true);
+  };
 
   // Fetch leads
   const fetchLeads = useCallback(async () => {
@@ -348,13 +410,84 @@ export default function LeadsPage() {
   };
 
   return (
-    <div className="flex flex-col h-full">
-      {/* Header */}
-      <div className="flex items-center justify-between p-6 border-b">
+    <div className="space-y-6 pb-10">
+      <div className="rounded-xl border border-border bg-background p-6">
+        <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
+          <div className="max-w-3xl">
+            <div className="mb-3 flex items-center gap-2">
+              <span className="h-2 w-2 rounded-full bg-primary" />
+              <p className="font-mono text-xs uppercase tracking-[0.2em] text-muted-foreground">
+                Perpetual Core sales command
+              </p>
+            </div>
+            <h1 className="text-3xl font-semibold tracking-tight text-foreground md:text-4xl">
+              Route every lead into a clear offer, next action, and operating lane.
+            </h1>
+            <p className="mt-3 max-w-2xl text-sm leading-6 text-muted-foreground">
+              Use this page to track prospects, decide which public asset to send, and move
+              serious buyers from interest into paid software, setup, workflow, or 90-day operating work.
+            </p>
+          </div>
+          <Button onClick={() => setShowCreateDialog(true)} className="w-full rounded-md sm:w-auto">
+            <Plus className="mr-2 h-4 w-4" />
+            Add Lead
+          </Button>
+        </div>
+      </div>
+
+      <div className="grid gap-4 lg:grid-cols-3">
+        {OFFER_ROUTES.map((route) => {
+          const Icon = route.icon;
+          return (
+            <Link
+              key={route.href}
+              href={route.href}
+              className="group rounded-lg border bg-card p-5 transition hover:border-primary/50 hover:bg-primary/[0.03]"
+            >
+              <div className="mb-4 flex items-center justify-between">
+                <div className="flex h-10 w-10 items-center justify-center rounded-md bg-primary/10 text-primary">
+                  <Icon className="h-5 w-5" />
+                </div>
+                <ArrowRight className="h-4 w-4 text-muted-foreground transition group-hover:translate-x-0.5 group-hover:text-primary" />
+              </div>
+              <p className="text-sm font-semibold text-foreground">{route.label}</p>
+              <p className="mt-2 text-sm leading-5 text-muted-foreground">{route.detail}</p>
+            </Link>
+          );
+        })}
+      </div>
+
+      <Card className="rounded-lg shadow-none">
+        <CardHeader>
+          <CardTitle className="text-lg">Fast-start lead templates</CardTitle>
+          <CardDescription>
+            Use these to capture the type of opportunity you are actively pursuing, then refine the details.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="grid gap-3 md:grid-cols-3">
+          {STARTER_LEADS.map((template) => (
+            <button
+              key={template.label}
+              type="button"
+              onClick={() => applyStarterLead(template)}
+              className="rounded-lg border bg-card p-4 text-left transition hover:border-primary/50 hover:bg-primary/[0.03]"
+            >
+              <p className="text-sm font-semibold text-foreground">{template.label}</p>
+              <p className="mt-2 text-sm leading-5 text-muted-foreground">{template.title}</p>
+              <p className="mt-4 font-mono text-[10px] uppercase tracking-[0.18em] text-primary">
+                Start lead <ArrowRight className="ml-1 inline h-3 w-3" />
+              </p>
+            </button>
+          ))}
+        </CardContent>
+      </Card>
+
+      <div className="rounded-xl border border-border bg-background">
+        <div className="flex items-center justify-between p-6 border-b">
         <div>
-          <h1 className="text-2xl font-semibold">Leads</h1>
+          <h2 className="text-2xl font-semibold">Pipeline</h2>
           <p className="text-muted-foreground">
-            Manage your sales pipeline and track potential customers
+            Track prospects from first attention through paid work.
           </p>
         </div>
         <Button onClick={() => setShowCreateDialog(true)}>
@@ -675,6 +808,7 @@ export default function LeadsPage() {
           </div>
         )}
       </div>
+      </div>
 
       {/* Create Lead Dialog */}
       <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
@@ -845,6 +979,30 @@ export default function LeadsPage() {
                               <StatusIcon className="h-3 w-3 mr-1" />
                               {config.label}
                             </Button>
+                          );
+                        })}
+                      </div>
+                    </div>
+
+                    <div>
+                      <Label className="text-sm text-muted-foreground">Recommended send links</Label>
+                      <div className="mt-2 grid gap-2">
+                        {OFFER_ROUTES.map((route) => {
+                          const Icon = route.icon;
+                          return (
+                            <Link
+                              key={route.href}
+                              href={route.href}
+                              className="flex items-start gap-3 rounded-lg border p-3 transition hover:border-primary/50 hover:bg-primary/[0.03]"
+                            >
+                              <Icon className="mt-0.5 h-4 w-4 flex-shrink-0 text-primary" />
+                              <span>
+                                <span className="block text-sm font-medium text-foreground">{route.label}</span>
+                                <span className="mt-1 block text-xs leading-5 text-muted-foreground">
+                                  {route.detail}
+                                </span>
+                              </span>
+                            </Link>
                           );
                         })}
                       </div>
