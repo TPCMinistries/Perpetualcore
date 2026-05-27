@@ -1,8 +1,15 @@
 import OpenAI from "openai";
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY!,
-});
+let openaiClient: OpenAI | null = null;
+
+function getOpenAIClient(): OpenAI {
+  const apiKey = process.env.OPENAI_API_KEY;
+  if (!apiKey) {
+    throw new Error("OPENAI_API_KEY is not configured");
+  }
+  openaiClient ??= new OpenAI({ apiKey });
+  return openaiClient;
+}
 
 /**
  * Generate embeddings for text chunks using OpenAI
@@ -19,7 +26,7 @@ export async function generateEmbeddings(
     for (let i = 0; i < chunks.length; i += batchSize) {
       const batch = chunks.slice(i, i + batchSize);
 
-      const response = await openai.embeddings.create({
+      const response = await getOpenAIClient().embeddings.create({
         model: "text-embedding-3-small",
         input: batch,
         dimensions: 1536,
@@ -50,7 +57,7 @@ export async function generateEmbeddings(
  */
 export async function generateQueryEmbedding(query: string): Promise<number[]> {
   try {
-    const response = await openai.embeddings.create({
+    const response = await getOpenAIClient().embeddings.create({
       model: "text-embedding-3-small",
       input: query,
       dimensions: 1536,
