@@ -389,6 +389,18 @@ export const NAVIGATION_CONFIG: NavigationSection[] = [
         },
       },
       {
+        name: "Operating",
+        href: "/dashboard/operating",
+        icon: Building2,
+        adaptiveConfig: {
+          visibleFor: ["beginner", "intermediate", "advanced"],
+          complexity: "essential",
+          badge: "new",
+          isCore: true,
+          helpText: "Unified client operating dashboard for leads, packages, revenue, and active lanes",
+        },
+      },
+      {
         name: "Outreach",
         href: "/dashboard/outreach",
         icon: Send,
