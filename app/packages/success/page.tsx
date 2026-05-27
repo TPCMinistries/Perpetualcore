@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Navbar } from "@/components/landing/Navbar";
 import { Footer } from "@/components/landing/Footer";
@@ -13,6 +13,13 @@ const NEXT_STEPS = [
   "Send your intake context so we can identify the first operating lane.",
   "We review the payment, company context, and best-fit package path.",
   "You receive the onboarding window, prep notes, and any access instructions.",
+];
+
+const PREP_CHECKLIST = [
+  "The company or team this package is for",
+  "The workflow, department, or product surface you want to start with",
+  "The files, systems, or notes we should understand before kickoff",
+  "The business result that would make the first 30 days worthwhile",
 ];
 
 export default function PackageSuccessPage({
@@ -42,6 +49,19 @@ export default function PackageSuccessPage({
             Your package payment was received through Stripe. The next step is intake context:
             what company, department, workflow, data, and outcome we should orient around.
           </p>
+          <div className="mb-10 border border-border bg-surface-hover/40 p-6">
+            <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground mb-5">
+              Have this ready
+            </p>
+            <div className="grid gap-3 sm:grid-cols-2">
+              {PREP_CHECKLIST.map((item) => (
+                <div key={item} className="flex items-start gap-3">
+                  <Check className="mt-0.5 h-4 w-4 flex-shrink-0 text-foreground" />
+                  <span className="text-sm leading-6 text-muted-foreground">{item}</span>
+                </div>
+              ))}
+            </div>
+          </div>
           <div className="flex flex-col sm:flex-row gap-3">
             <Button asChild className="text-sm font-medium h-10 px-5 shadow-none bg-foreground text-background hover:bg-foreground/90 rounded-[6px]">
               <Link href={intakeHref}>

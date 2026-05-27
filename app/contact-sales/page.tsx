@@ -32,8 +32,11 @@ import { toast } from "sonner";
 type SubmitState = "idle" | "submitting" | "success" | "error";
 
 const PLAN_OPTIONS = [
+  { value: "software-access", label: "Software access" },
   { value: "guided-setup", label: "Guided setup package" },
   { value: "first-workflow", label: "First workflow package" },
+  { value: "operating-lane-deposit", label: "90-day operating lane deposit" },
+  { value: "manual-invoice", label: "Manual invoice / ACH" },
   { value: "company-ai-os", label: "Company-wide AI operating system" },
   { value: "department-ai-os", label: "Department or operating unit install" },
   { value: "studio-sprint-30", label: "First workflow / proof-of-value sprint" },
@@ -71,6 +74,25 @@ const WHAT_HAPPENS_NEXT = [
   },
 ];
 
+const INTAKE_PROMPTS = [
+  {
+    title: "Company map",
+    body: "Which teams, locations, roles, or customer handoffs should the operating system understand?",
+  },
+  {
+    title: "First workflow",
+    body: "Where is time, revenue, quality, reporting, or response speed being lost right now?",
+  },
+  {
+    title: "Existing systems",
+    body: "Which tools, docs, inboxes, CRMs, spreadsheets, or databases already hold the context?",
+  },
+  {
+    title: "Success metric",
+    body: "What would make the first package obviously worth continuing or expanding?",
+  },
+];
+
 function SectionRail({ index, label }: { index: string; label: string }) {
   return (
     <div className="flex items-baseline gap-3 text-muted-foreground">
@@ -87,6 +109,7 @@ function ContactSalesForm() {
   const intentFromUrl = searchParams.get("intent") || "";
   const sessionFromUrl = searchParams.get("session_id") || "";
   const isPostPaymentIntake = intentFromUrl === "post-payment-intake";
+  const isManualInvoice = intentFromUrl === "manual-invoice";
 
   const [formData, setFormData] = useState({
     name: "",
@@ -94,7 +117,7 @@ function ContactSalesForm() {
     company: "",
     phone: "",
     employees: "",
-    plan: planFromUrl || (isPostPaymentIntake ? "guided-setup" : "company-ai-os"),
+    plan: planFromUrl || (isManualInvoice ? "manual-invoice" : isPostPaymentIntake ? "guided-setup" : "company-ai-os"),
     product: productFromUrl,
     message: isPostPaymentIntake
       ? `I already completed a Perpetual Core package checkout${sessionFromUrl ? ` (${sessionFromUrl})` : ""}. Here is the operating context we should use for onboarding: `
@@ -166,6 +189,8 @@ function ContactSalesForm() {
             <p className="mt-8 text-lg sm:text-xl text-muted-foreground leading-[1.65] max-w-2xl">
               {isPostPaymentIntake
                 ? "Your payment is in. Use this form to send the operating context we need before the first onboarding call."
+                : isManualInvoice
+                  ? "Use this form when the buying process needs ACH, procurement review, a custom first payment, or a manual Stripe invoice."
                 : "Perpetual Core installs AI operating systems across sales, operations, knowledge, customer communication, and leadership visibility. We can start with one high-leverage workflow, but we scope it with the larger company system in view."}
               {productFromUrl && (
                 <>
@@ -187,6 +212,15 @@ function ContactSalesForm() {
         <div className="container mx-auto px-6 sm:px-8">
           <div className="grid lg:grid-cols-[1fr_320px] gap-12 lg:gap-16">
             <form onSubmit={handleSubmit} className="space-y-6">
+              <div className="grid gap-3 sm:grid-cols-2">
+                {INTAKE_PROMPTS.map((prompt) => (
+                  <div key={prompt.title} className="border border-border bg-surface-hover/40 p-4">
+                    <p className="text-sm font-medium text-foreground">{prompt.title}</p>
+                    <p className="mt-2 text-sm leading-5 text-muted-foreground">{prompt.body}</p>
+                  </div>
+                ))}
+              </div>
+
               <div className="grid sm:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="name" className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground">

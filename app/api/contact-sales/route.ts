@@ -54,8 +54,11 @@ const companySizeValues = [
 ] as const;
 
 const planValues = [
+  "software-access",
   "guided-setup",
   "first-workflow",
+  "operating-lane-deposit",
+  "manual-invoice",
   "company-ai-os",
   "department-ai-os",
   "studio-sprint-30",
