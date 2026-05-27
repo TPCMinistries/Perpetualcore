@@ -698,14 +698,14 @@ export const NAVIGATION_CONFIG_V2: NavigationSection[] = [
     bgColor: "bg-muted/30",
     items: [
       {
-        name: "Home",
+        name: "Briefing",
         href: "/dashboard/home",
         icon: LayoutDashboard,
         adaptiveConfig: {
           visibleFor: ["beginner", "intermediate", "advanced"],
           complexity: "essential",
           isCore: true,
-          helpText: "Your daily briefing - priorities, insights, and what needs attention",
+          helpText: "Daily briefing, priorities, insights, and what needs attention",
         },
       },
       {

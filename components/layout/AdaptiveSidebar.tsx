@@ -51,7 +51,7 @@ export function AdaptiveSidebar({ profile, isCollapsed }: AdaptiveSidebarProps) 
   };
 
   const isActive = (href: string) => {
-    if (href === "/dashboard/home" && pathname === "/dashboard") {
+    if (href === "/dashboard/operating" && pathname === "/dashboard") {
       return true;
     }
     return pathname === href || pathname.startsWith(href + "/");
@@ -76,7 +76,7 @@ export function AdaptiveSidebar({ profile, isCollapsed }: AdaptiveSidebarProps) 
     <div className="flex h-full flex-col overflow-hidden bg-gradient-to-b from-[#1e1535] via-[#1a1040] to-[#150e2e] text-white">
       {/* Logo/Brand */}
       <div className={`py-5 ${isCollapsed ? "px-2" : "px-5"}`}>
-        <Link href="/dashboard/home" className={`flex items-center ${isCollapsed ? "justify-center" : "space-x-3"}`}>
+        <Link href="/dashboard/operating" className={`flex items-center ${isCollapsed ? "justify-center" : "space-x-3"}`}>
           <div className="h-9 w-9 rounded-xl bg-gradient-to-br from-violet-500 via-blue-500 to-cyan-400 flex items-center justify-center font-bold text-white text-sm shadow-glow-sm flex-shrink-0">
             AI
           </div>
