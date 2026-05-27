@@ -5,6 +5,7 @@ import { getUser, signOut } from "@/lib/auth/actions";
 const primaryNav = [
   { label: "Operating", href: "/dashboard" },
   { label: "Leads", href: "/dashboard/leads" },
+  { label: "Accounts", href: "/dashboard/account-plan" },
   { label: "Scripts", href: "/dashboard/sales-script" },
   { label: "Packages", href: "/packages" },
   { label: "Briefing", href: "/dashboard/home" },
