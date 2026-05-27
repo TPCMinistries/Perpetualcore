@@ -24,6 +24,7 @@ import { CaptureReadinessButton } from "@/components/rfp/CaptureReadinessButton"
 import { CaptureCommandCenter } from "@/components/rfp/CaptureCommandCenter";
 import { ExportProposalButton } from "@/components/rfp/ExportProposalButton";
 import { SubmissionReadinessPanel } from "@/components/rfp/SubmissionReadinessPanel";
+import { SubmissionPlanPanel } from "@/components/rfp/SubmissionPlanPanel";
 import type { CitationChunk } from "@/components/rfp/MarkupRenderer";
 import type {
   BidNoBidArtifact,
@@ -421,6 +422,14 @@ export default async function ProposalPage({
         </div>
         <SubmissionReadinessPanel
           bidNoBid={bidNoBid}
+          complianceMatrix={complianceMatrix}
+          packetChecklist={packetChecklist}
+          reviewerResult={reviewerResult}
+          verifyMarkerCount={verifyMarkerCount}
+          sectionCount={visibleSections.length}
+        />
+        <SubmissionPlanPanel
+          dueDate={proposal.due_date}
           complianceMatrix={complianceMatrix}
           packetChecklist={packetChecklist}
           reviewerResult={reviewerResult}
