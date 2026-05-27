@@ -4,6 +4,7 @@ import Link from "next/link";
 import {
   ArrowRight,
   Building2,
+  CalendarDays,
   CheckCircle2,
   Clipboard,
   FileText,
@@ -105,6 +106,64 @@ const offerPath = [
     title: "90-day operating lane",
     detail: "If they want you involved as AI consultant/operator, move into a managed operating lane.",
     href: "/contact-sales?plan=operating-lane-deposit",
+  },
+];
+
+const qualificationScorecard = [
+  {
+    signal: "Operational pain",
+    strong: "They can name a workflow costing time, revenue, visibility, or service quality.",
+    weak: "They only want to hear about AI in general.",
+  },
+  {
+    signal: "Executive sponsor",
+    strong: "An owner, president, or department head will join the second conversation.",
+    weak: "The conversation stays with a curious individual who cannot authorize change.",
+  },
+  {
+    signal: "Systems access",
+    strong: "They can identify the tools, inboxes, spreadsheets, CRMs, docs, or calendars involved.",
+    weak: "They cannot explain where the work currently happens.",
+  },
+  {
+    signal: "Budget shape",
+    strong: "They understand there is software plus implementation, even if the first invoice is scoped.",
+    weak: "They expect a subscription to solve the business problem by itself.",
+  },
+];
+
+const firstCallAgenda = [
+  "Clarify the business outcome they would pay to improve.",
+  "Map the current workflow from request to completion.",
+  "Identify who owns sales, operations, admin, and leadership reporting.",
+  "Name the data and systems the AI operating layer would need.",
+  "Choose the smallest paid lane that proves real value.",
+];
+
+const packagePicker = [
+  {
+    trigger: "They ask, 'Can I just try the software?'",
+    recommendation: "Software Access",
+    href: "/packages",
+    reason: "Use this when the buyer is product-curious but not ready for implementation.",
+  },
+  {
+    trigger: "They trust you but need a small first invoice.",
+    recommendation: "Guided Setup",
+    href: "/contact-sales?plan=guided-setup",
+    reason: "Use this to configure one product surface and establish the working relationship.",
+  },
+  {
+    trigger: "They have a painful workflow right now.",
+    recommendation: "First Workflow Package",
+    href: "/contact-sales?plan=first-workflow",
+    reason: "Use this when value depends on installing AI into sales, ops, admin, or reporting.",
+  },
+  {
+    trigger: "They want you as AI consultant/operator.",
+    recommendation: "90-Day Operating Lane",
+    href: "/contact-sales?plan=operating-lane-deposit",
+    reason: "Use this for Empire-style accounts where the goal is a company operating layer.",
   },
 ];
 
@@ -243,6 +302,82 @@ export default function AccountPlanPage() {
                 ))}
               </ul>
             </div>
+          ))}
+        </CardContent>
+      </Card>
+
+      <div className="grid gap-6 lg:grid-cols-[0.9fr_1.1fr]">
+        <Card className="rounded-lg shadow-none">
+          <CardHeader>
+            <div className="flex items-center justify-between gap-4">
+              <CardTitle className="text-xl">First-call agenda</CardTitle>
+              <CalendarDays className="h-5 w-5 text-muted-foreground" />
+            </div>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            {firstCallAgenda.map((item, index) => (
+              <div key={item} className="flex gap-3 rounded-lg border bg-card p-4">
+                <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-primary">
+                  {String(index + 1).padStart(2, "0")}
+                </span>
+                <p className="text-sm leading-6 text-muted-foreground">{item}</p>
+              </div>
+            ))}
+          </CardContent>
+        </Card>
+
+        <Card className="rounded-lg shadow-none">
+          <CardHeader>
+            <div className="flex items-center justify-between gap-4">
+              <CardTitle className="text-xl">Qualification scorecard</CardTitle>
+              <CheckCircle2 className="h-5 w-5 text-muted-foreground" />
+            </div>
+          </CardHeader>
+          <CardContent className="grid gap-3 md:grid-cols-2">
+            {qualificationScorecard.map((item) => (
+              <div key={item.signal} className="rounded-lg border bg-card p-4">
+                <p className="text-sm font-semibold text-foreground">{item.signal}</p>
+                <div className="mt-4 space-y-3">
+                  <div>
+                    <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-primary">
+                      Strong
+                    </p>
+                    <p className="mt-1 text-sm leading-5 text-muted-foreground">{item.strong}</p>
+                  </div>
+                  <div>
+                    <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
+                      Weak
+                    </p>
+                    <p className="mt-1 text-sm leading-5 text-muted-foreground">{item.weak}</p>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </CardContent>
+        </Card>
+      </div>
+
+      <Card className="rounded-lg shadow-none">
+        <CardHeader>
+          <div className="flex items-center justify-between gap-4">
+            <CardTitle className="text-xl">Package picker</CardTitle>
+            <PackageCheck className="h-5 w-5 text-muted-foreground" />
+          </div>
+        </CardHeader>
+        <CardContent className="grid gap-3 lg:grid-cols-4">
+          {packagePicker.map((item) => (
+            <Link
+              key={item.recommendation}
+              href={item.href}
+              className="group flex min-h-full flex-col rounded-lg border bg-card p-4 transition hover:border-primary/50 hover:bg-primary/[0.03]"
+            >
+              <p className="text-sm leading-5 text-muted-foreground">{item.trigger}</p>
+              <p className="mt-4 text-sm font-semibold text-foreground">{item.recommendation}</p>
+              <p className="mt-2 flex-1 text-sm leading-5 text-muted-foreground">{item.reason}</p>
+              <span className="mt-4 inline-flex items-center text-sm font-medium text-foreground">
+                Open path <ArrowRight className="ml-2 h-4 w-4 transition group-hover:translate-x-0.5" />
+              </span>
+            </Link>
           ))}
         </CardContent>
       </Card>
