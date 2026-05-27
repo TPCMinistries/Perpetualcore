@@ -1,5 +1,6 @@
 "use client";
 
+import { useMemo, useState } from "react";
 import Link from "next/link";
 import {
   ArrowRight,
@@ -57,6 +58,25 @@ const proposalLanes = [
     cta: "/contact-sales?plan=operating-lane-deposit",
   },
 ];
+
+const buyerTypes = [
+  "Regional operator",
+  "Small business",
+  "Professional service firm",
+  "Nonprofit / institution",
+  "Product-only buyer",
+];
+
+const workflowOptions = [
+  "Sales intake and follow-up",
+  "Quote / proposal workflow",
+  "Customer service and issue resolution",
+  "Internal knowledge and training",
+  "Leadership reporting",
+  "Operations coordination",
+];
+
+const timelineOptions = ["2-3 weeks", "30 days", "60 days", "90 days"];
 
 const scopeBlocks = [
   {
@@ -128,6 +148,43 @@ async function copyText(text: string) {
 }
 
 export default function ProposalsPage() {
+  const [buyerName, setBuyerName] = useState("Empire-style regional operator");
+  const [buyerType, setBuyerType] = useState(buyerTypes[0]);
+  const [workflow, setWorkflow] = useState(workflowOptions[0]);
+  const [businessOutcome, setBusinessOutcome] = useState(
+    "faster response, cleaner handoffs, better follow-up, and clearer leadership visibility"
+  );
+  const [selectedLaneName, setSelectedLaneName] = useState(proposalLanes[2].name);
+  const [timeline, setTimeline] = useState(timelineOptions[3]);
+  const [nextStep, setNextStep] = useState(
+    "confirm the starting lane, identify the working team, and issue the first invoice"
+  );
+
+  const selectedLane = proposalLanes.find((lane) => lane.name === selectedLaneName) ?? proposalLanes[2];
+  const generatedProposal = useMemo(() => {
+    return [
+      `Proposal direction for ${buyerName}`,
+      "",
+      `Buyer type: ${buyerType}`,
+      `Recommended lane: ${selectedLane.name} (${selectedLane.price})`,
+      `Starting workflow: ${workflow}`,
+      `Target outcome: ${businessOutcome}`,
+      `Timeline: ${timeline}`,
+      "",
+      "Positioning",
+      "The goal is not to add another AI tool. The goal is to install an AI operating layer into a workflow that already matters to the company, prove measurable value, and then expand from there.",
+      "",
+      "Recommended scope",
+      ...scopeBlocks.map((block) => `- ${block.title}: ${block.copy}`),
+      "",
+      "Deliverables",
+      ...selectedLane.deliverables.map((deliverable) => `- ${deliverable}`),
+      "",
+      "Next step",
+      `If this direction is right, the next step is to ${nextStep}.`,
+    ].join("\n");
+  }, [businessOutcome, buyerName, buyerType, nextStep, selectedLane, timeline, workflow]);
+
   return (
     <div className="space-y-6 pb-10">
       <div className="rounded-xl border border-border bg-background p-6">
@@ -159,6 +216,141 @@ export default function ProposalsPage() {
           </div>
         </div>
       </div>
+
+      <Card className="rounded-lg shadow-none">
+        <CardHeader>
+          <div className="flex items-center justify-between gap-4">
+            <div>
+              <CardTitle className="text-xl">Proposal composer</CardTitle>
+              <p className="mt-2 text-sm leading-6 text-muted-foreground">
+                Fill in the buyer context and generate a clean proposal draft you can copy into email,
+                a document, or a manual invoice note.
+              </p>
+            </div>
+            <FileText className="h-5 w-5 flex-shrink-0 text-muted-foreground" />
+          </div>
+        </CardHeader>
+        <CardContent>
+          <div className="grid gap-6 lg:grid-cols-[0.92fr_1.08fr]">
+            <div className="grid gap-4">
+              <label className="grid gap-2">
+                <span className="text-sm font-medium text-foreground">Buyer / account</span>
+                <input
+                  value={buyerName}
+                  onChange={(event) => setBuyerName(event.target.value)}
+                  className="min-h-11 rounded-md border border-input bg-background px-3 py-2 text-sm outline-none transition focus-visible:ring-2 focus-visible:ring-ring"
+                />
+              </label>
+
+              <div className="grid gap-4 md:grid-cols-2">
+                <label className="grid gap-2">
+                  <span className="text-sm font-medium text-foreground">Buyer type</span>
+                  <select
+                    value={buyerType}
+                    onChange={(event) => setBuyerType(event.target.value)}
+                    className="min-h-11 rounded-md border border-input bg-background px-3 py-2 text-sm outline-none transition focus-visible:ring-2 focus-visible:ring-ring"
+                  >
+                    {buyerTypes.map((type) => (
+                      <option key={type} value={type}>
+                        {type}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+
+                <label className="grid gap-2">
+                  <span className="text-sm font-medium text-foreground">Starting workflow</span>
+                  <select
+                    value={workflow}
+                    onChange={(event) => setWorkflow(event.target.value)}
+                    className="min-h-11 rounded-md border border-input bg-background px-3 py-2 text-sm outline-none transition focus-visible:ring-2 focus-visible:ring-ring"
+                  >
+                    {workflowOptions.map((option) => (
+                      <option key={option} value={option}>
+                        {option}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+              </div>
+
+              <div className="grid gap-4 md:grid-cols-2">
+                <label className="grid gap-2">
+                  <span className="text-sm font-medium text-foreground">Recommended lane</span>
+                  <select
+                    value={selectedLaneName}
+                    onChange={(event) => setSelectedLaneName(event.target.value)}
+                    className="min-h-11 rounded-md border border-input bg-background px-3 py-2 text-sm outline-none transition focus-visible:ring-2 focus-visible:ring-ring"
+                  >
+                    {proposalLanes.map((lane) => (
+                      <option key={lane.name} value={lane.name}>
+                        {lane.name} - {lane.price}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+
+                <label className="grid gap-2">
+                  <span className="text-sm font-medium text-foreground">Timeline</span>
+                  <select
+                    value={timeline}
+                    onChange={(event) => setTimeline(event.target.value)}
+                    className="min-h-11 rounded-md border border-input bg-background px-3 py-2 text-sm outline-none transition focus-visible:ring-2 focus-visible:ring-ring"
+                  >
+                    {timelineOptions.map((option) => (
+                      <option key={option} value={option}>
+                        {option}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+              </div>
+
+              <label className="grid gap-2">
+                <span className="text-sm font-medium text-foreground">Business outcome</span>
+                <textarea
+                  value={businessOutcome}
+                  onChange={(event) => setBusinessOutcome(event.target.value)}
+                  rows={3}
+                  className="rounded-md border border-input bg-background px-3 py-2 text-sm leading-6 outline-none transition focus-visible:ring-2 focus-visible:ring-ring"
+                />
+              </label>
+
+              <label className="grid gap-2">
+                <span className="text-sm font-medium text-foreground">Next step</span>
+                <input
+                  value={nextStep}
+                  onChange={(event) => setNextStep(event.target.value)}
+                  className="min-h-11 rounded-md border border-input bg-background px-3 py-2 text-sm outline-none transition focus-visible:ring-2 focus-visible:ring-ring"
+                />
+              </label>
+            </div>
+
+            <div className="flex min-h-full flex-col rounded-lg border bg-slate-950 p-4 text-white">
+              <div className="mb-4 flex items-center justify-between gap-4">
+                <div>
+                  <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-violet-200">
+                    Generated draft
+                  </p>
+                  <p className="mt-1 text-sm text-slate-300">{selectedLane.name} proposal language</p>
+                </div>
+                <Button
+                  type="button"
+                  variant="secondary"
+                  className="rounded-md"
+                  onClick={() => copyText(generatedProposal)}
+                >
+                  <Clipboard className="mr-2 h-4 w-4" />
+                  Copy
+                </Button>
+              </div>
+              <pre className="min-h-[360px] flex-1 whitespace-pre-wrap rounded-md bg-white/[0.06] p-4 text-sm leading-6 text-slate-100">
+                {generatedProposal}
+              </pre>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
       <div className="grid gap-4 lg:grid-cols-3">
         {proposalLanes.map((lane) => (
