@@ -17,6 +17,7 @@ import {
   RefreshCw,
   ShieldCheck,
   Sparkles,
+  Target,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -64,6 +65,25 @@ type OperatingData = {
     priority: string;
     href: string;
   }>;
+};
+
+type SourceLead = {
+  id: string;
+  name?: string | null;
+  contact_name?: string | null;
+  first_name?: string | null;
+  last_name?: string | null;
+  email?: string | null;
+  contact_email?: string | null;
+  phone?: string | null;
+  company?: string | null;
+  company_name?: string | null;
+  title?: string | null;
+  status: string | null;
+  estimated_value?: number | null;
+  notes?: string | null;
+  next_follow_up_at?: string | null;
+  updated_at: string;
 };
 
 const emptyData: OperatingData = {
@@ -144,11 +164,65 @@ function normalizeStatus(status: string) {
   return status.replace(/_/g, " ").replace(/\b\w/g, (letter) => letter.toUpperCase());
 }
 
+function formatCurrency(value?: number | null) {
+  return new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: "USD",
+    maximumFractionDigits: 0,
+  }).format(value || 0);
+}
+
+function getLeadName(lead: SourceLead) {
+  const composedName = [lead.first_name, lead.last_name].filter(Boolean).join(" ").trim();
+  return lead.name || lead.contact_name || composedName || lead.email || lead.contact_email || "Unnamed lead";
+}
+
+function getLeadCompany(lead: SourceLead) {
+  return lead.company || lead.company_name || "";
+}
+
+function getRecommendedPackageId(lead: SourceLead) {
+  const value = lead.estimated_value || 0;
+  const text = `${lead.title || ""} ${lead.notes || ""}`.toLowerCase();
+
+  if (value >= 15000 || text.includes("enterprise") || text.includes("operating system")) {
+    return "operating-lane-deposit";
+  }
+
+  if (value >= 7500 || text.includes("workflow")) {
+    return "first-workflow";
+  }
+
+  if (value >= 1000 || text.includes("setup")) {
+    return "guided-setup";
+  }
+
+  return "software-access";
+}
+
+function getAccountLane(lead: SourceLead) {
+  const packageId = getRecommendedPackageId(lead);
+  const lane = lanePlaybook.find((item) => {
+    if (packageId === "software-access") return item.lane === "Software Access";
+    if (packageId === "guided-setup") return item.lane === "Guided Setup";
+    if (packageId === "first-workflow") return item.lane === "First Workflow";
+    return item.lane === "90-Day Operating Lane";
+  });
+
+  return {
+    packageId,
+    label: lane?.lane || "First Workflow",
+    detail: lane?.action || "Confirm the first operating lane and next delivery action.",
+  };
+}
+
 export default function AccountsPage() {
   const [data, setData] = useState<OperatingData>(emptyData);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [sourceLeadId, setSourceLeadId] = useState("");
+  const [sourceLead, setSourceLead] = useState<SourceLead | null>(null);
+  const [sourceLeadLoading, setSourceLeadLoading] = useState(false);
 
   async function fetchAccounts() {
     setLoading(true);
@@ -166,10 +240,29 @@ export default function AccountsPage() {
     }
   }
 
+  async function fetchSourceLead(leadId: string) {
+    setSourceLeadLoading(true);
+
+    try {
+      const response = await fetch(`/api/leads/${leadId}`, { cache: "no-store" });
+      if (!response.ok) throw new Error("Failed to load source lead");
+      const result = (await response.json()) as { lead: SourceLead };
+      setSourceLead(result.lead);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to load source lead");
+    } finally {
+      setSourceLeadLoading(false);
+    }
+  }
+
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
-    setSourceLeadId(params.get("lead") || "");
+    const leadId = params.get("lead") || "";
+    setSourceLeadId(leadId);
     fetchAccounts();
+    if (leadId) {
+      fetchSourceLead(leadId);
+    }
   }, []);
 
   const paidAccounts = useMemo(
@@ -221,19 +314,108 @@ export default function AccountsPage() {
       ) : null}
 
       {sourceLeadId ? (
-        <div className="flex flex-col gap-3 rounded-lg border border-violet-200 bg-violet-50 p-4 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <p className="text-sm font-semibold text-violet-950">Opened from a lead record</p>
-            <p className="mt-1 text-sm leading-5 text-violet-800">
-              Use this account workspace to confirm the close path, handoff state, and first delivery lane.
-            </p>
-          </div>
-          <Button asChild variant="outline" className="shrink-0 rounded-md border-violet-200 bg-white">
-            <Link href={`/dashboard/leads?lead=${encodeURIComponent(sourceLeadId)}`}>
-              Return to lead
-            </Link>
-          </Button>
-        </div>
+        <Card className="overflow-hidden rounded-lg border-violet-200 shadow-none">
+          <CardContent className="p-0">
+            <div className="grid gap-0 lg:grid-cols-[1.1fr_0.9fr]">
+              <div className="bg-violet-50 p-5">
+                <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                  <div>
+                    <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-violet-700">
+                      Source lead context
+                    </p>
+                    {sourceLeadLoading ? (
+                      <p className="mt-3 text-sm text-violet-900">Loading lead context...</p>
+                    ) : sourceLead ? (
+                      <>
+                        <h2 className="mt-3 text-xl font-semibold text-violet-950">
+                          {getLeadCompany(sourceLead) || getLeadName(sourceLead)}
+                        </h2>
+                        <p className="mt-1 text-sm text-violet-800">
+                          {getLeadName(sourceLead)}
+                          {sourceLead.title ? ` - ${sourceLead.title}` : ""}
+                        </p>
+                      </>
+                    ) : (
+                      <p className="mt-3 text-sm text-violet-900">
+                        Opened from a lead record. Use this workspace to confirm the handoff.
+                      </p>
+                    )}
+                  </div>
+                  <Button asChild variant="outline" className="shrink-0 rounded-md border-violet-200 bg-white">
+                    <Link href={`/dashboard/leads?lead=${encodeURIComponent(sourceLeadId)}`}>
+                      Return to lead
+                    </Link>
+                  </Button>
+                </div>
+
+                {sourceLead ? (
+                  <div className="mt-5 grid gap-3 sm:grid-cols-3">
+                    <div className="rounded-md border border-violet-200 bg-white p-3">
+                      <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-slate-500">Status</p>
+                      <p className="mt-2 text-sm font-semibold text-slate-950">
+                        {normalizeStatus(sourceLead.status || "new")}
+                      </p>
+                    </div>
+                    <div className="rounded-md border border-violet-200 bg-white p-3">
+                      <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-slate-500">Value</p>
+                      <p className="mt-2 text-sm font-semibold text-slate-950">
+                        {sourceLead.estimated_value ? formatCurrency(sourceLead.estimated_value) : "Scope pending"}
+                      </p>
+                    </div>
+                    <div className="rounded-md border border-violet-200 bg-white p-3">
+                      <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-slate-500">
+                        Next touch
+                      </p>
+                      <p className="mt-2 text-sm font-semibold text-slate-950">
+                        {sourceLead.next_follow_up_at ? formatDate(sourceLead.next_follow_up_at) : "Not scheduled"}
+                      </p>
+                    </div>
+                  </div>
+                ) : null}
+              </div>
+
+              <div className="border-t border-violet-100 bg-white p-5 lg:border-l lg:border-t-0">
+                {sourceLead ? (
+                  <>
+                    {(() => {
+                      const lane = getAccountLane(sourceLead);
+                      const packageHref = `/packages?lead=${encodeURIComponent(sourceLead.id)}&package=${encodeURIComponent(lane.packageId)}`;
+                      return (
+                        <div>
+                          <div className="flex items-start gap-3">
+                            <div className="rounded-md bg-violet-100 p-2 text-violet-700">
+                              <Target className="h-4 w-4" />
+                            </div>
+                            <div>
+                              <p className="text-sm font-semibold text-slate-950">{lane.label}</p>
+                              <p className="mt-1 text-sm leading-5 text-slate-600">{lane.detail}</p>
+                            </div>
+                          </div>
+                          <div className="mt-5 grid gap-2 sm:grid-cols-2">
+                            <Button asChild className="rounded-md">
+                              <Link href={packageHref}>
+                                Send package <ArrowRight className="ml-2 h-4 w-4" />
+                              </Link>
+                            </Button>
+                            <Button asChild variant="outline" className="rounded-md">
+                              <Link href={`/dashboard/proposals?lead=${encodeURIComponent(sourceLead.id)}`}>
+                                Draft proposal
+                              </Link>
+                            </Button>
+                          </div>
+                        </div>
+                      );
+                    })()}
+                  </>
+                ) : (
+                  <p className="text-sm leading-6 text-slate-600">
+                    Once the lead loads, this panel will show the recommended account lane and next action.
+                  </p>
+                )}
+              </div>
+            </div>
+          </CardContent>
+        </Card>
       ) : null}
 
       <div className="grid gap-4 md:grid-cols-4">
