@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import {
   ArrowRight,
@@ -19,6 +19,22 @@ import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+
+interface LeadSummary {
+  id: string;
+  name: string;
+  company?: string | null;
+  status?: string | null;
+  estimated_value?: number | null;
+}
+
+interface SavedProposal {
+  id: string;
+  title: string;
+  description?: string | null;
+  to_value?: string | null;
+  created_at: string;
+}
 
 const proposalLanes = [
   {
@@ -148,6 +164,12 @@ async function copyText(text: string) {
 }
 
 export default function ProposalsPage() {
+  const [leads, setLeads] = useState<LeadSummary[]>([]);
+  const [selectedLeadId, setSelectedLeadId] = useState("");
+  const [proposalHistory, setProposalHistory] = useState<SavedProposal[]>([]);
+  const [loadingLeads, setLoadingLeads] = useState(true);
+  const [loadingHistory, setLoadingHistory] = useState(false);
+  const [savingProposal, setSavingProposal] = useState(false);
   const [buyerName, setBuyerName] = useState("Empire-style regional operator");
   const [buyerType, setBuyerType] = useState(buyerTypes[0]);
   const [workflow, setWorkflow] = useState(workflowOptions[0]);
@@ -161,6 +183,7 @@ export default function ProposalsPage() {
   );
 
   const selectedLane = proposalLanes.find((lane) => lane.name === selectedLaneName) ?? proposalLanes[2];
+  const selectedLead = leads.find((lead) => lead.id === selectedLeadId);
   const generatedProposal = useMemo(() => {
     return [
       `Proposal direction for ${buyerName}`,
@@ -184,6 +207,86 @@ export default function ProposalsPage() {
       `If this direction is right, the next step is to ${nextStep}.`,
     ].join("\n");
   }, [businessOutcome, buyerName, buyerType, nextStep, selectedLane, timeline, workflow]);
+
+  useEffect(() => {
+    async function fetchLeads() {
+      try {
+        setLoadingLeads(true);
+        const response = await fetch("/api/leads?limit=100");
+        if (!response.ok) throw new Error("Failed to fetch leads");
+        const data = (await response.json()) as { leads?: LeadSummary[] };
+        setLeads(data.leads || []);
+      } catch (error) {
+        console.error("Proposal lead fetch error:", error);
+        toast.error("Could not load leads");
+      } finally {
+        setLoadingLeads(false);
+      }
+    }
+
+    fetchLeads();
+  }, []);
+
+  useEffect(() => {
+    if (!selectedLead) return;
+    setBuyerName(selectedLead.company || selectedLead.name);
+  }, [selectedLead]);
+
+  useEffect(() => {
+    async function fetchProposalHistory() {
+      if (!selectedLeadId) {
+        setProposalHistory([]);
+        return;
+      }
+
+      try {
+        setLoadingHistory(true);
+        const response = await fetch(`/api/leads/${selectedLeadId}/proposals`);
+        if (!response.ok) throw new Error("Failed to fetch proposal history");
+        const data = (await response.json()) as { proposals?: SavedProposal[] };
+        setProposalHistory(data.proposals || []);
+      } catch (error) {
+        console.error("Proposal history fetch error:", error);
+        toast.error("Could not load proposal history");
+      } finally {
+        setLoadingHistory(false);
+      }
+    }
+
+    fetchProposalHistory();
+  }, [selectedLeadId]);
+
+  const saveProposalToLead = async () => {
+    if (!selectedLeadId) {
+      toast.error("Choose a lead before saving");
+      return;
+    }
+
+    try {
+      setSavingProposal(true);
+      const response = await fetch(`/api/leads/${selectedLeadId}/proposals`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          title: `${selectedLane.name} proposal for ${buyerName}`,
+          lane: selectedLane.name,
+          proposalText: generatedProposal,
+        }),
+      });
+
+      if (!response.ok) throw new Error("Failed to save proposal");
+      const data = (await response.json()) as { proposal?: SavedProposal };
+      if (data.proposal) {
+        setProposalHistory((current) => [data.proposal as SavedProposal, ...current]);
+      }
+      toast.success("Proposal saved to lead");
+    } catch (error) {
+      console.error("Proposal save error:", error);
+      toast.error("Could not save proposal");
+    } finally {
+      setSavingProposal(false);
+    }
+  };
 
   return (
     <div className="space-y-6 pb-10">
@@ -233,6 +336,23 @@ export default function ProposalsPage() {
         <CardContent>
           <div className="grid gap-6 lg:grid-cols-[0.92fr_1.08fr]">
             <div className="grid gap-4">
+              <label className="grid gap-2">
+                <span className="text-sm font-medium text-foreground">Attach to lead</span>
+                <select
+                  value={selectedLeadId}
+                  onChange={(event) => setSelectedLeadId(event.target.value)}
+                  disabled={loadingLeads}
+                  className="min-h-11 rounded-md border border-input bg-background px-3 py-2 text-sm outline-none transition focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  <option value="">{loadingLeads ? "Loading leads..." : "Choose a lead"}</option>
+                  {leads.map((lead) => (
+                    <option key={lead.id} value={lead.id}>
+                      {lead.company ? `${lead.company} - ${lead.name}` : lead.name}
+                    </option>
+                  ))}
+                </select>
+              </label>
+
               <label className="grid gap-2">
                 <span className="text-sm font-medium text-foreground">Buyer / account</span>
                 <input
@@ -343,12 +463,86 @@ export default function ProposalsPage() {
                   <Clipboard className="mr-2 h-4 w-4" />
                   Copy
                 </Button>
+                <Button
+                  type="button"
+                  className="rounded-md"
+                  onClick={saveProposalToLead}
+                  disabled={!selectedLeadId || savingProposal}
+                >
+                  <FileText className="mr-2 h-4 w-4" />
+                  {savingProposal ? "Saving..." : "Save"}
+                </Button>
               </div>
               <pre className="min-h-[360px] flex-1 whitespace-pre-wrap rounded-md bg-white/[0.06] p-4 text-sm leading-6 text-slate-100">
                 {generatedProposal}
               </pre>
             </div>
           </div>
+        </CardContent>
+      </Card>
+
+      <Card className="rounded-lg shadow-none">
+        <CardHeader>
+          <div className="flex items-center justify-between gap-4">
+            <div>
+              <CardTitle className="text-xl">Saved proposal history</CardTitle>
+              <p className="mt-2 text-sm leading-6 text-muted-foreground">
+                Select a lead in the composer to see proposal drafts saved against that opportunity.
+              </p>
+            </div>
+            <FileText className="h-5 w-5 flex-shrink-0 text-muted-foreground" />
+          </div>
+        </CardHeader>
+        <CardContent>
+          {!selectedLeadId ? (
+            <div className="rounded-lg border bg-card p-6 text-sm text-muted-foreground">
+              Choose a lead to view saved proposals.
+            </div>
+          ) : loadingHistory ? (
+            <div className="rounded-lg border bg-card p-6 text-sm text-muted-foreground">
+              Loading proposal history...
+            </div>
+          ) : proposalHistory.length === 0 ? (
+            <div className="rounded-lg border bg-card p-6 text-sm text-muted-foreground">
+              No saved proposals for this lead yet.
+            </div>
+          ) : (
+            <div className="grid gap-3">
+              {proposalHistory.map((proposal) => (
+                <div key={proposal.id} className="rounded-lg border bg-card p-4">
+                  <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                    <div>
+                      <div className="flex flex-wrap items-center gap-2">
+                        <p className="text-sm font-semibold text-foreground">{proposal.title}</p>
+                        {proposal.to_value && (
+                          <Badge variant="outline" className="rounded-md">
+                            {proposal.to_value}
+                          </Badge>
+                        )}
+                      </div>
+                      <p className="mt-1 text-xs text-muted-foreground">
+                        {new Date(proposal.created_at).toLocaleString()}
+                      </p>
+                    </div>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      className="rounded-md"
+                      onClick={() => copyText(proposal.description || "")}
+                    >
+                      <Clipboard className="mr-2 h-4 w-4" />
+                      Copy
+                    </Button>
+                  </div>
+                  {proposal.description && (
+                    <pre className="mt-4 max-h-64 overflow-auto whitespace-pre-wrap rounded-md bg-muted p-4 text-sm leading-6 text-muted-foreground">
+                      {proposal.description}
+                    </pre>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
         </CardContent>
       </Card>
 
