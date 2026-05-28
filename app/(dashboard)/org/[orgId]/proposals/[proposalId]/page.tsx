@@ -185,10 +185,15 @@ function countVerifyMarkers(sections: SectionRow[]): number {
 
 export default async function ProposalPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ orgId: string; proposalId: string }>;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const { orgId, proposalId } = await params;
+  const sp = await searchParams;
+  const pursuitStatus =
+    sp.pursuit === "ready" || sp.pursuit === "partial" ? sp.pursuit : null;
   const supabase = await createClient();
 
   const { data: proposal } = await supabase
@@ -347,6 +352,31 @@ export default async function ProposalPage({
         >
           {proposal.title}
         </h1>
+
+        {pursuitStatus ? (
+          <div
+            className={`mt-6 rounded-md border p-4 ${
+              pursuitStatus === "ready"
+                ? "border-emerald-500/30 bg-emerald-500/10"
+                : "border-amber-500/30 bg-amber-500/10"
+            }`}
+          >
+            <p
+              className={`font-mono text-[10px] uppercase tracking-[0.22em] ${
+                pursuitStatus === "ready" ? "text-emerald-200" : "text-amber-200"
+              }`}
+            >
+              {pursuitStatus === "ready"
+                ? "Pursuit engine completed"
+                : "Pursuit engine partially completed"}
+            </p>
+            <p className="mt-2 text-sm leading-6 text-zinc-300">
+              {pursuitStatus === "ready"
+                ? "The draft, reviewer pass, readiness matrix, and submission workroom were created from Discovery."
+                : "The proposal workspace was created, but one automation step did not finish. Use the controls below to rerun reviewer, readiness, or workroom sync."}
+            </p>
+          </div>
+        ) : null}
 
         {/* Honesty banner — voice + vault state reflect whether the drafter
             used the org's Voice Fingerprint v1 profile and/or any vault

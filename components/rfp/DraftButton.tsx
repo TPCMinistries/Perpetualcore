@@ -36,6 +36,7 @@ export function DraftButton({ orgId, oppId }: DraftButtonProps) {
   const router = useRouter();
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [step, setStep] = useState<string | null>(null);
   const [voiceTrained, setVoiceTrained] = useState<boolean | null>(null);
   const [vaultPopulated, setVaultPopulated] = useState<boolean | null>(null);
 
@@ -74,6 +75,7 @@ export function DraftButton({ orgId, oppId }: DraftButtonProps) {
     if (busy) return;
     setBusy(true);
     setError(null);
+    setStep("Drafting proposal");
     try {
       const res = await fetch("/api/rfp/draft", {
         method: "POST",
@@ -91,11 +93,62 @@ export function DraftButton({ orgId, oppId }: DraftButtonProps) {
         setError(msg);
         return;
       }
-      router.push(`/org/${orgId}/proposals/${payload.proposal_id}`);
+      const proposalId = payload.proposal_id;
+
+      const runOptionalStep = async (
+        label: string,
+        url: string,
+      ): Promise<boolean> => {
+        setStep(label);
+        try {
+          const stepRes = await fetch(url, {
+            method: "POST",
+            headers: { "content-type": "application/json" },
+          });
+          if (!stepRes.ok) {
+            const body = (await stepRes.json().catch(() => null)) as
+              | { error?: string; detail?: string }
+              | null;
+            console.warn("[rfp pursuit] optional step failed", {
+              label,
+              status: stepRes.status,
+              error: body?.error,
+              detail: body?.detail,
+            });
+            return false;
+          }
+          return true;
+        } catch (err) {
+          console.warn(
+            "[rfp pursuit] optional step errored",
+            label,
+            err instanceof Error ? err.message : "unknown",
+          );
+          return false;
+        }
+      };
+
+      const reviewOk = await runOptionalStep(
+        "Running reviewer",
+        `/api/rfp/proposals/${proposalId}/review`,
+      );
+      const complianceOk = await runOptionalStep(
+        "Building readiness matrix",
+        `/api/rfp/proposals/${proposalId}/compliance`,
+      );
+      const tasksOk = await runOptionalStep(
+        "Creating submission workroom",
+        `/api/rfp/proposals/${proposalId}/submission-tasks`,
+      );
+
+      const status = reviewOk && complianceOk && tasksOk ? "ready" : "partial";
+      setStep("Opening workspace");
+      router.push(`/org/${orgId}/proposals/${proposalId}?pursuit=${status}`);
     } catch (err) {
       setError(err instanceof Error ? err.message : "network error");
     } finally {
       setBusy(false);
+      setStep(null);
     }
   }
 
@@ -110,7 +163,7 @@ export function DraftButton({ orgId, oppId }: DraftButtonProps) {
         {busy ? (
           <>
             <Loader2 className="h-4 w-4 animate-spin" />
-            Building pursuit draft
+            {step ?? "Building pursuit"}
           </>
         ) : (
           <>
@@ -122,7 +175,7 @@ export function DraftButton({ orgId, oppId }: DraftButtonProps) {
       </button>
       <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-zinc-500">
         {[
-          "Draft",
+          busy ? "Engine running" : "Draft",
           voiceTrained ? "voice-trained draft" : "plain draft",
           vaultPopulated ? "vault-grounded" : "no vault yet",
         ].join(" · ")}
