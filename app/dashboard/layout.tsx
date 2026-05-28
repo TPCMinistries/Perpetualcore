@@ -6,7 +6,7 @@ import { ConfirmProvider } from "@/components/ui/confirm-dialog";
 const primaryNav = [
   { label: "Operating", href: "/dashboard" },
   { label: "Leads", href: "/dashboard/leads" },
-  { label: "Accounts", href: "/dashboard/account-plan" },
+  { label: "Accounts", href: "/dashboard/accounts" },
   { label: "Scripts", href: "/dashboard/sales-script" },
   { label: "Proposals", href: "/dashboard/proposals" },
   { label: "Packages", href: "/packages" },
