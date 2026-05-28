@@ -20,12 +20,12 @@ interface FitScoreChipProps {
 
 function classesForScore(score: number): string {
   if (score >= 90) {
-    return "bg-emerald-950 text-emerald-300 border-emerald-300/30";
+    return "bg-emerald-50 text-emerald-800 border-emerald-200";
   }
   if (score >= 70) {
-    return "bg-zinc-900 text-zinc-300 border-zinc-700";
+    return "bg-blue-50 text-blue-800 border-blue-200";
   }
-  return "bg-zinc-950 text-zinc-500 border-zinc-800";
+  return "bg-zinc-100 text-zinc-600 border-zinc-200";
 }
 
 export function FitScoreChip({ score, tier, className }: FitScoreChipProps) {

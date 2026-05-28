@@ -21,6 +21,13 @@
 import { useEffect, useState } from "react";
 import { FitScoreChip } from "./FitScoreChip";
 import { DraftButton } from "@/components/rfp/DraftButton";
+import {
+  CheckCircle2,
+  ExternalLink,
+  FileCheck2,
+  SearchCheck,
+  Sparkles,
+} from "lucide-react";
 import type { FeedRow } from "@/lib/rfp/feed";
 
 interface DetailPaneProps {
@@ -93,7 +100,7 @@ export function DetailPane({ orgId, selected }: DetailPaneProps) {
   if (!selected) {
     return (
       <div className="flex h-full items-center justify-center p-8">
-        <p className="font-serif italic text-zinc-400 text-lg text-center max-w-sm">
+        <p className="max-w-sm text-center text-lg text-zinc-500">
           Select an opportunity to see fit reasoning.
         </p>
       </div>
@@ -111,7 +118,7 @@ export function DetailPane({ orgId, selected }: DetailPaneProps) {
   return (
     <div className="h-full overflow-y-auto p-6 lg:p-8">
       {/* Eyebrow */}
-      <div className="flex items-center gap-3 text-[10px] uppercase tracking-[0.25em] text-zinc-500 font-mono">
+      <div className="flex flex-wrap items-center gap-3 font-mono text-[10px] uppercase tracking-[0.25em] text-zinc-500">
         <span>{row.source.replace(/_/g, " ")}</span>
         {row.agency && (
           <>
@@ -122,26 +129,22 @@ export function DetailPane({ orgId, selected }: DetailPaneProps) {
         {row.needs_review && (
           <>
             <span aria-hidden="true">·</span>
-            <span className="text-amber-300">Needs review</span>
+            <span className="text-amber-700">Needs review</span>
           </>
         )}
       </div>
 
-      {/* Title — serif italic large */}
-      <h2
-        className="mt-3 text-2xl leading-tight text-zinc-100 italic"
-        style={{ fontFamily: "Georgia, serif" }}
-      >
+      <h2 className="mt-3 max-w-4xl text-3xl font-semibold leading-tight tracking-tight text-zinc-950">
         {row.title}
       </h2>
 
       {/* Fit row — chip + reasoning chips inline */}
-      <div className="mt-5 flex items-center gap-2 flex-wrap">
+      <div className="mt-5 flex flex-wrap items-center gap-2">
         <FitScoreChip score={row.fit_score} tier={row.tier} />
         {row.chips.map((chip, i) => (
           <span
             key={`${chip}-${i}`}
-            className="inline-flex items-center px-2 py-0.5 rounded text-xs font-mono bg-zinc-900 text-zinc-300 border border-zinc-800"
+            className="inline-flex items-center rounded border border-zinc-200 bg-white px-2 py-0.5 font-mono text-xs text-zinc-600"
           >
             {chip}
           </span>
@@ -150,17 +153,53 @@ export function DetailPane({ orgId, selected }: DetailPaneProps) {
 
       {/* Money / deadline strip */}
       {moneyParts.length > 0 && (
-        <p className="mt-4 text-sm text-zinc-400 font-mono">
+        <p className="mt-4 font-mono text-sm text-zinc-500">
           {moneyParts.join(" · ")}
         </p>
       )}
 
+      <section className="mt-6 grid gap-3 rounded-xl border border-zinc-200 bg-white p-4 shadow-sm sm:grid-cols-3">
+        <div className="flex gap-3">
+          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-blue-50 text-blue-700">
+            <SearchCheck className="h-4 w-4" />
+          </div>
+          <div>
+            <p className="text-sm font-semibold text-zinc-950">Confirm fit</p>
+            <p className="mt-1 text-xs leading-5 text-zinc-500">
+              Score, source, deadline, and funder intent.
+            </p>
+          </div>
+        </div>
+        <div className="flex gap-3">
+          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-emerald-50 text-emerald-700">
+            <Sparkles className="h-4 w-4" />
+          </div>
+          <div>
+            <p className="text-sm font-semibold text-zinc-950">Draft</p>
+            <p className="mt-1 text-xs leading-5 text-zinc-500">
+              Profile, voice, vault, and opportunity context.
+            </p>
+          </div>
+        </div>
+        <div className="flex gap-3">
+          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-violet-50 text-violet-700">
+            <FileCheck2 className="h-4 w-4" />
+          </div>
+          <div>
+            <p className="text-sm font-semibold text-zinc-950">Submit ready</p>
+            <p className="mt-1 text-xs leading-5 text-zinc-500">
+              Review, compliance, packet, and workroom.
+            </p>
+          </div>
+        </div>
+      </section>
+
       {/* AI summary — REQUIRED render; null falls back to literal string. */}
       <section className="mt-6">
-        <h3 className="text-[10px] uppercase tracking-[0.25em] text-zinc-500 font-mono mb-2">
+        <h3 className="mb-2 font-mono text-[10px] uppercase tracking-[0.25em] text-zinc-500">
           AI summary
         </h3>
-        <p className="font-serif italic text-zinc-300 leading-relaxed">
+        <p className="max-w-3xl text-sm leading-7 text-zinc-700">
           {row.summary ?? "No summary generated."}
         </p>
       </section>
@@ -168,10 +207,10 @@ export function DetailPane({ orgId, selected }: DetailPaneProps) {
       {/* Brief */}
       {row.brief && (
         <section className="mt-6">
-          <h3 className="text-[10px] uppercase tracking-[0.25em] text-zinc-500 font-mono mb-2">
+          <h3 className="mb-2 font-mono text-[10px] uppercase tracking-[0.25em] text-zinc-500">
             Opportunity brief
           </h3>
-          <div className="text-sm text-zinc-300 leading-relaxed whitespace-pre-wrap">
+          <div className="max-w-3xl whitespace-pre-wrap text-sm leading-7 text-zinc-700">
             {row.brief}
           </div>
         </section>
@@ -180,14 +219,14 @@ export function DetailPane({ orgId, selected }: DetailPaneProps) {
       {/* Keywords */}
       {detail && detail.keywords.length > 0 && (
         <section className="mt-6">
-          <h3 className="text-[10px] uppercase tracking-[0.25em] text-zinc-500 font-mono mb-2">
+          <h3 className="mb-2 font-mono text-[10px] uppercase tracking-[0.25em] text-zinc-500">
             Keywords
           </h3>
           <div className="flex flex-wrap gap-1.5">
             {detail.keywords.map((kw) => (
               <span
                 key={kw}
-                className="inline-flex items-center px-2 py-0.5 rounded text-xs font-mono bg-zinc-950 text-zinc-500 border border-zinc-800"
+                className="inline-flex items-center rounded border border-zinc-200 bg-white px-2 py-0.5 font-mono text-xs text-zinc-600"
               >
                 {kw}
               </span>
@@ -197,28 +236,42 @@ export function DetailPane({ orgId, selected }: DetailPaneProps) {
       )}
 
       {/* Action row — draft + source */}
-      <section className="mt-8 pt-6 border-t border-zinc-900 flex flex-col gap-4">
-        <DraftButton orgId={orgId} oppId={row.opp_id} />
+      <section className="mt-8 flex flex-col gap-4 border-t border-zinc-200 pt-6">
+        <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-4">
+          <div className="mb-3 flex items-start gap-3">
+            <CheckCircle2 className="mt-0.5 h-4 w-4 text-emerald-700" />
+            <div>
+              <p className="text-sm font-semibold text-zinc-950">
+                Run the end-to-end engine
+              </p>
+              <p className="mt-1 text-xs leading-5 text-zinc-600">
+                Creates a proposal workspace, generates draft sections, then
+                opens reviewer, compliance, export, and submission workroom flow.
+              </p>
+            </div>
+          </div>
+          <DraftButton orgId={orgId} oppId={row.opp_id} />
+        </div>
         {row.url && (
           <a
             href={row.url}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-1 text-sm text-emerald-300 hover:text-emerald-200 underline-offset-4 hover:underline"
+            className="inline-flex items-center gap-1 text-sm font-medium text-zinc-700 underline-offset-4 hover:text-zinc-950 hover:underline"
           >
-            Open at source <span aria-hidden="true">↗</span>
+            Open at source <ExternalLink className="h-3.5 w-3.5" />
           </a>
         )}
       </section>
 
       {/* Loading / error overlays */}
       {loading && !detail && (
-        <p className="mt-6 text-xs text-zinc-500 font-mono uppercase tracking-wide">
+        <p className="mt-6 font-mono text-xs uppercase tracking-wide text-zinc-500">
           Loading detail…
         </p>
       )}
       {error && (
-        <p className="mt-6 text-xs text-amber-400 font-mono">
+        <p className="mt-6 font-mono text-xs text-amber-700">
           Detail unavailable ({error}). Showing summary from list.
         </p>
       )}

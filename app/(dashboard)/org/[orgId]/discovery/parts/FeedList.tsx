@@ -81,7 +81,7 @@ export function FeedList({
 
   return (
     <div className="h-full overflow-y-auto" data-testid="feed-list-scroll">
-      <ul className="divide-y divide-zinc-900">
+      <ul className="divide-y divide-zinc-200">
         {rows.map((row) => (
           <li key={row.opp_id}>
             <FeedRow
@@ -97,13 +97,13 @@ export function FeedList({
       {hasMore && (
         <div
           ref={sentinelRef}
-          className="py-4 text-center text-xs uppercase tracking-wide text-zinc-500 font-mono"
+          className="py-4 text-center font-mono text-xs uppercase tracking-wide text-zinc-500"
         >
           {loading ? "Loading…" : "Scroll for more"}
         </div>
       )}
       {!hasMore && rows.length > 0 && (
-        <div className="py-6 text-center text-xs uppercase tracking-wide text-zinc-600 font-mono">
+        <div className="py-6 text-center font-mono text-xs uppercase tracking-wide text-zinc-400">
           End of feed
         </div>
       )}
@@ -155,21 +155,20 @@ function EmptyFeed({ orgId }: { orgId?: string }) {
           className="pointer-events-none absolute -inset-12 -z-10 rounded-full bg-[radial-gradient(closest-side,rgba(16,185,129,0.18),transparent)] blur-2xl"
         />
 
-        <div className="rounded-2xl border border-white/5 bg-white/[0.02] p-8 backdrop-blur-sm">
-          <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-400 to-teal-600 text-zinc-950 shadow-[0_0_40px_-5px_rgba(16,185,129,0.55)]">
+        <div className="rounded-xl border border-zinc-200 bg-white p-8 shadow-sm">
+          <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl bg-emerald-700 text-white">
             <Sparkles className="h-5 w-5" />
           </div>
 
-          <p className="mt-5 font-mono text-[10px] uppercase tracking-[0.25em] text-emerald-300/80">
+          <p className="mt-5 font-mono text-[10px] uppercase tracking-[0.25em] text-emerald-700">
             New org · feed unscored
           </p>
           <h2
-            className="mt-2 text-2xl italic leading-tight text-zinc-100"
-            style={{ fontFamily: "Georgia, serif" }}
+            className="mt-2 text-2xl font-semibold leading-tight text-zinc-950"
           >
             Score this org against current opportunities.
           </h2>
-          <p className="mt-3 text-[13px] leading-relaxed text-zinc-400">
+          <p className="mt-3 text-[13px] leading-relaxed text-zinc-600">
             We&apos;ll match every open RFP against your capacity profile,
             NAICS codes, and capacity summary — then rank what fits.
           </p>
@@ -179,7 +178,7 @@ function EmptyFeed({ orgId }: { orgId?: string }) {
               type="button"
               onClick={runRecompute}
               disabled={state === "running" || state === "done"}
-              className="mt-6 h-11 w-full gap-2 rounded-md bg-gradient-to-br from-emerald-400 to-teal-600 text-[13px] font-medium text-zinc-950 shadow-[0_0_30px_-5px_rgba(16,185,129,0.55)] hover:from-emerald-300 hover:to-teal-500 disabled:opacity-70"
+              className="mt-6 h-11 w-full gap-2 rounded-lg bg-zinc-950 text-[13px] font-medium text-white transition-colors hover:bg-zinc-800 disabled:opacity-70"
             >
               {state === "running" ? (
                 <>
@@ -203,14 +202,14 @@ function EmptyFeed({ orgId }: { orgId?: string }) {
           {state === "error" && (
             <p
               role="alert"
-              className="mt-4 rounded-md border border-rose-500/30 bg-rose-500/5 p-3 text-[12px] text-rose-300"
+              className="mt-4 rounded-md border border-rose-200 bg-rose-50 p-3 text-[12px] text-rose-700"
             >
               Something went wrong. Try again, or paste an RFP URL into the
               import bar above to seed your feed manually.
             </p>
           )}
 
-          <p className="mt-6 border-t border-white/5 pt-5 font-mono text-[10px] uppercase tracking-[0.2em] text-zinc-500">
+          <p className="mt-6 border-t border-zinc-200 pt-5 font-mono text-[10px] uppercase tracking-[0.2em] text-zinc-500">
             Discovery also re-scans every 6 hours
           </p>
         </div>

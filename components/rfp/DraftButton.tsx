@@ -17,6 +17,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { ArrowRight, Loader2, WandSparkles } from "lucide-react";
 
 interface DraftButtonProps {
   orgId: string;
@@ -104,19 +105,30 @@ export function DraftButton({ orgId, oppId }: DraftButtonProps) {
         type="button"
         onClick={onClick}
         disabled={busy}
-        className="inline-flex items-center justify-center gap-2 rounded-md border border-emerald-500/30 bg-emerald-500/10 px-4 py-2 text-sm font-medium text-emerald-100 transition hover:bg-emerald-500/15 disabled:cursor-not-allowed disabled:opacity-50"
+        className="inline-flex h-11 items-center justify-center gap-2 rounded-lg bg-emerald-700 px-4 text-sm font-semibold text-white shadow-sm transition-colors duration-150 hover:bg-emerald-800 disabled:cursor-not-allowed disabled:opacity-50 motion-reduce:transition-none"
       >
-        {busy ? "Drafting…" : "Generate first-pass draft"}
+        {busy ? (
+          <>
+            <Loader2 className="h-4 w-4 animate-spin" />
+            Building pursuit draft
+          </>
+        ) : (
+          <>
+            <WandSparkles className="h-4 w-4" />
+            Start pursuit workflow
+            <ArrowRight className="h-4 w-4" />
+          </>
+        )}
       </button>
       <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-zinc-500">
         {[
-          "Preview",
+          "Draft",
           voiceTrained ? "voice-trained draft" : "plain draft",
           vaultPopulated ? "vault-grounded" : "no vault yet",
         ].join(" · ")}
       </p>
       {error ? (
-        <p className="text-[12px] text-rose-300">Draft failed: {error}</p>
+        <p className="text-[12px] text-rose-700">Draft failed: {error}</p>
       ) : null}
     </div>
   );

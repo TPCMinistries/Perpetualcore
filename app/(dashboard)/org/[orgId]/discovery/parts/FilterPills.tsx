@@ -58,10 +58,10 @@ const SOURCE_OPTIONS: Array<{ key: string; label: string }> = [
 ];
 
 function pillBase(active: boolean): string {
-  return `inline-flex items-center gap-1 px-3 py-1.5 rounded-full border text-xs uppercase tracking-wide font-mono transition-colors ${
+  return `inline-flex items-center gap-1 rounded-md border px-3 py-1.5 font-mono text-[11px] uppercase tracking-[0.14em] transition-colors duration-150 motion-reduce:transition-none ${
     active
-      ? "bg-zinc-900 border-zinc-600 text-zinc-100"
-      : "bg-zinc-950 border-zinc-800 text-zinc-400 hover:text-zinc-200 hover:border-zinc-700"
+      ? "border-zinc-950 bg-zinc-950 text-white"
+      : "border-zinc-300 bg-white text-zinc-600 hover:border-zinc-400 hover:text-zinc-950"
   }`;
 }
 
@@ -119,7 +119,7 @@ function ModePill({
         data-testid="mode-pill"
       >
         Mode
-        <span className={active ? "text-emerald-300" : "text-zinc-400"}>
+        <span className={active ? "text-emerald-200" : "text-zinc-500"}>
           · {modeLabel(value)}
         </span>
         <span aria-hidden="true">▾</span>
@@ -127,7 +127,7 @@ function ModePill({
       {open && (
         <div
           role="listbox"
-          className="absolute left-0 top-full mt-2 w-40 z-50 rounded-md border border-zinc-800 bg-zinc-950 shadow-xl p-1"
+          className="absolute left-0 top-full z-50 mt-2 w-40 rounded-lg border border-zinc-200 bg-white p-1 shadow-xl"
         >
           {MODE_OPTIONS.map((opt) => {
             const selected = opt.key === value;
@@ -143,13 +143,13 @@ function ModePill({
                 }}
                 className={`flex items-center justify-between w-full px-2 py-1.5 rounded text-sm text-left ${
                   selected
-                    ? "bg-zinc-900 text-zinc-100"
-                    : "text-zinc-200 hover:bg-zinc-900"
+                    ? "bg-zinc-100 text-zinc-950"
+                    : "text-zinc-700 hover:bg-zinc-50"
                 }`}
               >
                 <span>{opt.label}</span>
                 {selected && (
-                  <span aria-hidden="true" className="text-emerald-300 text-xs">
+                    <span aria-hidden="true" className="text-emerald-600 text-xs">
                     ●
                   </span>
                 )}
@@ -212,20 +212,20 @@ function SourcePill({
       {open && (
         <div
           role="listbox"
-          className="absolute left-0 top-full mt-2 w-56 z-50 rounded-md border border-zinc-800 bg-zinc-950 shadow-xl p-1"
+          className="absolute left-0 top-full z-50 mt-2 w-56 rounded-lg border border-zinc-200 bg-white p-1 shadow-xl"
         >
           {SOURCE_OPTIONS.map((opt) => {
             const checked = selected.includes(opt.key);
             return (
               <label
                 key={opt.key}
-                className="flex items-center gap-2 px-2 py-1.5 rounded text-sm text-zinc-200 hover:bg-zinc-900 cursor-pointer"
+                className="flex cursor-pointer items-center gap-2 rounded px-2 py-1.5 text-sm text-zinc-700 hover:bg-zinc-50"
               >
                 <input
                   type="checkbox"
                   checked={checked}
                   onChange={() => toggle(opt.key)}
-                  className="accent-emerald-400"
+                  className="accent-emerald-600"
                 />
                 <span>{opt.label}</span>
               </label>
@@ -252,7 +252,7 @@ function DeadlinePill({
     { key: 7, label: "7d" },
   ];
   return (
-    <div className="inline-flex rounded-full border border-zinc-800 bg-zinc-950 p-0.5 font-mono text-xs uppercase tracking-wide">
+    <div className="inline-flex rounded-md border border-zinc-300 bg-white p-0.5 font-mono text-[11px] uppercase tracking-[0.14em]">
       {options.map((opt) => {
         const active = value === opt.key;
         return (
@@ -262,8 +262,8 @@ function DeadlinePill({
             onClick={() => onChange(opt.key)}
             className={`px-3 py-1 rounded-full transition-colors ${
               active
-                ? "bg-zinc-800 text-zinc-100"
-                : "text-zinc-500 hover:text-zinc-300"
+                ? "bg-zinc-950 text-white"
+                : "text-zinc-500 hover:text-zinc-900"
             }`}
             aria-pressed={active}
           >
@@ -302,14 +302,14 @@ function MinAmountPill({
 
   return (
     <div
-      className={`inline-flex items-center rounded-full border px-2 py-1 font-mono text-xs ${
+      className={`inline-flex items-center rounded-md border px-2 py-1 font-mono text-[11px] ${
         value !== null
-          ? "bg-zinc-900 border-zinc-600 text-zinc-100"
-          : "bg-zinc-950 border-zinc-800 text-zinc-400"
+          ? "bg-zinc-950 border-zinc-950 text-white"
+          : "bg-white border-zinc-300 text-zinc-600"
       }`}
     >
       <span className="uppercase tracking-wide pr-1">Min</span>
-      <span className="text-zinc-500">$</span>
+      <span className={value !== null ? "text-zinc-300" : "text-zinc-500"}>$</span>
       <input
         type="number"
         inputMode="numeric"
@@ -347,7 +347,7 @@ export function FilterPills({
 
   return (
     <div className="flex items-center gap-2 flex-wrap">
-      <span className="text-[10px] uppercase tracking-[0.2em] text-zinc-500 font-mono pr-1">
+      <span className="pr-1 font-mono text-[10px] uppercase tracking-[0.2em] text-zinc-500">
         Filter
       </span>
       {/* Mode pill — dual-org users only. Renders to the left of Source per 05-06 plan. */}
@@ -379,7 +379,7 @@ export function FilterPills({
               min_amount: null,
             })
           }
-          className="text-xs text-zinc-500 hover:text-zinc-300 underline-offset-2 hover:underline ml-1"
+          className="ml-1 text-xs text-zinc-500 underline-offset-2 hover:text-zinc-950 hover:underline"
         >
           Clear all
         </button>

@@ -92,20 +92,20 @@ export function FeedRow({
       type="button"
       onClick={onClick}
       aria-current={selected ? "true" : undefined}
-      className={`w-full text-left px-4 py-3 border-l-2 transition-colors ${
+      className={`w-full border-l-2 px-4 py-3 text-left transition-colors duration-150 motion-reduce:transition-none ${
         selected
-          ? "bg-zinc-900 border-emerald-300"
-          : "bg-transparent border-transparent hover:bg-zinc-900/50"
+          ? "bg-emerald-50 border-emerald-700"
+          : "bg-white border-transparent hover:bg-zinc-50"
       } cursor-pointer`}
     >
       <div className="flex items-center gap-2 min-w-0">
         <FitScoreChip score={row.fit_score} tier={row.tier} />
-        <span className="font-semibold text-zinc-100 truncate min-w-0 flex-1">
+        <span className="min-w-0 flex-1 truncate font-semibold text-zinc-950">
           {row.title}
         </span>
         {badgeVisible && (
           <span
-            className="shrink-0 ml-1 inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-mono uppercase tracking-wide bg-zinc-900 text-zinc-400 border border-zinc-800"
+            className="ml-1 inline-flex shrink-0 items-center rounded border border-zinc-200 bg-white px-1.5 py-0.5 font-mono text-[10px] uppercase tracking-wide text-zinc-600"
             data-testid="feed-row-org-badge"
             title={`Scored for ${row.scored_for_org_name}`}
           >
@@ -116,12 +116,12 @@ export function FeedRow({
           </span>
         )}
         {row.needs_review && (
-          <span className="shrink-0 inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-mono uppercase tracking-wide bg-amber-950 text-amber-300 border border-amber-700/40">
+          <span className="inline-flex shrink-0 items-center rounded border border-amber-200 bg-amber-50 px-1.5 py-0.5 font-mono text-[10px] uppercase tracking-wide text-amber-800">
             Needs review
           </span>
         )}
       </div>
-      <div className="mt-1 text-xs text-zinc-400 truncate">
+      <div className="mt-1 truncate text-xs text-zinc-500">
         {row.agency ?? "Unknown agency"} · {formatAmount(row)} · {formatDeadline(row)}
       </div>
     </button>

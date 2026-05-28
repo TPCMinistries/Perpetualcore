@@ -251,10 +251,10 @@ export function DiscoveryClient({
     (isDualMode && mode !== "all" ? 1 : 0);
 
   return (
-    <div className="flex min-h-[calc(100vh-3.5rem)] flex-col bg-[#f6f7f4] text-zinc-950 lg:h-[calc(100vh-3.5rem)]">
+    <div className="flex min-h-[calc(100vh-3.5rem)] flex-col bg-[#f4f5f1] text-zinc-950 lg:h-[calc(100vh-3.5rem)]">
       {/* Header: value framing + Quick Import + filter pills */}
-      <div id="opportunity-feed" className="shrink-0 border-b border-zinc-200 bg-[#fbfbf7] px-4 py-4 lg:px-6">
-        <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_minmax(380px,0.72fr)] xl:items-end">
+      <div id="opportunity-feed" className="shrink-0 border-b border-zinc-200 bg-[#fbfbf7] px-4 py-4 shadow-sm lg:px-6">
+        <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_minmax(420px,0.62fr)] xl:items-end">
           <div>
             <div className="flex flex-wrap items-center gap-2">
               <span className="rounded-full border border-zinc-300 bg-white px-3 py-1 font-mono text-[10px] uppercase tracking-[0.2em] text-zinc-600">
@@ -272,8 +272,8 @@ export function DiscoveryClient({
                 </span>
               )}
             </div>
-            <h1 className="mt-3 max-w-3xl text-2xl font-semibold tracking-tight text-zinc-950 sm:text-3xl">
-              Search the full funding landscape, then move the best opportunities into action.
+            <h1 className="mt-3 max-w-3xl text-[28px] font-semibold leading-[1.08] tracking-tight text-zinc-950 sm:text-[34px]">
+              Find fundable opportunities and run the pursuit workflow.
             </h1>
             <p className="mt-2 max-w-2xl text-sm leading-6 text-zinc-600">
               Explore federal, state, city, and foundation opportunities by
@@ -315,7 +315,7 @@ export function DiscoveryClient({
             </form>
           </div>
 
-          <div className="grid grid-cols-3 overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-sm">
+          <div className="grid grid-cols-3 overflow-hidden rounded-xl border border-zinc-200 bg-white shadow-sm">
             <div className="border-r border-zinc-200 p-4">
               <Database className="mb-2 h-4 w-4 text-emerald-700" />
               <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-zinc-500">
@@ -340,7 +340,7 @@ export function DiscoveryClient({
           </div>
         </div>
 
-        <div className="mt-4 space-y-3 rounded-2xl border border-zinc-200 bg-white p-3 shadow-sm">
+        <div className="mt-4 space-y-3 rounded-xl border border-zinc-200 bg-white p-3 shadow-sm">
           <QuickImportBar orgId={orgId} onImported={handleImported} />
           <FilterPills
             value={filters}
@@ -353,8 +353,8 @@ export function DiscoveryClient({
       </div>
 
       {/* Split: list left, detail right */}
-      <div className="grid min-h-0 flex-1 grid-cols-1 lg:grid-cols-[minmax(360px,40%)_1fr]">
-        <div className="min-h-[360px] border-b border-white/10 bg-black/16 lg:min-h-0 lg:border-b-0 lg:border-r">
+      <div className="grid min-h-0 flex-1 grid-cols-1 lg:grid-cols-[minmax(360px,39%)_1fr]">
+        <div className="min-h-[360px] border-b border-zinc-200 bg-white lg:min-h-0 lg:border-b-0 lg:border-r">
           {showNoMemberOrgsState ? (
             <div className="flex h-full items-center justify-center p-8">
               <div className="text-center max-w-sm">
@@ -388,7 +388,7 @@ export function DiscoveryClient({
             />
           )}
         </div>
-        <div className="min-h-[520px] bg-zinc-950/72 lg:min-h-0">
+        <div className="min-h-[520px] bg-[#fbfbf7] lg:min-h-0">
           <DetailPane orgId={orgId} selected={selected} />
         </div>
       </div>

@@ -325,10 +325,10 @@ export function QuickImportBar({ orgId, onImported }: QuickImportBarProps) {
                 className={[
                   "inline-flex h-3.5 w-3.5 items-center justify-center rounded-full border text-[10px] leading-none",
                   completed
-                    ? "border-emerald-400/60 bg-emerald-400/20 text-emerald-300"
+                    ? "border-emerald-300 bg-emerald-50 text-emerald-700"
                     : active
-                    ? "border-emerald-300/70 bg-emerald-400/10 text-emerald-300"
-                    : "border-white/15 bg-zinc-900/40 text-zinc-600",
+                    ? "border-emerald-300 bg-white text-emerald-700"
+                    : "border-zinc-300 bg-white text-zinc-400",
                 ].join(" ")}
               >
                 {completed ? "✓" : active ? "●" : "○"}
@@ -337,11 +337,11 @@ export function QuickImportBar({ orgId, onImported }: QuickImportBarProps) {
                 className={[
                   "font-mono text-[10px] uppercase tracking-[0.22em]",
                   completed
-                    ? "text-emerald-300"
+                    ? "text-emerald-700"
                     : active
-                    ? "text-zinc-200"
+                    ? "text-zinc-950"
                     : upcoming
-                    ? "text-zinc-600"
+                    ? "text-zinc-400"
                     : "text-zinc-500",
                 ].join(" ")}
               >
@@ -352,7 +352,7 @@ export function QuickImportBar({ orgId, onImported }: QuickImportBarProps) {
                   aria-hidden="true"
                   className={[
                     "hidden h-px w-6 sm:block",
-                    completed ? "bg-emerald-400/40" : "bg-white/10",
+                    completed ? "bg-emerald-300" : "bg-zinc-200",
                   ].join(" ")}
                 />
               ) : null}
@@ -383,7 +383,7 @@ export function QuickImportBar({ orgId, onImported }: QuickImportBarProps) {
           autoComplete="off"
           spellCheck={false}
           placeholder="Paste opportunity URL…"
-          className="w-full flex-1 rounded-md border border-white/10 bg-zinc-950 px-3 py-2 font-mono text-[12px] text-zinc-100 placeholder:text-zinc-600 outline-none transition-colors focus:border-emerald-300/40 focus:ring-1 focus:ring-emerald-300/20"
+          className="w-full flex-1 rounded-lg border border-zinc-300 bg-white px-3 py-2 text-[13px] text-zinc-950 placeholder:text-zinc-400 outline-none transition-colors duration-150 focus:border-zinc-500 focus:ring-2 focus:ring-zinc-200 motion-reduce:transition-none"
           value={url}
           onChange={(e) => setUrl(e.target.value)}
           disabled={disabled}
@@ -391,7 +391,7 @@ export function QuickImportBar({ orgId, onImported }: QuickImportBarProps) {
         <button
           type="submit"
           disabled={disabled || url.trim().length === 0}
-          className="w-full rounded-md border border-emerald-300/30 bg-emerald-400/10 px-3 py-2 font-mono text-[10px] uppercase tracking-[0.22em] text-emerald-300 transition-colors hover:border-emerald-300/60 hover:bg-emerald-400/20 disabled:cursor-not-allowed disabled:opacity-40 sm:w-auto"
+          className="w-full rounded-lg border border-emerald-700 bg-emerald-700 px-4 py-2 font-mono text-[10px] uppercase tracking-[0.18em] text-white transition-colors duration-150 hover:bg-emerald-800 disabled:cursor-not-allowed disabled:opacity-40 motion-reduce:transition-none sm:w-auto"
         >
           {disabled ? "Submitting…" : "Import"}
         </button>
@@ -406,23 +406,23 @@ export function QuickImportBar({ orgId, onImported }: QuickImportBarProps) {
         <div className="flex flex-wrap items-center gap-3">
           <span
             aria-hidden="true"
-            className="inline-flex h-3.5 w-3.5 items-center justify-center rounded-full border border-emerald-400/60 bg-emerald-400/20 text-[10px] leading-none text-emerald-300"
+            className="inline-flex h-3.5 w-3.5 items-center justify-center rounded-full border border-emerald-300 bg-emerald-50 text-[10px] leading-none text-emerald-700"
           >
             {"✓"}
           </span>
-          <span className="font-mono text-[11px] uppercase tracking-[0.22em] text-emerald-300">
+          <span className="font-mono text-[11px] uppercase tracking-[0.22em] text-emerald-700">
             Imported
           </span>
           {needsReview ? (
             <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-zinc-400">
-              · Needs review
+              Needs review
             </span>
           ) : null}
         </div>
         <button
           type="button"
           onClick={resetToIdle}
-          className="font-mono text-[10px] uppercase tracking-[0.18em] text-zinc-500 transition-colors hover:text-zinc-300"
+          className="font-mono text-[10px] uppercase tracking-[0.18em] text-zinc-500 transition-colors hover:text-zinc-950"
         >
           Import another
         </button>
@@ -438,18 +438,18 @@ export function QuickImportBar({ orgId, onImported }: QuickImportBarProps) {
       <div className="flex min-w-0 items-center gap-3">
         <span
           aria-hidden="true"
-          className="inline-flex h-3.5 w-3.5 items-center justify-center rounded-full border border-zinc-600 bg-zinc-900/40 text-[10px] leading-none text-zinc-400"
+          className="inline-flex h-3.5 w-3.5 items-center justify-center rounded-full border border-rose-200 bg-rose-50 text-[10px] leading-none text-rose-700"
         >
           {"×"}
         </span>
-        <span className="truncate font-mono text-[11px] uppercase tracking-[0.18em] text-zinc-400">
+        <span className="truncate font-mono text-[11px] uppercase tracking-[0.18em] text-rose-700">
           Could not import. {message}
         </span>
       </div>
       <button
         type="button"
         onClick={resetToIdle}
-        className="shrink-0 font-mono text-[10px] uppercase tracking-[0.22em] text-emerald-300 transition-colors hover:text-emerald-200"
+        className="shrink-0 font-mono text-[10px] uppercase tracking-[0.22em] text-zinc-700 transition-colors hover:text-zinc-950"
       >
         Try again
       </button>
@@ -470,9 +470,8 @@ export function QuickImportBar({ orgId, onImported }: QuickImportBarProps) {
   return (
     <div
       data-testid="quick-import-bar"
-      className="relative w-full rounded-lg border border-white/10 bg-zinc-950/60 px-4 py-3 backdrop-blur-sm"
+      className="relative w-full rounded-lg border border-zinc-200 bg-zinc-50 px-4 py-3"
     >
-      <div className="pointer-events-none absolute -top-px left-10 right-10 h-px bg-gradient-to-r from-transparent via-emerald-400/40 to-transparent" />
       {body}
     </div>
   );
