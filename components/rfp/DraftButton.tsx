@@ -83,7 +83,7 @@ export function DraftButton({ orgId, oppId }: DraftButtonProps) {
         body: JSON.stringify({ org_id: orgId, opp_id: oppId }),
       });
       const payload = (await res.json()) as
-        | { proposal_id: string }
+        | { proposal_id: string; reused_existing?: boolean }
         | { error: string; detail?: string };
       if (!res.ok || !("proposal_id" in payload)) {
         const msg =
@@ -94,6 +94,7 @@ export function DraftButton({ orgId, oppId }: DraftButtonProps) {
         return;
       }
       const proposalId = payload.proposal_id;
+      const reusedExisting = payload.reused_existing === true;
 
       const runOptionalStep = async (
         label: string,
@@ -129,21 +130,22 @@ export function DraftButton({ orgId, oppId }: DraftButtonProps) {
       };
 
       const reviewOk = await runOptionalStep(
-        "Running reviewer",
+        reusedExisting ? "Refreshing reviewer" : "Running reviewer",
         `/api/rfp/proposals/${proposalId}/review`,
       );
       const complianceOk = await runOptionalStep(
-        "Building readiness matrix",
+        reusedExisting ? "Refreshing readiness matrix" : "Building readiness matrix",
         `/api/rfp/proposals/${proposalId}/compliance`,
       );
       const tasksOk = await runOptionalStep(
-        "Creating submission workroom",
+        reusedExisting ? "Syncing submission workroom" : "Creating submission workroom",
         `/api/rfp/proposals/${proposalId}/submission-tasks`,
       );
 
       const status = reviewOk && complianceOk && tasksOk ? "ready" : "partial";
       setStep("Opening workspace");
-      router.push(`/org/${orgId}/proposals/${proposalId}?pursuit=${status}`);
+      const mode = reusedExisting ? "&mode=resume" : "";
+      router.push(`/org/${orgId}/proposals/${proposalId}?pursuit=${status}${mode}`);
     } catch (err) {
       setError(err instanceof Error ? err.message : "network error");
     } finally {

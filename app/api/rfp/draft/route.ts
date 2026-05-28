@@ -1,8 +1,10 @@
 /**
  * POST /api/rfp/draft
  *
- * Generate a first-pass proposal draft for an opportunity. Single Sonnet
- * round, no vault retrieval, no reviewer. As of Voice Fingerprint v1 the
+ * Generate or resume a first-pass proposal draft for an opportunity. If the
+ * org already has an active draft/submitted proposal for the same opportunity,
+ * the route returns that proposal_id instead of creating a duplicate. Otherwise
+ * it runs a single Sonnet round. As of Voice Fingerprint v1 the
  * route loads `rfp_orgs.voice_fingerprint` and (when populated) passes the
  * profile to the drafter, which prepends it to its system prompt. When the
  * column is empty / unset the drafter behaves exactly as it did pre-voice.
@@ -27,7 +29,7 @@
  *     write to close the obvious privilege-escalation gap.
  *
  * Returns: { proposal_id, sections_generated, tokens_in, tokens_out,
- *            cost_usd, model } or { error } on failure.
+ *            cost_usd, model, reused_existing? } or { error } on failure.
  */
 
 import { NextResponse } from "next/server";
@@ -62,6 +64,11 @@ interface OrgRow {
   voice_fingerprint: unknown;
 }
 
+interface ExistingProposalRow {
+  id: string;
+  status: string;
+}
+
 export async function POST(req: Request): Promise<NextResponse> {
   let body: z.infer<typeof BodySchema>;
   try {
@@ -94,12 +101,48 @@ export async function POST(req: Request): Promise<NextResponse> {
     return NextResponse.json({ error: "forbidden" }, { status: 403 });
   }
 
+  // Switch to admin client after authorization. First, avoid duplicate active
+  // proposal workspaces for the same org + opportunity.
+  const admin = createAdminClient();
+  const { data: existingProposal, error: existingErr } = await admin
+    .from("rfp_proposals")
+    .select("id, status")
+    .eq("org_id", body.org_id)
+    .eq("opp_id", body.opp_id)
+    .in("status", ["draft", "submitted"])
+    .order("updated_at", { ascending: false })
+    .limit(1)
+    .maybeSingle<ExistingProposalRow>();
+  if (existingErr) {
+    return NextResponse.json(
+      {
+        error: "existing_proposal_lookup_failed",
+        detail: existingErr.message.slice(0, 200),
+      },
+      { status: 500 },
+    );
+  }
+  if (existingProposal) {
+    return NextResponse.json({
+      proposal_id: existingProposal.id,
+      sections_generated: 0,
+      tokens_in: 0,
+      tokens_out: 0,
+      cost_usd: 0,
+      model: "reused_existing",
+      reused_existing: true,
+      status: existingProposal.status,
+      voice_applied: false,
+      vault_applied: false,
+      vault_chunks_used: 0,
+    });
+  }
+
   // Load the org + opp via admin client (we've already authorized the caller).
   // We also pull voice_fingerprint to optionally apply at draft time —
   // Voice Fingerprint v1. When the column is the empty `{}` default it
   // fails isVoiceFingerprint() and the drafter behaves identically to
   // pre-voice.
-  const admin = createAdminClient();
   const { data: org, error: orgErr } = await admin
     .from("rfp_orgs")
     .select("name, type, capacity_summary, voice_fingerprint")

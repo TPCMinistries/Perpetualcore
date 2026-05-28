@@ -194,6 +194,7 @@ export default async function ProposalPage({
   const sp = await searchParams;
   const pursuitStatus =
     sp.pursuit === "ready" || sp.pursuit === "partial" ? sp.pursuit : null;
+  const pursuitMode = sp.mode === "resume" ? "resume" : "new";
   const supabase = await createClient();
 
   const { data: proposal } = await supabase
@@ -367,12 +368,18 @@ export default async function ProposalPage({
               }`}
             >
               {pursuitStatus === "ready"
-                ? "Pursuit engine completed"
-                : "Pursuit engine partially completed"}
+                ? pursuitMode === "resume"
+                  ? "Pursuit workspace resumed"
+                  : "Pursuit engine completed"
+                : pursuitMode === "resume"
+                  ? "Pursuit workspace resumed with gaps"
+                  : "Pursuit engine partially completed"}
             </p>
             <p className="mt-2 text-sm leading-6 text-zinc-300">
               {pursuitStatus === "ready"
-                ? "The draft, reviewer pass, readiness matrix, and submission workroom were created from Discovery."
+                ? pursuitMode === "resume"
+                  ? "An existing proposal for this opportunity was found. Reviewer, readiness, and workroom artifacts were refreshed."
+                  : "The draft, reviewer pass, readiness matrix, and submission workroom were created from Discovery."
                 : "The proposal workspace was created, but one automation step did not finish. Use the controls below to rerun reviewer, readiness, or workroom sync."}
             </p>
           </div>
