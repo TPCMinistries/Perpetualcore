@@ -25,7 +25,9 @@ import { CaptureCommandCenter } from "@/components/rfp/CaptureCommandCenter";
 import { ExportProposalButton } from "@/components/rfp/ExportProposalButton";
 import { SubmissionReadinessPanel } from "@/components/rfp/SubmissionReadinessPanel";
 import { SubmissionPlanPanel } from "@/components/rfp/SubmissionPlanPanel";
+import { SubmissionWorkroom } from "@/components/rfp/SubmissionWorkroom";
 import type { CitationChunk } from "@/components/rfp/MarkupRenderer";
+import type { SubmissionTaskRow } from "@/lib/rfp/submission/tasks";
 import type {
   BidNoBidArtifact,
   ComplianceMatrixArtifact,
@@ -215,6 +217,8 @@ export default async function ProposalPage({
     : { data: null };
   const role = (membership as { role: string } | null)?.role ?? null;
   const canEditStatus = role === "owner" || role === "writer";
+  const canEditSubmissionTasks =
+    role === "owner" || role === "writer" || role === "reviewer";
 
   const { data: sections } = await supabase
     .from("rfp_proposal_sections")
@@ -246,6 +250,15 @@ export default async function ProposalPage({
     ])
     .order("created_at", { ascending: false })
     .returns<ComplianceCheckRow[]>();
+
+  const { data: submissionTasks } = await supabase
+    .from("rfp_submission_tasks")
+    .select("*")
+    .eq("proposal_id", proposalId)
+    .order("status")
+    .order("priority")
+    .order("created_at", { ascending: true })
+    .returns<SubmissionTaskRow[]>();
 
   const checksByType = new Map<string, unknown>();
   for (const row of complianceRows ?? []) {
@@ -435,6 +448,11 @@ export default async function ProposalPage({
           reviewerResult={reviewerResult}
           verifyMarkerCount={verifyMarkerCount}
           sectionCount={visibleSections.length}
+        />
+        <SubmissionWorkroom
+          proposalId={proposalId}
+          initialTasks={submissionTasks ?? []}
+          canEdit={canEditSubmissionTasks}
         />
         <CaptureCommandCenter
           proposalId={proposalId}

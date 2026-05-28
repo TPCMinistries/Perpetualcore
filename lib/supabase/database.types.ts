@@ -15106,6 +15106,71 @@ export type Database = {
         }
         Relationships: []
       }
+      rfp_submission_tasks: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          detail: string
+          due_date: string | null
+          evidence: string
+          id: string
+          notes: string
+          owner_label: string
+          priority: string
+          proposal_id: string
+          resolved_at: string | null
+          source_id: string
+          source_type: string
+          status: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          detail?: string
+          due_date?: string | null
+          evidence?: string
+          id?: string
+          notes?: string
+          owner_label?: string
+          priority?: string
+          proposal_id: string
+          resolved_at?: string | null
+          source_id: string
+          source_type: string
+          status?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          detail?: string
+          due_date?: string | null
+          evidence?: string
+          id?: string
+          notes?: string
+          owner_label?: string
+          priority?: string
+          proposal_id?: string
+          resolved_at?: string | null
+          source_id?: string
+          source_type?: string
+          status?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "rfp_submission_tasks_proposal_id_fkey"
+            columns: ["proposal_id"]
+            isOneToOne: false
+            referencedRelation: "rfp_proposals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       rfp_user_orgs: {
         Row: {
           created_at: string
