@@ -713,6 +713,33 @@ export default function LeadsPage() {
     }
   };
 
+  const getLeadPrimaryHref = (lead: Lead) => {
+    const status = lead.status || "new";
+
+    if (status === "qualified" || status === "proposal") {
+      return `/dashboard/proposals?lead=${encodeURIComponent(lead.id)}`;
+    }
+
+    if (status === "negotiation") {
+      return `/packages?lead=${encodeURIComponent(lead.id)}&package=${encodeURIComponent(getRecommendedPackageId(lead))}`;
+    }
+
+    if (status === "won") {
+      return `/dashboard/accounts?lead=${encodeURIComponent(lead.id)}`;
+    }
+
+    return `/dashboard/leads?lead=${encodeURIComponent(lead.id)}`;
+  };
+
+  const getLeadPrimaryLabel = (lead: Lead) => {
+    const status = lead.status || "new";
+
+    if (status === "qualified" || status === "proposal") return "Build proposal";
+    if (status === "negotiation") return "Send package";
+    if (status === "won") return "Open account";
+    return "Open lead";
+  };
+
   const getCloseReadiness = (lead: Lead) => {
     const status = lead.status || "new";
     const hasContact = Boolean(getLeadEmail(lead) || lead.phone);
@@ -997,6 +1024,41 @@ export default function LeadsPage() {
       setSavingWorkingSession(false);
     }
   };
+
+  const actionConsole = [
+    {
+      label: "Follow up now",
+      detail: "Leads with a next touch due or overdue.",
+      icon: CalendarCheck,
+      leads: dueFollowUps.slice(0, 4),
+      empty: "No due follow-ups right now.",
+    },
+    {
+      label: "Send paid path",
+      detail: "Leads with enough context for package, proposal, or invoice movement.",
+      icon: CreditCard,
+      leads: leads
+        .filter((lead) => {
+          if (["won", "lost"].includes(lead.status || "new")) return false;
+          return getCloseReadiness(lead).score >= 4;
+        })
+        .slice(0, 4),
+      empty: "No lead is fully ready for a paid path yet.",
+    },
+    {
+      label: "Qualify next",
+      detail: "Leads that need buyer, pain, value, or company context before quoting.",
+      icon: Search,
+      leads: leads
+        .filter((lead) => {
+          if (["won", "lost"].includes(lead.status || "new")) return false;
+          return getCloseReadiness(lead).score < 4;
+        })
+        .sort((a, b) => (b.estimated_value || 0) - (a.estimated_value || 0))
+        .slice(0, 4),
+      empty: "No qualification backlog.",
+    },
+  ];
 
   return (
     <div className="space-y-6 pb-10">
@@ -1304,6 +1366,95 @@ export default function LeadsPage() {
                     <p className="text-sm font-semibold text-foreground">{pct}%</p>
                   </div>
                   <Progress value={pct} className="mt-3 h-2" />
+                </div>
+              );
+            })}
+          </CardContent>
+        </Card>
+      </div>
+
+      <div className="border-t p-6">
+        <Card className="rounded-lg shadow-none">
+          <CardHeader>
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+              <div>
+                <CardTitle className="text-lg">Action console</CardTitle>
+                <CardDescription>
+                  Work the pipeline by next move instead of opening every lead to figure out what to do.
+                </CardDescription>
+              </div>
+              <Button asChild variant="outline" className="rounded-md">
+                <Link href="/dashboard/accounts">
+                  Accounts handoff <ArrowRight className="ml-2 h-4 w-4" />
+                </Link>
+              </Button>
+            </div>
+          </CardHeader>
+          <CardContent className="grid gap-4 lg:grid-cols-3">
+            {actionConsole.map((lane) => {
+              const Icon = lane.icon;
+              return (
+                <div key={lane.label} className="rounded-lg border bg-card p-4">
+                  <div className="flex items-start justify-between gap-4">
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <div className="flex h-8 w-8 items-center justify-center rounded-md bg-primary/10 text-primary">
+                          <Icon className="h-4 w-4" />
+                        </div>
+                        <p className="text-sm font-semibold text-foreground">{lane.label}</p>
+                      </div>
+                      <p className="mt-2 text-sm leading-5 text-muted-foreground">{lane.detail}</p>
+                    </div>
+                    <Badge variant="outline" className="rounded-md">
+                      {lane.leads.length}
+                    </Badge>
+                  </div>
+
+                  <div className="mt-4 space-y-2">
+                    {lane.leads.length === 0 ? (
+                      <div className="rounded-md border border-dashed p-3 text-sm text-muted-foreground">
+                        {lane.empty}
+                      </div>
+                    ) : (
+                      lane.leads.map((lead) => {
+                        const statusConfig = STATUS_CONFIG[lead.status || "new"] || STATUS_CONFIG.new;
+                        const leadCompany = getLeadCompany(lead);
+                        return (
+                          <div key={lead.id} className="rounded-md border bg-background p-3">
+                            <div className="flex items-start justify-between gap-3">
+                              <div className="min-w-0">
+                                <p className="truncate text-sm font-semibold text-foreground">
+                                  {leadCompany || getLeadName(lead)}
+                                </p>
+                                <p className="mt-1 truncate text-xs text-muted-foreground">
+                                  {leadCompany ? getLeadName(lead) : getLeadNextAction(lead)}
+                                </p>
+                              </div>
+                              <Badge className={cn("shrink-0 text-xs", statusConfig.color)}>
+                                {statusConfig.label}
+                              </Badge>
+                            </div>
+                            <div className="mt-3 flex flex-wrap items-center gap-2">
+                              <Button
+                                type="button"
+                                size="sm"
+                                variant="outline"
+                                className="h-8 rounded-md"
+                                onClick={() => fetchLeadDetails(lead.id)}
+                              >
+                                Review
+                              </Button>
+                              <Button asChild size="sm" className="h-8 rounded-md">
+                                <Link href={getLeadPrimaryHref(lead)}>
+                                  {getLeadPrimaryLabel(lead)}
+                                </Link>
+                              </Button>
+                            </div>
+                          </div>
+                        );
+                      })
+                    )}
+                  </div>
                 </div>
               );
             })}
