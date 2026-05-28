@@ -148,6 +148,7 @@ export default function AccountsPage() {
   const [data, setData] = useState<OperatingData>(emptyData);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [sourceLeadId, setSourceLeadId] = useState("");
 
   async function fetchAccounts() {
     setLoading(true);
@@ -166,6 +167,8 @@ export default function AccountsPage() {
   }
 
   useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    setSourceLeadId(params.get("lead") || "");
     fetchAccounts();
   }, []);
 
@@ -214,6 +217,22 @@ export default function AccountsPage() {
       {error ? (
         <div className="rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700">
           {error}
+        </div>
+      ) : null}
+
+      {sourceLeadId ? (
+        <div className="flex flex-col gap-3 rounded-lg border border-violet-200 bg-violet-50 p-4 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <p className="text-sm font-semibold text-violet-950">Opened from a lead record</p>
+            <p className="mt-1 text-sm leading-5 text-violet-800">
+              Use this account workspace to confirm the close path, handoff state, and first delivery lane.
+            </p>
+          </div>
+          <Button asChild variant="outline" className="shrink-0 rounded-md border-violet-200 bg-white">
+            <Link href={`/dashboard/leads?lead=${encodeURIComponent(sourceLeadId)}`}>
+              Return to lead
+            </Link>
+          </Button>
         </div>
       ) : null}
 

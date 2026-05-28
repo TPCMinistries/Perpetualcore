@@ -276,6 +276,33 @@ const LEAD_ACTIONS = [
   },
 ];
 
+const CLOSE_PACKAGES = [
+  {
+    id: "software-access",
+    label: "Software Access",
+    fit: "Product-only buyer",
+    detail: "Use when they want to get inside the system before paying for implementation.",
+  },
+  {
+    id: "guided-setup",
+    label: "Guided Setup",
+    fit: "Small first invoice",
+    detail: "Use when they trust you but need a contained starting point.",
+  },
+  {
+    id: "first-workflow",
+    label: "First Workflow Package",
+    fit: "Clear operating pain",
+    detail: "Use when one workflow is costing time, revenue, or visibility right now.",
+  },
+  {
+    id: "operating-lane-deposit",
+    label: "90-Day Operating Lane",
+    fit: "AI consultant/operator",
+    detail: "Use when they want the broader Perpetual Core operating relationship.",
+  },
+];
+
 const STARTER_LEADS = [
   {
     label: "Enterprise prospect",
@@ -564,6 +591,25 @@ export default function LeadsPage() {
 
   const getLeadCompany = (lead: Lead) => lead.company || lead.company_name || "";
   const getLeadEmail = (lead: Lead) => lead.email || lead.contact_email || "";
+  const getRecommendedPackageId = (lead: Lead) => {
+    const value = lead.estimated_value || 0;
+    const text = `${lead.title || ""} ${lead.notes || ""}`.toLowerCase();
+
+    if (value >= 15000 || text.includes("enterprise") || text.includes("operating system")) {
+      return "operating-lane-deposit";
+    }
+
+    if (value >= 7500 || text.includes("workflow")) {
+      return "first-workflow";
+    }
+
+    if (value >= 1000 || text.includes("setup")) {
+      return "guided-setup";
+    }
+
+    return "software-access";
+  };
+
   const getLeadLane = (lead: Lead) => {
     const value = lead.estimated_value || 0;
     const text = `${lead.title || ""} ${lead.notes || ""}`.toLowerCase();
@@ -618,6 +664,46 @@ export default function LeadsPage() {
       default:
         return "Choose next action";
     }
+  };
+
+  const getCloseReadiness = (lead: Lead) => {
+    const status = lead.status || "new";
+    const hasContact = Boolean(getLeadEmail(lead) || lead.phone);
+    const hasCompany = Boolean(getLeadCompany(lead));
+    const hasValue = Boolean(lead.estimated_value);
+    const hasNotes = Boolean(lead.notes && lead.notes.length > 40);
+    const isLateStage = ["qualified", "proposal", "negotiation", "won"].includes(status);
+    const score = [hasContact, hasCompany, hasValue, hasNotes, isLateStage].filter(Boolean).length;
+
+    if (status === "won") {
+      return {
+        label: "Ready for account onboarding",
+        detail: "This lead is won. Move the relationship into Accounts and confirm the delivery lane.",
+        score,
+      };
+    }
+
+    if (score >= 4) {
+      return {
+        label: "Ready to send a paid path",
+        detail: "Enough context exists to send the right package, proposal, or invoice path.",
+        score,
+      };
+    }
+
+    if (score >= 2) {
+      return {
+        label: "Needs one more qualification step",
+        detail: "Clarify buyer authority, workflow pain, value, or implementation scope before asking for payment.",
+        score,
+      };
+    }
+
+    return {
+      label: "Qualify before closing",
+      detail: "Capture the buyer, company, problem, and first operating lane before sending a package.",
+      score,
+    };
   };
 
   const getAssistantScore = (lead: Lead) => {
@@ -1568,6 +1654,64 @@ export default function LeadsPage() {
                           </Button>
                         </div>
                       </div>
+                    </div>
+
+                    <div className="rounded-lg border bg-card p-4">
+                      {(() => {
+                        const readiness = getCloseReadiness(selectedLead);
+                        const recommendedPackage = getRecommendedPackageId(selectedLead);
+                        const selectedPackage = CLOSE_PACKAGES.find((pkg) => pkg.id === recommendedPackage) || CLOSE_PACKAGES[0];
+                        const packageHref = `/packages?lead=${encodeURIComponent(selectedLead.id)}&package=${encodeURIComponent(selectedPackage.id)}`;
+                        return (
+                          <div className="space-y-4">
+                            <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                              <div>
+                                <Label className="flex items-center gap-2 text-sm text-muted-foreground">
+                                  <CreditCard className="h-4 w-4 text-primary" />
+                                  Close path
+                                </Label>
+                                <p className="mt-2 text-base font-semibold text-foreground">{readiness.label}</p>
+                                <p className="mt-1 text-sm leading-6 text-muted-foreground">{readiness.detail}</p>
+                              </div>
+                              <Badge variant="outline" className="w-fit rounded-md">
+                                {readiness.score}/5 context
+                              </Badge>
+                            </div>
+
+                            <div className="rounded-md border bg-background p-3">
+                              <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
+                                Recommended package
+                              </p>
+                              <div className="mt-3 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                                <div>
+                                  <p className="text-sm font-semibold text-foreground">{selectedPackage.label}</p>
+                                  <p className="mt-1 text-sm leading-5 text-muted-foreground">
+                                    {selectedPackage.detail}
+                                  </p>
+                                </div>
+                                <Button asChild className="shrink-0 rounded-md">
+                                  <Link href={packageHref}>
+                                    Send package <ArrowRight className="ml-2 h-4 w-4" />
+                                  </Link>
+                                </Button>
+                              </div>
+                            </div>
+
+                            <div className="grid gap-2 sm:grid-cols-2">
+                              <Button asChild variant="outline" className="rounded-md">
+                                <Link href={`/contact-sales?intent=manual-invoice&lead=${encodeURIComponent(selectedLead.id)}`}>
+                                  Manual invoice path
+                                </Link>
+                              </Button>
+                              <Button asChild variant="outline" className="rounded-md">
+                                <Link href={`/dashboard/accounts?lead=${encodeURIComponent(selectedLead.id)}`}>
+                                  Open in Accounts
+                                </Link>
+                              </Button>
+                            </div>
+                          </div>
+                        );
+                      })()}
                     </div>
 
                     <div className="rounded-lg border bg-card p-4">
