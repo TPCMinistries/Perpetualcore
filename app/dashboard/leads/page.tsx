@@ -29,6 +29,9 @@ import {
   ListChecks,
   Workflow,
   CreditCard,
+  Bot,
+  Brain,
+  MessageSquare,
 } from "lucide-react";
 import { useConfirm } from "@/components/ui/confirm-dialog";
 import { Button } from "@/components/ui/button";
@@ -204,6 +207,29 @@ const SALES_FLOW = [
     label: "Close",
     detail: "Move to invoice, checkout, or operating onboarding.",
     icon: CreditCard,
+  },
+];
+
+const ASSISTANT_MODES = [
+  {
+    label: "Scout",
+    detail: "Find the signal in a lead, source, account, or conversation before you decide the offer.",
+    icon: Search,
+  },
+  {
+    label: "Qualifier",
+    detail: "Score fit, urgency, buyer readiness, and whether this should be software, setup, or operating work.",
+    icon: Brain,
+  },
+  {
+    label: "Proposal partner",
+    detail: "Turn the chosen lane into a buyer-specific proposal, close language, and follow-up sequence.",
+    icon: FileText,
+  },
+  {
+    label: "Operator",
+    detail: "After payment, carry the context into onboarding, weekly rhythm, deliverables, and expansion.",
+    icon: Bot,
   },
 ];
 
@@ -566,6 +592,20 @@ export default function LeadsPage() {
     ].join(" ");
   };
 
+  const getLeadAssistantPrompt = (lead: Lead, mode: "qualify" | "follow_up" | "proposal") => {
+    const briefing = getLeadBriefing(lead);
+
+    if (mode === "qualify") {
+      return `${briefing}\n\nAct as my Perpetual Core sales operator. Tell me the best next move, the likely buyer objections, what I should ask next, and whether this should be software access, guided setup, first workflow, or a 90-day operating lane.`;
+    }
+
+    if (mode === "follow_up") {
+      return `${briefing}\n\nDraft a concise follow-up message in my voice. Keep it practical, confident, and focused on the buyer's operating problem. Give me one short email and one text-message version.`;
+    }
+
+    return `${briefing}\n\nCreate a proposal outline for this lead. Include business problem, recommended starting lane, scope, timeline, investment framing, proof needed, and the next decision step.`;
+  };
+
   const copyText = async (text: string) => {
     try {
       await navigator.clipboard.writeText(text);
@@ -644,6 +684,45 @@ export default function LeadsPage() {
           );
         })}
       </div>
+
+      <Card className="rounded-lg border-primary/20 bg-gradient-to-br from-primary/[0.06] via-background to-background shadow-none">
+        <CardHeader>
+          <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+            <div className="max-w-2xl">
+              <div className="mb-3 flex items-center gap-2">
+                <Bot className="h-4 w-4 text-primary" />
+                <p className="font-mono text-xs uppercase tracking-[0.2em] text-muted-foreground">
+                  Adaptive AI layer
+                </p>
+              </div>
+              <CardTitle className="text-2xl">Your assistant should travel with the lead, not trap the lead.</CardTitle>
+              <CardDescription className="mt-3 text-sm leading-6">
+                The dashboard keeps the structure visible, while the assistant adapts the route, message,
+                proposal, and onboarding path from the actual lead context and your overrides.
+              </CardDescription>
+            </div>
+            <Button asChild variant="outline" className="rounded-md">
+              <Link href="/dashboard/chat">
+                Open AI chat <ArrowRight className="ml-2 h-4 w-4" />
+              </Link>
+            </Button>
+          </div>
+        </CardHeader>
+        <CardContent className="grid gap-3 md:grid-cols-2 lg:grid-cols-4">
+          {ASSISTANT_MODES.map((mode) => {
+            const Icon = mode.icon;
+            return (
+              <div key={mode.label} className="rounded-lg border bg-background p-4">
+                <div className="mb-4 flex h-9 w-9 items-center justify-center rounded-md bg-primary/10 text-primary">
+                  <Icon className="h-4 w-4" />
+                </div>
+                <p className="text-sm font-semibold text-foreground">{mode.label}</p>
+                <p className="mt-2 text-sm leading-5 text-muted-foreground">{mode.detail}</p>
+              </div>
+            );
+          })}
+        </CardContent>
+      </Card>
 
       <div className="grid gap-4 lg:grid-cols-3">
         {OFFER_ROUTES.map((route) => {
@@ -1382,6 +1461,35 @@ export default function LeadsPage() {
                                 </span>
                               </span>
                             </Link>
+                          );
+                        })}
+                      </div>
+                    </div>
+
+                    <div>
+                      <Label className="text-sm text-muted-foreground">Assistant prompts</Label>
+                      <div className="mt-2 grid gap-2">
+                        {[
+                          { label: "Qualify this lead", mode: "qualify" as const, icon: Brain },
+                          { label: "Draft follow-up", mode: "follow_up" as const, icon: MessageSquare },
+                          { label: "Outline proposal", mode: "proposal" as const, icon: FileText },
+                        ].map((prompt) => {
+                          const Icon = prompt.icon;
+                          return (
+                            <button
+                              key={prompt.label}
+                              type="button"
+                              onClick={() => copyText(getLeadAssistantPrompt(selectedLead, prompt.mode))}
+                              className="flex items-start gap-3 rounded-lg border bg-card p-3 text-left transition hover:border-primary/50 hover:bg-primary/[0.03]"
+                            >
+                              <Icon className="mt-0.5 h-4 w-4 flex-shrink-0 text-primary" />
+                              <span>
+                                <span className="block text-sm font-medium text-foreground">{prompt.label}</span>
+                                <span className="mt-1 block text-xs leading-5 text-muted-foreground">
+                                  Copy a context-aware prompt for your AI assistant.
+                                </span>
+                              </span>
+                            </button>
                           );
                         })}
                       </div>
