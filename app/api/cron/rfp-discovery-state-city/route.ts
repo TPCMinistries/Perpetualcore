@@ -43,12 +43,13 @@ export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 const CRON_NAME = "rfp-discovery-state-city";
 
-export async function POST(request: NextRequest) {
+function isAuthorized(request: NextRequest): boolean {
   const authHeader = request.headers.get("authorization");
-  if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
+  const expected = process.env.CRON_SECRET;
+  return Boolean(expected && authHeader === `Bearer ${expected}`);
+}
 
+async function runCron(): Promise<NextResponse> {
   const startedAt = Date.now();
 
   try {
@@ -147,9 +148,23 @@ export async function POST(request: NextRequest) {
   }
 }
 
-export function GET() {
-  return NextResponse.json(
-    { error: "Method Not Allowed" },
-    { status: 405, headers: { Allow: "POST" } }
+export async function POST(request: NextRequest): Promise<NextResponse> {
+  if (!isAuthorized(request)) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+  return runCron();
+}
+
+export async function GET(request: NextRequest): Promise<NextResponse> {
+  if (isAuthorized(request)) return runCron();
+  return new NextResponse(
+    JSON.stringify({ error: "Method not allowed. Use authenticated GET or POST." }),
+    {
+      status: 405,
+      headers: {
+        Allow: "GET, POST",
+        "Content-Type": "application/json",
+      },
+    }
   );
 }

@@ -29,34 +29,13 @@ export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 const CRON_NAME = "rfp-discovery-federal";
 
-/**
- * GET — accidental browser visits should be explicit, not silently 404 or
- * leak details about the route. Return 405 with an Allow header.
- */
-export async function GET(): Promise<NextResponse> {
-  return new NextResponse(
-    JSON.stringify({ error: "Method not allowed. Use POST." }),
-    {
-      status: 405,
-      headers: {
-        Allow: "POST",
-        "Content-Type": "application/json",
-      },
-    }
-  );
-}
-
-/**
- * POST — the cron entrypoint.
- */
-export async function POST(request: NextRequest): Promise<NextResponse> {
-  // Bearer-secret auth.
+function isAuthorized(request: NextRequest): boolean {
   const authHeader = request.headers.get("authorization");
   const expected = process.env.CRON_SECRET;
-  if (!expected || authHeader !== `Bearer ${expected}`) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
+  return Boolean(expected && authHeader === `Bearer ${expected}`);
+}
 
+async function runCron(): Promise<NextResponse> {
   const startedAt = Date.now();
 
   try {
@@ -148,4 +127,32 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       { status: 500 }
     );
   }
+}
+
+/**
+ * GET — Vercel Cron invokes GET. Authenticated GET runs the job; unauthenticated
+ * browser visits stay explicit and do not leak route details.
+ */
+export async function GET(request: NextRequest): Promise<NextResponse> {
+  if (isAuthorized(request)) return runCron();
+  return new NextResponse(
+    JSON.stringify({ error: "Method not allowed. Use authenticated GET or POST." }),
+    {
+      status: 405,
+      headers: {
+        Allow: "GET, POST",
+        "Content-Type": "application/json",
+      },
+    }
+  );
+}
+
+/**
+ * POST — manual cron entrypoint.
+ */
+export async function POST(request: NextRequest): Promise<NextResponse> {
+  if (!isAuthorized(request)) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+  return runCron();
 }
