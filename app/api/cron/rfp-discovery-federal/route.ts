@@ -23,9 +23,11 @@ import {
   type IngestRunResult,
 } from "@/lib/rfp/ingest/run";
 import { scoreNewOpportunitiesForAllActiveOrgs } from "@/lib/rfp/scoring/recompute";
+import { logRfpCronExecution } from "@/lib/rfp/cron-log";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
+const CRON_NAME = "rfp-discovery-federal";
 
 /**
  * GET — accidental browser visits should be explicit, not silently 404 or
@@ -62,6 +64,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
 
     const totalFetched = results.reduce((s, r) => s + r.fetched, 0);
     const totalUpserted = results.reduce((s, r) => s + r.upserted, 0);
+    const totalErrors = results.reduce((s, r) => s + r.errors.length, 0);
 
     // Hand off to Phase 05-03 scoring. Collect all upserted_ids across the
     // per-source results. The scorer iterates active orgs and writes
@@ -81,6 +84,37 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     }
 
     const duration_ms = Date.now() - startedAt;
+    const scoringFailed = "error" in scored;
+    await logRfpCronExecution({
+      cronName: CRON_NAME,
+      durationMs: duration_ms,
+      status: totalErrors > 0 || scoringFailed ? "warning" : "success",
+      result: {
+        total_fetched: totalFetched,
+        total_upserted: totalUpserted,
+        total_errors: totalErrors,
+        scored: "scored" in scored ? scored.scored : null,
+        scoring_error: "error" in scored ? scored.error.slice(0, 200) : null,
+        sources: results.map((row) => ({
+          source: row.source,
+          fetched: row.fetched,
+          upserted: row.upserted,
+          errors: row.errors.length,
+        })),
+      },
+      errors:
+        totalErrors > 0 || scoringFailed
+          ? {
+              sources: results
+                .filter((row) => row.errors.length > 0)
+                .map((row) => ({
+                  source: row.source,
+                  errors: row.errors.slice(0, 5),
+                })),
+              scoring: "error" in scored ? scored.error.slice(0, 200) : null,
+            }
+          : null,
+    });
     console.log(
       `[rfp-discovery-federal] complete in ${duration_ms}ms — ` +
         `fetched=${totalFetched} upserted=${totalUpserted} ` +
@@ -97,6 +131,12 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     // runFederalIngest is designed to never throw, but defense-in-depth.
     // Sanitize: do NOT leak stack traces or internal paths.
     const message = err instanceof Error ? err.message : "Unknown error";
+    await logRfpCronExecution({
+      cronName: CRON_NAME,
+      durationMs: Date.now() - startedAt,
+      status: "error",
+      errors: { message: message.slice(0, 200) },
+    });
     console.error("[rfp-discovery-federal] fatal", err);
     return NextResponse.json(
       {

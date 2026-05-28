@@ -31,6 +31,7 @@ import {
   type StateCityIngestResult,
 } from "@/lib/rfp/ingest/run-state-city";
 import { scoreNewOpportunitiesForAllActiveOrgs } from "@/lib/rfp/scoring/recompute";
+import { logRfpCronExecution } from "@/lib/rfp/cron-log";
 
 interface IngestTotals {
   fetched: number;
@@ -40,6 +41,7 @@ interface IngestTotals {
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
+const CRON_NAME = "rfp-discovery-state-city";
 
 export async function POST(request: NextRequest) {
   const authHeader = request.headers.get("authorization");
@@ -81,6 +83,37 @@ export async function POST(request: NextRequest) {
     }
 
     const duration_ms = Date.now() - startedAt;
+    const scoringFailed = "error" in scored;
+    await logRfpCronExecution({
+      cronName: CRON_NAME,
+      durationMs: duration_ms,
+      status: totals.errors > 0 || scoringFailed ? "warning" : "success",
+      result: {
+        total_fetched: totals.fetched,
+        total_upserted: totals.upserted,
+        total_errors: totals.errors,
+        scored: "scored" in scored ? scored.scored : null,
+        scoring_error: "error" in scored ? scored.error.slice(0, 200) : null,
+        sources: results.map((row) => ({
+          source: row.source,
+          fetched: row.fetched,
+          upserted: row.upserted,
+          errors: row.errors.length,
+        })),
+      },
+      errors:
+        totals.errors > 0 || scoringFailed
+          ? {
+              sources: results
+                .filter((row) => row.errors.length > 0)
+                .map((row) => ({
+                  source: row.source,
+                  errors: row.errors.slice(0, 5),
+                })),
+              scoring: "error" in scored ? scored.error.slice(0, 200) : null,
+            }
+          : null,
+    });
     console.log(
       `[rfp-discovery-state-city] fetched=${totals.fetched} upserted=${totals.upserted} errors=${totals.errors} scored=${"scored" in scored ? scored.scored : "error"} duration=${duration_ms}ms`
     );
@@ -94,6 +127,12 @@ export async function POST(request: NextRequest) {
     });
   } catch (e: unknown) {
     const message = e instanceof Error ? e.message : "unknown error";
+    await logRfpCronExecution({
+      cronName: CRON_NAME,
+      durationMs: Date.now() - startedAt,
+      status: "error",
+      errors: { message: message.slice(0, 200) },
+    });
     // Sanitize: log full detail server-side, return only the message to the caller.
     console.error("[rfp-discovery-state-city] fatal:", e);
     return NextResponse.json(
