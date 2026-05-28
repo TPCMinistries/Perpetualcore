@@ -26,6 +26,7 @@ import { ExportProposalButton } from "@/components/rfp/ExportProposalButton";
 import { SubmissionReadinessPanel } from "@/components/rfp/SubmissionReadinessPanel";
 import { SubmissionPlanPanel } from "@/components/rfp/SubmissionPlanPanel";
 import { SubmissionWorkroom } from "@/components/rfp/SubmissionWorkroom";
+import { PursuitActionSummary } from "@/components/rfp/PursuitActionSummary";
 import type { CitationChunk } from "@/components/rfp/MarkupRenderer";
 import type { SubmissionTaskRow } from "@/lib/rfp/submission/tasks";
 import type {
@@ -470,6 +471,16 @@ export default async function ProposalPage({
           <ReviewButton orgId={orgId} proposalId={proposalId} />
           <ExportProposalButton proposalId={proposalId} />
         </div>
+        <PursuitActionSummary
+          dueDate={proposal.due_date}
+          bidNoBid={bidNoBid}
+          complianceMatrix={complianceMatrix}
+          packetChecklist={packetChecklist}
+          reviewerResult={reviewerResult}
+          verifyMarkerCount={verifyMarkerCount}
+          sectionCount={visibleSections.length}
+          tasks={submissionTasks ?? []}
+        />
         <SubmissionReadinessPanel
           bidNoBid={bidNoBid}
           complianceMatrix={complianceMatrix}
