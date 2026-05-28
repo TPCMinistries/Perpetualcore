@@ -65,10 +65,26 @@ interface ComplianceSummaryRow {
   created_at: string;
 }
 
+interface SubmissionTaskSummaryRow {
+  proposal_id: string;
+  title: string;
+  status: string;
+  priority: string;
+  due_date: string | null;
+  created_at: string;
+}
+
 interface ReadinessSummary {
   label: string;
   tone: "ready" | "warn" | "blocked" | "empty";
   details: string[];
+}
+
+interface TaskQueueSummary {
+  open: number;
+  blocked: number;
+  critical: number;
+  nextTask: string | null;
 }
 
 const READINESS_CHIP: Record<ReadinessSummary["tone"], string> = {
@@ -76,6 +92,13 @@ const READINESS_CHIP: Record<ReadinessSummary["tone"], string> = {
   warn: "border-amber-500/40 bg-amber-500/10 text-amber-200",
   blocked: "border-rose-500/40 bg-rose-500/10 text-rose-200",
   empty: "border-zinc-800 bg-zinc-900 text-zinc-400",
+};
+
+const PRIORITY_RANK: Record<string, number> = {
+  critical: 0,
+  high: 1,
+  medium: 2,
+  low: 3,
 };
 
 function fmtDate(iso: string | null): string {
@@ -127,6 +150,61 @@ function readNumberField(value: unknown, key: string): number {
   return typeof n === "number" && Number.isFinite(n) ? n : 0;
 }
 
+function countPacketGaps(value: unknown): { missing: number; needsReview: number } {
+  if (typeof value !== "object" || value === null || Array.isArray(value)) {
+    return { missing: 0, needsReview: 0 };
+  }
+  const items = (value as Record<string, unknown>).items;
+  if (!Array.isArray(items)) return { missing: 0, needsReview: 0 };
+  let missing = 0;
+  let needsReview = 0;
+  for (const item of items) {
+    if (typeof item !== "object" || item === null || Array.isArray(item)) continue;
+    const status = (item as Record<string, unknown>).status;
+    if (status === "missing") missing++;
+    if (status === "partial" || status === "needs_review") needsReview++;
+  }
+  return { missing, needsReview };
+}
+
+function daysUntil(iso: string | null): number | null {
+  if (!iso) return null;
+  const due = new Date(`${iso}T00:00:00`);
+  if (Number.isNaN(due.getTime())) return null;
+  const now = new Date();
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  return Math.ceil((due.getTime() - today.getTime()) / 86_400_000);
+}
+
+function summarizeTasks(
+  proposalId: string,
+  taskRows: SubmissionTaskSummaryRow[],
+): TaskQueueSummary {
+  const openTasks = taskRows
+    .filter((task) => task.proposal_id === proposalId)
+    .filter(
+      (task) =>
+        task.status === "open" ||
+        task.status === "in_progress" ||
+        task.status === "blocked",
+    )
+    .sort((a, b) => {
+      if (a.status === "blocked" && b.status !== "blocked") return -1;
+      if (b.status === "blocked" && a.status !== "blocked") return 1;
+      const priorityDiff =
+        (PRIORITY_RANK[a.priority] ?? 99) - (PRIORITY_RANK[b.priority] ?? 99);
+      if (priorityDiff !== 0) return priorityDiff;
+      return a.created_at.localeCompare(b.created_at);
+    });
+
+  return {
+    open: openTasks.length,
+    blocked: openTasks.filter((task) => task.status === "blocked").length,
+    critical: openTasks.filter((task) => task.priority === "critical").length,
+    nextTask: openTasks[0]?.title ?? null,
+  };
+}
+
 function summarizeReadiness(
   proposalId: string,
   sectionRows: SectionSummaryRow[],
@@ -152,18 +230,15 @@ function summarizeReadiness(
     checksByType.has("bid_no_bid_v1") &&
     checksByType.has("compliance_matrix_v1") &&
     checksByType.has("packet_checklist_v1");
+  const packetGaps = countPacketGaps(checksByType.get("packet_checklist_v1"));
   const complianceGaps =
     readNumberField(checksByType.get("compliance_matrix_v1"), "missing_count") +
-    readNumberField(checksByType.get("packet_checklist_v1"), "missing_count");
+    packetGaps.missing;
   const reviewNeeds =
     readNumberField(
       checksByType.get("compliance_matrix_v1"),
       "needs_review_count",
-    ) +
-    readNumberField(
-      checksByType.get("packet_checklist_v1"),
-      "needs_review_count",
-    );
+    ) + packetGaps.needsReview;
 
   const reviewerRow = sections.find(
     (row) => row.section_type === REVIEWER_FINDINGS_SECTION_TYPE,
@@ -266,6 +341,15 @@ export default async function ProposalsListPage({
           .returns<ComplianceSummaryRow[]>()
       : { data: [] as ComplianceSummaryRow[] };
 
+  const { data: submissionTaskSummaries } =
+    proposalIds.length > 0
+      ? await supabase
+          .from("rfp_submission_tasks")
+          .select("proposal_id, title, status, priority, due_date, created_at")
+          .in("proposal_id", proposalIds)
+          .returns<SubmissionTaskSummaryRow[]>()
+      : { data: [] as SubmissionTaskSummaryRow[] };
+
   // Count per-status totals for the filter chips (small extra query;
   // a single GROUP BY would be more efficient but PostgREST doesn't
   // expose group-by cleanly in the JS client).
@@ -278,6 +362,41 @@ export default async function ProposalsListPage({
   for (const r of allForCounts ?? []) {
     counts[r.status] = (counts[r.status] ?? 0) + 1;
   }
+
+  const readinessByProposal = new Map<string, ReadinessSummary>();
+  const tasksByProposal = new Map<string, TaskQueueSummary>();
+  for (const proposal of rows) {
+    readinessByProposal.set(
+      proposal.id,
+      summarizeReadiness(
+        proposal.id,
+        sectionSummaries ?? [],
+        complianceSummaries ?? [],
+      ),
+    );
+    tasksByProposal.set(
+      proposal.id,
+      summarizeTasks(proposal.id, submissionTaskSummaries ?? []),
+    );
+  }
+  const pipelineOpenTasks = [...tasksByProposal.values()].reduce(
+    (sum, queue) => sum + queue.open,
+    0,
+  );
+  const pipelineBlocked = rows.filter((proposal) => {
+    const readiness = readinessByProposal.get(proposal.id);
+    const queue = tasksByProposal.get(proposal.id);
+    return readiness?.tone === "blocked" || (queue?.blocked ?? 0) > 0;
+  }).length;
+  const pipelineReady = rows.filter((proposal) => {
+    const readiness = readinessByProposal.get(proposal.id);
+    const queue = tasksByProposal.get(proposal.id);
+    return readiness?.tone === "ready" && (queue?.open ?? 0) === 0;
+  }).length;
+  const dueSoon = rows.filter((proposal) => {
+    const days = daysUntil(proposal.due_date);
+    return days !== null && days >= 0 && days <= 14;
+  }).length;
 
   return (
     <div className="relative">
@@ -331,6 +450,43 @@ export default async function ProposalsListPage({
           })}
         </div>
 
+        {counts.all > 0 ? (
+          <section className="mt-8 overflow-hidden rounded-md border border-zinc-900 bg-zinc-950">
+            <div className="border-b border-zinc-900 bg-zinc-900/70 px-5 py-4">
+              <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-emerald-300">
+                Pipeline command
+              </p>
+              <p className="mt-2 max-w-3xl text-sm leading-relaxed text-zinc-400">
+                Active pursuit health across the org. Use this to decide whether
+                to clear blockers, move ready packets to submission, or start a
+                new opportunity from Discovery.
+              </p>
+            </div>
+            <div className="grid sm:grid-cols-2 lg:grid-cols-4">
+              <PipelineMetric
+                label="Ready to submit"
+                value={String(pipelineReady)}
+                tone={pipelineReady > 0 ? "ready" : "neutral"}
+              />
+              <PipelineMetric
+                label="Blocked pursuits"
+                value={String(pipelineBlocked)}
+                tone={pipelineBlocked > 0 ? "danger" : "neutral"}
+              />
+              <PipelineMetric
+                label="Open tasks"
+                value={String(pipelineOpenTasks)}
+                tone={pipelineOpenTasks > 0 ? "warn" : "ready"}
+              />
+              <PipelineMetric
+                label="Due in 14d"
+                value={String(dueSoon)}
+                tone={dueSoon > 0 ? "warn" : "neutral"}
+              />
+            </div>
+          </section>
+        ) : null}
+
         {/* List */}
         {rows.length === 0 ? (
           <div className="mt-10 rounded-lg border border-zinc-900 bg-white/[0.02] p-8 text-center">
@@ -377,11 +533,17 @@ export default async function ProposalsListPage({
                   ? p.status
                   : "draft"
               ) as Status;
-              const readiness = summarizeReadiness(
-                p.id,
-                sectionSummaries ?? [],
-                complianceSummaries ?? [],
-              );
+              const readiness = readinessByProposal.get(p.id) ?? {
+                label: "Needs Draft",
+                tone: "empty" as const,
+                details: [],
+              };
+              const taskQueue = tasksByProposal.get(p.id) ?? {
+                open: 0,
+                blocked: 0,
+                critical: 0,
+                nextTask: null,
+              };
               return (
                 <li key={p.id}>
                   <Link
@@ -411,7 +573,17 @@ export default async function ProposalsListPage({
                       <span className="font-mono text-[9px] uppercase tracking-[0.16em] text-zinc-600">
                         {readiness.details.join(" · ")}
                       </span>
+                      {taskQueue.open > 0 ? (
+                        <span className="font-mono text-[9px] uppercase tracking-[0.16em] text-amber-300">
+                          {taskQueue.open} task{taskQueue.open === 1 ? "" : "s"}
+                        </span>
+                      ) : null}
                     </div>
+                    {taskQueue.nextTask ? (
+                      <div className="text-[12px] leading-relaxed text-zinc-500 sm:basis-full sm:pl-[72px]">
+                        Next: {taskQueue.nextTask}
+                      </div>
+                    ) : null}
                   </Link>
                 </li>
               );
@@ -419,6 +591,35 @@ export default async function ProposalsListPage({
           </ul>
         )}
       </div>
+    </div>
+  );
+}
+
+function PipelineMetric({
+  label,
+  value,
+  tone,
+}: {
+  label: string;
+  value: string;
+  tone: "ready" | "warn" | "danger" | "neutral";
+}) {
+  const valueClass =
+    tone === "ready"
+      ? "text-emerald-200"
+      : tone === "warn"
+        ? "text-amber-200"
+        : tone === "danger"
+          ? "text-rose-200"
+          : "text-zinc-100";
+  return (
+    <div className="border-b border-r border-zinc-900 px-5 py-4 last:border-r-0 lg:border-b-0">
+      <p className="font-mono text-[9px] uppercase tracking-[0.2em] text-zinc-500">
+        {label}
+      </p>
+      <p className={`mt-2 text-2xl font-semibold tabular-nums ${valueClass}`}>
+        {value}
+      </p>
     </div>
   );
 }
