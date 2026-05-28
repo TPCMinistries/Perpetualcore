@@ -9,9 +9,11 @@ import {
   CalendarClock,
   CheckCircle2,
   CircleDollarSign,
+  Clipboard,
   ClipboardCheck,
   FileText,
   Loader2,
+  Mail,
   MessagesSquare,
   PackageCheck,
   RefreshCw,
@@ -19,6 +21,7 @@ import {
   Sparkles,
   Target,
 } from "lucide-react";
+import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -84,6 +87,16 @@ type SourceLead = {
   notes?: string | null;
   next_follow_up_at?: string | null;
   updated_at: string;
+};
+
+type SourceLeadActivity = {
+  id: string;
+  activity_type: string;
+  title: string;
+  description?: string | null;
+  from_value?: string | null;
+  to_value?: string | null;
+  created_at: string;
 };
 
 const emptyData: OperatingData = {
@@ -216,12 +229,49 @@ function getAccountLane(lead: SourceLead) {
   };
 }
 
+function getSourceLeadSummary(lead: SourceLead) {
+  const company = getLeadCompany(lead);
+  const contact = getLeadName(lead);
+  const value = lead.estimated_value ? formatCurrency(lead.estimated_value) : "scope pending";
+  const status = normalizeStatus(lead.status || "new");
+  const nextTouch = lead.next_follow_up_at ? formatDate(lead.next_follow_up_at) : "not scheduled";
+
+  return `${company || contact} | ${contact} | ${status} | ${value} | next touch: ${nextTouch}`;
+}
+
+function getAccountCopyActions(lead: SourceLead) {
+  const lane = getAccountLane(lead);
+  const company = getLeadCompany(lead) || "your team";
+  const contact = getLeadName(lead);
+  const summary = getSourceLeadSummary(lead);
+  const notes = lead.notes?.trim() || "No detailed notes captured yet.";
+
+  return [
+    {
+      label: "Kickoff note",
+      icon: Mail,
+      body: `Hi ${contact},\n\nI mapped this as a ${lane.label} path for ${company}. The next move is to confirm the first operating lane, the immediate business outcome, and what access or context we need to start cleanly.\n\nSuggested next step: schedule a working session so we can turn this from interest into an installed operating system.\n\n${summary}`,
+    },
+    {
+      label: "Internal brief",
+      icon: Clipboard,
+      body: `Account brief\n${summary}\n\nRecommended lane: ${lane.label}\nWhy this lane: ${lane.detail}\n\nKnown context:\n${notes}\n\nNext action: confirm buyer priority, decision path, and the first workflow that should be installed.`,
+    },
+    {
+      label: "Discovery agenda",
+      icon: FileText,
+      body: `Discovery agenda for ${company}\n\n1. Confirm the business outcome this AI operating system should improve first.\n2. Identify the workflows, tools, people, and data currently involved.\n3. Decide whether the first step is software access, guided setup, first workflow, or a 90-day operating lane.\n4. Define the first measurable deliverable.\n5. Confirm payment path, kickoff date, and owner on each side.`,
+    },
+  ];
+}
+
 export default function AccountsPage() {
   const [data, setData] = useState<OperatingData>(emptyData);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [sourceLeadId, setSourceLeadId] = useState("");
   const [sourceLead, setSourceLead] = useState<SourceLead | null>(null);
+  const [sourceLeadActivities, setSourceLeadActivities] = useState<SourceLeadActivity[]>([]);
   const [sourceLeadLoading, setSourceLeadLoading] = useState(false);
 
   async function fetchAccounts() {
@@ -246,8 +296,9 @@ export default function AccountsPage() {
     try {
       const response = await fetch(`/api/leads/${leadId}`, { cache: "no-store" });
       if (!response.ok) throw new Error("Failed to load source lead");
-      const result = (await response.json()) as { lead: SourceLead };
+      const result = (await response.json()) as { lead: SourceLead; activities?: SourceLeadActivity[] };
       setSourceLead(result.lead);
+      setSourceLeadActivities(result.activities || []);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to load source lead");
     } finally {
@@ -264,6 +315,15 @@ export default function AccountsPage() {
       fetchSourceLead(leadId);
     }
   }, []);
+
+  async function copyAccountText(label: string, body: string) {
+    try {
+      await navigator.clipboard.writeText(body);
+      toast.success(`${label} copied`);
+    } catch {
+      toast.error("Could not copy text");
+    }
+  }
 
   const paidAccounts = useMemo(
     () => data.activeClients.filter((client) => client.status.toLowerCase().includes("paid")),
@@ -416,6 +476,75 @@ export default function AccountsPage() {
             </div>
           </CardContent>
         </Card>
+      ) : null}
+
+      {sourceLead ? (
+        <div className="grid gap-6 lg:grid-cols-[0.95fr_1.05fr]">
+          <Card className="rounded-lg shadow-none">
+            <CardHeader>
+              <div className="flex items-center justify-between gap-4">
+                <CardTitle className="text-xl">Handoff copy kit</CardTitle>
+                <MessagesSquare className="h-5 w-5 text-violet-600" />
+              </div>
+              <p className="text-sm leading-6 text-slate-600">
+                Copy clean language into email, proposal notes, or the internal delivery lane without
+                losing the source lead context.
+              </p>
+            </CardHeader>
+            <CardContent className="grid gap-3 md:grid-cols-3 lg:grid-cols-1 xl:grid-cols-3">
+              {getAccountCopyActions(sourceLead).map((action) => (
+                <button
+                  key={action.label}
+                  type="button"
+                  onClick={() => copyAccountText(action.label, action.body)}
+                  className="rounded-lg border bg-white p-4 text-left transition hover:border-violet-300 hover:bg-violet-50/40"
+                >
+                  <action.icon className="h-5 w-5 text-violet-600" />
+                  <p className="mt-4 text-sm font-semibold text-slate-950">{action.label}</p>
+                  <p className="mt-2 text-sm leading-5 text-slate-600">
+                    Copy the current lead context into a usable next step.
+                  </p>
+                </button>
+              ))}
+            </CardContent>
+          </Card>
+
+          <Card className="rounded-lg shadow-none">
+            <CardHeader>
+              <div className="flex items-center justify-between gap-4">
+                <CardTitle className="text-xl">Lead history</CardTitle>
+                <CalendarClock className="h-5 w-5 text-violet-600" />
+              </div>
+              <p className="text-sm leading-6 text-slate-600">
+                Recent lead activity stays visible when you move from sales into account work.
+              </p>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              {sourceLeadActivities.length === 0 ? (
+                <div className="rounded-lg border border-dashed p-4 text-sm text-slate-600">
+                  No activity has been logged yet. Save a working session or send a package from the lead.
+                </div>
+              ) : (
+                sourceLeadActivities.slice(0, 6).map((activity) => (
+                  <div key={activity.id} className="rounded-lg border bg-white p-4">
+                    <div className="flex flex-wrap items-center justify-between gap-3">
+                      <p className="text-sm font-semibold text-slate-950">{activity.title}</p>
+                      <Badge variant="outline" className="rounded-md">
+                        {formatDate(activity.created_at)}
+                      </Badge>
+                    </div>
+                    <p className="mt-2 font-mono text-[10px] uppercase tracking-[0.18em] text-slate-500">
+                      {normalizeStatus(activity.activity_type)}
+                    </p>
+                    {activity.description ? (
+                      <p className="mt-2 text-sm leading-5 text-slate-600">{activity.description}</p>
+                    ) : null}
+                  </div>
+                ))
+              )}
+            </CardContent>
+          </Card>
+        </div>
       ) : null}
 
       <div className="grid gap-4 md:grid-cols-4">
