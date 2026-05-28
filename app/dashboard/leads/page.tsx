@@ -32,6 +32,8 @@ import {
   Bot,
   Brain,
   MessageSquare,
+  CalendarCheck,
+  WandSparkles,
 } from "lucide-react";
 import { useConfirm } from "@/components/ui/confirm-dialog";
 import { Button } from "@/components/ui/button";
@@ -144,6 +146,19 @@ interface PipelineStats {
   };
 }
 
+type AssistantPromptMode = "qualify" | "follow_up" | "proposal";
+
+interface AssistantRecommendation {
+  generatedAt: string;
+  leadName: string;
+  score: number;
+  route: string;
+  nextAction: string;
+  followUp: string;
+  reasoning: string[];
+  questions: string[];
+}
+
 // Status configuration
 const STATUS_CONFIG: Record<string, { label: string; color: string; icon: LucideIcon }> = {
   new: { label: "New", color: "bg-blue-100 text-blue-700", icon: Sparkles },
@@ -233,6 +248,13 @@ const ASSISTANT_MODES = [
   },
 ];
 
+const FOLLOW_UP_PRESETS = [
+  { label: "Today", days: 0, detail: "Use when the lead is active or warm right now." },
+  { label: "Tomorrow", days: 1, detail: "Use after a first touch, intro, or soft reply." },
+  { label: "3 days", days: 3, detail: "Use after sending packages, map, or a proposal." },
+  { label: "1 week", days: 7, detail: "Use for nurture, lower urgency, or waiting on internal review." },
+];
+
 const LEAD_ACTIONS = [
   {
     label: "Build proposal",
@@ -299,6 +321,8 @@ export default function LeadsPage() {
   const [showDetailSheet, setShowDetailSheet] = useState(false);
   const [selectedLead, setSelectedLead] = useState<Lead | null>(null);
   const [leadActivities, setLeadActivities] = useState<LeadActivity[]>([]);
+  const [savingFollowUp, setSavingFollowUp] = useState<string | null>(null);
+  const [savingAssistantPlan, setSavingAssistantPlan] = useState(false);
 
   // Form state
   const [formData, setFormData] = useState({
@@ -459,7 +483,7 @@ export default function LeadsPage() {
   // Calculate totals
   const totalLeads = leads.length;
   const totalValue = Object.values(pipeline).reduce((sum, s) => sum + (s.value || 0), 0);
-  const activeLeads = leads.filter(l => !["won", "lost"].includes(l.status)).length;
+  const activeLeads = leads.filter(l => !["won", "lost"].includes(l.status || "new")).length;
   const proposalCount = pipeline.proposal?.count || 0;
   const closeRate = totalLeads > 0
     ? Math.round(((pipeline.won?.count || 0) / totalLeads) * 100)
@@ -471,6 +495,10 @@ export default function LeadsPage() {
   const proposalActivities = leadActivities.filter(
     (activity) => activity.activity_type === "proposal_draft"
   );
+  const dueFollowUps = leads.filter((lead) => {
+    if (!lead.next_follow_up_at || ["won", "lost"].includes(lead.status || "new")) return false;
+    return new Date(lead.next_follow_up_at).getTime() <= Date.now();
+  });
 
   // Format currency
   const formatCurrency = (value: number) => {
@@ -576,6 +604,78 @@ export default function LeadsPage() {
     }
   };
 
+  const getAssistantScore = (lead: Lead) => {
+    const value = lead.estimated_value || 0;
+    const hasContact = Boolean(getLeadEmail(lead) || lead.phone);
+    const hasCompany = Boolean(getLeadCompany(lead));
+    const hasNotes = Boolean(lead.notes && lead.notes.length > 30);
+    const statusWeight: Record<string, number> = {
+      new: 8,
+      contacted: 16,
+      qualified: 24,
+      proposal: 30,
+      negotiation: 34,
+      won: 100,
+      lost: 0,
+    };
+
+    const valueScore = value >= 30000 ? 28 : value >= 15000 ? 22 : value >= 7500 ? 16 : value >= 1000 ? 10 : 4;
+    const contextScore = (hasContact ? 10 : 0) + (hasCompany ? 10 : 0) + (hasNotes ? 10 : 0);
+    return Math.min(100, valueScore + contextScore + (statusWeight[lead.status || "new"] || 8));
+  };
+
+  const getAssistantRecommendation = (lead: Lead): AssistantRecommendation => {
+    const lane = getLeadLane(lead);
+    const score = lead.lead_score || getAssistantScore(lead);
+    const status = lead.status || "new";
+    const company = getLeadCompany(lead);
+    const route = lane.label;
+    const needsBuyer = !getLeadEmail(lead) && !lead.phone;
+    const needsScope = !lead.notes || lead.notes.length < 40;
+    const highIntent = ["qualified", "proposal", "negotiation"].includes(status);
+
+    return {
+      generatedAt: new Date().toISOString(),
+      leadName: getLeadName(lead),
+      score,
+      route,
+      nextAction: getLeadNextAction(lead),
+      followUp: highIntent ? "Schedule a 24-72 hour follow-up tied to a decision step." : "Set the next touch before this lead leaves the queue.",
+      reasoning: [
+        company ? `Company context exists: ${company}.` : "Company context is missing; qualify the account before quoting.",
+        lead.estimated_value ? `Estimated value is ${formatCurrency(lead.estimated_value)}.` : "No estimated value yet; ask what the workflow or operating gap is costing.",
+        `Recommended route is ${route} because ${lane.detail.toLowerCase()}`,
+      ],
+      questions: [
+        needsBuyer ? "Who owns the decision and what is the best direct contact?" : "Who else needs to approve the first engagement?",
+        needsScope ? "Which workflow, revenue leak, or operating bottleneck should we solve first?" : "What evidence would make this urgent enough to start now?",
+        "Do they need software access, implementation help, or an operating partner relationship?",
+      ],
+    };
+  };
+
+  const getCurrentAssistantInsight = (lead: Lead): AssistantRecommendation | null => {
+    if (!lead.ai_insights || typeof lead.ai_insights !== "object" || Array.isArray(lead.ai_insights)) {
+      return null;
+    }
+
+    const insight = lead.ai_insights as Partial<AssistantRecommendation>;
+    if (!insight.route || !insight.nextAction) {
+      return null;
+    }
+
+    return {
+      generatedAt: insight.generatedAt || lead.updated_at,
+      leadName: insight.leadName || getLeadName(lead),
+      score: typeof insight.score === "number" ? insight.score : getAssistantScore(lead),
+      route: insight.route,
+      nextAction: insight.nextAction,
+      followUp: insight.followUp || "Set a next touch before this lead leaves the queue.",
+      reasoning: Array.isArray(insight.reasoning) ? insight.reasoning : [],
+      questions: Array.isArray(insight.questions) ? insight.questions : [],
+    };
+  };
+
   const getLeadBriefing = (lead: Lead) => {
     const lane = getLeadLane(lead);
     const company = getLeadCompany(lead);
@@ -592,7 +692,7 @@ export default function LeadsPage() {
     ].join(" ");
   };
 
-  const getLeadAssistantPrompt = (lead: Lead, mode: "qualify" | "follow_up" | "proposal") => {
+  const getLeadAssistantPrompt = (lead: Lead, mode: AssistantPromptMode) => {
     const briefing = getLeadBriefing(lead);
 
     if (mode === "qualify") {
@@ -612,6 +712,61 @@ export default function LeadsPage() {
       toast.success("Copied to clipboard");
     } catch {
       toast.error("Could not copy text");
+    }
+  };
+
+  const updateLead = async (leadId: string, updates: Partial<Lead>) => {
+    const res = await fetch(`/api/leads/${leadId}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(updates),
+    });
+
+    if (!res.ok) {
+      throw new Error("Failed to update lead");
+    }
+
+    const data = (await res.json()) as { lead: Lead };
+    setLeads((current) => current.map((lead) => (lead.id === leadId ? { ...lead, ...data.lead } : lead)));
+    if (selectedLead?.id === leadId) {
+      setSelectedLead(data.lead);
+      fetchLeadDetails(leadId);
+    }
+    return data.lead;
+  };
+
+  const handleSetFollowUp = async (lead: Lead, days: number) => {
+    try {
+      setSavingFollowUp(`${lead.id}-${days}`);
+      const dueDate = new Date();
+      dueDate.setDate(dueDate.getDate() + days);
+      dueDate.setHours(10, 0, 0, 0);
+      await updateLead(lead.id, { next_follow_up_at: dueDate.toISOString() });
+      toast.success(`Follow-up set for ${formatDate(dueDate.toISOString())}`);
+      fetchLeads();
+    } catch (error) {
+      console.error("Error setting follow-up:", error);
+      toast.error("Could not set follow-up");
+    } finally {
+      setSavingFollowUp(null);
+    }
+  };
+
+  const handleSaveAssistantPlan = async (lead: Lead) => {
+    try {
+      setSavingAssistantPlan(true);
+      const recommendation = getAssistantRecommendation(lead);
+      await updateLead(lead.id, {
+        ai_insights: recommendation,
+        lead_score: recommendation.score,
+      });
+      toast.success("Assistant plan saved to lead");
+      fetchLeads();
+    } catch (error) {
+      console.error("Error saving assistant plan:", error);
+      toast.error("Could not save assistant plan");
+    } finally {
+      setSavingAssistantPlan(false);
     }
   };
 
@@ -828,15 +983,15 @@ export default function LeadsPage() {
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">Conversion Rate</CardTitle>
-            <Target className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-sm font-medium">Due Follow-ups</CardTitle>
+            <CalendarCheck className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {closeRate}%
+              {dueFollowUps.length}
             </div>
             <p className="text-xs text-muted-foreground">
-              Won / Total leads
+              {closeRate}% won / total leads
             </p>
           </CardContent>
         </Card>
@@ -880,6 +1035,9 @@ export default function LeadsPage() {
                     </div>
                     <div className="mt-4 flex flex-wrap items-center gap-2">
                       <Badge variant="outline" className="rounded-md">{lane.label}</Badge>
+                      <Badge variant="outline" className="rounded-md">
+                        AI score {lead.lead_score || getAssistantScore(lead)}
+                      </Badge>
                       {lead.estimated_value ? (
                         <Badge variant="secondary" className="rounded-md">
                           {formatCurrency(lead.estimated_value)}
@@ -904,6 +1062,7 @@ export default function LeadsPage() {
             {[
               { label: "Active pipeline", value: activeLeads, target: Math.max(totalLeads, 1), detail: "Leads still in motion" },
               { label: "Proposal coverage", value: proposalCount, target: Math.max(activeLeads, 1), detail: "Active leads with proposal-stage momentum" },
+              { label: "Follow-up discipline", value: leads.filter((lead) => lead.next_follow_up_at).length, target: Math.max(activeLeads, 1), detail: "Active leads with a next touch scheduled" },
               { label: "Won conversion", value: pipeline.won?.count || 0, target: Math.max(totalLeads, 1), detail: "Closed starts from the current lead pool" },
             ].map((item) => {
               const pct = Math.min(100, Math.round((item.value / item.target) * 100));
@@ -1393,6 +1552,107 @@ export default function LeadsPage() {
                           </Button>
                         </div>
                       </div>
+                    </div>
+
+                    <div className="rounded-lg border bg-card p-4">
+                      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                        <div>
+                          <Label className="flex items-center gap-2 text-sm text-muted-foreground">
+                            <WandSparkles className="h-4 w-4 text-primary" />
+                            Assistant plan
+                          </Label>
+                          <p className="mt-2 text-sm leading-6 text-muted-foreground">
+                            Save the current recommendation to this lead so the assistant can carry the route,
+                            score, questions, and follow-up context into proposals and client work.
+                          </p>
+                        </div>
+                        <Button
+                          type="button"
+                          className="rounded-md"
+                          disabled={savingAssistantPlan}
+                          onClick={() => handleSaveAssistantPlan(selectedLead)}
+                        >
+                          <Brain className="mr-2 h-4 w-4" />
+                          {savingAssistantPlan ? "Saving..." : "Save AI plan"}
+                        </Button>
+                      </div>
+
+                      {(() => {
+                        const insight = getCurrentAssistantInsight(selectedLead);
+                        const recommendation = insight || getAssistantRecommendation(selectedLead);
+                        return (
+                          <div className="mt-4 grid gap-3">
+                            <div className="grid gap-3 sm:grid-cols-3">
+                              <div className="rounded-md border bg-background p-3">
+                                <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
+                                  Score
+                                </p>
+                                <p className="mt-2 text-xl font-semibold">{recommendation.score}</p>
+                              </div>
+                              <div className="rounded-md border bg-background p-3 sm:col-span-2">
+                                <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
+                                  Route
+                                </p>
+                                <p className="mt-2 text-sm font-semibold">{recommendation.route}</p>
+                              </div>
+                            </div>
+                            <div className="rounded-md border bg-background p-3">
+                              <p className="text-sm font-semibold text-foreground">{recommendation.nextAction}</p>
+                              <p className="mt-1 text-sm leading-6 text-muted-foreground">{recommendation.followUp}</p>
+                            </div>
+                            <div className="grid gap-3 sm:grid-cols-2">
+                              <div className="rounded-md border bg-background p-3">
+                                <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">
+                                  Reasoning
+                                </p>
+                                <ul className="mt-2 space-y-2 text-sm leading-5 text-muted-foreground">
+                                  {recommendation.reasoning.map((item) => (
+                                    <li key={item}>{item}</li>
+                                  ))}
+                                </ul>
+                              </div>
+                              <div className="rounded-md border bg-background p-3">
+                                <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">
+                                  Ask next
+                                </p>
+                                <ul className="mt-2 space-y-2 text-sm leading-5 text-muted-foreground">
+                                  {recommendation.questions.map((item) => (
+                                    <li key={item}>{item}</li>
+                                  ))}
+                                </ul>
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })()}
+                    </div>
+
+                    <div>
+                      <Label className="text-sm text-muted-foreground">Schedule next touch</Label>
+                      <div className="mt-2 grid gap-2 sm:grid-cols-4">
+                        {FOLLOW_UP_PRESETS.map((preset) => (
+                          <button
+                            key={preset.label}
+                            type="button"
+                            disabled={savingFollowUp === `${selectedLead.id}-${preset.days}`}
+                            onClick={() => handleSetFollowUp(selectedLead, preset.days)}
+                            className="rounded-lg border bg-card p-3 text-left transition hover:border-primary/50 hover:bg-primary/[0.03] disabled:cursor-not-allowed disabled:opacity-60"
+                          >
+                            <span className="block text-sm font-semibold text-foreground">
+                              {savingFollowUp === `${selectedLead.id}-${preset.days}` ? "Saving..." : preset.label}
+                            </span>
+                            <span className="mt-1 block text-xs leading-5 text-muted-foreground">
+                              {preset.detail}
+                            </span>
+                          </button>
+                        ))}
+                      </div>
+                      {selectedLead.next_follow_up_at ? (
+                        <p className="mt-2 flex items-center gap-2 text-sm text-muted-foreground">
+                          <CalendarCheck className="h-4 w-4 text-primary" />
+                          Next follow-up: {formatDate(selectedLead.next_follow_up_at)}
+                        </p>
+                      ) : null}
                     </div>
 
                     {/* Status */}

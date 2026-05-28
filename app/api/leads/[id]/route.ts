@@ -76,7 +76,7 @@ export async function PATCH(
     // Get current lead for status change tracking
     const { data: currentLead } = await supabase
       .from("leads")
-      .select("status, stage")
+      .select("status, stage, next_follow_up_at")
       .eq("id", id)
       .eq("user_id", user.id)
       .single();
@@ -109,7 +109,7 @@ export async function PATCH(
       "ai_insights",
     ];
 
-    const updates: Record<string, any> = { updated_at: new Date().toISOString() };
+    const updates: Record<string, unknown> = { updated_at: new Date().toISOString() };
     for (const field of allowedFields) {
       if (body[field] !== undefined) {
         updates[field] = body[field];
@@ -152,6 +152,30 @@ export async function PATCH(
         title: `Status changed to ${body.status}`,
         from_value: currentLead.status,
         to_value: body.status,
+      });
+    }
+
+    if (
+      body.next_follow_up_at &&
+      body.next_follow_up_at !== currentLead.next_follow_up_at
+    ) {
+      await supabase.from("lead_activities").insert({
+        lead_id: id,
+        user_id: user.id,
+        activity_type: "follow_up_scheduled",
+        title: "Follow-up scheduled",
+        from_value: currentLead.next_follow_up_at,
+        to_value: body.next_follow_up_at,
+      });
+    }
+
+    if (body.ai_insights) {
+      await supabase.from("lead_activities").insert({
+        lead_id: id,
+        user_id: user.id,
+        activity_type: "ai_plan_saved",
+        title: "Assistant plan saved",
+        description: "AI routing, qualification questions, and next action were saved to this lead.",
       });
     }
 
