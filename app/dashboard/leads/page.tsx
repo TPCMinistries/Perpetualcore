@@ -26,10 +26,14 @@ import {
   Send,
   PackageCheck,
   Map,
+  ListChecks,
+  Workflow,
+  CreditCard,
 } from "lucide-react";
 import { useConfirm } from "@/components/ui/confirm-dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Progress } from "@/components/ui/progress";
 import {
   Card,
   CardContent,
@@ -180,6 +184,29 @@ const OFFER_ROUTES = [
   },
 ];
 
+const SALES_FLOW = [
+  {
+    label: "Capture",
+    detail: "Log the relationship, source, pain, and likely buyer type.",
+    icon: Users,
+  },
+  {
+    label: "Route",
+    detail: "Choose AI OS Map, Packages, or Sales intake based on readiness.",
+    icon: Workflow,
+  },
+  {
+    label: "Propose",
+    detail: "Create a lane-specific proposal and save it to the lead.",
+    icon: FileText,
+  },
+  {
+    label: "Close",
+    detail: "Move to invoice, checkout, or operating onboarding.",
+    icon: CreditCard,
+  },
+];
+
 const LEAD_ACTIONS = [
   {
     label: "Build proposal",
@@ -204,6 +231,7 @@ const LEAD_ACTIONS = [
 const STARTER_LEADS = [
   {
     label: "Enterprise prospect",
+    name: "Primary decision maker",
     company: "Empire Furniture",
     title: "AI operating system opportunity",
     value: "30000",
@@ -212,6 +240,7 @@ const STARTER_LEADS = [
   },
   {
     label: "Small business",
+    name: "Small business owner",
     company: "",
     title: "Guided setup opportunity",
     value: "5000",
@@ -220,6 +249,7 @@ const STARTER_LEADS = [
   },
   {
     label: "Product-only buyer",
+    name: "Product buyer",
     company: "",
     title: "Software access opportunity",
     value: "299",
@@ -259,7 +289,7 @@ export default function LeadsPage() {
 
   const applyStarterLead = (template: (typeof STARTER_LEADS)[number]) => {
     setFormData({
-      name: "",
+      name: template.name,
       email: "",
       phone: "",
       company: template.company,
@@ -404,6 +434,14 @@ export default function LeadsPage() {
   const totalLeads = leads.length;
   const totalValue = Object.values(pipeline).reduce((sum, s) => sum + (s.value || 0), 0);
   const activeLeads = leads.filter(l => !["won", "lost"].includes(l.status)).length;
+  const proposalCount = pipeline.proposal?.count || 0;
+  const closeRate = totalLeads > 0
+    ? Math.round(((pipeline.won?.count || 0) / totalLeads) * 100)
+    : 0;
+  const priorityLeads = leads
+    .filter((lead) => !["won", "lost"].includes(lead.status || "new"))
+    .sort((a, b) => (b.estimated_value || 0) - (a.estimated_value || 0))
+    .slice(0, 4);
   const proposalActivities = leadActivities.filter(
     (activity) => activity.activity_type === "proposal_draft"
   );
@@ -456,6 +494,61 @@ export default function LeadsPage() {
 
   const getLeadCompany = (lead: Lead) => lead.company || lead.company_name || "";
   const getLeadEmail = (lead: Lead) => lead.email || lead.contact_email || "";
+  const getLeadLane = (lead: Lead) => {
+    const value = lead.estimated_value || 0;
+    const text = `${lead.title || ""} ${lead.notes || ""}`.toLowerCase();
+
+    if (value >= 15000 || text.includes("enterprise") || text.includes("operating system")) {
+      return {
+        label: "90-Day Operating Lane",
+        detail: "Best path when they want you as AI consultant/operator across a broader system.",
+        href: `/dashboard/proposals?lead=${lead.id}`,
+      };
+    }
+
+    if (value >= 7500 || text.includes("workflow")) {
+      return {
+        label: "First Workflow Package",
+        detail: "Best path when one workflow has obvious time, revenue, or service pain.",
+        href: `/dashboard/proposals?lead=${lead.id}`,
+      };
+    }
+
+    if (value >= 1000 || text.includes("setup")) {
+      return {
+        label: "Guided Setup",
+        detail: "Best path for a smaller first invoice and one configured product surface.",
+        href: "/packages",
+      };
+    }
+
+    return {
+      label: "Software Access",
+      detail: "Best path when they only want to try the software before implementation.",
+      href: "/packages",
+    };
+  };
+
+  const getLeadNextAction = (lead: Lead) => {
+    switch (lead.status || "new") {
+      case "new":
+        return "Contact and qualify";
+      case "contacted":
+        return "Send the right route";
+      case "qualified":
+        return "Build proposal";
+      case "proposal":
+        return "Follow up and close";
+      case "negotiation":
+        return "Move to invoice";
+      case "won":
+        return "Start onboarding";
+      case "lost":
+        return "Archive or nurture";
+      default:
+        return "Choose next action";
+    }
+  };
 
   const copyText = async (text: string) => {
     try {
@@ -469,7 +562,7 @@ export default function LeadsPage() {
   return (
     <div className="space-y-6 pb-10">
       <div className="rounded-xl border border-border bg-background p-6">
-        <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
+        <div className="grid gap-6 lg:grid-cols-[1fr_0.72fr] lg:items-end">
           <div className="max-w-3xl">
             <div className="mb-3 flex items-center gap-2">
               <span className="h-2 w-2 rounded-full bg-primary" />
@@ -485,11 +578,55 @@ export default function LeadsPage() {
               serious buyers from interest into paid software, setup, workflow, or 90-day operating work.
             </p>
           </div>
-          <Button onClick={() => setShowCreateDialog(true)} className="w-full rounded-md sm:w-auto">
-            <Plus className="mr-2 h-4 w-4" />
-            Add Lead
-          </Button>
+          <div className="grid gap-3 rounded-lg border bg-muted/30 p-4">
+            <div className="flex items-center justify-between gap-4">
+              <div>
+                <p className="text-sm font-semibold text-foreground">Today&apos;s operating target</p>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  Get every active lead to one visible next action.
+                </p>
+              </div>
+              <Button onClick={() => setShowCreateDialog(true)} className="rounded-md">
+                <Plus className="mr-2 h-4 w-4" />
+                Add Lead
+              </Button>
+            </div>
+            <div className="grid grid-cols-3 gap-2 text-sm">
+              <div className="rounded-md bg-background p-3">
+                <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">Active</p>
+                <p className="mt-1 text-xl font-semibold text-foreground">{activeLeads}</p>
+              </div>
+              <div className="rounded-md bg-background p-3">
+                <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">Proposal</p>
+                <p className="mt-1 text-xl font-semibold text-foreground">{proposalCount}</p>
+              </div>
+              <div className="rounded-md bg-background p-3">
+                <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">Close</p>
+                <p className="mt-1 text-xl font-semibold text-foreground">{closeRate}%</p>
+              </div>
+            </div>
+          </div>
         </div>
+      </div>
+
+      <div className="grid gap-3 lg:grid-cols-4">
+        {SALES_FLOW.map((step, index) => {
+          const Icon = step.icon;
+          return (
+            <div key={step.label} className="rounded-lg border bg-card p-4">
+              <div className="mb-4 flex items-center justify-between">
+                <div className="flex h-9 w-9 items-center justify-center rounded-md bg-primary/10 text-primary">
+                  <Icon className="h-4 w-4" />
+                </div>
+                <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
+                  {String(index + 1).padStart(2, "0")}
+                </span>
+              </div>
+              <p className="text-sm font-semibold text-foreground">{step.label}</p>
+              <p className="mt-2 text-sm leading-5 text-muted-foreground">{step.detail}</p>
+            </div>
+          );
+        })}
       </div>
 
       <div className="grid gap-4 lg:grid-cols-3">
@@ -601,13 +738,93 @@ export default function LeadsPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {totalLeads > 0
-                ? Math.round(((pipeline.won?.count || 0) / totalLeads) * 100)
-                : 0}%
+              {closeRate}%
             </div>
             <p className="text-xs text-muted-foreground">
               Won / Total leads
             </p>
+          </CardContent>
+        </Card>
+      </div>
+
+      <div className="grid gap-4 border-t p-6 lg:grid-cols-[0.92fr_1.08fr]">
+        <Card className="rounded-lg shadow-none">
+          <CardHeader>
+            <div className="flex items-center justify-between gap-4">
+              <div>
+                <CardTitle className="text-lg">Priority queue</CardTitle>
+                <CardDescription>
+                  Highest-value active leads that need movement first.
+                </CardDescription>
+              </div>
+              <ListChecks className="h-5 w-5 text-muted-foreground" />
+            </div>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            {priorityLeads.length === 0 ? (
+              <div className="rounded-lg border bg-card p-4 text-sm text-muted-foreground">
+                Add or qualify active leads to build the daily queue.
+              </div>
+            ) : (
+              priorityLeads.map((lead) => {
+                const lane = getLeadLane(lead);
+                const statusConfig = STATUS_CONFIG[lead.status || "new"] || STATUS_CONFIG.new;
+                return (
+                  <button
+                    key={lead.id}
+                    type="button"
+                    onClick={() => fetchLeadDetails(lead.id)}
+                    className="w-full rounded-lg border bg-card p-4 text-left transition hover:border-primary/50 hover:bg-primary/[0.03]"
+                  >
+                    <div className="flex items-start justify-between gap-4">
+                      <div>
+                        <p className="text-sm font-semibold text-foreground">{getLeadCompany(lead) || getLeadName(lead)}</p>
+                        <p className="mt-1 text-sm text-muted-foreground">{getLeadNextAction(lead)}</p>
+                      </div>
+                      <Badge className={cn("text-xs", statusConfig.color)}>{statusConfig.label}</Badge>
+                    </div>
+                    <div className="mt-4 flex flex-wrap items-center gap-2">
+                      <Badge variant="outline" className="rounded-md">{lane.label}</Badge>
+                      {lead.estimated_value ? (
+                        <Badge variant="secondary" className="rounded-md">
+                          {formatCurrency(lead.estimated_value)}
+                        </Badge>
+                      ) : null}
+                    </div>
+                  </button>
+                );
+              })
+            )}
+          </CardContent>
+        </Card>
+
+        <Card className="rounded-lg shadow-none">
+          <CardHeader>
+            <CardTitle className="text-lg">Pipeline health</CardTitle>
+            <CardDescription>
+              Keep the funnel balanced: enough qualified leads, enough proposals, and enough closed starts.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="grid gap-4">
+            {[
+              { label: "Active pipeline", value: activeLeads, target: Math.max(totalLeads, 1), detail: "Leads still in motion" },
+              { label: "Proposal coverage", value: proposalCount, target: Math.max(activeLeads, 1), detail: "Active leads with proposal-stage momentum" },
+              { label: "Won conversion", value: pipeline.won?.count || 0, target: Math.max(totalLeads, 1), detail: "Closed starts from the current lead pool" },
+            ].map((item) => {
+              const pct = Math.min(100, Math.round((item.value / item.target) * 100));
+              return (
+                <div key={item.label} className="rounded-lg border bg-card p-4">
+                  <div className="flex items-center justify-between gap-4">
+                    <div>
+                      <p className="text-sm font-semibold text-foreground">{item.label}</p>
+                      <p className="mt-1 text-sm text-muted-foreground">{item.detail}</p>
+                    </div>
+                    <p className="text-sm font-semibold text-foreground">{pct}%</p>
+                  </div>
+                  <Progress value={pct} className="mt-3 h-2" />
+                </div>
+              );
+            })}
           </CardContent>
         </Card>
       </div>
