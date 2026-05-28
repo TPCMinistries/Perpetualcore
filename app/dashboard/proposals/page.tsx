@@ -22,8 +22,14 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 interface LeadSummary {
   id: string;
-  name: string;
+  name?: string | null;
+  contact_name?: string | null;
+  first_name?: string | null;
+  last_name?: string | null;
+  email?: string | null;
+  contact_email?: string | null;
   company?: string | null;
+  company_name?: string | null;
   status?: string | null;
   estimated_value?: number | null;
 }
@@ -163,6 +169,15 @@ async function copyText(text: string) {
   }
 }
 
+function getLeadDisplayName(lead: LeadSummary) {
+  const composedName = [lead.first_name, lead.last_name].filter(Boolean).join(" ").trim();
+  return lead.name || lead.contact_name || composedName || lead.email || lead.contact_email || "Unnamed lead";
+}
+
+function getLeadCompany(lead: LeadSummary) {
+  return lead.company || lead.company_name || "";
+}
+
 export default function ProposalsPage() {
   const [leads, setLeads] = useState<LeadSummary[]>([]);
   const [selectedLeadId, setSelectedLeadId] = useState("");
@@ -215,7 +230,12 @@ export default function ProposalsPage() {
         const response = await fetch("/api/leads?limit=100");
         if (!response.ok) throw new Error("Failed to fetch leads");
         const data = (await response.json()) as { leads?: LeadSummary[] };
-        setLeads(data.leads || []);
+        const fetchedLeads = data.leads || [];
+        setLeads(fetchedLeads);
+        const leadParam = new URLSearchParams(window.location.search).get("lead");
+        if (leadParam && fetchedLeads.some((lead) => lead.id === leadParam)) {
+          setSelectedLeadId(leadParam);
+        }
       } catch (error) {
         console.error("Proposal lead fetch error:", error);
         toast.error("Could not load leads");
@@ -229,7 +249,7 @@ export default function ProposalsPage() {
 
   useEffect(() => {
     if (!selectedLead) return;
-    setBuyerName(selectedLead.company || selectedLead.name);
+    setBuyerName(getLeadCompany(selectedLead) || getLeadDisplayName(selectedLead));
   }, [selectedLead]);
 
   useEffect(() => {
@@ -347,7 +367,9 @@ export default function ProposalsPage() {
                   <option value="">{loadingLeads ? "Loading leads..." : "Choose a lead"}</option>
                   {leads.map((lead) => (
                     <option key={lead.id} value={lead.id}>
-                      {lead.company ? `${lead.company} - ${lead.name}` : lead.name}
+                      {getLeadCompany(lead)
+                        ? `${getLeadCompany(lead)} - ${getLeadDisplayName(lead)}`
+                        : getLeadDisplayName(lead)}
                     </option>
                   ))}
                 </select>

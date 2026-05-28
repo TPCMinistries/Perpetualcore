@@ -180,6 +180,27 @@ const OFFER_ROUTES = [
   },
 ];
 
+const LEAD_ACTIONS = [
+  {
+    label: "Build proposal",
+    detail: "Attach a proposal draft to this lead and save it in their activity history.",
+    href: (leadId: string) => `/dashboard/proposals?lead=${leadId}`,
+    icon: FileText,
+  },
+  {
+    label: "Use sales script",
+    detail: "Open objection handling, cost framing, and follow-up language before you call or email.",
+    href: () => "/dashboard/sales-script",
+    icon: Clipboard,
+  },
+  {
+    label: "Manual invoice path",
+    detail: "Use when the buyer has agreed to start and needs a clean payment next step.",
+    href: () => "/contact-sales?intent=manual-invoice",
+    icon: DollarSign,
+  },
+];
+
 const STARTER_LEADS = [
   {
     label: "Enterprise prospect",
@@ -765,6 +786,18 @@ export default function LeadsPage() {
                                 <Eye className="h-4 w-4 mr-2" />
                                 View Details
                               </DropdownMenuItem>
+                              <DropdownMenuItem asChild onClick={(e) => e.stopPropagation()}>
+                                <Link href={`/dashboard/proposals?lead=${lead.id}`}>
+                                  <FileText className="h-4 w-4 mr-2" />
+                                  Build Proposal
+                                </Link>
+                              </DropdownMenuItem>
+                              <DropdownMenuItem asChild onClick={(e) => e.stopPropagation()}>
+                                <Link href="/dashboard/sales-script">
+                                  <Clipboard className="h-4 w-4 mr-2" />
+                                  Open Script
+                                </Link>
+                              </DropdownMenuItem>
                               <DropdownMenuSeparator />
                               <DropdownMenuItem
                                 className="text-destructive"
@@ -1048,6 +1081,30 @@ export default function LeadsPage() {
                       </div>
                     </div>
 
+                    <div>
+                      <Label className="text-sm text-muted-foreground">Next sales actions</Label>
+                      <div className="mt-2 grid gap-2">
+                        {LEAD_ACTIONS.map((action) => {
+                          const Icon = action.icon;
+                          return (
+                            <Link
+                              key={action.label}
+                              href={action.href(selectedLead.id)}
+                              className="flex items-start gap-3 rounded-lg border bg-card p-3 transition hover:border-primary/50 hover:bg-primary/[0.03]"
+                            >
+                              <Icon className="mt-0.5 h-4 w-4 flex-shrink-0 text-primary" />
+                              <span>
+                                <span className="block text-sm font-medium text-foreground">{action.label}</span>
+                                <span className="mt-1 block text-xs leading-5 text-muted-foreground">
+                                  {action.detail}
+                                </span>
+                              </span>
+                            </Link>
+                          );
+                        })}
+                      </div>
+                    </div>
+
                     {/* Contact Info */}
                     <div className="space-y-3">
                       <Label className="text-sm text-muted-foreground">Contact Information</Label>
@@ -1167,7 +1224,7 @@ export default function LeadsPage() {
                         <FileText className="mx-auto mb-3 h-8 w-8 opacity-50" />
                         <p className="text-sm">No proposal drafts saved for this lead yet.</p>
                         <Button asChild className="mt-4 rounded-md">
-                          <Link href="/dashboard/proposals">
+                          <Link href={`/dashboard/proposals?lead=${selectedLead.id}`}>
                             Create proposal <ArrowRight className="ml-2 h-4 w-4" />
                           </Link>
                         </Button>
