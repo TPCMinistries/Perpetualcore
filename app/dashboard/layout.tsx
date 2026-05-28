@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { getUser, signOut } from "@/lib/auth/actions";
+import { ConfirmProvider } from "@/components/ui/confirm-dialog";
 
 const primaryNav = [
   { label: "Operating", href: "/dashboard" },
@@ -65,9 +66,11 @@ export default async function DashboardLayout({
           ))}
         </nav>
       </header>
-      <main className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
-        {children}
-      </main>
+      <ConfirmProvider>
+        <main className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
+          {children}
+        </main>
+      </ConfirmProvider>
     </div>
   );
 }
