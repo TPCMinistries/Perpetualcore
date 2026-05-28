@@ -158,6 +158,13 @@ export async function GET(): Promise<NextResponse> {
           : "Latest RFP cron status unavailable.",
       ),
       check(
+        "cron_auth_config",
+        process.env.CRON_SECRET ? "ok" : "warn",
+        process.env.CRON_SECRET
+          ? "Cron bearer secret is configured in this runtime."
+          : "CRON_SECRET is missing; scheduled cron calls cannot authenticate.",
+      ),
+      check(
         "source_drift",
         (openDrift.count ?? 0) === 0 ? "ok" : "warn",
         `${openDrift.count ?? 0} unresolved source drift event${openDrift.count === 1 ? "" : "s"}.`,
