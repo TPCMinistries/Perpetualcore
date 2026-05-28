@@ -7,8 +7,9 @@
  * contents, never per-org cost.
  *
  * Fields are intentionally permissive: a missing/null value means "the
- * underlying table or row doesn't exist yet" rather than an error. The
- * top-level `status` is "ok" unless one of the load functions throws.
+ * underlying table or row doesn't exist yet" rather than leaking internals.
+ * The top-level `status` is "ok" or "degraded" unless a load function
+ * throws, in which case the endpoint returns 500.
  */
 
 import { NextResponse } from "next/server";
@@ -16,6 +17,18 @@ import { createAdminClient } from "@/lib/supabase/server";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
+
+const OPPORTUNITY_FRESH_HOURS = 72;
+const CRON_FRESH_HOURS = 36;
+const AI_COST_24H_WARN_USD = 50;
+
+type CheckStatus = "ok" | "warn" | "fail";
+
+interface HealthCheck {
+  name: string;
+  status: CheckStatus;
+  detail: string;
+}
 
 function isoHoursAgo(hours: number): string {
   return new Date(Date.now() - hours * 60 * 60 * 1000).toISOString();
@@ -27,12 +40,47 @@ function toNum(v: number | string | null | undefined): number {
   return Number.isFinite(n) ? n : 0;
 }
 
+function hoursSince(iso: string | null | undefined): number | null {
+  if (!iso) return null;
+  const t = new Date(iso).getTime();
+  if (Number.isNaN(t)) return null;
+  return Math.max(0, (Date.now() - t) / 3_600_000);
+}
+
+function formatHours(hours: number | null): string {
+  if (hours === null) return "unknown";
+  if (hours < 1) return `${Math.round(hours * 60)}m`;
+  if (hours < 48) return `${Math.round(hours)}h`;
+  return `${Math.round(hours / 24)}d`;
+}
+
+function check(
+  name: string,
+  status: CheckStatus,
+  detail: string,
+): HealthCheck {
+  return { name, status, detail };
+}
+
 export async function GET(): Promise<NextResponse> {
   try {
     const admin = createAdminClient();
     const dayAgo = isoHoursAgo(24);
 
-    const [lastCron, lastOpp, openDrift, cost24hRows] = await Promise.all([
+    const [
+      orgs,
+      proposals,
+      opportunities,
+      lastCron,
+      lastOpp,
+      openDrift,
+      cost24hRows,
+    ] = await Promise.all([
+      admin.from("rfp_orgs").select("id", { count: "exact", head: true }),
+      admin.from("rfp_proposals").select("id", { count: "exact", head: true }),
+      admin
+        .from("rfp_opportunities")
+        .select("id", { count: "exact", head: true }),
       admin
         .from("cron_executions")
         .select("cron_name, executed_at, status")
@@ -61,11 +109,88 @@ export async function GET(): Promise<NextResponse> {
       (sum, r) => sum + toNum(r.cost_usd),
       0,
     );
+    const lastOppAgeHours = hoursSince(lastOpp.data?.created_at);
+    const lastCronAgeHours = hoursSince(lastCron.data?.executed_at);
+    const lastCronStatus = lastCron.data?.status ?? null;
+
+    const checks: HealthCheck[] = [
+      check(
+        "database",
+        "ok",
+        "Admin client queries completed for RFP aggregate tables.",
+      ),
+      check(
+        "opportunity_inventory",
+        (opportunities.count ?? 0) > 0 ? "ok" : "warn",
+        `${opportunities.count ?? 0} opportunities indexed.`,
+      ),
+      check(
+        "opportunity_freshness",
+        lastOppAgeHours === null
+          ? "warn"
+          : lastOppAgeHours <= OPPORTUNITY_FRESH_HOURS
+            ? "ok"
+            : "warn",
+        lastOppAgeHours === null
+          ? "No opportunity ingestion timestamp found."
+          : `Latest opportunity ingested ${formatHours(lastOppAgeHours)} ago.`,
+      ),
+      check(
+        "cron_freshness",
+        lastCronAgeHours === null
+          ? "warn"
+          : lastCronAgeHours <= CRON_FRESH_HOURS
+            ? "ok"
+            : "warn",
+        lastCronAgeHours === null
+          ? "No RFP cron execution found."
+          : `Latest RFP cron ran ${formatHours(lastCronAgeHours)} ago.`,
+      ),
+      check(
+        "cron_status",
+        lastCronStatus === null
+          ? "warn"
+          : lastCronStatus === "success" || lastCronStatus === "ok"
+            ? "ok"
+            : "warn",
+        lastCronStatus
+          ? `Latest RFP cron status: ${lastCronStatus}.`
+          : "Latest RFP cron status unavailable.",
+      ),
+      check(
+        "source_drift",
+        (openDrift.count ?? 0) === 0 ? "ok" : "warn",
+        `${openDrift.count ?? 0} unresolved source drift event${openDrift.count === 1 ? "" : "s"}.`,
+      ),
+      check(
+        "ai_spend_24h",
+        ai_cost_24h_usd <= AI_COST_24H_WARN_USD ? "ok" : "warn",
+        `$${ai_cost_24h_usd.toFixed(4)} spent on RFP AI sessions in the last 24h.`,
+      ),
+      check(
+        "ai_provider_config",
+        process.env.ANTHROPIC_API_KEY || process.env.OPENAI_API_KEY ? "ok" : "warn",
+        process.env.ANTHROPIC_API_KEY || process.env.OPENAI_API_KEY
+          ? "At least one AI provider key is configured."
+          : "No AI provider key detected in this runtime.",
+      ),
+    ];
+    const degraded = checks.some((row) => row.status !== "ok");
 
     return NextResponse.json({
-      status: "ok",
+      status: degraded ? "degraded" : "ok",
       service: "rfp_engine",
       generated_at: new Date().toISOString(),
+      thresholds: {
+        opportunity_fresh_hours: OPPORTUNITY_FRESH_HOURS,
+        cron_fresh_hours: CRON_FRESH_HOURS,
+        ai_cost_24h_warn_usd: AI_COST_24H_WARN_USD,
+      },
+      totals: {
+        orgs: orgs.count ?? 0,
+        proposals: proposals.count ?? 0,
+        opportunities: opportunities.count ?? 0,
+      },
       last_cron: lastCron.data
         ? {
             name: lastCron.data.cron_name,
@@ -76,6 +201,7 @@ export async function GET(): Promise<NextResponse> {
       last_opportunity_ingested_at: lastOpp.data?.created_at ?? null,
       open_drift_events: openDrift.count ?? 0,
       ai_cost_24h_usd: Math.round(ai_cost_24h_usd * 10000) / 10000,
+      checks,
     });
   } catch (err) {
     const detail = err instanceof Error ? err.message.slice(0, 200) : "unknown";
