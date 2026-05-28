@@ -6,6 +6,7 @@ import {
   ArrowRight,
   CheckCircle2,
   Clipboard,
+  CreditCard,
   DollarSign,
   FileText,
   Layers3,
@@ -14,6 +15,7 @@ import {
   ShieldCheck,
   Sparkles,
   Target,
+  WandSparkles,
 } from "lucide-react";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
@@ -32,6 +34,22 @@ interface LeadSummary {
   company_name?: string | null;
   status?: string | null;
   estimated_value?: number | null;
+  title?: string | null;
+  notes?: string | null;
+  lead_score?: number | null;
+  ai_insights?: unknown;
+  next_follow_up_at?: string | null;
+}
+
+interface LeadAssistantPlan {
+  generatedAt?: string;
+  leadName?: string;
+  score?: number;
+  route?: string;
+  nextAction?: string;
+  followUp?: string;
+  reasoning?: string[];
+  questions?: string[];
 }
 
 interface SavedProposal {
@@ -54,6 +72,7 @@ const proposalLanes = [
       "Team walkthrough",
     ],
     cta: "/contact-sales?plan=guided-setup",
+    checkoutId: "guided-setup",
   },
   {
     name: "First Workflow Package",
@@ -66,6 +85,7 @@ const proposalLanes = [
       "Launch checklist and handoff",
     ],
     cta: "/contact-sales?plan=first-workflow",
+    checkoutId: "first-workflow",
   },
   {
     name: "90-Day Operating Lane",
@@ -78,6 +98,7 @@ const proposalLanes = [
       "Expansion roadmap",
     ],
     cta: "/contact-sales?plan=operating-lane-deposit",
+    checkoutId: "operating-lane-deposit",
   },
 ];
 
@@ -178,6 +199,44 @@ function getLeadCompany(lead: LeadSummary) {
   return lead.company || lead.company_name || "";
 }
 
+function getLeadAssistantPlan(lead?: LeadSummary): LeadAssistantPlan | null {
+  if (!lead?.ai_insights || typeof lead.ai_insights !== "object" || Array.isArray(lead.ai_insights)) {
+    return null;
+  }
+
+  const insight = lead.ai_insights as LeadAssistantPlan;
+  if (!insight.route && !insight.nextAction && !insight.reasoning?.length) {
+    return null;
+  }
+
+  return insight;
+}
+
+function getLaneNameFromRoute(route?: string) {
+  if (!route) return "";
+  const normalized = route.toLowerCase();
+
+  if (normalized.includes("operating")) return "90-Day Operating Lane";
+  if (normalized.includes("workflow")) return "First Workflow Package";
+  if (normalized.includes("guided") || normalized.includes("setup")) return "Guided Setup";
+  return "";
+}
+
+function getPackageIdForLane(laneName: string) {
+  if (laneName === "Guided Setup") return "guided-setup";
+  if (laneName === "First Workflow Package") return "first-workflow";
+  if (laneName === "90-Day Operating Lane") return "operating-lane-deposit";
+  return "guided-setup";
+}
+
+function getLeadStatusLabel(status?: string | null) {
+  if (!status) return "New";
+  return status
+    .split("_")
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+    .join(" ");
+}
+
 export default function ProposalsPage() {
   const [leads, setLeads] = useState<LeadSummary[]>([]);
   const [selectedLeadId, setSelectedLeadId] = useState("");
@@ -199,6 +258,28 @@ export default function ProposalsPage() {
 
   const selectedLane = proposalLanes.find((lane) => lane.name === selectedLaneName) ?? proposalLanes[2];
   const selectedLead = leads.find((lead) => lead.id === selectedLeadId);
+  const selectedAssistantPlan = getLeadAssistantPlan(selectedLead);
+  const paymentPackageId = getPackageIdForLane(selectedLane.name);
+  const leadDecisionPacket = useMemo(() => {
+    if (!selectedLead) return "";
+
+    const company = getLeadCompany(selectedLead);
+    const lines = [
+      `Lead: ${company ? `${company} - ${getLeadDisplayName(selectedLead)}` : getLeadDisplayName(selectedLead)}`,
+      `Status: ${getLeadStatusLabel(selectedLead.status)}`,
+      selectedLead.estimated_value ? `Estimated value: $${selectedLead.estimated_value.toLocaleString()}` : "",
+      selectedLead.lead_score ? `AI score: ${selectedLead.lead_score}` : "",
+      selectedAssistantPlan?.route ? `Assistant route: ${selectedAssistantPlan.route}` : "",
+      selectedAssistantPlan?.nextAction ? `Next action: ${selectedAssistantPlan.nextAction}` : "",
+      selectedAssistantPlan?.followUp ? `Follow-up: ${selectedAssistantPlan.followUp}` : "",
+      selectedLead.next_follow_up_at ? `Scheduled follow-up: ${new Date(selectedLead.next_follow_up_at).toLocaleDateString()}` : "",
+      selectedLead.notes ? `Lead notes: ${selectedLead.notes}` : "",
+      selectedAssistantPlan?.reasoning?.length ? `Reasoning:\n${selectedAssistantPlan.reasoning.map((item) => `- ${item}`).join("\n")}` : "",
+      selectedAssistantPlan?.questions?.length ? `Questions:\n${selectedAssistantPlan.questions.map((item) => `- ${item}`).join("\n")}` : "",
+    ].filter(Boolean);
+
+    return lines.join("\n");
+  }, [selectedAssistantPlan, selectedLead]);
   const generatedProposal = useMemo(() => {
     return [
       `Proposal direction for ${buyerName}`,
@@ -208,9 +289,16 @@ export default function ProposalsPage() {
       `Starting workflow: ${workflow}`,
       `Target outcome: ${businessOutcome}`,
       `Timeline: ${timeline}`,
+      selectedAssistantPlan?.score ? `AI readiness score: ${selectedAssistantPlan.score}` : "",
       "",
       "Positioning",
       "The goal is not to add another AI tool. The goal is to install an AI operating layer into a workflow that already matters to the company, prove measurable value, and then expand from there.",
+      selectedAssistantPlan?.reasoning?.length ? "" : "",
+      selectedAssistantPlan?.reasoning?.length ? "Assistant reasoning" : "",
+      ...(selectedAssistantPlan?.reasoning || []).map((item) => `- ${item}`),
+      selectedAssistantPlan?.questions?.length ? "" : "",
+      selectedAssistantPlan?.questions?.length ? "Questions to confirm before close" : "",
+      ...(selectedAssistantPlan?.questions || []).map((item) => `- ${item}`),
       "",
       "Recommended scope",
       ...scopeBlocks.map((block) => `- ${block.title}: ${block.copy}`),
@@ -220,8 +308,8 @@ export default function ProposalsPage() {
       "",
       "Next step",
       `If this direction is right, the next step is to ${nextStep}.`,
-    ].join("\n");
-  }, [businessOutcome, buyerName, buyerType, nextStep, selectedLane, timeline, workflow]);
+    ].filter((line, index, lines) => !(line === "" && lines[index - 1] === "")).join("\n");
+  }, [businessOutcome, buyerName, buyerType, nextStep, selectedAssistantPlan, selectedLane, timeline, workflow]);
 
   useEffect(() => {
     async function fetchLeads() {
@@ -250,6 +338,25 @@ export default function ProposalsPage() {
   useEffect(() => {
     if (!selectedLead) return;
     setBuyerName(getLeadCompany(selectedLead) || getLeadDisplayName(selectedLead));
+    const assistantPlan = getLeadAssistantPlan(selectedLead);
+    const laneName = getLaneNameFromRoute(assistantPlan?.route);
+    if (laneName) {
+      setSelectedLaneName(laneName);
+    } else if ((selectedLead.estimated_value || 0) >= 15000) {
+      setSelectedLaneName("90-Day Operating Lane");
+    } else if ((selectedLead.estimated_value || 0) >= 7500) {
+      setSelectedLaneName("First Workflow Package");
+    }
+
+    if (selectedLead.notes) {
+      const lowerNotes = selectedLead.notes.toLowerCase();
+      const matchedWorkflow = workflowOptions.find((option) =>
+        lowerNotes.includes(option.toLowerCase().split(" ")[0])
+      );
+      if (matchedWorkflow) {
+        setWorkflow(matchedWorkflow);
+      }
+    }
   }, [selectedLead]);
 
   useEffect(() => {
@@ -308,6 +415,23 @@ export default function ProposalsPage() {
     }
   };
 
+  const applyAssistantPlan = () => {
+    if (!selectedLead || !selectedAssistantPlan) {
+      toast.error("Choose a lead with a saved assistant plan");
+      return;
+    }
+
+    const laneName = getLaneNameFromRoute(selectedAssistantPlan.route);
+    if (laneName) setSelectedLaneName(laneName);
+    if (selectedAssistantPlan.nextAction) {
+      setNextStep(selectedAssistantPlan.nextAction.toLowerCase());
+    }
+    if (selectedLead.notes) {
+      setBusinessOutcome(selectedLead.notes);
+    }
+    toast.success("Assistant plan applied to proposal");
+  };
+
   return (
     <div className="space-y-6 pb-10">
       <div className="rounded-xl border border-border bg-background p-6">
@@ -339,6 +463,115 @@ export default function ProposalsPage() {
           </div>
         </div>
       </div>
+
+      <Card className="rounded-lg border-primary/20 bg-gradient-to-br from-primary/[0.06] via-background to-background shadow-none">
+        <CardHeader>
+          <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+            <div>
+              <div className="mb-3 flex items-center gap-2">
+                <WandSparkles className="h-4 w-4 text-primary" />
+                <p className="font-mono text-xs uppercase tracking-[0.2em] text-muted-foreground">
+                  Lead intelligence
+                </p>
+              </div>
+              <CardTitle className="text-xl">Use the saved assistant plan to write the proposal.</CardTitle>
+              <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">
+                When a lead has been scored in the sales command page, this desk pulls the route,
+                next action, reasoning, and questions into the proposal so the handoff stays coherent.
+              </p>
+            </div>
+            <div className="flex flex-col gap-2 sm:flex-row">
+              <Button
+                type="button"
+                variant="outline"
+                className="rounded-md"
+                disabled={!leadDecisionPacket}
+                onClick={() => copyText(leadDecisionPacket)}
+              >
+                <Clipboard className="mr-2 h-4 w-4" />
+                Copy packet
+              </Button>
+              <Button
+                type="button"
+                className="rounded-md"
+                disabled={!selectedAssistantPlan}
+                onClick={applyAssistantPlan}
+              >
+                Apply plan <ArrowRight className="ml-2 h-4 w-4" />
+              </Button>
+            </div>
+          </div>
+        </CardHeader>
+        <CardContent>
+          {!selectedLead ? (
+            <div className="rounded-lg border bg-background p-4 text-sm text-muted-foreground">
+              Choose a lead in the composer below to load its assistant plan.
+            </div>
+          ) : (
+            <div className="grid gap-3 lg:grid-cols-[0.7fr_1.3fr]">
+              <div className="rounded-lg border bg-background p-4">
+                <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
+                  Selected lead
+                </p>
+                <p className="mt-2 text-lg font-semibold text-foreground">
+                  {getLeadCompany(selectedLead) || getLeadDisplayName(selectedLead)}
+                </p>
+                <div className="mt-3 flex flex-wrap gap-2">
+                  <Badge variant="outline" className="rounded-md">
+                    {getLeadStatusLabel(selectedLead.status)}
+                  </Badge>
+                  {selectedLead.lead_score ? (
+                    <Badge variant="secondary" className="rounded-md">
+                      AI score {selectedLead.lead_score}
+                    </Badge>
+                  ) : null}
+                  {selectedLead.estimated_value ? (
+                    <Badge variant="outline" className="rounded-md">
+                      ${selectedLead.estimated_value.toLocaleString()}
+                    </Badge>
+                  ) : null}
+                </div>
+              </div>
+              <div className="rounded-lg border bg-background p-4">
+                {selectedAssistantPlan ? (
+                  <>
+                    <div className="grid gap-3 md:grid-cols-2">
+                      <div>
+                        <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
+                          Route
+                        </p>
+                        <p className="mt-2 text-sm font-semibold text-foreground">
+                          {selectedAssistantPlan.route || selectedLane.name}
+                        </p>
+                      </div>
+                      <div>
+                        <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
+                          Next action
+                        </p>
+                        <p className="mt-2 text-sm font-semibold text-foreground">
+                          {selectedAssistantPlan.nextAction || "Confirm starting lane"}
+                        </p>
+                      </div>
+                    </div>
+                    {selectedAssistantPlan.reasoning?.length ? (
+                      <div className="mt-4 grid gap-2 text-sm leading-5 text-muted-foreground">
+                        {selectedAssistantPlan.reasoning.map((item) => (
+                          <p key={item}>{item}</p>
+                        ))}
+                      </div>
+                    ) : null}
+                  </>
+                ) : (
+                  <div className="text-sm leading-6 text-muted-foreground">
+                    No saved assistant plan yet. Open the lead, save an AI plan, then return here to
+                    generate a sharper proposal.
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+        </CardContent>
+      </Card>
 
       <Card className="rounded-lg shadow-none">
         <CardHeader>
@@ -498,6 +731,34 @@ export default function ProposalsPage() {
               <pre className="min-h-[360px] flex-1 whitespace-pre-wrap rounded-md bg-white/[0.06] p-4 text-sm leading-6 text-slate-100">
                 {generatedProposal}
               </pre>
+              <div className="mt-4 grid gap-2 sm:grid-cols-2">
+                <Button
+                  type="button"
+                  variant="secondary"
+                  className="rounded-md"
+                  onClick={() =>
+                    copyText(
+                      [
+                        `Subject: ${selectedLane.name} starting point for ${buyerName}`,
+                        "",
+                        `I mapped this as a ${selectedLane.name.toLowerCase()} because the first win should be ${workflow.toLowerCase()}.`,
+                        `The practical next step is to ${nextStep}.`,
+                        "",
+                        "If this is the right direction, I can send the invoice/payment path and we can begin with the operating map.",
+                      ].join("\n")
+                    )
+                  }
+                >
+                  <MessageSquare className="mr-2 h-4 w-4" />
+                  Copy email
+                </Button>
+                <Button asChild className="rounded-md">
+                  <Link href={`/packages?package=${paymentPackageId}&lead=${selectedLeadId || "manual"}`}>
+                    <CreditCard className="mr-2 h-4 w-4" />
+                    Payment path
+                  </Link>
+                </Button>
+              </div>
             </div>
           </div>
         </CardContent>

@@ -12,6 +12,7 @@ const checkoutSchema = z.object({
     "first-workflow",
     "operating-lane-deposit",
   ]),
+  leadId: z.string().min(1).max(120).optional(),
 });
 
 const PACKAGE_CATALOG = {
@@ -103,9 +104,10 @@ export async function POST(req: Request) {
         type: "perpetual_core_package",
         package_id: parsed.data.packageId,
         package_name: pkg.name,
+        lead_id: parsed.data.leadId || "",
       },
-      success_url: `${baseUrl}/packages/success?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${baseUrl}/packages?checkout=cancelled`,
+      success_url: `${baseUrl}/packages/success?session_id={CHECKOUT_SESSION_ID}${parsed.data.leadId ? `&lead=${encodeURIComponent(parsed.data.leadId)}` : ""}`,
+      cancel_url: `${baseUrl}/packages?checkout=cancelled${parsed.data.leadId ? `&lead=${encodeURIComponent(parsed.data.leadId)}` : ""}`,
     });
 
     return NextResponse.json({

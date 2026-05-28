@@ -13,10 +13,12 @@ type PackageId =
 
 export function PackageCheckoutButton({
   packageId,
+  leadId,
   children,
   variant = "default",
 }: {
   packageId: PackageId;
+  leadId?: string;
   children: React.ReactNode;
   variant?: "default" | "outline";
 }) {
@@ -28,7 +30,7 @@ export function PackageCheckoutButton({
       const response = await fetch("/api/packages/checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ packageId }),
+        body: JSON.stringify({ packageId, leadId }),
       });
 
       const data = await response.json().catch(() => ({}));

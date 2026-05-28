@@ -151,7 +151,14 @@ function SectionRail({ index, label }: { index: string; label: string }) {
   );
 }
 
-export default function PackagesPage() {
+export default function PackagesPage({
+  searchParams,
+}: {
+  searchParams?: { lead?: string; package?: string };
+}) {
+  const leadId = searchParams?.lead;
+  const highlightedPackage = searchParams?.package;
+
   return (
     <div className="min-h-screen bg-background">
       <JsonLd
@@ -245,7 +252,7 @@ export default function PackagesPage() {
                 key={pkg.name}
                 className={`border border-border bg-card p-6 sm:p-7 flex flex-col ${
                   pkg.featured ? "border-primary/40 bg-primary/[0.04]" : ""
-                }`}
+                } ${highlightedPackage === pkg.checkoutId ? "ring-2 ring-primary/45" : ""}`}
               >
                 <div className="flex items-start justify-between gap-4 mb-8">
                   <span className="font-mono text-[10px] tracking-[0.18em] text-muted-foreground">
@@ -277,7 +284,7 @@ export default function PackagesPage() {
                     </li>
                   ))}
                 </ul>
-                <PackageCheckoutButton packageId={pkg.checkoutId}>
+                <PackageCheckoutButton packageId={pkg.checkoutId} leadId={leadId}>
                   {pkg.cta}
                 </PackageCheckoutButton>
               </div>
