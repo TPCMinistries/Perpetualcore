@@ -17,6 +17,8 @@ import {
   UserX,
   Clock,
   ArrowRight,
+  Clipboard,
+  FileText,
   Trash2,
   Eye,
   Target,
@@ -376,6 +378,9 @@ export default function LeadsPage() {
   const totalLeads = leads.length;
   const totalValue = Object.values(pipeline).reduce((sum, s) => sum + (s.value || 0), 0);
   const activeLeads = leads.filter(l => !["won", "lost"].includes(l.status)).length;
+  const proposalActivities = leadActivities.filter(
+    (activity) => activity.activity_type === "proposal_draft"
+  );
 
   // Format currency
   const formatCurrency = (value: number) => {
@@ -407,6 +412,15 @@ export default function LeadsPage() {
     if (diffDays < 7) return `${diffDays} days ago`;
     if (diffDays < 30) return `${Math.floor(diffDays / 7)} weeks ago`;
     return formatDate(dateString);
+  };
+
+  const copyText = async (text: string) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      toast.success("Copied to clipboard");
+    } catch {
+      toast.error("Could not copy text");
+    }
   };
 
   return (
@@ -957,6 +971,7 @@ export default function LeadsPage() {
                 <Tabs defaultValue="details">
                   <TabsList className="w-full">
                     <TabsTrigger value="details" className="flex-1">Details</TabsTrigger>
+                    <TabsTrigger value="proposals" className="flex-1">Proposals</TabsTrigger>
                     <TabsTrigger value="activity" className="flex-1">Activity</TabsTrigger>
                   </TabsList>
 
@@ -1119,6 +1134,56 @@ export default function LeadsPage() {
                         Delete Lead
                       </Button>
                     </div>
+                  </TabsContent>
+
+                  <TabsContent value="proposals" className="mt-4">
+                    {proposalActivities.length === 0 ? (
+                      <div className="rounded-lg border bg-card p-6 text-center text-muted-foreground">
+                        <FileText className="mx-auto mb-3 h-8 w-8 opacity-50" />
+                        <p className="text-sm">No proposal drafts saved for this lead yet.</p>
+                        <Button asChild className="mt-4 rounded-md">
+                          <Link href="/dashboard/proposals">
+                            Create proposal <ArrowRight className="ml-2 h-4 w-4" />
+                          </Link>
+                        </Button>
+                      </div>
+                    ) : (
+                      <div className="space-y-3">
+                        {proposalActivities.map((proposal) => (
+                          <div key={proposal.id} className="rounded-lg border bg-card p-4">
+                            <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                              <div>
+                                <div className="flex flex-wrap items-center gap-2">
+                                  <p className="text-sm font-semibold">{proposal.title}</p>
+                                  {proposal.to_value && (
+                                    <Badge variant="outline" className="text-xs">
+                                      {proposal.to_value}
+                                    </Badge>
+                                  )}
+                                </div>
+                                <p className="mt-1 text-xs text-muted-foreground">
+                                  {formatRelativeTime(proposal.created_at)}
+                                </p>
+                              </div>
+                              <Button
+                                type="button"
+                                variant="outline"
+                                size="sm"
+                                onClick={() => copyText(proposal.description || "")}
+                              >
+                                <Clipboard className="mr-2 h-4 w-4" />
+                                Copy
+                              </Button>
+                            </div>
+                            {proposal.description && (
+                              <pre className="mt-4 max-h-72 overflow-auto whitespace-pre-wrap rounded-md bg-muted p-4 text-sm leading-6 text-muted-foreground">
+                                {proposal.description}
+                              </pre>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    )}
                   </TabsContent>
 
                   <TabsContent value="activity" className="mt-4">
