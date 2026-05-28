@@ -147,6 +147,7 @@ interface PipelineStats {
 }
 
 type AssistantPromptMode = "qualify" | "follow_up" | "proposal";
+type OutboundCopyMode = "warm_follow_up" | "proposal_frame" | "cost_frame" | "invoice_handoff" | "kickoff_note";
 
 interface AssistantRecommendation {
   generatedAt: string;
@@ -273,6 +274,44 @@ const LEAD_ACTIONS = [
     detail: "Use when the buyer has agreed to start and needs a clean payment next step.",
     href: () => "/contact-sales?intent=manual-invoice",
     icon: DollarSign,
+  },
+];
+
+const OUTBOUND_COPY_ACTIONS: Array<{
+  label: string;
+  detail: string;
+  mode: OutboundCopyMode;
+  icon: LucideIcon;
+}> = [
+  {
+    label: "Warm follow-up",
+    detail: "Send after a conversation when the next step is still soft.",
+    mode: "warm_follow_up",
+    icon: MessageSquare,
+  },
+  {
+    label: "Proposal frame",
+    detail: "Use when the buyer needs the recommended lane explained clearly.",
+    mode: "proposal_frame",
+    icon: FileText,
+  },
+  {
+    label: "Cost frame",
+    detail: "Use when pricing comes up before scope is fully settled.",
+    mode: "cost_frame",
+    icon: DollarSign,
+  },
+  {
+    label: "Invoice handoff",
+    detail: "Use when they are ready to start and need payment/admin next steps.",
+    mode: "invoice_handoff",
+    icon: CreditCard,
+  },
+  {
+    label: "Kickoff note",
+    detail: "Use after payment or verbal yes to start delivery cleanly.",
+    mode: "kickoff_note",
+    icon: CalendarCheck,
   },
 ];
 
@@ -814,6 +853,36 @@ export default function LeadsPage() {
     }
 
     return `${briefing}\n\nCreate a proposal outline for this lead. Include business problem, recommended starting lane, scope, timeline, investment framing, proof needed, and the next decision step.`;
+  };
+
+  const getOutboundCopy = (lead: Lead, mode: OutboundCopyMode) => {
+    const leadName = getLeadName(lead);
+    const company = getLeadCompany(lead);
+    const lane = getLeadLane(lead);
+    const packageId = getRecommendedPackageId(lead);
+    const packageLink = `https://www.perpetualcore.com/packages?lead=${lead.id}&package=${packageId}`;
+    const account = company ? company : leadName;
+    const pain = lead.notes
+      ? `Based on what you shared, the operating issue I am anchoring on is: ${lead.notes}`
+      : "Based on what you shared, I would start by clarifying the highest-value workflow before we install anything.";
+
+    if (mode === "warm_follow_up") {
+      return `Subject: Next step for ${account}\n\n${leadName},\n\nGood speaking with you. ${pain}\n\nI would not start this as a generic AI conversation. I would start with the operating lane that can create the clearest business value, then expand once the first lane is working.\n\nThe path I would recommend right now is ${lane.label}. The next step is to confirm the workflow, owner, systems involved, and what proof would make this worth moving on.\n\nHere is the starter path if you want to review it: ${packageLink}`;
+    }
+
+    if (mode === "proposal_frame") {
+      return `Proposal frame for ${account}\n\nRecommended lane: ${lane.label}\n\nWhy this lane:\n${lane.detail}\n\nBusiness problem:\n${pain}\n\nScope to confirm:\n1. Workflow or department we are starting with\n2. Systems, inboxes, docs, or data sources involved\n3. Who owns decisions and who uses the system\n4. What a successful first 30 days should prove\n\nNext decision:\nApprove the starting lane, then we move into payment/admin and kickoff.`;
+    }
+
+    if (mode === "cost_frame") {
+      return `${leadName},\n\nThere are two parts to this: software access and implementation.\n\nThe software gives the account a place to operate. The implementation is where the value is created: mapping the workflow, connecting context, shaping the assistant behavior, training the team, and making sure the process actually runs.\n\nFor ${account}, I would not over-scope the first move. I would start with ${lane.label}, prove value in one lane, and then decide whether it should expand into a broader operating relationship.\n\nReview the starting path here: ${packageLink}`;
+    }
+
+    if (mode === "invoice_handoff") {
+      return `${leadName},\n\nTo start, I would set this up as ${lane.label}.\n\nOnce payment/admin is complete, I will confirm the kickoff window, collect the access/context needed, and open the first operating lane. The first goal is not a demo. The first goal is to get a useful workflow live and visible.\n\nPayment/start link: ${packageLink}\n\nAfter that, I will send the kickoff checklist and first working session agenda.`;
+    }
+
+    return `${leadName},\n\nWe are ready to start the ${lane.label} lane for ${account}.\n\nKickoff focus:\n1. Confirm the first workflow and owner\n2. Gather the core docs, links, systems, and examples\n3. Define what the assistant should do and what it should avoid\n4. Set the first delivery checkpoint\n5. Decide what needs to be measured or reported\n\nI will use the first session to turn the context into a working operating lane, not just a loose AI brainstorm.`;
   };
 
   const copyText = async (text: string) => {
@@ -2068,6 +2137,31 @@ export default function LeadsPage() {
                                 </span>
                               </span>
                             </Link>
+                          );
+                        })}
+                      </div>
+                    </div>
+
+                    <div>
+                      <Label className="text-sm text-muted-foreground">Outbound kit</Label>
+                      <div className="mt-2 grid gap-2">
+                        {OUTBOUND_COPY_ACTIONS.map((action) => {
+                          const Icon = action.icon;
+                          return (
+                            <button
+                              key={action.label}
+                              type="button"
+                              onClick={() => copyText(getOutboundCopy(selectedLead, action.mode))}
+                              className="flex items-start gap-3 rounded-lg border bg-card p-3 text-left transition hover:border-primary/50 hover:bg-primary/[0.03]"
+                            >
+                              <Icon className="mt-0.5 h-4 w-4 flex-shrink-0 text-primary" />
+                              <span>
+                                <span className="block text-sm font-medium text-foreground">{action.label}</span>
+                                <span className="mt-1 block text-xs leading-5 text-muted-foreground">
+                                  {action.detail}
+                                </span>
+                              </span>
+                            </button>
                           );
                         })}
                       </div>
