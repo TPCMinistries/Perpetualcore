@@ -42,6 +42,8 @@ interface DiscoveryPageProps {
 function parseFiltersFromSearch(
   raw: Record<string, string | string[] | undefined>
 ): FilterValues {
+  const query = typeof raw.q === "string" ? raw.q.trim().slice(0, 100) : "";
+
   const sources = typeof raw.sources === "string"
     ? raw.sources.split(",").map((s) => s.trim()).filter(Boolean)
     : [];
@@ -57,7 +59,7 @@ function parseFiltersFromSearch(
     ? Math.round(Number(minRaw))
     : null;
 
-  return { sources, deadline_within_days, min_amount };
+  return { query, sources, deadline_within_days, min_amount };
 }
 
 function parseModeFromSearch(
@@ -129,6 +131,7 @@ export default async function DiscoveryPage({
         dual_org_ids: dualOrgIds,
         mode_filter: isDualMode ? initialMode : undefined,
         sources: initialFilters.sources.length > 0 ? initialFilters.sources : undefined,
+        query: initialFilters.query,
         deadline_within_days: initialFilters.deadline_within_days,
         min_amount: initialFilters.min_amount,
         limit: 25,

@@ -31,6 +31,8 @@
  *                                          (sam_gov, grants_gov, simpler_grants, sbir,
  *                                           ny_state, nyc_dycd, nyc_hra, nyc_doe,
  *                                           foundation_url)
+ *   q (optional)                       — keyword search across opportunity title,
+ *                                          agency, and brief before org ranking
  *   deadline_within_days (optional)    — "7" | "30"
  *   min_amount (optional)              — integer dollars; matches rows where
  *                                          opp.amount_max >= min_amount
@@ -106,6 +108,10 @@ const QuerySchema = z.object({
         : []
     )
     .pipe(z.array(z.enum(KNOWN_SOURCES))),
+  q: z
+    .string()
+    .optional()
+    .transform((s) => (s ? s.trim().slice(0, 100) : "")),
   deadline_within_days: z
     .string()
     .optional()
@@ -227,6 +233,7 @@ export async function GET(req: Request) {
 
   const filters: FeedFilters = {
     org_id: parsed.data.org_id,
+    query: parsed.data.q,
     sources: parsed.data.sources.length > 0 ? parsed.data.sources : undefined,
     deadline_within_days: parsed.data.deadline_within_days,
     min_amount: parsed.data.min_amount,

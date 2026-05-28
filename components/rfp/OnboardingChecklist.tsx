@@ -13,7 +13,7 @@
  */
 
 import Link from "next/link";
-import { ArrowRight, Check, Search, Upload, WandSparkles } from "lucide-react";
+import { ArrowRight, Check, Database, Search, Upload, WandSparkles } from "lucide-react";
 import {
   VAULT_SEEDED_TARGET,
   type OnboardingState,
@@ -84,88 +84,95 @@ export function OnboardingChecklist({
   const setupItems = [
     {
       icon: Search,
-      title: "See live matches first",
-      body: "Score the current feed against your NAICS profile before asking your team for documents.",
+      title: "Search across 80k+ opportunities",
+      body: "Use keywords, source, deadline, amount, and fit signals to find the right grants and RFPs.",
       href: "#opportunity-feed",
-      cta: "Go to matches",
-      accent: "text-cyan-200",
+      cta: "Open discovery",
+      accent: "text-blue-700",
+    },
+    {
+      icon: Database,
+      title: "Tune your matching profile",
+      body: "NAICS codes, geography, and capacity details make the ranking sharper, but search works broadly.",
+      href: `/org/${orgId}/settings`,
+      cta: "Edit profile",
+      accent: "text-emerald-700",
     },
     {
       icon: WandSparkles,
-      title: "Train voice when value is clear",
-      body: "Paste prior proposals later so drafts sound like you instead of generic grant copy.",
+      title: "Improve proposal voice",
+      body: "Past writing samples help generated drafts sound like your organization.",
       href: `/org/${orgId}/settings/voice`,
       cta: state.voice_trained ? "Review voice" : "Train voice",
-      accent: "text-emerald-200",
+      accent: "text-violet-700",
     },
     {
       icon: Upload,
-      title: "Add proof for better drafts",
+      title: "Add evidence when ready",
       body: `Vault docs improve citations, outcomes, and past-performance claims (${state.vault_chunk_count}/${VAULT_SEEDED_TARGET}).`,
       href: `/org/${orgId}/settings/vault`,
       cta: state.vault_seeded ? "Manage vault" : "Add docs",
-      accent: "text-amber-200",
+      accent: "text-amber-700",
     },
   ];
 
   return (
-    <section className="overflow-hidden rounded-2xl border border-white/10 bg-[linear-gradient(135deg,rgba(8,47,73,0.72),rgba(6,78,59,0.34)_48%,rgba(9,9,11,0.96))] shadow-[0_24px_80px_-48px_rgba(34,211,238,0.55)]">
-      <div className="grid gap-0 lg:grid-cols-[1.05fr_0.95fr]">
+    <section className="overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-sm">
+      <div className="grid gap-0 lg:grid-cols-[0.95fr_1.05fr]">
         <div className="p-5 sm:p-6">
           <div className="flex flex-wrap items-center gap-2">
-            <span className="rounded-full border border-cyan-300/25 bg-cyan-300/10 px-3 py-1 font-mono text-[10px] uppercase tracking-[0.2em] text-cyan-100">
-              First value path
+            <span className="rounded-full border border-zinc-300 bg-zinc-50 px-3 py-1 font-mono text-[10px] uppercase tracking-[0.2em] text-zinc-600">
+              Discovery setup
             </span>
-            <span className="rounded-full border border-emerald-300/20 bg-emerald-300/10 px-3 py-1 font-mono text-[10px] uppercase tracking-[0.2em] text-emerald-100">
+            <span className="rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 font-mono text-[10px] uppercase tracking-[0.2em] text-emerald-800">
               {completed}/5 setup
             </span>
           </div>
-          <h2 className="mt-4 max-w-2xl text-2xl font-semibold tracking-tight text-white sm:text-3xl">
-            Start with the grant pipeline. Improve the draft engine after you see what is worth pursuing.
+          <h2 className="mt-4 max-w-2xl text-2xl font-semibold tracking-tight text-zinc-950 sm:text-3xl">
+            Your grant and RFP command center is ready to search.
           </h2>
-          <p className="mt-3 max-w-xl text-sm leading-6 text-cyan-50/75">
-            Voice fingerprint and vault docs matter, but they should not block the
-            first “is this useful?” moment. Score current opportunities now, then
-            add proof and voice when a real deadline is worth chasing.
+          <p className="mt-3 max-w-xl text-sm leading-6 text-zinc-600">
+            Browse the opportunity library now, then add profile details, writing
+            samples, and evidence files to make ranking and drafting stronger.
           </p>
           <div className="mt-5 flex flex-col gap-2 sm:flex-row">
             <Link
               href="#opportunity-feed"
-              className="inline-flex h-10 items-center justify-center rounded-md bg-emerald-300 px-4 text-sm font-semibold text-zinc-950 transition hover:bg-emerald-200"
+              className="inline-flex h-10 items-center justify-center rounded-md bg-zinc-950 px-4 text-sm font-semibold text-white transition hover:bg-zinc-800"
             >
-              See current matches <ArrowRight className="ml-2 h-4 w-4" />
+              Search opportunities <ArrowRight className="ml-2 h-4 w-4" />
             </Link>
             <Link
-              href={`/org/${orgId}/settings/voice`}
-              className="inline-flex h-10 items-center justify-center rounded-md border border-white/15 bg-white/5 px-4 text-sm font-medium text-white transition hover:bg-white/10"
+              href={`/org/${orgId}/settings`}
+              className="inline-flex h-10 items-center justify-center rounded-md border border-zinc-300 bg-white px-4 text-sm font-medium text-zinc-800 transition hover:bg-zinc-50"
             >
-              Improve draft quality later
+              Update profile
             </Link>
           </div>
         </div>
 
-        <div className="border-t border-white/10 bg-black/18 p-4 lg:border-l lg:border-t-0">
-          <div className="grid gap-2">
+        <div className="border-t border-zinc-200 bg-zinc-50 p-4 lg:border-l lg:border-t-0">
+          <div className="grid gap-2 md:grid-cols-2">
             {setupItems.map((item) => {
               const Icon = item.icon;
               return (
                 <Link
                   key={item.title}
                   href={item.href}
-                  className="group rounded-xl border border-white/10 bg-zinc-950/42 p-4 transition hover:border-white/20 hover:bg-zinc-950/58"
+                  className="group rounded-xl border border-zinc-200 bg-white p-4 transition hover:border-zinc-300 hover:shadow-sm"
                 >
                   <div className="flex gap-3">
-                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-white/10 bg-white/5">
+                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-zinc-200 bg-zinc-50">
                       <Icon className={`h-4 w-4 ${item.accent}`} />
                     </div>
                     <div className="min-w-0">
                       <div className="flex items-center justify-between gap-3">
-                        <p className="text-sm font-semibold text-white">{item.title}</p>
-                        <span className="shrink-0 font-mono text-[10px] uppercase tracking-[0.16em] text-zinc-500 group-hover:text-zinc-300">
+                        <p className="text-sm font-semibold text-zinc-950">{item.title}</p>
+                        <span className="shrink-0 font-mono text-[10px] uppercase tracking-[0.16em] text-zinc-500 group-hover:text-zinc-900">
                           {item.cta}
                         </span>
                       </div>
-                      <p className="mt-1 text-xs leading-5 text-zinc-400">{item.body}</p>
+                      <p className="mt-1 text-xs leading-5 text-zinc-600">{item.body}</p>
                     </div>
                   </div>
                 </Link>
@@ -175,24 +182,24 @@ export function OnboardingChecklist({
         </div>
       </div>
 
-      <ol className="border-t border-white/10 bg-zinc-950/72 p-3 sm:grid sm:grid-cols-5 sm:gap-2 sm:space-y-0">
+      <ol className="border-t border-zinc-200 bg-white p-3 sm:grid sm:grid-cols-5 sm:gap-2 sm:space-y-0">
         {steps.map((step, idx) => (
           <li
             key={idx}
-            className="flex items-start gap-2 rounded-lg border border-zinc-900 bg-black/20 px-3 py-2.5"
+            className="flex items-start gap-2 rounded-lg border border-zinc-200 bg-zinc-50 px-3 py-2.5"
           >
             <span
               className={`mt-[2px] inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full border font-mono text-[10px] ${
                 step.done
-                  ? "border-emerald-500/40 bg-emerald-500/15 text-emerald-200"
-                  : "border-zinc-700 bg-zinc-900 text-zinc-500"
+                  ? "border-emerald-200 bg-emerald-50 text-emerald-700"
+                  : "border-zinc-300 bg-white text-zinc-500"
               }`}
               aria-hidden
             >
               {step.done ? <Check className="h-3 w-3" /> : idx + 1}
             </span>
             <div className="flex-1">
-              <div className="text-[12px] font-medium text-zinc-100">
+              <div className="text-[12px] font-medium text-zinc-900">
                 {step.title}
               </div>
               <div className="mt-0.5 text-[12px] text-zinc-500">{step.hint}</div>

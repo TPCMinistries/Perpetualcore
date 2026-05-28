@@ -76,6 +76,8 @@ export interface FeedFilters {
   mode_filter?: FeedModeFilter;
   /** Optional source codes (e.g. ['sam_gov','grants_gov']). Empty/undefined = all. */
   sources?: string[];
+  /** Optional keyword search against opportunity title, agency, and brief. */
+  query?: string;
   /** 7 or 30 to filter rows whose deadline falls within N days; null/undef = no filter. */
   deadline_within_days?: 7 | 30 | null;
   /** Minimum opp.amount_max in dollars. null/undef = no filter. */
@@ -150,6 +152,10 @@ interface MatchJoinRow {
   rfp_orgs: OrgJoinShape | null;
 }
 
+interface OppSearchRow {
+  id: string;
+}
+
 // ── Helper ────────────────────────────────────────────────────────────────────
 
 function toFeedRow(r: MatchJoinRow): FeedRow | null {
@@ -189,6 +195,15 @@ function toFeedRow(r: MatchJoinRow): FeedRow | null {
   };
 }
 
+function escapeIlike(input: string): string {
+  return input
+    .replace(/[(),]/g, " ")
+    .replaceAll("\\", "\\\\")
+    .replaceAll("%", "\\%")
+    .replaceAll("_", "\\_")
+    .trim();
+}
+
 // ── Main entry point ──────────────────────────────────────────────────────────
 
 export async function buildFeedQuery(filters: FeedFilters): Promise<FeedPage> {
@@ -212,6 +227,28 @@ export async function buildFeedQuery(filters: FeedFilters): Promise<FeedPage> {
     from: (table: string) => any;
   };
 
+  const keyword = escapeIlike(filters.query?.trim().slice(0, 100) ?? "");
+  let keywordOppIds: string[] | null = null;
+  if (keyword.length > 0) {
+    const pattern = `%${keyword}%`;
+    const { data: oppRows, error: oppSearchError } = await rfp
+      .from("rfp_opportunities")
+      .select("id")
+      .or(
+        `title.ilike.${pattern},agency.ilike.${pattern},brief.ilike.${pattern}`
+      )
+      .limit(1000);
+
+    if (oppSearchError) {
+      throw new Error(`feed_keyword_search_failed: ${oppSearchError.message}`);
+    }
+
+    keywordOppIds = ((oppRows ?? []) as OppSearchRow[]).map((row) => row.id);
+    if (keywordOppIds.length === 0) {
+      return { rows: [], next_cursor: null };
+    }
+  }
+
   let query = rfp
     .from("rfp_opp_matches")
     .select(
@@ -223,6 +260,10 @@ export async function buildFeedQuery(filters: FeedFilters): Promise<FeedPage> {
     query = query.in("org_id", filters.dual_org_ids as string[]);
   } else {
     query = query.eq("org_id", filters.org_id);
+  }
+
+  if (keywordOppIds) {
+    query = query.in("opp_id", keywordOppIds);
   }
 
   // Deadline filter — bounded window relative to "now"

@@ -28,6 +28,7 @@ export type DeadlineWindow = 7 | 30 | null;
 export type ModeFilter = "all" | "nonprofit" | "forprofit";
 
 export interface FilterValues {
+  query: string;
   sources: string[];
   deadline_within_days: DeadlineWindow;
   min_amount: number | null;
@@ -339,6 +340,7 @@ export function FilterPills({
   onModeChange,
 }: FilterPillsProps) {
   const hasAny =
+    value.query.trim().length > 0 ||
     value.sources.length > 0 ||
     value.deadline_within_days !== null ||
     value.min_amount !== null;
@@ -371,6 +373,7 @@ export function FilterPills({
           type="button"
           onClick={() =>
             onChange({
+              query: "",
               sources: [],
               deadline_within_days: null,
               min_amount: null,

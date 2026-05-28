@@ -32,6 +32,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { Database, Search, SlidersHorizontal, Target } from "lucide-react";
 import {
   FilterPills,
   type FilterValues,
@@ -80,6 +81,7 @@ function filtersToSearchParams(
   isDualMode: boolean
 ): URLSearchParams {
   const p = new URLSearchParams();
+  if (filters.query.trim().length > 0) p.set("q", filters.query.trim());
   if (filters.sources.length > 0) p.set("sources", filters.sources.join(","));
   if (filters.deadline_within_days !== null) {
     p.set("deadline_within_days", String(filters.deadline_within_days));
@@ -146,6 +148,7 @@ export function DiscoveryClient({
     (f: FilterValues, m: ModeFilter, c: InitialCursor | null) => {
       const p = new URLSearchParams();
       p.set("org_id", orgId);
+      if (f.query.trim().length > 0) p.set("q", f.query.trim());
       if (f.sources.length > 0) p.set("sources", f.sources.join(","));
       if (f.deadline_within_days !== null) {
         p.set("deadline_within_days", String(f.deadline_within_days));
@@ -218,6 +221,11 @@ export function DiscoveryClient({
   }, [buildUrl, cursor, filters, mode, loading]);
 
   const selectedOppId = useMemo(() => selected?.opp_id ?? null, [selected]);
+  const [queryDraft, setQueryDraft] = useState(initialFilters.query);
+
+  useEffect(() => {
+    setQueryDraft(filters.query);
+  }, [filters.query]);
 
   // When the dual user has no underlying member orgs matching the mode, the
   // API returns empty_reason='no_member_orgs'. Render an actionable empty
@@ -231,65 +239,108 @@ export function DiscoveryClient({
     window.location.reload();
   }, []);
 
+  const applySearch = useCallback(() => {
+    setFilters((prev) => ({ ...prev, query: queryDraft.trim() }));
+  }, [queryDraft]);
+
+  const activeFilterCount =
+    (filters.query.trim().length > 0 ? 1 : 0) +
+    filters.sources.length +
+    (filters.deadline_within_days ? 1 : 0) +
+    (filters.min_amount ? 1 : 0) +
+    (isDualMode && mode !== "all" ? 1 : 0);
+
   return (
-    <div className="flex min-h-[calc(100vh-3.5rem)] flex-col bg-[radial-gradient(circle_at_top_left,rgba(34,211,238,0.12),transparent_34%),linear-gradient(180deg,#07111f_0%,#09090b_32%,#09090b_100%)] text-zinc-100 lg:h-[calc(100vh-3.5rem)]">
+    <div className="flex min-h-[calc(100vh-3.5rem)] flex-col bg-[#f6f7f4] text-zinc-950 lg:h-[calc(100vh-3.5rem)]">
       {/* Header: value framing + Quick Import + filter pills */}
-      <div id="opportunity-feed" className="shrink-0 border-b border-white/10 px-4 py-4 lg:px-6">
-        <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_minmax(360px,0.72fr)] xl:items-end">
+      <div id="opportunity-feed" className="shrink-0 border-b border-zinc-200 bg-[#fbfbf7] px-4 py-4 lg:px-6">
+        <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_minmax(380px,0.72fr)] xl:items-end">
           <div>
             <div className="flex flex-wrap items-center gap-2">
-              <span className="rounded-full border border-cyan-300/20 bg-cyan-300/10 px-3 py-1 font-mono text-[10px] uppercase tracking-[0.2em] text-cyan-100">
-                Live discovery
+              <span className="rounded-full border border-zinc-300 bg-white px-3 py-1 font-mono text-[10px] uppercase tracking-[0.2em] text-zinc-600">
+                Opportunity intelligence
               </span>
-              <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1 font-mono text-[10px] uppercase tracking-[0.2em] text-zinc-300">
+              <span className="rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 font-mono text-[10px] uppercase tracking-[0.2em] text-emerald-800">
+                80k+ grants & RFPs
+              </span>
+              <span className="rounded-full border border-zinc-300 bg-white px-3 py-1 font-mono text-[10px] uppercase tracking-[0.2em] text-zinc-600">
                 {orgTypeLabel(org.type)}
               </span>
               {loading && (
-                <span className="rounded-full border border-emerald-300/20 bg-emerald-300/10 px-3 py-1 font-mono text-[10px] uppercase tracking-[0.2em] text-emerald-100">
+                <span className="rounded-full border border-blue-200 bg-blue-50 px-3 py-1 font-mono text-[10px] uppercase tracking-[0.2em] text-blue-700">
                   Refreshing
                 </span>
               )}
             </div>
-            <h1 className="mt-3 max-w-3xl text-2xl font-semibold tracking-tight text-white sm:text-3xl">
-              Find the right grants and RFPs before you spend time training the system.
+            <h1 className="mt-3 max-w-3xl text-2xl font-semibold tracking-tight text-zinc-950 sm:text-3xl">
+              Search the full funding landscape, then move the best opportunities into action.
             </h1>
-            <p className="mt-2 max-w-2xl text-sm leading-6 text-zinc-400">
-              Start with fit, deadline, amount, and source. When a match is worth
-              pursuing, use voice and vault setup to make the draft sound like
-              your organization and cite real proof.
+            <p className="mt-2 max-w-2xl text-sm leading-6 text-zinc-600">
+              Explore federal, state, city, and foundation opportunities by
+              keyword, source, deadline, amount, NAICS fit, and scored relevance.
             </p>
+
+            <form
+              className="mt-4 flex max-w-3xl items-center gap-2 rounded-xl border border-zinc-300 bg-white p-2 shadow-sm"
+              onSubmit={(event) => {
+                event.preventDefault();
+                applySearch();
+              }}
+            >
+              <Search className="ml-2 h-4 w-4 shrink-0 text-zinc-400" />
+              <input
+                value={queryDraft}
+                onChange={(event) => setQueryDraft(event.target.value)}
+                placeholder="Search healthcare workforce, youth programs, housing, AI training, reentry..."
+                className="h-9 min-w-0 flex-1 bg-transparent text-sm outline-none placeholder:text-zinc-400"
+              />
+              {filters.query && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setQueryDraft("");
+                    setFilters((prev) => ({ ...prev, query: "" }));
+                  }}
+                  className="hidden text-xs font-medium text-zinc-500 hover:text-zinc-900 sm:inline"
+                >
+                  Clear
+                </button>
+              )}
+              <button
+                type="submit"
+                className="inline-flex h-9 items-center justify-center rounded-lg bg-zinc-950 px-4 text-sm font-medium text-white transition hover:bg-zinc-800"
+              >
+                Search
+              </button>
+            </form>
           </div>
 
-          <div className="grid grid-cols-3 overflow-hidden rounded-2xl border border-white/10 bg-black/22">
-            <div className="border-r border-white/10 p-4">
+          <div className="grid grid-cols-3 overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-sm">
+            <div className="border-r border-zinc-200 p-4">
+              <Database className="mb-2 h-4 w-4 text-emerald-700" />
               <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-zinc-500">
-                Matches shown
+                Library
               </p>
-              <p className="mt-1 text-2xl font-semibold text-white">{rows.length}</p>
+              <p className="mt-1 text-xl font-semibold text-zinc-950">80k+</p>
             </div>
-            <div className="border-r border-white/10 p-4">
+            <div className="border-r border-zinc-200 p-4">
+              <Target className="mb-2 h-4 w-4 text-blue-700" />
               <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-zinc-500">
-                Active filters
+                Shown
               </p>
-              <p className="mt-1 text-2xl font-semibold text-white">
-                {filters.sources.length +
-                  (filters.deadline_within_days ? 1 : 0) +
-                  (filters.min_amount ? 1 : 0) +
-                  (isDualMode && mode !== "all" ? 1 : 0)}
-              </p>
+              <p className="mt-1 text-xl font-semibold text-zinc-950">{rows.length}</p>
             </div>
             <div className="p-4">
+              <SlidersHorizontal className="mb-2 h-4 w-4 text-violet-700" />
               <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-zinc-500">
-                Selected
+                Filters
               </p>
-              <p className="mt-1 truncate text-sm font-semibold text-white">
-                {selected?.title ?? "None yet"}
-              </p>
+              <p className="mt-1 text-xl font-semibold text-zinc-950">{activeFilterCount}</p>
             </div>
           </div>
         </div>
 
-        <div className="mt-4 space-y-3 rounded-2xl border border-white/10 bg-black/24 p-3">
+        <div className="mt-4 space-y-3 rounded-2xl border border-zinc-200 bg-white p-3 shadow-sm">
           <QuickImportBar orgId={orgId} onImported={handleImported} />
           <FilterPills
             value={filters}
