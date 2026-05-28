@@ -38,6 +38,7 @@ type OperatingDashboardData = {
     value: string;
     nextStep: string;
     createdAt: string;
+    href: string;
   }>;
   recentPackages: Array<{
     id: string;
@@ -45,6 +46,7 @@ type OperatingDashboardData = {
     customerName: string;
     customerEmail: string;
     amountFormatted: string;
+    leadId: string;
     status: string;
     createdAt: string;
   }>;
@@ -139,6 +141,25 @@ const workspaceLayers = [
   {
     name: "Expansion",
     detail: "The first paid result becomes the proof point for a larger AI operating system install.",
+  },
+];
+
+const onboardingSteps = [
+  {
+    title: "Payment captured",
+    detail: "Stripe package payment lands with package and lead metadata.",
+  },
+  {
+    title: "Lead converted",
+    detail: "The linked lead moves to won and keeps the proposal, assistant plan, and activity history.",
+  },
+  {
+    title: "Client lane opened",
+    detail: "Operating dashboard shows the account, package, value, and next onboarding action.",
+  },
+  {
+    title: "Delivery rhythm starts",
+    detail: "Intake, kickoff, workflow map, product setup, and weekly operating cadence begin.",
   },
 ];
 
@@ -350,6 +371,36 @@ export function OperatingDashboard() {
         </CardContent>
       </Card>
 
+      <Card className="rounded-lg border-primary/20 bg-gradient-to-br from-primary/[0.06] via-background to-background shadow-none">
+        <CardHeader>
+          <div className="flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
+            <div>
+              <CardTitle className="text-lg">Paid-client handoff</CardTitle>
+              <p className="mt-1 max-w-2xl text-sm text-muted-foreground">
+                When a buyer pays from a lead-aware package link, the system keeps the trail:
+                lead, package, proposal context, Stripe session, and onboarding action.
+              </p>
+            </div>
+            <Button asChild variant="outline" className="rounded-md">
+              <Link href="/dashboard/proposals">
+                Proposal desk <ArrowRight className="ml-2 h-4 w-4" />
+              </Link>
+            </Button>
+          </div>
+        </CardHeader>
+        <CardContent className="grid gap-3 md:grid-cols-4">
+          {onboardingSteps.map((step, index) => (
+            <div key={step.title} className="rounded-lg border bg-background p-4">
+              <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-primary">
+                {String(index + 1).padStart(2, "0")}
+              </p>
+              <p className="mt-3 text-sm font-semibold text-foreground">{step.title}</p>
+              <p className="mt-2 text-sm leading-5 text-muted-foreground">{step.detail}</p>
+            </div>
+          ))}
+        </CardContent>
+      </Card>
+
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
         {metrics.map((metric) => {
           const Icon = metric.icon;
@@ -393,7 +444,11 @@ export function OperatingDashboard() {
               </div>
             ) : (
               data.activeClients.map((client) => (
-                <div key={client.id} className="grid gap-4 rounded-lg border bg-card p-4 md:grid-cols-[1fr_160px_220px] md:items-center">
+                <Link
+                  key={client.id}
+                  href={client.href}
+                  className="grid gap-4 rounded-lg border bg-card p-4 transition hover:border-primary/50 hover:bg-primary/[0.03] md:grid-cols-[1fr_160px_220px] md:items-center"
+                >
                   <div>
                     <div className="flex flex-wrap items-center gap-2">
                       <p className="font-medium text-foreground">{client.name}</p>
@@ -412,7 +467,7 @@ export function OperatingDashboard() {
                       <p className="text-xs text-muted-foreground">{formatDate(client.createdAt)}</p>
                     </div>
                   </div>
-                </div>
+                </Link>
               ))
             )}
           </CardContent>
@@ -479,6 +534,9 @@ export function OperatingDashboard() {
                     <p className="text-xs text-muted-foreground">
                       {payment.customerName} · {payment.customerEmail || "No email"}
                     </p>
+                    {payment.leadId ? (
+                      <p className="mt-1 text-xs text-primary">Linked lead</p>
+                    ) : null}
                   </div>
                   <div className="text-right">
                     <p className="text-sm font-semibold text-foreground">{payment.amountFormatted}</p>

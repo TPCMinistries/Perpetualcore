@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowRight, Check } from "lucide-react";
+import { ArrowRight, Check, ClipboardList, LayoutDashboard } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Navbar } from "@/components/landing/Navbar";
 import { Footer } from "@/components/landing/Footer";
@@ -25,11 +25,12 @@ const PREP_CHECKLIST = [
 export default function PackageSuccessPage({
   searchParams,
 }: {
-  searchParams?: { session_id?: string };
+  searchParams?: { session_id?: string; lead?: string };
 }) {
   const sessionId = searchParams?.session_id;
+  const leadId = searchParams?.lead;
   const intakeHref = sessionId
-    ? `/contact-sales?intent=post-payment-intake&session_id=${encodeURIComponent(sessionId)}`
+    ? `/contact-sales?intent=post-payment-intake&session_id=${encodeURIComponent(sessionId)}${leadId ? `&lead=${encodeURIComponent(leadId)}` : ""}`
     : "/contact-sales?intent=post-payment-intake";
 
   return (
@@ -69,7 +70,9 @@ export default function PackageSuccessPage({
               </Link>
             </Button>
             <Button asChild variant="outline" className="text-sm font-medium h-10 px-5 shadow-none rounded-[6px]">
-              <Link href="/packages">Back to packages</Link>
+              <Link href="/dashboard/operating">
+                Operating dashboard <LayoutDashboard className="ml-2 h-3.5 w-3.5" />
+              </Link>
             </Button>
           </div>
         </div>
@@ -85,6 +88,20 @@ export default function PackageSuccessPage({
               </li>
             ))}
           </ol>
+          {leadId ? (
+            <div className="mt-8 border-t border-border pt-6">
+              <p className="eyebrow mb-3">Linked opportunity</p>
+              <p className="text-sm leading-6 text-muted-foreground">
+                This payment is connected to a lead record, so the operating dashboard can carry
+                the package, proposal, and assistant-plan context forward.
+              </p>
+              <Button asChild variant="outline" className="mt-4 h-10 rounded-[6px] px-5 text-sm font-medium shadow-none">
+                <Link href={`/dashboard/leads?lead=${encodeURIComponent(leadId)}`}>
+                  Open lead <ClipboardList className="ml-2 h-3.5 w-3.5" />
+                </Link>
+              </Button>
+            </div>
+          ) : null}
         </aside>
         </div>
       </section>

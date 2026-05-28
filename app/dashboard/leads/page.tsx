@@ -323,6 +323,7 @@ export default function LeadsPage() {
   const [leadActivities, setLeadActivities] = useState<LeadActivity[]>([]);
   const [savingFollowUp, setSavingFollowUp] = useState<string | null>(null);
   const [savingAssistantPlan, setSavingAssistantPlan] = useState(false);
+  const [initialLeadHandled, setInitialLeadHandled] = useState(false);
 
   // Form state
   const [formData, setFormData] = useState({
@@ -377,6 +378,21 @@ export default function LeadsPage() {
   useEffect(() => {
     fetchLeads();
   }, [fetchLeads]);
+
+  useEffect(() => {
+    if (initialLeadHandled || loading || leads.length === 0) return;
+    const leadParam = new URLSearchParams(window.location.search).get("lead");
+    if (!leadParam) {
+      setInitialLeadHandled(true);
+      return;
+    }
+
+    const matchingLead = leads.find((lead) => lead.id === leadParam);
+    if (matchingLead) {
+      fetchLeadDetails(matchingLead.id);
+    }
+    setInitialLeadHandled(true);
+  }, [initialLeadHandled, leads, loading]);
 
   // Fetch lead details
   const fetchLeadDetails = async (leadId: string) => {

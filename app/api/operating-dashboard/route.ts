@@ -31,6 +31,7 @@ type PackagePayment = {
   id: string;
   packageName: string;
   packageId: string;
+  leadId: string;
   customerName: string;
   customerEmail: string;
   amount: number;
@@ -67,6 +68,7 @@ async function getPackagePayments(): Promise<PackagePayment[]> {
         id: session.id,
         packageName: session.metadata?.package_name || "Perpetual Core package",
         packageId: session.metadata?.package_id || "unknown",
+        leadId: session.metadata?.lead_id || "",
         customerName: session.customer_details?.name || "Unknown buyer",
         customerEmail: session.customer_details?.email || session.customer_email || "",
         amount: amount.value,
@@ -126,6 +128,7 @@ export async function GET() {
       value: formatStripeAmount(payment.amount, "usd").formatted,
       nextStep: "Confirm intake context and onboarding window",
       createdAt: payment.createdAt,
+      href: payment.leadId ? `/dashboard/leads?lead=${payment.leadId}` : `/contact-sales?intent=post-payment-intake&session_id=${encodeURIComponent(payment.id)}`,
     })),
     ...openSalesContacts.slice(0, 6).map((contact) => ({
       id: contact.id,
@@ -136,6 +139,7 @@ export async function GET() {
       value: "Scope pending",
       nextStep: "Qualify fit and define first operating lane",
       createdAt: contact.created_at || new Date().toISOString(),
+      href: "/dashboard/leads",
     })),
   ].slice(0, 10);
 
@@ -145,7 +149,9 @@ export async function GET() {
       title: `Onboard ${payment.customerName}`,
       detail: `${payment.packageName} paid. Send intake and schedule kickoff.`,
       priority: "high",
-      href: `/contact-sales?intent=post-payment-intake&session_id=${encodeURIComponent(payment.id)}`,
+      href: payment.leadId
+        ? `/dashboard/leads?lead=${payment.leadId}`
+        : `/contact-sales?intent=post-payment-intake&session_id=${encodeURIComponent(payment.id)}`,
     })),
     ...openSalesContacts.slice(0, 4).map((contact) => ({
       id: `contact-${contact.id}`,
