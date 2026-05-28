@@ -78,12 +78,17 @@ import { toast } from "sonner";
 interface Lead {
   id: string;
   user_id: string;
-  name: string;
-  email?: string;
+  name?: string | null;
+  contact_name?: string | null;
+  first_name?: string | null;
+  last_name?: string | null;
+  email?: string | null;
+  contact_email?: string | null;
   phone?: string;
-  company?: string;
+  company?: string | null;
+  company_name?: string | null;
   title?: string;
-  status: string;
+  status: string | null;
   stage?: string;
   source?: string;
   source_detail?: string;
@@ -414,6 +419,23 @@ export default function LeadsPage() {
     return formatDate(dateString);
   };
 
+  const getLeadName = (lead: Lead) => {
+    const composedName = [lead.first_name, lead.last_name].filter(Boolean).join(" ").trim();
+    return lead.name || lead.contact_name || composedName || lead.email || lead.contact_email || "Unnamed lead";
+  };
+
+  const getLeadInitials = (lead: Lead) => {
+    return getLeadName(lead)
+      .split(" ")
+      .map((part) => part[0])
+      .join("")
+      .slice(0, 2)
+      .toUpperCase();
+  };
+
+  const getLeadCompany = (lead: Lead) => lead.company || lead.company_name || "";
+  const getLeadEmail = (lead: Lead) => lead.email || lead.contact_email || "";
+
   const copyText = async (text: string) => {
     try {
       await navigator.clipboard.writeText(text);
@@ -652,7 +674,10 @@ export default function LeadsPage() {
               </Card>
             ) : (
               leads.map((lead) => {
-                const statusConfig = STATUS_CONFIG[lead.status] || STATUS_CONFIG.new;
+                const displayName = getLeadName(lead);
+                const company = getLeadCompany(lead);
+                const email = getLeadEmail(lead);
+                const statusConfig = STATUS_CONFIG[lead.status || "new"] || STATUS_CONFIG.new;
                 const StatusIcon = statusConfig.icon;
 
                 return (
@@ -667,13 +692,13 @@ export default function LeadsPage() {
                           <Avatar className="h-10 w-10">
                             <AvatarImage src={lead.contact?.avatar_url} />
                             <AvatarFallback>
-                              {lead.name.split(" ").map(n => n[0]).join("").toUpperCase()}
+                              {getLeadInitials(lead)}
                             </AvatarFallback>
                           </Avatar>
 
                           <div>
                             <div className="flex items-center gap-2">
-                              <span className="font-medium">{lead.name}</span>
+                              <span className="font-medium">{displayName}</span>
                               <Badge className={cn("text-xs", statusConfig.color)}>
                                 <StatusIcon className="h-3 w-3 mr-1" />
                                 {statusConfig.label}
@@ -685,17 +710,17 @@ export default function LeadsPage() {
                               )}
                             </div>
                             <div className="flex items-center gap-4 text-sm text-muted-foreground mt-1">
-                              {lead.company && (
+                              {company && (
                                 <span className="flex items-center gap-1">
                                   <Building className="h-3 w-3" />
-                                  {lead.company}
+                                  {company}
                                 </span>
                               )}
                               {lead.title && <span>{lead.title}</span>}
-                              {lead.email && (
+                              {email && (
                                 <span className="flex items-center gap-1">
                                   <Mail className="h-3 w-3" />
-                                  {lead.email}
+                                  {email}
                                 </span>
                               )}
                             </div>
@@ -794,10 +819,10 @@ export default function LeadsPage() {
                         onClick={() => fetchLeadDetails(lead.id)}
                       >
                         <CardContent className="p-3">
-                          <div className="font-medium text-sm">{lead.name}</div>
-                          {lead.company && (
+                          <div className="font-medium text-sm">{getLeadName(lead)}</div>
+                          {getLeadCompany(lead) && (
                             <div className="text-xs text-muted-foreground mt-1">
-                              {lead.company}
+                              {getLeadCompany(lead)}
                             </div>
                           )}
                           {lead.estimated_value && (
@@ -950,16 +975,16 @@ export default function LeadsPage() {
               <SheetHeader>
                 <div className="flex items-start justify-between">
                   <div className="flex items-center gap-3">
-                    <Avatar className="h-12 w-12">
-                      <AvatarImage src={selectedLead.contact?.avatar_url} />
-                      <AvatarFallback>
-                        {selectedLead.name.split(" ").map(n => n[0]).join("").toUpperCase()}
+                      <Avatar className="h-12 w-12">
+                        <AvatarImage src={selectedLead.contact?.avatar_url} />
+                        <AvatarFallback>
+                        {getLeadInitials(selectedLead)}
                       </AvatarFallback>
                     </Avatar>
                     <div>
-                      <SheetTitle>{selectedLead.name}</SheetTitle>
+                      <SheetTitle>{getLeadName(selectedLead)}</SheetTitle>
                       <SheetDescription>
-                        {selectedLead.company && `${selectedLead.company} • `}
+                        {getLeadCompany(selectedLead) && `${getLeadCompany(selectedLead)} • `}
                         {selectedLead.title}
                       </SheetDescription>
                     </div>
@@ -1026,11 +1051,11 @@ export default function LeadsPage() {
                     {/* Contact Info */}
                     <div className="space-y-3">
                       <Label className="text-sm text-muted-foreground">Contact Information</Label>
-                      {selectedLead.email && (
+                      {getLeadEmail(selectedLead) && (
                         <div className="flex items-center gap-2 text-sm">
                           <Mail className="h-4 w-4 text-muted-foreground" />
-                          <a href={`mailto:${selectedLead.email}`} className="hover:underline">
-                            {selectedLead.email}
+                          <a href={`mailto:${getLeadEmail(selectedLead)}`} className="hover:underline">
+                            {getLeadEmail(selectedLead)}
                           </a>
                         </div>
                       )}
@@ -1042,10 +1067,10 @@ export default function LeadsPage() {
                           </a>
                         </div>
                       )}
-                      {selectedLead.company && (
+                      {getLeadCompany(selectedLead) && (
                         <div className="flex items-center gap-2 text-sm">
                           <Building className="h-4 w-4 text-muted-foreground" />
-                          {selectedLead.company}
+                          {getLeadCompany(selectedLead)}
                         </div>
                       )}
                     </div>
