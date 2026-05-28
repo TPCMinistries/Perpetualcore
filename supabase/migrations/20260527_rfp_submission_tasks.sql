@@ -35,7 +35,7 @@ drop trigger if exists rfp_submission_tasks_set_updated_at on public.rfp_submiss
 create trigger rfp_submission_tasks_set_updated_at
   before update on public.rfp_submission_tasks
   for each row
-  execute function public.set_updated_at();
+  execute function public.rfp_set_updated_at();
 
 alter table public.rfp_submission_tasks enable row level security;
 
