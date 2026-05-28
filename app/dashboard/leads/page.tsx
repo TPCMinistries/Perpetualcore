@@ -350,7 +350,15 @@ export default function LeadsPage() {
   const [leadActivities, setLeadActivities] = useState<LeadActivity[]>([]);
   const [savingFollowUp, setSavingFollowUp] = useState<string | null>(null);
   const [savingAssistantPlan, setSavingAssistantPlan] = useState(false);
+  const [savingWorkingSession, setSavingWorkingSession] = useState(false);
   const [initialLeadHandled, setInitialLeadHandled] = useState(false);
+  const [workingSession, setWorkingSession] = useState({
+    operatingPain: "",
+    buyer: "",
+    objection: "",
+    proofNeeded: "",
+    nextMove: "",
+  });
 
   // Form state
   const [formData, setFormData] = useState({
@@ -869,6 +877,55 @@ export default function LeadsPage() {
       toast.error("Could not save assistant plan");
     } finally {
       setSavingAssistantPlan(false);
+    }
+  };
+
+  const handleSaveWorkingSession = async (lead: Lead, shouldQualify = false) => {
+    const entries = [
+      ["Operating pain", workingSession.operatingPain],
+      ["Buyer / authority", workingSession.buyer],
+      ["Objection / risk", workingSession.objection],
+      ["Proof needed", workingSession.proofNeeded],
+      ["Next move", workingSession.nextMove],
+    ].filter(([, value]) => value.trim());
+
+    if (entries.length === 0) {
+      toast.error("Add at least one working-session note");
+      return;
+    }
+
+    try {
+      setSavingWorkingSession(true);
+      const sessionNote = [
+        `Working session - ${new Date().toLocaleDateString("en-US", {
+          month: "short",
+          day: "numeric",
+          year: "numeric",
+        })}`,
+        ...entries.map(([label, value]) => `${label}: ${value.trim()}`),
+      ].join("\n");
+      const nextNotes = [lead.notes, sessionNote].filter(Boolean).join("\n\n");
+      const updates: Partial<Lead> = { notes: nextNotes };
+
+      if (shouldQualify && !["qualified", "proposal", "negotiation", "won"].includes(lead.status || "new")) {
+        updates.status = "qualified";
+      }
+
+      await updateLead(lead.id, updates);
+      setWorkingSession({
+        operatingPain: "",
+        buyer: "",
+        objection: "",
+        proofNeeded: "",
+        nextMove: "",
+      });
+      toast.success(shouldQualify ? "Working session saved and lead qualified" : "Working session saved");
+      fetchLeads();
+    } catch (error) {
+      console.error("Error saving working session:", error);
+      toast.error("Could not save working session");
+    } finally {
+      setSavingWorkingSession(false);
     }
   };
 
@@ -1712,6 +1769,136 @@ export default function LeadsPage() {
                           </div>
                         );
                       })()}
+                    </div>
+
+                    <div className="rounded-lg border bg-card p-4">
+                      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                        <div>
+                          <Label className="flex items-center gap-2 text-sm text-muted-foreground">
+                            <ListChecks className="h-4 w-4 text-primary" />
+                            Working session
+                          </Label>
+                          <p className="mt-2 text-sm leading-6 text-muted-foreground">
+                            Capture what you learned on the call so the assistant, proposal, close path,
+                            and account handoff have real operating context.
+                          </p>
+                        </div>
+                        <Badge variant="outline" className="w-fit rounded-md">
+                          Discovery memory
+                        </Badge>
+                      </div>
+
+                      <div className="mt-4 grid gap-3">
+                        <div>
+                          <Label htmlFor="operatingPain" className="text-xs text-muted-foreground">
+                            Operating pain
+                          </Label>
+                          <Textarea
+                            id="operatingPain"
+                            value={workingSession.operatingPain}
+                            onChange={(event) =>
+                              setWorkingSession((current) => ({
+                                ...current,
+                                operatingPain: event.target.value,
+                              }))
+                            }
+                            placeholder="What workflow, revenue leak, follow-up gap, or visibility problem did they name?"
+                            className="mt-1 min-h-20"
+                          />
+                        </div>
+                        <div className="grid gap-3 sm:grid-cols-2">
+                          <div>
+                            <Label htmlFor="buyer" className="text-xs text-muted-foreground">
+                              Buyer / authority
+                            </Label>
+                            <Textarea
+                              id="buyer"
+                              value={workingSession.buyer}
+                              onChange={(event) =>
+                                setWorkingSession((current) => ({
+                                  ...current,
+                                  buyer: event.target.value,
+                                }))
+                              }
+                              placeholder="Who decides, who influences, and who has to use it?"
+                              className="mt-1 min-h-20"
+                            />
+                          </div>
+                          <div>
+                            <Label htmlFor="objection" className="text-xs text-muted-foreground">
+                              Objection / risk
+                            </Label>
+                            <Textarea
+                              id="objection"
+                              value={workingSession.objection}
+                              onChange={(event) =>
+                                setWorkingSession((current) => ({
+                                  ...current,
+                                  objection: event.target.value,
+                                }))
+                              }
+                              placeholder="Budget, timing, trust, access, complexity, or internal resistance?"
+                              className="mt-1 min-h-20"
+                            />
+                          </div>
+                        </div>
+                        <div className="grid gap-3 sm:grid-cols-2">
+                          <div>
+                            <Label htmlFor="proofNeeded" className="text-xs text-muted-foreground">
+                              Proof needed
+                            </Label>
+                            <Textarea
+                              id="proofNeeded"
+                              value={workingSession.proofNeeded}
+                              onChange={(event) =>
+                                setWorkingSession((current) => ({
+                                  ...current,
+                                  proofNeeded: event.target.value,
+                                }))
+                              }
+                              placeholder="What would make the buyer comfortable saying yes?"
+                              className="mt-1 min-h-20"
+                            />
+                          </div>
+                          <div>
+                            <Label htmlFor="nextMove" className="text-xs text-muted-foreground">
+                              Next move
+                            </Label>
+                            <Textarea
+                              id="nextMove"
+                              value={workingSession.nextMove}
+                              onChange={(event) =>
+                                setWorkingSession((current) => ({
+                                  ...current,
+                                  nextMove: event.target.value,
+                                }))
+                              }
+                              placeholder="Send map, package, proposal, invoice, schedule call, or ask for access?"
+                              className="mt-1 min-h-20"
+                            />
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="mt-4 flex flex-col gap-2 sm:flex-row sm:justify-end">
+                        <Button
+                          type="button"
+                          variant="outline"
+                          className="rounded-md"
+                          disabled={savingWorkingSession}
+                          onClick={() => handleSaveWorkingSession(selectedLead)}
+                        >
+                          {savingWorkingSession ? "Saving..." : "Save session"}
+                        </Button>
+                        <Button
+                          type="button"
+                          className="rounded-md"
+                          disabled={savingWorkingSession}
+                          onClick={() => handleSaveWorkingSession(selectedLead, true)}
+                        >
+                          {savingWorkingSession ? "Saving..." : "Save and qualify"}
+                        </Button>
+                      </div>
                     </div>
 
                     <div className="rounded-lg border bg-card p-4">

@@ -76,7 +76,7 @@ export async function PATCH(
     // Get current lead for status change tracking
     const { data: currentLead } = await supabase
       .from("leads")
-      .select("status, stage, next_follow_up_at")
+      .select("status, stage, next_follow_up_at, notes")
       .eq("id", id)
       .eq("user_id", user.id)
       .single();
@@ -176,6 +176,16 @@ export async function PATCH(
         activity_type: "ai_plan_saved",
         title: "Assistant plan saved",
         description: "AI routing, qualification questions, and next action were saved to this lead.",
+      });
+    }
+
+    if (body.notes && body.notes !== currentLead.notes) {
+      await supabase.from("lead_activities").insert({
+        lead_id: id,
+        user_id: user.id,
+        activity_type: "working_session_saved",
+        title: "Working session saved",
+        description: "Discovery notes, buyer context, objections, proof needed, or next move were added to the lead.",
       });
     }
 
