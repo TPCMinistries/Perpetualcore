@@ -21,6 +21,7 @@ import {
   Dialog,
   DialogContent,
   DialogDescription,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
@@ -172,7 +173,18 @@ export function NaicsAssistantModal({
     }
   };
 
+  const handleAddEveryRecommendation = () => {
+    for (const program of programs) {
+      handleAddAll(program);
+    }
+  };
+
   const totalCodes = programs.reduce((sum, p) => sum + p.codes.length, 0);
+  const selectedCount = programs.reduce(
+    (sum, p) => sum + p.codes.filter((c) => existingCodes.includes(c.code)).length,
+    0,
+  );
+  const remainingCount = Math.max(totalCodes - selectedCount, 0);
 
   return (
     <Dialog
@@ -194,13 +206,13 @@ export function NaicsAssistantModal({
         </Button>
       </DialogTrigger>
 
-      <DialogContent className="sm:max-w-2xl max-h-[85vh] overflow-hidden flex flex-col">
+      <DialogContent className="flex max-h-[85vh] flex-col overflow-hidden border-emerald-400/20 bg-zinc-950 text-zinc-100 shadow-[0_30px_120px_-40px_rgba(16,185,129,0.45)] sm:max-w-3xl">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Sparkles className="h-4 w-4 text-emerald-400" />
             Find your NAICS codes
           </DialogTitle>
-          <DialogDescription>
+          <DialogDescription className="text-zinc-400">
             Describe what your organization does. We&apos;ll group codes by
             program and name the procurement systems each one unlocks.
           </DialogDescription>
@@ -343,15 +355,37 @@ export function NaicsAssistantModal({
         </div>
 
         {hasResults && (
-          <div className="flex items-center justify-between border-t border-zinc-800 pt-3 mt-1">
-            <p className="text-xs text-muted-foreground">
-              {totalCodes} code{totalCodes === 1 ? "" : "s"} across{" "}
-              {programs.length} program{programs.length === 1 ? "" : "s"}
+          <DialogFooter className="mt-1 gap-2 border-t border-zinc-800 pt-3 sm:items-center sm:justify-between">
+            <p className="text-xs text-zinc-400">
+              {selectedCount}/{totalCodes} selected across {programs.length}{" "}
+              program{programs.length === 1 ? "" : "s"}
             </p>
-            <Button type="button" variant="ghost" size="sm" onClick={reset}>
-              Start over
-            </Button>
-          </div>
+            <div className="flex flex-col gap-2 sm:flex-row">
+              <Button type="button" variant="ghost" size="sm" onClick={reset}>
+                Start over
+              </Button>
+              {remainingCount > 0 && (
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={handleAddEveryRecommendation}
+                  className="border-emerald-400/25 bg-emerald-400/5 text-emerald-100 hover:bg-emerald-400/10"
+                >
+                  Add all remaining
+                </Button>
+              )}
+              <Button
+                type="button"
+                size="sm"
+                disabled={selectedCount === 0}
+                onClick={() => setOpen(false)}
+                className="bg-emerald-400 text-zinc-950 hover:bg-emerald-300"
+              >
+                Save selected codes
+              </Button>
+            </div>
+          </DialogFooter>
         )}
       </DialogContent>
     </Dialog>
