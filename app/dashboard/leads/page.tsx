@@ -550,6 +550,22 @@ export default function LeadsPage() {
     }
   };
 
+  const getLeadBriefing = (lead: Lead) => {
+    const lane = getLeadLane(lead);
+    const company = getLeadCompany(lead);
+    const leadName = getLeadName(lead);
+    const accountLabel = company ? `${company} (${leadName})` : leadName;
+    const value = lead.estimated_value ? ` Estimated value: ${formatCurrency(lead.estimated_value)}.` : "";
+    const notes = lead.notes ? ` Context: ${lead.notes}` : "";
+
+    return [
+      `Lead: ${accountLabel}.`,
+      `Recommended route: ${lane.label}.`,
+      `Next action: ${getLeadNextAction(lead)}.`,
+      `${lane.detail}${value}${notes}`,
+    ].join(" ");
+  };
+
   const copyText = async (text: string) => {
     try {
       await navigator.clipboard.writeText(text);
@@ -915,6 +931,7 @@ export default function LeadsPage() {
                 const displayName = getLeadName(lead);
                 const company = getLeadCompany(lead);
                 const email = getLeadEmail(lead);
+                const lane = getLeadLane(lead);
                 const statusConfig = STATUS_CONFIG[lead.status || "new"] || STATUS_CONFIG.new;
                 const StatusIcon = statusConfig.icon;
 
@@ -961,6 +978,14 @@ export default function LeadsPage() {
                                   {email}
                                 </span>
                               )}
+                            </div>
+                            <div className="mt-3 flex flex-wrap items-center gap-2">
+                              <Badge variant="outline" className="rounded-md">
+                                {lane.label}
+                              </Badge>
+                              <span className="text-xs font-medium text-muted-foreground">
+                                {getLeadNextAction(lead)}
+                              </span>
                             </div>
                           </div>
                         </div>
@@ -1251,6 +1276,46 @@ export default function LeadsPage() {
                   </TabsList>
 
                   <TabsContent value="details" className="mt-4 space-y-6">
+                    <div className="rounded-lg border bg-primary/[0.03] p-4">
+                      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                        <div>
+                          <Label className="text-sm text-muted-foreground">Recommended route</Label>
+                          <p className="mt-2 text-lg font-semibold text-foreground">
+                            {getLeadLane(selectedLead).label}
+                          </p>
+                          <p className="mt-2 text-sm leading-6 text-muted-foreground">
+                            {getLeadLane(selectedLead).detail}
+                          </p>
+                          <div className="mt-3 flex flex-wrap items-center gap-2">
+                            <Badge variant="secondary" className="rounded-md">
+                              {getLeadNextAction(selectedLead)}
+                            </Badge>
+                            {selectedLead.estimated_value ? (
+                              <Badge variant="outline" className="rounded-md">
+                                {formatCurrency(selectedLead.estimated_value)}
+                              </Badge>
+                            ) : null}
+                          </div>
+                        </div>
+                        <div className="grid gap-2 sm:min-w-40">
+                          <Button asChild className="rounded-md">
+                            <Link href={`/dashboard/proposals?lead=${selectedLead.id}`}>
+                              Build proposal
+                            </Link>
+                          </Button>
+                          <Button
+                            type="button"
+                            variant="outline"
+                            className="rounded-md"
+                            onClick={() => copyText(getLeadBriefing(selectedLead))}
+                          >
+                            <Clipboard className="mr-2 h-4 w-4" />
+                            Copy briefing
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
+
                     {/* Status */}
                     <div>
                       <Label className="text-sm text-muted-foreground">Status</Label>
