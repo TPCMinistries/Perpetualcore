@@ -22,6 +22,8 @@ type LeadRow = {
   email: string | null;
   company: string | null;
   status: string | null;
+  stage?: string | null;
+  notes?: string | null;
   estimated_value: number | null;
   next_follow_up_at: string | null;
   created_at: string;
@@ -97,10 +99,10 @@ export async function GET() {
       .limit(25),
     admin
       .from("leads")
-      .select("id,name,email,company,status,estimated_value,next_follow_up_at,created_at")
+      .select("id,name,email,company,status,stage,notes,estimated_value,next_follow_up_at,created_at")
       .eq("user_id", user.id)
       .order("created_at", { ascending: false })
-      .limit(25),
+      .limit(50),
     getPackagePayments().catch(() => []),
   ]);
 
@@ -116,9 +118,30 @@ export async function GET() {
     const status = (lead.status || "new").toLowerCase();
     return !["won", "lost", "closed", "archived"].includes(status);
   });
+  const wonLeads = leads.filter((lead) => {
+    const status = (lead.status || "new").toLowerCase();
+    return status === "won" || lead.stage === "delivery_handoff";
+  });
   const pipelineValue = openLeads.reduce((sum, lead) => sum + (lead.estimated_value || 0), 0);
 
   const activeClients = [
+    ...wonLeads.map((lead) => ({
+      id: lead.id,
+      name: lead.company || lead.name || "Account",
+      company: lead.email || "Client account",
+      status: lead.stage === "delivery_handoff" ? "Delivery handoff" : "Won",
+      lane: lead.estimated_value && lead.estimated_value >= 15000 ? "90-Day Operating Lane" : "First Workflow",
+      value: new Intl.NumberFormat("en-US", {
+        style: "currency",
+        currency: "USD",
+        maximumFractionDigits: 0,
+      }).format(lead.estimated_value || 0),
+      nextStep: lead.notes?.includes("Delivery handoff opened")
+        ? "Run kickoff checklist and open the first operating lane"
+        : "Confirm kickoff plan and delivery owner",
+      createdAt: lead.created_at,
+      href: `/dashboard/accounts/${lead.id}`,
+    })),
     ...paidPackages.map((payment) => ({
       id: payment.id,
       name: payment.customerName,
@@ -128,7 +151,7 @@ export async function GET() {
       value: formatStripeAmount(payment.amount, "usd").formatted,
       nextStep: "Confirm intake context and onboarding window",
       createdAt: payment.createdAt,
-      href: payment.leadId ? `/dashboard/leads?lead=${payment.leadId}` : `/contact-sales?intent=post-payment-intake&session_id=${encodeURIComponent(payment.id)}`,
+      href: payment.leadId ? `/dashboard/accounts/${payment.leadId}` : `/contact-sales?intent=post-payment-intake&session_id=${encodeURIComponent(payment.id)}`,
     })),
     ...openSalesContacts.slice(0, 6).map((contact) => ({
       id: contact.id,

@@ -551,6 +551,11 @@ export default function AccountsPage() {
                               </Link>
                             </Button>
                             <Button asChild variant="outline" className="rounded-md sm:col-span-2">
+                              <Link href={`/dashboard/accounts/${encodeURIComponent(sourceLead.id)}`}>
+                                Open account room
+                              </Link>
+                            </Button>
+                            <Button asChild variant="outline" className="rounded-md sm:col-span-2">
                               <Link href={`/dashboard/proposals?lead=${encodeURIComponent(sourceLead.id)}`}>
                                 Draft proposal
                               </Link>

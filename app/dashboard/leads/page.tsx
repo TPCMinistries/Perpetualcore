@@ -849,7 +849,7 @@ export default function LeadsPage() {
     }
 
     if (status === "won") {
-      return `/dashboard/accounts?lead=${encodeURIComponent(lead.id)}`;
+      return `/dashboard/accounts/${encodeURIComponent(lead.id)}`;
     }
 
     return `/dashboard/leads?lead=${encodeURIComponent(lead.id)}`;
@@ -2640,7 +2640,7 @@ export default function LeadsPage() {
                                 </Link>
                               </Button>
                               <Button asChild variant="outline" className="rounded-md">
-                                <Link href={`/dashboard/accounts?lead=${encodeURIComponent(selectedLead.id)}`}>
+                                <Link href={`/dashboard/accounts/${encodeURIComponent(selectedLead.id)}`}>
                                   Start delivery room
                                 </Link>
                               </Button>
