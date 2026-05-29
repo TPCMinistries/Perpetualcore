@@ -1033,6 +1033,33 @@ export default function LeadsPage() {
     return `${briefing}\n\nCreate a proposal outline for this lead. Include business problem, recommended starting lane, scope, timeline, investment framing, proof needed, and the next decision step.`;
   };
 
+  const getCloseDecisionPacket = (lead: Lead) => {
+    const lane = getLeadLane(lead);
+    const packageId = getRecommendedPackageId(lead);
+    const selectedPackage = CLOSE_PACKAGES.find((pkg) => pkg.id === packageId) || CLOSE_PACKAGES[0];
+    const assistantPlan = getCurrentAssistantInsight(lead) || getAssistantRecommendation(lead);
+    const company = getLeadCompany(lead);
+    const buyer = getLeadName(lead);
+
+    return [
+      `Close decision packet`,
+      `Lead: ${company ? `${company} - ${buyer}` : buyer}`,
+      `Status: ${STATUS_CONFIG[lead.status || "new"]?.label || lead.status || "New"}`,
+      `Recommended lane: ${lane.label}`,
+      `Recommended package: ${selectedPackage.label}`,
+      lead.estimated_value ? `Estimated value: ${formatCurrency(lead.estimated_value)}` : "Estimated value: not set",
+      `AI score: ${assistantPlan.score}`,
+      `Next action: ${assistantPlan.nextAction}`,
+      `Follow-up: ${assistantPlan.followUp}`,
+      lead.notes ? `Context:\n${lead.notes}` : "Context: not captured yet",
+      assistantPlan.reasoning.length ? `Reasoning:\n${assistantPlan.reasoning.map((item) => `- ${item}`).join("\n")}` : "",
+      assistantPlan.questions.length ? `Questions to confirm:\n${assistantPlan.questions.map((item) => `- ${item}`).join("\n")}` : "",
+      `Proposal: https://www.perpetualcore.com/dashboard/proposals?lead=${lead.id}`,
+      `Payment path: https://www.perpetualcore.com/packages?lead=${lead.id}&package=${packageId}`,
+      `Manual invoice: https://www.perpetualcore.com/contact-sales?intent=manual-invoice&lead=${lead.id}&plan=${packageId}`,
+    ].filter(Boolean).join("\n\n");
+  };
+
   const getOutboundCopy = (lead: Lead, mode: OutboundCopyMode) => {
     const leadName = getLeadName(lead);
     const company = getLeadCompany(lead);
@@ -1122,6 +1149,29 @@ export default function LeadsPage() {
     } catch (error) {
       console.error("Error saving assistant plan:", error);
       toast.error("Could not save assistant plan");
+    } finally {
+      setSavingAssistantPlan(false);
+    }
+  };
+
+  const handlePrepareClosePath = async (lead: Lead) => {
+    try {
+      setSavingAssistantPlan(true);
+      const recommendation = getAssistantRecommendation(lead);
+      const nextStatus = ["new", "contacted", "qualified"].includes(lead.status || "new")
+        ? "proposal"
+        : lead.status || "proposal";
+
+      await updateLead(lead.id, {
+        status: nextStatus,
+        ai_insights: recommendation,
+        lead_score: recommendation.score,
+      });
+      toast.success("Close path saved and lead moved toward proposal");
+      fetchLeads();
+    } catch (error) {
+      console.error("Error preparing close path:", error);
+      toast.error("Could not prepare close path");
     } finally {
       setSavingAssistantPlan(false);
     }
@@ -2514,6 +2564,8 @@ export default function LeadsPage() {
                         const recommendedPackage = getRecommendedPackageId(selectedLead);
                         const selectedPackage = CLOSE_PACKAGES.find((pkg) => pkg.id === recommendedPackage) || CLOSE_PACKAGES[0];
                         const packageHref = `/packages?lead=${encodeURIComponent(selectedLead.id)}&package=${encodeURIComponent(selectedPackage.id)}`;
+                        const proposalHref = `/dashboard/proposals?lead=${encodeURIComponent(selectedLead.id)}`;
+                        const invoiceHref = `/contact-sales?intent=manual-invoice&lead=${encodeURIComponent(selectedLead.id)}&plan=${encodeURIComponent(selectedPackage.id)}`;
                         return (
                           <div className="space-y-4">
                             <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
@@ -2528,6 +2580,33 @@ export default function LeadsPage() {
                               <Badge variant="outline" className="w-fit rounded-md">
                                 {readiness.score}/5 context
                               </Badge>
+                            </div>
+
+                            <div className="grid gap-2 sm:grid-cols-3">
+                              <Button
+                                type="button"
+                                className="rounded-md"
+                                disabled={savingAssistantPlan}
+                                onClick={() => handlePrepareClosePath(selectedLead)}
+                              >
+                                <WandSparkles className="mr-2 h-4 w-4" />
+                                {savingAssistantPlan ? "Saving..." : "Prepare close"}
+                              </Button>
+                              <Button
+                                type="button"
+                                variant="outline"
+                                className="rounded-md"
+                                onClick={() => copyText(getCloseDecisionPacket(selectedLead))}
+                              >
+                                <Clipboard className="mr-2 h-4 w-4" />
+                                Copy packet
+                              </Button>
+                              <Button asChild variant="outline" className="rounded-md">
+                                <Link href={proposalHref}>
+                                  <FileText className="mr-2 h-4 w-4" />
+                                  Proposal
+                                </Link>
+                              </Button>
                             </div>
 
                             <div className="rounded-md border bg-background p-3">
@@ -2549,10 +2628,15 @@ export default function LeadsPage() {
                               </div>
                             </div>
 
-                            <div className="grid gap-2 sm:grid-cols-2">
+                            <div className="grid gap-2 sm:grid-cols-3">
                               <Button asChild variant="outline" className="rounded-md">
-                                <Link href={`/contact-sales?intent=manual-invoice&lead=${encodeURIComponent(selectedLead.id)}`}>
+                                <Link href={invoiceHref}>
                                   Manual invoice path
+                                </Link>
+                              </Button>
+                              <Button asChild variant="outline" className="rounded-md">
+                                <Link href={`/packages/success?lead=${encodeURIComponent(selectedLead.id)}`}>
+                                  Post-payment intake
                                 </Link>
                               </Button>
                               <Button asChild variant="outline" className="rounded-md">
