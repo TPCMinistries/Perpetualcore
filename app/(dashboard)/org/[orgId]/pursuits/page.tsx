@@ -514,6 +514,13 @@ function PursuitCard({ item, orgId }: { item: PursuitItem; orgId: string }) {
           ) : null}
 
           <div className="mt-5 flex flex-col gap-2">
+            <Link
+              href={`/org/${orgId}/pursuits/${item.oppId}`}
+              className="inline-flex h-10 items-center justify-center gap-2 rounded-md border border-zinc-300 bg-white px-4 text-sm font-medium text-zinc-800 transition hover:bg-zinc-100"
+            >
+              Open command file
+              <ArrowRight className="h-4 w-4" />
+            </Link>
             {item.proposal ? (
               <Link
                 href={`/org/${orgId}/proposals/${item.proposal.id}`}
