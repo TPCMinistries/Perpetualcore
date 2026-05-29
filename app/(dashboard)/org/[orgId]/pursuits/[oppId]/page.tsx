@@ -21,6 +21,16 @@ import { ReviewButton } from "@/components/rfp/ReviewButton";
 import { ExportProposalButton } from "@/components/rfp/ExportProposalButton";
 import { SubmissionWorkroom } from "@/components/rfp/SubmissionWorkroom";
 import { ManualSubmissionTaskForm } from "@/components/rfp/ManualSubmissionTaskForm";
+import {
+  PursuitCommandStateForm,
+  type PursuitPriority,
+  type PursuitStage,
+} from "@/components/rfp/PursuitCommandStateForm";
+import {
+  PursuitDecisionLog,
+  type PursuitDecisionEventType,
+  type PursuitDecisionLogRow,
+} from "@/components/rfp/PursuitDecisionLog";
 import type { SubmissionTaskRow } from "@/lib/rfp/submission/tasks";
 
 export const dynamic = "force-dynamic";
@@ -42,6 +52,9 @@ interface MatchRow {
   triage_status: TriageStatus;
   triage_note: string | null;
   triaged_at: string | null;
+  pursuit_owner_label: string;
+  pursuit_stage: string;
+  pursuit_priority: string;
   rfp_opportunities: {
     source: string;
     source_id: string | null;
@@ -115,6 +128,32 @@ function normalizeStatus(status: string): ProposalStatus {
     return status;
   }
   return "draft";
+}
+
+function normalizeStage(stage: string): PursuitStage {
+  if (
+    stage === "evaluating" ||
+    stage === "drafting" ||
+    stage === "reviewing" ||
+    stage === "ready" ||
+    stage === "submitted" ||
+    stage === "closed"
+  ) {
+    return stage;
+  }
+  return "evaluating";
+}
+
+function normalizePriority(priority: string): PursuitPriority {
+  if (
+    priority === "low" ||
+    priority === "medium" ||
+    priority === "high" ||
+    priority === "critical"
+  ) {
+    return priority;
+  }
+  return "medium";
 }
 
 function readStringArray(value: unknown, key: string): string[] {
@@ -215,7 +254,7 @@ export default async function PursuitDetailPage({ params }: PageProps) {
   const { data: match } = await supabase
     .from("rfp_opp_matches")
     .select(
-      "opp_id, fit_score, chips, summary, recommendation, score_breakdown, triage_status, triage_note, triaged_at, rfp_opportunities ( source, source_id, title, agency, amount_min, amount_max, deadline, posted_at, brief, url, needs_review, raw_json )",
+      "opp_id, fit_score, chips, summary, recommendation, score_breakdown, triage_status, triage_note, triaged_at, pursuit_owner_label, pursuit_stage, pursuit_priority, rfp_opportunities ( source, source_id, title, agency, amount_min, amount_max, deadline, posted_at, brief, url, needs_review, raw_json )",
     )
     .eq("org_id", orgId)
     .eq("opp_id", oppId)
@@ -243,6 +282,21 @@ export default async function PursuitDetailPage({ params }: PageProps) {
         .order("created_at", { ascending: true })
         .returns<SubmissionTaskRow[]>()
     : { data: [] as SubmissionTaskRow[] };
+
+  const { data: decisionLogs } = await supabase
+    .from("rfp_pursuit_decision_logs")
+    .select("id, org_id, opp_id, event_type, title, body, created_by, created_at")
+    .eq("org_id", orgId)
+    .eq("opp_id", oppId)
+    .order("created_at", { ascending: false })
+    .limit(25)
+    .returns<
+      Array<
+        Omit<PursuitDecisionLogRow, "event_type"> & {
+          event_type: PursuitDecisionEventType;
+        }
+      >
+    >();
 
   const taskRows = tasks ?? [];
   const openTasks = taskRows.filter((task) =>
@@ -334,6 +388,15 @@ export default async function PursuitDetailPage({ params }: PageProps) {
           </section>
 
           <aside className="space-y-4">
+            <PursuitCommandStateForm
+              orgId={orgId}
+              oppId={oppId}
+              initialOwnerLabel={match.pursuit_owner_label}
+              initialStage={normalizeStage(match.pursuit_stage)}
+              initialPriority={normalizePriority(match.pursuit_priority)}
+              canEdit={membership.role === "owner" || membership.role === "writer"}
+            />
+
             <section className={`rounded-xl border p-5 shadow-sm ${actionClass}`}>
               <div className="flex items-center gap-3">
                 <ActionIcon className="h-5 w-5" />
@@ -427,6 +490,15 @@ export default async function PursuitDetailPage({ params }: PageProps) {
             <ExternalLink className="h-4 w-4" />
           </a>
         ) : null}
+
+        <div className="mt-8">
+          <PursuitDecisionLog
+            orgId={orgId}
+            oppId={oppId}
+            logs={(decisionLogs ?? []) as PursuitDecisionLogRow[]}
+            canEdit={canEdit}
+          />
+        </div>
 
         {proposal ? (
           <div className="mt-8 grid gap-6 xl:grid-cols-[1fr_380px]">

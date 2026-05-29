@@ -44,6 +44,9 @@ interface PursuitMatchRow {
   triage_status: TriageStatus;
   triage_note: string | null;
   triaged_at: string | null;
+  pursuit_owner_label: string;
+  pursuit_stage: string;
+  pursuit_priority: string;
   rfp_opportunities: OppJoinRow | null;
 }
 
@@ -77,6 +80,9 @@ interface PursuitItem {
   summary: string | null;
   triageStatus: TriageStatus;
   triageNote: string | null;
+  ownerLabel: string;
+  pursuitStage: string;
+  pursuitPriority: string;
   proposal: ProposalRow | null;
   openTasks: number;
   blockedTasks: number;
@@ -229,7 +235,7 @@ export default async function PursuitsPage({ params }: PageProps) {
   const { data: matches, error: matchError } = await supabase
     .from("rfp_opp_matches")
     .select(
-      "opp_id, fit_score, chips, summary, triage_status, triage_note, triaged_at, rfp_opportunities ( source, title, agency, amount_min, amount_max, deadline, brief, url, needs_review )",
+      "opp_id, fit_score, chips, summary, triage_status, triage_note, triaged_at, pursuit_owner_label, pursuit_stage, pursuit_priority, rfp_opportunities ( source, title, agency, amount_min, amount_max, deadline, brief, url, needs_review )",
     )
     .eq("org_id", orgId)
     .in("triage_status", ["watch", "pursuing"])
@@ -308,6 +314,9 @@ export default async function PursuitsPage({ params }: PageProps) {
         summary: match.summary,
         triageStatus: match.triage_status,
         triageNote: match.triage_note,
+        ownerLabel: match.pursuit_owner_label,
+        pursuitStage: match.pursuit_stage,
+        pursuitPriority: match.pursuit_priority,
         proposal,
         openTasks: openTasks.length,
         blockedTasks: openTasks.filter((task) => task.status === "blocked").length,
@@ -455,6 +464,12 @@ function PursuitCard({ item, orgId }: { item: PursuitItem; orgId: string }) {
             <span className="rounded-full border border-zinc-200 px-3 py-1 font-mono text-[10px] uppercase tracking-[0.16em] text-zinc-500">
               Fit {Math.round(item.fitScore)}
             </span>
+            <span className="rounded-full border border-zinc-200 px-3 py-1 font-mono text-[10px] uppercase tracking-[0.16em] text-zinc-500">
+              {item.pursuitStage}
+            </span>
+            <span className="rounded-full border border-zinc-200 px-3 py-1 font-mono text-[10px] uppercase tracking-[0.16em] text-zinc-500">
+              {item.pursuitPriority}
+            </span>
           </div>
 
           <h2 className="mt-4 text-xl font-semibold tracking-tight text-zinc-950">
@@ -472,14 +487,8 @@ function PursuitCard({ item, orgId }: { item: PursuitItem; orgId: string }) {
             <Signal icon={FileText} label="Award ceiling" value={fmtMoney(item.amountMax)} />
             <Signal
               icon={ListChecks}
-              label="Workroom"
-              value={
-                item.proposal
-                  ? item.openTasks > 0
-                    ? `${item.openTasks} open tasks`
-                    : "No open tasks"
-                  : "No draft yet"
-              }
+              label="Owner"
+              value={item.ownerLabel}
             />
           </div>
 

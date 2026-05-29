@@ -14712,6 +14712,9 @@ export type Database = {
           opp_id: string
           org_id: string
           recommendation: string | null
+          pursuit_owner_label: string
+          pursuit_priority: string
+          pursuit_stage: string
           score_breakdown: Json
           scored_at: string
           scored_version: number
@@ -14729,6 +14732,9 @@ export type Database = {
           opp_id: string
           org_id: string
           recommendation?: string | null
+          pursuit_owner_label?: string
+          pursuit_priority?: string
+          pursuit_stage?: string
           score_breakdown?: Json
           scored_at?: string
           scored_version?: number
@@ -14746,6 +14752,9 @@ export type Database = {
           opp_id?: string
           org_id?: string
           recommendation?: string | null
+          pursuit_owner_label?: string
+          pursuit_priority?: string
+          pursuit_stage?: string
           score_breakdown?: Json
           scored_at?: string
           scored_version?: number
@@ -15012,6 +15021,54 @@ export type Database = {
             columns: ["proposal_id"]
             isOneToOne: false
             referencedRelation: "rfp_proposals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      rfp_pursuit_decision_logs: {
+        Row: {
+          body: string
+          created_at: string
+          created_by: string | null
+          event_type: string
+          id: string
+          opp_id: string
+          org_id: string
+          title: string
+        }
+        Insert: {
+          body?: string
+          created_at?: string
+          created_by?: string | null
+          event_type?: string
+          id?: string
+          opp_id: string
+          org_id: string
+          title: string
+        }
+        Update: {
+          body?: string
+          created_at?: string
+          created_by?: string | null
+          event_type?: string
+          id?: string
+          opp_id?: string
+          org_id?: string
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "rfp_pursuit_decision_logs_opp_id_fkey"
+            columns: ["opp_id"]
+            isOneToOne: false
+            referencedRelation: "rfp_opportunities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "rfp_pursuit_decision_logs_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "rfp_orgs"
             referencedColumns: ["id"]
           },
         ]
