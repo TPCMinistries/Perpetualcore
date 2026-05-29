@@ -740,6 +740,33 @@ export default function LeadsPage() {
     return "Open lead";
   };
 
+  const shouldOpenLeadInline = (lead: Lead) => {
+    const status = lead.status || "new";
+    return status === "new" || status === "contacted" || status === "lost";
+  };
+
+  const getQuickStatusAction = (lead: Lead) => {
+    const status = lead.status || "new";
+
+    if (status === "new") {
+      return { label: "Mark contacted", status: "contacted" };
+    }
+
+    if (status === "contacted") {
+      return { label: "Mark qualified", status: "qualified" };
+    }
+
+    if (status === "qualified") {
+      return { label: "Move to proposal", status: "proposal" };
+    }
+
+    if (status === "proposal") {
+      return { label: "Move to negotiation", status: "negotiation" };
+    }
+
+    return null;
+  };
+
   const getCloseReadiness = (lead: Lead) => {
     const status = lead.status || "new";
     const hasContact = Boolean(getLeadEmail(lead) || lead.phone);
@@ -1419,6 +1446,7 @@ export default function LeadsPage() {
                       lane.leads.map((lead) => {
                         const statusConfig = STATUS_CONFIG[lead.status || "new"] || STATUS_CONFIG.new;
                         const leadCompany = getLeadCompany(lead);
+                        const quickStatusAction = getQuickStatusAction(lead);
                         return (
                           <div key={lead.id} className="rounded-md border bg-background p-3">
                             <div className="flex items-start justify-between gap-3">
@@ -1435,6 +1463,21 @@ export default function LeadsPage() {
                               </Badge>
                             </div>
                             <div className="mt-3 flex flex-wrap items-center gap-2">
+                              <Badge variant="outline" className="rounded-md">
+                                {getLeadLane(lead).label}
+                              </Badge>
+                              {lead.estimated_value ? (
+                                <Badge variant="secondary" className="rounded-md">
+                                  {formatCurrency(lead.estimated_value)}
+                                </Badge>
+                              ) : null}
+                              {lead.next_follow_up_at ? (
+                                <Badge variant="outline" className="rounded-md">
+                                  Touch {formatDate(lead.next_follow_up_at)}
+                                </Badge>
+                              ) : null}
+                            </div>
+                            <div className="mt-3 flex flex-wrap items-center gap-2">
                               <Button
                                 type="button"
                                 size="sm"
@@ -1444,11 +1487,33 @@ export default function LeadsPage() {
                               >
                                 Review
                               </Button>
-                              <Button asChild size="sm" className="h-8 rounded-md">
-                                <Link href={getLeadPrimaryHref(lead)}>
+                              {shouldOpenLeadInline(lead) ? (
+                                <Button
+                                  type="button"
+                                  size="sm"
+                                  className="h-8 rounded-md"
+                                  onClick={() => fetchLeadDetails(lead.id)}
+                                >
                                   {getLeadPrimaryLabel(lead)}
-                                </Link>
-                              </Button>
+                                </Button>
+                              ) : (
+                                <Button asChild size="sm" className="h-8 rounded-md">
+                                  <Link href={getLeadPrimaryHref(lead)}>
+                                    {getLeadPrimaryLabel(lead)}
+                                  </Link>
+                                </Button>
+                              )}
+                              {quickStatusAction ? (
+                                <Button
+                                  type="button"
+                                  size="sm"
+                                  variant="ghost"
+                                  className="h-8 rounded-md"
+                                  onClick={() => handleUpdateStatus(lead.id, quickStatusAction.status)}
+                                >
+                                  {quickStatusAction.label}
+                                </Button>
+                              ) : null}
                             </div>
                           </div>
                         );
