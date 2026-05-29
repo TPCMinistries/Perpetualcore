@@ -104,7 +104,7 @@ interface Lead {
   estimated_value?: number;
   probability?: number;
   expected_close_date?: string;
-  notes?: string;
+  notes?: string | null;
   tags?: string[];
   lead_score?: number;
   ai_insights?: unknown;
@@ -407,6 +407,7 @@ export default function LeadsPage() {
     title: "",
     source: "",
     estimated_value: "",
+    notes: "",
   });
 
   // Form state
@@ -489,6 +490,7 @@ export default function LeadsPage() {
       title: selectedLead.title || "",
       source: selectedLead.source || "",
       estimated_value: selectedLead.estimated_value ? String(selectedLead.estimated_value) : "",
+      notes: selectedLead.notes || "",
     });
   }, [selectedLead]);
 
@@ -1052,6 +1054,7 @@ export default function LeadsPage() {
         title: leadProfile.title.trim() || undefined,
         source: leadProfile.source || undefined,
         estimated_value: estimatedValue,
+        notes: leadProfile.notes.trim() || null,
       });
       toast.success("Lead profile updated");
       fetchLeads();
@@ -2329,6 +2332,24 @@ export default function LeadsPage() {
                               placeholder="30000"
                             />
                           </div>
+                        </div>
+
+                        <div>
+                          <Label htmlFor="leadProfileNotes" className="text-xs text-muted-foreground">
+                            Sales notes
+                          </Label>
+                          <Textarea
+                            id="leadProfileNotes"
+                            value={leadProfile.notes}
+                            onChange={(event) =>
+                              setLeadProfile((current) => ({ ...current, notes: event.target.value }))
+                            }
+                            className="mt-1 min-h-24"
+                            placeholder="Relationship context, active pain, buyer language, budget signal, objections, and what would make this worth moving on."
+                          />
+                          <p className="mt-2 text-xs leading-5 text-muted-foreground">
+                            These notes feed the recommended route, outbound kit, assistant prompts, and proposal framing.
+                          </p>
                         </div>
                       </div>
                     </div>
