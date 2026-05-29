@@ -2641,7 +2641,7 @@ export default function LeadsPage() {
                               </Button>
                               <Button asChild variant="outline" className="rounded-md">
                                 <Link href={`/dashboard/accounts?lead=${encodeURIComponent(selectedLead.id)}`}>
-                                  Open in Accounts
+                                  Start delivery room
                                 </Link>
                               </Button>
                             </div>

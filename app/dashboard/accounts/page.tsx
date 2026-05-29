@@ -143,6 +143,29 @@ const onboardingSteps = [
   "Review next AI-assisted action weekly",
 ];
 
+const kickoffChecklist = [
+  {
+    title: "Confirm the paid path",
+    detail: "Checkout, invoice, or signed approval. Do not start delivery with the money path vague.",
+  },
+  {
+    title: "Name the first operating lane",
+    detail: "Sales, service, operations, admin, reporting, or knowledge. Pick one lane before expanding.",
+  },
+  {
+    title: "Collect the minimum context",
+    detail: "Docs, examples, links, current tools, owner names, customer language, and the first workflow outcome.",
+  },
+  {
+    title: "Set the first 7-day deliverable",
+    detail: "A working assistant, mapped process, proposal engine, intake flow, account view, or reporting surface.",
+  },
+  {
+    title: "Define the expansion signal",
+    detail: "What would prove this should become a broader 90-day operating lane.",
+  },
+];
+
 const lanePlaybook = [
   {
     lane: "Software Access",
@@ -239,6 +262,22 @@ function getSourceLeadSummary(lead: SourceLead) {
   return `${company || contact} | ${contact} | ${status} | ${value} | next touch: ${nextTouch}`;
 }
 
+function getDeliveryHandoffNote(lead: SourceLead) {
+  const lane = getAccountLane(lead);
+  const company = getLeadCompany(lead) || "Account";
+  const contact = getLeadName(lead);
+
+  return [
+    "Delivery handoff opened",
+    `Account: ${company}`,
+    `Contact: ${contact}`,
+    `Starting lane: ${lane.label}`,
+    `Recommended package: ${lane.packageId}`,
+    "Kickoff focus:",
+    ...kickoffChecklist.map((step, index) => `${index + 1}. ${step.title} - ${step.detail}`),
+  ].join("\n");
+}
+
 function getAccountCopyActions(lead: SourceLead) {
   const lane = getAccountLane(lead);
   const company = getLeadCompany(lead) || "your team";
@@ -262,6 +301,13 @@ function getAccountCopyActions(lead: SourceLead) {
       icon: FileText,
       body: `Discovery agenda for ${company}\n\n1. Confirm the business outcome this AI operating system should improve first.\n2. Identify the workflows, tools, people, and data currently involved.\n3. Decide whether the first step is software access, guided setup, first workflow, or a 90-day operating lane.\n4. Define the first measurable deliverable.\n5. Confirm payment path, kickoff date, and owner on each side.`,
     },
+    {
+      label: "Kickoff checklist",
+      icon: ClipboardCheck,
+      body: `Kickoff checklist for ${company}\n\nStarting lane: ${lane.label}\n\n${kickoffChecklist
+        .map((step, index) => `${index + 1}. ${step.title}\n${step.detail}`)
+        .join("\n\n")}`,
+    },
   ];
 }
 
@@ -273,6 +319,7 @@ export default function AccountsPage() {
   const [sourceLead, setSourceLead] = useState<SourceLead | null>(null);
   const [sourceLeadActivities, setSourceLeadActivities] = useState<SourceLeadActivity[]>([]);
   const [sourceLeadLoading, setSourceLeadLoading] = useState(false);
+  const [savingHandoff, setSavingHandoff] = useState(false);
 
   async function fetchAccounts() {
     setLoading(true);
@@ -322,6 +369,39 @@ export default function AccountsPage() {
       toast.success(`${label} copied`);
     } catch {
       toast.error("Could not copy text");
+    }
+  }
+
+  async function handleStartDeliveryHandoff(lead: SourceLead) {
+    setSavingHandoff(true);
+
+    try {
+      const handoffNote = getDeliveryHandoffNote(lead);
+      const existingNotes = lead.notes?.trim();
+      const nextNotes = existingNotes ? `${existingNotes}\n\n---\n${handoffNote}` : handoffNote;
+      const response = await fetch(`/api/leads/${lead.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          status: "won",
+          stage: "delivery_handoff",
+          notes: nextNotes,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to open delivery handoff");
+      }
+
+      const result = (await response.json()) as { lead: SourceLead };
+      setSourceLead(result.lead);
+      await fetchSourceLead(lead.id);
+      await fetchAccounts();
+      toast.success("Delivery handoff opened");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Could not open delivery handoff");
+    } finally {
+      setSavingHandoff(false);
     }
   }
 
@@ -452,12 +532,25 @@ export default function AccountsPage() {
                             </div>
                           </div>
                           <div className="mt-5 grid gap-2 sm:grid-cols-2">
+                            <Button
+                              type="button"
+                              className="rounded-md"
+                              disabled={savingHandoff}
+                              onClick={() => handleStartDeliveryHandoff(sourceLead)}
+                            >
+                              {savingHandoff ? (
+                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                              ) : (
+                                <PackageCheck className="mr-2 h-4 w-4" />
+                              )}
+                              Start delivery
+                            </Button>
                             <Button asChild className="rounded-md">
                               <Link href={packageHref}>
                                 Send package <ArrowRight className="ml-2 h-4 w-4" />
                               </Link>
                             </Button>
-                            <Button asChild variant="outline" className="rounded-md">
+                            <Button asChild variant="outline" className="rounded-md sm:col-span-2">
                               <Link href={`/dashboard/proposals?lead=${encodeURIComponent(sourceLead.id)}`}>
                                 Draft proposal
                               </Link>
@@ -474,6 +567,32 @@ export default function AccountsPage() {
                 )}
               </div>
             </div>
+          </CardContent>
+        </Card>
+      ) : null}
+
+      {sourceLead ? (
+        <Card className="rounded-lg shadow-none">
+          <CardHeader>
+            <div className="flex items-center justify-between gap-4">
+              <CardTitle className="text-xl">Delivery kickoff room</CardTitle>
+              <PackageCheck className="h-5 w-5 text-violet-600" />
+            </div>
+            <p className="text-sm leading-6 text-slate-600">
+              This is the bridge from sold interest to installed work. The assistant can use this
+              context to draft agendas, follow-ups, internal briefs, and the first delivery task.
+            </p>
+          </CardHeader>
+          <CardContent className="grid gap-3 lg:grid-cols-5">
+            {kickoffChecklist.map((step, index) => (
+              <div key={step.title} className="rounded-lg border bg-white p-4">
+                <span className="flex h-7 w-7 items-center justify-center rounded-full bg-violet-100 text-xs font-semibold text-violet-700">
+                  {index + 1}
+                </span>
+                <p className="mt-4 text-sm font-semibold text-slate-950">{step.title}</p>
+                <p className="mt-2 text-sm leading-5 text-slate-600">{step.detail}</p>
+              </div>
+            ))}
           </CardContent>
         </Card>
       ) : null}
