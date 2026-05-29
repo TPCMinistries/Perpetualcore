@@ -390,6 +390,7 @@ export default function LeadsPage() {
   const [savingFollowUp, setSavingFollowUp] = useState<string | null>(null);
   const [savingAssistantPlan, setSavingAssistantPlan] = useState(false);
   const [savingWorkingSession, setSavingWorkingSession] = useState(false);
+  const [savingLeadProfile, setSavingLeadProfile] = useState(false);
   const [initialLeadHandled, setInitialLeadHandled] = useState(false);
   const [workingSession, setWorkingSession] = useState({
     operatingPain: "",
@@ -397,6 +398,15 @@ export default function LeadsPage() {
     objection: "",
     proofNeeded: "",
     nextMove: "",
+  });
+  const [leadProfile, setLeadProfile] = useState({
+    name: "",
+    email: "",
+    phone: "",
+    company: "",
+    title: "",
+    source: "",
+    estimated_value: "",
   });
 
   // Form state
@@ -467,6 +477,20 @@ export default function LeadsPage() {
     }
     setInitialLeadHandled(true);
   }, [initialLeadHandled, leads, loading]);
+
+  useEffect(() => {
+    if (!selectedLead) return;
+
+    setLeadProfile({
+      name: getLeadName(selectedLead) === "Unnamed lead" ? "" : getLeadName(selectedLead),
+      email: getLeadEmail(selectedLead),
+      phone: selectedLead.phone || "",
+      company: getLeadCompany(selectedLead),
+      title: selectedLead.title || "",
+      source: selectedLead.source || "",
+      estimated_value: selectedLead.estimated_value ? String(selectedLead.estimated_value) : "",
+    });
+  }, [selectedLead]);
 
   // Fetch lead details
   const fetchLeadDetails = async (leadId: string) => {
@@ -1000,6 +1024,42 @@ export default function LeadsPage() {
       toast.error("Could not save assistant plan");
     } finally {
       setSavingAssistantPlan(false);
+    }
+  };
+
+  const handleSaveLeadProfile = async (lead: Lead) => {
+    if (!leadProfile.name.trim()) {
+      toast.error("Lead name is required");
+      return;
+    }
+
+    const estimatedValue = leadProfile.estimated_value.trim()
+      ? Number(leadProfile.estimated_value)
+      : undefined;
+
+    if (estimatedValue !== undefined && Number.isNaN(estimatedValue)) {
+      toast.error("Estimated value must be a number");
+      return;
+    }
+
+    try {
+      setSavingLeadProfile(true);
+      await updateLead(lead.id, {
+        name: leadProfile.name.trim(),
+        email: leadProfile.email.trim() || undefined,
+        phone: leadProfile.phone.trim() || undefined,
+        company: leadProfile.company.trim() || undefined,
+        title: leadProfile.title.trim() || undefined,
+        source: leadProfile.source || undefined,
+        estimated_value: estimatedValue,
+      });
+      toast.success("Lead profile updated");
+      fetchLeads();
+    } catch (error) {
+      console.error("Error saving lead profile:", error);
+      toast.error("Could not update lead profile");
+    } finally {
+      setSavingLeadProfile(false);
     }
   };
 
@@ -2129,6 +2189,146 @@ export default function LeadsPage() {
                             <Clipboard className="mr-2 h-4 w-4" />
                             Copy briefing
                           </Button>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="rounded-lg border bg-card p-4">
+                      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                        <div>
+                          <Label className="flex items-center gap-2 text-sm text-muted-foreground">
+                            <Building className="h-4 w-4 text-primary" />
+                            Lead profile
+                          </Label>
+                          <p className="mt-2 text-sm leading-6 text-muted-foreground">
+                            Keep the buyer record accurate before you route, price, propose, or hand off the account.
+                          </p>
+                        </div>
+                        <Button
+                          type="button"
+                          className="rounded-md"
+                          disabled={savingLeadProfile}
+                          onClick={() => handleSaveLeadProfile(selectedLead)}
+                        >
+                          {savingLeadProfile ? "Saving..." : "Save profile"}
+                        </Button>
+                      </div>
+
+                      <div className="mt-4 grid gap-3">
+                        <div className="grid gap-3 sm:grid-cols-2">
+                          <div>
+                            <Label htmlFor="leadProfileName" className="text-xs text-muted-foreground">
+                              Contact name
+                            </Label>
+                            <Input
+                              id="leadProfileName"
+                              value={leadProfile.name}
+                              onChange={(event) =>
+                                setLeadProfile((current) => ({ ...current, name: event.target.value }))
+                              }
+                              className="mt-1"
+                              placeholder="Primary buyer"
+                            />
+                          </div>
+                          <div>
+                            <Label htmlFor="leadProfileCompany" className="text-xs text-muted-foreground">
+                              Company
+                            </Label>
+                            <Input
+                              id="leadProfileCompany"
+                              value={leadProfile.company}
+                              onChange={(event) =>
+                                setLeadProfile((current) => ({ ...current, company: event.target.value }))
+                              }
+                              className="mt-1"
+                              placeholder="Company or account"
+                            />
+                          </div>
+                        </div>
+
+                        <div className="grid gap-3 sm:grid-cols-2">
+                          <div>
+                            <Label htmlFor="leadProfileEmail" className="text-xs text-muted-foreground">
+                              Email
+                            </Label>
+                            <Input
+                              id="leadProfileEmail"
+                              type="email"
+                              value={leadProfile.email}
+                              onChange={(event) =>
+                                setLeadProfile((current) => ({ ...current, email: event.target.value }))
+                              }
+                              className="mt-1"
+                              placeholder="buyer@company.com"
+                            />
+                          </div>
+                          <div>
+                            <Label htmlFor="leadProfilePhone" className="text-xs text-muted-foreground">
+                              Phone
+                            </Label>
+                            <Input
+                              id="leadProfilePhone"
+                              value={leadProfile.phone}
+                              onChange={(event) =>
+                                setLeadProfile((current) => ({ ...current, phone: event.target.value }))
+                              }
+                              className="mt-1"
+                              placeholder="+1 (555) 000-0000"
+                            />
+                          </div>
+                        </div>
+
+                        <div className="grid gap-3 sm:grid-cols-3">
+                          <div>
+                            <Label htmlFor="leadProfileTitle" className="text-xs text-muted-foreground">
+                              Opportunity title
+                            </Label>
+                            <Input
+                              id="leadProfileTitle"
+                              value={leadProfile.title}
+                              onChange={(event) =>
+                                setLeadProfile((current) => ({ ...current, title: event.target.value }))
+                              }
+                              className="mt-1"
+                              placeholder="AI operating system opportunity"
+                            />
+                          </div>
+                          <div>
+                            <Label className="text-xs text-muted-foreground">Source</Label>
+                            <Select
+                              value={leadProfile.source}
+                              onValueChange={(value) =>
+                                setLeadProfile((current) => ({ ...current, source: value }))
+                              }
+                            >
+                              <SelectTrigger className="mt-1">
+                                <SelectValue placeholder="Select source" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {SOURCE_OPTIONS.map((option) => (
+                                  <SelectItem key={option.value} value={option.value}>
+                                    {option.label}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          <div>
+                            <Label htmlFor="leadProfileValue" className="text-xs text-muted-foreground">
+                              Estimated value
+                            </Label>
+                            <Input
+                              id="leadProfileValue"
+                              type="number"
+                              min="0"
+                              value={leadProfile.estimated_value}
+                              onChange={(event) =>
+                                setLeadProfile((current) => ({ ...current, estimated_value: event.target.value }))
+                              }
+                              className="mt-1"
+                              placeholder="30000"
+                            />
+                          </div>
                         </div>
                       </div>
                     </div>
