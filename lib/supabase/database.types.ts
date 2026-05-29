@@ -14716,6 +14716,10 @@ export type Database = {
           scored_at: string
           scored_version: number
           summary: string | null
+          triage_note: string | null
+          triage_status: string
+          triaged_at: string | null
+          triaged_by: string | null
           win_prob: number | null
         }
         Insert: {
@@ -14729,6 +14733,10 @@ export type Database = {
           scored_at?: string
           scored_version?: number
           summary?: string | null
+          triage_note?: string | null
+          triage_status?: string
+          triaged_at?: string | null
+          triaged_by?: string | null
           win_prob?: number | null
         }
         Update: {
@@ -14742,6 +14750,10 @@ export type Database = {
           scored_at?: string
           scored_version?: number
           summary?: string | null
+          triage_note?: string | null
+          triage_status?: string
+          triaged_at?: string | null
+          triaged_by?: string | null
           win_prob?: number | null
         }
         Relationships: [

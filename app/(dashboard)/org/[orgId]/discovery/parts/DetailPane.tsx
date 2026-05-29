@@ -22,6 +22,10 @@ import { useEffect, useState } from "react";
 import { FitScoreChip } from "./FitScoreChip";
 import { DraftButton } from "@/components/rfp/DraftButton";
 import {
+  OpportunityTriageControl,
+  type OpportunityTriageStatus,
+} from "@/components/rfp/OpportunityTriageControl";
+import {
   AlertTriangle,
   CalendarClock,
   CheckCircle2,
@@ -37,6 +41,11 @@ import type { FeedRow } from "@/lib/rfp/feed";
 interface DetailPaneProps {
   orgId: string;
   selected: FeedRow | null;
+  onTriageChange?: (
+    oppId: string,
+    status: OpportunityTriageStatus,
+    note: string | null,
+  ) => void;
 }
 
 interface OppDetail extends FeedRow {
@@ -45,6 +54,18 @@ interface OppDetail extends FeedRow {
   keywords: string[];
   geo: string | null;
   raw_json: unknown;
+}
+
+function normalizeTriageStatus(status: string): OpportunityTriageStatus {
+  if (
+    status === "watch" ||
+    status === "pursuing" ||
+    status === "passed" ||
+    status === "untriaged"
+  ) {
+    return status;
+  }
+  return "untriaged";
 }
 
 function formatAmount(amt: number | null): string {
@@ -181,7 +202,11 @@ function decisionToneClasses(tone: "emerald" | "amber" | "zinc"): string {
   return "border-zinc-200 bg-white text-zinc-700";
 }
 
-export function DetailPane({ orgId, selected }: DetailPaneProps) {
+export function DetailPane({
+  orgId,
+  selected,
+  onTriageChange,
+}: DetailPaneProps) {
   const [detail, setDetail] = useState<OppDetail | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -310,6 +335,27 @@ export function DetailPane({ orgId, selected }: DetailPaneProps) {
           <p className="mt-1 text-xs leading-5 text-zinc-500">{effort.detail}</p>
         </div>
       </section>
+
+      <div className="mt-6">
+        <OpportunityTriageControl
+          orgId={orgId}
+          oppId={row.opp_id}
+          initialStatus={normalizeTriageStatus(row.triage_status)}
+          initialNote={row.triage_note}
+          onChange={(nextStatus, nextNote) => {
+            setDetail((prev) =>
+              prev
+                ? {
+                    ...prev,
+                    triage_status: nextStatus,
+                    triage_note: nextNote,
+                  }
+                : prev,
+            );
+            onTriageChange?.(row.opp_id, nextStatus, nextNote);
+          }}
+        />
+      </div>
 
       <section className="mt-6 grid gap-3 rounded-xl border border-zinc-200 bg-white p-4 shadow-sm sm:grid-cols-3">
         <div className="flex gap-3">

@@ -41,6 +41,7 @@ import {
 import { FeedList } from "./parts/FeedList";
 import { DetailPane } from "./parts/DetailPane";
 import { QuickImportBar } from "@/components/rfp/quick-import-bar";
+import type { OpportunityTriageStatus } from "@/components/rfp/OpportunityTriageControl";
 import type { FeedRow } from "@/lib/rfp/feed";
 import type { RfpOrg } from "@/lib/rfp/orgs";
 
@@ -239,6 +240,24 @@ export function DiscoveryClient({
     window.location.reload();
   }, []);
 
+  const handleTriageChange = useCallback(
+    (oppId: string, status: OpportunityTriageStatus, note: string | null) => {
+      setRows((prev) =>
+        prev.map((row) =>
+          row.opp_id === oppId
+            ? { ...row, triage_status: status, triage_note: note }
+            : row,
+        ),
+      );
+      setSelected((prev) =>
+        prev && prev.opp_id === oppId
+          ? { ...prev, triage_status: status, triage_note: note }
+          : prev,
+      );
+    },
+    [],
+  );
+
   const applySearch = useCallback(() => {
     setFilters((prev) => ({ ...prev, query: queryDraft.trim() }));
   }, [queryDraft]);
@@ -389,7 +408,11 @@ export function DiscoveryClient({
           )}
         </div>
         <div className="min-h-[520px] bg-[#fbfbf7] lg:min-h-0">
-          <DetailPane orgId={orgId} selected={selected} />
+          <DetailPane
+            orgId={orgId}
+            selected={selected}
+            onTriageChange={handleTriageChange}
+          />
         </div>
       </div>
     </div>

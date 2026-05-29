@@ -28,6 +28,8 @@ interface DetailJoinRow {
   fit_score: number;
   chips: string[] | null;
   summary: string | null;
+  triage_status: "untriaged" | "watch" | "pursuing" | "passed" | null;
+  triage_note: string | null;
   score_breakdown: unknown;
   rfp_opportunities: {
     source: string;
@@ -85,7 +87,7 @@ export async function GET(
   const { data, error } = await rfp
     .from("rfp_opp_matches")
     .select(
-      "opp_id, fit_score, chips, summary, score_breakdown, rfp_opportunities ( source, title, agency, amount_min, amount_max, deadline, brief, url, needs_review, posted_at, keywords, geo, raw_json )"
+      "opp_id, fit_score, chips, summary, triage_status, triage_note, score_breakdown, rfp_opportunities ( source, title, agency, amount_min, amount_max, deadline, brief, url, needs_review, posted_at, keywords, geo, raw_json )"
     )
     .eq("opp_id", id)
     .eq("org_id", parsed.data.org_id)
@@ -120,6 +122,8 @@ export async function GET(
     tier: tierFor(row.fit_score),
     chips: row.chips ?? [],
     summary: row.summary,
+    triage_status: row.triage_status ?? "untriaged",
+    triage_note: row.triage_note,
     needs_review: opp.needs_review ?? false,
     score_breakdown: row.score_breakdown,
     posted_at: opp.posted_at,

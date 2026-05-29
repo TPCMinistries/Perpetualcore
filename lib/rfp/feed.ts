@@ -103,6 +103,8 @@ export interface FeedRow {
   chips: string[];
   summary: string | null;
   needs_review: boolean;
+  triage_status: "untriaged" | "watch" | "pursuing" | "passed";
+  triage_note: string | null;
   /**
    * The org this row was scored against. In single-org mode this equals the
    * active org. In dual mode it's the underlying nonprofit/forprofit org that
@@ -148,6 +150,8 @@ interface MatchJoinRow {
   fit_score: number;
   chips: string[] | null;
   summary: string | null;
+  triage_status: "untriaged" | "watch" | "pursuing" | "passed" | null;
+  triage_note: string | null;
   rfp_opportunities: OppJoinShape | null;
   rfp_orgs: OrgJoinShape | null;
 }
@@ -189,6 +193,8 @@ function toFeedRow(r: MatchJoinRow): FeedRow | null {
     chips: r.chips ?? [],
     summary: r.summary,
     needs_review: opp.needs_review ?? false,
+    triage_status: r.triage_status ?? "untriaged",
+    triage_note: r.triage_note,
     scored_for_org_id: org.id,
     scored_for_org_name: org.name,
     scored_for_org_type: org.type,
@@ -252,7 +258,7 @@ export async function buildFeedQuery(filters: FeedFilters): Promise<FeedPage> {
   let query = rfp
     .from("rfp_opp_matches")
     .select(
-      "opp_id, org_id, fit_score, chips, summary, rfp_opportunities ( source, title, agency, amount_min, amount_max, deadline, brief, url, needs_review ), rfp_orgs ( id, name, type )"
+      "opp_id, org_id, fit_score, chips, summary, triage_status, triage_note, rfp_opportunities ( source, title, agency, amount_min, amount_max, deadline, brief, url, needs_review ), rfp_orgs ( id, name, type )"
     );
 
   // Org scope: dual_org_ids takes precedence; falls back to single org_id.

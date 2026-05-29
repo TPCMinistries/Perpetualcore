@@ -70,6 +70,21 @@ function orgTypeAbbrev(t: FeedRowType["scored_for_org_type"]): string {
   return "DUAL";
 }
 
+function triageLabel(status: FeedRowType["triage_status"]): string | null {
+  if (status === "watch") return "Watch";
+  if (status === "pursuing") return "Pursuing";
+  if (status === "passed") return "Passed";
+  return null;
+}
+
+function triageClasses(status: FeedRowType["triage_status"]): string {
+  if (status === "watch") return "border-blue-200 bg-blue-50 text-blue-800";
+  if (status === "pursuing") {
+    return "border-emerald-200 bg-emerald-50 text-emerald-800";
+  }
+  return "border-zinc-200 bg-zinc-100 text-zinc-700";
+}
+
 export function FeedRow({
   row,
   selected,
@@ -86,6 +101,7 @@ export function FeedRow({
   // single-mode rows leave the name empty since the API doesn't echo it back).
   const badgeVisible =
     showOrgBadge && row.scored_for_org_name.trim().length > 0;
+  const triage = triageLabel(row.triage_status);
 
   return (
     <button
@@ -113,6 +129,13 @@ export function FeedRow({
             <span className="ml-1 max-w-[8rem] truncate inline-block align-bottom">
               {row.scored_for_org_name}
             </span>
+          </span>
+        )}
+        {triage && (
+          <span
+            className={`inline-flex shrink-0 items-center rounded border px-1.5 py-0.5 font-mono text-[10px] uppercase tracking-wide ${triageClasses(row.triage_status)}`}
+          >
+            {triage}
           </span>
         )}
         {row.needs_review && (
