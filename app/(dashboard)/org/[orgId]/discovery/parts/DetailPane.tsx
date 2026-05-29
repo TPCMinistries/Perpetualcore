@@ -22,7 +22,11 @@ import { useEffect, useState } from "react";
 import { FitScoreChip } from "./FitScoreChip";
 import { DraftButton } from "@/components/rfp/DraftButton";
 import {
+  AlertTriangle,
+  CalendarClock,
   CheckCircle2,
+  CircleDollarSign,
+  ClipboardCheck,
   ExternalLink,
   FileCheck2,
   SearchCheck,
@@ -56,6 +60,125 @@ function formatDate(iso: string | null, prefix: string): string | null {
   const d = new Date(iso);
   if (Number.isNaN(d.getTime())) return null;
   return `${prefix} ${d.toLocaleDateString("en-US", { month: "short", day: "numeric" })}`;
+}
+
+function daysUntil(iso: string | null): number | null {
+  if (!iso) return null;
+  const t = new Date(iso).getTime();
+  if (Number.isNaN(t)) return null;
+  return Math.ceil((t - Date.now()) / 86_400_000);
+}
+
+function deadlineSignal(days: number | null): {
+  label: string;
+  detail: string;
+  tone: "emerald" | "amber" | "zinc";
+} {
+  if (days === null) {
+    return {
+      label: "No deadline found",
+      detail: "Confirm the source package before assigning work.",
+      tone: "zinc",
+    };
+  }
+  if (days < 0) {
+    return {
+      label: "Past deadline",
+      detail: "Keep for market intelligence unless the source extended it.",
+      tone: "zinc",
+    };
+  }
+  if (days <= 7) {
+    return {
+      label: `${days} day${days === 1 ? "" : "s"} left`,
+      detail: "Only pursue if requirements are already mostly reusable.",
+      tone: "amber",
+    };
+  }
+  if (days <= 21) {
+    return {
+      label: `${days} days left`,
+      detail: "Start the workroom before drafting heavily.",
+      tone: "amber",
+    };
+  }
+  return {
+    label: `${days} days left`,
+    detail: "Workable window for review, attachments, and sign-off.",
+    tone: "emerald",
+  };
+}
+
+function pursuitDecision(score: number, deadlineDays: number | null): {
+  label: string;
+  detail: string;
+  tone: "emerald" | "amber" | "zinc";
+} {
+  if (deadlineDays !== null && deadlineDays < 0) {
+    return {
+      label: "Pass for now",
+      detail: "Deadline appears closed. Check the source for extensions.",
+      tone: "zinc",
+    };
+  }
+  if (score >= 90 && (deadlineDays === null || deadlineDays > 14)) {
+    return {
+      label: "Pursue now",
+      detail: "Strong fit with enough room to build a clean submission packet.",
+      tone: "emerald",
+    };
+  }
+  if (score >= 70 && (deadlineDays === null || deadlineDays > 7)) {
+    return {
+      label: "Review closely",
+      detail: "Good match. Confirm eligibility and required attachments first.",
+      tone: "amber",
+    };
+  }
+  if (score >= 50) {
+    return {
+      label: "Watch or import details",
+      detail: "There may be a path, but the score needs human confirmation.",
+      tone: "zinc",
+    };
+  }
+  return {
+    label: "Low priority",
+    detail: "Keep it visible for search, but do not spend drafting time yet.",
+    tone: "zinc",
+  };
+}
+
+function effortSignal(amount: number | null, brief: string | null): {
+  label: string;
+  detail: string;
+} {
+  if (amount !== null && amount >= 1_000_000) {
+    return {
+      label: "High effort",
+      detail: "Expect budget, compliance, partner, and attachment work.",
+    };
+  }
+  if ((brief?.length ?? 0) < 500) {
+    return {
+      label: "Needs source review",
+      detail: "Brief is thin. Open the source before relying on the draft.",
+    };
+  }
+  return {
+    label: "Standard pursuit",
+    detail: "Draft, reviewer, readiness matrix, then submission packet.",
+  };
+}
+
+function decisionToneClasses(tone: "emerald" | "amber" | "zinc"): string {
+  if (tone === "emerald") {
+    return "border-emerald-200 bg-emerald-50 text-emerald-800";
+  }
+  if (tone === "amber") {
+    return "border-amber-200 bg-amber-50 text-amber-800";
+  }
+  return "border-zinc-200 bg-white text-zinc-700";
 }
 
 export function DetailPane({ orgId, selected }: DetailPaneProps) {
@@ -114,6 +237,10 @@ export function DetailPane({ orgId, selected }: DetailPaneProps) {
     formatDate(row.deadline, "deadline"),
     detail ? formatDate(detail.posted_at, "posted") : null,
   ].filter((p): p is string => Boolean(p));
+  const deadlineDays = daysUntil(row.deadline);
+  const deadline = deadlineSignal(deadlineDays);
+  const decision = pursuitDecision(row.fit_score, deadlineDays);
+  const effort = effortSignal(row.amount_max ?? row.amount_min ?? null, row.brief);
 
   return (
     <div className="h-full overflow-y-auto p-6 lg:p-8">
@@ -157,6 +284,32 @@ export function DetailPane({ orgId, selected }: DetailPaneProps) {
           {moneyParts.join(" · ")}
         </p>
       )}
+
+      <section className="mt-6 grid gap-3 rounded-xl border border-zinc-200 bg-white p-4 shadow-sm md:grid-cols-3">
+        <div
+          className={`rounded-lg border p-4 ${decisionToneClasses(decision.tone)}`}
+        >
+          <ClipboardCheck className="mb-3 h-4 w-4" />
+          <p className="text-sm font-semibold">{decision.label}</p>
+          <p className="mt-1 text-xs leading-5 opacity-80">{decision.detail}</p>
+        </div>
+        <div
+          className={`rounded-lg border p-4 ${decisionToneClasses(deadline.tone)}`}
+        >
+          <CalendarClock className="mb-3 h-4 w-4" />
+          <p className="text-sm font-semibold">{deadline.label}</p>
+          <p className="mt-1 text-xs leading-5 opacity-80">{deadline.detail}</p>
+        </div>
+        <div className="rounded-lg border border-zinc-200 bg-white p-4 text-zinc-700">
+          {(row.amount_max ?? row.amount_min ?? null) !== null ? (
+            <CircleDollarSign className="mb-3 h-4 w-4 text-zinc-500" />
+          ) : (
+            <AlertTriangle className="mb-3 h-4 w-4 text-zinc-500" />
+          )}
+          <p className="text-sm font-semibold">{effort.label}</p>
+          <p className="mt-1 text-xs leading-5 text-zinc-500">{effort.detail}</p>
+        </div>
+      </section>
 
       <section className="mt-6 grid gap-3 rounded-xl border border-zinc-200 bg-white p-4 shadow-sm sm:grid-cols-3">
         <div className="flex gap-3">
