@@ -10,6 +10,7 @@
  */
 
 import { createAdminClient } from "@/lib/supabase/server";
+import type { Json } from "@/lib/supabase/database.types";
 
 export interface PlatformTotals {
   orgs: number;
@@ -40,6 +41,14 @@ export interface ScraperHealthRow {
   open_drift_events: number;
   last_drift_at: string | null;
   last_drift_reason: string | null;
+}
+
+export interface OpenDriftRow {
+  id: string;
+  source: string;
+  reason: string;
+  details: Json;
+  created_at: string;
 }
 
 export interface CronRunRow {
@@ -298,6 +307,19 @@ export async function loadScraperHealth(): Promise<ScraperHealthRow[]> {
         last_drift_reason: lastDrift?.reason ?? null,
       };
     });
+}
+
+export async function loadOpenDriftRows(limit = 25): Promise<OpenDriftRow[]> {
+  const admin = createAdminClient();
+  const { data } = await admin
+    .from("rfp_source_drift")
+    .select("id, source, reason, details, created_at")
+    .is("resolved_at", null)
+    .order("created_at", { ascending: false })
+    .limit(limit)
+    .returns<OpenDriftRow[]>();
+
+  return data ?? [];
 }
 
 export async function loadRecentCronRuns(limit = 10): Promise<CronRunRow[]> {

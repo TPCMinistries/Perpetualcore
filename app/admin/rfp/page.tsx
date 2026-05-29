@@ -9,24 +9,30 @@
  *      vault chunks, opportunities, AI cost 30d.
  *   2. Per-org table — name, type, members, proposals, drafts 7d, $ 30d.
  *   3. Scraper health — per-source last baseline, opp count, open drifts.
- *   4. Recent cron runs — last 10 RFP cron executions.
- *   5. Audit log — last 50 rfp_agent_sessions rows.
+ *   4. Open drift — unresolved parser/source anomalies with resolve action.
+ *   5. Recent cron runs — last 10 RFP cron executions.
+ *   6. Audit log — last 50 rfp_agent_sessions rows.
  */
 
+import { revalidatePath } from "next/cache";
 import { notFound } from "next/navigation";
 import { getRfpPlatformAdmin } from "@/lib/rfp/admin";
 import {
   loadOrgBreakdown,
+  loadOpenDriftRows,
   loadPlatformTotals,
   loadRecentAudit,
   loadRecentCronRuns,
   loadScraperHealth,
   type AuditRow,
   type CronRunRow,
+  type OpenDriftRow,
   type OrgRow,
   type PlatformTotals,
   type ScraperHealthRow,
 } from "@/lib/rfp/admin-metrics";
+import { createAdminClient } from "@/lib/supabase/server";
+import type { Json } from "@/lib/supabase/database.types";
 
 export const dynamic = "force-dynamic";
 export const metadata = {
@@ -56,6 +62,51 @@ function formatRelative(iso: string | null): string {
   if (hours < 48) return `${hours}h ago`;
   const days = Math.floor(hours / 24);
   return `${days}d ago`;
+}
+
+function summarizeJson(value: Json): string {
+  if (value === null) return "No details.";
+  if (typeof value === "string") return value;
+  if (typeof value === "number" || typeof value === "boolean") {
+    return String(value);
+  }
+
+  const text = JSON.stringify(value);
+  if (!text) return "No details.";
+  return text.length > 260 ? `${text.slice(0, 260)}...` : text;
+}
+
+async function resolveDrift(formData: FormData) {
+  "use server";
+
+  const adminUser = await getRfpPlatformAdmin();
+  if (!adminUser) notFound();
+
+  const driftId = formData.get("drift_id");
+  if (typeof driftId !== "string") {
+    throw new Error("Missing drift_id");
+  }
+
+  const normalizedId = driftId.trim();
+  const uuidPattern =
+    /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+  if (!uuidPattern.test(normalizedId)) {
+    throw new Error("Invalid drift_id");
+  }
+
+  const admin = createAdminClient();
+  const { error } = await admin
+    .from("rfp_source_drift")
+    .update({ resolved_at: new Date().toISOString() })
+    .eq("id", normalizedId)
+    .is("resolved_at", null);
+
+  if (error) {
+    throw new Error(`Failed to resolve drift: ${error.message}`);
+  }
+
+  revalidatePath("/admin/rfp");
+  revalidatePath("/api/health/rfp");
 }
 
 function Tile({
@@ -264,6 +315,66 @@ function ScraperHealthTable({ rows }: { rows: ScraperHealthRow[] }) {
   );
 }
 
+function OpenDriftTable({ rows }: { rows: OpenDriftRow[] }) {
+  if (rows.length === 0) {
+    return (
+      <p className="rounded-md border border-emerald-500/20 bg-emerald-500/[0.04] p-6 text-sm text-emerald-200">
+        No open drift events. Discovery sources are clear.
+      </p>
+    );
+  }
+
+  return (
+    <div className="overflow-x-auto rounded-lg border border-amber-500/20 bg-amber-500/[0.03]">
+      <table className="w-full min-w-[920px] text-[13px]">
+        <thead>
+          <tr className="border-b border-amber-500/10 text-left font-mono text-[10px] uppercase tracking-[0.18em] text-amber-200/70">
+            <th className="px-4 py-3">Source</th>
+            <th className="px-3 py-3">Reason</th>
+            <th className="px-3 py-3">Details</th>
+            <th className="px-3 py-3 text-right">Opened</th>
+            <th className="px-4 py-3 text-right">Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          {rows.map((r) => (
+            <tr
+              key={r.id}
+              className="border-b border-amber-500/10 last:border-0"
+            >
+              <td className="px-4 py-3 font-mono text-[12px] text-zinc-100">
+                {r.source}
+              </td>
+              <td className="px-3 py-3">
+                <span className="rounded-full bg-amber-500/15 px-2 py-1 font-mono text-[10px] uppercase tracking-[0.14em] text-amber-100">
+                  {r.reason}
+                </span>
+              </td>
+              <td className="max-w-[460px] px-3 py-3 font-mono text-[11px] leading-5 text-zinc-400">
+                {summarizeJson(r.details)}
+              </td>
+              <td className="px-3 py-3 text-right font-mono text-[11px] text-zinc-500">
+                {formatRelative(r.created_at)}
+              </td>
+              <td className="px-4 py-3 text-right">
+                <form action={resolveDrift}>
+                  <input type="hidden" name="drift_id" value={r.id} />
+                  <button
+                    type="submit"
+                    className="rounded-md border border-white/10 bg-white/[0.04] px-3 py-2 font-mono text-[10px] uppercase tracking-[0.16em] text-zinc-200 transition hover:border-emerald-400/40 hover:bg-emerald-500/10 hover:text-emerald-100"
+                  >
+                    Resolve
+                  </button>
+                </form>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
 function CronTable({ rows }: { rows: CronRunRow[] }) {
   if (rows.length === 0) {
     return (
@@ -382,14 +493,16 @@ export default async function AdminRfpPage() {
     notFound();
   }
 
-  // Parallelize the five queries. Each is single-table.
-  const [totals, orgs, scraperHealth, cronRuns, audit] = await Promise.all([
-    loadPlatformTotals(),
-    loadOrgBreakdown(50),
-    loadScraperHealth(),
-    loadRecentCronRuns(10),
-    loadRecentAudit(50),
-  ]);
+  // Parallelize the six queries. Each is single-table.
+  const [totals, orgs, scraperHealth, openDrift, cronRuns, audit] =
+    await Promise.all([
+      loadPlatformTotals(),
+      loadOrgBreakdown(50),
+      loadScraperHealth(),
+      loadOpenDriftRows(25),
+      loadRecentCronRuns(10),
+      loadRecentAudit(50),
+    ]);
 
   return (
     <main className="mx-auto max-w-6xl px-6 py-12">
@@ -418,6 +531,12 @@ export default async function AdminRfpPage() {
 
       <SectionHeader title="Scraper health" detail="per source" />
       <ScraperHealthTable rows={scraperHealth} />
+
+      <SectionHeader
+        title="Open drift"
+        detail={`${openDrift.length} unresolved · verify before resolving`}
+      />
+      <OpenDriftTable rows={openDrift} />
 
       <SectionHeader title="Recent RFP cron runs" detail="last 10" />
       <CronTable rows={cronRuns} />
