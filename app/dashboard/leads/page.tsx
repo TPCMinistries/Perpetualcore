@@ -34,6 +34,7 @@ import {
   MessageSquare,
   CalendarCheck,
   WandSparkles,
+  CheckCircle2,
 } from "lucide-react";
 import { useConfirm } from "@/components/ui/confirm-dialog";
 import { Button } from "@/components/ui/button";
@@ -342,6 +343,61 @@ const CLOSE_PACKAGES = [
   },
 ];
 
+const LEAD_INTAKE_ROUTES = [
+  {
+    id: "operating-system",
+    label: "AI operating system",
+    buyer: "Enterprise / serious operator",
+    title: "AI operating system opportunity",
+    source: "referral",
+    value: "30000",
+    status: "contacted",
+    packageId: "operating-lane-deposit",
+    nextAction: "Map the company, choose the first operating lane, then propose 90-day operating work.",
+    notes:
+      "Buyer may need a broader AI operating relationship. Qualify the executive sponsor, first department/workflow, implementation authority, budget range, systems involved, and what a successful first 30 days must prove.",
+  },
+  {
+    id: "workflow-package",
+    label: "First workflow package",
+    buyer: "Owner / department lead",
+    title: "First workflow package opportunity",
+    source: "referral",
+    value: "12000",
+    status: "contacted",
+    packageId: "first-workflow",
+    nextAction: "Find the workflow costing time, revenue, or visibility, then quote the first implementation package.",
+    notes:
+      "Buyer has a concrete workflow problem. Capture the workflow owner, current process, systems involved, failure points, expected output, timeline pressure, and what proof would justify expansion.",
+  },
+  {
+    id: "guided-setup",
+    label: "Guided setup",
+    buyer: "Small business / first invoice",
+    title: "Guided setup opportunity",
+    source: "website",
+    value: "5000",
+    status: "new",
+    packageId: "guided-setup",
+    nextAction: "Confirm one useful product surface, collect context, and sell a contained setup engagement.",
+    notes:
+      "Buyer is warm but should start contained. Qualify the main use case, decision maker, data/docs they can provide, setup timeline, and what would make the first invoice feel low-risk.",
+  },
+  {
+    id: "software-access",
+    label: "Software access",
+    buyer: "Product-only evaluator",
+    title: "Software access opportunity",
+    source: "website",
+    value: "499",
+    status: "new",
+    packageId: "software-access",
+    nextAction: "Let them enter the software, then watch for usage that reveals implementation or operating need.",
+    notes:
+      "Buyer wants to try the product before implementation. Capture use case, team size, data sensitivity, expected usage, and what would trigger a guided setup or workflow package.",
+  },
+];
+
 const STARTER_LEADS = [
   {
     label: "Enterprise prospect",
@@ -422,6 +478,38 @@ export default function LeadsPage() {
     notes: "",
   });
   const [saving, setSaving] = useState(false);
+  const [selectedIntakeRoute, setSelectedIntakeRoute] = useState(LEAD_INTAKE_ROUTES[0].id);
+
+  const selectedCreateRoute =
+    LEAD_INTAKE_ROUTES.find((route) => route.id === selectedIntakeRoute) || LEAD_INTAKE_ROUTES[0];
+
+  const applyIntakeRoute = (routeId: string) => {
+    const route = LEAD_INTAKE_ROUTES.find((item) => item.id === routeId) || LEAD_INTAKE_ROUTES[0];
+    setSelectedIntakeRoute(route.id);
+    setFormData((current) => ({
+      ...current,
+      title: route.title,
+      source: route.source,
+      estimated_value: route.value,
+      notes: route.notes,
+    }));
+  };
+
+  const openCreateLeadDialog = () => {
+    const route = LEAD_INTAKE_ROUTES[0];
+    setSelectedIntakeRoute(route.id);
+    setFormData({
+      name: "",
+      email: "",
+      phone: "",
+      company: "",
+      title: route.title,
+      source: route.source,
+      estimated_value: route.value,
+      notes: route.notes,
+    });
+    setShowCreateDialog(true);
+  };
 
   const applyStarterLead = (template: (typeof STARTER_LEADS)[number]) => {
     setFormData({
@@ -434,6 +522,7 @@ export default function LeadsPage() {
       estimated_value: template.value,
       notes: template.notes,
     });
+    setSelectedIntakeRoute(template.value === "30000" ? "operating-system" : template.value === "5000" ? "guided-setup" : "software-access");
     setShowCreateDialog(true);
   };
 
@@ -524,7 +613,15 @@ export default function LeadsPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           ...formData,
-          estimated_value: formData.estimated_value ? parseFloat(formData.estimated_value) : undefined,
+          status: selectedCreateRoute.status,
+          title: formData.title || selectedCreateRoute.title,
+          source: formData.source || selectedCreateRoute.source,
+          notes: formData.notes
+            ? `${formData.notes}\n\nRecommended intake route: ${selectedCreateRoute.label}. Next action: ${selectedCreateRoute.nextAction}`
+            : `${selectedCreateRoute.notes}\n\nRecommended intake route: ${selectedCreateRoute.label}. Next action: ${selectedCreateRoute.nextAction}`,
+          estimated_value: formData.estimated_value
+            ? parseFloat(formData.estimated_value)
+            : parseFloat(selectedCreateRoute.value),
         }),
       });
 
@@ -542,6 +639,7 @@ export default function LeadsPage() {
         estimated_value: "",
         notes: "",
       });
+      setSelectedIntakeRoute(LEAD_INTAKE_ROUTES[0].id);
       fetchLeads();
     } catch (error) {
       console.error("Error creating lead:", error);
@@ -1228,7 +1326,7 @@ export default function LeadsPage() {
                   Get every active lead to one visible next action.
                 </p>
               </div>
-              <Button onClick={() => setShowCreateDialog(true)} className="rounded-md">
+              <Button onClick={openCreateLeadDialog} className="rounded-md">
                 <Plus className="mr-2 h-4 w-4" />
                 Add Lead
               </Button>
@@ -1365,7 +1463,7 @@ export default function LeadsPage() {
             Track prospects from first attention through paid work.
           </p>
         </div>
-        <Button onClick={() => setShowCreateDialog(true)}>
+        <Button onClick={openCreateLeadDialog}>
           <Plus className="h-4 w-4 mr-2" />
           Add Lead
         </Button>
@@ -1801,7 +1899,7 @@ export default function LeadsPage() {
                 <p className="text-muted-foreground mb-4">
                   Start building your pipeline by adding your first lead
                 </p>
-                <Button onClick={() => setShowCreateDialog(true)}>
+                <Button onClick={openCreateLeadDialog}>
                   <Plus className="h-4 w-4 mr-2" />
                   Add Lead
                 </Button>
@@ -2006,15 +2104,71 @@ export default function LeadsPage() {
 
       {/* Create Lead Dialog */}
       <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
-        <DialogContent className="sm:max-w-[500px]">
+        <DialogContent className="max-h-[92vh] overflow-y-auto sm:max-w-[760px]">
           <DialogHeader>
-            <DialogTitle>Add New Lead</DialogTitle>
+            <DialogTitle>Add lead with a sales route</DialogTitle>
             <DialogDescription>
-              Create a new lead to track in your sales pipeline
+              Capture the buyer and choose the first path before the record enters the pipeline.
             </DialogDescription>
           </DialogHeader>
 
           <div className="grid gap-4 py-4">
+            <div className="rounded-lg border bg-muted/30 p-4">
+              <Label className="text-sm font-semibold text-foreground">Choose the likely starting path</Label>
+              <p className="mt-1 text-sm leading-5 text-muted-foreground">
+                This pre-fills the opportunity, value, notes, and status so the assistant can route the lead immediately.
+              </p>
+              <div className="mt-4 grid gap-3 md:grid-cols-2">
+                {LEAD_INTAKE_ROUTES.map((route) => {
+                  const isSelected = selectedIntakeRoute === route.id;
+                  return (
+                    <button
+                      key={route.id}
+                      type="button"
+                      onClick={() => applyIntakeRoute(route.id)}
+                      className={cn(
+                        "rounded-lg border bg-background p-4 text-left transition hover:border-primary/50 hover:bg-primary/[0.03]",
+                        isSelected && "border-primary bg-primary/[0.06]"
+                      )}
+                    >
+                      <div className="flex items-start justify-between gap-4">
+                        <div>
+                          <p className="text-sm font-semibold text-foreground">{route.label}</p>
+                          <p className="mt-1 text-xs text-muted-foreground">{route.buyer}</p>
+                        </div>
+                        {isSelected ? (
+                          <CheckCircle2 className="h-4 w-4 shrink-0 text-primary" />
+                        ) : null}
+                      </div>
+                      <p className="mt-3 text-sm leading-5 text-muted-foreground">{route.nextAction}</p>
+                      <div className="mt-4 flex flex-wrap gap-2">
+                        <Badge variant="outline" className="rounded-md">
+                          {route.value === "499" ? "$499" : formatCurrency(Number(route.value))}
+                        </Badge>
+                        <Badge variant="secondary" className="rounded-md">
+                          {CLOSE_PACKAGES.find((pkg) => pkg.id === route.packageId)?.label}
+                        </Badge>
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            <div className="rounded-lg border bg-card p-4">
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                <div>
+                  <p className="text-sm font-semibold text-foreground">Selected route</p>
+                  <p className="mt-1 text-sm leading-5 text-muted-foreground">
+                    {selectedCreateRoute.nextAction}
+                  </p>
+                </div>
+                <Badge variant="outline" className="w-fit rounded-md">
+                  {selectedCreateRoute.label}
+                </Badge>
+              </div>
+            </div>
+
             <div className="grid gap-2">
               <Label htmlFor="name">Name *</Label>
               <Input
@@ -2100,13 +2254,13 @@ export default function LeadsPage() {
             </div>
 
             <div className="grid gap-2">
-              <Label htmlFor="notes">Notes</Label>
+              <Label htmlFor="notes">Sales context</Label>
               <Textarea
                 id="notes"
                 value={formData.notes}
                 onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-                placeholder="Additional notes about this lead..."
-                rows={3}
+                placeholder="Relationship context, operating pain, buyer authority, budget signal, objections, first workflow, and what should happen next."
+                rows={5}
               />
             </div>
           </div>
