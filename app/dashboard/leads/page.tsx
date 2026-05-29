@@ -1087,6 +1087,57 @@ export default function LeadsPage() {
     },
   ];
 
+  const readinessChecks = [
+    {
+      label: "Every active lead has a next touch",
+      detail: "No prospect should sit in the pipeline without a date or action.",
+      icon: CalendarCheck,
+      blockerLabel: "Missing follow-up",
+      leads: leads
+        .filter((lead) => !["won", "lost"].includes(lead.status || "new") && !lead.next_follow_up_at)
+        .slice(0, 3),
+      cta: "Set follow-up",
+    },
+    {
+      label: "Every serious lead has value and scope",
+      detail: "You need enough signal to price software, setup, workflow, or operating work.",
+      icon: Target,
+      blockerLabel: "Needs scope",
+      leads: leads
+        .filter((lead) => {
+          if (["won", "lost"].includes(lead.status || "new")) return false;
+          const hasValue = Boolean(lead.estimated_value);
+          const hasScope = Boolean(lead.notes && lead.notes.length > 40);
+          return !hasValue || !hasScope;
+        })
+        .sort((a, b) => (b.estimated_value || 0) - (a.estimated_value || 0))
+        .slice(0, 3),
+      cta: "Add context",
+    },
+    {
+      label: "Late-stage leads have a close path",
+      detail: "Qualified, proposal, and negotiation leads should point to proposal, package, or account handoff.",
+      icon: CreditCard,
+      blockerLabel: "Needs close path",
+      leads: leads
+        .filter((lead) => ["qualified", "proposal", "negotiation"].includes(lead.status || "new"))
+        .filter((lead) => getCloseReadiness(lead).score < 4)
+        .slice(0, 3),
+      cta: "Review close path",
+    },
+    {
+      label: "Won leads move into Accounts",
+      detail: "Closed buyers should leave the sales list and show up as delivery/account work.",
+      icon: PackageCheck,
+      blockerLabel: "Needs handoff",
+      leads: leads.filter((lead) => (lead.status || "new") === "won").slice(0, 3),
+      cta: "Open account",
+    },
+  ];
+
+  const readinessBlockerCount = readinessChecks.reduce((sum, check) => sum + check.leads.length, 0);
+  const readinessScore = Math.max(0, Math.round(((readinessChecks.length * 3 - readinessBlockerCount) / (readinessChecks.length * 3)) * 100));
+
   return (
     <div className="space-y-6 pb-10">
       <div className="rounded-xl border border-border bg-background p-6">
@@ -1518,6 +1569,90 @@ export default function LeadsPage() {
                           </div>
                         );
                       })
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </CardContent>
+        </Card>
+      </div>
+
+      <div className="border-t p-6">
+        <Card className="rounded-lg border-primary/20 shadow-none">
+          <CardHeader>
+            <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+              <div className="max-w-2xl">
+                <div className="mb-3 flex items-center gap-2">
+                  <ListChecks className="h-4 w-4 text-primary" />
+                  <p className="font-mono text-xs uppercase tracking-[0.2em] text-muted-foreground">
+                    Ship readiness
+                  </p>
+                </div>
+                <CardTitle className="text-lg">Sales system readiness</CardTitle>
+                <CardDescription className="mt-2">
+                  These are the operating checks that make the dashboard usable every day, not just impressive on screen.
+                </CardDescription>
+              </div>
+              <div className="w-full rounded-lg border bg-muted/30 p-4 lg:w-64">
+                <div className="flex items-center justify-between gap-3">
+                  <p className="text-sm font-semibold text-foreground">Ready score</p>
+                  <p className="text-2xl font-semibold text-foreground">{readinessScore}%</p>
+                </div>
+                <Progress value={readinessScore} className="mt-3 h-2" />
+                <p className="mt-2 text-xs leading-5 text-muted-foreground">
+                  {readinessBlockerCount === 0
+                    ? "No sales-system blockers in the visible pipeline."
+                    : `${readinessBlockerCount} visible blocker${readinessBlockerCount === 1 ? "" : "s"} to clear.`}
+                </p>
+              </div>
+            </div>
+          </CardHeader>
+          <CardContent className="grid gap-4 lg:grid-cols-4">
+            {readinessChecks.map((check) => {
+              const Icon = check.icon;
+              const isClear = check.leads.length === 0;
+              return (
+                <div key={check.label} className="rounded-lg border bg-card p-4">
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="flex h-9 w-9 items-center justify-center rounded-md bg-primary/10 text-primary">
+                      <Icon className="h-4 w-4" />
+                    </div>
+                    <Badge variant={isClear ? "secondary" : "outline"} className="rounded-md">
+                      {isClear ? "Clear" : `${check.leads.length} open`}
+                    </Badge>
+                  </div>
+                  <p className="mt-4 text-sm font-semibold text-foreground">{check.label}</p>
+                  <p className="mt-2 text-sm leading-5 text-muted-foreground">{check.detail}</p>
+
+                  <div className="mt-4 space-y-2">
+                    {isClear ? (
+                      <div className="rounded-md border border-dashed p-3 text-sm text-muted-foreground">
+                        This check is clean.
+                      </div>
+                    ) : (
+                      check.leads.map((lead) => (
+                        <button
+                          key={`${check.label}-${lead.id}`}
+                          type="button"
+                          onClick={() => fetchLeadDetails(lead.id)}
+                          className="w-full rounded-md border bg-background p-3 text-left transition hover:border-primary/50 hover:bg-primary/[0.03]"
+                        >
+                          <div className="flex items-start justify-between gap-3">
+                            <div className="min-w-0">
+                              <p className="truncate text-sm font-semibold text-foreground">
+                                {getLeadCompany(lead) || getLeadName(lead)}
+                              </p>
+                              <p className="mt-1 truncate text-xs text-muted-foreground">
+                                {check.cta}
+                              </p>
+                            </div>
+                            <Badge variant="outline" className="shrink-0 rounded-md">
+                              {check.blockerLabel}
+                            </Badge>
+                          </div>
+                        </button>
+                      ))
                     )}
                   </div>
                 </div>
