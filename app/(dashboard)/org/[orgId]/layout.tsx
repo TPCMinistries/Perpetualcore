@@ -81,6 +81,12 @@ export default async function OrgLayout({ children, params }: OrgLayoutProps) {
               Discovery
             </Link>
             <Link
+              href={`/org/${orgId}/pursuits`}
+              className="rounded-md px-3 py-1.5 text-[13px] font-medium text-zinc-300 transition-colors hover:bg-white/5 hover:text-white"
+            >
+              Pursuits
+            </Link>
+            <Link
               href={`/org/${orgId}/proposals`}
               className="rounded-md px-3 py-1.5 text-[13px] font-medium text-zinc-300 transition-colors hover:bg-white/5 hover:text-white"
             >
