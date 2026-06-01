@@ -50,6 +50,7 @@ const SOURCE_OPTIONS: Array<{ key: string; label: string }> = [
   { key: "grants_gov", label: "Grants.gov" },
   { key: "simpler_grants", label: "Simpler.Grants.gov" },
   { key: "sbir", label: "SBIR.gov" },
+  { key: "fed_register", label: "Federal Register" },
   { key: "ny_state", label: "NY State" },
   { key: "nyc_dycd", label: "NYC DYCD" },
   { key: "nyc_hra", label: "NYC HRA" },

@@ -27,9 +27,15 @@ import { fetchSamGovOpportunities } from "@/lib/rfp/ingest/sam-gov";
 import { fetchGrantsGovOpportunities } from "@/lib/rfp/ingest/grants-gov";
 import { fetchSimplerGrantsOpportunities } from "@/lib/rfp/ingest/simpler-grants";
 import { fetchSbirOpportunities } from "@/lib/rfp/ingest/sbir";
+import { fetchFederalRegisterOpportunities } from "@/lib/rfp/ingest/federal-register";
 
 export interface IngestSourceResult {
-  source: "sam_gov" | "grants_gov" | "simpler_grants" | "sbir_gov";
+  source:
+    | "sam_gov"
+    | "grants_gov"
+    | "simpler_grants"
+    | "sbir_gov"
+    | "fed_register";
   fetched: number;
   upserted: number;
   /**
@@ -125,6 +131,7 @@ export async function runFederalIngest(): Promise<IngestRunResult> {
     { name: "grants_gov", run: () => fetchGrantsGovOpportunities() },
     { name: "simpler_grants", run: () => fetchSimplerGrantsOpportunities() },
     { name: "sbir_gov", run: () => fetchSbirOpportunities() },
+    { name: "fed_register", run: () => fetchFederalRegisterOpportunities() },
   ];
 
   const settled = await Promise.allSettled(fetchers.map((f) => f.run()));

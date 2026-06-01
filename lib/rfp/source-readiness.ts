@@ -172,10 +172,10 @@ export const RFP_SOURCE_READINESS_TARGETS: SourceReadinessTarget[] = [
     source: "fed_register",
     label: "Federal Register funding notices",
     category: "federal",
-    status: "planned",
+    status: "live",
     priority: "p1",
     targetScale: "NOFO and policy notices",
-    nextStep: "Build query set for NOFO, grant, and cooperative agreement terms.",
+    nextStep: "Watch precision and add broader NOFO query terms after QA.",
   },
   {
     source: "nih_grants",

@@ -39,13 +39,15 @@ const BASE_URLS = {
   GRANTS_GOV: env.GRANTS_GOV_BASE_URL ?? "https://api.grants.gov/v1/api",
   SIMPLER_GRANTS: env.SIMPLER_GRANTS_BASE_URL ?? "https://api.simpler.grants.gov/v1",
   SBIR_GOV: env.SBIR_GOV_BASE_URL ?? "https://www.sbir.gov/api",
+  FED_REGISTER: "https://www.federalregister.gov/api/v1",
 } as const;
 
 export type RfpSourceName =
   | "sam_gov"
   | "grants_gov"
   | "simpler_grants"
-  | "sbir_gov";
+  | "sbir_gov"
+  | "fed_register";
 
 export interface RfpSource {
   /** Machine-readable source identifier — matches `rfp_opportunities.source` column. */
@@ -175,6 +177,26 @@ export const RFP_SOURCES: Record<RfpSourceName, RfpSource> = {
         method: "GET",
         headers: {
           "User-Agent": "PerpeturalCore-RFP-Engine/1.0 (contact: lorenzo@tpcmin.org)",
+        },
+      });
+    },
+    isAuthOk: (status) => status === 200,
+  },
+
+  fed_register: {
+    name: "fed_register",
+    displayName: "Federal Register",
+    requiresAuth: false,
+    pingRequest: () => {
+      const url = new URL(`${BASE_URLS.FED_REGISTER}/documents.json`);
+      url.searchParams.set("conditions[type][]", "NOTICE");
+      url.searchParams.set("conditions[term]", '"notice of funding opportunity"');
+      url.searchParams.set("per_page", "1");
+      return new Request(url.toString(), {
+        method: "GET",
+        headers: {
+          "User-Agent":
+            "PerpetualCore-RFP-Engine/1.0 (contact: lorenzo@tpcmin.org)",
         },
       });
     },

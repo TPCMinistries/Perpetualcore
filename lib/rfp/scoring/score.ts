@@ -109,6 +109,7 @@ function sourceTierChip(source: string): string {
     case 'grants_gov':
     case 'simpler_grants':
     case 'sbir':
+    case 'fed_register':
       return 'Federal';
     case 'ny_state':
       return 'NY State';

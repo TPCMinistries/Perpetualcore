@@ -23,6 +23,7 @@ export type OpportunitySourceEnum =
   | "grants_gov"
   | "simpler_grants"
   | "sbir"
+  | "fed_register"
   | "ny_state"
   | "nyc_dycd"
   | "foundation_url";
@@ -73,7 +74,13 @@ export interface OpportunityInput {
  * malformed record from a source — orchestrator catches and logs the rejection.
  */
 const opportunityInputSchema = z.object({
-  source: z.enum(["sam_gov", "grants_gov", "simpler_grants", "sbir_gov"]),
+  source: z.enum([
+    "sam_gov",
+    "grants_gov",
+    "simpler_grants",
+    "sbir_gov",
+    "fed_register",
+  ]),
   source_id: z.string().min(1, "source_id is required"),
   title: z.string().min(1, "title is required"),
   agency: z.string().nullish(),

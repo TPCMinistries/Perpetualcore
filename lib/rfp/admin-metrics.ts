@@ -207,6 +207,7 @@ const KNOWN_SOURCES = [
   "grants_gov",
   "simpler_grants",
   "sbir",
+  "fed_register",
   "ny_state",
   "nyc_dycd",
   "nyc_doe",
