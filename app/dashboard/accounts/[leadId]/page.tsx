@@ -11,6 +11,7 @@ import {
   CheckCircle2,
   Clipboard,
   FileText,
+  ExternalLink,
   ListChecks,
   Loader2,
   Mail,
@@ -343,6 +344,12 @@ function buildClientKickoffEmail(lead: AccountLead, plan: AccountPlan) {
   return `${contact},\n\nThe next step is to open the first operating lane for ${account}.\n\nFor kickoff, I want to confirm five things:\n\n1. The first workflow or department we are improving\n2. Who owns that workflow internally\n3. The docs, tools, examples, and customer language I should use as context\n4. What a useful first 7 days should produce\n5. What would make this worth expanding after the first lane is live\n\nMy proposed first lane: ${plan.firstLane}\n\nFirst deliverable: ${plan.sevenDayDeliverable}\n\nOnce those are confirmed, I can turn this into a working operating surface instead of another loose AI conversation.`;
 }
 
+function buildClientHandoffPath(lead: AccountLead, account: PermanentAccount | null, engagement: PermanentEngagement | null) {
+  const token = engagement?.id || account?.id;
+  if (!token) return "";
+  return `/client-handoff/${encodeURIComponent(lead.id)}?token=${encodeURIComponent(token)}`;
+}
+
 export default function AccountDetailPage() {
   const params = useParams<{ leadId: string }>();
   const leadId = params.leadId;
@@ -497,6 +504,17 @@ export default function AccountDetailPage() {
     } catch {
       toast.error("Could not copy text");
     }
+  }
+
+  async function copyClientHandoffLink() {
+    if (!lead) return;
+    const path = buildClientHandoffPath(lead, permanentAccount, permanentEngagement);
+    if (!path) {
+      toast.error("Sync the account before copying a client handoff link");
+      return;
+    }
+
+    await copyText("Client handoff link", `${window.location.origin}${path}`);
   }
 
   async function saveAccountPlan(nextStatus?: string) {
@@ -747,6 +765,10 @@ export default function AccountDetailPage() {
             )}
             Sync account DB
           </Button>
+          <Button type="button" className="rounded-md" variant="outline" onClick={copyClientHandoffLink}>
+            <Clipboard className="mr-2 h-4 w-4" />
+            Copy client link
+          </Button>
         </div>
       </div>
 
@@ -876,6 +898,11 @@ export default function AccountDetailPage() {
                   label: "Client kickoff email",
                   icon: Mail,
                   action: () => copyText("Kickoff email", buildClientKickoffEmail(lead, plan)),
+                },
+                {
+                  label: "Client handoff link",
+                  icon: ExternalLink,
+                  action: copyClientHandoffLink,
                 },
                 {
                   label: "Internal account brief",
