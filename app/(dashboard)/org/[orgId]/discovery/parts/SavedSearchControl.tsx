@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Bell, Check, ChevronDown, Save, Trash2 } from "lucide-react";
 import type { FilterValues, ModeFilter } from "./FilterPills";
-import type { RfpSavedSearch } from "@/lib/rfp/saved-searches";
+import type { RfpSavedSearchWithPreview } from "@/lib/rfp/saved-searches";
 
 interface SavedSearchControlProps {
   orgId: string;
@@ -47,7 +47,7 @@ export function SavedSearchControl({
   onApply,
 }: SavedSearchControlProps) {
   const [open, setOpen] = useState(false);
-  const [rows, setRows] = useState<RfpSavedSearch[]>([]);
+  const [rows, setRows] = useState<RfpSavedSearchWithPreview[]>([]);
   const [name, setName] = useState(defaultName(filters));
   const [alertEnabled, setAlertEnabled] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -76,7 +76,7 @@ export function SavedSearchControl({
     let cancelled = false;
     fetch(`/api/rfp/orgs/${orgId}/saved-searches`)
       .then((res) => (res.ok ? res.json() : Promise.reject(new Error("load failed"))))
-      .then((data: { rows: RfpSavedSearch[] }) => {
+      .then((data: { rows: RfpSavedSearchWithPreview[] }) => {
         if (!cancelled) setRows(data.rows ?? []);
       })
       .catch(() => {
@@ -106,7 +106,7 @@ export function SavedSearchControl({
         }),
       });
       if (!res.ok) throw new Error("save failed");
-      const data = (await res.json()) as { row: RfpSavedSearch };
+      const data = (await res.json()) as { row: RfpSavedSearchWithPreview };
       setRows((prev) => [data.row, ...prev]);
     } catch {
       setError("Could not save this search.");
@@ -214,6 +214,12 @@ export function SavedSearchControl({
                         {describeSearch(row)}
                         {row.alert_enabled ? ` · ${row.alert_frequency} alerts` : ""}
                       </p>
+                      {row.preview && (
+                        <p className="mt-1 font-mono text-[10px] uppercase tracking-[0.16em] text-emerald-700">
+                          {row.preview.matches_now} matches now ·{" "}
+                          {row.preview.new_since_last_run} new
+                        </p>
+                      )}
                     </button>
                     <button
                       type="button"

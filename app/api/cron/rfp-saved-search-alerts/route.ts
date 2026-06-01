@@ -5,46 +5,17 @@ import {
   normalizeSavedSearchRow,
   type RfpSavedSearch,
 } from "@/lib/rfp/saved-searches";
+import {
+  dueSince,
+  loadSavedSearchMatches,
+  type SavedSearchMatchRow,
+} from "@/lib/rfp/saved-search-execution";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-interface MatchRow {
-  opp_id: string;
-  fit_score: number;
-  chips: string[] | null;
-  summary: string | null;
-  rfp_opportunities: {
-    source: string;
-    title: string;
-    agency: string | null;
-    amount_min: number | null;
-    amount_max: number | null;
-    deadline: string | null;
-    brief: string | null;
-    url: string | null;
-    created_at: string;
-  } | null;
-}
-
 function rfpAdmin(): { from: (table: string) => any } {
   return createAdminClient() as unknown as { from: (table: string) => any };
-}
-
-function dueSince(search: RfpSavedSearch, now: Date): string | null {
-  const lastRun = search.last_run_at ? new Date(search.last_run_at) : null;
-  if (!lastRun || Number.isNaN(lastRun.getTime())) {
-    return new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000).toISOString();
-  }
-  const elapsed = now.getTime() - lastRun.getTime();
-  const day = 24 * 60 * 60 * 1000;
-  const required =
-    search.alert_frequency === "instant"
-      ? 60 * 60 * 1000
-      : search.alert_frequency === "daily"
-        ? day
-        : 7 * day;
-  return elapsed >= required ? lastRun.toISOString() : null;
 }
 
 function amountText(min: number | null, max: number | null): string {
@@ -55,33 +26,7 @@ function amountText(min: number | null, max: number | null): string {
   return "Amount not listed";
 }
 
-function matchesFilters(row: MatchRow, search: RfpSavedSearch, sinceIso: string): boolean {
-  const opp = row.rfp_opportunities;
-  if (!opp) return false;
-  if (new Date(opp.created_at).getTime() < new Date(sinceIso).getTime()) return false;
-
-  const { filters } = search;
-  if (filters.sources.length > 0 && !filters.sources.includes(opp.source as never)) {
-    return false;
-  }
-  if (filters.min_amount && (!opp.amount_max || opp.amount_max < filters.min_amount)) {
-    return false;
-  }
-  if (filters.deadline_within_days) {
-    if (!opp.deadline) return false;
-    const deadline = new Date(opp.deadline);
-    const upper = new Date(Date.now() + filters.deadline_within_days * 24 * 60 * 60 * 1000);
-    if (deadline < new Date() || deadline > upper) return false;
-  }
-  const q = filters.query.trim().toLowerCase();
-  if (q) {
-    const haystack = [opp.title, opp.agency, opp.brief].filter(Boolean).join(" ").toLowerCase();
-    if (!haystack.includes(q)) return false;
-  }
-  return true;
-}
-
-function buildHtml(search: RfpSavedSearch, rows: MatchRow[]): string {
+function buildHtml(search: RfpSavedSearch, rows: SavedSearchMatchRow[]): string {
   const items = rows
     .slice(0, 10)
     .map((row) => {
@@ -133,23 +78,6 @@ async function lookupEmail(userId: string): Promise<string | null> {
   return data.user?.email ?? null;
 }
 
-async function loadCandidateMatches(search: RfpSavedSearch): Promise<MatchRow[]> {
-  const { data, error } = await rfpAdmin()
-    .from("rfp_opp_matches")
-    .select(
-      "opp_id, fit_score, chips, summary, rfp_opportunities ( source, title, agency, amount_min, amount_max, deadline, brief, url, created_at )",
-    )
-    .eq("org_id", search.org_id)
-    .gte("fit_score", search.min_fit_score)
-    .order("fit_score", { ascending: false })
-    .limit(100);
-  if (error) {
-    console.error("[rfp-saved-search-alerts] match load failed", error.message);
-    return [];
-  }
-  return (data ?? []) as MatchRow[];
-}
-
 async function touchSearch(searchId: string, nowIso: string): Promise<void> {
   const { error } = await rfpAdmin()
     .from("rfp_saved_searches")
@@ -157,6 +85,43 @@ async function touchSearch(searchId: string, nowIso: string): Promise<void> {
     .eq("id", searchId);
   if (error) {
     console.error("[rfp-saved-search-alerts] last_run_at update failed", error.message);
+  }
+}
+
+async function loadSentOppIds(searchId: string, userId: string): Promise<Set<string>> {
+  const { data, error } = await rfpAdmin()
+    .from("rfp_saved_search_alert_log")
+    .select("opp_id")
+    .eq("search_id", searchId)
+    .eq("user_id", userId)
+    .limit(5_000);
+  if (error) {
+    console.error("[rfp-saved-search-alerts] dedupe load failed", error.message);
+    return new Set<string>();
+  }
+  return new Set(((data ?? []) as Array<{ opp_id: string }>).map((row) => row.opp_id));
+}
+
+async function logSentRows(args: {
+  search: RfpSavedSearch;
+  rows: SavedSearchMatchRow[];
+  email: string;
+}): Promise<void> {
+  if (args.rows.length === 0) return;
+  const { error } = await rfpAdmin()
+    .from("rfp_saved_search_alert_log")
+    .upsert(
+      args.rows.map((row) => ({
+        search_id: args.search.id,
+        org_id: args.search.org_id,
+        user_id: args.search.created_by,
+        opp_id: row.opp_id,
+        email: args.email,
+      })),
+      { onConflict: "search_id,user_id,opp_id", ignoreDuplicates: true },
+    );
+  if (error) {
+    console.error("[rfp-saved-search-alerts] sent log failed", error.message);
   }
 }
 
@@ -191,8 +156,20 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
     if (!sinceIso) continue;
     checked++;
 
-    const candidates = await loadCandidateMatches(search);
-    const rows = candidates.filter((row) => matchesFilters(row, search, sinceIso));
+    const sentOppIds = await loadSentOppIds(search.id, search.created_by);
+    const rows = await loadSavedSearchMatches({
+      client: rfpAdmin(),
+      search,
+      sinceIso,
+      excludeOppIds: sentOppIds,
+      limit: 500,
+    }).catch((e) => {
+      console.error(
+        "[rfp-saved-search-alerts] match load failed",
+        e instanceof Error ? e.message : String(e),
+      );
+      return [];
+    });
     matched += rows.length;
 
     if (rows.length === 0) {
@@ -206,11 +183,12 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
       continue;
     }
 
+    const sentRows = rows.slice(0, 50);
     const response = await resend.emails.send({
       from: EMAIL_CONFIG.from,
       to: email,
       subject: `New grant/RFP matches · ${search.name}`,
-      html: buildHtml(search, rows),
+      html: buildHtml(search, sentRows),
     });
 
     if (response.error) {
@@ -219,6 +197,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
     }
 
     sent++;
+    await logSentRows({ search, rows: sentRows, email });
     await touchSearch(search.id, nowIso);
   }
 

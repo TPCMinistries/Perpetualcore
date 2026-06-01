@@ -2,6 +2,9 @@ import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { getOrgForUser } from "@/lib/rfp/orgs";
 import {
+  buildSavedSearchPreview,
+} from "@/lib/rfp/saved-search-execution";
+import {
   normalizeSavedSearchRow,
   SAVED_SEARCH_COLUMNS,
   SavedSearchBodySchema,
@@ -44,8 +47,30 @@ export async function GET(
     return NextResponse.json({ error: "load_failed" }, { status: 500 });
   }
 
+  const handle = rfpHandle(supabase);
+  const rows = await Promise.all(
+    ((data ?? []) as unknown[]).map(async (row) => {
+      const savedSearch = normalizeSavedSearchRow(row);
+      try {
+        return {
+          ...savedSearch,
+          preview: await buildSavedSearchPreview({
+            client: handle,
+            search: savedSearch,
+          }),
+        };
+      } catch (e) {
+        console.error(
+          "[/api/rfp/orgs/saved-searches GET] preview failed",
+          e instanceof Error ? e.message : String(e),
+        );
+        return savedSearch;
+      }
+    }),
+  );
+
   return NextResponse.json({
-    rows: ((data ?? []) as unknown[]).map(normalizeSavedSearchRow),
+    rows,
   });
 }
 
@@ -100,8 +125,11 @@ export async function POST(
     return NextResponse.json({ error: "save_failed" }, { status: 500 });
   }
 
-  return NextResponse.json(
-    { row: normalizeSavedSearchRow(data) },
-    { status: 201 },
-  );
+  const savedSearch = normalizeSavedSearchRow(data);
+  const preview = await buildSavedSearchPreview({
+    client: rfpHandle(supabase),
+    search: savedSearch,
+  }).catch(() => undefined);
+
+  return NextResponse.json({ row: { ...savedSearch, preview } }, { status: 201 });
 }

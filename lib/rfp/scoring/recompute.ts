@@ -249,22 +249,28 @@ export async function loadExistingScoredVersions(
 ): Promise<Map<string, ExistingMatchRow>> {
   if (orgIds.length === 0 || oppIds.length === 0) return new Map();
   const supabase = rfpAdmin();
-  const { data, error } = await supabase
-    .from('rfp_opp_matches')
-    .select('opp_id, org_id, scored_version')
-    .in('org_id', orgIds as string[])
-    .in('opp_id', oppIds as string[]);
-  if (error) {
-    console.error(
-      '[scoring/recompute] loadExistingScoredVersions failed:',
-      error.message
-    );
-    return new Map();
-  }
   const out = new Map<string, ExistingMatchRow>();
-  for (const row of (data ?? []) as ExistingMatchRow[]) {
-    out.set(`${row.opp_id}::${row.org_id}`, row);
+  const batchSize = 100;
+
+  for (let start = 0; start < oppIds.length; start += batchSize) {
+    const batch = oppIds.slice(start, start + batchSize);
+    const { data, error } = await supabase
+      .from('rfp_opp_matches')
+      .select('opp_id, org_id, scored_version')
+      .in('org_id', orgIds as string[])
+      .in('opp_id', batch as string[]);
+    if (error) {
+      console.error(
+        '[scoring/recompute] loadExistingScoredVersions failed:',
+        error.message
+      );
+      continue;
+    }
+    for (const row of (data ?? []) as ExistingMatchRow[]) {
+      out.set(`${row.opp_id}::${row.org_id}`, row);
+    }
   }
+
   return out;
 }
 
@@ -284,13 +290,16 @@ async function upsertMatches(
   }>
 ): Promise<{ upserted: number; error: string | null }> {
   if (rows.length === 0) return { upserted: 0, error: null };
+  const deduped = Array.from(
+    new Map(rows.map((row) => [`${row.opp_id}::${row.org_id}`, row])).values(),
+  );
   const supabase = rfpAdmin();
   // Cast through never[] to bypass the Database type (rfp_* tables not yet
   // in lib/supabase/database.types.ts). Matches the pattern used by the
   // federal + state/city orchestrators.
   const { data, error } = await supabase
     .from('rfp_opp_matches')
-    .upsert(rows as unknown as never[], {
+    .upsert(deduped as unknown as never[], {
       onConflict: 'opp_id,org_id',
       ignoreDuplicates: false,
     })
@@ -298,7 +307,7 @@ async function upsertMatches(
   if (error) {
     return { upserted: 0, error: error.message };
   }
-  return { upserted: (data ?? []).length || rows.length, error: null };
+  return { upserted: (data ?? []).length || deduped.length, error: null };
 }
 
 // ── Public orchestrators ─────────────────────────────────────────────────────
@@ -454,29 +463,45 @@ export async function scoreNewOpportunitiesForAllActiveOrgs(
  */
 export async function recomputeAllForOrg(
   orgId: string,
-  opts?: { aiSummaries?: boolean }
+  opts?: { aiSummaries?: boolean; includeExpired?: boolean }
 ): Promise<{ scored: number }> {
   const supabase = rfpAdmin();
   const profile = await loadLatestProfile(orgId);
 
-  // Pull live opportunities. Open-ended deadlines (NULL) included — the
-  // feed may surface them even without a deadline.
+  // Pull opportunities in pages. Supabase/PostgREST caps unbounded selects, so
+  // a real backfill must use range pagination.
   const nowIso = new Date().toISOString();
-  const { data: oppRows, error } = await supabase
-    .from('rfp_opportunities')
-    .select(
-      'id, source, title, agency, amount_min, amount_max, deadline, brief, keywords, geo'
-    )
-    .or(`deadline.is.null,deadline.gt.${nowIso}`);
-  if (error) {
-    console.error('[scoring/recompute] live-opp load failed:', error.message);
-    return { scored: 0 };
+  const oppRows: OppRow[] = [];
+  const pageSize = 1_000;
+  for (let start = 0; ; start += pageSize) {
+    let query = supabase
+      .from('rfp_opportunities')
+      .select(
+        'id, source, title, agency, amount_min, amount_max, deadline, brief, keywords, geo'
+      )
+      .order('created_at', { ascending: false })
+      .order('id', { ascending: true })
+      .range(start, start + pageSize - 1);
+
+    if (opts?.includeExpired !== true) {
+      query = query.or(`deadline.is.null,deadline.gt.${nowIso}`);
+    }
+
+    const { data, error } = await query;
+    if (error) {
+      console.error('[scoring/recompute] opp page load failed:', error.message);
+      break;
+    }
+
+    const page = ((data ?? []) as unknown as OppRow[]).map((r) => ({
+      ...r,
+      keywords: Array.isArray(r.keywords) ? r.keywords : [],
+    }));
+    oppRows.push(...page);
+    if (page.length < pageSize) break;
   }
 
-  const opps = ((oppRows ?? []) as unknown as OppRow[]).map((r) => ({
-    ...r,
-    keywords: Array.isArray(r.keywords) ? r.keywords : [],
-  }));
+  const opps = oppRows;
   if (opps.length === 0) return { scored: 0 };
 
   // Load existing versions to increment scored_version cleanly.

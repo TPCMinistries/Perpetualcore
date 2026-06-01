@@ -62,6 +62,13 @@ export interface RfpSavedSearch {
   updated_at: string;
 }
 
+export interface RfpSavedSearchWithPreview extends RfpSavedSearch {
+  preview?: {
+    matches_now: number;
+    new_since_last_run: number;
+  };
+}
+
 export const SAVED_SEARCH_COLUMNS =
   "id, org_id, created_by, name, filters, mode, is_shared, alert_enabled, alert_frequency, min_fit_score, last_run_at, created_at, updated_at";
 
