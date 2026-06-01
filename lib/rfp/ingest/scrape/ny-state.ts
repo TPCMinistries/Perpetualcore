@@ -1,33 +1,23 @@
 /**
- * NY State Grants Gateway scraper (rewritten 2026-05-14).
+ * NY State grants scraper.
  *
- * OLD SOURCE (broken, HTTP 404 since some time pre-May 2026):
+ * OLD SOURCE 1 (broken, HTTP 404 since some time pre-May 2026):
  *   https://grantsmanagement.ny.gov/grant-opportunities
  *
- * NEW SOURCE:
+ * OLD SOURCE 2 (retired SFS transition, now redirects to IntelliGrants error):
  *   https://grantsgateway.ny.gov/IntelliGrants_NYSGG/module/nysgg/goportal.aspx?NavItem1=2
  *
- * The Grants Gateway public portal was migrated onto Agate Software's
- * IntelliGrants platform. The "Browse for Opportunities" tab is the public,
- * un-authenticated landing page for available state grants — it renders a
- * server-side HTML data grid (`<table id="...dgdGOBrowseResults">`) with
- * columns:
- *   Funding Agency | Grant Opportunity | Status | Eligibility |
- *   Availability Date | Anticipated Release Date | Due Date
+ * CURRENT SOURCE (2026-06-01):
+ *   https://www.ny.gov/new-york-state-nonprofit-unit/new-york-state-nonprofit-unit
  *
- * The default Browse view filters to status=Available (no pagination required
- * for the typical record count — observed 5-10 records on 2026-05-14). The
- * Search tab supports broader queries (including Anticipated and Closed) but
- * is a real ASP.NET WebForms postback flow with `__VIEWSTATE` and pagination;
- * that's a future enhancement once we need the broader corpus.
+ * New York retired Grants Gateway on January 9, 2025 and moved grantmaking to
+ * SFS. The SFS search UI is public but PeopleSoft/cookie-gated, so raw fetch()
+ * cannot reliably traverse it. The Governor's Nonprofit Unit publishes a static
+ * "Funding Opportunities" section with current links/due dates. That static
+ * page is our immediate reliable source while SFS browser automation is a
+ * separate connector backlog item.
  *
- * The portal does not expose a stable "Funding Opportunity ID" in the listing
- * itself — applicants click through to a detail page (a JavaScript postback)
- * for the ID. We therefore fall back to a FNV-1a hash of (title + agency) as
- * the source_id, which is stable across runs as long as the grant title and
- * sponsoring agency don't change.
- *
- * Auth: none. Throttle: 1 req/sec (single GET per run). HTML, not JS-rendered.
+ * Auth: none. HTML, not JS-rendered.
  */
 
 import { recordDrift } from "./drift";
@@ -44,9 +34,7 @@ import {
 const SOURCE = "ny_state" as const;
 
 const BASE_URL =
-  "https://grantsgateway.ny.gov/IntelliGrants_NYSGG/module/nysgg/goportal.aspx?NavItem1=2";
-
-const GRID_ID = "ctl00_cphPageContent_wclGOBrowseResults_dgdGOBrowseResults";
+  "https://www.ny.gov/new-york-state-nonprofit-unit/new-york-state-nonprofit-unit";
 
 export async function fetchNyStateOpportunities(): Promise<OpportunityInput[]> {
   let resp: Awaited<ReturnType<typeof fetchHtml>>;
@@ -71,21 +59,19 @@ export async function fetchNyStateOpportunities(): Promise<OpportunityInput[]> {
     return [];
   }
 
-  const records = parseGrantsGatewayGrid(resp.html);
+  const records = parseNyNonprofitFundingSection(resp.html);
 
   if (records.length === 0) {
-    // The page may legitimately be empty (no grants in "Available" status); we
-    // still emit a drift event so a multi-day silence raises an admin alert.
     const looksLikePortal =
-      resp.html.includes("IntelliGrants") &&
-      resp.html.includes("Grant Opportunity Portal");
+      resp.html.includes("New York State Nonprofit Unit") &&
+      resp.html.includes("Funding Opportunities");
     await recordDrift({
       source: SOURCE,
       reason: looksLikePortal ? "zero_nodes" : "shape_mismatch",
       details: {
         url: BASE_URL,
         html_bytes: resp.html.length,
-        hint: `Verify ${BASE_URL} still renders the dgdGOBrowseResults data grid; Agate may have changed the portal layout.`,
+        hint: `Verify ${BASE_URL} still renders the Funding Opportunities section; NY.gov may have changed the article layout.`,
       },
     });
     return [];
@@ -94,79 +80,157 @@ export async function fetchNyStateOpportunities(): Promise<OpportunityInput[]> {
   return records;
 }
 
-interface ParsedRow {
-  agency: string;
+interface ParsedFundingLink {
   title: string;
-  status: string;
-  eligibility: string;
-  availabilityDate: string;
-  anticipatedReleaseDate: string;
-  dueDate: string;
+  url: string;
+  context: string;
 }
 
-function parseGrantsGatewayGrid(html: string): OpportunityInput[] {
-  // The IntelliGrants portal uses an outer `<table>` for layout AND an inner
-  // `<table>` for the data grid; we target the grid by its ID to avoid matching
-  // the wrapper.
-  const gridRe = new RegExp(
-    `<table[^>]+id="${GRID_ID}"[^>]*>([\\s\\S]*?)</table>`,
-    "i"
-  );
-  const gridMatch = gridRe.exec(html);
-  if (!gridMatch) return [];
+function parseNyNonprofitFundingSection(html: string): OpportunityInput[] {
+  const section = extractFundingSection(html);
+  if (!section) return [];
 
+  const links = extractFundingLinks(section);
   const records: OpportunityInput[] = [];
-  const trMatches = gridMatch[1].matchAll(/<tr[^>]*>([\s\S]*?)<\/tr>/gi);
-  for (const tr of trMatches) {
-    const cells = Array.from(
-      tr[1].matchAll(/<td[^>]*>([\s\S]*?)<\/td>/gi)
-    ).map((m) => stripTags(m[1]));
+  const seen = new Set<string>();
 
-    // Header row has 7 cells starting with "Funding Agency"; pagination row has
-    // a single cell with the page number. Data rows have 7 cells with content.
-    if (cells.length < 7) continue;
-    if (/^funding\s*agency$/i.test(cells[0])) continue;
+  for (const link of links) {
+    if (seen.has(link.url)) continue;
+    seen.add(link.url);
+    const title = cleanTitle(link.title);
+    if (!isFundingOpportunityTitle(title)) continue;
 
-    const row: ParsedRow = {
-      agency: cells[0],
-      title: cells[1],
-      status: cells[2],
-      eligibility: cells[3],
-      availabilityDate: cells[4],
-      anticipatedReleaseDate: cells[5],
-      dueDate: cells[6],
-    };
-
-    if (!row.title || row.title.length < 4) continue;
-
+    const agency = inferAgency(title);
+    const deadline = extractDeadline(link.context);
     records.push({
       source: SOURCE,
-      source_id: fallbackSourceId([SOURCE, row.title, row.agency]),
-      title: decodeEntities(row.title),
-      agency: row.agency ? decodeEntities(row.agency) : null,
-      type: row.status || null,
+      source_id: fallbackSourceId([SOURCE, title, link.url]),
+      title,
+      agency,
+      type: "State grant opportunity",
       deadline:
-        row.dueDate && row.dueDate.trim() && row.dueDate !== " "
-          ? toIsoDate(row.dueDate)
+        deadline && deadline.trim() && !/^closed$/i.test(deadline)
+          ? toIsoDate(deadline)
           : null,
-      posted_at: toIsoDate(row.availabilityDate),
-      brief: row.eligibility
-        ? `Eligibility: ${decodeEntities(row.eligibility)}`
-        : null,
+      posted_at: null,
+      brief: summarizeContext(link.context),
       geo: "NY",
-      url: BASE_URL,
-      keywords: normalizeKeywords(row.title.split(/[\s,\-–()]+/)),
+      url: link.url,
+      keywords: normalizeKeywords(title.split(/[\s,\-–()#]+/)),
       raw_json: {
-        portal: "intelligrants_nysgg",
-        funding_agency: row.agency,
-        status: row.status,
-        eligibility: row.eligibility,
-        availability_date: row.availabilityDate,
-        anticipated_release_date: row.anticipatedReleaseDate,
-        due_date: row.dueDate,
+        portal: "nygov_nonprofit_unit",
+        page_url: BASE_URL,
+        title,
+        context: stripTags(link.context),
+        inferred_agency: agency,
+        deadline_raw: deadline,
       },
     });
   }
 
   return records;
+}
+
+function extractFundingSection(html: string): string | null {
+  const heading =
+    /<h2[^>]+id="funding_opportunities"[^>]*>[\s\S]*?<\/h2>/i.exec(html);
+  if (!heading) return null;
+
+  const start = heading.index + heading[0].length;
+  const rest = html.slice(start);
+  const nextSection = /<h2[^>]+id="resources_for_nonprofits"[^>]*>/i.exec(rest);
+  if (!nextSection) return rest;
+  return rest.slice(0, nextSection.index);
+}
+
+function extractFundingLinks(section: string): ParsedFundingLink[] {
+  const items = Array.from(section.matchAll(/<li[^>]*>([\s\S]*?)<\/li>/gi)).map(
+    (m) => m[1],
+  );
+  const blocks = items.length > 0 ? items : [section];
+  const out: ParsedFundingLink[] = [];
+
+  for (const block of blocks) {
+    const anchorMatches = Array.from(
+      block.matchAll(/<a\b[^>]*href="([^"]+)"[^>]*>([\s\S]*?)<\/a>/gi),
+    );
+    for (const match of anchorMatches) {
+      const href = decodeEntities(match[1]);
+      const title = stripTags(match[2]);
+      if (!title || title.length < 4) continue;
+      out.push({
+        title,
+        url: toAbsoluteUrl(href),
+        context: block,
+      });
+    }
+  }
+
+  return out;
+}
+
+function toAbsoluteUrl(href: string): string {
+  try {
+    return new URL(href, BASE_URL).toString();
+  } catch {
+    return BASE_URL;
+  }
+}
+
+function cleanTitle(title: string): string {
+  return decodeEntities(title)
+    .replace(/\s+/g, " ")
+    .replace(/\s+-\s+$/g, "")
+    .trim();
+}
+
+function isFundingOpportunityTitle(title: string): boolean {
+  const normalized = title.toLowerCase();
+  if (
+    normalized.includes("prequalified") ||
+    normalized.includes("notification") ||
+    normalized.includes("learn more") ||
+    normalized.includes("website") ||
+    normalized.includes("form to be notified")
+  ) {
+    return false;
+  }
+  return (
+    /\b(grant|rfa|rfp|funding|program|capacity|resilient|places for learning|securing communities)\b/i.test(
+      title,
+    ) || /^[A-Z]{2,5}\s+-/.test(title)
+  );
+}
+
+function inferAgency(title: string): string | null {
+  const prefix = /^([A-Z]{2,5})\s+-/.exec(title);
+  if (prefix) return prefix[1];
+  if (/NY PLAYS/i.test(title)) return "DASNY";
+  if (/Securing Communities Against Hate Crimes|DCJS/i.test(title)) {
+    return "DCJS";
+  }
+  if (/Regenerate New York/i.test(title)) return "DEC";
+  if (/Resilient Watersheds|Community Resilience/i.test(title)) return "DOS";
+  return "New York State";
+}
+
+function extractDeadline(context: string): string | null {
+  const text = stripTags(context);
+  const dueMatch =
+    /\b(?:applications?\s+(?:are\s+)?(?:due|accepted)|deadline(?:\s+for\s+applications)?|proposal\s+due\s+date)\b[^.]*?(?:by|through|from)?\s*([A-Z][a-z]+\.?\s+\d{1,2},?\s+\d{4}(?:\s+(?:at|by)\s+[\d:]+\s*(?:AM|PM|a\.m\.|p\.m\.)?)?)/i.exec(
+      text,
+    );
+  if (dueMatch) return dueMatch[1];
+
+  const dateMatch =
+    /\b([A-Z][a-z]+\.?\s+\d{1,2},?\s+\d{4}(?:\s+(?:at|by)\s+[\d:]+\s*(?:AM|PM|a\.m\.|p\.m\.)?)?)\b/.exec(
+      text,
+    );
+  return dateMatch?.[1] ?? null;
+}
+
+function summarizeContext(context: string): string | null {
+  const text = stripTags(context);
+  if (!text) return null;
+  return text.length > 500 ? `${text.slice(0, 497)}...` : text;
 }
