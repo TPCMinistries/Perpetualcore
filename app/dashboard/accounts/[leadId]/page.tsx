@@ -11,6 +11,7 @@ import {
   CheckCircle2,
   Clipboard,
   FileText,
+  ListChecks,
   Loader2,
   Mail,
   PackageCheck,
@@ -95,6 +96,29 @@ type PermanentEngagement = {
   updated_at: string;
 };
 
+type AccountTask = {
+  id: string;
+  title: string;
+  description?: string | null;
+  status: string;
+  priority: string;
+  due_date?: string | null;
+  created_at: string;
+  updated_at?: string | null;
+  source_reference?: string | null;
+  tags?: string[] | null;
+};
+
+type TimelineItem = {
+  id: string;
+  type: "task" | "update" | "milestone" | "activity" | "engagement";
+  title: string;
+  detail: string;
+  date: string;
+  status?: string;
+  priority?: string;
+};
+
 const defaultPlan: AccountPlan = {
   firstLane: "Confirm the first workflow and owner.",
   sevenDayDeliverable: "Ship one useful operating surface the client can react to.",
@@ -142,6 +166,16 @@ const defaultUpdate: AccountUpdate = {
 function formatDate(value?: string | null) {
   if (!value) return "Not scheduled";
   return new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric" }).format(new Date(value));
+}
+
+function formatDateTime(value?: string | null) {
+  if (!value) return "Not scheduled";
+  return new Intl.DateTimeFormat("en-US", {
+    month: "short",
+    day: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+  }).format(new Date(value));
 }
 
 function formatCurrency(value?: number | null) {
@@ -218,6 +252,62 @@ function readAccountMilestones(lead: AccountLead): AccountMilestone[] {
   });
 }
 
+function readAccountUpdates(lead: AccountLead): Array<AccountUpdate & { createdAt: string }> {
+  if (!lead.ai_insights || typeof lead.ai_insights !== "object" || Array.isArray(lead.ai_insights)) {
+    return [];
+  }
+
+  const insights = lead.ai_insights as { accountUpdates?: Array<AccountUpdate & { createdAt: string }> };
+  return insights.accountUpdates || [];
+}
+
+function addDays(date: Date, days: number) {
+  const nextDate = new Date(date);
+  nextDate.setDate(nextDate.getDate() + days);
+  return nextDate.toISOString();
+}
+
+function buildTaskTemplates(lead: AccountLead, plan: AccountPlan, engagement: PermanentEngagement | null) {
+  const account = getAccountName(lead);
+  const today = new Date();
+  const engagementContext = engagement
+    ? `Engagement: ${engagement.offer_name} (${engagement.id})`
+    : `Recommended lane: ${getRecommendedLane(lead)}`;
+
+  return [
+    {
+      title: `Confirm kickoff for ${account}`,
+      description: `Confirm decision owner, meeting time, paid path, and first lane.\n\n${engagementContext}\n\nNext action: ${plan.nextAction}`,
+      priority: "high",
+      dueDate: addDays(today, 1),
+    },
+    {
+      title: `Collect operating context from ${account}`,
+      description: `Request docs, tool access, examples, customer language, current process screenshots, and owner names.\n\nAccess needed: ${plan.accessNeeded}`,
+      priority: "high",
+      dueDate: addDays(today, 3),
+    },
+    {
+      title: `Map first operating lane for ${account}`,
+      description: `Define current workflow, bottleneck, users, source systems, escalation rules, and success metric.\n\nFirst lane: ${plan.firstLane}`,
+      priority: "medium",
+      dueDate: addDays(today, 5),
+    },
+    {
+      title: `Ship first 7-day deliverable for ${account}`,
+      description: `Build or configure the first working surface the client can use or react to.\n\nDeliverable: ${plan.sevenDayDeliverable}`,
+      priority: "high",
+      dueDate: addDays(today, 7),
+    },
+    {
+      title: `Review expansion signal for ${account}`,
+      description: `Review whether the first lane should expand into broader operating work.\n\n30-day outcome: ${plan.thirtyDayOutcome}`,
+      priority: "medium",
+      dueDate: addDays(today, 14),
+    },
+  ];
+}
+
 function buildAccountBrief(lead: AccountLead, plan: AccountPlan) {
   return [
     `Account: ${getAccountName(lead)}`,
@@ -264,6 +354,10 @@ export default function AccountDetailPage() {
   const [syncingAccount, setSyncingAccount] = useState(false);
   const [permanentAccount, setPermanentAccount] = useState<PermanentAccount | null>(null);
   const [permanentEngagement, setPermanentEngagement] = useState<PermanentEngagement | null>(null);
+  const [accountTasks, setAccountTasks] = useState<AccountTask[]>([]);
+  const [tasksLoading, setTasksLoading] = useState(false);
+  const [generatingTasks, setGeneratingTasks] = useState(false);
+  const [savingTaskId, setSavingTaskId] = useState("");
   const [plan, setPlan] = useState<AccountPlan>(defaultPlan);
   const [milestones, setMilestones] = useState<AccountMilestone[]>(createDefaultMilestones());
   const [accountUpdate, setAccountUpdate] = useState<AccountUpdate>(defaultUpdate);
@@ -284,6 +378,21 @@ export default function AccountDetailPage() {
     }
   }
 
+  async function fetchAccountTasks(nextLeadId: string) {
+    setTasksLoading(true);
+    try {
+      const response = await fetch(`/api/tasks?source_reference=${encodeURIComponent(nextLeadId)}`, { cache: "no-store" });
+      if (!response.ok) throw new Error("Could not load account tasks");
+      const result = (await response.json()) as { tasks?: AccountTask[] };
+      const tasks = result.tasks || [];
+      setAccountTasks(tasks.filter((task) => task.tags?.includes("perpetual-core-account") || task.source_reference === nextLeadId));
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Could not load account tasks");
+    } finally {
+      setTasksLoading(false);
+    }
+  }
+
   async function fetchAccount() {
     setLoading(true);
     try {
@@ -295,6 +404,7 @@ export default function AccountDetailPage() {
       setPlan(readAccountPlan(result.lead));
       setMilestones(readAccountMilestones(result.lead));
       await fetchPermanentAccount(result.lead.id);
+      await fetchAccountTasks(result.lead.id);
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Could not load account");
     } finally {
@@ -307,6 +417,78 @@ export default function AccountDetailPage() {
   }, [leadId]);
 
   const recommendedLane = useMemo(() => (lead ? getRecommendedLane(lead) : "First Workflow"), [lead]);
+  const timelineItems = useMemo<TimelineItem[]>(() => {
+    if (!lead) return [];
+
+    const updateItems = readAccountUpdates(lead).map((update, index) => ({
+      id: `update-${index}-${update.createdAt}`,
+      type: "update" as const,
+      title: update.summary || update.decision || "Account update",
+      detail: [update.decision ? `Decision: ${update.decision}` : "", update.risk ? `Risk: ${update.risk}` : "", update.nextAction ? `Next: ${update.nextAction}` : ""]
+        .filter(Boolean)
+        .join(" | "),
+      date: update.createdAt,
+      status: "Saved update",
+    }));
+
+    const taskItems = accountTasks.map((task) => ({
+      id: `task-${task.id}`,
+      type: "task" as const,
+      title: task.title,
+      detail: task.description || "Account task",
+      date: task.due_date || task.updated_at || task.created_at,
+      status: task.status,
+      priority: task.priority,
+    }));
+
+    const milestoneItems = milestones
+      .filter((milestone) => milestone.completed || milestone.dueDate || milestone.notes)
+      .map((milestone) => ({
+        id: `milestone-${milestone.id}`,
+        type: "milestone" as const,
+        title: milestone.title,
+        detail: milestone.notes || milestone.detail,
+        date: milestone.dueDate || lead.updated_at,
+        status: milestone.completed ? "Complete" : "Planned",
+      }));
+
+    const activityItems = activities.slice(0, 12).map((activity) => ({
+      id: `activity-${activity.id}`,
+      type: "activity" as const,
+      title: activity.title,
+      detail: activity.description || normalizeStatus(activity.activity_type),
+      date: activity.created_at,
+      status: normalizeStatus(activity.activity_type),
+    }));
+
+    const engagementItems = permanentEngagement
+      ? [
+          {
+            id: `engagement-${permanentEngagement.id}`,
+            type: "engagement" as const,
+            title: `${permanentEngagement.offer_name} engagement opened`,
+            detail: permanentEngagement.next_step || permanentEngagement.system_name,
+            date: permanentEngagement.updated_at,
+            status: normalizeStatus(permanentEngagement.stage),
+          },
+        ]
+      : [];
+
+    return [...engagementItems, ...updateItems, ...taskItems, ...milestoneItems, ...activityItems]
+      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+      .slice(0, 18);
+  }, [accountTasks, activities, lead, milestones, permanentEngagement]);
+
+  const taskSummary = useMemo(() => {
+    const complete = accountTasks.filter((task) => task.status === "completed").length;
+    const blocked = accountTasks.filter((task) => task.status === "blocked").length;
+    const open = accountTasks.length - complete;
+    const nextTask = accountTasks
+      .filter((task) => task.status !== "completed")
+      .sort((a, b) => new Date(a.due_date || a.created_at).getTime() - new Date(b.due_date || b.created_at).getTime())[0];
+
+    return { complete, blocked, open, nextTask };
+  }, [accountTasks]);
 
   async function copyText(label: string, value: string) {
     try {
@@ -378,6 +560,77 @@ export default function AccountDetailPage() {
       toast.error(error instanceof Error ? error.message : "Could not sync account");
     } finally {
       setSyncingAccount(false);
+    }
+  }
+
+  async function generateAccountTasks() {
+    if (!lead) return;
+    setGeneratingTasks(true);
+    try {
+      if (!permanentAccount || !permanentEngagement) {
+        await syncPermanentAccount();
+      }
+
+      const templates = buildTaskTemplates(lead, plan, permanentEngagement);
+      const existingTitles = new Set(accountTasks.map((task) => task.title.toLowerCase()));
+      const tasksToCreate = templates.filter((template) => !existingTitles.has(template.title.toLowerCase()));
+
+      if (tasksToCreate.length === 0) {
+        toast.message("Account tasks are already generated");
+        return;
+      }
+
+      const createdTasks: AccountTask[] = [];
+      for (const task of tasksToCreate) {
+        const response = await fetch("/api/tasks", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            title: task.title,
+            description: task.description,
+            priority: task.priority,
+            status: "todo",
+            dueDate: task.dueDate,
+            source_reference: lead.id,
+            tags: ["perpetual-core-account", "client-delivery", recommendedLane.toLowerCase().replace(/\s+/g, "-")],
+          }),
+        });
+
+        if (!response.ok) throw new Error("Could not create account task");
+        const result = (await response.json()) as { task: AccountTask };
+        createdTasks.push(result.task);
+      }
+
+      await fetchAccountTasks(lead.id);
+      toast.success(`${createdTasks.length} account task${createdTasks.length === 1 ? "" : "s"} created`);
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Could not generate tasks");
+    } finally {
+      setGeneratingTasks(false);
+    }
+  }
+
+  async function updateTaskStatus(task: AccountTask, completed: boolean) {
+    setSavingTaskId(task.id);
+    try {
+      const nextStatus = completed ? "completed" : "todo";
+      const response = await fetch("/api/tasks", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          id: task.id,
+          status: nextStatus,
+          completed_at: completed ? new Date().toISOString() : null,
+        }),
+      });
+
+      if (!response.ok) throw new Error("Could not update task");
+      await fetchAccountTasks(leadId);
+      toast.success(completed ? "Task completed" : "Task reopened");
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Could not update task");
+    } finally {
+      setSavingTaskId("");
     }
   }
 
@@ -676,6 +929,112 @@ export default function AccountDetailPage() {
 
       <Card className="rounded-lg shadow-none">
         <CardHeader>
+          <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
+            <div>
+              <div className="flex items-center gap-3">
+                <CardTitle className="text-xl">Account tasks</CardTitle>
+                <ListChecks className="h-5 w-5 text-violet-600" />
+              </div>
+              <p className="mt-2 text-sm leading-6 text-slate-600">
+                Turn the operating plan into real tasks in the main Perpetual Core task system. These
+                are linked back to this account by source reference.
+              </p>
+            </div>
+            <div className="flex flex-col gap-2 sm:flex-row">
+              <Button
+                type="button"
+                variant="outline"
+                className="rounded-md"
+                disabled={tasksLoading}
+                onClick={() => fetchAccountTasks(lead.id)}
+              >
+                {tasksLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <CalendarClock className="mr-2 h-4 w-4" />}
+                Refresh
+              </Button>
+              <Button type="button" className="rounded-md" disabled={generatingTasks} onClick={generateAccountTasks}>
+                {generatingTasks ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Sparkles className="mr-2 h-4 w-4" />}
+                Generate task plan
+              </Button>
+            </div>
+          </div>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="grid gap-3 md:grid-cols-4">
+            {[
+              ["Open", taskSummary.open],
+              ["Complete", taskSummary.complete],
+              ["Blocked", taskSummary.blocked],
+              ["Next", taskSummary.nextTask ? formatDate(taskSummary.nextTask.due_date || taskSummary.nextTask.created_at) : "None"],
+            ].map(([label, value]) => (
+              <div key={label} className="rounded-lg border bg-slate-50 p-4">
+                <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-slate-500">{label}</p>
+                <p className="mt-2 text-sm font-semibold text-slate-950">{value}</p>
+              </div>
+            ))}
+          </div>
+
+          {accountTasks.length === 0 ? (
+            <div className="rounded-lg border border-dashed p-5 text-sm leading-6 text-slate-600">
+              No account tasks yet. Generate a task plan after the account plan is directionally right.
+              The first task set will cover kickoff, context collection, lane mapping, first deliverable,
+              and expansion review.
+            </div>
+          ) : (
+            <div className="grid gap-3">
+              {accountTasks.map((task) => {
+                const isComplete = task.status === "completed";
+                return (
+                  <div
+                    key={task.id}
+                    className="grid gap-4 rounded-lg border bg-white p-4 lg:grid-cols-[minmax(0,1fr)_140px_160px]"
+                  >
+                    <div className="flex gap-3">
+                      <Checkbox
+                        id={`account-task-${task.id}`}
+                        checked={isComplete}
+                        disabled={savingTaskId === task.id}
+                        onCheckedChange={(checked) => updateTaskStatus(task, checked === true)}
+                        className="mt-1"
+                      />
+                      <div>
+                        <label
+                          htmlFor={`account-task-${task.id}`}
+                          className="cursor-pointer text-sm font-semibold text-slate-950"
+                        >
+                          {task.title}
+                        </label>
+                        {task.description ? (
+                          <p className="mt-2 whitespace-pre-wrap text-sm leading-5 text-slate-600">
+                            {task.description}
+                          </p>
+                        ) : null}
+                      </div>
+                    </div>
+                    <div>
+                      <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-slate-500">
+                        Status
+                      </p>
+                      <Badge className="mt-2 rounded-md" variant={isComplete ? "default" : "outline"}>
+                        {normalizeStatus(task.status)}
+                      </Badge>
+                    </div>
+                    <div>
+                      <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-slate-500">
+                        Priority / due
+                      </p>
+                      <p className="mt-2 text-sm font-medium text-slate-950">{normalizeStatus(task.priority)}</p>
+                      <p className="mt-1 text-xs text-slate-500">{formatDate(task.due_date)}</p>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      <Card className="rounded-lg shadow-none">
+        <CardHeader>
           <div className="flex items-center justify-between gap-4">
             <CardTitle className="text-xl">Account update</CardTitle>
             <CalendarClock className="h-5 w-5 text-violet-600" />
@@ -817,29 +1176,44 @@ export default function AccountDetailPage() {
       <Card className="rounded-lg shadow-none">
         <CardHeader>
           <div className="flex items-center justify-between gap-4">
-            <CardTitle className="text-xl">Activity trail</CardTitle>
+            <CardTitle className="text-xl">Engagement timeline</CardTitle>
             <CalendarClock className="h-5 w-5 text-violet-600" />
           </div>
+          <p className="text-sm leading-6 text-slate-600">
+            A combined delivery trail from account tasks, saved updates, milestones, account sync, and
+            source lead activity.
+          </p>
         </CardHeader>
         <CardContent className="space-y-3">
-          {activities.length === 0 ? (
+          {timelineItems.length === 0 ? (
             <p className="rounded-lg border border-dashed p-4 text-sm text-slate-600">
-              No account activity yet. Save the plan to create the first delivery memory.
+              No timeline yet. Save a plan, generate tasks, or add an account update to create the first
+              delivery memory.
             </p>
           ) : (
-            activities.slice(0, 10).map((activity) => (
-              <div key={activity.id} className="rounded-lg border bg-white p-4">
+            timelineItems.map((item) => (
+              <div key={item.id} className="rounded-lg border bg-white p-4">
                 <div className="flex flex-wrap items-center justify-between gap-3">
-                  <p className="text-sm font-semibold text-slate-950">{activity.title}</p>
-                  <Badge variant="outline" className="rounded-md">
-                    {formatDate(activity.created_at)}
-                  </Badge>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <Badge variant="outline" className="rounded-md">
+                      {normalizeStatus(item.type)}
+                    </Badge>
+                    {item.priority ? (
+                      <Badge className="rounded-md" variant={item.priority === "high" ? "default" : "secondary"}>
+                        {normalizeStatus(item.priority)}
+                      </Badge>
+                    ) : null}
+                    <p className="text-sm font-semibold text-slate-950">{item.title}</p>
+                  </div>
+                  <span className="text-xs text-slate-500">{formatDateTime(item.date)}</span>
                 </div>
-                <p className="mt-2 font-mono text-[10px] uppercase tracking-[0.18em] text-slate-500">
-                  {normalizeStatus(activity.activity_type)}
-                </p>
-                {activity.description ? (
-                  <p className="mt-2 text-sm leading-5 text-slate-600">{activity.description}</p>
+                {item.status ? (
+                  <p className="mt-2 font-mono text-[10px] uppercase tracking-[0.18em] text-slate-500">
+                    {normalizeStatus(item.status)}
+                  </p>
+                ) : null}
+                {item.detail ? (
+                  <p className="mt-2 whitespace-pre-wrap text-sm leading-5 text-slate-600">{item.detail}</p>
                 ) : null}
               </div>
             ))
