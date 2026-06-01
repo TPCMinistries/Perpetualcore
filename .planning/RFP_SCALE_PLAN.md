@@ -45,7 +45,8 @@ The app is workable for a private beta this week when:
 
 - Federal: SAM.gov, Grants.gov, Simpler Grants, SBIR/STTR.
 - New York/NYC: NY State Contract Reporter, NYC PASSPort, DYCD, DOE, HRA.
-- Nearby state expansion: CA, NJ, CT, PA.
+- Nearby state expansion: CA is live from the official California Grants Portal
+  datastore; NJ, CT, and PA remain next-state connector targets.
 - Research/innovation: NIH Guide, NSF funding search.
 
 ### P1: Add funder intelligence without mixing it into open opportunity counts
@@ -89,7 +90,7 @@ The app should beat CLEATUS.ai and Granted.ai by combining:
 
 1. Source readiness dashboard in `/admin/rfp`.
 2. Resolve production drift events and refresh source baselines.
-3. Add additional public connectors in order: California Grants Portal, NJ, CT, PA, Federal Register, NIH, NSF.
+3. Add additional public connectors in order: NJ, CT, PA, NIH, NSF.
 4. Add verified opportunity count to discovery UI instead of static "80k+" copy.
 5. Add attachment extraction for imported opportunities.
 6. Add saved searches and alert subscriptions.

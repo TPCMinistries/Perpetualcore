@@ -25,6 +25,7 @@ import { fetchNyStateOpportunities } from "./scrape/ny-state";
 import { fetchNycDycdOpportunities } from "./scrape/nyc-dycd";
 import { fetchNycHraOpportunities } from "./scrape/nyc-hra";
 import { fetchNycDoeOpportunities } from "./scrape/nyc-doe";
+import { fetchCaGrantOpportunities } from "./scrape/ca-grants";
 import {
   getRollingBaseline,
   recordBaseline,
@@ -49,10 +50,12 @@ const SCRAPERS: Array<{
   { source: "nyc_dycd", fetch: fetchNycDycdOpportunities },
   { source: "nyc_hra", fetch: fetchNycHraOpportunities },
   { source: "nyc_doe", fetch: fetchNycDoeOpportunities },
+  { source: "ca_grants", fetch: fetchCaGrantOpportunities },
 ];
 
 /** Anomaly threshold: parsed_count below 50% of rolling baseline triggers drift. */
 const COUNT_ANOMALY_FLOOR_PCT = 0.5;
+const LAST_SEEN_BATCH_SIZE = 500;
 
 export async function runStateCityIngest(): Promise<StateCityIngestResult[]> {
   const settled = await Promise.allSettled(
@@ -206,14 +209,21 @@ export async function runStateCityIngest(): Promise<StateCityIngestResult[]> {
     if (rows.length > 0 && !error) {
       const ids = result.upserted_ids;
       if (ids.length > 0) {
-        const touch = await supabase
-          .from("rfp_opportunities")
-          .update({ last_seen_at: now } as never)
-          .in("id", ids);
-        if (touch.error && !/column .* does not exist/i.test(touch.error.message)) {
-          result.errors.push(
-            `last_seen_at update failed: ${touch.error.message}`
-          );
+        for (let start = 0; start < ids.length; start += LAST_SEEN_BATCH_SIZE) {
+          const batch = ids.slice(start, start + LAST_SEEN_BATCH_SIZE);
+          const touch = await supabase
+            .from("rfp_opportunities")
+            .update({ last_seen_at: now } as never)
+            .in("id", batch);
+          if (
+            touch.error &&
+            !/column .* does not exist/i.test(touch.error.message)
+          ) {
+            result.errors.push(
+              `last_seen_at update failed: ${touch.error.message || "unknown error"}`
+            );
+            break;
+          }
         }
       }
     }

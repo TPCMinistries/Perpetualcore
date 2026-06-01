@@ -55,6 +55,7 @@ const SOURCE_OPTIONS: Array<{ key: string; label: string }> = [
   { key: "nyc_dycd", label: "NYC DYCD" },
   { key: "nyc_hra", label: "NYC HRA" },
   { key: "nyc_doe", label: "NYC DOE" },
+  { key: "ca_grants", label: "CA Grants" },
   { key: "foundation_url", label: "Foundation URL" },
 ];
 

@@ -136,10 +136,10 @@ export const RFP_SOURCE_READINESS_TARGETS: SourceReadinessTarget[] = [
     source: "ca_grants",
     label: "California Grants Portal",
     category: "state",
-    status: "planned",
+    status: "live",
     priority: "p0",
     targetScale: "High-volume state grant catalog",
-    nextStep: "Build connector, baseline count, and dedupe rules.",
+    nextStep: "Verify daily CKAN volume and dedupe against federal pass-through sources.",
   },
   {
     source: "nj_grants",

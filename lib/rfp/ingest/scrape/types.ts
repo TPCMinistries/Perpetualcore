@@ -12,7 +12,12 @@
  * does NOT call a separate normalize step.
  */
 
-export type StateCitySourceName = "ny_state" | "nyc_dycd" | "nyc_hra" | "nyc_doe";
+export type StateCitySourceName =
+  | "ny_state"
+  | "nyc_dycd"
+  | "nyc_hra"
+  | "nyc_doe"
+  | "ca_grants";
 
 export interface OpportunityInput {
   /** Source key — must be one of the values allowed by rfp_opportunities_source_check. */

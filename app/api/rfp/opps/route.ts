@@ -29,7 +29,8 @@
  *   mode (optional, dual mode only)    — "all" (default) | "nonprofit" | "forprofit"
  *   sources (optional)                 — comma-separated source codes
  *                                          (sam_gov, grants_gov, simpler_grants, sbir,
- *                                           ny_state, nyc_dycd, nyc_hra, nyc_doe,
+ *                                           fed_register, ny_state, nyc_dycd,
+ *                                           nyc_hra, nyc_doe, ca_grants,
  *                                           foundation_url)
  *   q (optional)                       — keyword search across opportunity title,
  *                                          agency, and brief before org ranking
@@ -84,6 +85,7 @@ const KNOWN_SOURCES = [
   "nyc_dycd",
   "nyc_hra",
   "nyc_doe",
+  "ca_grants",
   "foundation_url",
 ] as const;
 

@@ -213,6 +213,7 @@ const KNOWN_SOURCES = [
   "nyc_doe",
   "nyc_hra",
   "nyc_passport",
+  "ca_grants",
 ] as const;
 
 export async function loadScraperHealth(): Promise<ScraperHealthRow[]> {
