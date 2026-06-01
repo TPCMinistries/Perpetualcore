@@ -31,6 +31,13 @@ import {
   type PlatformTotals,
   type ScraperHealthRow,
 } from "@/lib/rfp/admin-metrics";
+import {
+  buildSourceReadiness,
+  summarizeSourceReadiness,
+  type SourceReadinessRow,
+  type SourceReadinessStatus,
+  type SourceReadinessSummary,
+} from "@/lib/rfp/source-readiness";
 import { createAdminClient } from "@/lib/supabase/server";
 import type { Json } from "@/lib/supabase/database.types";
 
@@ -182,6 +189,120 @@ function PlatformTilesRow({ totals }: { totals: PlatformTotals }) {
         value={formatCurrency(totals.ai_cost_30d_usd)}
         tone={totals.ai_cost_30d_usd > 100 ? "amber" : "emerald"}
       />
+    </div>
+  );
+}
+
+function statusClass(status: SourceReadinessStatus): string {
+  switch (status) {
+    case "live":
+      return "bg-emerald-500/15 text-emerald-200";
+    case "degraded":
+      return "bg-amber-500/15 text-amber-200";
+    case "blocked":
+      return "bg-rose-500/15 text-rose-200";
+    case "planned":
+    default:
+      return "bg-zinc-900 text-zinc-400";
+  }
+}
+
+function SourceReadinessTiles({
+  summary,
+}: {
+  summary: SourceReadinessSummary;
+}) {
+  return (
+    <div className="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-6">
+      <Tile
+        label="Indexed"
+        value={formatNumber(summary.indexed)}
+        sub="verified records"
+        tone={summary.indexed >= 80000 ? "emerald" : "amber"}
+      />
+      <Tile label="Sources" value={formatNumber(summary.totalSources)} />
+      <Tile label="Live" value={formatNumber(summary.live)} tone="emerald" />
+      <Tile
+        label="Degraded"
+        value={formatNumber(summary.degraded)}
+        tone={summary.degraded > 0 ? "amber" : "emerald"}
+      />
+      <Tile label="Planned" value={formatNumber(summary.planned)} />
+      <Tile
+        label="P0 gaps"
+        value={formatNumber(summary.p0Remaining)}
+        tone={summary.p0Remaining > 0 ? "amber" : "emerald"}
+      />
+    </div>
+  );
+}
+
+function SourceReadinessTable({ rows }: { rows: SourceReadinessRow[] }) {
+  return (
+    <div className="mt-4 overflow-x-auto rounded-lg border border-white/5 bg-white/[0.02]">
+      <table className="w-full min-w-[980px] text-[13px]">
+        <thead>
+          <tr className="border-b border-white/5 text-left font-mono text-[10px] uppercase tracking-[0.18em] text-zinc-500">
+            <th className="px-4 py-3">Source</th>
+            <th className="px-3 py-3">Category</th>
+            <th className="px-3 py-3">Status</th>
+            <th className="px-3 py-3 text-right">Indexed</th>
+            <th className="px-3 py-3 text-right">Drift</th>
+            <th className="px-3 py-3">Target</th>
+            <th className="px-4 py-3">Next step</th>
+          </tr>
+        </thead>
+        <tbody>
+          {rows.map((r) => (
+            <tr
+              key={r.source}
+              className="border-b border-white/5 last:border-0 hover:bg-white/[0.02]"
+            >
+              <td className="px-4 py-3">
+                <div className="text-zinc-100">{r.label}</div>
+                <div className="mt-1 font-mono text-[10px] text-zinc-600">
+                  {r.source} · {r.priority.toUpperCase()}
+                </div>
+              </td>
+              <td className="px-3 py-3">
+                <span className="font-mono text-[10px] uppercase tracking-[0.16em] text-zinc-400">
+                  {r.category}
+                </span>
+              </td>
+              <td className="px-3 py-3">
+                <span
+                  className={`rounded-full px-2 py-1 font-mono text-[10px] uppercase tracking-[0.14em] ${statusClass(
+                    r.effectiveStatus,
+                  )}`}
+                >
+                  {r.effectiveStatus}
+                </span>
+              </td>
+              <td className="px-3 py-3 text-right font-mono text-[12px] tabular-nums text-zinc-300">
+                {formatNumber(r.indexed)}
+              </td>
+              <td className="px-3 py-3 text-right">
+                <div
+                  className={`font-mono text-[12px] tabular-nums ${
+                    r.openDrift > 0 ? "text-amber-200" : "text-zinc-600"
+                  }`}
+                >
+                  {r.openDrift}
+                </div>
+                <div className="font-mono text-[10px] text-zinc-600">
+                  {formatRelative(r.lastDriftAt)}
+                </div>
+              </td>
+              <td className="max-w-[220px] px-3 py-3 text-zinc-400">
+                {r.targetScale}
+              </td>
+              <td className="max-w-[320px] px-4 py-3 text-zinc-400">
+                {r.nextStep}
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
     </div>
   );
 }
@@ -503,6 +624,8 @@ export default async function AdminRfpPage() {
       loadRecentCronRuns(10),
       loadRecentAudit(50),
     ]);
+  const sourceReadiness = buildSourceReadiness(scraperHealth);
+  const sourceReadinessSummary = summarizeSourceReadiness(sourceReadiness);
 
   return (
     <main className="mx-auto max-w-6xl px-6 py-12">
@@ -522,6 +645,18 @@ export default async function AdminRfpPage() {
 
       <SectionHeader title="Platform totals" detail="live" />
       <PlatformTilesRow totals={totals} />
+
+      <SectionHeader
+        title="Source scale readiness"
+        detail="verified coverage vs target catalog"
+      />
+      <SourceReadinessTiles summary={sourceReadinessSummary} />
+      <p className="mt-3 text-[13px] leading-6 text-zinc-500">
+        This is the operational view for scale claims. Public copy should use
+        the verified indexed count until the live source catalog supports a
+        larger number.
+      </p>
+      <SourceReadinessTable rows={sourceReadiness} />
 
       <SectionHeader
         title="Orgs"
