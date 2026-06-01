@@ -18,7 +18,7 @@
  * marketing surface rhythm.
  */
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { FitScoreChip } from "./FitScoreChip";
 import { DraftButton } from "@/components/rfp/DraftButton";
 import {
@@ -33,7 +33,12 @@ import {
   ClipboardCheck,
   ExternalLink,
   FileCheck2,
+  FileText,
+  ListChecks,
+  Mail,
+  Route,
   SearchCheck,
+  ShieldCheck,
   Sparkles,
 } from "lucide-react";
 import type { FeedRow } from "@/lib/rfp/feed";
@@ -54,6 +59,22 @@ interface OppDetail extends FeedRow {
   keywords: string[];
   geo: string | null;
   raw_json: unknown;
+  enrichment: OpportunityEnrichment | null;
+}
+
+interface OpportunityEnrichment {
+  eligibility: string[];
+  required_documents: string[];
+  submission_method: string | null;
+  submission_url: string | null;
+  contact: string | null;
+  matching_funds: string | null;
+  funding_method: string | null;
+  award_range: string | null;
+  timeline: string[];
+  risks: string[];
+  missing_fields: string[];
+  quality_score: number;
 }
 
 function normalizeTriageStatus(status: string): OpportunityTriageStatus {
@@ -202,6 +223,34 @@ function decisionToneClasses(tone: "emerald" | "amber" | "zinc"): string {
   return "border-zinc-200 bg-white text-zinc-700";
 }
 
+function shortList(items: string[], fallback: string): string[] {
+  return items.length > 0 ? items : [fallback];
+}
+
+function CaptureCard({
+  icon,
+  label,
+  children,
+}: {
+  icon: ReactNode;
+  label: string;
+  children: ReactNode;
+}) {
+  return (
+    <div className="rounded-xl border border-zinc-200 bg-white p-4 shadow-sm">
+      <div className="mb-3 flex items-center gap-2 text-zinc-950">
+        <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-zinc-100 text-zinc-700">
+          {icon}
+        </span>
+        <h3 className="font-mono text-[10px] uppercase tracking-[0.22em] text-zinc-500">
+          {label}
+        </h3>
+      </div>
+      {children}
+    </div>
+  );
+}
+
 export function DetailPane({
   orgId,
   selected,
@@ -266,6 +315,7 @@ export function DetailPane({
   const deadline = deadlineSignal(deadlineDays);
   const decision = pursuitDecision(row.fit_score, deadlineDays);
   const effort = effortSignal(row.amount_max ?? row.amount_min ?? null, row.brief);
+  const enrichment = detail?.enrichment ?? null;
 
   return (
     <div className="h-full overflow-y-auto p-6 lg:p-8">
@@ -356,6 +406,116 @@ export function DetailPane({
           }}
         />
       </div>
+
+      <section className="mt-6">
+        <div className="mb-3 flex flex-wrap items-end justify-between gap-3">
+          <div>
+            <h3 className="font-mono text-[10px] uppercase tracking-[0.25em] text-zinc-500">
+              Capture brief
+            </h3>
+            <p className="mt-1 text-sm text-zinc-600">
+              Extracted from the source payload so the team can judge effort before opening a workroom.
+            </p>
+          </div>
+          {enrichment && (
+            <span className="inline-flex items-center rounded-full border border-zinc-200 bg-white px-3 py-1 font-mono text-[11px] uppercase tracking-[0.16em] text-zinc-600">
+              {enrichment.quality_score}% source depth
+            </span>
+          )}
+        </div>
+
+        <div className="grid gap-3 lg:grid-cols-2">
+          <CaptureCard
+            icon={<ShieldCheck className="h-4 w-4" />}
+            label="Eligibility"
+          >
+            <ul className="space-y-2 text-sm leading-6 text-zinc-700">
+              {shortList(
+                enrichment?.eligibility ?? [],
+                "Eligibility was not structured in the source. Confirm before drafting.",
+              ).map((item) => (
+                <li key={item} className="flex gap-2">
+                  <CheckCircle2 className="mt-1 h-3.5 w-3.5 shrink-0 text-emerald-600" />
+                  <span>{item}</span>
+                </li>
+              ))}
+            </ul>
+          </CaptureCard>
+
+          <CaptureCard
+            icon={<FileText className="h-4 w-4" />}
+            label="Required docs"
+          >
+            <ul className="space-y-2 text-sm leading-6 text-zinc-700">
+              {shortList(
+                enrichment?.required_documents ?? [],
+                "No required document list was found yet. Review the solicitation package.",
+              ).map((item) => (
+                <li key={item} className="flex gap-2">
+                  <ListChecks className="mt-1 h-3.5 w-3.5 shrink-0 text-blue-600" />
+                  <span>{item}</span>
+                </li>
+              ))}
+            </ul>
+          </CaptureCard>
+
+          <CaptureCard
+            icon={<Route className="h-4 w-4" />}
+            label="Submission"
+          >
+            <div className="space-y-2 text-sm leading-6 text-zinc-700">
+              <p>{enrichment?.submission_method ?? "Submission path not extracted yet."}</p>
+              {enrichment?.submission_url && (
+                <a
+                  href={enrichment.submission_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1 text-sm font-medium text-zinc-800 underline-offset-4 hover:text-zinc-950 hover:underline"
+                >
+                  Submission/source link <ExternalLink className="h-3.5 w-3.5" />
+                </a>
+              )}
+              {enrichment?.timeline && enrichment.timeline.length > 0 && (
+                <div className="flex flex-wrap gap-1.5 pt-1">
+                  {enrichment.timeline.map((item) => (
+                    <span
+                      key={item}
+                      className="rounded border border-zinc-200 bg-zinc-50 px-2 py-0.5 font-mono text-[11px] text-zinc-600"
+                    >
+                      {item}
+                    </span>
+                  ))}
+                </div>
+              )}
+            </div>
+          </CaptureCard>
+
+          <CaptureCard icon={<Mail className="h-4 w-4" />} label="Risk scan">
+            <div className="space-y-3 text-sm leading-6 text-zinc-700">
+              <p>{enrichment?.contact ?? "No contact extracted from the source payload."}</p>
+              {(enrichment?.award_range ||
+                enrichment?.funding_method ||
+                enrichment?.matching_funds) && (
+                <div className="grid gap-2 rounded-lg bg-zinc-50 p-3 font-mono text-[11px] uppercase tracking-[0.12em] text-zinc-600">
+                  {enrichment.award_range && <span>Award: {enrichment.award_range}</span>}
+                  {enrichment.funding_method && <span>Funding: {enrichment.funding_method}</span>}
+                  {enrichment.matching_funds && <span>Match: {enrichment.matching_funds}</span>}
+                </div>
+              )}
+              {enrichment?.risks && enrichment.risks.length > 0 && (
+                <ul className="space-y-1.5 text-xs leading-5 text-amber-800">
+                  {enrichment.risks.slice(0, 4).map((risk) => (
+                    <li key={risk} className="flex gap-2">
+                      <AlertTriangle className="mt-0.5 h-3.5 w-3.5 shrink-0" />
+                      <span>{risk}</span>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          </CaptureCard>
+        </div>
+      </section>
 
       <section className="mt-6 grid gap-3 rounded-xl border border-zinc-200 bg-white p-4 shadow-sm sm:grid-cols-3">
         <div className="flex gap-3">

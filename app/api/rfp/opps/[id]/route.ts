@@ -17,6 +17,8 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
+import { ensureOpportunityEnrichment } from "@/lib/rfp/enrichment/store";
+import type { OpportunityEnrichment } from "@/lib/rfp/enrichment/generate";
 import { tierFor } from "@/lib/rfp/scoring/weights";
 
 const QuerySchema = z.object({
@@ -46,6 +48,21 @@ interface DetailJoinRow {
     geo: string | null;
     raw_json: unknown;
   } | null;
+}
+
+interface RfpClient {
+  from(table: "rfp_opp_matches"): {
+    select(columns: string): {
+      eq(column: "opp_id" | "org_id", value: string): {
+        eq(column: "opp_id" | "org_id", value: string): {
+          maybeSingle(): Promise<{
+            data: DetailJoinRow | null;
+            error: { message: string } | null;
+          }>;
+        };
+      };
+    };
+  };
 }
 
 export async function GET(
@@ -81,9 +98,7 @@ export async function GET(
   }
 
   // Query — rfp_* tables aren't in database.types.ts yet (per 05-03 pattern).
-  const rfp = supabase as unknown as {
-    from: (table: string) => any;
-  };
+  const rfp = supabase as unknown as RfpClient;
   const { data, error } = await rfp
     .from("rfp_opp_matches")
     .select(
@@ -108,6 +123,13 @@ export async function GET(
   }
 
   const opp = row.rfp_opportunities;
+  let enrichment: OpportunityEnrichment | null = null;
+  try {
+    enrichment = await ensureOpportunityEnrichment(row.opp_id);
+  } catch (e) {
+    console.error("[/api/rfp/opps/[id] GET] enrichment unavailable", e);
+  }
+
   return NextResponse.json({
     opp_id: row.opp_id,
     source: opp.source,
@@ -130,5 +152,6 @@ export async function GET(
     keywords: opp.keywords ?? [],
     geo: opp.geo,
     raw_json: opp.raw_json,
+    enrichment,
   });
 }
