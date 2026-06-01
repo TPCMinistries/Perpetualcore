@@ -98,6 +98,10 @@
       "schedule": "0 14 * * 0"
     },
     {
+      "path": "/api/cron/rfp-saved-search-alerts",
+      "schedule": "15 14 * * *"
+    },
+    {
       "path": "/api/cron/rfp-monthly-digest",
       "schedule": "0 14 1 * *"
     }

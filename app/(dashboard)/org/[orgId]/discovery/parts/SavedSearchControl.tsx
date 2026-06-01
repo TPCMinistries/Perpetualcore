@@ -178,7 +178,7 @@ export function SavedSearchControl({
                 onChange={(event) => setAlertEnabled(event.target.checked)}
                 className="h-4 w-4 rounded border-zinc-300"
               />
-              Alert me weekly when new matches fit this search
+              Send me a weekly digest when new matches fit this search
             </label>
             {!canSave && (
               <p className="mt-2 text-xs text-zinc-500">
