@@ -22,6 +22,7 @@ import {
 interface OnboardingChecklistProps {
   orgId: string;
   state: OnboardingState;
+  opportunityInventoryCount: number;
 }
 
 interface Step {
@@ -35,7 +36,9 @@ interface Step {
 export function OnboardingChecklist({
   orgId,
   state,
+  opportunityInventoryCount,
 }: OnboardingChecklistProps) {
+  const inventoryLabel = opportunityInventoryCount.toLocaleString("en-US");
   const steps: Step[] = [
     {
       done: state.org_created,
@@ -84,8 +87,8 @@ export function OnboardingChecklist({
   const setupItems = [
     {
       icon: Search,
-      title: "Search across 80k+ opportunities",
-      body: "Use keywords, source, deadline, amount, and fit signals to find the right grants and RFPs.",
+      title: `Search ${inventoryLabel} indexed opportunities`,
+      body: "Use keywords, source, deadline, amount, and fit signals while the source library keeps expanding.",
       href: "#opportunity-feed",
       cta: "Open discovery",
       accent: "text-blue-700",

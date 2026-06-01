@@ -26,6 +26,7 @@
  */
 
 import { buildFeedQuery } from "@/lib/rfp/feed";
+import { getOpportunityInventoryCount } from "@/lib/rfp/inventory";
 import { getOrgForUser, listUserOrgs } from "@/lib/rfp/orgs";
 import { getOnboardingState } from "@/lib/rfp/onboarding";
 import { OnboardingChecklist } from "@/components/rfp/OnboardingChecklist";
@@ -147,13 +148,20 @@ export default async function DiscoveryPage({
   // First-run checklist — auto-hides when all 5 steps complete. Cheap to
   // compute (4 parallel HEAD counts) and the page is already an SSR critical
   // path, so we keep it in the same request.
-  const onboarding = await getOnboardingState(orgId);
+  const [onboarding, opportunityInventoryCount] = await Promise.all([
+    getOnboardingState(orgId),
+    getOpportunityInventoryCount(),
+  ]);
 
   return (
     <>
       {onboarding.all_complete ? null : (
         <div className="mx-auto mb-6 max-w-5xl px-6">
-          <OnboardingChecklist orgId={orgId} state={onboarding} />
+          <OnboardingChecklist
+            orgId={orgId}
+            state={onboarding}
+            opportunityInventoryCount={opportunityInventoryCount}
+          />
         </div>
       )}
       <DeadlineTracker
@@ -170,6 +178,7 @@ export default async function DiscoveryPage({
         initialRows={initialRows}
         initialCursor={initialCursor}
         initialFilters={initialFilters}
+        opportunityInventoryCount={opportunityInventoryCount}
         initialMode={initialMode}
         initialEmptyReason={initialEmptyReason}
       />

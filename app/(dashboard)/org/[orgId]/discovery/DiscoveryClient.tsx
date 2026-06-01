@@ -59,6 +59,7 @@ interface DiscoveryClientProps {
   initialRows: FeedRow[];
   initialCursor: InitialCursor | null;
   initialFilters: FilterValues;
+  opportunityInventoryCount: number;
   /** Initial Mode selection — only meaningful when org.type === 'dual'. */
   initialMode?: ModeFilter;
   /**
@@ -117,17 +118,24 @@ function orgTypeLabel(type: RfpOrg["type"]): string {
   return "Dual";
 }
 
+function formatInventoryCount(count: number): string {
+  if (!Number.isFinite(count) || count <= 0) return "0";
+  return count.toLocaleString("en-US");
+}
+
 export function DiscoveryClient({
   org,
   initialRows,
   initialCursor,
   initialFilters,
+  opportunityInventoryCount,
   initialMode = "all",
   initialEmptyReason = null,
 }: DiscoveryClientProps) {
   const router = useRouter();
   const orgId = org.id;
   const isDualMode = org.type === "dual";
+  const inventoryLabel = formatInventoryCount(opportunityInventoryCount);
 
   const [filters, setFilters] = useState<FilterValues>(initialFilters);
   const [mode, setMode] = useState<ModeFilter>(initialMode);
@@ -280,7 +288,7 @@ export function DiscoveryClient({
                 Opportunity intelligence
               </span>
               <span className="rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 font-mono text-[10px] uppercase tracking-[0.2em] text-emerald-800">
-                80k+ grants & RFPs
+                {inventoryLabel} indexed
               </span>
               <span className="rounded-full border border-zinc-300 bg-white px-3 py-1 font-mono text-[10px] uppercase tracking-[0.2em] text-zinc-600">
                 {orgTypeLabel(org.type)}
@@ -338,9 +346,11 @@ export function DiscoveryClient({
             <div className="border-r border-zinc-200 p-4">
               <Database className="mb-2 h-4 w-4 text-emerald-700" />
               <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-zinc-500">
-                Library
+                Indexed
               </p>
-              <p className="mt-1 text-xl font-semibold text-zinc-950">80k+</p>
+              <p className="mt-1 text-xl font-semibold text-zinc-950">
+                {inventoryLabel}
+              </p>
             </div>
             <div className="border-r border-zinc-200 p-4">
               <Target className="mb-2 h-4 w-4 text-blue-700" />
