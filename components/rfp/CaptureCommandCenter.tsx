@@ -147,6 +147,7 @@ export function CaptureCommandCenter({
                 <tr>
                   <th className="px-3 py-2">Req</th>
                   <th className="px-3 py-2">Category</th>
+                  <th className="px-3 py-2">Source</th>
                   <th className="px-3 py-2">Requirement</th>
                   <th className="px-3 py-2">Owner</th>
                   <th className="px-3 py-2">Status</th>
@@ -160,6 +161,9 @@ export function CaptureCommandCenter({
                     </td>
                     <td className="px-3 py-3 font-mono text-[10px] uppercase tracking-[0.14em] text-zinc-500">
                       {item.category}
+                    </td>
+                    <td className="px-3 py-3 font-mono text-[10px] uppercase tracking-[0.14em] text-zinc-500">
+                      {item.source.replace(/_/g, " ")}
                     </td>
                     <td className="px-3 py-3 text-zinc-200">
                       <div>{item.requirement}</div>

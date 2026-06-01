@@ -10,6 +10,7 @@ import type {
   RequirementCategory,
   RequirementStatus,
 } from "./types";
+import type { PackageExtraction } from "@/lib/rfp/package/extract";
 
 interface ProposalInput {
   id: string;
@@ -44,6 +45,7 @@ export interface CaptureReadinessInput {
   opportunity: OpportunityInput | null;
   match: MatchInput | null;
   sections: SectionInput[];
+  packageExtractions?: PackageExtraction[];
 }
 
 const REQUIREMENT_WORDS = [
@@ -209,6 +211,41 @@ function extractRequirements(opp: OpportunityInput | null): string[] {
   return items;
 }
 
+function packageRequirements(extractions: PackageExtraction[] | undefined): string[] {
+  const seen = new Set<string>();
+  const out: string[] = [];
+  for (const extraction of extractions ?? []) {
+    for (const item of extraction.requirements) {
+      const requirement = cleanText(item.requirement);
+      if (!requirement) continue;
+      const key = requirement.toLowerCase();
+      if (seen.has(key)) continue;
+      seen.add(key);
+      out.push(requirement.length > 280 ? `${requirement.slice(0, 277)}...` : requirement);
+      if (out.length >= 14) return out;
+    }
+  }
+  return out;
+}
+
+function packageDocumentRequirements(extractions: PackageExtraction[] | undefined): string[] {
+  const seen = new Set<string>();
+  const out: string[] = [];
+  for (const extraction of extractions ?? []) {
+    for (const doc of extraction.required_documents) {
+      const label = cleanText(doc);
+      if (!label) continue;
+      const requirement = `Submission package includes required document: ${label}.`;
+      const key = requirement.toLowerCase();
+      if (seen.has(key)) continue;
+      seen.add(key);
+      out.push(requirement);
+      if (out.length >= 8) return out;
+    }
+  }
+  return out;
+}
+
 function vaultChunkCount(raw: unknown): number {
   return Array.isArray(raw) ? raw.length : 0;
 }
@@ -242,17 +279,27 @@ function standardRequirements(opp: OpportunityInput | null): string[] {
 
 function buildComplianceMatrix(input: CaptureReadinessInput): ComplianceMatrixArtifact {
   const extracted = extractRequirements(input.opportunity);
-  const reqs = [...extracted, ...standardRequirements(input.opportunity)].slice(0, 16);
+  const packageReqs = packageRequirements(input.packageExtractions);
+  const packageDocs = packageDocumentRequirements(input.packageExtractions);
+  const standardReqs = standardRequirements(input.opportunity);
+  const reqs = [...packageReqs, ...packageDocs, ...extracted, ...standardReqs].slice(0, 24);
   const items: ComplianceMatrixItem[] = reqs.map((requirement, idx) => {
     const category = categoryFor(requirement);
     const ownerSection = ownerSectionFor(category, requirement);
     const sectionBody = sectionText(input.sections, ownerSection);
     const responseStatus = statusForRequirement(requirement, category, sectionBody);
+    const source = packageReqs.includes(requirement)
+      ? "uploaded_package"
+      : packageDocs.includes(requirement)
+        ? "uploaded_package_document"
+        : extracted.includes(requirement)
+          ? "solicitation"
+          : "standard_capture_check";
     return {
       id: `REQ-${String(idx + 1).padStart(2, "0")}`,
       category,
       requirement,
-      source: extracted.includes(requirement) ? "solicitation" : "standard_capture_check",
+      source,
       response_status: responseStatus,
       owner_section: ownerSection,
       evidence:
@@ -287,6 +334,7 @@ function buildPacketChecklist(
   const sectionsByType = new Map(input.sections.map((s) => [s.section_type, s.content ?? ""]));
   const verifyMarkers = countVerifyMarkers(input.sections);
   const vaultChunks = vaultChunkCount(input.proposal.vault_chunks_used);
+  const packageCount = input.packageExtractions?.length ?? 0;
 
   const sectionItems = Object.values(SECTION_SPECS).map((spec) => {
     const content = sectionsByType.get(spec.type) ?? "";
@@ -323,6 +371,15 @@ function buildPacketChecklist(
         vaultChunks > 0
           ? `${vaultChunks} vault chunk${vaultChunks === 1 ? "" : "s"} cited by the drafter.`
           : "Draft was generated without retrieved evidence chunks.",
+    },
+    {
+      id: "rfp-package-imported",
+      label: "RFP package imported",
+      status: packageCount > 0 ? "met" : "needs_review",
+      notes:
+        packageCount > 0
+          ? `${packageCount} source package${packageCount === 1 ? "" : "s"} imported into the workroom.`
+          : "Import the solicitation package, addenda, or portal instructions before final review.",
     },
     {
       id: "source-link",

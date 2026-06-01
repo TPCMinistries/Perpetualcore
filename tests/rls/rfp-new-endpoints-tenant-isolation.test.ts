@@ -9,7 +9,8 @@
  *   2. PATCH /api/rfp/orgs/[orgId]                       (owner-only)
  *   3. POST  /api/rfp/billing/checkout                   (owner-only, Stripe)
  *   4. POST  /api/rfp/orgs/[orgId]/vault/upload-file     (owner/writer)
- *   5. GET   /admin/rfp page                             (env-var allowlist)
+ *   5. POST  /api/rfp/proposals/[proposalId]/package     (owner/writer/reviewer)
+ *   6. GET   /admin/rfp page                             (env-var allowlist)
  *
  * Setup mirrors the sibling RLS test:
  *   - Ephemeral users A + B via admin.auth.admin.createUser
@@ -366,6 +367,28 @@ async function callVaultUploadFile(orgId: string) {
   return POST(fakeReq, { params: Promise.resolve({ orgId }) });
 }
 
+async function callPackagePaste(proposalId: string) {
+  const { POST } = await import(
+    "@/app/api/rfp/proposals/[proposalId]/package/route"
+  );
+  const form = new FormData();
+  form.set("mode", "paste");
+  form.set("title", `Tenant package ${testRunId}`);
+  form.set("source_url", "");
+  form.set(
+    "body",
+    "Applicants must provide proof of nonprofit eligibility and include an IRS determination letter. " +
+      "The proposal must include a project narrative, budget narrative, measurable outcomes, and all portal attachments. " +
+      "Submission instructions require final upload before the deadline and review of all forms for completeness.",
+  );
+
+  const fakeReq = {
+    formData: async () => form,
+  } as unknown as Parameters<typeof POST>[0];
+
+  return POST(fakeReq, { params: Promise.resolve({ proposalId }) });
+}
+
 // ---------------------------------------------------------------------------
 // Test cases
 // ---------------------------------------------------------------------------
@@ -548,7 +571,37 @@ describe("RFP new-endpoint tenant isolation", () => {
   });
 
   // -------------------------------------------------------------------------
-  // 5. /admin/rfp page — env-var allowlist
+  // 5. Package intake (owner/writer/reviewer)
+  // -------------------------------------------------------------------------
+  describe("POST /api/rfp/proposals/[proposalId]/package", () => {
+    it("User C (writer on org A) can import package instructions", async () => {
+      const res = await withToken(userC.access_token, () =>
+        callPackagePaste(proposalA),
+      );
+      expect(res.status).toBe(200);
+      const body = await res.json();
+      expect(body.package_id).toBeTruthy();
+      expect(body.extraction.kind).toBe("package_requirements_v1");
+
+      const { data } = await admin
+        .from("rfp_package_documents")
+        .select("id")
+        .eq("id", body.package_id)
+        .eq("org_id", orgA)
+        .single();
+      expect(data?.id).toBe(body.package_id);
+    });
+
+    it("User B (different org) gets 404 and cannot import into org A's proposal", async () => {
+      const res = await withToken(userB.access_token, () =>
+        callPackagePaste(proposalA),
+      );
+      expect(res.status).toBe(404);
+    });
+  });
+
+  // -------------------------------------------------------------------------
+  // 6. /admin/rfp page — env-var allowlist
   // -------------------------------------------------------------------------
   describe("GET /admin/rfp page — RFP_PLATFORM_ADMIN_USER_IDS gate", () => {
     it("Non-allowlisted user returns null from getRfpPlatformAdmin (page calls notFound)", async () => {

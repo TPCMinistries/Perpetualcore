@@ -14,6 +14,7 @@ import { z } from "zod";
 import { createAdminClient, createClient } from "@/lib/supabase/server";
 import { generateCaptureReadiness } from "@/lib/rfp/compliance/generate";
 import { CAPTURE_CHECK_TYPES, type CaptureCheckType } from "@/lib/rfp/compliance/types";
+import type { PackageExtraction } from "@/lib/rfp/package/extract";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -52,6 +53,10 @@ interface MatchRow {
 interface SectionRow {
   section_type: string;
   content: string | null;
+}
+
+interface PackageDocRow {
+  extracted_json: unknown;
 }
 
 type RfpTableClient = {
@@ -167,11 +172,32 @@ export async function POST(
     );
   }
 
+  const { data: packageDocs, error: packageErr } = await adminDb
+    .from("rfp_package_documents")
+    .select("extracted_json")
+    .eq("proposal_id", proposal.id)
+    .returns<PackageDocRow[]>();
+  if (packageErr) {
+    return NextResponse.json(
+      { error: "package_load_failed", detail: packageErr.message.slice(0, 200) },
+      { status: 500 },
+    );
+  }
+
+  const packageExtractions = (packageDocs ?? [])
+    .map((row) => row.extracted_json)
+    .filter((value): value is PackageExtraction => {
+      if (!value || typeof value !== "object") return false;
+      const candidate = value as { kind?: unknown; requirements?: unknown };
+      return candidate.kind === "package_requirements_v1" && Array.isArray(candidate.requirements);
+    });
+
   const result = generateCaptureReadiness({
     proposal,
     opportunity,
     match,
     sections: sections ?? [],
+    packageExtractions,
   });
 
   const rows = [

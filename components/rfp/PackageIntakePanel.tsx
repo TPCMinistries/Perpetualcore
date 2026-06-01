@@ -47,11 +47,13 @@ export function PackageIntakePanel({
   const [file, setFile] = useState<File | null>(null);
   const [packages, setPackages] = useState(initialPackages);
   const [error, setError] = useState<string | null>(null);
+  const [status, setStatus] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
 
   function submit() {
     if (!canEdit || isPending) return;
     setError(null);
+    setStatus(null);
     startTransition(async () => {
       const form = new FormData();
       form.set("mode", mode);
@@ -93,6 +95,41 @@ export function PackageIntakePanel({
       ]);
       setBody("");
       setFile(null);
+      setStatus("Package rules extracted. Refreshing readiness checks...");
+
+      const complianceRes = await fetch(`/api/rfp/proposals/${proposalId}/compliance`, {
+        method: "POST",
+      });
+      if (!complianceRes.ok) {
+        const compliancePayload = (await complianceRes.json().catch(() => null)) as
+          | { error?: string; detail?: string }
+          | null;
+        setError(
+          compliancePayload?.detail ??
+            compliancePayload?.error ??
+            "Package imported, but readiness refresh failed.",
+        );
+        router.refresh();
+        return;
+      }
+
+      const tasksRes = await fetch(`/api/rfp/proposals/${proposalId}/submission-tasks`, {
+        method: "POST",
+      });
+      if (!tasksRes.ok) {
+        const tasksPayload = (await tasksRes.json().catch(() => null)) as
+          | { error?: string; detail?: string }
+          | null;
+        setError(
+          tasksPayload?.detail ??
+            tasksPayload?.error ??
+            "Readiness refreshed, but task sync failed.",
+        );
+        router.refresh();
+        return;
+      }
+
+      setStatus("Package rules, readiness checks, and workroom tasks are up to date.");
       router.refresh();
     });
   }
@@ -175,6 +212,7 @@ export function PackageIntakePanel({
             {isPending ? "Extracting package" : "Extract package rules"}
           </button>
           {error ? <p className="text-sm text-rose-700">{error}</p> : null}
+          {status ? <p className="text-sm text-emerald-700">{status}</p> : null}
         </div>
       ) : null}
 
