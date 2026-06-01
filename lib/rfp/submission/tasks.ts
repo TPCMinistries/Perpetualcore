@@ -8,6 +8,7 @@ import {
   ReviewerResultSchema,
   type ReviewerResult,
 } from "@/lib/rfp/review/rubric";
+import type { PackageExtraction } from "@/lib/rfp/package/extract";
 
 export type SubmissionTaskStatus =
   | "open"
@@ -100,6 +101,12 @@ export function parsePacketChecklist(value: unknown): PacketChecklistArtifact | 
   return value as unknown as PacketChecklistArtifact;
 }
 
+export function parsePackageRequirements(value: unknown): PackageExtraction | null {
+  if (!isObject(value) || value.kind !== "package_requirements_v1") return null;
+  if (!Array.isArray(value.requirements)) return null;
+  return value as unknown as PackageExtraction;
+}
+
 export function parseReviewerResult(content: string | null): ReviewerResult | null {
   if (!content) return null;
   try {
@@ -188,6 +195,31 @@ export function buildSubmissionTasks(params: {
       priority: item.response_status === "missing" ? "critical" : "high",
       due_date: params.dueDate,
       evidence: item.evidence || item.source,
+      created_by: params.userId,
+    });
+  }
+
+  const packageExtraction = parsePackageRequirements(
+    checksByType.get("package_requirements_v1"),
+  );
+  for (const item of packageExtraction?.requirements ?? []) {
+    tasks.push({
+      proposal_id: params.proposalId,
+      source_type: "compliance",
+      source_id: `package:${item.id}`,
+      title: `Package ${item.category} requirement`,
+      detail: item.requirement,
+      owner_label:
+        item.category === "budget"
+          ? "Finance / Operations"
+          : item.category === "submission"
+            ? "Submission lead"
+            : item.category === "attachment"
+              ? "Operations"
+              : "Proposal lead",
+      priority: item.priority,
+      due_date: params.dueDate,
+      evidence: item.source,
       created_by: params.userId,
     });
   }

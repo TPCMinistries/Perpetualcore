@@ -114,6 +114,7 @@ export async function POST(
           "bid_no_bid_v1",
           "compliance_matrix_v1",
           "packet_checklist_v1",
+          "package_requirements_v1",
         ])
         .order("created_at", { ascending: false })
         .returns<ComplianceCheckRow[]>(),

@@ -25,6 +25,7 @@ import { ReviewButton } from "@/components/rfp/ReviewButton";
 import { ExportProposalButton } from "@/components/rfp/ExportProposalButton";
 import { SubmissionWorkroom } from "@/components/rfp/SubmissionWorkroom";
 import { ManualSubmissionTaskForm } from "@/components/rfp/ManualSubmissionTaskForm";
+import { PackageIntakePanel } from "@/components/rfp/PackageIntakePanel";
 import {
   PursuitCommandStateForm,
   type PursuitPriority,
@@ -97,6 +98,30 @@ interface EnrichmentRow {
   risks: string[];
   missing_fields: string[];
   quality_score: number;
+}
+
+interface PackageDocRow {
+  id: string;
+  title: string;
+  source_type: "upload" | "url" | "paste";
+  source_url: string | null;
+  file_name: string | null;
+  mime_type: string | null;
+  extracted_chars: number;
+  extracted_json: {
+    quality_score?: number;
+    required_documents?: string[];
+    requirements?: Array<{
+      category?: string;
+      requirement?: string;
+      priority?: string;
+    }>;
+    risks?: string[];
+    page_limits?: string[];
+    scoring_criteria?: string[];
+    submission_instructions?: string[];
+  };
+  created_at: string;
 }
 
 function fmtDate(iso: string | null): string {
@@ -314,6 +339,15 @@ export default async function PursuitDetailPage({ params }: PageProps) {
         .returns<SubmissionTaskRow[]>()
     : { data: [] as SubmissionTaskRow[] };
 
+  const { data: packageDocs } = proposal
+    ? await supabase
+        .from("rfp_package_documents")
+        .select("id, title, source_type, source_url, file_name, mime_type, extracted_chars, extracted_json, created_at")
+        .eq("proposal_id", proposal.id)
+        .order("created_at", { ascending: false })
+        .returns<PackageDocRow[]>()
+    : { data: [] as PackageDocRow[] };
+
   const { data: decisionLogs } = await supabase
     .from("rfp_pursuit_decision_logs")
     .select("id, org_id, opp_id, event_type, title, body, created_by, created_at")
@@ -349,6 +383,12 @@ export default async function PursuitDetailPage({ params }: PageProps) {
     enrichment?.eligibility.length ? enrichment.eligibility : readStringArray(match.score_breakdown, "eligibility");
   const riskSignals =
     enrichment?.risks.length ? enrichment.risks : readStringArray(match.score_breakdown, "risks");
+  const latestPackage = packageDocs?.[0] ?? null;
+  const packageRequirements =
+    latestPackage?.extracted_json.requirements
+      ?.map((item) => item.requirement)
+      .filter((item): item is string => Boolean(item)) ?? [];
+  const packageDocsList = latestPackage?.extracted_json.required_documents ?? [];
 
   const actionClass =
     action.tone === "ready"
@@ -564,7 +604,7 @@ export default async function PursuitDetailPage({ params }: PageProps) {
               icon={ListChecks}
               title="Required documents"
               items={fallbackList(
-                enrichment?.required_documents,
+                packageDocsList.length > 0 ? packageDocsList : enrichment?.required_documents,
                 "Open the solicitation and build the attachment list.",
               )}
             />
@@ -572,7 +612,9 @@ export default async function PursuitDetailPage({ params }: PageProps) {
               icon={Route}
               title="Submission path"
               items={[
-                enrichment?.submission_method ?? "Confirm portal, deadline timezone, and submission evidence.",
+                latestPackage?.extracted_json.submission_instructions?.[0] ??
+                  enrichment?.submission_method ??
+                  "Confirm portal, deadline timezone, and submission evidence.",
                 ...(enrichment?.timeline ?? []).slice(0, 4),
               ]}
             />
@@ -595,10 +637,10 @@ export default async function PursuitDetailPage({ params }: PageProps) {
             />
             <CapturePlanCard
               icon={FileText}
-              title="Capture gaps"
+              title="Package requirements"
               items={fallbackList(
-                enrichment?.missing_fields,
-                "No missing source fields detected.",
+                packageRequirements,
+                "Import the solicitation package to extract the formal requirements.",
               )}
             />
           </div>
@@ -628,7 +670,12 @@ export default async function PursuitDetailPage({ params }: PageProps) {
         {proposal ? (
           <div className="mt-8 grid gap-6 xl:grid-cols-[1fr_380px]">
             <div>
-              <section className="rounded-lg border border-zinc-200 bg-white p-5 shadow-sm">
+              <PackageIntakePanel
+                proposalId={proposal.id}
+                initialPackages={packageDocs ?? []}
+                canEdit={canEdit}
+              />
+              <section className="mt-6 rounded-lg border border-zinc-200 bg-white p-5 shadow-sm">
                 <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-zinc-500">
                   Proposal controls
                 </p>

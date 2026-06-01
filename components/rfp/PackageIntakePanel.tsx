@@ -1,0 +1,215 @@
+"use client";
+
+import { useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
+import { FileUp, Link2, Loader2, TextCursorInput } from "lucide-react";
+
+type IntakeMode = "upload" | "url" | "paste";
+
+interface PackageSummary {
+  id: string;
+  title: string;
+  source_type: IntakeMode;
+  source_url: string | null;
+  file_name: string | null;
+  extracted_chars: number;
+  extracted_json: {
+    quality_score?: number;
+    required_documents?: string[];
+    requirements?: unknown[];
+    risks?: string[];
+  };
+  created_at: string;
+}
+
+interface PackageIntakePanelProps {
+  proposalId: string;
+  initialPackages: PackageSummary[];
+  canEdit: boolean;
+}
+
+function formatDate(iso: string): string {
+  const date = new Date(iso);
+  if (Number.isNaN(date.getTime())) return "Unknown";
+  return date.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+}
+
+export function PackageIntakePanel({
+  proposalId,
+  initialPackages,
+  canEdit,
+}: PackageIntakePanelProps) {
+  const router = useRouter();
+  const [mode, setMode] = useState<IntakeMode>("upload");
+  const [title, setTitle] = useState("Solicitation package");
+  const [sourceUrl, setSourceUrl] = useState("");
+  const [body, setBody] = useState("");
+  const [file, setFile] = useState<File | null>(null);
+  const [packages, setPackages] = useState(initialPackages);
+  const [error, setError] = useState<string | null>(null);
+  const [isPending, startTransition] = useTransition();
+
+  function submit() {
+    if (!canEdit || isPending) return;
+    setError(null);
+    startTransition(async () => {
+      const form = new FormData();
+      form.set("mode", mode);
+      form.set("title", title);
+      form.set("source_url", sourceUrl);
+      form.set("body", body);
+      if (file) form.set("file", file);
+
+      const res = await fetch(`/api/rfp/proposals/${proposalId}/package`, {
+        method: "POST",
+        body: form,
+      });
+      const payload = (await res.json().catch(() => null)) as
+        | {
+            package_id?: string;
+            extraction?: PackageSummary["extracted_json"];
+            error?: string;
+            detail?: string;
+            extracted_chars?: number;
+          }
+        | null;
+      if (!res.ok || !payload?.package_id || !payload.extraction) {
+        setError(payload?.detail ?? payload?.error ?? `HTTP ${res.status}`);
+        return;
+      }
+
+      setPackages((current) => [
+        {
+          id: payload.package_id!,
+          title,
+          source_type: mode,
+          source_url: sourceUrl || null,
+          file_name: file?.name ?? null,
+          extracted_chars: payload.extracted_chars ?? 0,
+          extracted_json: payload.extraction!,
+          created_at: new Date().toISOString(),
+        },
+        ...current,
+      ]);
+      setBody("");
+      setFile(null);
+      router.refresh();
+    });
+  }
+
+  return (
+    <section className="rounded-lg border border-zinc-200 bg-white p-5 shadow-sm">
+      <div className="flex flex-wrap items-start justify-between gap-4">
+        <div>
+          <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-zinc-500">
+            Package intake
+          </p>
+          <h2 className="mt-2 text-lg font-semibold text-zinc-950">
+            Import the actual RFP/grant package
+          </h2>
+          <p className="mt-2 max-w-2xl text-sm leading-6 text-zinc-600">
+            Extracts rules, attachments, page limits, scoring, dates, and
+            submission instructions into the workroom.
+          </p>
+        </div>
+        <div className="flex rounded-md border border-zinc-200 bg-zinc-50 p-1">
+          {(["upload", "url", "paste"] as const).map((nextMode) => (
+            <button
+              key={nextMode}
+              type="button"
+              onClick={() => setMode(nextMode)}
+              className={`inline-flex h-8 items-center gap-1.5 rounded px-3 text-xs font-medium capitalize transition ${
+                mode === nextMode
+                  ? "bg-zinc-950 text-white"
+                  : "text-zinc-600 hover:bg-white"
+              }`}
+            >
+              {nextMode === "upload" ? <FileUp className="h-3.5 w-3.5" /> : null}
+              {nextMode === "url" ? <Link2 className="h-3.5 w-3.5" /> : null}
+              {nextMode === "paste" ? <TextCursorInput className="h-3.5 w-3.5" /> : null}
+              {nextMode}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {canEdit ? (
+        <div className="mt-5 grid gap-3">
+          <input
+            value={title}
+            onChange={(event) => setTitle(event.target.value)}
+            className="h-10 rounded-md border border-zinc-300 bg-white px-3 text-sm outline-none focus:border-zinc-500"
+            placeholder="Package title"
+          />
+          {mode === "upload" ? (
+            <input
+              type="file"
+              accept=".pdf,.docx,.txt,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/plain"
+              onChange={(event) => setFile(event.target.files?.[0] ?? null)}
+              className="rounded-md border border-dashed border-zinc-300 bg-zinc-50 px-3 py-3 text-sm text-zinc-700"
+            />
+          ) : null}
+          {mode === "url" ? (
+            <input
+              value={sourceUrl}
+              onChange={(event) => setSourceUrl(event.target.value)}
+              className="h-10 rounded-md border border-zinc-300 bg-white px-3 text-sm outline-none focus:border-zinc-500"
+              placeholder="https://..."
+            />
+          ) : null}
+          {mode === "paste" ? (
+            <textarea
+              value={body}
+              onChange={(event) => setBody(event.target.value)}
+              className="min-h-32 rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm leading-6 outline-none focus:border-zinc-500"
+              placeholder="Paste solicitation text, instructions, addenda, or portal requirements..."
+            />
+          ) : null}
+          <button
+            type="button"
+            onClick={submit}
+            disabled={isPending}
+            className="inline-flex h-10 w-fit items-center gap-2 rounded-md bg-zinc-950 px-4 text-sm font-medium text-white transition hover:bg-zinc-800 disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            {isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <FileUp className="h-4 w-4" />}
+            {isPending ? "Extracting package" : "Extract package rules"}
+          </button>
+          {error ? <p className="text-sm text-rose-700">{error}</p> : null}
+        </div>
+      ) : null}
+
+      {packages.length > 0 ? (
+        <div className="mt-5 divide-y divide-zinc-200 overflow-hidden rounded-lg border border-zinc-200">
+          {packages.slice(0, 5).map((pkg) => {
+            const extraction = pkg.extracted_json;
+            return (
+              <div key={pkg.id} className="bg-zinc-50 p-4">
+                <div className="flex flex-wrap items-start justify-between gap-3">
+                  <div>
+                    <p className="text-sm font-semibold text-zinc-950">{pkg.title}</p>
+                    <p className="mt-1 font-mono text-[10px] uppercase tracking-[0.16em] text-zinc-500">
+                      {pkg.source_type} · {formatDate(pkg.created_at)} · {pkg.extracted_chars.toLocaleString()} chars
+                    </p>
+                  </div>
+                  <span className="rounded-full border border-zinc-200 bg-white px-3 py-1 font-mono text-[10px] uppercase tracking-[0.14em] text-zinc-600">
+                    {extraction.quality_score ?? 0}% depth
+                  </span>
+                </div>
+                <p className="mt-3 text-xs leading-5 text-zinc-600">
+                  {(extraction.requirements?.length ?? 0)} requirements ·{" "}
+                  {(extraction.required_documents?.length ?? 0)} docs ·{" "}
+                  {(extraction.risks?.length ?? 0)} risks
+                </p>
+              </div>
+            );
+          })}
+        </div>
+      ) : (
+        <p className="mt-5 rounded-lg border border-dashed border-zinc-300 bg-zinc-50 p-4 text-sm text-zinc-500">
+          No package imported yet. Add the solicitation PDF, DOCX, source URL, or
+          portal instructions to make this workroom package-aware.
+        </p>
+      )}
+    </section>
+  );
+}
