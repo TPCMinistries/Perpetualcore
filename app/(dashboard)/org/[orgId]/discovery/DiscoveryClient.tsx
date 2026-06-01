@@ -40,6 +40,7 @@ import {
 } from "./parts/FilterPills";
 import { FeedList } from "./parts/FeedList";
 import { DetailPane } from "./parts/DetailPane";
+import { SavedSearchControl } from "./parts/SavedSearchControl";
 import { QuickImportBar } from "@/components/rfp/quick-import-bar";
 import type { OpportunityTriageStatus } from "@/components/rfp/OpportunityTriageControl";
 import type { FeedRow } from "@/lib/rfp/feed";
@@ -248,6 +249,15 @@ export function DiscoveryClient({
     window.location.reload();
   }, []);
 
+  const applySavedSearch = useCallback(
+    (nextFilters: FilterValues, nextMode: ModeFilter) => {
+      setFilters(nextFilters);
+      setQueryDraft(nextFilters.query);
+      setMode(nextMode);
+    },
+    [],
+  );
+
   const handleTriageChange = useCallback(
     (oppId: string, status: OpportunityTriageStatus, note: string | null) => {
       setRows((prev) =>
@@ -371,13 +381,21 @@ export function DiscoveryClient({
 
         <div className="mt-4 space-y-3 rounded-xl border border-zinc-200 bg-white p-3 shadow-sm">
           <QuickImportBar orgId={orgId} onImported={handleImported} />
-          <FilterPills
-            value={filters}
-            onChange={setFilters}
-            isDualMode={isDualMode}
-            mode={mode}
-            onModeChange={setMode}
-          />
+          <div className="flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
+            <FilterPills
+              value={filters}
+              onChange={setFilters}
+              isDualMode={isDualMode}
+              mode={mode}
+              onModeChange={setMode}
+            />
+            <SavedSearchControl
+              orgId={orgId}
+              filters={filters}
+              mode={mode}
+              onApply={applySavedSearch}
+            />
+          </div>
         </div>
       </div>
 
