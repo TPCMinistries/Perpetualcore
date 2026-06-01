@@ -22,6 +22,8 @@ import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 
 type AccountLead = {
@@ -58,6 +60,23 @@ type AccountPlan = {
   nextAction: string;
 };
 
+type AccountMilestone = {
+  id: string;
+  title: string;
+  detail: string;
+  completed: boolean;
+  owner: string;
+  dueDate: string;
+  notes: string;
+};
+
+type AccountUpdate = {
+  summary: string;
+  decision: string;
+  risk: string;
+  nextAction: string;
+};
+
 const defaultPlan: AccountPlan = {
   firstLane: "Confirm the first workflow and owner.",
   sevenDayDeliverable: "Ship one useful operating surface the client can react to.",
@@ -69,26 +88,38 @@ const defaultPlan: AccountPlan = {
 
 const milestoneTemplates = [
   {
+    id: "kickoff-confirmed",
     title: "Kickoff confirmed",
     detail: "Payment/admin path, owner, first lane, and meeting date are clear.",
   },
   {
+    id: "context-collected",
     title: "Context collected",
     detail: "Docs, links, examples, data exports, inboxes, or screenshots are gathered.",
   },
   {
+    id: "workflow-mapped",
     title: "First workflow mapped",
     detail: "Current process, bottleneck, users, source systems, and success metric are defined.",
   },
   {
+    id: "assistant-behavior",
     title: "Assistant behavior drafted",
     detail: "What the AI should do, avoid, ask, escalate, and remember is written down.",
   },
   {
+    id: "first-lane-shipped",
     title: "First lane shipped",
     detail: "The client has a working output, not only a discussion or mockup.",
   },
 ];
+
+const defaultUpdate: AccountUpdate = {
+  summary: "",
+  decision: "",
+  risk: "",
+  nextAction: "",
+};
 
 function formatDate(value?: string | null) {
   if (!value) return "Not scheduled";
@@ -135,6 +166,36 @@ function readAccountPlan(lead: AccountLead): AccountPlan {
   return { ...defaultPlan, ...(insights.accountPlan || {}) };
 }
 
+function createDefaultMilestones(): AccountMilestone[] {
+  return milestoneTemplates.map((milestone) => ({
+    ...milestone,
+    completed: false,
+    owner: "",
+    dueDate: "",
+    notes: "",
+  }));
+}
+
+function readAccountMilestones(lead: AccountLead): AccountMilestone[] {
+  if (!lead.ai_insights || typeof lead.ai_insights !== "object" || Array.isArray(lead.ai_insights)) {
+    return createDefaultMilestones();
+  }
+
+  const insights = lead.ai_insights as { accountMilestones?: Partial<AccountMilestone>[] };
+  const saved = insights.accountMilestones || [];
+
+  return milestoneTemplates.map((template) => {
+    const match = saved.find((item) => item.id === template.id);
+    return {
+      ...template,
+      completed: Boolean(match?.completed),
+      owner: match?.owner || "",
+      dueDate: match?.dueDate || "",
+      notes: match?.notes || "",
+    };
+  });
+}
+
 function buildAccountBrief(lead: AccountLead, plan: AccountPlan) {
   return [
     `Account: ${getAccountName(lead)}`,
@@ -177,7 +238,10 @@ export default function AccountDetailPage() {
   const [activities, setActivities] = useState<LeadActivity[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [savingUpdate, setSavingUpdate] = useState(false);
   const [plan, setPlan] = useState<AccountPlan>(defaultPlan);
+  const [milestones, setMilestones] = useState<AccountMilestone[]>(createDefaultMilestones());
+  const [accountUpdate, setAccountUpdate] = useState<AccountUpdate>(defaultUpdate);
 
   async function fetchAccount() {
     setLoading(true);
@@ -188,6 +252,7 @@ export default function AccountDetailPage() {
       setLead(result.lead);
       setActivities(result.activities || []);
       setPlan(readAccountPlan(result.lead));
+      setMilestones(readAccountMilestones(result.lead));
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Could not load account");
     } finally {
@@ -227,6 +292,7 @@ export default function AccountDetailPage() {
           ai_insights: {
             ...currentInsights,
             accountPlan: plan,
+            accountMilestones: milestones,
             accountPlanUpdatedAt: new Date().toISOString(),
           },
         }),
@@ -241,6 +307,63 @@ export default function AccountDetailPage() {
       toast.error(error instanceof Error ? error.message : "Could not save account plan");
     } finally {
       setSaving(false);
+    }
+  }
+
+  async function saveAccountUpdate() {
+    if (!lead) return;
+    const hasUpdate = Object.values(accountUpdate).some((value) => value.trim().length > 0);
+    if (!hasUpdate) {
+      toast.error("Add an update before saving");
+      return;
+    }
+
+    setSavingUpdate(true);
+    try {
+      const currentInsights =
+        lead.ai_insights && typeof lead.ai_insights === "object" && !Array.isArray(lead.ai_insights)
+          ? (lead.ai_insights as { accountUpdates?: Array<AccountUpdate & { createdAt: string }> })
+          : {};
+      const accountUpdates = [
+        {
+          ...accountUpdate,
+          createdAt: new Date().toISOString(),
+        },
+        ...(currentInsights.accountUpdates || []),
+      ].slice(0, 20);
+      const updateBlock = [
+        "Account update",
+        accountUpdate.summary ? `Summary: ${accountUpdate.summary}` : "",
+        accountUpdate.decision ? `Decision: ${accountUpdate.decision}` : "",
+        accountUpdate.risk ? `Risk: ${accountUpdate.risk}` : "",
+        accountUpdate.nextAction ? `Next action: ${accountUpdate.nextAction}` : "",
+      ].filter(Boolean).join("\n");
+      const nextNotes = lead.notes?.trim() ? `${lead.notes.trim()}\n\n---\n${updateBlock}` : updateBlock;
+      const response = await fetch(`/api/leads/${lead.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          status: lead.status || "won",
+          stage: "delivery_handoff",
+          notes: nextNotes,
+          ai_insights: {
+            ...currentInsights,
+            accountPlan: plan,
+            accountMilestones: milestones,
+            accountUpdates,
+            accountPlanUpdatedAt: new Date().toISOString(),
+          },
+        }),
+      });
+
+      if (!response.ok) throw new Error("Could not save account update");
+      setAccountUpdate(defaultUpdate);
+      await fetchAccount();
+      toast.success("Account update saved");
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Could not save account update");
+    } finally {
+      setSavingUpdate(false);
     }
   }
 
@@ -434,18 +557,138 @@ export default function AccountDetailPage() {
       <Card className="rounded-lg shadow-none">
         <CardHeader>
           <div className="flex items-center justify-between gap-4">
+            <CardTitle className="text-xl">Account update</CardTitle>
+            <CalendarClock className="h-5 w-5 text-violet-600" />
+          </div>
+          <p className="text-sm leading-6 text-slate-600">
+            Save calls, decisions, risks, and next steps as delivery memory. This keeps the assistant
+            grounded in what actually happened with the client.
+          </p>
+        </CardHeader>
+        <CardContent className="grid gap-4 md:grid-cols-2">
+          {[
+            ["summary", "What happened?"],
+            ["decision", "Decision or commitment"],
+            ["risk", "Risk or blocker"],
+            ["nextAction", "Next action"],
+          ].map(([key, label]) => (
+            <div key={key}>
+              <label className="text-sm font-medium text-slate-800" htmlFor={`update-${key}`}>
+                {label}
+              </label>
+              <Textarea
+                id={`update-${key}`}
+                className="mt-2 min-h-24"
+                value={accountUpdate[key as keyof AccountUpdate]}
+                onChange={(event) =>
+                  setAccountUpdate((current) => ({
+                    ...current,
+                    [key]: event.target.value,
+                  }))
+                }
+              />
+            </div>
+          ))}
+          <div className="md:col-span-2">
+            <Button type="button" className="rounded-md" disabled={savingUpdate} onClick={saveAccountUpdate}>
+              {savingUpdate ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
+              Save account update
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card className="rounded-lg shadow-none">
+        <CardHeader>
+          <div className="flex items-center justify-between gap-4">
             <CardTitle className="text-xl">Delivery milestones</CardTitle>
             <CheckCircle2 className="h-5 w-5 text-violet-600" />
           </div>
+          <p className="text-sm leading-6 text-slate-600">
+            These are now editable operating checkpoints. Save the plan when owner, dates, or notes
+            change.
+          </p>
         </CardHeader>
-        <CardContent className="grid gap-3 md:grid-cols-5">
-          {milestoneTemplates.map((milestone, index) => (
-            <div key={milestone.title} className="rounded-lg border bg-white p-4">
-              <span className="flex h-7 w-7 items-center justify-center rounded-full bg-violet-100 text-xs font-semibold text-violet-700">
-                {index + 1}
-              </span>
-              <p className="mt-4 text-sm font-semibold text-slate-950">{milestone.title}</p>
-              <p className="mt-2 text-sm leading-5 text-slate-600">{milestone.detail}</p>
+        <CardContent className="grid gap-3">
+          {milestones.map((milestone, index) => (
+            <div
+              key={milestone.id}
+              className="grid gap-4 rounded-lg border bg-white p-4 lg:grid-cols-[minmax(0,1fr)_180px_180px_minmax(0,1fr)]"
+            >
+              <div className="flex gap-3">
+                <Checkbox
+                  id={`milestone-${milestone.id}`}
+                  checked={milestone.completed}
+                  onCheckedChange={(checked) =>
+                    setMilestones((current) =>
+                      current.map((item) =>
+                        item.id === milestone.id ? { ...item, completed: checked === true } : item,
+                      ),
+                    )
+                  }
+                  className="mt-1"
+                />
+                <div>
+                  <label
+                    htmlFor={`milestone-${milestone.id}`}
+                    className="cursor-pointer text-sm font-semibold text-slate-950"
+                  >
+                    {index + 1}. {milestone.title}
+                  </label>
+                  <p className="mt-2 text-sm leading-5 text-slate-600">{milestone.detail}</p>
+                </div>
+              </div>
+              <div>
+                <label className="text-xs font-medium uppercase tracking-[0.14em] text-slate-500">
+                  Owner
+                </label>
+                <Input
+                  className="mt-2"
+                  value={milestone.owner}
+                  placeholder="Lorenzo / client"
+                  onChange={(event) =>
+                    setMilestones((current) =>
+                      current.map((item) =>
+                        item.id === milestone.id ? { ...item, owner: event.target.value } : item,
+                      ),
+                    )
+                  }
+                />
+              </div>
+              <div>
+                <label className="text-xs font-medium uppercase tracking-[0.14em] text-slate-500">
+                  Due date
+                </label>
+                <Input
+                  className="mt-2"
+                  type="date"
+                  value={milestone.dueDate}
+                  onChange={(event) =>
+                    setMilestones((current) =>
+                      current.map((item) =>
+                        item.id === milestone.id ? { ...item, dueDate: event.target.value } : item,
+                      ),
+                    )
+                  }
+                />
+              </div>
+              <div>
+                <label className="text-xs font-medium uppercase tracking-[0.14em] text-slate-500">
+                  Notes
+                </label>
+                <Textarea
+                  className="mt-2 min-h-20"
+                  value={milestone.notes}
+                  placeholder="What needs to happen?"
+                  onChange={(event) =>
+                    setMilestones((current) =>
+                      current.map((item) =>
+                        item.id === milestone.id ? { ...item, notes: event.target.value } : item,
+                      ),
+                    )
+                  }
+                />
+              </div>
             </div>
           ))}
         </CardContent>
