@@ -262,22 +262,6 @@ function getSourceLeadSummary(lead: SourceLead) {
   return `${company || contact} | ${contact} | ${status} | ${value} | next touch: ${nextTouch}`;
 }
 
-function getDeliveryHandoffNote(lead: SourceLead) {
-  const lane = getAccountLane(lead);
-  const company = getLeadCompany(lead) || "Account";
-  const contact = getLeadName(lead);
-
-  return [
-    "Delivery handoff opened",
-    `Account: ${company}`,
-    `Contact: ${contact}`,
-    `Starting lane: ${lane.label}`,
-    `Recommended package: ${lane.packageId}`,
-    "Kickoff focus:",
-    ...kickoffChecklist.map((step, index) => `${index + 1}. ${step.title} - ${step.detail}`),
-  ].join("\n");
-}
-
 function getAccountCopyActions(lead: SourceLead) {
   const lane = getAccountLane(lead);
   const company = getLeadCompany(lead) || "your team";
@@ -376,28 +360,21 @@ export default function AccountsPage() {
     setSavingHandoff(true);
 
     try {
-      const handoffNote = getDeliveryHandoffNote(lead);
-      const existingNotes = lead.notes?.trim();
-      const nextNotes = existingNotes ? `${existingNotes}\n\n---\n${handoffNote}` : handoffNote;
-      const response = await fetch(`/api/leads/${lead.id}`, {
-        method: "PATCH",
+      const response = await fetch("/api/accounts", {
+        method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          status: "won",
-          stage: "delivery_handoff",
-          notes: nextNotes,
-        }),
+        body: JSON.stringify({ leadId: lead.id }),
       });
 
       if (!response.ok) {
-        throw new Error("Failed to open delivery handoff");
+        throw new Error("Failed to open account handoff");
       }
 
       const result = (await response.json()) as { lead: SourceLead };
       setSourceLead(result.lead);
       await fetchSourceLead(lead.id);
       await fetchAccounts();
-      toast.success("Delivery handoff opened");
+      toast.success("Permanent account and delivery handoff opened");
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Could not open delivery handoff");
     } finally {

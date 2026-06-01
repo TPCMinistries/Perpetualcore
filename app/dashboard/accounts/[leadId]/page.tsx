@@ -77,6 +77,24 @@ type AccountUpdate = {
   nextAction: string;
 };
 
+type PermanentAccount = {
+  id: string;
+  name: string;
+  account_type: string;
+  status: string;
+  updated_at: string;
+};
+
+type PermanentEngagement = {
+  id: string;
+  offer_name: string;
+  system_name: string;
+  stage: string;
+  value_range?: string | null;
+  next_step?: string | null;
+  updated_at: string;
+};
+
 const defaultPlan: AccountPlan = {
   firstLane: "Confirm the first workflow and owner.",
   sevenDayDeliverable: "Ship one useful operating surface the client can react to.",
@@ -136,6 +154,10 @@ function formatCurrency(value?: number | null) {
 
 function normalizeStatus(status?: string | null) {
   return (status || "new").replace(/_/g, " ").replace(/\b\w/g, (letter) => letter.toUpperCase());
+}
+
+function shortId(value?: string | null) {
+  return value ? value.slice(0, 8) : "pending";
 }
 
 function getAccountName(lead: AccountLead) {
@@ -239,9 +261,28 @@ export default function AccountDetailPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [savingUpdate, setSavingUpdate] = useState(false);
+  const [syncingAccount, setSyncingAccount] = useState(false);
+  const [permanentAccount, setPermanentAccount] = useState<PermanentAccount | null>(null);
+  const [permanentEngagement, setPermanentEngagement] = useState<PermanentEngagement | null>(null);
   const [plan, setPlan] = useState<AccountPlan>(defaultPlan);
   const [milestones, setMilestones] = useState<AccountMilestone[]>(createDefaultMilestones());
   const [accountUpdate, setAccountUpdate] = useState<AccountUpdate>(defaultUpdate);
+
+  async function fetchPermanentAccount(nextLeadId: string) {
+    try {
+      const response = await fetch(`/api/accounts?leadId=${encodeURIComponent(nextLeadId)}`, { cache: "no-store" });
+      if (!response.ok) return;
+      const result = (await response.json()) as {
+        account?: PermanentAccount | null;
+        engagement?: PermanentEngagement | null;
+      };
+      setPermanentAccount(result.account || null);
+      setPermanentEngagement(result.engagement || null);
+    } catch {
+      setPermanentAccount(null);
+      setPermanentEngagement(null);
+    }
+  }
 
   async function fetchAccount() {
     setLoading(true);
@@ -253,6 +294,7 @@ export default function AccountDetailPage() {
       setActivities(result.activities || []);
       setPlan(readAccountPlan(result.lead));
       setMilestones(readAccountMilestones(result.lead));
+      await fetchPermanentAccount(result.lead.id);
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Could not load account");
     } finally {
@@ -307,6 +349,35 @@ export default function AccountDetailPage() {
       toast.error(error instanceof Error ? error.message : "Could not save account plan");
     } finally {
       setSaving(false);
+    }
+  }
+
+  async function syncPermanentAccount() {
+    if (!lead) return;
+    setSyncingAccount(true);
+    try {
+      await saveAccountPlan("won");
+      const response = await fetch("/api/accounts", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ leadId: lead.id }),
+      });
+
+      if (!response.ok) throw new Error("Could not sync permanent account");
+      const result = (await response.json()) as {
+        account: PermanentAccount;
+        engagement: PermanentEngagement;
+        lead: AccountLead;
+      };
+      setLead(result.lead);
+      setPermanentAccount(result.account);
+      setPermanentEngagement(result.engagement);
+      await fetchAccount();
+      toast.success("Permanent account and engagement synced");
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Could not sync account");
+    } finally {
+      setSyncingAccount(false);
     }
   }
 
@@ -409,6 +480,20 @@ export default function AccountDetailPage() {
             {saving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
             Save plan
           </Button>
+          <Button
+            type="button"
+            className="rounded-md"
+            variant="outline"
+            disabled={syncingAccount}
+            onClick={syncPermanentAccount}
+          >
+            {syncingAccount ? (
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            ) : (
+              <PackageCheck className="mr-2 h-4 w-4" />
+            )}
+            Sync account DB
+          </Button>
         </div>
       </div>
 
@@ -445,6 +530,41 @@ export default function AccountDetailPage() {
               </div>
             ))}
           </div>
+        </div>
+      </section>
+
+      <section className="grid gap-3 md:grid-cols-3">
+        <div className="rounded-lg border border-violet-200 bg-violet-50 p-4">
+          <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-violet-700">
+            Permanent account
+          </p>
+          <p className="mt-2 text-sm font-semibold text-slate-950">
+            {permanentAccount ? permanentAccount.name : "Not synced yet"}
+          </p>
+          <p className="mt-1 text-xs text-slate-600">
+            {permanentAccount ? `pc_accounts/${shortId(permanentAccount.id)}` : "Use Sync account DB before delivery expands."}
+          </p>
+        </div>
+        <div className="rounded-lg border bg-white p-4">
+          <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-slate-500">
+            Engagement
+          </p>
+          <p className="mt-2 text-sm font-semibold text-slate-950">
+            {permanentEngagement ? permanentEngagement.offer_name : recommendedLane}
+          </p>
+          <p className="mt-1 text-xs text-slate-600">
+            {permanentEngagement
+              ? `pc_engagements/${shortId(permanentEngagement.id)} - ${normalizeStatus(permanentEngagement.stage)}`
+              : "Lead-backed recommendation until synced."}
+          </p>
+        </div>
+        <div className="rounded-lg border bg-white p-4">
+          <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-slate-500">
+            Next system action
+          </p>
+          <p className="mt-2 text-sm font-semibold text-slate-950">
+            {permanentEngagement?.next_step || plan.nextAction}
+          </p>
         </div>
       </section>
 
