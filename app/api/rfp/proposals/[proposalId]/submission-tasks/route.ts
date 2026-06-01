@@ -2,8 +2,10 @@ import { NextResponse } from "next/server";
 import { createAdminClient, createClient } from "@/lib/supabase/server";
 import {
   buildSubmissionTasks,
+  type SubmissionTaskEnrichment,
   type SubmissionTaskRow,
 } from "@/lib/rfp/submission/tasks";
+import { ensureOpportunityEnrichment } from "@/lib/rfp/enrichment/store";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -11,6 +13,7 @@ export const dynamic = "force-dynamic";
 interface ProposalRow {
   id: string;
   org_id: string;
+  opp_id: string | null;
   due_date: string | null;
 }
 
@@ -37,7 +40,7 @@ async function requireProposalAccess(proposalId: string) {
 
   const { data: proposal } = await supabase
     .from("rfp_proposals")
-    .select("id, org_id, due_date")
+    .select("id, org_id, opp_id, due_date")
     .eq("id", proposalId)
     .maybeSingle<ProposalRow>();
   if (!proposal) {
@@ -126,12 +129,17 @@ export async function POST(
     );
   }
 
+  const enrichment = access.proposal.opp_id
+    ? await ensureOpportunityEnrichment(access.proposal.opp_id)
+    : null;
+
   const tasks = buildSubmissionTasks({
     proposalId,
     dueDate: access.proposal.due_date,
     userId: access.user.id,
     sections: sections ?? [],
     checks: checks ?? [],
+    enrichment: enrichment as SubmissionTaskEnrichment | null,
   });
 
   if (tasks.length > 0) {

@@ -10,8 +10,12 @@ import {
   DollarSign,
   ExternalLink,
   FileText,
+  Gauge,
   ListChecks,
+  Mail,
+  Route,
   Search,
+  ShieldCheck,
   Sparkles,
 } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
@@ -78,6 +82,21 @@ interface ProposalRow {
   due_date: string | null;
   updated_at: string;
   created_at: string;
+}
+
+interface EnrichmentRow {
+  eligibility: string[];
+  required_documents: string[];
+  submission_method: string | null;
+  submission_url: string | null;
+  contact: string | null;
+  matching_funds: string | null;
+  funding_method: string | null;
+  award_range: string | null;
+  timeline: string[];
+  risks: string[];
+  missing_fields: string[];
+  quality_score: number;
 }
 
 function fmtDate(iso: string | null): string {
@@ -164,6 +183,10 @@ function readStringArray(value: unknown, key: string): string[] {
   return Array.isArray(raw)
     ? raw.filter((item): item is string => typeof item === "string")
     : [];
+}
+
+function fallbackList(items: string[] | undefined, fallback: string): string[] {
+  return items && items.length > 0 ? items : [fallback];
 }
 
 function nextAction(params: {
@@ -263,6 +286,14 @@ export default async function PursuitDetailPage({ params }: PageProps) {
   if (!match?.rfp_opportunities) notFound();
 
   const opp = match.rfp_opportunities;
+  const { data: enrichment } = await supabase
+    .from("rfp_opportunity_enrichments")
+    .select(
+      "eligibility, required_documents, submission_method, submission_url, contact, matching_funds, funding_method, award_range, timeline, risks, missing_fields, quality_score",
+    )
+    .eq("opp_id", oppId)
+    .maybeSingle<EnrichmentRow>();
+
   const { data: proposal } = await supabase
     .from("rfp_proposals")
     .select("id, title, status, due_date, updated_at, created_at")
@@ -314,8 +345,10 @@ export default async function PursuitDetailPage({ params }: PageProps) {
     deadlineDays,
   });
   const ActionIcon = action.icon;
-  const eligibilitySignals = readStringArray(match.score_breakdown, "eligibility");
-  const riskSignals = readStringArray(match.score_breakdown, "risks");
+  const eligibilitySignals =
+    enrichment?.eligibility.length ? enrichment.eligibility : readStringArray(match.score_breakdown, "eligibility");
+  const riskSignals =
+    enrichment?.risks.length ? enrichment.risks : readStringArray(match.score_breakdown, "risks");
 
   const actionClass =
     action.tone === "ready"
@@ -366,7 +399,7 @@ export default async function PursuitDetailPage({ params }: PageProps) {
               <Signal
                 icon={DollarSign}
                 label="Award range"
-                value={fmtMoney(opp.amount_min, opp.amount_max)}
+                value={enrichment?.award_range ?? fmtMoney(opp.amount_min, opp.amount_max)}
               />
               <Signal
                 icon={FileText}
@@ -463,6 +496,23 @@ export default async function PursuitDetailPage({ params }: PageProps) {
                 <MiniMetric label="Done" value={taskRows.length - openTasks.length} />
               </div>
             </section>
+
+            <section className="rounded-xl border border-zinc-200 bg-white p-5 shadow-sm">
+              <div className="flex items-center justify-between gap-3">
+                <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-zinc-500">
+                  Capture depth
+                </p>
+                <Gauge className="h-4 w-4 text-zinc-400" />
+              </div>
+              <p className="mt-3 text-3xl font-semibold tabular-nums text-zinc-950">
+                {enrichment ? `${enrichment.quality_score}%` : "—"}
+              </p>
+              <p className="mt-2 text-xs leading-5 text-zinc-500">
+                {enrichment
+                  ? `${enrichment.required_documents.length} docs · ${enrichment.risks.length} risks · ${enrichment.missing_fields.length} gaps`
+                  : "Capture enrichment has not been generated yet."}
+              </p>
+            </section>
           </aside>
         </div>
 
@@ -477,6 +527,81 @@ export default async function PursuitDetailPage({ params }: PageProps) {
             empty="No structured risk notes yet."
             items={riskSignals}
           />
+        </section>
+
+        <section className="mt-6 rounded-xl border border-zinc-200 bg-white p-5 shadow-sm">
+          <div className="flex flex-wrap items-start justify-between gap-3">
+            <div>
+              <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-zinc-500">
+                Capture work plan
+              </p>
+              <h2 className="mt-2 text-xl font-semibold text-zinc-950">
+                What this pursuit needs before submission
+              </h2>
+            </div>
+            {enrichment?.submission_url ? (
+              <a
+                href={enrichment.submission_url}
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex h-9 items-center gap-2 rounded-md border border-zinc-300 bg-white px-3 text-sm font-medium text-zinc-800 transition hover:bg-zinc-100"
+              >
+                Submission link
+                <ExternalLink className="h-4 w-4" />
+              </a>
+            ) : null}
+          </div>
+          <div className="mt-5 grid gap-4 lg:grid-cols-3">
+            <CapturePlanCard
+              icon={ShieldCheck}
+              title="Eligibility"
+              items={fallbackList(
+                enrichment?.eligibility,
+                "Confirm eligible applicant type in the source package.",
+              )}
+            />
+            <CapturePlanCard
+              icon={ListChecks}
+              title="Required documents"
+              items={fallbackList(
+                enrichment?.required_documents,
+                "Open the solicitation and build the attachment list.",
+              )}
+            />
+            <CapturePlanCard
+              icon={Route}
+              title="Submission path"
+              items={[
+                enrichment?.submission_method ?? "Confirm portal, deadline timezone, and submission evidence.",
+                ...(enrichment?.timeline ?? []).slice(0, 4),
+              ]}
+            />
+            <CapturePlanCard
+              icon={Mail}
+              title="Contact and funder"
+              items={[
+                enrichment?.contact ?? "No contact extracted yet; verify Q&A contact at source.",
+                enrichment?.funding_method ? `Funding method: ${enrichment.funding_method}` : null,
+                enrichment?.matching_funds ? `Match: ${enrichment.matching_funds}` : null,
+              ].filter((item): item is string => Boolean(item))}
+            />
+            <CapturePlanCard
+              icon={AlertTriangle}
+              title="Risks"
+              items={fallbackList(
+                enrichment?.risks,
+                "No major source risks extracted yet.",
+              )}
+            />
+            <CapturePlanCard
+              icon={FileText}
+              title="Capture gaps"
+              items={fallbackList(
+                enrichment?.missing_fields,
+                "No missing source fields detected.",
+              )}
+            />
+          </div>
         </section>
 
         {opp.url ? (
@@ -630,5 +755,34 @@ function InsightPanel({
         </ul>
       )}
     </section>
+  );
+}
+
+function CapturePlanCard({
+  icon: Icon,
+  title,
+  items,
+}: {
+  icon: typeof ShieldCheck;
+  title: string;
+  items: string[];
+}) {
+  return (
+    <div className="rounded-lg border border-zinc-200 bg-zinc-50 p-4">
+      <div className="flex items-center gap-2 text-zinc-600">
+        <Icon className="h-4 w-4" />
+        <p className="font-mono text-[10px] uppercase tracking-[0.16em]">
+          {title}
+        </p>
+      </div>
+      <ul className="mt-3 space-y-2">
+        {items.slice(0, 6).map((item) => (
+          <li key={item} className="flex gap-2 text-sm leading-6 text-zinc-700">
+            <CheckCircle2 className="mt-1 h-3.5 w-3.5 shrink-0 text-emerald-600" />
+            <span>{item}</span>
+          </li>
+        ))}
+      </ul>
+    </div>
   );
 }

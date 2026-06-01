@@ -23,6 +23,7 @@ export type SubmissionTaskSource =
   | "compliance"
   | "packet"
   | "reviewer"
+  | "enrichment"
   | "manual";
 
 export interface SubmissionTaskRow {
@@ -68,6 +69,21 @@ interface ComplianceCheckRow {
   details_json: unknown;
 }
 
+export interface SubmissionTaskEnrichment {
+  eligibility: string[];
+  required_documents: string[];
+  submission_method: string | null;
+  submission_url: string | null;
+  contact: string | null;
+  matching_funds: string | null;
+  funding_method: string | null;
+  award_range: string | null;
+  timeline: string[];
+  risks: string[];
+  missing_fields: string[];
+  quality_score: number;
+}
+
 function isObject(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
 }
@@ -106,6 +122,14 @@ function shortText(text: string, max = 220): string {
   return `${normalized.slice(0, max - 1).trim()}...`;
 }
 
+function slugPart(text: string): string {
+  return text
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, 48);
+}
+
 function extractVerifyMarkers(content: string): string[] {
   const markers: string[] = [];
   const re = /\[VERIFY:?\s*([^\]]+)\]/g;
@@ -122,6 +146,7 @@ export function buildSubmissionTasks(params: {
   userId: string | null;
   sections: SectionRow[];
   checks: ComplianceCheckRow[];
+  enrichment?: SubmissionTaskEnrichment | null;
 }): SubmissionTaskInsert[] {
   const tasks: SubmissionTaskInsert[] = [];
   const checksByType = new Map<string, unknown>();
@@ -203,6 +228,112 @@ export function buildSubmissionTasks(params: {
       due_date: params.dueDate,
       evidence: finding.excerpt ?? "",
       created_by: params.userId,
+    });
+  }
+
+  const enrichment = params.enrichment;
+  if (enrichment) {
+    enrichment.eligibility.slice(0, 6).forEach((item, index) => {
+      tasks.push({
+        proposal_id: params.proposalId,
+        source_type: "enrichment",
+        source_id: `eligibility:${index}:${slugPart(item)}`,
+        title: "Verify eligibility",
+        detail: item,
+        owner_label: "Proposal lead",
+        priority: "critical",
+        due_date: params.dueDate,
+        evidence: "",
+        created_by: params.userId,
+      });
+    });
+
+    enrichment.required_documents.slice(0, 10).forEach((item, index) => {
+      tasks.push({
+        proposal_id: params.proposalId,
+        source_type: "enrichment",
+        source_id: `required-doc:${index}:${slugPart(item)}`,
+        title: `Prepare ${shortText(item, 72)}`,
+        detail: "Add this document to the submission packet or mark it waived with evidence.",
+        owner_label: /budget|financial|audit|insurance/i.test(item)
+          ? "Finance / Operations"
+          : "Operations",
+        priority: /sam|uei|501|certification|audit|budget/i.test(item)
+          ? "critical"
+          : "high",
+        due_date: params.dueDate,
+        evidence: "",
+        created_by: params.userId,
+      });
+    });
+
+    if (enrichment.submission_method || enrichment.submission_url) {
+      tasks.push({
+        proposal_id: params.proposalId,
+        source_type: "enrichment",
+        source_id: "submission-path",
+        title: "Confirm submission portal and method",
+        detail: shortText(
+          [
+            enrichment.submission_method,
+            enrichment.submission_url ? `Source: ${enrichment.submission_url}` : null,
+          ]
+            .filter(Boolean)
+            .join(" "),
+        ),
+        owner_label: "Submission lead",
+        priority: "critical",
+        due_date: params.dueDate,
+        evidence: enrichment.submission_url ?? "",
+        created_by: params.userId,
+      });
+    }
+
+    if (enrichment.contact) {
+      tasks.push({
+        proposal_id: params.proposalId,
+        source_type: "enrichment",
+        source_id: "funder-contact",
+        title: "Confirm funder contact or Q&A channel",
+        detail: shortText(enrichment.contact),
+        owner_label: "Proposal lead",
+        priority: "medium",
+        due_date: params.dueDate,
+        evidence: "",
+        created_by: params.userId,
+      });
+    }
+
+    enrichment.risks.slice(0, 6).forEach((risk, index) => {
+      tasks.push({
+        proposal_id: params.proposalId,
+        source_type: "enrichment",
+        source_id: `risk:${index}:${slugPart(risk)}`,
+        title: "Resolve capture risk",
+        detail: risk,
+        owner_label: "Proposal lead",
+        priority: /deadline|eligibility|submission/i.test(risk)
+          ? "critical"
+          : "high",
+        due_date: params.dueDate,
+        evidence: "",
+        created_by: params.userId,
+      });
+    });
+
+    enrichment.missing_fields.slice(0, 6).forEach((field, index) => {
+      tasks.push({
+        proposal_id: params.proposalId,
+        source_type: "enrichment",
+        source_id: `missing-field:${index}:${slugPart(field)}`,
+        title: `Fill capture gap: ${field}`,
+        detail: "The source payload did not provide this field clearly. Open the source package and record the answer before final review.",
+        owner_label: "Proposal lead",
+        priority: "high",
+        due_date: params.dueDate,
+        evidence: "",
+        created_by: params.userId,
+      });
     });
   }
 
