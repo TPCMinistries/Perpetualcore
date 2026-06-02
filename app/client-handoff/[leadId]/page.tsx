@@ -2,10 +2,14 @@ import Link from "next/link";
 import {
   ArrowRight,
   CalendarClock,
+  CheckCircle2,
   ClipboardList,
+  FileText,
+  ListChecks,
   LockKeyhole,
   PackageCheck,
   ShieldCheck,
+  Sparkles,
   Target,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
@@ -60,6 +64,14 @@ type AccountTask = {
 
 type InsightRecord = Record<string, unknown>;
 
+type ClosePathState = {
+  buyerStage?: string;
+  paymentPath?: string;
+  paymentStatus?: string;
+  commercialNextStep?: string;
+  updatedAt?: string;
+};
+
 const defaultPlan: Required<AccountPlan> = {
   firstLane: "Confirm the first workflow and owner.",
   sevenDayDeliverable: "Ship one useful operating surface the team can react to.",
@@ -91,6 +103,21 @@ const fallbackMilestones: AccountMilestone[] = [
     detail: "The client has a working output, not only a discussion or mockup.",
   },
 ];
+
+const paymentPathLabels: Record<string, string> = {
+  package_checkout: "Package checkout",
+  manual_invoice: "Manual invoice",
+  procurement: "Procurement review",
+  signed_approval: "Signed approval",
+};
+
+const paymentStatusLabels: Record<string, string> = {
+  not_sent: "Not sent",
+  sent: "Sent",
+  in_review: "In review",
+  paid: "Paid",
+  blocked: "Blocked",
+};
 
 function isRecord(value: unknown): value is InsightRecord {
   return Boolean(value && typeof value === "object" && !Array.isArray(value));
@@ -126,6 +153,19 @@ function readMilestones(lead: LeadRecord) {
   }
 
   return (lead.ai_insights.accountMilestones as AccountMilestone[]).filter((milestone) => milestone.title);
+}
+
+function readClosePath(lead: LeadRecord): ClosePathState {
+  if (!isRecord(lead.ai_insights) || !isRecord(lead.ai_insights.closePath)) {
+    return {};
+  }
+
+  return lead.ai_insights.closePath as ClosePathState;
+}
+
+function getLabel(labels: Record<string, string>, value?: string, fallback = "To be confirmed") {
+  if (!value) return fallback;
+  return labels[value] || normalizeStatus(value);
 }
 
 function getTokenIsValid(lead: LeadRecord, token?: string) {
@@ -202,9 +242,43 @@ export default async function ClientHandoffPage({
 
   const plan = readPlan(lead);
   const milestones = readMilestones(lead);
+  const closePath = readClosePath(lead);
   const accountName = getAccountName(lead);
   const offerName = getOfferName(lead);
-  const contextHref = `/contact-sales?intent=client-handoff&lead=${encodeURIComponent(lead.id)}`;
+  const contextHref = `/contact-sales?intent=client-handoff&lead=${encodeURIComponent(
+    lead.id,
+  )}&offer=${encodeURIComponent(offerName)}`;
+  const buyerStage = normalizeStatus(closePath.buyerStage || lead.stage || "delivery handoff");
+  const paymentPath = getLabel(paymentPathLabels, closePath.paymentPath, "Start path to confirm");
+  const paymentStatus = getLabel(paymentStatusLabels, closePath.paymentStatus, "To confirm");
+  const commercialNextStep = closePath.commercialNextStep || plan.nextAction;
+  const contextItems = [
+    {
+      title: "Workflow owner",
+      detail: "Who owns the process, who approves changes, and who can answer operational questions.",
+    },
+    {
+      title: "Current tools and data",
+      detail: "The systems involved today: CRM, inboxes, forms, spreadsheets, calendars, documents, or dashboards.",
+    },
+    {
+      title: "Real examples",
+      detail: "Recent messages, handoffs, reports, proposals, tickets, calls, screenshots, or files from the workflow.",
+    },
+    {
+      title: "Rules and escalations",
+      detail: "What the assistant can do, what it should never do, and when a human needs to step in.",
+    },
+    {
+      title: "Success metric",
+      detail: "The visible result that makes the first lane worth expanding: speed, revenue, follow-up, accuracy, or clarity.",
+    },
+  ];
+  const nextSteps = [
+    "Perpetual Core confirms the start path, owner, and kickoff window.",
+    "We turn your examples into a first operating map and assistant behavior brief.",
+    "You review a working first lane before the broader system expands.",
+  ];
 
   return (
     <main className="min-h-screen bg-slate-50 text-slate-950">
@@ -236,10 +310,11 @@ export default async function ClientHandoffPage({
             your team, and the first deliverables we are working toward.
           </p>
 
-          <div className="mt-8 grid gap-3 sm:grid-cols-3">
+          <div className="mt-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
             {[
               ["First lane", plan.firstLane],
-              ["Next step", plan.nextAction],
+              ["Next step", commercialNextStep],
+              ["Start path", paymentPath],
               ["Kickoff window", formatDate(lead.next_follow_up_at)],
             ].map(([label, value]) => (
               <div key={label} className="rounded-lg border bg-white p-4">
@@ -256,11 +331,20 @@ export default async function ClientHandoffPage({
             <p className="text-sm font-semibold">What we need from you</p>
           </div>
           <p className="mt-4 whitespace-pre-wrap text-sm leading-6 text-slate-600">{plan.accessNeeded}</p>
-          <div className="mt-5 rounded-lg border bg-slate-50 p-4">
-            <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-slate-500">
-              Client-side owner
-            </p>
-            <p className="mt-2 text-sm font-semibold text-slate-950">{plan.ownerOnClientSide}</p>
+          <div className="mt-5 grid gap-3">
+            <div className="rounded-lg border bg-slate-50 p-4">
+              <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-slate-500">
+                Client-side owner
+              </p>
+              <p className="mt-2 text-sm font-semibold text-slate-950">{plan.ownerOnClientSide}</p>
+            </div>
+            <div className="rounded-lg border bg-slate-50 p-4">
+              <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-slate-500">
+                Start status
+              </p>
+              <p className="mt-2 text-sm font-semibold text-slate-950">{buyerStage}</p>
+              <p className="mt-1 text-xs text-slate-500">{paymentStatus}</p>
+            </div>
           </div>
           <Button asChild className="mt-5 w-full rounded-md">
             <Link href={contextHref}>
@@ -268,6 +352,60 @@ export default async function ClientHandoffPage({
             </Link>
           </Button>
         </aside>
+      </section>
+
+      <section className="mx-auto grid max-w-6xl gap-6 px-6 pb-12 lg:grid-cols-[1.1fr_0.9fr]">
+        <div className="rounded-lg border bg-white p-6">
+          <div className="flex items-center gap-3">
+            <ListChecks className="h-5 w-5 text-violet-600" />
+            <h2 className="text-xl font-semibold">Context to send before kickoff</h2>
+          </div>
+          <p className="mt-3 max-w-2xl text-sm leading-6 text-slate-600">
+            Send the pieces that let us build from your real operation instead of a generic AI demo.
+            You do not need everything perfect before kickoff; send what is available and name the gaps.
+          </p>
+          <div className="mt-5 grid gap-3 md:grid-cols-2">
+            {contextItems.map((item) => (
+              <div key={item.title} className="rounded-lg border bg-slate-50 p-4">
+                <div className="flex items-start gap-3">
+                  <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-violet-600" />
+                  <div>
+                    <p className="text-sm font-semibold text-slate-950">{item.title}</p>
+                    <p className="mt-1 text-sm leading-5 text-slate-600">{item.detail}</p>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="rounded-lg border bg-white p-6">
+          <div className="flex items-center gap-3">
+            <Sparkles className="h-5 w-5 text-violet-600" />
+            <h2 className="text-xl font-semibold">What happens next</h2>
+          </div>
+          <div className="mt-5 space-y-3">
+            {nextSteps.map((step, index) => (
+              <div key={step} className="flex gap-4 rounded-lg border bg-slate-50 p-4">
+                <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-violet-100 text-xs font-semibold text-violet-700">
+                  {index + 1}
+                </span>
+                <p className="text-sm leading-6 text-slate-700">{step}</p>
+              </div>
+            ))}
+          </div>
+          <div className="mt-5 rounded-lg border border-violet-100 bg-violet-50 p-4">
+            <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-slate-500">
+              Current commercial step
+            </p>
+            <p className="mt-2 text-sm leading-6 text-slate-700">{commercialNextStep}</p>
+          </div>
+          <Button asChild variant="outline" className="mt-5 w-full rounded-md">
+            <Link href={contextHref}>
+              Open context form <FileText className="ml-2 h-4 w-4" />
+            </Link>
+          </Button>
+        </div>
       </section>
 
       <section className="mx-auto grid max-w-6xl gap-6 px-6 pb-12 lg:grid-cols-[0.95fr_1.05fr]">
