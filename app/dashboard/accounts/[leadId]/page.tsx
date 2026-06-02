@@ -26,6 +26,14 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
+import { Progress } from "@/components/ui/progress";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 
 type AccountLead = {
@@ -77,6 +85,13 @@ type AccountUpdate = {
   decision: string;
   risk: string;
   nextAction: string;
+};
+
+type ClosePathState = {
+  buyerStage: string;
+  paymentPath: string;
+  paymentStatus: string;
+  commercialNextStep: string;
 };
 
 type PermanentAccount = {
@@ -172,6 +187,36 @@ const defaultUpdate: AccountUpdate = {
   risk: "",
   nextAction: "",
 };
+
+const defaultClosePath: ClosePathState = {
+  buyerStage: "proposal",
+  paymentPath: "package_checkout",
+  paymentStatus: "not_sent",
+  commercialNextStep: "Send proposal and package start link.",
+};
+
+const buyerStageOptions = [
+  { value: "discovery", label: "Discovery" },
+  { value: "proposal", label: "Proposal" },
+  { value: "payment_path", label: "Payment path" },
+  { value: "paid_start", label: "Paid start" },
+  { value: "delivery_handoff", label: "Delivery handoff" },
+];
+
+const paymentPathOptions = [
+  { value: "package_checkout", label: "Package checkout" },
+  { value: "manual_invoice", label: "Manual invoice" },
+  { value: "procurement", label: "Procurement review" },
+  { value: "signed_approval", label: "Signed approval" },
+];
+
+const paymentStatusOptions = [
+  { value: "not_sent", label: "Not sent" },
+  { value: "sent", label: "Sent" },
+  { value: "in_review", label: "In review" },
+  { value: "paid", label: "Paid" },
+  { value: "blocked", label: "Blocked" },
+];
 
 function formatDate(value?: string | null) {
   if (!value) return "Not scheduled";
@@ -282,6 +327,19 @@ function readAccountUpdates(lead: AccountLead): Array<AccountUpdate & { createdA
 
   const insights = lead.ai_insights as { accountUpdates?: Array<AccountUpdate & { createdAt: string }> };
   return insights.accountUpdates || [];
+}
+
+function readClosePath(lead: AccountLead): ClosePathState {
+  if (!lead.ai_insights || typeof lead.ai_insights !== "object" || Array.isArray(lead.ai_insights)) {
+    return defaultClosePath;
+  }
+
+  const insights = lead.ai_insights as { closePath?: Partial<ClosePathState> };
+  return { ...defaultClosePath, ...(insights.closePath || {}) };
+}
+
+function getOptionLabel(options: Array<{ value: string; label: string }>, value: string) {
+  return options.find((option) => option.value === value)?.label || normalizeStatus(value);
 }
 
 function addDays(date: Date, days: number) {
@@ -399,6 +457,8 @@ export default function AccountDetailPage() {
   const [plan, setPlan] = useState<AccountPlan>(defaultPlan);
   const [milestones, setMilestones] = useState<AccountMilestone[]>(createDefaultMilestones());
   const [accountUpdate, setAccountUpdate] = useState<AccountUpdate>(defaultUpdate);
+  const [closePath, setClosePath] = useState<ClosePathState>(defaultClosePath);
+  const [savingClosePath, setSavingClosePath] = useState(false);
 
   async function fetchPermanentAccount(nextLeadId: string) {
     try {
@@ -441,6 +501,7 @@ export default function AccountDetailPage() {
       setActivities(result.activities || []);
       setPlan(readAccountPlan(result.lead));
       setMilestones(readAccountMilestones(result.lead));
+      setClosePath(readClosePath(result.lead));
       await fetchPermanentAccount(result.lead.id);
       await fetchAccountTasks(result.lead.id);
     } catch (error) {
@@ -563,6 +624,45 @@ export default function AccountDetailPage() {
     await copyText("Buyer start email", buildBuyerStartEmail(lead, plan, window.location.origin));
   }
 
+  async function saveClosePath() {
+    if (!lead) return;
+    setSavingClosePath(true);
+    try {
+      const currentInsights =
+        lead.ai_insights && typeof lead.ai_insights === "object" && !Array.isArray(lead.ai_insights)
+          ? lead.ai_insights
+          : {};
+      const response = await fetch(`/api/leads/${lead.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          status: closePath.paymentStatus === "paid" ? "won" : lead.status || "proposal",
+          stage: closePath.buyerStage,
+          ai_insights: {
+            ...currentInsights,
+            accountPlan: plan,
+            accountMilestones: milestones,
+            closePath: {
+              ...closePath,
+              updatedAt: new Date().toISOString(),
+            },
+            accountPlanUpdatedAt: new Date().toISOString(),
+          },
+        }),
+      });
+
+      if (!response.ok) throw new Error("Could not save close path");
+      const result = (await response.json()) as { lead: AccountLead };
+      setLead(result.lead);
+      setClosePath(readClosePath(result.lead));
+      toast.success("Close path saved");
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Could not save close path");
+    } finally {
+      setSavingClosePath(false);
+    }
+  }
+
   async function saveAccountPlan(nextStatus?: string) {
     if (!lead) return;
     setSaving(true);
@@ -581,6 +681,7 @@ export default function AccountDetailPage() {
             ...currentInsights,
             accountPlan: plan,
             accountMilestones: milestones,
+            closePath,
             accountPlanUpdatedAt: new Date().toISOString(),
           },
         }),
@@ -738,6 +839,7 @@ export default function AccountDetailPage() {
             ...currentInsights,
             accountPlan: plan,
             accountMilestones: milestones,
+            closePath,
             accountUpdates,
             accountPlanUpdatedAt: new Date().toISOString(),
           },
@@ -777,6 +879,17 @@ export default function AccountDetailPage() {
   const packageName = packageLabels[recommendedPackageId];
   const packagePath = buildPackagePath(lead);
   const handoffReady = Boolean(buildClientHandoffPath(lead, permanentAccount, permanentEngagement));
+  const closePathProgress = Math.round(
+    ([
+      hasProposal,
+      closePath.paymentStatus === "sent" || closePath.paymentStatus === "in_review" || closePath.paymentStatus === "paid",
+      Boolean(permanentAccount),
+      accountTasks.length > 0,
+      handoffReady,
+    ].filter(Boolean).length /
+      5) *
+      100,
+  );
   const closePathItems = [
     {
       title: "Proposal",
@@ -962,7 +1075,104 @@ export default function AccountDetailPage() {
             </div>
           </div>
         </CardHeader>
-        <CardContent>
+        <CardContent className="space-y-5">
+          <div className="grid gap-4 rounded-lg border bg-slate-50 p-4 lg:grid-cols-[220px_220px_220px_minmax(0,1fr)_auto]">
+            <div>
+              <label className="text-xs font-medium uppercase tracking-[0.14em] text-slate-500">
+                Buyer stage
+              </label>
+              <Select
+                value={closePath.buyerStage}
+                onValueChange={(value) => setClosePath((current) => ({ ...current, buyerStage: value }))}
+              >
+                <SelectTrigger className="mt-2 bg-white">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {buyerStageOptions.map((option) => (
+                    <SelectItem key={option.value} value={option.value}>
+                      {option.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <label className="text-xs font-medium uppercase tracking-[0.14em] text-slate-500">
+                Payment path
+              </label>
+              <Select
+                value={closePath.paymentPath}
+                onValueChange={(value) => setClosePath((current) => ({ ...current, paymentPath: value }))}
+              >
+                <SelectTrigger className="mt-2 bg-white">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {paymentPathOptions.map((option) => (
+                    <SelectItem key={option.value} value={option.value}>
+                      {option.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <label className="text-xs font-medium uppercase tracking-[0.14em] text-slate-500">
+                Payment status
+              </label>
+              <Select
+                value={closePath.paymentStatus}
+                onValueChange={(value) => setClosePath((current) => ({ ...current, paymentStatus: value }))}
+              >
+                <SelectTrigger className="mt-2 bg-white">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {paymentStatusOptions.map((option) => (
+                    <SelectItem key={option.value} value={option.value}>
+                      {option.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <label className="text-xs font-medium uppercase tracking-[0.14em] text-slate-500">
+                Commercial next step
+              </label>
+              <Input
+                className="mt-2 bg-white"
+                value={closePath.commercialNextStep}
+                onChange={(event) =>
+                  setClosePath((current) => ({ ...current, commercialNextStep: event.target.value }))
+                }
+              />
+            </div>
+            <div className="flex items-end">
+              <Button type="button" className="w-full rounded-md" disabled={savingClosePath} onClick={saveClosePath}>
+                {savingClosePath ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
+                Save
+              </Button>
+            </div>
+          </div>
+
+          <div className="rounded-lg border bg-white p-4">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <div>
+                <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-slate-500">
+                  Close path progress
+                </p>
+                <p className="mt-1 text-sm text-slate-600">
+                  {getOptionLabel(buyerStageOptions, closePath.buyerStage)} ·{" "}
+                  {getOptionLabel(paymentStatusOptions, closePath.paymentStatus)} · {packageName}
+                </p>
+              </div>
+              <p className="text-sm font-semibold text-slate-950">{closePathProgress}%</p>
+            </div>
+            <Progress value={closePathProgress} className="mt-4 h-2" />
+          </div>
+
           <div className="grid gap-3 lg:grid-cols-5">
             {closePathItems.map((item, index) => (
               <div
