@@ -120,6 +120,15 @@ type TimelineItem = {
   priority?: string;
 };
 
+type PackageId = "software-access" | "guided-setup" | "first-workflow" | "operating-lane-deposit";
+
+const packageLabels: Record<PackageId, string> = {
+  "software-access": "Software Access",
+  "guided-setup": "Guided Setup",
+  "first-workflow": "First Workflow Package",
+  "operating-lane-deposit": "90-Day Operating Lane Deposit",
+};
+
 const defaultPlan: AccountPlan = {
   firstLane: "Confirm the first workflow and owner.",
   sevenDayDeliverable: "Ship one useful operating surface the client can react to.",
@@ -212,6 +221,19 @@ function getRecommendedLane(lead: AccountLead) {
   if (value >= 7500 || text.includes("workflow")) return "First Workflow";
   if (value >= 1000 || text.includes("setup")) return "Guided Setup";
   return "Software Access";
+}
+
+function getRecommendedPackageId(lead: AccountLead): PackageId {
+  const lane = getRecommendedLane(lead);
+  if (lane === "90-Day Operating Lane") return "operating-lane-deposit";
+  if (lane === "First Workflow") return "first-workflow";
+  if (lane === "Guided Setup") return "guided-setup";
+  return "software-access";
+}
+
+function buildPackagePath(lead: AccountLead) {
+  const packageId = getRecommendedPackageId(lead);
+  return `/packages?package=${encodeURIComponent(packageId)}&lead=${encodeURIComponent(lead.id)}`;
 }
 
 function readAccountPlan(lead: AccountLead): AccountPlan {
@@ -344,6 +366,15 @@ function buildClientKickoffEmail(lead: AccountLead, plan: AccountPlan) {
   return `${contact},\n\nThe next step is to open the first operating lane for ${account}.\n\nFor kickoff, I want to confirm five things:\n\n1. The first workflow or department we are improving\n2. Who owns that workflow internally\n3. The docs, tools, examples, and customer language I should use as context\n4. What a useful first 7 days should produce\n5. What would make this worth expanding after the first lane is live\n\nMy proposed first lane: ${plan.firstLane}\n\nFirst deliverable: ${plan.sevenDayDeliverable}\n\nOnce those are confirmed, I can turn this into a working operating surface instead of another loose AI conversation.`;
 }
 
+function buildBuyerStartEmail(lead: AccountLead, plan: AccountPlan, origin: string) {
+  const account = getAccountName(lead);
+  const contact = getContactName(lead);
+  const packagePath = `${origin}${buildPackagePath(lead)}`;
+  const packageName = packageLabels[getRecommendedPackageId(lead)];
+
+  return `${contact},\n\nBased on where ${account} is right now, I would start with ${packageName}.\n\nThe first operating lane I would open is:\n${plan.firstLane}\n\nThe first useful deliverable should be:\n${plan.sevenDayDeliverable}\n\nYou can start here:\n${packagePath}\n\nAfter that, I will use the kickoff/handoff page to keep the first lane, owner, context, and delivery milestones clear.`;
+}
+
 function buildClientHandoffPath(lead: AccountLead, account: PermanentAccount | null, engagement: PermanentEngagement | null) {
   const token = engagement?.id || account?.id;
   if (!token) return "";
@@ -424,6 +455,11 @@ export default function AccountDetailPage() {
   }, [leadId]);
 
   const recommendedLane = useMemo(() => (lead ? getRecommendedLane(lead) : "First Workflow"), [lead]);
+  const recommendedPackageId = useMemo<PackageId>(() => (lead ? getRecommendedPackageId(lead) : "first-workflow"), [lead]);
+  const hasProposal = useMemo(
+    () => activities.some((activity) => activity.activity_type === "proposal_draft"),
+    [activities],
+  );
   const timelineItems = useMemo<TimelineItem[]>(() => {
     if (!lead) return [];
 
@@ -515,6 +551,16 @@ export default function AccountDetailPage() {
     }
 
     await copyText("Client handoff link", `${window.location.origin}${path}`);
+  }
+
+  async function copyBuyerStartLink() {
+    if (!lead) return;
+    await copyText("Buyer start link", `${window.location.origin}${buildPackagePath(lead)}`);
+  }
+
+  async function copyBuyerStartEmail() {
+    if (!lead) return;
+    await copyText("Buyer start email", buildBuyerStartEmail(lead, plan, window.location.origin));
   }
 
   async function saveAccountPlan(nextStatus?: string) {
@@ -728,6 +774,54 @@ export default function AccountDetailPage() {
     );
   }
 
+  const packageName = packageLabels[recommendedPackageId];
+  const packagePath = buildPackagePath(lead);
+  const handoffReady = Boolean(buildClientHandoffPath(lead, permanentAccount, permanentEngagement));
+  const closePathItems = [
+    {
+      title: "Proposal",
+      detail: hasProposal ? "Proposal draft saved against this lead." : "Draft or save a proposal before sending the buyer into a paid path.",
+      complete: hasProposal,
+      href: `/dashboard/proposals?lead=${encodeURIComponent(lead.id)}`,
+      action: "Draft proposal",
+    },
+    {
+      title: "Payment path",
+      detail: `Recommended buyer start: ${packageName}.`,
+      complete: lead.status === "won" || Boolean(permanentAccount),
+      href: packagePath,
+      action: "Open package",
+    },
+    {
+      title: "Permanent account",
+      detail: permanentAccount
+        ? `Synced to pc_accounts/${shortId(permanentAccount.id)}.`
+        : "Create the durable account and engagement record before delivery expands.",
+      complete: Boolean(permanentAccount),
+      button: "Sync account",
+      onClick: syncPermanentAccount,
+      disabled: syncingAccount,
+    },
+    {
+      title: "Task plan",
+      detail: accountTasks.length > 0 ? `${accountTasks.length} account tasks linked.` : "Generate kickoff, context, mapping, delivery, and expansion tasks.",
+      complete: accountTasks.length > 0,
+      button: "Generate tasks",
+      onClick: generateAccountTasks,
+      disabled: generatingTasks,
+    },
+    {
+      title: "Client handoff",
+      detail: handoffReady
+        ? "Client kickoff link is ready to copy."
+        : "Sync the account before sharing a token-gated handoff page.",
+      complete: handoffReady,
+      button: "Copy handoff",
+      onClick: copyClientHandoffLink,
+      disabled: false,
+    },
+  ];
+
   return (
     <div className="space-y-6 pb-10">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
@@ -842,6 +936,75 @@ export default function AccountDetailPage() {
           </p>
         </div>
       </section>
+
+      <Card className="rounded-lg shadow-none">
+        <CardHeader>
+          <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+            <div>
+              <div className="flex items-center gap-3">
+                <CardTitle className="text-xl">Close/start path</CardTitle>
+                <ArrowRight className="h-5 w-5 text-violet-600" />
+              </div>
+              <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-600">
+                Move this account from buyer interest into paid work, permanent account memory, tasked
+                delivery, and a client-facing handoff without rebuilding the context each time.
+              </p>
+            </div>
+            <div className="flex flex-col gap-2 sm:flex-row">
+              <Button type="button" variant="outline" className="rounded-md" onClick={copyBuyerStartLink}>
+                <Clipboard className="mr-2 h-4 w-4" />
+                Copy start link
+              </Button>
+              <Button type="button" className="rounded-md" onClick={copyBuyerStartEmail}>
+                <Mail className="mr-2 h-4 w-4" />
+                Copy buyer email
+              </Button>
+            </div>
+          </div>
+        </CardHeader>
+        <CardContent>
+          <div className="grid gap-3 lg:grid-cols-5">
+            {closePathItems.map((item, index) => (
+              <div
+                key={item.title}
+                className={`flex min-h-[190px] flex-col rounded-lg border p-4 ${
+                  item.complete ? "border-violet-200 bg-violet-50/70" : "bg-white"
+                }`}
+              >
+                <div className="flex items-start justify-between gap-3">
+                  <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-slate-500">
+                    {String(index + 1).padStart(2, "0")}
+                  </span>
+                  <Badge className="rounded-md" variant={item.complete ? "default" : "outline"}>
+                    {item.complete ? "Ready" : "Next"}
+                  </Badge>
+                </div>
+                <h2 className="mt-4 text-sm font-semibold text-slate-950">{item.title}</h2>
+                <p className="mt-2 flex-1 text-sm leading-5 text-slate-600">{item.detail}</p>
+                {item.href ? (
+                  <Button asChild variant="outline" className="mt-4 rounded-md">
+                    <Link href={item.href}>
+                      {item.action}
+                      <ArrowRight className="ml-2 h-4 w-4" />
+                    </Link>
+                  </Button>
+                ) : (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="mt-4 rounded-md"
+                    onClick={item.onClick}
+                    disabled={item.disabled}
+                  >
+                    {item.disabled ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+                    {item.button}
+                  </Button>
+                )}
+              </div>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
 
       <div className="grid gap-6 lg:grid-cols-[1fr_380px]">
         <Card className="rounded-lg shadow-none">
