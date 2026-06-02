@@ -23,12 +23,16 @@ import {
   loadPlatformTotals,
   loadRecentAudit,
   loadRecentCronRuns,
+  loadRecentSavedSearchAlerts,
+  loadSavedSearchAlertMetrics,
   loadScraperHealth,
   type AuditRow,
   type CronRunRow,
   type OpenDriftRow,
   type OrgRow,
   type PlatformTotals,
+  type SavedSearchAlertMetrics,
+  type SavedSearchAlertRow,
   type ScraperHealthRow,
 } from "@/lib/rfp/admin-metrics";
 import {
@@ -232,6 +236,35 @@ function SourceReadinessTiles({
         label="P0 gaps"
         value={formatNumber(summary.p0Remaining)}
         tone={summary.p0Remaining > 0 ? "amber" : "emerald"}
+      />
+    </div>
+  );
+}
+
+function SavedSearchAlertTiles({
+  metrics,
+}: {
+  metrics: SavedSearchAlertMetrics;
+}) {
+  return (
+    <div className="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-6">
+      <Tile label="Saved searches" value={formatNumber(metrics.saved_searches)} />
+      <Tile
+        label="Alerts on"
+        value={formatNumber(metrics.alerts_enabled)}
+        tone={metrics.alerts_enabled > 0 ? "emerald" : "amber"}
+      />
+      <Tile
+        label="Due now"
+        value={formatNumber(metrics.due_now)}
+        tone={metrics.due_now > 0 ? "amber" : "emerald"}
+      />
+      <Tile label="Sent · 24h" value={formatNumber(metrics.sent_24h)} />
+      <Tile label="Sent · 7d" value={formatNumber(metrics.sent_7d)} />
+      <Tile
+        label="Last sent"
+        value={formatRelative(metrics.last_sent_at)}
+        tone={metrics.last_sent_at ? "emerald" : "amber"}
       />
     </div>
   );
@@ -552,6 +585,62 @@ function CronTable({ rows }: { rows: CronRunRow[] }) {
   );
 }
 
+function SavedSearchAlertsTable({ rows }: { rows: SavedSearchAlertRow[] }) {
+  if (rows.length === 0) {
+    return (
+      <p className="rounded-md border border-white/5 bg-white/[0.02] p-6 text-sm text-zinc-500">
+        No saved-search alert deliveries logged yet. Once users enable alerts,
+        rfp-saved-search-alerts writes dedupe rows here.
+      </p>
+    );
+  }
+
+  return (
+    <div className="overflow-x-auto rounded-lg border border-white/5 bg-white/[0.02]">
+      <table className="w-full min-w-[860px] text-[13px]">
+        <thead>
+          <tr className="border-b border-white/5 text-left font-mono text-[10px] uppercase tracking-[0.18em] text-zinc-500">
+            <th className="px-4 py-3">When</th>
+            <th className="px-3 py-3">Search</th>
+            <th className="px-3 py-3">Org</th>
+            <th className="px-3 py-3">Opportunity</th>
+            <th className="px-4 py-3">Recipient</th>
+          </tr>
+        </thead>
+        <tbody>
+          {rows.map((row) => (
+            <tr
+              key={row.id}
+              className="border-b border-white/5 last:border-0 hover:bg-white/[0.02]"
+            >
+              <td className="px-4 py-3 font-mono text-[11px] text-zinc-500">
+                {formatRelative(row.sent_at)}
+              </td>
+              <td className="px-3 py-3">
+                <div className="text-zinc-200">
+                  {row.search_name ?? "Unknown search"}
+                </div>
+                <div className="mt-1 font-mono text-[10px] text-zinc-600">
+                  {row.search_id.slice(0, 8)}
+                </div>
+              </td>
+              <td className="px-3 py-3 text-zinc-300">
+                {row.org_name ?? row.org_id.slice(0, 8)}
+              </td>
+              <td className="max-w-[300px] px-3 py-3 text-zinc-400">
+                {row.opp_title ?? row.opp_id.slice(0, 8)}
+              </td>
+              <td className="px-4 py-3 font-mono text-[11px] text-zinc-500">
+                {row.email || "—"}
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
 function AuditTable({ rows }: { rows: AuditRow[] }) {
   if (rows.length === 0) {
     return (
@@ -615,13 +704,24 @@ export default async function AdminRfpPage() {
   }
 
   // Parallelize the six queries. Each is single-table.
-  const [totals, orgs, scraperHealth, openDrift, cronRuns, audit] =
+  const [
+    totals,
+    orgs,
+    scraperHealth,
+    openDrift,
+    cronRuns,
+    savedSearchAlertMetrics,
+    recentSavedSearchAlerts,
+    audit,
+  ] =
     await Promise.all([
       loadPlatformTotals(),
       loadOrgBreakdown(50),
       loadScraperHealth(),
       loadOpenDriftRows(25),
       loadRecentCronRuns(10),
+      loadSavedSearchAlertMetrics(),
+      loadRecentSavedSearchAlerts(25),
       loadRecentAudit(50),
     ]);
   const sourceReadiness = buildSourceReadiness(scraperHealth);
@@ -675,6 +775,19 @@ export default async function AdminRfpPage() {
 
       <SectionHeader title="Recent RFP cron runs" detail="last 10" />
       <CronTable rows={cronRuns} />
+
+      <SectionHeader
+        title="Saved-search alerts"
+        detail="delivery and due-state"
+      />
+      <SavedSearchAlertTiles metrics={savedSearchAlertMetrics} />
+      <p className="mt-3 text-[13px] leading-6 text-zinc-500">
+        This is the discovery reach monitor: alerts enabled, searches due for
+        the cron, and actual delivery dedupe rows written after email sends.
+      </p>
+      <div className="mt-4">
+        <SavedSearchAlertsTable rows={recentSavedSearchAlerts} />
+      </div>
 
       <SectionHeader title="Audit log" detail="last 50 agent sessions" />
       <AuditTable rows={audit} />

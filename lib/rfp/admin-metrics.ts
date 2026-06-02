@@ -11,6 +11,8 @@
 
 import { createAdminClient } from "@/lib/supabase/server";
 import type { Json } from "@/lib/supabase/database.types";
+import { dueSince } from "@/lib/rfp/saved-search-execution";
+import { normalizeSavedSearchRow, type RfpSavedSearch } from "@/lib/rfp/saved-searches";
 
 export interface PlatformTotals {
   orgs: number;
@@ -69,6 +71,27 @@ export interface AuditRow {
   tokens_out: number | null;
   cost_usd: number | null;
   session_id: string | null;
+}
+
+export interface SavedSearchAlertMetrics {
+  saved_searches: number;
+  alerts_enabled: number;
+  due_now: number;
+  sent_24h: number;
+  sent_7d: number;
+  last_sent_at: string | null;
+}
+
+export interface SavedSearchAlertRow {
+  id: string;
+  search_id: string;
+  search_name: string | null;
+  org_id: string;
+  org_name: string | null;
+  opp_id: string;
+  opp_title: string | null;
+  email: string;
+  sent_at: string;
 }
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
@@ -370,5 +393,121 @@ export async function loadRecentAudit(limit = 50): Promise<AuditRow[]> {
     ...s,
     cost_usd: toNumeric(s.cost_usd),
     org_name: s.org_id ? (orgNames.get(s.org_id) ?? null) : null,
+  }));
+}
+
+export async function loadSavedSearchAlertMetrics(): Promise<SavedSearchAlertMetrics> {
+  const admin = createAdminClient();
+  const now = new Date();
+  const oneDayAgo = isoDaysAgo(1);
+  const sevenDaysAgo = isoDaysAgo(7);
+
+  const [allSearchesRes, enabledSearchesRes, sent24Res, sent7Res, latestSentRes] =
+    await Promise.all([
+      admin.from("rfp_saved_searches").select("id", { count: "exact", head: true }),
+      admin
+        .from("rfp_saved_searches")
+        .select(
+          "id, org_id, created_by, name, filters, mode, is_shared, alert_enabled, alert_frequency, min_fit_score, last_run_at, created_at, updated_at",
+          { count: "exact" },
+        )
+        .eq("alert_enabled", true)
+        .returns<unknown[]>(),
+      admin
+        .from("rfp_saved_search_alert_log")
+        .select("id", { count: "exact", head: true })
+        .gte("sent_at", oneDayAgo),
+      admin
+        .from("rfp_saved_search_alert_log")
+        .select("id", { count: "exact", head: true })
+        .gte("sent_at", sevenDaysAgo),
+      admin
+        .from("rfp_saved_search_alert_log")
+        .select("sent_at")
+        .order("sent_at", { ascending: false })
+        .limit(1)
+        .returns<{ sent_at: string }[]>(),
+    ]);
+
+  const searches = (enabledSearchesRes.data ?? [])
+    .map((row): RfpSavedSearch | null => {
+      try {
+        return normalizeSavedSearchRow(row);
+      } catch {
+        return null;
+      }
+    })
+    .filter((row): row is RfpSavedSearch => row !== null);
+
+  return {
+    saved_searches: allSearchesRes.count ?? 0,
+    alerts_enabled: enabledSearchesRes.count ?? searches.length,
+    due_now: searches.filter((search) => dueSince(search, now) !== null).length,
+    sent_24h: sent24Res.count ?? 0,
+    sent_7d: sent7Res.count ?? 0,
+    last_sent_at: latestSentRes.data?.[0]?.sent_at ?? null,
+  };
+}
+
+export async function loadRecentSavedSearchAlerts(
+  limit = 25,
+): Promise<SavedSearchAlertRow[]> {
+  const admin = createAdminClient();
+  const { data } = await admin
+    .from("rfp_saved_search_alert_log")
+    .select("id, search_id, org_id, user_id, opp_id, email, sent_at")
+    .order("sent_at", { ascending: false })
+    .limit(limit)
+    .returns<
+      {
+        id: string;
+        search_id: string;
+        org_id: string;
+        user_id: string;
+        opp_id: string;
+        email: string;
+        sent_at: string;
+      }[]
+    >();
+
+  const rows = data ?? [];
+  if (rows.length === 0) return [];
+
+  const searchIds = Array.from(new Set(rows.map((row) => row.search_id)));
+  const orgIds = Array.from(new Set(rows.map((row) => row.org_id)));
+  const oppIds = Array.from(new Set(rows.map((row) => row.opp_id)));
+
+  const [searchesRes, orgsRes, oppsRes] = await Promise.all([
+    admin
+      .from("rfp_saved_searches")
+      .select("id, name")
+      .in("id", searchIds)
+      .returns<{ id: string; name: string }[]>(),
+    admin
+      .from("rfp_orgs")
+      .select("id, name")
+      .in("id", orgIds)
+      .returns<{ id: string; name: string }[]>(),
+    admin
+      .from("rfp_opportunities")
+      .select("id, title")
+      .in("id", oppIds)
+      .returns<{ id: string; title: string }[]>(),
+  ]);
+
+  const searchNames = new Map((searchesRes.data ?? []).map((row) => [row.id, row.name]));
+  const orgNames = new Map((orgsRes.data ?? []).map((row) => [row.id, row.name]));
+  const oppTitles = new Map((oppsRes.data ?? []).map((row) => [row.id, row.title]));
+
+  return rows.map((row) => ({
+    id: row.id,
+    search_id: row.search_id,
+    search_name: searchNames.get(row.search_id) ?? null,
+    org_id: row.org_id,
+    org_name: orgNames.get(row.org_id) ?? null,
+    opp_id: row.opp_id,
+    opp_title: oppTitles.get(row.opp_id) ?? null,
+    email: row.email,
+    sent_at: row.sent_at,
   }));
 }
