@@ -228,6 +228,42 @@ function matchesFilter(value: string | undefined, filter: string) {
   return filter === "all" || value === filter;
 }
 
+function getPackageIdForAccount(client: AccountLane) {
+  const lane = client.lane.toLowerCase();
+  if (lane.includes("90-day") || lane.includes("operating lane")) return "operating-lane-deposit";
+  if (lane.includes("workflow")) return "first-workflow";
+  if (lane.includes("setup")) return "guided-setup";
+  return "software-access";
+}
+
+function getAccountBrief(client: AccountLane) {
+  return [
+    `Account: ${client.name}`,
+    `Company/contact: ${client.company}`,
+    `Lane: ${client.lane}`,
+    `Value: ${client.value}`,
+    `Status: ${normalizeStatus(client.status)}`,
+    `Buyer stage: ${client.buyerStage ? normalizeStatus(client.buyerStage) : "Not set"}`,
+    `Payment path: ${client.paymentPath ? normalizeStatus(client.paymentPath) : "Not set"}`,
+    `Payment status: ${client.paymentStatus ? normalizeStatus(client.paymentStatus) : "Not set"}`,
+    `Next step: ${client.nextStep}`,
+    "",
+    "AI instruction: Use this account state to recommend the next commercial action, the next delivery action, and the smallest proof point that can expand the relationship.",
+  ].join("\n");
+}
+
+function getAccountFollowUp(client: AccountLane) {
+  if (client.paymentStatus === "paid") {
+    return `Hi ${client.name},\n\nWe have the start path confirmed. The next step is to lock the kickoff window, confirm the first operating lane, and gather the minimum context needed to ship the first working surface.\n\nCurrent lane: ${client.lane}\nNext step: ${client.nextStep}`;
+  }
+
+  if (client.paymentStatus === "blocked") {
+    return `Hi ${client.name},\n\nI want to help unblock the start path. The work is mapped as ${client.lane}; the next clean move is to confirm whether checkout, invoice, procurement, or signed approval is the best payment path.\n\nOnce that is clear, we can move into kickoff without dragging the process out.`;
+  }
+
+  return `Hi ${client.name},\n\nBased on where we are, I would start with ${client.lane}. The next step is to confirm the payment/start path and the first outcome we should install.\n\nRecommended next move: ${client.nextStep}`;
+}
+
 function formatCurrency(value?: number | null) {
   return new Intl.NumberFormat("en-US", {
     style: "currency",
@@ -814,10 +850,9 @@ export default function AccountsPage() {
               </div>
             ) : (
               [...paidAccounts, ...pursuitAccounts].map((client) => (
-                <Link
+                <div
                   key={client.id}
-                  href={client.href}
-                  className="group grid gap-4 rounded-lg border bg-white p-4 transition hover:border-violet-300 hover:bg-violet-50/40 md:grid-cols-[1fr_150px_180px]"
+                  className="grid gap-4 rounded-lg border bg-white p-4 transition hover:border-violet-300 hover:bg-violet-50/40 md:grid-cols-[1fr_150px_180px]"
                 >
                   <div>
                     <div className="flex flex-wrap items-center gap-2">
@@ -847,6 +882,28 @@ export default function AccountsPage() {
                         ) : null}
                       </div>
                     ) : null}
+                    <div className="mt-4 flex flex-wrap gap-2">
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="outline"
+                        className="h-8 rounded-md"
+                        onClick={() => copyAccountText("Account brief", getAccountBrief(client))}
+                      >
+                        <Clipboard className="mr-2 h-3.5 w-3.5" />
+                        Brief
+                      </Button>
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="outline"
+                        className="h-8 rounded-md"
+                        onClick={() => copyAccountText("Follow-up", getAccountFollowUp(client))}
+                      >
+                        <Mail className="mr-2 h-3.5 w-3.5" />
+                        Follow-up
+                      </Button>
+                    </div>
                   </div>
                   <div>
                     <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-slate-500">
@@ -860,8 +917,24 @@ export default function AccountsPage() {
                     </p>
                     <p className="mt-2 text-sm font-medium text-slate-950">{client.value}</p>
                     <p className="mt-1 text-xs text-slate-500">{formatDate(client.createdAt)}</p>
+                    <div className="mt-4 grid gap-2">
+                      <Button asChild size="sm" className="h-8 rounded-md">
+                        <Link href={client.href}>
+                          Open <ArrowRight className="ml-2 h-3.5 w-3.5" />
+                        </Link>
+                      </Button>
+                      <Button asChild size="sm" variant="outline" className="h-8 rounded-md">
+                        <Link
+                          href={`/packages?lead=${encodeURIComponent(client.id)}&package=${encodeURIComponent(
+                            getPackageIdForAccount(client),
+                          )}`}
+                        >
+                          Package
+                        </Link>
+                      </Button>
+                    </div>
                   </div>
-                </Link>
+                </div>
               ))
             )}
           </CardContent>
