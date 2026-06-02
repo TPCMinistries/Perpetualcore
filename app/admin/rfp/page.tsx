@@ -42,6 +42,7 @@ import {
   type SourceReadinessStatus,
   type SourceReadinessSummary,
 } from "@/lib/rfp/source-readiness";
+import { SavedSearchAlertOpsPanel } from "@/components/rfp/admin/SavedSearchAlertOpsPanel";
 import { createAdminClient } from "@/lib/supabase/server";
 import type { Json } from "@/lib/supabase/database.types";
 
@@ -785,6 +786,9 @@ export default async function AdminRfpPage() {
         This is the discovery reach monitor: alerts enabled, searches due for
         the cron, and actual delivery dedupe rows written after email sends.
       </p>
+      <div className="mt-4">
+        <SavedSearchAlertOpsPanel />
+      </div>
       <div className="mt-4">
         <SavedSearchAlertsTable rows={recentSavedSearchAlerts} />
       </div>
