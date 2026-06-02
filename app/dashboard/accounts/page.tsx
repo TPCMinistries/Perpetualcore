@@ -17,6 +17,7 @@ import {
   MessagesSquare,
   PackageCheck,
   RefreshCw,
+  Search,
   ShieldCheck,
   Sparkles,
   Target,
@@ -25,6 +26,14 @@ import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 type AccountLane = {
   id: string;
@@ -62,6 +71,10 @@ type OperatingData = {
     packageRevenueFormatted: string;
     openLeadCount: number;
     activeClientCount: number;
+    paidStartCount?: number;
+    paymentReadyCount?: number;
+    blockedClosePathCount?: number;
+    proposalCount?: number;
     pipelineValueFormatted: string;
   };
   activeClients: AccountLane[];
@@ -211,6 +224,10 @@ function getPaymentBadgeVariant(status?: string) {
   return "outline";
 }
 
+function matchesFilter(value: string | undefined, filter: string) {
+  return filter === "all" || value === filter;
+}
+
 function formatCurrency(value?: number | null) {
   return new Intl.NumberFormat("en-US", {
     style: "currency",
@@ -315,6 +332,9 @@ export default function AccountsPage() {
   const [sourceLeadActivities, setSourceLeadActivities] = useState<SourceLeadActivity[]>([]);
   const [sourceLeadLoading, setSourceLeadLoading] = useState(false);
   const [savingHandoff, setSavingHandoff] = useState(false);
+  const [accountQuery, setAccountQuery] = useState("");
+  const [laneFilter, setLaneFilter] = useState("all");
+  const [paymentFilter, setPaymentFilter] = useState("all");
 
   async function fetchAccounts() {
     setLoading(true);
@@ -393,20 +413,50 @@ export default function AccountsPage() {
     }
   }
 
+  const filteredAccounts = useMemo(() => {
+    const query = accountQuery.trim().toLowerCase();
+
+    return data.activeClients.filter((client) => {
+      const haystack = [
+        client.name,
+        client.company,
+        client.status,
+        client.lane,
+        client.nextStep,
+        client.buyerStage,
+        client.paymentPath,
+        client.paymentStatus,
+      ]
+        .filter(Boolean)
+        .join(" ")
+        .toLowerCase();
+
+      const queryMatches = !query || haystack.includes(query);
+      const laneMatches = laneFilter === "all" || client.lane === laneFilter;
+      const paymentMatches = matchesFilter(client.paymentStatus, paymentFilter);
+      return queryMatches && laneMatches && paymentMatches;
+    });
+  }, [accountQuery, data.activeClients, laneFilter, paymentFilter]);
+
+  const availableLanes = useMemo(
+    () => Array.from(new Set(data.activeClients.map((client) => client.lane))).filter(Boolean),
+    [data.activeClients],
+  );
+
   const paidAccounts = useMemo(
     () =>
-      data.activeClients.filter(
+      filteredAccounts.filter(
         (client) => client.paymentStatus === "paid" || client.status.toLowerCase().includes("paid"),
       ),
-    [data.activeClients],
+    [filteredAccounts],
   );
 
   const pursuitAccounts = useMemo(
     () =>
-      data.activeClients.filter(
+      filteredAccounts.filter(
         (client) => client.paymentStatus !== "paid" && !client.status.toLowerCase().includes("paid"),
       ),
-    [data.activeClients],
+    [filteredAccounts],
   );
 
   return (
@@ -668,9 +718,25 @@ export default function AccountsPage() {
       <div className="grid gap-4 md:grid-cols-4">
         {[
           ["Active accounts", data.summary.activeClientCount],
-          ["Paid packages", data.summary.paidPackageCount],
+          ["Paid starts", data.summary.paidStartCount ?? data.summary.paidPackageCount],
+          ["Payment ready", data.summary.paymentReadyCount ?? 0],
+          ["Blocked paths", data.summary.blockedClosePathCount ?? 0],
+        ].map(([label, value]) => (
+          <Card key={label} className="rounded-lg shadow-none">
+            <CardContent className="p-5">
+              <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-slate-500">{label}</p>
+              <p className="mt-3 text-2xl font-semibold text-slate-950">{value}</p>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+
+      <div className="grid gap-4 md:grid-cols-4">
+        {[
           ["Package revenue", data.summary.packageRevenueFormatted],
           ["Open demand", data.summary.pipelineValueFormatted],
+          ["Open leads", data.summary.openLeadCount],
+          ["In proposal", data.summary.proposalCount ?? 0],
         ].map(([label, value]) => (
           <Card key={label} className="rounded-lg shadow-none">
             <CardContent className="p-5">
@@ -696,6 +762,44 @@ export default function AccountsPage() {
             </Button>
           </CardHeader>
           <CardContent className="space-y-3">
+            <div className="grid gap-3 rounded-lg border bg-slate-50 p-3 md:grid-cols-[1fr_180px_180px]">
+              <div className="relative">
+                <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+                <Input
+                  value={accountQuery}
+                  onChange={(event) => setAccountQuery(event.target.value)}
+                  placeholder="Search accounts, companies, next steps..."
+                  className="h-10 rounded-md bg-white pl-9"
+                />
+              </div>
+              <Select value={laneFilter} onValueChange={setLaneFilter}>
+                <SelectTrigger className="h-10 rounded-md bg-white">
+                  <SelectValue placeholder="Lane" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All lanes</SelectItem>
+                  {availableLanes.map((lane) => (
+                    <SelectItem key={lane} value={lane}>
+                      {lane}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <Select value={paymentFilter} onValueChange={setPaymentFilter}>
+                <SelectTrigger className="h-10 rounded-md bg-white">
+                  <SelectValue placeholder="Payment" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All payment states</SelectItem>
+                  <SelectItem value="not_sent">Not sent</SelectItem>
+                  <SelectItem value="sent">Sent</SelectItem>
+                  <SelectItem value="in_review">In review</SelectItem>
+                  <SelectItem value="paid">Paid</SelectItem>
+                  <SelectItem value="blocked">Blocked</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
             {loading ? (
               <div className="rounded-lg border border-dashed p-6 text-sm text-slate-600">
                 Loading account lanes...
@@ -703,6 +807,10 @@ export default function AccountsPage() {
             ) : data.activeClients.length === 0 ? (
               <div className="rounded-lg border border-dashed p-6 text-sm text-slate-600">
                 No active account lanes yet. Add a lead, send a package, or close a paid workflow.
+              </div>
+            ) : filteredAccounts.length === 0 ? (
+              <div className="rounded-lg border border-dashed p-6 text-sm text-slate-600">
+                No accounts match those filters.
               </div>
             ) : (
               [...paidAccounts, ...pursuitAccounts].map((client) => (

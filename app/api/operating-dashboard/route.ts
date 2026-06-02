@@ -224,6 +224,19 @@ export async function GET() {
     })),
   ].slice(0, 10);
 
+  const closePathActions = wonLeads
+    .map((lead) => ({ lead, closePath: readClosePath(lead) }))
+    .filter(({ closePath }) => closePath?.paymentStatus && closePath.paymentStatus !== "paid")
+    .map(({ lead, closePath }) => ({
+      id: `close-path-${lead.id}`,
+      title: `${closePath?.paymentStatus === "blocked" ? "Unblock" : "Advance"} ${lead.company || lead.name}`,
+      detail:
+        closePath?.commercialNextStep ||
+        `${humanizeStatus(closePath?.buyerStage || "proposal")} account needs a clear payment or approval path.`,
+      priority: closePath?.paymentStatus === "blocked" ? "high" : "medium",
+      href: `/dashboard/accounts/${lead.id}`,
+    }));
+
   const nextActions = [
     ...paidPackages.slice(0, 3).map((payment) => ({
       id: `paid-${payment.id}`,
@@ -234,6 +247,7 @@ export async function GET() {
         ? `/dashboard/leads?lead=${payment.leadId}`
         : `/contact-sales?intent=post-payment-intake&session_id=${encodeURIComponent(payment.id)}`,
     })),
+    ...closePathActions.slice(0, 4),
     ...openSalesContacts.slice(0, 4).map((contact) => ({
       id: `contact-${contact.id}`,
       title: `Follow up with ${contact.name || contact.company || "new sales contact"}`,
@@ -250,6 +264,12 @@ export async function GET() {
       packageRevenueFormatted: formatStripeAmount(packageRevenue, "usd").formatted,
       openLeadCount: openLeads.length + openSalesContacts.length,
       activeClientCount: activeClients.length,
+      paidStartCount: activeClients.filter((client) => client.paymentStatus === "paid").length,
+      paymentReadyCount: activeClients.filter((client) =>
+        ["sent", "in_review"].includes(client.paymentStatus || ""),
+      ).length,
+      blockedClosePathCount: activeClients.filter((client) => client.paymentStatus === "blocked").length,
+      proposalCount: activeClients.filter((client) => client.buyerStage === "proposal").length,
       pipelineValue,
       pipelineValueFormatted: new Intl.NumberFormat("en-US", {
         style: "currency",
