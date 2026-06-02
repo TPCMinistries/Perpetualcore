@@ -13,6 +13,20 @@ import {
 } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { DraftButton } from "@/components/rfp/DraftButton";
+import { PursuitReadinessScorecard } from "@/components/rfp/PursuitReadinessScorecard";
+import {
+  parseComplianceMatrix,
+  parsePacketChecklist,
+  parseReviewerResult,
+} from "@/lib/rfp/submission/tasks";
+import { SECTION_TYPES, type SectionType } from "@/lib/rfp/draft/sections";
+import { REVIEWER_FINDINGS_SECTION_TYPE } from "@/lib/rfp/review/rubric";
+import {
+  buildPursuitReadiness,
+  countVerifyMarkersFromSections,
+  parseBidNoBid,
+  type PursuitReadiness,
+} from "@/lib/rfp/readiness";
 
 export const dynamic = "force-dynamic";
 
@@ -67,6 +81,23 @@ interface TaskRow {
   title: string;
 }
 
+interface ComplianceCheckRow {
+  proposal_id: string;
+  check_type: string;
+  details_json: unknown;
+  created_at: string;
+}
+
+interface SectionRow {
+  proposal_id: string;
+  section_type: string;
+  content: string | null;
+}
+
+interface PackageRow {
+  proposal_id: string;
+}
+
 interface PursuitItem {
   oppId: string;
   title: string;
@@ -88,6 +119,7 @@ interface PursuitItem {
   blockedTasks: number;
   criticalTasks: number;
   nextTask: string | null;
+  readiness: PursuitReadiness;
 }
 
 const STATUS_LABEL: Record<ProposalStatus, string> = {
@@ -278,6 +310,39 @@ export default async function PursuitsPage({ params }: PageProps) {
           .returns<TaskRow[]>()
       : { data: [] as TaskRow[] };
 
+  const { data: complianceRows } =
+    proposalIds.length > 0
+      ? await supabase
+          .from("rfp_compliance_checks")
+          .select("proposal_id, check_type, details_json, created_at")
+          .in("proposal_id", proposalIds)
+          .in("check_type", [
+            "bid_no_bid_v1",
+            "compliance_matrix_v1",
+            "packet_checklist_v1",
+          ])
+          .order("created_at", { ascending: false })
+          .returns<ComplianceCheckRow[]>()
+      : { data: [] as ComplianceCheckRow[] };
+
+  const { data: sectionRows } =
+    proposalIds.length > 0
+      ? await supabase
+          .from("rfp_proposal_sections")
+          .select("proposal_id, section_type, content")
+          .in("proposal_id", proposalIds)
+          .returns<SectionRow[]>()
+      : { data: [] as SectionRow[] };
+
+  const { data: packageRows } =
+    proposalIds.length > 0
+      ? await supabase
+          .from("rfp_package_documents")
+          .select("proposal_id")
+          .in("proposal_id", proposalIds)
+          .returns<PackageRow[]>()
+      : { data: [] as PackageRow[] };
+
   const tasksByProposal = new Map<string, TaskRow[]>();
   for (const task of taskRows ?? []) {
     const existing = tasksByProposal.get(task.proposal_id) ?? [];
@@ -285,11 +350,40 @@ export default async function PursuitsPage({ params }: PageProps) {
     tasksByProposal.set(task.proposal_id, existing);
   }
 
+  const checksByProposal = new Map<string, ComplianceCheckRow[]>();
+  for (const row of complianceRows ?? []) {
+    const existing = checksByProposal.get(row.proposal_id) ?? [];
+    existing.push(row);
+    checksByProposal.set(row.proposal_id, existing);
+  }
+
+  const sectionsByProposal = new Map<string, SectionRow[]>();
+  for (const row of sectionRows ?? []) {
+    const existing = sectionsByProposal.get(row.proposal_id) ?? [];
+    existing.push(row);
+    sectionsByProposal.set(row.proposal_id, existing);
+  }
+
+  const packagesByProposal = new Set((packageRows ?? []).map((row) => row.proposal_id));
+
   const pursuits: PursuitItem[] = validMatches
     .map((match) => {
       const opp = match.rfp_opportunities as OppJoinRow;
       const proposal = proposalByOpp.get(match.opp_id) ?? null;
       const tasks = proposal ? tasksByProposal.get(proposal.id) ?? [] : [];
+      const checksByType = new Map<string, unknown>();
+      for (const row of proposal ? checksByProposal.get(proposal.id) ?? [] : []) {
+        if (!checksByType.has(row.check_type)) {
+          checksByType.set(row.check_type, row.details_json);
+        }
+      }
+      const sections = proposal ? sectionsByProposal.get(proposal.id) ?? [] : [];
+      const proposalSections = sections.filter((section) =>
+        SECTION_TYPES.includes(section.section_type as SectionType),
+      );
+      const reviewerSection = sections.find(
+        (section) => section.section_type === REVIEWER_FINDINGS_SECTION_TYPE,
+      );
       const openTasks = tasks.filter((task) =>
         ["open", "in_progress", "blocked"].includes(task.status),
       );
@@ -322,6 +416,22 @@ export default async function PursuitsPage({ params }: PageProps) {
         blockedTasks: openTasks.filter((task) => task.status === "blocked").length,
         criticalTasks: openTasks.filter((task) => task.priority === "critical").length,
         nextTask: sortedOpen[0]?.title ?? null,
+        readiness: buildPursuitReadiness({
+          proposalStatus: proposal?.status ?? null,
+          dueDate: proposal?.due_date ?? opp.deadline,
+          sectionCount: proposalSections.length,
+          verifyMarkerCount: countVerifyMarkersFromSections(proposalSections),
+          hasPackage: proposal ? packagesByProposal.has(proposal.id) : false,
+          bidNoBid: parseBidNoBid(checksByType.get("bid_no_bid_v1")),
+          complianceMatrix: parseComplianceMatrix(
+            checksByType.get("compliance_matrix_v1"),
+          ),
+          packetChecklist: parsePacketChecklist(
+            checksByType.get("packet_checklist_v1"),
+          ),
+          reviewerResult: parseReviewerResult(reviewerSection?.content ?? null),
+          tasks,
+        }),
       };
     })
     .sort(sortPursuits);
@@ -330,6 +440,9 @@ export default async function PursuitsPage({ params }: PageProps) {
   const draftReady = pursuits.filter((item) => item.triageStatus === "pursuing" && !item.proposal).length;
   const activeDrafts = pursuits.filter((item) => item.proposal && normalizeProposalStatus(item.proposal.status) === "draft").length;
   const blockedCount = pursuits.filter((item) => item.blockedTasks > 0 || item.criticalTasks > 0).length;
+  const submissionReady = pursuits.filter(
+    (item) => item.readiness.status === "ready" || item.readiness.status === "submitted",
+  ).length;
   const dueSoon = pursuits.filter((item) => {
     const days = daysUntil(item.deadline);
     return days !== null && days >= 0 && days <= 14;
@@ -366,10 +479,11 @@ export default async function PursuitsPage({ params }: PageProps) {
           </Link>
         </div>
 
-        <section className="mt-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
+        <section className="mt-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-6">
           <MetricCard label="Ready to draft" value={draftReady} tone={draftReady > 0 ? "warn" : "neutral"} />
           <MetricCard label="Draft workrooms" value={activeDrafts} tone={activeDrafts > 0 ? "ready" : "neutral"} />
           <MetricCard label="Blocked" value={blockedCount} tone={blockedCount > 0 ? "danger" : "neutral"} />
+          <MetricCard label="Submit-ready" value={submissionReady} tone={submissionReady > 0 ? "ready" : "neutral"} />
           <MetricCard label="Due in 14d" value={dueSoon} tone={dueSoon > 0 ? "warn" : "neutral"} />
           <MetricCard label="Watching" value={pursuits.length - pursuingCount} tone="neutral" />
         </section>
@@ -510,6 +624,9 @@ function PursuitCard({ item, orgId }: { item: PursuitItem; orgId: string }) {
             Next action
           </p>
           <p className="mt-2 text-sm leading-6 text-zinc-700">{stage.detail}</p>
+          <div className="mt-4">
+            <PursuitReadinessScorecard readiness={item.readiness} compact />
+          </div>
 
           {item.nextTask ? (
             <div className="mt-4 rounded-md border border-zinc-200 bg-white p-3">

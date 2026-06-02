@@ -27,6 +27,7 @@ import { SubmissionWorkroom } from "@/components/rfp/SubmissionWorkroom";
 import { ManualSubmissionTaskForm } from "@/components/rfp/ManualSubmissionTaskForm";
 import { PackageIntakePanel } from "@/components/rfp/PackageIntakePanel";
 import { PackageRedraftButton } from "@/components/rfp/PackageRedraftButton";
+import { PursuitReadinessScorecard } from "@/components/rfp/PursuitReadinessScorecard";
 import {
   PursuitCommandStateForm,
   type PursuitPriority,
@@ -37,7 +38,19 @@ import {
   type PursuitDecisionEventType,
   type PursuitDecisionLogRow,
 } from "@/components/rfp/PursuitDecisionLog";
-import type { SubmissionTaskRow } from "@/lib/rfp/submission/tasks";
+import {
+  parseComplianceMatrix,
+  parsePacketChecklist,
+  parseReviewerResult,
+  type SubmissionTaskRow,
+} from "@/lib/rfp/submission/tasks";
+import { SECTION_TYPES, type SectionType } from "@/lib/rfp/draft/sections";
+import { REVIEWER_FINDINGS_SECTION_TYPE } from "@/lib/rfp/review/rubric";
+import {
+  buildPursuitReadiness,
+  countVerifyMarkersFromSections,
+  parseBidNoBid,
+} from "@/lib/rfp/readiness";
 
 export const dynamic = "force-dynamic";
 
@@ -123,6 +136,17 @@ interface PackageDocRow {
     submission_instructions?: string[];
   };
   created_at: string;
+}
+
+interface ComplianceCheckRow {
+  check_type: string;
+  details_json: unknown;
+  created_at: string;
+}
+
+interface SectionRow {
+  section_type: string;
+  content: string | null;
 }
 
 function fmtDate(iso: string | null): string {
@@ -349,6 +373,28 @@ export default async function PursuitDetailPage({ params }: PageProps) {
         .returns<PackageDocRow[]>()
     : { data: [] as PackageDocRow[] };
 
+  const { data: complianceRows } = proposal
+    ? await supabase
+        .from("rfp_compliance_checks")
+        .select("check_type, details_json, created_at")
+        .eq("proposal_id", proposal.id)
+        .in("check_type", [
+          "bid_no_bid_v1",
+          "compliance_matrix_v1",
+          "packet_checklist_v1",
+        ])
+        .order("created_at", { ascending: false })
+        .returns<ComplianceCheckRow[]>()
+    : { data: [] as ComplianceCheckRow[] };
+
+  const { data: sections } = proposal
+    ? await supabase
+        .from("rfp_proposal_sections")
+        .select("section_type, content")
+        .eq("proposal_id", proposal.id)
+        .returns<SectionRow[]>()
+    : { data: [] as SectionRow[] };
+
   const { data: decisionLogs } = await supabase
     .from("rfp_pursuit_decision_logs")
     .select("id, org_id, opp_id, event_type, title, body, created_by, created_at")
@@ -390,6 +436,34 @@ export default async function PursuitDetailPage({ params }: PageProps) {
       ?.map((item) => item.requirement)
       .filter((item): item is string => Boolean(item)) ?? [];
   const packageDocsList = latestPackage?.extracted_json.required_documents ?? [];
+  const checksByType = new Map<string, unknown>();
+  for (const row of complianceRows ?? []) {
+    if (!checksByType.has(row.check_type)) {
+      checksByType.set(row.check_type, row.details_json);
+    }
+  }
+  const proposalSections = (sections ?? []).filter((section) =>
+    SECTION_TYPES.includes(section.section_type as SectionType),
+  );
+  const reviewerSection = (sections ?? []).find(
+    (section) => section.section_type === REVIEWER_FINDINGS_SECTION_TYPE,
+  );
+  const readiness = buildPursuitReadiness({
+    proposalStatus: proposal?.status ?? null,
+    dueDate: proposal?.due_date ?? opp.deadline,
+    sectionCount: proposalSections.length,
+    verifyMarkerCount: countVerifyMarkersFromSections(proposalSections),
+    hasPackage: (packageDocs?.length ?? 0) > 0,
+    bidNoBid: parseBidNoBid(checksByType.get("bid_no_bid_v1")),
+    complianceMatrix: parseComplianceMatrix(
+      checksByType.get("compliance_matrix_v1"),
+    ),
+    packetChecklist: parsePacketChecklist(
+      checksByType.get("packet_checklist_v1"),
+    ),
+    reviewerResult: parseReviewerResult(reviewerSection?.content ?? null),
+    tasks: taskRows,
+  });
 
   const actionClass =
     action.tone === "ready"
@@ -565,6 +639,10 @@ export default async function PursuitDetailPage({ params }: PageProps) {
             items={riskSignals}
           />
         </section>
+
+        <div className="mt-6">
+          <PursuitReadinessScorecard readiness={readiness} />
+        </div>
 
         <section className="mt-6 rounded-xl border border-zinc-200 bg-white p-5 shadow-sm">
           <div className="flex flex-wrap items-start justify-between gap-3">
