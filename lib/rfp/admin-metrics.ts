@@ -13,6 +13,21 @@ import { createAdminClient } from "@/lib/supabase/server";
 import type { Json } from "@/lib/supabase/database.types";
 import { dueSince } from "@/lib/rfp/saved-search-execution";
 import { normalizeSavedSearchRow, type RfpSavedSearch } from "@/lib/rfp/saved-searches";
+import {
+  parseComplianceMatrix,
+  parsePacketChecklist,
+  parseReviewerResult,
+  type SubmissionTaskPriority,
+  type SubmissionTaskStatus,
+} from "@/lib/rfp/submission/tasks";
+import { SECTION_TYPES, type SectionType } from "@/lib/rfp/draft/sections";
+import { REVIEWER_FINDINGS_SECTION_TYPE } from "@/lib/rfp/review/rubric";
+import {
+  buildPursuitReadiness,
+  countVerifyMarkersFromSections,
+  parseBidNoBid,
+  type ReadinessStatus,
+} from "@/lib/rfp/readiness";
 
 export interface PlatformTotals {
   orgs: number;
@@ -92,6 +107,33 @@ export interface SavedSearchAlertRow {
   opp_title: string | null;
   email: string;
   sent_at: string;
+}
+
+export interface PursuitReadinessMetrics {
+  proposals: number;
+  average_score: number;
+  ready: number;
+  blocked: number;
+  in_progress: number;
+  not_started: number;
+  submitted: number;
+  package_imported: number;
+  compliance_run: number;
+  reviewer_run: number;
+  open_tasks: number;
+  critical_tasks: number;
+}
+
+export interface PursuitReadinessOrgRow {
+  org_id: string;
+  org_name: string | null;
+  proposals: number;
+  average_score: number;
+  ready: number;
+  blocked: number;
+  in_progress: number;
+  submitted: number;
+  critical_tasks: number;
 }
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
@@ -510,4 +552,258 @@ export async function loadRecentSavedSearchAlerts(
     email: row.email,
     sent_at: row.sent_at,
   }));
+}
+
+export async function loadPursuitReadinessMetrics(): Promise<{
+  metrics: PursuitReadinessMetrics;
+  orgs: PursuitReadinessOrgRow[];
+}> {
+  const admin = createAdminClient();
+
+  const { data: proposals } = await admin
+    .from("rfp_proposals")
+    .select("id, org_id, status, due_date")
+    .order("updated_at", { ascending: false })
+    .limit(500)
+    .returns<
+      {
+        id: string;
+        org_id: string;
+        status: string;
+        due_date: string | null;
+      }[]
+    >();
+
+  const proposalRows = proposals ?? [];
+  if (proposalRows.length === 0) {
+    return {
+      metrics: {
+        proposals: 0,
+        average_score: 0,
+        ready: 0,
+        blocked: 0,
+        in_progress: 0,
+        not_started: 0,
+        submitted: 0,
+        package_imported: 0,
+        compliance_run: 0,
+        reviewer_run: 0,
+        open_tasks: 0,
+        critical_tasks: 0,
+      },
+      orgs: [],
+    };
+  }
+
+  const proposalIds = proposalRows.map((row) => row.id);
+  const orgIds = Array.from(new Set(proposalRows.map((row) => row.org_id)));
+
+  const [tasksRes, checksRes, sectionsRes, packagesRes, orgsRes] = await Promise.all([
+    admin
+      .from("rfp_submission_tasks")
+      .select("proposal_id, status, priority, title")
+      .in("proposal_id", proposalIds)
+      .returns<
+        {
+          proposal_id: string;
+          status: SubmissionTaskStatus;
+          priority: SubmissionTaskPriority;
+          title: string;
+        }[]
+      >(),
+    admin
+      .from("rfp_compliance_checks")
+      .select("proposal_id, check_type, details_json, created_at")
+      .in("proposal_id", proposalIds)
+      .in("check_type", [
+        "bid_no_bid_v1",
+        "compliance_matrix_v1",
+        "packet_checklist_v1",
+      ])
+      .order("created_at", { ascending: false })
+      .returns<
+        {
+          proposal_id: string;
+          check_type: string;
+          details_json: unknown;
+          created_at: string;
+        }[]
+      >(),
+    admin
+      .from("rfp_proposal_sections")
+      .select("proposal_id, section_type, content")
+      .in("proposal_id", proposalIds)
+      .returns<
+        {
+          proposal_id: string;
+          section_type: string;
+          content: string | null;
+        }[]
+      >(),
+    admin
+      .from("rfp_package_documents")
+      .select("proposal_id")
+      .in("proposal_id", proposalIds)
+      .returns<{ proposal_id: string }[]>(),
+    admin
+      .from("rfp_orgs")
+      .select("id, name")
+      .in("id", orgIds)
+      .returns<{ id: string; name: string }[]>(),
+  ]);
+
+  const tasksByProposal = new Map<string, NonNullable<typeof tasksRes.data>>();
+  for (const task of tasksRes.data ?? []) {
+    const existing = tasksByProposal.get(task.proposal_id) ?? [];
+    existing.push(task);
+    tasksByProposal.set(task.proposal_id, existing);
+  }
+
+  const checksByProposal = new Map<string, NonNullable<typeof checksRes.data>>();
+  for (const check of checksRes.data ?? []) {
+    const existing = checksByProposal.get(check.proposal_id) ?? [];
+    existing.push(check);
+    checksByProposal.set(check.proposal_id, existing);
+  }
+
+  const sectionsByProposal = new Map<string, NonNullable<typeof sectionsRes.data>>();
+  for (const section of sectionsRes.data ?? []) {
+    const existing = sectionsByProposal.get(section.proposal_id) ?? [];
+    existing.push(section);
+    sectionsByProposal.set(section.proposal_id, existing);
+  }
+
+  const packageProposalIds = new Set((packagesRes.data ?? []).map((row) => row.proposal_id));
+  const orgNames = new Map((orgsRes.data ?? []).map((row) => [row.id, row.name]));
+
+  const statusCounts: Record<ReadinessStatus, number> = {
+    not_started: 0,
+    blocked: 0,
+    in_progress: 0,
+    ready: 0,
+    submitted: 0,
+  };
+  const orgStats = new Map<
+    string,
+    {
+      proposals: number;
+      scoreTotal: number;
+      ready: number;
+      blocked: number;
+      in_progress: number;
+      submitted: number;
+      critical_tasks: number;
+    }
+  >();
+
+  let scoreTotal = 0;
+  let packageImported = 0;
+  let complianceRun = 0;
+  let reviewerRun = 0;
+  let openTasks = 0;
+  let criticalTasks = 0;
+
+  for (const proposal of proposalRows) {
+    const checksByType = new Map<string, unknown>();
+    for (const check of checksByProposal.get(proposal.id) ?? []) {
+      if (!checksByType.has(check.check_type)) {
+        checksByType.set(check.check_type, check.details_json);
+      }
+    }
+
+    const sections = sectionsByProposal.get(proposal.id) ?? [];
+    const proposalSections = sections.filter((section) =>
+      SECTION_TYPES.includes(section.section_type as SectionType),
+    );
+    const reviewerSection = sections.find(
+      (section) => section.section_type === REVIEWER_FINDINGS_SECTION_TYPE,
+    );
+    const tasks = (tasksByProposal.get(proposal.id) ?? []).map((task) => ({
+      status: task.status,
+      priority: task.priority,
+      title: task.title,
+    }));
+    const hasPackage = packageProposalIds.has(proposal.id);
+    const bidNoBid = parseBidNoBid(checksByType.get("bid_no_bid_v1"));
+    const complianceMatrix = parseComplianceMatrix(
+      checksByType.get("compliance_matrix_v1"),
+    );
+    const packetChecklist = parsePacketChecklist(
+      checksByType.get("packet_checklist_v1"),
+    );
+    const reviewerResult = parseReviewerResult(reviewerSection?.content ?? null);
+    const readiness = buildPursuitReadiness({
+      proposalStatus: proposal.status,
+      dueDate: proposal.due_date,
+      sectionCount: proposalSections.length,
+      verifyMarkerCount: countVerifyMarkersFromSections(proposalSections),
+      hasPackage,
+      bidNoBid,
+      complianceMatrix,
+      packetChecklist,
+      reviewerResult,
+      tasks,
+    });
+
+    statusCounts[readiness.status]++;
+    scoreTotal += readiness.score;
+    if (hasPackage) packageImported++;
+    if (complianceMatrix || packetChecklist || bidNoBid) complianceRun++;
+    if (reviewerResult) reviewerRun++;
+    openTasks += readiness.metrics.openTasks;
+    criticalTasks += readiness.metrics.criticalTasks;
+
+    const stat = orgStats.get(proposal.org_id) ?? {
+      proposals: 0,
+      scoreTotal: 0,
+      ready: 0,
+      blocked: 0,
+      in_progress: 0,
+      submitted: 0,
+      critical_tasks: 0,
+    };
+    stat.proposals++;
+    stat.scoreTotal += readiness.score;
+    if (readiness.status === "ready") stat.ready++;
+    if (readiness.status === "blocked") stat.blocked++;
+    if (readiness.status === "in_progress") stat.in_progress++;
+    if (readiness.status === "submitted") stat.submitted++;
+    stat.critical_tasks += readiness.metrics.criticalTasks;
+    orgStats.set(proposal.org_id, stat);
+  }
+
+  const orgs = Array.from(orgStats.entries())
+    .map(([orgId, stat]) => ({
+      org_id: orgId,
+      org_name: orgNames.get(orgId) ?? null,
+      proposals: stat.proposals,
+      average_score:
+        stat.proposals > 0 ? Math.round(stat.scoreTotal / stat.proposals) : 0,
+      ready: stat.ready,
+      blocked: stat.blocked,
+      in_progress: stat.in_progress,
+      submitted: stat.submitted,
+      critical_tasks: stat.critical_tasks,
+    }))
+    .sort((a, b) => b.blocked - a.blocked || b.critical_tasks - a.critical_tasks)
+    .slice(0, 10);
+
+  return {
+    metrics: {
+      proposals: proposalRows.length,
+      average_score:
+        proposalRows.length > 0 ? Math.round(scoreTotal / proposalRows.length) : 0,
+      ready: statusCounts.ready,
+      blocked: statusCounts.blocked,
+      in_progress: statusCounts.in_progress,
+      not_started: statusCounts.not_started,
+      submitted: statusCounts.submitted,
+      package_imported: packageImported,
+      compliance_run: complianceRun,
+      reviewer_run: reviewerRun,
+      open_tasks: openTasks,
+      critical_tasks: criticalTasks,
+    },
+    orgs,
+  };
 }

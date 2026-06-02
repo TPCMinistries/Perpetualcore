@@ -21,6 +21,7 @@ import {
   loadOrgBreakdown,
   loadOpenDriftRows,
   loadPlatformTotals,
+  loadPursuitReadinessMetrics,
   loadRecentAudit,
   loadRecentCronRuns,
   loadRecentSavedSearchAlerts,
@@ -31,6 +32,8 @@ import {
   type OpenDriftRow,
   type OrgRow,
   type PlatformTotals,
+  type PursuitReadinessMetrics,
+  type PursuitReadinessOrgRow,
   type SavedSearchAlertMetrics,
   type SavedSearchAlertRow,
   type ScraperHealthRow,
@@ -267,6 +270,113 @@ function SavedSearchAlertTiles({
         value={formatRelative(metrics.last_sent_at)}
         tone={metrics.last_sent_at ? "emerald" : "amber"}
       />
+    </div>
+  );
+}
+
+function PursuitReadinessTiles({
+  metrics,
+}: {
+  metrics: PursuitReadinessMetrics;
+}) {
+  return (
+    <div className="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-6">
+      <Tile
+        label="Avg readiness"
+        value={`${formatNumber(metrics.average_score)}`}
+        sub={`${formatNumber(metrics.proposals)} proposals`}
+        tone={metrics.average_score >= 80 ? "emerald" : metrics.average_score >= 55 ? "amber" : "default"}
+      />
+      <Tile
+        label="Ready"
+        value={formatNumber(metrics.ready + metrics.submitted)}
+        tone={metrics.ready + metrics.submitted > 0 ? "emerald" : "default"}
+      />
+      <Tile
+        label="Blocked"
+        value={formatNumber(metrics.blocked)}
+        tone={metrics.blocked > 0 ? "amber" : "emerald"}
+      />
+      <Tile label="In progress" value={formatNumber(metrics.in_progress)} />
+      <Tile
+        label="Critical tasks"
+        value={formatNumber(metrics.critical_tasks)}
+        tone={metrics.critical_tasks > 0 ? "amber" : "emerald"}
+      />
+      <Tile
+        label="Packages"
+        value={formatNumber(metrics.package_imported)}
+        sub={`${formatNumber(metrics.compliance_run)} readiness runs`}
+        tone={metrics.package_imported > 0 ? "emerald" : "default"}
+      />
+    </div>
+  );
+}
+
+function PursuitReadinessOrgTable({
+  rows,
+}: {
+  rows: PursuitReadinessOrgRow[];
+}) {
+  if (rows.length === 0) {
+    return (
+      <p className="mt-4 rounded-md border border-white/5 bg-white/[0.02] p-6 text-sm text-zinc-500">
+        No proposal readiness data yet. Once pursuits create proposal workrooms,
+        readiness distribution appears here.
+      </p>
+    );
+  }
+
+  return (
+    <div className="mt-4 overflow-x-auto rounded-lg border border-white/5 bg-white/[0.02]">
+      <table className="w-full min-w-[820px] text-[13px]">
+        <thead>
+          <tr className="border-b border-white/5 text-left font-mono text-[10px] uppercase tracking-[0.18em] text-zinc-500">
+            <th className="px-4 py-3">Org</th>
+            <th className="px-3 py-3 text-right">Avg</th>
+            <th className="px-3 py-3 text-right">Proposals</th>
+            <th className="px-3 py-3 text-right">Ready</th>
+            <th className="px-3 py-3 text-right">Blocked</th>
+            <th className="px-3 py-3 text-right">In progress</th>
+            <th className="px-4 py-3 text-right">Critical tasks</th>
+          </tr>
+        </thead>
+        <tbody>
+          {rows.map((row) => (
+            <tr
+              key={row.org_id}
+              className="border-b border-white/5 last:border-0 hover:bg-white/[0.02]"
+            >
+              <td className="px-4 py-3">
+                <div className="text-zinc-200">
+                  {row.org_name ?? row.org_id.slice(0, 8)}
+                </div>
+                <div className="mt-1 font-mono text-[10px] text-zinc-600">
+                  {row.org_id.slice(0, 8)}
+                </div>
+              </td>
+              <td className="px-3 py-3 text-right font-mono text-[12px] tabular-nums text-zinc-200">
+                {row.average_score}
+              </td>
+              <td className="px-3 py-3 text-right tabular-nums text-zinc-300">
+                {row.proposals}
+              </td>
+              <td className="px-3 py-3 text-right tabular-nums text-emerald-300">
+                {row.ready + row.submitted}
+              </td>
+              <td className="px-3 py-3 text-right tabular-nums text-amber-300">
+                {row.blocked}
+              </td>
+              <td className="px-3 py-3 text-right tabular-nums text-zinc-300">
+                {row.in_progress}
+              </td>
+              <td className="px-4 py-3 text-right tabular-nums text-zinc-300">
+                {row.critical_tasks}
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
     </div>
   );
 }
@@ -711,6 +821,7 @@ export default async function AdminRfpPage() {
     scraperHealth,
     openDrift,
     cronRuns,
+    pursuitReadiness,
     savedSearchAlertMetrics,
     recentSavedSearchAlerts,
     audit,
@@ -721,6 +832,7 @@ export default async function AdminRfpPage() {
       loadScraperHealth(),
       loadOpenDriftRows(25),
       loadRecentCronRuns(10),
+      loadPursuitReadinessMetrics(),
       loadSavedSearchAlertMetrics(),
       loadRecentSavedSearchAlerts(25),
       loadRecentAudit(50),
@@ -776,6 +888,18 @@ export default async function AdminRfpPage() {
 
       <SectionHeader title="Recent RFP cron runs" detail="last 10" />
       <CronTable rows={cronRuns} />
+
+      <SectionHeader
+        title="Pursuit readiness"
+        detail="proposal workroom health"
+      />
+      <PursuitReadinessTiles metrics={pursuitReadiness.metrics} />
+      <p className="mt-3 text-[13px] leading-6 text-zinc-500">
+        Same scoring model used on tenant pursuit pages. This shows whether
+        the engine is moving opportunities toward submission-ready packets or
+        leaving teams with blocked work queues.
+      </p>
+      <PursuitReadinessOrgTable rows={pursuitReadiness.orgs} />
 
       <SectionHeader
         title="Saved-search alerts"
