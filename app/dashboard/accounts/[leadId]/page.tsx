@@ -87,6 +87,16 @@ type AccountUpdate = {
   nextAction: string;
 };
 
+type AccountHandoffContext = {
+  workflowOwner?: string | null;
+  toolsAndData?: string | null;
+  realExamples?: string | null;
+  rulesAndEscalations?: string | null;
+  successMetric?: string | null;
+  notes?: string | null;
+  submittedAt?: string | null;
+};
+
 type ClosePathState = {
   buyerStage: string;
   paymentPath: string;
@@ -327,6 +337,15 @@ function readAccountUpdates(lead: AccountLead): Array<AccountUpdate & { createdA
 
   const insights = lead.ai_insights as { accountUpdates?: Array<AccountUpdate & { createdAt: string }> };
   return insights.accountUpdates || [];
+}
+
+function readAccountHandoffContext(lead: AccountLead): AccountHandoffContext | null {
+  if (!lead.ai_insights || typeof lead.ai_insights !== "object" || Array.isArray(lead.ai_insights)) {
+    return null;
+  }
+
+  const insights = lead.ai_insights as { accountHandoffContext?: AccountHandoffContext };
+  return insights.accountHandoffContext || null;
 }
 
 function readClosePath(lead: AccountLead): ClosePathState {
@@ -1030,6 +1049,15 @@ export default function AccountDetailPage() {
       detail: lead.next_follow_up_at ? formatDate(lead.next_follow_up_at) : handoffReady ? "Handoff ready" : "Not scheduled",
     },
   ];
+  const handoffContext = readAccountHandoffContext(lead);
+  const handoffContextItems = [
+    ["Workflow owner", handoffContext?.workflowOwner],
+    ["Success metric", handoffContext?.successMetric],
+    ["Tools and data", handoffContext?.toolsAndData],
+    ["Real examples", handoffContext?.realExamples],
+    ["Rules and escalations", handoffContext?.rulesAndEscalations],
+    ["Additional notes", handoffContext?.notes],
+  ].filter(([, value]) => Boolean(value));
 
   return (
     <div className="space-y-6 pb-10">
@@ -1389,6 +1417,52 @@ export default function AccountDetailPage() {
               ))}
             </div>
           </div>
+        </CardContent>
+      </Card>
+
+      <Card className="rounded-lg shadow-none">
+        <CardHeader>
+          <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+            <div>
+              <div className="flex items-center gap-3">
+                <CardTitle className="text-xl">Client handoff context</CardTitle>
+                <Clipboard className="h-5 w-5 text-violet-600" />
+              </div>
+              <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-600">
+                Context submitted from the secure client handoff page. Use this to map the first
+                operating lane, assistant behavior, and kickoff task plan.
+              </p>
+            </div>
+            <Badge className="w-fit rounded-md" variant={handoffContextItems.length > 0 ? "default" : "outline"}>
+              {handoffContextItems.length > 0
+                ? `Received ${handoffContext?.submittedAt ? formatDateTime(handoffContext.submittedAt) : ""}`
+                : "Awaiting client"}
+            </Badge>
+          </div>
+        </CardHeader>
+        <CardContent>
+          {handoffContextItems.length > 0 ? (
+            <div className="grid gap-3 md:grid-cols-2">
+              {handoffContextItems.map(([label, value]) => (
+                <div key={label} className="rounded-lg border bg-slate-50 p-4">
+                  <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-slate-500">{label}</p>
+                  <p className="mt-2 whitespace-pre-wrap text-sm leading-6 text-slate-700">{value}</p>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="rounded-lg border bg-slate-50 p-5">
+              <p className="text-sm font-semibold text-slate-950">No client context submitted yet.</p>
+              <p className="mt-2 text-sm leading-6 text-slate-600">
+                Copy the client handoff link after the account is synced. The submission will appear
+                here and log a lead activity automatically.
+              </p>
+              <Button type="button" variant="outline" className="mt-4 rounded-md" onClick={copyClientHandoffLink}>
+                <Clipboard className="mr-2 h-4 w-4" />
+                Copy client handoff link
+              </Button>
+            </div>
+          )}
         </CardContent>
       </Card>
 
