@@ -609,7 +609,11 @@ export function DetailPane({
               </p>
             </div>
           </div>
-          <DraftButton orgId={orgId} oppId={row.opp_id} />
+          <DraftButton
+            orgId={orgId}
+            oppId={row.opp_id}
+            triageNote={row.triage_note}
+          />
         </div>
         {row.url && (
           <a

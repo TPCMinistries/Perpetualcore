@@ -22,6 +22,8 @@ import { ArrowRight, Loader2, WandSparkles } from "lucide-react";
 interface DraftButtonProps {
   orgId: string;
   oppId: string;
+  ensurePursuing?: boolean;
+  triageNote?: string | null;
 }
 
 interface VoiceState {
@@ -32,7 +34,12 @@ interface VaultListResponse {
   docs?: unknown[];
 }
 
-export function DraftButton({ orgId, oppId }: DraftButtonProps) {
+export function DraftButton({
+  orgId,
+  oppId,
+  ensurePursuing = true,
+  triageNote = "Started pursuit workflow.",
+}: DraftButtonProps) {
   const router = useRouter();
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -75,8 +82,28 @@ export function DraftButton({ orgId, oppId }: DraftButtonProps) {
     if (busy) return;
     setBusy(true);
     setError(null);
-    setStep("Drafting proposal");
+    setStep(ensurePursuing ? "Marking pursuit" : "Drafting proposal");
     try {
+      if (ensurePursuing) {
+        const triageRes = await fetch(`/api/rfp/opps/${oppId}/triage`, {
+          method: "PATCH",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({
+            org_id: orgId,
+            status: "pursuing",
+            note: triageNote ?? "Started pursuit workflow.",
+          }),
+        });
+        if (!triageRes.ok) {
+          const body = (await triageRes.json().catch(() => null)) as
+            | { error?: string; detail?: string }
+            | null;
+          setError(body?.detail ?? body?.error ?? `triage_${triageRes.status}`);
+          return;
+        }
+      }
+
+      setStep("Drafting proposal");
       const res = await fetch("/api/rfp/draft", {
         method: "POST",
         headers: { "content-type": "application/json" },

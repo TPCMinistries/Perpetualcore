@@ -486,16 +486,12 @@ export default async function PursuitDetailPage({ params }: PageProps) {
                     Open proposal workroom
                     <ArrowRight className="h-4 w-4" />
                   </Link>
-                ) : match.triage_status === "pursuing" ? (
-                  <DraftButton orgId={orgId} oppId={oppId} />
                 ) : (
-                  <Link
-                    href={`/org/${orgId}/discovery`}
-                    className="inline-flex h-10 items-center justify-center gap-2 rounded-md bg-zinc-950 px-4 text-sm font-medium text-white transition hover:bg-zinc-800"
-                  >
-                    Review in Discovery
-                    <ArrowRight className="h-4 w-4" />
-                  </Link>
+                  <DraftButton
+                    orgId={orgId}
+                    oppId={oppId}
+                    triageNote={match.triage_note}
+                  />
                 )}
               </div>
             </section>
@@ -712,11 +708,13 @@ export default async function PursuitDetailPage({ params }: PageProps) {
               beyond triage. The system will create the proposal, reviewer pass,
               readiness matrix, and workroom tasks.
             </p>
-            {match.triage_status === "pursuing" ? (
-              <div className="mt-5 max-w-sm">
-                <DraftButton orgId={orgId} oppId={oppId} />
-              </div>
-            ) : null}
+            <div className="mt-5 max-w-sm">
+              <DraftButton
+                orgId={orgId}
+                oppId={oppId}
+                triageNote={match.triage_note}
+              />
+            </div>
           </section>
         )}
       </div>
