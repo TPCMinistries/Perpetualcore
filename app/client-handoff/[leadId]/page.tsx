@@ -15,6 +15,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { createAdminClient } from "@/lib/supabase/server";
+import { HandoffContextForm } from "./context-form";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -245,9 +246,7 @@ export default async function ClientHandoffPage({
   const closePath = readClosePath(lead);
   const accountName = getAccountName(lead);
   const offerName = getOfferName(lead);
-  const contextHref = `/contact-sales?intent=client-handoff&lead=${encodeURIComponent(
-    lead.id,
-  )}&offer=${encodeURIComponent(offerName)}`;
+  const contextHref = "#kickoff-context";
   const buyerStage = normalizeStatus(closePath.buyerStage || lead.stage || "delivery handoff");
   const paymentPath = getLabel(paymentPathLabels, closePath.paymentPath, "Start path to confirm");
   const paymentStatus = getLabel(paymentStatusLabels, closePath.paymentStatus, "To confirm");
@@ -354,7 +353,7 @@ export default async function ClientHandoffPage({
         </aside>
       </section>
 
-      <section className="mx-auto grid max-w-6xl gap-6 px-6 pb-12 lg:grid-cols-[1.1fr_0.9fr]">
+      <section id="kickoff-context" className="mx-auto grid max-w-6xl gap-6 px-6 pb-12 lg:grid-cols-[1.1fr_0.9fr]">
         <div className="rounded-lg border bg-white p-6">
           <div className="flex items-center gap-3">
             <ListChecks className="h-5 w-5 text-violet-600" />
@@ -376,6 +375,13 @@ export default async function ClientHandoffPage({
                 </div>
               </div>
             ))}
+          </div>
+          <div className="mt-6 rounded-lg border bg-white p-4">
+            <HandoffContextForm
+              leadId={lead.id}
+              token={searchParams?.token || ""}
+              defaultOwner={plan.ownerOnClientSide}
+            />
           </div>
         </div>
 
