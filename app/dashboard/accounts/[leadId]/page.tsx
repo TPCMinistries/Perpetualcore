@@ -433,6 +433,28 @@ function buildBuyerStartEmail(lead: AccountLead, plan: AccountPlan, origin: stri
   return `${contact},\n\nBased on where ${account} is right now, I would start with ${packageName}.\n\nThe first operating lane I would open is:\n${plan.firstLane}\n\nThe first useful deliverable should be:\n${plan.sevenDayDeliverable}\n\nYou can start here:\n${packagePath}\n\nAfter that, I will use the kickoff/handoff page to keep the first lane, owner, context, and delivery milestones clear.`;
 }
 
+function buildInvoiceRequestEmail(lead: AccountLead, plan: AccountPlan) {
+  const account = getAccountName(lead);
+  const contact = getContactName(lead);
+  const packageName = packageLabels[getRecommendedPackageId(lead)];
+
+  return `${contact},\n\nI can set this up as an invoice instead of checkout.\n\nRecommended start: ${packageName}\nAccount: ${account}\nFirst operating lane: ${plan.firstLane}\nFirst useful deliverable: ${plan.sevenDayDeliverable}\n\nPlease send the billing contact, legal entity name, billing email, and any PO or vendor requirements. Once the invoice path is clear, I can lock the kickoff window and move this into implementation.`;
+}
+
+function buildProcurementApprovalNote(lead: AccountLead, plan: AccountPlan) {
+  const account = getAccountName(lead);
+  const packageName = packageLabels[getRecommendedPackageId(lead)];
+
+  return `Procurement approval note\n\nVendor / partner: Perpetual Core\nBuyer/account: ${account}\nRecommended start: ${packageName}\nPurpose: Install an AI operating lane that improves a concrete workflow rather than adding another disconnected AI tool.\n\nInitial scope:\n${plan.firstLane}\n\nFirst deliverable:\n${plan.sevenDayDeliverable}\n\nContext needed:\n${plan.accessNeeded}\n\nBusiness reason:\nThis gives the team one accountable AI-supported workflow, clear owner, implementation cadence, and measurable first output before broader expansion.`;
+}
+
+function buildPaidKickoffNote(lead: AccountLead, plan: AccountPlan, handoffUrl: string) {
+  const account = getAccountName(lead);
+  const contact = getContactName(lead);
+
+  return `${contact},\n\nWe are clear to start ${account}'s first operating lane.\n\nKickoff focus:\n${plan.firstLane}\n\nFirst 7-day deliverable:\n${plan.sevenDayDeliverable}\n\nWhat I need before kickoff:\n${plan.accessNeeded}\n\nClient owner:\n${plan.ownerOnClientSide}\n\nHandoff page:\n${handoffUrl || "I will send the handoff link after the account is synced."}\n\nOnce that context is in, I will turn this into the first working operating surface and keep the next actions visible.`;
+}
+
 function buildClientHandoffPath(lead: AccountLead, account: PermanentAccount | null, engagement: PermanentEngagement | null) {
   const token = engagement?.id || account?.id;
   if (!token) return "";
@@ -878,11 +900,16 @@ export default function AccountDetailPage() {
 
   const packageName = packageLabels[recommendedPackageId];
   const packagePath = buildPackagePath(lead);
-  const handoffReady = Boolean(buildClientHandoffPath(lead, permanentAccount, permanentEngagement));
+  const clientHandoffPath = buildClientHandoffPath(lead, permanentAccount, permanentEngagement);
+  const clientHandoffUrl = clientHandoffPath
+    ? `${typeof window !== "undefined" ? window.location.origin : ""}${clientHandoffPath}`
+    : "";
+  const handoffReady = Boolean(clientHandoffPath);
+  const paymentSent = ["sent", "in_review", "paid"].includes(closePath.paymentStatus);
   const closePathProgress = Math.round(
     ([
       hasProposal,
-      closePath.paymentStatus === "sent" || closePath.paymentStatus === "in_review" || closePath.paymentStatus === "paid",
+      paymentSent,
       Boolean(permanentAccount),
       accountTasks.length > 0,
       handoffReady,
@@ -932,6 +959,75 @@ export default function AccountDetailPage() {
       button: "Copy handoff",
       onClick: copyClientHandoffLink,
       disabled: false,
+    },
+  ];
+  const moneyPathActions = [
+    {
+      label: "Checkout link",
+      detail: "Use when the buyer can start from a package page.",
+      icon: ExternalLink,
+      onClick: copyBuyerStartLink,
+      primary: true,
+    },
+    {
+      label: "Checkout email",
+      detail: "Client-ready note with the recommended package and first lane.",
+      icon: Mail,
+      onClick: copyBuyerStartEmail,
+      primary: false,
+    },
+    {
+      label: "Invoice request",
+      detail: "Use when the company needs a billing contact, PO, or manual invoice.",
+      icon: FileText,
+      onClick: () => copyText("Invoice request", buildInvoiceRequestEmail(lead, plan)),
+      primary: false,
+    },
+    {
+      label: "Procurement note",
+      detail: "Use when the buyer needs approval language for leadership or purchasing.",
+      icon: ListChecks,
+      onClick: () => copyText("Procurement note", buildProcurementApprovalNote(lead, plan)),
+      primary: false,
+    },
+    {
+      label: "Paid kickoff note",
+      detail: "Use after checkout, invoice approval, or signed approval clears.",
+      icon: CheckCircle2,
+      onClick: () => copyText("Paid kickoff note", buildPaidKickoffNote(lead, plan, clientHandoffUrl)),
+      primary: false,
+    },
+  ];
+  const commercialChecklist = [
+    {
+      label: "Offer chosen",
+      complete: Boolean(recommendedPackageId),
+      detail: packageName,
+    },
+    {
+      label: "Payment path chosen",
+      complete: Boolean(closePath.paymentPath),
+      detail: getOptionLabel(paymentPathOptions, closePath.paymentPath),
+    },
+    {
+      label: "Link, invoice, or approval sent",
+      complete: paymentSent,
+      detail: getOptionLabel(paymentStatusOptions, closePath.paymentStatus),
+    },
+    {
+      label: "Approval owner named",
+      complete: Boolean(plan.ownerOnClientSide && !plan.ownerOnClientSide.toLowerCase().includes("name the person")),
+      detail: plan.ownerOnClientSide,
+    },
+    {
+      label: "Paid or approved",
+      complete: closePath.paymentStatus === "paid" || closePath.paymentPath === "signed_approval",
+      detail: closePath.paymentStatus === "paid" ? "Paid" : getOptionLabel(paymentPathOptions, closePath.paymentPath),
+    },
+    {
+      label: "Kickoff scheduled",
+      complete: Boolean(lead.next_follow_up_at) || handoffReady,
+      detail: lead.next_follow_up_at ? formatDate(lead.next_follow_up_at) : handoffReady ? "Handoff ready" : "Not scheduled",
     },
   ];
 
@@ -1212,6 +1308,86 @@ export default function AccountDetailPage() {
                 )}
               </div>
             ))}
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card className="rounded-lg shadow-none">
+        <CardHeader>
+          <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+            <div>
+              <div className="flex items-center gap-3">
+                <CardTitle className="text-xl">Payment path command</CardTitle>
+                <PackageCheck className="h-5 w-5 text-violet-600" />
+              </div>
+              <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-600">
+                Pick the cleanest way this buyer can start: checkout, invoice, procurement, or signed
+                approval. Then copy the exact asset and save the state so the account overview stays accurate.
+              </p>
+            </div>
+            <div className="rounded-lg border bg-slate-50 p-4 lg:w-72">
+              <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-slate-500">
+                Recommended start
+              </p>
+              <p className="mt-2 text-sm font-semibold text-slate-950">{packageName}</p>
+              <p className="mt-1 text-xs leading-5 text-slate-600">{plan.firstLane}</p>
+            </div>
+          </div>
+        </CardHeader>
+        <CardContent className="grid gap-5 lg:grid-cols-[1fr_360px]">
+          <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+            {moneyPathActions.map((action) => (
+              <button
+                key={action.label}
+                type="button"
+                onClick={action.onClick}
+                className={`rounded-lg border p-4 text-left transition hover:border-violet-300 hover:bg-violet-50/50 ${
+                  action.primary ? "border-violet-200 bg-violet-50" : "bg-white"
+                }`}
+              >
+                <div className="flex items-center justify-between gap-3">
+                  <span className="rounded-md bg-white p-2 text-violet-700 shadow-sm">
+                    <action.icon className="h-4 w-4" />
+                  </span>
+                  <ArrowRight className="h-4 w-4 text-slate-400" />
+                </div>
+                <p className="mt-4 text-sm font-semibold text-slate-950">{action.label}</p>
+                <p className="mt-2 text-sm leading-5 text-slate-600">{action.detail}</p>
+              </button>
+            ))}
+          </div>
+
+          <div className="rounded-lg border bg-white p-4">
+            <div className="flex items-center justify-between gap-3">
+              <div>
+                <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-slate-500">
+                  Commercial checklist
+                </p>
+                <p className="mt-1 text-sm text-slate-600">What must be true before delivery scales.</p>
+              </div>
+              <Badge className="rounded-md" variant={commercialChecklist.every((item) => item.complete) ? "default" : "outline"}>
+                {commercialChecklist.filter((item) => item.complete).length}/{commercialChecklist.length}
+              </Badge>
+            </div>
+            <div className="mt-4 space-y-3">
+              {commercialChecklist.map((item) => (
+                <div key={item.label} className="flex gap-3 rounded-md border bg-slate-50 p-3">
+                  <span
+                    className={`mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full border ${
+                      item.complete
+                        ? "border-violet-600 bg-violet-600 text-white"
+                        : "border-slate-300 bg-white text-slate-400"
+                    }`}
+                  >
+                    {item.complete ? <CheckCircle2 className="h-3.5 w-3.5" /> : null}
+                  </span>
+                  <div>
+                    <p className="text-sm font-semibold text-slate-950">{item.label}</p>
+                    <p className="mt-1 text-xs leading-5 text-slate-600">{item.detail}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
         </CardContent>
       </Card>
