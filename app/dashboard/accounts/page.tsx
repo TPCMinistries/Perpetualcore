@@ -34,6 +34,11 @@ type AccountLane = {
   lane: string;
   value: string;
   nextStep: string;
+  buyerStage?: string;
+  paymentPath?: string;
+  paymentStatus?: string;
+  commercialNextStep?: string;
+  closePathUpdatedAt?: string;
   createdAt: string;
   href: string;
 };
@@ -198,6 +203,12 @@ function formatDate(value: string) {
 
 function normalizeStatus(status: string) {
   return status.replace(/_/g, " ").replace(/\b\w/g, (letter) => letter.toUpperCase());
+}
+
+function getPaymentBadgeVariant(status?: string) {
+  if (status === "paid") return "default";
+  if (status === "blocked") return "secondary";
+  return "outline";
 }
 
 function formatCurrency(value?: number | null) {
@@ -383,12 +394,18 @@ export default function AccountsPage() {
   }
 
   const paidAccounts = useMemo(
-    () => data.activeClients.filter((client) => client.status.toLowerCase().includes("paid")),
+    () =>
+      data.activeClients.filter(
+        (client) => client.paymentStatus === "paid" || client.status.toLowerCase().includes("paid"),
+      ),
     [data.activeClients],
   );
 
   const pursuitAccounts = useMemo(
-    () => data.activeClients.filter((client) => !client.status.toLowerCase().includes("paid")),
+    () =>
+      data.activeClients.filter(
+        (client) => client.paymentStatus !== "paid" && !client.status.toLowerCase().includes("paid"),
+      ),
     [data.activeClients],
   );
 
@@ -700,9 +717,28 @@ export default function AccountsPage() {
                       <Badge variant="outline" className="rounded-md">
                         {normalizeStatus(client.status)}
                       </Badge>
+                      {client.paymentStatus ? (
+                        <Badge variant={getPaymentBadgeVariant(client.paymentStatus)} className="rounded-md">
+                          {normalizeStatus(client.paymentStatus)}
+                        </Badge>
+                      ) : null}
                     </div>
                     <p className="mt-1 text-sm text-slate-600">{client.company}</p>
                     <p className="mt-3 text-sm leading-5 text-slate-600">{client.nextStep}</p>
+                    {client.buyerStage || client.paymentPath ? (
+                      <div className="mt-3 flex flex-wrap gap-2 text-xs text-slate-500">
+                        {client.buyerStage ? (
+                          <span className="rounded-md bg-slate-100 px-2 py-1">
+                            Buyer: {normalizeStatus(client.buyerStage)}
+                          </span>
+                        ) : null}
+                        {client.paymentPath ? (
+                          <span className="rounded-md bg-slate-100 px-2 py-1">
+                            Path: {normalizeStatus(client.paymentPath)}
+                          </span>
+                        ) : null}
+                      </div>
+                    ) : null}
                   </div>
                   <div>
                     <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-slate-500">

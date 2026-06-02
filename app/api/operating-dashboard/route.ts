@@ -24,9 +24,18 @@ type LeadRow = {
   status: string | null;
   stage?: string | null;
   notes?: string | null;
+  ai_insights?: unknown;
   estimated_value: number | null;
   next_follow_up_at: string | null;
   created_at: string;
+};
+
+type ClosePathState = {
+  buyerStage?: string;
+  paymentPath?: string;
+  paymentStatus?: string;
+  commercialNextStep?: string;
+  updatedAt?: string;
 };
 
 type PackagePayment = {
@@ -50,6 +59,43 @@ function formatStripeAmount(amount: number | null, currency: string | null) {
       maximumFractionDigits: 0,
     }).format((amount ?? 0) / 100),
   };
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+function readClosePath(lead: LeadRow): ClosePathState | null {
+  if (!isRecord(lead.ai_insights) || !isRecord(lead.ai_insights.closePath)) return null;
+  const rawClosePath = lead.ai_insights.closePath;
+
+  return {
+    buyerStage: typeof rawClosePath.buyerStage === "string" ? rawClosePath.buyerStage : undefined,
+    paymentPath: typeof rawClosePath.paymentPath === "string" ? rawClosePath.paymentPath : undefined,
+    paymentStatus: typeof rawClosePath.paymentStatus === "string" ? rawClosePath.paymentStatus : undefined,
+    commercialNextStep:
+      typeof rawClosePath.commercialNextStep === "string" ? rawClosePath.commercialNextStep : undefined,
+    updatedAt: typeof rawClosePath.updatedAt === "string" ? rawClosePath.updatedAt : undefined,
+  };
+}
+
+function humanizeStatus(value?: string | null) {
+  if (!value) return "";
+  return value.replace(/_/g, " ").replace(/\b\w/g, (letter) => letter.toUpperCase());
+}
+
+function getClientStatus(lead: LeadRow, closePath: ClosePathState | null) {
+  if (closePath?.paymentStatus === "paid") return "Paid start";
+  if (closePath?.paymentStatus === "blocked") return "Payment blocked";
+  if (closePath?.buyerStage) return humanizeStatus(closePath.buyerStage);
+  return lead.stage === "delivery_handoff" ? "Delivery handoff" : "Won";
+}
+
+function getClientNextStep(lead: LeadRow, closePath: ClosePathState | null) {
+  if (closePath?.commercialNextStep) return closePath.commercialNextStep;
+  return lead.notes?.includes("Delivery handoff opened")
+    ? "Run kickoff checklist and open the first operating lane"
+    : "Confirm kickoff plan and delivery owner";
 }
 
 async function getPackagePayments(): Promise<PackagePayment[]> {
@@ -99,7 +145,7 @@ export async function GET() {
       .limit(25),
     admin
       .from("leads")
-      .select("id,name,email,company,status,stage,notes,estimated_value,next_follow_up_at,created_at")
+      .select("id,name,email,company,status,stage,notes,ai_insights,estimated_value,next_follow_up_at,created_at")
       .eq("user_id", user.id)
       .order("created_at", { ascending: false })
       .limit(50),
@@ -125,23 +171,29 @@ export async function GET() {
   const pipelineValue = openLeads.reduce((sum, lead) => sum + (lead.estimated_value || 0), 0);
 
   const activeClients = [
-    ...wonLeads.map((lead) => ({
-      id: lead.id,
-      name: lead.company || lead.name || "Account",
-      company: lead.email || "Client account",
-      status: lead.stage === "delivery_handoff" ? "Delivery handoff" : "Won",
-      lane: lead.estimated_value && lead.estimated_value >= 15000 ? "90-Day Operating Lane" : "First Workflow",
-      value: new Intl.NumberFormat("en-US", {
-        style: "currency",
-        currency: "USD",
-        maximumFractionDigits: 0,
-      }).format(lead.estimated_value || 0),
-      nextStep: lead.notes?.includes("Delivery handoff opened")
-        ? "Run kickoff checklist and open the first operating lane"
-        : "Confirm kickoff plan and delivery owner",
-      createdAt: lead.created_at,
-      href: `/dashboard/accounts/${lead.id}`,
-    })),
+    ...wonLeads.map((lead) => {
+      const closePath = readClosePath(lead);
+      return {
+        id: lead.id,
+        name: lead.company || lead.name || "Account",
+        company: lead.email || "Client account",
+        status: getClientStatus(lead, closePath),
+        lane: lead.estimated_value && lead.estimated_value >= 15000 ? "90-Day Operating Lane" : "First Workflow",
+        value: new Intl.NumberFormat("en-US", {
+          style: "currency",
+          currency: "USD",
+          maximumFractionDigits: 0,
+        }).format(lead.estimated_value || 0),
+        nextStep: getClientNextStep(lead, closePath),
+        buyerStage: closePath?.buyerStage,
+        paymentPath: closePath?.paymentPath,
+        paymentStatus: closePath?.paymentStatus,
+        commercialNextStep: closePath?.commercialNextStep,
+        closePathUpdatedAt: closePath?.updatedAt,
+        createdAt: lead.created_at,
+        href: `/dashboard/accounts/${lead.id}`,
+      };
+    }),
     ...paidPackages.map((payment) => ({
       id: payment.id,
       name: payment.customerName,
@@ -150,6 +202,10 @@ export async function GET() {
       lane: payment.packageName.replace("Perpetual Core ", ""),
       value: formatStripeAmount(payment.amount, "usd").formatted,
       nextStep: "Confirm intake context and onboarding window",
+      buyerStage: "paid_start",
+      paymentPath: "package_checkout",
+      paymentStatus: "paid",
+      commercialNextStep: "Confirm intake context and onboarding window",
       createdAt: payment.createdAt,
       href: payment.leadId ? `/dashboard/accounts/${payment.leadId}` : `/contact-sales?intent=post-payment-intake&session_id=${encodeURIComponent(payment.id)}`,
     })),
@@ -161,6 +217,8 @@ export async function GET() {
       lane: contact.interested_in || contact.product || "Scoping",
       value: "Scope pending",
       nextStep: "Qualify fit and define first operating lane",
+      buyerStage: "discovery",
+      paymentStatus: "not_sent",
       createdAt: contact.created_at || new Date().toISOString(),
       href: "/dashboard/leads",
     })),
