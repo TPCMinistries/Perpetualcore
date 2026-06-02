@@ -10,7 +10,8 @@
  *   3. POST  /api/rfp/billing/checkout                   (owner-only, Stripe)
  *   4. POST  /api/rfp/orgs/[orgId]/vault/upload-file     (owner/writer)
  *   5. POST  /api/rfp/proposals/[proposalId]/package     (owner/writer/reviewer)
- *   6. GET   /admin/rfp page                             (env-var allowlist)
+ *   6. POST  /api/rfp/proposals/[proposalId]/redraft     (owner/writer)
+ *   7. GET   /admin/rfp page                             (env-var allowlist)
  *
  * Setup mirrors the sibling RLS test:
  *   - Ephemeral users A + B via admin.auth.admin.createUser
@@ -158,6 +159,31 @@ vi.mock("pdf-parse", () => ({
   })),
 }));
 
+vi.mock("@/lib/rfp/vault/retrieve", () => ({
+  retrieveVaultChunks: vi.fn(async () => []),
+}));
+
+vi.mock("@/lib/rfp/draft/generate", async () => {
+  const sections = await import("@/lib/rfp/draft/sections");
+  return {
+    ...sections,
+    generateDraft: vi.fn(async () => ({
+      sections: sections.SECTION_TYPES.map((type) => ({
+        type,
+        content: `Mock package-aware ${type} content for tenant isolation.`,
+      })),
+      tokens_in: 100,
+      tokens_out: 200,
+      cost_usd: 0.002,
+      model: "mock",
+      session_id: `mock_redraft_${Date.now()}`,
+      voice_applied: false,
+      vault_applied: false,
+      vault_chunks_used: 0,
+    })),
+  };
+});
+
 // ---------------------------------------------------------------------------
 // Clients + state
 // ---------------------------------------------------------------------------
@@ -170,6 +196,7 @@ let userB: { id: string; access_token: string; email: string };
 let userC: { id: string; access_token: string; email: string }; // writer on org A
 let orgA: string;
 let orgB: string;
+let oppA: string;
 let proposalA: string;
 const testRunId = Date.now();
 
@@ -253,11 +280,27 @@ beforeAll(async () => {
   ]);
   if (mem.error) throw new Error(`Insert memberships: ${mem.error.message}`);
 
+  const opp = await admin
+    .from("rfp_opportunities")
+    .insert({
+      source: "foundation_url",
+      source_id: `tenant-redraft-${testRunId}`,
+      title: `Tenant redraft opportunity ${testRunId}`,
+      agency: "Tenant Foundation",
+      brief: "A test opportunity for package-aware redraft route coverage.",
+      url: "https://example.test/rfp",
+    })
+    .select()
+    .single();
+  if (opp.error) throw new Error(`Seed opportunity: ${opp.error.message}`);
+  oppA = opp.data!.id;
+
   // Seed a draft proposal on Org A for status-transition tests.
   const prop = await admin
     .from("rfp_proposals")
     .insert({
       org_id: orgA,
+      opp_id: oppA,
       title: `Test proposal ${testRunId}`,
       status: "draft",
       owner_user_id: userA.id,
@@ -274,6 +317,7 @@ beforeAll(async () => {
 afterAll(async () => {
   if (orgA) await admin.from("rfp_orgs").delete().eq("id", orgA);
   if (orgB) await admin.from("rfp_orgs").delete().eq("id", orgB);
+  if (oppA) await admin.from("rfp_opportunities").delete().eq("id", oppA);
   if (userA?.id) await admin.auth.admin.deleteUser(userA.id);
   if (userB?.id) await admin.auth.admin.deleteUser(userB.id);
   if (userC?.id) await admin.auth.admin.deleteUser(userC.id);
@@ -387,6 +431,16 @@ async function callPackagePaste(proposalId: string) {
   } as unknown as Parameters<typeof POST>[0];
 
   return POST(fakeReq, { params: Promise.resolve({ proposalId }) });
+}
+
+async function callPackageRedraft(proposalId: string) {
+  const { POST } = await import(
+    "@/app/api/rfp/proposals/[proposalId]/redraft/route"
+  );
+  const req = new Request(`http://localhost/api/rfp/proposals/${proposalId}/redraft`, {
+    method: "POST",
+  });
+  return POST(req, { params: Promise.resolve({ proposalId }) });
 }
 
 // ---------------------------------------------------------------------------
@@ -600,8 +654,40 @@ describe("RFP new-endpoint tenant isolation", () => {
     });
   });
 
+  describe("POST /api/rfp/proposals/[proposalId]/redraft", () => {
+    it("User C (writer on org A) can regenerate canonical sections after package import", async () => {
+      const packageRes = await withToken(userC.access_token, () =>
+        callPackagePaste(proposalA),
+      );
+      expect(packageRes.status).toBe(200);
+
+      const res = await withToken(userC.access_token, () =>
+        callPackageRedraft(proposalA),
+      );
+      expect(res.status).toBe(200);
+      const body = await res.json();
+      expect(body.sections_generated).toBe(5);
+      expect(body.package_count).toBeGreaterThan(0);
+
+      const { data } = await admin
+        .from("rfp_proposal_sections")
+        .select("section_type")
+        .eq("proposal_id", proposalA);
+      const sectionTypes = (data ?? []).map((row) => row.section_type);
+      expect(sectionTypes).toContain("executive_summary");
+      expect(sectionTypes).toContain("budget_narrative");
+    });
+
+    it("User B (different org) gets 404 on package redraft", async () => {
+      const res = await withToken(userB.access_token, () =>
+        callPackageRedraft(proposalA),
+      );
+      expect(res.status).toBe(404);
+    });
+  });
+
   // -------------------------------------------------------------------------
-  // 6. /admin/rfp page — env-var allowlist
+  // 7. /admin/rfp page — env-var allowlist
   // -------------------------------------------------------------------------
   describe("GET /admin/rfp page — RFP_PLATFORM_ADMIN_USER_IDS gate", () => {
     it("Non-allowlisted user returns null from getRfpPlatformAdmin (page calls notFound)", async () => {

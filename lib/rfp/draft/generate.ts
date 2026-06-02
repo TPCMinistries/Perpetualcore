@@ -26,6 +26,7 @@ import { ALL_SECTION_SPECS, SECTION_TYPES, type SectionType } from "./sections";
 import { applyVoiceFingerprint } from "@/lib/rfp/voice/apply";
 import type { VoiceFingerprint } from "@/lib/rfp/voice/extract";
 import type { RetrievedChunk } from "@/lib/rfp/vault/retrieve";
+import type { PackageExtraction } from "@/lib/rfp/package/extract";
 
 const MODEL = "gpt-4o";
 
@@ -63,6 +64,12 @@ export interface DraftInput {
    * [VERIFY: ...] marker.
    */
   vaultChunks?: RetrievedChunk[];
+  /**
+   * Optional uploaded solicitation / RFP package extraction. This is source
+   * material from the user's workroom, not org evidence. It should shape
+   * requirements, attachments, page limits, and scoring alignment.
+   */
+  packageExtractions?: PackageExtraction[];
 }
 
 export interface DraftSection {
@@ -109,9 +116,37 @@ function buildVaultBlock(chunks: RetrievedChunk[]): string {
   return `# Vault facts (cite as [CITE: vault-N] when used)\n\n${lines.join("\n\n")}\n\n`;
 }
 
+function buildPackageBlock(extractions: PackageExtraction[]): string {
+  if (extractions.length === 0) return "";
+  const lines: string[] = [];
+  for (const extraction of extractions.slice(0, 3)) {
+    lines.push(`Package: ${extraction.title}`);
+    for (const item of extraction.requirements.slice(0, 10)) {
+      lines.push(`- Requirement (${item.category}): ${item.requirement}`);
+    }
+    for (const doc of extraction.required_documents.slice(0, 8)) {
+      lines.push(`- Required document: ${doc}`);
+    }
+    for (const criterion of extraction.scoring_criteria.slice(0, 6)) {
+      lines.push(`- Scoring criterion: ${criterion}`);
+    }
+    for (const rule of extraction.budget_rules.slice(0, 5)) {
+      lines.push(`- Budget rule: ${rule}`);
+    }
+    for (const limit of extraction.page_limits.slice(0, 5)) {
+      lines.push(`- Page/format limit: ${limit}`);
+    }
+    for (const instruction of extraction.submission_instructions.slice(0, 4)) {
+      lines.push(`- Submission instruction: ${instruction}`);
+    }
+  }
+  return `# Uploaded RFP / grant package rules\n\nUse these rules to shape the draft and avoid generic sections. Do not cite these as applicant evidence; they are funder instructions.\n\n${lines.join("\n")}\n\n`;
+}
+
 function buildUserPrompt(input: DraftInput): string {
-  const { opportunity: opp, org, vaultChunks } = input;
+  const { opportunity: opp, org, vaultChunks, packageExtractions } = input;
   const vaultBlock = buildVaultBlock(vaultChunks ?? []);
+  const packageBlock = buildPackageBlock(packageExtractions ?? []);
   const amount =
     opp.amount_min && opp.amount_max
       ? `$${opp.amount_min.toLocaleString()}–$${opp.amount_max.toLocaleString()}`
@@ -126,7 +161,7 @@ function buildUserPrompt(input: DraftInput): string {
       `  - ${s.type} ("${s.label}", target ~${s.target_words} words): ${s.guidance}`,
   ).join("\n");
 
-  return `${vaultBlock}# Funder opportunity
+  return `${vaultBlock}${packageBlock}# Funder opportunity
 
 Title: ${opp.title}
 Agency: ${opp.agency ?? "[VERIFY: agency]"}

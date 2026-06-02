@@ -26,6 +26,7 @@ import { ExportProposalButton } from "@/components/rfp/ExportProposalButton";
 import { SubmissionWorkroom } from "@/components/rfp/SubmissionWorkroom";
 import { ManualSubmissionTaskForm } from "@/components/rfp/ManualSubmissionTaskForm";
 import { PackageIntakePanel } from "@/components/rfp/PackageIntakePanel";
+import { PackageRedraftButton } from "@/components/rfp/PackageRedraftButton";
 import {
   PursuitCommandStateForm,
   type PursuitPriority,
@@ -679,7 +680,12 @@ export default async function PursuitDetailPage({ params }: PageProps) {
                 <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-zinc-500">
                   Proposal controls
                 </p>
-                <div className="mt-4 grid gap-3 sm:grid-cols-3">
+                <div className="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+                  <PackageRedraftButton
+                    proposalId={proposal.id}
+                    packageCount={packageDocs?.length ?? 0}
+                    canEdit={canEdit}
+                  />
                   <CaptureReadinessButton proposalId={proposal.id} />
                   <ReviewButton orgId={orgId} proposalId={proposal.id} />
                   <ExportProposalButton proposalId={proposal.id} />
