@@ -3,7 +3,10 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Bell, Check, ChevronDown, Save, Trash2 } from "lucide-react";
 import type { FilterValues, ModeFilter } from "./FilterPills";
-import type { RfpSavedSearchWithPreview } from "@/lib/rfp/saved-searches";
+import type {
+  RfpSavedSearch,
+  RfpSavedSearchWithPreview,
+} from "@/lib/rfp/saved-searches";
 
 interface SavedSearchControlProps {
   orgId: string;
@@ -50,7 +53,11 @@ export function SavedSearchControl({
   const [rows, setRows] = useState<RfpSavedSearchWithPreview[]>([]);
   const [name, setName] = useState(defaultName(filters));
   const [alertEnabled, setAlertEnabled] = useState(false);
+  const [alertFrequency, setAlertFrequency] =
+    useState<RfpSavedSearch["alert_frequency"]>("weekly");
+  const [minFitScore, setMinFitScore] = useState(70);
   const [saving, setSaving] = useState(false);
+  const [updatingId, setUpdatingId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const ref = useRef<HTMLDivElement | null>(null);
 
@@ -101,8 +108,8 @@ export function SavedSearchControl({
           mode,
           is_shared: false,
           alert_enabled: alertEnabled,
-          alert_frequency: "weekly",
-          min_fit_score: 70,
+          alert_frequency: alertFrequency,
+          min_fit_score: minFitScore,
         }),
       });
       if (!res.ok) throw new Error("save failed");
@@ -112,6 +119,37 @@ export function SavedSearchControl({
       setError("Could not save this search.");
     } finally {
       setSaving(false);
+    }
+  }
+
+  async function updateSearch(
+    searchId: string,
+    patch: Partial<
+      Pick<RfpSavedSearch, "alert_enabled" | "alert_frequency" | "min_fit_score">
+    >,
+  ) {
+    setError(null);
+    setUpdatingId(searchId);
+    const previous = rows;
+    setRows((current) =>
+      current.map((row) => (row.id === searchId ? { ...row, ...patch } : row)),
+    );
+    try {
+      const res = await fetch(`/api/rfp/orgs/${orgId}/saved-searches/${searchId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(patch),
+      });
+      if (!res.ok) throw new Error("update failed");
+      const data = (await res.json()) as { row: RfpSavedSearchWithPreview };
+      setRows((current) =>
+        current.map((row) => (row.id === searchId ? { ...row, ...data.row } : row)),
+      );
+    } catch {
+      setRows(previous);
+      setError("Could not update that saved search.");
+    } finally {
+      setUpdatingId(null);
     }
   }
 
@@ -178,8 +216,43 @@ export function SavedSearchControl({
                 onChange={(event) => setAlertEnabled(event.target.checked)}
                 className="h-4 w-4 rounded border-zinc-300"
               />
-              Send me a weekly digest when new matches fit this search
+              Send me alerts when new matches fit this search
             </label>
+            {alertEnabled ? (
+              <div className="mt-3 grid grid-cols-2 gap-2">
+                <label className="text-xs text-zinc-600">
+                  <span className="mb-1 block">Frequency</span>
+                  <select
+                    value={alertFrequency}
+                    onChange={(event) =>
+                      setAlertFrequency(
+                        event.target.value as RfpSavedSearch["alert_frequency"],
+                      )
+                    }
+                    className="h-9 w-full rounded-lg border border-zinc-300 bg-white px-2 text-xs outline-none focus:border-zinc-500"
+                  >
+                    <option value="instant">Hourly</option>
+                    <option value="daily">Daily</option>
+                    <option value="weekly">Weekly</option>
+                  </select>
+                </label>
+                <label className="text-xs text-zinc-600">
+                  <span className="mb-1 block">Minimum fit</span>
+                  <input
+                    type="number"
+                    min={0}
+                    max={100}
+                    value={minFitScore}
+                    onChange={(event) =>
+                      setMinFitScore(
+                        Math.max(0, Math.min(100, Number(event.target.value) || 0)),
+                      )
+                    }
+                    className="h-9 w-full rounded-lg border border-zinc-300 bg-white px-2 text-xs outline-none focus:border-zinc-500"
+                  />
+                </label>
+              </div>
+            ) : null}
             {!canSave && (
               <p className="mt-2 text-xs text-zinc-500">
                 Add a keyword, filter, source, deadline, amount, or mode first.
@@ -221,6 +294,70 @@ export function SavedSearchControl({
                         </p>
                       )}
                     </button>
+                    <div className="flex shrink-0 items-center gap-1">
+                      <button
+                        type="button"
+                        disabled={updatingId === row.id}
+                        onClick={() =>
+                          updateSearch(row.id, {
+                            alert_enabled: !row.alert_enabled,
+                          })
+                        }
+                        className={`rounded-md p-1.5 transition ${
+                          row.alert_enabled
+                            ? "bg-emerald-50 text-emerald-700 hover:bg-emerald-100"
+                            : "text-zinc-400 hover:bg-zinc-100 hover:text-zinc-700"
+                        } disabled:opacity-50`}
+                        aria-label={
+                          row.alert_enabled
+                            ? `Disable alerts for ${row.name}`
+                            : `Enable alerts for ${row.name}`
+                        }
+                      >
+                        <Bell className="h-4 w-4" />
+                      </button>
+                      {row.alert_enabled ? (
+                        <>
+                          <select
+                            value={row.alert_frequency}
+                            disabled={updatingId === row.id}
+                            onChange={(event) =>
+                              updateSearch(row.id, {
+                                alert_frequency:
+                                  event.target.value as RfpSavedSearch["alert_frequency"],
+                              })
+                            }
+                            className="h-7 rounded-md border border-zinc-200 bg-white px-1 text-[11px] text-zinc-600 outline-none hover:border-zinc-300 disabled:opacity-50"
+                            aria-label={`Alert frequency for ${row.name}`}
+                          >
+                            <option value="instant">1h</option>
+                            <option value="daily">1d</option>
+                            <option value="weekly">1w</option>
+                          </select>
+                          <input
+                            key={`${row.id}-${row.min_fit_score}`}
+                            type="number"
+                            min={0}
+                            max={100}
+                            defaultValue={row.min_fit_score}
+                            disabled={updatingId === row.id}
+                            onBlur={(event) => {
+                              const nextScore = Math.max(
+                                0,
+                                Math.min(100, Number(event.target.value) || 0),
+                              );
+                              if (nextScore !== row.min_fit_score) {
+                                void updateSearch(row.id, {
+                                  min_fit_score: nextScore,
+                                });
+                              }
+                            }}
+                            className="h-7 w-12 rounded-md border border-zinc-200 bg-white px-1 text-[11px] text-zinc-600 outline-none hover:border-zinc-300 disabled:opacity-50"
+                            aria-label={`Minimum fit score for ${row.name}`}
+                          />
+                        </>
+                      ) : null}
+                    </div>
                     <button
                       type="button"
                       onClick={() => deleteSearch(row.id)}
