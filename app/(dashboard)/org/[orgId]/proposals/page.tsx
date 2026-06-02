@@ -12,6 +12,7 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
+import { DraftButton } from "@/components/rfp/DraftButton";
 import { SECTION_TYPES, type SectionType } from "@/lib/rfp/draft/sections";
 import {
   REVIEWER_FINDINGS_SECTION_TYPE,
@@ -50,6 +51,24 @@ interface ProposalRow {
   due_date: string | null;
   updated_at: string;
   created_at: string;
+}
+
+interface ActivationOpportunityJoin {
+  source: string;
+  title: string;
+  agency: string | null;
+  amount_max: number | null;
+  deadline: string | null;
+  brief: string | null;
+}
+
+interface ActivationOpportunityRow {
+  opp_id: string;
+  fit_score: number;
+  chips: string[] | null;
+  summary: string | null;
+  triage_status: string | null;
+  rfp_opportunities: ActivationOpportunityJoin | null;
 }
 
 interface SectionSummaryRow {
@@ -110,6 +129,13 @@ function fmtDate(iso: string | null): string {
   });
 }
 
+function fmtMoney(value: number | null): string {
+  if (!value || value <= 0) return "Amount not listed";
+  if (value >= 1_000_000) return `$${(value / 1_000_000).toFixed(1)}M`;
+  if (value >= 1_000) return `$${Math.round(value / 1_000)}K`;
+  return `$${value.toLocaleString()}`;
+}
+
 function fmtRelative(iso: string | null): string {
   if (!iso) return "—";
   const t = new Date(iso).getTime();
@@ -136,6 +162,10 @@ function coerceStatus(s: string | undefined): Status | "all" {
     return s;
   }
   return "all";
+}
+
+function sourceLabel(source: string): string {
+  return source.replaceAll("_", " ").replace(/\b\w/g, (c) => c.toUpperCase());
 }
 
 function countVerifyMarkers(content: string | null): number {
@@ -363,6 +393,22 @@ export default async function ProposalsListPage({
     counts[r.status] = (counts[r.status] ?? 0) + 1;
   }
 
+  const { data: activationMatches } =
+    counts.all === 0
+      ? await supabase
+          .from("rfp_opp_matches")
+          .select(
+            "opp_id, fit_score, chips, summary, triage_status, rfp_opportunities ( source, title, agency, amount_max, deadline, brief )",
+          )
+          .eq("org_id", orgId)
+          .order("fit_score", { ascending: false })
+          .limit(3)
+          .returns<ActivationOpportunityRow[]>()
+      : { data: [] as ActivationOpportunityRow[] };
+  const activationOpportunities = (activationMatches ?? []).filter(
+    (row) => row.rfp_opportunities,
+  );
+
   const readinessByProposal = new Map<string, ReadinessSummary>();
   const tasksByProposal = new Map<string, TaskQueueSummary>();
   for (const proposal of rows) {
@@ -489,23 +535,24 @@ export default async function ProposalsListPage({
 
         {/* List */}
         {rows.length === 0 ? (
-          <div className="mt-10 rounded-lg border border-zinc-900 bg-white/[0.02] p-8 text-center">
+          <div className="mt-10 rounded-lg border border-zinc-900 bg-white/[0.02] p-8">
             <p className="font-serif text-lg italic text-zinc-300">
               {activeFilter === "all"
                 ? "No proposals yet."
                 : `No proposals with status "${activeFilter}".`}
             </p>
-            <p className="mt-2 text-[13px] text-zinc-500">
+            <p className="mt-2 max-w-2xl text-[13px] leading-6 text-zinc-500">
               {activeFilter === "all" ? (
                 <>
-                  Open{" "}
+                  Start with one strong match below or open{" "}
                   <Link
                     href={`/org/${orgId}/discovery`}
                     className="text-emerald-300 underline"
                   >
                     Discovery
-                  </Link>{" "}
-                  to pick an opportunity, then click "Generate first-pass draft."
+                  </Link>
+                  . The workflow creates the draft, reviewer pass, readiness
+                  matrix, and submission workroom in one run.
                 </>
               ) : (
                 <>
@@ -520,6 +567,80 @@ export default async function ProposalsListPage({
                 </>
               )}
             </p>
+
+            {activeFilter === "all" && activationOpportunities.length > 0 ? (
+              <div className="mt-6 grid gap-3">
+                {activationOpportunities.map((match) => {
+                  const opp = match.rfp_opportunities as ActivationOpportunityJoin;
+                  return (
+                    <article
+                      key={match.opp_id}
+                      className="rounded-lg border border-zinc-800 bg-zinc-950 p-4 text-left"
+                    >
+                      <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+                        <div className="min-w-0 flex-1">
+                          <div className="flex flex-wrap items-center gap-2">
+                            <span className="rounded-full border border-emerald-500/30 bg-emerald-500/10 px-2 py-1 font-mono text-[9px] uppercase tracking-[0.16em] text-emerald-200">
+                              Fit {Math.round(match.fit_score)}
+                            </span>
+                            <span className="rounded-full border border-zinc-800 px-2 py-1 font-mono text-[9px] uppercase tracking-[0.16em] text-zinc-500">
+                              {sourceLabel(opp.source)}
+                            </span>
+                            <span className="rounded-full border border-zinc-800 px-2 py-1 font-mono text-[9px] uppercase tracking-[0.16em] text-zinc-500">
+                              {fmtMoney(opp.amount_max)}
+                            </span>
+                            <span className="rounded-full border border-zinc-800 px-2 py-1 font-mono text-[9px] uppercase tracking-[0.16em] text-zinc-500">
+                              Due {fmtDate(opp.deadline)}
+                            </span>
+                          </div>
+                          <h2 className="mt-3 text-base font-semibold text-zinc-100">
+                            {opp.title}
+                          </h2>
+                          <p className="mt-1 text-[12px] text-zinc-500">
+                            {opp.agency ?? "Agency not listed"}
+                          </p>
+                          <p className="mt-3 max-w-3xl text-[13px] leading-6 text-zinc-400">
+                            {match.summary ?? opp.brief ?? "No summary available yet."}
+                          </p>
+                          {match.chips && match.chips.length > 0 ? (
+                            <div className="mt-3 flex flex-wrap gap-1.5">
+                              {match.chips.slice(0, 5).map((chip) => (
+                                <span
+                                  key={chip}
+                                  className="rounded-md bg-white/[0.04] px-2 py-1 font-mono text-[9px] uppercase tracking-[0.14em] text-zinc-500"
+                                >
+                                  {chip}
+                                </span>
+                              ))}
+                            </div>
+                          ) : null}
+                        </div>
+                        <div className="w-full shrink-0 lg:w-64">
+                          <DraftButton
+                            orgId={orgId}
+                            oppId={match.opp_id}
+                            triageNote="Started from proposals activation."
+                          />
+                          <Link
+                            href={`/org/${orgId}/pursuits/${match.opp_id}`}
+                            className="mt-3 inline-flex text-[12px] text-zinc-500 underline hover:text-zinc-300"
+                          >
+                            Inspect opportunity first
+                          </Link>
+                        </div>
+                      </div>
+                    </article>
+                  );
+                })}
+              </div>
+            ) : activeFilter === "all" ? (
+              <Link
+                href={`/org/${orgId}/discovery`}
+                className="mt-6 inline-flex h-10 items-center justify-center rounded-md bg-emerald-700 px-4 text-sm font-semibold text-white transition hover:bg-emerald-800"
+              >
+                Open Discovery
+              </Link>
+            ) : null}
           </div>
         ) : (
           <ul className="mt-8 divide-y divide-zinc-900 overflow-hidden rounded-lg border border-zinc-900 bg-white/[0.02]">
