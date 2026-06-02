@@ -79,6 +79,13 @@ function formatRelative(iso: string | null): string {
   return `${days}d ago`;
 }
 
+function ageHours(iso: string | null): number | null {
+  if (!iso) return null;
+  const t = new Date(iso).getTime();
+  if (Number.isNaN(t)) return null;
+  return Math.max(0, (Date.now() - t) / (60 * 60 * 1000));
+}
+
 function summarizeJson(value: Json): string {
   if (value === null) return "No details.";
   if (typeof value === "string") return value;
@@ -274,6 +281,215 @@ function SavedSearchAlertTiles({
   );
 }
 
+type OperatorActionSeverity = "critical" | "watch" | "healthy";
+
+interface OperatorAction {
+  id: string;
+  label: string;
+  detail: string;
+  metric: string;
+  severity: OperatorActionSeverity;
+}
+
+function actionSeverityClass(severity: OperatorActionSeverity): string {
+  switch (severity) {
+    case "critical":
+      return "border-rose-500/25 bg-rose-500/[0.05]";
+    case "watch":
+      return "border-amber-500/25 bg-amber-500/[0.05]";
+    case "healthy":
+    default:
+      return "border-emerald-500/20 bg-emerald-500/[0.04]";
+  }
+}
+
+function actionBadgeClass(severity: OperatorActionSeverity): string {
+  switch (severity) {
+    case "critical":
+      return "bg-rose-500/15 text-rose-200";
+    case "watch":
+      return "bg-amber-500/15 text-amber-200";
+    case "healthy":
+    default:
+      return "bg-emerald-500/15 text-emerald-200";
+  }
+}
+
+function buildOperatorActions({
+  totals,
+  sourceReadinessSummary,
+  openDrift,
+  cronRuns,
+  pursuitMetrics,
+  savedSearchMetrics,
+}: {
+  totals: PlatformTotals;
+  sourceReadinessSummary: SourceReadinessSummary;
+  openDrift: OpenDriftRow[];
+  cronRuns: CronRunRow[];
+  pursuitMetrics: PursuitReadinessMetrics;
+  savedSearchMetrics: SavedSearchAlertMetrics;
+}): OperatorAction[] {
+  const actions: OperatorAction[] = [];
+  const latestCron = cronRuns[0] ?? null;
+  const latestCronAge = ageHours(latestCron?.executed_at ?? null);
+
+  if (!latestCron) {
+    actions.push({
+      id: "cron-missing",
+      label: "Cron logging is missing",
+      detail: "Run the federal and state/city discovery jobs, then verify rfp_cron_runs is recording executions.",
+      metric: "0 runs",
+      severity: "critical",
+    });
+  } else if (latestCron.status !== "success") {
+    actions.push({
+      id: "cron-error",
+      label: "Latest discovery cron failed",
+      detail: `${latestCron.cron_name} last reported ${latestCron.status ?? "unknown"}. Inspect Vercel logs before relying on inventory freshness.`,
+      metric: formatRelative(latestCron.executed_at),
+      severity: "critical",
+    });
+  } else if (latestCronAge !== null && latestCronAge > 36) {
+    actions.push({
+      id: "cron-stale",
+      label: "Discovery cron is stale",
+      detail: "The latest successful cron is outside the 36-hour freshness window. Trigger discovery and confirm the schedule.",
+      metric: formatRelative(latestCron.executed_at),
+      severity: "watch",
+    });
+  }
+
+  if (openDrift.length > 0) {
+    actions.push({
+      id: "source-drift",
+      label: "Resolve source drift",
+      detail: "Parser/source anomalies are open. Verify the affected source before marking drift resolved.",
+      metric: `${formatNumber(openDrift.length)} open`,
+      severity: "critical",
+    });
+  }
+
+  if (sourceReadinessSummary.p0Remaining > 0) {
+    actions.push({
+      id: "source-p0",
+      label: "Close P0 source gaps",
+      detail: "Priority source coverage is not fully live. Use the source readiness table to pick the next connector or drift repair.",
+      metric: `${formatNumber(sourceReadinessSummary.p0Remaining)} gaps`,
+      severity: "watch",
+    });
+  }
+
+  if (sourceReadinessSummary.indexed < 80000) {
+    actions.push({
+      id: "inventory-scale",
+      label: "Scale verified inventory",
+      detail: "Public positioning wants 80k+ opportunities. Keep copy tied to verified indexed count until ingestion reaches that number.",
+      metric: formatNumber(sourceReadinessSummary.indexed),
+      severity: "watch",
+    });
+  }
+
+  if (savedSearchMetrics.alerts_enabled === 0 && savedSearchMetrics.saved_searches > 0) {
+    actions.push({
+      id: "alerts-disabled",
+      label: "Convert saved searches into alerts",
+      detail: "Users have saved searches but no active alert delivery. Improve activation prompts or default alert setup.",
+      metric: `${formatNumber(savedSearchMetrics.saved_searches)} saved`,
+      severity: "watch",
+    });
+  } else if (savedSearchMetrics.due_now > 0) {
+    actions.push({
+      id: "alerts-due",
+      label: "Run due saved-search alerts",
+      detail: "Saved searches are due for delivery. Use the alert ops runner or wait for the scheduled cron.",
+      metric: `${formatNumber(savedSearchMetrics.due_now)} due`,
+      severity: "watch",
+    });
+  }
+
+  if (pursuitMetrics.critical_tasks > 0 || pursuitMetrics.blocked > 0) {
+    actions.push({
+      id: "pursuit-blockers",
+      label: "Clear pursuit blockers",
+      detail: "Proposal workrooms have critical tasks or blocked readiness. Review the org rows below and unblock the highest-risk team first.",
+      metric: `${formatNumber(pursuitMetrics.critical_tasks)} critical`,
+      severity: "critical",
+    });
+  } else if (pursuitMetrics.proposals > 0 && pursuitMetrics.average_score < 70) {
+    actions.push({
+      id: "pursuit-readiness",
+      label: "Lift proposal readiness",
+      detail: "Average readiness is below ship quality. Run capture readiness, reviewer, and packet checklist on active pursuits.",
+      metric: `${formatNumber(pursuitMetrics.average_score)} avg`,
+      severity: "watch",
+    });
+  }
+
+  if (totals.proposals === 0 && totals.orgs > 0) {
+    actions.push({
+      id: "activation",
+      label: "Drive first proposal activation",
+      detail: "Organizations exist, but no proposals have been created. The next product goal is getting a user from discovery to a workroom.",
+      metric: "0 proposals",
+      severity: "watch",
+    });
+  }
+
+  if (actions.length === 0) {
+    actions.push({
+      id: "healthy",
+      label: "System is clear",
+      detail: "Discovery, source drift, alerts, and pursuit readiness have no current operator blockers.",
+      metric: "ready",
+      severity: "healthy",
+    });
+  }
+
+  return actions
+    .sort((a, b) => {
+      const rank: Record<OperatorActionSeverity, number> = {
+        critical: 0,
+        watch: 1,
+        healthy: 2,
+      };
+      return rank[a.severity] - rank[b.severity];
+    })
+    .slice(0, 6);
+}
+
+function OperatorActionQueue({ actions }: { actions: OperatorAction[] }) {
+  return (
+    <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
+      {actions.map((action) => (
+        <div
+          key={action.id}
+          className={`rounded-lg border p-4 ${actionSeverityClass(action.severity)}`}
+        >
+          <div className="flex items-start justify-between gap-3">
+            <span
+              className={`rounded-full px-2 py-1 font-mono text-[10px] uppercase tracking-[0.14em] ${actionBadgeClass(
+                action.severity,
+              )}`}
+            >
+              {action.severity}
+            </span>
+            <span className="font-mono text-[11px] tabular-nums text-zinc-400">
+              {action.metric}
+            </span>
+          </div>
+          <div className="mt-3 text-sm font-semibold text-zinc-100">
+            {action.label}
+          </div>
+          <p className="mt-2 text-[12px] leading-5 text-zinc-500">
+            {action.detail}
+          </p>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 function PursuitReadinessTiles({
   metrics,
 }: {
@@ -285,7 +501,13 @@ function PursuitReadinessTiles({
         label="Avg readiness"
         value={`${formatNumber(metrics.average_score)}`}
         sub={`${formatNumber(metrics.proposals)} proposals`}
-        tone={metrics.average_score >= 80 ? "emerald" : metrics.average_score >= 55 ? "amber" : "default"}
+        tone={
+          metrics.average_score >= 80
+            ? "emerald"
+            : metrics.average_score >= 55
+              ? "amber"
+              : "default"
+        }
       />
       <Tile
         label="Ready"
@@ -839,6 +1061,14 @@ export default async function AdminRfpPage() {
     ]);
   const sourceReadiness = buildSourceReadiness(scraperHealth);
   const sourceReadinessSummary = summarizeSourceReadiness(sourceReadiness);
+  const operatorActions = buildOperatorActions({
+    totals,
+    sourceReadinessSummary,
+    openDrift,
+    cronRuns,
+    pursuitMetrics: pursuitReadiness.metrics,
+    savedSearchMetrics: savedSearchAlertMetrics,
+  });
 
   return (
     <main className="mx-auto max-w-6xl px-6 py-12">
@@ -855,6 +1085,9 @@ export default async function AdminRfpPage() {
         Signed in as <span className="text-zinc-300">{admin.email}</span>.
         This page is not indexed and not exposed to tenants.
       </p>
+
+      <SectionHeader title="Operator action queue" detail="ranked by urgency" />
+      <OperatorActionQueue actions={operatorActions} />
 
       <SectionHeader title="Platform totals" detail="live" />
       <PlatformTilesRow totals={totals} />
