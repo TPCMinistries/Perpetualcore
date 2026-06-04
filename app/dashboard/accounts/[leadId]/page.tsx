@@ -474,6 +474,110 @@ function buildAccountOperatorPrompt(
   ].join("\n");
 }
 
+function buildExecutiveAccountUpdate(
+  lead: AccountLead,
+  plan: AccountPlan,
+  closePath: ClosePathState,
+  taskSummary: { complete: number; blocked: number; open: number; nextTask?: AccountTask },
+  handoffContext: AccountHandoffContext | null,
+) {
+  return [
+    `Executive account update: ${getAccountName(lead)}`,
+    "",
+    `Commercial stage: ${normalizeStatus(closePath.buyerStage)}`,
+    `Payment path: ${normalizeStatus(closePath.paymentPath)}`,
+    `Payment status: ${normalizeStatus(closePath.paymentStatus)}`,
+    `Recommended start: ${packageLabels[getRecommendedPackageId(lead)]}`,
+    "",
+    `First operating lane: ${plan.firstLane}`,
+    `7-day deliverable: ${plan.sevenDayDeliverable}`,
+    `30-day outcome: ${plan.thirtyDayOutcome}`,
+    "",
+    `Client context: ${handoffContext ? "Received" : "Not received yet"}`,
+    `Task pulse: ${taskSummary.open} open, ${taskSummary.complete} complete, ${taskSummary.blocked} blocked`,
+    `Next task: ${taskSummary.nextTask?.title || "No next task attached"}`,
+    "",
+    `Next commercial/delivery action: ${closePath.commercialNextStep || plan.nextAction}`,
+  ].join("\n");
+}
+
+function buildDeliveryRunbook(
+  lead: AccountLead,
+  plan: AccountPlan,
+  handoffContext: AccountHandoffContext | null,
+  tasks: AccountTask[],
+) {
+  const openTasks = tasks
+    .filter((task) => task.status !== "completed")
+    .slice(0, 8)
+    .map((task, index) => `${index + 1}. ${task.title}${task.due_date ? ` - due ${formatDate(task.due_date)}` : ""}`);
+
+  return [
+    `Delivery runbook: ${getAccountName(lead)}`,
+    "",
+    "Operating lane:",
+    plan.firstLane,
+    "",
+    "First 7 days should produce:",
+    plan.sevenDayDeliverable,
+    "",
+    "Access/context needed:",
+    plan.accessNeeded,
+    "",
+    "Client owner:",
+    plan.ownerOnClientSide,
+    "",
+    "Known client handoff context:",
+    handoffContext
+      ? [
+          `Workflow owner: ${handoffContext.workflowOwner || "Not provided"}`,
+          `Success metric: ${handoffContext.successMetric || "Not provided"}`,
+          `Tools/data: ${handoffContext.toolsAndData || "Not provided"}`,
+          `Examples: ${handoffContext.realExamples || "Not provided"}`,
+          `Rules/escalations: ${handoffContext.rulesAndEscalations || "Not provided"}`,
+        ].join("\n")
+      : "No handoff context submitted yet.",
+    "",
+    "Open task sequence:",
+    openTasks.length > 0 ? openTasks.join("\n") : "Generate kickoff tasks before delivery starts.",
+    "",
+    "Operating rule:",
+    "Do not expand the account until the first lane has a visible working output and a named expansion signal.",
+  ].join("\n");
+}
+
+function buildExpansionRecommendation(
+  lead: AccountLead,
+  plan: AccountPlan,
+  accountTasks: AccountTask[],
+  closePath: ClosePathState,
+) {
+  const complete = accountTasks.filter((task) => task.status === "completed").length;
+  const open = accountTasks.filter((task) => task.status !== "completed").length;
+  const paidOrApproved = closePath.paymentStatus === "paid" || closePath.paymentPath === "signed_approval";
+
+  return [
+    `Expansion recommendation: ${getAccountName(lead)}`,
+    "",
+    `Current start: ${packageLabels[getRecommendedPackageId(lead)]}`,
+    `Paid/approved: ${paidOrApproved ? "Yes" : "Not yet"}`,
+    `Task progress: ${complete} complete, ${open} open`,
+    "",
+    "Expansion signal to watch:",
+    plan.thirtyDayOutcome,
+    "",
+    "Recommended next expansion:",
+    paidOrApproved
+      ? "After the first lane is live, offer a 90-day operating lane that covers one adjacent workflow, leadership reporting, and assistant memory."
+      : "Do not pitch expansion yet. First clear the start path and install the first useful workflow.",
+    "",
+    "Client-facing language:",
+    `If this first lane proves useful, the next step is not another tool. It is a broader operating lane where Perpetual Core helps ${getAccountName(
+      lead,
+    )} keep the workflow, people, data, assistant behavior, and reporting connected over a 90-day implementation window.`,
+  ].join("\n");
+}
+
 function buildClientKickoffEmail(lead: AccountLead, plan: AccountPlan) {
   const contact = getContactName(lead);
   const account = getAccountName(lead);
@@ -1161,6 +1265,42 @@ export default function AccountDetailPage() {
           : taskSummary.nextTask
             ? taskSummary.nextTask.title
             : "Review the first operating lane and prepare the expansion recommendation.";
+  const commandPack = [
+    {
+      label: "Executive update",
+      detail: "Summarize commercial path, delivery state, context, task pulse, and the next move.",
+      icon: FileText,
+      body: buildExecutiveAccountUpdate(lead, plan, closePath, taskSummary, handoffContext),
+    },
+    {
+      label: "Delivery runbook",
+      detail: "Give the operator or assistant the exact first-lane delivery sequence.",
+      icon: ListChecks,
+      body: buildDeliveryRunbook(lead, plan, handoffContext, accountTasks),
+    },
+    {
+      label: "Expansion note",
+      detail: "Frame how this account could grow after the first useful lane proves value.",
+      icon: Sparkles,
+      body: buildExpansionRecommendation(lead, plan, accountTasks, closePath),
+    },
+    {
+      label: "Next-action prompt",
+      detail: "Ask the assistant to choose the next commercial and delivery move from current state.",
+      icon: Bot,
+      body: [
+        "Use this account state to decide my next move.",
+        "",
+        buildExecutiveAccountUpdate(lead, plan, closePath, taskSummary, handoffContext),
+        "",
+        "Return only:",
+        "1. One commercial action.",
+        "2. One delivery action.",
+        "3. One risk to reduce.",
+        "4. The exact message I should send.",
+      ].join("\n"),
+    },
+  ];
 
   return (
     <div className="space-y-6 pb-10">
@@ -1339,6 +1479,45 @@ export default function AccountDetailPage() {
               <p className="mt-2 text-xs leading-5 text-slate-600">{plan.sevenDayDeliverable}</p>
             </div>
           </div>
+        </CardContent>
+      </Card>
+
+      <Card className="rounded-lg shadow-none">
+        <CardHeader>
+          <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+            <div>
+              <div className="flex items-center gap-3">
+                <CardTitle className="text-xl">Operator command pack</CardTitle>
+                <Sparkles className="h-5 w-5 text-violet-600" />
+              </div>
+              <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-600">
+                Copy structured operating language for you, your AI assistant, or a teammate without
+                losing the current commercial and delivery state.
+              </p>
+            </div>
+            <Badge className="w-fit rounded-md" variant={paymentSent && accountTasks.length > 0 ? "default" : "outline"}>
+              {paymentSent && accountTasks.length > 0 ? "Operator-ready" : "Needs setup"}
+            </Badge>
+          </div>
+        </CardHeader>
+        <CardContent className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+          {commandPack.map((command) => (
+            <button
+              key={command.label}
+              type="button"
+              onClick={() => copyText(command.label, command.body)}
+              className="rounded-lg border bg-white p-4 text-left transition hover:border-violet-300 hover:bg-violet-50/40"
+            >
+              <div className="flex items-center justify-between gap-3">
+                <span className="rounded-md bg-violet-50 p-2 text-violet-700">
+                  <command.icon className="h-4 w-4" />
+                </span>
+                <Clipboard className="h-4 w-4 text-slate-400" />
+              </div>
+              <p className="mt-4 text-sm font-semibold text-slate-950">{command.label}</p>
+              <p className="mt-2 text-sm leading-5 text-slate-600">{command.detail}</p>
+            </button>
+          ))}
         </CardContent>
       </Card>
 
