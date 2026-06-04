@@ -430,6 +430,21 @@ function getPrimaryAccountAction(client: AccountLane) {
   return client.nextStep;
 }
 
+function getAccountCommandLine(client: AccountLane) {
+  const risk = getAccountRisk(client);
+  const readiness = getAccountReadiness(client);
+  const dueLabel = formatTaskDueLabel(client.nextTaskDueDate);
+
+  return [
+    `${client.name} (${client.company})`,
+    `Lane: ${client.lane}`,
+    `Risk: ${risk.label}`,
+    `Readiness: ${readiness.label}`,
+    `Action: ${getPrimaryAccountAction(client)}`,
+    `Task pulse: ${client.openTaskCount || 0} open, ${client.blockedTaskCount || 0} blocked, ${client.overdueTaskCount || 0} overdue, ${dueLabel}`,
+  ].join("\n");
+}
+
 function formatTaskDueLabel(value?: string) {
   if (!value) return "No due date";
 
@@ -718,6 +733,59 @@ export default function AccountsPage() {
     [filteredAccounts],
   );
 
+  const accountCommandPlan = useMemo(() => {
+    const urgentAccounts = [...filteredAccounts]
+      .map((client) => ({
+        client,
+        risk: getAccountRisk(client),
+        readiness: getAccountReadiness(client),
+        action: getPrimaryAccountAction(client),
+      }))
+      .sort((a, b) => {
+        if (b.risk.severity !== a.risk.severity) return b.risk.severity - a.risk.severity;
+        return a.readiness.score - b.readiness.score;
+      });
+
+    const commercialAccounts = urgentAccounts.filter(({ risk }) =>
+      ["Commercial block", "Buyer waiting", "Unrouted"].includes(risk.label),
+    );
+    const deliveryAccounts = urgentAccounts.filter(({ risk }) =>
+      ["Delivery slipping", "Context gap", "No task plan"].includes(risk.label),
+    );
+    const healthyAccounts = urgentAccounts.filter(({ risk }) => risk.label === "Healthy");
+    const focusAccounts = [
+      ...commercialAccounts.slice(0, 2),
+      ...deliveryAccounts.slice(0, 2),
+      ...healthyAccounts.slice(0, 1),
+    ].slice(0, 5);
+
+    const brief = [
+      "Perpetual Core account command brief",
+      "",
+      `Accounts in view: ${filteredAccounts.length}`,
+      `Ready for delivery: ${readinessCounts.delivery}`,
+      `Need client context: ${readinessCounts.context}`,
+      `Need task plan: ${readinessCounts.tasks}`,
+      `Waiting on buyer: ${readinessCounts.waiting}`,
+      `Blocked: ${readinessCounts.blocked}`,
+      "",
+      "Today:",
+      focusAccounts.length
+        ? focusAccounts.map(({ client }, index) => `${index + 1}. ${getAccountCommandLine(client)}`).join("\n\n")
+        : "No account command items in the current filter.",
+      "",
+      "Assistant instruction: prioritize revenue clarity first, then paid-client delivery reliability, then expansion proof.",
+    ].join("\n");
+
+    return {
+      focusAccounts,
+      commercialCount: commercialAccounts.length,
+      deliveryCount: deliveryAccounts.length,
+      healthyCount: healthyAccounts.length,
+      brief,
+    };
+  }, [filteredAccounts, readinessCounts]);
+
   const dueAccountTasks = useMemo(
     () =>
       [...filteredAccounts]
@@ -1005,6 +1073,97 @@ export default function AccountsPage() {
           </Card>
         ))}
       </div>
+
+      <Card className="overflow-hidden rounded-lg border-violet-200 bg-white shadow-none">
+        <CardContent className="p-0">
+          <div className="grid gap-0 lg:grid-cols-[0.95fr_1.05fr]">
+            <div className="bg-gradient-to-br from-violet-50 via-white to-slate-50 p-5">
+              <div className="flex items-start justify-between gap-4">
+                <div>
+                  <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-violet-700">
+                    Today&apos;s account command
+                  </p>
+                  <h2 className="mt-3 text-2xl font-semibold tracking-tight text-slate-950">
+                    Start with the accounts that move money or protect delivery.
+                  </h2>
+                  <p className="mt-3 text-sm leading-6 text-slate-600">
+                    The assistant can use this brief to decide whether to chase payment, collect context,
+                    generate tasks, or open the account room for active delivery work.
+                  </p>
+                </div>
+                <Sparkles className="h-5 w-5 shrink-0 text-violet-600" />
+              </div>
+              <div className="mt-5 grid gap-3 sm:grid-cols-3">
+                {[
+                  ["Commercial", accountCommandPlan.commercialCount, "Money path, buyer follow-up, routing."],
+                  ["Delivery", accountCommandPlan.deliveryCount, "Context, tasks, overdue work."],
+                  ["Healthy", accountCommandPlan.healthyCount, "Expansion and relationship proof."],
+                ].map(([label, value, detail]) => (
+                  <div key={label} className="rounded-lg border border-violet-100 bg-white p-4">
+                    <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-slate-500">{label}</p>
+                    <p className="mt-2 text-2xl font-semibold text-slate-950">{value}</p>
+                    <p className="mt-2 text-xs leading-5 text-slate-600">{detail}</p>
+                  </div>
+                ))}
+              </div>
+              <Button
+                type="button"
+                className="mt-5 rounded-md"
+                onClick={() => copyAccountText("Account command brief", accountCommandPlan.brief)}
+              >
+                <Clipboard className="mr-2 h-4 w-4" />
+                Copy command brief
+              </Button>
+            </div>
+
+            <div className="border-t border-violet-100 p-5 lg:border-l lg:border-t-0">
+              {accountCommandPlan.focusAccounts.length === 0 ? (
+                <div className="rounded-lg border border-dashed p-5 text-sm text-slate-600">
+                  No priority account actions in the current filter.
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {accountCommandPlan.focusAccounts.map(({ client, risk, readiness, action }, index) => (
+                    <div key={client.id} className="rounded-lg border bg-white p-4">
+                      <div className="flex flex-wrap items-start justify-between gap-3">
+                        <div>
+                          <div className="flex flex-wrap items-center gap-2">
+                            <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-slate-500">
+                              {String(index + 1).padStart(2, "0")}
+                            </span>
+                            <p className="font-semibold text-slate-950">{client.name}</p>
+                          </div>
+                          <p className="mt-1 text-sm text-slate-600">{client.company}</p>
+                        </div>
+                        <span className={`rounded-md border px-2 py-1 text-xs font-medium ${getReadinessClasses(risk.tone)}`}>
+                          {risk.label}
+                        </span>
+                      </div>
+                      <div className="mt-4 grid gap-3 md:grid-cols-[1fr_150px_auto] md:items-center">
+                        <div>
+                          <p className="text-sm font-semibold text-slate-950">{action}</p>
+                          <p className="mt-1 text-xs leading-5 text-slate-600">{readiness.detail}</p>
+                        </div>
+                        <div>
+                          <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-slate-500">Next due</p>
+                          <p className="mt-1 text-sm font-medium text-slate-950">
+                            {formatTaskDueLabel(client.nextTaskDueDate)}
+                          </p>
+                        </div>
+                        <Button asChild size="sm" className="h-8 rounded-md">
+                          <Link href={client.href}>
+                            Work it <ArrowRight className="ml-2 h-3.5 w-3.5" />
+                          </Link>
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
       <div className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
         <Card className="rounded-lg shadow-none">
