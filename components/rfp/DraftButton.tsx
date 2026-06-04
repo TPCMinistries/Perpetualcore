@@ -156,23 +156,33 @@ export function DraftButton({
         }
       };
 
+      const failedSteps: string[] = [];
       const reviewOk = await runOptionalStep(
         reusedExisting ? "Refreshing reviewer" : "Running reviewer",
         `/api/rfp/proposals/${proposalId}/review`,
       );
+      if (!reviewOk) failedSteps.push("review");
       const complianceOk = await runOptionalStep(
         reusedExisting ? "Refreshing readiness matrix" : "Building readiness matrix",
         `/api/rfp/proposals/${proposalId}/compliance`,
       );
+      if (!complianceOk) failedSteps.push("readiness");
       const tasksOk = await runOptionalStep(
         reusedExisting ? "Syncing submission workroom" : "Creating submission workroom",
         `/api/rfp/proposals/${proposalId}/submission-tasks`,
       );
+      if (!tasksOk) failedSteps.push("workroom");
 
       const status = reviewOk && complianceOk && tasksOk ? "ready" : "partial";
       setStep("Opening workspace");
       const mode = reusedExisting ? "&mode=resume" : "";
-      router.push(`/org/${orgId}/proposals/${proposalId}?pursuit=${status}${mode}`);
+      const failed =
+        failedSteps.length > 0
+          ? `&failed=${encodeURIComponent(failedSteps.join(","))}`
+          : "";
+      router.push(
+        `/org/${orgId}/proposals/${proposalId}?pursuit=${status}${mode}${failed}`,
+      );
     } catch (err) {
       setError(err instanceof Error ? err.message : "network error");
     } finally {

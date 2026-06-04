@@ -109,6 +109,17 @@ export interface SavedSearchAlertRow {
   sent_at: string;
 }
 
+export interface ActivationFunnelMetrics {
+  orgs: number;
+  orgs_with_matches: number;
+  orgs_with_proposals: number;
+  orgs_with_reviewer: number;
+  orgs_with_capture_readiness: number;
+  orgs_with_workroom: number;
+  proposals_7d: number;
+  partial_workflows_7d: number;
+}
+
 export interface PursuitReadinessMetrics {
   proposals: number;
   average_score: number;
@@ -552,6 +563,112 @@ export async function loadRecentSavedSearchAlerts(
     email: row.email,
     sent_at: row.sent_at,
   }));
+}
+
+export async function loadActivationFunnelMetrics(): Promise<ActivationFunnelMetrics> {
+  const admin = createAdminClient();
+  const sevenDaysAgo = isoDaysAgo(7);
+
+  const [
+    orgsRes,
+    matchesRes,
+    proposalsRes,
+    reviewerRes,
+    captureRes,
+    tasksRes,
+    proposal7dRes,
+  ] = await Promise.all([
+    admin.from("rfp_orgs").select("id", { count: "exact", head: true }),
+    admin.from("rfp_opp_matches").select("org_id").returns<{ org_id: string }[]>(),
+    admin
+      .from("rfp_proposals")
+      .select("id, org_id, created_at")
+      .returns<{ id: string; org_id: string; created_at: string }[]>(),
+    admin
+      .from("rfp_proposal_sections")
+      .select("proposal_id")
+      .eq("section_type", REVIEWER_FINDINGS_SECTION_TYPE)
+      .returns<{ proposal_id: string }[]>(),
+    admin
+      .from("rfp_compliance_checks")
+      .select("proposal_id, check_type")
+      .in("check_type", [
+        "bid_no_bid_v1",
+        "compliance_matrix_v1",
+        "packet_checklist_v1",
+      ])
+      .returns<{ proposal_id: string; check_type: string }[]>(),
+    admin
+      .from("rfp_submission_tasks")
+      .select("proposal_id")
+      .returns<{ proposal_id: string }[]>(),
+    admin
+      .from("rfp_proposals")
+      .select("id", { count: "exact", head: true })
+      .gte("created_at", sevenDaysAgo),
+  ]);
+
+  const proposalOrg = new Map((proposalsRes.data ?? []).map((row) => [row.id, row.org_id]));
+  const orgsWithMatches = new Set((matchesRes.data ?? []).map((row) => row.org_id));
+  const orgsWithProposals = new Set((proposalsRes.data ?? []).map((row) => row.org_id));
+  const orgsWithReviewer = new Set(
+    (reviewerRes.data ?? [])
+      .map((row) => proposalOrg.get(row.proposal_id))
+      .filter((orgId): orgId is string => Boolean(orgId)),
+  );
+  const captureByProposal = new Map<string, Set<string>>();
+  for (const row of captureRes.data ?? []) {
+    const set = captureByProposal.get(row.proposal_id) ?? new Set<string>();
+    set.add(row.check_type);
+    captureByProposal.set(row.proposal_id, set);
+  }
+  const orgsWithCapture = new Set<string>();
+  for (const [proposalId, types] of captureByProposal) {
+    if (
+      types.has("bid_no_bid_v1") &&
+      types.has("compliance_matrix_v1") &&
+      types.has("packet_checklist_v1")
+    ) {
+      const orgId = proposalOrg.get(proposalId);
+      if (orgId) orgsWithCapture.add(orgId);
+    }
+  }
+  const orgsWithWorkroom = new Set(
+    (tasksRes.data ?? [])
+      .map((row) => proposalOrg.get(row.proposal_id))
+      .filter((orgId): orgId is string => Boolean(orgId)),
+  );
+  const reviewedProposalIds = new Set((reviewerRes.data ?? []).map((row) => row.proposal_id));
+  const workroomProposalIds = new Set((tasksRes.data ?? []).map((row) => row.proposal_id));
+  const captureReadyProposalIds = new Set<string>();
+  for (const [proposalId, types] of captureByProposal) {
+    if (
+      types.has("bid_no_bid_v1") &&
+      types.has("compliance_matrix_v1") &&
+      types.has("packet_checklist_v1")
+    ) {
+      captureReadyProposalIds.add(proposalId);
+    }
+  }
+  const partialWorkflows7d = (proposalsRes.data ?? []).filter((proposal) => {
+    if (proposal.created_at < sevenDaysAgo) return false;
+    return (
+      !reviewedProposalIds.has(proposal.id) ||
+      !captureReadyProposalIds.has(proposal.id) ||
+      !workroomProposalIds.has(proposal.id)
+    );
+  }).length;
+
+  return {
+    orgs: orgsRes.count ?? 0,
+    orgs_with_matches: orgsWithMatches.size,
+    orgs_with_proposals: orgsWithProposals.size,
+    orgs_with_reviewer: orgsWithReviewer.size,
+    orgs_with_capture_readiness: orgsWithCapture.size,
+    orgs_with_workroom: orgsWithWorkroom.size,
+    proposals_7d: proposal7dRes.count ?? 0,
+    partial_workflows_7d: partialWorkflows7d,
+  };
 }
 
 export async function loadPursuitReadinessMetrics(): Promise<{

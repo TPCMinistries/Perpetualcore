@@ -184,6 +184,12 @@ function countVerifyMarkers(sections: SectionRow[]): number {
   }, 0);
 }
 
+const FAILED_STEP_LABELS: Record<string, string> = {
+  review: "Reviewer pass",
+  readiness: "Capture readiness matrix",
+  workroom: "Submission workroom tasks",
+};
+
 export default async function ProposalPage({
   params,
   searchParams,
@@ -196,6 +202,13 @@ export default async function ProposalPage({
   const pursuitStatus =
     sp.pursuit === "ready" || sp.pursuit === "partial" ? sp.pursuit : null;
   const pursuitMode = sp.mode === "resume" ? "resume" : "new";
+  const failedSteps =
+    typeof sp.failed === "string"
+      ? sp.failed
+          .split(",")
+          .map((item) => item.trim())
+          .filter((item) => item in FAILED_STEP_LABELS)
+      : [];
   const supabase = await createClient();
 
   const { data: proposal } = await supabase
@@ -381,7 +394,11 @@ export default async function ProposalPage({
                 ? pursuitMode === "resume"
                   ? "An existing proposal for this opportunity was found. Reviewer, readiness, and workroom artifacts were refreshed."
                   : "The draft, reviewer pass, readiness matrix, and submission workroom were created from Discovery."
-                : "The proposal workspace was created, but one automation step did not finish. Use the controls below to rerun reviewer, readiness, or workroom sync."}
+                : failedSteps.length > 0
+                  ? `The proposal workspace was created, but ${failedSteps
+                      .map((step) => FAILED_STEP_LABELS[step])
+                      .join(", ")} did not finish. Use the matching controls below to rerun only those steps.`
+                  : "The proposal workspace was created, but one automation step did not finish. Use the controls below to rerun reviewer, readiness, or workroom sync."}
             </p>
           </div>
         ) : null}

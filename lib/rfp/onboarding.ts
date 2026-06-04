@@ -20,6 +20,8 @@
  */
 
 import { createAdminClient } from "@/lib/supabase/server";
+import { SECTION_TYPES } from "@/lib/rfp/draft/sections";
+import { REVIEWER_FINDINGS_SECTION_TYPE } from "@/lib/rfp/review/rubric";
 import { VAULT_SEEDED_TARGET, type OnboardingState } from "./onboarding-shared";
 
 export type { OnboardingState } from "./onboarding-shared";
@@ -43,7 +45,15 @@ export async function getOnboardingState(
 ): Promise<OnboardingState> {
   const admin = createAdminClient();
 
-  const [orgRes, vaultRes, proposalsRes, reviewerSectionsRes] =
+  const [
+    orgRes,
+    vaultRes,
+    matchesRes,
+    proposalsRes,
+    reviewerSectionsRes,
+    complianceChecksRes,
+    submissionTasksRes,
+  ] =
     await Promise.all([
       admin
         .from("rfp_orgs")
@@ -55,42 +65,117 @@ export async function getOnboardingState(
         .select("id", { count: "exact", head: true })
         .eq("org_id", orgId),
       admin
+        .from("rfp_opp_matches")
+        .select("opp_id", { count: "exact", head: true })
+        .eq("org_id", orgId)
+        .in("triage_status", ["watch", "pursuing"]),
+      admin
         .from("rfp_proposals")
-        .select("id", { count: "exact", head: true })
-        .eq("org_id", orgId),
+        .select("id")
+        .eq("org_id", orgId)
+        .returns<{ id: string }[]>(),
       admin
         .from("rfp_proposal_sections")
         .select("id, proposal_id!inner(org_id)", {
           count: "exact",
           head: true,
         })
-        .eq("section_type", "reviewer_findings_v1")
+        .eq("section_type", REVIEWER_FINDINGS_SECTION_TYPE)
         // The PostgREST inner-join filter is the cleanest way to scope this
         // count to the org without a SECURITY DEFINER helper.
+        .eq("proposal_id.org_id", orgId),
+      admin
+        .from("rfp_compliance_checks")
+        .select("id, check_type, proposal_id!inner(org_id)", { count: "exact" })
+        .eq("proposal_id.org_id", orgId)
+        .in("check_type", [
+          "bid_no_bid_v1",
+          "compliance_matrix_v1",
+          "packet_checklist_v1",
+        ])
+        .returns<{ id: string; check_type: string }[]>(),
+      admin
+        .from("rfp_submission_tasks")
+        .select("id, proposal_id!inner(org_id)", { count: "exact", head: true })
         .eq("proposal_id.org_id", orgId),
     ]);
 
   const voice_trained = isVoiceTrained(orgRes.data?.voice_fingerprint);
   const vault_chunk_count = vaultRes.count ?? 0;
-  const proposal_count = proposalsRes.count ?? 0;
+  const match_count = matchesRes.count ?? 0;
+  const proposalRows = proposalsRes.data ?? [];
+  const proposalIds = proposalRows.map((proposal) => proposal.id);
+  const proposal_count = proposalRows.length;
   const reviewer_count = reviewerSectionsRes.count ?? 0;
+  const complianceChecks = complianceChecksRes.data ?? [];
+  const complianceTypes = new Set(complianceChecks.map((row) => row.check_type));
+  const first_capture_readiness =
+    complianceTypes.has("bid_no_bid_v1") &&
+    complianceTypes.has("compliance_matrix_v1") &&
+    complianceTypes.has("packet_checklist_v1");
+  const submission_task_count = submissionTasksRes.count ?? 0;
+  const { data: sectionRows } =
+    proposalIds.length > 0
+      ? await admin
+          .from("rfp_proposal_sections")
+          .select("proposal_id, section_type, content")
+          .in("proposal_id", proposalIds)
+          .in("section_type", SECTION_TYPES)
+          .returns<
+            {
+              proposal_id: string;
+              section_type: string;
+              content: string | null;
+            }[]
+          >()
+      : { data: [] };
+
+  const sectionsByProposal = new Map<
+    string,
+    { sectionTypes: Set<string>; verifyMarkers: number }
+  >();
+  for (const row of sectionRows ?? []) {
+    const stat =
+      sectionsByProposal.get(row.proposal_id) ??
+      { sectionTypes: new Set<string>(), verifyMarkers: 0 };
+    stat.sectionTypes.add(row.section_type);
+    stat.verifyMarkers += row.content?.match(/\[VERIFY:/g)?.length ?? 0;
+    sectionsByProposal.set(row.proposal_id, stat);
+  }
+  const first_export_ready = proposalRows.some((proposal) => {
+    const sectionStat = sectionsByProposal.get(proposal.id);
+    if (!sectionStat) return false;
+    return (
+      SECTION_TYPES.every((type) => sectionStat.sectionTypes.has(type)) &&
+      sectionStat.verifyMarkers === 0 &&
+      first_capture_readiness
+    );
+  });
 
   const state: OnboardingState = {
     org_created: true,
     voice_trained,
     vault_seeded: vault_chunk_count >= VAULT_SEEDED_THRESHOLD,
+    first_match_selected: match_count > 0,
     first_draft: proposal_count > 0,
     first_review: reviewer_count > 0,
+    first_capture_readiness,
+    first_workroom: submission_task_count > 0,
+    first_export_ready,
+    match_count,
     vault_chunk_count,
     proposal_count,
+    submission_task_count,
     all_complete: false,
   };
   state.all_complete =
     state.org_created &&
-    state.voice_trained &&
-    state.vault_seeded &&
+    state.first_match_selected &&
     state.first_draft &&
-    state.first_review;
+    state.first_review &&
+    state.first_capture_readiness &&
+    state.first_workroom &&
+    state.first_export_ready;
 
   return state;
 }

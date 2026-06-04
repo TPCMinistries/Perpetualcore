@@ -12,10 +12,16 @@ export interface OnboardingState {
   org_created: boolean;
   voice_trained: boolean;
   vault_seeded: boolean;
+  first_match_selected: boolean;
   first_draft: boolean;
   first_review: boolean;
+  first_capture_readiness: boolean;
+  first_workroom: boolean;
+  first_export_ready: boolean;
+  match_count: number;
   vault_chunk_count: number;
   proposal_count: number;
+  submission_task_count: number;
   all_complete: boolean;
 }
 

@@ -18,6 +18,7 @@ import { revalidatePath } from "next/cache";
 import { notFound } from "next/navigation";
 import { getRfpPlatformAdmin } from "@/lib/rfp/admin";
 import {
+  loadActivationFunnelMetrics,
   loadOrgBreakdown,
   loadOpenDriftRows,
   loadPlatformTotals,
@@ -28,6 +29,7 @@ import {
   loadSavedSearchAlertMetrics,
   loadScraperHealth,
   type AuditRow,
+  type ActivationFunnelMetrics,
   type CronRunRow,
   type OpenDriftRow,
   type OrgRow,
@@ -203,6 +205,49 @@ function PlatformTilesRow({ totals }: { totals: PlatformTotals }) {
         label="AI cost · 30d"
         value={formatCurrency(totals.ai_cost_30d_usd)}
         tone={totals.ai_cost_30d_usd > 100 ? "amber" : "emerald"}
+      />
+    </div>
+  );
+}
+
+function ActivationFunnelTiles({
+  metrics,
+}: {
+  metrics: ActivationFunnelMetrics;
+}) {
+  return (
+    <div className="grid grid-cols-2 gap-3 md:grid-cols-4 lg:grid-cols-8">
+      <Tile label="Orgs" value={formatNumber(metrics.orgs)} />
+      <Tile
+        label="Selected"
+        value={formatNumber(metrics.orgs_with_matches)}
+        tone={metrics.orgs_with_matches > 0 ? "emerald" : "amber"}
+      />
+      <Tile
+        label="Drafted"
+        value={formatNumber(metrics.orgs_with_proposals)}
+        tone={metrics.orgs_with_proposals > 0 ? "emerald" : "amber"}
+      />
+      <Tile
+        label="Reviewed"
+        value={formatNumber(metrics.orgs_with_reviewer)}
+        tone={metrics.orgs_with_reviewer > 0 ? "emerald" : "amber"}
+      />
+      <Tile
+        label="Readiness"
+        value={formatNumber(metrics.orgs_with_capture_readiness)}
+        tone={metrics.orgs_with_capture_readiness > 0 ? "emerald" : "amber"}
+      />
+      <Tile
+        label="Workroom"
+        value={formatNumber(metrics.orgs_with_workroom)}
+        tone={metrics.orgs_with_workroom > 0 ? "emerald" : "amber"}
+      />
+      <Tile label="Drafts · 7d" value={formatNumber(metrics.proposals_7d)} />
+      <Tile
+        label="Partial · 7d"
+        value={formatNumber(metrics.partial_workflows_7d)}
+        tone={metrics.partial_workflows_7d > 0 ? "amber" : "emerald"}
       />
     </div>
   );
@@ -1039,6 +1084,7 @@ export default async function AdminRfpPage() {
   // Parallelize the six queries. Each is single-table.
   const [
     totals,
+    activationFunnel,
     orgs,
     scraperHealth,
     openDrift,
@@ -1050,6 +1096,7 @@ export default async function AdminRfpPage() {
   ] =
     await Promise.all([
       loadPlatformTotals(),
+      loadActivationFunnelMetrics(),
       loadOrgBreakdown(50),
       loadScraperHealth(),
       loadOpenDriftRows(25),
@@ -1088,6 +1135,14 @@ export default async function AdminRfpPage() {
 
       <SectionHeader title="Operator action queue" detail="ranked by urgency" />
       <OperatorActionQueue actions={operatorActions} />
+
+      <SectionHeader title="Activation funnel" detail="first-run proof loop" />
+      <ActivationFunnelTiles metrics={activationFunnel} />
+      <p className="mt-3 text-[13px] leading-6 text-zinc-500">
+        This tracks the core customer path: select a match, create a draft,
+        run reviewer, generate readiness artifacts, and create the submission
+        workroom.
+      </p>
 
       <SectionHeader title="Platform totals" detail="live" />
       <PlatformTilesRow totals={totals} />
