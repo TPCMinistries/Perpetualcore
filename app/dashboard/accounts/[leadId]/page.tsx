@@ -1301,6 +1301,80 @@ export default function AccountDetailPage() {
       ].join("\n"),
     },
   ];
+  const launchCompleteCount = commercialChecklist.filter((item) => item.complete).length;
+  const launchReadiness = Math.round(
+    ([
+      paymentSent,
+      Boolean(permanentAccount),
+      handoffContextItems.length > 0,
+      accountTasks.length > 0,
+      Boolean(plan.firstLane && plan.sevenDayDeliverable),
+      taskSummary.blocked === 0,
+    ].filter(Boolean).length /
+      6) *
+      100,
+  );
+  const launchSteps = [
+    {
+      title: "Clear the money path",
+      detail: paymentSent
+        ? `${getOptionLabel(paymentStatusOptions, closePath.paymentStatus)} via ${getOptionLabel(paymentPathOptions, closePath.paymentPath)}.`
+        : `Send ${packageName}, invoice request, or procurement note before delivery expands.`,
+      complete: paymentSent,
+      action: "Copy buyer start email",
+      onClick: copyBuyerStartEmail,
+    },
+    {
+      title: "Create durable account memory",
+      detail: permanentAccount
+        ? `Account ${shortId(permanentAccount.id)} and engagement ${shortId(permanentEngagement?.id)} are synced.`
+        : "Move from lead-only memory into permanent account and engagement records.",
+      complete: Boolean(permanentAccount),
+      action: "Sync account DB",
+      onClick: syncPermanentAccount,
+      disabled: syncingAccount,
+    },
+    {
+      title: "Collect client operating context",
+      detail: handoffContextItems.length > 0
+        ? `${handoffContextItems.length} handoff fields received.`
+        : "Send the secure handoff link so workflow owner, examples, tools, rules, and metric are captured.",
+      complete: handoffContextItems.length > 0,
+      action: "Copy handoff link",
+      onClick: copyClientHandoffLink,
+    },
+    {
+      title: "Turn context into tasks",
+      detail: accountTasks.length > 0
+        ? `${accountTasks.length} account tasks linked, ${taskSummary.open} still open.`
+        : "Create the kickoff, context, mapping, first deliverable, and expansion review tasks.",
+      complete: accountTasks.length > 0,
+      action: handoffContextItems.length > 0 ? "Sync handoff tasks" : "Generate task plan",
+      onClick: handoffContextItems.length > 0 ? syncHandoffTasks : generateAccountTasks,
+      disabled: syncingHandoffTasks || generatingTasks,
+    },
+  ];
+  const launchNote = [
+    `Launch control: ${getAccountName(lead)}`,
+    "",
+    `Launch readiness: ${launchReadiness}%`,
+    `Commercial checklist: ${launchCompleteCount}/${commercialChecklist.length}`,
+    `Recommended start: ${packageName}`,
+    `Commercial stage: ${getOptionLabel(buyerStageOptions, closePath.buyerStage)}`,
+    `Payment path: ${getOptionLabel(paymentPathOptions, closePath.paymentPath)}`,
+    `Payment status: ${getOptionLabel(paymentStatusOptions, closePath.paymentStatus)}`,
+    "",
+    `First operating lane: ${plan.firstLane}`,
+    `First 7-day deliverable: ${plan.sevenDayDeliverable}`,
+    `30-day outcome: ${plan.thirtyDayOutcome}`,
+    "",
+    `Client context: ${handoffContextItems.length > 0 ? "Received" : "Not received yet"}`,
+    `Task pulse: ${taskSummary.open} open, ${taskSummary.complete} complete, ${taskSummary.blocked} blocked`,
+    `Next move: ${nextBestMove}`,
+    "",
+    "Launch sequence:",
+    ...launchSteps.map((step, index) => `${index + 1}. ${step.title} - ${step.detail}`),
+  ].join("\n");
 
   return (
     <div className="space-y-6 pb-10">
@@ -1478,6 +1552,91 @@ export default function AccountDetailPage() {
               <p className="mt-2 text-sm font-semibold text-slate-950">{plan.firstLane}</p>
               <p className="mt-2 text-xs leading-5 text-slate-600">{plan.sevenDayDeliverable}</p>
             </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card className="rounded-lg border-violet-200 bg-gradient-to-br from-violet-50 via-white to-white shadow-none">
+        <CardHeader>
+          <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+            <div>
+              <div className="flex items-center gap-3">
+                <CardTitle className="text-xl">Account launch control</CardTitle>
+                <Target className="h-5 w-5 text-violet-600" />
+              </div>
+              <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-600">
+                This is the account start sequence: clear the money path, sync durable account memory,
+                collect client context, then turn the handoff into executable tasks.
+              </p>
+            </div>
+            <div className="flex flex-col gap-2 sm:flex-row">
+              <Button type="button" variant="outline" className="rounded-md bg-white" onClick={() => copyText("Launch note", launchNote)}>
+                <Clipboard className="mr-2 h-4 w-4" />
+                Copy launch note
+              </Button>
+              <Button type="button" className="rounded-md" onClick={paymentSent ? copyClientHandoffLink : copyBuyerStartEmail}>
+                {paymentSent ? <ExternalLink className="mr-2 h-4 w-4" /> : <Mail className="mr-2 h-4 w-4" />}
+                {paymentSent ? "Copy handoff link" : "Copy buyer email"}
+              </Button>
+            </div>
+          </div>
+        </CardHeader>
+        <CardContent className="space-y-5">
+          <div className="grid gap-4 lg:grid-cols-[260px_minmax(0,1fr)]">
+            <div className="rounded-lg border bg-white p-4">
+              <div className="flex items-center justify-between gap-3">
+                <p className="text-sm font-semibold text-slate-950">Launch readiness</p>
+                <p className="text-2xl font-semibold text-slate-950">{launchReadiness}%</p>
+              </div>
+              <Progress value={launchReadiness} className="mt-3 h-2" />
+              <p className="mt-3 text-xs leading-5 text-slate-600">
+                Commercial checklist {launchCompleteCount}/{commercialChecklist.length}. Blockers: {taskSummary.blocked}.
+              </p>
+            </div>
+            <div className="grid gap-3 md:grid-cols-3">
+              {[
+                ["Next move", nextBestMove],
+                ["Start package", packageName],
+                ["Client context", handoffContextItems.length > 0 ? "Received" : "Awaiting handoff"],
+              ].map(([label, value]) => (
+                <div key={label} className="rounded-lg border bg-white p-4">
+                  <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-slate-500">{label}</p>
+                  <p className="mt-2 text-sm font-semibold leading-6 text-slate-950">{value}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="grid gap-3 lg:grid-cols-4">
+            {launchSteps.map((step, index) => (
+              <div
+                key={step.title}
+                className={`flex min-h-[220px] flex-col rounded-lg border p-4 ${
+                  step.complete ? "border-violet-200 bg-white" : "border-amber-200 bg-amber-50/60"
+                }`}
+              >
+                <div className="flex items-start justify-between gap-3">
+                  <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-slate-500">
+                    {String(index + 1).padStart(2, "0")}
+                  </span>
+                  <Badge className="rounded-md" variant={step.complete ? "default" : "outline"}>
+                    {step.complete ? "Ready" : "Open"}
+                  </Badge>
+                </div>
+                <p className="mt-4 text-sm font-semibold text-slate-950">{step.title}</p>
+                <p className="mt-2 flex-1 text-sm leading-5 text-slate-600">{step.detail}</p>
+                <Button
+                  type="button"
+                  variant={step.complete ? "outline" : "default"}
+                  className="mt-4 rounded-md"
+                  onClick={step.onClick}
+                  disabled={step.disabled}
+                >
+                  {step.disabled ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <ArrowRight className="mr-2 h-4 w-4" />}
+                  {step.action}
+                </Button>
+              </div>
+            ))}
           </div>
         </CardContent>
       </Card>
