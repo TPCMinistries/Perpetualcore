@@ -149,13 +149,34 @@ async function loadActiveOrgIds(): Promise<string[]> {
     .select('org_id');
   if (error) {
     console.error('[scoring/recompute] loadActiveOrgIds failed:', error.message);
-    return [];
+    return loadFallbackOrgIds();
   }
   const seen = new Set<string>();
   for (const row of (data ?? []) as Array<{ org_id: string }>) {
     if (row?.org_id) seen.add(row.org_id);
   }
-  return [...seen];
+  if (seen.size > 0) return [...seen];
+
+  console.warn(
+    '[scoring/recompute] no active org memberships found; falling back to rfp_orgs'
+  );
+  return loadFallbackOrgIds();
+}
+
+async function loadFallbackOrgIds(): Promise<string[]> {
+  const supabase = rfpAdmin();
+  const { data, error } = await supabase.from('rfp_orgs').select('id');
+  if (error) {
+    console.error('[scoring/recompute] loadFallbackOrgIds failed:', error.message);
+    return [];
+  }
+  return Array.from(
+    new Set(
+      ((data ?? []) as Array<{ id: string }>)
+        .map((row) => row.id)
+        .filter((id): id is string => typeof id === 'string' && id.length > 0)
+    )
+  );
 }
 
 /** Load latest capture profile per org (returns a Map for O(1) lookup). */
