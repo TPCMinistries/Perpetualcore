@@ -2565,48 +2565,87 @@ export default function LeadsPage() {
                         const selectedPackage = CLOSE_PACKAGES.find((pkg) => pkg.id === recommendedPackage) || CLOSE_PACKAGES[0];
                         const packageHref = `/packages?lead=${encodeURIComponent(selectedLead.id)}&package=${encodeURIComponent(selectedPackage.id)}`;
                         const proposalHref = `/dashboard/proposals?lead=${encodeURIComponent(selectedLead.id)}`;
+                        const accountHref = `/dashboard/accounts/${encodeURIComponent(selectedLead.id)}`;
                         const invoiceHref = `/contact-sales?intent=manual-invoice&lead=${encodeURIComponent(selectedLead.id)}&plan=${encodeURIComponent(selectedPackage.id)}`;
+                        const closeChecks = [
+                          { label: "Buyer contact", done: Boolean(getLeadEmail(selectedLead) || selectedLead.phone) },
+                          { label: "Company/account", done: Boolean(getLeadCompany(selectedLead)) },
+                          { label: "Value signal", done: Boolean(selectedLead.estimated_value) },
+                          { label: "Operating context", done: Boolean(selectedLead.notes && selectedLead.notes.length > 40) },
+                          { label: "Late-stage status", done: ["qualified", "proposal", "negotiation", "won"].includes(selectedLead.status || "new") },
+                        ];
+                        const primaryMove =
+                          selectedLead.status === "won"
+                            ? { label: "Open account room", href: accountHref, icon: Building }
+                            : readiness.score >= 4
+                              ? { label: "Send package", href: packageHref, icon: CreditCard }
+                              : { label: "Build proposal", href: proposalHref, icon: FileText };
+                        const PrimaryMoveIcon = primaryMove.icon;
+
                         return (
                           <div className="space-y-4">
-                            <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-                              <div>
-                                <Label className="flex items-center gap-2 text-sm text-muted-foreground">
-                                  <CreditCard className="h-4 w-4 text-primary" />
-                                  Close path
-                                </Label>
-                                <p className="mt-2 text-base font-semibold text-foreground">{readiness.label}</p>
-                                <p className="mt-1 text-sm leading-6 text-muted-foreground">{readiness.detail}</p>
+                            <div className="rounded-lg border bg-gradient-to-br from-primary/[0.08] via-background to-background p-4">
+                              <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                                <div>
+                                  <Label className="flex items-center gap-2 text-sm text-muted-foreground">
+                                    <CreditCard className="h-4 w-4 text-primary" />
+                                    Close bridge
+                                  </Label>
+                                  <p className="mt-2 text-base font-semibold text-foreground">{readiness.label}</p>
+                                  <p className="mt-1 text-sm leading-6 text-muted-foreground">{readiness.detail}</p>
+                                </div>
+                                <Badge variant="outline" className="w-fit rounded-md bg-background">
+                                  {readiness.score}/5 context
+                                </Badge>
                               </div>
-                              <Badge variant="outline" className="w-fit rounded-md">
-                                {readiness.score}/5 context
-                              </Badge>
+
+                              <div className="mt-4 grid gap-2">
+                                <Button asChild className="rounded-md">
+                                  <Link href={primaryMove.href}>
+                                    <PrimaryMoveIcon className="mr-2 h-4 w-4" />
+                                    {primaryMove.label}
+                                  </Link>
+                                </Button>
+                                <div className="grid gap-2 sm:grid-cols-2">
+                                  <Button
+                                    type="button"
+                                    variant="outline"
+                                    className="rounded-md bg-background"
+                                    disabled={savingAssistantPlan}
+                                    onClick={() => handlePrepareClosePath(selectedLead)}
+                                  >
+                                    <WandSparkles className="mr-2 h-4 w-4" />
+                                    {savingAssistantPlan ? "Saving..." : "Save close status"}
+                                  </Button>
+                                  <Button
+                                    type="button"
+                                    variant="outline"
+                                    className="rounded-md bg-background"
+                                    onClick={() => copyText(getCloseDecisionPacket(selectedLead))}
+                                  >
+                                    <Clipboard className="mr-2 h-4 w-4" />
+                                    Copy close packet
+                                  </Button>
+                                </div>
+                              </div>
                             </div>
 
-                            <div className="grid gap-2 sm:grid-cols-3">
-                              <Button
-                                type="button"
-                                className="rounded-md"
-                                disabled={savingAssistantPlan}
-                                onClick={() => handlePrepareClosePath(selectedLead)}
-                              >
-                                <WandSparkles className="mr-2 h-4 w-4" />
-                                {savingAssistantPlan ? "Saving..." : "Prepare close"}
-                              </Button>
-                              <Button
-                                type="button"
-                                variant="outline"
-                                className="rounded-md"
-                                onClick={() => copyText(getCloseDecisionPacket(selectedLead))}
-                              >
-                                <Clipboard className="mr-2 h-4 w-4" />
-                                Copy packet
-                              </Button>
-                              <Button asChild variant="outline" className="rounded-md">
-                                <Link href={proposalHref}>
-                                  <FileText className="mr-2 h-4 w-4" />
-                                  Proposal
-                                </Link>
-                              </Button>
+                            <div className="grid gap-2 sm:grid-cols-5">
+                              {closeChecks.map((check) => (
+                                <div
+                                  key={check.label}
+                                  className={cn(
+                                    "rounded-md border p-2 text-xs leading-5",
+                                    check.done ? "border-primary/25 bg-primary/[0.05] text-foreground" : "bg-muted/30 text-muted-foreground"
+                                  )}
+                                >
+                                  <div className="flex items-center gap-1.5">
+                                    <CheckCircle2 className={cn("h-3.5 w-3.5", check.done ? "text-primary" : "text-muted-foreground/50")} />
+                                    <span>{check.done ? "Ready" : "Missing"}</span>
+                                  </div>
+                                  <p className="mt-1 font-medium">{check.label}</p>
+                                </div>
+                              ))}
                             </div>
 
                             <div className="rounded-md border bg-background p-3">
@@ -2620,7 +2659,7 @@ export default function LeadsPage() {
                                     {selectedPackage.detail}
                                   </p>
                                 </div>
-                                <Button asChild className="shrink-0 rounded-md">
+                                <Button asChild variant="outline" className="shrink-0 rounded-md">
                                   <Link href={packageHref}>
                                     Send package <ArrowRight className="ml-2 h-4 w-4" />
                                   </Link>
@@ -2628,7 +2667,12 @@ export default function LeadsPage() {
                               </div>
                             </div>
 
-                            <div className="grid gap-2 sm:grid-cols-3">
+                            <div className="grid gap-2 sm:grid-cols-4">
+                              <Button asChild variant="outline" className="rounded-md">
+                                <Link href={proposalHref}>
+                                  Proposal
+                                </Link>
+                              </Button>
                               <Button asChild variant="outline" className="rounded-md">
                                 <Link href={invoiceHref}>
                                   Manual invoice path
@@ -2640,7 +2684,7 @@ export default function LeadsPage() {
                                 </Link>
                               </Button>
                               <Button asChild variant="outline" className="rounded-md">
-                                <Link href={`/dashboard/accounts/${encodeURIComponent(selectedLead.id)}`}>
+                                <Link href={accountHref}>
                                   Start delivery room
                                 </Link>
                               </Button>
