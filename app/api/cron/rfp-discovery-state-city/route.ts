@@ -85,10 +85,11 @@ async function runCron(): Promise<NextResponse> {
 
     const duration_ms = Date.now() - startedAt;
     const scoringFailed = "error" in scored;
+    const completedWithoutErrors = totals.errors === 0 && !scoringFailed;
     await logRfpCronExecution({
       cronName: CRON_NAME,
       durationMs: duration_ms,
-      status: totals.errors > 0 || scoringFailed ? "warning" : "success",
+      status: completedWithoutErrors ? "success" : "warning",
       result: {
         total_fetched: totals.fetched,
         total_upserted: totals.upserted,
@@ -120,10 +121,14 @@ async function runCron(): Promise<NextResponse> {
     );
 
     return NextResponse.json({
-      ok: true,
+      ok: completedWithoutErrors,
       results,
       totals,
       scored,
+      warning:
+        completedWithoutErrors
+          ? null
+          : "Ingest completed with source or scoring errors. See results and cron log for details.",
       duration_ms,
     });
   } catch (e: unknown) {

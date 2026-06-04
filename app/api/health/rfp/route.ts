@@ -30,6 +30,15 @@ interface HealthCheck {
   detail: string;
 }
 
+interface QueryError {
+  message?: string;
+  code?: string;
+}
+
+interface QueryResultLike {
+  error?: QueryError | null;
+}
+
 function isoHoursAgo(hours: number): string {
   return new Date(Date.now() - hours * 60 * 60 * 1000).toISOString();
 }
@@ -60,6 +69,12 @@ function check(
   detail: string,
 ): HealthCheck {
   return { name, status, detail };
+}
+
+function errorDetail(label: string, result: QueryResultLike): string | null {
+  if (!result.error) return null;
+  const suffix = result.error.code ? ` (${result.error.code})` : "";
+  return `${label}: ${(result.error.message ?? "query failed").slice(0, 160)}${suffix}`;
 }
 
 export async function GET(): Promise<NextResponse> {
@@ -105,6 +120,16 @@ export async function GET(): Promise<NextResponse> {
         .returns<{ cost_usd: number | string | null }[]>(),
     ]);
 
+    const dbErrors = [
+      errorDetail("rfp_orgs", orgs),
+      errorDetail("rfp_proposals", proposals),
+      errorDetail("rfp_opportunities.count", opportunities),
+      errorDetail("cron_executions.latest", lastCron),
+      errorDetail("rfp_opportunities.latest", lastOpp),
+      errorDetail("rfp_source_drift", openDrift),
+      errorDetail("rfp_agent_sessions.cost_24h", cost24hRows),
+    ].filter((row): row is string => Boolean(row));
+
     const ai_cost_24h_usd = (cost24hRows.data ?? []).reduce(
       (sum, r) => sum + toNum(r.cost_usd),
       0,
@@ -116,44 +141,64 @@ export async function GET(): Promise<NextResponse> {
     const checks: HealthCheck[] = [
       check(
         "database",
-        "ok",
-        "Admin client queries completed for RFP aggregate tables.",
+        dbErrors.length === 0 ? "ok" : "fail",
+        dbErrors.length === 0
+          ? "Admin client queries completed for RFP aggregate tables."
+          : `Supabase query errors: ${dbErrors.slice(0, 3).join("; ")}${dbErrors.length > 3 ? `; +${dbErrors.length - 3} more` : ""}.`,
       ),
       check(
         "opportunity_inventory",
-        (opportunities.count ?? 0) > 0 ? "ok" : "warn",
-        `${opportunities.count ?? 0} opportunities indexed.`,
+        opportunities.error
+          ? "fail"
+          : (opportunities.count ?? 0) > 0
+            ? "ok"
+            : "warn",
+        opportunities.error
+          ? "Opportunity count query failed."
+          : `${opportunities.count ?? 0} opportunities indexed.`,
       ),
       check(
         "opportunity_freshness",
-        lastOppAgeHours === null
+        lastOpp.error
+          ? "fail"
+          : lastOppAgeHours === null
           ? "warn"
           : lastOppAgeHours <= OPPORTUNITY_FRESH_HOURS
             ? "ok"
             : "warn",
-        lastOppAgeHours === null
+        lastOpp.error
+          ? "Latest opportunity query failed."
+          : lastOppAgeHours === null
           ? "No opportunity ingestion timestamp found."
           : `Latest opportunity ingested ${formatHours(lastOppAgeHours)} ago.`,
       ),
       check(
         "cron_freshness",
-        lastCronAgeHours === null
+        lastCron.error
+          ? "fail"
+          : lastCronAgeHours === null
           ? "warn"
           : lastCronAgeHours <= CRON_FRESH_HOURS
             ? "ok"
             : "warn",
-        lastCronAgeHours === null
+        lastCron.error
+          ? "Latest cron query failed."
+          : lastCronAgeHours === null
           ? "No RFP cron execution found."
           : `Latest RFP cron ran ${formatHours(lastCronAgeHours)} ago.`,
       ),
       check(
         "cron_status",
-        lastCronStatus === null
+        lastCron.error
+          ? "fail"
+          : lastCronStatus === null
           ? "warn"
           : lastCronStatus === "success" || lastCronStatus === "ok"
             ? "ok"
             : "warn",
-        lastCronStatus
+        lastCron.error
+          ? "Latest cron status query failed."
+          : lastCronStatus
           ? `Latest RFP cron status: ${lastCronStatus}.`
           : "Latest RFP cron status unavailable.",
       ),
@@ -166,13 +211,25 @@ export async function GET(): Promise<NextResponse> {
       ),
       check(
         "source_drift",
-        (openDrift.count ?? 0) === 0 ? "ok" : "warn",
-        `${openDrift.count ?? 0} unresolved source drift event${openDrift.count === 1 ? "" : "s"}.`,
+        openDrift.error
+          ? "fail"
+          : (openDrift.count ?? 0) === 0
+            ? "ok"
+            : "warn",
+        openDrift.error
+          ? "Source drift query failed."
+          : `${openDrift.count ?? 0} unresolved source drift event${openDrift.count === 1 ? "" : "s"}.`,
       ),
       check(
         "ai_spend_24h",
-        ai_cost_24h_usd <= AI_COST_24H_WARN_USD ? "ok" : "warn",
-        `$${ai_cost_24h_usd.toFixed(4)} spent on RFP AI sessions in the last 24h.`,
+        cost24hRows.error
+          ? "fail"
+          : ai_cost_24h_usd <= AI_COST_24H_WARN_USD
+            ? "ok"
+            : "warn",
+        cost24hRows.error
+          ? "RFP AI session cost query failed."
+          : `$${ai_cost_24h_usd.toFixed(4)} spent on RFP AI sessions in the last 24h.`,
       ),
       check(
         "ai_provider_config",
@@ -208,6 +265,7 @@ export async function GET(): Promise<NextResponse> {
       last_opportunity_ingested_at: lastOpp.data?.created_at ?? null,
       open_drift_events: openDrift.count ?? 0,
       ai_cost_24h_usd: Math.round(ai_cost_24h_usd * 10000) / 10000,
+      database_errors: dbErrors,
       checks,
     });
   } catch (err) {

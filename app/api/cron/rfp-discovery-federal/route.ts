@@ -64,10 +64,11 @@ async function runCron(): Promise<NextResponse> {
 
     const duration_ms = Date.now() - startedAt;
     const scoringFailed = "error" in scored;
+    const completedWithoutErrors = totalErrors === 0 && !scoringFailed;
     await logRfpCronExecution({
       cronName: CRON_NAME,
       durationMs: duration_ms,
-      status: totalErrors > 0 || scoringFailed ? "warning" : "success",
+      status: completedWithoutErrors ? "success" : "warning",
       result: {
         total_fetched: totalFetched,
         total_upserted: totalUpserted,
@@ -101,10 +102,19 @@ async function runCron(): Promise<NextResponse> {
     );
 
     return NextResponse.json({
-      ok: true,
+      ok: completedWithoutErrors,
       duration_ms,
       results,
       scored,
+      totals: {
+        fetched: totalFetched,
+        upserted: totalUpserted,
+        errors: totalErrors,
+      },
+      warning:
+        completedWithoutErrors
+          ? null
+          : "Ingest completed with source or scoring errors. See results and cron log for details.",
     });
   } catch (err) {
     // runFederalIngest is designed to never throw, but defense-in-depth.
