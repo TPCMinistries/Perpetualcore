@@ -25,13 +25,14 @@ const PREP_CHECKLIST = [
 export default function PackageSuccessPage({
   searchParams,
 }: {
-  searchParams?: { session_id?: string; lead?: string };
+  searchParams?: { session_id?: string; lead?: string; package?: string };
 }) {
   const sessionId = searchParams?.session_id;
   const leadId = searchParams?.lead;
+  const packageId = searchParams?.package;
   const intakeHref = sessionId
-    ? `/contact-sales?intent=post-payment-intake&session_id=${encodeURIComponent(sessionId)}${leadId ? `&lead=${encodeURIComponent(leadId)}` : ""}`
-    : "/contact-sales?intent=post-payment-intake";
+    ? `/package-intake?session_id=${encodeURIComponent(sessionId)}${packageId ? `&package=${encodeURIComponent(packageId)}` : ""}${leadId ? `&lead=${encodeURIComponent(leadId)}` : ""}`
+    : `/package-intake${packageId ? `?package=${encodeURIComponent(packageId)}` : ""}`;
 
   return (
     <div className="min-h-screen bg-background">

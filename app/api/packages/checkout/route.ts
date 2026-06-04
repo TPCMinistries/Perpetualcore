@@ -106,7 +106,7 @@ export async function POST(req: Request) {
         package_name: pkg.name,
         lead_id: parsed.data.leadId || "",
       },
-      success_url: `${baseUrl}/packages/success?session_id={CHECKOUT_SESSION_ID}${parsed.data.leadId ? `&lead=${encodeURIComponent(parsed.data.leadId)}` : ""}`,
+      success_url: `${baseUrl}/packages/success?session_id={CHECKOUT_SESSION_ID}&package=${encodeURIComponent(parsed.data.packageId)}${parsed.data.leadId ? `&lead=${encodeURIComponent(parsed.data.leadId)}` : ""}`,
       cancel_url: `${baseUrl}/packages?checkout=cancelled${parsed.data.leadId ? `&lead=${encodeURIComponent(parsed.data.leadId)}` : ""}`,
     });
 

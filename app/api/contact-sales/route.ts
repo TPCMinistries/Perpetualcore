@@ -72,6 +72,37 @@ const planValues = [
   "Custom",
 ] as const;
 
+function splitName(name: string) {
+  const parts = name.trim().split(/\s+/).filter(Boolean);
+  const firstName = parts[0] || name;
+  const lastName = parts.length > 1 ? parts.slice(1).join(" ") : null;
+  return { firstName, lastName };
+}
+
+function estimateValueForPlan(plan: string) {
+  if (plan === "operating-lane-deposit" || plan === "company-ai-os" || plan === "studio-retainer") {
+    return 30000;
+  }
+
+  if (plan === "first-workflow" || plan === "studio-sprint-30" || plan === "department-ai-os") {
+    return 12000;
+  }
+
+  if (plan === "guided-setup" || plan === "manual-invoice") {
+    return 5000;
+  }
+
+  if (plan === "software-access" || plan === "product-subscription") {
+    return 499;
+  }
+
+  return null;
+}
+
+function getSalesOwnerUserId() {
+  return process.env.LORENZO_USER_ID || process.env.DEFAULT_WEBHOOK_USER_ID || process.env.SALES_OWNER_USER_ID || null;
+}
+
 // Zod schema for contact sales form
 const contactSalesSchema = z.object({
   name: z.string()
@@ -170,6 +201,107 @@ export async function POST(request: Request) {
       // Log error but continue - we'll still try to send emails
       if (process.env.NODE_ENV === "development") {
         console.error("Failed to save contact to database:", dbError);
+      }
+    }
+
+    const ownerUserId = getSalesOwnerUserId();
+    if (ownerUserId) {
+      const now = new Date().toISOString();
+      const { firstName, lastName } = splitName(sanitizedName);
+      const canonicalMetadata = {
+        source: "contact-sales",
+        plan: sanitizedPlan,
+        product: sanitizedProduct ?? null,
+        companySize: sanitizedEmployees,
+        submittedAt: now,
+      };
+      const leadNotes = [
+        "Public sales/contact intake",
+        `Plan: ${sanitizedPlan}`,
+        sanitizedProduct ? `Product: ${sanitizedProduct}` : "",
+        sanitizedMessage ? `Message:\n${sanitizedMessage}` : "",
+      ].filter(Boolean).join("\n\n");
+
+      const { data: existingLead } = await supabase
+        .from("leads")
+        .select("id, notes, metadata, tags, status")
+        .eq("email", sanitizedEmail)
+        .eq("user_id", ownerUserId)
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
+      const leadPayload = {
+        user_id: ownerUserId,
+        name: sanitizedName,
+        first_name: firstName,
+        last_name: lastName,
+        contact_name: sanitizedName,
+        email: sanitizedEmail,
+        contact_email: sanitizedEmail,
+        phone: sanitizedPhone || null,
+        company: sanitizedCompany,
+        company_name: sanitizedCompany,
+        company_size: sanitizedEmployees,
+        title: sanitizedProduct ? `${sanitizedProduct} inquiry` : `${sanitizedPlan} inquiry`,
+        status: existingLead?.status || "new",
+        source: "contact-sales",
+        source_detail: sanitizedProduct || sanitizedPlan,
+        estimated_value: estimateValueForPlan(sanitizedPlan),
+        notes: existingLead?.notes ? `${existingLead.notes}\n\n---\n${leadNotes}` : leadNotes,
+        tags: Array.from(
+          new Set([
+            ...((existingLead?.tags as string[] | null) || []),
+            "public-intake",
+            sanitizedPlan,
+            ...(sanitizedProduct ? [sanitizedProduct] : []),
+          ]),
+        ),
+        metadata: {
+          ...((existingLead?.metadata && typeof existingLead.metadata === "object" && !Array.isArray(existingLead.metadata)
+            ? existingLead.metadata
+            : {}) as Record<string, unknown>),
+          contactSales: canonicalMetadata,
+        },
+        ai_insights: {
+          contactSales: {
+            plan: sanitizedPlan,
+            product: sanitizedProduct ?? null,
+            nextAction:
+              sanitizedPlan === "manual-invoice"
+                ? "Prepare manual invoice path and confirm billing details."
+                : sanitizedProduct === "package-intake"
+                  ? "Open account handoff, confirm kickoff window, and create first-lane tasks."
+                  : "Qualify fit and choose package, proposal, or operating lane.",
+          },
+        },
+        updated_at: now,
+      };
+
+      const leadResult = existingLead?.id
+        ? await supabase.from("leads").update(leadPayload).eq("id", existingLead.id).select("id").single()
+        : await supabase
+            .from("leads")
+            .insert({
+              ...leadPayload,
+              created_at: now,
+            })
+            .select("id")
+            .single();
+
+      if (leadResult.error) {
+        if (process.env.NODE_ENV === "development") {
+          console.error("Failed to sync contact-sales lead:", leadResult.error);
+        }
+      } else if (leadResult.data?.id) {
+        await supabase.from("lead_activities").insert({
+          lead_id: leadResult.data.id,
+          user_id: ownerUserId,
+          activity_type: sanitizedProduct === "package-intake" ? "package_intake" : "sales_intake",
+          title: sanitizedProduct === "package-intake" ? "Package intake submitted" : "Public sales inquiry submitted",
+          description: leadNotes,
+          to_value: sanitizedPlan,
+        });
       }
     }
 
