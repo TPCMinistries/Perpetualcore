@@ -85,20 +85,24 @@ export function DraftButton({
     setStep(ensurePursuing ? "Marking pursuit" : "Drafting proposal");
     try {
       if (ensurePursuing) {
-        const triageRes = await fetch(`/api/rfp/opps/${oppId}/triage`, {
+        const decisionRes = await fetch(`/api/rfp/opps/${oppId}/decision`, {
           method: "PATCH",
           headers: { "content-type": "application/json" },
           body: JSON.stringify({
             org_id: orgId,
-            status: "pursuing",
+            action: "pursue",
+            stage: "drafting",
+            priority: "high",
             note: triageNote ?? "Started pursuit workflow.",
           }),
         });
-        if (!triageRes.ok) {
-          const body = (await triageRes.json().catch(() => null)) as
+        if (!decisionRes.ok) {
+          const body = (await decisionRes.json().catch(() => null)) as
             | { error?: string; detail?: string }
             | null;
-          setError(body?.detail ?? body?.error ?? `triage_${triageRes.status}`);
+          setError(
+            body?.detail ?? body?.error ?? `decision_${decisionRes.status}`,
+          );
           return;
         }
       }

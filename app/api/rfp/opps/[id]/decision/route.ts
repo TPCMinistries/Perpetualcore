@@ -12,6 +12,10 @@ export const dynamic = "force-dynamic";
 const BodySchema = z.object({
   org_id: z.string().uuid(),
   action: z.enum(["pursue", "watch", "archive"]),
+  stage: z
+    .enum(["evaluating", "drafting", "reviewing", "ready", "submitted", "closed"])
+    .optional(),
+  priority: z.enum(["low", "medium", "high", "critical"]).optional(),
   note: z.string().trim().max(500).optional().nullable(),
 });
 
@@ -63,7 +67,12 @@ export async function PATCH(
 
   const { org_id, action } = parsed.data;
   const note = parsed.data.note?.trim() || ACTION_COPY[action].fallbackNote;
-  const command = defaultPursuitCommand(action);
+  const defaults = defaultPursuitCommand(action);
+  const command = {
+    ...defaults,
+    stage: parsed.data.stage ?? defaults.stage,
+    priority: parsed.data.priority ?? defaults.priority,
+  };
   const patch = {
     triage_status: command.triageStatus,
     triage_note: note,
