@@ -50,6 +50,7 @@ import {
 import { SavedSearchAlertOpsPanel } from "@/components/rfp/admin/SavedSearchAlertOpsPanel";
 import { createAdminClient } from "@/lib/supabase/server";
 import type { Json } from "@/lib/supabase/database.types";
+import { runScoreCoverageRepair } from "@/lib/rfp/scoring/coverage-repair";
 
 export const dynamic = "force-dynamic";
 export const metadata = {
@@ -128,6 +129,22 @@ async function resolveDrift(formData: FormData) {
   if (error) {
     throw new Error(`Failed to resolve drift: ${error.message}`);
   }
+
+  revalidatePath("/admin/rfp");
+  revalidatePath("/api/health/rfp");
+}
+
+async function repairScoreCoverage() {
+  "use server";
+
+  const adminUser = await getRfpPlatformAdmin();
+  if (!adminUser) notFound();
+
+  await runScoreCoverageRepair({
+    maxRepair: 500,
+    scanLimit: 20_000,
+    logExecution: true,
+  });
 
   revalidatePath("/admin/rfp");
   revalidatePath("/api/health/rfp");
@@ -427,6 +444,20 @@ function buildOperatorActions({
       label: "Resolve source drift",
       detail: "Parser/source anomalies are open. Verify the affected source before marking drift resolved.",
       metric: `${formatNumber(openDrift.length)} open`,
+      severity: "critical",
+    });
+  }
+
+  if (
+    totals.scoring_coverage_percent !== null &&
+    totals.scoring_coverage_percent < 99.5
+  ) {
+    actions.push({
+      id: "scoring-coverage",
+      label: "Repair scoring coverage",
+      detail:
+        "Some indexed opportunities are missing org-specific match rows. Run the coverage repair job before relying on rankings or alerts.",
+      metric: `${formatNumber(totals.matches)} / ${formatNumber(totals.expected_matches)}`,
       severity: "critical",
     });
   }
@@ -1035,6 +1066,50 @@ function SavedSearchAlertsTable({ rows }: { rows: SavedSearchAlertRow[] }) {
   );
 }
 
+function ScoreCoverageOpsPanel({ totals }: { totals: PlatformTotals }) {
+  const healthy =
+    totals.scoring_coverage_percent !== null &&
+    totals.scoring_coverage_percent >= 99.5;
+  const missing = Math.max(0, totals.expected_matches - totals.matches);
+
+  return (
+    <div
+      className={`mt-4 rounded-lg border p-4 ${
+        healthy
+          ? "border-emerald-500/20 bg-emerald-500/[0.04]"
+          : "border-amber-500/25 bg-amber-500/[0.05]"
+      }`}
+    >
+      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+        <div>
+          <div className="font-mono text-[10px] uppercase tracking-[0.2em] text-zinc-500">
+            Scoring coverage repair
+          </div>
+          <p className="mt-2 max-w-2xl text-[13px] leading-6 text-zinc-400">
+            {healthy
+              ? "Coverage is complete. Run this only after imports, org changes, or alert/ranking drift."
+              : `${formatNumber(missing)} org-opportunity match rows are missing. Repair before trusting rankings, alerts, or bid/no-bid recommendations.`}
+          </p>
+          <div className="mt-2 font-mono text-[11px] text-zinc-500">
+            {formatNumber(totals.matches)} / {formatNumber(totals.expected_matches)} matches
+            {totals.scoring_coverage_percent === null
+              ? ""
+              : ` · ${totals.scoring_coverage_percent.toFixed(1)}%`}
+          </div>
+        </div>
+        <form action={repairScoreCoverage}>
+          <button
+            type="submit"
+            className="rounded-md border border-white/10 bg-white/[0.04] px-4 py-3 font-mono text-[10px] uppercase tracking-[0.16em] text-zinc-100 transition hover:border-emerald-400/40 hover:bg-emerald-500/10 hover:text-emerald-100"
+          >
+            Run repair
+          </button>
+        </form>
+      </div>
+    </div>
+  );
+}
+
 function AuditTable({ rows }: { rows: AuditRow[] }) {
   if (rows.length === 0) {
     return (
@@ -1162,6 +1237,7 @@ export default async function AdminRfpPage() {
 
       <SectionHeader title="Platform totals" detail="live" />
       <PlatformTilesRow totals={totals} />
+      <ScoreCoverageOpsPanel totals={totals} />
 
       <SectionHeader
         title="Source scale readiness"
