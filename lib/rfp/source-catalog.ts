@@ -30,6 +30,7 @@ export type RfpOpportunitySource =
   | "sbir"
   | "fed_register"
   | "nih_grants"
+  | "nsf_grants"
   | "ny_state"
   | "nyc_dycd"
   | "nyc_hra"
@@ -59,6 +60,7 @@ export const RFP_ALLOWED_OPPORTUNITY_SOURCES: RfpOpportunitySource[] = [
   "sbir",
   "fed_register",
   "nih_grants",
+  "nsf_grants",
   "ny_state",
   "nyc_dycd",
   "nyc_hra",
@@ -294,14 +296,14 @@ export const RFP_SOURCE_CATALOG: RfpSourceCatalogEntry[] = [
     source: "nsf_grants",
     label: "NSF funding search",
     category: "research",
-    status: "planned",
-    priority: "p1",
+    status: "live",
+    priority: "p0",
     ingestMode: "api",
     geography: "US",
-    targetScale: "STEM education and research funding",
+    targetScale: "NSF STEM education and research funding",
     targetIndexedEstimate: 3_000,
     canonicalUrl: "https://new.nsf.gov/funding/opportunities",
-    nextStep: "Build source connector and program taxonomy.",
+    nextStep: "Track active and forecasted NSF opportunities from Grants.gov.",
   },
   {
     source: "irs_990_foundations",
