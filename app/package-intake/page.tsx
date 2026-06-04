@@ -71,6 +71,7 @@ function PackageIntakeForm() {
   const leadId = searchParams.get("lead") || "";
   const packageLabel = packageLabels[packageId] || "Perpetual Core package";
   const [submitState, setSubmitState] = useState<SubmitState>("idle");
+  const [submittedLeadId, setSubmittedLeadId] = useState(leadId);
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -113,53 +114,35 @@ function PackageIntakeForm() {
 
     setSubmitState("submitting");
 
-    const message = [
-      "[Package intake]",
-      `Package: ${packageLabel} (${packageId})`,
-      sessionId ? `Stripe session: ${sessionId}` : "",
-      leadId ? `Lead: ${leadId}` : "",
-      "",
-      `Workflow owner: ${formData.workflowOwner || "Not provided"}`,
-      "",
-      "First operating lane:",
-      formData.firstLane,
-      "",
-      "Tools and data:",
-      formData.toolsAndData,
-      "",
-      "Real examples:",
-      formData.examples || "Not provided",
-      "",
-      "Success metric:",
-      formData.successMetric,
-      "",
-      "Constraints, rules, or access notes:",
-      formData.constraints || "Not provided",
-    ]
-      .filter(Boolean)
-      .join("\n");
-
     try {
-      const response = await fetch("/api/contact-sales", {
+      const response = await fetch("/api/package-intake", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
+          leadId,
+          sessionId,
+          packageId,
+          packageLabel,
           name: formData.name,
           email: formData.email,
           company: formData.company,
           phone: formData.phone,
           employees: formData.employees,
-          plan: packageId,
-          product: "package-intake",
-          message,
+          workflowOwner: formData.workflowOwner,
+          firstLane: formData.firstLane,
+          toolsAndData: formData.toolsAndData,
+          examples: formData.examples,
+          successMetric: formData.successMetric,
+          constraints: formData.constraints,
         }),
       });
 
-      const body = await response.json().catch(() => ({}));
+      const body = (await response.json().catch(() => ({}))) as { error?: string; message?: string; leadId?: string };
       if (!response.ok) {
         throw new Error(body.error || body.message || "Intake failed.");
       }
 
+      setSubmittedLeadId(body.leadId || leadId);
       setSubmitState("success");
       toast.success("Intake received. We can prepare the kickoff from this.");
     } catch (error) {
@@ -183,9 +166,9 @@ function PackageIntakeForm() {
             to confirm the kickoff window and turn this into the first operating lane.
           </p>
           <div className="mt-10 flex flex-col justify-center gap-3 sm:flex-row">
-            {leadId ? (
+            {submittedLeadId ? (
               <Button asChild className="h-10 rounded-[6px] bg-foreground px-5 text-sm text-background shadow-none hover:bg-foreground/90">
-                <Link href={`/dashboard/accounts/${encodeURIComponent(leadId)}`}>
+                <Link href={`/dashboard/accounts/${encodeURIComponent(submittedLeadId)}`}>
                   Open account <ClipboardList className="ml-2 h-3.5 w-3.5" />
                 </Link>
               </Button>
