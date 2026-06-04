@@ -1709,6 +1709,9 @@ export default function LeadsPage() {
                         const statusConfig = STATUS_CONFIG[lead.status || "new"] || STATUS_CONFIG.new;
                         const leadCompany = getLeadCompany(lead);
                         const quickStatusAction = getQuickStatusAction(lead);
+                        const readiness = getCloseReadiness(lead);
+                        const packageId = getRecommendedPackageId(lead);
+                        const copyMode: OutboundCopyMode = readiness.score >= 4 ? "cost_frame" : "warm_follow_up";
                         return (
                           <div key={lead.id} className="rounded-md border bg-background p-3">
                             <div className="flex items-start justify-between gap-3">
@@ -1727,6 +1730,9 @@ export default function LeadsPage() {
                             <div className="mt-3 flex flex-wrap items-center gap-2">
                               <Badge variant="outline" className="rounded-md">
                                 {getLeadLane(lead).label}
+                              </Badge>
+                              <Badge variant={readiness.score >= 4 ? "secondary" : "outline"} className="rounded-md">
+                                Close {readiness.score}/5
                               </Badge>
                               {lead.estimated_value ? (
                                 <Badge variant="secondary" className="rounded-md">
@@ -1765,6 +1771,22 @@ export default function LeadsPage() {
                                   </Link>
                                 </Button>
                               )}
+                              <Button
+                                type="button"
+                                size="sm"
+                                variant="outline"
+                                className="h-8 rounded-md"
+                                onClick={() => copyText(getOutboundCopy(lead, copyMode))}
+                              >
+                                Copy message
+                              </Button>
+                              {readiness.score >= 4 ? (
+                                <Button asChild size="sm" variant="outline" className="h-8 rounded-md">
+                                  <Link href={`/packages?lead=${encodeURIComponent(lead.id)}&package=${encodeURIComponent(packageId)}`}>
+                                    Package
+                                  </Link>
+                                </Button>
+                              ) : null}
                               {quickStatusAction ? (
                                 <Button
                                   type="button"
@@ -1960,6 +1982,8 @@ export default function LeadsPage() {
                 const company = getLeadCompany(lead);
                 const email = getLeadEmail(lead);
                 const lane = getLeadLane(lead);
+                const readiness = getCloseReadiness(lead);
+                const packageId = getRecommendedPackageId(lead);
                 const statusConfig = STATUS_CONFIG[lead.status || "new"] || STATUS_CONFIG.new;
                 const StatusIcon = statusConfig.icon;
 
@@ -2011,6 +2035,9 @@ export default function LeadsPage() {
                               <Badge variant="outline" className="rounded-md">
                                 {lane.label}
                               </Badge>
+                              <Badge variant={readiness.score >= 4 ? "secondary" : "outline"} className="rounded-md">
+                                Close {readiness.score}/5
+                              </Badge>
                               <span className="text-xs font-medium text-muted-foreground">
                                 {getLeadNextAction(lead)}
                               </span>
@@ -2040,6 +2067,28 @@ export default function LeadsPage() {
                                 Follow up {formatDate(lead.next_follow_up_at)}
                               </div>
                             )}
+                          </div>
+
+                          <div className="hidden min-w-32 flex-col gap-2 xl:flex">
+                            <Button
+                              type="button"
+                              size="sm"
+                              variant="outline"
+                              className="h-8 rounded-md"
+                              onClick={(event) => {
+                                event.stopPropagation();
+                                copyText(getOutboundCopy(lead, readiness.score >= 4 ? "cost_frame" : "warm_follow_up"));
+                              }}
+                            >
+                              Copy message
+                            </Button>
+                            {readiness.score >= 4 ? (
+                              <Button asChild size="sm" className="h-8 rounded-md" onClick={(event) => event.stopPropagation()}>
+                                <Link href={`/packages?lead=${encodeURIComponent(lead.id)}&package=${encodeURIComponent(packageId)}`}>
+                                  Send package
+                                </Link>
+                              </Button>
+                            ) : null}
                           </div>
 
                           <DropdownMenu>
