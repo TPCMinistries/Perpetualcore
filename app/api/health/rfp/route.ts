@@ -94,6 +94,8 @@ export async function GET(): Promise<NextResponse> {
       cost24hRows,
       memberships,
       matches,
+      canonicalAliases,
+      canonicals,
     ] = await Promise.all([
       admin.from("rfp_orgs").select("id", { count: "exact", head: true }),
       admin.from("rfp_proposals").select("id", { count: "exact", head: true }),
@@ -124,6 +126,12 @@ export async function GET(): Promise<NextResponse> {
         .returns<{ cost_usd: number | string | null }[]>(),
       admin.from("rfp_user_orgs").select("org_id").returns<{ org_id: string }[]>(),
       admin.from("rfp_opp_matches").select("opp_id", { count: "exact", head: true }),
+      admin
+        .from("rfp_opportunity_aliases")
+        .select("opp_id", { count: "exact", head: true }),
+      admin
+        .from("rfp_opportunity_canonicals")
+        .select("id", { count: "exact", head: true }),
     ]);
 
     const dbErrors = [
@@ -136,6 +144,8 @@ export async function GET(): Promise<NextResponse> {
       errorDetail("rfp_agent_sessions.cost_24h", cost24hRows),
       errorDetail("rfp_user_orgs.active_orgs", memberships),
       errorDetail("rfp_opp_matches.count", matches),
+      errorDetail("rfp_opportunity_aliases.count", canonicalAliases),
+      errorDetail("rfp_opportunity_canonicals.count", canonicals),
     ].filter((row): row is string => Boolean(row));
 
     const ai_cost_24h_usd = (cost24hRows.data ?? []).reduce(
@@ -151,6 +161,12 @@ export async function GET(): Promise<NextResponse> {
     const expectedMatches = opportunityCount * activeOrgCount;
     const scoringCoverage =
       expectedMatches > 0 ? Math.min(100, (matchCount / expectedMatches) * 100) : null;
+    const canonicalAliasCount = canonicalAliases.count ?? 0;
+    const canonicalCount = canonicals.count ?? 0;
+    const canonicalCoverage =
+      opportunityCount > 0
+        ? Math.min(100, (canonicalAliasCount / opportunityCount) * 100)
+        : null;
     const sourceTargetIndexedEstimate = RFP_SOURCE_CATALOG.reduce(
       (sum, source) => sum + (source.targetIndexedEstimate ?? 0),
       0,
@@ -231,6 +247,21 @@ export async function GET(): Promise<NextResponse> {
           : expectedMatches === 0
             ? "No active org/opportunity scoring target found."
             : `${matchCount.toLocaleString("en-US")} / ${expectedMatches.toLocaleString("en-US")} expected org-opportunity matches (${(scoringCoverage ?? 0).toFixed(1)}%).`,
+      ),
+      check(
+        "canonical_coverage",
+        canonicalAliases.error || canonicals.error || opportunities.error
+          ? "fail"
+          : opportunityCount === 0
+            ? "warn"
+            : canonicalAliasCount >= opportunityCount
+              ? "ok"
+              : "warn",
+        canonicalAliases.error || canonicals.error || opportunities.error
+          ? "Canonical coverage query failed."
+          : opportunityCount === 0
+            ? "No opportunity canonical target found."
+            : `${canonicalAliasCount.toLocaleString("en-US")} / ${opportunityCount.toLocaleString("en-US")} opportunities have canonical aliases (${(canonicalCoverage ?? 0).toFixed(1)}%) across ${canonicalCount.toLocaleString("en-US")} canonical clusters.`,
       ),
       check(
         "cron_freshness",
@@ -320,6 +351,10 @@ export async function GET(): Promise<NextResponse> {
         expected_matches: expectedMatches,
         scoring_coverage_percent:
           scoringCoverage === null ? null : Math.round(scoringCoverage * 10) / 10,
+        canonical_aliases: canonicalAliasCount,
+        canonical_clusters: canonicalCount,
+        canonical_coverage_percent:
+          canonicalCoverage === null ? null : Math.round(canonicalCoverage * 10) / 10,
         source_catalog_target_estimate: sourceTargetIndexedEstimate,
         source_scale_coverage_percent:
           sourceScaleCoverage === null
