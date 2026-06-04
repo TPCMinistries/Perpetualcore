@@ -125,17 +125,28 @@ function rfpAdmin(): { from: (table: string) => any } {
 async function loadOpportunities(opportunityIds: string[]): Promise<OppRow[]> {
   if (opportunityIds.length === 0) return [];
   const supabase = rfpAdmin();
-  const { data, error } = await supabase
-    .from('rfp_opportunities')
-    .select(
-      'id, source, title, agency, amount_min, amount_max, deadline, brief, keywords, geo'
-    )
-    .in('id', opportunityIds);
-  if (error) {
-    console.error('[scoring/recompute] loadOpportunities failed:', error.message);
-    return [];
+  const rows: OppRow[] = [];
+  const batchSize = 100;
+
+  for (let start = 0; start < opportunityIds.length; start += batchSize) {
+    const batch = opportunityIds.slice(start, start + batchSize);
+    const { data, error } = await supabase
+      .from('rfp_opportunities')
+      .select(
+        'id, source, title, agency, amount_min, amount_max, deadline, brief, keywords, geo'
+      )
+      .in('id', batch);
+    if (error) {
+      console.error(
+        '[scoring/recompute] loadOpportunities failed:',
+        error.message
+      );
+      continue;
+    }
+    rows.push(...((data ?? []) as unknown as OppRow[]));
   }
-  return ((data ?? []) as unknown as OppRow[]).map((r) => ({
+
+  return rows.map((r) => ({
     ...r,
     keywords: Array.isArray(r.keywords) ? r.keywords : [],
   }));
