@@ -29,6 +29,7 @@ export type RfpOpportunitySource =
   | "simpler_grants"
   | "sbir"
   | "fed_register"
+  | "nih_grants"
   | "ny_state"
   | "nyc_dycd"
   | "nyc_hra"
@@ -57,6 +58,7 @@ export const RFP_ALLOWED_OPPORTUNITY_SOURCES: RfpOpportunitySource[] = [
   "simpler_grants",
   "sbir",
   "fed_register",
+  "nih_grants",
   "ny_state",
   "nyc_dycd",
   "nyc_hra",
@@ -131,6 +133,19 @@ export const RFP_SOURCE_CATALOG: RfpSourceCatalogEntry[] = [
     targetIndexedEstimate: 10_000,
     canonicalUrl: "https://www.federalregister.gov",
     nextStep: "Watch precision and add broader NOFO query terms after QA.",
+  },
+  {
+    source: "nih_grants",
+    label: "NIH Grant Opportunities",
+    category: "research",
+    status: "live",
+    priority: "p0",
+    ingestMode: "api",
+    geography: "US",
+    targetScale: "NIH NOFOs from Grants.gov",
+    targetIndexedEstimate: 8_000,
+    canonicalUrl: "https://grants.nih.gov/funding/explore-nih-opportunities",
+    nextStep: "Track NIH-specific active and forecasted NOFOs from Grants.gov.",
   },
   {
     source: "ny_state",
@@ -263,17 +278,17 @@ export const RFP_SOURCE_CATALOG: RfpSourceCatalogEntry[] = [
     nextStep: "Inventory official state sources and select canonical feed.",
   },
   {
-    source: "nih_grants",
-    label: "NIH Guide",
+    source: "nih_guide_notices",
+    label: "NIH Guide notices",
     category: "research",
     status: "planned",
     priority: "p1",
-    ingestMode: "api",
+    ingestMode: "html_scrape",
     geography: "US",
-    targetScale: "Biomedical and public health funding",
-    targetIndexedEstimate: 8_000,
+    targetScale: "NIH policy and informational notices",
+    targetIndexedEstimate: null,
     canonicalUrl: "https://grants.nih.gov/funding/searchguide/index.html",
-    nextStep: "Parse NIH Guide opportunities and map activity codes.",
+    nextStep: "Index notices separately from active NOFO opportunity records.",
   },
   {
     source: "nsf_grants",

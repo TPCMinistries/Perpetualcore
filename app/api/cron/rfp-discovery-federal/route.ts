@@ -4,7 +4,8 @@
  * POST /api/cron/rfp-discovery-federal
  *
  * Runs every 6 hours (Vercel Cron, see vercel.json) to ingest opportunities
- * from SAM.gov, Grants.gov, Simpler.Grants.gov, and SBIR.gov. Calls
+ * from SAM.gov, Grants.gov, Simpler.Grants.gov, SBIR.gov, Federal Register,
+ * and NIH-focused Grants.gov records. Calls
  * `runFederalIngest()` (lib/rfp/ingest/run.ts) which fans out to per-source
  * fetchers via Promise.allSettled, normalizes records, and upserts onto
  * `rfp_opportunities` keyed on (source, source_id) — idempotent on re-run.
