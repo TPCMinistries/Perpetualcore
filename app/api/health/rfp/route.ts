@@ -14,6 +14,7 @@
 
 import { NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/server";
+import { RFP_SOURCE_CATALOG } from "@/lib/rfp/source-catalog";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -21,6 +22,7 @@ export const dynamic = "force-dynamic";
 const OPPORTUNITY_FRESH_HOURS = 72;
 const CRON_FRESH_HOURS = 36;
 const AI_COST_24H_WARN_USD = 50;
+const SOURCE_SCALE_WARN_COVERAGE_PERCENT = 2;
 
 type CheckStatus = "ok" | "warn" | "fail";
 
@@ -149,6 +151,23 @@ export async function GET(): Promise<NextResponse> {
     const expectedMatches = opportunityCount * activeOrgCount;
     const scoringCoverage =
       expectedMatches > 0 ? Math.min(100, (matchCount / expectedMatches) * 100) : null;
+    const sourceTargetIndexedEstimate = RFP_SOURCE_CATALOG.reduce(
+      (sum, source) => sum + (source.targetIndexedEstimate ?? 0),
+      0,
+    );
+    const sourceScaleCoverage =
+      sourceTargetIndexedEstimate > 0
+        ? Math.min(100, (opportunityCount / sourceTargetIndexedEstimate) * 100)
+        : null;
+    const liveSourceCount = RFP_SOURCE_CATALOG.filter(
+      (source) => source.status === "live",
+    ).length;
+    const plannedSourceCount = RFP_SOURCE_CATALOG.filter(
+      (source) => source.status === "planned",
+    ).length;
+    const blockedSourceCount = RFP_SOURCE_CATALOG.filter(
+      (source) => source.status === "blocked",
+    ).length;
 
     const checks: HealthCheck[] = [
       check(
@@ -168,6 +187,20 @@ export async function GET(): Promise<NextResponse> {
         opportunities.error
           ? "Opportunity count query failed."
           : `${opportunities.count ?? 0} opportunities indexed.`,
+      ),
+      check(
+        "source_scale",
+        opportunities.error
+          ? "fail"
+          : sourceScaleCoverage !== null &&
+              sourceScaleCoverage >= SOURCE_SCALE_WARN_COVERAGE_PERCENT
+            ? "ok"
+            : "warn",
+        opportunities.error
+          ? "Opportunity scale query failed."
+          : sourceScaleCoverage === null
+            ? "No source catalog target estimate configured."
+            : `${opportunityCount.toLocaleString("en-US")} / ${sourceTargetIndexedEstimate.toLocaleString("en-US")} estimated catalog records (${sourceScaleCoverage.toFixed(1)}%).`,
       ),
       check(
         "opportunity_freshness",
@@ -276,6 +309,7 @@ export async function GET(): Promise<NextResponse> {
         opportunity_fresh_hours: OPPORTUNITY_FRESH_HOURS,
         cron_fresh_hours: CRON_FRESH_HOURS,
         ai_cost_24h_warn_usd: AI_COST_24H_WARN_USD,
+        source_scale_warn_coverage_percent: SOURCE_SCALE_WARN_COVERAGE_PERCENT,
       },
       totals: {
         orgs: orgs.count ?? 0,
@@ -286,6 +320,14 @@ export async function GET(): Promise<NextResponse> {
         expected_matches: expectedMatches,
         scoring_coverage_percent:
           scoringCoverage === null ? null : Math.round(scoringCoverage * 10) / 10,
+        source_catalog_target_estimate: sourceTargetIndexedEstimate,
+        source_scale_coverage_percent:
+          sourceScaleCoverage === null
+            ? null
+            : Math.round(sourceScaleCoverage * 10) / 10,
+        source_catalog_live: liveSourceCount,
+        source_catalog_planned: plannedSourceCount,
+        source_catalog_blocked: blockedSourceCount,
       },
       last_cron: lastCron.data
         ? {

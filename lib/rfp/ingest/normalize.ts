@@ -13,28 +13,24 @@
 
 import { z } from "zod";
 import type { RfpSourceName } from "@/lib/rfp/sources";
+import {
+  RFP_ALLOWED_OPPORTUNITY_SOURCES,
+  sourceKeyToOpportunitySource,
+  type RfpOpportunitySource,
+} from "@/lib/rfp/source-catalog";
 
 /**
  * The schema enum on rfp_opportunities.source. Note `sbir` (NOT `sbir_gov`).
  * Registry source keys (RfpSourceName) include `sbir_gov`; we map below.
  */
-export type OpportunitySourceEnum =
-  | "sam_gov"
-  | "grants_gov"
-  | "simpler_grants"
-  | "sbir"
-  | "fed_register"
-  | "ny_state"
-  | "nyc_dycd"
-  | "foundation_url";
+export type OpportunitySourceEnum = RfpOpportunitySource;
 
 /**
  * Map registry source keys -> schema enum values.
  * Only sbir_gov differs; others are identity mappings.
  */
-export function sourceKeyToEnum(name: RfpSourceName): OpportunitySourceEnum {
-  if (name === "sbir_gov") return "sbir";
-  return name;
+export function sourceKeyToEnum(name: string): OpportunitySourceEnum {
+  return sourceKeyToOpportunitySource(name);
 }
 
 /**
@@ -46,7 +42,7 @@ export function sourceKeyToEnum(name: RfpSourceName): OpportunitySourceEnum {
  */
 export interface OpportunityInput {
   /** Registry key (e.g. "grants_gov", "sbir_gov"). Normalizer maps to schema enum. */
-  source: RfpSourceName;
+  source: RfpSourceName | RfpOpportunitySource;
   /** Source-native ID (string). Combined with source for unique upsert key. */
   source_id: string;
   title: string;
@@ -74,13 +70,14 @@ export interface OpportunityInput {
  * malformed record from a source — orchestrator catches and logs the rejection.
  */
 const opportunityInputSchema = z.object({
-  source: z.enum([
-    "sam_gov",
-    "grants_gov",
-    "simpler_grants",
-    "sbir_gov",
-    "fed_register",
-  ]),
+  source: z
+    .string()
+    .refine(
+      (value) =>
+        value === "sbir_gov" ||
+        RFP_ALLOWED_OPPORTUNITY_SOURCES.includes(value as RfpOpportunitySource),
+      "source is not in the canonical RFP source catalog",
+    ),
   source_id: z.string().min(1, "source_id is required"),
   title: z.string().min(1, "title is required"),
   agency: z.string().nullish(),

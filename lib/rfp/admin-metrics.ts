@@ -28,6 +28,7 @@ import {
   parseBidNoBid,
   type ReadinessStatus,
 } from "@/lib/rfp/readiness";
+import { RFP_ALLOWED_OPPORTUNITY_SOURCES } from "@/lib/rfp/source-catalog";
 
 export interface PlatformTotals {
   orgs: number;
@@ -297,20 +298,6 @@ export async function loadOrgBreakdown(limit = 50): Promise<OrgRow[]> {
   }));
 }
 
-const KNOWN_SOURCES = [
-  "sam_gov",
-  "grants_gov",
-  "simpler_grants",
-  "sbir",
-  "fed_register",
-  "ny_state",
-  "nyc_dycd",
-  "nyc_doe",
-  "nyc_hra",
-  "nyc_passport",
-  "ca_grants",
-] as const;
-
 export async function loadScraperHealth(): Promise<ScraperHealthRow[]> {
   const admin = createAdminClient();
 
@@ -380,10 +367,10 @@ export async function loadScraperHealth(): Promise<ScraperHealthRow[]> {
     }
   }
 
-  // Build the row set from the union of (KNOWN_SOURCES, observed sources).
+  // Build the row set from the union of the source catalog and observed sources.
   // Observed sources catch anything new before we update the canonical list.
   const observed = new Set<string>([
-    ...KNOWN_SOURCES,
+    ...RFP_ALLOWED_OPPORTUNITY_SOURCES,
     ...oppsBySource.keys(),
     ...latestBaseline.keys(),
     ...lastDriftBySource.keys(),

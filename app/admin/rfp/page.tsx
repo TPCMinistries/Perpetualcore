@@ -306,12 +306,27 @@ function SourceReadinessTiles({
   summary: SourceReadinessSummary;
 }) {
   return (
-    <div className="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-6">
+    <div className="grid grid-cols-2 gap-3 md:grid-cols-4 lg:grid-cols-8">
       <Tile
         label="Indexed"
         value={formatNumber(summary.indexed)}
         sub="verified records"
         tone={summary.indexed >= 80000 ? "emerald" : "amber"}
+      />
+      <Tile
+        label="Target"
+        value={formatNumber(summary.targetIndexedEstimate)}
+        sub={
+          summary.indexedCoveragePercent === null
+            ? "catalog estimate"
+            : `${summary.indexedCoveragePercent.toFixed(1)}% covered`
+        }
+        tone={
+          summary.indexedCoveragePercent !== null &&
+          summary.indexedCoveragePercent >= 80
+            ? "emerald"
+            : "amber"
+        }
       />
       <Tile label="Sources" value={formatNumber(summary.totalSources)} />
       <Tile label="Live" value={formatNumber(summary.live)} tone="emerald" />
@@ -698,15 +713,18 @@ function PursuitReadinessOrgTable({
 function SourceReadinessTable({ rows }: { rows: SourceReadinessRow[] }) {
   return (
     <div className="mt-4 overflow-x-auto rounded-lg border border-white/5 bg-white/[0.02]">
-      <table className="w-full min-w-[980px] text-[13px]">
+      <table className="w-full min-w-[1180px] text-[13px]">
         <thead>
           <tr className="border-b border-white/5 text-left font-mono text-[10px] uppercase tracking-[0.18em] text-zinc-500">
             <th className="px-4 py-3">Source</th>
             <th className="px-3 py-3">Category</th>
             <th className="px-3 py-3">Status</th>
+            <th className="px-3 py-3">Geo</th>
+            <th className="px-3 py-3">Mode</th>
             <th className="px-3 py-3 text-right">Indexed</th>
+            <th className="px-3 py-3 text-right">Target</th>
             <th className="px-3 py-3 text-right">Drift</th>
-            <th className="px-3 py-3">Target</th>
+            <th className="px-3 py-3">Scope</th>
             <th className="px-4 py-3">Next step</th>
           </tr>
         </thead>
@@ -736,8 +754,19 @@ function SourceReadinessTable({ rows }: { rows: SourceReadinessRow[] }) {
                   {r.effectiveStatus}
                 </span>
               </td>
+              <td className="px-3 py-3 font-mono text-[10px] uppercase tracking-[0.16em] text-zinc-500">
+                {r.geography}
+              </td>
+              <td className="px-3 py-3 font-mono text-[10px] uppercase tracking-[0.16em] text-zinc-500">
+                {r.ingestMode.replace("_", " ")}
+              </td>
               <td className="px-3 py-3 text-right font-mono text-[12px] tabular-nums text-zinc-300">
                 {formatNumber(r.indexed)}
+              </td>
+              <td className="px-3 py-3 text-right font-mono text-[12px] tabular-nums text-zinc-400">
+                {r.targetIndexedEstimate === null
+                  ? "—"
+                  : formatNumber(r.targetIndexedEstimate)}
               </td>
               <td className="px-3 py-3 text-right">
                 <div
