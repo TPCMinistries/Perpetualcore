@@ -73,6 +73,7 @@ import {
   type FeedFilters,
   type FeedModeFilter,
 } from "@/lib/rfp/feed";
+import type { ActionabilityFilter, DiscoverySort } from "@/lib/rfp/actionability";
 import { getOrgForUser, listUserOrgs } from "@/lib/rfp/orgs";
 
 const KNOWN_SOURCES = [
@@ -131,6 +132,14 @@ const QuerySchema = z.object({
       return Number.isFinite(n) && n > 0 ? n : null;
     })
     .pipe(z.union([z.number(), z.null()])),
+  actionability: z
+    .enum(["ready", "needs_review", "missing_info"])
+    .optional()
+    .transform((value) => (value ?? null) as ActionabilityFilter | null),
+  sort: z
+    .enum(["fit", "readiness", "deadline"])
+    .optional()
+    .transform((value) => (value ?? "fit") as DiscoverySort),
   cursor: z
     .string()
     .optional()
@@ -242,6 +251,8 @@ export async function GET(req: Request) {
     sources: parsed.data.sources.length > 0 ? parsed.data.sources : undefined,
     deadline_within_days: parsed.data.deadline_within_days,
     min_amount: parsed.data.min_amount,
+    actionability: parsed.data.actionability,
+    sort: parsed.data.sort,
     cursor: parsed.data.cursor,
     limit: parsed.data.limit,
   };

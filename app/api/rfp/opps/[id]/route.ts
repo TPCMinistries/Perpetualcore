@@ -21,6 +21,7 @@ import { ensureOpportunityEnrichment } from "@/lib/rfp/enrichment/store";
 import type { OpportunityEnrichment } from "@/lib/rfp/enrichment/generate";
 import { tierFor } from "@/lib/rfp/scoring/weights";
 import { loadCanonicalMetadataForOpps } from "@/lib/rfp/canonical-read";
+import { computeOpportunityActionability } from "@/lib/rfp/actionability";
 
 const QuerySchema = z.object({
   org_id: z.string().uuid(),
@@ -152,5 +153,21 @@ export async function GET(
     raw_json: opp.raw_json,
     enrichment,
     canonical,
+    actionability: computeOpportunityActionability({
+      fitScore: row.fit_score,
+      deadline: opp.deadline,
+      needsReview: opp.needs_review ?? false,
+      enrichment: enrichment
+        ? {
+            eligibility: enrichment.eligibility,
+            required_documents: enrichment.required_documents,
+            submission_method: enrichment.submission_method,
+            submission_url: enrichment.submission_url,
+            risks: enrichment.risks,
+            missing_fields: enrichment.missing_fields,
+            quality_score: enrichment.quality_score,
+          }
+        : null,
+    }),
   });
 }

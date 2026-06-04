@@ -21,6 +21,8 @@ function hasFilters(filters: FilterValues, mode: ModeFilter): boolean {
     filters.sources.length > 0 ||
     filters.deadline_within_days !== null ||
     filters.min_amount !== null ||
+    filters.actionability !== null ||
+    filters.sort !== "fit" ||
     mode !== "all"
   );
 }
@@ -30,6 +32,11 @@ function defaultName(filters: FilterValues): string {
   if (filters.sources.length > 0) return `${filters.sources.length} source filter`;
   if (filters.deadline_within_days) return `Due in ${filters.deadline_within_days} days`;
   if (filters.min_amount) return `$${filters.min_amount.toLocaleString()}+ opportunities`;
+  if (filters.actionability === "ready") return "Ready to pursue";
+  if (filters.actionability === "needs_review") return "Needs review";
+  if (filters.actionability === "missing_info") return "Missing info";
+  if (filters.sort === "readiness") return "Pursuit-ready opportunities";
+  if (filters.sort === "deadline") return "Deadline-priority opportunities";
   return "Saved opportunity search";
 }
 
@@ -39,6 +46,8 @@ function describeSearch(row: RfpSavedSearch): string {
   if (row.filters.sources.length > 0) parts.push(`${row.filters.sources.length} sources`);
   if (row.filters.deadline_within_days) parts.push(`${row.filters.deadline_within_days}d`);
   if (row.filters.min_amount) parts.push(`$${row.filters.min_amount.toLocaleString()}+`);
+  if (row.filters.actionability) parts.push(row.filters.actionability.replace("_", " "));
+  if (row.filters.sort !== "fit") parts.push(`sort ${row.filters.sort}`);
   if (row.mode !== "all") parts.push(row.mode);
   return parts.length > 0 ? parts.join(" · ") : "All opportunities";
 }

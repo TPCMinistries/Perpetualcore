@@ -241,6 +241,13 @@ function decisionToneClasses(tone: "emerald" | "amber" | "zinc"): string {
   return "border-zinc-200 bg-white text-zinc-700";
 }
 
+function readinessToneClasses(level: NonNullable<FeedRow["actionability"]>["level"]): string {
+  if (level === "ready") return "border-emerald-200 bg-emerald-50 text-emerald-950";
+  if (level === "workable") return "border-blue-200 bg-blue-50 text-blue-950";
+  if (level === "review") return "border-amber-200 bg-amber-50 text-amber-950";
+  return "border-zinc-200 bg-zinc-100 text-zinc-800";
+}
+
 function shortList(items: string[], fallback: string): string[] {
   return items.length > 0 ? items : [fallback];
 }
@@ -343,6 +350,7 @@ export function DetailPane({
   });
   const sourceAliases = row.canonical?.source_aliases ?? [];
   const sourceCount = sourceAliases.length;
+  const actionability = row.actionability;
 
   return (
     <div className="h-full overflow-y-auto p-6 lg:p-8">
@@ -470,6 +478,75 @@ export function DetailPane({
           }}
         />
       </div>
+
+      {actionability && (
+        <section
+          className={`mt-6 rounded-xl border p-4 shadow-sm ${readinessToneClasses(actionability.level)}`}
+        >
+          <div className="flex flex-wrap items-start justify-between gap-4">
+            <div>
+              <h3 className="font-mono text-[10px] uppercase tracking-[0.25em] opacity-70">
+                Pursuit readiness
+              </h3>
+              <p className="mt-2 text-xl font-semibold">
+                {actionability.label} · {actionability.score}
+              </p>
+              <p className="mt-1 text-sm leading-6 opacity-80">
+                {actionability.effort[0].toUpperCase() + actionability.effort.slice(1)} effort
+                {actionability.deadline_days === null
+                  ? " · deadline unknown"
+                  : actionability.deadline_days < 0
+                    ? " · past deadline"
+                    : ` · ${actionability.deadline_days}d left`}
+              </p>
+            </div>
+            <span className="rounded-full border border-current/20 bg-white/60 px-3 py-1 font-mono text-[10px] uppercase tracking-[0.16em]">
+              {actionability.level}
+            </span>
+          </div>
+          <div className="mt-4 grid gap-3 md:grid-cols-3">
+            <div className="rounded-lg border border-current/10 bg-white/55 p-3">
+              <p className="font-mono text-[10px] uppercase tracking-[0.18em] opacity-70">
+                Why
+              </p>
+              <ul className="mt-2 space-y-1.5 text-xs leading-5">
+                {(actionability.reasons.length > 0
+                  ? actionability.reasons
+                  : ["Fit score and source depth drive this estimate."]
+                ).slice(0, 3).map((item) => (
+                  <li key={item}>{item}</li>
+                ))}
+              </ul>
+            </div>
+            <div className="rounded-lg border border-current/10 bg-white/55 p-3">
+              <p className="font-mono text-[10px] uppercase tracking-[0.18em] opacity-70">
+                Missing
+              </p>
+              <ul className="mt-2 space-y-1.5 text-xs leading-5">
+                {(actionability.missing.length > 0
+                  ? actionability.missing
+                  : ["No major structured-data gaps."]
+                ).slice(0, 4).map((item) => (
+                  <li key={item}>{item}</li>
+                ))}
+              </ul>
+            </div>
+            <div className="rounded-lg border border-current/10 bg-white/55 p-3">
+              <p className="font-mono text-[10px] uppercase tracking-[0.18em] opacity-70">
+                Blockers
+              </p>
+              <ul className="mt-2 space-y-1.5 text-xs leading-5">
+                {(actionability.blockers.length > 0
+                  ? actionability.blockers
+                  : ["No hard blocker detected."]
+                ).slice(0, 4).map((item) => (
+                  <li key={item}>{item}</li>
+                ))}
+              </ul>
+            </div>
+          </div>
+        </section>
+      )}
 
       <section className="mt-6 rounded-xl border border-zinc-200 bg-white p-4 shadow-sm">
         <div className="flex flex-wrap items-start justify-between gap-4">

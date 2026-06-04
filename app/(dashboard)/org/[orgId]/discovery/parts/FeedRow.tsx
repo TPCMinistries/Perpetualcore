@@ -85,6 +85,13 @@ function triageClasses(status: FeedRowType["triage_status"]): string {
   return "border-zinc-200 bg-zinc-100 text-zinc-700";
 }
 
+function readinessClasses(level: NonNullable<FeedRowType["actionability"]>["level"]): string {
+  if (level === "ready") return "border-emerald-200 bg-emerald-50 text-emerald-800";
+  if (level === "workable") return "border-blue-200 bg-blue-50 text-blue-800";
+  if (level === "review") return "border-amber-200 bg-amber-50 text-amber-800";
+  return "border-zinc-200 bg-zinc-100 text-zinc-700";
+}
+
 export function FeedRow({
   row,
   selected,
@@ -103,6 +110,7 @@ export function FeedRow({
     showOrgBadge && row.scored_for_org_name.trim().length > 0;
   const triage = triageLabel(row.triage_status);
   const sourceCount = row.canonical?.source_aliases.length ?? 0;
+  const readiness = row.actionability;
 
   return (
     <button
@@ -139,6 +147,14 @@ export function FeedRow({
             {triage}
           </span>
         )}
+        {readiness && (
+          <span
+            className={`inline-flex shrink-0 items-center rounded border px-1.5 py-0.5 font-mono text-[10px] uppercase tracking-wide ${readinessClasses(readiness.level)}`}
+            title={`${readiness.label}: ${readiness.score}/100`}
+          >
+            Ready {readiness.score}
+          </span>
+        )}
         {sourceCount > 1 && (
           <span
             className="inline-flex shrink-0 items-center rounded border border-blue-200 bg-blue-50 px-1.5 py-0.5 font-mono text-[10px] uppercase tracking-wide text-blue-800"
@@ -156,6 +172,14 @@ export function FeedRow({
       <div className="mt-1 truncate text-xs text-zinc-500">
         {row.agency ?? "Unknown agency"} · {formatAmount(row)} · {formatDeadline(row)}
       </div>
+      {readiness && (
+        <div className="mt-1 truncate font-mono text-[10px] uppercase tracking-[0.12em] text-zinc-400">
+          {readiness.label} · {readiness.effort} effort
+          {readiness.missing.length > 0
+            ? ` · missing ${readiness.missing.slice(0, 2).join(", ")}`
+            : ""}
+        </div>
+      )}
     </button>
   );
 }

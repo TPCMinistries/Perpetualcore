@@ -19,6 +19,8 @@
 import { useEffect, useRef, useState } from "react";
 
 export type DeadlineWindow = 7 | 30 | null;
+export type ActionabilityFilter = "ready" | "needs_review" | "missing_info" | null;
+export type DiscoverySort = "fit" | "readiness" | "deadline";
 
 /**
  * Phase 05-06 — Mode filter, surfaced only to dual-org users. 'all' unions
@@ -32,6 +34,8 @@ export interface FilterValues {
   sources: string[];
   deadline_within_days: DeadlineWindow;
   min_amount: number | null;
+  actionability: ActionabilityFilter;
+  sort: DiscoverySort;
 }
 
 interface FilterPillsProps {
@@ -334,6 +338,64 @@ function MinAmountPill({
   );
 }
 
+function ActionabilityPill({
+  value,
+  onChange,
+}: {
+  value: ActionabilityFilter;
+  onChange: (next: ActionabilityFilter) => void;
+}) {
+  const options: Array<{ key: ActionabilityFilter; label: string }> = [
+    { key: null, label: "All" },
+    { key: "ready", label: "Ready" },
+    { key: "needs_review", label: "Review" },
+    { key: "missing_info", label: "Missing" },
+  ];
+  return (
+    <div className="inline-flex rounded-md border border-zinc-300 bg-white p-0.5 font-mono text-[11px] uppercase tracking-[0.14em]">
+      {options.map((opt) => {
+        const active = value === opt.key;
+        return (
+          <button
+            key={opt.key ?? "all"}
+            type="button"
+            onClick={() => onChange(opt.key)}
+            className={`rounded px-2.5 py-1 transition-colors ${
+              active
+                ? "bg-zinc-950 text-white"
+                : "text-zinc-500 hover:text-zinc-900"
+            }`}
+            aria-pressed={active}
+          >
+            {opt.label}
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
+function SortPill({
+  value,
+  onChange,
+}: {
+  value: DiscoverySort;
+  onChange: (next: DiscoverySort) => void;
+}) {
+  return (
+    <select
+      value={value}
+      onChange={(event) => onChange(event.target.value as DiscoverySort)}
+      className={pillBase(value !== "fit")}
+      aria-label="Sort opportunities"
+    >
+      <option value="fit">Sort · Fit</option>
+      <option value="readiness">Sort · Ready</option>
+      <option value="deadline">Sort · Deadline</option>
+    </select>
+  );
+}
+
 // ── Main pills row ────────────────────────────────────────────────────────────
 
 export function FilterPills({
@@ -347,7 +409,9 @@ export function FilterPills({
     value.query.trim().length > 0 ||
     value.sources.length > 0 ||
     value.deadline_within_days !== null ||
-    value.min_amount !== null;
+    value.min_amount !== null ||
+    value.actionability !== null ||
+    value.sort !== "fit";
 
   return (
     <div className="flex items-center gap-2 flex-wrap">
@@ -372,6 +436,14 @@ export function FilterPills({
         value={value.min_amount}
         onChange={(min_amount) => onChange({ ...value, min_amount })}
       />
+      <ActionabilityPill
+        value={value.actionability}
+        onChange={(actionability) => onChange({ ...value, actionability })}
+      />
+      <SortPill
+        value={value.sort}
+        onChange={(sort) => onChange({ ...value, sort })}
+      />
       {hasAny && (
         <button
           type="button"
@@ -381,6 +453,8 @@ export function FilterPills({
               sources: [],
               deadline_within_days: null,
               min_amount: null,
+              actionability: null,
+              sort: "fit",
             })
           }
           className="ml-1 text-xs text-zinc-500 underline-offset-2 hover:text-zinc-950 hover:underline"

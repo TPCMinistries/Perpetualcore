@@ -92,6 +92,12 @@ function filtersToSearchParams(
   if (filters.min_amount !== null) {
     p.set("min_amount", String(filters.min_amount));
   }
+  if (filters.actionability !== null) {
+    p.set("actionability", filters.actionability);
+  }
+  if (filters.sort !== "fit") {
+    p.set("sort", filters.sort);
+  }
   // Mode is only meaningful in dual mode, and we only emit non-default to keep URLs clean.
   if (isDualMode && mode !== "all") {
     p.set("mode", mode);
@@ -164,6 +170,8 @@ export function DiscoveryClient({
         p.set("deadline_within_days", String(f.deadline_within_days));
       }
       if (f.min_amount !== null) p.set("min_amount", String(f.min_amount));
+      if (f.actionability !== null) p.set("actionability", f.actionability);
+      if (f.sort !== "fit") p.set("sort", f.sort);
       if (isDualMode) {
         p.set("dual", "true");
         p.set("mode", m);
@@ -285,6 +293,8 @@ export function DiscoveryClient({
     filters.sources.length +
     (filters.deadline_within_days ? 1 : 0) +
     (filters.min_amount ? 1 : 0) +
+    (filters.actionability ? 1 : 0) +
+    (filters.sort !== "fit" ? 1 : 0) +
     (isDualMode && mode !== "all" ? 1 : 0);
 
   return (

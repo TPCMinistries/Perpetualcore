@@ -6,6 +6,8 @@ export const RFP_SAVED_SEARCH_SOURCES = [
   "simpler_grants",
   "sbir",
   "fed_register",
+  "nih_grants",
+  "nsf_grants",
   "ny_state",
   "nyc_dycd",
   "nyc_hra",
@@ -20,6 +22,15 @@ export const SavedSearchFiltersSchema = z
     sources: z.array(z.enum(RFP_SAVED_SEARCH_SOURCES)).default([]),
     deadline_within_days: z.union([z.literal(7), z.literal(30), z.null()]).default(null),
     min_amount: z.number().int().positive().nullable().default(null),
+    actionability: z
+      .union([
+        z.literal("ready"),
+        z.literal("needs_review"),
+        z.literal("missing_info"),
+        z.null(),
+      ])
+      .default(null),
+    sort: z.union([z.literal("fit"), z.literal("readiness"), z.literal("deadline")]).default("fit"),
   })
   .strict();
 

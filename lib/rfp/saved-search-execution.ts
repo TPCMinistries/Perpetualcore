@@ -1,4 +1,8 @@
 import type { RfpSavedSearch } from "./saved-searches";
+import {
+  computeOpportunityActionability,
+  matchesActionabilityFilter,
+} from "@/lib/rfp/actionability";
 
 export interface SavedSearchOpportunity {
   source: string;
@@ -10,6 +14,18 @@ export interface SavedSearchOpportunity {
   brief: string | null;
   url: string | null;
   created_at: string;
+  needs_review: boolean | null;
+}
+
+interface SavedSearchEnrichmentRow {
+  opp_id: string;
+  eligibility: string[] | null;
+  required_documents: string[] | null;
+  submission_method: string | null;
+  submission_url: string | null;
+  risks: string[] | null;
+  missing_fields: string[] | null;
+  quality_score: number | null;
 }
 
 export interface SavedSearchMatchRow {
@@ -49,7 +65,10 @@ export function dueSince(search: RfpSavedSearch, now = new Date()): string | nul
 export function matchesSavedSearchFilters(
   row: SavedSearchMatchRow,
   search: RfpSavedSearch,
-  opts?: { sinceIso?: string | null },
+  opts?: {
+    sinceIso?: string | null;
+    enrichmentByOpp?: Map<string, SavedSearchEnrichmentRow>;
+  },
 ): boolean {
   const opp = row.rfp_opportunities;
   if (!opp) return false;
@@ -83,7 +102,51 @@ export function matchesSavedSearchFilters(
       .toLowerCase();
     if (!haystack.includes(q)) return false;
   }
+  if (filters.actionability) {
+    const enrichment = opts?.enrichmentByOpp?.get(row.opp_id) ?? null;
+    const actionability = computeOpportunityActionability({
+      fitScore: row.fit_score,
+      deadline: opp.deadline,
+      needsReview: opp.needs_review ?? false,
+      enrichment: enrichment
+        ? {
+            eligibility: enrichment.eligibility ?? [],
+            required_documents: enrichment.required_documents ?? [],
+            submission_method: enrichment.submission_method,
+            submission_url: enrichment.submission_url,
+            risks: enrichment.risks ?? [],
+            missing_fields: enrichment.missing_fields ?? [],
+            quality_score: enrichment.quality_score ?? 0,
+          }
+        : null,
+    });
+    if (!matchesActionabilityFilter(actionability, filters.actionability)) {
+      return false;
+    }
+  }
   return true;
+}
+
+async function loadSavedSearchEnrichments(
+  client: RfpClient,
+  oppIds: string[],
+): Promise<Map<string, SavedSearchEnrichmentRow>> {
+  if (oppIds.length === 0) return new Map();
+  const { data, error } = await client
+    .from("rfp_opportunity_enrichments")
+    .select(
+      "opp_id, eligibility, required_documents, submission_method, submission_url, risks, missing_fields, quality_score",
+    )
+    .in("opp_id", oppIds);
+
+  if (error) {
+    console.error("[rfp saved-search] enrichment load failed", error);
+    return new Map();
+  }
+
+  return new Map(
+    ((data ?? []) as SavedSearchEnrichmentRow[]).map((row) => [row.opp_id, row]),
+  );
 }
 
 export async function loadSavedSearchMatches(args: {
@@ -96,7 +159,7 @@ export async function loadSavedSearchMatches(args: {
   const { data, error } = await args.client
     .from("rfp_opp_matches")
     .select(
-      "opp_id, fit_score, chips, summary, rfp_opportunities ( source, title, agency, amount_min, amount_max, deadline, brief, url, created_at )",
+      "opp_id, fit_score, chips, summary, rfp_opportunities ( source, title, agency, amount_min, amount_max, deadline, brief, url, created_at, needs_review )",
     )
     .eq("org_id", args.search.org_id)
     .gte("fit_score", args.search.min_fit_score)
@@ -108,10 +171,20 @@ export async function loadSavedSearchMatches(args: {
   }
 
   const exclude = args.excludeOppIds ?? new Set<string>();
-  return ((data ?? []) as SavedSearchMatchRow[]).filter(
+  const rows = (data ?? []) as SavedSearchMatchRow[];
+  const enrichmentByOpp = args.search.filters.actionability
+    ? await loadSavedSearchEnrichments(
+        args.client,
+        rows.map((row) => row.opp_id),
+      )
+    : undefined;
+  return rows.filter(
     (row) =>
       !exclude.has(row.opp_id) &&
-      matchesSavedSearchFilters(row, args.search, { sinceIso: args.sinceIso }),
+      matchesSavedSearchFilters(row, args.search, {
+        sinceIso: args.sinceIso,
+        enrichmentByOpp,
+      }),
   );
 }
 

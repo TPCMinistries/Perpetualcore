@@ -56,6 +56,13 @@ import {
   loadCanonicalMetadataForOpps,
   type OpportunityCanonicalMetadata,
 } from "@/lib/rfp/canonical-read";
+import {
+  computeOpportunityActionability,
+  matchesActionabilityFilter,
+  type ActionabilityFilter,
+  type ActionabilityResult,
+  type DiscoverySort,
+} from "@/lib/rfp/actionability";
 
 // ── Public types ─────────────────────────────────────────────────────────────
 
@@ -86,6 +93,8 @@ export interface FeedFilters {
   deadline_within_days?: 7 | 30 | null;
   /** Minimum opp.amount_max in dollars. null/undef = no filter. */
   min_amount?: number | null;
+  actionability?: ActionabilityFilter | null;
+  sort?: DiscoverySort;
   /** Keyset cursor: { fit_score, opp_id } from the previous page's last row. */
   cursor?: { fit_score: number; opp_id: string } | null;
   /** Page size — default 25. */
@@ -119,6 +128,7 @@ export interface FeedRow {
   scored_for_org_name: string;
   scored_for_org_type: "nonprofit" | "forprofit" | "dual";
   canonical: OpportunityCanonicalMetadata | null;
+  actionability: ActionabilityResult | null;
 }
 
 export interface FeedPage {
@@ -147,6 +157,17 @@ interface OppJoinShape {
   brief: string | null;
   url: string | null;
   needs_review: boolean | null;
+}
+
+interface EnrichmentShape {
+  opp_id: string;
+  eligibility: string[] | null;
+  required_documents: string[] | null;
+  submission_method: string | null;
+  submission_url: string | null;
+  risks: string[] | null;
+  missing_fields: string[] | null;
+  quality_score: number | null;
 }
 
 interface MatchJoinRow {
@@ -204,6 +225,7 @@ function toFeedRow(r: MatchJoinRow): FeedRow | null {
     scored_for_org_name: org.name,
     scored_for_org_type: org.type,
     canonical: null,
+    actionability: null,
   };
 }
 
@@ -257,12 +279,51 @@ function collapseCanonicalRows(rows: FeedRow[], limit: number): FeedRow[] {
     }
   }
 
-  return Array.from(byCanonical.values())
-    .sort((a, b) => {
-      if (b.fit_score !== a.fit_score) return b.fit_score - a.fit_score;
-      return a.opp_id.localeCompare(b.opp_id);
-    })
-    .slice(0, limit);
+  return Array.from(byCanonical.values()).slice(0, limit);
+}
+
+function sortFeedRows(rows: FeedRow[], sort: DiscoverySort): FeedRow[] {
+  return [...rows].sort((a, b) => {
+    if (sort === "readiness") {
+      const readinessDelta =
+        (b.actionability?.score ?? -1) - (a.actionability?.score ?? -1);
+      if (readinessDelta !== 0) return readinessDelta;
+    }
+
+    if (sort === "deadline") {
+      const aTime = a.deadline ? new Date(a.deadline).getTime() : Number.POSITIVE_INFINITY;
+      const bTime = b.deadline ? new Date(b.deadline).getTime() : Number.POSITIVE_INFINITY;
+      const aLive = Number.isFinite(aTime) && aTime >= Date.now();
+      const bLive = Number.isFinite(bTime) && bTime >= Date.now();
+      if (aLive !== bLive) return aLive ? -1 : 1;
+      if (aTime !== bTime) return aTime - bTime;
+    }
+
+    if (b.fit_score !== a.fit_score) return b.fit_score - a.fit_score;
+    return a.opp_id.localeCompare(b.opp_id);
+  });
+}
+
+async function loadEnrichmentsForRows(
+  rfp: { from: (table: string) => any },
+  oppIds: string[],
+): Promise<Map<string, EnrichmentShape>> {
+  if (oppIds.length === 0) return new Map();
+  const { data, error } = await rfp
+    .from("rfp_opportunity_enrichments")
+    .select(
+      "opp_id, eligibility, required_documents, submission_method, submission_url, risks, missing_fields, quality_score",
+    )
+    .in("opp_id", oppIds);
+
+  if (error) {
+    console.error("[rfp/feed] enrichment metadata unavailable", error);
+    return new Map();
+  }
+
+  return new Map(
+    ((data ?? []) as EnrichmentShape[]).map((row) => [row.opp_id, row]),
+  );
 }
 
 // ── Main entry point ──────────────────────────────────────────────────────────
@@ -271,12 +332,18 @@ export async function buildFeedQuery(filters: FeedFilters): Promise<FeedPage> {
   // Request-scoped client — RLS enforces caller membership in every org_id we hit.
   const supabase = await createClient();
   const limit = filters.limit ?? 25;
+  const sort = filters.sort ?? "fit";
   const dualMode =
     Array.isArray(filters.dual_org_ids) && filters.dual_org_ids.length > 0;
 
   // Over-fetch so dual-org and canonical duplicate collapse still return dense
   // pages. We slice back to `limit` after dedup/canonical grouping.
-  const fetchLimit = dualMode ? limit * 3 : limit * 2;
+  const fetchLimit =
+    filters.actionability || sort !== "fit"
+      ? Math.min(100, limit * 4)
+      : dualMode
+        ? limit * 3
+        : limit * 2;
 
   // Untyped client narrowing — rfp_* tables not in database.types.ts yet (per
   // the 05-03 / lib/rfp/orgs.ts pattern). The `from(table) => any` shape lets
@@ -401,16 +468,40 @@ export async function buildFeedQuery(filters: FeedFilters): Promise<FeedPage> {
   }
 
   if (rows.length > 0) {
-    const canonicalByOpp = await loadCanonicalMetadataForOpps(
-      rfp,
-      rows.map((row) => row.opp_id),
-    );
+    const oppIds = rows.map((row) => row.opp_id);
+    const [canonicalByOpp, enrichmentByOpp] = await Promise.all([
+      loadCanonicalMetadataForOpps(rfp, oppIds),
+      loadEnrichmentsForRows(rfp, oppIds),
+    ]);
     for (const row of rows) {
       row.canonical = canonicalByOpp.get(row.opp_id) ?? null;
+      const enrichment = enrichmentByOpp.get(row.opp_id) ?? null;
+      row.actionability = computeOpportunityActionability({
+        fitScore: row.fit_score,
+        deadline: row.deadline,
+        needsReview: row.needs_review,
+        enrichment: enrichment
+          ? {
+              eligibility: enrichment.eligibility ?? [],
+              required_documents: enrichment.required_documents ?? [],
+              submission_method: enrichment.submission_method,
+              submission_url: enrichment.submission_url,
+              risks: enrichment.risks ?? [],
+              missing_fields: enrichment.missing_fields ?? [],
+              quality_score: enrichment.quality_score ?? 0,
+            }
+          : null,
+      });
     }
   }
 
-  const collapsedRows = collapseCanonicalRows(rows, limit);
+  const actionableRows = rows.filter((row) =>
+    matchesActionabilityFilter(row.actionability, filters.actionability),
+  );
+  const collapsedRows = collapseCanonicalRows(
+    sortFeedRows(actionableRows, sort),
+    limit,
+  );
 
   // If a source filter caused the related row to be filtered out, the parent
   // match row will still appear with rfp_opportunities === null. The toFeedRow

@@ -33,7 +33,12 @@ import { OnboardingChecklist } from "@/components/rfp/OnboardingChecklist";
 import { DeadlineTracker } from "@/components/rfp/DeadlineTracker";
 import { notFound } from "next/navigation";
 import { DiscoveryClient } from "./DiscoveryClient";
-import type { FilterValues, ModeFilter } from "./parts/FilterPills";
+import type {
+  ActionabilityFilter,
+  DiscoverySort,
+  FilterValues,
+  ModeFilter,
+} from "./parts/FilterPills";
 
 interface DiscoveryPageProps {
   params: Promise<{ orgId: string }>;
@@ -60,7 +65,20 @@ function parseFiltersFromSearch(
     ? Math.round(Number(minRaw))
     : null;
 
-  return { query, sources, deadline_within_days, min_amount };
+  const actionabilityRaw =
+    typeof raw.actionability === "string" ? raw.actionability : null;
+  const actionability: ActionabilityFilter =
+    actionabilityRaw === "ready" ||
+    actionabilityRaw === "needs_review" ||
+    actionabilityRaw === "missing_info"
+      ? actionabilityRaw
+      : null;
+
+  const sortRaw = typeof raw.sort === "string" ? raw.sort : null;
+  const sort: DiscoverySort =
+    sortRaw === "readiness" || sortRaw === "deadline" ? sortRaw : "fit";
+
+  return { query, sources, deadline_within_days, min_amount, actionability, sort };
 }
 
 function parseModeFromSearch(
@@ -135,6 +153,8 @@ export default async function DiscoveryPage({
         query: initialFilters.query,
         deadline_within_days: initialFilters.deadline_within_days,
         min_amount: initialFilters.min_amount,
+        actionability: initialFilters.actionability,
+        sort: initialFilters.sort,
         limit: 25,
       });
       initialRows = page.rows;
