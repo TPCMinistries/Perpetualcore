@@ -5,10 +5,10 @@
  *
  *   1. `scoreNewOpportunitiesForAllActiveOrgs(opportunityIds)` — called by the
  *      federal / state-city cron routes after each ingest. For each newly seen
- *      opportunity, score it against every active org's capture profile and
- *      upsert into rfp_opp_matches. Existing rows are refreshed because the
- *      cron's upsert refreshes last_seen_at; we want their scored_version
- *      incremented too so the feed reflects the latest computation.
+ *      opportunity, score missing (opportunity, org) pairs against every active
+ *      org's capture profile and upsert into rfp_opp_matches. Existing match
+ *      rows are left alone during ingest refreshes; profile edits use
+ *      recomputeAllForOrg() when a full recalculation is actually needed.
  *
  *   2. `recomputeAllForOrg(orgId, opts?)` — called by the per-org API endpoint
  *      (Phase 6) when a capture profile mutates. Iterates every open
@@ -321,7 +321,7 @@ async function upsertMatches(
  *   2. Load distinct active org IDs (from rfp_user_orgs).
  *   3. For each org, load its capture profile + NAICS.
  *   4. For each (opp, org) pair: scoreOpportunity → optionally summary →
- *      compute next scored_version → upsert.
+ *      compute first scored_version → upsert.
  *
  * Never throws. Per-pair errors are logged and skipped.
  */
@@ -352,11 +352,10 @@ export async function scoreNewOpportunitiesForAllActiveOrgs(
     }
   });
 
-  // 4. Load existing scored_versions so we can increment correctly + skip
-  //    redundant AI summary calls.
+  // 4. Load existing scored_versions so ingest refreshes only score new gaps.
   const existing = await loadExistingScoredVersions(orgIds, opps.map((o) => o.id));
 
-  // 5. Build the cross-product of (opp, org) pairs to score.
+  // 5. Build the cross-product of missing (opp, org) pairs to score.
   type Pair = {
     opp: OppRow;
     orgId: string;
@@ -365,9 +364,11 @@ export async function scoreNewOpportunitiesForAllActiveOrgs(
   const pairs: Pair[] = [];
   for (const opp of opps) {
     for (const { orgId, profile } of profiles) {
+      if (existing.has(`${opp.id}::${orgId}`)) continue;
       pairs.push({ opp, orgId, profile });
     }
   }
+  if (pairs.length === 0) return { scored: 0, orgs: orgIds.length };
 
   // 6. Score + (optional) summary. AI calls go through asyncPool(3) to stay
   //    under Anthropic rate limits; the deterministic scoreOpportunity call
@@ -379,7 +380,7 @@ export async function scoreNewOpportunitiesForAllActiveOrgs(
       const prev = existing.get(cacheKey);
       const scored_version = (prev?.scored_version ?? 0) + 1;
 
-      // AI summary on every new score for cron hand-off — this is the path
+      // AI summary only for missing cron-hand-off pairs — this is the path
       // where the user gets fresh prose for newly-discovered opps. Summary
       // helper returns null on error / missing key (we persist null then).
       const summary = await generateFitSummary(opp, profile, breakdown);
