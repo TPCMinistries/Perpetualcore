@@ -689,6 +689,7 @@ export default function AccountDetailPage() {
   const [accountUpdate, setAccountUpdate] = useState<AccountUpdate>(defaultUpdate);
   const [closePath, setClosePath] = useState<ClosePathState>(defaultClosePath);
   const [savingClosePath, setSavingClosePath] = useState(false);
+  const [generatingAssistantPlan, setGeneratingAssistantPlan] = useState(false);
 
   async function fetchPermanentAccount(nextLeadId: string) {
     try {
@@ -863,6 +864,36 @@ export default function AccountDetailPage() {
   async function copyBuyerStartEmail() {
     if (!lead) return;
     await copyText("Buyer start email", buildBuyerStartEmail(lead, plan, window.location.origin));
+  }
+
+  async function generateAssistantPlan() {
+    if (!lead) return;
+    setGeneratingAssistantPlan(true);
+    try {
+      const response = await fetch(`/api/accounts/${encodeURIComponent(lead.id)}/assistant-plan`, {
+        method: "POST",
+      });
+      const result = (await response.json().catch(() => ({}))) as {
+        lead?: AccountLead;
+        aiGenerated?: boolean;
+        error?: string;
+      };
+
+      if (!response.ok || !result.lead) {
+        throw new Error(result.error || "Could not generate assistant plan");
+      }
+
+      setLead(result.lead);
+      setPlan(readAccountPlan(result.lead));
+      setMilestones(readAccountMilestones(result.lead));
+      setClosePath(readClosePath(result.lead));
+      await fetchAccountTasks(result.lead.id);
+      toast.success(result.aiGenerated ? "AI operating plan generated" : "Operating plan generated");
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Could not generate assistant plan");
+    } finally {
+      setGeneratingAssistantPlan(false);
+    }
   }
 
   async function saveClosePath() {
@@ -1651,14 +1682,30 @@ export default function AccountDetailPage() {
                 move that keeps sales and delivery connected.
               </p>
             </div>
-            <Button
-              type="button"
-              className="w-fit rounded-md"
-              onClick={() => copyText("Account operator prompt", buildAccountOperatorPrompt(lead, plan, handoffContext, accountTasks))}
-            >
-              <Sparkles className="mr-2 h-4 w-4" />
-              Copy AI prompt
-            </Button>
+            <div className="flex flex-col gap-2 sm:flex-row">
+              <Button
+                type="button"
+                className="w-fit rounded-md"
+                disabled={generatingAssistantPlan}
+                onClick={generateAssistantPlan}
+              >
+                {generatingAssistantPlan ? (
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                ) : (
+                  <Sparkles className="mr-2 h-4 w-4" />
+                )}
+                Generate plan
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                className="w-fit rounded-md bg-white"
+                onClick={() => copyText("Account operator prompt", buildAccountOperatorPrompt(lead, plan, handoffContext, accountTasks))}
+              >
+                <Clipboard className="mr-2 h-4 w-4" />
+                Copy prompt
+              </Button>
+            </div>
           </div>
         </CardHeader>
         <CardContent className="space-y-4">
