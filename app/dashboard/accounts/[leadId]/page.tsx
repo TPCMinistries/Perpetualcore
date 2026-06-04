@@ -436,6 +436,44 @@ function buildAccountBrief(lead: AccountLead, plan: AccountPlan) {
   ].join("\n");
 }
 
+function buildAccountOperatorPrompt(
+  lead: AccountLead,
+  plan: AccountPlan,
+  handoffContext: AccountHandoffContext | null,
+  tasks: AccountTask[],
+) {
+  const openTasks = tasks
+    .filter((task) => task.status !== "completed")
+    .slice(0, 6)
+    .map((task) => `- ${task.title}${task.due_date ? ` (due ${formatDate(task.due_date)})` : ""}`);
+
+  return [
+    "Act as my Perpetual Core account operator.",
+    "",
+    buildAccountBrief(lead, plan),
+    "",
+    "Client handoff context:",
+    handoffContext
+      ? [
+          `Workflow owner: ${handoffContext.workflowOwner || "Not provided"}`,
+          `Success metric: ${handoffContext.successMetric || "Not provided"}`,
+          `Tools and data: ${handoffContext.toolsAndData || "Not provided"}`,
+          `Real examples: ${handoffContext.realExamples || "Not provided"}`,
+          `Rules and escalations: ${handoffContext.rulesAndEscalations || "Not provided"}`,
+        ].join("\n")
+      : "No client handoff context submitted yet.",
+    "",
+    "Open tasks:",
+    openTasks.length > 0 ? openTasks.join("\n") : "No open account tasks yet.",
+    "",
+    "Return:",
+    "1. The next three actions I should take.",
+    "2. The biggest risk to the deal or delivery.",
+    "3. The cleanest first workflow to install.",
+    "4. The client message I should send next.",
+  ].join("\n");
+}
+
 function buildClientKickoffEmail(lead: AccountLead, plan: AccountPlan) {
   const contact = getContactName(lead);
   const account = getAccountName(lead);
@@ -1090,6 +1128,39 @@ export default function AccountDetailPage() {
     ["Rules and escalations", handoffContext?.rulesAndEscalations],
     ["Additional notes", handoffContext?.notes],
   ].filter(([, value]) => Boolean(value));
+  const operatingSignals = [
+    {
+      label: "Commercial path",
+      value: paymentSent ? getOptionLabel(paymentStatusOptions, closePath.paymentStatus) : "Need send path",
+      complete: paymentSent,
+    },
+    {
+      label: "Account memory",
+      value: permanentAccount ? "Synced" : "Lead only",
+      complete: Boolean(permanentAccount),
+    },
+    {
+      label: "Client context",
+      value: handoffContextItems.length > 0 ? "Received" : "Need handoff",
+      complete: handoffContextItems.length > 0,
+    },
+    {
+      label: "Task plan",
+      value: accountTasks.length > 0 ? `${taskSummary.open} open` : "Need tasks",
+      complete: accountTasks.length > 0,
+    },
+  ];
+  const nextBestMove = !paymentSent
+    ? "Send the buyer checkout link, invoice request, or procurement note."
+    : !permanentAccount
+      ? "Sync the permanent account so delivery is not trapped in the lead record."
+      : handoffContextItems.length === 0
+        ? "Send the client handoff link and collect operating context."
+        : accountTasks.length === 0
+          ? "Sync or generate kickoff tasks from the submitted handoff context."
+          : taskSummary.nextTask
+            ? taskSummary.nextTask.title
+            : "Review the first operating lane and prepare the expansion recommendation.";
 
   return (
     <div className="space-y-6 pb-10">
@@ -1205,6 +1276,71 @@ export default function AccountDetailPage() {
           </p>
         </div>
       </section>
+
+      <Card className="rounded-lg border-slate-200 shadow-none">
+        <CardHeader>
+          <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+            <div>
+              <div className="flex items-center gap-3">
+                <CardTitle className="text-xl">AI operating brief</CardTitle>
+                <Bot className="h-5 w-5 text-violet-600" />
+              </div>
+              <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-600">
+                A compact readout for your assistant: what is known, what is missing, and the next
+                move that keeps sales and delivery connected.
+              </p>
+            </div>
+            <Button
+              type="button"
+              className="w-fit rounded-md"
+              onClick={() => copyText("Account operator prompt", buildAccountOperatorPrompt(lead, plan, handoffContext, accountTasks))}
+            >
+              <Sparkles className="mr-2 h-4 w-4" />
+              Copy AI prompt
+            </Button>
+          </div>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="grid gap-3 md:grid-cols-4">
+            {operatingSignals.map((signal) => (
+              <div
+                key={signal.label}
+                className={`rounded-lg border p-4 ${
+                  signal.complete ? "border-emerald-200 bg-emerald-50" : "border-amber-200 bg-amber-50"
+                }`}
+              >
+                <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-slate-500">{signal.label}</p>
+                <div className="mt-2 flex items-center gap-2">
+                  <span
+                    className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full ${
+                      signal.complete ? "bg-emerald-600 text-white" : "bg-amber-500 text-white"
+                    }`}
+                  >
+                    {signal.complete ? <CheckCircle2 className="h-3.5 w-3.5" /> : <ArrowRight className="h-3.5 w-3.5" />}
+                  </span>
+                  <p className="text-sm font-semibold text-slate-950">{signal.value}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div className="grid gap-4 rounded-lg border bg-slate-50 p-4 lg:grid-cols-[minmax(0,1fr)_320px]">
+            <div>
+              <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-slate-500">Next best move</p>
+              <p className="mt-2 text-base font-semibold leading-7 text-slate-950">{nextBestMove}</p>
+              <p className="mt-2 text-sm leading-6 text-slate-600">
+                The assistant should keep this flexible: close the buyer path, collect context, create
+                tasks, then install the first workflow before expanding the account.
+              </p>
+            </div>
+            <div className="rounded-lg border bg-white p-4">
+              <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-slate-500">Current lane</p>
+              <p className="mt-2 text-sm font-semibold text-slate-950">{plan.firstLane}</p>
+              <p className="mt-2 text-xs leading-5 text-slate-600">{plan.sevenDayDeliverable}</p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
       <Card className="rounded-lg shadow-none">
         <CardHeader>
