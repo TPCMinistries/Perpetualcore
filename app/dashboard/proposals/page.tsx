@@ -237,6 +237,125 @@ function getLeadStatusLabel(status?: string | null) {
     .join(" ");
 }
 
+function buildBuyerProposalEmail({
+  buyerName,
+  selectedLane,
+  workflow,
+  businessOutcome,
+  timeline,
+  nextStep,
+  paymentPackageId,
+  selectedLeadId,
+  origin,
+}: {
+  buyerName: string;
+  selectedLane: (typeof proposalLanes)[number];
+  workflow: string;
+  businessOutcome: string;
+  timeline: string;
+  nextStep: string;
+  paymentPackageId: string;
+  selectedLeadId: string;
+  origin: string;
+}) {
+  const packageUrl = `${origin}/packages?package=${encodeURIComponent(paymentPackageId)}&lead=${encodeURIComponent(
+    selectedLeadId || "manual",
+  )}`;
+
+  return [
+    `Subject: ${selectedLane.name} starting point for ${buyerName}`,
+    "",
+    `I would start ${buyerName} with ${selectedLane.name}.`,
+    "",
+    `The first workflow should be ${workflow.toLowerCase()}. The target outcome is ${businessOutcome}.`,
+    "",
+    `The working timeline is ${timeline}. The investment range is ${selectedLane.price}, depending on access, current systems, and how much implementation support is needed.`,
+    "",
+    "This is not positioned as another AI tool. It is a first operating lane: the workflow, context, people, review points, and AI-supported process working together.",
+    "",
+    `Next step: ${nextStep}.`,
+    "",
+    `Start path: ${packageUrl}`,
+  ].join("\n");
+}
+
+function buildInternalApprovalNote({
+  buyerName,
+  buyerType,
+  selectedLane,
+  workflow,
+  businessOutcome,
+  timeline,
+  selectedAssistantPlan,
+}: {
+  buyerName: string;
+  buyerType: string;
+  selectedLane: (typeof proposalLanes)[number];
+  workflow: string;
+  businessOutcome: string;
+  timeline: string;
+  selectedAssistantPlan: LeadAssistantPlan | null;
+}) {
+  return [
+    `Internal approval note: ${buyerName}`,
+    "",
+    `Buyer type: ${buyerType}`,
+    `Recommended start: ${selectedLane.name} (${selectedLane.price})`,
+    `Workflow: ${workflow}`,
+    `Outcome: ${businessOutcome}`,
+    `Timeline: ${timeline}`,
+    "",
+    "Why this path:",
+    selectedLane.bestFor,
+    "",
+    "Deliverables:",
+    ...selectedLane.deliverables.map((deliverable) => `- ${deliverable}`),
+    selectedAssistantPlan?.reasoning?.length ? "" : "",
+    selectedAssistantPlan?.reasoning?.length ? "Assistant reasoning:" : "",
+    ...(selectedAssistantPlan?.reasoning || []).map((item) => `- ${item}`),
+    "",
+    "Approval recommendation:",
+    "Approve a defined first lane before attempting a full companywide AI transformation. The sale can expand after the first working surface proves value.",
+  ]
+    .filter((line, index, lines) => !(line === "" && lines[index - 1] === ""))
+    .join("\n");
+}
+
+function buildImplementationScope({
+  buyerName,
+  selectedLane,
+  workflow,
+  businessOutcome,
+  timeline,
+}: {
+  buyerName: string;
+  selectedLane: (typeof proposalLanes)[number];
+  workflow: string;
+  businessOutcome: string;
+  timeline: string;
+}) {
+  return [
+    `Implementation scope: ${buyerName}`,
+    "",
+    `Starting lane: ${selectedLane.name}`,
+    `Workflow: ${workflow}`,
+    `Outcome: ${businessOutcome}`,
+    `Timeline: ${timeline}`,
+    "",
+    "Phase 1 - Map",
+    "Document the current workflow, people, tools, intake points, data sources, approval rules, and bottlenecks.",
+    "",
+    "Phase 2 - Install",
+    "Configure the AI-supported operating layer: context, prompts, task flow, review points, and the working surface the team will use.",
+    "",
+    "Phase 3 - Adopt",
+    "Train the owner/users, collect feedback, adjust the workflow, and define what should expand next.",
+    "",
+    "Out of scope until expansion:",
+    "Full-enterprise transformation, every department, unsupported integrations, or open-ended custom software beyond the selected first lane.",
+  ].join("\n");
+}
+
 export default function ProposalsPage() {
   const [leads, setLeads] = useState<LeadSummary[]>([]);
   const [selectedLeadId, setSelectedLeadId] = useState("");
@@ -310,6 +429,45 @@ export default function ProposalsPage() {
       `If this direction is right, the next step is to ${nextStep}.`,
     ].filter((line, index, lines) => !(line === "" && lines[index - 1] === "")).join("\n");
   }, [businessOutcome, buyerName, buyerType, nextStep, selectedAssistantPlan, selectedLane, timeline, workflow]);
+  const buyerProposalEmail = useMemo(
+    () =>
+      buildBuyerProposalEmail({
+        buyerName,
+        selectedLane,
+        workflow,
+        businessOutcome,
+        timeline,
+        nextStep,
+        paymentPackageId,
+        selectedLeadId,
+        origin: typeof window !== "undefined" ? window.location.origin : "",
+      }),
+    [businessOutcome, buyerName, nextStep, paymentPackageId, selectedLane, selectedLeadId, timeline, workflow],
+  );
+  const internalApprovalNote = useMemo(
+    () =>
+      buildInternalApprovalNote({
+        buyerName,
+        buyerType,
+        selectedLane,
+        workflow,
+        businessOutcome,
+        timeline,
+        selectedAssistantPlan,
+      }),
+    [businessOutcome, buyerName, buyerType, selectedAssistantPlan, selectedLane, timeline, workflow],
+  );
+  const implementationScope = useMemo(
+    () =>
+      buildImplementationScope({
+        buyerName,
+        selectedLane,
+        workflow,
+        businessOutcome,
+        timeline,
+      }),
+    [businessOutcome, buyerName, selectedLane, timeline, workflow],
+  );
 
   useEffect(() => {
     async function fetchLeads() {
@@ -759,6 +917,95 @@ export default function ProposalsPage() {
                   </Link>
                 </Button>
               </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card className="rounded-lg border-primary/20 shadow-none">
+        <CardHeader>
+          <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+            <div>
+              <div className="flex items-center gap-3">
+                <CardTitle className="text-xl">Close-ready proposal pack</CardTitle>
+                <PackageCheck className="h-5 w-5 text-primary" />
+              </div>
+              <p className="mt-2 max-w-3xl text-sm leading-6 text-muted-foreground">
+                Use this after the proposal language is directionally right. It gives you the buyer
+                email, internal approval note, implementation scope, and the next operational links.
+              </p>
+            </div>
+            <Badge className="w-fit rounded-md" variant={selectedLeadId ? "default" : "outline"}>
+              {selectedLeadId ? "Lead attached" : "Manual proposal"}
+            </Badge>
+          </div>
+        </CardHeader>
+        <CardContent className="grid gap-5 lg:grid-cols-[1fr_360px]">
+          <div className="grid gap-3 md:grid-cols-3">
+            {[
+              {
+                label: "Buyer email",
+                detail: "Send the proposal direction with package path and next step.",
+                icon: MessageSquare,
+                body: buyerProposalEmail,
+              },
+              {
+                label: "Approval note",
+                detail: "Use when the buyer needs leadership, finance, or procurement language.",
+                icon: ShieldCheck,
+                body: internalApprovalNote,
+              },
+              {
+                label: "Scope note",
+                detail: "Clarify what is included in the first lane and what waits for expansion.",
+                icon: Layers3,
+                body: implementationScope,
+              },
+            ].map((item) => (
+              <button
+                key={item.label}
+                type="button"
+                onClick={() => copyText(item.body)}
+                className="rounded-lg border bg-card p-4 text-left transition hover:border-primary/50 hover:bg-primary/[0.03]"
+              >
+                <div className="flex items-center justify-between gap-3">
+                  <span className="rounded-md bg-primary/10 p-2 text-primary">
+                    <item.icon className="h-4 w-4" />
+                  </span>
+                  <Clipboard className="h-4 w-4 text-muted-foreground" />
+                </div>
+                <p className="mt-4 text-sm font-semibold text-foreground">{item.label}</p>
+                <p className="mt-2 text-sm leading-5 text-muted-foreground">{item.detail}</p>
+              </button>
+            ))}
+          </div>
+
+          <div className="rounded-lg border bg-muted/40 p-4">
+            <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
+              Operational next step
+            </p>
+            <p className="mt-2 text-sm font-semibold text-foreground">{selectedLane.name}</p>
+            <p className="mt-2 text-sm leading-6 text-muted-foreground">
+              Save the proposal, send the package path, then open the account room so the first lane,
+              handoff context, tasks, and delivery memory stay connected.
+            </p>
+            <div className="mt-4 grid gap-2">
+              <Button type="button" className="rounded-md" disabled={!selectedLeadId || savingProposal} onClick={saveProposalToLead}>
+                <FileText className="mr-2 h-4 w-4" />
+                {savingProposal ? "Saving..." : "Save proposal to lead"}
+              </Button>
+              <Button asChild variant="outline" className="rounded-md">
+                <Link href={`/packages?package=${paymentPackageId}&lead=${selectedLeadId || "manual"}`}>
+                  <CreditCard className="mr-2 h-4 w-4" />
+                  Open payment path
+                </Link>
+              </Button>
+              <Button asChild variant="outline" className="rounded-md">
+                <Link href={selectedLeadId ? `/dashboard/accounts/${selectedLeadId}` : "/dashboard/accounts"}>
+                  <Target className="mr-2 h-4 w-4" />
+                  Open account room
+                </Link>
+              </Button>
             </div>
           </div>
         </CardContent>
