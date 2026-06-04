@@ -494,6 +494,7 @@ export default function AccountDetailPage() {
   const [accountTasks, setAccountTasks] = useState<AccountTask[]>([]);
   const [tasksLoading, setTasksLoading] = useState(false);
   const [generatingTasks, setGeneratingTasks] = useState(false);
+  const [syncingHandoffTasks, setSyncingHandoffTasks] = useState(false);
   const [savingTaskId, setSavingTaskId] = useState("");
   const [plan, setPlan] = useState<AccountPlan>(defaultPlan);
   const [milestones, setMilestones] = useState<AccountMilestone[]>(createDefaultMilestones());
@@ -813,6 +814,37 @@ export default function AccountDetailPage() {
       toast.error(error instanceof Error ? error.message : "Could not generate tasks");
     } finally {
       setGeneratingTasks(false);
+    }
+  }
+
+  async function syncHandoffTasks() {
+    if (!lead) return;
+    setSyncingHandoffTasks(true);
+    try {
+      const response = await fetch(`/api/accounts/${encodeURIComponent(lead.id)}/handoff-tasks`, {
+        method: "POST",
+      });
+      const result = (await response.json()) as {
+        taskSync?: { created?: number; skipped?: number; error?: string | null };
+        error?: string;
+      };
+
+      if (!response.ok || result.error || result.taskSync?.error) {
+        throw new Error(result.error || result.taskSync?.error || "Could not sync handoff tasks");
+      }
+
+      await fetchAccountTasks(lead.id);
+      const created = result.taskSync?.created || 0;
+      const skipped = result.taskSync?.skipped || 0;
+      toast.success(
+        created > 0
+          ? `${created} handoff task${created === 1 ? "" : "s"} created`
+          : `Handoff tasks already synced (${skipped} skipped)`,
+      );
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Could not sync handoff tasks");
+    } finally {
+      setSyncingHandoffTasks(false);
     }
   }
 
@@ -1442,13 +1474,33 @@ export default function AccountDetailPage() {
         </CardHeader>
         <CardContent>
           {handoffContextItems.length > 0 ? (
-            <div className="grid gap-3 md:grid-cols-2">
-              {handoffContextItems.map(([label, value]) => (
-                <div key={label} className="rounded-lg border bg-slate-50 p-4">
-                  <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-slate-500">{label}</p>
-                  <p className="mt-2 whitespace-pre-wrap text-sm leading-6 text-slate-700">{value}</p>
+            <div className="space-y-4">
+              <div className="grid gap-3 md:grid-cols-2">
+                {handoffContextItems.map(([label, value]) => (
+                  <div key={label} className="rounded-lg border bg-slate-50 p-4">
+                    <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-slate-500">{label}</p>
+                    <p className="mt-2 whitespace-pre-wrap text-sm leading-6 text-slate-700">{value}</p>
+                  </div>
+                ))}
+              </div>
+              <div className="flex flex-col gap-3 rounded-lg border border-violet-100 bg-violet-50/60 p-4 md:flex-row md:items-center md:justify-between">
+                <div>
+                  <p className="text-sm font-semibold text-slate-950">Turn this handoff into kickoff tasks.</p>
+                  <p className="mt-1 text-sm leading-6 text-slate-600">
+                    Use this if the client submitted context while Supabase was unavailable, or if you want to
+                    regenerate any missing kickoff tasks after editing the account.
+                  </p>
                 </div>
-              ))}
+                <Button
+                  type="button"
+                  className="shrink-0 rounded-md"
+                  disabled={syncingHandoffTasks}
+                  onClick={syncHandoffTasks}
+                >
+                  {syncingHandoffTasks ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <ListChecks className="mr-2 h-4 w-4" />}
+                  Sync handoff tasks
+                </Button>
+              </div>
             </div>
           ) : (
             <div className="rounded-lg border bg-slate-50 p-5">
