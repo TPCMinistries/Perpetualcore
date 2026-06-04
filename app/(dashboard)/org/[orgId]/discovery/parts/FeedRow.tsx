@@ -102,6 +102,7 @@ export function FeedRow({
   const badgeVisible =
     showOrgBadge && row.scored_for_org_name.trim().length > 0;
   const triage = triageLabel(row.triage_status);
+  const sourceCount = row.canonical?.source_aliases.length ?? 0;
 
   return (
     <button
@@ -136,6 +137,14 @@ export function FeedRow({
             className={`inline-flex shrink-0 items-center rounded border px-1.5 py-0.5 font-mono text-[10px] uppercase tracking-wide ${triageClasses(row.triage_status)}`}
           >
             {triage}
+          </span>
+        )}
+        {sourceCount > 1 && (
+          <span
+            className="inline-flex shrink-0 items-center rounded border border-blue-200 bg-blue-50 px-1.5 py-0.5 font-mono text-[10px] uppercase tracking-wide text-blue-800"
+            title={`Found across ${sourceCount} sources`}
+          >
+            {sourceCount} sources
           </span>
         )}
         {row.needs_review && (

@@ -81,6 +81,8 @@ const KNOWN_SOURCES = [
   "simpler_grants",
   "sbir",
   "fed_register",
+  "nih_grants",
+  "nsf_grants",
   "ny_state",
   "nyc_dycd",
   "nyc_hra",

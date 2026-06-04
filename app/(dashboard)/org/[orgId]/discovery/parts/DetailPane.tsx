@@ -212,6 +212,25 @@ function effortSignal(amount: number | null, brief: string | null): {
   };
 }
 
+function sourceLabel(source: string): string {
+  const labels: Record<string, string> = {
+    grants_gov: "Grants.gov",
+    nih_grants: "NIH Grants",
+    nsf_grants: "NSF Grants",
+    fed_register: "Federal Register",
+    sam_gov: "SAM.gov",
+    simpler_grants: "Simpler Grants",
+    sbir: "SBIR.gov",
+    ny_state: "NY State",
+    nyc_dycd: "NYC DYCD",
+    nyc_hra: "NYC HRA",
+    nyc_doe: "NYC DOE",
+    ca_grants: "CA Grants",
+    foundation_url: "Foundation",
+  };
+  return labels[source] ?? source.replace(/_/g, " ");
+}
+
 function decisionToneClasses(tone: "emerald" | "amber" | "zinc"): string {
   if (tone === "emerald") {
     return "border-emerald-200 bg-emerald-50 text-emerald-800";
@@ -322,6 +341,8 @@ export function DetailPane({
     needsReview: row.needs_review,
     enrichmentQuality: enrichment?.quality_score ?? null,
   });
+  const sourceAliases = row.canonical?.source_aliases ?? [];
+  const sourceCount = sourceAliases.length;
 
   return (
     <div className="h-full overflow-y-auto p-6 lg:p-8">
@@ -364,6 +385,42 @@ export function DetailPane({
         <p className="mt-4 font-mono text-sm text-zinc-500">
           {moneyParts.join(" · ")}
         </p>
+      )}
+
+      {sourceCount > 1 && (
+        <section className="mt-5 rounded-xl border border-blue-100 bg-blue-50/70 p-4">
+          <div className="flex flex-wrap items-start justify-between gap-3">
+            <div>
+              <h3 className="font-mono text-[10px] uppercase tracking-[0.25em] text-blue-700">
+                Source coverage
+              </h3>
+              <p className="mt-1 text-sm leading-6 text-blue-950">
+                This opportunity is backed by {sourceCount} source records. The
+                engine is showing the strongest scored version while preserving
+                the original postings.
+              </p>
+            </div>
+            <span className="rounded-full border border-blue-200 bg-white px-3 py-1 font-mono text-[10px] uppercase tracking-[0.16em] text-blue-700">
+              {row.canonical?.duplicate_count ?? sourceCount - 1} duplicate
+              {(row.canonical?.duplicate_count ?? sourceCount - 1) === 1 ? "" : "s"} collapsed
+            </span>
+          </div>
+          <div className="mt-3 flex flex-wrap gap-2">
+            {sourceAliases.map((alias) => (
+              <span
+                key={`${alias.source}:${alias.source_id}:${alias.opp_id}`}
+                className={`inline-flex items-center rounded-md border px-2.5 py-1 font-mono text-[11px] uppercase tracking-[0.12em] ${
+                  alias.opp_id === row.opp_id
+                    ? "border-blue-300 bg-white text-blue-800"
+                    : "border-blue-100 bg-blue-100/70 text-blue-700"
+                }`}
+                title={`${sourceLabel(alias.source)} ${alias.source_id}`}
+              >
+                {sourceLabel(alias.source)}
+              </span>
+            ))}
+          </div>
+        </section>
       )}
 
       <section className="mt-6 grid gap-3 rounded-xl border border-zinc-200 bg-white p-4 shadow-sm md:grid-cols-3">

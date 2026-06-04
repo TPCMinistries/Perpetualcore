@@ -216,6 +216,55 @@ function escapeIlike(input: string): string {
     .trim();
 }
 
+function hasLiveDeadline(row: FeedRow): boolean {
+  if (!row.deadline) return false;
+  const deadline = new Date(row.deadline).getTime();
+  return Number.isFinite(deadline) && deadline >= Date.now();
+}
+
+function isBetterCanonicalRow(candidate: FeedRow, current: FeedRow): boolean {
+  if (candidate.fit_score !== current.fit_score) {
+    return candidate.fit_score > current.fit_score;
+  }
+
+  const candidateLive = hasLiveDeadline(candidate);
+  const currentLive = hasLiveDeadline(current);
+  if (candidateLive !== currentLive) return candidateLive;
+
+  const candidatePrimary =
+    candidate.canonical?.canonical_primary_opp_id === candidate.opp_id;
+  const currentPrimary =
+    current.canonical?.canonical_primary_opp_id === current.opp_id;
+  if (candidatePrimary !== currentPrimary) return candidatePrimary;
+
+  const candidateAliasCount = candidate.canonical?.source_aliases.length ?? 0;
+  const currentAliasCount = current.canonical?.source_aliases.length ?? 0;
+  if (candidateAliasCount !== currentAliasCount) {
+    return candidateAliasCount > currentAliasCount;
+  }
+
+  return candidate.opp_id < current.opp_id;
+}
+
+function collapseCanonicalRows(rows: FeedRow[], limit: number): FeedRow[] {
+  const byCanonical = new Map<string, FeedRow>();
+
+  for (const row of rows) {
+    const key = row.canonical?.canonical_id ?? row.opp_id;
+    const current = byCanonical.get(key);
+    if (!current || isBetterCanonicalRow(row, current)) {
+      byCanonical.set(key, row);
+    }
+  }
+
+  return Array.from(byCanonical.values())
+    .sort((a, b) => {
+      if (b.fit_score !== a.fit_score) return b.fit_score - a.fit_score;
+      return a.opp_id.localeCompare(b.opp_id);
+    })
+    .slice(0, limit);
+}
+
 // ── Main entry point ──────────────────────────────────────────────────────────
 
 export async function buildFeedQuery(filters: FeedFilters): Promise<FeedPage> {
@@ -225,11 +274,9 @@ export async function buildFeedQuery(filters: FeedFilters): Promise<FeedPage> {
   const dualMode =
     Array.isArray(filters.dual_org_ids) && filters.dual_org_ids.length > 0;
 
-  // Over-fetch ratio for dual mode. We dedup by opp_id keeping highest fit_score,
-  // so up to 50% of fetched rows could collapse in the worst case (every opp
-  // scored against both nonprofit + for-profit). 2× keeps us safe; we slice
-  // back to `limit` after dedup.
-  const fetchLimit = dualMode ? limit * 2 : limit;
+  // Over-fetch so dual-org and canonical duplicate collapse still return dense
+  // pages. We slice back to `limit` after dedup/canonical grouping.
+  const fetchLimit = dualMode ? limit * 3 : limit * 2;
 
   // Untyped client narrowing — rfp_* tables not in database.types.ts yet (per
   // the 05-03 / lib/rfp/orgs.ts pattern). The `from(table) => any` shape lets
@@ -343,8 +390,6 @@ export async function buildFeedQuery(filters: FeedFilters): Promise<FeedPage> {
       if (b.fit_score !== a.fit_score) return b.fit_score - a.fit_score;
       return a.opp_id < b.opp_id ? -1 : a.opp_id > b.opp_id ? 1 : 0;
     });
-    // After dedup we may have more than `limit` rows (we over-fetched); slice down.
-    if (workingRows.length > limit) workingRows = workingRows.slice(0, limit);
   } else {
     workingRows = rawRows;
   }
@@ -365,20 +410,22 @@ export async function buildFeedQuery(filters: FeedFilters): Promise<FeedPage> {
     }
   }
 
+  const collapsedRows = collapseCanonicalRows(rows, limit);
+
   // If a source filter caused the related row to be filtered out, the parent
   // match row will still appear with rfp_opportunities === null. The toFeedRow
   // skip above already drops those; we don't need an extra in-memory step.
 
-  // Cursor: only emit when the page is "full" (rows.length === limit). In dual
-  // mode we sliced to limit after dedup, so this still holds: a full page means
-  // there were at least `limit` distinct opps in the fetched window.
+  // Cursor advances from the fetched window, while returned rows are collapsed.
+  // This prevents duplicate aliases from producing repeated visible rows across
+  // pages.
   const next_cursor =
-    rows.length === limit
+    workingRows.length === fetchLimit && collapsedRows.length > 0
       ? {
-          fit_score: rows[rows.length - 1].fit_score,
-          opp_id: rows[rows.length - 1].opp_id,
+          fit_score: workingRows[workingRows.length - 1].fit_score,
+          opp_id: workingRows[workingRows.length - 1].opp_id,
         }
       : null;
 
-  return { rows, next_cursor };
+  return { rows: collapsedRows, next_cursor };
 }

@@ -69,6 +69,15 @@ interface ExistingProposalRow {
   status: string;
 }
 
+interface OpportunityAliasRow {
+  canonical_id: string;
+  opp_id: string;
+}
+
+interface OpportunityCanonicalRow {
+  primary_opp_id: string;
+}
+
 export async function POST(req: Request): Promise<NextResponse> {
   let body: z.infer<typeof BodySchema>;
   try {
@@ -101,14 +110,70 @@ export async function POST(req: Request): Promise<NextResponse> {
     return NextResponse.json({ error: "forbidden" }, { status: 403 });
   }
 
-  // Switch to admin client after authorization. First, avoid duplicate active
-  // proposal workspaces for the same org + opportunity.
+  // Switch to admin client after authorization. First resolve source aliases so
+  // cross-posted opportunities reuse the same proposal workspace.
   const admin = createAdminClient();
+  let effectiveOppId = body.opp_id;
+  let aliasOppIds = [body.opp_id];
+
+  const { data: seedAlias, error: seedAliasErr } = await admin
+    .from("rfp_opportunity_aliases")
+    .select("canonical_id, opp_id")
+    .eq("opp_id", body.opp_id)
+    .maybeSingle<OpportunityAliasRow>();
+  if (seedAliasErr) {
+    return NextResponse.json(
+      {
+        error: "canonical_lookup_failed",
+        detail: seedAliasErr.message.slice(0, 200),
+      },
+      { status: 500 },
+    );
+  }
+
+  if (seedAlias) {
+    const [
+      { data: canonical, error: canonicalErr },
+      { data: aliases, error: aliasesErr },
+    ] = await Promise.all([
+      admin
+        .from("rfp_opportunity_canonicals")
+        .select("primary_opp_id")
+        .eq("id", seedAlias.canonical_id)
+        .maybeSingle<OpportunityCanonicalRow>(),
+      admin
+        .from("rfp_opportunity_aliases")
+        .select("opp_id")
+        .eq("canonical_id", seedAlias.canonical_id),
+    ]);
+
+    if (canonicalErr || aliasesErr) {
+      return NextResponse.json(
+        {
+          error: "canonical_lookup_failed",
+          detail: (canonicalErr?.message ?? aliasesErr?.message ?? "unknown").slice(0, 200),
+        },
+        { status: 500 },
+      );
+    }
+
+    effectiveOppId = canonical?.primary_opp_id ?? body.opp_id;
+    aliasOppIds = Array.from(
+      new Set([
+        effectiveOppId,
+        body.opp_id,
+        ...(((aliases ?? []) as Array<{ opp_id: string }>).map((row) => row.opp_id)),
+      ]),
+    );
+  }
+
+  // Avoid duplicate active proposal workspaces for any alias in the same
+  // canonical opportunity cluster.
   const { data: existingProposal, error: existingErr } = await admin
     .from("rfp_proposals")
     .select("id, status")
     .eq("org_id", body.org_id)
-    .eq("opp_id", body.opp_id)
+    .in("opp_id", aliasOppIds)
     .in("status", ["draft", "submitted"])
     .order("updated_at", { ascending: false })
     .limit(1)
@@ -161,7 +226,7 @@ export async function POST(req: Request): Promise<NextResponse> {
   const { data: opp, error: oppErr } = await admin
     .from("rfp_opportunities")
     .select("title, agency, brief, amount_min, amount_max, deadline, url")
-    .eq("id", body.opp_id)
+    .eq("id", effectiveOppId)
     .maybeSingle<OppRow>();
   if (oppErr || !opp) {
     return NextResponse.json({ error: "opp_not_found" }, { status: 404 });
@@ -234,7 +299,7 @@ export async function POST(req: Request): Promise<NextResponse> {
     .from("rfp_proposals")
     .insert({
       org_id: body.org_id,
-      opp_id: body.opp_id,
+      opp_id: effectiveOppId,
       title: proposalTitle,
       status: "draft",
       due_date: opp.deadline,
