@@ -468,6 +468,69 @@ export default function ProposalsPage() {
       }),
     [businessOutcome, buyerName, selectedLane, timeline, workflow],
   );
+  const packageHref = `/packages?package=${paymentPackageId}&lead=${selectedLeadId || "manual"}`;
+  const accountHref = selectedLeadId ? `/dashboard/accounts/${selectedLeadId}` : "/dashboard/accounts";
+  const manualInvoiceHref = `/contact-sales?intent=manual-invoice&plan=${paymentPackageId}&lead=${selectedLeadId || "manual"}`;
+  const closeSequence = useMemo(
+    () => [
+      {
+        label: "Save the proposal",
+        detail: selectedLeadId
+          ? "Attach the current scope to the lead so future follow-up and account handoff have memory."
+          : "Choose a lead before saving if this is tied to a real buyer.",
+        action: "Save proposal to lead",
+      },
+      {
+        label: "Send the buyer email",
+        detail: "Lead with outcome, starting lane, implementation path, and the package link.",
+        action: "Copy buyer email",
+      },
+      {
+        label: "Collect payment or issue invoice",
+        detail: `${selectedLane.name} should move through package checkout or manual invoice depending on buyer preference.`,
+        action: "Open payment path",
+      },
+      {
+        label: "Open the account room",
+        detail: "Once the buyer commits, move into delivery context, tasks, and operating handoff.",
+        action: "Open account room",
+      },
+    ],
+    [selectedLane.name, selectedLeadId],
+  );
+  const closeStackText = useMemo(
+    () =>
+      [
+        `Close stack for ${buyerName}`,
+        "",
+        `Recommended lane: ${selectedLane.name} (${selectedLane.price})`,
+        `Workflow: ${workflow}`,
+        `Outcome: ${businessOutcome}`,
+        `Timeline: ${timeline}`,
+        `Next step: ${nextStep}`,
+        "",
+        "Sequence:",
+        ...closeSequence.map((step, index) => `${index + 1}. ${step.label} - ${step.detail}`),
+        "",
+        `Payment path: ${typeof window !== "undefined" ? window.location.origin : ""}${packageHref}`,
+        `Manual invoice path: ${typeof window !== "undefined" ? window.location.origin : ""}${manualInvoiceHref}`,
+        selectedLeadId ? `Account room: ${typeof window !== "undefined" ? window.location.origin : ""}${accountHref}` : "",
+      ].filter(Boolean).join("\n"),
+    [
+      accountHref,
+      businessOutcome,
+      buyerName,
+      closeSequence,
+      manualInvoiceHref,
+      nextStep,
+      packageHref,
+      selectedLane.name,
+      selectedLane.price,
+      selectedLeadId,
+      timeline,
+      workflow,
+    ],
+  );
 
   useEffect(() => {
     async function fetchLeads() {
@@ -995,15 +1058,90 @@ export default function ProposalsPage() {
                 {savingProposal ? "Saving..." : "Save proposal to lead"}
               </Button>
               <Button asChild variant="outline" className="rounded-md">
-                <Link href={`/packages?package=${paymentPackageId}&lead=${selectedLeadId || "manual"}`}>
+                <Link href={packageHref}>
                   <CreditCard className="mr-2 h-4 w-4" />
                   Open payment path
                 </Link>
               </Button>
               <Button asChild variant="outline" className="rounded-md">
-                <Link href={selectedLeadId ? `/dashboard/accounts/${selectedLeadId}` : "/dashboard/accounts"}>
+                <Link href={accountHref}>
                   <Target className="mr-2 h-4 w-4" />
                   Open account room
+                </Link>
+              </Button>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card className="rounded-lg shadow-none">
+        <CardHeader>
+          <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+            <div>
+              <CardTitle className="text-xl">Send stack</CardTitle>
+              <p className="mt-2 max-w-3xl text-sm leading-6 text-muted-foreground">
+                Use this as the proposal-to-payment operating order. It keeps the proposal, buyer message,
+                package path, invoice option, and account room connected.
+              </p>
+            </div>
+            <Button type="button" variant="outline" className="rounded-md" onClick={() => copyText(closeStackText)}>
+              <Clipboard className="mr-2 h-4 w-4" />
+              Copy stack
+            </Button>
+          </div>
+        </CardHeader>
+        <CardContent className="grid gap-4 lg:grid-cols-[1fr_360px]">
+          <div className="grid gap-3 md:grid-cols-2">
+            {closeSequence.map((step, index) => (
+              <div key={step.label} className="rounded-lg border bg-card p-4">
+                <div className="flex items-center justify-between gap-4">
+                  <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-primary">
+                    {String(index + 1).padStart(2, "0")}
+                  </span>
+                  <Badge variant="outline" className="rounded-md">
+                    {step.action}
+                  </Badge>
+                </div>
+                <p className="mt-4 text-sm font-semibold text-foreground">{step.label}</p>
+                <p className="mt-2 text-sm leading-6 text-muted-foreground">{step.detail}</p>
+              </div>
+            ))}
+          </div>
+
+          <div className="rounded-lg border bg-muted/30 p-4">
+            <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
+              Close controls
+            </p>
+            <p className="mt-2 text-sm font-semibold text-foreground">{selectedLane.name}</p>
+            <p className="mt-2 text-sm leading-6 text-muted-foreground">
+              Use package checkout for simple starts, manual invoice for relationship-led or enterprise starts,
+              then move delivery into the account room.
+            </p>
+            <div className="mt-4 grid gap-2">
+              <Button type="button" className="rounded-md" disabled={!selectedLeadId || savingProposal} onClick={saveProposalToLead}>
+                <FileText className="mr-2 h-4 w-4" />
+                {savingProposal ? "Saving..." : "Save proposal"}
+              </Button>
+              <Button type="button" variant="outline" className="rounded-md" onClick={() => copyText(buyerProposalEmail)}>
+                <MessageSquare className="mr-2 h-4 w-4" />
+                Copy buyer email
+              </Button>
+              <Button asChild variant="outline" className="rounded-md">
+                <Link href={packageHref}>
+                  <CreditCard className="mr-2 h-4 w-4" />
+                  Package checkout
+                </Link>
+              </Button>
+              <Button asChild variant="outline" className="rounded-md">
+                <Link href={manualInvoiceHref}>
+                  <DollarSign className="mr-2 h-4 w-4" />
+                  Manual invoice
+                </Link>
+              </Button>
+              <Button asChild variant="outline" className="rounded-md">
+                <Link href={accountHref}>
+                  <Target className="mr-2 h-4 w-4" />
+                  Account room
                 </Link>
               </Button>
             </div>
