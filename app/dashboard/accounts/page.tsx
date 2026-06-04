@@ -48,6 +48,11 @@ type AccountLane = {
   paymentStatus?: string;
   commercialNextStep?: string;
   closePathUpdatedAt?: string;
+  handoffContextReceived?: boolean;
+  openTaskCount?: number;
+  blockedTaskCount?: number;
+  overdueTaskCount?: number;
+  nextTaskDueDate?: string;
   createdAt: string;
   href: string;
 };
@@ -269,12 +274,32 @@ function getAccountReadiness(client: AccountLane) {
   const paymentSent = ["sent", "in_review", "paid"].includes(client.paymentStatus || "");
   const paid = client.paymentStatus === "paid" || client.status.toLowerCase().includes("paid");
   const blocked = client.paymentStatus === "blocked";
+  const hasContext = Boolean(client.handoffContextReceived);
+  const hasOpenTasks = Boolean(client.openTaskCount && client.openTaskCount > 0);
 
   if (paid) {
+    if (!hasContext) {
+      return {
+        label: "Needs handoff context",
+        detail: "Payment is clear. Send or complete the client handoff so the first lane has real operating context.",
+        score: 4,
+        tone: "blue",
+      };
+    }
+
+    if (!hasOpenTasks) {
+      return {
+        label: "Needs task plan",
+        detail: "Context is in. Sync or generate kickoff tasks before delivery gets vague.",
+        score: 4,
+        tone: "amber",
+      };
+    }
+
     return {
       label: "Ready for delivery",
-      detail: "Open the account room, confirm kickoff, and create the first task plan.",
-      score: 4,
+      detail: "Payment, context, and tasks are connected. Open the room and run the next account task.",
+      score: 5,
       tone: "emerald",
     };
   }
@@ -565,6 +590,8 @@ export default function AccountsPage() {
       waiting: 0,
       send: 0,
       blocked: 0,
+      context: 0,
+      tasks: 0,
     };
 
     data.activeClients.forEach((client) => {
@@ -573,6 +600,8 @@ export default function AccountsPage() {
       if (readiness.label === "Waiting on buyer") counts.waiting += 1;
       if (readiness.label === "Send start path") counts.send += 1;
       if (readiness.label === "Blocked") counts.blocked += 1;
+      if (readiness.label === "Needs handoff context") counts.context += 1;
+      if (readiness.label === "Needs task plan") counts.tasks += 1;
     });
 
     return counts;
@@ -885,6 +914,19 @@ export default function AccountsPage() {
                       </div>
                       <p className="mt-1 text-sm text-slate-600">{client.company}</p>
                       <p className="mt-3 text-sm leading-5 text-slate-600">{readiness.detail}</p>
+                      <div className="mt-3 flex flex-wrap gap-2 text-xs text-slate-500">
+                        <span className="rounded-md bg-slate-100 px-2 py-1">
+                          Context: {client.handoffContextReceived ? "received" : "missing"}
+                        </span>
+                        <span className="rounded-md bg-slate-100 px-2 py-1">
+                          Tasks: {client.openTaskCount || 0} open
+                        </span>
+                        {client.overdueTaskCount ? (
+                          <span className="rounded-md bg-red-50 px-2 py-1 text-red-700">
+                            {client.overdueTaskCount} overdue
+                          </span>
+                        ) : null}
+                      </div>
                     </div>
                     <div>
                       <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-slate-500">Next move</p>
@@ -925,6 +967,8 @@ export default function AccountsPage() {
             <CardContent className="grid gap-3 sm:grid-cols-2">
               {[
                 ["Ready for delivery", readinessCounts.delivery, "Open account room and start kickoff."],
+                ["Need context", readinessCounts.context, "Send client handoff or collect operating context."],
+                ["Need task plan", readinessCounts.tasks, "Sync or generate kickoff tasks."],
                 ["Waiting on buyer", readinessCounts.waiting, "Follow up on sent package or approval."],
                 ["Need start path", readinessCounts.send, "Send checkout, invoice, or procurement note."],
                 ["Blocked", readinessCounts.blocked, "Unblock payment or approval path."],

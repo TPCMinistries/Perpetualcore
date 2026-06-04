@@ -30,6 +30,15 @@ type LeadRow = {
   created_at: string;
 };
 
+type TaskRow = {
+  id: string;
+  status: string | null;
+  priority: string | null;
+  source_reference: string | null;
+  due_date: string | null;
+  tags: string[] | null;
+};
+
 type ClosePathState = {
   buyerStage?: string;
   paymentPath?: string;
@@ -48,6 +57,13 @@ type PackagePayment = {
   amount: number;
   status: string;
   createdAt: string;
+};
+
+type AccountTaskSummary = {
+  open: number;
+  blocked: number;
+  overdue: number;
+  nextDueDate?: string;
 };
 
 function formatStripeAmount(amount: number | null, currency: string | null) {
@@ -76,6 +92,30 @@ function readClosePath(lead: LeadRow): ClosePathState | null {
     commercialNextStep:
       typeof rawClosePath.commercialNextStep === "string" ? rawClosePath.commercialNextStep : undefined,
     updatedAt: typeof rawClosePath.updatedAt === "string" ? rawClosePath.updatedAt : undefined,
+  };
+}
+
+function hasHandoffContext(lead: LeadRow) {
+  return isRecord(lead.ai_insights) && isRecord(lead.ai_insights.accountHandoffContext);
+}
+
+function createTaskSummary(tasks: TaskRow[]): AccountTaskSummary {
+  const now = Date.now();
+  const openTasks = tasks.filter((task) => task.status !== "completed");
+  const blocked = openTasks.filter((task) => task.status === "blocked").length;
+  const overdue = openTasks.filter((task) => {
+    if (!task.due_date) return false;
+    return new Date(task.due_date).getTime() < now;
+  }).length;
+  const nextDueDate = openTasks
+    .filter((task) => task.due_date)
+    .sort((a, b) => new Date(a.due_date || "").getTime() - new Date(b.due_date || "").getTime())[0]?.due_date;
+
+  return {
+    open: openTasks.length,
+    blocked,
+    overdue,
+    nextDueDate: nextDueDate || undefined,
   };
 }
 
@@ -154,6 +194,23 @@ export async function GET() {
 
   const salesContacts = (salesResult.data || []) as SalesContactRow[];
   const leads = (leadsResult.data || []) as LeadRow[];
+  const leadIds = leads.map((lead) => lead.id);
+  const tasksResult =
+    leadIds.length > 0
+      ? await admin
+          .from("tasks")
+          .select("id,status,priority,source_reference,due_date,tags")
+          .in("source_reference", leadIds)
+          .limit(500)
+      : { data: [] };
+  const accountTasks = (tasksResult.data || []) as TaskRow[];
+  const tasksByLeadId = accountTasks.reduce<Record<string, TaskRow[]>>((groups, task) => {
+    if (!task.source_reference) return groups;
+    return {
+      ...groups,
+      [task.source_reference]: [...(groups[task.source_reference] || []), task],
+    };
+  }, {});
   const paidPackages = packagePayments.filter((payment) => payment.status === "paid");
   const packageRevenue = paidPackages.reduce((sum, payment) => sum + payment.amount, 0);
   const openSalesContacts = salesContacts.filter((contact) => {
@@ -170,9 +227,10 @@ export async function GET() {
   });
   const pipelineValue = openLeads.reduce((sum, lead) => sum + (lead.estimated_value || 0), 0);
 
-  const activeClients = [
+  const allActiveClients = [
     ...wonLeads.map((lead) => {
       const closePath = readClosePath(lead);
+      const taskSummary = createTaskSummary(tasksByLeadId[lead.id] || []);
       return {
         id: lead.id,
         name: lead.company || lead.name || "Account",
@@ -190,6 +248,11 @@ export async function GET() {
         paymentStatus: closePath?.paymentStatus,
         commercialNextStep: closePath?.commercialNextStep,
         closePathUpdatedAt: closePath?.updatedAt,
+        handoffContextReceived: hasHandoffContext(lead),
+        openTaskCount: taskSummary.open,
+        blockedTaskCount: taskSummary.blocked,
+        overdueTaskCount: taskSummary.overdue,
+        nextTaskDueDate: taskSummary.nextDueDate,
         createdAt: lead.created_at,
         href: `/dashboard/accounts/${lead.id}`,
       };
@@ -206,6 +269,10 @@ export async function GET() {
       paymentPath: "package_checkout",
       paymentStatus: "paid",
       commercialNextStep: "Confirm intake context and onboarding window",
+      handoffContextReceived: false,
+      openTaskCount: 0,
+      blockedTaskCount: 0,
+      overdueTaskCount: 0,
       createdAt: payment.createdAt,
       href: payment.leadId ? `/dashboard/accounts/${payment.leadId}` : `/contact-sales?intent=post-payment-intake&session_id=${encodeURIComponent(payment.id)}`,
     })),
@@ -219,10 +286,15 @@ export async function GET() {
       nextStep: "Qualify fit and define first operating lane",
       buyerStage: "discovery",
       paymentStatus: "not_sent",
+      handoffContextReceived: false,
+      openTaskCount: 0,
+      blockedTaskCount: 0,
+      overdueTaskCount: 0,
       createdAt: contact.created_at || new Date().toISOString(),
       href: "/dashboard/leads",
     })),
-  ].slice(0, 10);
+  ];
+  const activeClients = allActiveClients.slice(0, 12);
 
   const closePathActions = wonLeads
     .map((lead) => ({ lead, closePath: readClosePath(lead) }))
@@ -263,13 +335,13 @@ export async function GET() {
       packageRevenue,
       packageRevenueFormatted: formatStripeAmount(packageRevenue, "usd").formatted,
       openLeadCount: openLeads.length + openSalesContacts.length,
-      activeClientCount: activeClients.length,
-      paidStartCount: activeClients.filter((client) => client.paymentStatus === "paid").length,
-      paymentReadyCount: activeClients.filter((client) =>
+      activeClientCount: allActiveClients.length,
+      paidStartCount: allActiveClients.filter((client) => client.paymentStatus === "paid").length,
+      paymentReadyCount: allActiveClients.filter((client) =>
         ["sent", "in_review"].includes(client.paymentStatus || ""),
       ).length,
-      blockedClosePathCount: activeClients.filter((client) => client.paymentStatus === "blocked").length,
-      proposalCount: activeClients.filter((client) => client.buyerStage === "proposal").length,
+      blockedClosePathCount: allActiveClients.filter((client) => client.paymentStatus === "blocked").length,
+      proposalCount: allActiveClients.filter((client) => client.buyerStage === "proposal").length,
       pipelineValue,
       pipelineValueFormatted: new Intl.NumberFormat("en-US", {
         style: "currency",
