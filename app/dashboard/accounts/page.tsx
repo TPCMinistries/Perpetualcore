@@ -264,6 +264,64 @@ function getAccountFollowUp(client: AccountLane) {
   return `Hi ${client.name},\n\nBased on where we are, I would start with ${client.lane}. The next step is to confirm the payment/start path and the first outcome we should install.\n\nRecommended next move: ${client.nextStep}`;
 }
 
+function getAccountReadiness(client: AccountLane) {
+  const hasPaymentPath = Boolean(client.paymentPath);
+  const paymentSent = ["sent", "in_review", "paid"].includes(client.paymentStatus || "");
+  const paid = client.paymentStatus === "paid" || client.status.toLowerCase().includes("paid");
+  const blocked = client.paymentStatus === "blocked";
+
+  if (paid) {
+    return {
+      label: "Ready for delivery",
+      detail: "Open the account room, confirm kickoff, and create the first task plan.",
+      score: 4,
+      tone: "emerald",
+    };
+  }
+
+  if (blocked) {
+    return {
+      label: "Blocked",
+      detail: "Send procurement, invoice, or approval language to unblock the buying path.",
+      score: 1,
+      tone: "red",
+    };
+  }
+
+  if (paymentSent) {
+    return {
+      label: "Waiting on buyer",
+      detail: "Follow up on the sent package, invoice, or approval path.",
+      score: 3,
+      tone: "amber",
+    };
+  }
+
+  if (hasPaymentPath) {
+    return {
+      label: "Send start path",
+      detail: "The package path is chosen. Send the buyer link, invoice request, or procurement note.",
+      score: 2,
+      tone: "blue",
+    };
+  }
+
+  return {
+    label: "Needs routing",
+    detail: "Choose the package lane and payment path before delivery starts.",
+    score: 0,
+    tone: "slate",
+  };
+}
+
+function getReadinessClasses(tone: string) {
+  if (tone === "emerald") return "border-emerald-200 bg-emerald-50 text-emerald-800";
+  if (tone === "red") return "border-red-200 bg-red-50 text-red-800";
+  if (tone === "amber") return "border-amber-200 bg-amber-50 text-amber-800";
+  if (tone === "blue") return "border-blue-200 bg-blue-50 text-blue-800";
+  return "border-slate-200 bg-slate-50 text-slate-700";
+}
+
 function formatCurrency(value?: number | null) {
   return new Intl.NumberFormat("en-US", {
     style: "currency",
@@ -494,6 +552,31 @@ export default function AccountsPage() {
       ),
     [filteredAccounts],
   );
+  const commandQueue = useMemo(
+    () =>
+      [...filteredAccounts]
+        .sort((a, b) => getAccountReadiness(b).score - getAccountReadiness(a).score)
+        .slice(0, 6),
+    [filteredAccounts],
+  );
+  const readinessCounts = useMemo(() => {
+    const counts = {
+      delivery: 0,
+      waiting: 0,
+      send: 0,
+      blocked: 0,
+    };
+
+    data.activeClients.forEach((client) => {
+      const readiness = getAccountReadiness(client);
+      if (readiness.label === "Ready for delivery") counts.delivery += 1;
+      if (readiness.label === "Waiting on buyer") counts.waiting += 1;
+      if (readiness.label === "Send start path") counts.send += 1;
+      if (readiness.label === "Blocked") counts.blocked += 1;
+    });
+
+    return counts;
+  }, [data.activeClients]);
 
   return (
     <div className="space-y-6 pb-10">
@@ -765,6 +848,132 @@ export default function AccountsPage() {
             </CardContent>
           </Card>
         ))}
+      </div>
+
+      <div className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
+        <Card className="rounded-lg shadow-none">
+          <CardHeader>
+            <div className="flex items-center justify-between gap-4">
+              <div>
+                <CardTitle className="text-xl">Account command queue</CardTitle>
+                <p className="mt-1 text-sm text-slate-600">
+                  Sorted by readiness so the best next account action is visible without opening every room.
+                </p>
+              </div>
+              <Bot className="h-5 w-5 text-violet-600" />
+            </div>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            {commandQueue.length === 0 ? (
+              <div className="rounded-lg border border-dashed p-5 text-sm text-slate-600">
+                No accounts in the current queue.
+              </div>
+            ) : (
+              commandQueue.map((client) => {
+                const readiness = getAccountReadiness(client);
+                return (
+                  <div
+                    key={client.id}
+                    className="grid gap-4 rounded-lg border bg-white p-4 lg:grid-cols-[minmax(0,1fr)_180px_150px]"
+                  >
+                    <div>
+                      <div className="flex flex-wrap items-center gap-2">
+                        <p className="font-semibold text-slate-950">{client.name}</p>
+                        <span className={`rounded-md border px-2 py-1 text-xs font-medium ${getReadinessClasses(readiness.tone)}`}>
+                          {readiness.label}
+                        </span>
+                      </div>
+                      <p className="mt-1 text-sm text-slate-600">{client.company}</p>
+                      <p className="mt-3 text-sm leading-5 text-slate-600">{readiness.detail}</p>
+                    </div>
+                    <div>
+                      <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-slate-500">Next move</p>
+                      <p className="mt-2 text-sm font-medium leading-5 text-slate-950">{client.nextStep}</p>
+                    </div>
+                    <div className="grid content-start gap-2">
+                      <Button asChild size="sm" className="h-8 rounded-md">
+                        <Link href={client.href}>
+                          Open room <ArrowRight className="ml-2 h-3.5 w-3.5" />
+                        </Link>
+                      </Button>
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="outline"
+                        className="h-8 rounded-md"
+                        onClick={() => copyAccountText("Follow-up", getAccountFollowUp(client))}
+                      >
+                        <Mail className="mr-2 h-3.5 w-3.5" />
+                        Follow-up
+                      </Button>
+                    </div>
+                  </div>
+                );
+              })
+            )}
+          </CardContent>
+        </Card>
+
+        <div className="space-y-6">
+          <Card className="rounded-lg shadow-none">
+            <CardHeader>
+              <div className="flex items-center justify-between gap-4">
+                <CardTitle className="text-xl">Readiness breakdown</CardTitle>
+                <Target className="h-5 w-5 text-violet-600" />
+              </div>
+            </CardHeader>
+            <CardContent className="grid gap-3 sm:grid-cols-2">
+              {[
+                ["Ready for delivery", readinessCounts.delivery, "Open account room and start kickoff."],
+                ["Waiting on buyer", readinessCounts.waiting, "Follow up on sent package or approval."],
+                ["Need start path", readinessCounts.send, "Send checkout, invoice, or procurement note."],
+                ["Blocked", readinessCounts.blocked, "Unblock payment or approval path."],
+              ].map(([label, value, detail]) => (
+                <div key={label} className="rounded-lg border bg-white p-4">
+                  <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-slate-500">{label}</p>
+                  <p className="mt-2 text-2xl font-semibold text-slate-950">{value}</p>
+                  <p className="mt-2 text-xs leading-5 text-slate-600">{detail}</p>
+                </div>
+              ))}
+            </CardContent>
+          </Card>
+
+          <Card className="rounded-lg shadow-none">
+            <CardHeader>
+              <div className="flex items-center justify-between gap-4">
+                <CardTitle className="text-xl">Recent package starts</CardTitle>
+                <CircleDollarSign className="h-5 w-5 text-violet-600" />
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              {data.recentPackages.length === 0 ? (
+                <div className="rounded-lg border border-dashed p-4 text-sm text-slate-600">
+                  No package starts recorded yet.
+                </div>
+              ) : (
+                data.recentPackages.slice(0, 4).map((payment) => (
+                  <div key={payment.id} className="rounded-lg border bg-white p-4">
+                    <div className="flex items-start justify-between gap-3">
+                      <div>
+                        <p className="text-sm font-semibold text-slate-950">{payment.packageName}</p>
+                        <p className="mt-1 text-xs text-slate-600">
+                          {payment.customerName || payment.customerEmail || "Unknown buyer"}
+                        </p>
+                      </div>
+                      <Badge className="rounded-md" variant={payment.status === "paid" ? "default" : "outline"}>
+                        {normalizeStatus(payment.status)}
+                      </Badge>
+                    </div>
+                    <div className="mt-3 flex items-center justify-between gap-3 text-sm">
+                      <span className="font-semibold text-slate-950">{payment.amountFormatted}</span>
+                      <span className="text-xs text-slate-500">{formatDate(payment.createdAt)}</span>
+                    </div>
+                  </div>
+                ))
+              )}
+            </CardContent>
+          </Card>
+        </div>
       </div>
 
       <div className="grid gap-4 md:grid-cols-4">
