@@ -23,6 +23,15 @@ type FormState = {
   notes: string;
 };
 
+type SubmitResponse = {
+  error?: string;
+  taskSync?: {
+    created: number;
+    skipped: number;
+    error: string | null;
+  };
+};
+
 const initialState: FormState = {
   workflowOwner: "",
   toolsAndData: "",
@@ -71,6 +80,7 @@ export function HandoffContextForm({ leadId, token, defaultOwner }: HandoffConte
   });
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [taskSyncMessage, setTaskSyncMessage] = useState("");
   const [fallbackBrief, setFallbackBrief] = useState("");
 
   function updateField(field: keyof FormState, value: string) {
@@ -88,13 +98,18 @@ export function HandoffContextForm({ leadId, token, defaultOwner }: HandoffConte
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ token, ...form }),
       });
-      const data = (await response.json()) as { error?: string };
+      const data = (await response.json()) as SubmitResponse;
 
       if (!response.ok) {
         throw new Error(data.error || "Failed to send context");
       }
 
       setSubmitted(true);
+      setTaskSyncMessage(
+        data.taskSync?.error
+          ? "Your context was saved. Kickoff tasks may need to be generated manually from the account room."
+          : `${data.taskSync?.created || 0} kickoff task${data.taskSync?.created === 1 ? "" : "s"} created for the account room.`,
+      );
       toast.success("Handoff context sent");
     } catch (error) {
       setFallbackBrief(buildKickoffBrief(form));
@@ -125,6 +140,9 @@ export function HandoffContextForm({ leadId, token, defaultOwner }: HandoffConte
               Perpetual Core can now turn this into the kickoff map, assistant behavior brief, and
               first operating lane tasks.
             </p>
+            {taskSyncMessage ? (
+              <p className="mt-2 text-sm leading-6 text-emerald-900">{taskSyncMessage}</p>
+            ) : null}
           </div>
         </div>
       </div>
