@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/server";
 import { sendSequenceEmail } from "@/lib/email/send-sequence-emails";
+import { isAuthorizedCronRequest } from "@/lib/cron/auth";
 
 export const runtime = 'nodejs';
 export const maxDuration = 300; // 5 minutes
@@ -8,12 +9,11 @@ export const maxDuration = 300; // 5 minutes
 export async function GET(req: NextRequest) {
   try {
     // Verify cron secret
-    const authHeader = req.headers.get('authorization');
-    if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
+    if (!isAuthorizedCronRequest(req)) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const supabase = await createClient();
+    const supabase = createAdminClient();
 
     // Get all leads ready for next email
     const { data: leads, error } = await supabase

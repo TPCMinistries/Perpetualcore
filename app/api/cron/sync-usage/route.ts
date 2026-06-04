@@ -2,12 +2,10 @@ import { createAdminClient } from "@/lib/supabase/server";
 import { NextRequest } from "next/server";
 import { syncUsageToStripe } from "@/lib/billing/metering";
 import { sendAlertNotifications, resetAlertsForBillingPeriod } from "@/lib/billing/alerts";
+import { isAuthorizedCronRequest } from "@/lib/cron/auth";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
-
-// Verify cron secret to prevent unauthorized access
-const CRON_SECRET = process.env.CRON_SECRET;
 
 /**
  * POST /api/cron/sync-usage
@@ -18,9 +16,7 @@ const CRON_SECRET = process.env.CRON_SECRET;
  */
 export async function POST(req: NextRequest) {
   try {
-    // Verify authorization
-    const authHeader = req.headers.get("authorization");
-    if (CRON_SECRET && authHeader !== `Bearer ${CRON_SECRET}`) {
+    if (!isAuthorizedCronRequest(req)) {
       return Response.json({ error: "Unauthorized" }, { status: 401 });
     }
 
@@ -109,9 +105,7 @@ export async function POST(req: NextRequest) {
  * Check status of sync job (for monitoring)
  */
 export async function GET(req: NextRequest) {
-  // Verify authorization
-  const authHeader = req.headers.get("authorization");
-  if (CRON_SECRET && authHeader !== `Bearer ${CRON_SECRET}`) {
+  if (!isAuthorizedCronRequest(req)) {
     return Response.json({ error: "Unauthorized" }, { status: 401 });
   }
 

@@ -16,23 +16,15 @@ import {
 } from "@/lib/ai/proactive-nudger";
 import { processScheduledBehaviors } from "@/lib/agents/inbox/scheduler";
 import { NextRequest } from "next/server";
+import { isAuthorizedCronRequest } from "@/lib/cron/auth";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 export const maxDuration = 60; // Allow up to 60 seconds
 
-// Verify cron secret to prevent unauthorized calls
-const CRON_SECRET = process.env.CRON_SECRET;
-
 export async function GET(req: NextRequest) {
-  // Verify authorization
-  const authHeader = req.headers.get("authorization");
-  if (CRON_SECRET && authHeader !== `Bearer ${CRON_SECRET}`) {
-    // Also check for Vercel cron header
-    const vercelCron = req.headers.get("x-vercel-cron");
-    if (!vercelCron) {
-      return Response.json({ error: "Unauthorized" }, { status: 401 });
-    }
+  if (!isAuthorizedCronRequest(req)) {
+    return Response.json({ error: "Unauthorized" }, { status: 401 });
   }
 
   const supabase = createAdminClient();

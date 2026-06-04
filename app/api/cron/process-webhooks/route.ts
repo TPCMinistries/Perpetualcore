@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { processPendingDeliveries } from "@/lib/webhooks";
+import { isAuthorizedCronRequest } from "@/lib/cron/auth";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -21,13 +22,8 @@ export const maxDuration = 60; // 60 second timeout
  * }
  */
 export async function GET(req: NextRequest) {
-  // Verify cron secret (if configured)
-  const cronSecret = process.env.CRON_SECRET;
-  if (cronSecret) {
-    const authHeader = req.headers.get("authorization");
-    if (authHeader !== `Bearer ${cronSecret}`) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+  if (!isAuthorizedCronRequest(req)) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
   console.log("[Webhooks Cron] Starting webhook delivery processing...");

@@ -1,21 +1,19 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/server";
 import { resend, EMAIL_FROM } from "@/lib/email/config";
 import { renderEmailTemplate } from "@/lib/email/templates/sequences/template-mapper";
+import { isAuthorizedCronRequest } from "@/lib/cron/auth";
 
 // This endpoint should be called by a cron job (Vercel Cron or external service)
 // Add authentication header check for security
-const CRON_SECRET = process.env.CRON_SECRET || "your-secret-key-here";
 
 export async function GET(request: NextRequest) {
   try {
-    // Verify cron secret
-    const authHeader = request.headers.get("authorization");
-    if (authHeader !== `Bearer ${CRON_SECRET}`) {
+    if (!isAuthorizedCronRequest(request)) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const supabase = await createClient();
+    const supabase = createAdminClient();
 
     // Get pending emails to send (using our database function)
     const { data: pendingEmails, error } = await supabase.rpc(

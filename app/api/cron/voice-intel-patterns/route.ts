@@ -1,12 +1,11 @@
 import { createAdminClient } from "@/lib/supabase/server";
 import { NextRequest } from "next/server";
 import { detectPatterns } from "@/lib/voice-intel/intelligence";
+import { isAuthorizedCronRequest } from "@/lib/cron/auth";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 export const maxDuration = 120;
-
-const CRON_SECRET = process.env.CRON_SECRET;
 
 /**
  * POST /api/cron/voice-intel-patterns
@@ -14,8 +13,7 @@ const CRON_SECRET = process.env.CRON_SECRET;
  */
 export async function POST(req: NextRequest) {
   try {
-    const authHeader = req.headers.get("authorization");
-    if (CRON_SECRET && authHeader !== `Bearer ${CRON_SECRET}`) {
+    if (!isAuthorizedCronRequest(req)) {
       return Response.json({ error: "Unauthorized" }, { status: 401 });
     }
 
