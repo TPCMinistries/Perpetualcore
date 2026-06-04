@@ -20,6 +20,7 @@ import { createClient } from "@/lib/supabase/server";
 import { ensureOpportunityEnrichment } from "@/lib/rfp/enrichment/store";
 import type { OpportunityEnrichment } from "@/lib/rfp/enrichment/generate";
 import { tierFor } from "@/lib/rfp/scoring/weights";
+import { loadCanonicalMetadataForOpps } from "@/lib/rfp/canonical-read";
 
 const QuerySchema = z.object({
   org_id: z.string().uuid(),
@@ -51,18 +52,7 @@ interface DetailJoinRow {
 }
 
 interface RfpClient {
-  from(table: "rfp_opp_matches"): {
-    select(columns: string): {
-      eq(column: "opp_id" | "org_id", value: string): {
-        eq(column: "opp_id" | "org_id", value: string): {
-          maybeSingle(): Promise<{
-            data: DetailJoinRow | null;
-            error: { message: string } | null;
-          }>;
-        };
-      };
-    };
-  };
+  from(table: string): any;
 }
 
 export async function GET(
@@ -130,6 +120,14 @@ export async function GET(
     console.error("[/api/rfp/opps/[id] GET] enrichment unavailable", e);
   }
 
+  let canonical = null;
+  try {
+    const canonicalByOpp = await loadCanonicalMetadataForOpps(rfp, [row.opp_id]);
+    canonical = canonicalByOpp.get(row.opp_id) ?? null;
+  } catch (e) {
+    console.error("[/api/rfp/opps/[id] GET] canonical metadata unavailable", e);
+  }
+
   return NextResponse.json({
     opp_id: row.opp_id,
     source: opp.source,
@@ -153,5 +151,6 @@ export async function GET(
     geo: opp.geo,
     raw_json: opp.raw_json,
     enrichment,
+    canonical,
   });
 }

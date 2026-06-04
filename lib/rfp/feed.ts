@@ -52,6 +52,10 @@
 
 import { createClient } from "@/lib/supabase/server";
 import { tierFor, type FitTier } from "@/lib/rfp/scoring/weights";
+import {
+  loadCanonicalMetadataForOpps,
+  type OpportunityCanonicalMetadata,
+} from "@/lib/rfp/canonical-read";
 
 // ── Public types ─────────────────────────────────────────────────────────────
 
@@ -114,6 +118,7 @@ export interface FeedRow {
   scored_for_org_id: string;
   scored_for_org_name: string;
   scored_for_org_type: "nonprofit" | "forprofit" | "dual";
+  canonical: OpportunityCanonicalMetadata | null;
 }
 
 export interface FeedPage {
@@ -198,6 +203,7 @@ function toFeedRow(r: MatchJoinRow): FeedRow | null {
     scored_for_org_id: org.id,
     scored_for_org_name: org.name,
     scored_for_org_type: org.type,
+    canonical: null,
   };
 }
 
@@ -347,6 +353,16 @@ export async function buildFeedQuery(filters: FeedFilters): Promise<FeedPage> {
   for (const r of workingRows) {
     const mapped = toFeedRow(r);
     if (mapped) rows.push(mapped);
+  }
+
+  if (rows.length > 0) {
+    const canonicalByOpp = await loadCanonicalMetadataForOpps(
+      rfp,
+      rows.map((row) => row.opp_id),
+    );
+    for (const row of rows) {
+      row.canonical = canonicalByOpp.get(row.opp_id) ?? null;
+    }
   }
 
   // If a source filter caused the related row to be filtered out, the parent
