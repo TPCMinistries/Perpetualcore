@@ -23,6 +23,10 @@ import {
   normalizeOpportunity,
   type OpportunityRow,
 } from "@/lib/rfp/ingest/normalize";
+import {
+  persistCanonicalAliases,
+  type OpportunityRowWithId,
+} from "@/lib/rfp/ingest/canonicalize";
 import { fetchSamGovOpportunities } from "@/lib/rfp/ingest/sam-gov";
 import { fetchGrantsGovOpportunities } from "@/lib/rfp/ingest/grants-gov";
 import { fetchSimplerGrantsOpportunities } from "@/lib/rfp/ingest/simpler-grants";
@@ -42,6 +46,7 @@ export interface IngestSourceResult {
     | "nsf_grants";
   fetched: number;
   upserted: number;
+  canonicalized: number;
   /**
    * Opportunity IDs that were upserted in this run.
    * Phase 05-03 scoring (lib/rfp/scoring/recompute.ts) consumes these to score
@@ -90,9 +95,12 @@ function normalizeBatch(
 async function upsertBatch(rows: OpportunityRow[]): Promise<{
   upserted: number;
   upserted_ids: string[];
+  upserted_rows: OpportunityRowWithId[];
   errors: string[];
 }> {
-  if (rows.length === 0) return { upserted: 0, upserted_ids: [], errors: [] };
+  if (rows.length === 0) {
+    return { upserted: 0, upserted_ids: [], upserted_rows: [], errors: [] };
+  }
 
   // Cast through `{ from: (table: string) => any }` because rfp_* tables
   // are not yet in lib/supabase/database.types.ts (regen deferred per
@@ -109,19 +117,30 @@ async function upsertBatch(rows: OpportunityRow[]): Promise<{
       onConflict: "source,source_id",
       ignoreDuplicates: false,
     })
-    .select("id");
+    .select(
+      "id, source, source_id, title, agency, type, amount_min, amount_max, deadline, posted_at, brief, keywords, geo, url, needs_review, last_seen_at, raw_json",
+    );
 
   if (error) {
-    return { upserted: 0, upserted_ids: [], errors: [`upsert: ${error.message}`] };
+    return {
+      upserted: 0,
+      upserted_ids: [],
+      upserted_rows: [],
+      errors: [`upsert: ${error.message}`],
+    };
   }
 
   // Surface the upserted IDs so the cron route can hand them to Phase 05-03
   // scoring. The cast above loses supabase-js's type for `data`; narrow inline.
-  type IdRow = { id: string };
-  const idRows = (data ?? []) as unknown as IdRow[];
-  const upserted_ids = idRows.map((r) => String(r.id));
+  const upsertedRows = (data ?? []) as unknown as OpportunityRowWithId[];
+  const upserted_ids = upsertedRows.map((r) => String(r.id));
 
-  return { upserted: idRows.length || rows.length, upserted_ids, errors: [] };
+  return {
+    upserted: upsertedRows.length || rows.length,
+    upserted_ids,
+    upserted_rows: upsertedRows,
+    errors: [],
+  };
 }
 
 /**
@@ -158,6 +177,7 @@ export async function runFederalIngest(): Promise<IngestRunResult> {
         source: spec.name,
         fetched: 0,
         upserted: 0,
+        canonicalized: 0,
         upserted_ids: [],
         errors: [`fetcher rejected: ${reason}`],
       });
@@ -166,14 +186,17 @@ export async function runFederalIngest(): Promise<IngestRunResult> {
 
     const inputs = outcome.value;
     const { rows, errors: normErrors } = normalizeBatch(inputs);
-    const { upserted, upserted_ids, errors: upsertErrors } = await upsertBatch(rows);
+    const { upserted, upserted_ids, upserted_rows, errors: upsertErrors } =
+      await upsertBatch(rows);
+    const canonicalResult = await persistCanonicalAliases(upserted_rows);
 
     results.push({
       source: spec.name,
       fetched: inputs.length,
       upserted,
+      canonicalized: canonicalResult.aliases_upserted,
       upserted_ids,
-      errors: [...normErrors, ...upsertErrors],
+      errors: [...normErrors, ...upsertErrors, ...canonicalResult.errors],
     });
   }
 
