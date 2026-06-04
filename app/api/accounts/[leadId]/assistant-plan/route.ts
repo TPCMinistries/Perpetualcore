@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import type { SupabaseClient } from "@supabase/supabase-js";
 import OpenAI from "openai";
 import { createAdminClient, createClient } from "@/lib/supabase/server";
 
@@ -6,6 +7,43 @@ export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 type InsightRecord = Record<string, unknown>;
+type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[];
+
+type PcMetadataRow = {
+  id: string;
+  created_by: string | null;
+  metadata: Json;
+  next_step?: string | null;
+};
+
+type PcMetadataUpdate = {
+  metadata?: Json;
+  next_step?: string | null;
+  updated_at?: string;
+};
+
+type PcDatabase = {
+  public: {
+    Tables: {
+      pc_accounts: {
+        Row: PcMetadataRow;
+        Insert: PcMetadataRow;
+        Update: PcMetadataUpdate;
+        Relationships: [];
+      };
+      pc_engagements: {
+        Row: PcMetadataRow;
+        Insert: PcMetadataRow;
+        Update: PcMetadataUpdate;
+        Relationships: [];
+      };
+    };
+    Views: Record<string, never>;
+    Functions: Record<string, never>;
+    Enums: Record<string, never>;
+    CompositeTypes: Record<string, never>;
+  };
+};
 
 type LeadRecord = {
   id: string;
@@ -74,6 +112,14 @@ function isRecord(value: unknown): value is InsightRecord {
 
 function readString(value: unknown) {
   return typeof value === "string" && value.trim().length > 0 ? value.trim() : "";
+}
+
+function toJsonRecord(value: unknown): Record<string, Json> {
+  return isRecord(value) ? (value as Record<string, Json>) : {};
+}
+
+function getPcClient() {
+  return createAdminClient() as unknown as SupabaseClient<PcDatabase>;
 }
 
 function getAccountName(lead: LeadRecord) {
@@ -315,6 +361,92 @@ async function generateAssistantPlan(lead: LeadRecord, tasks: AccountTask[]) {
   }
 }
 
+async function syncPermanentMetadata(
+  userId: string,
+  currentInsights: InsightRecord,
+  plan: AssistantPlan,
+  now: string,
+) {
+  const pc = getPcClient();
+  const accountId = readString(currentInsights.accountId);
+  const engagementId = readString(currentInsights.engagementId);
+  const nextMetadata = {
+    account_plan: plan.accountPlan,
+    account_milestones: plan.accountMilestones,
+    assistant_behavior: plan.assistantBehavior,
+    assistant_plan: plan,
+    account_plan_updated_at: now,
+    account_next_step: plan.commercialNextStep,
+    last_synced_at: now,
+  } satisfies Record<string, Json>;
+  const sync = {
+    account: accountId ? "skipped" : "not_linked",
+    engagement: engagementId ? "skipped" : "not_linked",
+    error: null as string | null,
+  };
+
+  if (accountId) {
+    const { data: account, error: accountReadError } = await pc
+      .from("pc_accounts")
+      .select("id,metadata")
+      .eq("id", accountId)
+      .eq("created_by", userId)
+      .maybeSingle();
+
+    if (accountReadError) {
+      sync.account = "error";
+      sync.error = "Could not read permanent account metadata";
+    } else if (account) {
+      const { error: accountUpdateError } = await pc
+        .from("pc_accounts")
+        .update({
+          metadata: {
+            ...toJsonRecord(account.metadata),
+            ...nextMetadata,
+          },
+          updated_at: now,
+        })
+        .eq("id", accountId)
+        .eq("created_by", userId);
+
+      sync.account = accountUpdateError ? "error" : "synced";
+      if (accountUpdateError) sync.error = "Could not sync permanent account metadata";
+    }
+  }
+
+  if (engagementId) {
+    const { data: engagement, error: engagementReadError } = await pc
+      .from("pc_engagements")
+      .select("id,metadata")
+      .eq("id", engagementId)
+      .eq("created_by", userId)
+      .maybeSingle();
+
+    if (engagementReadError) {
+      sync.engagement = "error";
+      sync.error = sync.error || "Could not read permanent engagement metadata";
+    } else if (engagement) {
+      const { error: engagementUpdateError } = await pc
+        .from("pc_engagements")
+        .update({
+          metadata: {
+            ...toJsonRecord(engagement.metadata),
+            ...nextMetadata,
+          },
+          next_step: plan.commercialNextStep,
+          updated_at: now,
+        })
+        .eq("id", engagementId)
+        .eq("created_by", userId);
+
+      sync.engagement = engagementUpdateError ? "error" : "synced";
+      if (engagementUpdateError) sync.error = sync.error || "Could not sync permanent engagement metadata";
+    }
+  }
+
+  return sync;
+}
+
 export async function POST(
   _request: NextRequest,
   { params }: { params: Promise<{ leadId: string }> },
@@ -392,6 +524,8 @@ export async function POST(
       return NextResponse.json({ error: "Could not save assistant plan" }, { status: 500 });
     }
 
+    const permanentSync = await syncPermanentMetadata(user.id, currentInsights, plan, now);
+
     await supabase.from("lead_activities").insert({
       lead_id: leadId,
       user_id: user.id,
@@ -405,6 +539,7 @@ export async function POST(
       success: true,
       aiGenerated: generated.aiGenerated,
       plan,
+      permanentSync,
       lead: updatedLead,
     });
   } catch (error) {
