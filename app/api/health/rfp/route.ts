@@ -90,6 +90,8 @@ export async function GET(): Promise<NextResponse> {
       lastOpp,
       openDrift,
       cost24hRows,
+      memberships,
+      matches,
     ] = await Promise.all([
       admin.from("rfp_orgs").select("id", { count: "exact", head: true }),
       admin.from("rfp_proposals").select("id", { count: "exact", head: true }),
@@ -118,6 +120,8 @@ export async function GET(): Promise<NextResponse> {
         .select("cost_usd")
         .gte("created_at", dayAgo)
         .returns<{ cost_usd: number | string | null }[]>(),
+      admin.from("rfp_user_orgs").select("org_id").returns<{ org_id: string }[]>(),
+      admin.from("rfp_opp_matches").select("opp_id", { count: "exact", head: true }),
     ]);
 
     const dbErrors = [
@@ -128,6 +132,8 @@ export async function GET(): Promise<NextResponse> {
       errorDetail("rfp_opportunities.latest", lastOpp),
       errorDetail("rfp_source_drift", openDrift),
       errorDetail("rfp_agent_sessions.cost_24h", cost24hRows),
+      errorDetail("rfp_user_orgs.active_orgs", memberships),
+      errorDetail("rfp_opp_matches.count", matches),
     ].filter((row): row is string => Boolean(row));
 
     const ai_cost_24h_usd = (cost24hRows.data ?? []).reduce(
@@ -137,6 +143,12 @@ export async function GET(): Promise<NextResponse> {
     const lastOppAgeHours = hoursSince(lastOpp.data?.created_at);
     const lastCronAgeHours = hoursSince(lastCron.data?.executed_at);
     const lastCronStatus = lastCron.data?.status ?? null;
+    const activeOrgCount = new Set((memberships.data ?? []).map((row) => row.org_id)).size;
+    const opportunityCount = opportunities.count ?? 0;
+    const matchCount = matches.count ?? 0;
+    const expectedMatches = opportunityCount * activeOrgCount;
+    const scoringCoverage =
+      expectedMatches > 0 ? Math.min(100, (matchCount / expectedMatches) * 100) : null;
 
     const checks: HealthCheck[] = [
       check(
@@ -171,6 +183,21 @@ export async function GET(): Promise<NextResponse> {
           : lastOppAgeHours === null
           ? "No opportunity ingestion timestamp found."
           : `Latest opportunity ingested ${formatHours(lastOppAgeHours)} ago.`,
+      ),
+      check(
+        "scoring_coverage",
+        memberships.error || matches.error || opportunities.error
+          ? "fail"
+          : expectedMatches === 0
+            ? "warn"
+            : matchCount >= expectedMatches
+              ? "ok"
+              : "warn",
+        memberships.error || matches.error || opportunities.error
+          ? "Scoring coverage query failed."
+          : expectedMatches === 0
+            ? "No active org/opportunity scoring target found."
+            : `${matchCount.toLocaleString("en-US")} / ${expectedMatches.toLocaleString("en-US")} expected org-opportunity matches (${(scoringCoverage ?? 0).toFixed(1)}%).`,
       ),
       check(
         "cron_freshness",
@@ -252,8 +279,13 @@ export async function GET(): Promise<NextResponse> {
       },
       totals: {
         orgs: orgs.count ?? 0,
+        active_orgs: activeOrgCount,
         proposals: proposals.count ?? 0,
-        opportunities: opportunities.count ?? 0,
+        opportunities: opportunityCount,
+        matches: matchCount,
+        expected_matches: expectedMatches,
+        scoring_coverage_percent:
+          scoringCoverage === null ? null : Math.round(scoringCoverage * 10) / 10,
       },
       last_cron: lastCron.data
         ? {

@@ -191,8 +191,9 @@ function SectionHeader({
 
 function PlatformTilesRow({ totals }: { totals: PlatformTotals }) {
   return (
-    <div className="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-6">
+    <div className="grid grid-cols-2 gap-3 md:grid-cols-4 lg:grid-cols-8">
       <Tile label="Orgs" value={formatNumber(totals.orgs)} />
+      <Tile label="Active orgs" value={formatNumber(totals.active_orgs)} />
       <Tile
         label="Proposals"
         value={formatNumber(totals.proposals)}
@@ -201,6 +202,21 @@ function PlatformTilesRow({ totals }: { totals: PlatformTotals }) {
       <Tile label="Reviewer runs" value={formatNumber(totals.reviewer_runs)} />
       <Tile label="Vault chunks" value={formatNumber(totals.vault_chunks)} />
       <Tile label="Opportunities" value={formatNumber(totals.opportunities)} />
+      <Tile
+        label="Score coverage"
+        value={
+          totals.scoring_coverage_percent === null
+            ? "—"
+            : `${totals.scoring_coverage_percent.toFixed(1)}%`
+        }
+        sub={`${formatNumber(totals.matches)} / ${formatNumber(totals.expected_matches)}`}
+        tone={
+          totals.scoring_coverage_percent === null ||
+          totals.scoring_coverage_percent < 99.5
+            ? "amber"
+            : "emerald"
+        }
+      />
       <Tile
         label="AI cost · 30d"
         value={formatCurrency(totals.ai_cost_30d_usd)}

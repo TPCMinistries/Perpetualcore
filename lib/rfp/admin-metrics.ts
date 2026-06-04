@@ -31,11 +31,15 @@ import {
 
 export interface PlatformTotals {
   orgs: number;
+  active_orgs: number;
   proposals: number;
   proposals_7d: number;
   reviewer_runs: number;
   vault_chunks: number;
   opportunities: number;
+  matches: number;
+  expected_matches: number;
+  scoring_coverage_percent: number | null;
   ai_cost_30d_usd: number;
 }
 
@@ -173,6 +177,8 @@ export async function loadPlatformTotals(): Promise<PlatformTotals> {
     reviewerRuns,
     vaultChunks,
     opportunities,
+    memberships,
+    matches,
     aiCostRows,
   ] = await Promise.all([
     admin.from("rfp_orgs").select("id", { count: "exact", head: true }),
@@ -187,6 +193,8 @@ export async function loadPlatformTotals(): Promise<PlatformTotals> {
       .eq("agent", "reviewer_v1"),
     admin.from("rfp_vault_artifacts").select("id", { count: "exact", head: true }),
     admin.from("rfp_opportunities").select("id", { count: "exact", head: true }),
+    admin.from("rfp_user_orgs").select("org_id").returns<{ org_id: string }[]>(),
+    admin.from("rfp_opp_matches").select("opp_id", { count: "exact", head: true }),
     admin
       .from("rfp_agent_sessions")
       .select("cost_usd")
@@ -198,14 +206,25 @@ export async function loadPlatformTotals(): Promise<PlatformTotals> {
     (sum, r) => sum + toNumeric(r.cost_usd),
     0,
   );
+  const activeOrgCount = new Set((memberships.data ?? []).map((row) => row.org_id)).size;
+  const opportunityCount = opportunities.count ?? 0;
+  const matchCount = matches.count ?? 0;
+  const expectedMatches = opportunityCount * activeOrgCount;
+  const scoringCoverage =
+    expectedMatches > 0 ? Math.min(100, (matchCount / expectedMatches) * 100) : null;
 
   return {
     orgs: orgs.count ?? 0,
+    active_orgs: activeOrgCount,
     proposals: proposals.count ?? 0,
     proposals_7d: proposals7d.count ?? 0,
     reviewer_runs: reviewerRuns.count ?? 0,
     vault_chunks: vaultChunks.count ?? 0,
-    opportunities: opportunities.count ?? 0,
+    opportunities: opportunityCount,
+    matches: matchCount,
+    expected_matches: expectedMatches,
+    scoring_coverage_percent:
+      scoringCoverage === null ? null : Math.round(scoringCoverage * 10) / 10,
     ai_cost_30d_usd,
   };
 }
