@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import {
   ArrowRight,
+  AlertTriangle,
   Bot,
   BriefcaseBusiness,
   CalendarClock,
@@ -347,6 +348,103 @@ function getReadinessClasses(tone: string) {
   return "border-slate-200 bg-slate-50 text-slate-700";
 }
 
+function getAccountRisk(client: AccountLane) {
+  const paid = client.paymentStatus === "paid" || client.status.toLowerCase().includes("paid");
+  const blocked = client.paymentStatus === "blocked";
+  const hasContext = Boolean(client.handoffContextReceived);
+  const hasOpenTasks = Boolean(client.openTaskCount && client.openTaskCount > 0);
+  const hasOverdueTasks = Boolean(client.overdueTaskCount && client.overdueTaskCount > 0);
+  const hasPaymentPath = Boolean(client.paymentPath);
+
+  if (blocked) {
+    return {
+      label: "Commercial block",
+      detail: "Payment or approval is blocked. Resolve the money path before expanding scope.",
+      severity: 5,
+      tone: "red",
+    };
+  }
+
+  if (paid && hasOverdueTasks) {
+    return {
+      label: "Delivery slipping",
+      detail: "This paid account has overdue work. Clear or reassign the next task before the relationship cools.",
+      severity: 5,
+      tone: "red",
+    };
+  }
+
+  if (paid && !hasContext) {
+    return {
+      label: "Context gap",
+      detail: "Money is clear, but the operating context is missing. Send the handoff before delivery starts.",
+      severity: 4,
+      tone: "amber",
+    };
+  }
+
+  if (paid && !hasOpenTasks) {
+    return {
+      label: "No task plan",
+      detail: "Context should turn into visible tasks. Sync the kickoff plan so the work has a next owner.",
+      severity: 4,
+      tone: "amber",
+    };
+  }
+
+  if (client.paymentStatus === "sent" || client.paymentStatus === "in_review") {
+    return {
+      label: "Buyer waiting",
+      detail: "The start path is out. Follow up with one clear decision request.",
+      severity: 3,
+      tone: "blue",
+    };
+  }
+
+  if (!hasPaymentPath) {
+    return {
+      label: "Unrouted",
+      detail: "Choose whether this should become software access, setup, a first workflow, or a 90-day lane.",
+      severity: 2,
+      tone: "slate",
+    };
+  }
+
+  return {
+    label: "Healthy",
+    detail: "The account has a clear enough path for the next move.",
+    severity: 1,
+    tone: "emerald",
+  };
+}
+
+function getPrimaryAccountAction(client: AccountLane) {
+  const risk = getAccountRisk(client);
+
+  if (risk.label === "Commercial block") return "Send invoice/procurement unblock note";
+  if (risk.label === "Delivery slipping") return "Open room and clear overdue work";
+  if (risk.label === "Context gap") return "Send client handoff";
+  if (risk.label === "No task plan") return "Sync kickoff tasks";
+  if (risk.label === "Buyer waiting") return "Follow up on the start path";
+  if (risk.label === "Unrouted") return "Pick package lane and payment path";
+  return client.nextStep;
+}
+
+function formatTaskDueLabel(value?: string) {
+  if (!value) return "No due date";
+
+  const due = new Date(value);
+  const today = new Date();
+  const startOfToday = new Date(today.getFullYear(), today.getMonth(), today.getDate()).getTime();
+  const startOfDue = new Date(due.getFullYear(), due.getMonth(), due.getDate()).getTime();
+  const dayDifference = Math.round((startOfDue - startOfToday) / 86400000);
+
+  if (dayDifference < 0) return `${Math.abs(dayDifference)}d overdue`;
+  if (dayDifference === 0) return "Due today";
+  if (dayDifference === 1) return "Due tomorrow";
+  return `Due ${formatDate(value)}`;
+}
+
 function formatCurrency(value?: number | null) {
   return new Intl.NumberFormat("en-US", {
     style: "currency",
@@ -606,6 +704,35 @@ export default function AccountsPage() {
 
     return counts;
   }, [data.activeClients]);
+
+  const highestRiskAccounts = useMemo(
+    () =>
+      [...filteredAccounts]
+        .map((client) => ({
+          client,
+          risk: getAccountRisk(client),
+        }))
+        .filter(({ risk }) => risk.label !== "Healthy")
+        .sort((a, b) => b.risk.severity - a.risk.severity)
+        .slice(0, 5),
+    [filteredAccounts],
+  );
+
+  const dueAccountTasks = useMemo(
+    () =>
+      [...filteredAccounts]
+        .filter((client) => client.nextTaskDueDate || client.overdueTaskCount || client.openTaskCount)
+        .sort((a, b) => {
+          if (a.overdueTaskCount && !b.overdueTaskCount) return -1;
+          if (!a.overdueTaskCount && b.overdueTaskCount) return 1;
+          return (
+            new Date(a.nextTaskDueDate || "9999-12-31").getTime() -
+            new Date(b.nextTaskDueDate || "9999-12-31").getTime()
+          );
+        })
+        .slice(0, 5),
+    [filteredAccounts],
+  );
 
   return (
     <div className="space-y-6 pb-10">
@@ -1018,6 +1145,116 @@ export default function AccountsPage() {
             </CardContent>
           </Card>
         </div>
+      </div>
+
+      <div className="grid gap-6 lg:grid-cols-[1fr_1fr]">
+        <Card className="rounded-lg shadow-none">
+          <CardHeader>
+            <div className="flex items-center justify-between gap-4">
+              <div>
+                <CardTitle className="text-xl">Risk and gap control</CardTitle>
+                <p className="mt-1 text-sm text-slate-600">
+                  Shows the accounts most likely to lose momentum because payment, context, or delivery work is unclear.
+                </p>
+              </div>
+              <AlertTriangle className="h-5 w-5 text-amber-600" />
+            </div>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            {highestRiskAccounts.length === 0 ? (
+              <div className="rounded-lg border border-dashed p-5 text-sm text-slate-600">
+                No account risks in the current filter. Keep the next task and follow-up cadence visible.
+              </div>
+            ) : (
+              highestRiskAccounts.map(({ client, risk }) => (
+                <div key={client.id} className="rounded-lg border bg-white p-4">
+                  <div className="flex flex-wrap items-start justify-between gap-3">
+                    <div>
+                      <div className="flex flex-wrap items-center gap-2">
+                        <p className="font-semibold text-slate-950">{client.name}</p>
+                        <span
+                          className={`rounded-md border px-2 py-1 text-xs font-medium ${getReadinessClasses(
+                            risk.tone,
+                          )}`}
+                        >
+                          {risk.label}
+                        </span>
+                      </div>
+                      <p className="mt-1 text-sm text-slate-600">{client.company}</p>
+                    </div>
+                    <Badge variant="outline" className="rounded-md">
+                      {client.lane}
+                    </Badge>
+                  </div>
+                  <p className="mt-3 text-sm leading-5 text-slate-600">{risk.detail}</p>
+                  <div className="mt-4 grid gap-2 sm:grid-cols-[1fr_auto] sm:items-center">
+                    <p className="text-sm font-medium text-slate-950">{getPrimaryAccountAction(client)}</p>
+                    <Button asChild size="sm" className="h-8 rounded-md">
+                      <Link href={client.href}>
+                        Work it <ArrowRight className="ml-2 h-3.5 w-3.5" />
+                      </Link>
+                    </Button>
+                  </div>
+                </div>
+              ))
+            )}
+          </CardContent>
+        </Card>
+
+        <Card className="rounded-lg shadow-none">
+          <CardHeader>
+            <div className="flex items-center justify-between gap-4">
+              <div>
+                <CardTitle className="text-xl">Task pulse</CardTitle>
+                <p className="mt-1 text-sm text-slate-600">
+                  A fast view of which paid or active accounts have work in motion, overdue, or missing.
+                </p>
+              </div>
+              <CalendarClock className="h-5 w-5 text-violet-600" />
+            </div>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            {dueAccountTasks.length === 0 ? (
+              <div className="rounded-lg border border-dashed p-5 text-sm text-slate-600">
+                No account tasks are attached yet. Paid accounts should get a kickoff plan as soon as context is in.
+              </div>
+            ) : (
+              dueAccountTasks.map((client) => (
+                <div
+                  key={client.id}
+                  className="grid gap-4 rounded-lg border bg-white p-4 sm:grid-cols-[minmax(0,1fr)_130px_110px]"
+                >
+                  <div>
+                    <p className="font-semibold text-slate-950">{client.name}</p>
+                    <p className="mt-1 text-sm text-slate-600">{client.company}</p>
+                    <div className="mt-3 flex flex-wrap gap-2 text-xs text-slate-500">
+                      <span className="rounded-md bg-slate-100 px-2 py-1">
+                        {client.openTaskCount || 0} open
+                      </span>
+                      <span className="rounded-md bg-slate-100 px-2 py-1">
+                        {client.blockedTaskCount || 0} blocked
+                      </span>
+                      {client.overdueTaskCount ? (
+                        <span className="rounded-md bg-red-50 px-2 py-1 text-red-700">
+                          {client.overdueTaskCount} overdue
+                        </span>
+                      ) : null}
+                    </div>
+                  </div>
+                  <div>
+                    <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-slate-500">Next due</p>
+                    <p className="mt-2 text-sm font-semibold text-slate-950">
+                      {formatTaskDueLabel(client.nextTaskDueDate)}
+                    </p>
+                  </div>
+                  <Button asChild size="sm" variant="outline" className="h-8 rounded-md self-start">
+                    <Link href={client.href}>Open</Link>
+                  </Button>
+                </div>
+              ))
+            )}
+          </CardContent>
+        </Card>
       </div>
 
       <div className="grid gap-4 md:grid-cols-4">
