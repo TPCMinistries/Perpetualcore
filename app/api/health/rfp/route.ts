@@ -96,6 +96,7 @@ export async function GET(): Promise<NextResponse> {
       matches,
       canonicalAliases,
       canonicals,
+      enrichments,
     ] = await Promise.all([
       admin.from("rfp_orgs").select("id", { count: "exact", head: true }),
       admin.from("rfp_proposals").select("id", { count: "exact", head: true }),
@@ -132,6 +133,9 @@ export async function GET(): Promise<NextResponse> {
       admin
         .from("rfp_opportunity_canonicals")
         .select("id", { count: "exact", head: true }),
+      admin
+        .from("rfp_opportunity_enrichments")
+        .select("opp_id", { count: "exact", head: true }),
     ]);
 
     const dbErrors = [
@@ -146,6 +150,7 @@ export async function GET(): Promise<NextResponse> {
       errorDetail("rfp_opp_matches.count", matches),
       errorDetail("rfp_opportunity_aliases.count", canonicalAliases),
       errorDetail("rfp_opportunity_canonicals.count", canonicals),
+      errorDetail("rfp_opportunity_enrichments.count", enrichments),
     ].filter((row): row is string => Boolean(row));
 
     const ai_cost_24h_usd = (cost24hRows.data ?? []).reduce(
@@ -166,6 +171,11 @@ export async function GET(): Promise<NextResponse> {
     const canonicalCoverage =
       opportunityCount > 0
         ? Math.min(100, (canonicalAliasCount / opportunityCount) * 100)
+        : null;
+    const enrichmentCount = enrichments.count ?? 0;
+    const enrichmentCoverage =
+      opportunityCount > 0
+        ? Math.min(100, (enrichmentCount / opportunityCount) * 100)
         : null;
     const sourceTargetIndexedEstimate = RFP_SOURCE_CATALOG.reduce(
       (sum, source) => sum + (source.targetIndexedEstimate ?? 0),
@@ -264,6 +274,21 @@ export async function GET(): Promise<NextResponse> {
             : `${canonicalAliasCount.toLocaleString("en-US")} / ${opportunityCount.toLocaleString("en-US")} opportunities have canonical aliases (${(canonicalCoverage ?? 0).toFixed(1)}%) across ${canonicalCount.toLocaleString("en-US")} canonical clusters.`,
       ),
       check(
+        "enrichment_coverage",
+        enrichments.error || opportunities.error
+          ? "fail"
+          : opportunityCount === 0
+            ? "warn"
+            : enrichmentCount >= opportunityCount
+              ? "ok"
+              : "warn",
+        enrichments.error || opportunities.error
+          ? "Enrichment coverage query failed."
+          : opportunityCount === 0
+            ? "No opportunity enrichment target found."
+            : `${enrichmentCount.toLocaleString("en-US")} / ${opportunityCount.toLocaleString("en-US")} opportunities have structured source intelligence (${(enrichmentCoverage ?? 0).toFixed(1)}%).`,
+      ),
+      check(
         "cron_freshness",
         lastCron.error
           ? "fail"
@@ -355,6 +380,9 @@ export async function GET(): Promise<NextResponse> {
         canonical_clusters: canonicalCount,
         canonical_coverage_percent:
           canonicalCoverage === null ? null : Math.round(canonicalCoverage * 10) / 10,
+        enrichments: enrichmentCount,
+        enrichment_coverage_percent:
+          enrichmentCoverage === null ? null : Math.round(enrichmentCoverage * 10) / 10,
         source_catalog_target_estimate: sourceTargetIndexedEstimate,
         source_scale_coverage_percent:
           sourceScaleCoverage === null
