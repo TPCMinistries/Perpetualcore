@@ -7,6 +7,7 @@ const primaryNav = [
   { label: "Operating", href: "/dashboard" },
   { label: "Leads", href: "/dashboard/leads" },
   { label: "Accounts", href: "/dashboard/accounts" },
+  { label: "Handoffs", href: "/dashboard/handoffs" },
   { label: "Scripts", href: "/dashboard/sales-script" },
   { label: "Proposals", href: "/dashboard/proposals" },
   { label: "Packages", href: "/packages" },
