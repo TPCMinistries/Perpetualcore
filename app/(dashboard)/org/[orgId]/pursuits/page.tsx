@@ -27,6 +27,10 @@ import {
   parseBidNoBid,
   type PursuitReadiness,
 } from "@/lib/rfp/readiness";
+import {
+  buildPursuitDecisionSummary,
+  type PursuitDecisionSummary,
+} from "@/lib/rfp/pursuit-decision";
 
 export const dynamic = "force-dynamic";
 
@@ -105,6 +109,7 @@ interface PursuitItem {
   source: string;
   deadline: string | null;
   amountMax: number | null;
+  needsReview: boolean;
   brief: string | null;
   fitScore: number;
   chips: string[];
@@ -120,6 +125,7 @@ interface PursuitItem {
   criticalTasks: number;
   nextTask: string | null;
   readiness: PursuitReadiness;
+  decision: PursuitDecisionSummary;
 }
 
 const STATUS_LABEL: Record<ProposalStatus, string> = {
@@ -402,6 +408,7 @@ export default async function PursuitsPage({ params }: PageProps) {
         source: opp.source,
         deadline: opp.deadline,
         amountMax: opp.amount_max,
+        needsReview: opp.needs_review ?? false,
         brief: opp.brief,
         fitScore: match.fit_score,
         chips: match.chips ?? [],
@@ -431,6 +438,13 @@ export default async function PursuitsPage({ params }: PageProps) {
           ),
           reviewerResult: parseReviewerResult(reviewerSection?.content ?? null),
           tasks,
+        }),
+        decision: buildPursuitDecisionSummary({
+          fitScore: match.fit_score,
+          deadline: opp.deadline,
+          amountMax: opp.amount_max ?? opp.amount_min ?? null,
+          needsReview: opp.needs_review,
+          bidNoBid: parseBidNoBid(checksByType.get("bid_no_bid_v1")),
         }),
       };
     })
@@ -578,6 +592,17 @@ function PursuitCard({ item, orgId }: { item: PursuitItem; orgId: string }) {
             <span className="rounded-full border border-zinc-200 px-3 py-1 font-mono text-[10px] uppercase tracking-[0.16em] text-zinc-500">
               Fit {Math.round(item.fitScore)}
             </span>
+            <span
+              className={`rounded-full border px-3 py-1 font-mono text-[10px] uppercase tracking-[0.16em] ${
+                item.decision.recommendation === "pursue"
+                  ? "border-emerald-200 bg-emerald-50 text-emerald-800"
+                  : item.decision.recommendation === "maybe"
+                    ? "border-amber-200 bg-amber-50 text-amber-800"
+                    : "border-zinc-200 bg-zinc-100 text-zinc-700"
+              }`}
+            >
+              {item.decision.label} {item.decision.score}
+            </span>
             <span className="rounded-full border border-zinc-200 px-3 py-1 font-mono text-[10px] uppercase tracking-[0.16em] text-zinc-500">
               {item.pursuitStage}
             </span>
@@ -594,6 +619,9 @@ function PursuitCard({ item, orgId }: { item: PursuitItem; orgId: string }) {
           </p>
           <p className="mt-4 max-w-3xl text-sm leading-6 text-zinc-600">
             {item.summary ?? item.brief ?? "No summary available yet."}
+          </p>
+          <p className="mt-2 max-w-3xl text-xs leading-5 text-zinc-500">
+            {item.decision.detail}
           </p>
 
           <div className="mt-5 grid gap-3 sm:grid-cols-3">

@@ -35,6 +35,13 @@ export interface PursuitReadiness {
   tone: ReadinessTone;
   label: string;
   nextAction: string;
+  bidNoBid: {
+    recommendation: BidNoBidArtifact["recommendation"];
+    score: number;
+    drivers: string[];
+    risks: string[];
+    nextActions: string[];
+  } | null;
   blockers: string[];
   checks: ReadinessCheck[];
   metrics: {
@@ -307,6 +314,15 @@ export function buildPursuitReadiness(input: PursuitReadinessInput): PursuitRead
     tone,
     label,
     nextAction,
+    bidNoBid: input.bidNoBid
+      ? {
+          recommendation: input.bidNoBid.recommendation,
+          score: input.bidNoBid.score,
+          drivers: input.bidNoBid.drivers,
+          risks: input.bidNoBid.risks,
+          nextActions: input.bidNoBid.next_actions,
+        }
+      : null,
     blockers: blockers.slice(0, 6),
     checks,
     metrics: {

@@ -21,10 +21,9 @@
 import { useEffect, useState, type ReactNode } from "react";
 import { FitScoreChip } from "./FitScoreChip";
 import { DraftButton } from "@/components/rfp/DraftButton";
-import {
-  OpportunityTriageControl,
-  type OpportunityTriageStatus,
-} from "@/components/rfp/OpportunityTriageControl";
+import { PursuitDecisionBar } from "@/components/rfp/PursuitDecisionBar";
+import type { OpportunityTriageStatus } from "@/components/rfp/OpportunityTriageControl";
+import { buildPursuitDecisionSummary } from "@/lib/rfp/pursuit-decision";
 import {
   AlertTriangle,
   CalendarClock,
@@ -316,6 +315,13 @@ export function DetailPane({
   const decision = pursuitDecision(row.fit_score, deadlineDays);
   const effort = effortSignal(row.amount_max ?? row.amount_min ?? null, row.brief);
   const enrichment = detail?.enrichment ?? null;
+  const bidDecision = buildPursuitDecisionSummary({
+    fitScore: row.fit_score,
+    deadline: row.deadline,
+    amountMax: row.amount_max ?? row.amount_min ?? null,
+    needsReview: row.needs_review,
+    enrichmentQuality: enrichment?.quality_score ?? null,
+  });
 
   return (
     <div className="h-full overflow-y-auto p-6 lg:p-8">
@@ -387,7 +393,8 @@ export function DetailPane({
       </section>
 
       <div className="mt-6">
-        <OpportunityTriageControl
+        <PursuitDecisionBar
+          key={row.opp_id}
           orgId={orgId}
           oppId={row.opp_id}
           initialStatus={normalizeTriageStatus(row.triage_status)}
@@ -406,6 +413,36 @@ export function DetailPane({
           }}
         />
       </div>
+
+      <section className="mt-6 rounded-xl border border-zinc-200 bg-white p-4 shadow-sm">
+        <div className="flex flex-wrap items-start justify-between gap-4">
+          <div>
+            <h3 className="font-mono text-[10px] uppercase tracking-[0.25em] text-zinc-500">
+              Bid / no-bid estimate
+            </h3>
+            <p className="mt-2 text-lg font-semibold text-zinc-950">
+              {bidDecision.label} · {bidDecision.score}
+            </p>
+            <p className="mt-1 max-w-2xl text-sm leading-6 text-zinc-600">
+              {bidDecision.detail}
+            </p>
+          </div>
+          <span className="rounded-full border border-zinc-200 bg-zinc-50 px-3 py-1 font-mono text-[10px] uppercase tracking-[0.16em] text-zinc-500">
+            {bidDecision.confidence.replace("-", " ")}
+          </span>
+        </div>
+        <div className="mt-4 grid gap-2 md:grid-cols-3">
+          {bidDecision.signals.slice(0, 3).map((signal) => (
+            <div
+              key={`${signal.label}-${signal.detail}`}
+              className={`rounded-lg border p-3 ${decisionToneClasses(signal.tone === "ready" ? "emerald" : signal.tone === "warn" || signal.tone === "danger" ? "amber" : "zinc")}`}
+            >
+              <p className="text-sm font-semibold">{signal.label}</p>
+              <p className="mt-1 text-xs leading-5 opacity-80">{signal.detail}</p>
+            </div>
+          ))}
+        </div>
+      </section>
 
       <section className="mt-6">
         <div className="mb-3 flex flex-wrap items-end justify-between gap-3">

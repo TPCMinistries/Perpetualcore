@@ -51,6 +51,7 @@ import {
   countVerifyMarkersFromSections,
   parseBidNoBid,
 } from "@/lib/rfp/readiness";
+import { buildPursuitDecisionSummary } from "@/lib/rfp/pursuit-decision";
 
 export const dynamic = "force-dynamic";
 
@@ -464,6 +465,14 @@ export default async function PursuitDetailPage({ params }: PageProps) {
     reviewerResult: parseReviewerResult(reviewerSection?.content ?? null),
     tasks: taskRows,
   });
+  const bidDecision = buildPursuitDecisionSummary({
+    fitScore: match.fit_score,
+    deadline: opp.deadline,
+    amountMax: opp.amount_max ?? opp.amount_min ?? null,
+    needsReview: opp.needs_review,
+    enrichmentQuality: enrichment?.quality_score ?? null,
+    bidNoBid: parseBidNoBid(checksByType.get("bid_no_bid_v1")),
+  });
 
   const actionClass =
     action.tone === "ready"
@@ -533,6 +542,40 @@ export default async function PursuitDetailPage({ params }: PageProps) {
                 </p>
               </div>
             ) : null}
+
+            <div className="mt-6 rounded-lg border border-zinc-200 bg-zinc-50 p-4">
+              <div className="flex flex-wrap items-start justify-between gap-3">
+                <div>
+                  <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-zinc-500">
+                    Bid / no-bid
+                  </p>
+                  <p className="mt-2 text-lg font-semibold text-zinc-950">
+                    {bidDecision.label} · {bidDecision.score}
+                  </p>
+                  <p className="mt-1 max-w-2xl text-sm leading-6 text-zinc-600">
+                    {bidDecision.detail}
+                  </p>
+                </div>
+                <span className="rounded-full border border-zinc-200 bg-white px-3 py-1 font-mono text-[10px] uppercase tracking-[0.16em] text-zinc-500">
+                  {bidDecision.confidence.replace("-", " ")}
+                </span>
+              </div>
+              <div className="mt-4 grid gap-2 md:grid-cols-3">
+                {bidDecision.signals.slice(0, 3).map((signal) => (
+                  <div
+                    key={`${signal.label}-${signal.detail}`}
+                    className="rounded-md border border-zinc-200 bg-white p-3"
+                  >
+                    <p className="text-sm font-semibold text-zinc-950">
+                      {signal.label}
+                    </p>
+                    <p className="mt-1 text-xs leading-5 text-zinc-600">
+                      {signal.detail}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            </div>
           </section>
 
           <aside className="space-y-4">

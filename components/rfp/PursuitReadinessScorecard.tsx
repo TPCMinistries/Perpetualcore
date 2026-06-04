@@ -1,4 +1,11 @@
-import { AlertTriangle, CheckCircle2, CircleDashed, Gauge, ListChecks } from "lucide-react";
+import {
+  AlertTriangle,
+  CheckCircle2,
+  CircleDashed,
+  Gauge,
+  ListChecks,
+  Route,
+} from "lucide-react";
 import type { PursuitReadiness, ReadinessTone } from "@/lib/rfp/readiness";
 
 interface PursuitReadinessScorecardProps {
@@ -25,6 +32,14 @@ function iconFor(readiness: PursuitReadiness) {
   if (readiness.status === "blocked") return AlertTriangle;
   if (readiness.status === "in_progress") return ListChecks;
   return CircleDashed;
+}
+
+function bidRecommendationLabel(
+  recommendation: NonNullable<PursuitReadiness["bidNoBid"]>["recommendation"],
+): string {
+  if (recommendation === "pursue") return "Pursue";
+  if (recommendation === "maybe") return "Review";
+  return "Pass";
 }
 
 export function PursuitReadinessScorecard({
@@ -101,6 +116,40 @@ export function PursuitReadinessScorecard({
         </p>
       </div>
 
+      {readiness.bidNoBid ? (
+        <div className="mt-4 rounded-lg border border-zinc-200 bg-white p-4">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div className="flex items-center gap-2">
+              <Route className="h-4 w-4 text-zinc-500" />
+              <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-zinc-500">
+                Bid / no-bid
+              </p>
+            </div>
+            <span className="rounded-full border border-zinc-200 bg-zinc-50 px-3 py-1 font-mono text-[10px] uppercase tracking-[0.16em] text-zinc-600">
+              {bidRecommendationLabel(readiness.bidNoBid.recommendation)} ·{" "}
+              {Math.round(readiness.bidNoBid.score)}
+            </span>
+          </div>
+          <div className="mt-4 grid gap-4 md:grid-cols-3">
+            <MiniList
+              label="Drivers"
+              items={readiness.bidNoBid.drivers}
+              empty="No drivers recorded."
+            />
+            <MiniList
+              label="Risks"
+              items={readiness.bidNoBid.risks}
+              empty="No risks recorded."
+            />
+            <MiniList
+              label="Next steps"
+              items={readiness.bidNoBid.nextActions}
+              empty="No next steps recorded."
+            />
+          </div>
+        </div>
+      ) : null}
+
       {readiness.blockers.length > 0 ? (
         <div className="mt-4 rounded-lg border border-rose-200 bg-rose-50 p-4">
           <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-rose-700">
@@ -141,5 +190,29 @@ export function PursuitReadinessScorecard({
         ))}
       </div>
     </section>
+  );
+}
+
+function MiniList({
+  label,
+  items,
+  empty,
+}: {
+  label: string;
+  items: string[];
+  empty: string;
+}) {
+  const rows = items.length > 0 ? items.slice(0, 3) : [empty];
+  return (
+    <div>
+      <p className="font-mono text-[10px] uppercase tracking-[0.16em] text-zinc-500">
+        {label}
+      </p>
+      <ul className="mt-2 space-y-2 text-xs leading-5 text-zinc-600">
+        {rows.map((item) => (
+          <li key={item}>{item}</li>
+        ))}
+      </ul>
+    </div>
   );
 }
