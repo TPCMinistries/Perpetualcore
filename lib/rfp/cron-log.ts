@@ -2,6 +2,7 @@ import { createAdminClient } from "@/lib/supabase/server";
 import type { Json } from "@/lib/supabase/database.types";
 
 export type RfpCronStatus = "success" | "warning" | "error";
+type CronExecutionStatus = "success" | "partial_success" | "failed";
 
 interface LogRfpCronExecutionParams {
   cronName: string;
@@ -24,12 +25,18 @@ export async function logRfpCronExecution({
 }: LogRfpCronExecutionParams): Promise<void> {
   try {
     const admin = createAdminClient();
+    const cronStatus: CronExecutionStatus =
+      status === "success"
+        ? "success"
+        : status === "warning"
+          ? "partial_success"
+          : "failed";
     const { error } = await admin.from("cron_executions").insert({
       cron_name: cronName,
       job_name: cronName,
       executed_at: new Date().toISOString(),
       duration_ms: durationMs,
-      status,
+      status: cronStatus,
       result,
       errors,
     });
