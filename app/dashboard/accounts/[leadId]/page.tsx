@@ -578,6 +578,52 @@ function buildExpansionRecommendation(
   ].join("\n");
 }
 
+function buildClientStatusReport(
+  lead: AccountLead,
+  plan: AccountPlan,
+  closePath: ClosePathState,
+  taskSummary: { complete: number; blocked: number; open: number; nextTask?: AccountTask },
+  handoffContext: AccountHandoffContext | null,
+) {
+  return [
+    `Client status report: ${getAccountName(lead)}`,
+    "",
+    "Current state:",
+    `- Commercial path: ${normalizeStatus(closePath.paymentStatus)} via ${normalizeStatus(closePath.paymentPath)}`,
+    `- First operating lane: ${plan.firstLane}`,
+    `- Client context: ${handoffContext ? "received" : "not received yet"}`,
+    `- Task pulse: ${taskSummary.complete} complete, ${taskSummary.open} open, ${taskSummary.blocked} blocked`,
+    "",
+    "What we are building toward:",
+    plan.sevenDayDeliverable,
+    "",
+    "Next action:",
+    taskSummary.nextTask?.title || closePath.commercialNextStep || plan.nextAction,
+    "",
+    "What would make this expand:",
+    plan.thirtyDayOutcome,
+  ].join("\n");
+}
+
+function buildTaskUpdate(task: AccountTask, lead: AccountLead) {
+  return [
+    `Task update: ${task.title}`,
+    `Account: ${getAccountName(lead)}`,
+    `Status: ${normalizeStatus(task.status)}`,
+    `Priority: ${normalizeStatus(task.priority)}`,
+    `Due: ${formatDate(task.due_date)}`,
+    "",
+    task.description || "No task detail captured yet.",
+    "",
+    "Needed next:",
+    task.status === "blocked"
+      ? "Name the blocker, owner, and unblock date."
+      : task.status === "completed"
+        ? "Confirm whether this creates a new next action or expansion signal."
+        : "Move this task to done, blocked, or clarify the next owner.",
+  ].join("\n");
+}
+
 function buildClientKickoffEmail(lead: AccountLead, plan: AccountPlan) {
   const contact = getContactName(lead);
   const account = getAccountName(lead);
@@ -777,6 +823,17 @@ export default function AccountDetailPage() {
 
     return { complete, blocked, open, nextTask };
   }, [accountTasks]);
+  const openTasksSorted = useMemo(
+    () =>
+      accountTasks
+        .filter((task) => task.status !== "completed")
+        .sort((a, b) => {
+          if (a.status === "blocked" && b.status !== "blocked") return -1;
+          if (a.status !== "blocked" && b.status === "blocked") return 1;
+          return new Date(a.due_date || a.created_at).getTime() - new Date(b.due_date || b.created_at).getTime();
+        }),
+    [accountTasks],
+  );
 
   async function copyText(label: string, value: string) {
     try {
@@ -1300,6 +1357,12 @@ export default function AccountDetailPage() {
         "4. The exact message I should send.",
       ].join("\n"),
     },
+    {
+      label: "Client status report",
+      detail: "Turn account state into a short client-ready progress note.",
+      icon: CalendarClock,
+      body: buildClientStatusReport(lead, plan, closePath, taskSummary, handoffContext),
+    },
   ];
   const launchCompleteCount = commercialChecklist.filter((item) => item.complete).length;
   const launchReadiness = Math.round(
@@ -1375,6 +1438,90 @@ export default function AccountDetailPage() {
     "Launch sequence:",
     ...launchSteps.map((step, index) => `${index + 1}. ${step.title} - ${step.detail}`),
   ].join("\n");
+  const operatingMode =
+    closePath.paymentStatus !== "paid" && !permanentAccount
+      ? "Close"
+      : handoffContextItems.length === 0
+        ? "Kickoff"
+        : taskSummary.blocked > 0
+          ? "Unblock"
+          : taskSummary.open > 0
+            ? "Deliver"
+            : "Expand";
+  const operatingModeDetail =
+    operatingMode === "Close"
+      ? "Secure checkout, invoice, procurement, or signed approval before delivery grows."
+      : operatingMode === "Kickoff"
+        ? "Collect the client operating context so the first workflow is grounded."
+        : operatingMode === "Unblock"
+          ? "Clear blockers before the client feels stalled."
+          : operatingMode === "Deliver"
+            ? "Finish the next visible working output."
+            : "Package the proof and offer the next operating lane.";
+  const seventyTwoHourPlan = [
+    {
+      title: operatingMode === "Close" ? "Send the start path" : "Confirm the next owner",
+      detail:
+        operatingMode === "Close"
+          ? `${packageName}, invoice, procurement, or signed approval.`
+          : taskSummary.nextTask?.title || plan.nextAction,
+    },
+    {
+      title: handoffContextItems.length > 0 ? "Use submitted context" : "Collect client context",
+      detail:
+        handoffContextItems.length > 0
+          ? `${handoffContextItems.length} handoff fields are available for tasks and assistant behavior.`
+          : "Copy the handoff link and ask for owner, tools, examples, rules, and success metric.",
+    },
+    {
+      title: taskSummary.open > 0 ? "Move one task to done" : "Create the task plan",
+      detail:
+        taskSummary.open > 0
+          ? openTasksSorted[0]?.title || "Choose the next visible delivery task."
+          : "Generate kickoff tasks so delivery has a visible sequence.",
+    },
+  ];
+  const executionBrief = [
+    `Account execution cockpit: ${getAccountName(lead)}`,
+    "",
+    `Mode: ${operatingMode}`,
+    `Why: ${operatingModeDetail}`,
+    `Launch readiness: ${launchReadiness}%`,
+    `Next best move: ${nextBestMove}`,
+    "",
+    "72-hour plan:",
+    ...seventyTwoHourPlan.map((item, index) => `${index + 1}. ${item.title} - ${item.detail}`),
+    "",
+    "Open tasks:",
+    openTasksSorted.length > 0
+      ? openTasksSorted.slice(0, 5).map((task) => `- ${task.title} (${normalizeStatus(task.status)}, due ${formatDate(task.due_date)})`).join("\n")
+      : "No open account tasks.",
+    "",
+    "Assistant instruction: recommend one action that moves money, one action that protects delivery, and one message to send now.",
+  ].join("\n");
+  const assistantMoves = [
+    {
+      label: "Decide next move",
+      detail: "Ask AI to choose the one action that matters most now.",
+      body: executionBrief,
+    },
+    {
+      label: "Draft client update",
+      detail: "Create a concise client-facing progress note.",
+      body: buildClientStatusReport(lead, plan, closePath, taskSummary, handoffContext),
+    },
+    {
+      label: "Clear blocker",
+      detail: "Use when the account has a commercial, access, or delivery blocker.",
+      body: [
+        "Help me clear the blocker in this account.",
+        "",
+        executionBrief,
+        "",
+        "Return: blocker diagnosis, owner, exact ask, and follow-up message.",
+      ].join("\n"),
+    },
+  ];
 
   return (
     <div className="space-y-6 pb-10">
@@ -1551,6 +1698,73 @@ export default function AccountDetailPage() {
               <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-slate-500">Current lane</p>
               <p className="mt-2 text-sm font-semibold text-slate-950">{plan.firstLane}</p>
               <p className="mt-2 text-xs leading-5 text-slate-600">{plan.sevenDayDeliverable}</p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card className="overflow-hidden rounded-lg border-slate-200 bg-white shadow-none">
+        <CardContent className="p-0">
+          <div className="grid gap-0 lg:grid-cols-[0.85fr_1.15fr]">
+            <div className="bg-slate-950 p-5 text-white">
+              <div className="flex items-start justify-between gap-4">
+                <div>
+                  <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-violet-200">
+                    Account execution cockpit
+                  </p>
+                  <h2 className="mt-3 text-2xl font-semibold tracking-tight">{operatingMode} mode</h2>
+                  <p className="mt-3 text-sm leading-6 text-slate-300">{operatingModeDetail}</p>
+                </div>
+                <Bot className="h-5 w-5 shrink-0 text-violet-300" />
+              </div>
+              <div className="mt-5 grid gap-3 sm:grid-cols-3">
+                {[
+                  ["Readiness", `${launchReadiness}%`],
+                  ["Open tasks", taskSummary.open],
+                  ["Blocked", taskSummary.blocked],
+                ].map(([label, value]) => (
+                  <div key={label} className="rounded-lg border border-white/10 bg-white/5 p-4">
+                    <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-slate-400">{label}</p>
+                    <p className="mt-2 text-xl font-semibold text-white">{value}</p>
+                  </div>
+                ))}
+              </div>
+              <Button
+                type="button"
+                className="mt-5 rounded-md bg-white text-slate-950 hover:bg-violet-100"
+                onClick={() => copyText("Execution brief", executionBrief)}
+              >
+                <Clipboard className="mr-2 h-4 w-4" />
+                Copy execution brief
+              </Button>
+            </div>
+
+            <div className="p-5">
+              <div className="grid gap-3 lg:grid-cols-3">
+                {seventyTwoHourPlan.map((item, index) => (
+                  <div key={item.title} className="rounded-lg border bg-slate-50 p-4">
+                    <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-slate-500">
+                      Next {index + 1}
+                    </span>
+                    <p className="mt-3 text-sm font-semibold text-slate-950">{item.title}</p>
+                    <p className="mt-2 text-sm leading-5 text-slate-600">{item.detail}</p>
+                  </div>
+                ))}
+              </div>
+              <div className="mt-4 grid gap-3 md:grid-cols-3">
+                {assistantMoves.map((move) => (
+                  <button
+                    key={move.label}
+                    type="button"
+                    onClick={() => copyText(move.label, move.body)}
+                    className="rounded-lg border bg-white p-4 text-left transition hover:border-violet-300 hover:bg-violet-50/40"
+                  >
+                    <Sparkles className="h-4 w-4 text-violet-600" />
+                    <p className="mt-3 text-sm font-semibold text-slate-950">{move.label}</p>
+                    <p className="mt-2 text-sm leading-5 text-slate-600">{move.detail}</p>
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
         </CardContent>
@@ -2200,6 +2414,16 @@ export default function AccountDetailPage() {
                       </p>
                       <p className="mt-2 text-sm font-medium text-slate-950">{normalizeStatus(task.priority)}</p>
                       <p className="mt-1 text-xs text-slate-500">{formatDate(task.due_date)}</p>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        className="mt-3 h-8 rounded-md"
+                        onClick={() => copyText("Task update", buildTaskUpdate(task, lead))}
+                      >
+                        <Clipboard className="mr-2 h-3.5 w-3.5" />
+                        Copy update
+                      </Button>
                     </div>
                   </div>
                 );
