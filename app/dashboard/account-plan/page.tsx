@@ -3,6 +3,7 @@
 import Link from "next/link";
 import {
   ArrowRight,
+  Bot,
   Building2,
   CalendarDays,
   CheckCircle2,
@@ -20,26 +21,55 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 
 const accountProfile = {
-  name: "Empire-style regional operator",
-  segment: "Furniture, FF&E, retail operations, regional service business",
+  name: "Regional operator or serious small business",
+  segment:
+    "Furniture, FF&E, retail operations, professional services, local service businesses",
   hypothesis:
-    "The opportunity is not one AI tool. It is an AI operating layer across sales intake, quotes, customer follow-up, internal knowledge, service coordination, inventory visibility, vendor handoffs, and leadership reporting.",
+    "The opportunity is not one AI tool. It is an AI operating layer across sales intake, quotes, customer follow-up, internal knowledge, service coordination, vendor handoffs, admin work, and leadership reporting.",
   firstMove:
     "Start with a company map and one high-value workflow. Prove value in one operating lane, then expand across departments.",
 };
 
+const marketPositioning = [
+  {
+    tier: "Small business",
+    buyerLanguage: "I need help using AI in the work we already do.",
+    bestStart: "Guided Setup or First Workflow",
+    promise:
+      "Install one useful AI-supported workflow without making them feel like they bought a transformation project.",
+  },
+  {
+    tier: "Established regional company",
+    buyerLanguage:
+      "We have teams, handoffs, quotes, service issues, and reporting gaps.",
+    bestStart: "First Workflow or 90-Day Operating Lane",
+    promise:
+      "Show how Perpetual Core becomes the operating layer across departments, then start with one measurable lane.",
+  },
+  {
+    tier: "Enterprise-style account",
+    buyerLanguage: "We need a serious AI consultant/operator, not a tool demo.",
+    bestStart: "90-Day Operating Lane",
+    promise:
+      "Run a managed cadence: map, install, train, report, and expand across the company operating system.",
+  },
+];
+
 const buyingCommittee = [
   {
     role: "Owner / President",
-    cares: "Revenue, margin, speed, leadership visibility, competitive advantage.",
+    cares:
+      "Revenue, margin, speed, leadership visibility, competitive advantage.",
   },
   {
     role: "Operations leader",
-    cares: "Handoffs, service quality, process consistency, fewer manual follow-ups.",
+    cares:
+      "Handoffs, service quality, process consistency, fewer manual follow-ups.",
   },
   {
     role: "Sales manager",
-    cares: "Faster quotes, better follow-up, cleaner pipeline, fewer missed opportunities.",
+    cares:
+      "Faster quotes, better follow-up, cleaner pipeline, fewer missed opportunities.",
   },
   {
     role: "Finance / admin",
@@ -86,25 +116,29 @@ const offerPath = [
   {
     step: "01",
     title: "AI OS Map",
-    detail: "Send the map so they understand this is a whole-company operating layer, not a chatbot pitch.",
+    detail:
+      "Send the map so they understand this is a whole-company operating layer, not a chatbot pitch.",
     href: "/lead-magnet",
   },
   {
     step: "02",
     title: "Sales intake",
-    detail: "Capture the operating context, stakeholders, workflow pain, systems, and buying process.",
+    detail:
+      "Capture the operating context, stakeholders, workflow pain, systems, and buying process.",
     href: "/contact-sales?intent=operating-system-map",
   },
   {
     step: "03",
     title: "First workflow package",
-    detail: "Use one visible workflow to prove value without asking for a full-company commitment first.",
+    detail:
+      "Use one visible workflow to prove value without asking for a full-company commitment first.",
     href: "/packages",
   },
   {
     step: "04",
     title: "90-day operating lane",
-    detail: "If they want you involved as AI consultant/operator, move into a managed operating lane.",
+    detail:
+      "If they want you involved as AI consultant/operator, move into a managed operating lane.",
     href: "/contact-sales?plan=operating-lane-deposit",
   },
 ];
@@ -112,22 +146,26 @@ const offerPath = [
 const qualificationScorecard = [
   {
     signal: "Operational pain",
-    strong: "They can name a workflow costing time, revenue, visibility, or service quality.",
+    strong:
+      "They can name a workflow costing time, revenue, visibility, or service quality.",
     weak: "They only want to hear about AI in general.",
   },
   {
     signal: "Executive sponsor",
-    strong: "An owner, president, or department head will join the second conversation.",
+    strong:
+      "An owner, president, or department head will join the second conversation.",
     weak: "The conversation stays with a curious individual who cannot authorize change.",
   },
   {
     signal: "Systems access",
-    strong: "They can identify the tools, inboxes, spreadsheets, CRMs, docs, or calendars involved.",
+    strong:
+      "They can identify the tools, inboxes, spreadsheets, CRMs, docs, or calendars involved.",
     weak: "They cannot explain where the work currently happens.",
   },
   {
     signal: "Budget shape",
-    strong: "They understand there is software plus implementation, even if the first invoice is scoped.",
+    strong:
+      "They understand there is software plus implementation, even if the first invoice is scoped.",
     weak: "They expect a subscription to solve the business problem by itself.",
   },
 ];
@@ -145,43 +183,44 @@ const packagePicker = [
     trigger: "They ask, 'Can I just try the software?'",
     recommendation: "Software Access",
     href: "/packages",
-    reason: "Use this when the buyer is product-curious but not ready for implementation.",
+    reason:
+      "Use this when the buyer is product-curious but not ready for implementation.",
   },
   {
     trigger: "They trust you but need a small first invoice.",
     recommendation: "Guided Setup",
     href: "/contact-sales?plan=guided-setup",
-    reason: "Use this to configure one product surface and establish the working relationship.",
+    reason:
+      "Use this to configure one product surface and establish the working relationship.",
   },
   {
     trigger: "They have a painful workflow right now.",
     recommendation: "First Workflow Package",
     href: "/contact-sales?plan=first-workflow",
-    reason: "Use this when value depends on installing AI into sales, ops, admin, or reporting.",
+    reason:
+      "Use this when value depends on installing AI into sales, ops, admin, or reporting.",
   },
   {
     trigger: "They want you as AI consultant/operator.",
     recommendation: "90-Day Operating Lane",
     href: "/contact-sales?plan=operating-lane-deposit",
-    reason: "Use this for Empire-style accounts where the goal is a company operating layer.",
+    reason:
+      "Use this for Empire-style accounts where the goal is a company operating layer.",
   },
 ];
 
 const outreachCopy = [
   {
     label: "Warm intro text",
-    text:
-      "I have been thinking about how AI could help a company like yours beyond a chatbot. The opportunity is an operating layer across sales, quotes, customer follow-up, internal knowledge, operations, and leadership visibility. I would start by mapping the company and picking one high-value workflow to prove value before expanding.",
+    text: "I have been thinking about how AI could help a company like yours beyond a chatbot. The opportunity is an operating layer across sales, quotes, customer follow-up, internal knowledge, operations, and leadership visibility. I would start by mapping the company and picking one high-value workflow to prove value before expanding.",
   },
   {
     label: "After first conversation",
-    text:
-      "Based on what you shared, I would not start with a huge AI transformation project. I would start with one operating lane: map the workflow, connect the right company context, install the first AI-supported process, and measure whether it saves time, improves follow-up, or increases visibility.",
+    text: "Based on what you shared, I would not start with a huge AI transformation project. I would start with one operating lane: map the workflow, connect the right company context, install the first AI-supported process, and measure whether it saves time, improves follow-up, or increases visibility.",
   },
   {
     label: "Cost framing",
-    text:
-      "There are two layers: software access and implementation. Software can start small, but the real value is installing it into a workflow that matters. For a company-wide opportunity, I would start with a scoped first workflow or a 90-day operating lane instead of pretending a subscription alone will transform the business.",
+    text: "There are two layers: software access and implementation. Software can start small, but the real value is installing it into a workflow that matters. For a company-wide opportunity, I would start with a scoped first workflow or a 90-day operating lane instead of pretending a subscription alone will transform the business.",
   },
 ];
 
@@ -192,6 +231,20 @@ const nextActions = [
   "Propose one paid first workflow with an expansion path.",
   "Move serious buyers into Sales intake or Manual invoice.",
 ];
+
+const accountPlanPrompt = [
+  "You are helping Lorenzo sell and install Perpetual Core.",
+  "",
+  "Given a target company, return:",
+  "1. The likely buying committee.",
+  "2. The first workflow worth mapping.",
+  "3. The best starter offer: Software Access, Guided Setup, First Workflow, or 90-Day Operating Lane.",
+  "4. The discovery questions by department.",
+  "5. The follow-up message in Lorenzo's voice.",
+  "6. The expansion path from first paid work to a broader AI operating system.",
+  "",
+  "Positioning rule: do not sell a chatbot. Sell an AI operating layer that starts with one practical workflow and can expand across sales, operations, admin, knowledge, and leadership reporting.",
+].join("\n");
 
 async function copyText(text: string) {
   try {
@@ -218,13 +271,23 @@ export default function AccountPlanPage() {
               Build the pursuit around the buyer's operation.
             </h1>
             <p className="mt-3 max-w-2xl text-sm leading-6 text-muted-foreground">
-              Use this page for Empire-style accounts and any serious company where the opportunity is
-              a full operating system, not a one-off AI workflow.
+              Use this page for Empire-style accounts and any serious company
+              where the opportunity is a full operating system, not a one-off AI
+              workflow.
             </p>
           </div>
           <div className="flex flex-col gap-2 sm:flex-row">
             <Button asChild variant="outline" className="rounded-md">
               <Link href="/dashboard/sales-script">Scripts</Link>
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              className="rounded-md"
+              onClick={() => copyText(accountPlanPrompt)}
+            >
+              <Bot className="mr-2 h-4 w-4" />
+              Copy AI brief
             </Button>
             <Button asChild className="rounded-md">
               <Link href="/dashboard/leads">
@@ -234,6 +297,42 @@ export default function AccountPlanPage() {
           </div>
         </div>
       </div>
+
+      <Card className="rounded-lg border-violet-200 bg-white shadow-none">
+        <CardHeader>
+          <div className="flex items-center justify-between gap-4">
+            <CardTitle className="text-xl">How to scale the offer</CardTitle>
+            <Bot className="h-5 w-5 text-violet-600" />
+          </div>
+          <p className="text-sm leading-6 text-muted-foreground">
+            Use the same operating-system thesis, but change the first invoice
+            and language based on company maturity.
+          </p>
+        </CardHeader>
+        <CardContent className="grid gap-3 lg:grid-cols-3">
+          {marketPositioning.map((item) => (
+            <div key={item.tier} className="rounded-lg border bg-card p-4">
+              <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-primary">
+                {item.tier}
+              </p>
+              <p className="mt-3 text-sm font-semibold text-foreground">
+                {item.buyerLanguage}
+              </p>
+              <div className="mt-4 rounded-md bg-primary/[0.06] p-3">
+                <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-primary">
+                  Start with
+                </p>
+                <p className="mt-1 text-sm font-semibold text-foreground">
+                  {item.bestStart}
+                </p>
+              </div>
+              <p className="mt-4 text-sm leading-6 text-muted-foreground">
+                {item.promise}
+              </p>
+            </div>
+          ))}
+        </CardContent>
+      </Card>
 
       <div className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
         <Card className="rounded-lg shadow-none">
@@ -253,13 +352,17 @@ export default function AccountPlanPage() {
               <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
                 Hypothesis
               </p>
-              <p className="mt-2 text-sm leading-6 text-muted-foreground">{accountProfile.hypothesis}</p>
+              <p className="mt-2 text-sm leading-6 text-muted-foreground">
+                {accountProfile.hypothesis}
+              </p>
             </div>
             <div>
               <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
                 First move
               </p>
-              <p className="mt-2 text-sm leading-6 text-muted-foreground">{accountProfile.firstMove}</p>
+              <p className="mt-2 text-sm leading-6 text-muted-foreground">
+                {accountProfile.firstMove}
+              </p>
             </div>
           </CardContent>
         </Card>
@@ -274,8 +377,12 @@ export default function AccountPlanPage() {
           <CardContent className="space-y-3">
             {buyingCommittee.map((buyer) => (
               <div key={buyer.role} className="rounded-lg border bg-card p-4">
-                <p className="text-sm font-semibold text-foreground">{buyer.role}</p>
-                <p className="mt-2 text-sm leading-5 text-muted-foreground">{buyer.cares}</p>
+                <p className="text-sm font-semibold text-foreground">
+                  {buyer.role}
+                </p>
+                <p className="mt-2 text-sm leading-5 text-muted-foreground">
+                  {buyer.cares}
+                </p>
               </div>
             ))}
           </CardContent>
@@ -292,10 +399,15 @@ export default function AccountPlanPage() {
         <CardContent className="grid gap-4 lg:grid-cols-4">
           {discoveryMap.map((section) => (
             <div key={section.area} className="rounded-lg border bg-card p-4">
-              <p className="text-sm font-semibold text-foreground">{section.area}</p>
+              <p className="text-sm font-semibold text-foreground">
+                {section.area}
+              </p>
               <ul className="mt-4 space-y-3">
                 {section.questions.map((question) => (
-                  <li key={question} className="flex gap-2 text-sm leading-5 text-muted-foreground">
+                  <li
+                    key={question}
+                    className="flex gap-2 text-sm leading-5 text-muted-foreground"
+                  >
                     <CheckCircle2 className="mt-0.5 h-4 w-4 flex-shrink-0 text-primary" />
                     {question}
                   </li>
@@ -316,11 +428,16 @@ export default function AccountPlanPage() {
           </CardHeader>
           <CardContent className="space-y-3">
             {firstCallAgenda.map((item, index) => (
-              <div key={item} className="flex gap-3 rounded-lg border bg-card p-4">
+              <div
+                key={item}
+                className="flex gap-3 rounded-lg border bg-card p-4"
+              >
                 <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-primary">
                   {String(index + 1).padStart(2, "0")}
                 </span>
-                <p className="text-sm leading-6 text-muted-foreground">{item}</p>
+                <p className="text-sm leading-6 text-muted-foreground">
+                  {item}
+                </p>
               </div>
             ))}
           </CardContent>
@@ -336,19 +453,25 @@ export default function AccountPlanPage() {
           <CardContent className="grid gap-3 md:grid-cols-2">
             {qualificationScorecard.map((item) => (
               <div key={item.signal} className="rounded-lg border bg-card p-4">
-                <p className="text-sm font-semibold text-foreground">{item.signal}</p>
+                <p className="text-sm font-semibold text-foreground">
+                  {item.signal}
+                </p>
                 <div className="mt-4 space-y-3">
                   <div>
                     <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-primary">
                       Strong
                     </p>
-                    <p className="mt-1 text-sm leading-5 text-muted-foreground">{item.strong}</p>
+                    <p className="mt-1 text-sm leading-5 text-muted-foreground">
+                      {item.strong}
+                    </p>
                   </div>
                   <div>
                     <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
                       Weak
                     </p>
-                    <p className="mt-1 text-sm leading-5 text-muted-foreground">{item.weak}</p>
+                    <p className="mt-1 text-sm leading-5 text-muted-foreground">
+                      {item.weak}
+                    </p>
                   </div>
                 </div>
               </div>
@@ -371,11 +494,18 @@ export default function AccountPlanPage() {
               href={item.href}
               className="group flex min-h-full flex-col rounded-lg border bg-card p-4 transition hover:border-primary/50 hover:bg-primary/[0.03]"
             >
-              <p className="text-sm leading-5 text-muted-foreground">{item.trigger}</p>
-              <p className="mt-4 text-sm font-semibold text-foreground">{item.recommendation}</p>
-              <p className="mt-2 flex-1 text-sm leading-5 text-muted-foreground">{item.reason}</p>
+              <p className="text-sm leading-5 text-muted-foreground">
+                {item.trigger}
+              </p>
+              <p className="mt-4 text-sm font-semibold text-foreground">
+                {item.recommendation}
+              </p>
+              <p className="mt-2 flex-1 text-sm leading-5 text-muted-foreground">
+                {item.reason}
+              </p>
               <span className="mt-4 inline-flex items-center text-sm font-medium text-foreground">
-                Open path <ArrowRight className="ml-2 h-4 w-4 transition group-hover:translate-x-0.5" />
+                Open path{" "}
+                <ArrowRight className="ml-2 h-4 w-4 transition group-hover:translate-x-0.5" />
               </span>
             </Link>
           ))}
@@ -401,11 +531,16 @@ export default function AccountPlanPage() {
                   {item.step}
                 </span>
                 <span>
-                  <span className="block text-sm font-semibold text-foreground">{item.title}</span>
-                  <span className="mt-1 block text-sm leading-5 text-muted-foreground">{item.detail}</span>
+                  <span className="block text-sm font-semibold text-foreground">
+                    {item.title}
+                  </span>
+                  <span className="mt-1 block text-sm leading-5 text-muted-foreground">
+                    {item.detail}
+                  </span>
                 </span>
                 <span className="inline-flex items-center text-sm font-medium text-foreground sm:justify-end">
-                  Open <ArrowRight className="ml-2 h-4 w-4 transition group-hover:translate-x-0.5" />
+                  Open{" "}
+                  <ArrowRight className="ml-2 h-4 w-4 transition group-hover:translate-x-0.5" />
                 </span>
               </Link>
             ))}
@@ -428,10 +563,14 @@ export default function AccountPlanPage() {
                 className="w-full rounded-lg border bg-card p-4 text-left transition hover:border-primary/50 hover:bg-primary/[0.03]"
               >
                 <div className="flex items-center justify-between gap-4">
-                  <p className="text-sm font-semibold text-foreground">{item.label}</p>
+                  <p className="text-sm font-semibold text-foreground">
+                    {item.label}
+                  </p>
                   <Clipboard className="h-4 w-4 text-muted-foreground" />
                 </div>
-                <p className="mt-2 text-sm leading-6 text-muted-foreground">{item.text}</p>
+                <p className="mt-2 text-sm leading-6 text-muted-foreground">
+                  {item.text}
+                </p>
               </button>
             ))}
           </CardContent>
@@ -451,7 +590,9 @@ export default function AccountPlanPage() {
               <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-primary">
                 {String(index + 1).padStart(2, "0")}
               </p>
-              <p className="mt-3 text-sm leading-6 text-muted-foreground">{action}</p>
+              <p className="mt-3 text-sm leading-6 text-muted-foreground">
+                {action}
+              </p>
             </div>
           ))}
         </CardContent>
@@ -459,9 +600,12 @@ export default function AccountPlanPage() {
 
       <div className="flex flex-col gap-3 rounded-xl border border-border bg-background p-5 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <p className="text-sm font-semibold text-foreground">Ready to work this account?</p>
+          <p className="text-sm font-semibold text-foreground">
+            Ready to work this account?
+          </p>
           <p className="mt-1 text-sm text-muted-foreground">
-            Capture the lead, send the map, and move the conversation toward one paid operating lane.
+            Capture the lead, send the map, and move the conversation toward one
+            paid operating lane.
           </p>
         </div>
         <Button asChild className="rounded-md">
