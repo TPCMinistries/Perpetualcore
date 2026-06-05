@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { createAdminClient } from "@/lib/supabase/server";
 import { AccountHandoffContext, createMissingHandoffTasks } from "@/lib/accounts/handoff-tasks";
+import { getPermanentAccountName, syncPermanentAccount } from "@/lib/accounts/permanent-account-sync";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -15,10 +16,16 @@ type LeadRecord = {
   email: string | null;
   phone: string | null;
   company: string | null;
+  title: string | null;
+  status: string | null;
+  stage: string | null;
+  estimated_value: number | null;
   notes: string | null;
   metadata: unknown;
   tags: unknown;
   ai_insights: unknown;
+  created_at?: string | null;
+  updated_at?: string | null;
 };
 
 const packageValues = [
@@ -93,7 +100,7 @@ async function findLead(
   if (leadId) {
     const { data, error } = await supabase
       .from("leads")
-      .select("id,user_id,name,email,phone,company,notes,metadata,tags,ai_insights")
+      .select("id,user_id,name,email,phone,company,title,status,stage,estimated_value,notes,metadata,tags,ai_insights,created_at,updated_at")
       .eq("id", leadId)
       .eq("user_id", ownerUserId)
       .maybeSingle();
@@ -110,7 +117,7 @@ async function findLead(
 
   const { data, error } = await supabase
     .from("leads")
-    .select("id,user_id,name,email,phone,company,notes,metadata,tags,ai_insights")
+    .select("id,user_id,name,email,phone,company,title,status,stage,estimated_value,notes,metadata,tags,ai_insights,created_at,updated_at")
     .eq("email", email)
     .eq("user_id", ownerUserId)
     .order("created_at", { ascending: false })
@@ -203,6 +210,13 @@ export async function POST(request: Request) {
       },
       ai_insights: {
         ...currentInsights,
+        packageIntake: {
+          packageId: data.packageId,
+          packageLabel: data.packageLabel,
+          sessionId: data.sessionId || null,
+          submittedAt: now,
+          employees: data.employees,
+        },
         accountHandoffContext: {
           ...(isRecord(currentInsights.accountHandoffContext) ? currentInsights.accountHandoffContext : {}),
           ...context,
@@ -221,14 +235,19 @@ export async function POST(request: Request) {
     };
 
     const leadResult = existingLead?.id
-      ? await supabase.from("leads").update(leadPayload).eq("id", existingLead.id).select("id,user_id,name,company,email,ai_insights").single()
+      ? await supabase
+          .from("leads")
+          .update(leadPayload)
+          .eq("id", existingLead.id)
+          .select("id,user_id,name,email,phone,company,title,status,stage,estimated_value,notes,metadata,tags,ai_insights,created_at,updated_at")
+          .single()
       : await supabase
           .from("leads")
           .insert({
             ...leadPayload,
             created_at: now,
           })
-          .select("id,user_id,name,company,email,ai_insights")
+          .select("id,user_id,name,email,phone,company,title,status,stage,estimated_value,notes,metadata,tags,ai_insights,created_at,updated_at")
           .single();
 
     if (leadResult.error || !leadResult.data) {
@@ -236,6 +255,37 @@ export async function POST(request: Request) {
     }
 
     const leadRecord = leadResult.data as LeadRecord;
+    const accountSync = await syncPermanentAccount({
+      lead: leadRecord,
+      userId: ownerUserId,
+      createdFrom: "package_intake",
+    });
+    const leadInsights = isRecord(leadRecord.ai_insights) ? leadRecord.ai_insights : {};
+    const existingNotes = leadRecord.notes?.trim() || "";
+    const nextNotes = existingNotes.includes(accountSync.account.id)
+      ? existingNotes
+      : existingNotes
+        ? `${existingNotes}\n\n---\n${accountSync.handoffBlock}`
+        : accountSync.handoffBlock;
+    const { data: syncedLead, error: syncedLeadError } = await supabase
+      .from("leads")
+      .update({
+        notes: nextNotes,
+        ai_insights: {
+          ...leadInsights,
+          ...accountSync.nextInsights,
+        },
+        updated_at: new Date().toISOString(),
+      })
+      .eq("id", leadRecord.id)
+      .eq("user_id", ownerUserId)
+      .select("id,user_id,name,email,phone,company,title,status,stage,estimated_value,notes,metadata,tags,ai_insights,created_at,updated_at")
+      .single();
+
+    if (syncedLeadError || !syncedLead) {
+      return NextResponse.json({ error: "Package intake saved, but account sync failed" }, { status: 500 });
+    }
+
     const taskSync = await createMissingHandoffTasks(supabase, leadRecord, context);
 
     await supabase.from("lead_activities").insert({
@@ -247,11 +297,25 @@ export async function POST(request: Request) {
       to_value: data.packageId,
     });
 
+    await supabase.from("lead_activities").insert({
+      lead_id: leadRecord.id,
+      user_id: ownerUserId,
+      activity_type: "account_synced",
+      title: "Permanent account synced from intake",
+      description: `${getPermanentAccountName(leadRecord)} is now stored in pc_accounts with a ${accountSync.lane.offerName} engagement.`,
+    });
+
     return NextResponse.json({
       success: true,
-      leadId: leadRecord.id,
+      leadId: syncedLead.id,
       context,
       taskSync,
+      accountSync: {
+        accountId: accountSync.account.id,
+        engagementId: accountSync.engagement.id,
+        offerName: accountSync.lane.offerName,
+        nextStep: accountSync.lane.nextStep,
+      },
     });
   } catch (error) {
     console.error("Package intake error:", error);
