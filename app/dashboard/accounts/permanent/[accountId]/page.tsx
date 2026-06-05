@@ -82,6 +82,38 @@ type AccountUpdate = {
   createdAt: string;
 };
 
+type AssistantPlan = {
+  accountPlan: {
+    firstLane: string;
+    sevenDayDeliverable: string;
+    thirtyDayOutcome: string;
+    accessNeeded: string;
+    ownerOnClientSide: string;
+    nextAction: string;
+  };
+  accountMilestones: Array<{
+    id: string;
+    title: string;
+    detail: string;
+    completed: boolean;
+    owner: string;
+    dueDate: string;
+    notes: string;
+  }>;
+  assistantBehavior: {
+    shouldDo: string[];
+    shouldAvoid: string[];
+    shouldAsk: string[];
+    shouldEscalate: string[];
+    memoryRules: string[];
+  };
+  commercialNextStep: string;
+  suggestedEmail: string;
+  operatingBrief: string;
+  generatedAt?: string;
+  generatedBy?: string;
+};
+
 type PermanentAccountResponse = {
   account?: PermanentAccount;
   engagements?: PermanentEngagement[];
@@ -98,6 +130,13 @@ type AccountTasksResponse = {
 type AccountUpdateResponse = {
   account?: PermanentAccount;
   update?: AccountUpdate;
+  error?: string;
+};
+
+type AssistantPlanResponse = {
+  account?: PermanentAccount;
+  plan?: AssistantPlan;
+  aiGenerated?: boolean;
   error?: string;
 };
 
@@ -146,6 +185,54 @@ function getAccountUpdates(metadata: JsonRecord): AccountUpdate[] {
     nextAction: readString(update, "nextAction"),
     createdAt: readString(update, "createdAt") || new Date().toISOString(),
   }));
+}
+
+function readStringList(value: unknown) {
+  return Array.isArray(value) ? value.map((item) => String(item)).filter(Boolean).slice(0, 8) : [];
+}
+
+function getAssistantPlan(metadata: JsonRecord): AssistantPlan | null {
+  const rawPlan = metadata.assistant_plan;
+  if (!isRecord(rawPlan)) return null;
+
+  const accountPlan = isRecord(rawPlan.accountPlan) ? rawPlan.accountPlan : {};
+  const assistantBehavior = isRecord(rawPlan.assistantBehavior) ? rawPlan.assistantBehavior : {};
+  const rawMilestones = Array.isArray(rawPlan.accountMilestones) ? rawPlan.accountMilestones : [];
+  const firstLane = readString(accountPlan, "firstLane");
+
+  if (!firstLane) return null;
+
+  return {
+    accountPlan: {
+      firstLane,
+      sevenDayDeliverable: readString(accountPlan, "sevenDayDeliverable"),
+      thirtyDayOutcome: readString(accountPlan, "thirtyDayOutcome"),
+      accessNeeded: readString(accountPlan, "accessNeeded"),
+      ownerOnClientSide: readString(accountPlan, "ownerOnClientSide"),
+      nextAction: readString(accountPlan, "nextAction"),
+    },
+    accountMilestones: rawMilestones.filter(isRecord).map((milestone, index) => ({
+      id: readString(milestone, "id") || `milestone-${index + 1}`,
+      title: readString(milestone, "title") || `Milestone ${index + 1}`,
+      detail: readString(milestone, "detail"),
+      completed: Boolean(milestone.completed),
+      owner: readString(milestone, "owner"),
+      dueDate: readString(milestone, "dueDate"),
+      notes: readString(milestone, "notes"),
+    })),
+    assistantBehavior: {
+      shouldDo: readStringList(assistantBehavior.shouldDo),
+      shouldAvoid: readStringList(assistantBehavior.shouldAvoid),
+      shouldAsk: readStringList(assistantBehavior.shouldAsk),
+      shouldEscalate: readStringList(assistantBehavior.shouldEscalate),
+      memoryRules: readStringList(assistantBehavior.memoryRules),
+    },
+    commercialNextStep: readString(rawPlan, "commercialNextStep"),
+    suggestedEmail: readString(rawPlan, "suggestedEmail"),
+    operatingBrief: readString(rawPlan, "operatingBrief"),
+    generatedAt: readString(rawPlan, "generatedAt"),
+    generatedBy: readString(rawPlan, "generatedBy"),
+  };
 }
 
 function buildAccountBrief(account: PermanentAccount, engagements: PermanentEngagement[]) {
@@ -233,6 +320,7 @@ export default function PermanentAccountPage() {
   const [loading, setLoading] = useState(true);
   const [taskLoading, setTaskLoading] = useState(false);
   const [generatingTasks, setGeneratingTasks] = useState(false);
+  const [generatingAssistantPlan, setGeneratingAssistantPlan] = useState(false);
   const [savingUpdate, setSavingUpdate] = useState(false);
   const [error, setError] = useState("");
   const [updateForm, setUpdateForm] = useState({
@@ -289,6 +377,7 @@ export default function PermanentAccountPage() {
 
   const metadata = useMemo(() => (account && isRecord(account.metadata) ? account.metadata : {}), [account]);
   const accountUpdates = useMemo(() => getAccountUpdates(metadata), [metadata]);
+  const assistantPlan = useMemo(() => getAssistantPlan(metadata), [metadata]);
   const primaryEngagement = getPrimaryEngagement(engagements);
   const sourceLeadId = readString(metadata, "source_lead_id");
   const contactName = readString(metadata, "contact_name");
@@ -321,6 +410,17 @@ export default function PermanentAccountPage() {
     }
   }
 
+  async function copySuggestedEmail() {
+    if (!assistantPlan?.suggestedEmail) return;
+
+    try {
+      await navigator.clipboard.writeText(assistantPlan.suggestedEmail);
+      toast.success("Suggested email copied");
+    } catch {
+      toast.error("Could not copy suggested email");
+    }
+  }
+
   async function generateTaskPlan() {
     setGeneratingTasks(true);
 
@@ -338,6 +438,26 @@ export default function PermanentAccountPage() {
       toast.error(err instanceof Error ? err.message : "Could not create task plan");
     } finally {
       setGeneratingTasks(false);
+    }
+  }
+
+  async function generateAssistantPlan() {
+    setGeneratingAssistantPlan(true);
+
+    try {
+      const response = await fetch(`/api/accounts/permanent/${encodeURIComponent(accountId)}/assistant-plan`, {
+        method: "POST",
+      });
+      const result = (await response.json()) as AssistantPlanResponse;
+      if (!response.ok || !result.account || !result.plan) {
+        throw new Error(result.error || "Could not generate account AI plan");
+      }
+      setAccount(result.account);
+      toast.success(result.aiGenerated ? "AI account plan generated" : "Fallback account plan generated");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Could not generate account AI plan");
+    } finally {
+      setGeneratingAssistantPlan(false);
     }
   }
 
@@ -452,6 +572,10 @@ export default function PermanentAccountPage() {
               </Link>
             </Button>
           ) : null}
+          <Button type="button" className="rounded-md" onClick={generateAssistantPlan} disabled={generatingAssistantPlan}>
+            {generatingAssistantPlan ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Sparkles className="mr-2 h-4 w-4" />}
+            Generate AI plan
+          </Button>
           <Button type="button" variant="outline" className="rounded-md" onClick={copyOperatorPrompt}>
             <Sparkles className="mr-2 h-4 w-4" />
             Copy operator prompt
@@ -478,6 +602,119 @@ export default function PermanentAccountPage() {
           </Card>
         ))}
       </div>
+
+      <Card className="overflow-hidden rounded-lg border-violet-200 bg-gradient-to-br from-white via-violet-50/40 to-white shadow-none">
+        <CardHeader>
+          <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+            <div>
+              <div className="flex flex-wrap items-center gap-2">
+                <Badge className="rounded-md bg-violet-600">AI operating plan</Badge>
+                {assistantPlan?.generatedAt ? (
+                  <Badge variant="outline" className="rounded-md">
+                    Updated {formatDateTime(assistantPlan.generatedAt)}
+                  </Badge>
+                ) : null}
+                {assistantPlan?.generatedBy ? (
+                  <Badge variant="outline" className="rounded-md">
+                    {assistantPlan.generatedBy === "openai" ? "AI generated" : "Fallback plan"}
+                  </Badge>
+                ) : null}
+              </div>
+              <CardTitle className="mt-3 text-2xl">Account operating intelligence</CardTitle>
+              <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-600">
+                Generate a plan that reads the permanent account, engagement, tasks, handoff context, and update log,
+                then saves the next action back to the account.
+              </p>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {assistantPlan?.suggestedEmail ? (
+                <Button type="button" variant="outline" className="rounded-md bg-white" onClick={copySuggestedEmail}>
+                  <Clipboard className="mr-2 h-4 w-4" />
+                  Copy email
+                </Button>
+              ) : null}
+              <Button type="button" className="rounded-md" onClick={generateAssistantPlan} disabled={generatingAssistantPlan}>
+                {generatingAssistantPlan ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Sparkles className="mr-2 h-4 w-4" />}
+                {assistantPlan ? "Refresh AI plan" : "Generate AI plan"}
+              </Button>
+            </div>
+          </div>
+        </CardHeader>
+        <CardContent>
+          {assistantPlan ? (
+            <div className="grid gap-5 xl:grid-cols-[1fr_0.95fr]">
+              <div className="space-y-4">
+                <div className="rounded-lg border bg-white p-5">
+                  <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-violet-600">First lane</p>
+                  <p className="mt-3 text-lg font-semibold leading-7 text-slate-950">
+                    {assistantPlan.accountPlan.firstLane}
+                  </p>
+                </div>
+                <div className="grid gap-3 md:grid-cols-2">
+                  {[
+                    ["7-day deliverable", assistantPlan.accountPlan.sevenDayDeliverable],
+                    ["30-day outcome", assistantPlan.accountPlan.thirtyDayOutcome],
+                    ["Access needed", assistantPlan.accountPlan.accessNeeded],
+                    ["Client-side owner", assistantPlan.accountPlan.ownerOnClientSide],
+                  ].map(([label, value]) => (
+                    <div key={label} className="rounded-lg border bg-white p-4">
+                      <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-slate-500">{label}</p>
+                      <p className="mt-2 text-sm leading-6 text-slate-700">{value || "Not set"}</p>
+                    </div>
+                  ))}
+                </div>
+                <div className="rounded-lg border bg-white p-5">
+                  <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-violet-600">
+                    Commercial next step
+                  </p>
+                  <p className="mt-3 text-sm font-semibold leading-6 text-slate-950">
+                    {assistantPlan.commercialNextStep || assistantPlan.accountPlan.nextAction}
+                  </p>
+                </div>
+              </div>
+              <div className="space-y-4">
+                <div className="rounded-lg border bg-white p-5">
+                  <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-slate-500">Milestones</p>
+                  <div className="mt-4 space-y-3">
+                    {assistantPlan.accountMilestones.slice(0, 5).map((milestone) => (
+                      <div key={milestone.id} className="rounded-md border bg-slate-50 p-3">
+                        <p className="text-sm font-semibold text-slate-950">{milestone.title}</p>
+                        <p className="mt-1 text-sm leading-5 text-slate-600">{milestone.detail}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                <div className="rounded-lg border bg-white p-5">
+                  <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-slate-500">
+                    Assistant behavior
+                  </p>
+                  <div className="mt-4 grid gap-3">
+                    {[
+                      ["Do", assistantPlan.assistantBehavior.shouldDo],
+                      ["Ask", assistantPlan.assistantBehavior.shouldAsk],
+                      ["Escalate", assistantPlan.assistantBehavior.shouldEscalate],
+                    ].map(([label, items]) => (
+                      <div key={label as string}>
+                        <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">{label as string}</p>
+                        <ul className="mt-2 space-y-1 text-sm leading-5 text-slate-700">
+                          {(items as string[]).slice(0, 3).map((item) => (
+                            <li key={item}>- {item}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div className="rounded-lg border border-dashed bg-white p-6 text-sm leading-6 text-slate-600">
+              No AI operating plan has been generated for this account yet. Use Generate AI plan to create one from
+              the account history, then it will be stored in the account memory and update log.
+            </div>
+          )}
+        </CardContent>
+      </Card>
 
       <div className="grid gap-6 lg:grid-cols-[1.05fr_0.95fr]">
         <Card className="rounded-lg shadow-none">
