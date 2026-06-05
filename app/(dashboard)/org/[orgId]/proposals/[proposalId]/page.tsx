@@ -505,6 +505,7 @@ export default async function ProposalPage({
           reviewerResult={reviewerResult}
           verifyMarkerCount={verifyMarkerCount}
           sectionCount={visibleSections.length}
+          tasks={submissionTasks ?? []}
         />
         <SubmissionPlanPanel
           dueDate={proposal.due_date}
