@@ -441,6 +441,31 @@ export default function PermanentAccountPage() {
     }
   }
 
+  async function generateAssistantPlanTasks() {
+    if (!assistantPlan) {
+      toast.error("Generate an AI operating plan before creating plan tasks");
+      return;
+    }
+
+    setGeneratingTasks(true);
+
+    try {
+      const response = await fetch(`/api/accounts/permanent/${encodeURIComponent(accountId)}/tasks`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ source: "assistant_plan" }),
+      });
+      const result = (await response.json()) as AccountTasksResponse;
+      if (!response.ok) throw new Error(result.error || "Could not create AI plan tasks");
+      setTasks(result.tasks || []);
+      toast.success(result.created ? `Created ${result.created} AI plan tasks` : "AI plan tasks are already current");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Could not create AI plan tasks");
+    } finally {
+      setGeneratingTasks(false);
+    }
+  }
+
   async function generateAssistantPlan() {
     setGeneratingAssistantPlan(true);
 
@@ -633,6 +658,18 @@ export default function PermanentAccountPage() {
                   Copy email
                 </Button>
               ) : null}
+              {assistantPlan ? (
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="rounded-md bg-white"
+                  onClick={generateAssistantPlanTasks}
+                  disabled={generatingTasks}
+                >
+                  {generatingTasks ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <ListChecks className="mr-2 h-4 w-4" />}
+                  Create plan tasks
+                </Button>
+              ) : null}
               <Button type="button" className="rounded-md" onClick={generateAssistantPlan} disabled={generatingAssistantPlan}>
                 {generatingAssistantPlan ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Sparkles className="mr-2 h-4 w-4" />}
                 {assistantPlan ? "Refresh AI plan" : "Generate AI plan"}
@@ -737,10 +774,18 @@ export default function PermanentAccountPage() {
                   These tasks stay with the account even when there is no original lead room.
                 </p>
               </div>
-              <Button type="button" className="rounded-md" onClick={generateTaskPlan} disabled={generatingTasks}>
-                {generatingTasks ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Sparkles className="mr-2 h-4 w-4" />}
-                Create task plan
-              </Button>
+              <div className="flex flex-wrap gap-2">
+                {assistantPlan ? (
+                  <Button type="button" className="rounded-md" onClick={generateAssistantPlanTasks} disabled={generatingTasks}>
+                    {generatingTasks ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <ListChecks className="mr-2 h-4 w-4" />}
+                    Create AI plan tasks
+                  </Button>
+                ) : null}
+                <Button type="button" variant={assistantPlan ? "outline" : "default"} className="rounded-md" onClick={generateTaskPlan} disabled={generatingTasks}>
+                  {generatingTasks ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Sparkles className="mr-2 h-4 w-4" />}
+                  Create kickoff tasks
+                </Button>
+              </div>
             </div>
 
             {taskLoading ? (
@@ -750,8 +795,8 @@ export default function PermanentAccountPage() {
               </div>
             ) : tasks.length === 0 ? (
               <div className="rounded-lg border border-dashed p-5 text-sm leading-6 text-slate-600">
-                Use <span className="font-semibold text-slate-950">Create task plan</span> to create the first
-                account-level operating tasks from the engagement and handoff context.
+                Use <span className="font-semibold text-slate-950">Create kickoff tasks</span> for the default
+                account checklist, or generate an AI operating plan and create plan-specific tasks from it.
               </div>
             ) : (
               <div className="space-y-3">

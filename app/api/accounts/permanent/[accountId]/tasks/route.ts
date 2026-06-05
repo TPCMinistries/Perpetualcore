@@ -23,6 +23,7 @@ type TaskTemplate = {
 
 const taskStatusSchema = z.object({
   regenerate: z.boolean().optional(),
+  source: z.enum(["kickoff", "assistant_plan"]).optional().default("kickoff"),
 });
 
 function isRecord(value: unknown): value is JsonRecord {
@@ -100,6 +101,72 @@ function buildAccountTaskTemplates({
       dueInDays: 7,
     },
   ];
+}
+
+function buildAssistantPlanTaskTemplates(metadata: JsonRecord): TaskTemplate[] {
+  const assistantPlan = isRecord(metadata.assistant_plan) ? metadata.assistant_plan : {};
+  const accountPlan = isRecord(assistantPlan.accountPlan) ? assistantPlan.accountPlan : {};
+  const rawMilestones = Array.isArray(assistantPlan.accountMilestones) ? assistantPlan.accountMilestones : [];
+  const firstLane = readString(accountPlan, "firstLane");
+  const sevenDayDeliverable = readString(accountPlan, "sevenDayDeliverable");
+  const thirtyDayOutcome = readString(accountPlan, "thirtyDayOutcome");
+  const accessNeeded = readString(accountPlan, "accessNeeded");
+  const ownerOnClientSide = readString(accountPlan, "ownerOnClientSide");
+  const nextAction = readString(accountPlan, "nextAction");
+  const templates: TaskTemplate[] = [];
+
+  if (nextAction) {
+    templates.push({
+      title: nextAction,
+      description:
+        firstLane || ownerOnClientSide
+          ? [`First lane: ${firstLane || "Not set"}`, `Client owner: ${ownerOnClientSide || "Not set"}`].join("\n")
+          : "Run the next action from the saved account AI operating plan.",
+      priority: "high",
+      dueInDays: 1,
+    });
+  }
+
+  if (accessNeeded) {
+    templates.push({
+      title: "Collect access needed for the AI operating plan",
+      description: accessNeeded,
+      priority: "high",
+      dueInDays: 2,
+    });
+  }
+
+  rawMilestones.filter(isRecord).slice(0, 5).forEach((milestone, index) => {
+    const title = readString(milestone, "title");
+    if (!title) return;
+
+    templates.push({
+      title,
+      description: readString(milestone, "detail") || readString(milestone, "notes") || "Move this account milestone forward.",
+      priority: index <= 1 ? "high" : "medium",
+      dueInDays: 3 + index * 2,
+    });
+  });
+
+  if (sevenDayDeliverable) {
+    templates.push({
+      title: "Ship the 7-day account deliverable",
+      description: sevenDayDeliverable,
+      priority: "high",
+      dueInDays: 7,
+    });
+  }
+
+  if (thirtyDayOutcome) {
+    templates.push({
+      title: "Review the 30-day account outcome",
+      description: thirtyDayOutcome,
+      priority: "medium",
+      dueInDays: 30,
+    });
+  }
+
+  return templates;
 }
 
 async function getAuthenticatedAccount(accountId: string) {
@@ -196,13 +263,20 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
       : isRecord(engagementMetadata.account_handoff_context)
         ? engagementMetadata.account_handoff_context
         : null;
-    const templates = buildAccountTaskTemplates({
-      accountName: resolved.account.name,
-      offerName: primaryEngagement?.offer_name || "Perpetual Core",
-      systemName: primaryEngagement?.system_name || "AI operating system",
-      nextStep: primaryEngagement?.next_step || "Confirm kickoff plan and operating owner",
-      handoffContext: accountHandoff,
-    });
+    const templates =
+      parsed.data.source === "assistant_plan"
+        ? buildAssistantPlanTaskTemplates(accountMetadata)
+        : buildAccountTaskTemplates({
+            accountName: resolved.account.name,
+            offerName: primaryEngagement?.offer_name || "Perpetual Core",
+            systemName: primaryEngagement?.system_name || "AI operating system",
+            nextStep: primaryEngagement?.next_step || "Confirm kickoff plan and operating owner",
+            handoffContext: accountHandoff,
+          });
+
+    if (templates.length === 0) {
+      return NextResponse.json({ error: "No assistant plan is saved on this account yet" }, { status: 400 });
+    }
     const existingTitles = new Set((existingTasksResult.data || []).map((task) => task.title));
     const tasksToCreate = templates.filter((template) => parsed.data.regenerate || !existingTitles.has(template.title));
 
@@ -217,9 +291,12 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
           priority: template.priority,
           status: "todo",
           due_date: addDays(template.dueInDays),
-          source: "pc_account",
+          source: parsed.data.source === "assistant_plan" ? "pc_account_assistant_plan" : "pc_account",
           source_reference: accountId,
-          tags: ["perpetual-core-account", "pc-account", "client-delivery", "account-task-plan"],
+          tags:
+            parsed.data.source === "assistant_plan"
+              ? ["perpetual-core-account", "pc-account", "client-delivery", "assistant-plan-task"]
+              : ["perpetual-core-account", "pc-account", "client-delivery", "account-task-plan"],
           created_at: now,
           updated_at: now,
         })),
