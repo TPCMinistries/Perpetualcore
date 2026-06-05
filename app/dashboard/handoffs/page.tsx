@@ -50,6 +50,8 @@ type HandoffAccount = {
   overdueTaskCount?: number;
   nextTaskDueDate?: string;
   clientHandoffPath?: string;
+  sourceType?: string;
+  leadId?: string;
   createdAt: string;
   href: string;
 };
@@ -272,6 +274,7 @@ export default function HandoffsPage() {
   const [error, setError] = useState("");
   const [query, setQuery] = useState("");
   const [stateFilter, setStateFilter] = useState<HandoffState>("all");
+  const [syncingTaskId, setSyncingTaskId] = useState("");
 
   async function fetchHandoffs() {
     setLoading(true);
@@ -303,6 +306,63 @@ export default function HandoffsPage() {
       toast.success(`${label} copied`);
     } catch {
       toast.error("Could not copy text");
+    }
+  }
+
+  async function syncTasks(account: HandoffAccount) {
+    if (!account.handoffContextReceived) {
+      toast.error("Client handoff context is needed before creating tasks");
+      return;
+    }
+
+    const endpoint =
+      account.sourceType === "Permanent account"
+        ? `/api/accounts/permanent/${encodeURIComponent(account.id)}/tasks`
+        : account.leadId
+          ? `/api/accounts/${encodeURIComponent(account.leadId)}/handoff-tasks`
+          : "";
+
+    if (!endpoint) {
+      toast.error("Open the account room to create tasks for this source");
+      return;
+    }
+
+    setSyncingTaskId(account.id);
+
+    try {
+      const response = await fetch(endpoint, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body:
+          account.sourceType === "Permanent account"
+            ? JSON.stringify({ source: "kickoff" })
+            : JSON.stringify({}),
+      });
+      const result = (await response.json().catch(() => ({}))) as {
+        error?: string;
+        created?: number;
+        skipped?: number;
+        taskSync?: { created?: number; skipped?: number };
+      };
+
+      if (!response.ok) {
+        throw new Error(result.error || "Could not sync tasks");
+      }
+
+      const created = result.created ?? result.taskSync?.created ?? 0;
+      const skipped = result.skipped ?? result.taskSync?.skipped ?? 0;
+      toast.success(
+        created > 0
+          ? `Created ${created} task${created === 1 ? "" : "s"}`
+          : skipped > 0
+            ? "Task plan is already current"
+            : "Task plan synced",
+      );
+      await fetchHandoffs();
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Could not sync tasks");
+    } finally {
+      setSyncingTaskId("");
     }
   }
 
@@ -683,6 +743,23 @@ export default function HandoffsPage() {
                         <Mail className="mr-2 h-3.5 w-3.5" />
                         Copy ask
                       </Button>
+                      {state.key === "needs_tasks" ? (
+                        <Button
+                          type="button"
+                          size="sm"
+                          variant="outline"
+                          className="h-8 rounded-md"
+                          disabled={syncingTaskId === account.id}
+                          onClick={() => syncTasks(account)}
+                        >
+                          {syncingTaskId === account.id ? (
+                            <Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" />
+                          ) : (
+                            <Target className="mr-2 h-3.5 w-3.5" />
+                          )}
+                          Sync tasks
+                        </Button>
+                      ) : null}
                       {account.clientHandoffPath ? (
                         <>
                           <Button
