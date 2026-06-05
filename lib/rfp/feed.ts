@@ -138,8 +138,6 @@ export interface FeedPage {
 }
 
 // ── Internal row-shape (from Supabase) ────────────────────────────────────────
-// Keep this loose — the rfp_* tables aren't in database.types.ts yet (per
-// repo-wide pattern set in 05-01/02/03).
 
 interface OrgJoinShape {
   id: string;
@@ -184,19 +182,6 @@ interface MatchJoinRow {
 
 interface OppSearchRow {
   id: string;
-}
-
-interface EnrichmentSelectQuery {
-  in(column: string, values: string[]): Promise<{
-    data: EnrichmentShape[] | null;
-    error: { message: string } | null;
-  }>;
-}
-
-interface RfpEnrichmentReadClient {
-  from(table: "rfp_opportunity_enrichments"): {
-    select(columns: string): EnrichmentSelectQuery;
-  };
 }
 
 // ── Helper ────────────────────────────────────────────────────────────────────
@@ -318,7 +303,7 @@ function sortFeedRows(rows: FeedRow[], sort: DiscoverySort): FeedRow[] {
 }
 
 async function loadEnrichmentsForRows(
-  rfp: RfpEnrichmentReadClient,
+  rfp: ReturnType<typeof createClient>,
   oppIds: string[],
 ): Promise<Map<string, EnrichmentShape>> {
   if (oppIds.length === 0) return new Map();
@@ -358,10 +343,8 @@ export async function buildFeedQuery(filters: FeedFilters): Promise<FeedPage> {
         ? limit * 3
         : limit * 2;
 
-  // Untyped client narrowing — rfp_* tables not in database.types.ts yet (per
-  // the 05-03 / lib/rfp/orgs.ts pattern). The `from(table) => any` shape lets
-  // PostgREST chain methods (.select/.eq/.in/.gte/.lte/.or/.not/.order/.limit)
-  // without TS2589 "instantiation excessively deep".
+  // Narrow the complex dynamic feed query to avoid TS2589
+  // "instantiation excessively deep" on long PostgREST chains.
   const rfp = supabase as unknown as {
     from: (table: string) => any;
   };
@@ -484,7 +467,7 @@ export async function buildFeedQuery(filters: FeedFilters): Promise<FeedPage> {
     const oppIds = rows.map((row) => row.opp_id);
     const [canonicalByOpp, enrichmentByOpp] = await Promise.all([
       loadCanonicalMetadataForOpps(rfp, oppIds),
-      loadEnrichmentsForRows(rfp as unknown as RfpEnrichmentReadClient, oppIds),
+      loadEnrichmentsForRows(rfp, oppIds),
     ]);
     for (const row of rows) {
       row.canonical = canonicalByOpp.get(row.opp_id) ?? null;

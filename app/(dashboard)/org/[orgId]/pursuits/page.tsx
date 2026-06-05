@@ -102,21 +102,6 @@ interface PackageRow {
   proposal_id: string;
 }
 
-interface RowsResult<T> {
-  data: T[] | null;
-  error: { message: string } | null;
-}
-
-interface MissingRfpTableReadClient {
-  from(table: "rfp_package_documents"): {
-    select(columns: string): {
-      in(column: string, values: string[]): {
-        returns<T>(): Promise<RowsResult<T extends Array<infer Row> ? Row : T>>;
-      };
-    };
-  };
-}
-
 interface PursuitItem {
   oppId: string;
   title: string;
@@ -357,7 +342,7 @@ export default async function PursuitsPage({ params }: PageProps) {
 
   const { data: packageRows } =
     proposalIds.length > 0
-      ? await (supabase as unknown as MissingRfpTableReadClient)
+      ? await supabase
           .from("rfp_package_documents")
           .select("proposal_id")
           .in("proposal_id", proposalIds)
@@ -478,7 +463,10 @@ export default async function PursuitsPage({ params }: PageProps) {
   }).length;
 
   return (
-    <div className="min-h-[calc(100vh-4rem)] bg-[#f7f6f2] text-zinc-950">
+    <div
+      className="min-h-[calc(100vh-4rem)] bg-[#f7f6f2] text-zinc-950"
+      data-testid="rfp-pursuits-page"
+    >
       <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
         <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
           <div>
@@ -593,7 +581,10 @@ function PursuitCard({ item, orgId }: { item: PursuitItem; orgId: string }) {
           : "border-zinc-200 bg-zinc-100 text-zinc-700";
 
   return (
-    <article className="overflow-hidden rounded-lg border border-zinc-200 bg-white shadow-sm">
+    <article
+      className="overflow-hidden rounded-lg border border-zinc-200 bg-white shadow-sm"
+      data-testid="rfp-pursuit-card"
+    >
       <div className="grid gap-0 lg:grid-cols-[1fr_340px]">
         <div className="p-5 sm:p-6">
           <div className="flex flex-wrap items-center gap-2">
@@ -686,6 +677,7 @@ function PursuitCard({ item, orgId }: { item: PursuitItem; orgId: string }) {
             <Link
               href={`/org/${orgId}/pursuits/${item.oppId}`}
               className="inline-flex h-10 items-center justify-center gap-2 rounded-md border border-zinc-300 bg-white px-4 text-sm font-medium text-zinc-800 transition hover:bg-zinc-100"
+              data-testid="rfp-open-command-file"
             >
               Open command file
               <ArrowRight className="h-4 w-4" />

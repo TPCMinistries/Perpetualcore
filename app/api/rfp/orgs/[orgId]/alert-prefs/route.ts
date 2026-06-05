@@ -79,11 +79,7 @@ interface PrefsRow {
 const COLUMNS =
   'id, org_id, user_id, threshold, email_enabled, email_address, telegram_enabled, telegram_chat_id, discord_enabled, discord_webhook, digest_mode';
 
-/** Untyped handle since rfp_* tables aren't in database.types.ts. */
 type SupabaseClient = Awaited<ReturnType<typeof createClient>>;
-function rfpHandle(supabase: SupabaseClient): { from: (table: string) => any } {
-  return supabase as unknown as { from: (table: string) => any };
-}
 
 // ── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -99,8 +95,7 @@ async function loadRow(args: {
   orgId: string;
   userId: string | null;
 }): Promise<PrefsRow | null> {
-  const handle = rfpHandle(args.supabase);
-  let query = handle
+  let query = args.supabase
     .from('rfp_alert_prefs')
     .select(COLUMNS)
     .eq('org_id', args.orgId);
@@ -130,8 +125,6 @@ async function upsertRow(args: {
   body: PrefsBody;
   existing: PrefsRow | null;
 }): Promise<{ row: PrefsRow | null; error: string | null }> {
-  const handle = rfpHandle(args.supabase);
-
   if (args.existing) {
     const updates: Partial<PrefsRow> = {};
     if (args.body.threshold !== undefined) updates.threshold = args.body.threshold;
@@ -147,7 +140,7 @@ async function upsertRow(args: {
       return { row: args.existing, error: null };
     }
 
-    const { data, error } = await handle
+    const { data, error } = await args.supabase
       .from('rfp_alert_prefs')
       .update(updates)
       .eq('id', args.existing.id)
@@ -171,7 +164,7 @@ async function upsertRow(args: {
     digest_mode: args.body.digest_mode ?? false,
   };
 
-  const { data, error } = await handle
+  const { data, error } = await args.supabase
     .from('rfp_alert_prefs')
     .insert(insertRow)
     .select(COLUMNS)

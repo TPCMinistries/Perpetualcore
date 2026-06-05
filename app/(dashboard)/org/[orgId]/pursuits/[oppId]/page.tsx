@@ -140,31 +140,6 @@ interface PackageDocRow {
   created_at: string;
 }
 
-interface MaybeSingleResult<T> {
-  data: T | null;
-  error: { message: string } | null;
-}
-
-interface RowsResult<T> {
-  data: T[] | null;
-  error: { message: string } | null;
-}
-
-interface EqQuery {
-  maybeSingle<T>(): Promise<MaybeSingleResult<T>>;
-  order(column: string, options: { ascending: boolean }): {
-    returns<T>(): Promise<RowsResult<T extends Array<infer Row> ? Row : T>>;
-  };
-}
-
-interface MissingRfpTableReadClient {
-  from(table: "rfp_opportunity_enrichments" | "rfp_package_documents"): {
-    select(columns: string): {
-      eq(column: string, value: string): EqQuery;
-    };
-  };
-}
-
 interface ComplianceCheckRow {
   check_type: string;
   details_json: unknown;
@@ -363,8 +338,7 @@ export default async function PursuitDetailPage({ params }: PageProps) {
   if (!match?.rfp_opportunities) notFound();
 
   const opp = match.rfp_opportunities;
-  const missingRfpTables = supabase as unknown as MissingRfpTableReadClient;
-  const { data: enrichment } = await missingRfpTables
+  const { data: enrichment } = await supabase
     .from("rfp_opportunity_enrichments")
     .select(
       "eligibility, required_documents, submission_method, submission_url, contact, matching_funds, funding_method, award_range, timeline, risks, missing_fields, quality_score",
@@ -393,7 +367,7 @@ export default async function PursuitDetailPage({ params }: PageProps) {
     : { data: [] as SubmissionTaskRow[] };
 
   const { data: packageDocs } = proposal
-    ? await missingRfpTables
+    ? await supabase
         .from("rfp_package_documents")
         .select("id, title, source_type, source_url, file_name, mime_type, extracted_chars, extracted_json, created_at")
         .eq("proposal_id", proposal.id)
@@ -516,7 +490,10 @@ export default async function PursuitDetailPage({ params }: PageProps) {
           : "border-zinc-200 bg-zinc-100 text-zinc-700";
 
   return (
-    <div className="min-h-[calc(100vh-4rem)] bg-[#f7f6f2] text-zinc-950">
+    <div
+      className="min-h-[calc(100vh-4rem)] bg-[#f7f6f2] text-zinc-950"
+      data-testid="rfp-pursuit-detail-page"
+    >
       <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
         <Link
           href={`/org/${orgId}/pursuits`}

@@ -878,6 +878,7 @@ export type Database = {
           page_url: string | null
           referrer: string | null
           session_id: string | null
+          source_site: string | null
           user_agent: string | null
           user_id: string | null
           utm_campaign: string | null
@@ -898,6 +899,7 @@ export type Database = {
           page_url?: string | null
           referrer?: string | null
           session_id?: string | null
+          source_site?: string | null
           user_agent?: string | null
           user_id?: string | null
           utm_campaign?: string | null
@@ -918,6 +920,7 @@ export type Database = {
           page_url?: string | null
           referrer?: string | null
           session_id?: string | null
+          source_site?: string | null
           user_agent?: string | null
           user_id?: string | null
           utm_campaign?: string | null
@@ -3697,6 +3700,54 @@ export type Database = {
           phone?: string | null
           role?: string | null
           whatsapp_number?: string | null
+        }
+        Relationships: []
+      }
+      connected_accounts: {
+        Row: {
+          access_token_ciphertext: string | null
+          account_email: string | null
+          created_at: string
+          expires_at: string | null
+          id: string
+          metadata: Json
+          owner_user_id: string
+          provider: string
+          refresh_token_ciphertext: string | null
+          scopes: string[]
+          status: string
+          updated_at: string
+          workspace_id: string
+        }
+        Insert: {
+          access_token_ciphertext?: string | null
+          account_email?: string | null
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          metadata?: Json
+          owner_user_id: string
+          provider: string
+          refresh_token_ciphertext?: string | null
+          scopes?: string[]
+          status?: string
+          updated_at?: string
+          workspace_id?: string
+        }
+        Update: {
+          access_token_ciphertext?: string | null
+          account_email?: string | null
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          metadata?: Json
+          owner_user_id?: string
+          provider?: string
+          refresh_token_ciphertext?: string | null
+          scopes?: string[]
+          status?: string
+          updated_at?: string
+          workspace_id?: string
         }
         Relationships: []
       }
@@ -10234,16 +10285,24 @@ export type Database = {
           industry: string | null
           last_name: string | null
           lead_magnet: string | null
+          lead_type: string | null
           metadata: Json | null
           phone: string | null
           qualification_notes: string | null
           qualification_score: number | null
+          referrer: string | null
           segment: string | null
           source: string | null
+          source_page: string | null
+          source_site: string | null
           status: string | null
           tags: string[] | null
           updated_at: string | null
           user_id: string | null
+          utm_campaign: string | null
+          utm_content: string | null
+          utm_medium: string | null
+          utm_source: string | null
           website: string | null
         }
         Insert: {
@@ -10259,16 +10318,24 @@ export type Database = {
           industry?: string | null
           last_name?: string | null
           lead_magnet?: string | null
+          lead_type?: string | null
           metadata?: Json | null
           phone?: string | null
           qualification_notes?: string | null
           qualification_score?: number | null
+          referrer?: string | null
           segment?: string | null
           source?: string | null
+          source_page?: string | null
+          source_site?: string | null
           status?: string | null
           tags?: string[] | null
           updated_at?: string | null
           user_id?: string | null
+          utm_campaign?: string | null
+          utm_content?: string | null
+          utm_medium?: string | null
+          utm_source?: string | null
           website?: string | null
         }
         Update: {
@@ -10284,16 +10351,24 @@ export type Database = {
           industry?: string | null
           last_name?: string | null
           lead_magnet?: string | null
+          lead_type?: string | null
           metadata?: Json | null
           phone?: string | null
           qualification_notes?: string | null
           qualification_score?: number | null
+          referrer?: string | null
           segment?: string | null
           source?: string | null
+          source_page?: string | null
+          source_site?: string | null
           status?: string | null
           tags?: string[] | null
           updated_at?: string | null
           user_id?: string | null
+          utm_campaign?: string | null
+          utm_content?: string | null
+          utm_medium?: string | null
+          utm_source?: string | null
           website?: string | null
         }
         Relationships: []
@@ -12524,6 +12599,81 @@ export type Database = {
           },
         ]
       }
+      newsletter_sends: {
+        Row: {
+          click_count: number | null
+          content_html: string | null
+          content_text: string | null
+          id: string
+          metadata: Json | null
+          newsletter: string
+          open_count: number | null
+          recipient_count: number | null
+          sent_at: string | null
+          subject: string
+        }
+        Insert: {
+          click_count?: number | null
+          content_html?: string | null
+          content_text?: string | null
+          id?: string
+          metadata?: Json | null
+          newsletter?: string
+          open_count?: number | null
+          recipient_count?: number | null
+          sent_at?: string | null
+          subject: string
+        }
+        Update: {
+          click_count?: number | null
+          content_html?: string | null
+          content_text?: string | null
+          id?: string
+          metadata?: Json | null
+          newsletter?: string
+          open_count?: number | null
+          recipient_count?: number | null
+          sent_at?: string | null
+          subject?: string
+        }
+        Relationships: []
+      }
+      newsletter_subscribers: {
+        Row: {
+          email: string
+          id: string
+          metadata: Json | null
+          name: string | null
+          newsletter: string
+          source_site: string
+          status: string
+          subscribed_at: string | null
+          unsubscribed_at: string | null
+        }
+        Insert: {
+          email: string
+          id?: string
+          metadata?: Json | null
+          name?: string | null
+          newsletter?: string
+          source_site: string
+          status?: string
+          subscribed_at?: string | null
+          unsubscribed_at?: string | null
+        }
+        Update: {
+          email?: string
+          id?: string
+          metadata?: Json | null
+          name?: string | null
+          newsletter?: string
+          source_site?: string
+          status?: string
+          subscribed_at?: string | null
+          unsubscribed_at?: string | null
+        }
+        Relationships: []
+      }
       notifications: {
         Row: {
           action_label: string | null
@@ -12990,6 +13140,568 @@ export type Database = {
             columns: ["organization_id"]
             isOneToOne: false
             referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pc_accounts: {
+        Row: {
+          account_type: string
+          buyer_type: string | null
+          created_at: string
+          created_by: string | null
+          data_posture: string
+          id: string
+          metadata: Json
+          name: string
+          normalized_name: string
+          notes: string | null
+          risk_level: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          account_type?: string
+          buyer_type?: string | null
+          created_at?: string
+          created_by?: string | null
+          data_posture?: string
+          id?: string
+          metadata?: Json
+          name: string
+          normalized_name: string
+          notes?: string | null
+          risk_level?: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          account_type?: string
+          buyer_type?: string | null
+          created_at?: string
+          created_by?: string | null
+          data_posture?: string
+          id?: string
+          metadata?: Json
+          name?: string
+          normalized_name?: string
+          notes?: string | null
+          risk_level?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      pc_automation_runs: {
+        Row: {
+          automation_id: string
+          completed_at: string | null
+          created_at: string
+          error: string | null
+          id: string
+          input: Json
+          output: Json
+          receipt: string | null
+          started_at: string | null
+          status: string
+        }
+        Insert: {
+          automation_id: string
+          completed_at?: string | null
+          created_at?: string
+          error?: string | null
+          id?: string
+          input?: Json
+          output?: Json
+          receipt?: string | null
+          started_at?: string | null
+          status?: string
+        }
+        Update: {
+          automation_id?: string
+          completed_at?: string | null
+          created_at?: string
+          error?: string | null
+          id?: string
+          input?: Json
+          output?: Json
+          receipt?: string | null
+          started_at?: string | null
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pc_automation_runs_automation_id_fkey"
+            columns: ["automation_id"]
+            isOneToOne: false
+            referencedRelation: "pc_automations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pc_automations: {
+        Row: {
+          automation_type: string
+          created_at: string
+          delivery: Json
+          description: string | null
+          id: string
+          last_error: string | null
+          last_run_at: string | null
+          last_status: string | null
+          name: string
+          next_run_at: string | null
+          owner_user_id: string
+          schedule: Json
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          automation_type: string
+          created_at?: string
+          delivery?: Json
+          description?: string | null
+          id?: string
+          last_error?: string | null
+          last_run_at?: string | null
+          last_status?: string | null
+          name: string
+          next_run_at?: string | null
+          owner_user_id?: string
+          schedule?: Json
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          automation_type?: string
+          created_at?: string
+          delivery?: Json
+          description?: string | null
+          id?: string
+          last_error?: string | null
+          last_run_at?: string | null
+          last_status?: string | null
+          name?: string
+          next_run_at?: string | null
+          owner_user_id?: string
+          schedule?: Json
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      pc_custom_skill_tests: {
+        Row: {
+          created_at: string
+          custom_skill_id: string
+          expected_output: Json
+          fixture_input: Json
+          id: string
+          notes: string | null
+          observed_output: Json
+          owner_user_id: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          custom_skill_id: string
+          expected_output?: Json
+          fixture_input?: Json
+          id?: string
+          notes?: string | null
+          observed_output?: Json
+          owner_user_id?: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          custom_skill_id?: string
+          expected_output?: Json
+          fixture_input?: Json
+          id?: string
+          notes?: string | null
+          observed_output?: Json
+          owner_user_id?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pc_custom_skill_tests_custom_skill_id_fkey"
+            columns: ["custom_skill_id"]
+            isOneToOne: false
+            referencedRelation: "pc_custom_skills"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pc_custom_skills: {
+        Row: {
+          activated_at: string | null
+          archived_at: string | null
+          blueprint: Json
+          created_at: string
+          description: string
+          id: string
+          implementation_task_id: string | null
+          last_tested_at: string | null
+          lifecycle_state: string
+          name: string
+          owner_user_id: string
+          paused_at: string | null
+          provider: string
+          risk_level: string
+          slug: string
+          source_execution_id: string | null
+          trigger_kind: string
+          updated_at: string
+        }
+        Insert: {
+          activated_at?: string | null
+          archived_at?: string | null
+          blueprint?: Json
+          created_at?: string
+          description?: string
+          id?: string
+          implementation_task_id?: string | null
+          last_tested_at?: string | null
+          lifecycle_state?: string
+          name: string
+          owner_user_id?: string
+          paused_at?: string | null
+          provider?: string
+          risk_level?: string
+          slug: string
+          source_execution_id?: string | null
+          trigger_kind?: string
+          updated_at?: string
+        }
+        Update: {
+          activated_at?: string | null
+          archived_at?: string | null
+          blueprint?: Json
+          created_at?: string
+          description?: string
+          id?: string
+          implementation_task_id?: string | null
+          last_tested_at?: string | null
+          lifecycle_state?: string
+          name?: string
+          owner_user_id?: string
+          paused_at?: string | null
+          provider?: string
+          risk_level?: string
+          slug?: string
+          source_execution_id?: string | null
+          trigger_kind?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pc_custom_skills_implementation_task_id_fkey"
+            columns: ["implementation_task_id"]
+            isOneToOne: false
+            referencedRelation: "mc_tasks"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pc_custom_skills_source_execution_id_fkey"
+            columns: ["source_execution_id"]
+            isOneToOne: true
+            referencedRelation: "skill_executions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pc_engagements: {
+        Row: {
+          account_id: string
+          created_at: string
+          created_by: string | null
+          data_posture: string
+          id: string
+          metadata: Json
+          name: string
+          next_step: string | null
+          offer_name: string
+          risk_level: string
+          stage: string
+          system_name: string
+          task_id: string | null
+          updated_at: string
+          value_range: string | null
+        }
+        Insert: {
+          account_id: string
+          created_at?: string
+          created_by?: string | null
+          data_posture?: string
+          id?: string
+          metadata?: Json
+          name: string
+          next_step?: string | null
+          offer_name: string
+          risk_level?: string
+          stage?: string
+          system_name: string
+          task_id?: string | null
+          updated_at?: string
+          value_range?: string | null
+        }
+        Update: {
+          account_id?: string
+          created_at?: string
+          created_by?: string | null
+          data_posture?: string
+          id?: string
+          metadata?: Json
+          name?: string
+          next_step?: string | null
+          offer_name?: string
+          risk_level?: string
+          stage?: string
+          system_name?: string
+          task_id?: string | null
+          updated_at?: string
+          value_range?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pc_engagements_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "pc_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pc_engagements_task_id_fkey"
+            columns: ["task_id"]
+            isOneToOne: false
+            referencedRelation: "mc_tasks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pc_meeting_prep_packets: {
+        Row: {
+          attendees: Json
+          automation_run_id: string | null
+          context: string | null
+          created_at: string
+          follow_up_task_ids: Json
+          follow_ups: Json
+          id: string
+          objective: string
+          owner_user_id: string
+          packet: Json
+          questions: Json
+          risks: Json
+          skill_execution_id: string | null
+          source: string
+          source_event_id: string | null
+          start_at: string | null
+          status: string
+          talking_points: Json
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          attendees?: Json
+          automation_run_id?: string | null
+          context?: string | null
+          created_at?: string
+          follow_up_task_ids?: Json
+          follow_ups?: Json
+          id?: string
+          objective: string
+          owner_user_id?: string
+          packet?: Json
+          questions?: Json
+          risks?: Json
+          skill_execution_id?: string | null
+          source?: string
+          source_event_id?: string | null
+          start_at?: string | null
+          status?: string
+          talking_points?: Json
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          attendees?: Json
+          automation_run_id?: string | null
+          context?: string | null
+          created_at?: string
+          follow_up_task_ids?: Json
+          follow_ups?: Json
+          id?: string
+          objective?: string
+          owner_user_id?: string
+          packet?: Json
+          questions?: Json
+          risks?: Json
+          skill_execution_id?: string | null
+          source?: string
+          source_event_id?: string | null
+          start_at?: string | null
+          status?: string
+          talking_points?: Json
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pc_meeting_prep_packets_automation_run_id_fkey"
+            columns: ["automation_run_id"]
+            isOneToOne: false
+            referencedRelation: "pc_automation_runs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pc_meeting_prep_packets_skill_execution_id_fkey"
+            columns: ["skill_execution_id"]
+            isOneToOne: false
+            referencedRelation: "skill_executions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pc_notification_deliveries: {
+        Row: {
+          automation_id: string | null
+          automation_run_id: string | null
+          body: string
+          created_at: string
+          delivered_at: string
+          delivery_channel: string
+          href: string | null
+          id: string
+          metadata: Json
+          owner_user_id: string
+          read_at: string | null
+          severity: string
+          title: string
+        }
+        Insert: {
+          automation_id?: string | null
+          automation_run_id?: string | null
+          body: string
+          created_at?: string
+          delivered_at?: string
+          delivery_channel?: string
+          href?: string | null
+          id?: string
+          metadata?: Json
+          owner_user_id?: string
+          read_at?: string | null
+          severity?: string
+          title: string
+        }
+        Update: {
+          automation_id?: string | null
+          automation_run_id?: string | null
+          body?: string
+          created_at?: string
+          delivered_at?: string
+          delivery_channel?: string
+          href?: string | null
+          id?: string
+          metadata?: Json
+          owner_user_id?: string
+          read_at?: string | null
+          severity?: string
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pc_notification_deliveries_automation_id_fkey"
+            columns: ["automation_id"]
+            isOneToOne: false
+            referencedRelation: "pc_automations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pc_notification_deliveries_automation_run_id_fkey"
+            columns: ["automation_run_id"]
+            isOneToOne: false
+            referencedRelation: "pc_automation_runs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pc_outputs: {
+        Row: {
+          archived_at: string | null
+          content: string
+          created_at: string
+          custom_skill_id: string | null
+          id: string
+          metadata: Json
+          output_type: string
+          owner_user_id: string
+          prompt: string
+          review_state: string
+          source_execution_id: string | null
+          source_href: string | null
+          source_index: number
+          source_kind: string
+          source_label: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          archived_at?: string | null
+          content?: string
+          created_at?: string
+          custom_skill_id?: string | null
+          id?: string
+          metadata?: Json
+          output_type?: string
+          owner_user_id?: string
+          prompt?: string
+          review_state?: string
+          source_execution_id?: string | null
+          source_href?: string | null
+          source_index?: number
+          source_kind?: string
+          source_label?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          archived_at?: string | null
+          content?: string
+          created_at?: string
+          custom_skill_id?: string | null
+          id?: string
+          metadata?: Json
+          output_type?: string
+          owner_user_id?: string
+          prompt?: string
+          review_state?: string
+          source_execution_id?: string | null
+          source_href?: string | null
+          source_index?: number
+          source_kind?: string
+          source_label?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pc_outputs_custom_skill_id_fkey"
+            columns: ["custom_skill_id"]
+            isOneToOne: false
+            referencedRelation: "pc_custom_skills"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pc_outputs_source_execution_id_fkey"
+            columns: ["source_execution_id"]
+            isOneToOne: false
+            referencedRelation: "skill_executions"
             referencedColumns: ["id"]
           },
         ]
@@ -14711,10 +15423,10 @@ export type Database = {
           id: string
           opp_id: string
           org_id: string
-          recommendation: string | null
           pursuit_owner_label: string
           pursuit_priority: string
           pursuit_stage: string
+          recommendation: string | null
           score_breakdown: Json
           scored_at: string
           scored_version: number
@@ -14731,10 +15443,10 @@ export type Database = {
           id?: string
           opp_id: string
           org_id: string
-          recommendation?: string | null
           pursuit_owner_label?: string
           pursuit_priority?: string
           pursuit_stage?: string
+          recommendation?: string | null
           score_breakdown?: Json
           scored_at?: string
           scored_version?: number
@@ -14751,10 +15463,10 @@ export type Database = {
           id?: string
           opp_id?: string
           org_id?: string
-          recommendation?: string | null
           pursuit_owner_label?: string
           pursuit_priority?: string
           pursuit_stage?: string
+          recommendation?: string | null
           score_breakdown?: Json
           scored_at?: string
           scored_version?: number
@@ -14844,6 +15556,166 @@ export type Database = {
           url?: string | null
         }
         Relationships: []
+      }
+      rfp_opportunity_aliases: {
+        Row: {
+          canonical_id: string
+          confidence: number
+          created_at: string
+          evidence: Json
+          id: string
+          opp_id: string
+          source: string
+          source_id: string
+          updated_at: string
+        }
+        Insert: {
+          canonical_id: string
+          confidence?: number
+          created_at?: string
+          evidence?: Json
+          id?: string
+          opp_id: string
+          source: string
+          source_id: string
+          updated_at?: string
+        }
+        Update: {
+          canonical_id?: string
+          confidence?: number
+          created_at?: string
+          evidence?: Json
+          id?: string
+          opp_id?: string
+          source?: string
+          source_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "rfp_opportunity_aliases_canonical_id_fkey"
+            columns: ["canonical_id"]
+            isOneToOne: false
+            referencedRelation: "rfp_opportunity_canonicals"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "rfp_opportunity_aliases_opp_id_fkey"
+            columns: ["opp_id"]
+            isOneToOne: true
+            referencedRelation: "rfp_opportunities"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      rfp_opportunity_canonicals: {
+        Row: {
+          agency: string | null
+          canonical_key: string
+          created_at: string
+          id: string
+          primary_opp_id: string
+          source_count: number
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          agency?: string | null
+          canonical_key: string
+          created_at?: string
+          id?: string
+          primary_opp_id: string
+          source_count?: number
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          agency?: string | null
+          canonical_key?: string
+          created_at?: string
+          id?: string
+          primary_opp_id?: string
+          source_count?: number
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "rfp_opportunity_canonicals_primary_opp_id_fkey"
+            columns: ["primary_opp_id"]
+            isOneToOne: false
+            referencedRelation: "rfp_opportunities"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      rfp_opportunity_enrichments: {
+        Row: {
+          award_range: string | null
+          contact: string | null
+          created_at: string
+          eligibility: string[]
+          funding_method: string | null
+          matching_funds: string | null
+          missing_fields: string[]
+          opp_id: string
+          quality_score: number
+          raw: Json
+          required_documents: string[]
+          risks: string[]
+          source: string
+          submission_method: string | null
+          submission_url: string | null
+          timeline: string[]
+          updated_at: string
+        }
+        Insert: {
+          award_range?: string | null
+          contact?: string | null
+          created_at?: string
+          eligibility?: string[]
+          funding_method?: string | null
+          matching_funds?: string | null
+          missing_fields?: string[]
+          opp_id: string
+          quality_score?: number
+          raw?: Json
+          required_documents?: string[]
+          risks?: string[]
+          source?: string
+          submission_method?: string | null
+          submission_url?: string | null
+          timeline?: string[]
+          updated_at?: string
+        }
+        Update: {
+          award_range?: string | null
+          contact?: string | null
+          created_at?: string
+          eligibility?: string[]
+          funding_method?: string | null
+          matching_funds?: string | null
+          missing_fields?: string[]
+          opp_id?: string
+          quality_score?: number
+          raw?: Json
+          required_documents?: string[]
+          risks?: string[]
+          source?: string
+          submission_method?: string | null
+          submission_url?: string | null
+          timeline?: string[]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "rfp_opportunity_enrichments_opp_id_fkey"
+            columns: ["opp_id"]
+            isOneToOne: true
+            referencedRelation: "rfp_opportunities"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       rfp_org_invites: {
         Row: {
@@ -14987,6 +15859,82 @@ export type Database = {
         }
         Relationships: []
       }
+      rfp_package_documents: {
+        Row: {
+          created_at: string
+          extracted_chars: number
+          extracted_json: Json
+          extracted_text: string
+          file_name: string | null
+          id: string
+          mime_type: string | null
+          opp_id: string | null
+          org_id: string
+          proposal_id: string
+          source_type: string
+          source_url: string | null
+          title: string
+          updated_at: string
+          uploaded_by: string | null
+        }
+        Insert: {
+          created_at?: string
+          extracted_chars?: number
+          extracted_json?: Json
+          extracted_text?: string
+          file_name?: string | null
+          id?: string
+          mime_type?: string | null
+          opp_id?: string | null
+          org_id: string
+          proposal_id: string
+          source_type: string
+          source_url?: string | null
+          title: string
+          updated_at?: string
+          uploaded_by?: string | null
+        }
+        Update: {
+          created_at?: string
+          extracted_chars?: number
+          extracted_json?: Json
+          extracted_text?: string
+          file_name?: string | null
+          id?: string
+          mime_type?: string | null
+          opp_id?: string | null
+          org_id?: string
+          proposal_id?: string
+          source_type?: string
+          source_url?: string | null
+          title?: string
+          updated_at?: string
+          uploaded_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "rfp_package_documents_opp_id_fkey"
+            columns: ["opp_id"]
+            isOneToOne: false
+            referencedRelation: "rfp_opportunities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "rfp_package_documents_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "rfp_orgs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "rfp_package_documents_proposal_id_fkey"
+            columns: ["proposal_id"]
+            isOneToOne: false
+            referencedRelation: "rfp_proposals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       rfp_proposal_sections: {
         Row: {
           content: string | null
@@ -15021,6 +15969,60 @@ export type Database = {
             columns: ["proposal_id"]
             isOneToOne: false
             referencedRelation: "rfp_proposals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      rfp_proposals: {
+        Row: {
+          created_at: string
+          due_date: string | null
+          id: string
+          opp_id: string | null
+          org_id: string
+          owner_user_id: string | null
+          status: string
+          title: string
+          updated_at: string
+          vault_chunks_used: Json
+        }
+        Insert: {
+          created_at?: string
+          due_date?: string | null
+          id?: string
+          opp_id?: string | null
+          org_id: string
+          owner_user_id?: string | null
+          status?: string
+          title: string
+          updated_at?: string
+          vault_chunks_used?: Json
+        }
+        Update: {
+          created_at?: string
+          due_date?: string | null
+          id?: string
+          opp_id?: string | null
+          org_id?: string
+          owner_user_id?: string | null
+          status?: string
+          title?: string
+          updated_at?: string
+          vault_chunks_used?: Json
+        }
+        Relationships: [
+          {
+            foreignKeyName: "rfp_proposals_opp_id_fkey"
+            columns: ["opp_id"]
+            isOneToOne: false
+            referencedRelation: "rfp_opportunities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "rfp_proposals_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "rfp_orgs"
             referencedColumns: ["id"]
           },
         ]
@@ -15073,53 +16075,110 @@ export type Database = {
           },
         ]
       }
-      rfp_proposals: {
+      rfp_saved_search_alert_log: {
         Row: {
           created_at: string
-          due_date: string | null
+          email: string | null
           id: string
-          opp_id: string | null
+          opp_id: string
           org_id: string
-          owner_user_id: string | null
-          status: string
-          title: string
-          updated_at: string
-          vault_chunks_used: Json
+          search_id: string
+          sent_at: string
+          user_id: string
         }
         Insert: {
           created_at?: string
-          due_date?: string | null
+          email?: string | null
           id?: string
-          opp_id?: string | null
+          opp_id: string
           org_id: string
-          owner_user_id?: string | null
-          status?: string
-          title: string
-          updated_at?: string
-          vault_chunks_used?: Json
+          search_id: string
+          sent_at?: string
+          user_id: string
         }
         Update: {
           created_at?: string
-          due_date?: string | null
+          email?: string | null
           id?: string
-          opp_id?: string | null
+          opp_id?: string
           org_id?: string
-          owner_user_id?: string | null
-          status?: string
-          title?: string
-          updated_at?: string
-          vault_chunks_used?: Json
+          search_id?: string
+          sent_at?: string
+          user_id?: string
         }
         Relationships: [
           {
-            foreignKeyName: "rfp_proposals_opp_id_fkey"
+            foreignKeyName: "rfp_saved_search_alert_log_opp_id_fkey"
             columns: ["opp_id"]
             isOneToOne: false
             referencedRelation: "rfp_opportunities"
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "rfp_proposals_org_id_fkey"
+            foreignKeyName: "rfp_saved_search_alert_log_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "rfp_orgs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "rfp_saved_search_alert_log_search_id_fkey"
+            columns: ["search_id"]
+            isOneToOne: false
+            referencedRelation: "rfp_saved_searches"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      rfp_saved_searches: {
+        Row: {
+          alert_enabled: boolean
+          alert_frequency: string
+          created_at: string
+          created_by: string
+          filters: Json
+          id: string
+          is_shared: boolean
+          last_run_at: string | null
+          min_fit_score: number
+          mode: string
+          name: string
+          org_id: string
+          updated_at: string
+        }
+        Insert: {
+          alert_enabled?: boolean
+          alert_frequency?: string
+          created_at?: string
+          created_by: string
+          filters?: Json
+          id?: string
+          is_shared?: boolean
+          last_run_at?: string | null
+          min_fit_score?: number
+          mode?: string
+          name: string
+          org_id: string
+          updated_at?: string
+        }
+        Update: {
+          alert_enabled?: boolean
+          alert_frequency?: string
+          created_at?: string
+          created_by?: string
+          filters?: Json
+          id?: string
+          is_shared?: boolean
+          last_run_at?: string | null
+          min_fit_score?: number
+          mode?: string
+          name?: string
+          org_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "rfp_saved_searches_org_id_fkey"
             columns: ["org_id"]
             isOneToOne: false
             referencedRelation: "rfp_orgs"
@@ -17224,6 +18283,7 @@ export type Database = {
           project: string | null
           project_id: string | null
           retry_count: number | null
+          snoozed_until: string | null
           source: string | null
           source_reference: string | null
           started_at: string | null
@@ -17269,6 +18329,7 @@ export type Database = {
           project?: string | null
           project_id?: string | null
           retry_count?: number | null
+          snoozed_until?: string | null
           source?: string | null
           source_reference?: string | null
           started_at?: string | null
@@ -17314,6 +18375,7 @@ export type Database = {
           project?: string | null
           project_id?: string | null
           retry_count?: number | null
+          snoozed_until?: string | null
           source?: string | null
           source_reference?: string | null
           started_at?: string | null
@@ -22550,6 +23612,7 @@ export type Database = {
           project: string | null
           project_id: string | null
           retry_count: number | null
+          snoozed_until: string | null
           source: string | null
           source_reference: string | null
           started_at: string | null

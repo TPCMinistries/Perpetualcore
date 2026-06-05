@@ -52,10 +52,6 @@ interface DetailJoinRow {
   } | null;
 }
 
-interface RfpClient {
-  from(table: string): any;
-}
-
 export async function GET(
   req: Request,
   { params }: { params: Promise<{ id: string }> }
@@ -88,9 +84,7 @@ export async function GET(
     );
   }
 
-  // Query — rfp_* tables aren't in database.types.ts yet (per 05-03 pattern).
-  const rfp = supabase as unknown as RfpClient;
-  const { data, error } = await rfp
+  const { data, error } = await supabase
     .from("rfp_opp_matches")
     .select(
       "opp_id, fit_score, chips, summary, triage_status, triage_note, score_breakdown, rfp_opportunities ( source, title, agency, amount_min, amount_max, deadline, brief, url, needs_review, posted_at, keywords, geo, raw_json )"

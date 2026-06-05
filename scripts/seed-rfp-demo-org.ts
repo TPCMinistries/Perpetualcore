@@ -606,10 +606,8 @@ async function main(): Promise<void> {
       status: "draft",
       owner_user_id: DEMO_USER_ID,
       due_date: daysFromNow(14),
-      // vault_chunks_used column added in 20260519 migration. The generated
-      // database.types.ts doesn't include it yet, so cast through `as unknown`.
       vault_chunks_used: toJsonb(draftVaultChunksUsed),
-    } as unknown as RfpProposalInsert;
+    } satisfies RfpProposalInsert;
 
     const wonProposalInsert: RfpProposalInsert = {
       org_id: orgId,

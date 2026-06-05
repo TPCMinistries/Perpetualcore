@@ -16,7 +16,8 @@
     "test:e2e:ui": "playwright test --ui",
     "test:e2e:headed": "playwright test --headed",
     "playwright:install": "playwright install",
-    "smoke:rfp-apis": "tsx scripts/smoke-test-rfp-apis.ts"
+    "smoke:rfp-apis": "tsx scripts/smoke-test-rfp-apis.ts",
+    "types:supabase": "supabase gen types typescript --project-id hgxxxmtfmvguotkowxbu --schema public > lib/supabase/database.types.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.67.0",

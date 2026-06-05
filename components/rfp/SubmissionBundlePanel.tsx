@@ -91,7 +91,10 @@ export function SubmissionBundlePanel({
   ];
 
   return (
-    <section className="mt-8 rounded-md border border-zinc-800 bg-zinc-950 p-5">
+    <section
+      className="mt-8 rounded-md border border-zinc-800 bg-zinc-950 p-5"
+      data-testid="rfp-submission-bundle-panel"
+    >
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
           <div className="flex flex-wrap items-center gap-2">
