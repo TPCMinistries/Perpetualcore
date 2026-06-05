@@ -166,14 +166,22 @@ export function SubmissionWorkroom({
             findings, compliance gaps, and packet items.
           </p>
         </div>
-        <button
-          type="button"
-          onClick={refreshTasks}
-          disabled={!canEdit || isPending}
-          className="rounded-md border border-emerald-500/40 bg-emerald-500/10 px-3 py-2 font-mono text-[10px] uppercase tracking-[0.18em] text-emerald-200 transition hover:border-emerald-300 disabled:cursor-not-allowed disabled:opacity-50"
-        >
-          {isPending ? "Syncing" : "Sync tasks"}
-        </button>
+        <div className="flex flex-wrap items-center gap-2">
+          <a
+            href={`/api/rfp/proposals/${proposalId}/export/manifest-csv`}
+            className="rounded-md border border-sky-500/40 bg-sky-500/10 px-3 py-2 font-mono text-[10px] uppercase tracking-[0.18em] text-sky-100 transition hover:border-sky-300"
+          >
+            Export manifest
+          </a>
+          <button
+            type="button"
+            onClick={refreshTasks}
+            disabled={!canEdit || isPending}
+            className="rounded-md border border-emerald-500/40 bg-emerald-500/10 px-3 py-2 font-mono text-[10px] uppercase tracking-[0.18em] text-emerald-200 transition hover:border-emerald-300 disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            {isPending ? "Syncing" : "Sync tasks"}
+          </button>
+        </div>
       </div>
 
       <div className="mt-5 grid gap-3 sm:grid-cols-3">
