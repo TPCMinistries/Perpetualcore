@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import Stripe from "stripe";
+import { getPcClient } from "@/lib/accounts/permanent-account-sync";
 import { createAdminClient, createClient } from "@/lib/supabase/server";
 
 export const runtime = "nodejs";
@@ -66,6 +67,30 @@ type AccountTaskSummary = {
   nextDueDate?: string;
 };
 
+type PcAccountRow = {
+  id: string;
+  name: string;
+  status: string;
+  notes: string | null;
+  metadata: unknown;
+  created_at: string;
+  updated_at: string;
+};
+
+type PcEngagementRow = {
+  id: string;
+  account_id: string;
+  name: string;
+  offer_name: string;
+  system_name: string;
+  stage: string;
+  value_range: string | null;
+  next_step: string | null;
+  metadata: unknown;
+  created_at: string;
+  updated_at: string;
+};
+
 function formatStripeAmount(amount: number | null, currency: string | null) {
   return {
     value: amount ?? 0,
@@ -79,6 +104,14 @@ function formatStripeAmount(amount: number | null, currency: string | null) {
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+function readString(value: unknown) {
+  return typeof value === "string" && value.trim().length > 0 ? value : undefined;
+}
+
+function readNumber(value: unknown) {
+  return typeof value === "number" && Number.isFinite(value) ? value : undefined;
 }
 
 function readClosePath(lead: LeadRow): ClosePathState | null {
@@ -177,7 +210,8 @@ export async function GET() {
   }
 
   const admin = createAdminClient();
-  const [salesResult, leadsResult, packagePayments] = await Promise.all([
+  const pc = getPcClient();
+  const [salesResult, leadsResult, accountResult, engagementResult, packagePayments] = await Promise.all([
     admin
       .from("sales_contacts")
       .select("id,name,email,company,status,interested_in,product,created_at")
@@ -189,11 +223,34 @@ export async function GET() {
       .eq("user_id", user.id)
       .order("created_at", { ascending: false })
       .limit(50),
+    pc
+      .from("pc_accounts")
+      .select("id,name,status,notes,metadata,created_at,updated_at")
+      .eq("created_by", user.id)
+      .order("updated_at", { ascending: false })
+      .limit(50),
+    pc
+      .from("pc_engagements")
+      .select("id,account_id,name,offer_name,system_name,stage,value_range,next_step,metadata,created_at,updated_at")
+      .eq("created_by", user.id)
+      .order("updated_at", { ascending: false })
+      .limit(100),
     getPackagePayments().catch(() => []),
   ]);
 
+  if (accountResult.error) throw accountResult.error;
+  if (engagementResult.error) throw engagementResult.error;
+
   const salesContacts = (salesResult.data || []) as SalesContactRow[];
   const leads = (leadsResult.data || []) as LeadRow[];
+  const pcAccounts = (accountResult.data || []) as PcAccountRow[];
+  const pcEngagements = (engagementResult.data || []) as PcEngagementRow[];
+  const engagementsByAccountId = pcEngagements.reduce<Record<string, PcEngagementRow[]>>((groups, engagement) => {
+    return {
+      ...groups,
+      [engagement.account_id]: [...(groups[engagement.account_id] || []), engagement],
+    };
+  }, {});
   const leadIds = leads.map((lead) => lead.id);
   const tasksResult =
     leadIds.length > 0
@@ -226,9 +283,59 @@ export async function GET() {
     return status === "won" || lead.stage === "delivery_handoff";
   });
   const pipelineValue = openLeads.reduce((sum, lead) => sum + (lead.estimated_value || 0), 0);
+  const permanentLeadIds = new Set(
+    pcAccounts
+      .map((account) => {
+        const metadata = isRecord(account.metadata) ? account.metadata : {};
+        return readString(metadata.source_lead_id);
+      })
+      .filter((value): value is string => Boolean(value)),
+  );
 
   const allActiveClients = [
+    ...pcAccounts.map((account) => {
+      const accountMetadata = isRecord(account.metadata) ? account.metadata : {};
+      const engagement = engagementsByAccountId[account.id]?.[0] || null;
+      const engagementMetadata = isRecord(engagement?.metadata) ? engagement.metadata : {};
+      const sourceLeadId = readString(accountMetadata.source_lead_id) || readString(engagementMetadata.source_lead_id);
+      const estimatedValue = readNumber(accountMetadata.estimated_value) || readNumber(engagementMetadata.estimated_value) || 0;
+      const closePath = sourceLeadId ? readClosePath(leads.find((lead) => lead.id === sourceLeadId) || ({} as LeadRow)) : null;
+      const taskSummary = sourceLeadId ? createTaskSummary(tasksByLeadId[sourceLeadId] || []) : createTaskSummary([]);
+      const handoffContextReceived = isRecord(accountMetadata.account_handoff_context) || isRecord(engagementMetadata.account_handoff_context);
+      const packageIntakeReceived = isRecord(accountMetadata.package_intake) || isRecord(engagementMetadata.package_intake);
+      const contactEmail = readString(accountMetadata.contact_email) || readString(engagementMetadata.contact_email);
+      const sourceStatus = readString(accountMetadata.source_lead_status) || readString(engagementMetadata.source_lead_status);
+
+      return {
+        id: account.id,
+        name: account.name,
+        company: contactEmail || "Permanent client account",
+        status: closePath?.paymentStatus === "paid" || packageIntakeReceived ? "Paid start" : humanizeStatus(sourceStatus || account.status),
+        lane: engagement?.offer_name || "AI operating system",
+        value:
+          engagement?.value_range ||
+          new Intl.NumberFormat("en-US", {
+            style: "currency",
+            currency: "USD",
+            maximumFractionDigits: 0,
+          }).format(estimatedValue),
+        nextStep: engagement?.next_step || closePath?.commercialNextStep || "Open the account room and run the next operating action",
+        buyerStage: closePath?.buyerStage || readString(accountMetadata.source_lead_stage) || readString(engagementMetadata.source_lead_stage),
+        paymentPath: closePath?.paymentPath || (packageIntakeReceived ? "package_checkout" : undefined),
+        paymentStatus: closePath?.paymentStatus || (packageIntakeReceived ? "paid" : undefined),
+        commercialNextStep: closePath?.commercialNextStep || engagement?.next_step || undefined,
+        closePathUpdatedAt: closePath?.updatedAt,
+        handoffContextReceived,
+        openTaskCount: taskSummary.open,
+        blockedTaskCount: taskSummary.blocked,
+        overdueTaskCount: taskSummary.overdue,
+        nextTaskDueDate: taskSummary.nextDueDate,
+        createdAt: account.created_at,
+        href: sourceLeadId ? `/dashboard/accounts/${sourceLeadId}` : "/dashboard/accounts",
+      };
+    }),
     ...wonLeads.map((lead) => {
+      if (permanentLeadIds.has(lead.id)) return null;
       const closePath = readClosePath(lead);
       const taskSummary = createTaskSummary(tasksByLeadId[lead.id] || []);
       return {
@@ -256,7 +363,7 @@ export async function GET() {
         createdAt: lead.created_at,
         href: `/dashboard/accounts/${lead.id}`,
       };
-    }),
+    }).filter((client): client is NonNullable<typeof client> => Boolean(client)),
     ...paidPackages.map((payment) => ({
       id: payment.id,
       name: payment.customerName,
