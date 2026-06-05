@@ -77,14 +77,31 @@ export async function GET(
     );
   }
 
-  const header = ["ID", "Packet item", "Status", "Notes", "Due date", "Submission URL"];
+  const header = [
+    "ID",
+    "Packet item",
+    "Status",
+    "Notes",
+    "Due date",
+    "Deadline timezone",
+    "Submission portal",
+    "Submission method",
+    "Submission URL",
+    "Required forms",
+    "Q&A deadlines",
+  ];
   const rows = checklist.items.map((item) => [
     item.id,
     item.label,
     item.status,
     item.notes,
     checklist.due_date,
+    checklist.deadline_timezone ?? "",
+    checklist.submission_portal ?? "",
+    checklist.submission_method ?? "",
     checklist.submission_url,
+    (checklist.forms ?? []).join("; "),
+    (checklist.question_deadlines ?? []).join("; "),
   ]);
   const csv = csvDocument([header, ...rows]);
 

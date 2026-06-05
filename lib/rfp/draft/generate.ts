@@ -121,17 +121,54 @@ function buildPackageBlock(extractions: PackageExtraction[]): string {
   const lines: string[] = [];
   for (const extraction of extractions.slice(0, 3)) {
     lines.push(`Package: ${extraction.title}`);
+    if (extraction.submission_portal || extraction.submission_method || extraction.submission_url) {
+      lines.push(
+        `- Submission path: ${[
+          extraction.submission_portal ? `portal ${extraction.submission_portal}` : null,
+          extraction.submission_method,
+          extraction.submission_url ? `URL ${extraction.submission_url}` : null,
+        ]
+          .filter(Boolean)
+          .join("; ")}`,
+      );
+    }
+    if (extraction.deadline_timezone) {
+      lines.push(`- Deadline timezone: ${extraction.deadline_timezone}`);
+    }
+    for (const deadline of (extraction.question_deadlines ?? []).slice(0, 4)) {
+      lines.push(`- Q&A / clarification deadline: ${deadline}`);
+    }
+    for (const form of (extraction.forms ?? []).slice(0, 8)) {
+      lines.push(`- Required form: ${form}`);
+    }
     for (const item of extraction.requirements.slice(0, 10)) {
-      lines.push(`- Requirement (${item.category}): ${item.requirement}`);
+      lines.push(
+        `- Requirement (${[
+          item.category,
+          item.priority ? `priority ${item.priority}` : null,
+          item.owner_hint ? `owner ${item.owner_hint}` : null,
+        ]
+          .filter(Boolean)
+          .join(", ")}): ${item.requirement}`,
+      );
     }
     for (const doc of extraction.required_documents.slice(0, 8)) {
       lines.push(`- Required document: ${doc}`);
+    }
+    for (const attachment of (extraction.attachments ?? []).slice(0, 6)) {
+      lines.push(`- Required attachment: ${attachment}`);
     }
     for (const criterion of extraction.scoring_criteria.slice(0, 6)) {
       lines.push(`- Scoring criterion: ${criterion}`);
     }
     for (const rule of extraction.budget_rules.slice(0, 5)) {
       lines.push(`- Budget rule: ${rule}`);
+    }
+    for (const rule of (extraction.matching_funds ?? []).slice(0, 4)) {
+      lines.push(`- Match / cost-share rule: ${rule}`);
+    }
+    for (const limit of (extraction.award_limits ?? []).slice(0, 4)) {
+      lines.push(`- Award limit: ${limit}`);
     }
     for (const limit of extraction.page_limits.slice(0, 5)) {
       lines.push(`- Page/format limit: ${limit}`);

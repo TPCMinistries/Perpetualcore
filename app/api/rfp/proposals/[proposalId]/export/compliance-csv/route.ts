@@ -80,19 +80,25 @@ export async function GET(
   const header = [
     "ID",
     "Category",
+    "Priority",
     "Requirement",
     "Source",
+    "Source excerpt",
     "Response status",
-    "Owner section",
+    "Owner",
+    "Phase",
     "Evidence",
   ];
   const rows = matrix.items.map((item) => [
     item.id,
     item.category,
+    item.priority ?? "",
     item.requirement,
     item.source,
+    item.source_excerpt ?? "",
     item.response_status,
-    item.owner_section,
+    item.owner_label ?? item.owner_section,
+    item.phase ?? "",
     item.evidence,
   ]);
   const csv = csvDocument([header, ...rows]);
