@@ -96,9 +96,10 @@ export function ProposalStatusControl({
         status?: string;
         error?: string;
         detail?: string;
+        next_action?: string;
       };
       if (!res.ok || !payload.status) {
-        setError(payload.detail ?? payload.error ?? `http_${res.status}`);
+        setError(payload.next_action ?? payload.detail ?? payload.error ?? `http_${res.status}`);
         return;
       }
       setStatus(coerceStatus(payload.status));

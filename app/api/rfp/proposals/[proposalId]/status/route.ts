@@ -23,6 +23,17 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { createClient, createAdminClient } from "@/lib/supabase/server";
 import { enrollInSequence } from "@/lib/rfp/sequences";
+import { SECTION_TYPES, type SectionType } from "@/lib/rfp/draft/sections";
+import {
+  REVIEWER_FINDINGS_SECTION_TYPE,
+  ReviewerResultSchema,
+} from "@/lib/rfp/review/rubric";
+import { buildSubmitReadinessGate } from "@/lib/rfp/submission/readiness-gate";
+import type {
+  ComplianceMatrixArtifact,
+  PacketChecklistArtifact,
+} from "@/lib/rfp/compliance/types";
+import type { SubmissionTaskRow } from "@/lib/rfp/submission/tasks";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -47,6 +58,39 @@ interface ProposalRow {
   title: string;
   owner_user_id: string | null;
   metadata?: unknown;
+}
+
+interface SectionRow {
+  section_type: string;
+  content: string | null;
+}
+
+interface ComplianceCheckRow {
+  check_type: string;
+  details_json: unknown;
+}
+
+function isObject(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+function parseComplianceMatrix(value: unknown): ComplianceMatrixArtifact | null {
+  if (!isObject(value) || value.kind !== "compliance_matrix_v1") return null;
+  if (!Array.isArray(value.items)) return null;
+  return value as unknown as ComplianceMatrixArtifact;
+}
+
+function parsePacketChecklist(value: unknown): PacketChecklistArtifact | null {
+  if (!isObject(value) || value.kind !== "packet_checklist_v1") return null;
+  if (!Array.isArray(value.items)) return null;
+  return value as unknown as PacketChecklistArtifact;
+}
+
+function countVerifyMarkers(sections: SectionRow[]): number {
+  return sections.reduce((total, section) => {
+    const matches = section.content?.match(/\[VERIFY:?\s*[^\]]+\]/g) ?? [];
+    return total + matches.length;
+  }, 0);
 }
 
 export async function PATCH(
@@ -101,10 +145,89 @@ export async function PATCH(
     return NextResponse.json({ status: prevStatus, unchanged: true });
   }
 
+  const admin = createAdminClient();
+  if (body.status === "submitted") {
+    const [sectionsRes, checksRes, tasksRes] = await Promise.all([
+      admin
+        .from("rfp_proposal_sections")
+        .select("section_type, content")
+        .eq("proposal_id", proposalId)
+        .returns<SectionRow[]>(),
+      admin
+        .from("rfp_compliance_checks")
+        .select("check_type, details_json")
+        .eq("proposal_id", proposalId)
+        .in("check_type", [
+          "compliance_matrix_v1",
+          "packet_checklist_v1",
+        ])
+        .order("created_at", { ascending: false })
+        .returns<ComplianceCheckRow[]>(),
+      admin
+        .from("rfp_submission_tasks")
+        .select("status, priority, title, owner_label")
+        .eq("proposal_id", proposalId)
+        .returns<Pick<SubmissionTaskRow, "status" | "priority" | "title" | "owner_label">[]>(),
+    ]);
+
+    if (sectionsRes.error || checksRes.error || tasksRes.error) {
+      return NextResponse.json(
+        {
+          error: "submit_gate_load_failed",
+          detail: (sectionsRes.error ?? checksRes.error ?? tasksRes.error)?.message.slice(0, 200),
+        },
+        { status: 500 },
+      );
+    }
+
+    const checksByType = new Map<string, unknown>();
+    for (const row of checksRes.data ?? []) {
+      if (!checksByType.has(row.check_type)) {
+        checksByType.set(row.check_type, row.details_json);
+      }
+    }
+    const sections = sectionsRes.data ?? [];
+    const canonicalSections = sections.filter((section) =>
+      SECTION_TYPES.includes(section.section_type as SectionType),
+    );
+    const reviewerSection = sections.find(
+      (section) => section.section_type === REVIEWER_FINDINGS_SECTION_TYPE,
+    );
+    let reviewerResult = null;
+    if (reviewerSection?.content) {
+      try {
+        reviewerResult = ReviewerResultSchema.parse(JSON.parse(reviewerSection.content));
+      } catch {
+        reviewerResult = null;
+      }
+    }
+    const gate = buildSubmitReadinessGate({
+      sectionCount: canonicalSections.length,
+      verifyMarkerCount: countVerifyMarkers(canonicalSections),
+      complianceMatrix: parseComplianceMatrix(checksByType.get("compliance_matrix_v1")),
+      packetChecklist: parsePacketChecklist(checksByType.get("packet_checklist_v1")),
+      reviewerResult,
+      tasks: tasksRes.data ?? [],
+    });
+
+    if (gate.status !== "ready") {
+      return NextResponse.json(
+        {
+          error: "submit_gate_blocked",
+          detail: gate.summary,
+          next_action: gate.nextAction,
+          blockers: gate.blockers,
+          reviews: gate.reviews,
+          score: gate.score,
+        },
+        { status: 409 },
+      );
+    }
+  }
+
   // Persist the new status. Notes get stored on rfp_agent_sessions as an
   // editor-trail row so we don't need a new column on rfp_proposals just
   // for status-change annotations.
-  const admin = createAdminClient();
   const updatePayload = {
     status: body.status,
     updated_at: new Date().toISOString(),
