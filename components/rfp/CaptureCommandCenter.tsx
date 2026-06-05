@@ -141,6 +141,42 @@ export function CaptureCommandCenter({
               </a>
             </div>
           </div>
+          {complianceMatrix.submission_summary ? (
+            <div className="mt-3 grid gap-2 rounded-md border border-zinc-800 bg-zinc-950 p-3 text-[12px] leading-relaxed text-zinc-400 md:grid-cols-4">
+              <div>
+                <p className="font-mono text-[9px] uppercase tracking-[0.16em] text-zinc-600">
+                  Portal
+                </p>
+                <p className="mt-1 text-zinc-200">
+                  {complianceMatrix.submission_summary.submission_portal ?? "Not extracted"}
+                </p>
+              </div>
+              <div>
+                <p className="font-mono text-[9px] uppercase tracking-[0.16em] text-zinc-600">
+                  Timezone
+                </p>
+                <p className="mt-1 text-zinc-200">
+                  {complianceMatrix.submission_summary.deadline_timezone ?? "Confirm manually"}
+                </p>
+              </div>
+              <div>
+                <p className="font-mono text-[9px] uppercase tracking-[0.16em] text-zinc-600">
+                  Forms
+                </p>
+                <p className="mt-1 text-zinc-200">
+                  {complianceMatrix.submission_summary.forms.length} extracted
+                </p>
+              </div>
+              <div>
+                <p className="font-mono text-[9px] uppercase tracking-[0.16em] text-zinc-600">
+                  Critical
+                </p>
+                <p className="mt-1 text-zinc-200">
+                  {complianceMatrix.critical_count ?? 0} requirements
+                </p>
+              </div>
+            </div>
+          ) : null}
           <div className="mt-3 overflow-x-auto rounded-md border border-zinc-800">
             <table className="w-full min-w-[760px] text-left text-[13px]">
               <thead className="border-b border-zinc-800 bg-zinc-950 font-mono text-[9px] uppercase tracking-[0.18em] text-zinc-500">
@@ -170,7 +206,12 @@ export function CaptureCommandCenter({
                       <div className="mt-1 text-[12px] text-zinc-500">{item.evidence}</div>
                     </td>
                     <td className="px-3 py-3 font-mono text-[10px] text-zinc-400">
-                      {item.owner_section}
+                      {item.owner_label ?? item.owner_section}
+                      {item.priority ? (
+                        <span className="mt-1 block text-[9px] uppercase tracking-[0.14em] text-zinc-600">
+                          {item.priority}
+                        </span>
+                      ) : null}
                     </td>
                     <td className="px-3 py-3">
                       <span

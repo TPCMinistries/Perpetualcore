@@ -10,8 +10,12 @@ export interface PackageRequirement {
     | "submission"
     | "other";
   requirement: string;
-  source: string;
-  priority: "critical" | "high" | "medium";
+  source?: string;
+  source_excerpt?: string;
+  source_location?: string | null;
+  owner_hint?: string;
+  phase?: "eligibility" | "draft" | "budget" | "attachments" | "submission" | "review";
+  priority?: "critical" | "high" | "medium";
 }
 
 export interface PackageExtraction {
@@ -19,8 +23,18 @@ export interface PackageExtraction {
   title: string;
   source_type: "upload" | "url" | "paste";
   source_url: string | null;
+  extracted_at?: string;
   extracted_chars: number;
   quality_score: number;
+  deadline_timezone?: string | null;
+  submission_method?: string | null;
+  submission_portal?: string | null;
+  submission_url?: string | null;
+  forms?: string[];
+  attachments?: string[];
+  matching_funds?: string[];
+  award_limits?: string[];
+  question_deadlines?: string[];
   eligibility: string[];
   required_documents: string[];
   page_limits: string[];
@@ -60,6 +74,17 @@ const DOC_PATTERNS: Array<{ label: string; pattern: RegExp }> = [
   { label: "Audit, financial statements, or insurance", pattern: /\baudit|financial statements?|insurance\b/i },
 ];
 
+const FORM_PATTERNS: Array<{ label: string; pattern: RegExp }> = [
+  { label: "SF-424", pattern: /\bSF[- ]?424\b/i },
+  { label: "SF-424A budget information", pattern: /\bSF[- ]?424A\b/i },
+  { label: "SF-424B assurances", pattern: /\bSF[- ]?424B\b/i },
+  { label: "Project abstract", pattern: /\b(project abstract|abstract form)\b/i },
+  { label: "Budget justification", pattern: /\bbudget justification\b/i },
+  { label: "Disclosure of lobbying activities", pattern: /\bSF[- ]?LLL|lobbying activities\b/i },
+  { label: "Assurances and certifications", pattern: /\bassurances?|certifications?\b/i },
+  { label: "Logic model", pattern: /\blogic model\b/i },
+];
+
 function clean(text: string): string {
   return text.replace(/\u00a0/g, " ").replace(/\s+/g, " ").trim();
 }
@@ -67,6 +92,10 @@ function clean(text: string): string {
 function truncate(text: string, max = 260): string {
   const cleaned = clean(text);
   return cleaned.length > max ? `${cleaned.slice(0, max - 3)}...` : cleaned;
+}
+
+function sourceExcerpt(text: string): string {
+  return truncate(text, 340);
 }
 
 function sentences(text: string): string[] {
@@ -94,6 +123,100 @@ function unique(items: Array<string | null | undefined>, limit: number): string[
 
 function matchedSentences(text: string, pattern: RegExp, limit: number): string[] {
   return unique(sentences(text).filter((sentence) => pattern.test(sentence)), limit);
+}
+
+function requirementPhase(category: PackageRequirement["category"]): PackageRequirement["phase"] {
+  if (category === "eligibility") return "eligibility";
+  if (category === "budget") return "budget";
+  if (category === "attachment" || category === "format") return "attachments";
+  if (category === "deadline" || category === "submission") return "submission";
+  if (category === "scoring") return "review";
+  return "draft";
+}
+
+function ownerHint(category: PackageRequirement["category"], sentence: string): string {
+  if (category === "budget") return "Finance / Operations";
+  if (category === "submission" || category === "deadline") return "Submission lead";
+  if (category === "attachment" || category === "format") return "Operations";
+  if (category === "eligibility") return "Proposal lead";
+  if (/evaluation|outcome|metric|performance/i.test(sentence)) return "Evaluation lead";
+  return "Writer";
+}
+
+function deadlineTimezone(text: string): string | null {
+  const match = text.match(/\b(?:Eastern|Central|Mountain|Pacific|Atlantic)\s+(?:Standard|Daylight)?\s*Time\b|\b(?:EST|EDT|CST|CDT|MST|MDT|PST|PDT|UTC)\b/i);
+  return match ? clean(match[0]) : null;
+}
+
+function absoluteUrls(text: string): string[] {
+  return unique(text.match(/\bhttps?:\/\/[^\s)>\]]+/gi) ?? [], 8);
+}
+
+function submissionPortal(text: string): string | null {
+  if (/\bgrants\.gov\b/i.test(text)) return "Grants.gov";
+  if (/\bsam\.gov\b/i.test(text)) return "SAM.gov";
+  if (/\bera commons\b/i.test(text)) return "eRA Commons";
+  if (/\bresearch\.gov\b/i.test(text)) return "Research.gov";
+  if (/\bjustgrants\b/i.test(text)) return "JustGrants";
+  if (/\bbonfire\b/i.test(text)) return "Bonfire";
+  if (/\bsubmittable\b/i.test(text)) return "Submittable";
+  if (/\bportal\b/i.test(text)) return "Online portal";
+  if (/\bemail\b/i.test(text)) return "Email";
+  return null;
+}
+
+function submissionMethod(text: string): string | null {
+  const portal = submissionPortal(text);
+  const instruction = matchedSentences(text, /\b(submit|submission|upload|portal|email|grants\.gov|sam\.gov|research\.gov|era commons)\b/i, 1)[0];
+  if (instruction) return instruction;
+  if (portal) return `Submit through ${portal}.`;
+  return null;
+}
+
+function submissionUrl(text: string): string | null {
+  const urls = absoluteUrls(text);
+  return (
+    urls.find((url) => /grants\.gov|sam\.gov|research\.gov|era|portal|procurement|bonfire|submittable/i.test(url)) ??
+    urls[0] ??
+    null
+  );
+}
+
+function forms(text: string): string[] {
+  return unique(
+    [
+      ...FORM_PATTERNS.filter((rule) => rule.pattern.test(text)).map((rule) => rule.label),
+      ...matchedSentences(text, /\b(form|SF[- ]?424|assurances?|certifications?|lobbying|abstract)\b/i, 8),
+    ],
+    12,
+  );
+}
+
+function attachments(text: string): string[] {
+  return unique(
+    matchedSentences(
+      text,
+      /\b(attachment|appendix|letter of support|resume|bio|audit|financial statement|insurance|determination letter|work plan)\b/i,
+      12,
+    ),
+    12,
+  );
+}
+
+function matchingFunds(text: string): string[] {
+  return matchedSentences(text, /\b(match|matching funds|cost share|in-kind|cash match)\b/i, 8);
+}
+
+function awardLimits(text: string): string[] {
+  const amountLike = text.match(/\b(?:award|grant|funding|budget)[^.\n]{0,120}\$[\d,]+(?:\.\d{2})?(?:\s*(?:-|to)\s*\$[\d,]+(?:\.\d{2})?)?/gi) ?? [];
+  return unique([...amountLike, ...matchedSentences(text, /\b(maximum award|minimum award|award ceiling|funding range|not exceed \$)\b/i, 6)], 8);
+}
+
+function questionDeadlines(text: string): string[] {
+  return unique(
+    matchedSentences(text, /\b(questions?(?:\s+are)?\s+due|q&a|question deadline|inquiries|requests for clarification|pre[- ]?proposal)\b/i, 8),
+    8,
+  );
 }
 
 function pageLimits(text: string): string[] {
@@ -128,6 +251,10 @@ function buildRequirements(text: string): PackageRequirement[] {
         category: rule.category,
         requirement,
         source: "package text",
+        source_excerpt: sourceExcerpt(sentence),
+        source_location: null,
+        owner_hint: ownerHint(rule.category, sentence),
+        phase: requirementPhase(rule.category),
         priority: rule.priority,
       });
       break;
@@ -140,6 +267,10 @@ function buildRequirements(text: string): PackageRequirement[] {
 function quality(extraction: Omit<PackageExtraction, "quality_score">): number {
   let score = 10;
   if (extraction.extracted_chars >= 2_000) score += 15;
+  if (extraction.submission_method) score += 8;
+  if (extraction.submission_portal || extraction.submission_url) score += 6;
+  if ((extraction.forms ?? []).length > 0) score += 6;
+  if ((extraction.question_deadlines ?? []).length > 0) score += 4;
   if (extraction.eligibility.length > 0) score += 12;
   if (extraction.required_documents.length > 0) score += 14;
   if (extraction.deadlines.length > 0) score += 12;
@@ -158,6 +289,15 @@ export function extractPackageRequirements(params: {
   text: string;
 }): PackageExtraction {
   const text = clean(params.text);
+  const extractedDeadlines = deadlines(text);
+  const extractedForms = forms(text);
+  const extractedAttachments = attachments(text);
+  const extractedMatchingFunds = matchingFunds(text);
+  const extractedAwardLimits = awardLimits(text);
+  const extractedQuestionDeadlines = questionDeadlines(text);
+  const extractedSubmissionMethod = submissionMethod(text);
+  const extractedSubmissionPortal = submissionPortal(text);
+  const extractedSubmissionUrl = submissionUrl(text);
   const requiredDocuments = unique(
     [
       ...DOC_PATTERNS.filter((rule) => rule.pattern.test(text)).map((rule) => rule.label),
@@ -171,13 +311,23 @@ export function extractPackageRequirements(params: {
     title: params.title,
     source_type: params.sourceType,
     source_url: params.sourceUrl,
+    extracted_at: new Date().toISOString(),
     extracted_chars: text.length,
+    deadline_timezone: deadlineTimezone(text),
+    submission_method: extractedSubmissionMethod,
+    submission_portal: extractedSubmissionPortal,
+    submission_url: extractedSubmissionUrl,
+    forms: extractedForms,
+    attachments: extractedAttachments,
+    matching_funds: extractedMatchingFunds,
+    award_limits: extractedAwardLimits,
+    question_deadlines: extractedQuestionDeadlines,
     eligibility: matchedSentences(text, /\b(eligible|eligibility|applicant|nonprofit|501\(c\)|public agency|tribal|bidder)\b/i, 10),
     required_documents: requiredDocuments,
     page_limits: pageLimits(text),
     budget_rules: matchedSentences(text, /\b(budget|match|cost share|indirect|allowable|reimbursement)\b/i, 10),
     scoring_criteria: matchedSentences(text, /\b(scoring|points|evaluation criteria|rubric|review criteria)\b/i, 10),
-    deadlines: deadlines(text),
+    deadlines: extractedDeadlines,
     submission_instructions: matchedSentences(text, /\b(submit|submission|portal|upload|email|grants\.gov|sam\.gov)\b/i, 10),
     contacts: contacts(text),
     risks: unique(
@@ -185,7 +335,8 @@ export function extractPackageRequirements(params: {
         text.length < 2_000 ? "Extracted package text is short; confirm the full solicitation was imported." : null,
         requirements.some((req) => req.category === "eligibility") ? null : "Package eligibility language was not clearly extracted.",
         requiredDocuments.length > 0 ? null : "Required attachment list was not clearly extracted.",
-        deadlines(text).length > 0 ? null : "Package deadline language was not clearly extracted.",
+        extractedDeadlines.length > 0 ? null : "Package deadline language was not clearly extracted.",
+        extractedSubmissionMethod ? null : "Submission portal or method was not clearly extracted.",
         matchedSentences(text, /\b(scoring|points|evaluation criteria|rubric|review criteria)\b/i, 2).length > 0
           ? null
           : "Scoring rubric was not clearly extracted.",

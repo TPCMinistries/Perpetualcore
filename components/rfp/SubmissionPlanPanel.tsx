@@ -243,6 +243,38 @@ export function SubmissionPlanPanel({
           Deadline
         </p>
         <p className="mt-1 text-sm text-zinc-100">{formatDueDate(deadline)}</p>
+        {packetChecklist?.deadline_timezone ||
+        packetChecklist?.submission_portal ||
+        packetChecklist?.submission_method ? (
+          <div className="mt-3 grid gap-2 border-t border-zinc-800 pt-3 text-[12px] leading-relaxed text-zinc-400 md:grid-cols-3">
+            <div>
+              <span className="font-mono text-[9px] uppercase tracking-[0.16em] text-zinc-600">
+                Timezone
+              </span>
+              <p className="mt-1 text-zinc-200">
+                {packetChecklist.deadline_timezone ?? "Confirm manually"}
+              </p>
+            </div>
+            <div>
+              <span className="font-mono text-[9px] uppercase tracking-[0.16em] text-zinc-600">
+                Portal
+              </span>
+              <p className="mt-1 text-zinc-200">
+                {packetChecklist.submission_portal ?? "Not extracted"}
+              </p>
+            </div>
+            <div>
+              <span className="font-mono text-[9px] uppercase tracking-[0.16em] text-zinc-600">
+                Forms
+              </span>
+              <p className="mt-1 text-zinc-200">
+                {(packetChecklist.forms?.length ?? 0) > 0
+                  ? `${packetChecklist.forms?.length} required`
+                  : "No forms extracted"}
+              </p>
+            </div>
+          </div>
+        ) : null}
       </div>
 
       <ol className="mt-4 divide-y divide-zinc-900 overflow-hidden rounded-md border border-zinc-800">

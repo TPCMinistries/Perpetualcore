@@ -9,6 +9,7 @@ export type RequirementCategory =
   | "narrative"
   | "budget"
   | "evaluation"
+  | "submission"
   | "other";
 
 export interface BidNoBidArtifact {
@@ -28,6 +29,10 @@ export interface ComplianceMatrixItem {
   response_status: RequirementStatus;
   owner_section: string;
   evidence: string;
+  priority?: "critical" | "high" | "medium" | "low";
+  source_excerpt?: string;
+  owner_label?: string;
+  phase?: string;
 }
 
 export interface ComplianceMatrixArtifact {
@@ -35,6 +40,15 @@ export interface ComplianceMatrixArtifact {
   overall_status: CaptureStatus;
   missing_count: number;
   needs_review_count: number;
+  critical_count?: number;
+  submission_summary?: {
+    deadline_timezone: string | null;
+    submission_method: string | null;
+    submission_portal: string | null;
+    submission_url: string | null;
+    forms: string[];
+    question_deadlines: string[];
+  };
   items: ComplianceMatrixItem[];
 }
 
@@ -50,6 +64,11 @@ export interface PacketChecklistArtifact {
   overall_status: CaptureStatus;
   due_date: string | null;
   submission_url: string | null;
+  deadline_timezone?: string | null;
+  submission_method?: string | null;
+  submission_portal?: string | null;
+  forms?: string[];
+  question_deadlines?: string[];
   items: PacketChecklistItem[];
 }
 

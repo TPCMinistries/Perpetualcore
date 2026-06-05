@@ -18,6 +18,11 @@ interface PackageSummary {
     required_documents?: string[];
     requirements?: unknown[];
     risks?: string[];
+    deadline_timezone?: string | null;
+    submission_method?: string | null;
+    submission_portal?: string | null;
+    forms?: string[];
+    question_deadlines?: string[];
   };
   created_at: string;
 }
@@ -236,8 +241,39 @@ export function PackageIntakePanel({
                 <p className="mt-3 text-xs leading-5 text-zinc-600">
                   {(extraction.requirements?.length ?? 0)} requirements ·{" "}
                   {(extraction.required_documents?.length ?? 0)} docs ·{" "}
+                  {(extraction.forms?.length ?? 0)} forms ·{" "}
                   {(extraction.risks?.length ?? 0)} risks
                 </p>
+                <div className="mt-3 grid gap-2 text-xs leading-5 text-zinc-600 md:grid-cols-3">
+                  <div className="rounded-md border border-zinc-200 bg-white p-3">
+                    <p className="font-mono text-[9px] uppercase tracking-[0.16em] text-zinc-400">
+                      Submission
+                    </p>
+                    <p className="mt-1 font-medium text-zinc-800">
+                      {extraction.submission_portal ??
+                        extraction.submission_method ??
+                        "Not extracted"}
+                    </p>
+                  </div>
+                  <div className="rounded-md border border-zinc-200 bg-white p-3">
+                    <p className="font-mono text-[9px] uppercase tracking-[0.16em] text-zinc-400">
+                      Timezone
+                    </p>
+                    <p className="mt-1 font-medium text-zinc-800">
+                      {extraction.deadline_timezone ?? "Confirm manually"}
+                    </p>
+                  </div>
+                  <div className="rounded-md border border-zinc-200 bg-white p-3">
+                    <p className="font-mono text-[9px] uppercase tracking-[0.16em] text-zinc-400">
+                      Q&A
+                    </p>
+                    <p className="mt-1 font-medium text-zinc-800">
+                      {(extraction.question_deadlines?.length ?? 0) > 0
+                        ? `${extraction.question_deadlines?.length} deadline${extraction.question_deadlines?.length === 1 ? "" : "s"}`
+                        : "No Q&A deadline found"}
+                    </p>
+                  </div>
+                </div>
               </div>
             );
           })}

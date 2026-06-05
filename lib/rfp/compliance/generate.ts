@@ -6,6 +6,7 @@ import type {
   CaptureStatus,
   ComplianceMatrixArtifact,
   ComplianceMatrixItem,
+  PacketChecklistItem,
   PacketChecklistArtifact,
   RequirementCategory,
   RequirementStatus,
@@ -38,6 +39,16 @@ interface MatchInput {
 interface SectionInput {
   section_type: string;
   content: string | null;
+}
+
+interface RequirementRecord {
+  requirement: string;
+  source: string;
+  priority: "critical" | "high" | "medium" | "low";
+  source_excerpt?: string;
+  owner_label?: string;
+  phase?: string;
+  category?: RequirementCategory;
 }
 
 export interface CaptureReadinessInput {
@@ -130,6 +141,7 @@ function categoryFor(requirement: string): RequirementCategory {
     return "eligibility";
   }
   if (/deadline|due|submit by|closing date/.test(t)) return "deadline";
+  if (/submit|submission|portal|upload|email|grants\.gov|sam\.gov|research\.gov/.test(t)) return "submission";
   if (/page|font|margin|format|single-spaced|double-spaced/.test(t)) return "format";
   if (/attachment|letter|resume|certification|insurance|form|appendix/.test(t)) {
     return "attachment";
@@ -148,6 +160,15 @@ function ownerSectionFor(category: RequirementCategory, requirement: string): st
   }
   if (category === "narrative") return "project_narrative";
   return "global";
+}
+
+function ownerLabelFor(category: RequirementCategory, ownerSection: string): string {
+  if (category === "budget") return "Finance / Operations";
+  if (category === "submission" || category === "deadline") return "Submission lead";
+  if (category === "attachment" || category === "format") return "Operations";
+  if (ownerSection === "evaluation_plan") return "Evaluation lead";
+  if (ownerSection === "organizational_capacity") return "Proposal lead";
+  return "Writer";
 }
 
 function wordsFor(text: string): string[] {
@@ -188,7 +209,7 @@ function statusForRequirement(
   return "missing";
 }
 
-function extractRequirements(opp: OpportunityInput | null): string[] {
+function extractRequirements(opp: OpportunityInput | null): RequirementRecord[] {
   if (!opp) return [];
   const sources = [
     opp.title,
@@ -197,7 +218,7 @@ function extractRequirements(opp: OpportunityInput | null): string[] {
   ].join("\n");
 
   const seen = new Set<string>();
-  const items: string[] = [];
+  const items: RequirementRecord[] = [];
   for (const sentence of sentenceSplit(sources)) {
     const lower = sentence.toLowerCase();
     if (!REQUIREMENT_WORDS.some((w) => lower.includes(w))) continue;
@@ -205,15 +226,27 @@ function extractRequirements(opp: OpportunityInput | null): string[] {
     const key = requirement.toLowerCase();
     if (seen.has(key)) continue;
     seen.add(key);
-    items.push(requirement);
+    items.push({
+      requirement,
+      source: "solicitation",
+      priority: /deadline|eligible|must|shall|required|submit/i.test(requirement)
+        ? "high"
+        : "medium",
+      source_excerpt: requirement,
+    });
     if (items.length >= 10) break;
   }
   return items;
 }
 
-function packageRequirements(extractions: PackageExtraction[] | undefined): string[] {
+function normalizedPackageCategory(category: PackageExtraction["requirements"][number]["category"]): RequirementCategory {
+  if (category === "scoring") return "evaluation";
+  return category;
+}
+
+function packageRequirements(extractions: PackageExtraction[] | undefined): RequirementRecord[] {
   const seen = new Set<string>();
-  const out: string[] = [];
+  const out: RequirementRecord[] = [];
   for (const extraction of extractions ?? []) {
     for (const item of extraction.requirements) {
       const requirement = cleanText(item.requirement);
@@ -221,29 +254,71 @@ function packageRequirements(extractions: PackageExtraction[] | undefined): stri
       const key = requirement.toLowerCase();
       if (seen.has(key)) continue;
       seen.add(key);
-      out.push(requirement.length > 280 ? `${requirement.slice(0, 277)}...` : requirement);
+      out.push({
+        requirement: requirement.length > 280 ? `${requirement.slice(0, 277)}...` : requirement,
+        source: "uploaded_package",
+        priority: item.priority ?? "high",
+        source_excerpt: item.source_excerpt ?? item.source ?? extraction.title,
+        owner_label: item.owner_hint,
+        phase: item.phase,
+        category: normalizedPackageCategory(item.category),
+      });
       if (out.length >= 14) return out;
     }
   }
   return out;
 }
 
-function packageDocumentRequirements(extractions: PackageExtraction[] | undefined): string[] {
+function packageDocumentRequirements(extractions: PackageExtraction[] | undefined): RequirementRecord[] {
   const seen = new Set<string>();
-  const out: string[] = [];
+  const out: RequirementRecord[] = [];
   for (const extraction of extractions ?? []) {
-    for (const doc of extraction.required_documents) {
+    for (const doc of [...extraction.required_documents, ...(extraction.forms ?? []), ...(extraction.attachments ?? [])]) {
       const label = cleanText(doc);
       if (!label) continue;
       const requirement = `Submission package includes required document: ${label}.`;
       const key = requirement.toLowerCase();
       if (seen.has(key)) continue;
       seen.add(key);
-      out.push(requirement);
-      if (out.length >= 8) return out;
+      out.push({
+        requirement,
+        source: "uploaded_package_document",
+        priority: /sf-424|budget|certification|assurance|audit|501|determination|financial/i.test(label)
+          ? "critical"
+          : "high",
+        source_excerpt: label,
+        owner_label: /budget|financial|audit/i.test(label)
+          ? "Finance / Operations"
+          : "Operations",
+        phase: "attachments",
+        category: "attachment",
+      });
+      if (out.length >= 12) return out;
     }
   }
   return out;
+}
+
+function standardRequirementRecords(opp: OpportunityInput | null): RequirementRecord[] {
+  return standardRequirements(opp).map((requirement) => ({
+    requirement,
+    source: "standard_capture_check",
+    priority: "medium",
+  }));
+}
+
+function packageSubmissionSummary(
+  extractions: PackageExtraction[] | undefined,
+): NonNullable<ComplianceMatrixArtifact["submission_summary"]> {
+  const firstWithMethod = extractions?.find((item) => item.submission_method || item.submission_portal || item.submission_url);
+  return {
+    deadline_timezone: extractions?.find((item) => item.deadline_timezone)?.deadline_timezone ?? null,
+    submission_method: firstWithMethod?.submission_method ?? null,
+    submission_portal: firstWithMethod?.submission_portal ?? null,
+    submission_url: firstWithMethod?.submission_url ?? null,
+    forms: Array.from(new Set((extractions ?? []).flatMap((item) => item.forms ?? []))).slice(0, 12),
+    question_deadlines: Array.from(new Set((extractions ?? []).flatMap((item) => item.question_deadlines ?? []))).slice(0, 8),
+  };
 }
 
 function vaultChunkCount(raw: unknown): number {
@@ -281,40 +356,40 @@ function buildComplianceMatrix(input: CaptureReadinessInput): ComplianceMatrixAr
   const extracted = extractRequirements(input.opportunity);
   const packageReqs = packageRequirements(input.packageExtractions);
   const packageDocs = packageDocumentRequirements(input.packageExtractions);
-  const standardReqs = standardRequirements(input.opportunity);
-  const reqs = [...packageReqs, ...packageDocs, ...extracted, ...standardReqs].slice(0, 24);
-  const items: ComplianceMatrixItem[] = reqs.map((requirement, idx) => {
-    const category = categoryFor(requirement);
-    const ownerSection = ownerSectionFor(category, requirement);
+  const standardReqs = standardRequirementRecords(input.opportunity);
+  const reqs = [...packageReqs, ...packageDocs, ...extracted, ...standardReqs].slice(0, 28);
+  const items: ComplianceMatrixItem[] = reqs.map((record, idx) => {
+    const category = record.category ?? categoryFor(record.requirement);
+    const ownerSection = ownerSectionFor(category, record.requirement);
     const sectionBody = sectionText(input.sections, ownerSection);
-    const responseStatus = statusForRequirement(requirement, category, sectionBody);
-    const source = packageReqs.includes(requirement)
-      ? "uploaded_package"
-      : packageDocs.includes(requirement)
-        ? "uploaded_package_document"
-        : extracted.includes(requirement)
-          ? "solicitation"
-          : "standard_capture_check";
+    const responseStatus = statusForRequirement(record.requirement, category, sectionBody);
+    const evidence = record.source_excerpt
+      ? `Source excerpt: ${record.source_excerpt}`
+      : responseStatus === "met"
+        ? "Likely covered in the current draft."
+        : responseStatus === "partial"
+          ? "Partially reflected; verify exact wording against the source."
+          : responseStatus === "needs_review"
+            ? "Needs human review before submission."
+            : "No clear draft coverage found.";
     return {
       id: `REQ-${String(idx + 1).padStart(2, "0")}`,
       category,
-      requirement,
-      source,
+      requirement: record.requirement,
+      source: record.source,
       response_status: responseStatus,
       owner_section: ownerSection,
-      evidence:
-        responseStatus === "met"
-          ? "Likely covered in the current draft."
-          : responseStatus === "partial"
-            ? "Partially reflected; verify exact wording against the source."
-            : responseStatus === "needs_review"
-              ? "Needs human review before submission."
-              : "No clear draft coverage found.",
+      evidence,
+      priority: record.priority,
+      source_excerpt: record.source_excerpt,
+      owner_label: record.owner_label ?? ownerLabelFor(category, ownerSection),
+      phase: record.phase,
     };
   });
 
   const missing = items.filter((i) => i.response_status === "missing").length;
   const needsReview = items.filter((i) => i.response_status === "needs_review").length;
+  const critical = items.filter((i) => i.priority === "critical").length;
   const overall: CaptureStatus =
     missing > 0 ? "fail" : needsReview > 0 ? "warn" : "pass";
 
@@ -323,6 +398,8 @@ function buildComplianceMatrix(input: CaptureReadinessInput): ComplianceMatrixAr
     overall_status: overall,
     missing_count: missing,
     needs_review_count: needsReview,
+    critical_count: critical,
+    submission_summary: packageSubmissionSummary(input.packageExtractions),
     items,
   };
 }
@@ -335,8 +412,17 @@ function buildPacketChecklist(
   const verifyMarkers = countVerifyMarkers(input.sections);
   const vaultChunks = vaultChunkCount(input.proposal.vault_chunks_used);
   const packageCount = input.packageExtractions?.length ?? 0;
+  const packageSummary = packageSubmissionSummary(input.packageExtractions);
+  const packageForms = packageSummary.forms;
+  const questionDeadlines = packageSummary.question_deadlines;
+  const matchingFunds = Array.from(
+    new Set((input.packageExtractions ?? []).flatMap((item) => item.matching_funds ?? [])),
+  ).slice(0, 6);
+  const awardLimits = Array.from(
+    new Set((input.packageExtractions ?? []).flatMap((item) => item.award_limits ?? [])),
+  ).slice(0, 6);
 
-  const sectionItems = Object.values(SECTION_SPECS).map((spec) => {
+  const sectionItems: PacketChecklistItem[] = Object.values(SECTION_SPECS).map((spec) => {
     const content = sectionsByType.get(spec.type) ?? "";
     const words = wordsFor(content).length;
     return {
@@ -352,7 +438,7 @@ function buildPacketChecklist(
     };
   });
 
-  const items = [
+  const items: PacketChecklistItem[] = [
     ...sectionItems,
     {
       id: "verify-markers",
@@ -382,6 +468,44 @@ function buildPacketChecklist(
           : "Import the solicitation package, addenda, or portal instructions before final review.",
     },
     {
+      id: "submission-method",
+      label: "Submission method confirmed",
+      status: packageSummary.submission_method || packageSummary.submission_portal || input.opportunity?.url
+        ? "needs_review"
+        : "missing",
+      notes:
+        packageSummary.submission_method ??
+        (packageSummary.submission_portal
+          ? `Portal detected: ${packageSummary.submission_portal}. Confirm account access and upload rules.`
+          : input.opportunity?.url
+            ? "Source URL is available; confirm portal and upload rules manually."
+            : "No submission method or portal was extracted."),
+    },
+    ...packageForms.slice(0, 8).map((form, index) => ({
+      id: `required-form-${index + 1}`,
+      label: `Required form: ${form}`,
+      status: "needs_review" as const,
+      notes: "Confirm the latest form template is complete and included in the final packet.",
+    })),
+    ...questionDeadlines.slice(0, 3).map((deadline, index) => ({
+      id: `question-deadline-${index + 1}`,
+      label: "Q&A deadline tracked",
+      status: "needs_review" as const,
+      notes: deadline,
+    })),
+    ...matchingFunds.slice(0, 3).map((rule, index) => ({
+      id: `match-rule-${index + 1}`,
+      label: "Match or cost-share rule reviewed",
+      status: "needs_review" as const,
+      notes: rule,
+    })),
+    ...awardLimits.slice(0, 3).map((rule, index) => ({
+      id: `award-limit-${index + 1}`,
+      label: "Award limit reviewed",
+      status: "needs_review" as const,
+      notes: rule,
+    })),
+    {
       id: "source-link",
       label: "Source posting available",
       status: input.opportunity?.url ? "met" : "needs_review",
@@ -410,7 +534,12 @@ function buildPacketChecklist(
     kind: "packet_checklist_v1",
     overall_status: overall,
     due_date: input.proposal.due_date ?? input.opportunity?.deadline ?? null,
-    submission_url: input.opportunity?.url ?? null,
+    submission_url: packageSummary.submission_url ?? input.opportunity?.url ?? null,
+    deadline_timezone: packageSummary.deadline_timezone,
+    submission_method: packageSummary.submission_method,
+    submission_portal: packageSummary.submission_portal,
+    forms: packageForms,
+    question_deadlines: questionDeadlines,
     items,
   };
 }

@@ -191,10 +191,12 @@ export function buildSubmissionTasks(params: {
       source_id: item.id,
       title: `Close ${item.category} requirement`,
       detail: item.requirement,
-      owner_label: item.owner_section || "Compliance reviewer",
-      priority: item.response_status === "missing" ? "critical" : "high",
+      owner_label: item.owner_label || item.owner_section || "Compliance reviewer",
+      priority: item.priority === "low"
+        ? "medium"
+        : item.priority ?? (item.response_status === "missing" ? "critical" : "high"),
       due_date: params.dueDate,
-      evidence: item.evidence || item.source,
+      evidence: item.source_excerpt || item.evidence || item.source,
       created_by: params.userId,
     });
   }
@@ -210,35 +212,101 @@ export function buildSubmissionTasks(params: {
       title: `Package ${item.category} requirement`,
       detail: item.requirement,
       owner_label:
-        item.category === "budget"
+        item.owner_hint ??
+        (item.category === "budget"
           ? "Finance / Operations"
           : item.category === "submission"
             ? "Submission lead"
             : item.category === "attachment"
               ? "Operations"
-              : "Proposal lead",
-      priority: item.priority,
+              : "Proposal lead"),
+      priority: item.priority ?? "high",
       due_date: params.dueDate,
-      evidence: item.source,
+      evidence: item.source_excerpt ?? item.source ?? "",
+      created_by: params.userId,
+    });
+  }
+
+  for (const [index, form] of (packageExtraction?.forms ?? []).entries()) {
+    tasks.push({
+      proposal_id: params.proposalId,
+      source_type: "compliance",
+      source_id: `package-form:${index}:${slugPart(form)}`,
+      title: `Complete required form: ${shortText(form, 72)}`,
+      detail: "Confirm the current template is complete, signed if required, and included in the final submission packet.",
+      owner_label: /budget|424a/i.test(form) ? "Finance / Operations" : "Operations",
+      priority: /sf-424|assurance|certification|budget/i.test(form) ? "critical" : "high",
+      due_date: params.dueDate,
+      evidence: packageExtraction?.submission_url ?? packageExtraction?.source_url ?? "",
+      created_by: params.userId,
+    });
+  }
+
+  for (const [index, deadline] of (packageExtraction?.question_deadlines ?? []).entries()) {
+    tasks.push({
+      proposal_id: params.proposalId,
+      source_type: "compliance",
+      source_id: `package-question-deadline:${index}:${slugPart(deadline)}`,
+      title: "Track Q&A or clarification deadline",
+      detail: deadline,
+      owner_label: "Proposal lead",
+      priority: "high",
+      due_date: params.dueDate,
+      evidence: packageExtraction?.submission_url ?? packageExtraction?.source_url ?? "",
+      created_by: params.userId,
+    });
+  }
+
+  if (packageExtraction?.submission_method || packageExtraction?.submission_portal) {
+    tasks.push({
+      proposal_id: params.proposalId,
+      source_type: "compliance",
+      source_id: "package-submission-method",
+      title: "Verify submission account, portal, and upload rules",
+      detail: shortText(
+        [
+          packageExtraction.submission_portal
+            ? `Portal: ${packageExtraction.submission_portal}.`
+            : null,
+          packageExtraction.submission_method,
+          packageExtraction.deadline_timezone
+            ? `Deadline timezone: ${packageExtraction.deadline_timezone}.`
+            : null,
+        ]
+          .filter(Boolean)
+          .join(" "),
+      ),
+      owner_label: "Submission lead",
+      priority: "critical",
+      due_date: params.dueDate,
+      evidence: packageExtraction.submission_url ?? packageExtraction.source_url ?? "",
       created_by: params.userId,
     });
   }
 
   const packet = parsePacketChecklist(checksByType.get("packet_checklist_v1"));
-  for (const item of packet?.items ?? []) {
-    if (item.status === "met") continue;
-    tasks.push({
-      proposal_id: params.proposalId,
-      source_type: "packet",
-      source_id: item.id,
-      title: `Prepare ${item.label}`,
-      detail: item.notes,
-      owner_label: "Operations",
-      priority: item.status === "missing" ? "critical" : "medium",
-      due_date: packet.due_date ?? params.dueDate,
-      evidence: packet.submission_url ?? "",
-      created_by: params.userId,
-    });
+  if (packet) {
+    for (const item of packet.items) {
+      if (item.status === "met") continue;
+      tasks.push({
+        proposal_id: params.proposalId,
+        source_type: "packet",
+        source_id: item.id,
+        title: `Prepare ${item.label}`,
+        detail: item.notes,
+        owner_label: /submission|portal|source/i.test(item.id)
+          ? "Submission lead"
+          : /budget|match|award|financial/i.test(`${item.id} ${item.label}`)
+            ? "Finance / Operations"
+            : "Operations",
+        priority: item.status === "missing" || /submission-method|required-form|match-rule/i.test(item.id)
+          ? "critical"
+          : "medium",
+        due_date: packet.due_date ?? params.dueDate,
+        evidence: packet.submission_url ?? "",
+        created_by: params.userId,
+      });
+    }
   }
 
   const reviewerSection = params.sections.find(
