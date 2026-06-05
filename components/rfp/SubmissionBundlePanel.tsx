@@ -103,13 +103,22 @@ export function SubmissionBundlePanel({
             available for review and portal prep.
           </p>
         </div>
-        <div className="rounded-md border border-zinc-800 bg-zinc-900/60 px-4 py-3 text-right">
-          <p className="font-mono text-[9px] uppercase tracking-[0.18em] text-zinc-500">
-            Gate score
-          </p>
-          <p className="mt-1 text-2xl font-semibold tabular-nums text-zinc-100">
-            {gate.score}
-          </p>
+        <div className="flex flex-wrap items-start gap-3">
+          <a
+            href={`/api/rfp/proposals/${proposalId}/export/bundle-zip`}
+            className="inline-flex h-11 items-center justify-center gap-2 rounded-md border border-emerald-400/50 bg-emerald-400 px-4 text-sm font-semibold text-zinc-950 transition hover:bg-emerald-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300 focus-visible:ring-offset-2 focus-visible:ring-offset-zinc-950"
+          >
+            <Download className="h-4 w-4" aria-hidden="true" />
+            Download ZIP
+          </a>
+          <div className="rounded-md border border-zinc-800 bg-zinc-900/60 px-4 py-3 text-right">
+            <p className="font-mono text-[9px] uppercase tracking-[0.18em] text-zinc-500">
+              Gate score
+            </p>
+            <p className="mt-1 text-2xl font-semibold tabular-nums text-zinc-100">
+              {gate.score}
+            </p>
+          </div>
         </div>
       </div>
 

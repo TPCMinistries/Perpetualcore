@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createAdminClient, createClient } from "@/lib/supabase/server";
-import { csvDocument, exportFilename } from "@/lib/rfp/export/csv";
+import { exportFilename } from "@/lib/rfp/export/csv";
+import { complianceCsvDocument } from "@/lib/rfp/export/compliance-csv";
 import type { ComplianceMatrixArtifact } from "@/lib/rfp/compliance/types";
 
 export const runtime = "nodejs";
@@ -77,31 +78,7 @@ export async function GET(
     );
   }
 
-  const header = [
-    "ID",
-    "Category",
-    "Priority",
-    "Requirement",
-    "Source",
-    "Source excerpt",
-    "Response status",
-    "Owner",
-    "Phase",
-    "Evidence",
-  ];
-  const rows = matrix.items.map((item) => [
-    item.id,
-    item.category,
-    item.priority ?? "",
-    item.requirement,
-    item.source,
-    item.source_excerpt ?? "",
-    item.response_status,
-    item.owner_label ?? item.owner_section,
-    item.phase ?? "",
-    item.evidence,
-  ]);
-  const csv = csvDocument([header, ...rows]);
+  const csv = complianceCsvDocument(matrix);
 
   return new Response(csv, {
     headers: {
