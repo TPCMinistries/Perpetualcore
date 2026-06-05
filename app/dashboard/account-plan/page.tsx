@@ -457,7 +457,9 @@ export default function AccountPlanPage() {
     [companySize, painArea],
   );
   const plannerCompany = companyName.trim() || "Target company";
-  const plannerLeadHref = `/dashboard/leads?company=${encodeURIComponent(plannerCompany)}&source=account-plan`;
+  const plannerLeadHref = `/dashboard/leads?company=${encodeURIComponent(
+    plannerCompany,
+  )}&source=account_plan&package=${encodeURIComponent(recommendedOffer.packageId)}`;
   const plannerPackageHref = `/packages?package=${encodeURIComponent(recommendedOffer.packageId)}&company=${encodeURIComponent(
     plannerCompany,
   )}`;
