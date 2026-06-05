@@ -54,6 +54,8 @@ type AccountLane = {
   blockedTaskCount?: number;
   overdueTaskCount?: number;
   nextTaskDueDate?: string;
+  sourceType?: string;
+  leadId?: string;
   createdAt: string;
   href: string;
 };
@@ -246,6 +248,7 @@ function getAccountBrief(client: AccountLane) {
   return [
     `Account: ${client.name}`,
     `Company/contact: ${client.company}`,
+    `Source: ${client.sourceType || "Account workspace"}`,
     `Lane: ${client.lane}`,
     `Value: ${client.value}`,
     `Status: ${normalizeStatus(client.status)}`,
@@ -440,6 +443,7 @@ function getAccountCommandLine(client: AccountLane) {
     `Lane: ${client.lane}`,
     `Risk: ${risk.label}`,
     `Readiness: ${readiness.label}`,
+    `Source: ${client.sourceType || "Account workspace"}`,
     `Action: ${getPrimaryAccountAction(client)}`,
     `Task pulse: ${client.openTaskCount || 0} open, ${client.blockedTaskCount || 0} blocked, ${client.overdueTaskCount || 0} overdue, ${dueLabel}`,
   ].join("\n");
@@ -658,6 +662,7 @@ export default function AccountsPage() {
         client.buyerStage,
         client.paymentPath,
         client.paymentStatus,
+        client.sourceType,
       ]
         .filter(Boolean)
         .join(" ")
@@ -1194,6 +1199,11 @@ export default function AccountsPage() {
                     <div>
                       <div className="flex flex-wrap items-center gap-2">
                         <p className="font-semibold text-slate-950">{client.name}</p>
+                        {client.sourceType ? (
+                          <Badge variant="outline" className="rounded-md">
+                            {client.sourceType}
+                          </Badge>
+                        ) : null}
                         <span className={`rounded-md border px-2 py-1 text-xs font-medium ${getReadinessClasses(readiness.tone)}`}>
                           {readiness.label}
                         </span>
@@ -1331,6 +1341,11 @@ export default function AccountsPage() {
                     <div>
                       <div className="flex flex-wrap items-center gap-2">
                         <p className="font-semibold text-slate-950">{client.name}</p>
+                        {client.sourceType ? (
+                          <Badge variant="outline" className="rounded-md">
+                            {client.sourceType}
+                          </Badge>
+                        ) : null}
                         <span
                           className={`rounded-md border px-2 py-1 text-xs font-medium ${getReadinessClasses(
                             risk.tone,
@@ -1506,6 +1521,11 @@ export default function AccountsPage() {
                   <div>
                     <div className="flex flex-wrap items-center gap-2">
                       <p className="font-semibold text-slate-950">{client.name}</p>
+                      {client.sourceType ? (
+                        <Badge variant="outline" className="rounded-md">
+                          {client.sourceType}
+                        </Badge>
+                      ) : null}
                       <Badge variant="outline" className="rounded-md">
                         {normalizeStatus(client.status)}
                       </Badge>
@@ -1574,7 +1594,7 @@ export default function AccountsPage() {
                       </Button>
                       <Button asChild size="sm" variant="outline" className="h-8 rounded-md">
                         <Link
-                          href={`/packages?lead=${encodeURIComponent(client.id)}&package=${encodeURIComponent(
+                          href={`/packages?${client.leadId ? `lead=${encodeURIComponent(client.leadId)}&` : ""}package=${encodeURIComponent(
                             getPackageIdForAccount(client),
                           )}`}
                         >

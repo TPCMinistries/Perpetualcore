@@ -331,6 +331,8 @@ export async function GET() {
         overdueTaskCount: taskSummary.overdue,
         nextTaskDueDate: taskSummary.nextDueDate,
         createdAt: account.created_at,
+        sourceType: "Permanent account",
+        leadId: sourceLeadId,
         href: sourceLeadId ? `/dashboard/accounts/${sourceLeadId}` : "/dashboard/accounts",
       };
     }),
@@ -361,6 +363,8 @@ export async function GET() {
         overdueTaskCount: taskSummary.overdue,
         nextTaskDueDate: taskSummary.nextDueDate,
         createdAt: lead.created_at,
+        sourceType: "Lead handoff",
+        leadId: lead.id,
         href: `/dashboard/accounts/${lead.id}`,
       };
     }).filter((client): client is NonNullable<typeof client> => Boolean(client)),
@@ -381,6 +385,8 @@ export async function GET() {
       blockedTaskCount: 0,
       overdueTaskCount: 0,
       createdAt: payment.createdAt,
+      sourceType: "Stripe package",
+      leadId: payment.leadId || undefined,
       href: payment.leadId ? `/dashboard/accounts/${payment.leadId}` : `/contact-sales?intent=post-payment-intake&session_id=${encodeURIComponent(payment.id)}`,
     })),
     ...openSalesContacts.slice(0, 6).map((contact) => ({
@@ -398,6 +404,7 @@ export async function GET() {
       blockedTaskCount: 0,
       overdueTaskCount: 0,
       createdAt: contact.created_at || new Date().toISOString(),
+      sourceType: "Sales inquiry",
       href: "/dashboard/leads",
     })),
   ];
