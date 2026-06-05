@@ -186,6 +186,19 @@ interface OppSearchRow {
   id: string;
 }
 
+interface EnrichmentSelectQuery {
+  in(column: string, values: string[]): Promise<{
+    data: EnrichmentShape[] | null;
+    error: { message: string } | null;
+  }>;
+}
+
+interface RfpEnrichmentReadClient {
+  from(table: "rfp_opportunity_enrichments"): {
+    select(columns: string): EnrichmentSelectQuery;
+  };
+}
+
 // ── Helper ────────────────────────────────────────────────────────────────────
 
 function toFeedRow(r: MatchJoinRow): FeedRow | null {
@@ -305,7 +318,7 @@ function sortFeedRows(rows: FeedRow[], sort: DiscoverySort): FeedRow[] {
 }
 
 async function loadEnrichmentsForRows(
-  rfp: { from: (table: string) => any },
+  rfp: RfpEnrichmentReadClient,
   oppIds: string[],
 ): Promise<Map<string, EnrichmentShape>> {
   if (oppIds.length === 0) return new Map();
@@ -471,7 +484,7 @@ export async function buildFeedQuery(filters: FeedFilters): Promise<FeedPage> {
     const oppIds = rows.map((row) => row.opp_id);
     const [canonicalByOpp, enrichmentByOpp] = await Promise.all([
       loadCanonicalMetadataForOpps(rfp, oppIds),
-      loadEnrichmentsForRows(rfp, oppIds),
+      loadEnrichmentsForRows(rfp as unknown as RfpEnrichmentReadClient, oppIds),
     ]);
     for (const row of rows) {
       row.canonical = canonicalByOpp.get(row.opp_id) ?? null;

@@ -102,6 +102,21 @@ interface PackageRow {
   proposal_id: string;
 }
 
+interface RowsResult<T> {
+  data: T[] | null;
+  error: { message: string } | null;
+}
+
+interface MissingRfpTableReadClient {
+  from(table: "rfp_package_documents"): {
+    select(columns: string): {
+      in(column: string, values: string[]): {
+        returns<T>(): Promise<RowsResult<T extends Array<infer Row> ? Row : T>>;
+      };
+    };
+  };
+}
+
 interface PursuitItem {
   oppId: string;
   title: string;
@@ -342,7 +357,7 @@ export default async function PursuitsPage({ params }: PageProps) {
 
   const { data: packageRows } =
     proposalIds.length > 0
-      ? await supabase
+      ? await (supabase as unknown as MissingRfpTableReadClient)
           .from("rfp_package_documents")
           .select("proposal_id")
           .in("proposal_id", proposalIds)
