@@ -154,6 +154,7 @@ type OutboundCopyMode =
   | "cost_frame"
   | "invoice_handoff"
   | "kickoff_note";
+type NextTouchCopyMode = "call_agenda" | "short_text" | "decision_email";
 
 interface AssistantRecommendation {
   generatedAt: string;
@@ -164,6 +165,14 @@ interface AssistantRecommendation {
   followUp: string;
   reasoning: string[];
   questions: string[];
+}
+
+interface NextTouchPlan {
+  objective: string;
+  channel: string;
+  ask: string;
+  proof: string;
+  timing: string;
 }
 
 // Status configuration
@@ -1298,6 +1307,115 @@ export default function LeadsPage() {
     ]
       .filter(Boolean)
       .join("\n\n");
+  };
+
+  const getNextTouchPlan = (lead: Lead): NextTouchPlan => {
+    const status = lead.status || "new";
+    const lane = getLeadLane(lead);
+    const readiness = getCloseReadiness(lead);
+    const hasContact = Boolean(getLeadEmail(lead) || lead.phone);
+    const hasValue = Boolean(lead.estimated_value);
+
+    if (!hasContact) {
+      return {
+        objective: "Find the real decision maker and direct contact.",
+        channel: "Relationship intro or short text",
+        ask: "Ask who owns the operating decision and whether they will take a 15-minute fit call.",
+        proof: `Lead with the ${lane.label} frame, not a generic AI pitch.`,
+        timing: "Today or next business day",
+      };
+    }
+
+    if (status === "new" || status === "contacted") {
+      return {
+        objective: "Qualify the first operating lane before sending payment.",
+        channel: "Call first, then email recap",
+        ask: "Confirm the workflow, owner, system access, urgency, and what would make the first engagement worth it.",
+        proof: `Use the ${lane.label} explanation and capture what business pain it solves.`,
+        timing: "Within 24 hours",
+      };
+    }
+
+    if (readiness.score >= 4 || status === "proposal") {
+      return {
+        objective: "Move from interest to a paid next step.",
+        channel: "Decision email plus follow-up call",
+        ask: hasValue
+          ? "Ask them to approve the starting lane and confirm payment/admin next steps."
+          : "Confirm the first invoice range, then send the package or proposal path.",
+        proof: `Show the recommended package, the first 30-day outcome, and why ${lane.label} is the right start.`,
+        timing: "24-72 hours",
+      };
+    }
+
+    if (status === "negotiation") {
+      return {
+        objective: "Remove the remaining blocker and get the start date.",
+        channel: "Direct call",
+        ask: "Ask what is preventing approval today and whether the next step is invoice, package link, or procurement.",
+        proof:
+          "Keep the scope tight: first lane, first outcome, first checkpoint.",
+        timing: "Same day",
+      };
+    }
+
+    return {
+      objective: "Decide whether to nurture, revive, or close out.",
+      channel: "Short email",
+      ask: "Ask whether this is still active and what changed since the last conversation.",
+      proof: "Offer a practical next step without over-selling.",
+      timing: "This week",
+    };
+  };
+
+  const getNextTouchCopy = (lead: Lead, mode: NextTouchCopyMode) => {
+    const plan = getNextTouchPlan(lead);
+    const leadName = getLeadName(lead);
+    const company = getLeadCompany(lead);
+    const account = company || leadName;
+    const lane = getLeadLane(lead);
+    const packageId = getRecommendedPackageId(lead);
+    const packageLink = `https://www.perpetualcore.com/packages?lead=${lead.id}&package=${packageId}`;
+
+    if (mode === "call_agenda") {
+      return [
+        `Call agenda for ${account}`,
+        `Objective: ${plan.objective}`,
+        `Recommended channel: ${plan.channel}`,
+        `Timing: ${plan.timing}`,
+        `Recommended lane: ${lane.label}`,
+        `Proof to bring: ${plan.proof}`,
+        `Questions:`,
+        `1. What workflow or operating gap should we solve first?`,
+        `2. Who owns the decision and who has to use the system?`,
+        `3. What systems, inboxes, docs, or data sources are involved?`,
+        `4. What would make the first 30 days clearly worth it?`,
+        `5. Is the right next step a package, proposal, or invoice path?`,
+        `Close ask: ${plan.ask}`,
+      ].join("\n\n");
+    }
+
+    if (mode === "short_text") {
+      return `${leadName}, quick thought for ${account}: I would start this around ${lane.label}, but only after we confirm the first workflow, owner, and proof point. Are you open to a short call so I can map the right starting lane instead of sending a generic AI package?`;
+    }
+
+    return `Subject: Recommended next step for ${account}
+
+${leadName},
+
+I looked at the best next step and would not position this as a generic AI tool conversation. The cleaner path is to start with ${lane.label}, prove value in one operating lane, and then decide whether it should expand.
+
+The immediate objective: ${plan.objective}
+
+What I need to confirm:
+1. The first workflow or operating gap
+2. Who owns the decision and who will use the system
+3. What systems, docs, inboxes, or data sources are involved
+4. What would make the first 30 days clearly worth it
+
+If that is aligned, the next step is: ${plan.ask}
+
+Reference path: ${packageLink}`;
   };
 
   const getOutboundCopy = (lead: Lead, mode: OutboundCopyMode) => {
@@ -3659,6 +3777,102 @@ export default function LeadsPage() {
                                   ))}
                                 </ul>
                               </div>
+                            </div>
+                          </div>
+                        );
+                      })()}
+                    </div>
+
+                    <div className="rounded-lg border bg-card p-4">
+                      {(() => {
+                        const nextTouch = getNextTouchPlan(selectedLead);
+                        const copyActions: Array<{
+                          label: string;
+                          mode: NextTouchCopyMode;
+                          icon: LucideIcon;
+                        }> = [
+                          {
+                            label: "Copy call agenda",
+                            mode: "call_agenda",
+                            icon: Phone,
+                          },
+                          {
+                            label: "Copy text",
+                            mode: "short_text",
+                            icon: MessageSquare,
+                          },
+                          {
+                            label: "Copy decision email",
+                            mode: "decision_email",
+                            icon: Mail,
+                          },
+                        ];
+
+                        return (
+                          <div className="space-y-4">
+                            <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                              <div>
+                                <Label className="flex items-center gap-2 text-sm text-muted-foreground">
+                                  <Target className="h-4 w-4 text-primary" />
+                                  Next touch command
+                                </Label>
+                                <p className="mt-2 text-base font-semibold text-foreground">
+                                  {nextTouch.objective}
+                                </p>
+                                <p className="mt-1 text-sm leading-6 text-muted-foreground">
+                                  {nextTouch.ask}
+                                </p>
+                              </div>
+                              <Badge
+                                variant="outline"
+                                className="w-fit rounded-md"
+                              >
+                                {nextTouch.timing}
+                              </Badge>
+                            </div>
+
+                            <div className="grid gap-3 sm:grid-cols-3">
+                              <div className="rounded-md border bg-background p-3">
+                                <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
+                                  Channel
+                                </p>
+                                <p className="mt-2 text-sm font-medium leading-5">
+                                  {nextTouch.channel}
+                                </p>
+                              </div>
+                              <div className="rounded-md border bg-background p-3 sm:col-span-2">
+                                <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
+                                  Proof to bring
+                                </p>
+                                <p className="mt-2 text-sm leading-5 text-muted-foreground">
+                                  {nextTouch.proof}
+                                </p>
+                              </div>
+                            </div>
+
+                            <div className="grid gap-2 sm:grid-cols-3">
+                              {copyActions.map((action) => {
+                                const Icon = action.icon;
+                                return (
+                                  <Button
+                                    key={action.mode}
+                                    type="button"
+                                    variant="outline"
+                                    className="rounded-md bg-background"
+                                    onClick={() =>
+                                      copyText(
+                                        getNextTouchCopy(
+                                          selectedLead,
+                                          action.mode,
+                                        ),
+                                      )
+                                    }
+                                  >
+                                    <Icon className="mr-2 h-4 w-4" />
+                                    {action.label}
+                                  </Button>
+                                );
+                              })}
                             </div>
                           </div>
                         );
