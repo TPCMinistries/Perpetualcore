@@ -23,6 +23,7 @@ import { DraftButton } from "@/components/rfp/DraftButton";
 import { CaptureReadinessButton } from "@/components/rfp/CaptureReadinessButton";
 import { ReviewButton } from "@/components/rfp/ReviewButton";
 import { ExportProposalButton } from "@/components/rfp/ExportProposalButton";
+import { SubmissionBundlePanel } from "@/components/rfp/SubmissionBundlePanel";
 import { SubmissionWorkroom } from "@/components/rfp/SubmissionWorkroom";
 import { ManualSubmissionTaskForm } from "@/components/rfp/ManualSubmissionTaskForm";
 import { PackageIntakePanel } from "@/components/rfp/PackageIntakePanel";
@@ -449,20 +450,25 @@ export default async function PursuitDetailPage({ params }: PageProps) {
   const reviewerSection = (sections ?? []).find(
     (section) => section.section_type === REVIEWER_FINDINGS_SECTION_TYPE,
   );
+  const bidNoBid = parseBidNoBid(checksByType.get("bid_no_bid_v1"));
+  const complianceMatrix = parseComplianceMatrix(
+    checksByType.get("compliance_matrix_v1"),
+  );
+  const packetChecklist = parsePacketChecklist(
+    checksByType.get("packet_checklist_v1"),
+  );
+  const reviewerResult = parseReviewerResult(reviewerSection?.content ?? null);
+  const verifyMarkerCount = countVerifyMarkersFromSections(proposalSections);
   const readiness = buildPursuitReadiness({
     proposalStatus: proposal?.status ?? null,
     dueDate: proposal?.due_date ?? opp.deadline,
     sectionCount: proposalSections.length,
-    verifyMarkerCount: countVerifyMarkersFromSections(proposalSections),
+    verifyMarkerCount,
     hasPackage: (packageDocs?.length ?? 0) > 0,
-    bidNoBid: parseBidNoBid(checksByType.get("bid_no_bid_v1")),
-    complianceMatrix: parseComplianceMatrix(
-      checksByType.get("compliance_matrix_v1"),
-    ),
-    packetChecklist: parsePacketChecklist(
-      checksByType.get("packet_checklist_v1"),
-    ),
-    reviewerResult: parseReviewerResult(reviewerSection?.content ?? null),
+    bidNoBid,
+    complianceMatrix,
+    packetChecklist,
+    reviewerResult,
     tasks: taskRows,
   });
   const bidDecision = buildPursuitDecisionSummary({
@@ -471,7 +477,7 @@ export default async function PursuitDetailPage({ params }: PageProps) {
     amountMax: opp.amount_max ?? opp.amount_min ?? null,
     needsReview: opp.needs_review,
     enrichmentQuality: enrichment?.quality_score ?? null,
-    bidNoBid: parseBidNoBid(checksByType.get("bid_no_bid_v1")),
+    bidNoBid,
   });
 
   const actionClass =
@@ -808,6 +814,15 @@ export default async function PursuitDetailPage({ params }: PageProps) {
                   <ExportProposalButton proposalId={proposal.id} />
                 </div>
               </section>
+              <SubmissionBundlePanel
+                proposalId={proposal.id}
+                complianceMatrix={complianceMatrix}
+                packetChecklist={packetChecklist}
+                reviewerResult={reviewerResult}
+                verifyMarkerCount={verifyMarkerCount}
+                sectionCount={proposalSections.length}
+                tasks={taskRows}
+              />
               <SubmissionWorkroom
                 proposalId={proposal.id}
                 initialTasks={taskRows}

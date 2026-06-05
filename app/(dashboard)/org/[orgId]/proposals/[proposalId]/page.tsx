@@ -24,6 +24,7 @@ import { CaptureReadinessButton } from "@/components/rfp/CaptureReadinessButton"
 import { CaptureCommandCenter } from "@/components/rfp/CaptureCommandCenter";
 import { ExportProposalButton } from "@/components/rfp/ExportProposalButton";
 import { SubmissionReadinessPanel } from "@/components/rfp/SubmissionReadinessPanel";
+import { SubmissionBundlePanel } from "@/components/rfp/SubmissionBundlePanel";
 import { SubmissionPlanPanel } from "@/components/rfp/SubmissionPlanPanel";
 import { SubmissionWorkroom } from "@/components/rfp/SubmissionWorkroom";
 import { PursuitActionSummary } from "@/components/rfp/PursuitActionSummary";
@@ -500,6 +501,15 @@ export default async function ProposalPage({
         />
         <SubmissionReadinessPanel
           bidNoBid={bidNoBid}
+          complianceMatrix={complianceMatrix}
+          packetChecklist={packetChecklist}
+          reviewerResult={reviewerResult}
+          verifyMarkerCount={verifyMarkerCount}
+          sectionCount={visibleSections.length}
+          tasks={submissionTasks ?? []}
+        />
+        <SubmissionBundlePanel
+          proposalId={proposalId}
           complianceMatrix={complianceMatrix}
           packetChecklist={packetChecklist}
           reviewerResult={reviewerResult}
