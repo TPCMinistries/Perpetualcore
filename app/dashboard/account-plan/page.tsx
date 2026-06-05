@@ -1,5 +1,6 @@
 "use client";
 
+import { useMemo, useState } from "react";
 import Link from "next/link";
 import {
   ArrowRight,
@@ -19,6 +20,15 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
 
 const accountProfile = {
   name: "Regional operator or serious small business",
@@ -54,6 +64,171 @@ const marketPositioning = [
       "Run a managed cadence: map, install, train, report, and expand across the company operating system.",
   },
 ];
+
+const companySizeOptions = [
+  { value: "small", label: "Small business" },
+  { value: "regional", label: "Regional company" },
+  { value: "enterprise", label: "Enterprise-style account" },
+] as const;
+
+const painOptions = [
+  { value: "sales", label: "Sales, quoting, and follow-up" },
+  { value: "operations", label: "Operations and service handoffs" },
+  { value: "knowledge", label: "Internal knowledge and training" },
+  { value: "reporting", label: "Leadership reporting and visibility" },
+] as const;
+
+type CompanySize = (typeof companySizeOptions)[number]["value"];
+type PainArea = (typeof painOptions)[number]["value"];
+
+const painAreaDetails: Record<
+  PainArea,
+  {
+    workflow: string;
+    proof: string;
+    questions: string[];
+  }
+> = {
+  sales: {
+    workflow:
+      "lead intake, quote preparation, customer follow-up, and pipeline visibility",
+    proof:
+      "show faster quote turnaround, fewer missed follow-ups, and a cleaner view of active opportunities",
+    questions: [
+      "Where do quote requests and customer inquiries enter the business today?",
+      "Which follow-ups get missed when the team is busy?",
+      "What information does sales need from operations before a quote can move?",
+    ],
+  },
+  operations: {
+    workflow:
+      "sales-to-operations handoff, service coordination, delivery status, and issue tracking",
+    proof:
+      "show fewer handoff gaps, clearer owner visibility, and a better daily view of stuck work",
+    questions: [
+      "Where does work slow down after a customer says yes?",
+      "Which updates do managers have to chase manually?",
+      "What handoff would be most valuable to automate or summarize first?",
+    ],
+  },
+  knowledge: {
+    workflow:
+      "company knowledge, SOPs, training answers, vendor notes, and policy retrieval",
+    proof:
+      "show that staff can get accurate answers from company context without interrupting senior people",
+    questions: [
+      "What does the team ask the same senior person over and over?",
+      "Which policies, vendor rules, or product details are hard to find?",
+      "What would be painful if a key employee left tomorrow?",
+    ],
+  },
+  reporting: {
+    workflow:
+      "owner dashboard, weekly summaries, KPI snapshots, and management follow-up",
+    proof:
+      "show a reliable leadership view that replaces manual status chasing",
+    questions: [
+      "What does leadership wish they could see every morning?",
+      "Which reports are late, manual, or hard to trust?",
+      "What decisions would improve if the right summary arrived weekly?",
+    ],
+  },
+};
+
+function getRecommendedOffer(size: CompanySize, painArea: PainArea) {
+  if (size === "enterprise") {
+    return {
+      name: "90-Day Operating Lane",
+      packageId: "operating-lane-deposit",
+      path: "/contact-sales?plan=operating-lane-deposit",
+      rationale:
+        "They need you as the operating partner, not just software access. Start with a managed lane and expand through cadence.",
+    };
+  }
+
+  if (size === "regional") {
+    return {
+      name:
+        painArea === "knowledge"
+          ? "First Workflow Package"
+          : "90-Day Operating Lane",
+      packageId:
+        painArea === "knowledge" ? "first-workflow" : "operating-lane-deposit",
+      path:
+        painArea === "knowledge"
+          ? "/contact-sales?plan=first-workflow"
+          : "/contact-sales?plan=operating-lane-deposit",
+      rationale:
+        painArea === "knowledge"
+          ? "Knowledge work can prove value quickly before expanding across departments."
+          : "Regional operators usually have enough cross-team complexity to justify a managed operating lane.",
+    };
+  }
+
+  if (painArea === "sales" || painArea === "operations") {
+    return {
+      name: "First Workflow Package",
+      packageId: "first-workflow",
+      path: "/contact-sales?plan=first-workflow",
+      rationale:
+        "The buyer has a concrete workflow problem. Price the first useful installation instead of selling a generic subscription.",
+    };
+  }
+
+  return {
+    name: "Guided Setup",
+    packageId: "guided-setup",
+    path: "/contact-sales?plan=guided-setup",
+    rationale:
+      "Start with a smaller invoice, configure the first surface, and use the result to expand into a workflow package.",
+  };
+}
+
+function buildPursuitBrief(input: {
+  companyName: string;
+  industry: string;
+  companySize: CompanySize;
+  painArea: PainArea;
+  notes: string;
+}) {
+  const company = input.companyName.trim() || "Target company";
+  const industry = input.industry.trim() || "their industry";
+  const pain = painAreaDetails[input.painArea];
+  const sizeLabel =
+    companySizeOptions.find((option) => option.value === input.companySize)
+      ?.label || "Company";
+  const offer = getRecommendedOffer(input.companySize, input.painArea);
+  const notes = input.notes.trim();
+
+  return [
+    `${company} pursuit brief`,
+    "",
+    `Segment: ${sizeLabel} in ${industry}`,
+    `Recommended first offer: ${offer.name}`,
+    `Why: ${offer.rationale}`,
+    "",
+    "Positioning:",
+    `Do not pitch a chatbot. Pitch Perpetual Core as an AI operating layer that starts with ${pain.workflow}.`,
+    "",
+    "First workflow to map:",
+    pain.workflow,
+    "",
+    "Proof point:",
+    pain.proof,
+    "",
+    "Discovery questions:",
+    ...pain.questions.map((question, index) => `${index + 1}. ${question}`),
+    "",
+    "Follow-up language:",
+    `I would not start by trying to transform everything at ${company}. I would start with one operating lane around ${pain.workflow}, install the first useful AI-supported process, and prove whether it improves speed, visibility, or follow-up before expanding.`,
+    "",
+    "Expansion path:",
+    "Map -> install first workflow -> measure proof -> create task/account cadence -> expand into a broader 90-day operating lane.",
+    notes ? `\nKnown notes:\n${notes}` : "",
+  ]
+    .filter(Boolean)
+    .join("\n");
+}
 
 const buyingCommittee = [
   {
@@ -256,6 +431,37 @@ async function copyText(text: string) {
 }
 
 export default function AccountPlanPage() {
+  const [companyName, setCompanyName] = useState("Empire Furniture");
+  const [industry, setIndustry] = useState(
+    "Furniture, FF&E, and regional retail operations",
+  );
+  const [companySize, setCompanySize] = useState<CompanySize>("regional");
+  const [painArea, setPainArea] = useState<PainArea>("sales");
+  const [notes, setNotes] = useState(
+    "Large regional operator. Likely opportunity across quote intake, customer follow-up, operations handoff, internal knowledge, and owner visibility.",
+  );
+
+  const pursuitBrief = useMemo(
+    () =>
+      buildPursuitBrief({
+        companyName,
+        industry,
+        companySize,
+        painArea,
+        notes,
+      }),
+    [companyName, companySize, industry, notes, painArea],
+  );
+  const recommendedOffer = useMemo(
+    () => getRecommendedOffer(companySize, painArea),
+    [companySize, painArea],
+  );
+  const plannerCompany = companyName.trim() || "Target company";
+  const plannerLeadHref = `/dashboard/leads?company=${encodeURIComponent(plannerCompany)}&source=account-plan`;
+  const plannerPackageHref = `/packages?package=${encodeURIComponent(recommendedOffer.packageId)}&company=${encodeURIComponent(
+    plannerCompany,
+  )}`;
+
   return (
     <div className="space-y-6 pb-10">
       <div className="rounded-xl border border-border bg-background p-6">
@@ -297,6 +503,167 @@ export default function AccountPlanPage() {
           </div>
         </div>
       </div>
+
+      <Card className="overflow-hidden rounded-lg border-violet-200 bg-white shadow-none">
+        <CardContent className="p-0">
+          <div className="grid gap-0 lg:grid-cols-[0.95fr_1.05fr]">
+            <div className="border-b border-violet-100 bg-gradient-to-br from-violet-50 via-white to-slate-50 p-5 lg:border-b-0 lg:border-r">
+              <div className="flex items-start justify-between gap-4">
+                <div>
+                  <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-violet-700">
+                    Pursuit planner
+                  </p>
+                  <h2 className="mt-3 text-2xl font-semibold tracking-tight text-slate-950">
+                    Generate the account plan before the first serious call.
+                  </h2>
+                  <p className="mt-3 text-sm leading-6 text-slate-600">
+                    Use this to translate a target company into the right offer,
+                    first workflow, proof point, discovery questions, and
+                    follow-up language.
+                  </p>
+                </div>
+                <Bot className="h-5 w-5 shrink-0 text-violet-600" />
+              </div>
+
+              <div className="mt-5 grid gap-4">
+                <div>
+                  <p className="mb-2 text-sm font-medium text-slate-900">
+                    Company
+                  </p>
+                  <Input
+                    value={companyName}
+                    onChange={(event) => setCompanyName(event.target.value)}
+                    placeholder="Company name"
+                    className="rounded-md bg-white"
+                  />
+                </div>
+                <div>
+                  <p className="mb-2 text-sm font-medium text-slate-900">
+                    Industry / context
+                  </p>
+                  <Input
+                    value={industry}
+                    onChange={(event) => setIndustry(event.target.value)}
+                    placeholder="Industry, market, or business model"
+                    className="rounded-md bg-white"
+                  />
+                </div>
+                <div className="grid gap-4 md:grid-cols-2">
+                  <div>
+                    <p className="mb-2 text-sm font-medium text-slate-900">
+                      Company maturity
+                    </p>
+                    <Select
+                      value={companySize}
+                      onValueChange={(value) =>
+                        setCompanySize(value as CompanySize)
+                      }
+                    >
+                      <SelectTrigger className="rounded-md bg-white">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {companySizeOptions.map((option) => (
+                          <SelectItem key={option.value} value={option.value}>
+                            {option.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
+                    <p className="mb-2 text-sm font-medium text-slate-900">
+                      First pain to map
+                    </p>
+                    <Select
+                      value={painArea}
+                      onValueChange={(value) => setPainArea(value as PainArea)}
+                    >
+                      <SelectTrigger className="rounded-md bg-white">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {painOptions.map((option) => (
+                          <SelectItem key={option.value} value={option.value}>
+                            {option.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+                <div>
+                  <p className="mb-2 text-sm font-medium text-slate-900">
+                    Known notes
+                  </p>
+                  <Textarea
+                    value={notes}
+                    onChange={(event) => setNotes(event.target.value)}
+                    placeholder="Relationship context, pain, people, possible budget, current systems..."
+                    className="min-h-28 rounded-md bg-white"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div className="p-5">
+              <div className="rounded-lg border border-violet-100 bg-violet-50/60 p-4">
+                <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-violet-700">
+                  Recommended start
+                </p>
+                <div className="mt-3 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                  <div>
+                    <p className="text-xl font-semibold text-slate-950">
+                      {recommendedOffer.name}
+                    </p>
+                    <p className="mt-2 max-w-xl text-sm leading-6 text-slate-700">
+                      {recommendedOffer.rationale}
+                    </p>
+                  </div>
+                  <Badge className="w-fit rounded-md" variant="outline">
+                    {plannerCompany}
+                  </Badge>
+                </div>
+              </div>
+
+              <div className="mt-4 rounded-lg border bg-slate-950 p-4 text-white">
+                <div className="flex items-center justify-between gap-3">
+                  <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-slate-300">
+                    Generated brief
+                  </p>
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="secondary"
+                    className="h-8 rounded-md"
+                    onClick={() => copyText(pursuitBrief)}
+                  >
+                    <Clipboard className="mr-2 h-3.5 w-3.5" />
+                    Copy
+                  </Button>
+                </div>
+                <pre className="mt-4 max-h-[460px] overflow-auto whitespace-pre-wrap text-sm leading-6 text-slate-100">
+                  {pursuitBrief}
+                </pre>
+              </div>
+
+              <div className="mt-4 grid gap-2 sm:grid-cols-3">
+                <Button asChild className="rounded-md">
+                  <Link href={plannerLeadHref}>
+                    Add lead <ArrowRight className="ml-2 h-4 w-4" />
+                  </Link>
+                </Button>
+                <Button asChild variant="outline" className="rounded-md">
+                  <Link href={plannerPackageHref}>Open package</Link>
+                </Button>
+                <Button asChild variant="outline" className="rounded-md">
+                  <Link href={recommendedOffer.path}>Sales intake</Link>
+                </Button>
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
       <Card className="rounded-lg border-violet-200 bg-white shadow-none">
         <CardHeader>
