@@ -761,7 +761,8 @@ export default function LeadsPage() {
 
       if (!res.ok) throw new Error("Failed to create lead");
 
-      toast.success("Lead created successfully");
+      const data = (await res.json()) as { lead?: Lead };
+      toast.success("Lead created. Close path is ready.");
       setShowCreateDialog(false);
       setFormData({
         name: "",
@@ -774,7 +775,13 @@ export default function LeadsPage() {
         notes: "",
       });
       setSelectedIntakeRoute(LEAD_INTAKE_ROUTES[0].id);
-      fetchLeads();
+
+      if (data.lead?.id) {
+        await fetchLeads();
+        await fetchLeadDetails(data.lead.id);
+      } else {
+        fetchLeads();
+      }
     } catch (error) {
       console.error("Error creating lead:", error);
       toast.error("Failed to create lead");
