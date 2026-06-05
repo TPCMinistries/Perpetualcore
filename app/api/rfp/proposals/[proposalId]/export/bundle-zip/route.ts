@@ -17,6 +17,10 @@ import {
 } from "@/lib/rfp/export/submission-manifest";
 import { csvDocument, exportFilename } from "@/lib/rfp/export/csv";
 import { loadSubmitReadinessGate } from "@/lib/rfp/submission/readiness-source";
+import {
+  auditTrailCsvDocument,
+  type RfpAuditTrailRow,
+} from "@/lib/rfp/export/audit-trail-csv";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -123,7 +127,7 @@ export async function GET(
   }
 
   const admin = createAdminClient();
-  const [orgRes, sectionsRes, checksRes, tasksRes, readinessRes] = await Promise.all([
+  const [orgRes, sectionsRes, checksRes, tasksRes, auditRes, readinessRes] = await Promise.all([
     admin.from("rfp_orgs").select("name").eq("id", proposal.org_id).maybeSingle<OrgRow>(),
     admin
       .from("rfp_proposal_sections")
@@ -149,14 +153,20 @@ export async function GET(
       .order("priority")
       .order("created_at", { ascending: true })
       .returns<SubmissionTaskRow[]>(),
+    admin
+      .from("rfp_agent_sessions")
+      .select("created_at, agent, model, session_id, tokens_in, tokens_out, cost_usd, proposal_id, org_id")
+      .eq("proposal_id", proposalId)
+      .order("created_at", { ascending: true })
+      .returns<RfpAuditTrailRow[]>(),
     loadSubmitReadinessGate(proposalId),
   ]);
 
-  if (sectionsRes.error || checksRes.error || tasksRes.error) {
+  if (sectionsRes.error || checksRes.error || tasksRes.error || auditRes.error) {
     return NextResponse.json(
       {
         error: "bundle_source_load_failed",
-        detail: (sectionsRes.error ?? checksRes.error ?? tasksRes.error)?.message.slice(0, 200),
+        detail: (sectionsRes.error ?? checksRes.error ?? tasksRes.error ?? auditRes.error)?.message.slice(0, 200),
       },
       { status: 500 },
     );
@@ -265,6 +275,7 @@ export async function GET(
       2,
     ),
   );
+  zip.file("06-audit-trail.csv", auditTrailCsvDocument(auditRes.data ?? []));
 
   const buffer = await zip.generateAsync({
     type: "nodebuffer",

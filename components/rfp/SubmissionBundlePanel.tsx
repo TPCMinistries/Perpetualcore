@@ -3,6 +3,7 @@ import {
   Download,
   FileJson,
   FileText,
+  History,
   ShieldCheck,
   Table,
 } from "lucide-react";
@@ -81,6 +82,12 @@ export function SubmissionBundlePanel({
       href: `/api/rfp/proposals/${proposalId}/submit-readiness`,
       icon: FileJson,
     },
+    {
+      label: "Audit CSV",
+      detail: "Agent, model, token, cost, and edit trail metadata.",
+      href: `/api/rfp/proposals/${proposalId}/export/audit-trail-csv`,
+      icon: History,
+    },
   ];
 
   return (
@@ -122,7 +129,7 @@ export function SubmissionBundlePanel({
         </div>
       </div>
 
-      <div className="mt-5 grid gap-3 md:grid-cols-5">
+      <div className="mt-5 grid gap-3 md:grid-cols-3 xl:grid-cols-6">
         {bundleItems.map((item) => {
           const Icon = item.icon;
           return (
