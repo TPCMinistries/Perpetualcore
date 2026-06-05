@@ -9,7 +9,9 @@ import {
   CreditCard,
   DollarSign,
   FileText,
+  Loader2,
   Layers3,
+  Mail,
   MessageSquare,
   PackageCheck,
   ShieldCheck,
@@ -60,11 +62,23 @@ interface SavedProposal {
   created_at: string;
 }
 
+interface PermanentAccount {
+  id: string;
+  name: string;
+}
+
+interface PermanentEngagement {
+  id: string;
+  offer_name?: string | null;
+  system_name?: string | null;
+}
+
 const proposalLanes = [
   {
     name: "Guided Setup",
     price: "$2.5K-$5K",
-    bestFor: "Warm leads who need a small first invoice and one configured product surface.",
+    bestFor:
+      "Warm leads who need a small first invoice and one configured product surface.",
     deliverables: [
       "One onboarding call",
       "One product or workflow configured",
@@ -77,7 +91,8 @@ const proposalLanes = [
   {
     name: "First Workflow Package",
     price: "$7.5K-$15K",
-    bestFor: "Companies with one visible workflow costing time, revenue, or service quality.",
+    bestFor:
+      "Companies with one visible workflow costing time, revenue, or service quality.",
     deliverables: [
       "Workflow map",
       "AI-supported process design",
@@ -90,7 +105,8 @@ const proposalLanes = [
   {
     name: "90-Day Operating Lane",
     price: "$15K-$30K+",
-    bestFor: "Strategic accounts that want Lorenzo/Perpetual Core as AI consultant and operator.",
+    bestFor:
+      "Strategic accounts that want Lorenzo/Perpetual Core as AI consultant and operator.",
     deliverables: [
       "Executive operating map",
       "Priority workflow installs",
@@ -124,23 +140,19 @@ const timelineOptions = ["2-3 weeks", "30 days", "60 days", "90 days"];
 const scopeBlocks = [
   {
     title: "Current-state map",
-    copy:
-      "We document how the work currently moves across people, systems, inboxes, documents, and decisions so the AI layer is grounded in the real operation.",
+    copy: "We document how the work currently moves across people, systems, inboxes, documents, and decisions so the AI layer is grounded in the real operation.",
   },
   {
     title: "AI operating layer",
-    copy:
-      "We configure the context, workflows, prompts, intake paths, and review loops that let the company use AI inside the work instead of beside it.",
+    copy: "We configure the context, workflows, prompts, intake paths, and review loops that let the company use AI inside the work instead of beside it.",
   },
   {
     title: "Human review and adoption",
-    copy:
-      "We keep humans in the right approval points, train the team on the workflow, and establish a cadence for measuring what improves.",
+    copy: "We keep humans in the right approval points, train the team on the workflow, and establish a cadence for measuring what improves.",
   },
   {
     title: "Expansion plan",
-    copy:
-      "We identify what should come next after the first lane proves value: sales, service, operations, admin, leadership reporting, or knowledge management.",
+    copy: "We identify what should come next after the first lane proves value: sales, service, operations, admin, leadership reporting, or knowledge management.",
   },
 ];
 
@@ -158,18 +170,15 @@ const proposalSections = [
 const copyBlocks = [
   {
     label: "Proposal opener",
-    text:
-      "The goal is not to add another AI tool. The goal is to install an AI operating layer into one workflow that already matters to the company, prove measurable value, and then expand from there.",
+    text: "The goal is not to add another AI tool. The goal is to install an AI operating layer into one workflow that already matters to the company, prove measurable value, and then expand from there.",
   },
   {
     label: "Investment framing",
-    text:
-      "Software access is only one part of the investment. The larger value is in mapping the workflow, configuring the operating context, training the team, and creating a repeatable process the business can actually use.",
+    text: "Software access is only one part of the investment. The larger value is in mapping the workflow, configuring the operating context, training the team, and creating a repeatable process the business can actually use.",
   },
   {
     label: "Next-step close",
-    text:
-      "If this direction is right, the next step is to choose the starting lane, confirm the decision maker and working team, and issue the first invoice so we can begin the map and implementation work.",
+    text: "If this direction is right, the next step is to choose the starting lane, confirm the decision maker and working team, and issue the first invoice so we can begin the map and implementation work.",
   },
 ];
 
@@ -191,8 +200,18 @@ async function copyText(text: string) {
 }
 
 function getLeadDisplayName(lead: LeadSummary) {
-  const composedName = [lead.first_name, lead.last_name].filter(Boolean).join(" ").trim();
-  return lead.name || lead.contact_name || composedName || lead.email || lead.contact_email || "Unnamed lead";
+  const composedName = [lead.first_name, lead.last_name]
+    .filter(Boolean)
+    .join(" ")
+    .trim();
+  return (
+    lead.name ||
+    lead.contact_name ||
+    composedName ||
+    lead.email ||
+    lead.contact_email ||
+    "Unnamed lead"
+  );
 }
 
 function getLeadCompany(lead: LeadSummary) {
@@ -200,7 +219,11 @@ function getLeadCompany(lead: LeadSummary) {
 }
 
 function getLeadAssistantPlan(lead?: LeadSummary): LeadAssistantPlan | null {
-  if (!lead?.ai_insights || typeof lead.ai_insights !== "object" || Array.isArray(lead.ai_insights)) {
+  if (
+    !lead?.ai_insights ||
+    typeof lead.ai_insights !== "object" ||
+    Array.isArray(lead.ai_insights)
+  ) {
     return null;
   }
 
@@ -218,7 +241,8 @@ function getLaneNameFromRoute(route?: string) {
 
   if (normalized.includes("operating")) return "90-Day Operating Lane";
   if (normalized.includes("workflow")) return "First Workflow Package";
-  if (normalized.includes("guided") || normalized.includes("setup")) return "Guided Setup";
+  if (normalized.includes("guided") || normalized.includes("setup"))
+    return "Guided Setup";
   return "";
 }
 
@@ -356,6 +380,53 @@ function buildImplementationScope({
   ].join("\n");
 }
 
+function buildClientHandoffPath(
+  leadId: string,
+  account: PermanentAccount | null,
+  engagement: PermanentEngagement | null,
+) {
+  const token = engagement?.id || account?.id;
+  if (!leadId || !token) return "";
+  return `/client-handoff/${encodeURIComponent(leadId)}?token=${encodeURIComponent(token)}`;
+}
+
+function buildKickoffContextAsk({
+  buyerName,
+  selectedLane,
+  workflow,
+  businessOutcome,
+  timeline,
+  handoffUrl,
+}: {
+  buyerName: string;
+  selectedLane: (typeof proposalLanes)[number];
+  workflow: string;
+  businessOutcome: string;
+  timeline: string;
+  handoffUrl: string;
+}) {
+  return [
+    `Subject: Kickoff context for ${buyerName}`,
+    "",
+    `To start ${selectedLane.name} cleanly, I want to collect the minimum operating context before we build the first surface.`,
+    "",
+    `First workflow: ${workflow}`,
+    `Target outcome: ${businessOutcome}`,
+    `Working timeline: ${timeline}`,
+    "",
+    "What I need:",
+    "1. The workflow owner and decision owner",
+    "2. The tools, docs, inboxes, files, or data involved",
+    "3. A few real examples of the work",
+    "4. What the AI should do, avoid, ask, remember, and escalate",
+    "5. The success metric for the first lane",
+    "",
+    handoffUrl
+      ? `Secure handoff page: ${handoffUrl}`
+      : "I will send the secure handoff page after the account room is synced.",
+  ].join("\n");
+}
+
 export default function ProposalsPage() {
   const [leads, setLeads] = useState<LeadSummary[]>([]);
   const [selectedLeadId, setSelectedLeadId] = useState("");
@@ -363,19 +434,28 @@ export default function ProposalsPage() {
   const [loadingLeads, setLoadingLeads] = useState(true);
   const [loadingHistory, setLoadingHistory] = useState(false);
   const [savingProposal, setSavingProposal] = useState(false);
+  const [syncingAccount, setSyncingAccount] = useState(false);
+  const [permanentAccount, setPermanentAccount] =
+    useState<PermanentAccount | null>(null);
+  const [permanentEngagement, setPermanentEngagement] =
+    useState<PermanentEngagement | null>(null);
   const [buyerName, setBuyerName] = useState("Empire-style regional operator");
   const [buyerType, setBuyerType] = useState(buyerTypes[0]);
   const [workflow, setWorkflow] = useState(workflowOptions[0]);
   const [businessOutcome, setBusinessOutcome] = useState(
-    "faster response, cleaner handoffs, better follow-up, and clearer leadership visibility"
+    "faster response, cleaner handoffs, better follow-up, and clearer leadership visibility",
   );
-  const [selectedLaneName, setSelectedLaneName] = useState(proposalLanes[2].name);
+  const [selectedLaneName, setSelectedLaneName] = useState(
+    proposalLanes[2].name,
+  );
   const [timeline, setTimeline] = useState(timelineOptions[3]);
   const [nextStep, setNextStep] = useState(
-    "confirm the starting lane, identify the working team, and issue the first invoice"
+    "confirm the starting lane, identify the working team, and issue the first invoice",
   );
 
-  const selectedLane = proposalLanes.find((lane) => lane.name === selectedLaneName) ?? proposalLanes[2];
+  const selectedLane =
+    proposalLanes.find((lane) => lane.name === selectedLaneName) ??
+    proposalLanes[2];
   const selectedLead = leads.find((lead) => lead.id === selectedLeadId);
   const selectedAssistantPlan = getLeadAssistantPlan(selectedLead);
   const paymentPackageId = getPackageIdForLane(selectedLane.name);
@@ -386,15 +466,29 @@ export default function ProposalsPage() {
     const lines = [
       `Lead: ${company ? `${company} - ${getLeadDisplayName(selectedLead)}` : getLeadDisplayName(selectedLead)}`,
       `Status: ${getLeadStatusLabel(selectedLead.status)}`,
-      selectedLead.estimated_value ? `Estimated value: $${selectedLead.estimated_value.toLocaleString()}` : "",
+      selectedLead.estimated_value
+        ? `Estimated value: $${selectedLead.estimated_value.toLocaleString()}`
+        : "",
       selectedLead.lead_score ? `AI score: ${selectedLead.lead_score}` : "",
-      selectedAssistantPlan?.route ? `Assistant route: ${selectedAssistantPlan.route}` : "",
-      selectedAssistantPlan?.nextAction ? `Next action: ${selectedAssistantPlan.nextAction}` : "",
-      selectedAssistantPlan?.followUp ? `Follow-up: ${selectedAssistantPlan.followUp}` : "",
-      selectedLead.next_follow_up_at ? `Scheduled follow-up: ${new Date(selectedLead.next_follow_up_at).toLocaleDateString()}` : "",
+      selectedAssistantPlan?.route
+        ? `Assistant route: ${selectedAssistantPlan.route}`
+        : "",
+      selectedAssistantPlan?.nextAction
+        ? `Next action: ${selectedAssistantPlan.nextAction}`
+        : "",
+      selectedAssistantPlan?.followUp
+        ? `Follow-up: ${selectedAssistantPlan.followUp}`
+        : "",
+      selectedLead.next_follow_up_at
+        ? `Scheduled follow-up: ${new Date(selectedLead.next_follow_up_at).toLocaleDateString()}`
+        : "",
       selectedLead.notes ? `Lead notes: ${selectedLead.notes}` : "",
-      selectedAssistantPlan?.reasoning?.length ? `Reasoning:\n${selectedAssistantPlan.reasoning.map((item) => `- ${item}`).join("\n")}` : "",
-      selectedAssistantPlan?.questions?.length ? `Questions:\n${selectedAssistantPlan.questions.map((item) => `- ${item}`).join("\n")}` : "",
+      selectedAssistantPlan?.reasoning?.length
+        ? `Reasoning:\n${selectedAssistantPlan.reasoning.map((item) => `- ${item}`).join("\n")}`
+        : "",
+      selectedAssistantPlan?.questions?.length
+        ? `Questions:\n${selectedAssistantPlan.questions.map((item) => `- ${item}`).join("\n")}`
+        : "",
     ].filter(Boolean);
 
     return lines.join("\n");
@@ -408,7 +502,9 @@ export default function ProposalsPage() {
       `Starting workflow: ${workflow}`,
       `Target outcome: ${businessOutcome}`,
       `Timeline: ${timeline}`,
-      selectedAssistantPlan?.score ? `AI readiness score: ${selectedAssistantPlan.score}` : "",
+      selectedAssistantPlan?.score
+        ? `AI readiness score: ${selectedAssistantPlan.score}`
+        : "",
       "",
       "Positioning",
       "The goal is not to add another AI tool. The goal is to install an AI operating layer into a workflow that already matters to the company, prove measurable value, and then expand from there.",
@@ -416,7 +512,9 @@ export default function ProposalsPage() {
       selectedAssistantPlan?.reasoning?.length ? "Assistant reasoning" : "",
       ...(selectedAssistantPlan?.reasoning || []).map((item) => `- ${item}`),
       selectedAssistantPlan?.questions?.length ? "" : "",
-      selectedAssistantPlan?.questions?.length ? "Questions to confirm before close" : "",
+      selectedAssistantPlan?.questions?.length
+        ? "Questions to confirm before close"
+        : "",
       ...(selectedAssistantPlan?.questions || []).map((item) => `- ${item}`),
       "",
       "Recommended scope",
@@ -427,8 +525,19 @@ export default function ProposalsPage() {
       "",
       "Next step",
       `If this direction is right, the next step is to ${nextStep}.`,
-    ].filter((line, index, lines) => !(line === "" && lines[index - 1] === "")).join("\n");
-  }, [businessOutcome, buyerName, buyerType, nextStep, selectedAssistantPlan, selectedLane, timeline, workflow]);
+    ]
+      .filter((line, index, lines) => !(line === "" && lines[index - 1] === ""))
+      .join("\n");
+  }, [
+    businessOutcome,
+    buyerName,
+    buyerType,
+    nextStep,
+    selectedAssistantPlan,
+    selectedLane,
+    timeline,
+    workflow,
+  ]);
   const buyerProposalEmail = useMemo(
     () =>
       buildBuyerProposalEmail({
@@ -442,7 +551,16 @@ export default function ProposalsPage() {
         selectedLeadId,
         origin: typeof window !== "undefined" ? window.location.origin : "",
       }),
-    [businessOutcome, buyerName, nextStep, paymentPackageId, selectedLane, selectedLeadId, timeline, workflow],
+    [
+      businessOutcome,
+      buyerName,
+      nextStep,
+      paymentPackageId,
+      selectedLane,
+      selectedLeadId,
+      timeline,
+      workflow,
+    ],
   );
   const internalApprovalNote = useMemo(
     () =>
@@ -455,7 +573,15 @@ export default function ProposalsPage() {
         timeline,
         selectedAssistantPlan,
       }),
-    [businessOutcome, buyerName, buyerType, selectedAssistantPlan, selectedLane, timeline, workflow],
+    [
+      businessOutcome,
+      buyerName,
+      buyerType,
+      selectedAssistantPlan,
+      selectedLane,
+      timeline,
+      workflow,
+    ],
   );
   const implementationScope = useMemo(
     () =>
@@ -469,8 +595,38 @@ export default function ProposalsPage() {
     [businessOutcome, buyerName, selectedLane, timeline, workflow],
   );
   const packageHref = `/packages?package=${paymentPackageId}&lead=${selectedLeadId || "manual"}`;
-  const accountHref = selectedLeadId ? `/dashboard/accounts/${selectedLeadId}` : "/dashboard/accounts";
+  const accountHref = selectedLeadId
+    ? `/dashboard/accounts/${selectedLeadId}`
+    : "/dashboard/accounts";
   const manualInvoiceHref = `/contact-sales?intent=manual-invoice&plan=${paymentPackageId}&lead=${selectedLeadId || "manual"}`;
+  const clientHandoffHref = buildClientHandoffPath(
+    selectedLeadId,
+    permanentAccount,
+    permanentEngagement,
+  );
+  const absoluteClientHandoffHref =
+    typeof window !== "undefined" && clientHandoffHref
+      ? `${window.location.origin}${clientHandoffHref}`
+      : "";
+  const kickoffContextAsk = useMemo(
+    () =>
+      buildKickoffContextAsk({
+        buyerName,
+        selectedLane,
+        workflow,
+        businessOutcome,
+        timeline,
+        handoffUrl: absoluteClientHandoffHref,
+      }),
+    [
+      absoluteClientHandoffHref,
+      businessOutcome,
+      buyerName,
+      selectedLane,
+      timeline,
+      workflow,
+    ],
+  );
   const closeSequence = useMemo(
     () => [
       {
@@ -482,7 +638,8 @@ export default function ProposalsPage() {
       },
       {
         label: "Send the buyer email",
-        detail: "Lead with outcome, starting lane, implementation path, and the package link.",
+        detail:
+          "Lead with outcome, starting lane, implementation path, and the package link.",
         action: "Copy buyer email",
       },
       {
@@ -492,7 +649,8 @@ export default function ProposalsPage() {
       },
       {
         label: "Open the account room",
-        detail: "Once the buyer commits, move into delivery context, tasks, and operating handoff.",
+        detail:
+          "Once the buyer commits, move into delivery context, tasks, and operating handoff.",
         action: "Open account room",
       },
     ],
@@ -510,12 +668,18 @@ export default function ProposalsPage() {
         `Next step: ${nextStep}`,
         "",
         "Sequence:",
-        ...closeSequence.map((step, index) => `${index + 1}. ${step.label} - ${step.detail}`),
+        ...closeSequence.map(
+          (step, index) => `${index + 1}. ${step.label} - ${step.detail}`,
+        ),
         "",
         `Payment path: ${typeof window !== "undefined" ? window.location.origin : ""}${packageHref}`,
         `Manual invoice path: ${typeof window !== "undefined" ? window.location.origin : ""}${manualInvoiceHref}`,
-        selectedLeadId ? `Account room: ${typeof window !== "undefined" ? window.location.origin : ""}${accountHref}` : "",
-      ].filter(Boolean).join("\n"),
+        selectedLeadId
+          ? `Account room: ${typeof window !== "undefined" ? window.location.origin : ""}${accountHref}`
+          : "",
+      ]
+        .filter(Boolean)
+        .join("\n"),
     [
       accountHref,
       businessOutcome,
@@ -541,7 +705,9 @@ export default function ProposalsPage() {
         const data = (await response.json()) as { leads?: LeadSummary[] };
         const fetchedLeads = data.leads || [];
         setLeads(fetchedLeads);
-        const leadParam = new URLSearchParams(window.location.search).get("lead");
+        const leadParam = new URLSearchParams(window.location.search).get(
+          "lead",
+        );
         if (leadParam && fetchedLeads.some((lead) => lead.id === leadParam)) {
           setSelectedLeadId(leadParam);
         }
@@ -558,7 +724,9 @@ export default function ProposalsPage() {
 
   useEffect(() => {
     if (!selectedLead) return;
-    setBuyerName(getLeadCompany(selectedLead) || getLeadDisplayName(selectedLead));
+    setBuyerName(
+      getLeadCompany(selectedLead) || getLeadDisplayName(selectedLead),
+    );
     const assistantPlan = getLeadAssistantPlan(selectedLead);
     const laneName = getLaneNameFromRoute(assistantPlan?.route);
     if (laneName) {
@@ -572,7 +740,7 @@ export default function ProposalsPage() {
     if (selectedLead.notes) {
       const lowerNotes = selectedLead.notes.toLowerCase();
       const matchedWorkflow = workflowOptions.find((option) =>
-        lowerNotes.includes(option.toLowerCase().split(" ")[0])
+        lowerNotes.includes(option.toLowerCase().split(" ")[0]),
       );
       if (matchedWorkflow) {
         setWorkflow(matchedWorkflow);
@@ -604,6 +772,33 @@ export default function ProposalsPage() {
     fetchProposalHistory();
   }, [selectedLeadId]);
 
+  useEffect(() => {
+    async function fetchPermanentAccount() {
+      setPermanentAccount(null);
+      setPermanentEngagement(null);
+
+      if (!selectedLeadId) return;
+
+      try {
+        const response = await fetch(
+          `/api/accounts?leadId=${encodeURIComponent(selectedLeadId)}`,
+          { cache: "no-store" },
+        );
+        if (!response.ok) return;
+        const data = (await response.json()) as {
+          account?: PermanentAccount | null;
+          engagement?: PermanentEngagement | null;
+        };
+        setPermanentAccount(data.account || null);
+        setPermanentEngagement(data.engagement || null);
+      } catch (error) {
+        console.error("Permanent account fetch error:", error);
+      }
+    }
+
+    fetchPermanentAccount();
+  }, [selectedLeadId]);
+
   const saveProposalToLead = async () => {
     if (!selectedLeadId) {
       toast.error("Choose a lead before saving");
@@ -625,7 +820,10 @@ export default function ProposalsPage() {
       if (!response.ok) throw new Error("Failed to save proposal");
       const data = (await response.json()) as { proposal?: SavedProposal };
       if (data.proposal) {
-        setProposalHistory((current) => [data.proposal as SavedProposal, ...current]);
+        setProposalHistory((current) => [
+          data.proposal as SavedProposal,
+          ...current,
+        ]);
       }
       toast.success("Proposal saved to lead");
     } catch (error) {
@@ -653,6 +851,38 @@ export default function ProposalsPage() {
     toast.success("Assistant plan applied to proposal");
   };
 
+  const syncAccountFromProposal = async () => {
+    if (!selectedLeadId) {
+      toast.error("Choose a lead before syncing an account");
+      return;
+    }
+
+    try {
+      setSyncingAccount(true);
+      const response = await fetch("/api/accounts", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ leadId: selectedLeadId }),
+      });
+
+      if (!response.ok) throw new Error("Could not sync account");
+      const data = (await response.json()) as {
+        account?: PermanentAccount | null;
+        engagement?: PermanentEngagement | null;
+      };
+      setPermanentAccount(data.account || null);
+      setPermanentEngagement(data.engagement || null);
+      toast.success("Account room synced");
+    } catch (error) {
+      console.error("Proposal account sync error:", error);
+      toast.error(
+        error instanceof Error ? error.message : "Could not sync account",
+      );
+    } finally {
+      setSyncingAccount(false);
+    }
+  };
+
   return (
     <div className="space-y-6 pb-10">
       <div className="rounded-xl border border-border bg-background p-6">
@@ -668,8 +898,9 @@ export default function ProposalsPage() {
               Turn a serious conversation into a clear paid starting lane.
             </h1>
             <p className="mt-3 max-w-2xl text-sm leading-6 text-muted-foreground">
-              Use this page after discovery to choose the offer, frame the scope, and send language
-              that moves a buyer from interest into invoice, checkout, or sales intake.
+              Use this page after discovery to choose the offer, frame the
+              scope, and send language that moves a buyer from interest into
+              invoice, checkout, or sales intake.
             </p>
           </div>
           <div className="flex flex-col gap-2 sm:flex-row">
@@ -695,10 +926,13 @@ export default function ProposalsPage() {
                   Lead intelligence
                 </p>
               </div>
-              <CardTitle className="text-xl">Use the saved assistant plan to write the proposal.</CardTitle>
+              <CardTitle className="text-xl">
+                Use the saved assistant plan to write the proposal.
+              </CardTitle>
               <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">
-                When a lead has been scored in the sales command page, this desk pulls the route,
-                next action, reasoning, and questions into the proposal so the handoff stays coherent.
+                When a lead has been scored in the sales command page, this desk
+                pulls the route, next action, reasoning, and questions into the
+                proposal so the handoff stays coherent.
               </p>
             </div>
             <div className="flex flex-col gap-2 sm:flex-row">
@@ -735,7 +969,8 @@ export default function ProposalsPage() {
                   Selected lead
                 </p>
                 <p className="mt-2 text-lg font-semibold text-foreground">
-                  {getLeadCompany(selectedLead) || getLeadDisplayName(selectedLead)}
+                  {getLeadCompany(selectedLead) ||
+                    getLeadDisplayName(selectedLead)}
                 </p>
                 <div className="mt-3 flex flex-wrap gap-2">
                   <Badge variant="outline" className="rounded-md">
@@ -770,7 +1005,8 @@ export default function ProposalsPage() {
                           Next action
                         </p>
                         <p className="mt-2 text-sm font-semibold text-foreground">
-                          {selectedAssistantPlan.nextAction || "Confirm starting lane"}
+                          {selectedAssistantPlan.nextAction ||
+                            "Confirm starting lane"}
                         </p>
                       </div>
                     </div>
@@ -784,8 +1020,8 @@ export default function ProposalsPage() {
                   </>
                 ) : (
                   <div className="text-sm leading-6 text-muted-foreground">
-                    No saved assistant plan yet. Open the lead, save an AI plan, then return here to
-                    generate a sharper proposal.
+                    No saved assistant plan yet. Open the lead, save an AI plan,
+                    then return here to generate a sharper proposal.
                   </div>
                 )}
               </div>
@@ -800,8 +1036,8 @@ export default function ProposalsPage() {
             <div>
               <CardTitle className="text-xl">Proposal composer</CardTitle>
               <p className="mt-2 text-sm leading-6 text-muted-foreground">
-                Fill in the buyer context and generate a clean proposal draft you can copy into email,
-                a document, or a manual invoice note.
+                Fill in the buyer context and generate a clean proposal draft
+                you can copy into email, a document, or a manual invoice note.
               </p>
             </div>
             <FileText className="h-5 w-5 flex-shrink-0 text-muted-foreground" />
@@ -811,14 +1047,18 @@ export default function ProposalsPage() {
           <div className="grid gap-6 lg:grid-cols-[0.92fr_1.08fr]">
             <div className="grid gap-4">
               <label className="grid gap-2">
-                <span className="text-sm font-medium text-foreground">Attach to lead</span>
+                <span className="text-sm font-medium text-foreground">
+                  Attach to lead
+                </span>
                 <select
                   value={selectedLeadId}
                   onChange={(event) => setSelectedLeadId(event.target.value)}
                   disabled={loadingLeads}
                   className="min-h-11 rounded-md border border-input bg-background px-3 py-2 text-sm outline-none transition focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-60"
                 >
-                  <option value="">{loadingLeads ? "Loading leads..." : "Choose a lead"}</option>
+                  <option value="">
+                    {loadingLeads ? "Loading leads..." : "Choose a lead"}
+                  </option>
                   {leads.map((lead) => (
                     <option key={lead.id} value={lead.id}>
                       {getLeadCompany(lead)
@@ -830,7 +1070,9 @@ export default function ProposalsPage() {
               </label>
 
               <label className="grid gap-2">
-                <span className="text-sm font-medium text-foreground">Buyer / account</span>
+                <span className="text-sm font-medium text-foreground">
+                  Buyer / account
+                </span>
                 <input
                   value={buyerName}
                   onChange={(event) => setBuyerName(event.target.value)}
@@ -840,7 +1082,9 @@ export default function ProposalsPage() {
 
               <div className="grid gap-4 md:grid-cols-2">
                 <label className="grid gap-2">
-                  <span className="text-sm font-medium text-foreground">Buyer type</span>
+                  <span className="text-sm font-medium text-foreground">
+                    Buyer type
+                  </span>
                   <select
                     value={buyerType}
                     onChange={(event) => setBuyerType(event.target.value)}
@@ -855,7 +1099,9 @@ export default function ProposalsPage() {
                 </label>
 
                 <label className="grid gap-2">
-                  <span className="text-sm font-medium text-foreground">Starting workflow</span>
+                  <span className="text-sm font-medium text-foreground">
+                    Starting workflow
+                  </span>
                   <select
                     value={workflow}
                     onChange={(event) => setWorkflow(event.target.value)}
@@ -872,10 +1118,14 @@ export default function ProposalsPage() {
 
               <div className="grid gap-4 md:grid-cols-2">
                 <label className="grid gap-2">
-                  <span className="text-sm font-medium text-foreground">Recommended lane</span>
+                  <span className="text-sm font-medium text-foreground">
+                    Recommended lane
+                  </span>
                   <select
                     value={selectedLaneName}
-                    onChange={(event) => setSelectedLaneName(event.target.value)}
+                    onChange={(event) =>
+                      setSelectedLaneName(event.target.value)
+                    }
                     className="min-h-11 rounded-md border border-input bg-background px-3 py-2 text-sm outline-none transition focus-visible:ring-2 focus-visible:ring-ring"
                   >
                     {proposalLanes.map((lane) => (
@@ -887,7 +1137,9 @@ export default function ProposalsPage() {
                 </label>
 
                 <label className="grid gap-2">
-                  <span className="text-sm font-medium text-foreground">Timeline</span>
+                  <span className="text-sm font-medium text-foreground">
+                    Timeline
+                  </span>
                   <select
                     value={timeline}
                     onChange={(event) => setTimeline(event.target.value)}
@@ -903,7 +1155,9 @@ export default function ProposalsPage() {
               </div>
 
               <label className="grid gap-2">
-                <span className="text-sm font-medium text-foreground">Business outcome</span>
+                <span className="text-sm font-medium text-foreground">
+                  Business outcome
+                </span>
                 <textarea
                   value={businessOutcome}
                   onChange={(event) => setBusinessOutcome(event.target.value)}
@@ -913,7 +1167,9 @@ export default function ProposalsPage() {
               </label>
 
               <label className="grid gap-2">
-                <span className="text-sm font-medium text-foreground">Next step</span>
+                <span className="text-sm font-medium text-foreground">
+                  Next step
+                </span>
                 <input
                   value={nextStep}
                   onChange={(event) => setNextStep(event.target.value)}
@@ -928,7 +1184,9 @@ export default function ProposalsPage() {
                   <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-violet-200">
                     Generated draft
                   </p>
-                  <p className="mt-1 text-sm text-slate-300">{selectedLane.name} proposal language</p>
+                  <p className="mt-1 text-sm text-slate-300">
+                    {selectedLane.name} proposal language
+                  </p>
                 </div>
                 <Button
                   type="button"
@@ -966,7 +1224,7 @@ export default function ProposalsPage() {
                         `The practical next step is to ${nextStep}.`,
                         "",
                         "If this is the right direction, I can send the invoice/payment path and we can begin with the operating map.",
-                      ].join("\n")
+                      ].join("\n"),
                     )
                   }
                 >
@@ -974,7 +1232,9 @@ export default function ProposalsPage() {
                   Copy email
                 </Button>
                 <Button asChild className="rounded-md">
-                  <Link href={`/packages?package=${paymentPackageId}&lead=${selectedLeadId || "manual"}`}>
+                  <Link
+                    href={`/packages?package=${paymentPackageId}&lead=${selectedLeadId || "manual"}`}
+                  >
                     <CreditCard className="mr-2 h-4 w-4" />
                     Payment path
                   </Link>
@@ -990,15 +1250,21 @@ export default function ProposalsPage() {
           <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
             <div>
               <div className="flex items-center gap-3">
-                <CardTitle className="text-xl">Close-ready proposal pack</CardTitle>
+                <CardTitle className="text-xl">
+                  Close-ready proposal pack
+                </CardTitle>
                 <PackageCheck className="h-5 w-5 text-primary" />
               </div>
               <p className="mt-2 max-w-3xl text-sm leading-6 text-muted-foreground">
-                Use this after the proposal language is directionally right. It gives you the buyer
-                email, internal approval note, implementation scope, and the next operational links.
+                Use this after the proposal language is directionally right. It
+                gives you the buyer email, internal approval note,
+                implementation scope, and the next operational links.
               </p>
             </div>
-            <Badge className="w-fit rounded-md" variant={selectedLeadId ? "default" : "outline"}>
+            <Badge
+              className="w-fit rounded-md"
+              variant={selectedLeadId ? "default" : "outline"}
+            >
               {selectedLeadId ? "Lead attached" : "Manual proposal"}
             </Badge>
           </div>
@@ -1008,19 +1274,22 @@ export default function ProposalsPage() {
             {[
               {
                 label: "Buyer email",
-                detail: "Send the proposal direction with package path and next step.",
+                detail:
+                  "Send the proposal direction with package path and next step.",
                 icon: MessageSquare,
                 body: buyerProposalEmail,
               },
               {
                 label: "Approval note",
-                detail: "Use when the buyer needs leadership, finance, or procurement language.",
+                detail:
+                  "Use when the buyer needs leadership, finance, or procurement language.",
                 icon: ShieldCheck,
                 body: internalApprovalNote,
               },
               {
                 label: "Scope note",
-                detail: "Clarify what is included in the first lane and what waits for expansion.",
+                detail:
+                  "Clarify what is included in the first lane and what waits for expansion.",
                 icon: Layers3,
                 body: implementationScope,
               },
@@ -1037,8 +1306,12 @@ export default function ProposalsPage() {
                   </span>
                   <Clipboard className="h-4 w-4 text-muted-foreground" />
                 </div>
-                <p className="mt-4 text-sm font-semibold text-foreground">{item.label}</p>
-                <p className="mt-2 text-sm leading-5 text-muted-foreground">{item.detail}</p>
+                <p className="mt-4 text-sm font-semibold text-foreground">
+                  {item.label}
+                </p>
+                <p className="mt-2 text-sm leading-5 text-muted-foreground">
+                  {item.detail}
+                </p>
               </button>
             ))}
           </div>
@@ -1047,13 +1320,21 @@ export default function ProposalsPage() {
             <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
               Operational next step
             </p>
-            <p className="mt-2 text-sm font-semibold text-foreground">{selectedLane.name}</p>
+            <p className="mt-2 text-sm font-semibold text-foreground">
+              {selectedLane.name}
+            </p>
             <p className="mt-2 text-sm leading-6 text-muted-foreground">
-              Save the proposal, send the package path, then open the account room so the first lane,
-              handoff context, tasks, and delivery memory stay connected.
+              Save the proposal, send the package path, then open the account
+              room so the first lane, handoff context, tasks, and delivery
+              memory stay connected.
             </p>
             <div className="mt-4 grid gap-2">
-              <Button type="button" className="rounded-md" disabled={!selectedLeadId || savingProposal} onClick={saveProposalToLead}>
+              <Button
+                type="button"
+                className="rounded-md"
+                disabled={!selectedLeadId || savingProposal}
+                onClick={saveProposalToLead}
+              >
                 <FileText className="mr-2 h-4 w-4" />
                 {savingProposal ? "Saving..." : "Save proposal to lead"}
               </Button>
@@ -1069,6 +1350,143 @@ export default function ProposalsPage() {
                   Open account room
                 </Link>
               </Button>
+              <Button
+                type="button"
+                variant="outline"
+                className="rounded-md"
+                disabled={!selectedLeadId || syncingAccount}
+                onClick={syncAccountFromProposal}
+              >
+                {syncingAccount ? (
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                ) : (
+                  <ShieldCheck className="mr-2 h-4 w-4" />
+                )}
+                {permanentAccount ? "Resync account" : "Sync account"}
+              </Button>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card className="rounded-lg border-violet-200 bg-violet-50/40 shadow-none">
+        <CardHeader>
+          <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+            <div>
+              <div className="flex items-center gap-3">
+                <CardTitle className="text-xl">Proposal to handoff</CardTitle>
+                <ShieldCheck className="h-5 w-5 text-violet-600" />
+              </div>
+              <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-600">
+                Once the buyer approves, turn the proposal into durable account
+                memory, then send the secure handoff ask so delivery starts with
+                owner, tools, examples, rules, and a success metric.
+              </p>
+            </div>
+            <Badge
+              variant={permanentAccount ? "default" : "outline"}
+              className="w-fit rounded-md"
+            >
+              {permanentAccount ? "Account synced" : "Needs sync"}
+            </Badge>
+          </div>
+        </CardHeader>
+        <CardContent className="grid gap-4 lg:grid-cols-[1fr_360px]">
+          <div className="grid gap-3 md:grid-cols-3">
+            {[
+              {
+                title: "1. Preserve the proposal",
+                detail:
+                  "Save the proposal against the lead so the buyer language, lane, and scope remain attached.",
+                done: proposalHistory.length > 0,
+              },
+              {
+                title: "2. Sync account room",
+                detail:
+                  "Create or refresh the durable account and engagement record used for delivery memory.",
+                done: Boolean(permanentAccount),
+              },
+              {
+                title: "3. Send handoff ask",
+                detail:
+                  "Collect the client-side context that makes the first operating lane practical.",
+                done: Boolean(clientHandoffHref),
+              },
+            ].map((step) => (
+              <div key={step.title} className="rounded-lg border bg-white p-4">
+                <CheckCircle2
+                  className={`h-5 w-5 ${step.done ? "text-violet-600" : "text-slate-300"}`}
+                />
+                <p className="mt-4 text-sm font-semibold text-slate-950">
+                  {step.title}
+                </p>
+                <p className="mt-2 text-sm leading-5 text-slate-600">
+                  {step.detail}
+                </p>
+              </div>
+            ))}
+          </div>
+
+          <div className="rounded-lg border bg-white p-4">
+            <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-slate-500">
+              Handoff controls
+            </p>
+            <p className="mt-2 text-sm font-semibold text-slate-950">
+              {permanentEngagement?.offer_name || selectedLane.name}
+            </p>
+            <p className="mt-2 text-sm leading-6 text-slate-600">
+              The handoff page is token-gated. Sync the account first, then copy
+              or open the client handoff path.
+            </p>
+            <div className="mt-4 grid gap-2">
+              <Button
+                type="button"
+                className="rounded-md"
+                disabled={!selectedLeadId || syncingAccount}
+                onClick={syncAccountFromProposal}
+              >
+                {syncingAccount ? (
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                ) : (
+                  <ShieldCheck className="mr-2 h-4 w-4" />
+                )}
+                {permanentAccount ? "Resync account" : "Sync account"}
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                className="rounded-md"
+                onClick={() => copyText(kickoffContextAsk)}
+              >
+                <Mail className="mr-2 h-4 w-4" />
+                Copy handoff ask
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                className="rounded-md"
+                disabled={!absoluteClientHandoffHref}
+                onClick={() => copyText(absoluteClientHandoffHref)}
+              >
+                <Clipboard className="mr-2 h-4 w-4" />
+                Copy handoff link
+              </Button>
+              {clientHandoffHref ? (
+                <Button asChild variant="outline" className="rounded-md">
+                  <Link href={clientHandoffHref}>
+                    Open handoff page <ArrowRight className="ml-2 h-4 w-4" />
+                  </Link>
+                </Button>
+              ) : (
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="rounded-md"
+                  disabled
+                >
+                  Open handoff page <ArrowRight className="ml-2 h-4 w-4" />
+                </Button>
+              )}
             </div>
           </div>
         </CardContent>
@@ -1080,11 +1498,17 @@ export default function ProposalsPage() {
             <div>
               <CardTitle className="text-xl">Send stack</CardTitle>
               <p className="mt-2 max-w-3xl text-sm leading-6 text-muted-foreground">
-                Use this as the proposal-to-payment operating order. It keeps the proposal, buyer message,
-                package path, invoice option, and account room connected.
+                Use this as the proposal-to-payment operating order. It keeps
+                the proposal, buyer message, package path, invoice option, and
+                account room connected.
               </p>
             </div>
-            <Button type="button" variant="outline" className="rounded-md" onClick={() => copyText(closeStackText)}>
+            <Button
+              type="button"
+              variant="outline"
+              className="rounded-md"
+              onClick={() => copyText(closeStackText)}
+            >
               <Clipboard className="mr-2 h-4 w-4" />
               Copy stack
             </Button>
@@ -1102,8 +1526,12 @@ export default function ProposalsPage() {
                     {step.action}
                   </Badge>
                 </div>
-                <p className="mt-4 text-sm font-semibold text-foreground">{step.label}</p>
-                <p className="mt-2 text-sm leading-6 text-muted-foreground">{step.detail}</p>
+                <p className="mt-4 text-sm font-semibold text-foreground">
+                  {step.label}
+                </p>
+                <p className="mt-2 text-sm leading-6 text-muted-foreground">
+                  {step.detail}
+                </p>
               </div>
             ))}
           </div>
@@ -1112,17 +1540,30 @@ export default function ProposalsPage() {
             <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
               Close controls
             </p>
-            <p className="mt-2 text-sm font-semibold text-foreground">{selectedLane.name}</p>
+            <p className="mt-2 text-sm font-semibold text-foreground">
+              {selectedLane.name}
+            </p>
             <p className="mt-2 text-sm leading-6 text-muted-foreground">
-              Use package checkout for simple starts, manual invoice for relationship-led or enterprise starts,
-              then move delivery into the account room.
+              Use package checkout for simple starts, manual invoice for
+              relationship-led or enterprise starts, then move delivery into the
+              account room.
             </p>
             <div className="mt-4 grid gap-2">
-              <Button type="button" className="rounded-md" disabled={!selectedLeadId || savingProposal} onClick={saveProposalToLead}>
+              <Button
+                type="button"
+                className="rounded-md"
+                disabled={!selectedLeadId || savingProposal}
+                onClick={saveProposalToLead}
+              >
                 <FileText className="mr-2 h-4 w-4" />
                 {savingProposal ? "Saving..." : "Save proposal"}
               </Button>
-              <Button type="button" variant="outline" className="rounded-md" onClick={() => copyText(buyerProposalEmail)}>
+              <Button
+                type="button"
+                variant="outline"
+                className="rounded-md"
+                onClick={() => copyText(buyerProposalEmail)}
+              >
                 <MessageSquare className="mr-2 h-4 w-4" />
                 Copy buyer email
               </Button>
@@ -1155,7 +1596,8 @@ export default function ProposalsPage() {
             <div>
               <CardTitle className="text-xl">Saved proposal history</CardTitle>
               <p className="mt-2 text-sm leading-6 text-muted-foreground">
-                Select a lead in the composer to see proposal drafts saved against that opportunity.
+                Select a lead in the composer to see proposal drafts saved
+                against that opportunity.
               </p>
             </div>
             <FileText className="h-5 w-5 flex-shrink-0 text-muted-foreground" />
@@ -1177,11 +1619,16 @@ export default function ProposalsPage() {
           ) : (
             <div className="grid gap-3">
               {proposalHistory.map((proposal) => (
-                <div key={proposal.id} className="rounded-lg border bg-card p-4">
+                <div
+                  key={proposal.id}
+                  className="rounded-lg border bg-card p-4"
+                >
                   <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                     <div>
                       <div className="flex flex-wrap items-center gap-2">
-                        <p className="text-sm font-semibold text-foreground">{proposal.title}</p>
+                        <p className="text-sm font-semibold text-foreground">
+                          {proposal.title}
+                        </p>
                         {proposal.to_value && (
                           <Badge variant="outline" className="rounded-md">
                             {proposal.to_value}
@@ -1229,10 +1676,15 @@ export default function ProposalsPage() {
               </div>
             </CardHeader>
             <CardContent className="flex flex-1 flex-col">
-              <p className="text-sm leading-6 text-muted-foreground">{lane.bestFor}</p>
+              <p className="text-sm leading-6 text-muted-foreground">
+                {lane.bestFor}
+              </p>
               <ul className="mt-5 flex-1 space-y-3">
                 {lane.deliverables.map((deliverable) => (
-                  <li key={deliverable} className="flex gap-2 text-sm leading-5 text-muted-foreground">
+                  <li
+                    key={deliverable}
+                    className="flex gap-2 text-sm leading-5 text-muted-foreground"
+                  >
                     <CheckCircle2 className="mt-0.5 h-4 w-4 flex-shrink-0 text-primary" />
                     {deliverable}
                   </li>
@@ -1265,10 +1717,14 @@ export default function ProposalsPage() {
                 className="cursor-pointer rounded-lg border bg-card p-4 text-left transition hover:border-primary/50 hover:bg-primary/[0.03]"
               >
                 <div className="flex items-center justify-between gap-4">
-                  <p className="text-sm font-semibold text-foreground">{block.title}</p>
+                  <p className="text-sm font-semibold text-foreground">
+                    {block.title}
+                  </p>
                   <Clipboard className="h-4 w-4 text-muted-foreground" />
                 </div>
-                <p className="mt-2 text-sm leading-6 text-muted-foreground">{block.copy}</p>
+                <p className="mt-2 text-sm leading-6 text-muted-foreground">
+                  {block.copy}
+                </p>
               </button>
             ))}
           </CardContent>
@@ -1283,7 +1739,10 @@ export default function ProposalsPage() {
           </CardHeader>
           <CardContent className="space-y-2">
             {proposalSections.map((section, index) => (
-              <div key={section} className="flex items-center gap-3 rounded-lg border bg-card p-3">
+              <div
+                key={section}
+                className="flex items-center gap-3 rounded-lg border bg-card p-3"
+              >
                 <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-primary">
                   {String(index + 1).padStart(2, "0")}
                 </span>
@@ -1304,9 +1763,14 @@ export default function ProposalsPage() {
           </CardHeader>
           <CardContent className="space-y-3">
             {proofChecklist.map((item) => (
-              <div key={item} className="flex gap-3 rounded-lg border bg-card p-4">
+              <div
+                key={item}
+                className="flex gap-3 rounded-lg border bg-card p-4"
+              >
                 <Target className="mt-0.5 h-4 w-4 flex-shrink-0 text-primary" />
-                <p className="text-sm leading-6 text-muted-foreground">{item}</p>
+                <p className="text-sm leading-6 text-muted-foreground">
+                  {item}
+                </p>
               </div>
             ))}
           </CardContent>
@@ -1328,10 +1792,14 @@ export default function ProposalsPage() {
                 className="cursor-pointer rounded-lg border bg-card p-4 text-left transition hover:border-primary/50 hover:bg-primary/[0.03]"
               >
                 <div className="flex items-center justify-between gap-4">
-                  <p className="text-sm font-semibold text-foreground">{item.label}</p>
+                  <p className="text-sm font-semibold text-foreground">
+                    {item.label}
+                  </p>
                   <Clipboard className="h-4 w-4 text-muted-foreground" />
                 </div>
-                <p className="mt-2 text-sm leading-6 text-muted-foreground">{item.text}</p>
+                <p className="mt-2 text-sm leading-6 text-muted-foreground">
+                  {item.text}
+                </p>
               </button>
             ))}
           </CardContent>
@@ -1344,12 +1812,16 @@ export default function ProposalsPage() {
           className="group cursor-pointer rounded-lg border bg-card p-5 transition hover:border-primary/50 hover:bg-primary/[0.03]"
         >
           <Sparkles className="h-5 w-5 text-primary" />
-          <p className="mt-4 text-sm font-semibold text-foreground">Attach to a lead</p>
+          <p className="mt-4 text-sm font-semibold text-foreground">
+            Attach to a lead
+          </p>
           <p className="mt-2 text-sm leading-5 text-muted-foreground">
-            Keep the proposal tied to the actual buyer, stage, expected value, and follow-up.
+            Keep the proposal tied to the actual buyer, stage, expected value,
+            and follow-up.
           </p>
           <span className="mt-4 inline-flex items-center text-sm font-medium text-foreground">
-            Open leads <ArrowRight className="ml-2 h-4 w-4 transition group-hover:translate-x-0.5" />
+            Open leads{" "}
+            <ArrowRight className="ml-2 h-4 w-4 transition group-hover:translate-x-0.5" />
           </span>
         </Link>
         <Link
@@ -1357,12 +1829,16 @@ export default function ProposalsPage() {
           className="group cursor-pointer rounded-lg border bg-card p-5 transition hover:border-primary/50 hover:bg-primary/[0.03]"
         >
           <MessageSquare className="h-5 w-5 text-primary" />
-          <p className="mt-4 text-sm font-semibold text-foreground">Use the script</p>
+          <p className="mt-4 text-sm font-semibold text-foreground">
+            Use the script
+          </p>
           <p className="mt-2 text-sm leading-5 text-muted-foreground">
-            Pull objection handling, cost framing, and follow-up language before sending.
+            Pull objection handling, cost framing, and follow-up language before
+            sending.
           </p>
           <span className="mt-4 inline-flex items-center text-sm font-medium text-foreground">
-            Open scripts <ArrowRight className="ml-2 h-4 w-4 transition group-hover:translate-x-0.5" />
+            Open scripts{" "}
+            <ArrowRight className="ml-2 h-4 w-4 transition group-hover:translate-x-0.5" />
           </span>
         </Link>
         <Link
@@ -1370,12 +1846,15 @@ export default function ProposalsPage() {
           className="group cursor-pointer rounded-lg border bg-card p-5 transition hover:border-primary/50 hover:bg-primary/[0.03]"
         >
           <PackageCheck className="h-5 w-5 text-primary" />
-          <p className="mt-4 text-sm font-semibold text-foreground">Move to payment</p>
+          <p className="mt-4 text-sm font-semibold text-foreground">
+            Move to payment
+          </p>
           <p className="mt-2 text-sm leading-5 text-muted-foreground">
             Use sales intake or manual invoice when the buyer is ready to start.
           </p>
           <span className="mt-4 inline-flex items-center text-sm font-medium text-foreground">
-            Open intake <ArrowRight className="ml-2 h-4 w-4 transition group-hover:translate-x-0.5" />
+            Open intake{" "}
+            <ArrowRight className="ml-2 h-4 w-4 transition group-hover:translate-x-0.5" />
           </span>
         </Link>
       </div>
