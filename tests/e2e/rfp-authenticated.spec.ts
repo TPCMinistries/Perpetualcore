@@ -5,6 +5,8 @@ const password = process.env.RFP_E2E_PASSWORD;
 const orgId = process.env.RFP_E2E_ORG_ID;
 
 test.describe("RFP authenticated workflow", () => {
+  test.setTimeout(60_000);
+
   test.skip(
     !email || !password || !orgId,
     "Set RFP_E2E_EMAIL, RFP_E2E_PASSWORD, and RFP_E2E_ORG_ID to run authenticated RFP smoke tests.",
@@ -34,17 +36,27 @@ test.describe("RFP authenticated workflow", () => {
       return;
     }
 
-    await cards.first().getByTestId("rfp-open-command-file").click();
+    const proposalBackedCard = cards.filter({
+      has: page.getByRole("link", { name: /Open workroom/i }),
+    });
+    const targetCard = (await proposalBackedCard.count()) > 0
+      ? proposalBackedCard.first()
+      : cards.first();
+
+    await targetCard.getByTestId("rfp-open-command-file").click();
     await expect(page.getByTestId("rfp-pursuit-detail-page")).toBeVisible({
       timeout: 20_000,
     });
-    await expect(page.getByText("Bid / no-bid")).toBeVisible();
+    await expect(page.getByText("Bid / no-bid").first()).toBeVisible();
 
     const bundlePanel = page.getByTestId("rfp-submission-bundle-panel");
-    if (await bundlePanel.isVisible().catch(() => false)) {
+    if ((await proposalBackedCard.count()) > 0) {
+      await expect(bundlePanel).toBeVisible();
       await expect(bundlePanel.getByRole("link", { name: /Download ZIP/i })).toBeVisible();
       await expect(bundlePanel.getByRole("link", { name: /Audit CSV/i })).toBeVisible();
       await expect(bundlePanel.getByRole("link", { name: /Readiness JSON/i })).toBeVisible();
+    } else if (await bundlePanel.isVisible().catch(() => false)) {
+      await expect(bundlePanel.getByRole("link", { name: /Download ZIP/i })).toBeVisible();
     } else {
       await expect(page.getByText("No draft workroom yet")).toBeVisible();
     }

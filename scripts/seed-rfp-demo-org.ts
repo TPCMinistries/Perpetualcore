@@ -27,9 +27,12 @@
  * Run:
  *   npx tsx scripts/seed-rfp-demo-org.ts
  *
- * Env (required):
+ * Env:
  *   RFP_DEMO_USER_EMAIL  — email of the auth.user who will own the demo org
- *   RFP_DEMO_USER_ID     — uuid of that auth.user
+ *   RFP_DEMO_USER_ID     — uuid of that auth.user; optional when
+ *                          RFP_DEMO_USER_PASSWORD is provided
+ *   RFP_DEMO_USER_PASSWORD — optional; when provided, the script creates or
+ *                            resets the auth user and prints E2E env exports
  *   NEXT_PUBLIC_SUPABASE_URL
  *   SUPABASE_SERVICE_ROLE_KEY
  *
@@ -54,6 +57,7 @@ import { createAdminClient } from "../lib/supabase/server";
 import type { Database, Json } from "../lib/supabase/database.types";
 import type { VoiceFingerprint } from "../lib/rfp/voice/extract";
 import { VAULT_DOC_TYPES, type VaultDocType } from "../lib/rfp/vault/upload";
+import type { User as SupabaseAuthUser } from "@supabase/supabase-js";
 
 // ── env validation ─────────────────────────────────────────────────────────
 
@@ -68,7 +72,13 @@ function requireEnv(key: string): string {
 }
 
 const DEMO_USER_EMAIL = requireEnv("RFP_DEMO_USER_EMAIL");
-const DEMO_USER_ID = requireEnv("RFP_DEMO_USER_ID");
+const DEMO_USER_PASSWORD = process.env.RFP_DEMO_USER_PASSWORD?.trim() || null;
+const DEMO_USER_ID_FROM_ENV = process.env.RFP_DEMO_USER_ID?.trim() || null;
+if (!DEMO_USER_ID_FROM_ENV && !DEMO_USER_PASSWORD) {
+  throw new Error(
+    "Missing RFP_DEMO_USER_ID. Provide it for an existing user, or set RFP_DEMO_USER_PASSWORD so the seeder can create/reset the E2E auth user.",
+  );
+}
 requireEnv("NEXT_PUBLIC_SUPABASE_URL");
 requireEnv("SUPABASE_SERVICE_ROLE_KEY");
 
@@ -363,20 +373,89 @@ type RfpProposalSectionInsert =
   Database["public"]["Tables"]["rfp_proposal_sections"]["Insert"];
 type RfpAgentSessionInsert =
   Database["public"]["Tables"]["rfp_agent_sessions"]["Insert"];
-
+type RfpComplianceCheckInsert =
+  Database["public"]["Tables"]["rfp_compliance_checks"]["Insert"];
+type RfpPackageDocumentInsert =
+  Database["public"]["Tables"]["rfp_package_documents"]["Insert"];
+type RfpSubmissionTaskInsert =
+  Database["public"]["Tables"]["rfp_submission_tasks"]["Insert"];
 /** Round-trip-to-JSON to satisfy the supabase Json type (uses index signature). */
 function toJsonb(value: unknown): Json {
   return JSON.parse(JSON.stringify(value)) as Json;
+}
+
+async function findAuthUserByEmail(
+  admin: ReturnType<typeof createAdminClient>,
+  email: string,
+): Promise<SupabaseAuthUser | null> {
+  for (let page = 1; page <= 20; page += 1) {
+    const { data, error } = await admin.auth.admin.listUsers({
+      page,
+      perPage: 100,
+    });
+    if (error) {
+      throw new Error(`auth_user_list_failed: ${error.message}`);
+    }
+    const found = data.users.find(
+      (user) => user.email?.toLowerCase() === email.toLowerCase(),
+    );
+    if (found) return found;
+    if (data.users.length < 100) return null;
+  }
+  throw new Error("auth_user_lookup_exceeded_2000_users");
+}
+
+async function ensureDemoAuthUser(
+  admin: ReturnType<typeof createAdminClient>,
+): Promise<string> {
+  if (DEMO_USER_ID_FROM_ENV) {
+    if (DEMO_USER_PASSWORD) {
+      const { error } = await admin.auth.admin.updateUserById(DEMO_USER_ID_FROM_ENV, {
+        password: DEMO_USER_PASSWORD,
+        email_confirm: true,
+      });
+      if (error) throw new Error(`auth_user_password_reset_failed: ${error.message}`);
+      console.log("[seed] ✓ auth user password reset from RFP_DEMO_USER_ID");
+    }
+    return DEMO_USER_ID_FROM_ENV;
+  }
+
+  if (!DEMO_USER_PASSWORD) {
+    throw new Error("RFP_DEMO_USER_PASSWORD is required when RFP_DEMO_USER_ID is omitted");
+  }
+
+  const existing = await findAuthUserByEmail(admin, DEMO_USER_EMAIL);
+  if (existing) {
+    const { error } = await admin.auth.admin.updateUserById(existing.id, {
+      password: DEMO_USER_PASSWORD,
+      email_confirm: true,
+    });
+    if (error) throw new Error(`auth_user_password_reset_failed: ${error.message}`);
+    console.log(`[seed] ✓ existing auth user reset: ${existing.id}`);
+    return existing.id;
+  }
+
+  const { data, error } = await admin.auth.admin.createUser({
+    email: DEMO_USER_EMAIL,
+    password: DEMO_USER_PASSWORD,
+    email_confirm: true,
+  });
+  if (error || !data.user) {
+    throw new Error(`auth_user_create_failed: ${error?.message ?? "no user returned"}`);
+  }
+  console.log(`[seed] ✓ auth user created: ${data.user.id}`);
+  return data.user.id;
 }
 
 // ── main ───────────────────────────────────────────────────────────────────
 
 async function main(): Promise<void> {
   const admin = createAdminClient();
+  const demoUserId = await ensureDemoAuthUser(admin);
 
   console.log("=== RFP Engine — Demo Org seeder ===");
   console.log(`[seed] owner email: ${DEMO_USER_EMAIL}`);
-  console.log(`[seed] owner user_id: ${DEMO_USER_ID}`);
+  console.log(`[seed] owner user_id: ${demoUserId}`);
 
   // 1) Org row
   const orgInsert: RfpOrgInsert = {
@@ -409,7 +488,7 @@ async function main(): Promise<void> {
   try {
     // 2) Owner membership
     const memInsert: RfpUserOrgInsert = {
-      user_id: DEMO_USER_ID,
+      user_id: demoUserId,
       org_id: orgId,
       role: "owner",
     };
@@ -569,6 +648,18 @@ async function main(): Promise<void> {
         }),
         scored_version: 1,
         scored_at: daysAgo(2),
+        triage_status: "pursuing",
+        triage_note:
+          idx === 0
+            ? "E2E seed: pursue this as the no-draft command-file scenario."
+            : idx === 1
+              ? "E2E seed: proposal-backed pursuit with prior win evidence."
+              : "E2E seed: active draft pursuit with submission bundle artifacts.",
+        triaged_at: daysAgo(idx + 1),
+        triaged_by: demoUserId,
+        pursuit_owner_label: idx === 0 ? "Proposal lead" : idx === 1 ? "Program director" : "Lorenzo",
+        pursuit_stage: idx === 0 ? "evaluating" : idx === 1 ? "submitted" : "reviewing",
+        pursuit_priority: idx === 2 ? "critical" : idx === 1 ? "high" : "medium",
       };
     });
 
@@ -604,8 +695,10 @@ async function main(): Promise<void> {
       opp_id: draftOppId,
       title: "DYCD Compass Concept Paper — Healthcare Credential Pathway (Draft)",
       status: "draft",
-      owner_user_id: DEMO_USER_ID,
+      owner_user_id: demoUserId,
       due_date: daysFromNow(14),
+      created_at: daysAgo(3),
+      updated_at: daysAgo(1),
       vault_chunks_used: toJsonb(draftVaultChunksUsed),
     } satisfies RfpProposalInsert;
 
@@ -613,11 +706,12 @@ async function main(): Promise<void> {
       org_id: orgId,
       opp_id: wonOppId,
       title: "WIOA Youth Workforce — Healthcare Sector Partnership (Won)",
-      status: "awarded",
-      owner_user_id: DEMO_USER_ID,
+      status: "won",
+      owner_user_id: demoUserId,
       due_date: daysAgo(60),
       created_at: daysAgo(95),
       updated_at: daysAgo(45),
+      vault_chunks_used: toJsonb([]),
     };
 
     const { data: proposals, error: propErr } = await admin
@@ -630,7 +724,7 @@ async function main(): Promise<void> {
       );
     }
     const draftProposal = proposals.find((p) => p.status === "draft");
-    const wonProposal = proposals.find((p) => p.status === "awarded");
+    const wonProposal = proposals.find((p) => p.status === "won");
     if (!draftProposal || !wonProposal) {
       throw new Error("proposal_split_failed: could not identify draft vs won");
     }
@@ -668,6 +762,294 @@ async function main(): Promise<void> {
     console.log(
       `[seed] ✓ ${sectionInserts.length} proposal sections inserted (incl. reviewer findings)`,
     );
+
+    const packageExtraction = {
+      kind: "package_requirements_v1",
+      title: "DYCD Compass Concept Paper Instructions",
+      source_type: "paste",
+      source_url: null,
+      extracted_at: ISO,
+      extracted_chars: 1850,
+      quality_score: 86,
+      deadline_timezone: "Eastern Time",
+      submission_method: "Submit the concept paper and attachments through PASSPort before 5:00 PM Eastern Time.",
+      submission_portal: "PASSPort",
+      submission_url: "https://passport.cityofnewyork.us/",
+      forms: ["Concept paper form", "Budget summary", "MWBE utilization plan"],
+      attachments: [
+        "501(c)(3) determination letter",
+        "Audited financial statements",
+        "Letters of commitment",
+      ],
+      matching_funds: ["No match required"],
+      award_limits: ["Maximum request $385,000"],
+      question_deadlines: ["Questions due 7 days before submission deadline"],
+      eligibility: [
+        "Applicant must be a NYC-serving nonprofit organization.",
+        "Applicant must document experience with youth workforce programming.",
+      ],
+      required_documents: [
+        "Project narrative",
+        "Budget and budget justification",
+        "501(c)(3) determination letter",
+        "Audited financial statements",
+        "Letters of commitment",
+      ],
+      page_limits: ["Concept paper narrative may not exceed 8 pages."],
+      budget_rules: [
+        "Administrative costs must be reasonable and allocable.",
+        "Participant stipends are allowable with documentation.",
+      ],
+      scoring_criteria: [
+        "Program experience and organizational capacity",
+        "Strength of employer partnerships",
+        "Outcome measurement plan",
+      ],
+      deadlines: [daysFromNow(14)],
+      submission_instructions: [
+        "Upload all required forms as PDFs in PASSPort.",
+        "Retain confirmation receipt after submission.",
+      ],
+      contacts: ["DYCD procurement helpdesk"],
+      risks: [
+        "Short concept paper timeline.",
+        "Attachment completeness required before portal submission.",
+      ],
+      requirements: [
+        {
+          id: "pkg-eligibility-nonprofit",
+          category: "eligibility",
+          requirement: "Confirm NYC nonprofit eligibility and service area.",
+          source: "Demo package",
+          source_excerpt: "Applicant must be a NYC-serving nonprofit organization.",
+          owner_hint: "Proposal lead",
+          phase: "eligibility",
+          priority: "critical",
+        },
+        {
+          id: "pkg-attachment-financials",
+          category: "attachment",
+          requirement: "Attach audited financial statements.",
+          source: "Demo package",
+          source_excerpt: "Required attachments include audited financial statements.",
+          owner_hint: "Finance / Operations",
+          phase: "attachments",
+          priority: "high",
+        },
+        {
+          id: "pkg-submission-passport",
+          category: "submission",
+          requirement: "Submit packet through PASSPort and save confirmation receipt.",
+          source: "Demo package",
+          source_excerpt: "Submit through PASSPort before 5:00 PM Eastern Time.",
+          owner_hint: "Submission lead",
+          phase: "submission",
+          priority: "critical",
+        },
+      ],
+    };
+
+    const packageDocInsert: RfpPackageDocumentInsert = {
+      proposal_id: draftProposal.id,
+      org_id: orgId,
+      opp_id: draftOppId,
+      title: "DYCD Compass Concept Paper Instructions",
+      source_type: "paste",
+      source_url: null,
+      extracted_text:
+        "Concept papers are due in PASSPort by 5:00 PM Eastern Time. Applicants must include a project narrative, budget and budget justification, 501(c)(3) determination letter, audited financial statements, and letters of commitment. The narrative may not exceed 8 pages. Save the PASSPort confirmation receipt after submission.",
+      extracted_chars: 1850,
+      extracted_json: toJsonb(packageExtraction),
+      uploaded_by: demoUserId,
+    };
+    const { error: packageDocErr } = await admin
+      .from("rfp_package_documents")
+      .insert(packageDocInsert);
+    if (packageDocErr) {
+      throw new Error(`package_doc_insert_failed: ${packageDocErr.message}`);
+    }
+    console.log("[seed] ✓ package document inserted for draft proposal");
+
+    const bidNoBid = {
+      kind: "bid_no_bid_v1",
+      recommendation: "pursue",
+      score: 84,
+      drivers: [
+        "NYC youth workforce scope matches Uplift's healthcare credential pathway.",
+        "Prior DYCD Compass award creates credible past-performance evidence.",
+        "Award ceiling matches the existing cohort expansion budget.",
+      ],
+      risks: [
+        "Short submission window.",
+        "Attachment completeness must be verified before portal upload.",
+      ],
+      next_actions: [
+        "Confirm PASSPort attachment list.",
+        "Resolve financial statement attachment.",
+        "Run final reviewer pass before submission.",
+      ],
+    };
+    const complianceMatrix = {
+      kind: "compliance_matrix_v1",
+      overall_status: "warn",
+      missing_count: 1,
+      needs_review_count: 1,
+      critical_count: 1,
+      submission_summary: {
+        deadline_timezone: "Eastern Time",
+        submission_method: packageExtraction.submission_method,
+        submission_portal: "PASSPort",
+        submission_url: "https://passport.cityofnewyork.us/",
+        forms: packageExtraction.forms,
+        question_deadlines: packageExtraction.question_deadlines,
+      },
+      items: [
+        {
+          id: "compliance-eligibility",
+          category: "eligibility",
+          requirement: "Applicant is a NYC-serving nonprofit.",
+          source: "Demo package",
+          response_status: "met",
+          owner_section: "organizational_capacity",
+          evidence: "Uplift Communities operates from Linden Boulevard and serves central Brooklyn.",
+          priority: "critical",
+          owner_label: "Proposal lead",
+          phase: "eligibility",
+        },
+        {
+          id: "compliance-financials",
+          category: "attachment",
+          requirement: "Attach audited financial statements.",
+          source: "Demo package",
+          response_status: "missing",
+          owner_section: "attachments",
+          evidence: "",
+          priority: "critical",
+          owner_label: "Finance / Operations",
+          phase: "attachments",
+        },
+        {
+          id: "compliance-budget",
+          category: "budget",
+          requirement: "Validate stipend and admin cost assumptions.",
+          source: "Demo package",
+          response_status: "needs_review",
+          owner_section: "budget_narrative",
+          evidence: "Budget draft includes participant stipends and indirect assumptions.",
+          priority: "high",
+          owner_label: "Finance / Operations",
+          phase: "budget",
+        },
+      ],
+    };
+    const packetChecklist = {
+      kind: "packet_checklist_v1",
+      overall_status: "warn",
+      due_date: daysFromNow(14),
+      submission_url: "https://passport.cityofnewyork.us/",
+      deadline_timezone: "Eastern Time",
+      submission_method: packageExtraction.submission_method,
+      submission_portal: "PASSPort",
+      forms: packageExtraction.forms,
+      question_deadlines: packageExtraction.question_deadlines,
+      items: [
+        {
+          id: "packet-narrative",
+          label: "Project narrative",
+          status: "partial",
+          notes: "Draft exists; final reviewer pass still needed.",
+        },
+        {
+          id: "packet-budget",
+          label: "Budget and budget justification",
+          status: "needs_review",
+          notes: "Finance must confirm stipend and indirect assumptions.",
+        },
+        {
+          id: "packet-financials",
+          label: "Audited financial statements",
+          status: "missing",
+          notes: "Upload current audited statements before submission.",
+        },
+      ],
+    };
+
+    const complianceInserts: RfpComplianceCheckInsert[] = [
+      {
+        proposal_id: draftProposal.id,
+        check_type: "bid_no_bid_v1",
+        status: "warn",
+        details_json: toJsonb(bidNoBid),
+      },
+      {
+        proposal_id: draftProposal.id,
+        check_type: "compliance_matrix_v1",
+        status: "warn",
+        details_json: toJsonb(complianceMatrix),
+      },
+      {
+        proposal_id: draftProposal.id,
+        check_type: "packet_checklist_v1",
+        status: "warn",
+        details_json: toJsonb(packetChecklist),
+      },
+    ];
+    const { error: complianceErr } = await admin
+      .from("rfp_compliance_checks")
+      .insert(complianceInserts);
+    if (complianceErr) {
+      throw new Error(`compliance_insert_failed: ${complianceErr.message}`);
+    }
+    console.log("[seed] ✓ capture readiness artifacts inserted for draft proposal");
+
+    const taskInserts: RfpSubmissionTaskInsert[] = [
+      {
+        proposal_id: draftProposal.id,
+        source_type: "packet",
+        source_id: "packet-financials",
+        title: "Upload audited financial statements",
+        detail: "Required PASSPort attachment is missing from the packet checklist.",
+        owner_label: "Finance / Operations",
+        priority: "critical",
+        status: "blocked",
+        due_date: daysFromNow(10),
+        evidence: "",
+        created_by: demoUserId,
+      },
+      {
+        proposal_id: draftProposal.id,
+        source_type: "compliance",
+        source_id: "compliance-budget",
+        title: "Review budget justification assumptions",
+        detail: "Validate stipend and indirect assumptions against the concept paper instructions.",
+        owner_label: "Finance / Operations",
+        priority: "high",
+        status: "in_progress",
+        due_date: daysFromNow(7),
+        evidence: "Budget draft includes participant stipends and indirect assumptions.",
+        created_by: demoUserId,
+      },
+      {
+        proposal_id: draftProposal.id,
+        source_type: "reviewer",
+        source_id: "reviewer-final-pass",
+        title: "Run final reviewer pass",
+        detail: "Run reviewer after attachments and budget assumptions are resolved.",
+        owner_label: "Reviewer",
+        priority: "medium",
+        status: "open",
+        due_date: daysFromNow(11),
+        evidence: "",
+        created_by: demoUserId,
+      },
+    ];
+    const { error: taskErr } = await admin
+      .from("rfp_submission_tasks")
+      .insert(taskInserts);
+    if (taskErr) {
+      throw new Error(`submission_task_insert_failed: ${taskErr.message}`);
+    }
+    console.log(`[seed] ✓ ${taskInserts.length} submission tasks inserted`);
 
     // 7) Agent sessions — drafter_v1 + reviewer_v1 + voice_trainer_v1 spread
     // across the past 14 days with realistic cost figures.
@@ -762,8 +1144,14 @@ async function main(): Promise<void> {
     console.log(`org_id:        ${orgId}`);
     console.log(`org_name:      ${ORG_NAME}`);
     console.log(`owner_email:   ${DEMO_USER_EMAIL}`);
-    console.log(`owner_user_id: ${DEMO_USER_ID}`);
+    console.log(`owner_user_id: ${demoUserId}`);
     console.log(`dashboard:     ${RFP_BASE_URL}/org/${orgId}`);
+    if (DEMO_USER_PASSWORD) {
+      console.log("\nE2E env:");
+      console.log(`  RFP_E2E_EMAIL=${DEMO_USER_EMAIL}`);
+      console.log("  RFP_E2E_PASSWORD=<same value as RFP_DEMO_USER_PASSWORD>");
+      console.log(`  RFP_E2E_ORG_ID=${orgId}`);
+    }
     console.log("\nProposals:");
     console.log(`  draft: ${RFP_BASE_URL}/org/${orgId}/proposals/${draftProposal.id}`);
     console.log(`  won:   ${RFP_BASE_URL}/org/${orgId}/proposals/${wonProposal.id}`);
