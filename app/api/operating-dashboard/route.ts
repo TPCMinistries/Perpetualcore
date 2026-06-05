@@ -107,29 +107,51 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 }
 
 function readString(value: unknown) {
-  return typeof value === "string" && value.trim().length > 0 ? value : undefined;
+  return typeof value === "string" && value.trim().length > 0
+    ? value
+    : undefined;
 }
 
 function readNumber(value: unknown) {
-  return typeof value === "number" && Number.isFinite(value) ? value : undefined;
+  return typeof value === "number" && Number.isFinite(value)
+    ? value
+    : undefined;
 }
 
 function readClosePath(lead: LeadRow): ClosePathState | null {
-  if (!isRecord(lead.ai_insights) || !isRecord(lead.ai_insights.closePath)) return null;
+  if (!isRecord(lead.ai_insights) || !isRecord(lead.ai_insights.closePath))
+    return null;
   const rawClosePath = lead.ai_insights.closePath;
 
   return {
-    buyerStage: typeof rawClosePath.buyerStage === "string" ? rawClosePath.buyerStage : undefined,
-    paymentPath: typeof rawClosePath.paymentPath === "string" ? rawClosePath.paymentPath : undefined,
-    paymentStatus: typeof rawClosePath.paymentStatus === "string" ? rawClosePath.paymentStatus : undefined,
+    buyerStage:
+      typeof rawClosePath.buyerStage === "string"
+        ? rawClosePath.buyerStage
+        : undefined,
+    paymentPath:
+      typeof rawClosePath.paymentPath === "string"
+        ? rawClosePath.paymentPath
+        : undefined,
+    paymentStatus:
+      typeof rawClosePath.paymentStatus === "string"
+        ? rawClosePath.paymentStatus
+        : undefined,
     commercialNextStep:
-      typeof rawClosePath.commercialNextStep === "string" ? rawClosePath.commercialNextStep : undefined,
-    updatedAt: typeof rawClosePath.updatedAt === "string" ? rawClosePath.updatedAt : undefined,
+      typeof rawClosePath.commercialNextStep === "string"
+        ? rawClosePath.commercialNextStep
+        : undefined,
+    updatedAt:
+      typeof rawClosePath.updatedAt === "string"
+        ? rawClosePath.updatedAt
+        : undefined,
   };
 }
 
 function hasHandoffContext(lead: LeadRow) {
-  return isRecord(lead.ai_insights) && isRecord(lead.ai_insights.accountHandoffContext);
+  return (
+    isRecord(lead.ai_insights) &&
+    isRecord(lead.ai_insights.accountHandoffContext)
+  );
 }
 
 function createTaskSummary(tasks: TaskRow[]): AccountTaskSummary {
@@ -142,7 +164,11 @@ function createTaskSummary(tasks: TaskRow[]): AccountTaskSummary {
   }).length;
   const nextDueDate = openTasks
     .filter((task) => task.due_date)
-    .sort((a, b) => new Date(a.due_date || "").getTime() - new Date(b.due_date || "").getTime())[0]?.due_date;
+    .sort(
+      (a, b) =>
+        new Date(a.due_date || "").getTime() -
+        new Date(b.due_date || "").getTime(),
+    )[0]?.due_date;
 
   return {
     open: openTasks.length,
@@ -154,7 +180,9 @@ function createTaskSummary(tasks: TaskRow[]): AccountTaskSummary {
 
 function humanizeStatus(value?: string | null) {
   if (!value) return "";
-  return value.replace(/_/g, " ").replace(/\b\w/g, (letter) => letter.toUpperCase());
+  return value
+    .replace(/_/g, " ")
+    .replace(/\b\w/g, (letter) => letter.toUpperCase());
 }
 
 function getClientStatus(lead: LeadRow, closePath: ClosePathState | null) {
@@ -173,6 +201,11 @@ function getClientNextStep(lead: LeadRow, closePath: ClosePathState | null) {
 
 function hasAssistantPlan(metadata: Record<string, unknown>) {
   return isRecord(metadata.assistant_plan) || isRecord(metadata.account_plan);
+}
+
+function buildClientHandoffPath(leadId?: string, token?: string) {
+  if (!leadId || !token) return undefined;
+  return `/client-handoff/${encodeURIComponent(leadId)}?token=${encodeURIComponent(token)}`;
 }
 
 async function getPackagePayments(): Promise<PackagePayment[]> {
@@ -195,7 +228,8 @@ async function getPackagePayments(): Promise<PackagePayment[]> {
         packageId: session.metadata?.package_id || "unknown",
         leadId: session.metadata?.lead_id || "",
         customerName: session.customer_details?.name || "Unknown buyer",
-        customerEmail: session.customer_details?.email || session.customer_email || "",
+        customerEmail:
+          session.customer_details?.email || session.customer_email || "",
         amount: amount.value,
         status: session.payment_status,
         createdAt: new Date(session.created * 1000).toISOString(),
@@ -215,7 +249,13 @@ export async function GET() {
 
   const admin = createAdminClient();
   const pc = getPcClient();
-  const [salesResult, leadsResult, accountResult, engagementResult, packagePayments] = await Promise.all([
+  const [
+    salesResult,
+    leadsResult,
+    accountResult,
+    engagementResult,
+    packagePayments,
+  ] = await Promise.all([
     admin
       .from("sales_contacts")
       .select("id,name,email,company,status,interested_in,product,created_at")
@@ -223,7 +263,9 @@ export async function GET() {
       .limit(25),
     admin
       .from("leads")
-      .select("id,name,email,company,status,stage,notes,ai_insights,estimated_value,next_follow_up_at,created_at")
+      .select(
+        "id,name,email,company,status,stage,notes,ai_insights,estimated_value,next_follow_up_at,created_at",
+      )
       .eq("user_id", user.id)
       .order("created_at", { ascending: false })
       .limit(50),
@@ -235,7 +277,9 @@ export async function GET() {
       .limit(50),
     pc
       .from("pc_engagements")
-      .select("id,account_id,name,offer_name,system_name,stage,value_range,next_step,metadata,created_at,updated_at")
+      .select(
+        "id,account_id,name,offer_name,system_name,stage,value_range,next_step,metadata,created_at,updated_at",
+      )
       .eq("created_by", user.id)
       .order("updated_at", { ascending: false })
       .limit(100),
@@ -249,14 +293,21 @@ export async function GET() {
   const leads = (leadsResult.data || []) as LeadRow[];
   const pcAccounts = (accountResult.data || []) as PcAccountRow[];
   const pcEngagements = (engagementResult.data || []) as PcEngagementRow[];
-  const engagementsByAccountId = pcEngagements.reduce<Record<string, PcEngagementRow[]>>((groups, engagement) => {
+  const engagementsByAccountId = pcEngagements.reduce<
+    Record<string, PcEngagementRow[]>
+  >((groups, engagement) => {
     return {
       ...groups,
-      [engagement.account_id]: [...(groups[engagement.account_id] || []), engagement],
+      [engagement.account_id]: [
+        ...(groups[engagement.account_id] || []),
+        engagement,
+      ],
     };
   }, {});
   const leadIds = leads.map((lead) => lead.id);
-  const taskSourceReferences = Array.from(new Set([...leadIds, ...pcAccounts.map((account) => account.id)]));
+  const taskSourceReferences = Array.from(
+    new Set([...leadIds, ...pcAccounts.map((account) => account.id)]),
+  );
   const tasksResult =
     taskSourceReferences.length > 0
       ? await admin
@@ -266,15 +317,26 @@ export async function GET() {
           .limit(500)
       : { data: [] };
   const accountTasks = (tasksResult.data || []) as TaskRow[];
-  const tasksBySourceReference = accountTasks.reduce<Record<string, TaskRow[]>>((groups, task) => {
-    if (!task.source_reference) return groups;
-    return {
-      ...groups,
-      [task.source_reference]: [...(groups[task.source_reference] || []), task],
-    };
-  }, {});
-  const paidPackages = packagePayments.filter((payment) => payment.status === "paid");
-  const packageRevenue = paidPackages.reduce((sum, payment) => sum + payment.amount, 0);
+  const tasksBySourceReference = accountTasks.reduce<Record<string, TaskRow[]>>(
+    (groups, task) => {
+      if (!task.source_reference) return groups;
+      return {
+        ...groups,
+        [task.source_reference]: [
+          ...(groups[task.source_reference] || []),
+          task,
+        ],
+      };
+    },
+    {},
+  );
+  const paidPackages = packagePayments.filter(
+    (payment) => payment.status === "paid",
+  );
+  const packageRevenue = paidPackages.reduce(
+    (sum, payment) => sum + payment.amount,
+    0,
+  );
   const openSalesContacts = salesContacts.filter((contact) => {
     const status = (contact.status || "new").toLowerCase();
     return !["closed", "won", "lost", "archived"].includes(status);
@@ -287,7 +349,10 @@ export async function GET() {
     const status = (lead.status || "new").toLowerCase();
     return status === "won" || lead.stage === "delivery_handoff";
   });
-  const pipelineValue = openLeads.reduce((sum, lead) => sum + (lead.estimated_value || 0), 0);
+  const pipelineValue = openLeads.reduce(
+    (sum, lead) => sum + (lead.estimated_value || 0),
+    0,
+  );
   const permanentLeadIds = new Set(
     pcAccounts
       .map((account) => {
@@ -299,20 +364,42 @@ export async function GET() {
 
   const allActiveClients = [
     ...pcAccounts.map((account) => {
-      const accountMetadata = isRecord(account.metadata) ? account.metadata : {};
+      const accountMetadata = isRecord(account.metadata)
+        ? account.metadata
+        : {};
       const engagement = engagementsByAccountId[account.id]?.[0] || null;
-      const engagementMetadata = isRecord(engagement?.metadata) ? engagement.metadata : {};
-      const sourceLeadId = readString(accountMetadata.source_lead_id) || readString(engagementMetadata.source_lead_id);
-      const estimatedValue = readNumber(accountMetadata.estimated_value) || readNumber(engagementMetadata.estimated_value) || 0;
-      const closePath = sourceLeadId ? readClosePath(leads.find((lead) => lead.id === sourceLeadId) || ({} as LeadRow)) : null;
+      const engagementMetadata = isRecord(engagement?.metadata)
+        ? engagement.metadata
+        : {};
+      const sourceLeadId =
+        readString(accountMetadata.source_lead_id) ||
+        readString(engagementMetadata.source_lead_id);
+      const handoffToken = engagement?.id || account.id;
+      const estimatedValue =
+        readNumber(accountMetadata.estimated_value) ||
+        readNumber(engagementMetadata.estimated_value) ||
+        0;
+      const closePath = sourceLeadId
+        ? readClosePath(
+            leads.find((lead) => lead.id === sourceLeadId) || ({} as LeadRow),
+          )
+        : null;
       const taskSummary = createTaskSummary([
         ...(tasksBySourceReference[account.id] || []),
         ...(sourceLeadId ? tasksBySourceReference[sourceLeadId] || [] : []),
       ]);
-      const handoffContextReceived = isRecord(accountMetadata.account_handoff_context) || isRecord(engagementMetadata.account_handoff_context);
-      const packageIntakeReceived = isRecord(accountMetadata.package_intake) || isRecord(engagementMetadata.package_intake);
-      const contactEmail = readString(accountMetadata.contact_email) || readString(engagementMetadata.contact_email);
-      const sourceStatus = readString(accountMetadata.source_lead_status) || readString(engagementMetadata.source_lead_status);
+      const handoffContextReceived =
+        isRecord(accountMetadata.account_handoff_context) ||
+        isRecord(engagementMetadata.account_handoff_context);
+      const packageIntakeReceived =
+        isRecord(accountMetadata.package_intake) ||
+        isRecord(engagementMetadata.package_intake);
+      const contactEmail =
+        readString(accountMetadata.contact_email) ||
+        readString(engagementMetadata.contact_email);
+      const sourceStatus =
+        readString(accountMetadata.source_lead_status) ||
+        readString(engagementMetadata.source_lead_status);
       const accountNextStep =
         readString(accountMetadata.last_account_next_action) ||
         readString(accountMetadata.account_next_step) ||
@@ -326,7 +413,10 @@ export async function GET() {
         id: account.id,
         name: account.name,
         company: contactEmail || "Permanent client account",
-        status: closePath?.paymentStatus === "paid" || packageIntakeReceived ? "Paid start" : humanizeStatus(sourceStatus || account.status),
+        status:
+          closePath?.paymentStatus === "paid" || packageIntakeReceived
+            ? "Paid start"
+            : humanizeStatus(sourceStatus || account.status),
         lane: engagement?.offer_name || "AI operating system",
         value:
           engagement?.value_range ||
@@ -340,13 +430,23 @@ export async function GET() {
           engagement?.next_step ||
           closePath?.commercialNextStep ||
           "Open the account room and run the next operating action",
-        buyerStage: closePath?.buyerStage || readString(accountMetadata.source_lead_stage) || readString(engagementMetadata.source_lead_stage),
-        paymentPath: closePath?.paymentPath || (packageIntakeReceived ? "package_checkout" : undefined),
-        paymentStatus: closePath?.paymentStatus || (packageIntakeReceived ? "paid" : undefined),
-        commercialNextStep: closePath?.commercialNextStep || engagement?.next_step || undefined,
+        buyerStage:
+          closePath?.buyerStage ||
+          readString(accountMetadata.source_lead_stage) ||
+          readString(engagementMetadata.source_lead_stage),
+        paymentPath:
+          closePath?.paymentPath ||
+          (packageIntakeReceived ? "package_checkout" : undefined),
+        paymentStatus:
+          closePath?.paymentStatus ||
+          (packageIntakeReceived ? "paid" : undefined),
+        commercialNextStep:
+          closePath?.commercialNextStep || engagement?.next_step || undefined,
         closePathUpdatedAt: closePath?.updatedAt,
         handoffContextReceived,
-        hasAssistantPlan: hasAssistantPlan(accountMetadata) || hasAssistantPlan(engagementMetadata),
+        hasAssistantPlan:
+          hasAssistantPlan(accountMetadata) ||
+          hasAssistantPlan(engagementMetadata),
         assistantPlanUpdatedAt,
         openTaskCount: taskSummary.open,
         blockedTaskCount: taskSummary.blocked,
@@ -355,43 +455,58 @@ export async function GET() {
         createdAt: account.created_at,
         sourceType: "Permanent account",
         leadId: sourceLeadId,
+        clientHandoffPath: buildClientHandoffPath(sourceLeadId, handoffToken),
         href: sourceLeadId
           ? `/dashboard/accounts/${sourceLeadId}`
           : `/dashboard/accounts/permanent/${account.id}`,
       };
     }),
-    ...wonLeads.map((lead) => {
-      if (permanentLeadIds.has(lead.id)) return null;
-      const closePath = readClosePath(lead);
-      const taskSummary = createTaskSummary(tasksBySourceReference[lead.id] || []);
-      return {
-        id: lead.id,
-        name: lead.company || lead.name || "Account",
-        company: lead.email || "Client account",
-        status: getClientStatus(lead, closePath),
-        lane: lead.estimated_value && lead.estimated_value >= 15000 ? "90-Day Operating Lane" : "First Workflow",
-        value: new Intl.NumberFormat("en-US", {
-          style: "currency",
-          currency: "USD",
-          maximumFractionDigits: 0,
-        }).format(lead.estimated_value || 0),
-        nextStep: getClientNextStep(lead, closePath),
-        buyerStage: closePath?.buyerStage,
-        paymentPath: closePath?.paymentPath,
-        paymentStatus: closePath?.paymentStatus,
-        commercialNextStep: closePath?.commercialNextStep,
-        closePathUpdatedAt: closePath?.updatedAt,
-        handoffContextReceived: hasHandoffContext(lead),
-        openTaskCount: taskSummary.open,
-        blockedTaskCount: taskSummary.blocked,
-        overdueTaskCount: taskSummary.overdue,
-        nextTaskDueDate: taskSummary.nextDueDate,
-        createdAt: lead.created_at,
-        sourceType: "Lead handoff",
-        leadId: lead.id,
-        href: `/dashboard/accounts/${lead.id}`,
-      };
-    }).filter((client): client is NonNullable<typeof client> => Boolean(client)),
+    ...wonLeads
+      .map((lead) => {
+        if (permanentLeadIds.has(lead.id)) return null;
+        const closePath = readClosePath(lead);
+        const leadInsights = isRecord(lead.ai_insights) ? lead.ai_insights : {};
+        const handoffToken =
+          readString(leadInsights.engagementId) ||
+          readString(leadInsights.accountId);
+        const taskSummary = createTaskSummary(
+          tasksBySourceReference[lead.id] || [],
+        );
+        return {
+          id: lead.id,
+          name: lead.company || lead.name || "Account",
+          company: lead.email || "Client account",
+          status: getClientStatus(lead, closePath),
+          lane:
+            lead.estimated_value && lead.estimated_value >= 15000
+              ? "90-Day Operating Lane"
+              : "First Workflow",
+          value: new Intl.NumberFormat("en-US", {
+            style: "currency",
+            currency: "USD",
+            maximumFractionDigits: 0,
+          }).format(lead.estimated_value || 0),
+          nextStep: getClientNextStep(lead, closePath),
+          buyerStage: closePath?.buyerStage,
+          paymentPath: closePath?.paymentPath,
+          paymentStatus: closePath?.paymentStatus,
+          commercialNextStep: closePath?.commercialNextStep,
+          closePathUpdatedAt: closePath?.updatedAt,
+          handoffContextReceived: hasHandoffContext(lead),
+          openTaskCount: taskSummary.open,
+          blockedTaskCount: taskSummary.blocked,
+          overdueTaskCount: taskSummary.overdue,
+          nextTaskDueDate: taskSummary.nextDueDate,
+          createdAt: lead.created_at,
+          sourceType: "Lead handoff",
+          leadId: lead.id,
+          clientHandoffPath: buildClientHandoffPath(lead.id, handoffToken),
+          href: `/dashboard/accounts/${lead.id}`,
+        };
+      })
+      .filter((client): client is NonNullable<typeof client> =>
+        Boolean(client),
+      ),
     ...paidPackages.map((payment) => ({
       id: payment.id,
       name: payment.customerName,
@@ -412,7 +527,9 @@ export async function GET() {
       createdAt: payment.createdAt,
       sourceType: "Stripe package",
       leadId: payment.leadId || undefined,
-      href: payment.leadId ? `/dashboard/accounts/${payment.leadId}` : `/contact-sales?intent=post-payment-intake&session_id=${encodeURIComponent(payment.id)}`,
+      href: payment.leadId
+        ? `/dashboard/accounts/${payment.leadId}`
+        : `/contact-sales?intent=post-payment-intake&session_id=${encodeURIComponent(payment.id)}`,
     })),
     ...openSalesContacts.slice(0, 6).map((contact) => ({
       id: contact.id,
@@ -438,7 +555,10 @@ export async function GET() {
 
   const closePathActions = wonLeads
     .map((lead) => ({ lead, closePath: readClosePath(lead) }))
-    .filter(({ closePath }) => closePath?.paymentStatus && closePath.paymentStatus !== "paid")
+    .filter(
+      ({ closePath }) =>
+        closePath?.paymentStatus && closePath.paymentStatus !== "paid",
+    )
     .map(({ lead, closePath }) => ({
       id: `close-path-${lead.id}`,
       title: `${closePath?.paymentStatus === "blocked" ? "Unblock" : "Advance"} ${lead.company || lead.name}`,
@@ -473,15 +593,22 @@ export async function GET() {
     summary: {
       paidPackageCount: paidPackages.length,
       packageRevenue,
-      packageRevenueFormatted: formatStripeAmount(packageRevenue, "usd").formatted,
+      packageRevenueFormatted: formatStripeAmount(packageRevenue, "usd")
+        .formatted,
       openLeadCount: openLeads.length + openSalesContacts.length,
       activeClientCount: allActiveClients.length,
-      paidStartCount: allActiveClients.filter((client) => client.paymentStatus === "paid").length,
+      paidStartCount: allActiveClients.filter(
+        (client) => client.paymentStatus === "paid",
+      ).length,
       paymentReadyCount: allActiveClients.filter((client) =>
         ["sent", "in_review"].includes(client.paymentStatus || ""),
       ).length,
-      blockedClosePathCount: allActiveClients.filter((client) => client.paymentStatus === "blocked").length,
-      proposalCount: allActiveClients.filter((client) => client.buyerStage === "proposal").length,
+      blockedClosePathCount: allActiveClients.filter(
+        (client) => client.paymentStatus === "blocked",
+      ).length,
+      proposalCount: allActiveClients.filter(
+        (client) => client.buyerStage === "proposal",
+      ).length,
       pipelineValue,
       pipelineValueFormatted: new Intl.NumberFormat("en-US", {
         style: "currency",
@@ -497,10 +624,26 @@ export async function GET() {
     recentSalesContacts: salesContacts.slice(0, 8),
     nextActions,
     systemMap: [
-      { name: "Lorenzo D.C.", role: "Trust and demand", status: "Routes qualified attention" },
-      { name: "Perpetual Core", role: "Commercial engine", status: "Packages, retainers, installs" },
-      { name: "Sage / Dashboard", role: "Operating layer", status: "Client delivery and internal OS" },
-      { name: "IHA / Engine", role: "Mission gravity", status: "Revenue commitment and legitimacy" },
+      {
+        name: "Lorenzo D.C.",
+        role: "Trust and demand",
+        status: "Routes qualified attention",
+      },
+      {
+        name: "Perpetual Core",
+        role: "Commercial engine",
+        status: "Packages, retainers, installs",
+      },
+      {
+        name: "Sage / Dashboard",
+        role: "Operating layer",
+        status: "Client delivery and internal OS",
+      },
+      {
+        name: "IHA / Engine",
+        role: "Mission gravity",
+        status: "Revenue commitment and legitimacy",
+      },
     ],
   });
 }
