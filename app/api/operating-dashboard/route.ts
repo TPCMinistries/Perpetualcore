@@ -333,7 +333,9 @@ export async function GET() {
         createdAt: account.created_at,
         sourceType: "Permanent account",
         leadId: sourceLeadId,
-        href: sourceLeadId ? `/dashboard/accounts/${sourceLeadId}` : "/dashboard/accounts",
+        href: sourceLeadId
+          ? `/dashboard/accounts/${sourceLeadId}`
+          : `/dashboard/accounts/permanent/${account.id}`,
       };
     }),
     ...wonLeads.map((lead) => {
