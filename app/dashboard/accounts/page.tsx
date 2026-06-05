@@ -143,22 +143,26 @@ const emptyData: OperatingData = {
 const aiJobs = [
   {
     title: "Account brief",
-    detail: "Summarize buyer context, offer fit, package, stakeholders, and open questions.",
+    detail:
+      "Summarize buyer context, offer fit, package, stakeholders, and open questions.",
     icon: FileText,
   },
   {
     title: "Next-best action",
-    detail: "Recommend whether to send the map, price a package, draft proposal, or schedule kickoff.",
+    detail:
+      "Recommend whether to send the map, price a package, draft proposal, or schedule kickoff.",
     icon: Sparkles,
   },
   {
     title: "Delivery memory",
-    detail: "Keep notes, files, calls, decisions, and implementation history attached to the account.",
+    detail:
+      "Keep notes, files, calls, decisions, and implementation history attached to the account.",
     icon: ShieldCheck,
   },
   {
     title: "Follow-up drafts",
-    detail: "Generate outreach that adapts to the account lane without locking you into one script.",
+    detail:
+      "Generate outreach that adapts to the account lane without locking you into one script.",
     icon: MessagesSquare,
   },
 ];
@@ -174,23 +178,28 @@ const onboardingSteps = [
 const kickoffChecklist = [
   {
     title: "Confirm the paid path",
-    detail: "Checkout, invoice, or signed approval. Do not start delivery with the money path vague.",
+    detail:
+      "Checkout, invoice, or signed approval. Do not start delivery with the money path vague.",
   },
   {
     title: "Name the first operating lane",
-    detail: "Sales, service, operations, admin, reporting, or knowledge. Pick one lane before expanding.",
+    detail:
+      "Sales, service, operations, admin, reporting, or knowledge. Pick one lane before expanding.",
   },
   {
     title: "Collect the minimum context",
-    detail: "Docs, examples, links, current tools, owner names, customer language, and the first workflow outcome.",
+    detail:
+      "Docs, examples, links, current tools, owner names, customer language, and the first workflow outcome.",
   },
   {
     title: "Set the first 7-day deliverable",
-    detail: "A working assistant, mapped process, proposal engine, intake flow, account view, or reporting surface.",
+    detail:
+      "A working assistant, mapped process, proposal engine, intake flow, account view, or reporting surface.",
   },
   {
     title: "Define the expansion signal",
-    detail: "What would prove this should become a broader 90-day operating lane.",
+    detail:
+      "What would prove this should become a broader 90-day operating lane.",
   },
 ];
 
@@ -208,12 +217,14 @@ const lanePlaybook = [
   {
     lane: "First Workflow",
     when: "There is a clear revenue, time, or visibility problem.",
-    action: "Map the workflow, install the AI-supported process, and measure the result.",
+    action:
+      "Map the workflow, install the AI-supported process, and measure the result.",
   },
   {
     lane: "90-Day Operating Lane",
     when: "They want you as AI consultant/operator.",
-    action: "Run a managed cadence across sales, ops, admin, and leadership visibility.",
+    action:
+      "Run a managed cadence across sales, ops, admin, and leadership visibility.",
   },
 ];
 
@@ -225,7 +236,9 @@ function formatDate(value: string) {
 }
 
 function normalizeStatus(status: string) {
-  return status.replace(/_/g, " ").replace(/\b\w/g, (letter) => letter.toUpperCase());
+  return status
+    .replace(/_/g, " ")
+    .replace(/\b\w/g, (letter) => letter.toUpperCase());
 }
 
 function getPaymentBadgeVariant(status?: string) {
@@ -240,7 +253,8 @@ function matchesFilter(value: string | undefined, filter: string) {
 
 function getPackageIdForAccount(client: AccountLane) {
   const lane = client.lane.toLowerCase();
-  if (lane.includes("90-day") || lane.includes("operating lane")) return "operating-lane-deposit";
+  if (lane.includes("90-day") || lane.includes("operating lane"))
+    return "operating-lane-deposit";
   if (lane.includes("workflow")) return "first-workflow";
   if (lane.includes("setup")) return "guided-setup";
   return "software-access";
@@ -277,18 +291,25 @@ function getAccountFollowUp(client: AccountLane) {
 
 function getAccountReadiness(client: AccountLane) {
   const hasPaymentPath = Boolean(client.paymentPath);
-  const paymentSent = ["sent", "in_review", "paid"].includes(client.paymentStatus || "");
-  const paid = client.paymentStatus === "paid" || client.status.toLowerCase().includes("paid");
+  const paymentSent = ["sent", "in_review", "paid"].includes(
+    client.paymentStatus || "",
+  );
+  const paid =
+    client.paymentStatus === "paid" ||
+    client.status.toLowerCase().includes("paid");
   const blocked = client.paymentStatus === "blocked";
   const hasContext = Boolean(client.handoffContextReceived);
   const hasAssistantPlan = Boolean(client.hasAssistantPlan);
-  const hasOpenTasks = Boolean(client.openTaskCount && client.openTaskCount > 0);
+  const hasOpenTasks = Boolean(
+    client.openTaskCount && client.openTaskCount > 0,
+  );
 
   if (paid) {
     if (!hasContext) {
       return {
         label: "Needs handoff context",
-        detail: "Payment is clear. Send or complete the client handoff so the first lane has real operating context.",
+        detail:
+          "Payment is clear. Send or complete the client handoff so the first lane has real operating context.",
         score: 4,
         tone: "blue",
       };
@@ -307,7 +328,8 @@ function getAccountReadiness(client: AccountLane) {
 
     return {
       label: "Ready for delivery",
-      detail: "Payment, context, and tasks are connected. Open the room and run the next account task.",
+      detail:
+        "Payment, context, and tasks are connected. Open the room and run the next account task.",
       score: 5,
       tone: "emerald",
     };
@@ -316,7 +338,8 @@ function getAccountReadiness(client: AccountLane) {
   if (blocked) {
     return {
       label: "Blocked",
-      detail: "Send procurement, invoice, or approval language to unblock the buying path.",
+      detail:
+        "Send procurement, invoice, or approval language to unblock the buying path.",
       score: 1,
       tone: "red",
     };
@@ -334,7 +357,8 @@ function getAccountReadiness(client: AccountLane) {
   if (hasPaymentPath) {
     return {
       label: "Send start path",
-      detail: "The package path is chosen. Send the buyer link, invoice request, or procurement note.",
+      detail:
+        "The package path is chosen. Send the buyer link, invoice request, or procurement note.",
       score: 2,
       tone: "blue",
     };
@@ -349,7 +373,8 @@ function getAccountReadiness(client: AccountLane) {
 }
 
 function getReadinessClasses(tone: string) {
-  if (tone === "emerald") return "border-emerald-200 bg-emerald-50 text-emerald-800";
+  if (tone === "emerald")
+    return "border-emerald-200 bg-emerald-50 text-emerald-800";
   if (tone === "red") return "border-red-200 bg-red-50 text-red-800";
   if (tone === "amber") return "border-amber-200 bg-amber-50 text-amber-800";
   if (tone === "blue") return "border-blue-200 bg-blue-50 text-blue-800";
@@ -357,18 +382,25 @@ function getReadinessClasses(tone: string) {
 }
 
 function getAccountRisk(client: AccountLane) {
-  const paid = client.paymentStatus === "paid" || client.status.toLowerCase().includes("paid");
+  const paid =
+    client.paymentStatus === "paid" ||
+    client.status.toLowerCase().includes("paid");
   const blocked = client.paymentStatus === "blocked";
   const hasContext = Boolean(client.handoffContextReceived);
   const hasAssistantPlan = Boolean(client.hasAssistantPlan);
-  const hasOpenTasks = Boolean(client.openTaskCount && client.openTaskCount > 0);
-  const hasOverdueTasks = Boolean(client.overdueTaskCount && client.overdueTaskCount > 0);
+  const hasOpenTasks = Boolean(
+    client.openTaskCount && client.openTaskCount > 0,
+  );
+  const hasOverdueTasks = Boolean(
+    client.overdueTaskCount && client.overdueTaskCount > 0,
+  );
   const hasPaymentPath = Boolean(client.paymentPath);
 
   if (blocked) {
     return {
       label: "Commercial block",
-      detail: "Payment or approval is blocked. Resolve the money path before expanding scope.",
+      detail:
+        "Payment or approval is blocked. Resolve the money path before expanding scope.",
       severity: 5,
       tone: "red",
     };
@@ -377,7 +409,8 @@ function getAccountRisk(client: AccountLane) {
   if (paid && hasOverdueTasks) {
     return {
       label: "Delivery slipping",
-      detail: "This paid account has overdue work. Clear or reassign the next task before the relationship cools.",
+      detail:
+        "This paid account has overdue work. Clear or reassign the next task before the relationship cools.",
       severity: 5,
       tone: "red",
     };
@@ -386,7 +419,8 @@ function getAccountRisk(client: AccountLane) {
   if (paid && !hasContext) {
     return {
       label: "Context gap",
-      detail: "Money is clear, but the operating context is missing. Send the handoff before delivery starts.",
+      detail:
+        "Money is clear, but the operating context is missing. Send the handoff before delivery starts.",
       severity: 4,
       tone: "amber",
     };
@@ -406,7 +440,8 @@ function getAccountRisk(client: AccountLane) {
   if (client.paymentStatus === "sent" || client.paymentStatus === "in_review") {
     return {
       label: "Buyer waiting",
-      detail: "The start path is out. Follow up with one clear decision request.",
+      detail:
+        "The start path is out. Follow up with one clear decision request.",
       severity: 3,
       tone: "blue",
     };
@@ -415,7 +450,8 @@ function getAccountRisk(client: AccountLane) {
   if (!hasPaymentPath) {
     return {
       label: "Unrouted",
-      detail: "Choose whether this should become software access, setup, a first workflow, or a 90-day lane.",
+      detail:
+        "Choose whether this should become software access, setup, a first workflow, or a 90-day lane.",
       severity: 2,
       tone: "slate",
     };
@@ -432,8 +468,10 @@ function getAccountRisk(client: AccountLane) {
 function getPrimaryAccountAction(client: AccountLane) {
   const risk = getAccountRisk(client);
 
-  if (risk.label === "Commercial block") return "Send invoice/procurement unblock note";
-  if (risk.label === "Delivery slipping") return "Open room and clear overdue work";
+  if (risk.label === "Commercial block")
+    return "Send invoice/procurement unblock note";
+  if (risk.label === "Delivery slipping")
+    return "Open room and clear overdue work";
   if (risk.label === "Context gap") return "Send client handoff";
   if (risk.label === "No AI plan") return "Generate AI operating plan";
   if (risk.label === "No task plan") return "Sync kickoff tasks";
@@ -459,13 +497,68 @@ function getAccountCommandLine(client: AccountLane) {
   ].join("\n");
 }
 
+function getAccountOperatorPrompt(client: AccountLane) {
+  const risk = getAccountRisk(client);
+  const readiness = getAccountReadiness(client);
+
+  return [
+    "You are operating this Perpetual Core account.",
+    "",
+    getAccountCommandLine(client),
+    "",
+    "Return exactly:",
+    "1. The next commercial move, if any.",
+    "2. The next delivery move, if any.",
+    "3. The smallest proof point that would make this account expand.",
+    "4. The client-facing follow-up language.",
+    "5. The internal task list with owner, priority, and due window.",
+    "",
+    `Decision rule: treat ${risk.label} as the risk to clear first and ${readiness.label} as the readiness state to improve next.`,
+  ].join("\n");
+}
+
+function getAccountActionLink(client: AccountLane) {
+  const risk = getAccountRisk(client);
+
+  if (
+    risk.label === "Buyer waiting" ||
+    risk.label === "Commercial block" ||
+    risk.label === "Unrouted"
+  ) {
+    return {
+      label: "Send path",
+      href: `/packages?${client.leadId ? `lead=${encodeURIComponent(client.leadId)}&` : ""}package=${encodeURIComponent(
+        getPackageIdForAccount(client),
+      )}`,
+    };
+  }
+
+  return {
+    label:
+      risk.label === "No AI plan"
+        ? "Generate plan"
+        : risk.label === "No task plan"
+          ? "Create tasks"
+          : "Work room",
+    href: client.href,
+  };
+}
+
 function formatTaskDueLabel(value?: string) {
   if (!value) return "No due date";
 
   const due = new Date(value);
   const today = new Date();
-  const startOfToday = new Date(today.getFullYear(), today.getMonth(), today.getDate()).getTime();
-  const startOfDue = new Date(due.getFullYear(), due.getMonth(), due.getDate()).getTime();
+  const startOfToday = new Date(
+    today.getFullYear(),
+    today.getMonth(),
+    today.getDate(),
+  ).getTime();
+  const startOfDue = new Date(
+    due.getFullYear(),
+    due.getMonth(),
+    due.getDate(),
+  ).getTime();
   const dayDifference = Math.round((startOfDue - startOfToday) / 86400000);
 
   if (dayDifference < 0) return `${Math.abs(dayDifference)}d overdue`;
@@ -483,8 +576,18 @@ function formatCurrency(value?: number | null) {
 }
 
 function getLeadName(lead: SourceLead) {
-  const composedName = [lead.first_name, lead.last_name].filter(Boolean).join(" ").trim();
-  return lead.name || lead.contact_name || composedName || lead.email || lead.contact_email || "Unnamed lead";
+  const composedName = [lead.first_name, lead.last_name]
+    .filter(Boolean)
+    .join(" ")
+    .trim();
+  return (
+    lead.name ||
+    lead.contact_name ||
+    composedName ||
+    lead.email ||
+    lead.contact_email ||
+    "Unnamed lead"
+  );
 }
 
 function getLeadCompany(lead: SourceLead) {
@@ -495,7 +598,11 @@ function getRecommendedPackageId(lead: SourceLead) {
   const value = lead.estimated_value || 0;
   const text = `${lead.title || ""} ${lead.notes || ""}`.toLowerCase();
 
-  if (value >= 15000 || text.includes("enterprise") || text.includes("operating system")) {
+  if (
+    value >= 15000 ||
+    text.includes("enterprise") ||
+    text.includes("operating system")
+  ) {
     return "operating-lane-deposit";
   }
 
@@ -522,16 +629,22 @@ function getAccountLane(lead: SourceLead) {
   return {
     packageId,
     label: lane?.lane || "First Workflow",
-    detail: lane?.action || "Confirm the first operating lane and next delivery action.",
+    detail:
+      lane?.action ||
+      "Confirm the first operating lane and next delivery action.",
   };
 }
 
 function getSourceLeadSummary(lead: SourceLead) {
   const company = getLeadCompany(lead);
   const contact = getLeadName(lead);
-  const value = lead.estimated_value ? formatCurrency(lead.estimated_value) : "scope pending";
+  const value = lead.estimated_value
+    ? formatCurrency(lead.estimated_value)
+    : "scope pending";
   const status = normalizeStatus(lead.status || "new");
-  const nextTouch = lead.next_follow_up_at ? formatDate(lead.next_follow_up_at) : "not scheduled";
+  const nextTouch = lead.next_follow_up_at
+    ? formatDate(lead.next_follow_up_at)
+    : "not scheduled";
 
   return `${company || contact} | ${contact} | ${status} | ${value} | next touch: ${nextTouch}`;
 }
@@ -575,7 +688,9 @@ export default function AccountsPage() {
   const [error, setError] = useState("");
   const [sourceLeadId, setSourceLeadId] = useState("");
   const [sourceLead, setSourceLead] = useState<SourceLead | null>(null);
-  const [sourceLeadActivities, setSourceLeadActivities] = useState<SourceLeadActivity[]>([]);
+  const [sourceLeadActivities, setSourceLeadActivities] = useState<
+    SourceLeadActivity[]
+  >([]);
   const [sourceLeadLoading, setSourceLeadLoading] = useState(false);
   const [savingHandoff, setSavingHandoff] = useState(false);
   const [accountQuery, setAccountQuery] = useState("");
@@ -587,12 +702,16 @@ export default function AccountsPage() {
     setError("");
 
     try {
-      const response = await fetch("/api/operating-dashboard", { cache: "no-store" });
+      const response = await fetch("/api/operating-dashboard", {
+        cache: "no-store",
+      });
       if (!response.ok) throw new Error("Failed to load account workspace");
       const result = (await response.json()) as OperatingData;
       setData(result);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to load account workspace");
+      setError(
+        err instanceof Error ? err.message : "Failed to load account workspace",
+      );
     } finally {
       setLoading(false);
     }
@@ -602,13 +721,20 @@ export default function AccountsPage() {
     setSourceLeadLoading(true);
 
     try {
-      const response = await fetch(`/api/leads/${leadId}`, { cache: "no-store" });
+      const response = await fetch(`/api/leads/${leadId}`, {
+        cache: "no-store",
+      });
       if (!response.ok) throw new Error("Failed to load source lead");
-      const result = (await response.json()) as { lead: SourceLead; activities?: SourceLeadActivity[] };
+      const result = (await response.json()) as {
+        lead: SourceLead;
+        activities?: SourceLeadActivity[];
+      };
       setSourceLead(result.lead);
       setSourceLeadActivities(result.activities || []);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to load source lead");
+      setError(
+        err instanceof Error ? err.message : "Failed to load source lead",
+      );
     } finally {
       setSourceLeadLoading(false);
     }
@@ -653,7 +779,9 @@ export default function AccountsPage() {
       await fetchAccounts();
       toast.success("Permanent account and delivery handoff opened");
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Could not open delivery handoff");
+      toast.error(
+        err instanceof Error ? err.message : "Could not open delivery handoff",
+      );
     } finally {
       setSavingHandoff(false);
     }
@@ -686,14 +814,19 @@ export default function AccountsPage() {
   }, [accountQuery, data.activeClients, laneFilter, paymentFilter]);
 
   const availableLanes = useMemo(
-    () => Array.from(new Set(data.activeClients.map((client) => client.lane))).filter(Boolean),
+    () =>
+      Array.from(
+        new Set(data.activeClients.map((client) => client.lane)),
+      ).filter(Boolean),
     [data.activeClients],
   );
 
   const paidAccounts = useMemo(
     () =>
       filteredAccounts.filter(
-        (client) => client.paymentStatus === "paid" || client.status.toLowerCase().includes("paid"),
+        (client) =>
+          client.paymentStatus === "paid" ||
+          client.status.toLowerCase().includes("paid"),
       ),
     [filteredAccounts],
   );
@@ -701,14 +834,22 @@ export default function AccountsPage() {
   const pursuitAccounts = useMemo(
     () =>
       filteredAccounts.filter(
-        (client) => client.paymentStatus !== "paid" && !client.status.toLowerCase().includes("paid"),
+        (client) =>
+          client.paymentStatus !== "paid" &&
+          !client.status.toLowerCase().includes("paid"),
       ),
     [filteredAccounts],
   );
   const commandQueue = useMemo(
     () =>
       [...filteredAccounts]
-        .sort((a, b) => getAccountReadiness(b).score - getAccountReadiness(a).score)
+        .sort((a, b) => {
+          const aRisk = getAccountRisk(a);
+          const bRisk = getAccountRisk(b);
+          if (bRisk.severity !== aRisk.severity)
+            return bRisk.severity - aRisk.severity;
+          return getAccountReadiness(a).score - getAccountReadiness(b).score;
+        })
         .slice(0, 6),
     [filteredAccounts],
   );
@@ -759,7 +900,8 @@ export default function AccountsPage() {
         action: getPrimaryAccountAction(client),
       }))
       .sort((a, b) => {
-        if (b.risk.severity !== a.risk.severity) return b.risk.severity - a.risk.severity;
+        if (b.risk.severity !== a.risk.severity)
+          return b.risk.severity - a.risk.severity;
         return a.readiness.score - b.readiness.score;
       });
 
@@ -767,9 +909,16 @@ export default function AccountsPage() {
       ["Commercial block", "Buyer waiting", "Unrouted"].includes(risk.label),
     );
     const deliveryAccounts = urgentAccounts.filter(({ risk }) =>
-      ["Delivery slipping", "Context gap", "No task plan"].includes(risk.label),
+      [
+        "Delivery slipping",
+        "Context gap",
+        "No AI plan",
+        "No task plan",
+      ].includes(risk.label),
     );
-    const healthyAccounts = urgentAccounts.filter(({ risk }) => risk.label === "Healthy");
+    const healthyAccounts = urgentAccounts.filter(
+      ({ risk }) => risk.label === "Healthy",
+    );
     const focusAccounts = [
       ...commercialAccounts.slice(0, 2),
       ...deliveryAccounts.slice(0, 2),
@@ -789,7 +938,12 @@ export default function AccountsPage() {
       "",
       "Today:",
       focusAccounts.length
-        ? focusAccounts.map(({ client }, index) => `${index + 1}. ${getAccountCommandLine(client)}`).join("\n\n")
+        ? focusAccounts
+            .map(
+              ({ client }, index) =>
+                `${index + 1}. ${getAccountCommandLine(client)}`,
+            )
+            .join("\n\n")
         : "No account command items in the current filter.",
       "",
       "Assistant instruction: prioritize revenue clarity first, then paid-client delivery reliability, then expansion proof.",
@@ -807,7 +961,12 @@ export default function AccountsPage() {
   const dueAccountTasks = useMemo(
     () =>
       [...filteredAccounts]
-        .filter((client) => client.nextTaskDueDate || client.overdueTaskCount || client.openTaskCount)
+        .filter(
+          (client) =>
+            client.nextTaskDueDate ||
+            client.overdueTaskCount ||
+            client.openTaskCount,
+        )
         .sort((a, b) => {
           if (a.overdueTaskCount && !b.overdueTaskCount) return -1;
           if (!a.overdueTaskCount && b.overdueTaskCount) return 1;
@@ -835,8 +994,9 @@ export default function AccountsPage() {
               Turn leads and paid packages into client operating lanes.
             </h1>
             <p className="mt-3 max-w-2xl text-sm leading-6 text-slate-600">
-              This is the post-sale command surface: keep the buyer context, payment, package,
-              handoff, assistant work, and next delivery action together so the relationship can grow.
+              This is the post-sale command surface: keep the buyer context,
+              payment, package, handoff, assistant work, and next delivery
+              action together so the relationship can grow.
             </p>
           </div>
           <div className="flex flex-col gap-2 sm:flex-row">
@@ -869,11 +1029,14 @@ export default function AccountsPage() {
                       Source lead context
                     </p>
                     {sourceLeadLoading ? (
-                      <p className="mt-3 text-sm text-violet-900">Loading lead context...</p>
+                      <p className="mt-3 text-sm text-violet-900">
+                        Loading lead context...
+                      </p>
                     ) : sourceLead ? (
                       <>
                         <h2 className="mt-3 text-xl font-semibold text-violet-950">
-                          {getLeadCompany(sourceLead) || getLeadName(sourceLead)}
+                          {getLeadCompany(sourceLead) ||
+                            getLeadName(sourceLead)}
                         </h2>
                         <p className="mt-1 text-sm text-violet-800">
                           {getLeadName(sourceLead)}
@@ -882,12 +1045,19 @@ export default function AccountsPage() {
                       </>
                     ) : (
                       <p className="mt-3 text-sm text-violet-900">
-                        Opened from a lead record. Use this workspace to confirm the handoff.
+                        Opened from a lead record. Use this workspace to confirm
+                        the handoff.
                       </p>
                     )}
                   </div>
-                  <Button asChild variant="outline" className="shrink-0 rounded-md border-violet-200 bg-white">
-                    <Link href={`/dashboard/leads?lead=${encodeURIComponent(sourceLeadId)}`}>
+                  <Button
+                    asChild
+                    variant="outline"
+                    className="shrink-0 rounded-md border-violet-200 bg-white"
+                  >
+                    <Link
+                      href={`/dashboard/leads?lead=${encodeURIComponent(sourceLeadId)}`}
+                    >
                       Return to lead
                     </Link>
                   </Button>
@@ -896,15 +1066,21 @@ export default function AccountsPage() {
                 {sourceLead ? (
                   <div className="mt-5 grid gap-3 sm:grid-cols-3">
                     <div className="rounded-md border border-violet-200 bg-white p-3">
-                      <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-slate-500">Status</p>
+                      <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-slate-500">
+                        Status
+                      </p>
                       <p className="mt-2 text-sm font-semibold text-slate-950">
                         {normalizeStatus(sourceLead.status || "new")}
                       </p>
                     </div>
                     <div className="rounded-md border border-violet-200 bg-white p-3">
-                      <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-slate-500">Value</p>
+                      <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-slate-500">
+                        Value
+                      </p>
                       <p className="mt-2 text-sm font-semibold text-slate-950">
-                        {sourceLead.estimated_value ? formatCurrency(sourceLead.estimated_value) : "Scope pending"}
+                        {sourceLead.estimated_value
+                          ? formatCurrency(sourceLead.estimated_value)
+                          : "Scope pending"}
                       </p>
                     </div>
                     <div className="rounded-md border border-violet-200 bg-white p-3">
@@ -912,7 +1088,9 @@ export default function AccountsPage() {
                         Next touch
                       </p>
                       <p className="mt-2 text-sm font-semibold text-slate-950">
-                        {sourceLead.next_follow_up_at ? formatDate(sourceLead.next_follow_up_at) : "Not scheduled"}
+                        {sourceLead.next_follow_up_at
+                          ? formatDate(sourceLead.next_follow_up_at)
+                          : "Not scheduled"}
                       </p>
                     </div>
                   </div>
@@ -932,8 +1110,12 @@ export default function AccountsPage() {
                               <Target className="h-4 w-4" />
                             </div>
                             <div>
-                              <p className="text-sm font-semibold text-slate-950">{lane.label}</p>
-                              <p className="mt-1 text-sm leading-5 text-slate-600">{lane.detail}</p>
+                              <p className="text-sm font-semibold text-slate-950">
+                                {lane.label}
+                              </p>
+                              <p className="mt-1 text-sm leading-5 text-slate-600">
+                                {lane.detail}
+                              </p>
                             </div>
                           </div>
                           <div className="mt-5 grid gap-2 sm:grid-cols-2">
@@ -941,7 +1123,9 @@ export default function AccountsPage() {
                               type="button"
                               className="rounded-md"
                               disabled={savingHandoff}
-                              onClick={() => handleStartDeliveryHandoff(sourceLead)}
+                              onClick={() =>
+                                handleStartDeliveryHandoff(sourceLead)
+                              }
                             >
                               {savingHandoff ? (
                                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -952,16 +1136,29 @@ export default function AccountsPage() {
                             </Button>
                             <Button asChild className="rounded-md">
                               <Link href={packageHref}>
-                                Send package <ArrowRight className="ml-2 h-4 w-4" />
+                                Send package{" "}
+                                <ArrowRight className="ml-2 h-4 w-4" />
                               </Link>
                             </Button>
-                            <Button asChild variant="outline" className="rounded-md sm:col-span-2">
-                              <Link href={`/dashboard/accounts/${encodeURIComponent(sourceLead.id)}`}>
+                            <Button
+                              asChild
+                              variant="outline"
+                              className="rounded-md sm:col-span-2"
+                            >
+                              <Link
+                                href={`/dashboard/accounts/${encodeURIComponent(sourceLead.id)}`}
+                              >
                                 Open account room
                               </Link>
                             </Button>
-                            <Button asChild variant="outline" className="rounded-md sm:col-span-2">
-                              <Link href={`/dashboard/proposals?lead=${encodeURIComponent(sourceLead.id)}`}>
+                            <Button
+                              asChild
+                              variant="outline"
+                              className="rounded-md sm:col-span-2"
+                            >
+                              <Link
+                                href={`/dashboard/proposals?lead=${encodeURIComponent(sourceLead.id)}`}
+                              >
                                 Draft proposal
                               </Link>
                             </Button>
@@ -972,7 +1169,8 @@ export default function AccountsPage() {
                   </>
                 ) : (
                   <p className="text-sm leading-6 text-slate-600">
-                    Once the lead loads, this panel will show the recommended account lane and next action.
+                    Once the lead loads, this panel will show the recommended
+                    account lane and next action.
                   </p>
                 )}
               </div>
@@ -989,8 +1187,9 @@ export default function AccountsPage() {
               <PackageCheck className="h-5 w-5 text-violet-600" />
             </div>
             <p className="text-sm leading-6 text-slate-600">
-              This is the bridge from sold interest to installed work. The assistant can use this
-              context to draft agendas, follow-ups, internal briefs, and the first delivery task.
+              This is the bridge from sold interest to installed work. The
+              assistant can use this context to draft agendas, follow-ups,
+              internal briefs, and the first delivery task.
             </p>
           </CardHeader>
           <CardContent className="grid gap-3 lg:grid-cols-5">
@@ -999,8 +1198,12 @@ export default function AccountsPage() {
                 <span className="flex h-7 w-7 items-center justify-center rounded-full bg-violet-100 text-xs font-semibold text-violet-700">
                   {index + 1}
                 </span>
-                <p className="mt-4 text-sm font-semibold text-slate-950">{step.title}</p>
-                <p className="mt-2 text-sm leading-5 text-slate-600">{step.detail}</p>
+                <p className="mt-4 text-sm font-semibold text-slate-950">
+                  {step.title}
+                </p>
+                <p className="mt-2 text-sm leading-5 text-slate-600">
+                  {step.detail}
+                </p>
               </div>
             ))}
           </CardContent>
@@ -1016,8 +1219,8 @@ export default function AccountsPage() {
                 <MessagesSquare className="h-5 w-5 text-violet-600" />
               </div>
               <p className="text-sm leading-6 text-slate-600">
-                Copy clean language into email, proposal notes, or the internal delivery lane without
-                losing the source lead context.
+                Copy clean language into email, proposal notes, or the internal
+                delivery lane without losing the source lead context.
               </p>
             </CardHeader>
             <CardContent className="grid gap-3 md:grid-cols-3 lg:grid-cols-1 xl:grid-cols-3">
@@ -1029,7 +1232,9 @@ export default function AccountsPage() {
                   className="rounded-lg border bg-white p-4 text-left transition hover:border-violet-300 hover:bg-violet-50/40"
                 >
                   <action.icon className="h-5 w-5 text-violet-600" />
-                  <p className="mt-4 text-sm font-semibold text-slate-950">{action.label}</p>
+                  <p className="mt-4 text-sm font-semibold text-slate-950">
+                    {action.label}
+                  </p>
                   <p className="mt-2 text-sm leading-5 text-slate-600">
                     Copy the current lead context into a usable next step.
                   </p>
@@ -1045,19 +1250,26 @@ export default function AccountsPage() {
                 <CalendarClock className="h-5 w-5 text-violet-600" />
               </div>
               <p className="text-sm leading-6 text-slate-600">
-                Recent lead activity stays visible when you move from sales into account work.
+                Recent lead activity stays visible when you move from sales into
+                account work.
               </p>
             </CardHeader>
             <CardContent className="space-y-3">
               {sourceLeadActivities.length === 0 ? (
                 <div className="rounded-lg border border-dashed p-4 text-sm text-slate-600">
-                  No activity has been logged yet. Save a working session or send a package from the lead.
+                  No activity has been logged yet. Save a working session or
+                  send a package from the lead.
                 </div>
               ) : (
                 sourceLeadActivities.slice(0, 6).map((activity) => (
-                  <div key={activity.id} className="rounded-lg border bg-white p-4">
+                  <div
+                    key={activity.id}
+                    className="rounded-lg border bg-white p-4"
+                  >
                     <div className="flex flex-wrap items-center justify-between gap-3">
-                      <p className="text-sm font-semibold text-slate-950">{activity.title}</p>
+                      <p className="text-sm font-semibold text-slate-950">
+                        {activity.title}
+                      </p>
                       <Badge variant="outline" className="rounded-md">
                         {formatDate(activity.created_at)}
                       </Badge>
@@ -1066,7 +1278,9 @@ export default function AccountsPage() {
                       {normalizeStatus(activity.activity_type)}
                     </p>
                     {activity.description ? (
-                      <p className="mt-2 text-sm leading-5 text-slate-600">{activity.description}</p>
+                      <p className="mt-2 text-sm leading-5 text-slate-600">
+                        {activity.description}
+                      </p>
                     ) : null}
                   </div>
                 ))
@@ -1079,14 +1293,21 @@ export default function AccountsPage() {
       <div className="grid gap-4 md:grid-cols-4">
         {[
           ["Active accounts", data.summary.activeClientCount],
-          ["Paid starts", data.summary.paidStartCount ?? data.summary.paidPackageCount],
+          [
+            "Paid starts",
+            data.summary.paidStartCount ?? data.summary.paidPackageCount,
+          ],
           ["Payment ready", data.summary.paymentReadyCount ?? 0],
           ["Blocked paths", data.summary.blockedClosePathCount ?? 0],
         ].map(([label, value]) => (
           <Card key={label} className="rounded-lg shadow-none">
             <CardContent className="p-5">
-              <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-slate-500">{label}</p>
-              <p className="mt-3 text-2xl font-semibold text-slate-950">{value}</p>
+              <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-slate-500">
+                {label}
+              </p>
+              <p className="mt-3 text-2xl font-semibold text-slate-950">
+                {value}
+              </p>
             </CardContent>
           </Card>
         ))}
@@ -1105,29 +1326,56 @@ export default function AccountsPage() {
                     Start with the accounts that move money or protect delivery.
                   </h2>
                   <p className="mt-3 text-sm leading-6 text-slate-600">
-                    The assistant can use this brief to decide whether to chase payment, collect context,
-                    generate tasks, or open the account room for active delivery work.
+                    The assistant can use this brief to decide whether to chase
+                    payment, collect context, generate tasks, or open the
+                    account room for active delivery work.
                   </p>
                 </div>
                 <Sparkles className="h-5 w-5 shrink-0 text-violet-600" />
               </div>
               <div className="mt-5 grid gap-3 sm:grid-cols-3">
                 {[
-                  ["Commercial", accountCommandPlan.commercialCount, "Money path, buyer follow-up, routing."],
-                  ["Delivery", accountCommandPlan.deliveryCount, "Context, AI plans, tasks, overdue work."],
-                  ["Healthy", accountCommandPlan.healthyCount, "Expansion and relationship proof."],
+                  [
+                    "Commercial",
+                    accountCommandPlan.commercialCount,
+                    "Money path, buyer follow-up, routing.",
+                  ],
+                  [
+                    "Delivery",
+                    accountCommandPlan.deliveryCount,
+                    "Context, AI plans, tasks, overdue work.",
+                  ],
+                  [
+                    "Healthy",
+                    accountCommandPlan.healthyCount,
+                    "Expansion and relationship proof.",
+                  ],
                 ].map(([label, value, detail]) => (
-                  <div key={label} className="rounded-lg border border-violet-100 bg-white p-4">
-                    <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-slate-500">{label}</p>
-                    <p className="mt-2 text-2xl font-semibold text-slate-950">{value}</p>
-                    <p className="mt-2 text-xs leading-5 text-slate-600">{detail}</p>
+                  <div
+                    key={label}
+                    className="rounded-lg border border-violet-100 bg-white p-4"
+                  >
+                    <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-slate-500">
+                      {label}
+                    </p>
+                    <p className="mt-2 text-2xl font-semibold text-slate-950">
+                      {value}
+                    </p>
+                    <p className="mt-2 text-xs leading-5 text-slate-600">
+                      {detail}
+                    </p>
                   </div>
                 ))}
               </div>
               <Button
                 type="button"
                 className="mt-5 rounded-md"
-                onClick={() => copyAccountText("Account command brief", accountCommandPlan.brief)}
+                onClick={() =>
+                  copyAccountText(
+                    "Account command brief",
+                    accountCommandPlan.brief,
+                  )
+                }
               >
                 <Clipboard className="mr-2 h-4 w-4" />
                 Copy command brief
@@ -1141,59 +1389,111 @@ export default function AccountsPage() {
                 </div>
               ) : (
                 <div className="space-y-3">
-                  {accountCommandPlan.focusAccounts.map(({ client, risk, readiness, action }, index) => (
-                    <div key={client.id} className="rounded-lg border bg-white p-4">
-                      <div className="flex flex-wrap items-start justify-between gap-3">
-                        <div>
-                          <div className="flex flex-wrap items-center gap-2">
-                            <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-slate-500">
-                              {String(index + 1).padStart(2, "0")}
-                            </span>
-                            <p className="font-semibold text-slate-950">{client.name}</p>
-                          </div>
-                          <p className="mt-1 text-sm text-slate-600">{client.company}</p>
-                        </div>
-                        <span className={`rounded-md border px-2 py-1 text-xs font-medium ${getReadinessClasses(risk.tone)}`}>
-                          {risk.label}
-                        </span>
-                      </div>
-                      <div className="mt-4 grid gap-3 md:grid-cols-[1fr_150px_auto] md:items-center">
-                        <div>
-                          <p className="text-sm font-semibold text-slate-950">{action}</p>
-                          <p className="mt-1 text-xs leading-5 text-slate-600">{readiness.detail}</p>
-                          {client.sourceType === "Permanent account" ? (
-                            <div className="mt-2 flex flex-wrap gap-2 text-xs">
-                              <span
-                                className={`rounded-md px-2 py-1 ${
-                                  client.hasAssistantPlan
-                                    ? "bg-emerald-50 text-emerald-700"
-                                    : "bg-amber-50 text-amber-700"
-                                }`}
-                              >
-                                AI plan: {client.hasAssistantPlan ? "ready" : "missing"}
-                              </span>
-                              {client.assistantPlanUpdatedAt ? (
-                                <span className="rounded-md bg-slate-100 px-2 py-1 text-slate-600">
-                                  Updated {formatDate(client.assistantPlanUpdatedAt)}
+                  {accountCommandPlan.focusAccounts.map(
+                    ({ client, risk, readiness, action }, index) => (
+                      <div
+                        key={client.id}
+                        className="rounded-lg border bg-white p-4"
+                      >
+                        {(() => {
+                          const actionLink = getAccountActionLink(client);
+                          return (
+                            <>
+                              <div className="flex flex-wrap items-start justify-between gap-3">
+                                <div>
+                                  <div className="flex flex-wrap items-center gap-2">
+                                    <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-slate-500">
+                                      {String(index + 1).padStart(2, "0")}
+                                    </span>
+                                    <p className="font-semibold text-slate-950">
+                                      {client.name}
+                                    </p>
+                                  </div>
+                                  <p className="mt-1 text-sm text-slate-600">
+                                    {client.company}
+                                  </p>
+                                </div>
+                                <span
+                                  className={`rounded-md border px-2 py-1 text-xs font-medium ${getReadinessClasses(risk.tone)}`}
+                                >
+                                  {risk.label}
                                 </span>
-                              ) : null}
-                            </div>
-                          ) : null}
-                        </div>
-                        <div>
-                          <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-slate-500">Next due</p>
-                          <p className="mt-1 text-sm font-medium text-slate-950">
-                            {formatTaskDueLabel(client.nextTaskDueDate)}
-                          </p>
-                        </div>
-                        <Button asChild size="sm" className="h-8 rounded-md">
-                          <Link href={client.href}>
-                            Work it <ArrowRight className="ml-2 h-3.5 w-3.5" />
-                          </Link>
-                        </Button>
+                              </div>
+                              <div className="mt-4 grid gap-3 md:grid-cols-[1fr_150px_auto] md:items-center">
+                                <div>
+                                  <p className="text-sm font-semibold text-slate-950">
+                                    {action}
+                                  </p>
+                                  <p className="mt-1 text-xs leading-5 text-slate-600">
+                                    {readiness.detail}
+                                  </p>
+                                  {client.sourceType === "Permanent account" ? (
+                                    <div className="mt-2 flex flex-wrap gap-2 text-xs">
+                                      <span
+                                        className={`rounded-md px-2 py-1 ${
+                                          client.hasAssistantPlan
+                                            ? "bg-emerald-50 text-emerald-700"
+                                            : "bg-amber-50 text-amber-700"
+                                        }`}
+                                      >
+                                        AI plan:{" "}
+                                        {client.hasAssistantPlan
+                                          ? "ready"
+                                          : "missing"}
+                                      </span>
+                                      {client.assistantPlanUpdatedAt ? (
+                                        <span className="rounded-md bg-slate-100 px-2 py-1 text-slate-600">
+                                          Updated{" "}
+                                          {formatDate(
+                                            client.assistantPlanUpdatedAt,
+                                          )}
+                                        </span>
+                                      ) : null}
+                                    </div>
+                                  ) : null}
+                                </div>
+                                <div>
+                                  <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-slate-500">
+                                    Next due
+                                  </p>
+                                  <p className="mt-1 text-sm font-medium text-slate-950">
+                                    {formatTaskDueLabel(client.nextTaskDueDate)}
+                                  </p>
+                                </div>
+                                <div className="grid gap-2">
+                                  <Button
+                                    asChild
+                                    size="sm"
+                                    className="h-8 rounded-md"
+                                  >
+                                    <Link href={actionLink.href}>
+                                      {actionLink.label}{" "}
+                                      <ArrowRight className="ml-2 h-3.5 w-3.5" />
+                                    </Link>
+                                  </Button>
+                                  <Button
+                                    type="button"
+                                    size="sm"
+                                    variant="outline"
+                                    className="h-8 rounded-md"
+                                    onClick={() =>
+                                      copyAccountText(
+                                        "Operator prompt",
+                                        getAccountOperatorPrompt(client),
+                                      )
+                                    }
+                                  >
+                                    <Bot className="mr-2 h-3.5 w-3.5" />
+                                    Prompt
+                                  </Button>
+                                </div>
+                              </div>
+                            </>
+                          );
+                        })()}
                       </div>
-                    </div>
-                  ))}
+                    ),
+                  )}
                 </div>
               )}
             </div>
@@ -1208,7 +1508,8 @@ export default function AccountsPage() {
               <div>
                 <CardTitle className="text-xl">Account command queue</CardTitle>
                 <p className="mt-1 text-sm text-slate-600">
-                  Sorted by readiness so the best next account action is visible without opening every room.
+                  Sorted by risk and readiness so the next account action is
+                  visible without opening every room.
                 </p>
               </div>
               <Bot className="h-5 w-5 text-violet-600" />
@@ -1222,6 +1523,8 @@ export default function AccountsPage() {
             ) : (
               commandQueue.map((client) => {
                 const readiness = getAccountReadiness(client);
+                const risk = getAccountRisk(client);
+                const actionLink = getAccountActionLink(client);
                 return (
                   <div
                     key={client.id}
@@ -1229,21 +1532,39 @@ export default function AccountsPage() {
                   >
                     <div>
                       <div className="flex flex-wrap items-center gap-2">
-                        <p className="font-semibold text-slate-950">{client.name}</p>
+                        <p className="font-semibold text-slate-950">
+                          {client.name}
+                        </p>
                         {client.sourceType ? (
                           <Badge variant="outline" className="rounded-md">
                             {client.sourceType}
                           </Badge>
                         ) : null}
-                        <span className={`rounded-md border px-2 py-1 text-xs font-medium ${getReadinessClasses(readiness.tone)}`}>
+                        <span
+                          className={`rounded-md border px-2 py-1 text-xs font-medium ${getReadinessClasses(readiness.tone)}`}
+                        >
                           {readiness.label}
                         </span>
+                        {risk.label !== readiness.label ? (
+                          <span
+                            className={`rounded-md border px-2 py-1 text-xs font-medium ${getReadinessClasses(risk.tone)}`}
+                          >
+                            {risk.label}
+                          </span>
+                        ) : null}
                       </div>
-                      <p className="mt-1 text-sm text-slate-600">{client.company}</p>
-                      <p className="mt-3 text-sm leading-5 text-slate-600">{readiness.detail}</p>
+                      <p className="mt-1 text-sm text-slate-600">
+                        {client.company}
+                      </p>
+                      <p className="mt-3 text-sm leading-5 text-slate-600">
+                        {readiness.detail}
+                      </p>
                       <div className="mt-3 flex flex-wrap gap-2 text-xs text-slate-500">
                         <span className="rounded-md bg-slate-100 px-2 py-1">
-                          Context: {client.handoffContextReceived ? "received" : "missing"}
+                          Context:{" "}
+                          {client.handoffContextReceived
+                            ? "received"
+                            : "missing"}
                         </span>
                         <span className="rounded-md bg-slate-100 px-2 py-1">
                           Tasks: {client.openTaskCount || 0} open
@@ -1251,10 +1572,13 @@ export default function AccountsPage() {
                         {client.sourceType === "Permanent account" ? (
                           <span
                             className={`rounded-md px-2 py-1 ${
-                              client.hasAssistantPlan ? "bg-emerald-50 text-emerald-700" : "bg-amber-50 text-amber-700"
+                              client.hasAssistantPlan
+                                ? "bg-emerald-50 text-emerald-700"
+                                : "bg-amber-50 text-amber-700"
                             }`}
                           >
-                            AI plan: {client.hasAssistantPlan ? "ready" : "missing"}
+                            AI plan:{" "}
+                            {client.hasAssistantPlan ? "ready" : "missing"}
                           </span>
                         ) : null}
                         {client.overdueTaskCount ? (
@@ -1265,13 +1589,21 @@ export default function AccountsPage() {
                       </div>
                     </div>
                     <div>
-                      <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-slate-500">Next move</p>
-                      <p className="mt-2 text-sm font-medium leading-5 text-slate-950">{client.nextStep}</p>
+                      <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-slate-500">
+                        Next move
+                      </p>
+                      <p className="mt-2 text-sm font-medium leading-5 text-slate-950">
+                        {getPrimaryAccountAction(client)}
+                      </p>
+                      <p className="mt-2 text-xs leading-5 text-slate-500">
+                        {client.nextStep}
+                      </p>
                     </div>
                     <div className="grid content-start gap-2">
                       <Button asChild size="sm" className="h-8 rounded-md">
-                        <Link href={client.href}>
-                          Open room <ArrowRight className="ml-2 h-3.5 w-3.5" />
+                        <Link href={actionLink.href}>
+                          {actionLink.label}{" "}
+                          <ArrowRight className="ml-2 h-3.5 w-3.5" />
                         </Link>
                       </Button>
                       <Button
@@ -1279,7 +1611,27 @@ export default function AccountsPage() {
                         size="sm"
                         variant="outline"
                         className="h-8 rounded-md"
-                        onClick={() => copyAccountText("Follow-up", getAccountFollowUp(client))}
+                        onClick={() =>
+                          copyAccountText(
+                            "Operator prompt",
+                            getAccountOperatorPrompt(client),
+                          )
+                        }
+                      >
+                        <Bot className="mr-2 h-3.5 w-3.5" />
+                        Prompt
+                      </Button>
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="outline"
+                        className="h-8 rounded-md"
+                        onClick={() =>
+                          copyAccountText(
+                            "Follow-up",
+                            getAccountFollowUp(client),
+                          )
+                        }
                       >
                         <Mail className="mr-2 h-3.5 w-3.5" />
                         Follow-up
@@ -1302,18 +1654,52 @@ export default function AccountsPage() {
             </CardHeader>
             <CardContent className="grid gap-3 sm:grid-cols-2">
               {[
-                ["Ready for delivery", readinessCounts.delivery, "Open account room and start kickoff."],
-                ["Need context", readinessCounts.context, "Send client handoff or collect operating context."],
-                ["Need AI plan", readinessCounts.aiPlan, "Generate account intelligence before delivery expands."],
-                ["Need task plan", readinessCounts.tasks, "Create kickoff or AI-plan tasks."],
-                ["Waiting on buyer", readinessCounts.waiting, "Follow up on sent package or approval."],
-                ["Need start path", readinessCounts.send, "Send checkout, invoice, or procurement note."],
-                ["Blocked", readinessCounts.blocked, "Unblock payment or approval path."],
+                [
+                  "Ready for delivery",
+                  readinessCounts.delivery,
+                  "Open account room and start kickoff.",
+                ],
+                [
+                  "Need context",
+                  readinessCounts.context,
+                  "Send client handoff or collect operating context.",
+                ],
+                [
+                  "Need AI plan",
+                  readinessCounts.aiPlan,
+                  "Generate account intelligence before delivery expands.",
+                ],
+                [
+                  "Need task plan",
+                  readinessCounts.tasks,
+                  "Create kickoff or AI-plan tasks.",
+                ],
+                [
+                  "Waiting on buyer",
+                  readinessCounts.waiting,
+                  "Follow up on sent package or approval.",
+                ],
+                [
+                  "Need start path",
+                  readinessCounts.send,
+                  "Send checkout, invoice, or procurement note.",
+                ],
+                [
+                  "Blocked",
+                  readinessCounts.blocked,
+                  "Unblock payment or approval path.",
+                ],
               ].map(([label, value, detail]) => (
                 <div key={label} className="rounded-lg border bg-white p-4">
-                  <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-slate-500">{label}</p>
-                  <p className="mt-2 text-2xl font-semibold text-slate-950">{value}</p>
-                  <p className="mt-2 text-xs leading-5 text-slate-600">{detail}</p>
+                  <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-slate-500">
+                    {label}
+                  </p>
+                  <p className="mt-2 text-2xl font-semibold text-slate-950">
+                    {value}
+                  </p>
+                  <p className="mt-2 text-xs leading-5 text-slate-600">
+                    {detail}
+                  </p>
                 </div>
               ))}
             </CardContent>
@@ -1333,21 +1719,37 @@ export default function AccountsPage() {
                 </div>
               ) : (
                 data.recentPackages.slice(0, 4).map((payment) => (
-                  <div key={payment.id} className="rounded-lg border bg-white p-4">
+                  <div
+                    key={payment.id}
+                    className="rounded-lg border bg-white p-4"
+                  >
                     <div className="flex items-start justify-between gap-3">
                       <div>
-                        <p className="text-sm font-semibold text-slate-950">{payment.packageName}</p>
+                        <p className="text-sm font-semibold text-slate-950">
+                          {payment.packageName}
+                        </p>
                         <p className="mt-1 text-xs text-slate-600">
-                          {payment.customerName || payment.customerEmail || "Unknown buyer"}
+                          {payment.customerName ||
+                            payment.customerEmail ||
+                            "Unknown buyer"}
                         </p>
                       </div>
-                      <Badge className="rounded-md" variant={payment.status === "paid" ? "default" : "outline"}>
+                      <Badge
+                        className="rounded-md"
+                        variant={
+                          payment.status === "paid" ? "default" : "outline"
+                        }
+                      >
                         {normalizeStatus(payment.status)}
                       </Badge>
                     </div>
                     <div className="mt-3 flex items-center justify-between gap-3 text-sm">
-                      <span className="font-semibold text-slate-950">{payment.amountFormatted}</span>
-                      <span className="text-xs text-slate-500">{formatDate(payment.createdAt)}</span>
+                      <span className="font-semibold text-slate-950">
+                        {payment.amountFormatted}
+                      </span>
+                      <span className="text-xs text-slate-500">
+                        {formatDate(payment.createdAt)}
+                      </span>
                     </div>
                   </div>
                 ))
@@ -1364,7 +1766,8 @@ export default function AccountsPage() {
               <div>
                 <CardTitle className="text-xl">Risk and gap control</CardTitle>
                 <p className="mt-1 text-sm text-slate-600">
-                  Shows the accounts most likely to lose momentum because payment, context, or delivery work is unclear.
+                  Shows the accounts most likely to lose momentum because
+                  payment, context, or delivery work is unclear.
                 </p>
               </div>
               <AlertTriangle className="h-5 w-5 text-amber-600" />
@@ -1373,7 +1776,8 @@ export default function AccountsPage() {
           <CardContent className="space-y-3">
             {highestRiskAccounts.length === 0 ? (
               <div className="rounded-lg border border-dashed p-5 text-sm text-slate-600">
-                No account risks in the current filter. Keep the next task and follow-up cadence visible.
+                No account risks in the current filter. Keep the next task and
+                follow-up cadence visible.
               </div>
             ) : (
               highestRiskAccounts.map(({ client, risk }) => (
@@ -1381,7 +1785,9 @@ export default function AccountsPage() {
                   <div className="flex flex-wrap items-start justify-between gap-3">
                     <div>
                       <div className="flex flex-wrap items-center gap-2">
-                        <p className="font-semibold text-slate-950">{client.name}</p>
+                        <p className="font-semibold text-slate-950">
+                          {client.name}
+                        </p>
                         {client.sourceType ? (
                           <Badge variant="outline" className="rounded-md">
                             {client.sourceType}
@@ -1395,15 +1801,21 @@ export default function AccountsPage() {
                           {risk.label}
                         </span>
                       </div>
-                      <p className="mt-1 text-sm text-slate-600">{client.company}</p>
+                      <p className="mt-1 text-sm text-slate-600">
+                        {client.company}
+                      </p>
                     </div>
                     <Badge variant="outline" className="rounded-md">
                       {client.lane}
                     </Badge>
                   </div>
-                  <p className="mt-3 text-sm leading-5 text-slate-600">{risk.detail}</p>
+                  <p className="mt-3 text-sm leading-5 text-slate-600">
+                    {risk.detail}
+                  </p>
                   <div className="mt-4 grid gap-2 sm:grid-cols-[1fr_auto] sm:items-center">
-                    <p className="text-sm font-medium text-slate-950">{getPrimaryAccountAction(client)}</p>
+                    <p className="text-sm font-medium text-slate-950">
+                      {getPrimaryAccountAction(client)}
+                    </p>
                     <Button asChild size="sm" className="h-8 rounded-md">
                       <Link href={client.href}>
                         Work it <ArrowRight className="ml-2 h-3.5 w-3.5" />
@@ -1422,7 +1834,8 @@ export default function AccountsPage() {
               <div>
                 <CardTitle className="text-xl">Task pulse</CardTitle>
                 <p className="mt-1 text-sm text-slate-600">
-                  A fast view of which paid or active accounts have work in motion, overdue, or missing.
+                  A fast view of which paid or active accounts have work in
+                  motion, overdue, or missing.
                 </p>
               </div>
               <CalendarClock className="h-5 w-5 text-violet-600" />
@@ -1431,7 +1844,8 @@ export default function AccountsPage() {
           <CardContent className="space-y-3">
             {dueAccountTasks.length === 0 ? (
               <div className="rounded-lg border border-dashed p-5 text-sm text-slate-600">
-                No account tasks are attached yet. Paid accounts should get a kickoff plan as soon as context is in.
+                No account tasks are attached yet. Paid accounts should get a
+                kickoff plan as soon as context is in.
               </div>
             ) : (
               dueAccountTasks.map((client) => (
@@ -1440,8 +1854,12 @@ export default function AccountsPage() {
                   className="grid gap-4 rounded-lg border bg-white p-4 sm:grid-cols-[minmax(0,1fr)_130px_110px]"
                 >
                   <div>
-                    <p className="font-semibold text-slate-950">{client.name}</p>
-                    <p className="mt-1 text-sm text-slate-600">{client.company}</p>
+                    <p className="font-semibold text-slate-950">
+                      {client.name}
+                    </p>
+                    <p className="mt-1 text-sm text-slate-600">
+                      {client.company}
+                    </p>
                     <div className="mt-3 flex flex-wrap gap-2 text-xs text-slate-500">
                       <span className="rounded-md bg-slate-100 px-2 py-1">
                         {client.openTaskCount || 0} open
@@ -1457,12 +1875,19 @@ export default function AccountsPage() {
                     </div>
                   </div>
                   <div>
-                    <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-slate-500">Next due</p>
+                    <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-slate-500">
+                      Next due
+                    </p>
                     <p className="mt-2 text-sm font-semibold text-slate-950">
                       {formatTaskDueLabel(client.nextTaskDueDate)}
                     </p>
                   </div>
-                  <Button asChild size="sm" variant="outline" className="h-8 rounded-md self-start">
+                  <Button
+                    asChild
+                    size="sm"
+                    variant="outline"
+                    className="h-8 rounded-md self-start"
+                  >
                     <Link href={client.href}>Open</Link>
                   </Button>
                 </div>
@@ -1481,8 +1906,12 @@ export default function AccountsPage() {
         ].map(([label, value]) => (
           <Card key={label} className="rounded-lg shadow-none">
             <CardContent className="p-5">
-              <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-slate-500">{label}</p>
-              <p className="mt-3 text-2xl font-semibold text-slate-950">{value}</p>
+              <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-slate-500">
+                {label}
+              </p>
+              <p className="mt-3 text-2xl font-semibold text-slate-950">
+                {value}
+              </p>
             </CardContent>
           </Card>
         ))}
@@ -1494,11 +1923,22 @@ export default function AccountsPage() {
             <div>
               <CardTitle className="text-xl">Client lanes</CardTitle>
               <p className="mt-1 text-sm text-slate-600">
-                Paid accounts first, then serious prospects that need a defined next move.
+                Paid accounts first, then serious prospects that need a defined
+                next move.
               </p>
             </div>
-            <Button variant="outline" size="sm" className="rounded-md" onClick={fetchAccounts} disabled={loading}>
-              {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <RefreshCw className="mr-2 h-4 w-4" />}
+            <Button
+              variant="outline"
+              size="sm"
+              className="rounded-md"
+              onClick={fetchAccounts}
+              disabled={loading}
+            >
+              {loading ? (
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              ) : (
+                <RefreshCw className="mr-2 h-4 w-4" />
+              )}
               Refresh
             </Button>
           </CardHeader>
@@ -1547,7 +1987,8 @@ export default function AccountsPage() {
               </div>
             ) : data.activeClients.length === 0 ? (
               <div className="rounded-lg border border-dashed p-6 text-sm text-slate-600">
-                No active account lanes yet. Add a lead, send a package, or close a paid workflow.
+                No active account lanes yet. Add a lead, send a package, or
+                close a paid workflow.
               </div>
             ) : filteredAccounts.length === 0 ? (
               <div className="rounded-lg border border-dashed p-6 text-sm text-slate-600">
@@ -1561,7 +2002,9 @@ export default function AccountsPage() {
                 >
                   <div>
                     <div className="flex flex-wrap items-center gap-2">
-                      <p className="font-semibold text-slate-950">{client.name}</p>
+                      <p className="font-semibold text-slate-950">
+                        {client.name}
+                      </p>
                       {client.sourceType ? (
                         <Badge variant="outline" className="rounded-md">
                           {client.sourceType}
@@ -1571,13 +2014,20 @@ export default function AccountsPage() {
                         {normalizeStatus(client.status)}
                       </Badge>
                       {client.paymentStatus ? (
-                        <Badge variant={getPaymentBadgeVariant(client.paymentStatus)} className="rounded-md">
+                        <Badge
+                          variant={getPaymentBadgeVariant(client.paymentStatus)}
+                          className="rounded-md"
+                        >
                           {normalizeStatus(client.paymentStatus)}
                         </Badge>
                       ) : null}
                     </div>
-                    <p className="mt-1 text-sm text-slate-600">{client.company}</p>
-                    <p className="mt-3 text-sm leading-5 text-slate-600">{client.nextStep}</p>
+                    <p className="mt-1 text-sm text-slate-600">
+                      {client.company}
+                    </p>
+                    <p className="mt-3 text-sm leading-5 text-slate-600">
+                      {client.nextStep}
+                    </p>
                     {client.buyerStage || client.paymentPath ? (
                       <div className="mt-3 flex flex-wrap gap-2 text-xs text-slate-500">
                         {client.buyerStage ? (
@@ -1598,7 +2048,12 @@ export default function AccountsPage() {
                         size="sm"
                         variant="outline"
                         className="h-8 rounded-md"
-                        onClick={() => copyAccountText("Account brief", getAccountBrief(client))}
+                        onClick={() =>
+                          copyAccountText(
+                            "Account brief",
+                            getAccountBrief(client),
+                          )
+                        }
                       >
                         <Clipboard className="mr-2 h-3.5 w-3.5" />
                         Brief
@@ -1608,7 +2063,12 @@ export default function AccountsPage() {
                         size="sm"
                         variant="outline"
                         className="h-8 rounded-md"
-                        onClick={() => copyAccountText("Follow-up", getAccountFollowUp(client))}
+                        onClick={() =>
+                          copyAccountText(
+                            "Follow-up",
+                            getAccountFollowUp(client),
+                          )
+                        }
                       >
                         <Mail className="mr-2 h-3.5 w-3.5" />
                         Follow-up
@@ -1619,21 +2079,32 @@ export default function AccountsPage() {
                     <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-slate-500">
                       Lane
                     </p>
-                    <p className="mt-2 text-sm font-medium text-slate-950">{client.lane}</p>
+                    <p className="mt-2 text-sm font-medium text-slate-950">
+                      {client.lane}
+                    </p>
                   </div>
                   <div>
                     <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-slate-500">
                       Value / opened
                     </p>
-                    <p className="mt-2 text-sm font-medium text-slate-950">{client.value}</p>
-                    <p className="mt-1 text-xs text-slate-500">{formatDate(client.createdAt)}</p>
+                    <p className="mt-2 text-sm font-medium text-slate-950">
+                      {client.value}
+                    </p>
+                    <p className="mt-1 text-xs text-slate-500">
+                      {formatDate(client.createdAt)}
+                    </p>
                     <div className="mt-4 grid gap-2">
                       <Button asChild size="sm" className="h-8 rounded-md">
                         <Link href={client.href}>
                           Open <ArrowRight className="ml-2 h-3.5 w-3.5" />
                         </Link>
                       </Button>
-                      <Button asChild size="sm" variant="outline" className="h-8 rounded-md">
+                      <Button
+                        asChild
+                        size="sm"
+                        variant="outline"
+                        className="h-8 rounded-md"
+                      >
                         <Link
                           href={`/packages?${client.leadId ? `lead=${encodeURIComponent(client.leadId)}&` : ""}package=${encodeURIComponent(
                             getPackageIdForAccount(client),
@@ -1660,7 +2131,10 @@ export default function AccountsPage() {
             </CardHeader>
             <CardContent className="space-y-3">
               {onboardingSteps.map((step, index) => (
-                <div key={step} className="flex gap-3 rounded-lg border bg-white p-3">
+                <div
+                  key={step}
+                  className="flex gap-3 rounded-lg border bg-white p-3"
+                >
                   <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-violet-100 text-xs font-semibold text-violet-700">
                     {index + 1}
                   </span>
@@ -1690,12 +2164,21 @@ export default function AccountsPage() {
                     className="block rounded-lg border bg-white p-4 transition hover:border-violet-300 hover:bg-violet-50/40"
                   >
                     <div className="flex items-center justify-between gap-3">
-                      <p className="text-sm font-semibold text-slate-950">{action.title}</p>
-                      <Badge className="rounded-md" variant={action.priority === "high" ? "default" : "outline"}>
+                      <p className="text-sm font-semibold text-slate-950">
+                        {action.title}
+                      </p>
+                      <Badge
+                        className="rounded-md"
+                        variant={
+                          action.priority === "high" ? "default" : "outline"
+                        }
+                      >
                         {action.priority}
                       </Badge>
                     </div>
-                    <p className="mt-2 text-sm leading-5 text-slate-600">{action.detail}</p>
+                    <p className="mt-2 text-sm leading-5 text-slate-600">
+                      {action.detail}
+                    </p>
                   </Link>
                 ))
               )}
@@ -1711,16 +2194,21 @@ export default function AccountsPage() {
             <Bot className="h-5 w-5 text-violet-600" />
           </div>
           <p className="text-sm leading-6 text-slate-600">
-            The assistant should work across the account rather than trap you in one workflow. It reads
-            the lane, context, payment state, notes, and files, then suggests the next useful action.
+            The assistant should work across the account rather than trap you in
+            one workflow. It reads the lane, context, payment state, notes, and
+            files, then suggests the next useful action.
           </p>
         </CardHeader>
         <CardContent className="grid gap-3 md:grid-cols-4">
           {aiJobs.map((job) => (
             <div key={job.title} className="rounded-lg border bg-white p-4">
               <job.icon className="h-5 w-5 text-violet-600" />
-              <p className="mt-4 text-sm font-semibold text-slate-950">{job.title}</p>
-              <p className="mt-2 text-sm leading-5 text-slate-600">{job.detail}</p>
+              <p className="mt-4 text-sm font-semibold text-slate-950">
+                {job.title}
+              </p>
+              <p className="mt-2 text-sm leading-5 text-slate-600">
+                {job.detail}
+              </p>
             </div>
           ))}
         </CardContent>
@@ -1736,15 +2224,21 @@ export default function AccountsPage() {
         <CardContent className="grid gap-3 md:grid-cols-4">
           {lanePlaybook.map((item) => (
             <div key={item.lane} className="rounded-lg border bg-white p-4">
-              <p className="text-sm font-semibold text-slate-950">{item.lane}</p>
+              <p className="text-sm font-semibold text-slate-950">
+                {item.lane}
+              </p>
               <p className="mt-3 font-mono text-[10px] uppercase tracking-[0.18em] text-slate-500">
                 When
               </p>
-              <p className="mt-1 text-sm leading-5 text-slate-600">{item.when}</p>
+              <p className="mt-1 text-sm leading-5 text-slate-600">
+                {item.when}
+              </p>
               <p className="mt-4 font-mono text-[10px] uppercase tracking-[0.18em] text-slate-500">
                 Do
               </p>
-              <p className="mt-1 text-sm leading-5 text-slate-600">{item.action}</p>
+              <p className="mt-1 text-sm leading-5 text-slate-600">
+                {item.action}
+              </p>
             </div>
           ))}
         </CardContent>
@@ -1756,9 +2250,12 @@ export default function AccountsPage() {
           className="group rounded-lg border bg-white p-5 transition hover:border-violet-300 hover:bg-violet-50/40"
         >
           <ClipboardCheck className="h-5 w-5 text-violet-600" />
-          <p className="mt-4 text-sm font-semibold text-slate-950">Draft proposal</p>
+          <p className="mt-4 text-sm font-semibold text-slate-950">
+            Draft proposal
+          </p>
           <p className="mt-2 text-sm leading-5 text-slate-600">
-            Turn an account lane into a scoped first workflow or operating-lane proposal.
+            Turn an account lane into a scoped first workflow or operating-lane
+            proposal.
           </p>
         </Link>
         <Link
@@ -1766,9 +2263,12 @@ export default function AccountsPage() {
           className="group rounded-lg border bg-white p-5 transition hover:border-violet-300 hover:bg-violet-50/40"
         >
           <CircleDollarSign className="h-5 w-5 text-violet-600" />
-          <p className="mt-4 text-sm font-semibold text-slate-950">Send package</p>
+          <p className="mt-4 text-sm font-semibold text-slate-950">
+            Send package
+          </p>
           <p className="mt-2 text-sm leading-5 text-slate-600">
-            Move the buyer into software, setup, a first workflow, or a 90-day lane.
+            Move the buyer into software, setup, a first workflow, or a 90-day
+            lane.
           </p>
         </Link>
         <Link
@@ -1776,9 +2276,12 @@ export default function AccountsPage() {
           className="group rounded-lg border bg-white p-5 transition hover:border-violet-300 hover:bg-violet-50/40"
         >
           <CheckCircle2 className="h-5 w-5 text-violet-600" />
-          <p className="mt-4 text-sm font-semibold text-slate-950">Operating dashboard</p>
+          <p className="mt-4 text-sm font-semibold text-slate-950">
+            Operating dashboard
+          </p>
           <p className="mt-2 text-sm leading-5 text-slate-600">
-            See package revenue, demand, active clients, and the full commercial system.
+            See package revenue, demand, active clients, and the full commercial
+            system.
           </p>
         </Link>
       </div>
