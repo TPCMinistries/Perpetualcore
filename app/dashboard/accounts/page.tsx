@@ -50,6 +50,8 @@ type AccountLane = {
   commercialNextStep?: string;
   closePathUpdatedAt?: string;
   handoffContextReceived?: boolean;
+  hasAssistantPlan?: boolean;
+  assistantPlanUpdatedAt?: string;
   openTaskCount?: number;
   blockedTaskCount?: number;
   overdueTaskCount?: number;
@@ -279,6 +281,7 @@ function getAccountReadiness(client: AccountLane) {
   const paid = client.paymentStatus === "paid" || client.status.toLowerCase().includes("paid");
   const blocked = client.paymentStatus === "blocked";
   const hasContext = Boolean(client.handoffContextReceived);
+  const hasAssistantPlan = Boolean(client.hasAssistantPlan);
   const hasOpenTasks = Boolean(client.openTaskCount && client.openTaskCount > 0);
 
   if (paid) {
@@ -294,7 +297,9 @@ function getAccountReadiness(client: AccountLane) {
     if (!hasOpenTasks) {
       return {
         label: "Needs task plan",
-        detail: "Context is in. Sync or generate kickoff tasks before delivery gets vague.",
+        detail: hasAssistantPlan
+          ? "AI plan is in. Create plan tasks before delivery gets vague."
+          : "Context is in. Generate an AI plan or kickoff tasks before delivery gets vague.",
         score: 4,
         tone: "amber",
       };
@@ -355,6 +360,7 @@ function getAccountRisk(client: AccountLane) {
   const paid = client.paymentStatus === "paid" || client.status.toLowerCase().includes("paid");
   const blocked = client.paymentStatus === "blocked";
   const hasContext = Boolean(client.handoffContextReceived);
+  const hasAssistantPlan = Boolean(client.hasAssistantPlan);
   const hasOpenTasks = Boolean(client.openTaskCount && client.openTaskCount > 0);
   const hasOverdueTasks = Boolean(client.overdueTaskCount && client.overdueTaskCount > 0);
   const hasPaymentPath = Boolean(client.paymentPath);
@@ -388,8 +394,10 @@ function getAccountRisk(client: AccountLane) {
 
   if (paid && !hasOpenTasks) {
     return {
-      label: "No task plan",
-      detail: "Context should turn into visible tasks. Sync the kickoff plan so the work has a next owner.",
+      label: hasAssistantPlan ? "No task plan" : "No AI plan",
+      detail: hasAssistantPlan
+        ? "AI plan should turn into visible tasks. Create plan tasks so the work has a next owner."
+        : "The account needs an AI operating plan before the next delivery work expands.",
       severity: 4,
       tone: "amber",
     };
@@ -427,6 +435,7 @@ function getPrimaryAccountAction(client: AccountLane) {
   if (risk.label === "Commercial block") return "Send invoice/procurement unblock note";
   if (risk.label === "Delivery slipping") return "Open room and clear overdue work";
   if (risk.label === "Context gap") return "Send client handoff";
+  if (risk.label === "No AI plan") return "Generate AI operating plan";
   if (risk.label === "No task plan") return "Sync kickoff tasks";
   if (risk.label === "Buyer waiting") return "Follow up on the start path";
   if (risk.label === "Unrouted") return "Pick package lane and payment path";
@@ -444,6 +453,7 @@ function getAccountCommandLine(client: AccountLane) {
     `Risk: ${risk.label}`,
     `Readiness: ${readiness.label}`,
     `Source: ${client.sourceType || "Account workspace"}`,
+    `AI plan: ${client.hasAssistantPlan ? `yes${client.assistantPlanUpdatedAt ? `, updated ${formatDate(client.assistantPlanUpdatedAt)}` : ""}` : "missing"}`,
     `Action: ${getPrimaryAccountAction(client)}`,
     `Task pulse: ${client.openTaskCount || 0} open, ${client.blockedTaskCount || 0} blocked, ${client.overdueTaskCount || 0} overdue, ${dueLabel}`,
   ].join("\n");
@@ -710,6 +720,7 @@ export default function AccountsPage() {
       blocked: 0,
       context: 0,
       tasks: 0,
+      aiPlan: 0,
     };
 
     data.activeClients.forEach((client) => {
@@ -720,6 +731,7 @@ export default function AccountsPage() {
       if (readiness.label === "Blocked") counts.blocked += 1;
       if (readiness.label === "Needs handoff context") counts.context += 1;
       if (readiness.label === "Needs task plan") counts.tasks += 1;
+      if (getAccountRisk(client).label === "No AI plan") counts.aiPlan += 1;
     });
 
     return counts;
@@ -770,6 +782,7 @@ export default function AccountsPage() {
       `Accounts in view: ${filteredAccounts.length}`,
       `Ready for delivery: ${readinessCounts.delivery}`,
       `Need client context: ${readinessCounts.context}`,
+      `Need AI plan: ${readinessCounts.aiPlan}`,
       `Need task plan: ${readinessCounts.tasks}`,
       `Waiting on buyer: ${readinessCounts.waiting}`,
       `Blocked: ${readinessCounts.blocked}`,
@@ -1101,7 +1114,7 @@ export default function AccountsPage() {
               <div className="mt-5 grid gap-3 sm:grid-cols-3">
                 {[
                   ["Commercial", accountCommandPlan.commercialCount, "Money path, buyer follow-up, routing."],
-                  ["Delivery", accountCommandPlan.deliveryCount, "Context, tasks, overdue work."],
+                  ["Delivery", accountCommandPlan.deliveryCount, "Context, AI plans, tasks, overdue work."],
                   ["Healthy", accountCommandPlan.healthyCount, "Expansion and relationship proof."],
                 ].map(([label, value, detail]) => (
                   <div key={label} className="rounded-lg border border-violet-100 bg-white p-4">
@@ -1148,6 +1161,24 @@ export default function AccountsPage() {
                         <div>
                           <p className="text-sm font-semibold text-slate-950">{action}</p>
                           <p className="mt-1 text-xs leading-5 text-slate-600">{readiness.detail}</p>
+                          {client.sourceType === "Permanent account" ? (
+                            <div className="mt-2 flex flex-wrap gap-2 text-xs">
+                              <span
+                                className={`rounded-md px-2 py-1 ${
+                                  client.hasAssistantPlan
+                                    ? "bg-emerald-50 text-emerald-700"
+                                    : "bg-amber-50 text-amber-700"
+                                }`}
+                              >
+                                AI plan: {client.hasAssistantPlan ? "ready" : "missing"}
+                              </span>
+                              {client.assistantPlanUpdatedAt ? (
+                                <span className="rounded-md bg-slate-100 px-2 py-1 text-slate-600">
+                                  Updated {formatDate(client.assistantPlanUpdatedAt)}
+                                </span>
+                              ) : null}
+                            </div>
+                          ) : null}
                         </div>
                         <div>
                           <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-slate-500">Next due</p>
@@ -1217,6 +1248,15 @@ export default function AccountsPage() {
                         <span className="rounded-md bg-slate-100 px-2 py-1">
                           Tasks: {client.openTaskCount || 0} open
                         </span>
+                        {client.sourceType === "Permanent account" ? (
+                          <span
+                            className={`rounded-md px-2 py-1 ${
+                              client.hasAssistantPlan ? "bg-emerald-50 text-emerald-700" : "bg-amber-50 text-amber-700"
+                            }`}
+                          >
+                            AI plan: {client.hasAssistantPlan ? "ready" : "missing"}
+                          </span>
+                        ) : null}
                         {client.overdueTaskCount ? (
                           <span className="rounded-md bg-red-50 px-2 py-1 text-red-700">
                             {client.overdueTaskCount} overdue
@@ -1264,7 +1304,8 @@ export default function AccountsPage() {
               {[
                 ["Ready for delivery", readinessCounts.delivery, "Open account room and start kickoff."],
                 ["Need context", readinessCounts.context, "Send client handoff or collect operating context."],
-                ["Need task plan", readinessCounts.tasks, "Sync or generate kickoff tasks."],
+                ["Need AI plan", readinessCounts.aiPlan, "Generate account intelligence before delivery expands."],
+                ["Need task plan", readinessCounts.tasks, "Create kickoff or AI-plan tasks."],
                 ["Waiting on buyer", readinessCounts.waiting, "Follow up on sent package or approval."],
                 ["Need start path", readinessCounts.send, "Send checkout, invoice, or procurement note."],
                 ["Blocked", readinessCounts.blocked, "Unblock payment or approval path."],

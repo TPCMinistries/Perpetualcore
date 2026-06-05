@@ -171,6 +171,10 @@ function getClientNextStep(lead: LeadRow, closePath: ClosePathState | null) {
     : "Confirm kickoff plan and delivery owner";
 }
 
+function hasAssistantPlan(metadata: Record<string, unknown>) {
+  return isRecord(metadata.assistant_plan) || isRecord(metadata.account_plan);
+}
+
 async function getPackagePayments(): Promise<PackagePayment[]> {
   const secretKey = process.env.STRIPE_SECRET_KEY;
   if (!secretKey || secretKey.includes("your-stripe")) return [];
@@ -309,6 +313,14 @@ export async function GET() {
       const packageIntakeReceived = isRecord(accountMetadata.package_intake) || isRecord(engagementMetadata.package_intake);
       const contactEmail = readString(accountMetadata.contact_email) || readString(engagementMetadata.contact_email);
       const sourceStatus = readString(accountMetadata.source_lead_status) || readString(engagementMetadata.source_lead_status);
+      const accountNextStep =
+        readString(accountMetadata.last_account_next_action) ||
+        readString(accountMetadata.account_next_step) ||
+        readString(engagementMetadata.account_next_step);
+      const assistantPlanUpdatedAt =
+        readString(accountMetadata.account_plan_updated_at) ||
+        readString(engagementMetadata.account_plan_updated_at) ||
+        readString(accountMetadata.last_account_update_at);
 
       return {
         id: account.id,
@@ -323,13 +335,19 @@ export async function GET() {
             currency: "USD",
             maximumFractionDigits: 0,
           }).format(estimatedValue),
-        nextStep: engagement?.next_step || closePath?.commercialNextStep || "Open the account room and run the next operating action",
+        nextStep:
+          accountNextStep ||
+          engagement?.next_step ||
+          closePath?.commercialNextStep ||
+          "Open the account room and run the next operating action",
         buyerStage: closePath?.buyerStage || readString(accountMetadata.source_lead_stage) || readString(engagementMetadata.source_lead_stage),
         paymentPath: closePath?.paymentPath || (packageIntakeReceived ? "package_checkout" : undefined),
         paymentStatus: closePath?.paymentStatus || (packageIntakeReceived ? "paid" : undefined),
         commercialNextStep: closePath?.commercialNextStep || engagement?.next_step || undefined,
         closePathUpdatedAt: closePath?.updatedAt,
         handoffContextReceived,
+        hasAssistantPlan: hasAssistantPlan(accountMetadata) || hasAssistantPlan(engagementMetadata),
+        assistantPlanUpdatedAt,
         openTaskCount: taskSummary.open,
         blockedTaskCount: taskSummary.blocked,
         overdueTaskCount: taskSummary.overdue,
@@ -387,6 +405,7 @@ export async function GET() {
       paymentStatus: "paid",
       commercialNextStep: "Confirm intake context and onboarding window",
       handoffContextReceived: false,
+      hasAssistantPlan: false,
       openTaskCount: 0,
       blockedTaskCount: 0,
       overdueTaskCount: 0,
@@ -406,6 +425,7 @@ export async function GET() {
       buyerStage: "discovery",
       paymentStatus: "not_sent",
       handoffContextReceived: false,
+      hasAssistantPlan: false,
       openTaskCount: 0,
       blockedTaskCount: 0,
       overdueTaskCount: 0,
