@@ -252,16 +252,17 @@ export async function GET() {
     };
   }, {});
   const leadIds = leads.map((lead) => lead.id);
+  const taskSourceReferences = Array.from(new Set([...leadIds, ...pcAccounts.map((account) => account.id)]));
   const tasksResult =
-    leadIds.length > 0
+    taskSourceReferences.length > 0
       ? await admin
           .from("tasks")
           .select("id,status,priority,source_reference,due_date,tags")
-          .in("source_reference", leadIds)
+          .in("source_reference", taskSourceReferences)
           .limit(500)
       : { data: [] };
   const accountTasks = (tasksResult.data || []) as TaskRow[];
-  const tasksByLeadId = accountTasks.reduce<Record<string, TaskRow[]>>((groups, task) => {
+  const tasksBySourceReference = accountTasks.reduce<Record<string, TaskRow[]>>((groups, task) => {
     if (!task.source_reference) return groups;
     return {
       ...groups,
@@ -300,7 +301,10 @@ export async function GET() {
       const sourceLeadId = readString(accountMetadata.source_lead_id) || readString(engagementMetadata.source_lead_id);
       const estimatedValue = readNumber(accountMetadata.estimated_value) || readNumber(engagementMetadata.estimated_value) || 0;
       const closePath = sourceLeadId ? readClosePath(leads.find((lead) => lead.id === sourceLeadId) || ({} as LeadRow)) : null;
-      const taskSummary = sourceLeadId ? createTaskSummary(tasksByLeadId[sourceLeadId] || []) : createTaskSummary([]);
+      const taskSummary = createTaskSummary([
+        ...(tasksBySourceReference[account.id] || []),
+        ...(sourceLeadId ? tasksBySourceReference[sourceLeadId] || [] : []),
+      ]);
       const handoffContextReceived = isRecord(accountMetadata.account_handoff_context) || isRecord(engagementMetadata.account_handoff_context);
       const packageIntakeReceived = isRecord(accountMetadata.package_intake) || isRecord(engagementMetadata.package_intake);
       const contactEmail = readString(accountMetadata.contact_email) || readString(engagementMetadata.contact_email);
@@ -341,7 +345,7 @@ export async function GET() {
     ...wonLeads.map((lead) => {
       if (permanentLeadIds.has(lead.id)) return null;
       const closePath = readClosePath(lead);
-      const taskSummary = createTaskSummary(tasksByLeadId[lead.id] || []);
+      const taskSummary = createTaskSummary(tasksBySourceReference[lead.id] || []);
       return {
         id: lead.id,
         name: lead.company || lead.name || "Account",
