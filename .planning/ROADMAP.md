@@ -50,7 +50,11 @@ Milestone v1.0 Conversion Optimization shipped Phases 1-2 (Phase 3 superseded by
   2. No page or marketing surface displays a static or inflated opportunity count ("80k+" or any hardcoded number); counts are either dynamic or absent
   3. SAM.gov system account registration is submitted and a calendar alert exists for the 90-day key expiry cycle
   4. All 18 open source-drift events are resolved or triaged with a clear owner and ETA
-**Plans**: TBD
+**Plans**: 4 plans
+- [ ] 13-01-PLAN.md — Purge inflated/static opportunity counts (80k+) from admin/marketing surfaces [LAUNCH-04]
+- [ ] 13-02-PLAN.md — Triage all 18 open rfp_source_drift events: classify, resolve quick ones, owner+ETA for the rest [LAUNCH-04]
+- [ ] 13-03-PLAN.md — SAM.gov key-expiry alerting (code) + system-account registration handoff + 90-day calendar alert [LAUNCH-03]
+- [ ] 13-04-PLAN.md — Safe two-way merge of PR #4 → main with backup, conflict pre-analysis, build/route verify, gated push + rollback [LAUNCH-01]
 
 ### Phase 14: Canonical Data Foundation
 **Goal**: A single unified schema stores both government contracts and foundation grants; opportunities are deduplicated; each org has a queryable entitlement record; and the pgvector HNSW RPC is live and callable
