@@ -38,6 +38,7 @@ Progress: [█░░░░░░░░░] ~10% (v2.0 phases — Phase 14 of 25)
 | Phase 13-pre-work-stabilization P01 | 15 | 2 tasks | 1 files |
 | Phase 13 P02 | 4 | 2 tasks | 1 files |
 | Phase 14-canonical-data-foundation P01 | 12 | 1 tasks | 1 files |
+| Phase 14-canonical-data-foundation P03 | 10 | 2 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -60,6 +61,9 @@ Recent decisions affecting current work:
 - [Phase 13-04]: Merge commit d5e9164 on local main — verified build exit 0, all 4 key RFP routes present, middleware host-rewrite intact, getUser() before /api/* confirmed
 - [Phase 14-canonical-data-foundation]: Strict regex prefix parse (^naics:[0-9]{2,6}$) prevents naive colon-split corruption; only naics/cfda backfilled, other typed fields deferred to Phase 15 ingest parsers
 - [Phase 14-canonical-data-foundation]: database.types.ts regen deferred to Plan 14-04 (single owner) to avoid parallel-wave write collision with other Wave-1 plans
+- [Phase 14-canonical-data-foundation]: Coverage level stored as text CHECK constraint (not Postgres enum) to avoid enum-value migration complexity when l3 is added
+- [Phase 14-canonical-data-foundation]: Webhook rfp_entitlements upsert provides only 3 fields (org_id, coverage_level, updated_at) so operator override fields survive subsequent webhook events
+- [Phase 14-canonical-data-foundation]: Phase 17 boundary maintained: quota columns nullable, no enforcement middleware or AI-cost ledger in Phase 14
 
 ### Pending Todos
 
