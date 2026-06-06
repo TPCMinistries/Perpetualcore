@@ -10,11 +10,11 @@ See: .planning/PROJECT.md (updated 2026-06-05)
 ## Current Position
 
 Phase: 13 of 25 (Pre-Work Stabilization)
-Plan: 0 of TBD in current phase
-Status: Ready to plan — roadmap written, Phase 13 is next
-Last activity: 2026-06-05 — Roadmap created for v2.0 milestone (13 phases, 43 requirements mapped)
+Plan: 2 of 4 in current phase (13-01 + 13-02 complete; 13-03 + 13-04 pending)
+Status: In progress — Phase 13 executing (parallel wave 1)
+Last activity: 2026-06-06 — 13-02 drift triage complete; all 18 rfp_source_drift events classified + annotated
 
-Progress: [░░░░░░░░░░] 0% (v2.0 phases)
+Progress: [█░░░░░░░░░] ~8% (v2.0 phases — Phase 13 of 13 phases in v2.0)
 
 ## Performance Metrics
 
@@ -36,6 +36,7 @@ Progress: [░░░░░░░░░░] 0% (v2.0 phases)
 
 *Updated after each plan completion*
 | Phase 13-pre-work-stabilization P01 | 15 | 2 tasks | 1 files |
+| Phase 13 P02 | 4 | 2 tasks | 1 files |
 
 ## Accumulated Context
 
@@ -51,6 +52,8 @@ Recent decisions affecting current work:
 - Candid/Foundation Directory excluded (license prohibits AI/LLM use) — ProPublica + IRS 990 is the clean path
 - Discovery is tiered (L1=federal, L2=national+foundations, L3=global) gated by entitlement, not hardcoded
 - [Phase 13-pre-work-stabilization]: Indexed tile tone and operator action driven by indexedCoveragePercent (relative), not hardcoded 80000 raw count — LAUNCH-04
+- [Phase 13]: All 18 rfp_source_drift events retrospectively classified: 4 stale-URL, 14 parser-break; ny_state portal session timeout confirmed structural gap (not transient)
+- [Phase 13]: nyc_doe has zero baseline recovery rows — source effectively offline until Phase 15 URL audit
 
 ### Pending Todos
 
@@ -66,6 +69,6 @@ Recent decisions affecting current work:
 
 ## Session Continuity
 
-Last session: 2026-06-05
-Stopped at: Roadmap created — 43 v2.0 requirements mapped to Phases 13-25; ROADMAP.md and STATE.md written
+Last session: 2026-06-06
+Stopped at: Completed 13-02-PLAN.md — drift triage register + DB annotation (all 18 events classified)
 Resume file: None
