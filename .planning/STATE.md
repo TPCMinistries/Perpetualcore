@@ -35,6 +35,7 @@ Progress: [░░░░░░░░░░] 0% (v2.0 phases)
 - Trend: Variable (build-heavy plans take longer)
 
 *Updated after each plan completion*
+| Phase 13-pre-work-stabilization P01 | 15 | 2 tasks | 1 files |
 
 ## Accumulated Context
 
@@ -49,6 +50,7 @@ Recent decisions affecting current work:
 - Phase 13 is mandatory pre-work: merge PR #4, purge inflated counts, SAM.gov re-registration (10-day wait)
 - Candid/Foundation Directory excluded (license prohibits AI/LLM use) — ProPublica + IRS 990 is the clean path
 - Discovery is tiered (L1=federal, L2=national+foundations, L3=global) gated by entitlement, not hardcoded
+- [Phase 13-pre-work-stabilization]: Indexed tile tone and operator action driven by indexedCoveragePercent (relative), not hardcoded 80000 raw count — LAUNCH-04
 
 ### Pending Todos
 
