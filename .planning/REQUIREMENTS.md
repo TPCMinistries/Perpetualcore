@@ -12,7 +12,7 @@ Grouped by category. Each maps to exactly one roadmap phase (see Traceability). 
 
 - [x] **FND-01**: A unified canonical opportunity model stores both government contracts (NAICS/PSC/set-aside/agency) and grants (CFDA/eligibility/cost-share/funder) in one queryable schema
 - [ ] **FND-02**: Opportunities ingested from multiple sources are normalized and deduplicated so one real opportunity appears once
-- [ ] **FND-03**: A pgvector HNSW index + SECURITY DEFINER match RPC enables vault retrieval at >50 docs/org without in-Node cosine
+- [x] **FND-03**: A pgvector HNSW index + SECURITY DEFINER match RPC enables vault retrieval at >50 docs/org without in-Node cosine
 - [x] **FND-04**: Each org has an entitlement record (coverage level + per-operation quotas) independently overridable by an operator
 
 ### Discovery & Coverage (DISCO)
@@ -116,7 +116,7 @@ Tracked, not in this roadmap.
 |-------------|-------|--------|
 | FND-01 | Phase 14 | Complete |
 | FND-02 | Phase 14 | Pending |
-| FND-03 | Phase 14 | Pending |
+| FND-03 | Phase 14 | Complete |
 | FND-04 | Phase 14 | Complete |
 | DISCO-01 | Phase 15 | Pending |
 | DISCO-02 | Phase 15 | Pending |

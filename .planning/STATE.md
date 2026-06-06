@@ -10,9 +10,9 @@ See: .planning/PROJECT.md (updated 2026-06-05)
 ## Current Position
 
 Phase: 14 of 25 (Canonical Data Foundation)
-Plan: 1 of 4 complete (14-01 done; 14-02, 14-03, 14-04 pending)
-Status: In progress — Phase 14, Plan 01 complete
-Last activity: 2026-06-06 — 14-01 migration applied (dcda09c), FND-01 complete, 815 rows backfilled
+Plan: 2 of 4 complete (14-01, 14-02 done; 14-03, 14-04 pending)
+Status: In progress — Phase 14, Plan 02 complete
+Last activity: 2026-06-06 — 14-02 complete (1ad7ff6), HNSW index + match_vault_docs RPC + retrieve.ts wired, FND-03 complete
 
 Progress: [█░░░░░░░░░] ~10% (v2.0 phases — Phase 14 of 25)
 
@@ -39,6 +39,7 @@ Progress: [█░░░░░░░░░] ~10% (v2.0 phases — Phase 14 of 25)
 | Phase 13 P02 | 4 | 2 tasks | 1 files |
 | Phase 14-canonical-data-foundation P01 | 12 | 1 tasks | 1 files |
 | Phase 14-canonical-data-foundation P03 | 10 | 2 tasks | 2 files |
+| Phase 14-canonical-data-foundation P02 | 15 | 2 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -64,6 +65,9 @@ Recent decisions affecting current work:
 - [Phase 14-canonical-data-foundation]: Coverage level stored as text CHECK constraint (not Postgres enum) to avoid enum-value migration complexity when l3 is added
 - [Phase 14-canonical-data-foundation]: Webhook rfp_entitlements upsert provides only 3 fields (org_id, coverage_level, updated_at) so operator override fields survive subsequent webhook events
 - [Phase 14-canonical-data-foundation]: Phase 17 boundary maintained: quota columns nullable, no enforcement middleware or AI-cost ledger in Phase 14
+- [Phase 14-canonical-data-foundation]: ROADMAP index name correction: rfp_vault_artifacts_embedding_idx (not rfp_opportunities_embedding_idx) — index is on rfp_vault_artifacts table
+- [Phase 14-canonical-data-foundation]: match_vault_docs RPC uses as-unknown-as cast until plan 14-04 regenerates database.types.ts
+- [Phase 14-canonical-data-foundation]: In-Node cosine fallback retained in retrieve.ts for local dev safety and graceful RPC degradation
 
 ### Pending Todos
 
