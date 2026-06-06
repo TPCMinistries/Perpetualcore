@@ -86,7 +86,7 @@ Grouped by category. Each maps to exactly one roadmap phase (see Traceability). 
 
 - [ ] **LAUNCH-01**: PR #4 is merged to main and production runs from a stable main
 - [ ] **LAUNCH-02**: E2E coverage exists on the draft → review → submit critical path
-- [ ] **LAUNCH-03**: SAM.gov system account is active with key-expiry alerting in place
+- [x] **LAUNCH-03**: SAM.gov system account is active with key-expiry alerting in place
 - [x] **LAUNCH-04**: All inflated/static opportunity-count claims ("80k+") are removed from UI and marketing
 
 ## v2.1 Requirements (Deferred)
@@ -159,7 +159,7 @@ Tracked, not in this roadmap.
 | FTUE-03 | Phase 24 | Pending |
 | LAUNCH-01 | Phase 13 | Pending |
 | LAUNCH-02 | Phase 25 | Pending |
-| LAUNCH-03 | Phase 13 | Pending |
+| LAUNCH-03 | Phase 13 | Complete |
 | LAUNCH-04 | Phase 13 | Complete |
 
 **Coverage:**
