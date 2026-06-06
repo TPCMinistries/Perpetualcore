@@ -49,7 +49,7 @@ Beachhead coverage uses what's ALREADY live: federal (SAM/Grants.gov/NIH/NSF) + 
 
 ### v2.0 RFP Engine — Market-Ready & Best-in-Class
 
-- [ ] **Phase 13: Pre-Work Stabilization** - Merge PR #4, purge inflated counts, start SAM.gov re-registration, resolve source-drift events
+- [x] **Phase 13: Pre-Work Stabilization** - Merge PR #4 (pushed to origin/main d5e9164, 2026-06-06, prod 200/no regression), purged inflated counts, SAM.gov key wired + expiry alert armed, drift resolved ✓ COMPLETE
 - [ ] **Phase 14: Canonical Data Foundation** - Unified opportunity model, dedup, entitlement table, pgvector HNSW match RPC
 - [ ] **Phase 15: Level-1 Federal Discovery** - SAM.gov/Grants.gov/SBIR ingest with durable jobs, source-health SLA, verified live counts
 ⏸ - [ ] **Phase 16: Extended Discovery (Levels 2 & 3) + Saved Searches** - Declarative all-50-state connector framework (any state via config row), tri-state live, IRS 990 foundations, global sources, gated by entitlement; saved search alerts
