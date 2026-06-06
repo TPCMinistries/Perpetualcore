@@ -4,17 +4,17 @@
 
 See: .planning/PROJECT.md (updated 2026-02-23)
 
-**Core value:** The AI operating system brain — if this breaks, everything downstream breaks
-**Current focus:** v1.0 Conversion Optimization — Phase 2: Onboarding Optimization
+**Core value:** Move an org from discovery → qualified pursuit → draft → compliance → review → submission-ready → post-submission, better than any competitor.
+**Current focus:** v2.0 RFP Engine — Market-Ready & Best-in-Class (defining requirements)
 
 ## Current Position
 
-Phase: 2 of 3 (Onboarding Optimization)
-Plan: 2 of 2 completed in current phase
-Status: Phase 02 complete — all plans done
-Last activity: 2026-02-23 — Plan 02-02 complete (activation checklist with 3 milestones)
+Phase: Not started (defining requirements)
+Plan: —
+Status: Defining requirements — milestone v2.0 started, phases continue from 13
+Last activity: 2026-06-05 — Milestone v2.0 started (competitive teardown complete; scope locked)
 
-Progress: [######░░░░] 60%
+Progress: [░░░░░░░░░░] 0%
 
 ## Performance Metrics
 
