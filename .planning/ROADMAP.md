@@ -28,7 +28,7 @@ Milestone v1.0 Conversion Optimization shipped Phases 1-2 (Phase 3 superseded by
 - [ ] **Phase 13: Pre-Work Stabilization** - Merge PR #4, purge inflated counts, start SAM.gov re-registration, resolve source-drift events
 - [ ] **Phase 14: Canonical Data Foundation** - Unified opportunity model, dedup, entitlement table, pgvector HNSW match RPC
 - [ ] **Phase 15: Level-1 Federal Discovery** - SAM.gov/Grants.gov/SBIR ingest with durable jobs, source-health SLA, verified live counts
-- [ ] **Phase 16: Extended Discovery (Levels 2 & 3) + Saved Searches** - National state sources, IRS 990 foundations, global sources, gated by entitlement; saved search alerts
+- [ ] **Phase 16: Extended Discovery (Levels 2 & 3) + Saved Searches** - Declarative all-50-state connector framework (any state via config row), tri-state live, IRS 990 foundations, global sources, gated by entitlement; saved search alerts
 - [ ] **Phase 17: AI Cost Guardrail** - Per-tenant AI cost ledger with hard spend limit enforced before every LLM call
 - [ ] **Phase 18: Explainable Fit Scoring** - Vault-grounded fit scores with dimension breakdown, disqualifier flags, and cited evidence
 - [ ] **Phase 19: Rubric Review, Compliance Gate & Upload** - Adversarial reviewer panel, rubric extraction, compliance gate v1, AI-use disclosure, PDF/DOCX upload
@@ -79,13 +79,14 @@ Milestone v1.0 Conversion Optimization shipped Phases 1-2 (Phase 3 superseded by
 **Plans**: TBD
 
 ### Phase 16: Extended Discovery (Levels 2 & 3) + Saved Searches
-**Goal**: National (50-state + IRS 990 foundation) and global (EU TED, UK Find a Tender, CanadaBuys) sources ingest and gate by entitlement; users can save searches and receive alerts on new matches
+**Goal**: A declarative state-connector framework gives the product the ability to ingest ANY US state; tri-state (NY/NYC/NJ) + ≥20 states ship live via generic open-data connectors; National (IRS 990 foundations) and global (EU TED, UK, CanadaBuys) sources ingest and gate by entitlement; users can save searches and receive alerts. See `.planning/STATE-COVERAGE-PLAN.md`.
 **Depends on**: Phase 15
-**Requirements**: DISCO-03, DISCO-04, DISCO-06
+**Requirements**: DISCO-03, DISCO-04, DISCO-06, DISCO-10
 **Success Criteria** (what must be TRUE):
-  1. A user on a Level-2 plan sees state and foundation grant results in their feed; a user on a Level-1 plan does not, and sees a clear upgrade prompt instead
-  2. A user on a Level-3 plan sees EU TED, UK, and CanadaBuys opportunities alongside federal and national results in one feed
-  3. A user can save a search filter set (keyword + geography + funding type) and receive an in-app or email alert when new matching opportunities appear — verifiable by seeding a new matching opp and checking notification delivery
+  1. The `rfp_state_coverage` registry exists; a new Socrata/CKAN state is onboarded by inserting a config row (no new code) — verifiable by adding one state and seeing its opportunities ingest
+  2. Tri-state (NY, NYC, NJ) returns real open opportunities from open-data APIs, and the fragile NY/NYC scrapers are retired; ≥20 states show `status = live`
+  3. A user on a Level-2 plan sees state + foundation results (Level-1 sees an upgrade prompt); Level-3 adds EU TED, UK, CanadaBuys in one feed; per-state coverage status is visible
+  4. A user can save a search filter set (keyword + geography + funding type) and receive an alert when a new matching opportunity appears — verifiable by seeding a matching opp and checking delivery
 **Plans**: TBD
 
 ### Phase 17: AI Cost Guardrail

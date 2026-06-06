@@ -24,6 +24,7 @@ Grouped by category. Each maps to exactly one roadmap phase (see Traceability). 
 - [ ] **DISCO-05**: Discovery UI shows verified counts read from `rfp_opportunities` (no static or inflated claims)
 - [ ] **DISCO-06**: User can save searches and receive alerts when new matching opportunities appear
 - [ ] **DISCO-07**: Each source reports health (last success, row delta, drift) against an SLA; threshold breaches alert the operator
+- [ ] **DISCO-10**: The product can ingest opportunities from ANY US state via a declarative connector registry (`rfp_state_coverage`: socrata/ckan/aggregator/scrape) — adding a Socrata/CKAN state needs only a config row, not new code. Tri-state (NY, NYC, NJ) ships live from open-data APIs; ≥20 states live via generic connectors; per-state coverage status is visible. See `.planning/STATE-COVERAGE-PLAN.md` + `.planning/research/STATE-SOURCE-MAP.md`.
 
 ### Fit Scoring (SCORE)
 
@@ -124,6 +125,7 @@ Tracked, not in this roadmap.
 | DISCO-05 | Phase 15 | Pending |
 | DISCO-06 | Phase 16 | Pending |
 | DISCO-07 | Phase 15 | Pending |
+| DISCO-10 | Phase 16 | Pending |
 | SCORE-01 | Phase 18 | Pending |
 | SCORE-02 | Phase 18 | Pending |
 | SCORE-03 | Phase 18 | Pending |
@@ -163,8 +165,8 @@ Tracked, not in this roadmap.
 | LAUNCH-04 | Phase 13 | Complete |
 
 **Coverage:**
-- v2.0 requirements: 43 total
-- Mapped to phases: 43
+- v2.0 requirements: 44 total
+- Mapped to phases: 44
 - Unmapped: 0
 
 ---
