@@ -1,77 +1,137 @@
-# Requirements: Perpetual Core
+# Requirements: Perpetual Core RFP & Proposal Engine
 
-**Defined:** 2026-02-23
-**Core Value:** The AI operating system brain — if this breaks, everything downstream breaks
+**Defined:** 2026-06-05
+**Milestone:** v2.0 — Market-Ready & Best-in-Class
+**Core Value:** Move an org from discovery → qualified pursuit → draft → compliance → review → submission-ready → post-submission, better than any competitor.
 
-## v1.0 Requirements
+## v2.0 Requirements
 
-Requirements for Milestone v1.0: Conversion Optimization. Each maps to roadmap phases.
+Grouped by category. Each maps to exactly one roadmap phase (see Traceability). Phases continue from 13.
 
-### Social Proof
+### Foundation & Data Model (FND)
 
-- [x] **PROOF-01**: Visitor sees "Built By" founder section with Lorenzo's story, photo placeholder, and IHA mission on landing page
-- [x] **PROOF-02**: Visitor sees feature comparison table (Perpetual Core vs ChatGPT vs competitors) with clear differentiators across memory, models, RAG, agents, and pricing
-- [x] **PROOF-03**: Landing page displays security/compliance trust badges (SOC 2 ready, enterprise SSO, 99.9% uptime SLA)
-- [x] **PROOF-04**: Landing page shows "trusted by X organizations" counter with industry/partner logo placeholders
+- [ ] **FND-01**: A unified canonical opportunity model stores both government contracts (NAICS/PSC/set-aside/agency) and grants (CFDA/eligibility/cost-share/funder) in one queryable schema
+- [ ] **FND-02**: Opportunities ingested from multiple sources are normalized and deduplicated so one real opportunity appears once
+- [ ] **FND-03**: A pgvector HNSW index + SECURITY DEFINER match RPC enables vault retrieval at >50 docs/org without in-Node cosine
+- [ ] **FND-04**: Each org has an entitlement record (coverage level + per-operation quotas) independently overridable by an operator
 
-### Onboarding Optimization
+### Discovery & Coverage (DISCO)
 
-- [x] **ONBD-01**: Existing onboarding flow analyzed and improved — guided first-use experience leads to aha moment (contextual AI chat that demonstrates persistent memory)
-- [x] **ONBD-02**: New user receives onboarding checklist tracking key activation milestones (first chat, upload doc, explore agents)
+- [ ] **DISCO-01**: User sees a single unified feed combining government RFPs and foundation grants
+- [ ] **DISCO-02**: Level 1 Federal sources (SAM.gov, Grants.gov, SBIR/STTR) ingest reliably with durable retry and health telemetry
+- [ ] **DISCO-03**: Level 2 National sources (50 states + IRS 990 foundation data via ProPublica) ingest, gated by plan entitlement
+- [ ] **DISCO-04**: Level 3 Global sources (EU TED, UK Find a Tender, CanadaBuys) ingest, gated by plan entitlement
+- [ ] **DISCO-05**: Discovery UI shows verified counts read from `rfp_opportunities` (no static or inflated claims)
+- [ ] **DISCO-06**: User can save searches and receive alerts when new matching opportunities appear
+- [ ] **DISCO-07**: Each source reports health (last success, row delta, drift) against an SLA; threshold breaches alert the operator
 
-### Conversion Analytics
+### Fit Scoring (SCORE)
 
-- [ ] **ANLYT-01**: Custom events track full funnel: page view → CTA click → signup → first chat → activation
-- [ ] **ANLYT-02**: Admin dashboard displays conversion funnel visualization with drop-off rates
-- [ ] **ANLYT-03**: UTM parameter tracking captures marketing campaign attribution
+- [ ] **SCORE-01**: Each opportunity shows a fit score with a plain-English explanation of why it fits
+- [ ] **SCORE-02**: The explanation cites the org's own vault artifacts / prior wins (evidence-grounded, not black-box)
+- [ ] **SCORE-03**: The score breaks down by dimension (mission fit, eligibility, track record, capacity, funder relationship)
+- [ ] **SCORE-04**: The score flags disqualifiers (e.g., missing past-performance threshold, ineligible entity type)
 
-## v2 Requirements
+### Drafting, Review & Compliance (REVIEW)
 
-Deferred to future milestone. Tracked but not in current roadmap.
+- [ ] **REVIEW-01**: System extracts the actual evaluation criteria from a solicitation (gov Section L/M; grant funder priorities) with weights
+- [ ] **REVIEW-02**: A multi-agent reviewer panel scores the draft against those extracted criteria, not generic writing quality
+- [ ] **REVIEW-03**: Reviewer findings anchor to draft sections with severity and a suggested fix
+- [ ] **REVIEW-04**: Compliance gate v1 checks page limits, required attachments, budget math, eligibility, and deadline+timezone before submit
+- [ ] **REVIEW-05**: Draft output carries an AI-use disclosure notice and the compliance gate includes an AI-disclosure checklist item (GSA GSAR 552.239-7001 / NIH)
+- [ ] **REVIEW-06**: User can upload PDF/DOCX into the vault and attach solicitation documents, parsed reliably on Vercel serverless
 
-### Content Marketing
+### Submission & Amendments (SUBMIT)
 
-- **CONT-01**: Blog section with SEO-optimized articles about AI productivity
-- **CONT-02**: Case study pages with real or realistic customer stories
-- **CONT-03**: Video demo embeds on landing page and feature pages
+- [ ] **SUBMIT-01**: User can assemble a submission packet (sections + attachments + compliance summary + audit trail)
+- [ ] **SUBMIT-02**: User can record and track submission status per pursuit
+- [ ] **SUBMIT-03**: System re-polls active pursuits and diffs solicitation amendments/addenda against the original capture
+- [ ] **SUBMIT-04**: Material amendment changes alert the user and re-trigger compliance/fit checks
 
-### Advanced Growth
+### Win/Loss Learning (LEARN)
 
-- **GROW-01**: A/B testing framework for landing page variants
-- **GROW-02**: Referral program with tracking and rewards
-- **GROW-03**: Email drip campaigns for trial-to-paid conversion
+- [ ] **LEARN-01**: User can record an outcome (won / lost / no-bid) with a short debrief per pursuit
+- [ ] **LEARN-02**: Win-rate analytics surface per org (by source, funding type, and score band)
+
+### Billing & Entitlements (BILL)
+
+- [ ] **BILL-01**: Self-serve Stripe checkout for all tiers with trial → automatic org provisioning
+- [ ] **BILL-02**: Plans map to coverage levels + quotas; entitlements enforced in app and RLS
+- [ ] **BILL-03**: Usage metering uses Stripe Meters (legacy metered prices migrated before live mode)
+- [ ] **BILL-04**: A per-tenant AI cost ledger enforces a hard spend limit BEFORE each LLM call fires
+- [ ] **BILL-05**: Transparent pricing and a risk-reversal guarantee are presented on the pricing surface
+
+### Operator Console & Monitoring (ADMIN)
+
+- [ ] **ADMIN-01**: Operator console shows orgs, drafts/week, reviewer runs, vault chunks, and MRR by tier
+- [ ] **ADMIN-02**: Operator sees AI cost and gross margin per org, with budget alarms
+- [ ] **ADMIN-03**: Operator sees source health/drift with a manual "rerun now" control
+- [ ] **ADMIN-04**: `/api/health/rfp` returns JSON status (scraper last success, drift open, cron last run, error rate) wired to a status monitor
+- [ ] **ADMIN-05**: Operator can toggle per-org feature flags / entitlement overrides
+
+### Trust, Security & Legal (TRUST)
+
+- [ ] **TRUST-01**: RLS audit passes and a cross-tenant CI test (Org A cannot read Org B's data) is a required check
+- [ ] **TRUST-02**: Per-tenant isolation for vault + proposals is verified; no service-role misuse in user-context paths
+- [ ] **TRUST-03**: Legal pages are live: Terms of Service, Privacy Policy, AI-use disclosure
+- [ ] **TRUST-04**: Data-source ToS compliance verified; no redistribution of license-restricted data (Candid excluded; ProPublica/IRS 990 used)
+
+### Onboarding / First-Time UX (FTUE)
+
+- [ ] **FTUE-01**: A new org reaches first scored opportunities within one session via a ≤5-field setup (org type, mission, geography, funding types)
+- [ ] **FTUE-02**: A guided checklist moves the user org → voice → vault → first draft → review
+- [ ] **FTUE-03**: Every key surface (Discovery / Proposals / Vault / Voice) has a real empty state with one clear CTA toward first qualified draft
+
+### Launch Readiness (LAUNCH)
+
+- [ ] **LAUNCH-01**: PR #4 is merged to main and production runs from a stable main
+- [ ] **LAUNCH-02**: E2E coverage exists on the draft → review → submit critical path
+- [ ] **LAUNCH-03**: SAM.gov system account is active with key-expiry alerting in place
+- [ ] **LAUNCH-04**: All inflated/static opportunity-count claims ("80k+") are removed from UI and marketing
+
+## v2.1 Requirements (Deferred)
+
+Tracked, not in this roadmap.
+
+- **SCORE-05**: Fit-score recalibration learns from recorded win/loss outcomes (needs ≥5 outcomes/category)
+- **LEARN-03**: Debrief themes feed back into drafting guidance
+- **DISCO-08**: World Bank + UNGM global procurement (no public API today)
+- **DISCO-09**: Additional state portals beyond the initial national set
+- **POST-01**: Post-award financial/reporting tracking (Instrumentl parity)
 
 ## Out of Scope
 
 | Feature | Reason |
 |---------|--------|
-| Signup flow changes | Current flow works — not a conversion bottleneck |
-| Google OAuth | Deferred — email/password sufficient for now |
-| Blog/content marketing | Separate milestone — conversion optimization first |
-| Referral program | Needs user base before referral mechanics make sense |
-| A/B testing framework | Premature optimization — ship improvements first, test later |
+| Auto-submit on the user's behalf | By design, final submission is always human — we get to submit-ready, not past it |
+| Candid / Foundation Directory API integration | License prohibits AI/LLM use + redistribution; ProPublica + IRS 990 is the legally clean source |
+| Post-award spend tracking | Deferred to v2.1; not required for launch |
+| Native mobile app | Web-first; responsive web covers launch |
+| Next.js 15 upgrade | Not required for any v2.0 feature; avoid churn |
 
 ## Traceability
 
-Which phases cover which requirements. Updated during roadmap creation.
+Populated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| PROOF-01 | Phase 1 | Complete |
-| PROOF-02 | Phase 1 | Complete |
-| PROOF-03 | Phase 1 | Complete |
-| PROOF-04 | Phase 1 | Complete |
-| ONBD-01 | Phase 2 | Complete |
-| ONBD-02 | Phase 2 | Complete |
-| ANLYT-01 | Phase 3 | Pending |
-| ANLYT-02 | Phase 3 | Pending |
-| ANLYT-03 | Phase 3 | Pending |
+| (pending roadmap) | — | Pending |
 
 **Coverage:**
-- v1.0 requirements: 9 total
-- Mapped to phases: 9
-- Unmapped: 0
+- v2.0 requirements: 43 total
+- Mapped to phases: TBD
+- Unmapped: TBD
 
 ---
-*Requirements defined: 2026-02-23*
-*Last updated: 2026-02-23 — traceability filled after roadmap creation*
+
+## Prior Milestone — v1.0 Conversion Optimization (completed / superseded)
+
+Retained for history. These belonged to the parent AI-OS funnel work.
+
+- [x] PROOF-01..04 (Social Proof) — Phase 1, complete
+- [x] ONBD-01, ONBD-02 (Onboarding aha + checklist) — Phase 2, complete
+- [ ] ANLYT-01..03 (Conversion Analytics) — Phase 3, not started (superseded by RFP focus)
+
+---
+*Requirements defined: 2026-06-05*
+*Last updated: 2026-06-05 after milestone v2.0 definition*
