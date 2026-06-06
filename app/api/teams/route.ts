@@ -227,10 +227,11 @@ export async function POST(request: NextRequest) {
       can_manage_projects: true,
     });
 
-    // Auto-create a dedicated AI advisor for BOS 2.0 teams
+    // Auto-create a dedicated AI advisor for every team
     let advisor = null;
     const templateId = (body as any).template_id;
     if (templateId) {
+      // Template-based teams get a specialized advisor from the template context
       const allTemplates = [...(BOS_2_TEAM_TEMPLATES || []), ...(TRADITIONAL_TEAM_TEMPLATES || [])];
       const template = allTemplates.find((t) => t.id === templateId);
 
@@ -244,10 +245,78 @@ export async function POST(request: NextRequest) {
 
         if (advisorError) {
           console.error("Warning: Failed to create team advisor:", advisorError);
-          // Don't fail team creation - advisor is optional
         } else {
           advisor = createdAdvisor;
         }
+      }
+    }
+
+    // If no advisor was created (no template or template had no ai_context), create a generic one
+    if (!advisor) {
+      try {
+        const genericAdvisorData = {
+          organization_id: profile.organization_id,
+          user_id: user.id,
+          name: `${team.name} AI Advisor`,
+          description: `Dedicated AI advisor for the ${team.name} team. Helps with planning, coordination, and team productivity.`,
+          role: "team-advisor",
+          avatar_emoji: body.emoji || "🤖",
+          personality_traits: ["helpful", "organized", "proactive"],
+          tone: "professional",
+          verbosity: "balanced",
+          system_instructions: `You are the AI Advisor for the "${team.name}" team.
+
+## Your Role
+You are a professional, collaborative advisor dedicated to supporting this team's work.
+
+## Team Context
+${body.description || `The ${team.name} team within the organization.`}
+
+## Core Responsibilities
+- Help team members plan and coordinate work
+- Provide insights and suggestions based on team activity
+- Assist with decision-making and problem-solving
+- Track progress and identify bottlenecks
+
+## Guidelines
+1. Stay focused on the team's goals and priorities
+2. Provide actionable, specific advice
+3. Be proactive about identifying issues and opportunities
+4. Maintain a professional, supportive tone`,
+          context_knowledge: body.description || `Team: ${team.name}`,
+          example_interactions: [],
+          capabilities: [],
+          tools_enabled: {},
+          model_preference: "claude-sonnet-4",
+          temperature: 0.7,
+          max_tokens: 2500,
+          team_id: team.id,
+          advisor_type: "dedicated",
+          enabled: true,
+          is_public: false,
+          is_featured: false,
+        };
+
+        const { data: genericAdvisor, error: genericError } = await supabase
+          .from("ai_assistants")
+          .insert(genericAdvisorData)
+          .select()
+          .single();
+
+        if (genericError) {
+          console.error("Warning: Failed to create generic team advisor:", genericError);
+        } else {
+          advisor = genericAdvisor;
+
+          // Link advisor to team
+          await supabase
+            .from("teams")
+            .update({ primary_advisor_id: genericAdvisor.id })
+            .eq("id", team.id);
+        }
+      } catch (advisorErr) {
+        console.error("Warning: Generic team advisor creation failed:", advisorErr);
+        // Don't fail team creation - advisor is optional
       }
     }
 

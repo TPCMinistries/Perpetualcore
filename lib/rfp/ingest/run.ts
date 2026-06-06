@@ -23,15 +23,37 @@ import {
   normalizeOpportunity,
   type OpportunityRow,
 } from "@/lib/rfp/ingest/normalize";
+import {
+  persistCanonicalAliases,
+  type OpportunityRowWithId,
+} from "@/lib/rfp/ingest/canonicalize";
 import { fetchSamGovOpportunities } from "@/lib/rfp/ingest/sam-gov";
 import { fetchGrantsGovOpportunities } from "@/lib/rfp/ingest/grants-gov";
 import { fetchSimplerGrantsOpportunities } from "@/lib/rfp/ingest/simpler-grants";
 import { fetchSbirOpportunities } from "@/lib/rfp/ingest/sbir";
+import { fetchFederalRegisterOpportunities } from "@/lib/rfp/ingest/federal-register";
+import { fetchNihGrantOpportunities } from "@/lib/rfp/ingest/nih-grants";
+import { fetchNsfGrantOpportunities } from "@/lib/rfp/ingest/nsf-grants";
 
 export interface IngestSourceResult {
-  source: "sam_gov" | "grants_gov" | "simpler_grants" | "sbir_gov";
+  source:
+    | "sam_gov"
+    | "grants_gov"
+    | "simpler_grants"
+    | "sbir_gov"
+    | "fed_register"
+    | "nih_grants"
+    | "nsf_grants";
   fetched: number;
   upserted: number;
+  canonicalized: number;
+  /**
+   * Opportunity IDs that were upserted in this run.
+   * Phase 05-03 scoring (lib/rfp/scoring/recompute.ts) consumes these to score
+   * only the freshly seen opps; existing rows are not re-scored unless the
+   * org's capture profile changes (handled separately by recomputeAllForOrg).
+   */
+  upserted_ids: string[];
   errors: string[];
 }
 
@@ -72,28 +94,53 @@ function normalizeBatch(
  */
 async function upsertBatch(rows: OpportunityRow[]): Promise<{
   upserted: number;
+  upserted_ids: string[];
+  upserted_rows: OpportunityRowWithId[];
   errors: string[];
 }> {
-  if (rows.length === 0) return { upserted: 0, errors: [] };
+  if (rows.length === 0) {
+    return { upserted: 0, upserted_ids: [], upserted_rows: [], errors: [] };
+  }
 
-  const supabase = createAdminClient();
+  // Cast through `{ from: (table: string) => any }` because rfp_* tables
+  // are not yet in lib/supabase/database.types.ts (regen deferred per
+  // CLAUDE.md). Without the cast, `.from("rfp_opportunities")` fails the
+  // generated literal-table-name overload (TS2769 / TS2589). Mirrors the
+  // pattern in lib/rfp/ingest/run-state-city.ts and lib/rfp/scoring/recompute.ts.
+  const supabase = createAdminClient() as unknown as {
+    from: (table: string) => any;
+  };
 
-  // Cast through unknown to bypass the generated Database type — the new
-  // columns from 20260510_rfp_opportunities_extensions.sql aren't reflected
-  // in lib/supabase/database.types.ts yet (Phase 5 doesn't regen types).
   const { data, error } = await supabase
     .from("rfp_opportunities")
     .upsert(rows as unknown as never[], {
       onConflict: "source,source_id",
       ignoreDuplicates: false,
     })
-    .select("id");
+    .select(
+      "id, source, source_id, title, agency, type, amount_min, amount_max, deadline, posted_at, brief, keywords, geo, url, needs_review, last_seen_at, raw_json",
+    );
 
   if (error) {
-    return { upserted: 0, errors: [`upsert: ${error.message}`] };
+    return {
+      upserted: 0,
+      upserted_ids: [],
+      upserted_rows: [],
+      errors: [`upsert: ${error.message}`],
+    };
   }
 
-  return { upserted: data?.length ?? rows.length, errors: [] };
+  // Surface the upserted IDs so the cron route can hand them to Phase 05-03
+  // scoring. The cast above loses supabase-js's type for `data`; narrow inline.
+  const upsertedRows = (data ?? []) as unknown as OpportunityRowWithId[];
+  const upserted_ids = upsertedRows.map((r) => String(r.id));
+
+  return {
+    upserted: upsertedRows.length || rows.length,
+    upserted_ids,
+    upserted_rows: upsertedRows,
+    errors: [],
+  };
 }
 
 /**
@@ -107,6 +154,9 @@ export async function runFederalIngest(): Promise<IngestRunResult> {
     { name: "grants_gov", run: () => fetchGrantsGovOpportunities() },
     { name: "simpler_grants", run: () => fetchSimplerGrantsOpportunities() },
     { name: "sbir_gov", run: () => fetchSbirOpportunities() },
+    { name: "fed_register", run: () => fetchFederalRegisterOpportunities() },
+    { name: "nih_grants", run: () => fetchNihGrantOpportunities() },
+    { name: "nsf_grants", run: () => fetchNsfGrantOpportunities() },
   ];
 
   const settled = await Promise.allSettled(fetchers.map((f) => f.run()));
@@ -127,6 +177,8 @@ export async function runFederalIngest(): Promise<IngestRunResult> {
         source: spec.name,
         fetched: 0,
         upserted: 0,
+        canonicalized: 0,
+        upserted_ids: [],
         errors: [`fetcher rejected: ${reason}`],
       });
       continue;
@@ -134,13 +186,17 @@ export async function runFederalIngest(): Promise<IngestRunResult> {
 
     const inputs = outcome.value;
     const { rows, errors: normErrors } = normalizeBatch(inputs);
-    const { upserted, errors: upsertErrors } = await upsertBatch(rows);
+    const { upserted, upserted_ids, upserted_rows, errors: upsertErrors } =
+      await upsertBatch(rows);
+    const canonicalResult = await persistCanonicalAliases(upserted_rows);
 
     results.push({
       source: spec.name,
       fetched: inputs.length,
       upserted,
-      errors: [...normErrors, ...upsertErrors],
+      canonicalized: canonicalResult.aliases_upserted,
+      upserted_ids,
+      errors: [...normErrors, ...upsertErrors, ...canonicalResult.errors],
     });
   }
 

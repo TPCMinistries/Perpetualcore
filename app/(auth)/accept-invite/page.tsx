@@ -1,17 +1,15 @@
 /**
  * /accept-invite?token=... — Accept an org invite.
  *
- * Server shell wraps AcceptInviteForm (client component) in Suspense.
- * Suspense is required to prevent Next.js from throwing a build-time error
- * for `useSearchParams()` usage inside the client form.
- *
- * The form reads the token from the query string, validates it via
- * GET /api/orgs/invites/validate, then branches to signup or login.
- * On success, redirects to /org/[orgId].
+ * Server shell wraps AcceptInviteForm in <AuthShell> so it picks up the
+ * host-aware chrome (dark+emerald on rfp.*, default elsewhere). The form
+ * itself runs its own state machine for loading / choose / signup / login
+ * / accepting / done, and renders dynamic copy inside the shell body.
  */
 
 import { Suspense } from 'react';
 import { AcceptInviteForm } from '@/components/rfp/AcceptInviteForm';
+import { AuthShell } from '@/components/auth/AuthShell';
 
 export const metadata = {
   title: 'Accept Invite | Perpetual Core',
@@ -19,18 +17,19 @@ export const metadata = {
 
 export default function AcceptInvitePage() {
   return (
-    <div className="min-h-screen bg-black flex items-center justify-center p-4">
-      <div className="w-full max-w-md">
-        <Suspense
-          fallback={
-            <div className="text-center">
-              <p className="text-zinc-400 text-sm">Loading invite...</p>
-            </div>
-          }
-        >
-          <AcceptInviteForm />
-        </Suspense>
-      </div>
-    </div>
+    <AuthShell
+      title="Accept your invite"
+      subtitle="Join your team and start capturing the right opportunities."
+    >
+      <Suspense
+        fallback={
+          <p className="text-center text-sm text-muted-foreground">
+            Loading invite...
+          </p>
+        }
+      >
+        <AcceptInviteForm />
+      </Suspense>
+    </AuthShell>
   );
 }

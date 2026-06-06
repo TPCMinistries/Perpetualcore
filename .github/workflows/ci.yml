@@ -28,12 +28,14 @@ jobs:
       - name: TypeScript type check
         run: npm run type-check
         env:
-          NODE_OPTIONS: --max-old-space-size=6144
+          # tsc OOMs at the default 1.7 GB heap on this codebase; ubuntu-latest
+          # runners have ≥7 GB available so 8 GB is safe.
+          NODE_OPTIONS: --max-old-space-size=8192
 
       - name: ESLint
         run: npm run lint
         env:
-          NODE_OPTIONS: --max-old-space-size=6144
+          NODE_OPTIONS: --max-old-space-size=8192
 
   build:
     name: Build

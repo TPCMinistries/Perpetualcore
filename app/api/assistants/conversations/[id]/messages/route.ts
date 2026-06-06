@@ -1,6 +1,9 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import Anthropic from "@anthropic-ai/sdk";
+import OpenAI from "openai";
+import { buildMemoryContext, extractMemoriesFromConversation } from "@/lib/ai/memory";
+import { selectBestModel } from "@/lib/ai/model-router";
 
 const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY!,
@@ -154,20 +157,56 @@ export async function POST(
       systemPrompt += `\n\n${verbosityGuidance[assistant.verbosity as keyof typeof verbosityGuidance] || verbosityGuidance.balanced}`;
     }
 
+    // Inject RAG context from user's documents
+    try {
+      if (process.env.OPENAI_API_KEY && conversation.organization_id) {
+        const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+        const embeddingResponse = await openai.embeddings.create({
+          model: "text-embedding-3-small",
+          input: content.trim(),
+        });
+        const queryEmbedding = embeddingResponse.data[0].embedding;
+
+        const { data: ragChunks } = await supabase.rpc("search_document_chunks", {
+          query_embedding: queryEmbedding,
+          org_id: conversation.organization_id,
+          requesting_user_id: user.id,
+          match_threshold: 0.35,
+          match_count: 5,
+          search_scope: "all",
+          conversation_id: null,
+          space_id: null,
+        });
+
+        if (ragChunks && ragChunks.length > 0) {
+          const ragContext = ragChunks
+            .map((chunk: any, i: number) => `[${i + 1}] "${chunk.document_title}": ${chunk.content}`)
+            .join("\n\n");
+          systemPrompt += `\n\n## Relevant Documents\nThe following excerpts from the user's documents may be relevant to their question. Reference them specifically when answering:\n\n${ragContext}`;
+        }
+      }
+    } catch (ragError) {
+      console.warn("RAG search failed (non-blocking):", ragError);
+    }
+
+    // Inject persistent memory context
+    try {
+      const memoryContext = await buildMemoryContext(supabase, user.id);
+      if (memoryContext) {
+        systemPrompt += `\n\n${memoryContext}`;
+      }
+    } catch (memError) {
+      console.warn("Memory context failed (non-blocking):", memError);
+    }
+
     console.log(`🤖 Generating streaming response for assistant: ${assistant.name} (${assistant.role})`);
 
-    // Map model preferences to actual Anthropic API model names
-    // Note: Using Haiku for cost-effectiveness and reliability
-    const modelMapping: Record<string, string> = {
-      "claude-sonnet-4": "claude-3-haiku-20240307",
-      "claude-opus-4": "claude-3-haiku-20240307",
-      "claude-3-5-sonnet-20241022": "claude-3-haiku-20240307",
-      "claude-3-haiku-20240307": "claude-3-haiku-20240307",
-      "custom": "claude-3-haiku-20240307",
-    };
-
-    const modelPreference = assistant.model_preference || "claude-3-haiku-20240307";
-    const actualModel = modelMapping[modelPreference] || "claude-3-haiku-20240307";
+    // Smart model routing — use selectBestModel for intelligent cost-aware selection
+    // Honor the advisor's model preference if it's a premium model, otherwise route intelligently
+    const modelSelection = selectBestModel(content.trim());
+    const actualModel = modelSelection.provider === "anthropic"
+      ? modelSelection.model
+      : "claude-sonnet-4"; // Default to Sonnet for non-Anthropic routes since we're using Anthropic SDK here
 
     // Create a streaming response using Server-Sent Events
     const encoder = new TextEncoder();
@@ -262,6 +301,12 @@ export async function POST(
               },
             });
             controller.enqueue(encoder.encode(`data: ${completionData}\n\n`));
+
+            // Extract memories from this advisor conversation (non-blocking)
+            extractMemoriesFromConversation(supabase, user.id, conversationId, [
+              ...messages,
+              { role: "assistant", content: fullResponse }
+            ]).catch(err => console.warn("Memory extraction failed:", err));
           }
 
           controller.close();

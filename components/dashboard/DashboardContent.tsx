@@ -29,6 +29,11 @@ import {
   Moon,
   Target,
   Network,
+  Bot,
+  Bell,
+  CircleCheck,
+  CircleX,
+  Clock,
 } from "lucide-react";
 
 interface DashboardContentProps {
@@ -284,7 +289,7 @@ export function DashboardContent({ userId, userName }: DashboardContentProps) {
           </p>
           <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2">
             <greeting.Icon className={`h-6 w-6 ${greeting.color}`} />
-            {greeting.text}, {userName}
+            {greeting.text}, <span className="bg-gradient-to-r from-primary to-purple-500 bg-clip-text text-transparent">{userName}</span>
           </h1>
         </motion.div>
         <Button
@@ -292,7 +297,7 @@ export function DashboardContent({ userId, userName }: DashboardContentProps) {
           size="sm"
           onClick={() => fetchBriefing(true)}
           disabled={refreshing}
-          className="gap-2 text-muted-foreground"
+          className="gap-2 text-muted-foreground hover:text-primary transition-colors"
         >
           <RefreshCw className={`h-4 w-4 ${refreshing ? "animate-spin" : ""}`} />
           {refreshing ? "Refreshing" : "Refresh"}
@@ -355,21 +360,16 @@ export function DashboardContent({ userId, userName }: DashboardContentProps) {
           iconColor="green"
         />
         <StatCard
-          label="Automations"
-          value={overnight.completedAutomations}
-          icon={Zap}
+          label="Agent Actions"
+          value={data.agentActivity?.todayCount ?? 0}
+          icon={Bot}
           iconColor="violet"
-          change={
-            overnight.failedAutomations > 0
-              ? { value: `${overnight.failedAutomations} failed`, trend: "down" as const }
-              : undefined
-          }
         />
         <StatCard
-          label="New Contacts"
-          value={overnight.newContacts}
-          icon={UserPlus}
-          iconColor="cyan"
+          label="Notifications"
+          value={data.unreadNotifications ?? 0}
+          icon={Bell}
+          iconColor="amber"
         />
       </StatCardGrid>
 
@@ -381,15 +381,16 @@ export function DashboardContent({ userId, userName }: DashboardContentProps) {
         className="grid grid-cols-2 md:grid-cols-4 gap-3"
       >
         {quickActions.map((action) => (
-          <Button
+          <button
             key={action.label}
-            variant="ghost"
-            className={`h-auto py-3 px-4 justify-start gap-3 rounded-xl border border-transparent ${action.bg} transition-all`}
             onClick={() => router.push(action.href)}
+            className={`flex items-center gap-3 rounded-xl border border-border/50 ${action.bg} px-4 py-3.5 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md active:scale-[0.98] group`}
           >
-            <action.icon className={`h-5 w-5 ${action.color}`} />
-            <span className="font-medium text-sm">{action.label}</span>
-          </Button>
+            <div className={`p-2 rounded-lg bg-background/80 ${action.color} group-hover:scale-110 transition-transform duration-200`}>
+              <action.icon className="h-4 w-4" />
+            </div>
+            <span className="font-medium text-sm text-foreground">{action.label}</span>
+          </button>
         ))}
       </motion.div>
 
@@ -426,8 +427,51 @@ export function DashboardContent({ userId, userName }: DashboardContentProps) {
           </motion.div>
         </div>
 
-        {/* Right Column — Meetings + Automations + Insights */}
+        {/* Right Column — Agent Activity + Meetings + Automations + Insights */}
         <div className="space-y-6">
+          {/* Recent Agent Actions */}
+          {data.agentActivity && data.agentActivity.recentActions.length > 0 && (
+            <motion.div
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.28 }}
+            >
+              <div className="rounded-xl border border-border/50 bg-card p-4">
+                <div className="flex items-center gap-2 mb-3">
+                  <Bot className="h-4 w-4 text-violet-500" />
+                  <h3 className="text-sm font-semibold">Recent Agent Activity</h3>
+                  <span className="ml-auto text-xs text-muted-foreground">
+                    {data.agentActivity.todayCount} today
+                  </span>
+                </div>
+                <div className="space-y-2">
+                  {data.agentActivity.recentActions.map((action) => (
+                    <div
+                      key={action.id}
+                      className="flex items-center gap-3 text-sm py-1.5 border-b border-border/30 last:border-0"
+                    >
+                      {action.status === "completed" ? (
+                        <CircleCheck className="h-3.5 w-3.5 text-green-500 shrink-0" />
+                      ) : action.status === "failed" ? (
+                        <CircleX className="h-3.5 w-3.5 text-red-500 shrink-0" />
+                      ) : (
+                        <Clock className="h-3.5 w-3.5 text-amber-500 shrink-0" />
+                      )}
+                      <div className="min-w-0 flex-1">
+                        <p className="truncate text-foreground">
+                          {action.action_type.replace(/_/g, " ")}
+                        </p>
+                        <p className="text-xs text-muted-foreground truncate">
+                          {action.agent_name}
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </motion.div>
+          )}
+
           <motion.div
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}

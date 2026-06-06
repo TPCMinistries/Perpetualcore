@@ -14,6 +14,9 @@ import {
   UTM_MAX_AGE,
 } from '@/lib/analytics/utm-store';
 
+const PRODUCT_INTENT_COOKIE = 'pc_product_intent';
+const RFP_INTENT_MAX_AGE = 60 * 60 * 24; // 24 hours
+
 // Blanket API rate limiter — 200 requests per minute per IP
 // Individual routes can enforce stricter limits on top of this
 let apiRateLimiter: Ratelimit | null = null;
@@ -33,43 +36,142 @@ try {
   // Silently fall back to no rate limiting if Redis is unavailable
 }
 
+// Hosts that map to the RFP Engine product surface.
+// Production: rfp.perpetualcore.com
+// Local dev:  rfp.localhost:3001 (add to /etc/hosts: 127.0.0.1 rfp.localhost)
+function isRfpHost(host: string | null): boolean {
+  if (!host) return false;
+  const h = host.toLowerCase().split(':')[0];
+  return h === 'rfp.perpetualcore.com' || h === 'rfp.localhost';
+}
+
+function isPlainLocalhost(host: string | null): boolean {
+  if (!host) return false;
+  return host.toLowerCase().split(':')[0] === 'localhost';
+}
+
+function redirectToLocalRfpHost(request: NextRequest): NextResponse {
+  const url = request.nextUrl.clone();
+  const port = request.headers.get('host')?.split(':')[1];
+  url.hostname = 'rfp.localhost';
+  if (port) url.port = port;
+  const redirectResponse = NextResponse.redirect(url, 307);
+  setRfpIntentCookie(redirectResponse, request);
+  return redirectResponse;
+}
+
+// Paths the RFP subdomain serves directly (post-auth product routes).
+// Anything not matched here gets rewritten under /rfp/* for the marketing surface.
+//
+// `/dashboard` is INTENTIONALLY OMITTED: that is the legacy Perpetual Core
+// SaaS dashboard (purple gradient "Simple/Full Mode" onboarding, Atlas exec
+// assistant, etc.) and must never render on the RFP product host. The
+// post-login redirect target for rfp.* is `/orgs`, which routes to the
+// caller's first org's discovery feed (or /orgs/new for net-new users).
+function isRfpAppPath(pathname: string): boolean {
+  return (
+    pathname.startsWith('/api/') ||
+    pathname.startsWith('/_next') ||
+    pathname.startsWith('/auth/') ||
+    pathname.startsWith('/login') ||
+    pathname.startsWith('/signup') ||
+    pathname.startsWith('/reset-password') ||
+    pathname.startsWith('/accept-invite') ||
+    pathname.startsWith('/orgs') ||
+    pathname.startsWith('/org/') ||
+    // `/admin/rfp` ONLY — not `/admin/` broadly, which would re-expose the
+    // legacy Perpetual Core admin surface on the RFP host.
+    pathname === '/admin/rfp' ||
+    pathname.startsWith('/admin/rfp/') ||
+    pathname.startsWith('/contact-sales') ||
+    pathname.startsWith('/unsubscribe') ||
+    pathname === '/privacy' ||
+    pathname === '/terms' ||
+    pathname.startsWith('/rfp')
+  );
+}
+
+function hasRfpIntent(request: NextRequest): boolean {
+  return request.cookies.get(PRODUCT_INTENT_COOKIE)?.value === 'rfp';
+}
+
+function shouldMarkRfpIntent(request: NextRequest): boolean {
+  const pathname = request.nextUrl.pathname;
+  const product = request.nextUrl.searchParams.get('product');
+  const next = request.nextUrl.searchParams.get('next') ?? request.nextUrl.searchParams.get('redirect');
+  return (
+    pathname.startsWith('/rfp') ||
+    pathname.startsWith('/orgs') ||
+    pathname.startsWith('/org/') ||
+    product === 'rfp-engine' ||
+    next === '/orgs' ||
+    next === '/orgs/new' ||
+    Boolean(next?.startsWith('/org/'))
+  );
+}
+
+function setRfpIntentCookie(response: NextResponse, request: NextRequest): void {
+  response.cookies.set(PRODUCT_INTENT_COOKIE, 'rfp', {
+    maxAge: RFP_INTENT_MAX_AGE,
+    path: '/',
+    sameSite: 'lax',
+    secure: process.env.NODE_ENV === 'production',
+    httpOnly: true,
+    domain:
+      process.env.NODE_ENV === 'production' &&
+      (request.headers.get('host') || '').toLowerCase().split(':')[0].endsWith('perpetualcore.com')
+        ? '.perpetualcore.com'
+        : undefined,
+  });
+}
+
 export async function middleware(request: NextRequest) {
+  const host = request.headers.get('host');
+  const pathname = request.nextUrl.pathname;
+  const markRfpIntent = shouldMarkRfpIntent(request) || isRfpHost(host);
+
+  // Local development: `localhost` accumulates cookies from every app in the
+  // ecosystem, which can trigger HTTP 431 before RFP routes render. Move RFP
+  // traffic onto `rfp.localhost` so it has its own cookie namespace, mirroring
+  // production's rfp.perpetualcore.com subdomain.
+  if (isPlainLocalhost(host) && markRfpIntent) {
+    return redirectToLocalRfpHost(request);
+  }
+
+  // ── RFP intent: redirect legacy /dashboard/* to /orgs ──
+  // Bookmarked or auto-redirected requests to /dashboard can land in the
+  // legacy Perpetual Core SaaS. On rfp.* and on localhost after the browser
+  // has entered the RFP flow, send them to /orgs which routes to their first
+  // org or /orgs/new.
+  if ((isRfpHost(host) || hasRfpIntent(request)) && pathname.startsWith('/dashboard')) {
+    const url = request.nextUrl.clone();
+    url.pathname = '/orgs';
+    url.search = '';
+    const redirectResponse = NextResponse.redirect(url, 307);
+    if (markRfpIntent) setRfpIntentCookie(redirectResponse, request);
+    return redirectResponse;
+  }
+
+  // ── Subdomain rewrite: rfp.* serves the RFP Engine product surface ──
+  // Marketing routes get rewritten under /rfp/* so they share the RFP layout.
+  // App + auth routes pass through so SSO works across subdomains.
+  if (isRfpHost(host) && !isRfpAppPath(pathname)) {
+    const url = request.nextUrl.clone();
+    url.pathname = `/rfp${pathname === '/' ? '' : pathname}`;
+    const rewriteResponse = NextResponse.rewrite(url);
+    setRfpIntentCookie(rewriteResponse, request);
+    return rewriteResponse;
+  }
+
   // Allow public access to specific pages
   if (
     request.nextUrl.pathname === '/presentation' ||
     request.nextUrl.pathname.startsWith('/invite/') ||
     request.nextUrl.pathname.startsWith('/auth/callback')
   ) {
-    return NextResponse.next();
-  }
-
-  // Rate limit API routes, then pass through (skip cron + webhook routes)
-  if (request.nextUrl.pathname.startsWith('/api/')) {
-    if (
-      apiRateLimiter &&
-      !request.nextUrl.pathname.startsWith('/api/cron/') &&
-      !request.nextUrl.pathname.startsWith('/api/webhooks/')
-    ) {
-      const ip = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim()
-        || request.headers.get('x-real-ip')
-        || 'unknown';
-      const result = await apiRateLimiter.limit(`mw:${ip}`);
-      if (!result.success) {
-        const reset = Math.ceil((result.reset - Date.now()) / 1000);
-        return NextResponse.json(
-          { error: 'Too many requests', retryAfter: reset },
-          {
-            status: 429,
-            headers: {
-              'Retry-After': reset.toString(),
-              'X-RateLimit-Limit': result.limit.toString(),
-              'X-RateLimit-Remaining': '0',
-            },
-          }
-        );
-      }
-    }
-    return NextResponse.next();
+    const publicResponse = NextResponse.next();
+    if (markRfpIntent) setRfpIntentCookie(publicResponse, request);
+    return publicResponse;
   }
 
   let response = NextResponse.next({
@@ -77,6 +179,15 @@ export async function middleware(request: NextRequest) {
       headers: request.headers,
     },
   });
+
+  // Cross-subdomain SSO: scope auth cookies to .perpetualcore.com in production
+  // so signing in on perpetualcore.com persists on rfp.perpetualcore.com (and any
+  // future product subdomain). Stays unset locally to avoid breaking localhost.
+  const hostname = (host || '').toLowerCase().split(':')[0];
+  const cookieDomain =
+    process.env.NODE_ENV === 'production' && hostname.endsWith('perpetualcore.com')
+      ? '.perpetualcore.com'
+      : undefined;
 
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -94,6 +205,7 @@ export async function middleware(request: NextRequest) {
             path: '/',
             sameSite: 'lax' as const,
             secure: process.env.NODE_ENV === 'production',
+            ...(cookieDomain ? { domain: cookieDomain } : {}),
           };
 
           request.cookies.set({
@@ -133,8 +245,44 @@ export async function middleware(request: NextRequest) {
     }
   );
 
-  // Refresh session if expired
+  // Refresh session if expired. CRITICAL: this must run for /api/* routes too
+  // (not just rendered pages) — Supabase access tokens last ~1h and route
+  // handlers that call `createClient()` then `supabase.auth.getUser()` only
+  // see the cookie state at request time. Without a refresh here, an expired
+  // access token silently 401s every API call even though the page rendered
+  // immediately before looked signed-in.
   const { data: { user } } = await supabase.auth.getUser();
+
+  // Rate limit API routes (after session refresh so the route handler sees
+  // a valid cookie), then short-circuit before analytics + IP whitelist.
+  if (request.nextUrl.pathname.startsWith('/api/')) {
+    if (
+      apiRateLimiter &&
+      !request.nextUrl.pathname.startsWith('/api/cron/') &&
+      !request.nextUrl.pathname.startsWith('/api/webhooks/')
+    ) {
+      const ip = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim()
+        || request.headers.get('x-real-ip')
+        || 'unknown';
+      const result = await apiRateLimiter.limit(`mw:${ip}`);
+      if (!result.success) {
+        const reset = Math.ceil((result.reset - Date.now()) / 1000);
+        return NextResponse.json(
+          { error: 'Too many requests', retryAfter: reset },
+          {
+            status: 429,
+            headers: {
+              'Retry-After': reset.toString(),
+              'X-RateLimit-Limit': result.limit.toString(),
+              'X-RateLimit-Remaining': '0',
+            },
+          }
+        );
+      }
+    }
+    if (markRfpIntent) setRfpIntentCookie(response, request);
+    return response;
+  }
 
   // --- Analytics: UTM capture + anonymous/session ID cookies ---
   // Gated on cookie consent (GDPR / UK PECR). The pc_consent cookie is set
@@ -175,6 +323,10 @@ export async function middleware(request: NextRequest) {
         secure: process.env.NODE_ENV === 'production',
       });
     }
+  }
+
+  if (markRfpIntent) {
+    setRfpIntentCookie(response, request);
   }
 
   // IP Whitelist + Session Duration checks for authenticated users

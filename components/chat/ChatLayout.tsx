@@ -16,7 +16,7 @@ export function ChatLayout({
   // Simplified layout - no duplicate sidebar
   // Main app sidebar already handles navigation
   return (
-    <div className="flex flex-col h-full overflow-hidden bg-white dark:bg-slate-950">
+    <div className="flex flex-col h-full overflow-hidden bg-background">
       {children}
     </div>
   );

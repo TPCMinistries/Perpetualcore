@@ -21,6 +21,7 @@ import {
   Dialog,
   DialogContent,
   DialogDescription,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
@@ -67,9 +68,9 @@ const LOADING_STEPS = [
 ] as const;
 
 const CONFIDENCE_STYLES: Record<NaicsCode["confidence"], string> = {
-  high: "bg-emerald-500/15 text-emerald-300 border-emerald-500/30",
-  medium: "bg-amber-500/15 text-amber-300 border-amber-500/30",
-  low: "bg-zinc-500/15 text-zinc-400 border-zinc-500/30",
+  high: "bg-emerald-50 text-emerald-800 border-emerald-200",
+  medium: "bg-amber-50 text-amber-800 border-amber-200",
+  low: "bg-zinc-100 text-zinc-600 border-zinc-200",
 };
 
 const CONFIDENCE_LABEL: Record<NaicsCode["confidence"], string> = {
@@ -172,7 +173,18 @@ export function NaicsAssistantModal({
     }
   };
 
+  const handleAddEveryRecommendation = () => {
+    for (const program of programs) {
+      handleAddAll(program);
+    }
+  };
+
   const totalCodes = programs.reduce((sum, p) => sum + p.codes.length, 0);
+  const selectedCount = programs.reduce(
+    (sum, p) => sum + p.codes.filter((c) => existingCodes.includes(c.code)).length,
+    0,
+  );
+  const remainingCount = Math.max(totalCodes - selectedCount, 0);
 
   return (
     <Dialog
@@ -194,15 +206,15 @@ export function NaicsAssistantModal({
         </Button>
       </DialogTrigger>
 
-      <DialogContent className="sm:max-w-2xl max-h-[85vh] overflow-hidden flex flex-col">
+      <DialogContent className="flex max-h-[85vh] flex-col overflow-hidden border-zinc-200 bg-[#fbfbf7] text-zinc-950 shadow-2xl sm:max-w-3xl">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <Sparkles className="h-4 w-4 text-emerald-400" />
+            <Sparkles className="h-4 w-4 text-emerald-700" />
             Find your NAICS codes
           </DialogTitle>
-          <DialogDescription>
+          <DialogDescription className="text-zinc-600">
             Describe what your organization does. We&apos;ll group codes by
-            program and name the procurement systems each one unlocks.
+            program and show which opportunity systems each one can help match.
           </DialogDescription>
         </DialogHeader>
 
@@ -245,7 +257,7 @@ export function NaicsAssistantModal({
           )}
 
           {loading && (
-            <div className="rounded-lg border border-emerald-500/20 bg-emerald-500/5 p-4 space-y-2">
+            <div className="rounded-lg border border-emerald-200 bg-emerald-50 p-4 space-y-2">
               {LOADING_STEPS.map((step, i) => {
                 const status =
                   i < loadingStep
@@ -266,17 +278,17 @@ export function NaicsAssistantModal({
                     }
                   >
                     {status === "done" ? (
-                      <Check className="h-3.5 w-3.5 text-emerald-400" />
+                      <Check className="h-3.5 w-3.5 text-emerald-700" />
                     ) : status === "active" ? (
-                      <Loader2 className="h-3.5 w-3.5 animate-spin text-emerald-400" />
+                      <Loader2 className="h-3.5 w-3.5 animate-spin text-emerald-700" />
                     ) : (
-                      <span className="h-3.5 w-3.5 rounded-full border border-zinc-700" />
+                      <span className="h-3.5 w-3.5 rounded-full border border-zinc-300" />
                     )}
                     <span
                       className={
                         status === "active"
-                          ? "text-emerald-200"
-                          : "text-zinc-400"
+                          ? "text-emerald-900"
+                          : "text-zinc-600"
                       }
                     >
                       {step}
@@ -313,8 +325,8 @@ export function NaicsAssistantModal({
           )}
 
           {hasResults && !loading && (
-            <div className="rounded-lg border border-dashed border-zinc-700 p-4 space-y-2">
-              <p className="text-xs font-mono uppercase tracking-[0.18em] text-muted-foreground">
+            <div className="rounded-lg border border-dashed border-zinc-300 bg-white p-4 space-y-2">
+              <p className="text-xs font-mono uppercase tracking-[0.18em] text-zinc-500">
                 Need codes for another program?
               </p>
               <Textarea
@@ -342,17 +354,46 @@ export function NaicsAssistantModal({
           )}
         </div>
 
-        {hasResults && (
-          <div className="flex items-center justify-between border-t border-zinc-800 pt-3 mt-1">
-            <p className="text-xs text-muted-foreground">
-              {totalCodes} code{totalCodes === 1 ? "" : "s"} across{" "}
-              {programs.length} program{programs.length === 1 ? "" : "s"}
-            </p>
-            <Button type="button" variant="ghost" size="sm" onClick={reset}>
-              Start over
+        <DialogFooter className="mt-1 gap-2 border-t border-zinc-200 pt-3 sm:items-center sm:justify-between">
+          <p className="text-xs text-zinc-600">
+            {hasResults ? (
+              <>
+                {selectedCount}/{totalCodes} selected across {programs.length}{" "}
+              program{programs.length === 1 ? "" : "s"}
+              </>
+            ) : (
+              "Selections are saved to your org form."
+            )}
+          </p>
+          <div className="flex flex-col gap-2 sm:flex-row">
+            {hasResults && (
+              <Button type="button" variant="ghost" size="sm" onClick={reset}>
+                Start over
+              </Button>
+            )}
+            {hasResults && remainingCount > 0 && (
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={handleAddEveryRecommendation}
+                className="border-emerald-200 bg-emerald-50 text-emerald-900 hover:bg-emerald-100"
+              >
+                Add all remaining
+              </Button>
+            )}
+            <Button
+              type="button"
+              size="sm"
+              variant={hasResults ? "default" : "outline"}
+              disabled={hasResults && selectedCount === 0}
+              onClick={() => setOpen(false)}
+              className={hasResults ? "bg-zinc-950 text-white hover:bg-zinc-800" : ""}
+            >
+              {hasResults ? "Save selected codes" : "Done"}
             </Button>
           </div>
-        )}
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   );
@@ -386,18 +427,18 @@ function ProgramCard({
   return (
     <div
       className={
-        "rounded-xl border border-zinc-800 bg-zinc-900/40 p-4 space-y-3 transition-all duration-500 " +
+        "rounded-xl border border-zinc-200 bg-white p-4 space-y-3 transition-all duration-500 " +
         (visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2")
       }
     >
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
-          <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-emerald-400">
+          <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-emerald-700">
             Program
           </p>
-          <h3 className="font-semibold text-zinc-100">{program.name}</h3>
+          <h3 className="font-semibold text-zinc-950">{program.name}</h3>
           {program.summary && (
-            <p className="text-sm text-muted-foreground mt-0.5">
+            <p className="text-sm text-zinc-600 mt-0.5">
               {program.summary}
             </p>
           )}
@@ -459,17 +500,17 @@ function CodeCard({
   return (
     <div
       className={
-        "rounded-lg border border-zinc-800 bg-zinc-950/60 p-3 transition-all duration-500 " +
+        "rounded-lg border border-zinc-200 bg-zinc-50 p-3 transition-all duration-500 " +
         (visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-1")
       }
     >
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0 flex-1 space-y-2">
           <div className="flex items-baseline gap-2 flex-wrap">
-            <span className="font-mono text-sm font-semibold text-zinc-100">
+            <span className="font-mono text-sm font-semibold text-zinc-950">
               {code.code}
             </span>
-            <span className="text-sm text-zinc-300">{code.title}</span>
+            <span className="text-sm text-zinc-700">{code.title}</span>
             <span
               className={
                 "rounded-full border px-2 py-0.5 font-mono text-[9px] uppercase tracking-[0.16em] " +
@@ -481,7 +522,7 @@ function CodeCard({
             </span>
           </div>
 
-          <p className="text-xs leading-relaxed text-zinc-400">
+          <p className="text-xs leading-relaxed text-zinc-600">
             {code.rationale}
           </p>
 
@@ -490,7 +531,7 @@ function CodeCard({
               {code.procurement.map((p) => (
                 <span
                   key={p}
-                  className="rounded-md border border-zinc-800 bg-zinc-900 px-2 py-0.5 font-mono text-[10px] uppercase tracking-[0.12em] text-zinc-400"
+                  className="rounded-md border border-zinc-200 bg-white px-2 py-0.5 font-mono text-[10px] uppercase tracking-[0.12em] text-zinc-600"
                 >
                   {p}
                 </span>

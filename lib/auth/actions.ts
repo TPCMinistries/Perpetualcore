@@ -5,6 +5,21 @@ import { SignUpInput, SignInInput } from "@/lib/validations/auth";
 import { redirect } from "next/navigation";
 import { headers } from "next/headers";
 
+/**
+ * Derive the origin of the current request so auth redirects work across
+ * subdomains (www.perpetualcore.com, rfp.perpetualcore.com, localhost dev).
+ * Falls back to a sanitized NEXT_PUBLIC_APP_URL when called outside a
+ * request context (build-time, etc).
+ */
+async function getRequestOrigin(): Promise<string> {
+  const h = await headers();
+  const host = h.get("x-forwarded-host") ?? h.get("host");
+  const proto = h.get("x-forwarded-proto") ?? "https";
+  if (host) return `${proto}://${host}`;
+  const envUrl = process.env.NEXT_PUBLIC_APP_URL?.trim();
+  return envUrl || "https://www.perpetualcore.com";
+}
+
 function slugify(text: string): string {
   return text
     .toLowerCase()
@@ -14,7 +29,14 @@ function slugify(text: string): string {
     .trim();
 }
 
-export async function signUp(data: SignUpInput) {
+function safeAuthNext(value: string | undefined): string | null {
+  if (!value) return null;
+  if (!value.startsWith("/") || value.startsWith("//")) return null;
+  if (value.startsWith("/api/") || value.startsWith("/auth/callback")) return null;
+  return value;
+}
+
+export async function signUp(data: SignUpInput, nextPath?: string) {
   const supabase = await createClient();
 
   // Validate beta code if provided
@@ -46,6 +68,11 @@ export async function signUp(data: SignUpInput) {
   }
 
   // Create user with Supabase Auth
+  const origin = await getRequestOrigin();
+  const next = safeAuthNext(nextPath);
+  const callbackUrl = new URL("/auth/callback", origin);
+  if (next) callbackUrl.searchParams.set("next", next);
+
   const { data: authData, error: authError } = await supabase.auth.signUp({
     email: data.email,
     password: data.password,
@@ -56,11 +83,21 @@ export async function signUp(data: SignUpInput) {
         organization_name: data.organizationName,
         beta_tier: betaTier,
       },
-      emailRedirectTo: `${process.env.NEXT_PUBLIC_APP_URL}/auth/callback`,
+      emailRedirectTo: callbackUrl.toString(),
     },
   });
 
   if (authError) {
+    // Surface a structured flag for the existing-user case so the UI can
+    // route the user to sign-in instead of showing a generic error.
+    const msg = authError.message.toLowerCase();
+    if (msg.includes("already registered") || msg.includes("user already")) {
+      return {
+        error: "An account with this email already exists.",
+        userExists: true,
+        email: data.email,
+      };
+    }
     return { error: authError.message };
   }
 
@@ -138,7 +175,7 @@ export async function signUp(data: SignUpInput) {
     // Regular user: create their own organization
     const orgSlug = `${slugify(data.organizationName)}-${Date.now()}`;
 
-    const { data: orgId, error: orgError } = await supabase.rpc(
+    const { error: orgError } = await supabase.rpc(
       "create_organization_and_profile",
       {
         user_id: authData.user.id,
@@ -168,7 +205,7 @@ export async function signUp(data: SignUpInput) {
 
   // Send welcome email
   try {
-    await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/email/welcome`, {
+    await fetch(`${origin}/api/email/welcome`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -271,15 +308,12 @@ export async function resetOnboarding() {
 
 export async function requestPasswordReset(email: string) {
   const supabase = await createClient();
+  const origin = await getRequestOrigin();
 
   // Route through /auth/callback so the PKCE ?code= from the email is
-  // exchanged for a session before landing on the update-password form.
-  // Without this hop, the form has no session and Supabase bounces to /login.
-  const h = await headers();
-  const host = h.get("x-forwarded-host") ?? h.get("host");
-  const proto = h.get("x-forwarded-proto") ?? "https";
-  const origin = host ? `${proto}://${host}` : (process.env.NEXT_PUBLIC_APP_URL?.trim() || "https://rfp.perpetualcore.com");
-
+  // exchanged for a session BEFORE the user lands on the update-password
+  // form. Without this hop, the form's server action runs with no session
+  // and Supabase returns "Auth session missing!".
   const { error } = await supabase.auth.resetPasswordForEmail(email, {
     redirectTo: `${origin}/auth/callback?next=/auth/update-password`,
   });

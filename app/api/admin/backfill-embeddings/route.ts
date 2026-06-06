@@ -7,11 +7,19 @@ export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 export const maxDuration = 300; // 5 minutes for batch processing
 
-// Service role client for admin operations
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
+type AdminSupabaseClient = ReturnType<typeof createClient>;
+
+let adminSupabase: AdminSupabaseClient | null = null;
+
+function getAdminSupabase(): AdminSupabaseClient {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!supabaseUrl || !serviceRoleKey) {
+    throw new Error("Supabase admin environment variables are not configured");
+  }
+  adminSupabase ??= createClient(supabaseUrl, serviceRoleKey);
+  return adminSupabase;
+}
 
 interface BackfillResult {
   document_id: string;
@@ -59,6 +67,8 @@ export async function POST(req: NextRequest) {
 
     console.log("[Backfill] Starting embeddings backfill...");
     console.log("[Backfill] Options:", { document_ids, batch_size, dry_run });
+
+    const supabase = getAdminSupabase();
 
     // Find documents that need embeddings
     let documentsQuery = supabase
@@ -192,6 +202,8 @@ async function processDocumentEmbeddings(
   content: string
 ): Promise<BackfillResult> {
   try {
+    const supabase = getAdminSupabase();
+
     if (!content || content.length < 10) {
       return {
         document_id: documentId,

@@ -20,6 +20,20 @@ const serverEnvSchema = z.object({
 
   // Email - Optional but recommended
   RESEND_API_KEY: z.string().optional(),
+  RESEND_FROM_EMAIL: z.string().optional(),
+  /**
+   * Plan 05-07 — override sender for RFP alert emails.
+   * Runtime fallback chain: RFP_ALERT_FROM_EMAIL ?? RESEND_FROM_EMAIL ?? 'noreply@perpetualcore.com'.
+   * Optional — when unset, alerts use the project-wide RESEND_FROM_EMAIL.
+   */
+  RFP_ALERT_FROM_EMAIL: z.string().optional(),
+  /**
+   * Plan 05-07 — Telegram Bot API token for high-fit alert dispatch.
+   * Optional — when unset, the Telegram channel is skipped at dispatch time
+   * (logged with status='skipped_unverified') so the rest of the alert path
+   * continues to fire.
+   */
+  TELEGRAM_BOT_TOKEN: z.string().optional(),
 
   // Stripe - Optional (for billing)
   STRIPE_SECRET_KEY: z.string().optional(),

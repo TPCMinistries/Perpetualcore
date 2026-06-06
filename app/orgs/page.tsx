@@ -1,0 +1,61 @@
+/**
+ * /orgs — Post-auth router for the RFP product.
+ *
+ * Resolves the caller's RFP org memberships and redirects:
+ *   - 0 orgs → /orgs/new (create-org wizard)
+ *   - 1+ orgs → /org/[mostRecent]/discovery
+ *
+ * This is the canonical post-login landing on rfp.perpetualcore.com. The
+ * LoginForm and /auth/callback now point here when the request is on the
+ * RFP host, so users never land in the legacy /dashboard surface.
+ *
+ * Server component. No body rendered — always redirects.
+ */
+
+import { redirect } from "next/navigation";
+import { createClient } from "@/lib/supabase/server";
+import { listUserOrgs } from "@/lib/rfp/orgs";
+import { enrollInSequence } from "@/lib/rfp/sequences";
+
+export const dynamic = "force-dynamic";
+
+export default async function OrgsIndexPage() {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    redirect("/login?next=/orgs");
+  }
+
+  const memberships = await listUserOrgs();
+
+  // Best-effort lead-capture enrollment: fires on the first /orgs visit
+  // for any signed-in user. enrollInSequence upserts on (email, sequence_key)
+  // so repeat visits are a no-op. Covers both the email-confirmation flow
+  // (which hits /auth/callback) and the direct-signup flow (which doesn't).
+  // Wrapped because a Supabase blip should NEVER block a logged-in user
+  // from reaching their org.
+  if (user.email) {
+    try {
+      await enrollInSequence({
+        email: user.email,
+        sequenceKey: "lead-capture",
+        userId: user.id,
+      });
+    } catch {
+      // intentionally silent — see above
+    }
+  }
+
+  if (memberships.length === 0) {
+    redirect("/orgs/new");
+  }
+
+  const first = memberships[0]?.rfp_orgs;
+  if (!first?.id) {
+    redirect("/orgs/new");
+  }
+  redirect(`/org/${first.id}/discovery`);
+}

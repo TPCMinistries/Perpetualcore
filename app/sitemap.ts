@@ -7,6 +7,23 @@ function getBaseUrl(): string {
   return raw.replace(/\s+/g, "").replace(/\/$/, "");
 }
 
+const RFP_BASE = "https://rfp.perpetualcore.com";
+
+// RFP Engine — separate subdomain, own sitemap entries. Listed inline with
+// absolute URLs so they get the correct host even when NEXT_PUBLIC_APP_URL
+// points at the parent (www.perpetualcore.com / perpetualcore.ai).
+const rfpPages: MetadataRoute.Sitemap = [
+  { url: `${RFP_BASE}/rfp`, priority: 1.0, changeFrequency: "weekly", lastModified: new Date() },
+  { url: `${RFP_BASE}/rfp/how-it-works`, priority: 0.9, changeFrequency: "monthly", lastModified: new Date() },
+  { url: `${RFP_BASE}/rfp/pricing`, priority: 0.9, changeFrequency: "monthly", lastModified: new Date() },
+  { url: `${RFP_BASE}/rfp/trust`, priority: 0.7, changeFrequency: "monthly", lastModified: new Date() },
+  { url: `${RFP_BASE}/rfp/vs`, priority: 0.7, changeFrequency: "monthly", lastModified: new Date() },
+  { url: `${RFP_BASE}/rfp/roadmap`, priority: 0.7, changeFrequency: "weekly", lastModified: new Date() },
+  { url: `${RFP_BASE}/rfp/roi`, priority: 0.8, changeFrequency: "monthly", lastModified: new Date() },
+  { url: `${RFP_BASE}/rfp/changelog`, priority: 0.6, changeFrequency: "weekly", lastModified: new Date() },
+  { url: `${RFP_BASE}/contact-sales/rfp-engine`, priority: 0.8, changeFrequency: "monthly", lastModified: new Date() },
+];
+
 type Page = {
   path: string;
   priority: number;
@@ -119,10 +136,13 @@ export default function sitemap(): MetadataRoute.Sitemap {
 
   const lastModified = new Date();
 
-  return allPages.map((page) => ({
-    url: `${baseUrl}${page.path}`,
-    lastModified,
-    changeFrequency: page.changeFrequency,
-    priority: page.priority,
-  }));
+  return [
+    ...allPages.map((page) => ({
+      url: `${baseUrl}${page.path}`,
+      lastModified,
+      changeFrequency: page.changeFrequency,
+      priority: page.priority,
+    })),
+    ...rfpPages,
+  ];
 }

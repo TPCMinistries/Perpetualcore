@@ -6,13 +6,11 @@
  * the bootstrap insert that must atomically write two RLS-protected tables before
  * the org+membership relationship exists to satisfy those policies.
  *
- * NOTE: rfp_* tables were added to LDC Brain AI in Plan 04-01. They are NOT yet
- * reflected in the generated database.types.ts (would require a `supabase gen types`
- * run against the live project). We use typed interfaces below and cast with `as`.
- * Phase 5 should regenerate database.types.ts once all rfp_* DDL is stable.
  */
 
 import { createClient, createAdminClient } from "@/lib/supabase/server";
+import { enrollInSequence } from "./sequences";
+import { recomputeAllForOrg } from "./scoring/recompute";
 
 // ── RFP domain types ─────────────────────────────────────────────────────────
 
@@ -65,8 +63,7 @@ export async function createOrgWithOwner(
   const admin = createAdminClient();
 
   // Step 1: insert the org
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data: org, error: orgErr } = await (admin as any)
+  const { data: org, error: orgErr } = await admin
     .from("rfp_orgs")
     .insert({ name: input.name, type: input.type, naics: input.naics })
     .select()
@@ -77,17 +74,49 @@ export async function createOrgWithOwner(
   }
 
   // Step 2: insert the owner membership
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { error: memErr } = await (admin as any)
+  const { error: memErr } = await admin
     .from("rfp_user_orgs")
     .insert({ user_id: userId, org_id: org.id, role: "owner" });
 
   if (memErr) {
     // Compensating delete — roll back the orphaned org
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await (admin as any).from("rfp_orgs").delete().eq("id", org.id);
+    await admin.from("rfp_orgs").delete().eq("id", org.id);
     throw new Error(`org_membership_failed: ${memErr.message}`);
   }
+
+  // Enroll the owner in the trial-onboarding sequence. Best-effort — a
+  // failure here does NOT block org creation; the user can be enrolled
+  // later by re-running this code path or via a backfill script.
+  try {
+    const { data: userResp } = await admin.auth.admin.getUserById(userId);
+    const email = userResp?.user?.email;
+    if (email) {
+      await enrollInSequence({
+        email,
+        sequenceKey: "trial-onboarding",
+        userId,
+        orgId: org.id,
+        orgName: org.name,
+      });
+    }
+  } catch (err) {
+    console.warn(
+      "[orgs] trial-onboarding enroll skipped:",
+      err instanceof Error ? err.message.slice(0, 120) : "unknown",
+    );
+  }
+
+  // Fire-and-forget: score the org against all current opportunities so the
+  // Discovery feed isn't empty the first time the user lands on it. Idempotent
+  // (upserts by opp_id, org_id) so a serverless timeout mid-pass is safe — a
+  // subsequent recompute resumes cleanly. We swallow errors here so a scoring
+  // failure never blocks org creation.
+  void recomputeAllForOrg(org.id).catch((err) => {
+    console.warn(
+      "[orgs] initial recompute failed:",
+      err instanceof Error ? err.message.slice(0, 200) : "unknown",
+    );
+  });
 
   return org as RfpOrg;
 }
@@ -101,8 +130,7 @@ export async function createOrgWithOwner(
  */
 export async function getOrgForUser(orgId: string): Promise<RfpOrg | null> {
   const supabase = await createClient();
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data } = await (supabase as any)
+  const { data } = await supabase
     .from("rfp_orgs")
     .select("*")
     .eq("id", orgId)
@@ -120,10 +148,9 @@ export async function listUserOrgs(): Promise<
   Array<{ role: OrgRole; rfp_orgs: RfpOrg }>
 > {
   const supabase = await createClient();
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data } = await (supabase as any)
+  const { data } = await supabase
     .from("rfp_user_orgs")
     .select("role, rfp_orgs(id, name, type, naics, created_at, updated_at)")
     .order("created_at", { ascending: false });
-  return (data as Array<{ role: OrgRole; rfp_orgs: RfpOrg }>) ?? [];
+  return (data as unknown as Array<{ role: OrgRole; rfp_orgs: RfpOrg }>) ?? [];
 }

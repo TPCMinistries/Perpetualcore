@@ -4,11 +4,18 @@
  * Server component shell: verifies auth, then delegates to the
  * CreateOrgForm client component. Logged-out users are redirected
  * to /login with a `next` param so they bounce back after sign-in.
+ *
+ * Wrapped in <AuthShell productCopyKey="createOrg"> so the page
+ * picks up the host-aware product chrome — dark+emerald on
+ * rfp.perpetualcore.com, default elsewhere — matching the rest of
+ * the auth/onboarding flow.
  */
 
 import { redirect } from "next/navigation";
+import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { CreateOrgForm } from "@/components/rfp/CreateOrgForm";
+import { AuthShell } from "@/components/auth/AuthShell";
 
 export const metadata = {
   title: "Create an Organization — Perpetual Core",
@@ -25,13 +32,17 @@ export default async function NewOrgPage() {
   }
 
   return (
-    <div className="container max-w-2xl py-12">
-      <h1 className="text-3xl font-semibold mb-2">Create an Organization</h1>
-      <p className="text-muted-foreground mb-8">
-        Set up your tenant — this scopes Discovery, Vault, Drafts, and
-        Compliance to your team.
-      </p>
+    <AuthShell
+      title=""
+      productCopyKey="createOrg"
+      maxWidth="lg"
+      footer={
+        <Link href="/" className="hover:underline">
+          ← Back to site
+        </Link>
+      }
+    >
       <CreateOrgForm />
-    </div>
+    </AuthShell>
   );
 }

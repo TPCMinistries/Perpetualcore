@@ -8,7 +8,7 @@ if (typeof self === 'undefined') {
 const withPWA = withPWAInit({
   dest: 'public',
   disable: process.env.NODE_ENV === 'development', // Enable in production only
-  register: false,
+  register: true,
   skipWaiting: true,
   sw: 'service-worker.js',
   runtimeCaching: [
@@ -255,7 +255,7 @@ const nextConfig = {
         key: 'Content-Security-Policy',
         value: [
           "default-src 'self'",
-          "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://js.stripe.com https://apis.google.com https://www.googletagmanager.com https://www.google-analytics.com https://cdn.sentry.io https://client.crisp.chat",
+          "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://js.stripe.com https://apis.google.com https://www.googletagmanager.com https://www.google-analytics.com https://cdn.sentry.io https://va.vercel-scripts.com https://client.crisp.chat",
           "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://client.crisp.chat",
           "img-src 'self' data: blob: https: http:",
           "font-src 'self' https://fonts.gstatic.com data: https://client.crisp.chat",
@@ -265,7 +265,7 @@ const nextConfig = {
           "base-uri 'self'",
           "form-action 'self'",
           "frame-ancestors 'self'",
-          "upgrade-insecure-requests",
+          ...(process.env.NODE_ENV === 'production' ? ["upgrade-insecure-requests"] : []),
         ].join('; '),
       },
     ];
