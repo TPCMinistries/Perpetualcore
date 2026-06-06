@@ -9,12 +9,12 @@ See: .planning/PROJECT.md (updated 2026-06-05)
 
 ## Current Position
 
-Phase: 13 of 25 (Pre-Work Stabilization)
-Plan: 4 of 4 in current phase (13-01 + 13-02 + 13-03 complete; 13-04 at checkpoint — awaiting push approval)
-Status: In progress — Phase 13, Plan 04 at human-verify checkpoint (pre-push)
-Last activity: 2026-06-06 — 13-04 merge complete locally (d5e9164), build passing, awaiting push to origin/main
+Phase: 14 of 25 (Canonical Data Foundation)
+Plan: 1 of 4 complete (14-01 done; 14-02, 14-03, 14-04 pending)
+Status: In progress — Phase 14, Plan 01 complete
+Last activity: 2026-06-06 — 14-01 migration applied (dcda09c), FND-01 complete, 815 rows backfilled
 
-Progress: [█░░░░░░░░░] ~8% (v2.0 phases — Phase 13 of 13 phases in v2.0)
+Progress: [█░░░░░░░░░] ~10% (v2.0 phases — Phase 14 of 25)
 
 ## Performance Metrics
 
@@ -37,6 +37,7 @@ Progress: [█░░░░░░░░░] ~8% (v2.0 phases — Phase 13 of 13 p
 *Updated after each plan completion*
 | Phase 13-pre-work-stabilization P01 | 15 | 2 tasks | 1 files |
 | Phase 13 P02 | 4 | 2 tasks | 1 files |
+| Phase 14-canonical-data-foundation P01 | 12 | 1 tasks | 1 files |
 
 ## Accumulated Context
 
@@ -57,6 +58,8 @@ Recent decisions affecting current work:
 - [Phase 13-pre-work-stabilization]: Alert de-dup: 7-day window on last_alerted_at prevents daily re-spam; 21-day threshold gives 6-day buffer over SAM.gov's 15-day renewal window
 - [Phase 13-04]: Two-way merge strategy chosen (no squash): 253 feat commits + 114 main commits preserved; next.config.mjs hand-merged with union CSP + main's redirects + feat's PWA register:true
 - [Phase 13-04]: Merge commit d5e9164 on local main — verified build exit 0, all 4 key RFP routes present, middleware host-rewrite intact, getUser() before /api/* confirmed
+- [Phase 14-canonical-data-foundation]: Strict regex prefix parse (^naics:[0-9]{2,6}$) prevents naive colon-split corruption; only naics/cfda backfilled, other typed fields deferred to Phase 15 ingest parsers
+- [Phase 14-canonical-data-foundation]: database.types.ts regen deferred to Plan 14-04 (single owner) to avoid parallel-wave write collision with other Wave-1 plans
 
 ### Pending Todos
 
@@ -73,5 +76,5 @@ Recent decisions affecting current work:
 ## Session Continuity
 
 Last session: 2026-06-06
-Stopped at: 13-04-PLAN.md Task 3 checkpoint — merge complete locally, push not yet executed
-Resume file: None (reply "push approved" to push, then confirm Vercel deploy + rfp.perpetualcore.com health)
+Stopped at: Completed 14-canonical-data-foundation/14-01-PLAN.md
+Resume file: None — next plan is 14-02
