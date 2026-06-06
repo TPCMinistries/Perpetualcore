@@ -89,7 +89,11 @@ Beachhead coverage uses what's ALREADY live: federal (SAM/Grants.gov/NIH/NSF) + 
   2. Ingesting the same opportunity twice from two sources results in one row, not two — dedup is verifiable with a script or test
   3. `SELECT match_vault_docs(org_id, query_embedding, 50)` returns results without scanning in Node; the HNSW index is confirmed via `\d rfp_opportunities_embedding_idx` or equivalent
   4. Each org row in `rfp_entitlements` carries coverage level and per-operation quotas; an operator SQL update overrides a single org without affecting others
-**Plans**: TBD
+**Plans**: 4 plans
+- [ ] 14-01-PLAN.md — Add 7 typed contract/grant columns + GIN indexes + backfill to rfp_opportunities [FND-01]
+- [ ] 14-02-PLAN.md — Swap ivfflat→HNSW + match_vault_docs SECURITY DEFINER RPC + retrieve.ts wiring [FND-03]
+- [ ] 14-03-PLAN.md — Create rfp_entitlements table + RLS + Stripe webhook tier→coverage upsert [FND-04]
+- [ ] 14-04-PLAN.md — Dedup verification (unit test + live-DB script) + database.types.ts regen [FND-02]
 
 ### Phase 15: Level-1 Federal Discovery
 **Goal**: Federal opportunities from SAM.gov, Grants.gov, and SBIR/STTR ingest reliably on a durable job cadence; the discovery feed shows live counts; source health is reported and alerts the operator on SLA breach
@@ -222,7 +226,7 @@ Phases execute in numeric order: 13 → 14 → 15 → 16 → 17 → 18 → 19 �
 | 2. Onboarding Optimization | v1.0 | 2/2 | Complete | 2026-02-23 |
 | 3. Conversion Analytics | v1.0 | 0/TBD | Superseded | - |
 | 13. Pre-Work Stabilization | 3/4 | In Progress|  | - |
-| 14. Canonical Data Foundation | v2.0 | 0/TBD | Not started | - |
+| 14. Canonical Data Foundation | v2.0 | 0/4 | Not started | - |
 | 15. Level-1 Federal Discovery | v2.0 | 0/TBD | Not started | - |
 | 16. Extended Discovery + Saved Searches | v2.0 | 0/TBD | Not started | - |
 | 17. AI Cost Guardrail | v2.0 | 0/TBD | Not started | - |
