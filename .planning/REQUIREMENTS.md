@@ -111,16 +111,61 @@ Tracked, not in this roadmap.
 
 ## Traceability
 
-Populated during roadmap creation.
-
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| (pending roadmap) | — | Pending |
+| FND-01 | Phase 14 | Pending |
+| FND-02 | Phase 14 | Pending |
+| FND-03 | Phase 14 | Pending |
+| FND-04 | Phase 14 | Pending |
+| DISCO-01 | Phase 15 | Pending |
+| DISCO-02 | Phase 15 | Pending |
+| DISCO-03 | Phase 16 | Pending |
+| DISCO-04 | Phase 16 | Pending |
+| DISCO-05 | Phase 15 | Pending |
+| DISCO-06 | Phase 16 | Pending |
+| DISCO-07 | Phase 15 | Pending |
+| SCORE-01 | Phase 18 | Pending |
+| SCORE-02 | Phase 18 | Pending |
+| SCORE-03 | Phase 18 | Pending |
+| SCORE-04 | Phase 18 | Pending |
+| REVIEW-01 | Phase 19 | Pending |
+| REVIEW-02 | Phase 19 | Pending |
+| REVIEW-03 | Phase 19 | Pending |
+| REVIEW-04 | Phase 19 | Pending |
+| REVIEW-05 | Phase 19 | Pending |
+| REVIEW-06 | Phase 19 | Pending |
+| SUBMIT-01 | Phase 20 | Pending |
+| SUBMIT-02 | Phase 20 | Pending |
+| SUBMIT-03 | Phase 20 | Pending |
+| SUBMIT-04 | Phase 20 | Pending |
+| LEARN-01 | Phase 21 | Pending |
+| LEARN-02 | Phase 21 | Pending |
+| BILL-01 | Phase 23 | Pending |
+| BILL-02 | Phase 23 | Pending |
+| BILL-03 | Phase 23 | Pending |
+| BILL-04 | Phase 17 | Pending |
+| BILL-05 | Phase 23 | Pending |
+| ADMIN-01 | Phase 24 | Pending |
+| ADMIN-02 | Phase 24 | Pending |
+| ADMIN-03 | Phase 24 | Pending |
+| ADMIN-04 | Phase 24 | Pending |
+| ADMIN-05 | Phase 24 | Pending |
+| TRUST-01 | Phase 22 | Pending |
+| TRUST-02 | Phase 22 | Pending |
+| TRUST-03 | Phase 22 | Pending |
+| TRUST-04 | Phase 22 | Pending |
+| FTUE-01 | Phase 24 | Pending |
+| FTUE-02 | Phase 24 | Pending |
+| FTUE-03 | Phase 24 | Pending |
+| LAUNCH-01 | Phase 13 | Pending |
+| LAUNCH-02 | Phase 25 | Pending |
+| LAUNCH-03 | Phase 13 | Pending |
+| LAUNCH-04 | Phase 13 | Pending |
 
 **Coverage:**
 - v2.0 requirements: 43 total
-- Mapped to phases: TBD
-- Unmapped: TBD
+- Mapped to phases: 43
+- Unmapped: 0
 
 ---
 
@@ -134,4 +179,4 @@ Retained for history. These belonged to the parent AI-OS funnel work.
 
 ---
 *Requirements defined: 2026-06-05*
-*Last updated: 2026-06-05 after milestone v2.0 definition*
+*Last updated: 2026-06-05 — Traceability populated after roadmap creation (Phases 13-25)*

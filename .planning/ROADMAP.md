@@ -1,68 +1,207 @@
-# Roadmap: Perpetual Core
+# Roadmap: Perpetual Core RFP & Proposal Engine
 
 ## Overview
 
-Milestone v1.0 Conversion Optimization takes a fully-built product and optimizes the funnel from visitor to active user. Phase 1 adds manufactured social proof to the landing page. Phase 2 improves the onboarding flow to deliver a guided aha moment. Phase 3 instruments the full funnel with analytics so every improvement is measurable.
+Milestone v1.0 Conversion Optimization shipped Phases 1-2 (Phase 3 superseded by RFP focus). Milestone v2.0 "RFP Engine — Market-Ready & Best-in-Class" runs Phases 13-24. It opens with a stabilization phase that de-risks the codebase before any feature work begins, then builds the load-bearing data foundation, tiered discovery, AI-cost guardrails, explainable scoring, adversarial review with compliance gating, submission tracking, win/loss learning, a security hard gate, live billing, the operator console, first-time UX, and a final E2E launch gate. Every phase delivers a coherent, independently verifiable capability.
+
+## Milestones
+
+- [x] **v1.0 Conversion Optimization** — Phases 1-2 (shipped 2026-02-23; Phase 3 superseded)
+- [ ] **v2.0 RFP Engine — Market-Ready & Best-in-Class** — Phases 13-24 (active)
 
 ## Phases
 
 **Phase Numbering:**
-- Integer phases (1, 2, 3): Planned milestone work
+- Integer phases (1, 2, 3 …): Planned milestone work
 - Decimal phases (2.1, 2.2): Urgent insertions (marked with INSERTED)
 
-Decimal phases appear between their surrounding integers in numeric order.
+<details>
+<summary>v1.0 Conversion Optimization (Phases 1-2) — SHIPPED 2026-02-23</summary>
 
 - [x] **Phase 1: Social Proof** - Add founder credibility, comparison table, and trust signals to the landing page
-- [x] **Phase 2: Onboarding Optimization** - Improve the first-use flow to deliver a guided aha moment with activation checklist (completed 2026-02-23)
-- [ ] **Phase 3: Conversion Analytics** - Instrument the full funnel with event tracking, UTM attribution, and admin dashboard visualization
+- [x] **Phase 2: Onboarding Optimization** - Improve the first-use flow to deliver a guided aha moment with activation checklist
+
+</details>
+
+### v2.0 RFP Engine — Market-Ready & Best-in-Class
+
+- [ ] **Phase 13: Pre-Work Stabilization** - Merge PR #4, purge inflated counts, start SAM.gov re-registration, resolve source-drift events
+- [ ] **Phase 14: Canonical Data Foundation** - Unified opportunity model, dedup, entitlement table, pgvector HNSW match RPC
+- [ ] **Phase 15: Level-1 Federal Discovery** - SAM.gov/Grants.gov/SBIR ingest with durable jobs, source-health SLA, verified live counts
+- [ ] **Phase 16: Extended Discovery (Levels 2 & 3) + Saved Searches** - National state sources, IRS 990 foundations, global sources, gated by entitlement; saved search alerts
+- [ ] **Phase 17: AI Cost Guardrail** - Per-tenant AI cost ledger with hard spend limit enforced before every LLM call
+- [ ] **Phase 18: Explainable Fit Scoring** - Vault-grounded fit scores with dimension breakdown, disqualifier flags, and cited evidence
+- [ ] **Phase 19: Rubric Review, Compliance Gate & Upload** - Adversarial reviewer panel, rubric extraction, compliance gate v1, AI-use disclosure, PDF/DOCX upload
+- [ ] **Phase 20: Submission Tracking & Amendments** - Submission packet assembly, status tracking, amendment diffing, change alerts
+- [ ] **Phase 21: Win/Loss Learning** - Outcome recording, debrief, win-rate analytics by source/type/score band
+- [ ] **Phase 22: Trust, Security & Legal** - RLS audit, cross-tenant CI gate, per-tenant vault isolation, legal pages live
+- [ ] **Phase 23: Live Billing & Entitlements** - Stripe live mode, self-serve trial → provisioning, Meters migration, transparent pricing
+- [ ] **Phase 24: Operator Console, Monitoring & FTUE** - Admin console, /api/health/rfp, status monitor, first-time UX (≤5-field setup → first scored opps, guided checklist, real empty states)
+- [ ] **Phase 25: Launch Gate** - E2E coverage on draft → review → submit critical path; production stable
 
 ## Phase Details
 
-### Phase 1: Social Proof
-**Goal**: Visitors can see credibility signals on the landing page that justify signing up
-**Depends on**: Nothing (first phase)
-**Requirements**: PROOF-01, PROOF-02, PROOF-03, PROOF-04
+### Phase 13: Pre-Work Stabilization
+**Goal**: The codebase is safe to build on — PR #4 merged to main, no inflated claims in the UI, SAM.gov system account re-registered with expiry alerting in place, and all 18 source-drift events resolved
+**Depends on**: Nothing (first phase of v2.0)
+**Requirements**: LAUNCH-01, LAUNCH-03, LAUNCH-04
 **Success Criteria** (what must be TRUE):
-  1. Visitor can read a "Built By" section with Lorenzo's story, photo placeholder, and the IHA mission statement
-  2. Visitor can compare Perpetual Core vs ChatGPT vs competitors in a feature table showing memory, models, RAG, agents, and pricing differentiators
-  3. Visitor can see trust badges (SOC 2 ready, enterprise SSO, 99.9% uptime SLA) on the landing page
-  4. Visitor can see a "trusted by X organizations" counter with industry/partner logo placeholders
-**Plans:** 1/1 plans complete
+  1. `git log origin/main` shows the PR #4 branch commits and production is running from main without regression
+  2. No page or marketing surface displays a static or inflated opportunity count ("80k+" or any hardcoded number); counts are either dynamic or absent
+  3. SAM.gov system account registration is submitted and a calendar alert exists for the 90-day key expiry cycle
+  4. All 18 open source-drift events are resolved or triaged with a clear owner and ETA
+**Plans**: TBD
 
-Plans:
-- [x] 01-01-PLAN.md — Create and integrate 4 social proof sections (founder story, comparison table, trust badges, org counter)
-
-### Phase 2: Onboarding Optimization
-**Goal**: New users reach an aha moment during their first session and know exactly what to do next
-**Depends on**: Phase 1
-**Requirements**: ONBD-01, ONBD-02
+### Phase 14: Canonical Data Foundation
+**Goal**: A single unified schema stores both government contracts and foundation grants; opportunities are deduplicated; each org has a queryable entitlement record; and the pgvector HNSW RPC is live and callable
+**Depends on**: Phase 13
+**Requirements**: FND-01, FND-02, FND-03, FND-04
 **Success Criteria** (what must be TRUE):
-  1. New user is guided through a contextual first-chat experience that demonstrates persistent memory
-  2. New user sees an onboarding checklist that tracks activation milestones (first chat, upload doc, explore agents)
-  3. Completed checklist items are visually marked so the user knows what they have and have not done
-**Plans:** 2/2 plans complete
+  1. A single `rfp_opportunities` table (or equivalent unified view) returns both contract and grant records with all required fields (NAICS/PSC/set-aside for contracts; CFDA/eligibility/cost-share/funder for grants) queryable from a single call
+  2. Ingesting the same opportunity twice from two sources results in one row, not two — dedup is verifiable with a script or test
+  3. `SELECT match_vault_docs(org_id, query_embedding, 50)` returns results without scanning in Node; the HNSW index is confirmed via `\d rfp_opportunities_embedding_idx` or equivalent
+  4. Each org row in `rfp_entitlements` carries coverage level and per-operation quotas; an operator SQL update overrides a single org without affecting others
+**Plans**: TBD
 
-Plans:
-- [ ] 02-01-PLAN.md — Guided first-chat aha moment (onboarding-to-chat redirect with personalized AI greeting)
-- [ ] 02-02-PLAN.md — Activation checklist with 3 milestones (first chat, upload doc, explore agents)
-
-### Phase 3: Conversion Analytics
-**Goal**: Every step of the visitor-to-active-user funnel is tracked, attributed to campaigns, and visible in the admin dashboard
-**Depends on**: Phase 2
-**Requirements**: ANLYT-01, ANLYT-02, ANLYT-03
+### Phase 15: Level-1 Federal Discovery
+**Goal**: Federal opportunities from SAM.gov, Grants.gov, and SBIR/STTR ingest reliably on a durable job cadence; the discovery feed shows live counts; source health is reported and alerts the operator on SLA breach
+**Depends on**: Phase 14
+**Requirements**: DISCO-01, DISCO-02, DISCO-05, DISCO-07
 **Success Criteria** (what must be TRUE):
-  1. Admin can see a funnel visualization showing drop-off rates at each step (page view, CTA click, signup, first chat, activation)
-  2. Custom events fire correctly for all five funnel steps and appear in the tracking store
-  3. UTM parameters from marketing links are captured and associated with signups in the admin dashboard
+  1. Opening the Discovery feed shows a unified list of government contracts and grants with a count pulled live from `rfp_opportunities`, not a static string
+  2. A simulated source failure (e.g., toggling the SAM.gov cron off) is detected within the SLA window and fires an operator alert
+  3. An ingest run completes, retries on transient failure, and records last-success timestamp and row-delta in the source-health table — visible in logs or a query
+  4. All three Level-1 sources (SAM.gov, Grants.gov, SBIR/STTR) have at least one successful ingest run recorded in production
+**Plans**: TBD
+
+### Phase 16: Extended Discovery (Levels 2 & 3) + Saved Searches
+**Goal**: National (50-state + IRS 990 foundation) and global (EU TED, UK Find a Tender, CanadaBuys) sources ingest and gate by entitlement; users can save searches and receive alerts on new matches
+**Depends on**: Phase 15
+**Requirements**: DISCO-03, DISCO-04, DISCO-06
+**Success Criteria** (what must be TRUE):
+  1. A user on a Level-2 plan sees state and foundation grant results in their feed; a user on a Level-1 plan does not, and sees a clear upgrade prompt instead
+  2. A user on a Level-3 plan sees EU TED, UK, and CanadaBuys opportunities alongside federal and national results in one feed
+  3. A user can save a search filter set (keyword + geography + funding type) and receive an in-app or email alert when new matching opportunities appear — verifiable by seeding a new matching opp and checking notification delivery
+**Plans**: TBD
+
+### Phase 17: AI Cost Guardrail
+**Goal**: Every LLM-backed operation is gated by a per-tenant budget check; no LLM call fires when a tenant has exceeded their hard spend limit; cost is ledgered in real time
+**Depends on**: Phase 14 (entitlement table), Phase 15 (first LLM context)
+**Requirements**: BILL-04
+**Success Criteria** (what must be TRUE):
+  1. Setting a test org's AI budget to $0.00 and triggering any LLM call (scoring, drafting, review) returns a clear budget-exceeded error — the LLM call is never made, confirmed by zero token usage in logs
+  2. A successful LLM call records cost (input tokens × rate + output tokens × rate) in the per-tenant ledger row within the same request lifecycle
+  3. After cumulative spend crosses the configured limit mid-session, the next LLM call is blocked — the user sees an actionable message, not a 500 error
+**Plans**: TBD
+
+### Phase 18: Explainable Fit Scoring
+**Goal**: Every opportunity in the feed has a fit score grounded in the org's vault artifacts; the score explains WHY across five dimensions, flags disqualifiers, and cites specific prior wins or vault evidence
+**Depends on**: Phase 14 (HNSW RPC), Phase 15 (discovery data), Phase 17 (AI cost guardrail active)
+**Requirements**: SCORE-01, SCORE-02, SCORE-03, SCORE-04
+**Success Criteria** (what must be TRUE):
+  1. Clicking an opportunity shows a fit score (0-100 or equivalent) with a plain-English summary of why the org fits or does not fit
+  2. The explanation cites at least one vault artifact (prior proposal, award, annual report) by name and links or previews the excerpt it drew from
+  3. The score panel breaks down into at least five labeled dimensions (mission fit, eligibility, track record, capacity, funder relationship) each with a sub-score or rating
+  4. At least one disqualifier check (e.g., past-performance threshold not met, entity type ineligible) surfaces as a flagged warning when applicable — verifiable by testing against an ineligible opp
+**Plans**: TBD
+
+### Phase 19: Rubric Review, Compliance Gate & Upload
+**Goal**: Proposals are scored against the actual solicitation rubric by a multi-agent panel; a compliance gate blocks premature submission; AI-use is disclosed; users can upload and parse solicitation PDFs and DOCX files
+**Depends on**: Phase 18 (scoring live), Phase 14 (vault model), Phase 17 (AI cost guardrail)
+**Requirements**: REVIEW-01, REVIEW-02, REVIEW-03, REVIEW-04, REVIEW-05, REVIEW-06
+**Success Criteria** (what must be TRUE):
+  1. Uploading a federal solicitation PDF extracts Section L/M evaluation criteria (or grant funder priorities) with associated weights — visible in the proposal workspace
+  2. Triggering a review run produces reviewer-panel scores anchored to specific draft sections, each with a severity label and a suggested fix — not generic grammar feedback
+  3. The compliance gate explicitly checks page limits, required attachments, budget math, eligibility, and deadline+timezone and surfaces a pass/fail checklist the user can see before submitting
+  4. Draft output includes an AI-use disclosure notice, and the compliance checklist includes an AI-disclosure line item (GSA GSAR 552.239-7001 / NIH) that the user must acknowledge
+  5. A user can upload a PDF or DOCX solicitation document on Vercel serverless and have it parsed into vault chunks without timeout or truncation on a 20-page document
+**Plans**: TBD
+
+### Phase 20: Submission Tracking & Amendments
+**Goal**: Users assemble a submission packet and track it through its lifecycle; the system monitors live solicitations for amendments and re-triggers compliance and fit checks when material changes appear
+**Depends on**: Phase 19 (compliance gate live)
+**Requirements**: SUBMIT-01, SUBMIT-02, SUBMIT-03, SUBMIT-04
+**Success Criteria** (what must be TRUE):
+  1. A user can assemble a submission packet (sections + attachments + compliance summary + full audit trail) and export or review it as a coherent unit before submitting externally
+  2. A user can mark a pursuit with a submission status (draft, submitted, awarded, lost, no-bid) and see the current status at a glance on the Proposals list
+  3. The system re-polls a tracked solicitation, detects an amendment, diffs it against the original capture, and surfaces the diff to the user within the SLA window
+  4. A material amendment (e.g., deadline extension, scope change) triggers a notification to the user and re-queues compliance and fit rechecks — verifiable by seeding an amendment event
+**Plans**: TBD
+
+### Phase 21: Win/Loss Learning
+**Goal**: Users record pursuit outcomes; win-rate analytics surface patterns by source, funding type, and score band so the org can learn what to pursue more of
+**Depends on**: Phase 20 (pursuit lifecycle complete)
+**Requirements**: LEARN-01, LEARN-02
+**Success Criteria** (what must be TRUE):
+  1. A user can open a closed pursuit, select an outcome (won / lost / no-bid), write a short debrief note, and save it — the outcome is visible on the pursuit record
+  2. The analytics view shows win rate broken down by at least three dimensions (source, funding type, score band) with counts and percentages, drawing from real recorded outcomes
+**Plans**: TBD
+
+### Phase 22: Trust, Security & Legal
+**Goal**: RLS is audited and a cross-tenant isolation test is a required CI gate; per-tenant vault isolation is verified; no service-role misuse in user paths; legal pages are live; ToS compliance for data sources is documented
+**Depends on**: Phase 21 (all feature phases complete; this is the HARD GATE before billing goes live)
+**Requirements**: TRUST-01, TRUST-02, TRUST-03, TRUST-04
+**Success Criteria** (what must be TRUE):
+  1. A CI test that authenticates as Org A and attempts to read Org B's proposals, vault chunks, and entitlements returns 0 rows (not an error, not data) — this test is a required check in the pipeline
+  2. A code audit confirms no user-context API route calls the service-role Supabase client; all user-facing vault and proposal reads go through RLS-enforced paths
+  3. Terms of Service, Privacy Policy, and AI-use disclosure pages are publicly accessible at known URLs on the live domain
+  4. A documented ToS-compliance review confirms that ProPublica/IRS 990 data is used lawfully and that no Candid data is ingested
+**Plans**: TBD
+
+### Phase 23: Live Billing & Entitlements
+**Goal**: Stripe live mode is active; any visitor can self-serve into a trial that auto-provisions their org; plans map to coverage levels enforced in app and RLS; legacy metered prices are migrated to Stripe Meters; transparent pricing and a risk-reversal guarantee are live on the pricing page
+**Depends on**: Phase 22 (Trust/Security hard gate passed)
+**Requirements**: BILL-01, BILL-02, BILL-03, BILL-05
+**Success Criteria** (what must be TRUE):
+  1. A net-new visitor can click "Start trial," complete Stripe checkout in live mode, and land in a provisioned org — no manual step required from the operator
+  2. A Level-1 plan user cannot access Level-2 discovery results; attempting to do so shows an upgrade prompt — the gate is enforced by entitlement, not only UI hiding
+  3. Usage metering reads from Stripe Meters (not legacy metered prices); upgrading or downgrading a plan correctly adjusts the entitlement record within the same billing cycle
+  4. The public pricing page shows tier names, prices, coverage levels, and a risk-reversal guarantee with no contradictions between what is listed and what the system actually enforces
+**Plans**: TBD
+
+### Phase 24: Operator Console, Monitoring & FTUE
+**Goal**: Operators can see org health, AI cost/margin, source drift, and revenue at a glance; the health endpoint is wired to a status monitor; a new org reaches first scored opportunities in one session via ≤5-field setup; every key surface has a real empty state
+**Depends on**: Phase 23 (billing live, full feature set complete)
+**Requirements**: ADMIN-01, ADMIN-02, ADMIN-03, ADMIN-04, ADMIN-05, FTUE-01, FTUE-02, FTUE-03
+**Success Criteria** (what must be TRUE):
+  1. An operator opening the admin console can see, on one screen: active org count, drafts/week, reviewer runs, vault chunk counts, and MRR grouped by tier
+  2. The admin console shows AI cost and gross margin per org; an operator can set a budget alarm that fires when a specific org's spend crosses a threshold
+  3. An operator can see source health (last success, row delta, drift status) and trigger a manual "rerun now" for any source — the rerun result is visible within 60 seconds
+  4. `GET /api/health/rfp` returns JSON with scraper last-success, drift-open count, cron last-run, and error rate — and this endpoint is wired to an uptime or status-page monitor
+  5. A brand-new org completes ≤5-field setup (org type, mission, geography, funding types) and sees their first scored opportunities in the same session — no additional config required
+  6. Every major empty state (Discovery empty, Proposals empty, Vault empty, Voice empty) shows a real CTA guiding the user toward their first qualified draft
+**Plans**: TBD
+
+### Phase 25: Launch Gate
+**Goal**: The full critical path from draft → review → submit is covered by E2E tests; production is stable on main; v2.0 is ready to call done
+**Depends on**: Phase 24 (all prior phases complete)
+**Requirements**: LAUNCH-02
+**Success Criteria** (what must be TRUE):
+  1. An automated E2E test (Playwright or equivalent) walks draft → compliance review → submission packet assembly → submission status update and passes without manual intervention
+  2. The E2E suite runs on CI and blocks merge to main on failure
+  3. Production is running from main and the last deployment has no critical errors in logs or the health endpoint — the operator can confirm this by checking `/api/health/rfp`
 **Plans**: TBD
 
 ## Progress
 
 **Execution Order:**
-Phases execute in numeric order: 1 -> 2 -> 3
+Phases execute in numeric order: 13 → 14 → 15 → 16 → 17 → 18 → 19 → 20 → 21 → 22 → 23 → 24 → 25
 
-| Phase | Plans Complete | Status | Completed |
-|-------|----------------|--------|-----------|
-| 1. Social Proof | 1/1 | Complete    | 2026-02-23 |
-| 2. Onboarding Optimization | 2/2 | Complete   | 2026-02-23 |
-| 3. Conversion Analytics | 0/TBD | Not started | - |
+| Phase | Milestone | Plans Complete | Status | Completed |
+|-------|-----------|----------------|--------|-----------|
+| 1. Social Proof | v1.0 | 1/1 | Complete | 2026-02-23 |
+| 2. Onboarding Optimization | v1.0 | 2/2 | Complete | 2026-02-23 |
+| 3. Conversion Analytics | v1.0 | 0/TBD | Superseded | - |
+| 13. Pre-Work Stabilization | v2.0 | 0/TBD | Not started | - |
+| 14. Canonical Data Foundation | v2.0 | 0/TBD | Not started | - |
+| 15. Level-1 Federal Discovery | v2.0 | 0/TBD | Not started | - |
+| 16. Extended Discovery + Saved Searches | v2.0 | 0/TBD | Not started | - |
+| 17. AI Cost Guardrail | v2.0 | 0/TBD | Not started | - |
+| 18. Explainable Fit Scoring | v2.0 | 0/TBD | Not started | - |
+| 19. Rubric Review, Compliance Gate & Upload | v2.0 | 0/TBD | Not started | - |
+| 20. Submission Tracking & Amendments | v2.0 | 0/TBD | Not started | - |
+| 21. Win/Loss Learning | v2.0 | 0/TBD | Not started | - |
+| 22. Trust, Security & Legal | v2.0 | 0/TBD | Not started | - |
+| 23. Live Billing & Entitlements | v2.0 | 0/TBD | Not started | - |
+| 24. Operator Console, Monitoring & FTUE | v2.0 | 0/TBD | Not started | - |
+| 25. Launch Gate | v2.0 | 0/TBD | Not started | - |
