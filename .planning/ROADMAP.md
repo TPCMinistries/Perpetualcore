@@ -50,7 +50,7 @@ Beachhead coverage uses what's ALREADY live: federal (SAM/Grants.gov/NIH/NSF) + 
 ### v2.0 RFP Engine — Market-Ready & Best-in-Class
 
 - [x] **Phase 13: Pre-Work Stabilization** - Merge PR #4 (pushed to origin/main d5e9164, 2026-06-06, prod 200/no regression), purged inflated counts, SAM.gov key wired + expiry alert armed, drift resolved ✓ COMPLETE
-- [ ] **Phase 14: Canonical Data Foundation** - Unified opportunity model, dedup, entitlement table, pgvector HNSW match RPC
+- [x] **Phase 14: Canonical Data Foundation** - Unified opportunity model, dedup, entitlement table, pgvector HNSW match RPC (completed 2026-06-06)
 - [ ] **Phase 15: Level-1 Federal Discovery** - SAM.gov/Grants.gov/SBIR ingest with durable jobs, source-health SLA, verified live counts
 ⏸ - [ ] **Phase 16: Extended Discovery (Levels 2 & 3) + Saved Searches** - Declarative all-50-state connector framework (any state via config row), tri-state live, IRS 990 foundations, global sources, gated by entitlement; saved search alerts
 - [ ] **Phase 17: AI Cost Guardrail** - Per-tenant AI cost ledger with hard spend limit enforced before every LLM call
@@ -226,7 +226,7 @@ Phases execute in numeric order: 13 → 14 → 15 → 16 → 17 → 18 → 19 �
 | 2. Onboarding Optimization | v1.0 | 2/2 | Complete | 2026-02-23 |
 | 3. Conversion Analytics | v1.0 | 0/TBD | Superseded | - |
 | 13. Pre-Work Stabilization | 3/4 | In Progress|  | - |
-| 14. Canonical Data Foundation | 3/4 | In Progress|  | - |
+| 14. Canonical Data Foundation | 3/4 | Complete    | 2026-06-06 | - |
 | 15. Level-1 Federal Discovery | v2.0 | 0/TBD | Not started | - |
 | 16. Extended Discovery + Saved Searches | v2.0 | 0/TBD | Not started | - |
 | 17. AI Cost Guardrail | v2.0 | 0/TBD | Not started | - |
