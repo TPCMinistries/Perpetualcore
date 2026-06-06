@@ -311,7 +311,12 @@ function SourceReadinessTiles({
         label="Indexed"
         value={formatNumber(summary.indexed)}
         sub="verified records"
-        tone={summary.indexed >= 80000 ? "emerald" : "amber"}
+        tone={
+          summary.indexedCoveragePercent !== null &&
+          summary.indexedCoveragePercent >= 80
+            ? "emerald"
+            : "amber"
+        }
       />
       <Tile
         label="Target"
@@ -487,12 +492,15 @@ function buildOperatorActions({
     });
   }
 
-  if (sourceReadinessSummary.indexed < 80000) {
+  if (
+    sourceReadinessSummary.indexedCoveragePercent !== null &&
+    sourceReadinessSummary.indexedCoveragePercent < 80
+  ) {
     actions.push({
       id: "inventory-scale",
       label: "Scale verified inventory",
-      detail: "Public positioning wants 80k+ opportunities. Keep copy tied to verified indexed count until ingestion reaches that number.",
-      metric: formatNumber(sourceReadinessSummary.indexed),
+      detail: "Indexed inventory is below catalog coverage target — keep all public copy tied to the live verified count.",
+      metric: `${sourceReadinessSummary.indexedCoveragePercent.toFixed(1)}% covered`,
       severity: "watch",
     });
   }
