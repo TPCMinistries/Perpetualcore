@@ -10,9 +10,9 @@ See: .planning/PROJECT.md (updated 2026-06-05)
 ## Current Position
 
 Phase: 14 of 25 (Canonical Data Foundation)
-Plan: 2 of 4 complete (14-01, 14-02 done; 14-03, 14-04 pending)
-Status: In progress — Phase 14, Plan 02 complete
-Last activity: 2026-06-06 — 14-02 complete (1ad7ff6), HNSW index + match_vault_docs RPC + retrieve.ts wired, FND-03 complete
+Plan: 4 of 4 complete (14-01, 14-02, 14-03, 14-04 done — Phase 14 COMPLETE)
+Status: Phase 14 complete — ready for Phase 22 (security)
+Last activity: 2026-06-06 — 14-04 complete (737c8f0), database.types.ts regen + FND-02 dedup proof (unit test + live-DB script)
 
 Progress: [█░░░░░░░░░] ~10% (v2.0 phases — Phase 14 of 25)
 
@@ -68,6 +68,10 @@ Recent decisions affecting current work:
 - [Phase 14-canonical-data-foundation]: ROADMAP index name correction: rfp_vault_artifacts_embedding_idx (not rfp_opportunities_embedding_idx) — index is on rfp_vault_artifacts table
 - [Phase 14-canonical-data-foundation]: match_vault_docs RPC uses as-unknown-as cast until plan 14-04 regenerates database.types.ts
 - [Phase 14-canonical-data-foundation]: In-Node cosine fallback retained in retrieve.ts for local dev safety and graceful RPC degradation
+- [Phase 14-04]: database.types.ts regenerated via CLI (not hand-edited) — supabase CLI authenticated; all Phase 14 schema present (rfp_entitlements, 7 opp columns, match_vault_docs RPC)
+- [Phase 14-04]: persistCanonicalAliases call-site confirmed at run.ts:191 — no new wiring required; plan was verification-only for FND-02
+- [Phase 14-04]: Live-DB verify scripts use VERIFY- prefix + finally cleanup as standard pattern for CORE DB safety
+- [Phase 14-04]: Phase 14 COMPLETE — all 4 plans done (FND-01, FND-02, FND-03 requirements met)
 
 ### Pending Todos
 
@@ -84,5 +88,5 @@ Recent decisions affecting current work:
 ## Session Continuity
 
 Last session: 2026-06-06
-Stopped at: Completed 14-canonical-data-foundation/14-01-PLAN.md
-Resume file: None — next plan is 14-02
+Stopped at: Completed 14-canonical-data-foundation/14-04-PLAN.md — Phase 14 complete
+Resume file: None — next phase is 22 (security)
