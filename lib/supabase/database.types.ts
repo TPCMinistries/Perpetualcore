@@ -15258,6 +15258,30 @@ export type Database = {
           },
         ]
       }
+      rfp_api_key_health: {
+        Row: {
+          account_type: string | null
+          expires_at: string | null
+          key_name: string
+          last_alerted_at: string | null
+          updated_at: string
+        }
+        Insert: {
+          account_type?: string | null
+          expires_at?: string | null
+          key_name: string
+          last_alerted_at?: string | null
+          updated_at?: string
+        }
+        Update: {
+          account_type?: string | null
+          expires_at?: string | null
+          key_name?: string
+          last_alerted_at?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       rfp_capture_profiles: {
         Row: {
           created_at: string
@@ -15416,6 +15440,59 @@ export type Database = {
           },
         ]
       }
+      rfp_entitlements: {
+        Row: {
+          coverage_level: string
+          created_at: string
+          id: string
+          monthly_draft_quota: number | null
+          monthly_review_quota: number | null
+          monthly_score_quota: number | null
+          monthly_vault_mb: number | null
+          org_id: string
+          override_at: string | null
+          override_by: string | null
+          override_reason: string | null
+          updated_at: string
+        }
+        Insert: {
+          coverage_level?: string
+          created_at?: string
+          id?: string
+          monthly_draft_quota?: number | null
+          monthly_review_quota?: number | null
+          monthly_score_quota?: number | null
+          monthly_vault_mb?: number | null
+          org_id: string
+          override_at?: string | null
+          override_by?: string | null
+          override_reason?: string | null
+          updated_at?: string
+        }
+        Update: {
+          coverage_level?: string
+          created_at?: string
+          id?: string
+          monthly_draft_quota?: number | null
+          monthly_review_quota?: number | null
+          monthly_score_quota?: number | null
+          monthly_vault_mb?: number | null
+          org_id?: string
+          override_at?: string | null
+          override_by?: string | null
+          override_reason?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "rfp_entitlements_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: true
+            referencedRelation: "rfp_orgs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       rfp_opp_matches: {
         Row: {
           chips: string[]
@@ -15500,15 +15577,22 @@ export type Database = {
           amount_max: number | null
           amount_min: number | null
           brief: string | null
+          cfda_numbers: string[]
+          cost_share_required: boolean | null
           created_at: string
           deadline: string | null
+          eligibility_types: string[]
+          funder_name: string | null
           geo: string | null
           id: string
           keywords: string[]
           last_seen_at: string | null
+          naics_codes: string[]
           needs_review: boolean
           posted_at: string | null
+          psc_code: string | null
           raw_json: Json
+          set_aside_code: string | null
           source: string
           source_id: string | null
           title: string
@@ -15520,15 +15604,22 @@ export type Database = {
           amount_max?: number | null
           amount_min?: number | null
           brief?: string | null
+          cfda_numbers?: string[]
+          cost_share_required?: boolean | null
           created_at?: string
           deadline?: string | null
+          eligibility_types?: string[]
+          funder_name?: string | null
           geo?: string | null
           id?: string
           keywords?: string[]
           last_seen_at?: string | null
+          naics_codes?: string[]
           needs_review?: boolean
           posted_at?: string | null
+          psc_code?: string | null
           raw_json?: Json
+          set_aside_code?: string | null
           source: string
           source_id?: string | null
           title: string
@@ -15540,15 +15631,22 @@ export type Database = {
           amount_max?: number | null
           amount_min?: number | null
           brief?: string | null
+          cfda_numbers?: string[]
+          cost_share_required?: boolean | null
           created_at?: string
           deadline?: string | null
+          eligibility_types?: string[]
+          funder_name?: string | null
           geo?: string | null
           id?: string
           keywords?: string[]
           last_seen_at?: string | null
+          naics_codes?: string[]
           needs_review?: boolean
           posted_at?: string | null
+          psc_code?: string | null
           raw_json?: Json
+          set_aside_code?: string | null
           source?: string
           source_id?: string | null
           title?: string
@@ -16231,6 +16329,45 @@ export type Database = {
           reason?: string
           resolved_at?: string | null
           source?: string
+        }
+        Relationships: []
+      }
+      rfp_state_coverage: {
+        Row: {
+          connector: string
+          display_name: string
+          feed_kind: string
+          last_success_at: string | null
+          opportunity_count: number | null
+          reliability: string | null
+          source_config: Json
+          state_code: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          connector: string
+          display_name: string
+          feed_kind?: string
+          last_success_at?: string | null
+          opportunity_count?: number | null
+          reliability?: string | null
+          source_config?: Json
+          state_code: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          connector?: string
+          display_name?: string
+          feed_kind?: string
+          last_success_at?: string | null
+          opportunity_count?: number | null
+          reliability?: string | null
+          source_config?: Json
+          state_code?: string
+          status?: string
+          updated_at?: string
         }
         Relationships: []
       }
@@ -24149,6 +24286,17 @@ export type Database = {
           similarity: number
         }[]
       }
+      match_vault_docs: {
+        Args: { match_count?: number; org_id: string; query_embedding: string }
+        Returns: {
+          body: string
+          id: string
+          similarity: number
+          source_metadata: Json
+          title: string
+          type: string
+        }[]
+      }
       mnemo_search: {
         Args: {
           match_count?: number
@@ -24423,6 +24571,7 @@ export type Database = {
         Args: { perm_name: string; resource_uuid?: string; user_uuid: string }
         Returns: boolean
       }
+      user_org_ids: { Args: never; Returns: string[] }
       validate_api_key: {
         Args: { p_key_hash: string }
         Returns: {
