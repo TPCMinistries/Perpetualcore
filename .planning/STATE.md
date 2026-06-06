@@ -5,7 +5,7 @@
 See: .planning/PROJECT.md (updated 2026-06-05)
 
 **Core value:** Move an org from discovery → qualified pursuit → draft → compliance → review → submission-ready → post-submission, better than any competitor.
-**Current focus:** Phase 13 — Pre-Work Stabilization (v2.0 kickoff)
+**Current focus:** v2.0 re-sequenced BEACHHEAD-FIRST (2026-06-06) — see `VISION.md` + ROADMAP "Execution Sequence". Active path: 13(stabilize) → 14 → 22(security) → 17 → 18(scoring) → 19(review/compliance) → 20 → 24-FTUE → dogfood Uplift/IHA. Deferred w/ triggers: 16(all-50/global), 21, 23, 25. Real bottleneck: foundation/tooling (broken worktree node_modules; PR#4 unpushed).
 
 ## Current Position
 

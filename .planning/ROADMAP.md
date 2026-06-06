@@ -9,11 +9,35 @@ Milestone v1.0 Conversion Optimization shipped Phases 1-2 (Phase 3 superseded by
 - [x] **v1.0 Conversion Optimization** — Phases 1-2 (shipped 2026-02-23; Phase 3 superseded)
 - [ ] **v2.0 RFP Engine — Market-Ready & Best-in-Class** — Phases 13-24 (active)
 
+## Execution Sequence — BEACHHEAD-FIRST (overrides strict numeric order, 2026-06-06)
+
+We build depth-over-breadth toward a **design-partner-ready** beachhead (workforce/health CBOs, NY/NJ-metro, dogfooded by Uplift/IHA/TPC) — NOT a 50-state self-serve SaaS first. Full ambition is preserved in `VISION.md` with revisit triggers; nothing is abandoned.
+
+**ACTIVE PATH (in this order):**
+1. **Phase 13** — Stabilize (merge PR #4, fix dev tooling, one repo/deploy)
+2. **Phase 14** — Canonical data foundation
+3. **Phase 22** — Trust/Security (RLS audit + cross-tenant test) — pulled early; gate for any 2nd org
+4. **Phase 17** — AI cost guardrail
+5. **Phase 18** — Explainable fit scoring (the moat)
+6. **Phase 19** — Adversarial review + compliance gate (win-the-bid depth)
+7. **Phase 20** — Submission tracking (enough to submit a real bid)
+8. **Phase 24 (FTUE slice)** — onboarding good enough for a design partner
+9. **→ DOGFOOD:** run live Uplift/IHA/TPC bids; win 2-3. *(Beachhead "done".)*
+
+**DEFERRED — parked in `VISION.md` with triggers (do NOT build until trigger fires):**
+- **Phase 16 breadth** (all-50 states, global) → trigger: ≥10 requests for states beyond NY/NJ. *(Framework already built; coverage is config rows.)*
+- **Phase 23** self-serve billing + public signup → trigger: ≥3 partners say "I'd pay" + security passed
+- **Phase 21** win/loss recalibration → trigger: ≥5 outcomes per category
+- **Phase 25** public launch / GTM → trigger: ≥3 published case studies
+
+Beachhead coverage uses what's ALREADY live: federal (SAM/Grants.gov/NIH/NSF) + NYC + NJ-Treasury + foundations. No new discovery breadth needed to win the first bids.
+
 ## Phases
 
 **Phase Numbering:**
 - Integer phases (1, 2, 3 …): Planned milestone work
 - Decimal phases (2.1, 2.2): Urgent insertions (marked with INSERTED)
+- ⏸ = DEFERRED per beachhead sequencing above; spec preserved, revisit trigger in `VISION.md`
 
 <details>
 <summary>v1.0 Conversion Optimization (Phases 1-2) — SHIPPED 2026-02-23</summary>
@@ -28,16 +52,16 @@ Milestone v1.0 Conversion Optimization shipped Phases 1-2 (Phase 3 superseded by
 - [ ] **Phase 13: Pre-Work Stabilization** - Merge PR #4, purge inflated counts, start SAM.gov re-registration, resolve source-drift events
 - [ ] **Phase 14: Canonical Data Foundation** - Unified opportunity model, dedup, entitlement table, pgvector HNSW match RPC
 - [ ] **Phase 15: Level-1 Federal Discovery** - SAM.gov/Grants.gov/SBIR ingest with durable jobs, source-health SLA, verified live counts
-- [ ] **Phase 16: Extended Discovery (Levels 2 & 3) + Saved Searches** - Declarative all-50-state connector framework (any state via config row), tri-state live, IRS 990 foundations, global sources, gated by entitlement; saved search alerts
+⏸ - [ ] **Phase 16: Extended Discovery (Levels 2 & 3) + Saved Searches** - Declarative all-50-state connector framework (any state via config row), tri-state live, IRS 990 foundations, global sources, gated by entitlement; saved search alerts
 - [ ] **Phase 17: AI Cost Guardrail** - Per-tenant AI cost ledger with hard spend limit enforced before every LLM call
 - [ ] **Phase 18: Explainable Fit Scoring** - Vault-grounded fit scores with dimension breakdown, disqualifier flags, and cited evidence
 - [ ] **Phase 19: Rubric Review, Compliance Gate & Upload** - Adversarial reviewer panel, rubric extraction, compliance gate v1, AI-use disclosure, PDF/DOCX upload
 - [ ] **Phase 20: Submission Tracking & Amendments** - Submission packet assembly, status tracking, amendment diffing, change alerts
-- [ ] **Phase 21: Win/Loss Learning** - Outcome recording, debrief, win-rate analytics by source/type/score band
+⏸ - [ ] **Phase 21: Win/Loss Learning** - Outcome recording, debrief, win-rate analytics by source/type/score band
 - [ ] **Phase 22: Trust, Security & Legal** - RLS audit, cross-tenant CI gate, per-tenant vault isolation, legal pages live
-- [ ] **Phase 23: Live Billing & Entitlements** - Stripe live mode, self-serve trial → provisioning, Meters migration, transparent pricing
+⏸ - [ ] **Phase 23: Live Billing & Entitlements** - Stripe live mode, self-serve trial → provisioning, Meters migration, transparent pricing
 - [ ] **Phase 24: Operator Console, Monitoring & FTUE** - Admin console, /api/health/rfp, status monitor, first-time UX (≤5-field setup → first scored opps, guided checklist, real empty states)
-- [ ] **Phase 25: Launch Gate** - E2E coverage on draft → review → submit critical path; production stable
+⏸ - [ ] **Phase 25: Launch Gate** - E2E coverage on draft → review → submit critical path; production stable
 
 ## Phase Details
 
