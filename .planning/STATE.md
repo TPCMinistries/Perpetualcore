@@ -10,9 +10,9 @@ See: .planning/PROJECT.md (updated 2026-06-05)
 ## Current Position
 
 Phase: 13 of 25 (Pre-Work Stabilization)
-Plan: 2 of 4 in current phase (13-01 + 13-02 complete; 13-03 + 13-04 pending)
-Status: In progress — Phase 13 executing (parallel wave 1)
-Last activity: 2026-06-06 — 13-02 drift triage complete; all 18 rfp_source_drift events classified + annotated
+Plan: 4 of 4 in current phase (13-01 + 13-02 + 13-03 complete; 13-04 at checkpoint — awaiting push approval)
+Status: In progress — Phase 13, Plan 04 at human-verify checkpoint (pre-push)
+Last activity: 2026-06-06 — 13-04 merge complete locally (d5e9164), build passing, awaiting push to origin/main
 
 Progress: [█░░░░░░░░░] ~8% (v2.0 phases — Phase 13 of 13 phases in v2.0)
 
@@ -55,6 +55,8 @@ Recent decisions affecting current work:
 - [Phase 13]: All 18 rfp_source_drift events retrospectively classified: 4 stale-URL, 14 parser-break; ny_state portal session timeout confirmed structural gap (not transient)
 - [Phase 13]: nyc_doe has zero baseline recovery rows — source effectively offline until Phase 15 URL audit
 - [Phase 13-pre-work-stabilization]: Alert de-dup: 7-day window on last_alerted_at prevents daily re-spam; 21-day threshold gives 6-day buffer over SAM.gov's 15-day renewal window
+- [Phase 13-04]: Two-way merge strategy chosen (no squash): 253 feat commits + 114 main commits preserved; next.config.mjs hand-merged with union CSP + main's redirects + feat's PWA register:true
+- [Phase 13-04]: Merge commit d5e9164 on local main — verified build exit 0, all 4 key RFP routes present, middleware host-rewrite intact, getUser() before /api/* confirmed
 
 ### Pending Todos
 
@@ -66,10 +68,10 @@ Recent decisions affecting current work:
 ### Blockers/Concerns
 
 - [Phase 13] SAM.gov system account registration has a ~10-day wait; kick off immediately so it doesn't block Phase 15 federal ingest. Grants.gov/SBIR can proceed in parallel.
-- [Phase 14] PR #4 is 70+ commits ahead of main; merge must happen before any schema work or there is a drift risk.
+- [Phase 13 - RESOLVED LOCALLY] PR #4 merge complete on local main (d5e9164, build PASS) — push to origin/main awaiting human approval. Run `git push origin main` from the perpetual-core worktree after reviewing the checkpoint.
 
 ## Session Continuity
 
 Last session: 2026-06-06
-Stopped at: Completed 13-02-PLAN.md — drift triage register + DB annotation (all 18 events classified)
-Resume file: None
+Stopped at: 13-04-PLAN.md Task 3 checkpoint — merge complete locally, push not yet executed
+Resume file: None (reply "push approved" to push, then confirm Vercel deploy + rfp.perpetualcore.com health)
