@@ -9,10 +9,10 @@ See: .planning/PROJECT.md (updated 2026-06-05)
 
 ## Current Position
 
-Phase: 22 of 25 (Trust, Security & Legal)
-Plan: 4 of 4 complete (22-01 TRUST-01 RLS CI gate; 22-02 TRUST-02 service-role audit; 22-03 TRUST-03 legal pages; 22-04 TRUST-04 data-source compliance)
-Status: Phase 22 COMPLETE — all 4 plans done; SECURITY-AUDIT.md, legal pages, DATA-SOURCE-COMPLIANCE.md all in repo
-Last activity: 2026-06-07 — 17-03 complete (c44b561), user-facing call-site guardrail integration; voice×2 + vault×2 + naics-suggest all gated
+Phase: 18 of 25 (Explainable Fit Scoring)
+Plan: 2 of ? complete (18-01 RESEARCH; 18-02 checkDisqualifiers + mapToDimensions pure fns)
+Status: Phase 18 in progress — SCORE-03 + SCORE-04 pure functions complete; next: Plan 03 cron/endpoint integration
+Last activity: 2026-06-07 — 18-02 complete (4f70f9c), checkDisqualifiers + mapToDimensions with 17/17 tests passing
 
 Progress: [██░░░░░░░░] ~20% (v2.0 phases — Phase 22 of 25 active)
 
@@ -49,6 +49,7 @@ Progress: [██░░░░░░░░] ~20% (v2.0 phases — Phase 22 of 25 
 | Phase 17-ai-cost-guardrail P03 | 43 | 3 tasks | 6 files |
 | Phase 17-ai-cost-guardrail P02 | 58 | 2 tasks | 3 files |
 | Phase 17-ai-cost-guardrail P05 | 2 | 2 tasks | 2 files |
+| Phase 18-explainable-fit-scoring P02 | 5 | 5 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -97,6 +98,9 @@ Recent decisions affecting current work:
 - [Phase 17-ai-cost-guardrail]: Draft route: proposal_id omitted from session meta (unknown pre-insert) — org_id sufficient for budget; null proposal_id acceptable for cost ledgering
 - [Phase 17-ai-cost-guardrail]: Review route: capturedReview pattern preserves exact ReviewerResult response shape — extra camelCase meta fields never leak into JSON output
 - [Phase 17-ai-cost-guardrail]: Phase 17 Plan 05: NULL budget guard prevents coercion-to-zero regression in unit tests; live-DB script uses captured session IDs for precise cleanup; quick-import/extract.ts NOT guarded (no org_id at extract time) — deferred to future phase
+- [Phase 18-explainable-fit-scoring]: checkDisqualifiers guards every check behind null/empty presence test — zero false positives on sparse pre-Phase-15 data
+- [Phase 18-explainable-fit-scoring]: dual org type not auto-disqualified by SBA set-aside — only nonprofit is explicitly excluded
+- [Phase 18-explainable-fit-scoring]: mapToDimensions: funder_relationship combines past_funder (1/3) + geo (2/3) proportional to their 10%/20% component weights
 
 ### Pending Todos
 
@@ -113,5 +117,5 @@ Recent decisions affecting current work:
 ## Session Continuity
 
 Last session: 2026-06-07
-Stopped at: Completed 17-ai-cost-guardrail/17-05-PLAN.md — all 3 BILL-04 success criteria proven (vitest unit tests + live-DB script); Phase 17 COMPLETE
-Resume file: None — Phase 17 complete; next phase per ROADMAP
+Stopped at: Completed 18-explainable-fit-scoring/18-02-PLAN.md — checkDisqualifiers + mapToDimensions pure fns; 17/17 tests pass; SCORE-03 + SCORE-04 complete
+Resume file: None — continue with 18-03 (cron/endpoint integration)
