@@ -181,7 +181,7 @@ Beachhead coverage uses what's ALREADY live: federal (SAM/Grants.gov/NIH/NSF) + 
   4. A documented ToS-compliance review confirms that ProPublica/IRS 990 data is used lawfully and that no Candid data is ingested
 **Plans**: 4 plans
 - [ ] 22-01-PLAN.md — Cross-tenant RLS test gate: add rfp_entitlements assertion + required test-rls CI job (+ secret human-action) [TRUST-01]
-- [ ] 22-02-PLAN.md — Documented service-role hygiene audit (route-by-route, dual-client pattern, enrichments check) [TRUST-02]
+- [x] 22-02-PLAN.md — Documented service-role hygiene audit (route-by-route, dual-client pattern, enrichments check) [TRUST-02]
 - [ ] 22-03-PLAN.md — Rewrite /terms + /privacy for RFP engine, create public /ai-disclosure page, allowlist in middleware [TRUST-03]
 - [ ] 22-04-PLAN.md — DATA-SOURCE-COMPLIANCE.md: per-source ToS review + Candid exclusion + ProPublica pre-Phase-16 flag [TRUST-04]
 
@@ -238,7 +238,7 @@ Phases execute in numeric order: 13 → 14 → 15 → 16 → 17 → 18 → 19 �
 | 19. Rubric Review, Compliance Gate & Upload | v2.0 | 0/TBD | Not started | - |
 | 20. Submission Tracking & Amendments | v2.0 | 0/TBD | Not started | - |
 | 21. Win/Loss Learning | v2.0 | 0/TBD | Not started | - |
-| 22. Trust, Security & Legal | 1/4 | In Progress|  | - |
+| 22. Trust, Security & Legal | 3/4 | In Progress|  | - |
 | 23. Live Billing & Entitlements | v2.0 | 0/TBD | Not started | - |
 | 24. Operator Console, Monitoring & FTUE | v2.0 | 0/TBD | Not started | - |
 | 25. Launch Gate | v2.0 | 0/TBD | Not started | - |

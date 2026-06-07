@@ -10,9 +10,9 @@ See: .planning/PROJECT.md (updated 2026-06-05)
 ## Current Position
 
 Phase: 22 of 25 (Trust, Security & Legal)
-Plan: 4 of 4 in progress (22-04 complete — TRUST-04 satisfied)
-Status: Phase 22 in progress — 22-04 (data-source compliance doc) done; 22-01, 22-02, 22-03 remain
-Last activity: 2026-06-06 — 22-04 complete (2f4c1a3), DATA-SOURCE-COMPLIANCE.md created covering all 22 catalog sources
+Plan: 4 of 4 complete (22-01 TRUST-01 RLS CI gate; 22-02 TRUST-02 service-role audit; 22-03 TRUST-03 legal pages; 22-04 TRUST-04 data-source compliance)
+Status: Phase 22 COMPLETE — all 4 plans done; SECURITY-AUDIT.md, legal pages, DATA-SOURCE-COMPLIANCE.md all in repo
+Last activity: 2026-06-07 — 22-02 complete (9b48ad4), SECURITY-AUDIT.md produced; 41 routes audited, zero violations, enrichments question resolved
 
 Progress: [██░░░░░░░░] ~20% (v2.0 phases — Phase 22 of 25 active)
 
@@ -41,6 +41,8 @@ Progress: [██░░░░░░░░] ~20% (v2.0 phases — Phase 22 of 25 
 | Phase 14-canonical-data-foundation P03 | 10 | 2 tasks | 2 files |
 | Phase 14-canonical-data-foundation P02 | 15 | 2 tasks | 2 files |
 | Phase 22-trust-security-legal P04 | 2 | 2 tasks | 1 files |
+| Phase 22-trust-security-legal P01 | 525723 | 2 tasks | 2 files |
+| Phase 22-trust-security-legal P02 | 4 | 2 tasks | 1 files |
 
 ## Accumulated Context
 
@@ -73,8 +75,12 @@ Recent decisions affecting current work:
 - [Phase 14-04]: persistCanonicalAliases call-site confirmed at run.ts:191 — no new wiring required; plan was verification-only for FND-02
 - [Phase 14-04]: Live-DB verify scripts use VERIFY- prefix + finally cleanup as standard pattern for CORE DB safety
 - [Phase 14-04]: Phase 14 COMPLETE — all 4 plans done (FND-01, FND-02, FND-03 requirements met)
+- [Phase 22-trust-security-legal 22-01]: Cross-tenant RLS gate wired — test-rls CI job + branch protection required check set via gh API; rfp_entitlements ON DELETE CASCADE confirmed so afterAll org deletes handle cleanup
+- [Phase 22-trust-security-legal 22-01]: SUPABASE_SERVICE_ROLE_KEY scoped only to test-rls job, NOT added to existing test job — avoids prod-DB assertions on every unit test run
 - [Phase 22-trust-security-legal]: Candid exclusion confirmed by code grep — zero API calls; HowItWorksContent.tsx marketing copy is aspirational, not a compliance violation
 - [Phase 22-trust-security-legal]: ProPublica/IRS 990 flagged as pre-Phase-16 gate: commercial-use clause must be reviewed at propublica.org/nonprofits/api before Phase 16 integration
+- [Phase 22-trust-security-legal 22-02]: Service-role audit CLEAN — 41 routes, 0 violations; dual-client pattern (createClient auth gate → createAdminClient write/read) confirmed consistent across all user-facing RFP routes
+- [Phase 22-trust-security-legal 22-02]: rfp_opportunity_enrichments policy correction: actual migration uses rfp_my_org_ids() via rfp_opp_matches join, NOT auth.uid() IS NOT NULL — more conservative than research stated; no org_id column confirms per-opp metadata only
 
 ### Pending Todos
 
@@ -90,6 +96,6 @@ Recent decisions affecting current work:
 
 ## Session Continuity
 
-Last session: 2026-06-06
-Stopped at: Completed 14-canonical-data-foundation/14-04-PLAN.md — Phase 14 complete
-Resume file: None — next phase is 22 (security)
+Last session: 2026-06-07
+Stopped at: Completed 22-trust-security-legal/22-01-PLAN.md — rfp_entitlements isolation assertion + test-rls CI job + branch protection on main
+Resume file: None — continue with remaining Phase 22 plans

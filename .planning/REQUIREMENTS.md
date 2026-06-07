@@ -72,7 +72,7 @@ Grouped by category. Each maps to exactly one roadmap phase (see Traceability). 
 
 ### Trust, Security & Legal (TRUST)
 
-- [ ] **TRUST-01**: RLS audit passes and a cross-tenant CI test (Org A cannot read Org B's data) is a required check
+- [x] **TRUST-01**: RLS audit passes and a cross-tenant CI test (Org A cannot read Org B's data) is a required check
 - [ ] **TRUST-02**: Per-tenant isolation for vault + proposals is verified; no service-role misuse in user-context paths
 - [ ] **TRUST-03**: Legal pages are live: Terms of Service, Privacy Policy, AI-use disclosure
 - [x] **TRUST-04**: Data-source ToS compliance verified; no redistribution of license-restricted data (Candid excluded; ProPublica/IRS 990 used)
@@ -152,7 +152,7 @@ Tracked, not in this roadmap.
 | ADMIN-03 | Phase 24 | Pending |
 | ADMIN-04 | Phase 24 | Pending |
 | ADMIN-05 | Phase 24 | Pending |
-| TRUST-01 | Phase 22 | Pending |
+| TRUST-01 | Phase 22 | Complete |
 | TRUST-02 | Phase 22 | Pending |
 | TRUST-03 | Phase 22 | Pending |
 | TRUST-04 | Phase 22 | Complete |
