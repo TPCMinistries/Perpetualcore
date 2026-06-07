@@ -46,10 +46,14 @@ import {
   type CaptureProfileForScoring,
   type ScoreBreakdown,
 } from './score';
-import { generateFitSummary } from './summary';
+import { generateExplainedSummary } from './summary';
 import { guardedLLMCall, BudgetExceededError } from '@/lib/rfp/ai/guardrail';
 import { maybeDispatchAlert } from '@/lib/rfp/alerts/dispatch';
 import { DEFAULT_THRESHOLD } from '@/lib/rfp/alerts/prefs';
+import { checkDisqualifiers, type DisqualifierFlag } from './disqualifiers';
+import { mapToDimensions, type ExplainedDimensions } from './dimensions';
+import { upsertFitEvidence, type FitEvidenceRow, type FitEvidenceDimension } from './evidence-store';
+import { retrieveVaultChunks } from '@/lib/rfp/vault/retrieve';
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
@@ -59,10 +63,57 @@ type OppRow = OpportunityForScoring & {
   // alias makes future column additions explicit at the call site.
 };
 
+/**
+ * Extended opp fields needed for disqualifier checks (SCORE-04).
+ * These columns exist as of Phase 14 but are NOT in OpportunityForScoring
+ * (that type is score.ts's domain; we don't modify it here).
+ * The select() queries that hydrate OppRow are extended to include these fields.
+ */
+interface OppDisqualifierFields {
+  set_aside_code: string | null;
+  eligibility_types: string[] | null;
+  naics_codes: string[] | null;
+}
+
+/** OppRow extended with disqualifier columns fetched from DB. */
+type OppRowExtended = OppRow & OppDisqualifierFields;
+
 /** Row shape we read from rfp_orgs.naics for the profile builder. */
 interface OrgNaicsRow {
   id: string;
   naics: string[];
+}
+
+/**
+ * Org row extended with type — needed by checkDisqualifiers (SCORE-04).
+ * rfp_orgs.type is always populated on org creation.
+ */
+interface OrgNaicsTypeRow extends OrgNaicsRow {
+  type: 'nonprofit' | 'forprofit' | 'dual';
+}
+
+/**
+ * Org context needed for scoreOnePairV2 — profile + org.type.
+ * org.type lives in rfp_orgs; profile lives in rfp_capture_profiles.
+ * We combine them here rather than extending CaptureProfileForScoring
+ * (which is score.ts's domain — per plan, define a local type instead).
+ */
+interface OrgForScoring {
+  orgId: string;
+  profile: CaptureProfileForScoring | null;
+  type: 'nonprofit' | 'forprofit' | 'dual';
+  naics: string[];
+}
+
+/**
+ * Extended breakdown persisted to score_breakdown JSONB (Pattern 6).
+ * Adds Phase 18 v2 fields on top of the base ScoreBreakdown.
+ */
+interface ScoreBreakdownV2 extends ScoreBreakdown {
+  dimensions: ExplainedDimensions;
+  disqualifiers: DisqualifierFlag[];
+  vault_hit_count: number;
+  scored_at_v2: string; // ISO sentinel — distinguishes v2 rows from v1
 }
 
 interface CaptureProfileRow {
@@ -122,19 +173,21 @@ function rfpAdmin(): { from: (table: string) => any } {
   return createAdminClient() as unknown as { from: (table: string) => any };
 }
 
-/** Hydrate the opportunity rows needed for scoring. */
-async function loadOpportunities(opportunityIds: string[]): Promise<OppRow[]> {
+/** Hydrate the opportunity rows needed for scoring (includes Phase 18 disqualifier fields). */
+async function loadOpportunities(opportunityIds: string[]): Promise<OppRowExtended[]> {
   if (opportunityIds.length === 0) return [];
   const supabase = rfpAdmin();
-  const rows: OppRow[] = [];
+  const rows: OppRowExtended[] = [];
   const batchSize = 100;
 
   for (let start = 0; start < opportunityIds.length; start += batchSize) {
     const batch = opportunityIds.slice(start, start + batchSize);
     const { data, error } = await supabase
       .from('rfp_opportunities')
+      // Phase 18: extended with set_aside_code, eligibility_types, naics_codes
+      // so checkDisqualifiers receives real data and SCORE-04 fires in production.
       .select(
-        'id, source, title, agency, amount_min, amount_max, deadline, brief, keywords, geo'
+        'id, source, title, agency, amount_min, amount_max, deadline, brief, keywords, geo, set_aside_code, eligibility_types, naics_codes'
       )
       .in('id', batch);
     if (error) {
@@ -144,12 +197,15 @@ async function loadOpportunities(opportunityIds: string[]): Promise<OppRow[]> {
       );
       continue;
     }
-    rows.push(...((data ?? []) as unknown as OppRow[]));
+    rows.push(...((data ?? []) as unknown as OppRowExtended[]));
   }
 
   return rows.map((r) => ({
     ...r,
     keywords: Array.isArray(r.keywords) ? r.keywords : [],
+    set_aside_code: r.set_aside_code ?? null,
+    eligibility_types: Array.isArray(r.eligibility_types) ? r.eligibility_types : null,
+    naics_codes: Array.isArray(r.naics_codes) ? r.naics_codes : null,
   }));
 }
 
@@ -191,16 +247,23 @@ async function loadFallbackOrgIds(): Promise<string[]> {
   );
 }
 
-/** Load latest capture profile per org (returns a Map for O(1) lookup). */
+/**
+ * Load latest capture profile per org.
+ *
+ * Phase 18: now returns OrgForScoring which carries the org's type alongside the
+ * profile — needed by checkDisqualifiers. The return type changed from
+ * `CaptureProfileForScoring | null` to `OrgForScoring`. Callers that need only
+ * the profile extract `.profile`.
+ */
 export async function loadLatestProfile(
   orgId: string
-): Promise<CaptureProfileForScoring | null> {
+): Promise<OrgForScoring> {
   const supabase = rfpAdmin();
-  // org row gives us NAICS + (eventually) past_funders via past wins.
+  // Phase 18: extended select to include 'type' so checkDisqualifiers receives real data.
   const [{ data: orgRow }, { data: profileRow }] = await Promise.all([
     supabase
       .from('rfp_orgs')
-      .select('id, naics')
+      .select('id, naics, type')
       .eq('id', orgId)
       .maybeSingle(),
     supabase
@@ -212,22 +275,30 @@ export async function loadLatestProfile(
       .maybeSingle(),
   ]);
 
+  const typedOrgRow = orgRow as OrgNaicsTypeRow | null;
   const naics =
-    Array.isArray((orgRow as OrgNaicsRow | null)?.naics)
-      ? (orgRow as OrgNaicsRow).naics
+    Array.isArray(typedOrgRow?.naics)
+      ? typedOrgRow!.naics
       : [];
+  const orgType: 'nonprofit' | 'forprofit' | 'dual' = typedOrgRow?.type ?? 'nonprofit';
   const profile = profileRow as CaptureProfileRow | null;
 
-  // Profile-pending case: no row in rfp_capture_profiles yet. Return null
-  // so scoreOpportunity falls into its empty-profile fallback.
+  // Profile-pending case: no row in rfp_capture_profiles yet.
   if (!profile) {
-    if (naics.length === 0) return null;
+    if (naics.length === 0) {
+      return { orgId, profile: null, type: orgType, naics };
+    }
     return {
+      orgId,
+      type: orgType,
       naics,
-      capacity_keywords: [],
-      geo_focus: [],
-      typical_award_band: null,
-      past_funders: [],
+      profile: {
+        naics,
+        capacity_keywords: [],
+        geo_focus: [],
+        typical_award_band: null,
+        past_funders: [],
+      },
     };
   }
 
@@ -262,11 +333,16 @@ export async function loadLatestProfile(
   }
 
   return {
+    orgId,
+    type: orgType,
     naics,
-    capacity_keywords,
-    geo_focus,
-    typical_award_band,
-    past_funders,
+    profile: {
+      naics,
+      capacity_keywords,
+      geo_focus,
+      typical_award_band,
+      past_funders,
+    },
   };
 }
 
@@ -343,6 +419,182 @@ async function upsertMatches(
   return { upserted: (data ?? []).length || deduped.length, error: null };
 }
 
+// ── Phase 18: Shared v2 pair scorer ──────────────────────────────────────────
+
+/** Result type for scoreOnePairV2 */
+export interface ScoreOnePairV2Result {
+  row: {
+    opp_id: string;
+    org_id: string;
+    fit_score: number;
+    score_breakdown: ScoreBreakdownV2;
+    chips: string[];
+    summary: string | null;
+    scored_version: number;
+  };
+  evidenceRows: FitEvidenceRow[];
+  skippedBudget: boolean;
+}
+
+/**
+ * Shared Phase 18 v2 scorer for a single (opp, org) pair.
+ *
+ * Used by BOTH the cron path (scoreNewOpportunitiesForAllActiveOrgs) AND the
+ * per-org path (recomputeAllForOrg) AND the on-demand rescore endpoint.
+ * Centralizing here ensures both paths produce the same vault-grounded output
+ * and prevents the Pitfall 5 divergence (per-org path had an ungated summary call).
+ *
+ * Steps:
+ * 1. scoreOpportunity (deterministic, unchanged)
+ * 2. checkDisqualifiers (pure fn, no AI/DB)
+ * 3. guardedLLMCall wraps vault retrieve + generateExplainedSummary
+ *    (so embed + LLM cost are both captured under 'scoring_v2' agent)
+ * 4. On BudgetExceededError: set skippedBudget=true, use deterministic fallback,
+ *    still upsert chips + scores (only the LLM narrative is omitted).
+ * 5. Build ScoreBreakdownV2 (includes v1 fields + dimensions + disqualifiers + vault sentinel)
+ * 6. Build FitEvidenceRow[] from cited_excerpts (caller persists these)
+ *
+ * NOTE: at beachhead scale (≤10 orgs) per-pair embedding is acceptable.
+ * TODO: cache opp embedding at N>20 orgs (see 18-RESEARCH.md Open Q1)
+ *
+ * @param opp          Extended opp row including set_aside_code/eligibility_types/naics_codes
+ * @param org          Org context including type + naics for disqualifier checks
+ * @param scoredVersion The scored_version value to assign to the new match row
+ */
+export async function scoreOnePairV2(
+  opp: OppRowExtended,
+  org: OrgForScoring,
+  scoredVersion: number
+): Promise<ScoreOnePairV2Result> {
+  // 1. Deterministic base score (unchanged).
+  const base = scoreOpportunity(opp, org.profile);
+
+  // 2. Disqualifier checks (pure, no AI).
+  const disqualifiers = checkDisqualifiers(
+    {
+      set_aside_code: opp.set_aside_code ?? null,
+      eligibility_types: opp.eligibility_types ?? null,
+      naics_codes: opp.naics_codes ?? null,
+    },
+    { type: org.type, naics: org.naics }
+  );
+
+  // 3. Vault retrieve + LLM summarize — ALL wrapped in ONE guardedLLMCall so
+  //    embedding cost (embed.ts) and summary cost (summary.ts) are both captured.
+  let summaryText: string | null = null;
+  let dims = mapToDimensions(base, 0, disqualifiers);
+  let evidenceRows: FitEvidenceRow[] = [];
+  let vaultHitCount = 0;
+  let skippedBudget = false;
+
+  try {
+    const guarded = await guardedLLMCall(org.orgId, async () => {
+      // Retrieve vault chunks (embed call happens inside retrieveVaultChunks).
+      const chunks = await retrieveVaultChunks(
+        org.orgId,
+        `${opp.title} ${opp.agency ?? ''} ${(opp.brief ?? '').slice(0, 300)}`,
+        { k: 5 }
+      );
+
+      // Map to dimensions with vault hit count.
+      const localDims = mapToDimensions(base, chunks.length, disqualifiers);
+
+      // Generate cited summary.
+      const summary = await generateExplainedSummary(opp, org.profile, localDims, chunks);
+
+      return {
+        agent: 'scoring_v2' as const,
+        model: 'claude-sonnet-4-5', // primary model used by generateExplainedSummary
+        tokensIn: summary.tokensIn,
+        tokensOut: summary.tokensOut,
+        costUsd: summary.costUsd,
+        _summary: summary,
+        _dims: localDims,
+        _chunks: chunks,
+      };
+    });
+
+    dims = guarded._dims;
+    vaultHitCount = guarded._chunks.length;
+    summaryText = guarded._summary.text;
+
+    // 6. Build evidence rows from cited_excerpts.
+    // Map each cited excerpt to a FitEvidenceRow per relevant dimension.
+    // We attribute citations to all dimensions they contribute to (simplest: assign to
+    // mission_fit as the primary; future phases can map per-chunk to dimension).
+    const dimensionForChunk = (
+      idx: number,
+      totalChunks: number
+    ): FitEvidenceDimension => {
+      // Simple round-robin across dimensions: first chunk = mission_fit,
+      // second = track_record, third = capacity, others = mission_fit.
+      // This is a reasonable heuristic at beachhead scale.
+      const dims_order: FitEvidenceDimension[] = [
+        'mission_fit', 'track_record', 'capacity', 'funder_relationship', 'eligibility',
+      ];
+      return dims_order[idx % dims_order.length];
+    };
+
+    for (const cited of guarded._summary.cited_excerpts) {
+      // Find the matching chunk to get similarity score.
+      const matchedChunk = guarded._chunks.find((c) => c.doc_id === cited.artifact_id);
+      const similarity = matchedChunk?.similarity_score ?? 0;
+      const chunkIdx = guarded._chunks.findIndex((c) => c.doc_id === cited.artifact_id);
+      const dimension = dimensionForChunk(chunkIdx >= 0 ? chunkIdx : 0, guarded._chunks.length);
+
+      evidenceRows.push({
+        opp_id: opp.id,
+        org_id: org.orgId,
+        scored_version: scoredVersion,
+        dimension,
+        artifact_id: matchedChunk?.id ?? cited.artifact_id,
+        artifact_doc_id: cited.artifact_id,
+        artifact_title: cited.artifact_title,
+        artifact_type: matchedChunk?.doc_type ?? 'other',
+        excerpt: cited.excerpt.slice(0, 200),
+        similarity,
+      });
+    }
+  } catch (err: unknown) {
+    if (err instanceof BudgetExceededError) {
+      // Over-budget: set skip flag, use deterministic fallback (no LLM prose).
+      // Chips + scores still upsert — only the vault narrative is omitted.
+      console.warn(
+        `[scoring/recompute] org over AI budget, skipping v2 vault scoring: ${org.orgId}`
+      );
+      skippedBudget = true;
+      // dims stays at mapToDimensions(base, 0, disqualifiers) — computed above.
+      // summaryText stays null, evidenceRows stays [].
+    } else {
+      // Non-budget error — re-throw to outer catch so real failures still surface.
+      throw err;
+    }
+  }
+
+  // 5. Build extended score_breakdown.
+  const score_breakdown: ScoreBreakdownV2 = {
+    ...base,
+    dimensions: dims,
+    disqualifiers,
+    vault_hit_count: vaultHitCount,
+    scored_at_v2: new Date().toISOString(),
+  };
+
+  return {
+    row: {
+      opp_id: opp.id,
+      org_id: org.orgId,
+      fit_score: base.fit_score,
+      score_breakdown,
+      chips: base.chips,
+      summary: summaryText,
+      scored_version: scoredVersion,
+    },
+    evidenceRows,
+    skippedBudget,
+  };
+}
+
 // ── Public orchestrators ─────────────────────────────────────────────────────
 
 /**
@@ -363,7 +615,7 @@ export async function scoreNewOpportunitiesForAllActiveOrgs(
 ): Promise<{ scored: number; orgs: number }> {
   if (opportunityIds.length === 0) return { scored: 0, orgs: 0 };
 
-  // 1. Load opportunity rows
+  // 1. Load opportunity rows (now includes set_aside_code, eligibility_types, naics_codes)
   const opps = await loadOpportunities(opportunityIds);
   if (opps.length === 0) return { scored: 0, orgs: 0 };
 
@@ -373,15 +625,16 @@ export async function scoreNewOpportunitiesForAllActiveOrgs(
 
   // 3. Load profiles per org (with bounded concurrency; rfp_capture_profiles
   //    reads are cheap but we don't need to hammer the connection pool).
-  const profiles = await asyncPool(5, orgIds, async (orgId) => {
+  //    Phase 18: loadLatestProfile now returns OrgForScoring (includes org.type + naics).
+  const orgContexts = await asyncPool(5, orgIds, async (orgId) => {
     try {
-      return { orgId, profile: await loadLatestProfile(orgId) };
+      return await loadLatestProfile(orgId);
     } catch (e) {
       console.error(
         `[scoring/recompute] profile load failed for org ${orgId}:`,
         e instanceof Error ? e.message : String(e)
       );
-      return { orgId, profile: null };
+      return { orgId, profile: null, type: 'nonprofit' as const, naics: [] };
     }
   });
 
@@ -390,89 +643,57 @@ export async function scoreNewOpportunitiesForAllActiveOrgs(
 
   // 5. Build the cross-product of missing (opp, org) pairs to score.
   type Pair = {
-    opp: OppRow;
-    orgId: string;
-    profile: CaptureProfileForScoring | null;
+    opp: OppRowExtended;
+    org: OrgForScoring;
   };
   const pairs: Pair[] = [];
   for (const opp of opps) {
-    for (const { orgId, profile } of profiles) {
-      if (existing.has(`${opp.id}::${orgId}`)) continue;
-      pairs.push({ opp, orgId, profile });
+    for (const org of orgContexts) {
+      if (existing.has(`${opp.id}::${org.orgId}`)) continue;
+      pairs.push({ opp, org });
     }
   }
   if (pairs.length === 0) return { scored: 0, orgs: orgIds.length };
 
-  // 6. Score + (optional) summary. AI calls go through asyncPool(3) to stay
-  //    under Anthropic rate limits; the deterministic scoreOpportunity call
-  //    is synchronous and cheap, so we don't bother pooling it.
-  //
-  //    Phase 17-04: each summary call is routed through guardedLLMCall(orgId).
-  //    An over-budget org is SILENTLY SKIPPED (logged + continue with null
-  //    summary so scoring chips/scores still upsert). Non-budget errors re-throw
-  //    to the outer catch so real failures still surface.
-  const computed = await asyncPool(3, pairs, async ({ opp, orgId, profile }) => {
+  // 6. Score via shared scoreOnePairV2 — vault + disqualifiers + evidence.
+  //    Concurrency pool 3 to stay under Anthropic + OpenAI rate limits.
+  //    Over-budget orgs produce skippedBudget=true rows (chips/scores still upsert).
+  const allEvidenceRows: FitEvidenceRow[] = [];
+  const computed = await asyncPool(3, pairs, async ({ opp, org }) => {
     try {
-      const breakdown = scoreOpportunity(opp, profile);
-      const cacheKey = `${opp.id}::${orgId}`;
+      const cacheKey = `${opp.id}::${org.orgId}`;
       const prev = existing.get(cacheKey);
-      const scored_version = (prev?.scored_version ?? 0) + 1;
+      const scoredVersion = (prev?.scored_version ?? 0) + 1;
 
-      // AI summary only for missing cron-hand-off pairs — this is the path
-      // where the user gets fresh prose for newly-discovered opps.
-      let summaryText: string | null = null;
-      try {
-        const guarded = await guardedLLMCall(orgId, async () => {
-          const r = await generateFitSummary(opp, profile, breakdown);
-          return {
-            agent: 'scoring_summary_v1' as const,
-            model: 'claude-sonnet-4-5', // generateFitSummary tries primary first
-            tokensIn: r.tokensIn,
-            tokensOut: r.tokensOut,
-            costUsd: r.costUsd,
-            _text: r.text,
-          };
-        });
-        summaryText = guarded._text;
-      } catch (err: unknown) {
-        if (err instanceof BudgetExceededError) {
-          // Open Question 1 default: silently skip summary for over-budget org.
-          // Scoring chips and score still upsert; only the narrative is omitted.
-          console.warn(
-            `[scoring/recompute] org over AI budget, skipping summary: ${orgId}`
-          );
-          summaryText = null;
-        } else {
-          // Non-budget error — re-throw so the outer catch logs + skips the pair.
-          throw err;
-        }
-      }
-
-      return {
-        opp_id: opp.id,
-        org_id: orgId,
-        fit_score: breakdown.fit_score,
-        score_breakdown: breakdown,
-        chips: breakdown.chips,
-        summary: summaryText,
-        scored_version,
-      };
+      const result = await scoreOnePairV2(opp, org, scoredVersion);
+      allEvidenceRows.push(...result.evidenceRows);
+      return result.row;
     } catch (e) {
       console.error(
-        `[scoring/recompute] score pair failed (opp=${opp.id}, org=${orgId}):`,
+        `[scoring/recompute] score pair failed (opp=${opp.id}, org=${org.orgId}):`,
         e instanceof Error ? e.message : String(e)
       );
       return null;
     }
   });
 
-  // 7. Upsert in one batch
+  // 7. Upsert match rows in one batch
   const rows = computed.filter(
     (r): r is NonNullable<typeof r> => r !== null
   );
-  const { upserted, error } = await upsertMatches(rows);
+  const { upserted, error } = await upsertMatches(
+    rows as unknown as Parameters<typeof upsertMatches>[0]
+  );
   if (error) {
     console.error('[scoring/recompute] upsert batch failed:', error);
+  }
+
+  // 7b. Persist evidence rows (vault citations per dimension).
+  if (allEvidenceRows.length > 0) {
+    const { error: evErr } = await upsertFitEvidence(allEvidenceRows);
+    if (evErr) {
+      console.error('[scoring/recompute] evidence upsert failed (non-fatal):', evErr);
+    }
   }
 
   // 8. Plan 05-07 — fire alerts for newly-high-fit matches.
@@ -519,8 +740,13 @@ export async function scoreNewOpportunitiesForAllActiveOrgs(
  * Scopes to "live" opportunities only (deadline IS NULL OR deadline > now())
  * so we don't pay compute to score rotting opps.
  *
- * AI summaries OFF by default — profile changes do not always warrant new
- * prose. The endpoint allows opting in via { ai_summaries: true } body.
+ * Phase 18: now routes through scoreOnePairV2 (shared path with cron) so
+ * the per-org path is budget-guarded and produces vault-grounded scores.
+ * The old ungated generateFitSummary call has been removed — both paths
+ * now use scoreOnePairV2 which wraps the LLM block in ONE guardedLLMCall.
+ *
+ * AI summaries ON when opts.aiSummaries=true (default: true for Phase 18 —
+ * vault scoring always attempts the LLM; budget guard handles over-limit orgs).
  *
  * Skips alert delivery entirely per 05-CONTEXT.md: alerts only fire on
  * cron-discovered new opps; this is a refresh path.
@@ -530,18 +756,21 @@ export async function recomputeAllForOrg(
   opts?: { aiSummaries?: boolean; includeExpired?: boolean }
 ): Promise<{ scored: number }> {
   const supabase = rfpAdmin();
-  const profile = await loadLatestProfile(orgId);
+  // Phase 18: loadLatestProfile now returns OrgForScoring (includes org.type + naics).
+  const org = await loadLatestProfile(orgId);
 
   // Pull opportunities in pages. Supabase/PostgREST caps unbounded selects, so
   // a real backfill must use range pagination.
   const nowIso = new Date().toISOString();
-  const oppRows: OppRow[] = [];
+  const oppRows: OppRowExtended[] = [];
   const pageSize = 1_000;
   for (let start = 0; ; start += pageSize) {
     let query = supabase
       .from('rfp_opportunities')
+      // Phase 18: extended with set_aside_code, eligibility_types, naics_codes
+      // so checkDisqualifiers receives real data and SCORE-04 fires in production.
       .select(
-        'id, source, title, agency, amount_min, amount_max, deadline, brief, keywords, geo'
+        'id, source, title, agency, amount_min, amount_max, deadline, brief, keywords, geo, set_aside_code, eligibility_types, naics_codes'
       )
       .order('created_at', { ascending: false })
       .order('id', { ascending: true })
@@ -557,9 +786,12 @@ export async function recomputeAllForOrg(
       break;
     }
 
-    const page = ((data ?? []) as unknown as OppRow[]).map((r) => ({
+    const page = ((data ?? []) as unknown as OppRowExtended[]).map((r) => ({
       ...r,
       keywords: Array.isArray(r.keywords) ? r.keywords : [],
+      set_aside_code: r.set_aside_code ?? null,
+      eligibility_types: Array.isArray(r.eligibility_types) ? r.eligibility_types : null,
+      naics_codes: Array.isArray(r.naics_codes) ? r.naics_codes : null,
     }));
     oppRows.push(...page);
     if (page.length < pageSize) break;
@@ -571,38 +803,56 @@ export async function recomputeAllForOrg(
   // Load existing versions to increment scored_version cleanly.
   const existing = await loadExistingScoredVersions([orgId], opps.map((o) => o.id));
 
-  const ai = opts?.aiSummaries === true;
+  // Phase 18: aiSummaries defaults to true (scoreOnePairV2 always attempts vault scoring).
+  // Set to false to skip LLM (pure deterministic rescore without AI prose).
+  const ai = opts?.aiSummaries !== false; // default: true
 
-  const computed = await asyncPool(
-    ai ? 3 : 8, // pure scoring tolerates higher concurrency than AI
-    opps,
-    async (opp) => {
+  if (!ai) {
+    // Pure deterministic path — no vault, no LLM. Skip summary column.
+    const computed = await asyncPool(8, opps, async (opp) => {
       try {
-        const breakdown = scoreOpportunity(opp, profile);
+        const breakdown = scoreOpportunity(opp, org.profile);
         const cacheKey = `${opp.id}::${orgId}`;
         const prev = existing.get(cacheKey);
         const scored_version = (prev?.scored_version ?? 0) + 1;
-
-        let summary: string | null = null;
-        if (ai) {
-          // Phase 17-04: generateFitSummary now returns FitSummaryResult.
-          // recomputeAllForOrg is the per-org triggered path (profile mutations),
-          // not the cron ingest path, so we don't guard with guardedLLMCall here
-          // (orgId is already in scope but this path is opt-in and less
-          // financially sensitive). Extract just the text for the upsert.
-          const r = await generateFitSummary(opp, profile, breakdown);
-          summary = r.text;
-        }
-
         return {
           opp_id: opp.id,
           org_id: orgId,
           fit_score: breakdown.fit_score,
           score_breakdown: breakdown,
           chips: breakdown.chips,
-          summary,
           scored_version,
         };
+      } catch (e) {
+        console.error(
+          `[scoring/recompute] recompute pair failed (opp=${opp.id}, org=${orgId}):`,
+          e instanceof Error ? e.message : String(e)
+        );
+        return null;
+      }
+    });
+    const rows = computed.filter((r): r is NonNullable<typeof r> => r !== null);
+    const { upserted, error: upErr } = await upsertMatches(
+      rows as unknown as Parameters<typeof upsertMatches>[0]
+    );
+    if (upErr) console.error('[scoring/recompute] upsert (no-ai) failed:', upErr);
+    return { scored: upserted };
+  }
+
+  // AI path — use scoreOnePairV2 (vault + disqualifiers + LLM, budget-guarded).
+  const allEvidenceRows: FitEvidenceRow[] = [];
+  const computed = await asyncPool(
+    3, // vault + LLM concurrency limit
+    opps,
+    async (opp) => {
+      try {
+        const cacheKey = `${opp.id}::${orgId}`;
+        const prev = existing.get(cacheKey);
+        const scoredVersion = (prev?.scored_version ?? 0) + 1;
+
+        const result = await scoreOnePairV2(opp, org, scoredVersion);
+        allEvidenceRows.push(...result.evidenceRows);
+        return result.row;
       } catch (e) {
         console.error(
           `[scoring/recompute] recompute pair failed (opp=${opp.id}, org=${orgId}):`,
@@ -613,29 +863,19 @@ export async function recomputeAllForOrg(
     }
   );
 
-  const rows = computed.filter(
-    (r): r is NonNullable<typeof r> => r !== null
+  const rows = computed.filter((r): r is NonNullable<typeof r> => r !== null);
+  const { upserted, error: upErr } = await upsertMatches(
+    rows as unknown as Parameters<typeof upsertMatches>[0]
   );
-  // If aiSummaries was false, keep existing summary text on rows — don't
-  // overwrite with null. The upsert as-written would set summary=null on
-  // every row, so split the path:
-  //   - aiSummaries=true → upsert everything (including null on errors)
-  //   - aiSummaries=false → upsert without the summary column
-  if (!ai) {
-    // Strip summary so PostgREST leaves the existing column untouched.
-    // (supabase-js merges by column name; omitted column = no UPDATE.)
-    type RowWithoutSummary = Omit<(typeof rows)[number], 'summary'>;
-    const stripped: RowWithoutSummary[] = rows.map(
-      ({ summary: _omit, ...rest }) => rest
-    );
-    const { upserted, error: upErr } = await upsertMatches(
-      stripped as unknown as Parameters<typeof upsertMatches>[0]
-    );
-    if (upErr) console.error('[scoring/recompute] upsert (no-ai) failed:', upErr);
-    return { scored: upserted };
+  if (upErr) console.error('[scoring/recompute] upsert (ai) failed:', upErr);
+
+  // Persist evidence rows (vault citations per dimension).
+  if (allEvidenceRows.length > 0) {
+    const { error: evErr } = await upsertFitEvidence(allEvidenceRows);
+    if (evErr) {
+      console.error('[scoring/recompute] evidence upsert failed (non-fatal):', evErr);
+    }
   }
 
-  const { upserted, error: upErr } = await upsertMatches(rows);
-  if (upErr) console.error('[scoring/recompute] upsert (ai) failed:', upErr);
   return { scored: upserted };
 }
