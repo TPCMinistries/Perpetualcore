@@ -47,6 +47,7 @@ Progress: [██░░░░░░░░] ~20% (v2.0 phases — Phase 22 of 25 
 | Phase 17-ai-cost-guardrail P01 | 11 | 3 tasks | 3 files |
 | Phase 17-ai-cost-guardrail P04 | 7 | 2 tasks | 2 files |
 | Phase 17-ai-cost-guardrail P03 | 43 | 3 tasks | 6 files |
+| Phase 17-ai-cost-guardrail P02 | 58 | 2 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -92,6 +93,8 @@ Recent decisions affecting current work:
 - [Phase 17-ai-cost-guardrail]: database.types.ts regenerated via CLI as single owner for Phase 17; all Phase 14 types preserved
 - [Phase 17-ai-cost-guardrail]: generateFitSummary returns FitSummaryResult {text,tokensIn,tokensOut,costUsd} in all branches; cron scoring loop guarded per org via guardedLLMCall; over-budget orgs silently skipped with null summary (scoring chips/scores still upsert)
 - [Phase 17-ai-cost-guardrail]: vault/from-description: model label = 'gpt-4o' (dominant) for combined expand+embed session row; naics-suggest membership non-member treated as absent (silent downgrade, no 403 leak)
+- [Phase 17-ai-cost-guardrail]: Draft route: proposal_id omitted from session meta (unknown pre-insert) — org_id sufficient for budget; null proposal_id acceptable for cost ledgering
+- [Phase 17-ai-cost-guardrail]: Review route: capturedReview pattern preserves exact ReviewerResult response shape — extra camelCase meta fields never leak into JSON output
 
 ### Pending Todos
 
