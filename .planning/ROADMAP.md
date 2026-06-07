@@ -58,7 +58,7 @@ Beachhead coverage uses what's ALREADY live: federal (SAM/Grants.gov/NIH/NSF) + 
 - [ ] **Phase 19: Rubric Review, Compliance Gate & Upload** - Adversarial reviewer panel, rubric extraction, compliance gate v1, AI-use disclosure, PDF/DOCX upload
 - [ ] **Phase 20: Submission Tracking & Amendments** - Submission packet assembly, status tracking, amendment diffing, change alerts
 ⏸ - [ ] **Phase 21: Win/Loss Learning** - Outcome recording, debrief, win-rate analytics by source/type/score band
-- [ ] **Phase 22: Trust, Security & Legal** - RLS audit, cross-tenant CI gate, per-tenant vault isolation, legal pages live
+- [ ] **Phase 22: Trust, Security & Legal** - RLS audit, cross-tenant CI gate, per-tenant vault isolation, legal pages live (4 plans planned 2026-06-06)
 ⏸ - [ ] **Phase 23: Live Billing & Entitlements** - Stripe live mode, self-serve trial → provisioning, Meters migration, transparent pricing
 - [ ] **Phase 24: Operator Console, Monitoring & FTUE** - Admin console, /api/health/rfp, status monitor, first-time UX (≤5-field setup → first scored opps, guided checklist, real empty states)
 ⏸ - [ ] **Phase 25: Launch Gate** - E2E coverage on draft → review → submit critical path; production stable
@@ -172,14 +172,18 @@ Beachhead coverage uses what's ALREADY live: federal (SAM/Grants.gov/NIH/NSF) + 
 
 ### Phase 22: Trust, Security & Legal
 **Goal**: RLS is audited and a cross-tenant isolation test is a required CI gate; per-tenant vault isolation is verified; no service-role misuse in user paths; legal pages are live; ToS compliance for data sources is documented
-**Depends on**: Phase 21 (all feature phases complete; this is the HARD GATE before billing goes live)
+**Depends on**: Phase 14 (entitlements table exists). Pulled EARLY per beachhead sequencing — this is the HARD GATE before any second org goes live (and before Phase 23 billing). Audit scopes to tables/routes that exist NOW (Phase 14 + Phases 04/05/13 routes); later-phase tables are added to the CI test as they ship.
 **Requirements**: TRUST-01, TRUST-02, TRUST-03, TRUST-04
 **Success Criteria** (what must be TRUE):
   1. A CI test that authenticates as Org A and attempts to read Org B's proposals, vault chunks, and entitlements returns 0 rows (not an error, not data) — this test is a required check in the pipeline
   2. A code audit confirms no user-context API route calls the service-role Supabase client; all user-facing vault and proposal reads go through RLS-enforced paths
   3. Terms of Service, Privacy Policy, and AI-use disclosure pages are publicly accessible at known URLs on the live domain
   4. A documented ToS-compliance review confirms that ProPublica/IRS 990 data is used lawfully and that no Candid data is ingested
-**Plans**: TBD
+**Plans**: 4 plans
+- [ ] 22-01-PLAN.md — Cross-tenant RLS test gate: add rfp_entitlements assertion + required test-rls CI job (+ secret human-action) [TRUST-01]
+- [ ] 22-02-PLAN.md — Documented service-role hygiene audit (route-by-route, dual-client pattern, enrichments check) [TRUST-02]
+- [ ] 22-03-PLAN.md — Rewrite /terms + /privacy for RFP engine, create public /ai-disclosure page, allowlist in middleware [TRUST-03]
+- [ ] 22-04-PLAN.md — DATA-SOURCE-COMPLIANCE.md: per-source ToS review + Candid exclusion + ProPublica pre-Phase-16 flag [TRUST-04]
 
 ### Phase 23: Live Billing & Entitlements
 **Goal**: Stripe live mode is active; any visitor can self-serve into a trial that auto-provisions their org; plans map to coverage levels enforced in app and RLS; legacy metered prices are migrated to Stripe Meters; transparent pricing and a risk-reversal guarantee are live on the pricing page
@@ -234,7 +238,7 @@ Phases execute in numeric order: 13 → 14 → 15 → 16 → 17 → 18 → 19 �
 | 19. Rubric Review, Compliance Gate & Upload | v2.0 | 0/TBD | Not started | - |
 | 20. Submission Tracking & Amendments | v2.0 | 0/TBD | Not started | - |
 | 21. Win/Loss Learning | v2.0 | 0/TBD | Not started | - |
-| 22. Trust, Security & Legal | v2.0 | 0/TBD | Not started | - |
+| 22. Trust, Security & Legal | v2.0 | 0/4 | Planned | - |
 | 23. Live Billing & Entitlements | v2.0 | 0/TBD | Not started | - |
 | 24. Operator Console, Monitoring & FTUE | v2.0 | 0/TBD | Not started | - |
 | 25. Launch Gate | v2.0 | 0/TBD | Not started | - |
