@@ -238,7 +238,7 @@ Phases execute in numeric order: 13 → 14 → 15 → 16 → 17 → 18 → 19 �
 | 14. Canonical Data Foundation | 3/4 | Complete    | 2026-06-06 | - |
 | 15. Level-1 Federal Discovery | v2.0 | 0/TBD | Not started | - |
 | 16. Extended Discovery + Saved Searches | v2.0 | 0/TBD | Not started | - |
-| 17. AI Cost Guardrail | v2.0 | 0/5 | Planned | - |
+| 17. AI Cost Guardrail | 1/5 | In Progress|  | - |
 | 18. Explainable Fit Scoring | v2.0 | 0/TBD | Not started | - |
 | 19. Rubric Review, Compliance Gate & Upload | v2.0 | 0/TBD | Not started | - |
 | 20. Submission Tracking & Amendments | v2.0 | 0/TBD | Not started | - |

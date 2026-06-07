@@ -44,6 +44,7 @@ Progress: [██░░░░░░░░] ~20% (v2.0 phases — Phase 22 of 25 
 | Phase 22-trust-security-legal P01 | 525723 | 2 tasks | 2 files |
 | Phase 22-trust-security-legal P02 | 4 | 2 tasks | 1 files |
 | Phase 22-trust-security-legal P03 | 14 | 3 tasks | 4 files |
+| Phase 17-ai-cost-guardrail P01 | 11 | 3 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -85,6 +86,8 @@ Recent decisions affecting current work:
 - [Phase 22-trust-security-legal]: Draft banner inline on each legal page (not shared component) to keep changes surgical
 - [Phase 22-trust-security-legal]: /ai-disclosure added to isRfpAppPath middleware allowlist alongside /privacy and /terms
 - [Phase 22-trust-security-legal]: Live-domain production confirmation deferred to next vercel --prod deploy; local build confirmed (exit 0)
+- [Phase 17-ai-cost-guardrail]: rfp_agent_sessions reused as ledger — additive column on rfp_entitlements only; NULL monthly_ai_budget_usd = unlimited; fail-CLOSED on DB read error
+- [Phase 17-ai-cost-guardrail]: database.types.ts regenerated via CLI as single owner for Phase 17; all Phase 14 types preserved
 
 ### Pending Todos
 
@@ -101,5 +104,5 @@ Recent decisions affecting current work:
 ## Session Continuity
 
 Last session: 2026-06-07
-Stopped at: Completed 22-trust-security-legal/22-01-PLAN.md — rfp_entitlements isolation assertion + test-rls CI job + branch protection on main
-Resume file: None — continue with remaining Phase 22 plans
+Stopped at: Completed 17-ai-cost-guardrail/17-01-PLAN.md — guardrail foundation (migration + guardrail.ts + database.types.ts regen)
+Resume file: None — continue with 17-02 (call-site integration Wave 2)
