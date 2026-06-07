@@ -238,7 +238,7 @@ Phases execute in numeric order: 13 → 14 → 15 → 16 → 17 → 18 → 19 �
 | 19. Rubric Review, Compliance Gate & Upload | v2.0 | 0/TBD | Not started | - |
 | 20. Submission Tracking & Amendments | v2.0 | 0/TBD | Not started | - |
 | 21. Win/Loss Learning | v2.0 | 0/TBD | Not started | - |
-| 22. Trust, Security & Legal | v2.0 | 0/4 | Planned | - |
+| 22. Trust, Security & Legal | 1/4 | In Progress|  | - |
 | 23. Live Billing & Entitlements | v2.0 | 0/TBD | Not started | - |
 | 24. Operator Console, Monitoring & FTUE | v2.0 | 0/TBD | Not started | - |
 | 25. Launch Gate | v2.0 | 0/TBD | Not started | - |

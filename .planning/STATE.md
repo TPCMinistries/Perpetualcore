@@ -9,12 +9,12 @@ See: .planning/PROJECT.md (updated 2026-06-05)
 
 ## Current Position
 
-Phase: 14 of 25 (Canonical Data Foundation)
-Plan: 4 of 4 complete (14-01, 14-02, 14-03, 14-04 done — Phase 14 COMPLETE)
-Status: Phase 14 complete — ready for Phase 22 (security)
-Last activity: 2026-06-06 — 14-04 complete (737c8f0), database.types.ts regen + FND-02 dedup proof (unit test + live-DB script)
+Phase: 22 of 25 (Trust, Security & Legal)
+Plan: 4 of 4 in progress (22-04 complete — TRUST-04 satisfied)
+Status: Phase 22 in progress — 22-04 (data-source compliance doc) done; 22-01, 22-02, 22-03 remain
+Last activity: 2026-06-06 — 22-04 complete (2f4c1a3), DATA-SOURCE-COMPLIANCE.md created covering all 22 catalog sources
 
-Progress: [█░░░░░░░░░] ~10% (v2.0 phases — Phase 14 of 25)
+Progress: [██░░░░░░░░] ~20% (v2.0 phases — Phase 22 of 25 active)
 
 ## Performance Metrics
 
@@ -40,6 +40,7 @@ Progress: [█░░░░░░░░░] ~10% (v2.0 phases — Phase 14 of 25)
 | Phase 14-canonical-data-foundation P01 | 12 | 1 tasks | 1 files |
 | Phase 14-canonical-data-foundation P03 | 10 | 2 tasks | 2 files |
 | Phase 14-canonical-data-foundation P02 | 15 | 2 tasks | 2 files |
+| Phase 22-trust-security-legal P04 | 2 | 2 tasks | 1 files |
 
 ## Accumulated Context
 
@@ -72,6 +73,8 @@ Recent decisions affecting current work:
 - [Phase 14-04]: persistCanonicalAliases call-site confirmed at run.ts:191 — no new wiring required; plan was verification-only for FND-02
 - [Phase 14-04]: Live-DB verify scripts use VERIFY- prefix + finally cleanup as standard pattern for CORE DB safety
 - [Phase 14-04]: Phase 14 COMPLETE — all 4 plans done (FND-01, FND-02, FND-03 requirements met)
+- [Phase 22-trust-security-legal]: Candid exclusion confirmed by code grep — zero API calls; HowItWorksContent.tsx marketing copy is aspirational, not a compliance violation
+- [Phase 22-trust-security-legal]: ProPublica/IRS 990 flagged as pre-Phase-16 gate: commercial-use clause must be reviewed at propublica.org/nonprofits/api before Phase 16 integration
 
 ### Pending Todos
 

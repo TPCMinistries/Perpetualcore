@@ -75,7 +75,7 @@ Grouped by category. Each maps to exactly one roadmap phase (see Traceability). 
 - [ ] **TRUST-01**: RLS audit passes and a cross-tenant CI test (Org A cannot read Org B's data) is a required check
 - [ ] **TRUST-02**: Per-tenant isolation for vault + proposals is verified; no service-role misuse in user-context paths
 - [ ] **TRUST-03**: Legal pages are live: Terms of Service, Privacy Policy, AI-use disclosure
-- [ ] **TRUST-04**: Data-source ToS compliance verified; no redistribution of license-restricted data (Candid excluded; ProPublica/IRS 990 used)
+- [x] **TRUST-04**: Data-source ToS compliance verified; no redistribution of license-restricted data (Candid excluded; ProPublica/IRS 990 used)
 
 ### Onboarding / First-Time UX (FTUE)
 
@@ -155,7 +155,7 @@ Tracked, not in this roadmap.
 | TRUST-01 | Phase 22 | Pending |
 | TRUST-02 | Phase 22 | Pending |
 | TRUST-03 | Phase 22 | Pending |
-| TRUST-04 | Phase 22 | Pending |
+| TRUST-04 | Phase 22 | Complete |
 | FTUE-01 | Phase 24 | Pending |
 | FTUE-02 | Phase 24 | Pending |
 | FTUE-03 | Phase 24 | Pending |
