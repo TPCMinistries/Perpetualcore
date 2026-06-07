@@ -43,6 +43,7 @@ Progress: [██░░░░░░░░] ~20% (v2.0 phases — Phase 22 of 25 
 | Phase 22-trust-security-legal P04 | 2 | 2 tasks | 1 files |
 | Phase 22-trust-security-legal P01 | 525723 | 2 tasks | 2 files |
 | Phase 22-trust-security-legal P02 | 4 | 2 tasks | 1 files |
+| Phase 22-trust-security-legal P03 | 14 | 3 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -81,6 +82,9 @@ Recent decisions affecting current work:
 - [Phase 22-trust-security-legal]: ProPublica/IRS 990 flagged as pre-Phase-16 gate: commercial-use clause must be reviewed at propublica.org/nonprofits/api before Phase 16 integration
 - [Phase 22-trust-security-legal 22-02]: Service-role audit CLEAN — 41 routes, 0 violations; dual-client pattern (createClient auth gate → createAdminClient write/read) confirmed consistent across all user-facing RFP routes
 - [Phase 22-trust-security-legal 22-02]: rfp_opportunity_enrichments policy correction: actual migration uses rfp_my_org_ids() via rfp_opp_matches join, NOT auth.uid() IS NOT NULL — more conservative than research stated; no org_id column confirms per-opp metadata only
+- [Phase 22-trust-security-legal]: Draft banner inline on each legal page (not shared component) to keep changes surgical
+- [Phase 22-trust-security-legal]: /ai-disclosure added to isRfpAppPath middleware allowlist alongside /privacy and /terms
+- [Phase 22-trust-security-legal]: Live-domain production confirmation deferred to next vercel --prod deploy; local build confirmed (exit 0)
 
 ### Pending Todos
 

@@ -58,7 +58,7 @@ Beachhead coverage uses what's ALREADY live: federal (SAM/Grants.gov/NIH/NSF) + 
 - [ ] **Phase 19: Rubric Review, Compliance Gate & Upload** - Adversarial reviewer panel, rubric extraction, compliance gate v1, AI-use disclosure, PDF/DOCX upload
 - [ ] **Phase 20: Submission Tracking & Amendments** - Submission packet assembly, status tracking, amendment diffing, change alerts
 ⏸ - [ ] **Phase 21: Win/Loss Learning** - Outcome recording, debrief, win-rate analytics by source/type/score band
-- [ ] **Phase 22: Trust, Security & Legal** - RLS audit, cross-tenant CI gate, per-tenant vault isolation, legal pages live (4 plans planned 2026-06-06)
+- [x] **Phase 22: Trust, Security & Legal** - RLS audit, cross-tenant CI gate, per-tenant vault isolation, legal pages live (4 plans planned 2026-06-06) (completed 2026-06-07)
 ⏸ - [ ] **Phase 23: Live Billing & Entitlements** - Stripe live mode, self-serve trial → provisioning, Meters migration, transparent pricing
 - [ ] **Phase 24: Operator Console, Monitoring & FTUE** - Admin console, /api/health/rfp, status monitor, first-time UX (≤5-field setup → first scored opps, guided checklist, real empty states)
 ⏸ - [ ] **Phase 25: Launch Gate** - E2E coverage on draft → review → submit critical path; production stable
@@ -238,7 +238,7 @@ Phases execute in numeric order: 13 → 14 → 15 → 16 → 17 → 18 → 19 �
 | 19. Rubric Review, Compliance Gate & Upload | v2.0 | 0/TBD | Not started | - |
 | 20. Submission Tracking & Amendments | v2.0 | 0/TBD | Not started | - |
 | 21. Win/Loss Learning | v2.0 | 0/TBD | Not started | - |
-| 22. Trust, Security & Legal | 4/4 | Complete |  | - |
+| 22. Trust, Security & Legal | 4/4 | Complete   | 2026-06-07 | - |
 | 23. Live Billing & Entitlements | v2.0 | 0/TBD | Not started | - |
 | 24. Operator Console, Monitoring & FTUE | v2.0 | 0/TBD | Not started | - |
 | 25. Launch Gate | v2.0 | 0/TBD | Not started | - |
