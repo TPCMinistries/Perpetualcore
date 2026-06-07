@@ -20,9 +20,14 @@
  *   (opp_id, org_id) row already has the same scored_version, the caller skips
  *   `generateFitSummary` entirely. This module is a pure generator; cache
  *   logic lives in recompute.ts.
+ *
+ * Phase 17-04: Return shape changed from `string | null` to
+ * `{ text, tokensIn, tokensOut, costUsd }` so the cron can ledger per-org cost
+ * without a separate DB insert here.
  */
 
 import Anthropic from '@anthropic-ai/sdk';
+import { computeCostUsd } from '@/lib/rfp/ai/guardrail';
 import type {
   OpportunityForScoring,
   CaptureProfileForScoring,
@@ -82,27 +87,46 @@ function buildPrompt(
   ].join('\n');
 }
 
+/** Structured result returned by generateFitSummary (Phase 17-04). */
+export interface FitSummaryResult {
+  text: string | null;
+  tokensIn: number;
+  tokensOut: number;
+  costUsd: number;
+}
+
+/** Zero-cost sentinel for branches that make no AI call. */
+const ZERO_COST_RESULT: FitSummaryResult = {
+  text: null,
+  tokensIn: 0,
+  tokensOut: 0,
+  costUsd: 0,
+};
+
 /**
  * Generate a 1-2 sentence reasoning summary.
  *
- * @returns the summary string on success, the profile-pending sentinel when
- * `breakdown.profile_pending` is true, or `null` on any error or missing
- * ANTHROPIC_API_KEY (caller leaves existing summary or null).
+ * @returns a FitSummaryResult with text and cost metadata in every branch.
+ *   - Profile-pending: text = PROFILE_PENDING_SUMMARY, cost = 0.
+ *   - No ANTHROPIC_API_KEY: text = null, cost = 0.
+ *   - Successful call: text = summary prose, cost computed via computeCostUsd.
+ *   - Both models failed: text = null, cost = 0.
+ *   Never throws.
  */
 export async function generateFitSummary(
   opp: OpportunityForScoring,
   profile: CaptureProfileForScoring | null,
   breakdown: ScoreBreakdown
-): Promise<string | null> {
+): Promise<FitSummaryResult> {
   // Profile-pending case: skip the AI call.
   if (breakdown.profile_pending || profile === null) {
-    return PROFILE_PENDING_SUMMARY;
+    return { text: PROFILE_PENDING_SUMMARY, tokensIn: 0, tokensOut: 0, costUsd: 0 };
   }
 
   const client = getAnthropic();
   if (!client) {
     // No key wired — caller treats null as "leave blank".
-    return null;
+    return ZERO_COST_RESULT;
   }
 
   const prompt = buildPrompt(opp, profile, breakdown);
@@ -119,7 +143,16 @@ export async function generateFitSummary(
       const block = resp.content[0];
       if (block && block.type === 'text') {
         const text = block.text.trim();
-        if (text.length > 0) return text;
+        if (text.length > 0) {
+          const tokensIn = resp.usage.input_tokens;
+          const tokensOut = resp.usage.output_tokens;
+          return {
+            text,
+            tokensIn,
+            tokensOut,
+            costUsd: computeCostUsd(model, tokensIn, tokensOut),
+          };
+        }
       }
       // Empty response — try fallback if any.
     } catch (err: unknown) {
@@ -132,5 +165,5 @@ export async function generateFitSummary(
   }
 
   // Both models failed (rate limit, network, etc.) — return null per contract.
-  return null;
+  return ZERO_COST_RESULT;
 }
