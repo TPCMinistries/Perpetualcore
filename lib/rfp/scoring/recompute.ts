@@ -47,6 +47,7 @@ import {
   type ScoreBreakdown,
 } from './score';
 import { generateFitSummary } from './summary';
+import { guardedLLMCall, BudgetExceededError } from '@/lib/rfp/ai/guardrail';
 import { maybeDispatchAlert } from '@/lib/rfp/alerts/dispatch';
 import { DEFAULT_THRESHOLD } from '@/lib/rfp/alerts/prefs';
 
@@ -405,6 +406,11 @@ export async function scoreNewOpportunitiesForAllActiveOrgs(
   // 6. Score + (optional) summary. AI calls go through asyncPool(3) to stay
   //    under Anthropic rate limits; the deterministic scoreOpportunity call
   //    is synchronous and cheap, so we don't bother pooling it.
+  //
+  //    Phase 17-04: each summary call is routed through guardedLLMCall(orgId).
+  //    An over-budget org is SILENTLY SKIPPED (logged + continue with null
+  //    summary so scoring chips/scores still upsert). Non-budget errors re-throw
+  //    to the outer catch so real failures still surface.
   const computed = await asyncPool(3, pairs, async ({ opp, orgId, profile }) => {
     try {
       const breakdown = scoreOpportunity(opp, profile);
@@ -413,9 +419,34 @@ export async function scoreNewOpportunitiesForAllActiveOrgs(
       const scored_version = (prev?.scored_version ?? 0) + 1;
 
       // AI summary only for missing cron-hand-off pairs — this is the path
-      // where the user gets fresh prose for newly-discovered opps. Summary
-      // helper returns null on error / missing key (we persist null then).
-      const summary = await generateFitSummary(opp, profile, breakdown);
+      // where the user gets fresh prose for newly-discovered opps.
+      let summaryText: string | null = null;
+      try {
+        const guarded = await guardedLLMCall(orgId, async () => {
+          const r = await generateFitSummary(opp, profile, breakdown);
+          return {
+            agent: 'scoring_summary_v1' as const,
+            model: 'claude-sonnet-4-5', // generateFitSummary tries primary first
+            tokensIn: r.tokensIn,
+            tokensOut: r.tokensOut,
+            costUsd: r.costUsd,
+            _text: r.text,
+          };
+        });
+        summaryText = guarded._text;
+      } catch (err: unknown) {
+        if (err instanceof BudgetExceededError) {
+          // Open Question 1 default: silently skip summary for over-budget org.
+          // Scoring chips and score still upsert; only the narrative is omitted.
+          console.warn(
+            `[scoring/recompute] org over AI budget, skipping summary: ${orgId}`
+          );
+          summaryText = null;
+        } else {
+          // Non-budget error — re-throw so the outer catch logs + skips the pair.
+          throw err;
+        }
+      }
 
       return {
         opp_id: opp.id,
@@ -423,7 +454,7 @@ export async function scoreNewOpportunitiesForAllActiveOrgs(
         fit_score: breakdown.fit_score,
         score_breakdown: breakdown,
         chips: breakdown.chips,
-        summary,
+        summary: summaryText,
         scored_version,
       };
     } catch (e) {
@@ -554,7 +585,13 @@ export async function recomputeAllForOrg(
 
         let summary: string | null = null;
         if (ai) {
-          summary = await generateFitSummary(opp, profile, breakdown);
+          // Phase 17-04: generateFitSummary now returns FitSummaryResult.
+          // recomputeAllForOrg is the per-org triggered path (profile mutations),
+          // not the cron ingest path, so we don't guard with guardedLLMCall here
+          // (orgId is already in scope but this path is opt-in and less
+          // financially sensitive). Extract just the text for the upsert.
+          const r = await generateFitSummary(opp, profile, breakdown);
+          summary = r.text;
         }
 
         return {
