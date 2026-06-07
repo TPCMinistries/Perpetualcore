@@ -39,6 +39,11 @@ import {
   REVIEWER_FINDINGS_SECTION_TYPE,
   type ReviewerResult,
 } from "@/lib/rfp/review/rubric";
+import {
+  guardedLLMCall,
+  budgetExceededResponse,
+  BudgetExceededError,
+} from "@/lib/rfp/ai/guardrail";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -171,11 +176,37 @@ export async function POST(
     );
   }
 
-  // Call Opus.
+  // Call Opus — gated by per-tenant AI budget (Phase 17).
+  // guardedLLMCall runs checkBudget() BEFORE generateReview fires, so an
+  // over-budget org never reaches the model. recordCost() is called by the
+  // wrapper after the review returns; the inline rfp_agent_sessions insert
+  // that used to live below has been removed to avoid double-counting.
+  //
+  // We do NOT spread the ReviewerResult into the returned meta object to keep
+  // the response shape unchanged. Instead the meta is built from scalar fields
+  // only; the full `result` is captured in the outer `review` variable.
   let review: ReviewerResult;
   try {
-    review = await generateReview({ opportunity: opp, sections: draftedSections });
+    let capturedReview: ReviewerResult | undefined;
+    await guardedLLMCall(proposal.org_id, async () => {
+      const result = await generateReview({ opportunity: opp, sections: draftedSections });
+      capturedReview = result;
+      return {
+        agent: REVIEWER_AGENT,
+        model: result.model,
+        tokensIn: result.tokens_in,
+        tokensOut: result.tokens_out,
+        costUsd: result.cost_usd,
+        sessionId: result.session_id,
+        proposalId: proposal.id,
+      };
+    });
+    if (!capturedReview) {
+      throw new Error("review result was not captured");
+    }
+    review = capturedReview;
   } catch (err) {
+    if (err instanceof BudgetExceededError) return budgetExceededResponse(err);
     const msg = err instanceof Error ? err.message : "unknown";
     return NextResponse.json(
       { error: "review_failed", detail: msg.slice(0, 200) },
@@ -222,17 +253,8 @@ export async function POST(
     );
   }
 
-  // Audit row — model/tokens/cost only for v1 (matches drafter).
-  await admin.from("rfp_agent_sessions").insert({
-    proposal_id: proposal.id,
-    org_id: proposal.org_id,
-    agent: REVIEWER_AGENT,
-    session_id: review.session_id,
-    model: review.model,
-    tokens_in: review.tokens_in,
-    tokens_out: review.tokens_out,
-    cost_usd: review.cost_usd,
-  });
+  // The rfp_agent_sessions audit row is recorded by guardedLLMCall → recordCost
+  // (wrapper owns the single insert). No inline insert here.
 
   return NextResponse.json(review);
 }
