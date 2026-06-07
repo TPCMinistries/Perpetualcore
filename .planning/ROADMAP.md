@@ -125,7 +125,12 @@ Beachhead coverage uses what's ALREADY live: federal (SAM/Grants.gov/NIH/NSF) + 
   1. Setting a test org's AI budget to $0.00 and triggering any LLM call (scoring, drafting, review) returns a clear budget-exceeded error — the LLM call is never made, confirmed by zero token usage in logs
   2. A successful LLM call records cost (input tokens × rate + output tokens × rate) in the per-tenant ledger row within the same request lifecycle
   3. After cumulative spend crosses the configured limit mid-session, the next LLM call is blocked — the user sees an actionable message, not a 500 error
-**Plans**: TBD
+**Plans**: 5 plans
+- [ ] 17-01-PLAN.md — Foundation: additive migration (monthly_ai_budget_usd) + guardedLLMCall wrapper + BudgetExceededError + model-rate map + 402 helper + database.types.ts regen [BILL-04]
+- [ ] 17-02-PLAN.md — Gate proposal-writing routes (draft, redraft, review) through the wrapper; remove inline session inserts [BILL-04]
+- [ ] 17-03-PLAN.md — Gate voice (x2), vault (x2, expand+embed as one), and naics-suggest (optional org_id) routes through the wrapper [BILL-04]
+- [ ] 17-04-PLAN.md — Cron path: summary.ts returns cost metadata + recompute.ts per-org guard with silent budget-exceed skip [BILL-04]
+- [ ] 17-05-PLAN.md — Verification: vitest unit tests + CORE-safe live-DB script proving all 3 success criteria [BILL-04]
 
 ### Phase 18: Explainable Fit Scoring
 **Goal**: Every opportunity in the feed has a fit score grounded in the org's vault artifacts; the score explains WHY across five dimensions, flags disqualifiers, and cites specific prior wins or vault evidence
@@ -233,7 +238,7 @@ Phases execute in numeric order: 13 → 14 → 15 → 16 → 17 → 18 → 19 �
 | 14. Canonical Data Foundation | 3/4 | Complete    | 2026-06-06 | - |
 | 15. Level-1 Federal Discovery | v2.0 | 0/TBD | Not started | - |
 | 16. Extended Discovery + Saved Searches | v2.0 | 0/TBD | Not started | - |
-| 17. AI Cost Guardrail | v2.0 | 0/TBD | Not started | - |
+| 17. AI Cost Guardrail | v2.0 | 0/5 | Planned | - |
 | 18. Explainable Fit Scoring | v2.0 | 0/TBD | Not started | - |
 | 19. Rubric Review, Compliance Gate & Upload | v2.0 | 0/TBD | Not started | - |
 | 20. Submission Tracking & Amendments | v2.0 | 0/TBD | Not started | - |
