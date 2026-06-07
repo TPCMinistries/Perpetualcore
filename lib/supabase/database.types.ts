@@ -15496,6 +15496,66 @@ export type Database = {
           },
         ]
       }
+      rfp_fit_evidence: {
+        Row: {
+          artifact_doc_id: string
+          artifact_id: string
+          artifact_title: string
+          artifact_type: string
+          created_at: string
+          dimension: string
+          excerpt: string
+          id: string
+          opp_id: string
+          org_id: string
+          scored_version: number
+          similarity: number
+        }
+        Insert: {
+          artifact_doc_id: string
+          artifact_id: string
+          artifact_title: string
+          artifact_type: string
+          created_at?: string
+          dimension: string
+          excerpt: string
+          id?: string
+          opp_id: string
+          org_id: string
+          scored_version: number
+          similarity: number
+        }
+        Update: {
+          artifact_doc_id?: string
+          artifact_id?: string
+          artifact_title?: string
+          artifact_type?: string
+          created_at?: string
+          dimension?: string
+          excerpt?: string
+          id?: string
+          opp_id?: string
+          org_id?: string
+          scored_version?: number
+          similarity?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "rfp_fit_evidence_opp_id_fkey"
+            columns: ["opp_id"]
+            isOneToOne: false
+            referencedRelation: "rfp_opportunities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "rfp_fit_evidence_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "rfp_orgs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       rfp_opp_matches: {
         Row: {
           chips: string[]

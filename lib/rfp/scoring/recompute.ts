@@ -75,8 +75,8 @@ interface OppDisqualifierFields {
   naics_codes: string[] | null;
 }
 
-/** OppRow extended with disqualifier columns fetched from DB. */
-type OppRowExtended = OppRow & OppDisqualifierFields;
+/** OppRow extended with disqualifier columns fetched from DB. Exported for the rescore endpoint. */
+export type OppRowExtended = OppRow & OppDisqualifierFields;
 
 /** Row shape we read from rfp_orgs.naics for the profile builder. */
 interface OrgNaicsRow {
@@ -97,8 +97,9 @@ interface OrgNaicsTypeRow extends OrgNaicsRow {
  * org.type lives in rfp_orgs; profile lives in rfp_capture_profiles.
  * We combine them here rather than extending CaptureProfileForScoring
  * (which is score.ts's domain — per plan, define a local type instead).
+ * Exported for the on-demand rescore endpoint.
  */
-interface OrgForScoring {
+export interface OrgForScoring {
   orgId: string;
   profile: CaptureProfileForScoring | null;
   type: 'nonprofit' | 'forprofit' | 'dual';
@@ -483,7 +484,7 @@ export async function scoreOnePairV2(
   //    embedding cost (embed.ts) and summary cost (summary.ts) are both captured.
   let summaryText: string | null = null;
   let dims = mapToDimensions(base, 0, disqualifiers);
-  let evidenceRows: FitEvidenceRow[] = [];
+  const evidenceRows: FitEvidenceRow[] = [];
   let vaultHitCount = 0;
   let skippedBudget = false;
 
@@ -522,12 +523,9 @@ export async function scoreOnePairV2(
     // Map each cited excerpt to a FitEvidenceRow per relevant dimension.
     // We attribute citations to all dimensions they contribute to (simplest: assign to
     // mission_fit as the primary; future phases can map per-chunk to dimension).
-    const dimensionForChunk = (
-      idx: number,
-      totalChunks: number
-    ): FitEvidenceDimension => {
+    const dimensionForChunk = (idx: number): FitEvidenceDimension => {
       // Simple round-robin across dimensions: first chunk = mission_fit,
-      // second = track_record, third = capacity, others = mission_fit.
+      // second = track_record, third = capacity, others cycle.
       // This is a reasonable heuristic at beachhead scale.
       const dims_order: FitEvidenceDimension[] = [
         'mission_fit', 'track_record', 'capacity', 'funder_relationship', 'eligibility',
@@ -540,7 +538,7 @@ export async function scoreOnePairV2(
       const matchedChunk = guarded._chunks.find((c) => c.doc_id === cited.artifact_id);
       const similarity = matchedChunk?.similarity_score ?? 0;
       const chunkIdx = guarded._chunks.findIndex((c) => c.doc_id === cited.artifact_id);
-      const dimension = dimensionForChunk(chunkIdx >= 0 ? chunkIdx : 0, guarded._chunks.length);
+      const dimension = dimensionForChunk(chunkIdx >= 0 ? chunkIdx : 0);
 
       evidenceRows.push({
         opp_id: opp.id,

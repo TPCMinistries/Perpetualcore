@@ -10,12 +10,9 @@
  * retrieval. Evidence rows are written here after the caller has already
  * retrieved and scored vault chunks.
  *
- * NOTE: database.types.ts has not yet been regenerated to include
- * rfp_fit_evidence. It will be regenerated in a later plan that owns the single
- * regen step (to avoid parallel-wave write collision). Until then, DB calls
- * use `as unknown as` casts per the established project pattern.
- * See: STATE.md "[Phase 14-canonical-data-foundation]: database.types.ts
- *       regen deferred to Plan 14-04 (single owner)"
+ * Phase 18-03: database.types.ts has been regenerated (Plan 03 is the single
+ * owner of the Phase 18 types regen). The temporary `as unknown as` casts used
+ * in Plan 18-01 have been removed now that rfp_fit_evidence is properly typed.
  */
 
 import { createAdminClient } from '@/lib/supabase/server';
@@ -100,16 +97,14 @@ export async function upsertFitEvidence(
 
   // Upsert with the full unique constraint as the conflict key.
   // ignoreDuplicates: false — update in place on rescore to refresh excerpt/similarity.
-  // Cast through unknown because rfp_fit_evidence is not yet in database.types.ts.
-  const { data, error: upsertError } = await (
-    admin
-      .from('rfp_fit_evidence' as unknown as 'rfp_orgs') // cast until types regen
-      .upsert(prepared as unknown as never[], {
-        onConflict: 'opp_id,org_id,scored_version,artifact_id,dimension',
-        ignoreDuplicates: false,
-      })
-      .select('opp_id')
-  ) as unknown as { data: { opp_id: string }[] | null; error: { message: string } | null };
+  // rfp_fit_evidence is now in database.types.ts (Plan 18-03 regen); no casts needed.
+  const { data, error: upsertError } = await admin
+    .from('rfp_fit_evidence')
+    .upsert(prepared, {
+      onConflict: 'opp_id,org_id,scored_version,artifact_id,dimension',
+      ignoreDuplicates: false,
+    })
+    .select('opp_id');
 
   if (upsertError) {
     return { upserted: 0, error: upsertError.message };
@@ -134,14 +129,12 @@ export async function upsertFitEvidence(
   }
 
   for (const { opp_id, org_id, scored_version } of pairVersionMap.values()) {
-    const { error: pruneError } = await (
-      admin
-        .from('rfp_fit_evidence' as unknown as 'rfp_orgs')
-        .delete()
-        .eq('opp_id', opp_id)
-        .eq('org_id', org_id)
-        .lt('scored_version', scored_version)
-    ) as unknown as { error: { message: string } | null };
+    const { error: pruneError } = await admin
+      .from('rfp_fit_evidence')
+      .delete()
+      .eq('opp_id', opp_id)
+      .eq('org_id', org_id)
+      .lt('scored_version', scored_version);
 
     if (pruneError) {
       // Non-fatal — log and continue. Stale rows are hidden by scored_version
