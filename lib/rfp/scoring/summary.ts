@@ -33,6 +33,8 @@ import type {
   CaptureProfileForScoring,
   ScoreBreakdown,
 } from './score';
+import type { ExplainedDimensions } from './dimensions';
+import type { RetrievedChunk } from '@/lib/rfp/vault/retrieve';
 
 // Lazy init — matches lib/ai/router.ts pattern. Don't crash at build-time when
 // ANTHROPIC_API_KEY is absent.
@@ -166,4 +168,232 @@ export async function generateFitSummary(
 
   // Both models failed (rate limit, network, etc.) — return null per contract.
   return ZERO_COST_RESULT;
+}
+
+// ── Phase 18: Vault-grounded cited summary ────────────────────────────────────
+
+/**
+ * One cited vault artifact in the explained summary output.
+ * Maps to a row in rfp_fit_evidence (dimension is added by the caller).
+ */
+export interface CitedArtifact {
+  artifact_id: string;    // doc_id from vault chunk
+  excerpt: string;        // ≤120 chars from chunk.text
+  artifact_title: string; // chunk.doc_title
+}
+
+/**
+ * Extended result returned by generateExplainedSummary.
+ * Extends FitSummaryResult with vault citation data.
+ * On JSON parse failure, citation arrays are empty (graceful degrade — Pitfall 4).
+ */
+export interface ExplainedSummaryResult extends FitSummaryResult {
+  cited_artifact_ids: string[];
+  cited_excerpts: CitedArtifact[];
+}
+
+/** Zero-cost sentinel for the explained summary (empty vault or no key). */
+const ZERO_EXPLAINED_RESULT: ExplainedSummaryResult = {
+  text: null,
+  tokensIn: 0,
+  tokensOut: 0,
+  costUsd: 0,
+  cited_artifact_ids: [],
+  cited_excerpts: [],
+};
+
+/**
+ * Cap response at ~200 tokens — enough for 2-3 sentence narrative + JSON citations.
+ */
+const EXPLAINED_MAX_TOKENS = 350;
+
+/**
+ * Build the prompt for generateExplainedSummary.
+ * When vaultChunks is empty, falls back to a plain summary without citation instructions.
+ */
+function buildExplainedPrompt(
+  opp: OpportunityForScoring,
+  profile: CaptureProfileForScoring,
+  dimensions: ExplainedDimensions,
+  vaultChunks: RetrievedChunk[]
+): string {
+  const briefTruncated = (opp.brief ?? '').slice(0, 200);
+  const amountStr =
+    opp.amount_max != null ? `$${opp.amount_max.toLocaleString()}` : 'unspecified amount';
+  const deadlineStr = opp.deadline ?? 'no deadline given';
+  const naicsList = profile.naics.join(',') || 'none';
+  const capStr = profile.capacity_keywords.slice(0, 5).join(', ') || 'none';
+
+  const dimSummary = [
+    `Mission fit: ${dimensions.mission_fit.sub_score}/100 — ${dimensions.mission_fit.label}`,
+    `Eligibility: ${dimensions.eligibility.sub_score}/100 — ${dimensions.eligibility.label}`,
+    `Track record: ${dimensions.track_record.sub_score}/100 — ${dimensions.track_record.label}`,
+    `Capacity: ${dimensions.capacity.sub_score}/100 — ${dimensions.capacity.label}`,
+    `Funder relationship: ${dimensions.funder_relationship.sub_score}/100 — ${dimensions.funder_relationship.label}`,
+  ].join('\n');
+
+  if (vaultChunks.length === 0) {
+    // Empty-vault degrade: plain summary, no citation instructions.
+    return [
+      'You explain why an opportunity matches an organization in 2-3 sentences.',
+      'Be specific. Reference NAICS code, capacity area, geo, or past funder by name when they match.',
+      'No marketing language. No "Strong fit" — that\'s already shown elsewhere.',
+      '',
+      `Opportunity: ${opp.title} — ${opp.agency ?? 'agency unknown'} — ${amountStr} — deadline ${deadlineStr} — ${briefTruncated}`,
+      `Org: NAICS ${naicsList} · capacity ${capStr}`,
+      `Dimension scores:\n${dimSummary}`,
+      '',
+      'Return ONLY valid JSON: {"text":"...","cited_artifact_ids":[],"cited_excerpts":[]}',
+    ].join('\n');
+  }
+
+  // Build vault chunk context (trim each chunk to 300 chars to keep prompt short).
+  const chunkContext = vaultChunks
+    .map(
+      (c, i) =>
+        `[${i + 1}] id="${c.doc_id}" title="${c.doc_title}" text="${c.text.slice(0, 300)}"`
+    )
+    .join('\n');
+
+  return [
+    'You explain why an opportunity matches an organization in 2-3 sentences, citing the org\'s own vault documents by name.',
+    'Be specific. Reference the vault doc titles that provide evidence for the fit.',
+    'No marketing language. No "Strong fit" — that\'s already shown elsewhere.',
+    '',
+    `Opportunity: ${opp.title} — ${opp.agency ?? 'agency unknown'} — ${amountStr} — deadline ${deadlineStr} — ${briefTruncated}`,
+    `Org: NAICS ${naicsList} · capacity ${capStr}`,
+    `Dimension scores:\n${dimSummary}`,
+    '',
+    'Relevant vault documents:',
+    chunkContext,
+    '',
+    'Return ONLY valid JSON with this exact shape (no markdown, no preamble):',
+    '{"text":"2-3 sentence summary citing vault doc titles by name","cited_artifact_ids":["doc_id_1",...],"cited_excerpts":[{"artifact_id":"doc_id","excerpt":"≤120 chars","artifact_title":"doc title"},...]  }',
+  ].join('\n');
+}
+
+/**
+ * Generate a vault-grounded, cited fit summary.
+ *
+ * Reuses the same model selection (MODEL_PRIMARY / MODEL_FALLBACK) as
+ * generateFitSummary — do NOT introduce a new model.
+ *
+ * Do NOT call guardedLLMCall inside this function — the caller wraps it.
+ * This keeps the function reusable and independently testable.
+ *
+ * @param opp        Opportunity being scored
+ * @param profile    Capture profile for the org (may be null → profile-pending)
+ * @param dimensions Dimension breakdown from mapToDimensions
+ * @param vaultChunks Retrieved vault chunks (may be empty → empty-vault degrade)
+ * @returns ExplainedSummaryResult with text + citation arrays + cost metadata.
+ *   Never throws. On JSON parse failure, degrades to plain text with empty citations.
+ */
+export async function generateExplainedSummary(
+  opp: OpportunityForScoring,
+  profile: CaptureProfileForScoring | null,
+  dimensions: ExplainedDimensions,
+  vaultChunks: RetrievedChunk[]
+): Promise<ExplainedSummaryResult> {
+  // Profile-pending case: skip AI.
+  if (profile === null) {
+    return {
+      text: PROFILE_PENDING_SUMMARY,
+      tokensIn: 0,
+      tokensOut: 0,
+      costUsd: 0,
+      cited_artifact_ids: [],
+      cited_excerpts: [],
+    };
+  }
+
+  const client = getAnthropic();
+  if (!client) {
+    return ZERO_EXPLAINED_RESULT;
+  }
+
+  const prompt = buildExplainedPrompt(opp, profile, dimensions, vaultChunks);
+
+  for (const model of [MODEL_PRIMARY, MODEL_FALLBACK]) {
+    try {
+      const resp = await client.messages.create({
+        model,
+        max_tokens: EXPLAINED_MAX_TOKENS,
+        messages: [{ role: 'user', content: prompt }],
+      });
+
+      const block = resp.content[0];
+      if (!block || block.type !== 'text') continue;
+
+      const rawText = block.text.trim();
+      if (!rawText) continue;
+
+      const tokensIn = resp.usage.input_tokens;
+      const tokensOut = resp.usage.output_tokens;
+      const costUsd = computeCostUsd(model, tokensIn, tokensOut);
+
+      // Try to parse the JSON response (Pitfall 4: graceful degrade on failure).
+      try {
+        // Strip markdown code fences if present (common LLM output artifact).
+        const jsonStr = rawText.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/, '').trim();
+        const parsed = JSON.parse(jsonStr) as {
+          text?: unknown;
+          cited_artifact_ids?: unknown;
+          cited_excerpts?: unknown;
+        };
+
+        const text =
+          typeof parsed.text === 'string' && parsed.text.length > 0
+            ? parsed.text
+            : rawText;
+
+        const cited_artifact_ids = Array.isArray(parsed.cited_artifact_ids)
+          ? (parsed.cited_artifact_ids as unknown[]).filter(
+              (id): id is string => typeof id === 'string'
+            )
+          : [];
+
+        const cited_excerpts: CitedArtifact[] = [];
+        if (Array.isArray(parsed.cited_excerpts)) {
+          for (const item of parsed.cited_excerpts as unknown[]) {
+            if (
+              item &&
+              typeof item === 'object' &&
+              typeof (item as Record<string, unknown>).artifact_id === 'string' &&
+              typeof (item as Record<string, unknown>).excerpt === 'string' &&
+              typeof (item as Record<string, unknown>).artifact_title === 'string'
+            ) {
+              const i = item as Record<string, unknown>;
+              cited_excerpts.push({
+                artifact_id: i.artifact_id as string,
+                excerpt: (i.excerpt as string).slice(0, 120), // enforce ≤120 chars
+                artifact_title: i.artifact_title as string,
+              });
+            }
+          }
+        }
+
+        return { text, tokensIn, tokensOut, costUsd, cited_artifact_ids, cited_excerpts };
+      } catch {
+        // JSON parse failed — fall back to plain text with empty citations.
+        console.warn(
+          `[scoring/summary] generateExplainedSummary: JSON parse failed for opp=${opp.id} model=${model} — falling back to plain text`
+        );
+        return {
+          text: rawText,
+          tokensIn,
+          tokensOut,
+          costUsd,
+          cited_artifact_ids: [],
+          cited_excerpts: [],
+        };
+      }
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : String(err);
+      console.warn(
+        `[scoring/summary] generateExplainedSummary ${model} failed for opp=${opp.id}: ${msg}`
+      );
+    }
+  }
+
+  return ZERO_EXPLAINED_RESULT;
 }
