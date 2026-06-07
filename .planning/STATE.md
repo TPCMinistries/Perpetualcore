@@ -48,6 +48,7 @@ Progress: [██░░░░░░░░] ~20% (v2.0 phases — Phase 22 of 25 
 | Phase 17-ai-cost-guardrail P04 | 7 | 2 tasks | 2 files |
 | Phase 17-ai-cost-guardrail P03 | 43 | 3 tasks | 6 files |
 | Phase 17-ai-cost-guardrail P02 | 58 | 2 tasks | 3 files |
+| Phase 17-ai-cost-guardrail P05 | 2 | 2 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -95,6 +96,7 @@ Recent decisions affecting current work:
 - [Phase 17-ai-cost-guardrail]: vault/from-description: model label = 'gpt-4o' (dominant) for combined expand+embed session row; naics-suggest membership non-member treated as absent (silent downgrade, no 403 leak)
 - [Phase 17-ai-cost-guardrail]: Draft route: proposal_id omitted from session meta (unknown pre-insert) — org_id sufficient for budget; null proposal_id acceptable for cost ledgering
 - [Phase 17-ai-cost-guardrail]: Review route: capturedReview pattern preserves exact ReviewerResult response shape — extra camelCase meta fields never leak into JSON output
+- [Phase 17-ai-cost-guardrail]: Phase 17 Plan 05: NULL budget guard prevents coercion-to-zero regression in unit tests; live-DB script uses captured session IDs for precise cleanup; quick-import/extract.ts NOT guarded (no org_id at extract time) — deferred to future phase
 
 ### Pending Todos
 
@@ -111,5 +113,5 @@ Recent decisions affecting current work:
 ## Session Continuity
 
 Last session: 2026-06-07
-Stopped at: Completed 17-ai-cost-guardrail/17-01-PLAN.md — guardrail foundation (migration + guardrail.ts + database.types.ts regen)
-Resume file: None — continue with 17-02 (call-site integration Wave 2)
+Stopped at: Completed 17-ai-cost-guardrail/17-05-PLAN.md — all 3 BILL-04 success criteria proven (vitest unit tests + live-DB script); Phase 17 COMPLETE
+Resume file: None — Phase 17 complete; next phase per ROADMAP

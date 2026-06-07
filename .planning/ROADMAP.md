@@ -53,7 +53,7 @@ Beachhead coverage uses what's ALREADY live: federal (SAM/Grants.gov/NIH/NSF) + 
 - [x] **Phase 14: Canonical Data Foundation** - Unified opportunity model, dedup, entitlement table, pgvector HNSW match RPC (completed 2026-06-06)
 - [ ] **Phase 15: Level-1 Federal Discovery** - SAM.gov/Grants.gov/SBIR ingest with durable jobs, source-health SLA, verified live counts
 ⏸ - [ ] **Phase 16: Extended Discovery (Levels 2 & 3) + Saved Searches** - Declarative all-50-state connector framework (any state via config row), tri-state live, IRS 990 foundations, global sources, gated by entitlement; saved search alerts
-- [ ] **Phase 17: AI Cost Guardrail** - Per-tenant AI cost ledger with hard spend limit enforced before every LLM call
+- [x] **Phase 17: AI Cost Guardrail** - Per-tenant AI cost ledger with hard spend limit enforced before every LLM call (completed 2026-06-07)
 - [ ] **Phase 18: Explainable Fit Scoring** - Vault-grounded fit scores with dimension breakdown, disqualifier flags, and cited evidence
 - [ ] **Phase 19: Rubric Review, Compliance Gate & Upload** - Adversarial reviewer panel, rubric extraction, compliance gate v1, AI-use disclosure, PDF/DOCX upload
 - [ ] **Phase 20: Submission Tracking & Amendments** - Submission packet assembly, status tracking, amendment diffing, change alerts
@@ -238,7 +238,7 @@ Phases execute in numeric order: 13 → 14 → 15 → 16 → 17 → 18 → 19 �
 | 14. Canonical Data Foundation | 3/4 | Complete    | 2026-06-06 | - |
 | 15. Level-1 Federal Discovery | v2.0 | 0/TBD | Not started | - |
 | 16. Extended Discovery + Saved Searches | v2.0 | 0/TBD | Not started | - |
-| 17. AI Cost Guardrail | 4/5 | In Progress|  | - |
+| 17. AI Cost Guardrail | 5/5 | Complete   | 2026-06-07 | - |
 | 18. Explainable Fit Scoring | v2.0 | 0/TBD | Not started | - |
 | 19. Rubric Review, Compliance Gate & Upload | v2.0 | 0/TBD | Not started | - |
 | 20. Submission Tracking & Amendments | v2.0 | 0/TBD | Not started | - |
