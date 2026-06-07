@@ -45,6 +45,7 @@ Progress: [██░░░░░░░░] ~20% (v2.0 phases — Phase 22 of 25 
 | Phase 22-trust-security-legal P02 | 4 | 2 tasks | 1 files |
 | Phase 22-trust-security-legal P03 | 14 | 3 tasks | 4 files |
 | Phase 17-ai-cost-guardrail P01 | 11 | 3 tasks | 3 files |
+| Phase 17-ai-cost-guardrail P04 | 7 | 2 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -88,6 +89,7 @@ Recent decisions affecting current work:
 - [Phase 22-trust-security-legal]: Live-domain production confirmation deferred to next vercel --prod deploy; local build confirmed (exit 0)
 - [Phase 17-ai-cost-guardrail]: rfp_agent_sessions reused as ledger — additive column on rfp_entitlements only; NULL monthly_ai_budget_usd = unlimited; fail-CLOSED on DB read error
 - [Phase 17-ai-cost-guardrail]: database.types.ts regenerated via CLI as single owner for Phase 17; all Phase 14 types preserved
+- [Phase 17-ai-cost-guardrail]: generateFitSummary returns FitSummaryResult {text,tokensIn,tokensOut,costUsd} in all branches; cron scoring loop guarded per org via guardedLLMCall; over-budget orgs silently skipped with null summary (scoring chips/scores still upsert)
 
 ### Pending Todos
 
