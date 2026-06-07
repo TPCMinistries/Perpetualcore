@@ -59,7 +59,7 @@ Grouped by category. Each maps to exactly one roadmap phase (see Traceability). 
 - [ ] **BILL-01**: Self-serve Stripe checkout for all tiers with trial → automatic org provisioning
 - [ ] **BILL-02**: Plans map to coverage levels + quotas; entitlements enforced in app and RLS
 - [ ] **BILL-03**: Usage metering uses Stripe Meters (legacy metered prices migrated before live mode)
-- [ ] **BILL-04**: A per-tenant AI cost ledger enforces a hard spend limit BEFORE each LLM call fires
+- [x] **BILL-04**: A per-tenant AI cost ledger enforces a hard spend limit BEFORE each LLM call fires
 - [ ] **BILL-05**: Transparent pricing and a risk-reversal guarantee are presented on the pricing surface
 
 ### Operator Console & Monitoring (ADMIN)
@@ -145,7 +145,7 @@ Tracked, not in this roadmap.
 | BILL-01 | Phase 23 | Pending |
 | BILL-02 | Phase 23 | Pending |
 | BILL-03 | Phase 23 | Pending |
-| BILL-04 | Phase 17 | Pending |
+| BILL-04 | Phase 17 | Complete |
 | BILL-05 | Phase 23 | Pending |
 | ADMIN-01 | Phase 24 | Pending |
 | ADMIN-02 | Phase 24 | Pending |
