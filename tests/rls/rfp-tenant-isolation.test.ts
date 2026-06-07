@@ -156,6 +156,15 @@ beforeAll(async () => {
   ]);
   if (artifactResult.error)
     throw new Error(`Failed to seed artifacts: ${artifactResult.error.message}`);
+
+  // Seed one rfp_entitlements row per org via admin (service role bypasses RLS write policy)
+  // Shape mirrors the Stripe webhook upsert (Phase 14-03 decision): only 3 fields
+  const entitlementResult = await admin.from("rfp_entitlements").insert([
+    { org_id: orgA, coverage_level: "l1" },
+    { org_id: orgB, coverage_level: "l1" },
+  ]);
+  if (entitlementResult.error)
+    throw new Error(`Failed to seed entitlements: ${entitlementResult.error.message}`);
 }, 30000);
 
 // ---------------------------------------------------------------------------
@@ -238,6 +247,31 @@ describe("RFP tenant isolation", () => {
     expect(data).not.toBeNull();
     expect(data!.find((o) => o.id === orgB)).toBeTruthy();
     expect(data!.find((o) => o.id === orgA)).toBeUndefined();
+  });
+
+  it("User A cannot read Org B entitlements", async () => {
+    const c = clientFor(userA.access_token);
+    const { data, error } = await c
+      .from("rfp_entitlements")
+      .select("*")
+      .eq("org_id", orgB);
+
+    // RLS SELECT policy uses rfp_my_org_ids() — returns empty set, NOT a 403
+    expect(error).toBeNull();
+    expect(data).toEqual([]);
+  });
+
+  it("User A reads only their own Org A entitlements", async () => {
+    const c = clientFor(userA.access_token);
+    const { data, error } = await c
+      .from("rfp_entitlements")
+      .select("*")
+      .eq("org_id", orgA);
+
+    expect(error).toBeNull();
+    expect(data).not.toBeNull();
+    expect(data!.length).toBeGreaterThanOrEqual(1);
+    expect(data!.every((r) => r.org_id === orgA)).toBe(true);
   });
 
   it("rfp_opportunities is globally readable for authenticated users", async () => {
