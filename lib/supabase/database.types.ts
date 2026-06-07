@@ -15445,6 +15445,7 @@ export type Database = {
           coverage_level: string
           created_at: string
           id: string
+          monthly_ai_budget_usd: number | null
           monthly_draft_quota: number | null
           monthly_review_quota: number | null
           monthly_score_quota: number | null
@@ -15459,6 +15460,7 @@ export type Database = {
           coverage_level?: string
           created_at?: string
           id?: string
+          monthly_ai_budget_usd?: number | null
           monthly_draft_quota?: number | null
           monthly_review_quota?: number | null
           monthly_score_quota?: number | null
@@ -15473,6 +15475,7 @@ export type Database = {
           coverage_level?: string
           created_at?: string
           id?: string
+          monthly_ai_budget_usd?: number | null
           monthly_draft_quota?: number | null
           monthly_review_quota?: number | null
           monthly_score_quota?: number | null
@@ -16599,6 +16602,127 @@ export type Database = {
             columns: ["permission_id"]
             isOneToOne: false
             referencedRelation: "permissions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      sage_conversations: {
+        Row: {
+          created_at: string
+          id: string
+          mode: string
+          owner_user_id: string
+          title: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          mode?: string
+          owner_user_id?: string
+          title?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          mode?: string
+          owner_user_id?: string
+          title?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      sage_library: {
+        Row: {
+          content: string | null
+          conversation_id: string | null
+          created_at: string
+          id: string
+          kind: string
+          metadata: Json
+          owner_user_id: string
+          prompt: string
+          provider: string | null
+          status: string
+          storage_path: string | null
+          storage_url: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          content?: string | null
+          conversation_id?: string | null
+          created_at?: string
+          id?: string
+          kind: string
+          metadata?: Json
+          owner_user_id?: string
+          prompt: string
+          provider?: string | null
+          status?: string
+          storage_path?: string | null
+          storage_url?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          content?: string | null
+          conversation_id?: string | null
+          created_at?: string
+          id?: string
+          kind?: string
+          metadata?: Json
+          owner_user_id?: string
+          prompt?: string
+          provider?: string | null
+          status?: string
+          storage_path?: string | null
+          storage_url?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sage_library_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "sage_conversations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      sage_messages: {
+        Row: {
+          content: string
+          conversation_id: string
+          created_at: string
+          id: string
+          model_slug: string | null
+          role: string
+        }
+        Insert: {
+          content: string
+          conversation_id: string
+          created_at?: string
+          id?: string
+          model_slug?: string | null
+          role: string
+        }
+        Update: {
+          content?: string
+          conversation_id?: string
+          created_at?: string
+          id?: string
+          model_slug?: string | null
+          role?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sage_messages_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "sage_conversations"
             referencedColumns: ["id"]
           },
         ]
@@ -24716,3 +24840,5 @@ export const Constants = {
     Enums: {},
   },
 } as const
+A new version of Supabase CLI is available: v2.105.0 (currently installed v2.54.11)
+We recommend updating regularly for new features and bug fixes: https://supabase.com/docs/guides/cli/getting-started#updating-the-supabase-cli
