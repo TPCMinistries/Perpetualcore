@@ -10,9 +10,9 @@ See: .planning/PROJECT.md (updated 2026-06-05)
 ## Current Position
 
 Phase: 18 of 25 (Explainable Fit Scoring)
-Plan: 2 of ? complete (18-01 RESEARCH; 18-02 checkDisqualifiers + mapToDimensions pure fns)
-Status: Phase 18 in progress — SCORE-03 + SCORE-04 pure functions complete; next: Plan 03 cron/endpoint integration
-Last activity: 2026-06-07 — 18-02 complete (4f70f9c), checkDisqualifiers + mapToDimensions with 17/17 tests passing
+Plan: 3 of 4 complete (18-01 rfp_fit_evidence migration + evidence-store.ts; 18-02 checkDisqualifiers + mapToDimensions pure fns)
+Status: Phase 18 in progress — SCORE-02 storage backbone + SCORE-03/04 pure fns complete; next: Plan 03 cron/endpoint integration
+Last activity: 2026-06-07 — 18-01 complete (9ef56f0), rfp_fit_evidence table + upsertFitEvidence helper
 
 Progress: [██░░░░░░░░] ~20% (v2.0 phases — Phase 22 of 25 active)
 
@@ -101,6 +101,9 @@ Recent decisions affecting current work:
 - [Phase 18-explainable-fit-scoring]: checkDisqualifiers guards every check behind null/empty presence test — zero false positives on sparse pre-Phase-15 data
 - [Phase 18-explainable-fit-scoring]: dual org type not auto-disqualified by SBA set-aside — only nonprofit is explicitly excluded
 - [Phase 18-explainable-fit-scoring]: mapToDimensions: funder_relationship combines past_funder (1/3) + geo (2/3) proportional to their 10%/20% component weights
+- [Phase 18-01]: rfp_fit_evidence artifact_id is NOT a FK to rfp_vault_artifacts — citations must outlive the source artifact
+- [Phase 18-01]: Stale-row prune in evidence-store.ts (application code) not DB cascade — prune failure is non-fatal; stale rows filtered by scored_version at read time
+- [Phase 18-01]: database.types.ts regen deferred to later plan (established single-owner pattern from Phase 14-04); as-unknown-as cast used in evidence-store.ts
 
 ### Pending Todos
 
@@ -117,5 +120,5 @@ Recent decisions affecting current work:
 ## Session Continuity
 
 Last session: 2026-06-07
-Stopped at: Completed 18-explainable-fit-scoring/18-02-PLAN.md — checkDisqualifiers + mapToDimensions pure fns; 17/17 tests pass; SCORE-03 + SCORE-04 complete
-Resume file: None — continue with 18-03 (cron/endpoint integration)
+Stopped at: Completed 18-explainable-fit-scoring/18-01-PLAN.md — rfp_fit_evidence migration + upsertFitEvidence helper; SCORE-02 storage backbone complete
+Resume file: None — continue with 18-02 (checkDisqualifiers + mapToDimensions pure fns)
