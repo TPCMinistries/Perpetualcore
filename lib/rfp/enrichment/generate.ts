@@ -43,7 +43,7 @@ const DOCUMENT_RULES: Array<{ label: string; pattern: RegExp }> = [
   { label: "Audit, financial statements, or insurance", pattern: /\b(audit|financial statement|insurance|certificate of insurance)\b/i },
 ];
 
-const ELIGIBILITY_RULES: Array<{ label: string; pattern: RegExp }> = [
+export const ELIGIBILITY_RULES: Array<{ label: string; pattern: RegExp }> = [
   { label: "Nonprofit organizations", pattern: /\b(nonprofit|non-profit|501\(c\)\(3\))\b/i },
   { label: "Public agencies or local governments", pattern: /\b(public agenc|local government|city|county|municipal)\b/i },
   { label: "Schools, colleges, or education providers", pattern: /\b(school|college|university|education(al)? institution)\b/i },
