@@ -12,7 +12,7 @@ See: .planning/PROJECT.md (updated 2026-06-05)
 Phase: 22 of 25 (Trust, Security & Legal)
 Plan: 4 of 4 complete (22-01 TRUST-01 RLS CI gate; 22-02 TRUST-02 service-role audit; 22-03 TRUST-03 legal pages; 22-04 TRUST-04 data-source compliance)
 Status: Phase 22 COMPLETE — all 4 plans done; SECURITY-AUDIT.md, legal pages, DATA-SOURCE-COMPLIANCE.md all in repo
-Last activity: 2026-06-07 — 22-02 complete (9b48ad4), SECURITY-AUDIT.md produced; 41 routes audited, zero violations, enrichments question resolved
+Last activity: 2026-06-07 — 17-03 complete (c44b561), user-facing call-site guardrail integration; voice×2 + vault×2 + naics-suggest all gated
 
 Progress: [██░░░░░░░░] ~20% (v2.0 phases — Phase 22 of 25 active)
 
@@ -46,6 +46,7 @@ Progress: [██░░░░░░░░] ~20% (v2.0 phases — Phase 22 of 25 
 | Phase 22-trust-security-legal P03 | 14 | 3 tasks | 4 files |
 | Phase 17-ai-cost-guardrail P01 | 11 | 3 tasks | 3 files |
 | Phase 17-ai-cost-guardrail P04 | 7 | 2 tasks | 2 files |
+| Phase 17-ai-cost-guardrail P03 | 43 | 3 tasks | 6 files |
 
 ## Accumulated Context
 
@@ -90,6 +91,7 @@ Recent decisions affecting current work:
 - [Phase 17-ai-cost-guardrail]: rfp_agent_sessions reused as ledger — additive column on rfp_entitlements only; NULL monthly_ai_budget_usd = unlimited; fail-CLOSED on DB read error
 - [Phase 17-ai-cost-guardrail]: database.types.ts regenerated via CLI as single owner for Phase 17; all Phase 14 types preserved
 - [Phase 17-ai-cost-guardrail]: generateFitSummary returns FitSummaryResult {text,tokensIn,tokensOut,costUsd} in all branches; cron scoring loop guarded per org via guardedLLMCall; over-budget orgs silently skipped with null summary (scoring chips/scores still upsert)
+- [Phase 17-ai-cost-guardrail]: vault/from-description: model label = 'gpt-4o' (dominant) for combined expand+embed session row; naics-suggest membership non-member treated as absent (silent downgrade, no 403 leak)
 
 ### Pending Todos
 
