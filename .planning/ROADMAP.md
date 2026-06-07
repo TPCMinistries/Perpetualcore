@@ -141,7 +141,11 @@ Beachhead coverage uses what's ALREADY live: federal (SAM/Grants.gov/NIH/NSF) + 
   2. The explanation cites at least one vault artifact (prior proposal, award, annual report) by name and links or previews the excerpt it drew from
   3. The score panel breaks down into at least five labeled dimensions (mission fit, eligibility, track record, capacity, funder relationship) each with a sub-score or rating
   4. At least one disqualifier check (e.g., past-performance threshold not met, entity type ineligible) surfaces as a flagged warning when applicable — verifiable by testing against an ineligible opp
-**Plans**: TBD
+**Plans**: 4 plans
+- [ ] 18-01-PLAN.md — Create rfp_fit_evidence table + RLS + evidence-store helper [SCORE-02]
+- [ ] 18-02-PLAN.md — TDD pure functions: checkDisqualifiers + mapToDimensions [SCORE-03, SCORE-04]
+- [ ] 18-03-PLAN.md — Wire vault-grounded cited summary + dimensions + evidence into scoring pipeline + on-demand rescore endpoint [SCORE-01, SCORE-02, SCORE-03]
+- [ ] 18-04-PLAN.md — Detail-pane Fit Reasoning UI: dimensions + disqualifier warnings + vault citations + rescore (human-verify) [SCORE-01, SCORE-02, SCORE-03, SCORE-04]
 
 ### Phase 19: Rubric Review, Compliance Gate & Upload
 **Goal**: Proposals are scored against the actual solicitation rubric by a multi-agent panel; a compliance gate blocks premature submission; AI-use is disclosed; users can upload and parse solicitation PDFs and DOCX files
@@ -239,7 +243,7 @@ Phases execute in numeric order: 13 → 14 → 15 → 16 → 17 → 18 → 19 �
 | 15. Level-1 Federal Discovery | v2.0 | 0/TBD | Not started | - |
 | 16. Extended Discovery + Saved Searches | v2.0 | 0/TBD | Not started | - |
 | 17. AI Cost Guardrail | 5/5 | Complete    | 2026-06-07 | - |
-| 18. Explainable Fit Scoring | v2.0 | 0/TBD | Not started | - |
+| 18. Explainable Fit Scoring | v2.0 | 0/4 | Planned | - |
 | 19. Rubric Review, Compliance Gate & Upload | v2.0 | 0/TBD | Not started | - |
 | 20. Submission Tracking & Amendments | v2.0 | 0/TBD | Not started | - |
 | 21. Win/Loss Learning | v2.0 | 0/TBD | Not started | - |
