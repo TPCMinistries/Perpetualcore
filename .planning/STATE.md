@@ -10,9 +10,9 @@ See: .planning/PROJECT.md (updated 2026-06-05)
 ## Current Position
 
 Phase: 18 of 25 (Explainable Fit Scoring)
-Plan: 3 of 4 complete (18-01 rfp_fit_evidence migration + evidence-store.ts; 18-02 checkDisqualifiers + mapToDimensions pure fns)
-Status: Phase 18 in progress — SCORE-02 storage backbone + SCORE-03/04 pure fns complete; next: Plan 03 cron/endpoint integration
-Last activity: 2026-06-07 — 18-01 complete (9ef56f0), rfp_fit_evidence table + upsertFitEvidence helper
+Plan: 3 of 4 complete (18-01 rfp_fit_evidence migration + evidence-store.ts; 18-02 checkDisqualifiers + mapToDimensions pure fns; 18-03 vault-grounded scoreOnePairV2 + rescore endpoint)
+Status: Phase 18 in progress — scoring engine now vault-grounded + budget-guarded; next: Plan 04 detail-pane UI + human-verify checkpoint
+Last activity: 2026-06-07 — 18-03 complete (b2ad259), generateExplainedSummary + scoreOnePairV2 (both paths guarded) + POST /rescore + types regen; rfp_fit_evidence table applied live (RLS, 2 policies)
 
 Progress: [██░░░░░░░░] ~20% (v2.0 phases — Phase 22 of 25 active)
 

@@ -243,7 +243,7 @@ Phases execute in numeric order: 13 → 14 → 15 → 16 → 17 → 18 → 19 �
 | 15. Level-1 Federal Discovery | v2.0 | 0/TBD | Not started | - |
 | 16. Extended Discovery + Saved Searches | v2.0 | 0/TBD | Not started | - |
 | 17. AI Cost Guardrail | 5/5 | Complete    | 2026-06-07 | - |
-| 18. Explainable Fit Scoring | 2/4 | In Progress|  | - |
+| 18. Explainable Fit Scoring | 3/4 | In Progress|  | - |
 | 19. Rubric Review, Compliance Gate & Upload | v2.0 | 0/TBD | Not started | - |
 | 20. Submission Tracking & Amendments | v2.0 | 0/TBD | Not started | - |
 | 21. Win/Loss Learning | v2.0 | 0/TBD | Not started | - |
