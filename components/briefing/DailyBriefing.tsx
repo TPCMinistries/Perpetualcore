@@ -64,6 +64,17 @@ export interface BriefingData {
     action: string;
     count?: number;
   }[];
+  agentActivity?: {
+    todayCount: number;
+    recentActions: {
+      id: string;
+      action_type: string;
+      status: string;
+      agent_name: string;
+      created_at: string;
+    }[];
+  };
+  unreadNotifications?: number;
 }
 
 interface DailyBriefingProps {

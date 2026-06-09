@@ -121,7 +121,14 @@ export function OnboardingFlowV3({ userProfile }: OnboardingFlowV3Props) {
         new CustomEvent("dashboardModeChanged", { detail: { mode: userContext.dashboardMode } })
       );
 
-      // If simple mode selected, seed AI employees
+      // Always seed executive advisors for all users
+      try {
+        await fetch("/api/assistants/seed", { method: "POST" });
+      } catch (seedError) {
+        console.error("Failed to seed executive advisors:", seedError);
+      }
+
+      // If simple mode selected, also seed AI employees
       if (userContext.dashboardMode === "simple") {
         try {
           await fetch("/api/assistants/seed-employees", { method: "POST" });

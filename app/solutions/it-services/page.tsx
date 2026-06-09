@@ -15,12 +15,12 @@ export default function ITServicesPage() {
   const [openFaq, setOpenFaq] = useState<number | null>(null);
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white dark:from-gray-900 dark:to-gray-800">
+    <div className="min-h-screen bg-gradient-to-b from-background via-background to-muted/20">
       {/* Header */}
-      <header className="border-b bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm sticky top-0 z-10">
+      <header className="border-b border-border/50 backdrop-blur-xl bg-background/80 sticky top-0 z-50">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
           <Link href="/" className="flex items-center space-x-2">
-            <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center text-primary-foreground font-bold">
+            <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-primary via-purple-600 to-purple-700 flex items-center justify-center text-white font-bold shadow-lg">
               AI
             </div>
             <span className="text-xl font-bold">Perpetual Core</span>
@@ -69,7 +69,7 @@ export default function ITServicesPage() {
       </section>
 
       {/* Stats Section */}
-      <section className="bg-muted/50 py-16">
+      <section className="bg-muted/30 py-16">
         <div className="container mx-auto px-4">
           <div className="grid md:grid-cols-4 gap-8 text-center">
             <div>
@@ -653,7 +653,7 @@ export default function ITServicesPage() {
         </div>
 
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-          <Card className="border-2 hover:border-primary transition-colors">
+          <Card className="border border-border/50 backdrop-blur-xl bg-card/50 hover:border-primary/40 hover:-translate-y-0.5 hover:shadow-md transition-all duration-300">
             <CardHeader>
               <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center mb-4">
                 <FileText className="h-6 w-6 text-primary" />
@@ -666,7 +666,7 @@ export default function ITServicesPage() {
             </CardHeader>
           </Card>
 
-          <Card className="border-2 hover:border-primary transition-colors">
+          <Card className="border border-border/50 backdrop-blur-xl bg-card/50 hover:border-primary/40 hover:-translate-y-0.5 hover:shadow-md transition-all duration-300">
             <CardHeader>
               <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center mb-4">
                 <Network className="h-6 w-6 text-primary" />
@@ -679,7 +679,7 @@ export default function ITServicesPage() {
             </CardHeader>
           </Card>
 
-          <Card className="border-2 hover:border-primary transition-colors">
+          <Card className="border border-border/50 backdrop-blur-xl bg-card/50 hover:border-primary/40 hover:-translate-y-0.5 hover:shadow-md transition-all duration-300">
             <CardHeader>
               <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center mb-4">
                 <Settings className="h-6 w-6 text-primary" />
@@ -692,7 +692,7 @@ export default function ITServicesPage() {
             </CardHeader>
           </Card>
 
-          <Card className="border-2 hover:border-primary transition-colors">
+          <Card className="border border-border/50 backdrop-blur-xl bg-card/50 hover:border-primary/40 hover:-translate-y-0.5 hover:shadow-md transition-all duration-300">
             <CardHeader>
               <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center mb-4">
                 <Users className="h-6 w-6 text-primary" />
@@ -705,7 +705,7 @@ export default function ITServicesPage() {
             </CardHeader>
           </Card>
 
-          <Card className="border-2 hover:border-primary transition-colors">
+          <Card className="border border-border/50 backdrop-blur-xl bg-card/50 hover:border-primary/40 hover:-translate-y-0.5 hover:shadow-md transition-all duration-300">
             <CardHeader>
               <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center mb-4">
                 <HardDrive className="h-6 w-6 text-primary" />
@@ -718,7 +718,7 @@ export default function ITServicesPage() {
             </CardHeader>
           </Card>
 
-          <Card className="border-2 hover:border-primary transition-colors">
+          <Card className="border border-border/50 backdrop-blur-xl bg-card/50 hover:border-primary/40 hover:-translate-y-0.5 hover:shadow-md transition-all duration-300">
             <CardHeader>
               <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center mb-4">
                 <Zap className="h-6 w-6 text-primary" />
@@ -1195,7 +1195,7 @@ export default function ITServicesPage() {
                 answer: "Simple: add or remove technician seats anytime with no penalties. If you hire 3 new techs mid-month, add their seats and pay prorated for the remainder of the month. If someone leaves, remove their seat and stop paying for it next billing cycle. Volume discounts apply automatically when you reach the thresholds (10+ or 25+ techs). Many MSPs fluctuate seasonally or with contract changes—our pricing adapts with you. No long-term lock-in, no penalties for changes. The only requirement: 30-day notice if canceling entirely."
               }
             ].map((faq, i) => (
-              <Card key={i} className="border-2 hover:border-primary transition-colors">
+              <Card key={i} className="border border-border/50 backdrop-blur-xl bg-card/50 hover:border-primary/40 hover:-translate-y-0.5 hover:shadow-md transition-all duration-300">
                 <CardHeader
                   className="cursor-pointer select-none"
                   onClick={() => setOpenFaq(openFaq === i ? null : i)}
@@ -1360,7 +1360,7 @@ export default function ITServicesPage() {
           <div className="grid md:grid-cols-4 gap-8 mb-8">
             <div>
               <Link href="/" className="flex items-center space-x-2 mb-4">
-                <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center text-primary-foreground font-bold">
+                <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-primary via-purple-600 to-purple-700 flex items-center justify-center text-white font-bold shadow-lg">
                   AI
                 </div>
                 <span className="text-lg font-bold">Perpetual Core</span>

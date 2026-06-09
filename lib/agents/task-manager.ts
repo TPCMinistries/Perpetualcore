@@ -5,7 +5,7 @@
  * and optionally auto-executing tasks that are marked as fully automated.
  */
 
-import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/server";
 import Anthropic from "@anthropic-ai/sdk";
 import { logger } from "@/lib/logging";
 
@@ -127,7 +127,7 @@ Guidelines:
  * Process tasks for a specific agent
  */
 export async function processTasksForAgent(agentId: string) {
-  const supabase = await createClient();
+  const supabase = createAdminClient();
 
   // Get agent details
   const { data: agent, error: agentError } = await supabase
@@ -293,7 +293,7 @@ export async function processTasksForAgent(agentId: string) {
  * Process all enabled task manager agents
  */
 export async function processAllTaskManagerAgents() {
-  const supabase = await createClient();
+  const supabase = createAdminClient();
 
   const { data: agents, error } = await supabase
     .from("ai_agents")

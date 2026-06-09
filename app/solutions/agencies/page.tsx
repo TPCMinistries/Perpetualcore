@@ -30,12 +30,12 @@ export default function AgenciesPage() {
   const [openFaq, setOpenFaq] = useState<number | null>(null);
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white dark:from-gray-900 dark:to-gray-800">
+    <div className="min-h-screen bg-gradient-to-b from-background via-background to-muted/20">
       {/* Header */}
-      <header className="border-b bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm sticky top-0 z-50">
+      <header className="border-b border-border/50 backdrop-blur-xl bg-background/80 sticky top-0 z-50">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
           <Link href="/" className="flex items-center space-x-2">
-            <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center text-primary-foreground font-bold">
+            <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-primary via-purple-600 to-purple-700 flex items-center justify-center text-white font-bold shadow-lg">
               AI
             </div>
             <span className="text-xl font-bold">Perpetual Core</span>
@@ -711,7 +711,7 @@ export default function AgenciesPage() {
         </div>
 
         <div className="max-w-6xl mx-auto grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-          <Card className="border-2 hover:border-primary transition-colors">
+          <Card className="border border-border/50 backdrop-blur-xl bg-card/50 hover:border-primary/40 hover:-translate-y-0.5 hover:shadow-md transition-all duration-300">
             <CardHeader>
               <FileText className="h-10 w-10 text-primary mb-4" />
               <CardTitle>Content Generation</CardTitle>
@@ -737,7 +737,7 @@ export default function AgenciesPage() {
             </CardContent>
           </Card>
 
-          <Card className="border-2 hover:border-primary transition-colors">
+          <Card className="border border-border/50 backdrop-blur-xl bg-card/50 hover:border-primary/40 hover:-translate-y-0.5 hover:shadow-md transition-all duration-300">
             <CardHeader>
               <Palette className="h-10 w-10 text-primary mb-4" />
               <CardTitle>Creative Assistance</CardTitle>
@@ -763,7 +763,7 @@ export default function AgenciesPage() {
             </CardContent>
           </Card>
 
-          <Card className="border-2 hover:border-primary transition-colors">
+          <Card className="border border-border/50 backdrop-blur-xl bg-card/50 hover:border-primary/40 hover:-translate-y-0.5 hover:shadow-md transition-all duration-300">
             <CardHeader>
               <Briefcase className="h-10 w-10 text-primary mb-4" />
               <CardTitle>Project Organization</CardTitle>
@@ -789,7 +789,7 @@ export default function AgenciesPage() {
             </CardContent>
           </Card>
 
-          <Card className="border-2 hover:border-primary transition-colors">
+          <Card className="border border-border/50 backdrop-blur-xl bg-card/50 hover:border-primary/40 hover:-translate-y-0.5 hover:shadow-md transition-all duration-300">
             <CardHeader>
               <Users className="h-10 w-10 text-primary mb-4" />
               <CardTitle>Client Communication</CardTitle>
@@ -815,7 +815,7 @@ export default function AgenciesPage() {
             </CardContent>
           </Card>
 
-          <Card className="border-2 hover:border-primary transition-colors">
+          <Card className="border border-border/50 backdrop-blur-xl bg-card/50 hover:border-primary/40 hover:-translate-y-0.5 hover:shadow-md transition-all duration-300">
             <CardHeader>
               <Target className="h-10 w-10 text-primary mb-4" />
               <CardTitle>Campaign Management</CardTitle>
@@ -841,7 +841,7 @@ export default function AgenciesPage() {
             </CardContent>
           </Card>
 
-          <Card className="border-2 hover:border-primary transition-colors">
+          <Card className="border border-border/50 backdrop-blur-xl bg-card/50 hover:border-primary/40 hover:-translate-y-0.5 hover:shadow-md transition-all duration-300">
             <CardHeader>
               <Calendar className="h-10 w-10 text-primary mb-4" />
               <CardTitle>Knowledge Base</CardTitle>
@@ -1483,7 +1483,7 @@ export default function AgenciesPage() {
                 answer: "Enterprise-grade support: (1) Dedicated implementation specialist during onboarding. (2) Priority support with 4-hour response time. (3) Email, chat, and video call support. (4) 24/7 AI Coach for instant help. (5) Regular check-ins with your account manager. (6) Ongoing training and optimization sessions. For larger agencies, we offer on-site training and quarterly business reviews."
               }
             ].map((faq, i) => (
-              <Card key={i} className="border-2 hover:border-primary transition-colors">
+              <Card key={i} className="border border-border/50 backdrop-blur-xl bg-card/50 hover:border-primary/40 hover:-translate-y-0.5 hover:shadow-md transition-all duration-300">
                 <CardHeader
                   className="cursor-pointer select-none"
                   onClick={() => setOpenFaq(openFaq === i ? null : i)}
@@ -1575,7 +1575,7 @@ export default function AgenciesPage() {
           <div className="grid md:grid-cols-4 gap-8 mb-8">
             <div>
               <Link href="/" className="flex items-center space-x-2 mb-4">
-                <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center text-primary-foreground font-bold">
+                <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-primary via-purple-600 to-purple-700 flex items-center justify-center text-white font-bold shadow-lg">
                   AI
                 </div>
                 <span className="text-lg font-bold">Perpetual Core</span>

@@ -5,7 +5,7 @@
  * suggest tags, and identify action items.
  */
 
-import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/server";
 import Anthropic from "@anthropic-ai/sdk";
 import { logger } from "@/lib/logging";
 
@@ -109,7 +109,7 @@ Important:
  * Process documents for a specific agent
  */
 export async function processDocumentsForAgent(agentId: string) {
-  const supabase = await createClient();
+  const supabase = createAdminClient();
 
   // Get agent details
   const { data: agent, error: agentError } = await supabase
@@ -286,7 +286,7 @@ export async function processDocumentsForAgent(agentId: string) {
  * Apply tags to a document
  */
 async function applyTagsToDocument(
-  supabase: Awaited<ReturnType<typeof createClient>>,
+  supabase: ReturnType<typeof createAdminClient>,
   documentId: string,
   tagNames: string[],
   organizationId: string
@@ -351,7 +351,7 @@ function getRandomTagColor(): string {
  * Process all enabled document analyzer agents
  */
 export async function processAllDocumentAnalyzerAgents() {
-  const supabase = await createClient();
+  const supabase = createAdminClient();
 
   const { data: agents, error } = await supabase
     .from("ai_agents")

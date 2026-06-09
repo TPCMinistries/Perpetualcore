@@ -84,3 +84,14 @@ STRIPE_SECRET_KEY
 - `/design` - SaaS-quality UI/UX
 - `/deploy` - HIGH risk deployments
 - `/content tech` - Product documentation and marketing
+
+
+## Herald Bridge
+Send completed work, content, and status updates to Herald via shared folder.
+
+**Drop files in:** ~/ORGANIZED/08_MASTER_BUILD/herald-claude-bridge/outbox/
+**Read tasks from:** ~/ORGANIZED/08_MASTER_BUILD/herald-claude-bridge/inbox/
+**Full instructions:** ~/ORGANIZED/08_MASTER_BUILD/herald-claude-bridge/HOW_TO_USE.md
+**Project state:** ~/ORGANIZED/08_MASTER_BUILD/herald-claude-bridge/context/shared-state.md
+
+Herald checks outbox every 30 min and acts automatically.
