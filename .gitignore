@@ -48,3 +48,7 @@ next-env.d.ts
 /public/fallback-*.js
 .env.vercel
 .claude/worktrees/
+
+# Supabase CLI local state (machine-specific — must not cross Macs)
+supabase/.temp/
+supabase/.branches/

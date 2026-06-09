@@ -18,8 +18,9 @@
  * marketing surface rhythm.
  */
 
-import { useEffect, useState, type ReactNode } from "react";
+import { useEffect, useCallback, useState, type ReactNode } from "react";
 import { FitScoreChip } from "./FitScoreChip";
+import { FitReasoningPanel, type FitReasoningData } from "./FitReasoningPanel";
 import { DraftButton } from "@/components/rfp/DraftButton";
 import { PursuitDecisionBar } from "@/components/rfp/PursuitDecisionBar";
 import type { OpportunityTriageStatus } from "@/components/rfp/OpportunityTriageControl";
@@ -59,6 +60,7 @@ interface OppDetail extends FeedRow {
   geo: string | null;
   raw_json: unknown;
   enrichment: OpportunityEnrichment | null;
+  fit_reasoning?: FitReasoningData;
 }
 
 interface OpportunityEnrichment {
@@ -284,8 +286,15 @@ export function DetailPane({
   const [detail, setDetail] = useState<OppDetail | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  // Incrementing this triggers a re-fetch after an on-demand rescore.
+  const [rescoreKey, setRescoreKey] = useState(0);
 
-  // Fetch single-opp detail whenever the selected row changes.
+  // Re-fetch after rescore; stable reference so FitReasoningPanel's dep array is stable.
+  const handleRescored = useCallback(() => {
+    setRescoreKey((k) => k + 1);
+  }, []);
+
+  // Fetch single-opp detail whenever the selected row changes (or after rescore).
   useEffect(() => {
     if (!selected) {
       setDetail(null);
@@ -316,7 +325,8 @@ export function DetailPane({
     return () => {
       cancelled = true;
     };
-  }, [orgId, selected]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [orgId, selected, rescoreKey]);
 
   // Empty state
   if (!selected) {
@@ -723,6 +733,17 @@ export function DetailPane({
           </div>
         </div>
       </section>
+
+      {/* Phase 18: Fit reasoning panel — SCORE-01/02/03/04. */}
+      {/* Renders above AI summary; only available once detail is loaded. */}
+      {detail?.fit_reasoning && (
+        <FitReasoningPanel
+          oppId={detail.opp_id}
+          orgId={orgId}
+          fitReasoning={detail.fit_reasoning}
+          onRescored={handleRescored}
+        />
+      )}
 
       {/* AI summary — REQUIRED render; null falls back to literal string. */}
       <section className="mt-6">

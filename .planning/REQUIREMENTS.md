@@ -29,7 +29,7 @@ Grouped by category. Each maps to exactly one roadmap phase (see Traceability). 
 ### Fit Scoring (SCORE)
 
 - [ ] **SCORE-01**: Each opportunity shows a fit score with a plain-English explanation of why it fits
-- [ ] **SCORE-02**: The explanation cites the org's own vault artifacts / prior wins (evidence-grounded, not black-box)
+- [x] **SCORE-02**: The explanation cites the org's own vault artifacts / prior wins (evidence-grounded, not black-box)
 - [x] **SCORE-03**: The score breaks down by dimension (mission fit, eligibility, track record, capacity, funder relationship)
 - [x] **SCORE-04**: The score flags disqualifiers (e.g., missing past-performance threshold, ineligible entity type)
 
@@ -127,7 +127,7 @@ Tracked, not in this roadmap.
 | DISCO-07 | Phase 15 | Pending |
 | DISCO-10 | Phase 16 | Pending |
 | SCORE-01 | Phase 18 | Pending |
-| SCORE-02 | Phase 18 | Pending |
+| SCORE-02 | Phase 18 | Complete |
 | SCORE-03 | Phase 18 | Complete |
 | SCORE-04 | Phase 18 | Complete |
 | REVIEW-01 | Phase 19 | Pending |
