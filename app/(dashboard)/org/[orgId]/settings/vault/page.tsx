@@ -60,7 +60,7 @@ export default async function VaultSettingsPage({ params }: PageProps) {
     <div className="container max-w-3xl py-10">
       <Link
         href={`/org/${orgId}/discovery`}
-        className="font-mono text-[10px] uppercase tracking-[0.22em] text-zinc-500 hover:text-zinc-300"
+        className="font-mono text-[10px] uppercase tracking-[0.22em] text-zinc-500 hover:text-zinc-700"
       >
         ← Discovery
       </Link>
@@ -70,12 +70,12 @@ export default async function VaultSettingsPage({ params }: PageProps) {
           Settings · Vault
         </p>
         <h1
-          className="mt-2 text-3xl leading-tight italic text-zinc-100"
+          className="mt-2 text-3xl leading-tight italic text-zinc-900"
           style={{ fontFamily: "Georgia, serif" }}
         >
           {orgRow.name}&apos;s vault
         </h1>
-        <p className="mt-3 max-w-2xl text-sm text-zinc-400">
+        <p className="mt-3 max-w-2xl text-sm text-zinc-600">
           Vault — preview. Paste past proposals, annual reports, founder
           letters. Each doc gets chunked, embedded, and stored as evidence the
           drafter can retrieve when grounding claims. Today&apos;s v1 only

@@ -415,7 +415,7 @@ export function DiscoveryClient({
           {showNoMemberOrgsState ? (
             <div className="flex h-full items-center justify-center p-8">
               <div className="text-center max-w-sm">
-                <p className="text-zinc-300 italic font-serif text-lg mb-2">
+                <p className="text-zinc-700 italic font-serif text-lg mb-2">
                   No member orgs in{" "}
                   {mode === "all" ? "either side" : mode === "nonprofit" ? "nonprofit" : "for-profit"}.
                 </p>
@@ -426,7 +426,7 @@ export function DiscoveryClient({
                 </p>
                 <Link
                   href="/orgs/new"
-                  className="mt-4 inline-flex text-emerald-300 hover:text-emerald-200 text-sm uppercase tracking-wide font-mono"
+                  className="mt-4 inline-flex text-emerald-600 hover:text-emerald-700 text-sm uppercase tracking-wide font-mono"
                 >
                   + Create or join an org
                 </Link>

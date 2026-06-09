@@ -26,23 +26,23 @@ const STATUS_META: Record<
 > = {
   draft: {
     label: "Draft",
-    chip: "border-zinc-700 bg-zinc-900 text-zinc-300",
+    chip: "border-zinc-300 bg-zinc-100 text-zinc-700",
   },
   submitted: {
     label: "Submitted",
-    chip: "border-amber-500/40 bg-amber-500/10 text-amber-200",
+    chip: "border-amber-200 bg-amber-50 text-amber-700",
   },
   won: {
     label: "Won",
-    chip: "border-emerald-500/40 bg-emerald-500/10 text-emerald-200",
+    chip: "border-emerald-200 bg-emerald-50 text-emerald-700",
   },
   lost: {
     label: "Lost",
-    chip: "border-rose-500/40 bg-rose-500/10 text-rose-200",
+    chip: "border-rose-200 bg-rose-50 text-rose-700",
   },
   withdrawn: {
     label: "Withdrawn",
-    chip: "border-zinc-700 bg-zinc-900 text-zinc-400",
+    chip: "border-zinc-300 bg-zinc-100 text-zinc-500",
   },
 };
 
@@ -130,13 +130,13 @@ export function ProposalStatusControl({
         type="button"
         onClick={() => setOpen((v) => !v)}
         disabled={busy !== null}
-        className={`inline-flex items-center gap-2 rounded-md border px-2 py-0.5 font-mono text-[10px] uppercase tracking-[0.18em] transition hover:brightness-110 ${meta.chip} disabled:opacity-50`}
+        className={`inline-flex items-center gap-2 rounded-md border px-2 py-0.5 font-mono text-[10px] uppercase tracking-[0.18em] transition hover:brightness-95 ${meta.chip} disabled:opacity-50`}
       >
         {meta.label}
         <span aria-hidden className="text-[8px]">▾</span>
       </button>
       {open ? (
-        <div className="absolute left-0 top-full z-20 mt-2 min-w-[180px] rounded-md border border-zinc-800 bg-zinc-950 p-1 shadow-lg">
+        <div className="absolute left-0 top-full z-20 mt-2 min-w-[180px] rounded-md border border-zinc-200 bg-white p-1 shadow-lg">
           {options.map((next) => {
             const nextMeta = STATUS_META[next];
             const isBusy = busy === next;
@@ -146,7 +146,7 @@ export function ProposalStatusControl({
                 type="button"
                 onClick={() => void changeTo(next)}
                 disabled={busy !== null}
-                className="flex w-full items-center justify-between rounded px-2 py-1.5 text-left text-[12px] text-zinc-200 transition hover:bg-zinc-900 disabled:cursor-not-allowed disabled:opacity-50"
+                className="flex w-full items-center justify-between rounded px-2 py-1.5 text-left text-[12px] text-zinc-700 transition hover:bg-zinc-50 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 <span>Mark {nextMeta.label.toLowerCase()}</span>
                 {isBusy ? (
@@ -158,14 +158,14 @@ export function ProposalStatusControl({
           <button
             type="button"
             onClick={() => setOpen(false)}
-            className="mt-1 w-full rounded px-2 py-1 text-left font-mono text-[9px] uppercase tracking-[0.18em] text-zinc-600 hover:text-zinc-400"
+            className="mt-1 w-full rounded px-2 py-1 text-left font-mono text-[9px] uppercase tracking-[0.18em] text-zinc-400 hover:text-zinc-600"
           >
             cancel
           </button>
         </div>
       ) : null}
       {error ? (
-        <p className="mt-1 font-mono text-[10px] text-rose-300">{error}</p>
+        <p className="mt-1 font-mono text-[10px] text-rose-700">{error}</p>
       ) : null}
     </div>
   );

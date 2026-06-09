@@ -344,7 +344,7 @@ export default async function ProposalPage({
         {/* Breadcrumb */}
         <Link
           href={`/org/${orgId}/discovery`}
-          className="font-mono text-[10px] uppercase tracking-[0.22em] text-zinc-500 hover:text-zinc-300"
+          className="font-mono text-[10px] uppercase tracking-[0.22em] text-zinc-500 hover:text-zinc-700"
         >
           ← Discovery
         </Link>
@@ -363,7 +363,7 @@ export default async function ProposalPage({
         </div>
 
         <h1
-          className="mt-3 text-3xl leading-tight italic text-zinc-100"
+          className="mt-3 text-3xl leading-tight italic text-zinc-900"
           style={{ fontFamily: "Georgia, serif" }}
         >
           {proposal.title}
@@ -373,13 +373,13 @@ export default async function ProposalPage({
           <div
             className={`mt-6 rounded-md border p-4 ${
               pursuitStatus === "ready"
-                ? "border-emerald-500/30 bg-emerald-500/10"
-                : "border-amber-500/30 bg-amber-500/10"
+                ? "border-emerald-200 bg-emerald-50"
+                : "border-amber-200 bg-amber-50"
             }`}
           >
             <p
               className={`font-mono text-[10px] uppercase tracking-[0.22em] ${
-                pursuitStatus === "ready" ? "text-emerald-200" : "text-amber-200"
+                pursuitStatus === "ready" ? "text-emerald-700" : "text-amber-700"
               }`}
             >
               {pursuitStatus === "ready"
@@ -390,7 +390,7 @@ export default async function ProposalPage({
                   ? "Pursuit workspace resumed with gaps"
                   : "Pursuit engine partially completed"}
             </p>
-            <p className="mt-2 text-sm leading-6 text-zinc-300">
+            <p className="mt-2 text-sm leading-6 text-zinc-700">
               {pursuitStatus === "ready"
                 ? pursuitMode === "resume"
                   ? "An existing proposal for this opportunity was found. Reviewer, readiness, and workroom artifacts were refreshed."
@@ -408,8 +408,8 @@ export default async function ProposalPage({
             used the org's Voice Fingerprint v1 profile and/or any vault
             chunks. voiceApplied===null + vaultChunksUsed===0 means this
             draft predates the tracking suffixes. */}
-        <div className="mt-6 rounded-md border border-amber-500/30 bg-amber-500/5 p-4">
-          <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-amber-300">
+        <div className="mt-6 rounded-md border border-amber-200 bg-amber-50 p-4">
+          <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-amber-700">
             {[
               "First-pass draft",
               voiceApplied === true ? "voice-trained" : null,
@@ -421,7 +421,7 @@ export default async function ProposalPage({
               .filter(Boolean)
               .join(" · ")}
           </p>
-          <p className="mt-2 text-sm text-zinc-300">
+          <p className="mt-2 text-sm text-zinc-700">
             {voiceApplied === true || vaultChunksUsed > 0 ? (
               <>
                 This first pass applied{" "}
@@ -453,32 +453,32 @@ export default async function ProposalPage({
 
         {/* Audit row */}
         {session ? (
-          <div className="mt-6 grid grid-cols-2 gap-4 rounded-md border border-zinc-900 bg-zinc-950 p-4 font-mono text-[11px] text-zinc-400 sm:grid-cols-4">
+          <div className="mt-6 grid grid-cols-2 gap-4 rounded-md border border-zinc-200 bg-white p-4 font-mono text-[11px] text-zinc-600 shadow-sm sm:grid-cols-4">
             <div>
-              <div className="text-[9px] uppercase tracking-[0.22em] text-zinc-600">
+              <div className="text-[9px] uppercase tracking-[0.22em] text-zinc-400">
                 Agent
               </div>
-              <div className="mt-1 text-zinc-200">{session.agent}</div>
+              <div className="mt-1 text-zinc-900">{session.agent}</div>
             </div>
             <div>
-              <div className="text-[9px] uppercase tracking-[0.22em] text-zinc-600">
+              <div className="text-[9px] uppercase tracking-[0.22em] text-zinc-400">
                 Model
               </div>
-              <div className="mt-1 text-zinc-200">{session.model ?? "—"}</div>
+              <div className="mt-1 text-zinc-900">{session.model ?? "—"}</div>
             </div>
             <div>
-              <div className="text-[9px] uppercase tracking-[0.22em] text-zinc-600">
+              <div className="text-[9px] uppercase tracking-[0.22em] text-zinc-400">
                 Tokens
               </div>
-              <div className="mt-1 text-zinc-200">
+              <div className="mt-1 text-zinc-900">
                 {session.tokens_in ?? "—"} in · {session.tokens_out ?? "—"} out
               </div>
             </div>
             <div>
-              <div className="text-[9px] uppercase tracking-[0.22em] text-zinc-600">
+              <div className="text-[9px] uppercase tracking-[0.22em] text-zinc-400">
                 Cost
               </div>
-              <div className="mt-1 text-zinc-200">{fmtCost(session.cost_usd)}</div>
+              <div className="mt-1 text-zinc-900">{fmtCost(session.cost_usd)}</div>
             </div>
           </div>
         ) : null}

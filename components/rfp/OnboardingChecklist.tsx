@@ -211,22 +211,21 @@ export function OnboardingChecklist({
                 <Link
                   key={item.title}
                   href={item.href}
-                  className="group rounded-xl border border-zinc-200 bg-white p-4 transition hover:border-zinc-300 hover:shadow-sm"
+                  className="group flex flex-col rounded-xl border border-zinc-200 bg-white p-4 transition hover:border-zinc-300 hover:shadow-[0_2px_8px_-2px_rgba(0,0,0,0.06)]"
                 >
-                  <div className="flex gap-3">
+                  <div className="flex items-start gap-3">
                     <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-zinc-200 bg-zinc-50">
                       <Icon className={`h-4 w-4 ${item.accent}`} />
                     </div>
-                    <div className="min-w-0">
-                      <div className="flex items-center justify-between gap-3">
-                        <p className="text-sm font-semibold text-zinc-950">{item.title}</p>
-                        <span className="shrink-0 font-mono text-[10px] uppercase tracking-[0.16em] text-zinc-500 group-hover:text-zinc-900">
-                          {item.cta}
-                        </span>
-                      </div>
-                      <p className="mt-1 text-xs leading-5 text-zinc-600">{item.body}</p>
-                    </div>
+                    <p className="pt-0.5 text-sm font-semibold leading-snug text-zinc-900">
+                      {item.title}
+                    </p>
                   </div>
+                  <p className="mt-2 text-xs leading-5 text-zinc-600">{item.body}</p>
+                  <span className="mt-3 inline-flex items-center gap-1 font-mono text-[10px] uppercase tracking-[0.16em] text-zinc-400 transition-colors group-hover:text-emerald-700">
+                    {item.cta}
+                    <ArrowRight className="h-3 w-3 transition-transform group-hover:translate-x-0.5" />
+                  </span>
                 </Link>
               );
             })}
