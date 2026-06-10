@@ -9,10 +9,10 @@ See: .planning/PROJECT.md (updated 2026-06-05)
 
 ## Current Position
 
-Phase: 18 of 25 (Explainable Fit Scoring)
-Plan: 3 of 4 complete (18-01 rfp_fit_evidence migration + evidence-store.ts; 18-02 checkDisqualifiers + mapToDimensions pure fns; 18-03 vault-grounded scoreOnePairV2 + rescore endpoint)
-Status: Phase 18 in progress — scoring engine now vault-grounded + budget-guarded; next: Plan 04 detail-pane UI + human-verify checkpoint
-Last activity: 2026-06-07 — 18-03 complete (b2ad259), generateExplainedSummary + scoreOnePairV2 (both paths guarded) + POST /rescore + types regen; rfp_fit_evidence table applied live (RLS, 2 policies)
+Phase: 18 of 25 COMPLETE → next is Phase 19 (review/compliance) per beachhead sequence
+Plan: 4 of 4 complete (18-01 evidence store; 18-02 disqualifiers+dimensions; 18-03 scoreOnePairV2 + rescore; 18-04 UI + verification — see 18-04-SUMMARY.md)
+Status: Phase 18 CLOSED 2026-06-09 — all four SCORE criteria verified end-to-end on prod (incl. SCORE-04 seed/rescore/rollback). Verification surfaced + fixed: Anthropic credit exhaustion nulled every summary → gpt-4o fallback added to summary.ts + new funded ANTHROPIC_API_KEY rotated across all Vercel projects.
+Last activity: 2026-06-09 — Phase 18 closed; also shipped: premium light redesign of the entire dashboard chrome (cf9edc3, 34 files), deployed + verified on rfp.perpetualcore.com
 
 Progress: [██░░░░░░░░] ~20% (v2.0 phases — Phase 22 of 25 active)
 
@@ -119,6 +119,6 @@ Recent decisions affecting current work:
 
 ## Session Continuity
 
-Last session: 2026-06-07
-Stopped at: Completed 18-explainable-fit-scoring/18-01-PLAN.md — rfp_fit_evidence migration + upsertFitEvidence helper; SCORE-02 storage backbone complete
-Resume file: None — continue with 18-02 (checkDisqualifiers + mapToDimensions pure fns)
+Last session: 2026-06-09 (herald Mac)
+Stopped at: Phase 18 CLOSED (18-04-SUMMARY.md written). Light redesign shipped + deployed. New AI keys live in all Vercel project envs (other projects need a redeploy to pick them up).
+Resume file: None — next action is /gsd:plan-phase 19 (adversarial review/compliance vs Section L/M + funder priorities)
