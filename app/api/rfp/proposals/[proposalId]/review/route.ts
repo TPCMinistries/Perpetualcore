@@ -149,17 +149,11 @@ export async function POST(
   // Criteria extraction only happens at package upload (solicitation_mode) — we
   // never re-extract here. Zero criteria = v1 generic-rubric behavior.
   const { data: rawCriteria } = await admin
-    .from("rfp_rubric_criteria" as unknown as "rfp_opportunities")
+    .from("rfp_rubric_criteria")
     .select("id, section_ref, criterion_text, max_points, weight")
     .eq("opp_id", proposal.opp_id)
     .order("created_at");
-  const criteriaRows = (rawCriteria ?? []) as unknown as Array<{
-    id: string;
-    section_ref: string;
-    criterion_text: string;
-    max_points: number | null;
-    weight: number | null;
-  }>;
+  const criteriaRows = rawCriteria ?? [];
   const rubricCriteria: RubricCriterion[] = criteriaRows.map((r) => ({
     id: r.id,
     section_ref: r.section_ref,

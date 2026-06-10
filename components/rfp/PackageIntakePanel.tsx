@@ -2,9 +2,20 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { FileUp, Link2, Loader2, TextCursorInput } from "lucide-react";
+import { FileUp, Link2, Loader2, RefreshCw, TextCursorInput } from "lucide-react";
 
 type IntakeMode = "upload" | "url" | "paste";
+
+type RubricSkippedReason = "no_opportunity_linked" | "budget_exceeded" | "extraction_failed";
+
+interface RubricCriterion {
+  id: string;
+  section_ref: string;
+  criterion_text: string;
+  max_points: number | null;
+  weight: number | null;
+  is_inferred: boolean;
+}
 
 interface PackageSummary {
   id: string;
@@ -25,6 +36,12 @@ interface PackageSummary {
     question_deadlines?: string[];
   };
   created_at: string;
+}
+
+interface ImportResult {
+  packageId: string;
+  rubricCriteria: RubricCriterion[] | null;
+  rubricSkippedReason: RubricSkippedReason | null;
 }
 
 interface PackageIntakePanelProps {
@@ -51,11 +68,13 @@ export function PackageIntakePanel({
   const [body, setBody] = useState("");
   const [file, setFile] = useState<File | null>(null);
   const [packages, setPackages] = useState(initialPackages);
+  const [solicitationMode, setSolicitationMode] = useState(true);
+  const [importResult, setImportResult] = useState<ImportResult | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [status, setStatus] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
 
-  function submit() {
+  function submit(opts?: { forceReExtract?: boolean; existingPackageId?: string }) {
     if (!canEdit || isPending) return;
     setError(null);
     setStatus(null);
@@ -66,6 +85,8 @@ export function PackageIntakePanel({
       form.set("source_url", sourceUrl);
       form.set("body", body);
       if (file) form.set("file", file);
+      if (solicitationMode) form.set("solicitation_mode", "true");
+      if (opts?.forceReExtract) form.set("force_re_extract", "true");
 
       const res = await fetch(`/api/rfp/proposals/${proposalId}/package`, {
         method: "POST",
@@ -78,6 +99,8 @@ export function PackageIntakePanel({
             error?: string;
             detail?: string;
             extracted_chars?: number;
+            rubric_criteria?: RubricCriterion[];
+            rubric_skipped_reason?: RubricSkippedReason;
           }
         | null;
       if (!res.ok || !payload?.package_id || !payload.extraction) {
@@ -85,21 +108,29 @@ export function PackageIntakePanel({
         return;
       }
 
-      setPackages((current) => [
-        {
-          id: payload.package_id!,
-          title,
-          source_type: mode,
-          source_url: sourceUrl || null,
-          file_name: file?.name ?? null,
-          extracted_chars: payload.extracted_chars ?? 0,
-          extracted_json: payload.extraction!,
-          created_at: new Date().toISOString(),
-        },
-        ...current,
-      ]);
-      setBody("");
-      setFile(null);
+      setImportResult({
+        packageId: payload.package_id,
+        rubricCriteria: payload.rubric_criteria ?? null,
+        rubricSkippedReason: payload.rubric_skipped_reason ?? null,
+      });
+
+      if (!opts?.forceReExtract) {
+        setPackages((current) => [
+          {
+            id: payload.package_id!,
+            title,
+            source_type: mode,
+            source_url: sourceUrl || null,
+            file_name: file?.name ?? null,
+            extracted_chars: payload.extracted_chars ?? 0,
+            extracted_json: payload.extraction!,
+            created_at: new Date().toISOString(),
+          },
+          ...current,
+        ]);
+        setBody("");
+        setFile(null);
+      }
       setStatus("Package rules extracted. Refreshing readiness checks...");
 
       const complianceRes = await fetch(`/api/rfp/proposals/${proposalId}/compliance`, {
@@ -207,9 +238,20 @@ export function PackageIntakePanel({
               placeholder="Paste solicitation text, instructions, addenda, or portal requirements..."
             />
           ) : null}
+          <label className="flex cursor-pointer items-center gap-2.5">
+            <input
+              type="checkbox"
+              checked={solicitationMode}
+              onChange={(e) => setSolicitationMode(e.target.checked)}
+              className="h-4 w-4 rounded border-zinc-300 accent-zinc-950"
+            />
+            <span className="text-sm text-zinc-700">
+              This is the solicitation — extract evaluation rubric
+            </span>
+          </label>
           <button
             type="button"
-            onClick={submit}
+            onClick={() => submit()}
             disabled={isPending}
             className="inline-flex h-10 w-fit items-center gap-2 rounded-md bg-zinc-950 px-4 text-sm font-medium text-white transition hover:bg-zinc-800 disabled:cursor-not-allowed disabled:opacity-50"
           >
@@ -218,6 +260,37 @@ export function PackageIntakePanel({
           </button>
           {error ? <p className="text-sm text-rose-700">{error}</p> : null}
           {status ? <p className="text-sm text-emerald-700">{status}</p> : null}
+          {importResult ? (
+            <div className="rounded-md border border-zinc-200 bg-zinc-50 p-3 text-sm">
+              {importResult.rubricCriteria && importResult.rubricCriteria.length > 0 ? (
+                <p className="text-emerald-700">
+                  {importResult.rubricCriteria.length} evaluation{" "}
+                  {importResult.rubricCriteria.length === 1 ? "criterion" : "criteria"} extracted
+                  {" — "}
+                  <span className="text-zinc-500">view them in the proposal workspace</span>
+                </p>
+              ) : importResult.rubricSkippedReason ? (
+                <p className="text-zinc-500">
+                  {importResult.rubricSkippedReason === "no_opportunity_linked"
+                    ? "No linked opportunity — rubric extraction skipped"
+                    : importResult.rubricSkippedReason === "budget_exceeded"
+                      ? "AI budget reached — rubric extraction skipped"
+                      : "Rubric extraction failed — re-upload with 'extract rubric' to retry"}
+                </p>
+              ) : null}
+              {solicitationMode ? (
+                <button
+                  type="button"
+                  onClick={() => submit({ forceReExtract: true })}
+                  disabled={isPending}
+                  className="mt-2 inline-flex items-center gap-1.5 text-xs text-zinc-600 underline-offset-2 hover:text-zinc-900 hover:underline disabled:opacity-50"
+                >
+                  <RefreshCw className="h-3 w-3" />
+                  Re-extract rubric
+                </button>
+              ) : null}
+            </div>
+          ) : null}
         </div>
       ) : null}
 

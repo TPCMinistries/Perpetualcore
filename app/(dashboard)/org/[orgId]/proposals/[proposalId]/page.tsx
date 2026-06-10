@@ -287,11 +287,10 @@ export default async function ProposalPage({
 
   // Phase 19-02: load rubric criteria for this opp (if any).
   // RLS SELECT policy allows read when user has a proposal on the opp.
-  // as unknown as cast — database.types.ts regen deferred to 19-04.
   const rubricCriteria: RubricCriteriaRow[] = [];
   if (proposal.opp_id) {
     const { data: criteriaData } = await supabase
-      .from("rfp_rubric_criteria" as unknown as "rfp_compliance_checks")
+      .from("rfp_rubric_criteria")
       .select("id, section_ref, criterion_text, max_points, weight, is_inferred")
       .eq("opp_id", proposal.opp_id)
       .order("created_at")

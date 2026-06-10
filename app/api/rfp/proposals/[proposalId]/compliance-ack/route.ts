@@ -121,7 +121,7 @@ export async function PATCH(
     .update({
       ai_disclosure_acknowledged: true,
       ai_disclosure_acknowledged_at: acknowledgedAt,
-    } as unknown as Record<string, unknown>)
+    })
     .eq("id", proposal.id);
 
   if (updateErr) {

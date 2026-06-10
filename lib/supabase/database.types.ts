@@ -16136,6 +16136,8 @@ export type Database = {
       }
       rfp_proposals: {
         Row: {
+          ai_disclosure_acknowledged: boolean
+          ai_disclosure_acknowledged_at: string | null
           created_at: string
           due_date: string | null
           id: string
@@ -16148,6 +16150,8 @@ export type Database = {
           vault_chunks_used: Json
         }
         Insert: {
+          ai_disclosure_acknowledged?: boolean
+          ai_disclosure_acknowledged_at?: string | null
           created_at?: string
           due_date?: string | null
           id?: string
@@ -16160,6 +16164,8 @@ export type Database = {
           vault_chunks_used?: Json
         }
         Update: {
+          ai_disclosure_acknowledged?: boolean
+          ai_disclosure_acknowledged_at?: string | null
           created_at?: string
           due_date?: string | null
           id?: string
@@ -16232,6 +16238,63 @@ export type Database = {
             columns: ["org_id"]
             isOneToOne: false
             referencedRelation: "rfp_orgs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      rfp_rubric_criteria: {
+        Row: {
+          created_at: string
+          criterion_text: string
+          extracted_at: string
+          extracted_by: string
+          id: string
+          is_inferred: boolean
+          max_points: number | null
+          opp_id: string
+          package_doc_id: string | null
+          section_ref: string
+          weight: number | null
+        }
+        Insert: {
+          created_at?: string
+          criterion_text: string
+          extracted_at?: string
+          extracted_by?: string
+          id?: string
+          is_inferred?: boolean
+          max_points?: number | null
+          opp_id: string
+          package_doc_id?: string | null
+          section_ref: string
+          weight?: number | null
+        }
+        Update: {
+          created_at?: string
+          criterion_text?: string
+          extracted_at?: string
+          extracted_by?: string
+          id?: string
+          is_inferred?: boolean
+          max_points?: number | null
+          opp_id?: string
+          package_doc_id?: string | null
+          section_ref?: string
+          weight?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "rfp_rubric_criteria_opp_id_fkey"
+            columns: ["opp_id"]
+            isOneToOne: false
+            referencedRelation: "rfp_opportunities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "rfp_rubric_criteria_package_doc_id_fkey"
+            columns: ["package_doc_id"]
+            isOneToOne: false
+            referencedRelation: "rfp_package_documents"
             referencedColumns: ["id"]
           },
         ]

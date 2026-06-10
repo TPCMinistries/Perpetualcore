@@ -311,9 +311,9 @@ export async function POST(
       // Cache check: if rows already exist and not forced, return cached
       if (!forceRe) {
         const { data: cachedRows } = await admin
-          .from("rfp_rubric_criteria" as unknown as "rfp_package_documents")
+          .from("rfp_rubric_criteria")
           .select("id, opp_id, package_doc_id, section_ref, criterion_text, max_points, weight, is_inferred, extracted_by, extracted_at")
-          .eq("opp_id" as never, oppId)
+          .eq("opp_id", oppId)
           .returns<RubricCriteriaRow[]>();
 
         if (cachedRows && cachedRows.length > 0) {
@@ -370,9 +370,9 @@ export async function POST(
             // If force re-extract, delete existing rows first
             if (forceRe) {
               await admin
-                .from("rfp_rubric_criteria" as unknown as "rfp_package_documents")
+                .from("rfp_rubric_criteria")
                 .delete()
-                .eq("opp_id" as never, oppId);
+                .eq("opp_id", oppId);
             }
 
             // De-dupe section_refs before insert (enforce UNIQUE constraint client-side)
@@ -399,8 +399,8 @@ export async function POST(
               }));
 
               const { data: insertedRows, error: rubricInsertError } = await admin
-                .from("rfp_rubric_criteria" as unknown as "rfp_package_documents")
-                .insert(rowsToInsert as never)
+                .from("rfp_rubric_criteria")
+                .insert(rowsToInsert)
                 .select("id, opp_id, package_doc_id, section_ref, criterion_text, max_points, weight, is_inferred, extracted_by, extracted_at")
                 .returns<RubricCriteriaRow[]>();
 
