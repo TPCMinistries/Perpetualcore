@@ -75,6 +75,13 @@ export default function AiDisclosurePage() {
                 enable retrieval-augmented generation (RAG) — surfacing the most
                 relevant portions of your vault when drafting a specific section.
               </li>
+              <li>
+                <strong>Rubric Extraction:</strong> AI extracts evaluation
+                criteria from uploaded solicitation documents (Section&nbsp;L/M
+                for federal RFPs; funder priority sections for grants) and
+                structures them as scored criteria for use in the adversarial
+                review pass.
+              </li>
             </ul>
           </section>
 

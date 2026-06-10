@@ -28,6 +28,7 @@ import { SubmissionBundlePanel } from "@/components/rfp/SubmissionBundlePanel";
 import { SubmissionPlanPanel } from "@/components/rfp/SubmissionPlanPanel";
 import { SubmissionWorkroom } from "@/components/rfp/SubmissionWorkroom";
 import { PursuitActionSummary } from "@/components/rfp/PursuitActionSummary";
+import { AiDisclosureBanner } from "@/components/rfp/AiDisclosureBanner";
 import type { CitationChunk } from "@/components/rfp/MarkupRenderer";
 import type { SubmissionTaskRow } from "@/lib/rfp/submission/tasks";
 import type {
@@ -50,6 +51,8 @@ interface ProposalRow {
   opp_id: string | null;
   created_at: string;
   vault_chunks_used: unknown;
+  ai_disclosure_acknowledged: boolean;
+  ai_disclosure_acknowledged_at: string | null;
 }
 
 /**
@@ -214,7 +217,7 @@ export default async function ProposalPage({
 
   const { data: proposal } = await supabase
     .from("rfp_proposals")
-    .select("id, title, status, due_date, opp_id, created_at, vault_chunks_used")
+    .select("id, title, status, due_date, opp_id, created_at, vault_chunks_used, ai_disclosure_acknowledged, ai_disclosure_acknowledged_at")
     .eq("id", proposalId)
     .eq("org_id", orgId)
     .maybeSingle<ProposalRow>();
@@ -538,6 +541,17 @@ export default async function ProposalPage({
         />
         {reviewerResultGlobalOnly ? (
           <ReviewerFindingsPanel result={reviewerResultGlobalOnly} />
+        ) : null}
+
+        {/* AI-use disclosure banner — shown when at least one section has been drafted */}
+        {visibleSections.some((s) => s.content && s.content.trim().length > 0) ? (
+          <div className="mt-8">
+            <AiDisclosureBanner
+              proposalId={proposalId}
+              initialAcknowledged={proposal.ai_disclosure_acknowledged ?? false}
+              acknowledgedAt={proposal.ai_disclosure_acknowledged_at ?? null}
+            />
+          </div>
         ) : null}
 
         {/* Sections in canonical order */}
