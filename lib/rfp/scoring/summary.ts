@@ -8,6 +8,10 @@
  * Model selection:
  *   - Primary: Claude Sonnet 4 (claude-sonnet-4-5)
  *   - Fallback: Claude Haiku 4.5 (claude-haiku-4-5)
+ *   - Last resort: OpenAI gpt-4o — same pattern as drafter/voice/reviewer,
+ *     added 2026-06-09 because the Anthropic account ran out of credit and
+ *     every summary silently nulled. Anthropic re-enables automatically when
+ *     credit lands (it's earlier in the chain).
  *   - On any error (rate limit, network, model down) returns null. Caller
  *     treats null as "keep existing summary or leave blank." Never throws.
  *
@@ -27,6 +31,7 @@
  */
 
 import Anthropic from '@anthropic-ai/sdk';
+import OpenAI from 'openai';
 import { computeCostUsd } from '@/lib/rfp/ai/guardrail';
 import type {
   OpportunityForScoring,
@@ -47,6 +52,15 @@ function getAnthropic(): Anthropic | null {
   return anthropic;
 }
 
+let openaiClient: OpenAI | null = null;
+function getOpenAI(): OpenAI | null {
+  if (openaiClient) return openaiClient;
+  const key = process.env.OPENAI_API_KEY;
+  if (!key) return null;
+  openaiClient = new OpenAI({ apiKey: key });
+  return openaiClient;
+}
+
 /** Sentinel returned when profile is pending — no AI call. */
 const PROFILE_PENDING_SUMMARY =
   'Capture profile not yet built. Score uses geo and deadline only.';
@@ -54,6 +68,60 @@ const PROFILE_PENDING_SUMMARY =
 /** Primary + fallback model ids. Sonnet 4.5 / Haiku 4.5 per Anthropic 2026 lineup. */
 const MODEL_PRIMARY = 'claude-sonnet-4-5';
 const MODEL_FALLBACK = 'claude-haiku-4-5';
+/** Last-resort fallback when Anthropic is unavailable (e.g. credit exhausted). */
+const MODEL_OPENAI_FALLBACK = 'gpt-4o';
+const MODEL_CHAIN = [MODEL_PRIMARY, MODEL_FALLBACK, MODEL_OPENAI_FALLBACK];
+
+/**
+ * Call one model in the chain and return its raw text + usage, or null on any
+ * failure (missing key, API error, empty response). Dispatches on the model id:
+ * gpt-* goes to OpenAI, everything else to Anthropic. Never throws.
+ */
+async function callModel(
+  model: string,
+  prompt: string,
+  maxTokens: number,
+  oppId: string
+): Promise<{ rawText: string; tokensIn: number; tokensOut: number } | null> {
+  try {
+    if (model.startsWith('gpt-')) {
+      const client = getOpenAI();
+      if (!client) return null;
+      const resp = await client.chat.completions.create({
+        model,
+        max_tokens: maxTokens,
+        messages: [{ role: 'user', content: prompt }],
+      });
+      const rawText = (resp.choices[0]?.message?.content ?? '').trim();
+      if (!rawText) return null;
+      return {
+        rawText,
+        tokensIn: resp.usage?.prompt_tokens ?? 0,
+        tokensOut: resp.usage?.completion_tokens ?? 0,
+      };
+    }
+    const client = getAnthropic();
+    if (!client) return null;
+    const resp = await client.messages.create({
+      model,
+      max_tokens: maxTokens,
+      messages: [{ role: 'user', content: prompt }],
+    });
+    const block = resp.content[0];
+    if (!block || block.type !== 'text') return null;
+    const rawText = block.text.trim();
+    if (!rawText) return null;
+    return {
+      rawText,
+      tokensIn: resp.usage.input_tokens,
+      tokensOut: resp.usage.output_tokens,
+    };
+  } catch (err: unknown) {
+    const msg = err instanceof Error ? err.message : String(err);
+    console.warn(`[scoring/summary] ${model} failed for opp=${oppId}: ${msg}`);
+    return null;
+  }
+}
 
 /** Cap response at ~50 tokens — this is a one-or-two-sentence summary. */
 const MAX_TOKENS = 80;
@@ -125,48 +193,21 @@ export async function generateFitSummary(
     return { text: PROFILE_PENDING_SUMMARY, tokensIn: 0, tokensOut: 0, costUsd: 0 };
   }
 
-  const client = getAnthropic();
-  if (!client) {
-    // No key wired — caller treats null as "leave blank".
-    return ZERO_COST_RESULT;
-  }
-
   const prompt = buildPrompt(opp, profile, breakdown);
 
-  // Try primary, fall back to Haiku on transient errors.
-  for (const model of [MODEL_PRIMARY, MODEL_FALLBACK]) {
-    try {
-      const resp = await client.messages.create({
-        model,
-        max_tokens: MAX_TOKENS,
-        messages: [{ role: 'user', content: prompt }],
-      });
-      // Extract text from the first content block.
-      const block = resp.content[0];
-      if (block && block.type === 'text') {
-        const text = block.text.trim();
-        if (text.length > 0) {
-          const tokensIn = resp.usage.input_tokens;
-          const tokensOut = resp.usage.output_tokens;
-          return {
-            text,
-            tokensIn,
-            tokensOut,
-            costUsd: computeCostUsd(model, tokensIn, tokensOut),
-          };
-        }
-      }
-      // Empty response — try fallback if any.
-    } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : String(err);
-      console.warn(
-        `[scoring/summary] ${model} failed for opp=${opp.id}: ${msg}`
-      );
-      // Continue to fallback model.
-    }
+  // Try primary, fall back to Haiku, then gpt-4o on transient errors.
+  for (const model of MODEL_CHAIN) {
+    const result = await callModel(model, prompt, MAX_TOKENS, opp.id);
+    if (!result) continue;
+    return {
+      text: result.rawText,
+      tokensIn: result.tokensIn,
+      tokensOut: result.tokensOut,
+      costUsd: computeCostUsd(model, result.tokensIn, result.tokensOut),
+    };
   }
 
-  // Both models failed (rate limit, network, etc.) — return null per contract.
+  // All models failed (no keys, rate limit, network) — return null per contract.
   return ZERO_COST_RESULT;
 }
 
@@ -306,29 +347,14 @@ export async function generateExplainedSummary(
     };
   }
 
-  const client = getAnthropic();
-  if (!client) {
-    return ZERO_EXPLAINED_RESULT;
-  }
-
   const prompt = buildExplainedPrompt(opp, profile, dimensions, vaultChunks);
 
-  for (const model of [MODEL_PRIMARY, MODEL_FALLBACK]) {
-    try {
-      const resp = await client.messages.create({
-        model,
-        max_tokens: EXPLAINED_MAX_TOKENS,
-        messages: [{ role: 'user', content: prompt }],
-      });
+  for (const model of MODEL_CHAIN) {
+    {
+      const result = await callModel(model, prompt, EXPLAINED_MAX_TOKENS, opp.id);
+      if (!result) continue;
 
-      const block = resp.content[0];
-      if (!block || block.type !== 'text') continue;
-
-      const rawText = block.text.trim();
-      if (!rawText) continue;
-
-      const tokensIn = resp.usage.input_tokens;
-      const tokensOut = resp.usage.output_tokens;
+      const { rawText, tokensIn, tokensOut } = result;
       const costUsd = computeCostUsd(model, tokensIn, tokensOut);
 
       // Try to parse the JSON response (Pitfall 4: graceful degrade on failure).
@@ -387,11 +413,6 @@ export async function generateExplainedSummary(
           cited_excerpts: [],
         };
       }
-    } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : String(err);
-      console.warn(
-        `[scoring/summary] generateExplainedSummary ${model} failed for opp=${opp.id}: ${msg}`
-      );
     }
   }
 
