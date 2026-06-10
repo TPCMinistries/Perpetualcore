@@ -18,6 +18,7 @@ import { createClient } from "@/lib/supabase/server";
 import { SECTION_SPECS, SECTION_TYPES, type SectionType } from "@/lib/rfp/draft/sections";
 import { ReviewButton } from "@/components/rfp/ReviewButton";
 import { ReviewerFindingsPanel } from "@/components/rfp/ReviewerFindingsPanel";
+import { RubricCriteriaPanel } from "@/components/rfp/RubricCriteriaPanel";
 import { ProposalSectionEditor } from "@/components/rfp/ProposalSectionEditor";
 import { ProposalStatusControl } from "@/components/rfp/ProposalStatusControl";
 import { CaptureReadinessButton } from "@/components/rfp/CaptureReadinessButton";
@@ -106,6 +107,15 @@ interface ComplianceCheckRow {
   check_type: string;
   details_json: unknown;
   created_at: string;
+}
+
+interface RubricCriteriaRow {
+  id: string;
+  section_ref: string;
+  criterion_text: string;
+  max_points: number | null;
+  weight: number | null;
+  is_inferred: boolean;
 }
 
 /**
@@ -274,6 +284,20 @@ export default async function ProposalPage({
     ])
     .order("created_at", { ascending: false })
     .returns<ComplianceCheckRow[]>();
+
+  // Phase 19-02: load rubric criteria for this opp (if any).
+  // RLS SELECT policy allows read when user has a proposal on the opp.
+  // as unknown as cast — database.types.ts regen deferred to 19-04.
+  const rubricCriteria: RubricCriteriaRow[] = [];
+  if (proposal.opp_id) {
+    const { data: criteriaData } = await supabase
+      .from("rfp_rubric_criteria" as unknown as "rfp_compliance_checks")
+      .select("id, section_ref, criterion_text, max_points, weight, is_inferred")
+      .eq("opp_id", proposal.opp_id)
+      .order("created_at")
+      .returns<RubricCriteriaRow[]>();
+    rubricCriteria.push(...(criteriaData ?? []));
+  }
 
   const { data: submissionTasks } = await supabase
     .from("rfp_submission_tasks")
@@ -539,8 +563,16 @@ export default async function ProposalPage({
           complianceMatrix={complianceMatrix}
           packetChecklist={packetChecklist}
         />
+        {/* Phase 19-02: Evaluation rubric panel — shown when criteria exist for the opp */}
+        {rubricCriteria.length > 0 ? (
+          <RubricCriteriaPanel criteria={rubricCriteria} />
+        ) : null}
+
         {reviewerResultGlobalOnly ? (
-          <ReviewerFindingsPanel result={reviewerResultGlobalOnly} />
+          <ReviewerFindingsPanel
+            result={reviewerResultGlobalOnly}
+            criteria={rubricCriteria}
+          />
         ) : null}
 
         {/* AI-use disclosure banner — shown when at least one section has been drafted */}

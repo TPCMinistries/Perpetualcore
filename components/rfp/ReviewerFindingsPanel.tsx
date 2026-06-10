@@ -83,11 +83,29 @@ function scoreTone(score: number): string {
   return "border-rose-200 bg-rose-50 text-rose-700";
 }
 
-interface ReviewerFindingsPanelProps {
-  result: ReviewerResult;
+interface CriterionForPanel {
+  id: string;
+  section_ref: string;
 }
 
-export function ReviewerFindingsPanel({ result }: ReviewerFindingsPanelProps) {
+interface ReviewerFindingsPanelProps {
+  result: ReviewerResult;
+  /**
+   * Phase 19-02: rubric criteria for this opp. Used to resolve criterion_id
+   * on each finding to a human-readable section_ref chip. Default empty array
+   * = no criterion chips rendered (backward compatible).
+   */
+  criteria?: CriterionForPanel[];
+}
+
+export function ReviewerFindingsPanel({
+  result,
+  criteria = [],
+}: ReviewerFindingsPanelProps) {
+  // Build id → section_ref lookup for O(1) resolution
+  const criterionMap = new Map<string, string>(
+    criteria.map((c) => [c.id, c.section_ref]),
+  );
   const grouped = new Map<FindingSeverity, ReviewerFinding[]>();
   for (const sev of SEVERITY_ORDER) grouped.set(sev, []);
   for (const f of result.findings) {
@@ -166,6 +184,17 @@ export function ReviewerFindingsPanel({ result }: ReviewerFindingsPanelProps) {
                       <span className="font-mono text-[9px] uppercase tracking-[0.22em] text-zinc-500">
                         {SECTION_LABEL[f.section_type] ?? f.section_type}
                       </span>
+                      {/* Phase 19-02: criterion chip — show when finding has a known criterion_id */}
+                      {f.criterion_id && criterionMap.has(f.criterion_id) ? (
+                        <>
+                          <span className="font-mono text-[9px] uppercase tracking-[0.22em] text-zinc-400">
+                            ·
+                          </span>
+                          <span className="inline-flex items-center rounded-md border border-emerald-200 bg-emerald-50 px-2 py-0.5 font-mono text-[9px] uppercase tracking-[0.18em] text-emerald-700">
+                            {criterionMap.get(f.criterion_id)}
+                          </span>
+                        </>
+                      ) : null}
                     </div>
 
                     <p className="mt-3 text-[14px] leading-relaxed text-zinc-900">
