@@ -38,8 +38,8 @@ Grouped by category. Each maps to exactly one roadmap phase (see Traceability). 
 - [x] **REVIEW-01**: System extracts the actual evaluation criteria from a solicitation (gov Section L/M; grant funder priorities) with weights
 - [ ] **REVIEW-02**: A multi-agent reviewer panel scores the draft against those extracted criteria, not generic writing quality
 - [ ] **REVIEW-03**: Reviewer findings anchor to draft sections with severity and a suggested fix
-- [ ] **REVIEW-04**: Compliance gate v1 checks page limits, required attachments, budget math, eligibility, and deadline+timezone before submit
-- [ ] **REVIEW-05**: Draft output carries an AI-use disclosure notice and the compliance gate includes an AI-disclosure checklist item (GSA GSAR 552.239-7001 / NIH)
+- [x] **REVIEW-04**: Compliance gate v1 checks page limits, required attachments, budget math, eligibility, and deadline+timezone before submit
+- [x] **REVIEW-05**: Draft output carries an AI-use disclosure notice and the compliance gate includes an AI-disclosure checklist item (GSA GSAR 552.239-7001 / NIH)
 - [ ] **REVIEW-06**: User can upload PDF/DOCX into the vault and attach solicitation documents, parsed reliably on Vercel serverless
 
 ### Submission & Amendments (SUBMIT)
@@ -133,8 +133,8 @@ Tracked, not in this roadmap.
 | REVIEW-01 | Phase 19 | Complete |
 | REVIEW-02 | Phase 19 | Pending |
 | REVIEW-03 | Phase 19 | Pending |
-| REVIEW-04 | Phase 19 | Pending |
-| REVIEW-05 | Phase 19 | Pending |
+| REVIEW-04 | Phase 19 | Complete |
+| REVIEW-05 | Phase 19 | Complete |
 | REVIEW-06 | Phase 19 | Pending |
 | SUBMIT-01 | Phase 20 | Pending |
 | SUBMIT-02 | Phase 20 | Pending |

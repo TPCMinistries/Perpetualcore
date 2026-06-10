@@ -51,6 +51,7 @@ Progress: [██░░░░░░░░] ~20% (v2.0 phases — Phase 22 of 25 
 | Phase 17-ai-cost-guardrail P05 | 2 | 2 tasks | 2 files |
 | Phase 18-explainable-fit-scoring P02 | 5 | 5 tasks | 5 files |
 | Phase 19-rubric-review-compliance-gate-upload P01 | 7 | 3 tasks | 3 files |
+| Phase 19-rubric-review-compliance-gate-upload P03 | 8 | 3 tasks | 7 files |
 
 ## Accumulated Context
 
@@ -107,6 +108,9 @@ Recent decisions affecting current work:
 - [Phase 18-01]: database.types.ts regen deferred to later plan (established single-owner pattern from Phase 14-04); as-unknown-as cast used in evidence-store.ts
 - [Phase 19-rubric-review-compliance-gate-upload]: Synchronous rubric extraction inline with package upload (not async); maxDuration=90 covers LLM call time; budget-gated via guardedLLMCall
 - [Phase 19-rubric-review-compliance-gate-upload]: rfp_rubric_criteria queries use as-unknown-as cast until database.types.ts regen in 19-04 (single-owner pattern)
+- [Phase 19-03]: ai-disclosure checklist item status driven ONLY by ai_disclosure_acknowledged boolean — no content scanning, never auto-advances
+- [Phase 19-03]: deadline-timezone null + due_date = status 'missing' (fail blocker); no deadline = 'needs_review'
+- [Phase 19-03]: compliance-ack PATCH endpoint: BodySchema accepts only literal true; un-ack not supported in v1
 
 ### Pending Todos
 
