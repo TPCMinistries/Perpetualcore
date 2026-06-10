@@ -38,6 +38,7 @@ import {
   REVIEWER_AGENT,
   REVIEWER_FINDINGS_SECTION_TYPE,
   type ReviewerResult,
+  type RubricCriterion,
 } from "@/lib/rfp/review/rubric";
 import {
   guardedLLMCall,
@@ -144,6 +145,29 @@ export async function POST(
     return NextResponse.json({ error: "opp_not_found" }, { status: 404 });
   }
 
+  // Phase 19-02: Load rubric criteria for this opp (if any).
+  // Criteria extraction only happens at package upload (solicitation_mode) — we
+  // never re-extract here. Zero criteria = v1 generic-rubric behavior.
+  const { data: rawCriteria } = await admin
+    .from("rfp_rubric_criteria" as unknown as "rfp_opportunities")
+    .select("id, section_ref, criterion_text, max_points, weight")
+    .eq("opp_id", proposal.opp_id)
+    .order("created_at");
+  const criteriaRows = (rawCriteria ?? []) as unknown as Array<{
+    id: string;
+    section_ref: string;
+    criterion_text: string;
+    max_points: number | null;
+    weight: number | null;
+  }>;
+  const rubricCriteria: RubricCriterion[] = criteriaRows.map((r) => ({
+    id: r.id,
+    section_ref: r.section_ref,
+    criterion_text: r.criterion_text,
+    max_points: r.max_points,
+    weight: r.weight,
+  }));
+
   // Load drafted sections. Filter out any prior reviewer rows so the model
   // doesn't critique its own past output.
   const { data: rawSections, error: sErr } = await admin
@@ -189,7 +213,11 @@ export async function POST(
   try {
     let capturedReview: ReviewerResult | undefined;
     await guardedLLMCall(proposal.org_id, async () => {
-      const result = await generateReview({ opportunity: opp, sections: draftedSections });
+      const result = await generateReview({
+        opportunity: opp,
+        sections: draftedSections,
+        rubric_criteria: rubricCriteria.length > 0 ? rubricCriteria : undefined,
+      });
       capturedReview = result;
       return {
         agent: REVIEWER_AGENT,
@@ -256,5 +284,5 @@ export async function POST(
   // The rfp_agent_sessions audit row is recorded by guardedLLMCall → recordCost
   // (wrapper owns the single insert). No inline insert here.
 
-  return NextResponse.json(review);
+  return NextResponse.json({ ...review, rubric_criteria_count: rubricCriteria.length });
 }
