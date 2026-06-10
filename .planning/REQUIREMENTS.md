@@ -35,7 +35,7 @@ Grouped by category. Each maps to exactly one roadmap phase (see Traceability). 
 
 ### Drafting, Review & Compliance (REVIEW)
 
-- [ ] **REVIEW-01**: System extracts the actual evaluation criteria from a solicitation (gov Section L/M; grant funder priorities) with weights
+- [x] **REVIEW-01**: System extracts the actual evaluation criteria from a solicitation (gov Section L/M; grant funder priorities) with weights
 - [ ] **REVIEW-02**: A multi-agent reviewer panel scores the draft against those extracted criteria, not generic writing quality
 - [ ] **REVIEW-03**: Reviewer findings anchor to draft sections with severity and a suggested fix
 - [ ] **REVIEW-04**: Compliance gate v1 checks page limits, required attachments, budget math, eligibility, and deadline+timezone before submit
@@ -130,7 +130,7 @@ Tracked, not in this roadmap.
 | SCORE-02 | Phase 18 | Complete |
 | SCORE-03 | Phase 18 | Complete |
 | SCORE-04 | Phase 18 | Complete |
-| REVIEW-01 | Phase 19 | Pending |
+| REVIEW-01 | Phase 19 | Complete |
 | REVIEW-02 | Phase 19 | Pending |
 | REVIEW-03 | Phase 19 | Pending |
 | REVIEW-04 | Phase 19 | Pending |

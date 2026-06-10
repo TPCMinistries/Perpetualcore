@@ -50,6 +50,7 @@ Progress: [██░░░░░░░░] ~20% (v2.0 phases — Phase 22 of 25 
 | Phase 17-ai-cost-guardrail P02 | 58 | 2 tasks | 3 files |
 | Phase 17-ai-cost-guardrail P05 | 2 | 2 tasks | 2 files |
 | Phase 18-explainable-fit-scoring P02 | 5 | 5 tasks | 5 files |
+| Phase 19-rubric-review-compliance-gate-upload P01 | 7 | 3 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -104,6 +105,8 @@ Recent decisions affecting current work:
 - [Phase 18-01]: rfp_fit_evidence artifact_id is NOT a FK to rfp_vault_artifacts — citations must outlive the source artifact
 - [Phase 18-01]: Stale-row prune in evidence-store.ts (application code) not DB cascade — prune failure is non-fatal; stale rows filtered by scored_version at read time
 - [Phase 18-01]: database.types.ts regen deferred to later plan (established single-owner pattern from Phase 14-04); as-unknown-as cast used in evidence-store.ts
+- [Phase 19-rubric-review-compliance-gate-upload]: Synchronous rubric extraction inline with package upload (not async); maxDuration=90 covers LLM call time; budget-gated via guardedLLMCall
+- [Phase 19-rubric-review-compliance-gate-upload]: rfp_rubric_criteria queries use as-unknown-as cast until database.types.ts regen in 19-04 (single-owner pattern)
 
 ### Pending Todos
 
