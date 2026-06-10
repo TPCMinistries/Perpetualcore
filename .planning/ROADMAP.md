@@ -157,7 +157,13 @@ Beachhead coverage uses what's ALREADY live: federal (SAM/Grants.gov/NIH/NSF) + 
   3. The compliance gate explicitly checks page limits, required attachments, budget math, eligibility, and deadline+timezone and surfaces a pass/fail checklist the user can see before submitting
   4. Draft output includes an AI-use disclosure notice, and the compliance checklist includes an AI-disclosure line item (GSA GSAR 552.239-7001 / NIH) that the user must acknowledge
   5. A user can upload a PDF or DOCX solicitation document on Vercel serverless and have it parsed into vault chunks without timeout or truncation on a 20-page document
-**Plans**: TBD
+**Plans**: 4 plans
+
+Plans:
+- [ ] 19-01-PLAN.md — rfp_rubric_criteria table + Claude rubric extraction + solicitation_mode in package route (REVIEW-01)
+- [ ] 19-02-PLAN.md — Rubric-anchored reviewer on Anthropic chain + criterion_id findings + RubricCriteriaPanel (REVIEW-02, REVIEW-03)
+- [ ] 19-03-PLAN.md — Compliance gate hardening (page limit/timezone/budget) + AI-disclosure ack + banner (REVIEW-04, REVIEW-05)
+- [ ] 19-04-PLAN.md — Solicitation upload UI + types regen + prod deploy + human verification (REVIEW-06)
 
 ### Phase 20: Submission Tracking & Amendments
 **Goal**: Users assemble a submission packet and track it through its lifecycle; the system monitors live solicitations for amendments and re-triggers compliance and fit checks when material changes appear
