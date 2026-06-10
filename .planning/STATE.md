@@ -52,6 +52,7 @@ Progress: [██░░░░░░░░] ~20% (v2.0 phases — Phase 22 of 25 
 | Phase 18-explainable-fit-scoring P02 | 5 | 5 tasks | 5 files |
 | Phase 19-rubric-review-compliance-gate-upload P01 | 7 | 3 tasks | 3 files |
 | Phase 19-rubric-review-compliance-gate-upload P03 | 8 | 3 tasks | 7 files |
+| Phase 19-rubric-review-compliance-gate-upload P02 | 5 | 3 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -111,6 +112,9 @@ Recent decisions affecting current work:
 - [Phase 19-03]: ai-disclosure checklist item status driven ONLY by ai_disclosure_acknowledged boolean — no content scanning, never auto-advances
 - [Phase 19-03]: deadline-timezone null + due_date = status 'missing' (fail blocker); no deadline = 'needs_review'
 - [Phase 19-03]: compliance-ack PATCH endpoint: BodySchema accepts only literal true; un-ack not supported in v1
+- [Phase Phase 19-02]: Anthropic-first model chain (sonnet-4-5 → haiku-4-5 → gpt-4o) replaces hard-coded GPT-4o in reviewer; preserves throw-on-full-chain-failure contract
+- [Phase Phase 19-02]: criterion_id: z.string().nullable().optional() in Zod schema — no UUID enforcement; unknown echoed IDs sanitized to null post-parse, finding retained
+- [Phase Phase 19-02]: RubricCriteriaPanel returns null when criteria empty; ReviewerFindingsPanel criteria prop defaults to [] for backward compat; section-level criterion chips not threaded to avoid prop drilling
 
 ### Pending Todos
 
