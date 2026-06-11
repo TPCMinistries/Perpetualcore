@@ -1,4 +1,4 @@
-# HANDOFF — RFP Engine Phase 20 Closed
+# HANDOFF — RFP Engine Phase 24 In Progress
 
 **Updated:** 2026-06-11
 **Repo:** `~/perpetual-core-rfp`
@@ -8,7 +8,7 @@
 
 ## Status
 
-Phase 19 and Phase 20 are closed.
+Phase 19 and Phase 20 are closed. Phase 24 is in progress.
 
 The last production deployment from Phase 19 is:
 
@@ -18,7 +18,7 @@ dpl_8xnvTW5qLYeXc3CPuiocvQuJK4ui
 
 That deployment includes a closeout fix in `app/api/rfp/proposals/[proposalId]/package/route.ts`: the route now passes `solicitation_mode` and `force_re_extract` into `FieldsSchema.safeParse(...)`. Before that fix, the UI toggle submitted the values but the route never entered the rubric extraction branch.
 
-## Phase 20 Current State
+## Phase 20 Closed State
 
 All Phase 20 plans are complete.
 
@@ -57,6 +57,22 @@ Verification:
 - Full RLS file has unrelated drift: older submitted-status test now hits submit-readiness gate `409`; package/redraft tests hit 5s timeout.
 - `npm run type-check` was stopped after 5+ minutes with no diagnostics while `tsc` was still active.
 
+## Phase 24 Current State
+
+Completed 24-01 / ADMIN-04 JSON hardening:
+
+- `/api/health/rfp` now returns `scraper_last_success`.
+- `/api/health/rfp` now returns `cron_24h` with runs, successes, warnings, failures, `error_rate`, `error_rate_percent`, latest run, and latest success.
+- Existing `open_drift_events` and `last_cron` fields are preserved.
+- Endpoint remains public and aggregate-only for uptime/status polling.
+
+Verification:
+
+- `npm run test:run -- tests/unit/rfp-health-monitoring.test.ts` passed, 3 tests.
+- Focused ESLint passed for health route/helper/test.
+- Direct route smoke with `.env.local` loaded returned HTTP `200` and showed `cron_24h` present.
+- Live data currently reports degraded due to `24` unresolved source-drift events.
+
 ## Verification Evidence
 
 See:
@@ -80,7 +96,7 @@ Verified on production:
 Continue current phase per beachhead sequence:
 
 ```text
-Phase 20 — Submission Tracking & Amendments
+Phase 24 — Operator Console, Monitoring & FTUE
 ```
 
 Do not follow `gsd-tools` numeric next-phase output if it points elsewhere. The source of truth is ROADMAP "Execution Sequence":
@@ -100,7 +116,7 @@ Do not follow `gsd-tools` numeric next-phase output if it points elsewhere. The 
 
 ## Next Engineering Step
 
-Move to Phase 24-FTUE per beachhead sequence, then dogfood Uplift/IHA/TPC.
+Continue Phase 24 FTUE/onboarding and empty-state work. Remaining ADMIN-04 task is external uptime/status monitor wiring.
 
 ## Open Human Tasks
 

@@ -119,6 +119,7 @@ Recent decisions affecting current work:
 - [Phase 19-04]: Package route closeout fix — solicitation_mode and force_re_extract must be included in FieldsSchema.safeParse input, not only in FieldsSchema, or the rubric branch never runs.
 - [Phase 19-04]: Reviewer fix text field remains `suggestion` per existing ReviewerFinding schema; verification maps that to the REVIEW-03 "suggested fix" requirement.
 - [Phase 19-04]: Cached solicitation re-upload creates a new package document but returns existing criteria rows by opp_id; DB count must remain 4 for the test fixture, not duplicate to 8.
+- [Phase 24-01]: `/api/health/rfp` now exposes explicit `scraper_last_success` and `cron_24h` error-rate fields; endpoint remains public aggregate-only for uptime/status monitors.
 
 ### Pending Todos
 
@@ -135,5 +136,5 @@ Recent decisions affecting current work:
 ## Session Continuity
 
 Last session: 2026-06-11
-Stopped at: Phase 20 closed. Submission packet, lifecycle tracking, amendment diffing, and material-change workroom alerts are complete.
-Resume file: `.planning/phases/20-submission-tracking-amendments/20-02-SUMMARY.md` plus `20-03-SUMMARY.md` — next action is Phase 24 FTUE per beachhead sequence, then dogfood Uplift/IHA/TPC.
+Stopped at: Phase 24 started. ADMIN-04 health endpoint JSON is complete; external uptime/status monitor wiring remains.
+Resume file: `.planning/phases/24-operator-console-monitoring-ftue/24-01-SUMMARY.md` — next action is Phase 24 FTUE/onboarding and empty states, then dogfood Uplift/IHA/TPC.

@@ -228,7 +228,8 @@ Plans:
   4. `GET /api/health/rfp` returns JSON with scraper last-success, drift-open count, cron last-run, and error rate — and this endpoint is wired to an uptime or status-page monitor
   5. A brand-new org completes ≤5-field setup (org type, mission, geography, funding types) and sees their first scored opportunities in the same session — no additional config required
   6. Every major empty state (Discovery empty, Proposals empty, Vault empty, Voice empty) shows a real CTA guiding the user toward their first qualified draft
-**Plans**: TBD
+**Plans**:
+- [x] 24-01 — RFP health endpoint hardening [ADMIN-04 partial: JSON complete; external monitor remains]
 
 ### Phase 25: Launch Gate
 **Goal**: The full critical path from draft → review → submit is covered by E2E tests; production is stable on main; v2.0 is ready to call done
@@ -261,5 +262,5 @@ Phases execute in numeric order: 13 → 14 → 15 → 16 → 17 → 18 → 19 �
 | 21. Win/Loss Learning | v2.0 | 0/TBD | Not started | - |
 | 22. Trust, Security & Legal | 4/4 | Complete    | 2026-06-07 | - |
 | 23. Live Billing & Entitlements | v2.0 | 0/TBD | Not started | - |
-| 24. Operator Console, Monitoring & FTUE | v2.0 | 0/TBD | Not started | - |
+| 24. Operator Console, Monitoring & FTUE | v2.0 | 1/TBD | In Progress | - |
 | 25. Launch Gate | v2.0 | 0/TBD | Not started | - |
