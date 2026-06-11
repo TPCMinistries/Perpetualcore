@@ -493,13 +493,13 @@ describe("RFP new-endpoint tenant isolation", () => {
       await admin.from("rfp_proposals").update({ status: "draft" }).eq("id", proposalA);
     });
 
-    it("PATCH status='withdrawn' succeeds (full lifecycle vocabulary)", async () => {
+    it("PATCH status='no_bid' succeeds (Phase 20 lifecycle vocabulary)", async () => {
       const res = await withToken(userA.access_token, () =>
-        callPatchStatus(proposalA, { status: "withdrawn" }),
+        callPatchStatus(proposalA, { status: "no_bid" }),
       );
       expect(res.status).toBe(200);
       const body = await res.json();
-      expect(body.status).toBe("withdrawn");
+      expect(body.status).toBe("no_bid");
 
       await admin.from("rfp_proposals").update({ status: "draft" }).eq("id", proposalA);
     });

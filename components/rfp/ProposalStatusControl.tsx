@@ -4,7 +4,7 @@
  * ProposalStatusControl — owner/writer-only control to advance a proposal
  * through its lifecycle. Renders inline at the top of the proposal page.
  *
- * Statuses: draft → submitted → won | lost  (withdrawn possible from any)
+ * Statuses: draft → submitted → won | lost | no-bid
  *
  * v1 has no notes field — the API accepts notes but the UI sends none.
  * If we want notes we add a textarea later; keeping the click-path one
@@ -18,7 +18,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 
-type Status = "draft" | "submitted" | "won" | "lost" | "withdrawn";
+type Status = "draft" | "submitted" | "won" | "lost" | "no_bid" | "withdrawn";
 
 const STATUS_META: Record<
   Status,
@@ -40,20 +40,25 @@ const STATUS_META: Record<
     label: "Lost",
     chip: "border-rose-200 bg-rose-50 text-rose-700",
   },
+  no_bid: {
+    label: "No-bid",
+    chip: "border-zinc-300 bg-zinc-100 text-zinc-500",
+  },
   withdrawn: {
-    label: "Withdrawn",
+    label: "No-bid",
     chip: "border-zinc-300 bg-zinc-100 text-zinc-500",
   },
 };
 
 // Allowed forward transitions. We let drafts go directly to any terminal
 // state so a writer who marks "won" without flagging "submitted" first
-// doesn't get blocked. Withdrawn is reachable from anywhere.
+// doesn't get blocked. No-bid is reachable from anywhere.
 const NEXT_OPTIONS: Record<Status, Status[]> = {
-  draft: ["submitted", "won", "lost", "withdrawn"],
-  submitted: ["won", "lost", "withdrawn"],
-  won: ["lost", "withdrawn"],
-  lost: ["won", "withdrawn"],
+  draft: ["submitted", "won", "lost", "no_bid"],
+  submitted: ["won", "lost", "no_bid"],
+  won: ["lost", "no_bid"],
+  lost: ["won", "no_bid"],
+  no_bid: ["draft"],
   withdrawn: ["draft"],
 };
 
@@ -64,7 +69,14 @@ interface ProposalStatusControlProps {
 }
 
 function coerceStatus(s: string): Status {
-  if (s === "draft" || s === "submitted" || s === "won" || s === "lost" || s === "withdrawn") {
+  if (
+    s === "draft" ||
+    s === "submitted" ||
+    s === "won" ||
+    s === "lost" ||
+    s === "no_bid" ||
+    s === "withdrawn"
+  ) {
     return s;
   }
   return "draft";

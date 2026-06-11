@@ -9,12 +9,12 @@ See: .planning/PROJECT.md (updated 2026-06-05)
 
 ## Current Position
 
-Phase: 19 of 25 COMPLETE → next is Phase 20 (submission tracking/amendments) per beachhead sequence
-Plan: 4 of 4 complete (19-01 rubric extraction; 19-02 rubric-anchored reviewer; 19-03 compliance + AI disclosure; 19-04 solicitation upload + prod verification)
-Status: Phase 19 CLOSED 2026-06-11 — all six REVIEW requirements verified end-to-end on prod. Verification surfaced + fixed: package route omitted solicitation_mode/force_re_extract from safeParse input, preventing rubric extraction despite the UI toggle; fixed and deployed to dpl_8xnvTW5qLYeXc3CPuiocvQuJK4ui.
-Last activity: 2026-06-11 — Phase 19 closed; 20-page DOCX solicitation parsed on Vercel, 4 weighted Section M criteria visible in workspace, claude-sonnet-4-5 reviewer anchored findings to criteria, compliance gate + AI disclosure ack verified, cached re-upload avoided duplicate rows, and seeded prod data rolled back to zero.
+Phase: 20 of 25 IN PROGRESS — submission tracking/amendments
+Plan: 1 of 4 complete (20-01 canonical no-bid lifecycle status)
+Status: Phase 20 active. SUBMIT-02 is complete: proposal lifecycle now supports canonical `no_bid`, legacy `withdrawn` remains accepted/readable as No-bid, and the live DB CHECK constraint includes both values.
+Last activity: 2026-06-11 — Phase 20-01 completed; applied live Supabase constraint migration to LDC Brain AI (`hgxxxmtfmvguotkowxbu`), verified focused RLS `PATCH status='no_bid'`, and documented unrelated full-RLS-file drift.
 
-Progress: [██████░░░░] beachhead path 6/9 complete — next Phase 20
+Progress: [██████░░░░] beachhead path 6/9 complete — Phase 20 in progress
 
 ## Performance Metrics
 
@@ -135,5 +135,5 @@ Recent decisions affecting current work:
 ## Session Continuity
 
 Last session: 2026-06-11
-Stopped at: Phase 19 CLOSED (19-04-SUMMARY.md + 19-VERIFICATION.md written). Route fix for solicitation_mode/force_re_extract deployed to prod and verified; seeded production data rolled back.
-Resume file: None — next action is Phase 20 (submission tracking/amendments) per beachhead sequence, then Phase 24-FTUE, then dogfood Uplift/IHA/TPC.
+Stopped at: Phase 20-01 complete. Canonical `no_bid` status is implemented in app code and live DB constraint; SUBMIT-02 marked complete.
+Resume file: `.planning/phases/20-submission-tracking-amendments/20-01-SUMMARY.md` — next action is Phase 20-02/20-03: verify final submission packet UX and then build amendment polling/diffing.

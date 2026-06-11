@@ -174,7 +174,13 @@ Plans:
   2. A user can mark a pursuit with a submission status (draft, submitted, awarded, lost, no-bid) and see the current status at a glance on the Proposals list
   3. The system re-polls a tracked solicitation, detects an amendment, diffs it against the original capture, and surfaces the diff to the user within the SLA window
   4. A material amendment (e.g., deadline extension, scope change) triggers a notification to the user and re-queues compliance and fit rechecks — verifiable by seeding an amendment event
-**Plans**: TBD
+**Plans**: 4 plans
+
+Plans:
+- [x] 20-01-PLAN.md — canonical no-bid lifecycle status + live DB constraint (SUBMIT-02)
+- [ ] 20-02-PLAN.md — submission packet final polish + coherent packet review/export verification (SUBMIT-01)
+- [ ] 20-03-PLAN.md — solicitation amendment snapshot/diff model + active pursuit re-poll (SUBMIT-03)
+- [ ] 20-04-PLAN.md — material amendment alerts + compliance/fit recheck queue (SUBMIT-04)
 
 ### Phase 21: Win/Loss Learning
 **Goal**: Users record pursuit outcomes; win-rate analytics surface patterns by source, funding type, and score band so the org can learn what to pursue more of
@@ -251,7 +257,7 @@ Phases execute in numeric order: 13 → 14 → 15 → 16 → 17 → 18 → 19 �
 | 17. AI Cost Guardrail | 5/5 | Complete    | 2026-06-07 | - |
 | 18. Explainable Fit Scoring | 4/4 | Complete    | 2026-06-09 | - |
 | 19. Rubric Review, Compliance Gate & Upload | 4/4 | Complete    | 2026-06-11 | - |
-| 20. Submission Tracking & Amendments | v2.0 | 0/TBD | Not started | - |
+| 20. Submission Tracking & Amendments | v2.0 | 1/4 | In progress | SUBMIT-02 complete |
 | 21. Win/Loss Learning | v2.0 | 0/TBD | Not started | - |
 | 22. Trust, Security & Legal | 4/4 | Complete    | 2026-06-07 | - |
 | 23. Live Billing & Entitlements | v2.0 | 0/TBD | Not started | - |

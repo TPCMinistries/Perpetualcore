@@ -236,7 +236,7 @@ export default async function ProposalPage({
   const vaultChunks = parseVaultChunks(proposal.vault_chunks_used);
 
   // Resolve caller's role on this org so we can gate the status control.
-  // Owners and writers can mark submitted/won/lost/withdrawn; reviewers
+  // Owners and writers can mark submitted/won/lost/no-bid; reviewers
   // and viewers see status read-only.
   const {
     data: { user },

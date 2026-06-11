@@ -1,4 +1,4 @@
-# HANDOFF — RFP Engine Phase 19 Closed → Next Phase 20
+# HANDOFF — RFP Engine Phase 20 In Progress
 
 **Updated:** 2026-06-11
 **Repo:** `~/perpetual-core-rfp`
@@ -8,15 +8,34 @@
 
 ## Status
 
-Phase 19 is closed. All six REVIEW requirements are complete and production-verified.
+Phase 19 is closed. Phase 20 is now in progress.
 
-The final production deployment is:
+The last production deployment from Phase 19 is:
 
 ```text
 dpl_8xnvTW5qLYeXc3CPuiocvQuJK4ui
 ```
 
 That deployment includes a closeout fix in `app/api/rfp/proposals/[proposalId]/package/route.ts`: the route now passes `solicitation_mode` and `force_re_extract` into `FieldsSchema.safeParse(...)`. Before that fix, the UI toggle submitted the values but the route never entered the rubric extraction branch.
+
+## Phase 20 Current State
+
+Plan 20-01 is complete: canonical no-bid lifecycle status.
+
+Implemented locally and applied to live DB:
+
+- `PATCH /api/rfp/proposals/[proposalId]/status` accepts `no_bid`.
+- Live Supabase constraint `rfp_proposals_status_check` accepts `draft`, `submitted`, `won`, `lost`, `no_bid`, and legacy `withdrawn`.
+- Proposal/pursuit UI renders `no_bid` and legacy `withdrawn` as `No-bid`.
+- Proposals list No-bid filter includes both `no_bid` and legacy `withdrawn`.
+- Readiness treats `no_bid` as closed.
+
+Verification:
+
+- Submission unit tests passed: 5 files / 13 tests.
+- Focused RLS status test passed: `PATCH status='no_bid'`.
+- Full RLS file has unrelated drift: older submitted-status test now hits submit-readiness gate `409`; package/redraft tests hit 5s timeout.
+- `npm run type-check` was stopped after 5+ minutes with no diagnostics while `tsc` was still active.
 
 ## Verification Evidence
 
@@ -38,7 +57,7 @@ Verified on production:
 
 ## Current Plan
 
-Next phase per beachhead sequence:
+Continue current phase per beachhead sequence:
 
 ```text
 Phase 20 — Submission Tracking & Amendments
@@ -58,6 +77,15 @@ Do not follow `gsd-tools` numeric next-phase output if it points elsewhere. The 
 - Do not deploy this app to the `ai-os-platform` Vercel project.
 - Avoid concurrent `tsc` or local builds; Vercel build is the deployment gate for this worktree.
 - Remove `.env.verification` and `/tmp/p19-cookies.txt` after verification runs.
+
+## Next Engineering Step
+
+Build Phase 20 amendment monitoring:
+
+- Persist solicitation package snapshots/amendment records.
+- Re-poll tracked active pursuits.
+- Diff amendment/addendum text against original capture.
+- Notify on material changes and re-queue compliance/fit checks.
 
 ## Open Human Tasks
 

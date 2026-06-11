@@ -3,7 +3,7 @@
  *
  * Lists every proposal in the org, sorted by updated_at desc. Click-
  * through to the detail page. Adds a filterable status pill row at
- * the top: all / draft / submitted / won / lost / withdrawn.
+ * the top: all / draft / submitted / won / lost / no-bid.
  *
  * Closes the dead-end where typing /org/[id]/proposals 404'd — users
  * had to navigate back through /discovery to find a proposal again.
@@ -21,14 +21,14 @@ import {
 
 export const dynamic = "force-dynamic";
 
-type Status = "draft" | "submitted" | "won" | "lost" | "withdrawn";
+type Status = "draft" | "submitted" | "won" | "lost" | "no_bid" | "withdrawn";
 const STATUS_FILTERS: Array<Status | "all"> = [
   "all",
   "draft",
   "submitted",
   "won",
   "lost",
-  "withdrawn",
+  "no_bid",
 ];
 
 const STATUS_CHIP: Record<Status, string> = {
@@ -36,8 +36,14 @@ const STATUS_CHIP: Record<Status, string> = {
   submitted: "border-amber-200 bg-amber-50 text-amber-700",
   won: "border-emerald-200 bg-emerald-50 text-emerald-700",
   lost: "border-rose-200 bg-rose-50 text-rose-700",
+  no_bid: "border-zinc-300 bg-zinc-100 text-zinc-500",
   withdrawn: "border-zinc-300 bg-zinc-100 text-zinc-500",
 };
+
+function statusLabel(status: Status | "all"): string {
+  if (status === "no_bid" || status === "withdrawn") return "no-bid";
+  return status;
+}
 
 interface PageProps {
   params: Promise<{ orgId: string }>;
@@ -157,6 +163,7 @@ function coerceStatus(s: string | undefined): Status | "all" {
     s === "submitted" ||
     s === "won" ||
     s === "lost" ||
+    s === "no_bid" ||
     s === "withdrawn"
   ) {
     return s;
@@ -339,7 +346,9 @@ export default async function ProposalsListPage({
     .order("updated_at", { ascending: false })
     .limit(100);
 
-  if (activeFilter !== "all") {
+  if (activeFilter === "no_bid" || activeFilter === "withdrawn") {
+    query = query.in("status", ["no_bid", "withdrawn"]);
+  } else if (activeFilter !== "all") {
     query = query.eq("status", activeFilter);
   }
 
@@ -392,6 +401,7 @@ export default async function ProposalsListPage({
   for (const r of allForCounts ?? []) {
     counts[r.status] = (counts[r.status] ?? 0) + 1;
   }
+  counts.no_bid = (counts.no_bid ?? 0) + (counts.withdrawn ?? 0);
 
   const { data: activationMatches } =
     counts.all === 0
@@ -487,7 +497,7 @@ export default async function ProposalsListPage({
                     : "border-zinc-200 bg-white text-zinc-500 hover:border-zinc-300"
                 }`}
               >
-                {s}
+                {statusLabel(s)}
                 <span className="font-mono text-[9px] text-zinc-500">
                   {count}
                 </span>
@@ -539,7 +549,7 @@ export default async function ProposalsListPage({
             <p className="font-serif text-lg italic text-zinc-700">
               {activeFilter === "all"
                 ? "No proposals yet."
-                : `No proposals with status "${activeFilter}".`}
+                : `No proposals with status "${statusLabel(activeFilter)}".`}
             </p>
             <p className="mt-2 max-w-2xl text-[13px] leading-6 text-zinc-500">
               {activeFilter === "all" ? (
@@ -650,6 +660,7 @@ export default async function ProposalsListPage({
                 p.status === "submitted" ||
                 p.status === "won" ||
                 p.status === "lost" ||
+                p.status === "no_bid" ||
                 p.status === "withdrawn"
                   ? p.status
                   : "draft"
@@ -674,7 +685,7 @@ export default async function ProposalsListPage({
                     <span
                       className={`shrink-0 inline-flex items-center rounded-md border px-2 py-0.5 font-mono text-[9px] uppercase tracking-[0.18em] ${STATUS_CHIP[status]}`}
                     >
-                      {status}
+                      {statusLabel(status)}
                     </span>
                     <div className="min-w-0 flex-1">
                       <div className="truncate text-[14px] text-zinc-900">
