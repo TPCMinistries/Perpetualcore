@@ -10,9 +10,9 @@ See: .planning/PROJECT.md (updated 2026-06-05)
 ## Current Position
 
 Phase: 20 of 25 IN PROGRESS — submission tracking/amendments
-Plan: 1 of 4 complete (20-01 canonical no-bid lifecycle status)
-Status: Phase 20 active. SUBMIT-02 is complete: proposal lifecycle now supports canonical `no_bid`, legacy `withdrawn` remains accepted/readable as No-bid, and the live DB CHECK constraint includes both values.
-Last activity: 2026-06-11 — Phase 20-01 completed; applied live Supabase constraint migration to LDC Brain AI (`hgxxxmtfmvguotkowxbu`), verified focused RLS `PATCH status='no_bid'`, and documented unrelated full-RLS-file drift.
+Plan: 3 of 4 complete (20-01 canonical no-bid lifecycle; 20-03 amendment monitoring/diffing; 20-04 material amendment workroom alert/recheck task)
+Status: Phase 20 active. SUBMIT-02/03/04 are complete. Remaining work is 20-02: coherent submission packet final polish and verification for SUBMIT-01.
+Last activity: 2026-06-11 — Phase 20-03/04 completed; applied live Supabase amendment tables with RLS to LDC Brain AI (`hgxxxmtfmvguotkowxbu`), added amendment monitor cron, deterministic diffing, tenant readback endpoint, Discovery amendment panel, and material-change task/decision-log queue.
 
 Progress: [██████░░░░] beachhead path 6/9 complete — Phase 20 in progress
 
@@ -135,5 +135,5 @@ Recent decisions affecting current work:
 ## Session Continuity
 
 Last session: 2026-06-11
-Stopped at: Phase 20-01 complete. Canonical `no_bid` status is implemented in app code and live DB constraint; SUBMIT-02 marked complete.
-Resume file: `.planning/phases/20-submission-tracking-amendments/20-01-SUMMARY.md` — next action is Phase 20-02/20-03: verify final submission packet UX and then build amendment polling/diffing.
+Stopped at: Phase 20-03/04 complete. Amendment snapshots/diffs and material-change workroom alerts are implemented; SUBMIT-03 and SUBMIT-04 marked complete.
+Resume file: `.planning/phases/20-submission-tracking-amendments/20-03-SUMMARY.md` — next action is Phase 20-02: coherent submission packet review/export verification and final packet UX polish.

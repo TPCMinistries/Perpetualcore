@@ -99,6 +99,15 @@ interface FitEvidenceDbRow {
   dimension: FitEvidenceDimension;
 }
 
+interface AmendmentRow {
+  id: string;
+  material: boolean;
+  material_reasons: string[] | null;
+  diff_json: unknown;
+  status: string;
+  created_at: string;
+}
+
 export async function GET(
   req: Request,
   { params }: { params: Promise<{ id: string }> }
@@ -169,6 +178,24 @@ export async function GET(
     canonical = canonicalByOpp.get(row.opp_id) ?? null;
   } catch (e) {
     console.error("[/api/rfp/opps/[id] GET] canonical metadata unavailable", e);
+  }
+
+  let amendments: AmendmentRow[] = [];
+  try {
+    const { data: amendmentRows, error: amendmentError } = await supabase
+      .from("rfp_solicitation_amendments")
+      .select("id, material, material_reasons, diff_json, status, created_at")
+      .eq("org_id", parsed.data.org_id)
+      .eq("opp_id", id)
+      .order("created_at", { ascending: false })
+      .limit(5);
+    if (amendmentError) {
+      console.warn("[/api/rfp/opps/[id] GET] amendment fetch failed (non-fatal):", amendmentError.message);
+    } else {
+      amendments = (amendmentRows ?? []) as AmendmentRow[];
+    }
+  } catch (e) {
+    console.error("[/api/rfp/opps/[id] GET] amendment fetch threw (non-fatal):", e);
   }
 
   // ── Phase 18: Build fit_reasoning from score_breakdown v2 fields + rfp_fit_evidence ──
@@ -264,6 +291,7 @@ export async function GET(
     raw_json: opp.raw_json,
     enrichment,
     canonical,
+    amendments,
     actionability: computeOpportunityActionability({
       fitScore: row.fit_score,
       deadline: opp.deadline,

@@ -20,7 +20,7 @@ That deployment includes a closeout fix in `app/api/rfp/proposals/[proposalId]/p
 
 ## Phase 20 Current State
 
-Plan 20-01 is complete: canonical no-bid lifecycle status.
+Plans 20-01 and 20-03/04 are complete.
 
 Implemented locally and applied to live DB:
 
@@ -29,11 +29,22 @@ Implemented locally and applied to live DB:
 - Proposal/pursuit UI renders `no_bid` and legacy `withdrawn` as `No-bid`.
 - Proposals list No-bid filter includes both `no_bid` and legacy `withdrawn`.
 - Readiness treats `no_bid` as closed.
+- Live Supabase amendment tables exist with RLS:
+  - `rfp_solicitation_snapshots`
+  - `rfp_solicitation_amendments`
+- `/api/cron/rfp-amendment-monitor` scans active proposal-backed pursuits and creates baseline snapshots/diffs.
+- `/api/rfp/opps/[id]/amendments` and `/api/rfp/opps/[id]` expose recent amendments through tenant-scoped reads.
+- Discovery detail pane renders recent solicitation amendments.
+- Material amendments create a critical submission task plus a pursuit decision-log risk entry.
 
 Verification:
 
 - Submission unit tests passed: 5 files / 13 tests.
 - Focused RLS status test passed: `PATCH status='no_bid'`.
+- Amendment unit test passed: `tests/unit/rfp-amendment-diff.test.ts`.
+- Touched-file ESLint passed for amendment files/routes/UI.
+- Runtime import check passed for amendment modules/routes.
+- Live DB table/RLS verification passed for amendment tables.
 - Full RLS file has unrelated drift: older submitted-status test now hits submit-readiness gate `409`; package/redraft tests hit 5s timeout.
 - `npm run type-check` was stopped after 5+ minutes with no diagnostics while `tsc` was still active.
 
@@ -80,12 +91,11 @@ Do not follow `gsd-tools` numeric next-phase output if it points elsewhere. The 
 
 ## Next Engineering Step
 
-Build Phase 20 amendment monitoring:
+Finish Phase 20-02:
 
-- Persist solicitation package snapshots/amendment records.
-- Re-poll tracked active pursuits.
-- Diff amendment/addendum text against original capture.
-- Notify on material changes and re-queue compliance/fit checks.
+- Verify submission bundle/manifest/audit/export flow as a coherent packet.
+- Polish any remaining packet UX gaps.
+- Then close Phase 20 and move to Phase 24-FTUE per beachhead sequence.
 
 ## Open Human Tasks
 

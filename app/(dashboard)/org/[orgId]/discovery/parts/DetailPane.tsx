@@ -36,6 +36,7 @@ import {
   FileText,
   ListChecks,
   Mail,
+  Megaphone,
   Route,
   SearchCheck,
   ShieldCheck,
@@ -61,6 +62,21 @@ interface OppDetail extends FeedRow {
   raw_json: unknown;
   enrichment: OpportunityEnrichment | null;
   fit_reasoning?: FitReasoningData;
+  amendments?: AmendmentSummary[];
+}
+
+interface AmendmentSummary {
+  id: string;
+  material: boolean;
+  material_reasons: string[] | null;
+  diff_json: {
+    summary?: string;
+    field_changes?: Array<{ field: string; before: string | number | null; after: string | number | null }>;
+    added_lines?: string[];
+    removed_lines?: string[];
+  } | null;
+  status: string;
+  created_at: string;
 }
 
 interface OpportunityEnrichment {
@@ -325,7 +341,6 @@ export function DetailPane({
     return () => {
       cancelled = true;
     };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [orgId, selected, rescoreKey]);
 
   // Empty state
@@ -361,6 +376,7 @@ export function DetailPane({
   const sourceAliases = row.canonical?.source_aliases ?? [];
   const sourceCount = sourceAliases.length;
   const actionability = row.actionability;
+  const amendments = detail?.amendments ?? [];
 
   return (
     <div className="h-full overflow-y-auto p-6 lg:p-8">
@@ -554,6 +570,68 @@ export function DetailPane({
                 ))}
               </ul>
             </div>
+          </div>
+        </section>
+      )}
+
+      {amendments.length > 0 && (
+        <section className="mt-6 rounded-xl border border-amber-200 bg-amber-50 p-4 shadow-sm">
+          <div className="flex flex-wrap items-start justify-between gap-4">
+            <div className="flex gap-3">
+              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-white text-amber-700">
+                <Megaphone className="h-4 w-4" />
+              </span>
+              <div>
+                <h3 className="font-mono text-[10px] uppercase tracking-[0.25em] text-amber-700">
+                  Solicitation amendments
+                </h3>
+                <p className="mt-1 text-sm leading-6 text-amber-950">
+                  {amendments[0]?.material
+                    ? "Material change detected. Review the task queue before submitting."
+                    : "Changes were detected since the last solicitation snapshot."}
+                </p>
+              </div>
+            </div>
+            <span className="rounded-full border border-amber-200 bg-white px-3 py-1 font-mono text-[10px] uppercase tracking-[0.16em] text-amber-700">
+              {amendments.length} update{amendments.length === 1 ? "" : "s"}
+            </span>
+          </div>
+          <div className="mt-4 space-y-3">
+            {amendments.slice(0, 3).map((amendment) => (
+              <article
+                key={amendment.id}
+                className="rounded-lg border border-amber-200 bg-white p-3"
+              >
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="font-mono text-[10px] uppercase tracking-[0.16em] text-amber-700">
+                    {amendment.material ? "Material" : "Changed"}
+                  </span>
+                  <span className="text-xs text-zinc-500">
+                    {formatDate(amendment.created_at, "detected")}
+                  </span>
+                </div>
+                <p className="mt-2 text-sm leading-6 text-zinc-700">
+                  {amendment.diff_json?.summary ?? "Solicitation changed."}
+                </p>
+                {(amendment.material_reasons ?? []).length > 0 && (
+                  <div className="mt-2 flex flex-wrap gap-1.5">
+                    {(amendment.material_reasons ?? []).map((reason) => (
+                      <span
+                        key={reason}
+                        className="rounded border border-amber-200 bg-amber-50 px-2 py-0.5 font-mono text-[10px] uppercase tracking-[0.12em] text-amber-800"
+                      >
+                        {reason}
+                      </span>
+                    ))}
+                  </div>
+                )}
+                {(amendment.diff_json?.added_lines ?? []).length > 0 && (
+                  <p className="mt-2 text-xs leading-5 text-zinc-500">
+                    Added: {amendment.diff_json?.added_lines?.[0]}
+                  </p>
+                )}
+              </article>
+            ))}
           </div>
         </section>
       )}
