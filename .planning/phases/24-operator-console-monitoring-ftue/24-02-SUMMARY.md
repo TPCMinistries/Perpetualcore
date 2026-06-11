@@ -32,6 +32,8 @@
 - Runtime import check passed for touched client/server modules.
 - Local dev server started on `http://localhost:3002`.
 - Browser smoke to `/orgs/new` returned HTTP `200` after auth redirect to `/login?next=/orgs/new`, with no page or console errors.
+- Production deploy `dpl_DrP1M1S6epZWn4Ug1nSV8xiKNEak` is Ready and aliased to `https://rfp.perpetualcore.com`.
+- Production `GET /api/health/rfp` includes `scraper_last_success` and `cron_24h`; current status is `degraded` because `open_drift_events=24`.
 
 ## Remaining Work
 

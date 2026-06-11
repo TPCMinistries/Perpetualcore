@@ -88,6 +88,8 @@ Verification:
 - Focused ESLint passed for touched FTUE files.
 - Runtime import checks passed for touched client/server modules.
 - Local dev server smoke to `/orgs/new` redirected unauthenticated users to login with no page or console errors.
+- Production deploy `dpl_DrP1M1S6epZWn4Ug1nSV8xiKNEak` is Ready and aliased to `https://rfp.perpetualcore.com`.
+- Production health endpoint includes `scraper_last_success` and `cron_24h`; status is degraded due to `24` open drift events.
 
 ## Verification Evidence
 
