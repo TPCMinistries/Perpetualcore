@@ -80,9 +80,10 @@ Grouped by category. Each maps to exactly one roadmap phase (see Traceability). 
 
 ### Onboarding / First-Time UX (FTUE)
 
-- [ ] **FTUE-01**: A new org reaches first scored opportunities within one session via a ≤5-field setup (org type, mission, geography, funding types)
-- [ ] **FTUE-02**: A guided checklist moves the user org → voice → vault → first draft → review
-- [ ] **FTUE-03**: Every key surface (Discovery / Proposals / Vault / Voice) has a real empty state with one clear CTA toward first qualified draft
+- [x] **FTUE-01**: A new org reaches first scored opportunities within one session via a ≤5-field setup (org type, mission, geography, funding types)
+- [x] **FTUE-02**: A guided checklist moves the user org → voice → vault → first draft → review
+- [x] **FTUE-03**: Every key surface (Discovery / Proposals / Vault / Voice) has a real empty state with one clear CTA toward first qualified draft
+  - 2026-06-11: Code complete. Remaining launch hardening: authenticated E2E for create org → scored Discovery → first draft.
 
 ### Launch Readiness (LAUNCH)
 

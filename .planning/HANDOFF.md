@@ -73,6 +73,22 @@ Verification:
 - Direct route smoke with `.env.local` loaded returned HTTP `200` and showed `cron_24h` present.
 - Live data currently reports degraded due to `24` unresolved source-drift events.
 
+Completed 24-02 / FTUE-01..03 code:
+
+- New org setup is now five fields: name, type, mission, geography, funding types.
+- The setup payload is stored into `rfp_orgs.capacity_summary`.
+- Initial post-create scoring still runs through `createOrgWithOwner`.
+- Onboarding state now includes `profile_complete`.
+- Discovery checklist now follows profile → voice → vault → match → draft → reviewer/export, with visible step CTAs.
+- Discovery, Proposals, Vault, and Voice empty states all point toward the first qualified draft path.
+- Vault page copy now matches current support for PDF/DOCX extraction and drafter retrieval.
+
+Verification:
+
+- Focused ESLint passed for touched FTUE files.
+- Runtime import checks passed for touched client/server modules.
+- Local dev server smoke to `/orgs/new` redirected unauthenticated users to login with no page or console errors.
+
 ## Verification Evidence
 
 See:
@@ -116,7 +132,7 @@ Do not follow `gsd-tools` numeric next-phase output if it points elsewhere. The 
 
 ## Next Engineering Step
 
-Continue Phase 24 FTUE/onboarding and empty-state work. Remaining ADMIN-04 task is external uptime/status monitor wiring.
+Continue Phase 24 admin/operator console work or authenticated FTUE E2E. Remaining ADMIN-04 task is external uptime/status monitor wiring.
 
 ## Open Human Tasks
 

@@ -153,6 +153,23 @@ export function VoiceTrainingForm({ orgId, initialFingerprint }: VoiceTrainingFo
         </p>
       </div>
 
+      {!fingerprint ? (
+        <div className="rounded-md border border-zinc-200 bg-zinc-50 p-5">
+          <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-emerald-700">
+            Voice empty
+          </p>
+          <h2 className="mt-3 text-base font-semibold text-zinc-900">
+            Create a starting voice before the first qualified draft.
+          </h2>
+          <p className="mt-2 text-sm leading-6 text-zinc-600">
+            Use three pasted samples below, or use the describe-your-voice
+            shortcut above when past proposals are not handy. You can still
+            draft without this, but trained voice makes the first review pass
+            substantially easier.
+          </p>
+        </div>
+      ) : null}
+
       {/* Document slots */}
       <div className="flex flex-col gap-6">
         {docs.map((doc, i) => {

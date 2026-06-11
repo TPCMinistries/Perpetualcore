@@ -126,6 +126,7 @@ export function VaultUploadForm({ orgId, onUploaded }: VaultUploadFormProps) {
 
   return (
     <form
+      id="vault-upload"
       onSubmit={handleSubmit}
       className="flex flex-col gap-4 rounded-md border border-zinc-200 bg-white p-6 shadow-sm"
     >

@@ -16,6 +16,7 @@ import { createOrgWithOwner, listUserOrgs } from "@/lib/rfp/orgs";
 const CreateOrgSchema = z.object({
   name: z.string().min(2).max(120),
   type: z.enum(["nonprofit", "forprofit", "dual"]),
+  capacity_summary: z.string().min(40).max(2000),
   naics: z
     .array(z.string().regex(/^\d{2,6}$/, "NAICS code must be 2-6 digits"))
     .max(20)
