@@ -169,6 +169,8 @@ export async function POST(
     title: form.get("title"),
     source_url: form.get("source_url") ?? "",
     body: form.get("body") ?? "",
+    solicitation_mode: form.get("solicitation_mode") ?? undefined,
+    force_re_extract: form.get("force_re_extract") ?? undefined,
   });
   if (!parsedFields.success) {
     return NextResponse.json(

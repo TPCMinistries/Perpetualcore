@@ -54,8 +54,8 @@ Beachhead coverage uses what's ALREADY live: federal (SAM/Grants.gov/NIH/NSF) + 
 - [ ] **Phase 15: Level-1 Federal Discovery** - SAM.gov/Grants.gov/SBIR ingest with durable jobs, source-health SLA, verified live counts
 ⏸ - [ ] **Phase 16: Extended Discovery (Levels 2 & 3) + Saved Searches** - Declarative all-50-state connector framework (any state via config row), tri-state live, IRS 990 foundations, global sources, gated by entitlement; saved search alerts
 - [x] **Phase 17: AI Cost Guardrail** - Per-tenant AI cost ledger with hard spend limit enforced before every LLM call (completed 2026-06-07)
-- [ ] **Phase 18: Explainable Fit Scoring** - Vault-grounded fit scores with dimension breakdown, disqualifier flags, and cited evidence
-- [ ] **Phase 19: Rubric Review, Compliance Gate & Upload** - Adversarial reviewer panel, rubric extraction, compliance gate v1, AI-use disclosure, PDF/DOCX upload
+- [x] **Phase 18: Explainable Fit Scoring** - Vault-grounded fit scores with dimension breakdown, disqualifier flags, and cited evidence (completed 2026-06-09)
+- [x] **Phase 19: Rubric Review, Compliance Gate & Upload** - Adversarial reviewer panel, rubric extraction, compliance gate v1, AI-use disclosure, PDF/DOCX upload (completed 2026-06-11)
 - [ ] **Phase 20: Submission Tracking & Amendments** - Submission packet assembly, status tracking, amendment diffing, change alerts
 ⏸ - [ ] **Phase 21: Win/Loss Learning** - Outcome recording, debrief, win-rate analytics by source/type/score band
 - [x] **Phase 22: Trust, Security & Legal** - RLS audit, cross-tenant CI gate, per-tenant vault isolation, legal pages live (4 plans planned 2026-06-06) (completed 2026-06-07)
@@ -142,10 +142,10 @@ Beachhead coverage uses what's ALREADY live: federal (SAM/Grants.gov/NIH/NSF) + 
   3. The score panel breaks down into at least five labeled dimensions (mission fit, eligibility, track record, capacity, funder relationship) each with a sub-score or rating
   4. At least one disqualifier check (e.g., past-performance threshold not met, entity type ineligible) surfaces as a flagged warning when applicable — verifiable by testing against an ineligible opp
 **Plans**: 4 plans
-- [ ] 18-01-PLAN.md — Create rfp_fit_evidence table + RLS + evidence-store helper [SCORE-02]
-- [ ] 18-02-PLAN.md — TDD pure functions: checkDisqualifiers + mapToDimensions [SCORE-03, SCORE-04]
-- [ ] 18-03-PLAN.md — Wire vault-grounded cited summary + dimensions + evidence into scoring pipeline + on-demand rescore endpoint [SCORE-01, SCORE-02, SCORE-03]
-- [ ] 18-04-PLAN.md — Detail-pane Fit Reasoning UI: dimensions + disqualifier warnings + vault citations + rescore (human-verify) [SCORE-01, SCORE-02, SCORE-03, SCORE-04]
+- [x] 18-01-PLAN.md — Create rfp_fit_evidence table + RLS + evidence-store helper [SCORE-02]
+- [x] 18-02-PLAN.md — TDD pure functions: checkDisqualifiers + mapToDimensions [SCORE-03, SCORE-04]
+- [x] 18-03-PLAN.md — Wire vault-grounded cited summary + dimensions + evidence into scoring pipeline + on-demand rescore endpoint [SCORE-01, SCORE-02, SCORE-03]
+- [x] 18-04-PLAN.md — Detail-pane Fit Reasoning UI: dimensions + disqualifier warnings + vault citations + rescore (human-verify) [SCORE-01, SCORE-02, SCORE-03, SCORE-04]
 
 ### Phase 19: Rubric Review, Compliance Gate & Upload
 **Goal**: Proposals are scored against the actual solicitation rubric by a multi-agent panel; a compliance gate blocks premature submission; AI-use is disclosed; users can upload and parse solicitation PDFs and DOCX files
@@ -160,10 +160,10 @@ Beachhead coverage uses what's ALREADY live: federal (SAM/Grants.gov/NIH/NSF) + 
 **Plans**: 4 plans
 
 Plans:
-- [ ] 19-01-PLAN.md — rfp_rubric_criteria table + Claude rubric extraction + solicitation_mode in package route (REVIEW-01)
-- [ ] 19-02-PLAN.md — Rubric-anchored reviewer on Anthropic chain + criterion_id findings + RubricCriteriaPanel (REVIEW-02, REVIEW-03)
-- [ ] 19-03-PLAN.md — Compliance gate hardening (page limit/timezone/budget) + AI-disclosure ack + banner (REVIEW-04, REVIEW-05)
-- [ ] 19-04-PLAN.md — Solicitation upload UI + types regen + prod deploy + human verification (REVIEW-06)
+- [x] 19-01-PLAN.md — rfp_rubric_criteria table + Claude rubric extraction + solicitation_mode in package route (REVIEW-01)
+- [x] 19-02-PLAN.md — Rubric-anchored reviewer on Anthropic chain + criterion_id findings + RubricCriteriaPanel (REVIEW-02, REVIEW-03)
+- [x] 19-03-PLAN.md — Compliance gate hardening (page limit/timezone/budget) + AI-disclosure ack + banner (REVIEW-04, REVIEW-05)
+- [x] 19-04-PLAN.md — Solicitation upload UI + types regen + prod deploy + human verification (REVIEW-06)
 
 ### Phase 20: Submission Tracking & Amendments
 **Goal**: Users assemble a submission packet and track it through its lifecycle; the system monitors live solicitations for amendments and re-triggers compliance and fit checks when material changes appear
@@ -249,8 +249,8 @@ Phases execute in numeric order: 13 → 14 → 15 → 16 → 17 → 18 → 19 �
 | 15. Level-1 Federal Discovery | v2.0 | 0/TBD | Not started | - |
 | 16. Extended Discovery + Saved Searches | v2.0 | 0/TBD | Not started | - |
 | 17. AI Cost Guardrail | 5/5 | Complete    | 2026-06-07 | - |
-| 18. Explainable Fit Scoring | 3/4 | In Progress|  | - |
-| 19. Rubric Review, Compliance Gate & Upload | 3/4 | In Progress|  | - |
+| 18. Explainable Fit Scoring | 4/4 | Complete    | 2026-06-09 | - |
+| 19. Rubric Review, Compliance Gate & Upload | 4/4 | Complete    | 2026-06-11 | - |
 | 20. Submission Tracking & Amendments | v2.0 | 0/TBD | Not started | - |
 | 21. Win/Loss Learning | v2.0 | 0/TBD | Not started | - |
 | 22. Trust, Security & Legal | 4/4 | Complete    | 2026-06-07 | - |

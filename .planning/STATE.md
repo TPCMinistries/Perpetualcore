@@ -9,12 +9,12 @@ See: .planning/PROJECT.md (updated 2026-06-05)
 
 ## Current Position
 
-Phase: 18 of 25 COMPLETE → next is Phase 19 (review/compliance) per beachhead sequence
-Plan: 4 of 4 complete (18-01 evidence store; 18-02 disqualifiers+dimensions; 18-03 scoreOnePairV2 + rescore; 18-04 UI + verification — see 18-04-SUMMARY.md)
-Status: Phase 18 CLOSED 2026-06-09 — all four SCORE criteria verified end-to-end on prod (incl. SCORE-04 seed/rescore/rollback). Verification surfaced + fixed: Anthropic credit exhaustion nulled every summary → gpt-4o fallback added to summary.ts + new funded ANTHROPIC_API_KEY rotated across all Vercel projects.
-Last activity: 2026-06-09 — Phase 18 closed; also shipped: premium light redesign of the entire dashboard chrome (cf9edc3, 34 files), deployed + verified on rfp.perpetualcore.com
+Phase: 19 of 25 COMPLETE → next is Phase 20 (submission tracking/amendments) per beachhead sequence
+Plan: 4 of 4 complete (19-01 rubric extraction; 19-02 rubric-anchored reviewer; 19-03 compliance + AI disclosure; 19-04 solicitation upload + prod verification)
+Status: Phase 19 CLOSED 2026-06-11 — all six REVIEW requirements verified end-to-end on prod. Verification surfaced + fixed: package route omitted solicitation_mode/force_re_extract from safeParse input, preventing rubric extraction despite the UI toggle; fixed and deployed to dpl_8xnvTW5qLYeXc3CPuiocvQuJK4ui.
+Last activity: 2026-06-11 — Phase 19 closed; 20-page DOCX solicitation parsed on Vercel, 4 weighted Section M criteria visible in workspace, claude-sonnet-4-5 reviewer anchored findings to criteria, compliance gate + AI disclosure ack verified, cached re-upload avoided duplicate rows, and seeded prod data rolled back to zero.
 
-Progress: [██░░░░░░░░] ~20% (v2.0 phases — Phase 22 of 25 active)
+Progress: [██████░░░░] beachhead path 6/9 complete — next Phase 20
 
 ## Performance Metrics
 
@@ -53,6 +53,7 @@ Progress: [██░░░░░░░░] ~20% (v2.0 phases — Phase 22 of 25 
 | Phase 19-rubric-review-compliance-gate-upload P01 | 7 | 3 tasks | 3 files |
 | Phase 19-rubric-review-compliance-gate-upload P03 | 8 | 3 tasks | 7 files |
 | Phase 19-rubric-review-compliance-gate-upload P02 | 5 | 3 tasks | 5 files |
+| Phase 19-rubric-review-compliance-gate-upload P04 | 18 | 3 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -115,6 +116,9 @@ Recent decisions affecting current work:
 - [Phase Phase 19-02]: Anthropic-first model chain (sonnet-4-5 → haiku-4-5 → gpt-4o) replaces hard-coded GPT-4o in reviewer; preserves throw-on-full-chain-failure contract
 - [Phase Phase 19-02]: criterion_id: z.string().nullable().optional() in Zod schema — no UUID enforcement; unknown echoed IDs sanitized to null post-parse, finding retained
 - [Phase Phase 19-02]: RubricCriteriaPanel returns null when criteria empty; ReviewerFindingsPanel criteria prop defaults to [] for backward compat; section-level criterion chips not threaded to avoid prop drilling
+- [Phase 19-04]: Package route closeout fix — solicitation_mode and force_re_extract must be included in FieldsSchema.safeParse input, not only in FieldsSchema, or the rubric branch never runs.
+- [Phase 19-04]: Reviewer fix text field remains `suggestion` per existing ReviewerFinding schema; verification maps that to the REVIEW-03 "suggested fix" requirement.
+- [Phase 19-04]: Cached solicitation re-upload creates a new package document but returns existing criteria rows by opp_id; DB count must remain 4 for the test fixture, not duplicate to 8.
 
 ### Pending Todos
 
@@ -130,6 +134,6 @@ Recent decisions affecting current work:
 
 ## Session Continuity
 
-Last session: 2026-06-09 (herald Mac)
-Stopped at: Phase 18 CLOSED (18-04-SUMMARY.md written). Light redesign shipped + deployed. New AI keys live in all Vercel project envs (other projects need a redeploy to pick them up).
-Resume file: None — next action is /gsd:plan-phase 19 (adversarial review/compliance vs Section L/M + funder priorities)
+Last session: 2026-06-11
+Stopped at: Phase 19 CLOSED (19-04-SUMMARY.md + 19-VERIFICATION.md written). Route fix for solicitation_mode/force_re_extract deployed to prod and verified; seeded production data rolled back.
+Resume file: None — next action is Phase 20 (submission tracking/amendments) per beachhead sequence, then Phase 24-FTUE, then dogfood Uplift/IHA/TPC.

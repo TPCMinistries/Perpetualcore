@@ -28,7 +28,7 @@ Grouped by category. Each maps to exactly one roadmap phase (see Traceability). 
 
 ### Fit Scoring (SCORE)
 
-- [ ] **SCORE-01**: Each opportunity shows a fit score with a plain-English explanation of why it fits
+- [x] **SCORE-01**: Each opportunity shows a fit score with a plain-English explanation of why it fits
 - [x] **SCORE-02**: The explanation cites the org's own vault artifacts / prior wins (evidence-grounded, not black-box)
 - [x] **SCORE-03**: The score breaks down by dimension (mission fit, eligibility, track record, capacity, funder relationship)
 - [x] **SCORE-04**: The score flags disqualifiers (e.g., missing past-performance threshold, ineligible entity type)
@@ -40,7 +40,7 @@ Grouped by category. Each maps to exactly one roadmap phase (see Traceability). 
 - [x] **REVIEW-03**: Reviewer findings anchor to draft sections with severity and a suggested fix
 - [x] **REVIEW-04**: Compliance gate v1 checks page limits, required attachments, budget math, eligibility, and deadline+timezone before submit
 - [x] **REVIEW-05**: Draft output carries an AI-use disclosure notice and the compliance gate includes an AI-disclosure checklist item (GSA GSAR 552.239-7001 / NIH)
-- [ ] **REVIEW-06**: User can upload PDF/DOCX into the vault and attach solicitation documents, parsed reliably on Vercel serverless
+- [x] **REVIEW-06**: User can upload PDF/DOCX into the vault and attach solicitation documents, parsed reliably on Vercel serverless
 
 ### Submission & Amendments (SUBMIT)
 
@@ -126,7 +126,7 @@ Tracked, not in this roadmap.
 | DISCO-06 | Phase 16 | Pending |
 | DISCO-07 | Phase 15 | Pending |
 | DISCO-10 | Phase 16 | Pending |
-| SCORE-01 | Phase 18 | Pending |
+| SCORE-01 | Phase 18 | Complete |
 | SCORE-02 | Phase 18 | Complete |
 | SCORE-03 | Phase 18 | Complete |
 | SCORE-04 | Phase 18 | Complete |
@@ -135,7 +135,7 @@ Tracked, not in this roadmap.
 | REVIEW-03 | Phase 19 | Complete |
 | REVIEW-04 | Phase 19 | Complete |
 | REVIEW-05 | Phase 19 | Complete |
-| REVIEW-06 | Phase 19 | Pending |
+| REVIEW-06 | Phase 19 | Complete |
 | SUBMIT-01 | Phase 20 | Pending |
 | SUBMIT-02 | Phase 20 | Pending |
 | SUBMIT-03 | Phase 20 | Pending |
