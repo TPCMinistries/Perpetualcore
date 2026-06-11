@@ -44,7 +44,7 @@ Grouped by category. Each maps to exactly one roadmap phase (see Traceability). 
 
 ### Submission & Amendments (SUBMIT)
 
-- [ ] **SUBMIT-01**: User can assemble a submission packet (sections + attachments + compliance summary + audit trail)
+- [x] **SUBMIT-01**: User can assemble a submission packet (sections + attachments + compliance summary + audit trail)
 - [x] **SUBMIT-02**: User can record and track submission status per pursuit
 - [x] **SUBMIT-03**: System re-polls active pursuits and diffs solicitation amendments/addenda against the original capture
 - [x] **SUBMIT-04**: Material amendment changes alert the user and re-trigger compliance/fit checks

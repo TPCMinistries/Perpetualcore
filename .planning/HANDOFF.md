@@ -1,4 +1,4 @@
-# HANDOFF — RFP Engine Phase 20 In Progress
+# HANDOFF — RFP Engine Phase 20 Closed
 
 **Updated:** 2026-06-11
 **Repo:** `~/perpetual-core-rfp`
@@ -8,7 +8,7 @@
 
 ## Status
 
-Phase 19 is closed. Phase 20 is now in progress.
+Phase 19 and Phase 20 are closed.
 
 The last production deployment from Phase 19 is:
 
@@ -20,7 +20,7 @@ That deployment includes a closeout fix in `app/api/rfp/proposals/[proposalId]/p
 
 ## Phase 20 Current State
 
-Plans 20-01 and 20-03/04 are complete.
+All Phase 20 plans are complete.
 
 Implemented locally and applied to live DB:
 
@@ -36,6 +36,14 @@ Implemented locally and applied to live DB:
 - `/api/rfp/opps/[id]/amendments` and `/api/rfp/opps/[id]` expose recent amendments through tenant-scoped reads.
 - Discovery detail pane renders recent solicitation amendments.
 - Material amendments create a critical submission task plus a pursuit decision-log risk entry.
+- Submission bundle is verified as a coherent packet:
+  - proposal DOCX
+  - submission manifest CSV
+  - compliance CSV
+  - packet CSV
+  - readiness JSON
+  - audit trail CSV
+  - missing-artifact notes when readiness artifacts do not exist yet
 
 Verification:
 
@@ -45,6 +53,7 @@ Verification:
 - Touched-file ESLint passed for amendment files/routes/UI.
 - Runtime import check passed for amendment modules/routes.
 - Live DB table/RLS verification passed for amendment tables.
+- Submission bundle/manifest tests passed.
 - Full RLS file has unrelated drift: older submitted-status test now hits submit-readiness gate `409`; package/redraft tests hit 5s timeout.
 - `npm run type-check` was stopped after 5+ minutes with no diagnostics while `tsc` was still active.
 
@@ -91,11 +100,7 @@ Do not follow `gsd-tools` numeric next-phase output if it points elsewhere. The 
 
 ## Next Engineering Step
 
-Finish Phase 20-02:
-
-- Verify submission bundle/manifest/audit/export flow as a coherent packet.
-- Polish any remaining packet UX gaps.
-- Then close Phase 20 and move to Phase 24-FTUE per beachhead sequence.
+Move to Phase 24-FTUE per beachhead sequence, then dogfood Uplift/IHA/TPC.
 
 ## Open Human Tasks
 

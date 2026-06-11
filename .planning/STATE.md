@@ -9,12 +9,12 @@ See: .planning/PROJECT.md (updated 2026-06-05)
 
 ## Current Position
 
-Phase: 20 of 25 IN PROGRESS — submission tracking/amendments
-Plan: 3 of 4 complete (20-01 canonical no-bid lifecycle; 20-03 amendment monitoring/diffing; 20-04 material amendment workroom alert/recheck task)
-Status: Phase 20 active. SUBMIT-02/03/04 are complete. Remaining work is 20-02: coherent submission packet final polish and verification for SUBMIT-01.
-Last activity: 2026-06-11 — Phase 20-03/04 completed; applied live Supabase amendment tables with RLS to LDC Brain AI (`hgxxxmtfmvguotkowxbu`), added amendment monitor cron, deterministic diffing, tenant readback endpoint, Discovery amendment panel, and material-change task/decision-log queue.
+Phase: 20 of 25 COMPLETE — submission tracking/amendments
+Plan: 4 of 4 complete (20-01 lifecycle status; 20-02 submission packet verification; 20-03 amendment monitoring/diffing; 20-04 material amendment workroom alert/recheck task)
+Status: Phase 20 closed. SUBMIT-01/02/03/04 are complete.
+Last activity: 2026-06-11 — Phase 20 closed; verified submission bundle/manifest/audit packet coverage, applied live Supabase amendment tables with RLS to LDC Brain AI (`hgxxxmtfmvguotkowxbu`), added amendment monitor cron, deterministic diffing, tenant readback endpoint, Discovery amendment panel, and material-change task/decision-log queue.
 
-Progress: [██████░░░░] beachhead path 6/9 complete — Phase 20 in progress
+Progress: [███████░░░] beachhead path 7/9 complete — next Phase 24 FTUE
 
 ## Performance Metrics
 
@@ -135,5 +135,5 @@ Recent decisions affecting current work:
 ## Session Continuity
 
 Last session: 2026-06-11
-Stopped at: Phase 20-03/04 complete. Amendment snapshots/diffs and material-change workroom alerts are implemented; SUBMIT-03 and SUBMIT-04 marked complete.
-Resume file: `.planning/phases/20-submission-tracking-amendments/20-03-SUMMARY.md` — next action is Phase 20-02: coherent submission packet review/export verification and final packet UX polish.
+Stopped at: Phase 20 closed. Submission packet, lifecycle tracking, amendment diffing, and material-change workroom alerts are complete.
+Resume file: `.planning/phases/20-submission-tracking-amendments/20-02-SUMMARY.md` plus `20-03-SUMMARY.md` — next action is Phase 24 FTUE per beachhead sequence, then dogfood Uplift/IHA/TPC.
