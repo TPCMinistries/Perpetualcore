@@ -18,6 +18,8 @@
 - `npm run test:run -- tests/unit/rfp-admin-source-rerun.test.ts` — passed, 3 tests.
 - Focused ESLint passed for admin rerun files.
 - Runtime import check passed with local env loaded.
+- Production deploy `dpl_FwxJcS8DAAZxkqYL7ycZQqouniut` is Ready and aliased to `https://rfp.perpetualcore.com`.
+- Production health endpoint remains `degraded` with `open_drift_events=25` and `cron_24h.error_rate_percent=0`.
 
 ## Notes
 
