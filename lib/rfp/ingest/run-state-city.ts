@@ -53,13 +53,26 @@ const SCRAPERS: Array<{
   { source: "ca_grants", fetch: fetchCaGrantOpportunities },
 ];
 
+export function isStateCityIngestSource(
+  source: string,
+): source is StateCitySourceName {
+  return SCRAPERS.some((scraper) => scraper.source === source);
+}
+
 /** Anomaly threshold: parsed_count below 50% of rolling baseline triggers drift. */
 const COUNT_ANOMALY_FLOOR_PCT = 0.5;
 const LAST_SEEN_BATCH_SIZE = 500;
 
-export async function runStateCityIngest(): Promise<StateCityIngestResult[]> {
+export async function runStateCityIngest(options?: {
+  sources?: StateCitySourceName[];
+}): Promise<StateCityIngestResult[]> {
+  const requestedSources = new Set(options?.sources ?? []);
+  const scrapers =
+    requestedSources.size > 0
+      ? SCRAPERS.filter((scraper) => requestedSources.has(scraper.source))
+      : SCRAPERS;
   const settled = await Promise.allSettled(
-    SCRAPERS.map(async ({ source, fetch }) => {
+    scrapers.map(async ({ source, fetch }) => {
       const opportunities = await fetch();
       return { source, opportunities };
     })
@@ -74,7 +87,7 @@ export async function runStateCityIngest(): Promise<StateCityIngestResult[]> {
   const results: StateCityIngestResult[] = [];
 
   for (let i = 0; i < settled.length; i++) {
-    const { source } = SCRAPERS[i];
+    const { source } = scrapers[i];
     const settledResult = settled[i];
 
     const result: StateCityIngestResult = {

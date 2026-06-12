@@ -66,7 +66,7 @@ Grouped by category. Each maps to exactly one roadmap phase (see Traceability). 
 
 - [ ] **ADMIN-01**: Operator console shows orgs, drafts/week, reviewer runs, vault chunks, and MRR by tier
 - [ ] **ADMIN-02**: Operator sees AI cost and gross margin per org, with budget alarms
-- [ ] **ADMIN-03**: Operator sees source health/drift with a manual "rerun now" control
+- [x] **ADMIN-03**: Operator sees source health/drift with a manual "rerun now" control
 - [ ] **ADMIN-04**: `/api/health/rfp` returns JSON status (scraper last success, drift open, cron last run, error rate) wired to a status monitor
   - 2026-06-11: JSON fields complete in code (`scraper_last_success`, `open_drift_events`, `last_cron`, `cron_24h.error_rate_percent`). External uptime/status monitor wiring remains.
 - [ ] **ADMIN-05**: Operator can toggle per-org feature flags / entitlement overrides

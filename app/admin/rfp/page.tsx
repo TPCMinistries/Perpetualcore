@@ -51,6 +51,10 @@ import { SavedSearchAlertOpsPanel } from "@/components/rfp/admin/SavedSearchAler
 import { createAdminClient } from "@/lib/supabase/server";
 import type { Json } from "@/lib/supabase/database.types";
 import { runScoreCoverageRepair } from "@/lib/rfp/scoring/coverage-repair";
+import {
+  canManualRerunSource,
+  rerunRfpSource,
+} from "@/lib/rfp/admin-source-rerun";
 
 export const dynamic = "force-dynamic";
 export const metadata = {
@@ -145,6 +149,28 @@ async function repairScoreCoverage() {
     scanLimit: 20_000,
     logExecution: true,
   });
+
+  revalidatePath("/admin/rfp");
+  revalidatePath("/api/health/rfp");
+}
+
+async function rerunSource(formData: FormData) {
+  "use server";
+
+  const adminUser = await getRfpPlatformAdmin();
+  if (!adminUser) notFound();
+
+  const source = formData.get("source");
+  if (typeof source !== "string" || !/^[a-z0-9_]+$/i.test(source)) {
+    throw new Error("Invalid source");
+  }
+
+  const normalizedSource = source.trim();
+  if (!canManualRerunSource(normalizedSource)) {
+    throw new Error(`No manual runner for source: ${normalizedSource}`);
+  }
+
+  await rerunRfpSource(normalizedSource);
 
   revalidatePath("/admin/rfp");
   revalidatePath("/api/health/rfp");
@@ -721,7 +747,7 @@ function PursuitReadinessOrgTable({
 function SourceReadinessTable({ rows }: { rows: SourceReadinessRow[] }) {
   return (
     <div className="mt-4 overflow-x-auto rounded-lg border border-white/5 bg-white/[0.02]">
-      <table className="w-full min-w-[1180px] text-[13px]">
+      <table className="w-full min-w-[1280px] text-[13px]">
         <thead>
           <tr className="border-b border-white/5 text-left font-mono text-[10px] uppercase tracking-[0.18em] text-zinc-500">
             <th className="px-4 py-3">Source</th>
@@ -733,7 +759,8 @@ function SourceReadinessTable({ rows }: { rows: SourceReadinessRow[] }) {
             <th className="px-3 py-3 text-right">Target</th>
             <th className="px-3 py-3 text-right">Drift</th>
             <th className="px-3 py-3">Scope</th>
-            <th className="px-4 py-3">Next step</th>
+            <th className="px-3 py-3">Next step</th>
+            <th className="px-4 py-3 text-right">Rerun</th>
           </tr>
         </thead>
         <tbody>
@@ -791,8 +818,25 @@ function SourceReadinessTable({ rows }: { rows: SourceReadinessRow[] }) {
               <td className="max-w-[220px] px-3 py-3 text-zinc-400">
                 {r.targetScale}
               </td>
-              <td className="max-w-[320px] px-4 py-3 text-zinc-400">
+              <td className="max-w-[320px] px-3 py-3 text-zinc-400">
                 {r.nextStep}
+              </td>
+              <td className="px-4 py-3 text-right">
+                {canManualRerunSource(r.source) ? (
+                  <form action={rerunSource}>
+                    <input type="hidden" name="source" value={r.source} />
+                    <button
+                      type="submit"
+                      className="rounded-md border border-white/10 bg-white/[0.04] px-3 py-2 font-mono text-[10px] uppercase tracking-[0.16em] text-zinc-200 transition hover:border-emerald-400/40 hover:bg-emerald-500/10 hover:text-emerald-100"
+                    >
+                      Rerun
+                    </button>
+                  </form>
+                ) : (
+                  <span className="font-mono text-[10px] uppercase tracking-[0.16em] text-zinc-600">
+                    No runner
+                  </span>
+                )}
               </td>
             </tr>
           ))}

@@ -91,6 +91,19 @@ Verification:
 - Production deploy `dpl_DrP1M1S6epZWn4Ug1nSV8xiKNEak` is Ready and aliased to `https://rfp.perpetualcore.com`.
 - Production health endpoint includes `scraper_last_success` and `cron_24h`; status is degraded due to `24` open drift events.
 
+Completed 24-03 / ADMIN-03 code:
+
+- Federal and state/city ingest orchestrators accept source filters.
+- `/admin/rfp` Source scale readiness has a Rerun action for supported automated sources.
+- Reruns log to `cron_executions` as `rfp-manual-source-rerun:{source}` and then revalidate `/admin/rfp` plus `/api/health/rfp`.
+- Unsupported sources show `No runner`.
+
+Verification:
+
+- `npm run test:run -- tests/unit/rfp-admin-source-rerun.test.ts` passed, 3 tests.
+- Focused ESLint passed.
+- Runtime import check passed with local env loaded.
+
 ## Verification Evidence
 
 See:
@@ -134,7 +147,7 @@ Do not follow `gsd-tools` numeric next-phase output if it points elsewhere. The 
 
 ## Next Engineering Step
 
-Continue Phase 24 admin/operator console work or authenticated FTUE E2E. Remaining ADMIN-04 task is external uptime/status monitor wiring.
+Continue Phase 24 admin cost/margin/budget/entitlement work or authenticated FTUE E2E. Remaining ADMIN-04 task is external uptime/status monitor wiring.
 
 ## Open Human Tasks
 

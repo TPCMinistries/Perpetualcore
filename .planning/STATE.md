@@ -121,6 +121,7 @@ Recent decisions affecting current work:
 - [Phase 19-04]: Cached solicitation re-upload creates a new package document but returns existing criteria rows by opp_id; DB count must remain 4 for the test fixture, not duplicate to 8.
 - [Phase 24-01]: `/api/health/rfp` now exposes explicit `scraper_last_success` and `cron_24h` error-rate fields; endpoint remains public aggregate-only for uptime/status monitors.
 - [Phase 24-02]: New-org setup is five fields stored into `capacity_summary`; onboarding checklist now tracks profile → voice → vault → match/draft → review/export, with visible CTAs.
+- [Phase 24-03]: `/admin/rfp` Source scale readiness has source-scoped Rerun buttons for supported automated sources; reruns log `rfp-manual-source-rerun:{source}` rows in cron history.
 
 ### Pending Todos
 
@@ -137,5 +138,5 @@ Recent decisions affecting current work:
 ## Session Continuity
 
 Last session: 2026-06-11
-Stopped at: Phase 24 in progress. ADMIN-04 JSON and FTUE-01..03 code are complete; external monitor wiring and admin operator controls remain.
-Resume file: `.planning/phases/24-operator-console-monitoring-ftue/24-02-SUMMARY.md` — next action is Phase 24 admin/operator console work or authenticated FTUE E2E, then dogfood Uplift/IHA/TPC.
+Stopped at: Phase 24 in progress. ADMIN-03, ADMIN-04 JSON, and FTUE-01..03 code are complete; external monitor wiring and remaining admin cost/entitlement controls remain.
+Resume file: `.planning/phases/24-operator-console-monitoring-ftue/24-03-SUMMARY.md` — next action is Phase 24 admin cost/margin/budget/entitlement work or authenticated FTUE E2E, then dogfood Uplift/IHA/TPC.
