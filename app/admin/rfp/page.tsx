@@ -68,8 +68,21 @@ function formatCurrency(n: number): string {
   return `$${n.toFixed(2)}`;
 }
 
+function formatPercent(n: number | null): string {
+  if (n === null || !Number.isFinite(n)) return "—";
+  return `${n.toFixed(1)}%`;
+}
+
 function formatNumber(n: number): string {
   return n.toLocaleString("en-US");
+}
+
+function formatNullableNumber(n: number | null): string {
+  return n === null ? "—" : formatNumber(n);
+}
+
+function formatNullableCurrency(n: number | null): string {
+  return n === null ? "—" : formatCurrency(n);
 }
 
 function formatRelative(iso: string | null): string {
@@ -103,6 +116,26 @@ function summarizeJson(value: Json): string {
   const text = JSON.stringify(value);
   if (!text) return "No details.";
   return text.length > 260 ? `${text.slice(0, 260)}...` : text;
+}
+
+function parseNullableNumber(value: FormDataEntryValue | null): number | null {
+  if (typeof value !== "string") return null;
+  const trimmed = value.trim();
+  if (trimmed.length === 0) return null;
+  const parsed = Number(trimmed);
+  if (!Number.isFinite(parsed) || parsed < 0) {
+    throw new Error("Numeric entitlement fields must be zero or greater.");
+  }
+  return parsed;
+}
+
+function parseNullableInteger(value: FormDataEntryValue | null): number | null {
+  const parsed = parseNullableNumber(value);
+  if (parsed === null) return null;
+  if (!Number.isInteger(parsed)) {
+    throw new Error("Quota entitlement fields must be whole numbers.");
+  }
+  return parsed;
 }
 
 async function resolveDrift(formData: FormData) {
@@ -176,6 +209,71 @@ async function rerunSource(formData: FormData) {
   revalidatePath("/api/health/rfp");
 }
 
+async function updateEntitlement(formData: FormData) {
+  "use server";
+
+  const adminUser = await getRfpPlatformAdmin();
+  if (!adminUser) notFound();
+
+  const orgId = formData.get("org_id");
+  if (typeof orgId !== "string") {
+    throw new Error("Missing org_id");
+  }
+
+  const normalizedOrgId = orgId.trim();
+  const uuidPattern =
+    /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+  if (!uuidPattern.test(normalizedOrgId)) {
+    throw new Error("Invalid org_id");
+  }
+
+  const coverageLevel = formData.get("coverage_level");
+  if (
+    typeof coverageLevel !== "string" ||
+    !["free", "l1", "l2", "l3"].includes(coverageLevel)
+  ) {
+    throw new Error("Invalid coverage level");
+  }
+
+  const reasonRaw = formData.get("override_reason");
+  const overrideReason =
+    typeof reasonRaw === "string" && reasonRaw.trim().length > 0
+      ? reasonRaw.trim().slice(0, 240)
+      : "operator override";
+
+  const admin = createAdminClient();
+  const { error } = await admin.from("rfp_entitlements").upsert(
+    {
+      org_id: normalizedOrgId,
+      coverage_level: coverageLevel,
+      monthly_ai_budget_usd: parseNullableNumber(
+        formData.get("monthly_ai_budget_usd"),
+      ),
+      monthly_score_quota: parseNullableInteger(
+        formData.get("monthly_score_quota"),
+      ),
+      monthly_draft_quota: parseNullableInteger(
+        formData.get("monthly_draft_quota"),
+      ),
+      monthly_review_quota: parseNullableInteger(
+        formData.get("monthly_review_quota"),
+      ),
+      monthly_vault_mb: parseNullableInteger(formData.get("monthly_vault_mb")),
+      override_by: adminUser.user_id,
+      override_reason: overrideReason,
+      override_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    },
+    { onConflict: "org_id" },
+  );
+
+  if (error) {
+    throw new Error(`Failed to update entitlement: ${error.message}`);
+  }
+
+  revalidatePath("/admin/rfp");
+}
+
 function Tile({
   label,
   value,
@@ -234,9 +332,14 @@ function SectionHeader({
 
 function PlatformTilesRow({ totals }: { totals: PlatformTotals }) {
   return (
-    <div className="grid grid-cols-2 gap-3 md:grid-cols-4 lg:grid-cols-8">
+    <div className="grid grid-cols-2 gap-3 md:grid-cols-4 lg:grid-cols-9">
       <Tile label="Orgs" value={formatNumber(totals.orgs)} />
       <Tile label="Active orgs" value={formatNumber(totals.active_orgs)} />
+      <Tile
+        label="MRR"
+        value={formatCurrency(totals.mrr_usd)}
+        tone={totals.mrr_usd > 0 ? "emerald" : "default"}
+      />
       <Tile
         label="Proposals"
         value={formatNumber(totals.proposals)}
@@ -264,6 +367,12 @@ function PlatformTilesRow({ totals }: { totals: PlatformTotals }) {
         label="AI cost · 30d"
         value={formatCurrency(totals.ai_cost_30d_usd)}
         tone={totals.ai_cost_30d_usd > 100 ? "amber" : "emerald"}
+      />
+      <Tile
+        label="Margin · 30d"
+        value={formatCurrency(totals.gross_margin_30d_usd)}
+        sub={formatPercent(totals.gross_margin_percent)}
+        tone={totals.gross_margin_30d_usd >= 0 ? "emerald" : "amber"}
       />
     </div>
   );
@@ -577,6 +686,28 @@ function buildOperatorActions({
     });
   }
 
+  if (totals.mrr_usd > 0 && totals.gross_margin_percent !== null) {
+    if (totals.gross_margin_percent < 70) {
+      actions.push({
+        id: "margin-risk",
+        label: "Review AI margin",
+        detail:
+          "Thirty-day AI spend is compressing subscription margin. Check org budgets and high-cost agent sessions before adding more design partners.",
+        metric: formatPercent(totals.gross_margin_percent),
+        severity: "watch",
+      });
+    }
+  } else if (totals.ai_cost_30d_usd > 0 && totals.mrr_usd === 0) {
+    actions.push({
+      id: "unfunded-ai-spend",
+      label: "AI spend has no matched MRR",
+      detail:
+        "The product is accruing AI costs without active RFP subscription revenue. Confirm beta/test org budgets are intentional.",
+      metric: formatCurrency(totals.ai_cost_30d_usd),
+      severity: "watch",
+    });
+  }
+
   if (actions.length === 0) {
     actions.push({
       id: "healthy",
@@ -856,15 +987,20 @@ function OrgsTable({ rows }: { rows: OrgRow[] }) {
   }
   return (
     <div className="overflow-x-auto rounded-lg border border-white/5 bg-white/[0.02]">
-      <table className="w-full min-w-[760px] text-[13px]">
+      <table className="w-full min-w-[1320px] text-[13px]">
         <thead>
           <tr className="border-b border-white/5 text-left font-mono text-[10px] uppercase tracking-[0.18em] text-zinc-500">
             <th className="px-4 py-3">Name</th>
-            <th className="px-3 py-3">Type</th>
+            <th className="px-3 py-3">Plan</th>
             <th className="px-3 py-3 text-right">Members</th>
             <th className="px-3 py-3 text-right">Proposals</th>
             <th className="px-3 py-3 text-right">7d</th>
+            <th className="px-3 py-3 text-right">MRR</th>
             <th className="px-3 py-3 text-right">$ · 30d</th>
+            <th className="px-3 py-3 text-right">Margin</th>
+            <th className="px-3 py-3">Budget</th>
+            <th className="px-3 py-3">Quotas</th>
+            <th className="px-4 py-3">Override</th>
             <th className="px-4 py-3 text-right">Created</th>
           </tr>
         </thead>
@@ -876,9 +1012,12 @@ function OrgsTable({ rows }: { rows: OrgRow[] }) {
             >
               <td className="px-4 py-3 text-zinc-100">{r.name}</td>
               <td className="px-3 py-3">
-                <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-zinc-400">
-                  {r.type}
-                </span>
+                <div className="font-mono text-[10px] uppercase tracking-[0.18em] text-zinc-300">
+                  {r.subscription_tier ?? "none"}
+                </div>
+                <div className="mt-1 font-mono text-[10px] uppercase tracking-[0.14em] text-zinc-600">
+                  {r.subscription_status ?? "no subscription"} · {r.type}
+                </div>
               </td>
               <td className="px-3 py-3 text-right tabular-nums text-zinc-300">
                 {r.members}
@@ -896,7 +1035,116 @@ function OrgsTable({ rows }: { rows: OrgRow[] }) {
                 </span>
               </td>
               <td className="px-3 py-3 text-right tabular-nums text-zinc-200">
+                {formatCurrency(r.mrr_usd)}
+              </td>
+              <td className="px-3 py-3 text-right tabular-nums text-zinc-200">
                 {formatCurrency(r.ai_cost_30d_usd)}
+              </td>
+              <td className="px-3 py-3 text-right">
+                <div
+                  className={`tabular-nums ${
+                    r.gross_margin_30d_usd >= 0
+                      ? "text-emerald-300"
+                      : "text-amber-300"
+                  }`}
+                >
+                  {formatCurrency(r.gross_margin_30d_usd)}
+                </div>
+                <div className="mt-1 font-mono text-[10px] text-zinc-600">
+                  {formatPercent(r.gross_margin_percent)}
+                </div>
+              </td>
+              <td className="px-3 py-3">
+                <div className="font-mono text-[10px] uppercase tracking-[0.16em] text-zinc-400">
+                  {r.coverage_level ?? "missing"}
+                </div>
+                <div
+                  className={`mt-1 font-mono text-[10px] ${
+                    r.monthly_ai_budget_usd !== null &&
+                    r.ai_cost_30d_usd >= r.monthly_ai_budget_usd
+                      ? "text-amber-300"
+                      : "text-zinc-600"
+                  }`}
+                >
+                  {formatNullableCurrency(r.monthly_ai_budget_usd)} cap
+                </div>
+              </td>
+              <td className="px-3 py-3 font-mono text-[10px] leading-5 text-zinc-500">
+                <div>score {formatNullableNumber(r.monthly_score_quota)}</div>
+                <div>draft {formatNullableNumber(r.monthly_draft_quota)}</div>
+                <div>review {formatNullableNumber(r.monthly_review_quota)}</div>
+                <div>vault {formatNullableNumber(r.monthly_vault_mb)} MB</div>
+              </td>
+              <td className="px-4 py-3">
+                <form action={updateEntitlement} className="min-w-[360px]">
+                  <input type="hidden" name="org_id" value={r.id} />
+                  <div className="grid grid-cols-5 gap-2">
+                    <select
+                      name="coverage_level"
+                      defaultValue={r.coverage_level ?? "free"}
+                      className="col-span-1 rounded-md border border-white/10 bg-zinc-950 px-2 py-2 font-mono text-[11px] text-zinc-100"
+                    >
+                      <option value="free">free</option>
+                      <option value="l1">l1</option>
+                      <option value="l2">l2</option>
+                      <option value="l3">l3</option>
+                    </select>
+                    <input
+                      name="monthly_ai_budget_usd"
+                      inputMode="decimal"
+                      defaultValue={r.monthly_ai_budget_usd ?? ""}
+                      placeholder="$ cap"
+                      className="rounded-md border border-white/10 bg-zinc-950 px-2 py-2 font-mono text-[11px] text-zinc-100 placeholder:text-zinc-700"
+                    />
+                    <input
+                      name="monthly_score_quota"
+                      inputMode="numeric"
+                      defaultValue={r.monthly_score_quota ?? ""}
+                      placeholder="score"
+                      className="rounded-md border border-white/10 bg-zinc-950 px-2 py-2 font-mono text-[11px] text-zinc-100 placeholder:text-zinc-700"
+                    />
+                    <input
+                      name="monthly_draft_quota"
+                      inputMode="numeric"
+                      defaultValue={r.monthly_draft_quota ?? ""}
+                      placeholder="draft"
+                      className="rounded-md border border-white/10 bg-zinc-950 px-2 py-2 font-mono text-[11px] text-zinc-100 placeholder:text-zinc-700"
+                    />
+                    <input
+                      name="monthly_review_quota"
+                      inputMode="numeric"
+                      defaultValue={r.monthly_review_quota ?? ""}
+                      placeholder="review"
+                      className="rounded-md border border-white/10 bg-zinc-950 px-2 py-2 font-mono text-[11px] text-zinc-100 placeholder:text-zinc-700"
+                    />
+                  </div>
+                  <div className="mt-2 grid grid-cols-[1fr_96px] gap-2">
+                    <input
+                      name="monthly_vault_mb"
+                      inputMode="numeric"
+                      defaultValue={r.monthly_vault_mb ?? ""}
+                      placeholder="vault MB"
+                      className="rounded-md border border-white/10 bg-zinc-950 px-2 py-2 font-mono text-[11px] text-zinc-100 placeholder:text-zinc-700"
+                    />
+                    <button
+                      type="submit"
+                      className="rounded-md border border-emerald-400/30 bg-emerald-500/10 px-3 py-2 font-mono text-[10px] uppercase tracking-[0.16em] text-emerald-100 transition hover:bg-emerald-500/20"
+                    >
+                      Save
+                    </button>
+                  </div>
+                  <input
+                    name="override_reason"
+                    defaultValue={r.override_reason ?? ""}
+                    placeholder="reason"
+                    className="mt-2 w-full rounded-md border border-white/10 bg-zinc-950 px-2 py-2 font-mono text-[11px] text-zinc-100 placeholder:text-zinc-700"
+                  />
+                  {r.override_at ? (
+                    <div className="mt-1 font-mono text-[10px] text-zinc-600">
+                      last override {formatRelative(r.override_at)}
+                    </div>
+                  ) : null}
+                </form>
               </td>
               <td className="px-4 py-3 text-right font-mono text-[11px] text-zinc-500">
                 {formatRelative(r.created_at)}

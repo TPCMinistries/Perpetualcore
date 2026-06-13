@@ -106,6 +106,21 @@ Verification:
 - Production deploy `dpl_FwxJcS8DAAZxkqYL7ycZQqouniut` is Ready and aliased to `https://rfp.perpetualcore.com`.
 - Production health endpoint remains degraded with `25` open drift events and `cron_24h.error_rate_percent=0`.
 
+Completed 24-04 / ADMIN-01, ADMIN-02, ADMIN-05 code:
+
+- `/admin/rfp` platform totals now include active RFP MRR, AI cost over the last 30 days, gross margin dollars, and gross margin percent.
+- Operator action queue now flags margin-risk and unfunded-AI-spend states.
+- Per-org admin rows now show subscription tier/status, MRR, 30-day AI cost, gross margin, coverage level, monthly AI budget, score/draft/review/vault quotas, and last entitlement override metadata.
+- Added a gated `updateEntitlement` server action on `/admin/rfp`.
+- Entitlement overrides upsert `rfp_entitlements` by `org_id`, use `createAdminClient()`, and stamp `override_by`, `override_reason`, `override_at`, and `updated_at`.
+- Blank budget/quota fields remain `NULL`, preserving the existing unlimited/inherited semantics.
+
+Verification:
+
+- Focused ESLint passed for `app/admin/rfp/page.tsx` and `lib/rfp/admin-metrics.ts`.
+- Env-loaded runtime import check passed for the admin metrics module and admin page.
+- Full project typecheck was stopped after several minutes with no diagnostics to avoid the known long compiler-run issue.
+
 ## Verification Evidence
 
 See:
@@ -149,7 +164,7 @@ Do not follow `gsd-tools` numeric next-phase output if it points elsewhere. The 
 
 ## Next Engineering Step
 
-Continue Phase 24 admin cost/margin/budget/entitlement work or authenticated FTUE E2E. Remaining ADMIN-04 task is external uptime/status monitor wiring.
+Run an authenticated browser pass on `/admin/rfp`, deploy the Phase 24-04 admin controls, then continue with authenticated FTUE E2E. Remaining ADMIN-04 task is external uptime/status monitor wiring.
 
 ## Open Human Tasks
 

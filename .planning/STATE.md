@@ -12,7 +12,7 @@ See: .planning/PROJECT.md (updated 2026-06-05)
 Phase: 20 of 25 COMPLETE — submission tracking/amendments
 Plan: 4 of 4 complete (20-01 lifecycle status; 20-02 submission packet verification; 20-03 amendment monitoring/diffing; 20-04 material amendment workroom alert/recheck task)
 Status: Phase 20 closed. SUBMIT-01/02/03/04 are complete.
-Last activity: 2026-06-11 — Phase 20 closed; verified submission bundle/manifest/audit packet coverage, applied live Supabase amendment tables with RLS to LDC Brain AI (`hgxxxmtfmvguotkowxbu`), added amendment monitor cron, deterministic diffing, tenant readback endpoint, Discovery amendment panel, and material-change task/decision-log queue.
+Last activity: 2026-06-13 — Phase 24 admin controls advanced locally; `/admin/rfp` now shows MRR, 30-day AI cost, gross margin, subscription state, entitlement coverage/budgets/quotas, and gated per-org entitlement override controls. Focused ESLint and runtime import checks passed; production deploy and authenticated browser pass remain.
 
 Progress: [███████░░░] beachhead path 7/9 complete — next Phase 24 FTUE
 
@@ -122,6 +122,7 @@ Recent decisions affecting current work:
 - [Phase 24-01]: `/api/health/rfp` now exposes explicit `scraper_last_success` and `cron_24h` error-rate fields; endpoint remains public aggregate-only for uptime/status monitors.
 - [Phase 24-02]: New-org setup is five fields stored into `capacity_summary`; onboarding checklist now tracks profile → voice → vault → match/draft → review/export, with visible CTAs.
 - [Phase 24-03]: `/admin/rfp` Source scale readiness has source-scoped Rerun buttons for supported automated sources; reruns log `rfp-manual-source-rerun:{source}` rows in cron history.
+- [Phase 24-04]: `/admin/rfp` now exposes active RFP MRR, AI spend, gross margin, and per-org entitlement override controls using existing `rfp_entitlements` nullable quota semantics.
 
 ### Pending Todos
 
@@ -137,6 +138,6 @@ Recent decisions affecting current work:
 
 ## Session Continuity
 
-Last session: 2026-06-11
-Stopped at: Phase 24 in progress. ADMIN-03, ADMIN-04 JSON, and FTUE-01..03 code are complete; external monitor wiring and remaining admin cost/entitlement controls remain.
-Resume file: `.planning/phases/24-operator-console-monitoring-ftue/24-03-SUMMARY.md` — next action is Phase 24 admin cost/margin/budget/entitlement work or authenticated FTUE E2E, then dogfood Uplift/IHA/TPC.
+Last session: 2026-06-13
+Stopped at: Phase 24 in progress. ADMIN-01/02/03/05 code, ADMIN-04 JSON, and FTUE-01..03 code are complete locally. Production deploy, authenticated `/admin/rfp` browser pass, external monitor wiring, and authenticated FTUE E2E remain.
+Resume file: `.planning/phases/24-operator-console-monitoring-ftue/24-04-SUMMARY.md` — next action is authenticated admin browser verification, deploy, then FTUE E2E before dogfood Uplift/IHA/TPC.

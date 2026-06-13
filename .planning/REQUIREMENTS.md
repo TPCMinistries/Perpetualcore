@@ -64,12 +64,15 @@ Grouped by category. Each maps to exactly one roadmap phase (see Traceability). 
 
 ### Operator Console & Monitoring (ADMIN)
 
-- [ ] **ADMIN-01**: Operator console shows orgs, drafts/week, reviewer runs, vault chunks, and MRR by tier
-- [ ] **ADMIN-02**: Operator sees AI cost and gross margin per org, with budget alarms
+- [x] **ADMIN-01**: Operator console shows orgs, drafts/week, reviewer runs, vault chunks, and MRR by tier
+  - 2026-06-13: `/admin/rfp` totals and per-org rows now include active RFP MRR/tier data.
+- [x] **ADMIN-02**: Operator sees AI cost and gross margin per org, with budget alarms
+  - 2026-06-13: `/admin/rfp` per-org rows show AI cost, gross margin, and monthly AI budget cap status; operator queue flags margin risk and unfunded AI spend.
 - [x] **ADMIN-03**: Operator sees source health/drift with a manual "rerun now" control
 - [ ] **ADMIN-04**: `/api/health/rfp` returns JSON status (scraper last success, drift open, cron last run, error rate) wired to a status monitor
   - 2026-06-11: JSON fields complete in code (`scraper_last_success`, `open_drift_events`, `last_cron`, `cron_24h.error_rate_percent`). External uptime/status monitor wiring remains.
-- [ ] **ADMIN-05**: Operator can toggle per-org feature flags / entitlement overrides
+- [x] **ADMIN-05**: Operator can toggle per-org feature flags / entitlement overrides
+  - 2026-06-13: `/admin/rfp` has gated per-org coverage, AI budget, and quota override controls backed by `rfp_entitlements`.
 
 ### Trust, Security & Legal (TRUST)
 
@@ -149,11 +152,11 @@ Tracked, not in this roadmap.
 | BILL-03 | Phase 23 | Pending |
 | BILL-04 | Phase 17 | Complete |
 | BILL-05 | Phase 23 | Pending |
-| ADMIN-01 | Phase 24 | Pending |
-| ADMIN-02 | Phase 24 | Pending |
+| ADMIN-01 | Phase 24 | Complete |
+| ADMIN-02 | Phase 24 | Complete |
 | ADMIN-03 | Phase 24 | Pending |
 | ADMIN-04 | Phase 24 | Pending |
-| ADMIN-05 | Phase 24 | Pending |
+| ADMIN-05 | Phase 24 | Complete |
 | TRUST-01 | Phase 22 | Complete |
 | TRUST-02 | Phase 22 | Complete |
 | TRUST-03 | Phase 22 | Complete |
