@@ -119,6 +119,12 @@ Verification:
 
 - Focused ESLint passed for `app/admin/rfp/page.tsx` and `lib/rfp/admin-metrics.ts`.
 - Env-loaded runtime import check passed for the admin metrics module and admin page.
+- `npm run build` passed locally; generated all 402 routes including `/admin/rfp`.
+- Production deploy `dpl_6gRf69DSzFEnZFqRaKpV3isd39gi` is Ready and aliased to `https://rfp.perpetualcore.com`.
+- Production smoke passed:
+  - `GET /api/health/rfp` returned `200` with `cron_24h.error_rate_percent=0`.
+  - `HEAD /rfp` returned `200`.
+  - `HEAD /admin/rfp` returned the expected gated `404` for unauthenticated access with `x-matched-path: /admin/rfp`.
 - Full project typecheck was stopped after several minutes with no diagnostics to avoid the known long compiler-run issue.
 
 ## Verification Evidence
@@ -164,7 +170,7 @@ Do not follow `gsd-tools` numeric next-phase output if it points elsewhere. The 
 
 ## Next Engineering Step
 
-Run an authenticated browser pass on `/admin/rfp`, deploy the Phase 24-04 admin controls, then continue with authenticated FTUE E2E. Remaining ADMIN-04 task is external uptime/status monitor wiring.
+Run an authenticated browser pass on `/admin/rfp`, then continue with authenticated FTUE E2E. Remaining ADMIN-04 task is external uptime/status monitor wiring.
 
 ## Open Human Tasks
 

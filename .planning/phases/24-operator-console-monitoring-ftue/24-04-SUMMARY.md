@@ -31,6 +31,11 @@
   - `lib/rfp/admin-metrics.ts`
   - `app/admin/rfp/page.tsx`
 - `npm run build` — passed; generated all 402 routes including `/admin/rfp`.
+- Production deploy `dpl_6gRf69DSzFEnZFqRaKpV3isd39gi` is Ready and aliased to `https://rfp.perpetualcore.com`.
+- Production smoke checks passed:
+  - `GET /api/health/rfp` returned `200` with `cron_24h.error_rate_percent=0`.
+  - `HEAD /rfp` returned `200`.
+  - `HEAD /admin/rfp` returned gated `404` for unauthenticated access with `x-matched-path: /admin/rfp`.
 
 ## Notes
 
@@ -42,6 +47,5 @@
 ## Remaining Work
 
 - Authenticated browser pass on `/admin/rfp`.
-- Production deploy from `~/perpetual-core-rfp`.
 - External uptime/status monitor wiring for the remaining ADMIN-04 task.
 - Authenticated FTUE E2E for create org → scored Discovery → first draft.
