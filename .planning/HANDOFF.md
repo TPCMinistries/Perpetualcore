@@ -137,12 +137,15 @@ Completed 24-05 / readiness repair:
 - Production score coverage was repaired from 55.7% to 100.0%.
 - Manual `ca_grants` rerun succeeded with 1,932 fetched, 1,932 upserted, and 0 errors.
 - 28 stale CA grants timeout drift rows were resolved after the successful rerun.
+- Production deploy `dpl_59P8uDKL6Bi7jTWCPxuJcWYN97mJ` is Ready and aliased to `https://rfp.perpetualcore.com`.
 
 Verification:
 
 - Focused ESLint passed for readiness repair files.
 - `npm run test:run -- tests/unit/rfp-admin-source-rerun.test.ts tests/unit/rfp-health-monitoring.test.ts` passed, 2 files / 6 tests.
+- `npm run build` passed locally; generated all 402 routes.
 - Production health endpoint returned `status=ok`, 27,225 / 27,225 expected matches, 100.0% scoring coverage, and 0 open drift events.
+- Production smoke passed: `GET /api/health/rfp`, `HEAD /rfp`, and expected gated unauthenticated `HEAD /admin/rfp` 404 with `x-matched-path: /admin/rfp`.
 
 ## Verification Evidence
 
@@ -188,7 +191,7 @@ Do not follow `gsd-tools` numeric next-phase output if it points elsewhere. The 
 
 ## Next Engineering Step
 
-Deploy 24-05 readiness code, smoke test production, then run an authenticated browser pass on `/admin/rfp` and continue with authenticated FTUE E2E. Remaining ADMIN-04 task is external uptime/status monitor wiring.
+Run an authenticated browser pass on `/admin/rfp` and continue with authenticated FTUE E2E. Remaining ADMIN-04 task is external uptime/status monitor wiring.
 
 ## Open Human Tasks
 

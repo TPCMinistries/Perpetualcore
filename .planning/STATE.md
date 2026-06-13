@@ -11,8 +11,8 @@ See: .planning/PROJECT.md (updated 2026-06-05)
 
 Phase: 24 of 25 IN PROGRESS — operator console, monitoring, FTUE
 Plan: 5 plans complete (24-01 health JSON; 24-02 FTUE; 24-03 source rerun controls; 24-04 admin margin/entitlement controls; 24-05 readiness repair)
-Status: Phase 24 core operator/admin/readiness work is production-green. External uptime monitor wiring and authenticated FTUE/admin browser passes remain.
-Last activity: 2026-06-13 — Production readiness repaired. Score coverage recovered from 55.7% to 100.0%; `ca_grants` rerun succeeded with 1,932 fetched/upserted and 0 errors; 28 stale CA drift rows resolved; `/api/health/rfp` now returns `status=ok`, 27,225 / 27,225 expected matches, and 0 open drift events.
+Status: Phase 24 core operator/admin/readiness work is production-green and deployed. External uptime monitor wiring and authenticated FTUE/admin browser passes remain.
+Last activity: 2026-06-13 — Production readiness repaired and deployed via `dpl_59P8uDKL6Bi7jTWCPxuJcWYN97mJ`. Score coverage recovered from 55.7% to 100.0%; `ca_grants` rerun succeeded with 1,932 fetched/upserted and 0 errors; 28 stale CA drift rows resolved; `/api/health/rfp` now returns `status=ok`, 27,225 / 27,225 expected matches, and 0 open drift events.
 
 Progress: [███████░░░] beachhead path 7/9 complete — next Phase 24 FTUE
 
@@ -141,5 +141,5 @@ Recent decisions affecting current work:
 ## Session Continuity
 
 Last session: 2026-06-13
-Stopped at: Phase 24 in progress. Admin controls are deployed and production health is green after 24-05 readiness repair. Code changes for 24-05 still need production deploy/smoke if not already completed in the active session; authenticated `/admin/rfp` browser pass, external monitor wiring, and authenticated FTUE E2E remain.
-Resume file: `.planning/phases/24-operator-console-monitoring-ftue/24-05-SUMMARY.md` — next action is deploy/smoke 24-05 readiness code, then authenticated admin browser verification and FTUE E2E before dogfood Uplift/IHA/TPC.
+Stopped at: Phase 24 in progress. Admin controls and 24-05 readiness repair are deployed, smoke-tested, and production health is green. Authenticated `/admin/rfp` browser pass, external monitor wiring, and authenticated FTUE E2E remain.
+Resume file: `.planning/phases/24-operator-console-monitoring-ftue/24-05-SUMMARY.md` — next action is authenticated admin browser verification and FTUE E2E before dogfood Uplift/IHA/TPC.

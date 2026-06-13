@@ -32,6 +32,8 @@ Production readiness sweep after Phase 24 admin controls.
 - Unit tests passed:
   - `tests/unit/rfp-admin-source-rerun.test.ts`
   - `tests/unit/rfp-health-monitoring.test.ts`
+- `npm run build` passed locally; generated all 402 routes.
+- Production deploy `dpl_59P8uDKL6Bi7jTWCPxuJcWYN97mJ` is Ready and aliased to `https://rfp.perpetualcore.com`.
 - Production health passed:
   - status: `ok`
   - opportunities: 5,445
@@ -41,6 +43,10 @@ Production readiness sweep after Phase 24 admin controls.
   - enrichment coverage: 100.0%
   - open drift events: 0
   - cron 24h error rate: 5.7%
+- Production smoke passed:
+  - `GET /api/health/rfp` returned `status=ok`.
+  - `HEAD /rfp` returned `200`.
+  - `HEAD /admin/rfp` returned the expected gated `404` for unauthenticated access with `x-matched-path: /admin/rfp`.
 
 ## Notes
 
