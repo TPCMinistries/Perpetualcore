@@ -131,6 +131,8 @@ interface ExistingMatchRow {
   scored_version: number;
 }
 
+const MATCH_UPSERT_BATCH_SIZE = 500;
+
 // ── Tiny async pool (no new dependency) ──────────────────────────────────────
 
 /**
@@ -404,20 +406,27 @@ async function upsertMatches(
     new Map(rows.map((row) => [`${row.opp_id}::${row.org_id}`, row])).values(),
   );
   const supabase = rfpAdmin();
-  // Cast through never[] to bypass the Database type (rfp_* tables not yet
-  // in lib/supabase/database.types.ts). Matches the pattern used by the
-  // federal + state/city orchestrators.
-  const { data, error } = await supabase
-    .from('rfp_opp_matches')
-    .upsert(deduped as unknown as never[], {
-      onConflict: 'opp_id,org_id',
-      ignoreDuplicates: false,
-    })
-    .select('opp_id');
-  if (error) {
-    return { upserted: 0, error: error.message };
+  let upserted = 0;
+
+  for (let start = 0; start < deduped.length; start += MATCH_UPSERT_BATCH_SIZE) {
+    const batch = deduped.slice(start, start + MATCH_UPSERT_BATCH_SIZE);
+    // Cast through never[] to bypass the Database type (rfp_* tables not yet
+    // in lib/supabase/database.types.ts). Matches the pattern used by the
+    // federal + state/city orchestrators.
+    const { data, error } = await supabase
+      .from('rfp_opp_matches')
+      .upsert(batch as unknown as never[], {
+        onConflict: 'opp_id,org_id',
+        ignoreDuplicates: false,
+      })
+      .select('opp_id');
+    if (error) {
+      return { upserted, error: error.message };
+    }
+    upserted += (data ?? []).length || batch.length;
   }
-  return { upserted: (data ?? []).length || deduped.length, error: null };
+
+  return { upserted, error: null };
 }
 
 // ── Phase 18: Shared v2 pair scorer ──────────────────────────────────────────
@@ -728,6 +737,85 @@ export async function scoreNewOpportunitiesForAllActiveOrgs(
       '[scoring/recompute] alert fan-out failed (non-fatal):',
       e instanceof Error ? e.message : String(e)
     );
+  }
+
+  return { scored: upserted, orgs: orgIds.length };
+}
+
+/**
+ * Recovery/backfill entry. Scores missing opportunity/org pairs without vault
+ * retrieval, LLM summaries, evidence writes, or alert dispatch.
+ *
+ * This is intentionally narrower than scoreNewOpportunitiesForAllActiveOrgs:
+ * coverage repair must be able to fill deterministic match rows even when an
+ * external AI provider is unavailable or out of budget.
+ */
+export async function scoreMissingOpportunitiesForAllActiveOrgsNoAi(
+  opportunityIds: string[]
+): Promise<{ scored: number; orgs: number }> {
+  if (opportunityIds.length === 0) return { scored: 0, orgs: 0 };
+
+  const opps = await loadOpportunities(opportunityIds);
+  if (opps.length === 0) return { scored: 0, orgs: 0 };
+
+  const orgIds = await loadActiveOrgIds();
+  if (orgIds.length === 0) return { scored: 0, orgs: 0 };
+
+  const orgContexts = await asyncPool(5, orgIds, async (orgId) => {
+    try {
+      return await loadLatestProfile(orgId);
+    } catch (e) {
+      console.error(
+        `[scoring/recompute] profile load failed for org ${orgId}:`,
+        e instanceof Error ? e.message : String(e)
+      );
+      return { orgId, profile: null, type: 'nonprofit' as const, naics: [] };
+    }
+  });
+
+  const existing = await loadExistingScoredVersions(orgIds, opps.map((o) => o.id));
+
+  type Pair = {
+    opp: OppRowExtended;
+    org: OrgForScoring;
+  };
+  const pairs: Pair[] = [];
+  for (const opp of opps) {
+    for (const org of orgContexts) {
+      if (existing.has(`${opp.id}::${org.orgId}`)) continue;
+      pairs.push({ opp, org });
+    }
+  }
+  if (pairs.length === 0) return { scored: 0, orgs: orgIds.length };
+
+  const computed = await asyncPool(8, pairs, async ({ opp, org }) => {
+    try {
+      const cacheKey = `${opp.id}::${org.orgId}`;
+      const prev = existing.get(cacheKey);
+      const scored_version = (prev?.scored_version ?? 0) + 1;
+      const breakdown = scoreOpportunity(opp, org.profile);
+      return {
+        opp_id: opp.id,
+        org_id: org.orgId,
+        fit_score: breakdown.fit_score,
+        score_breakdown: breakdown,
+        chips: breakdown.chips,
+        summary: null,
+        scored_version,
+      };
+    } catch (e) {
+      console.error(
+        `[scoring/recompute] deterministic score pair failed (opp=${opp.id}, org=${org.orgId}):`,
+        e instanceof Error ? e.message : String(e)
+      );
+      return null;
+    }
+  });
+
+  const rows = computed.filter((r): r is NonNullable<typeof r> => r !== null);
+  const { upserted, error } = await upsertMatches(rows);
+  if (error) {
+    throw new Error(`deterministic_upsert_failed: ${error}`);
   }
 
   return { scored: upserted, orgs: orgIds.length };

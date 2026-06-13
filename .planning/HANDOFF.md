@@ -1,6 +1,6 @@
 # HANDOFF — RFP Engine Phase 24 In Progress
 
-**Updated:** 2026-06-11
+**Updated:** 2026-06-13
 **Repo:** `~/perpetual-core-rfp`
 **Branch:** `feat/rfp-orgs-invites-cont`
 **Prod:** `https://rfp.perpetualcore.com`
@@ -127,12 +127,30 @@ Verification:
   - `HEAD /admin/rfp` returned the expected gated `404` for unauthenticated access with `x-matched-path: /admin/rfp`.
 - Full project typecheck was stopped after several minutes with no diagnostics to avoid the known long compiler-run issue.
 
+Completed 24-05 / readiness repair:
+
+- Coverage repair now uses deterministic no-AI scoring so health recovery is not blocked by LLM provider credits.
+- Manual source reruns now use deterministic no-AI scoring after ingest.
+- Match upserts are chunked to avoid PostgREST transport failures on large repair batches.
+- State/city opportunity upserts are chunked to avoid CA grants statement timeouts.
+- Coverage scan page size was reduced from 500 to 100.
+- Production score coverage was repaired from 55.7% to 100.0%.
+- Manual `ca_grants` rerun succeeded with 1,932 fetched, 1,932 upserted, and 0 errors.
+- 28 stale CA grants timeout drift rows were resolved after the successful rerun.
+
+Verification:
+
+- Focused ESLint passed for readiness repair files.
+- `npm run test:run -- tests/unit/rfp-admin-source-rerun.test.ts tests/unit/rfp-health-monitoring.test.ts` passed, 2 files / 6 tests.
+- Production health endpoint returned `status=ok`, 27,225 / 27,225 expected matches, 100.0% scoring coverage, and 0 open drift events.
+
 ## Verification Evidence
 
 See:
 
 - `.planning/phases/19-rubric-review-compliance-gate-upload/19-04-SUMMARY.md`
 - `.planning/phases/19-rubric-review-compliance-gate-upload/19-VERIFICATION.md`
+- `.planning/phases/24-operator-console-monitoring-ftue/24-05-SUMMARY.md`
 
 Verified on production:
 
@@ -170,7 +188,7 @@ Do not follow `gsd-tools` numeric next-phase output if it points elsewhere. The 
 
 ## Next Engineering Step
 
-Run an authenticated browser pass on `/admin/rfp`, then continue with authenticated FTUE E2E. Remaining ADMIN-04 task is external uptime/status monitor wiring.
+Deploy 24-05 readiness code, smoke test production, then run an authenticated browser pass on `/admin/rfp` and continue with authenticated FTUE E2E. Remaining ADMIN-04 task is external uptime/status monitor wiring.
 
 ## Open Human Tasks
 

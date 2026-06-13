@@ -9,10 +9,10 @@ See: .planning/PROJECT.md (updated 2026-06-05)
 
 ## Current Position
 
-Phase: 20 of 25 COMPLETE — submission tracking/amendments
-Plan: 4 of 4 complete (20-01 lifecycle status; 20-02 submission packet verification; 20-03 amendment monitoring/diffing; 20-04 material amendment workroom alert/recheck task)
-Status: Phase 20 closed. SUBMIT-01/02/03/04 are complete.
-Last activity: 2026-06-13 — Phase 24 admin controls advanced locally; `/admin/rfp` now shows MRR, 30-day AI cost, gross margin, subscription state, entitlement coverage/budgets/quotas, and gated per-org entitlement override controls. Focused ESLint and runtime import checks passed; production deploy and authenticated browser pass remain.
+Phase: 24 of 25 IN PROGRESS — operator console, monitoring, FTUE
+Plan: 5 plans complete (24-01 health JSON; 24-02 FTUE; 24-03 source rerun controls; 24-04 admin margin/entitlement controls; 24-05 readiness repair)
+Status: Phase 24 core operator/admin/readiness work is production-green. External uptime monitor wiring and authenticated FTUE/admin browser passes remain.
+Last activity: 2026-06-13 — Production readiness repaired. Score coverage recovered from 55.7% to 100.0%; `ca_grants` rerun succeeded with 1,932 fetched/upserted and 0 errors; 28 stale CA drift rows resolved; `/api/health/rfp` now returns `status=ok`, 27,225 / 27,225 expected matches, and 0 open drift events.
 
 Progress: [███████░░░] beachhead path 7/9 complete — next Phase 24 FTUE
 
@@ -123,6 +123,8 @@ Recent decisions affecting current work:
 - [Phase 24-02]: New-org setup is five fields stored into `capacity_summary`; onboarding checklist now tracks profile → voice → vault → match/draft → review/export, with visible CTAs.
 - [Phase 24-03]: `/admin/rfp` Source scale readiness has source-scoped Rerun buttons for supported automated sources; reruns log `rfp-manual-source-rerun:{source}` rows in cron history.
 - [Phase 24-04]: `/admin/rfp` now exposes active RFP MRR, AI spend, gross margin, and per-org entitlement override controls using existing `rfp_entitlements` nullable quota semantics.
+- [Phase 24-05]: Coverage repair and manual source reruns use deterministic no-AI scoring; health recovery no longer depends on external LLM credits.
+- [Phase 24-05]: Large match and state/city opportunity upserts are chunked to prevent PostgREST fetch failures and CA grants statement timeouts.
 
 ### Pending Todos
 
@@ -139,5 +141,5 @@ Recent decisions affecting current work:
 ## Session Continuity
 
 Last session: 2026-06-13
-Stopped at: Phase 24 in progress. ADMIN-01/02/03/05 code, ADMIN-04 JSON, and FTUE-01..03 code are complete locally. Production deploy, authenticated `/admin/rfp` browser pass, external monitor wiring, and authenticated FTUE E2E remain.
-Resume file: `.planning/phases/24-operator-console-monitoring-ftue/24-04-SUMMARY.md` — next action is authenticated admin browser verification, deploy, then FTUE E2E before dogfood Uplift/IHA/TPC.
+Stopped at: Phase 24 in progress. Admin controls are deployed and production health is green after 24-05 readiness repair. Code changes for 24-05 still need production deploy/smoke if not already completed in the active session; authenticated `/admin/rfp` browser pass, external monitor wiring, and authenticated FTUE E2E remain.
+Resume file: `.planning/phases/24-operator-console-monitoring-ftue/24-05-SUMMARY.md` — next action is deploy/smoke 24-05 readiness code, then authenticated admin browser verification and FTUE E2E before dogfood Uplift/IHA/TPC.

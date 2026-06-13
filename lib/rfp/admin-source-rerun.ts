@@ -9,7 +9,7 @@ import {
   type StateCityIngestResult,
 } from "@/lib/rfp/ingest/run-state-city";
 import { logRfpCronExecution } from "@/lib/rfp/cron-log";
-import { scoreNewOpportunitiesForAllActiveOrgs } from "@/lib/rfp/scoring/recompute";
+import { scoreMissingOpportunitiesForAllActiveOrgsNoAi } from "@/lib/rfp/scoring/recompute";
 
 export type ManualSourceRerunKind = "federal" | "state_city";
 
@@ -65,7 +65,7 @@ export async function rerunRfpSource(
   let scoringError: string | null = null;
   try {
     const scoreResult =
-      await scoreNewOpportunitiesForAllActiveOrgs(upsertedIds);
+      await scoreMissingOpportunitiesForAllActiveOrgsNoAi(upsertedIds);
     scored = scoreResult.scored;
   } catch (err) {
     scoringError = err instanceof Error ? err.message.slice(0, 200) : "unknown";

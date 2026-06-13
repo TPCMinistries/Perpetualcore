@@ -61,6 +61,7 @@ export function isStateCityIngestSource(
 
 /** Anomaly threshold: parsed_count below 50% of rolling baseline triggers drift. */
 const COUNT_ANOMALY_FLOOR_PCT = 0.5;
+const UPSERT_BATCH_SIZE = 250;
 const LAST_SEEN_BATCH_SIZE = 500;
 
 export async function runStateCityIngest(options?: {
@@ -186,40 +187,50 @@ export async function runStateCityIngest(options?: {
       // will start populating them.
     }));
 
-    // Cast through unknown to bypass the generated Database type — the new
-    // columns (last_seen_at) and new source enum values ('nyc_hra', 'nyc_doe')
-    // from the 05-01 / 05-02 migrations aren't reflected in
-    // lib/supabase/database.types.ts yet. Matches the pattern used in
-    // lib/rfp/ingest/run.ts (federal orchestrator).
-    const { data, error } = await supabase
-      .from("rfp_opportunities")
-      .upsert(rows as unknown as never[], {
-        onConflict: "source,source_id",
-        ignoreDuplicates: false,
-      })
-      .select("id");
+    type IdRow = { id: string };
+    const idRows: IdRow[] = [];
+    let upsertError: string | null = null;
 
-    if (error) {
-      result.errors.push(`upsert failed: ${error.message}`);
+    // Chunk upserts so large public datasets like California Grants do not
+    // hit Postgres statement timeouts while refreshing ~2K records.
+    for (let start = 0; start < rows.length; start += UPSERT_BATCH_SIZE) {
+      const batch = rows.slice(start, start + UPSERT_BATCH_SIZE);
+      const { data, error } = await supabase
+        .from("rfp_opportunities")
+        .upsert(batch as unknown as never[], {
+          onConflict: "source,source_id",
+          ignoreDuplicates: false,
+        })
+        .select("id");
+
+      if (error) {
+        upsertError = error.message;
+        result.errors.push(`upsert failed: ${error.message}`);
+        break;
+      }
+
+      idRows.push(...(((data ?? []) as unknown as IdRow[]) ?? []));
+    }
+
+    if (upsertError) {
       await recordDrift({
         source,
         reason: "shape_mismatch",
         details: {
           stage: "upsert",
-          message: error.message,
+          message: upsertError,
           sample_count: rows.length,
+          batch_size: UPSERT_BATCH_SIZE,
         },
       }).catch(() => {});
     } else {
-      type IdRow = { id: string };
-      const idRows = (data ?? []) as IdRow[];
       result.upserted = idRows.length;
       result.upserted_ids = idRows.map((r: IdRow) => String(r.id));
     }
 
     // Touch last_seen_at separately if the column exists. Failure here is
     // non-fatal (column may not exist yet pre-05-01).
-    if (rows.length > 0 && !error) {
+    if (rows.length > 0 && !upsertError) {
       const ids = result.upserted_ids;
       if (ids.length > 0) {
         for (let start = 0; start < ids.length; start += LAST_SEEN_BATCH_SIZE) {
