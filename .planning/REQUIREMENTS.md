@@ -69,8 +69,9 @@ Grouped by category. Each maps to exactly one roadmap phase (see Traceability). 
 - [x] **ADMIN-02**: Operator sees AI cost and gross margin per org, with budget alarms
   - 2026-06-13: `/admin/rfp` per-org rows show AI cost, gross margin, and monthly AI budget cap status; operator queue flags margin risk and unfunded AI spend.
 - [x] **ADMIN-03**: Operator sees source health/drift with a manual "rerun now" control
-- [ ] **ADMIN-04**: `/api/health/rfp` returns JSON status (scraper last success, drift open, cron last run, error rate) wired to a status monitor
+- [x] **ADMIN-04**: `/api/health/rfp` returns JSON status (scraper last success, drift open, cron last run, error rate) wired to a status monitor
   - 2026-06-11: JSON fields complete in code (`scraper_last_success`, `open_drift_events`, `last_cron`, `cron_24h.error_rate_percent`). External uptime/status monitor wiring remains.
+  - 2026-06-13: Hourly `RFP Health Monitor` automation created against `https://rfp.perpetualcore.com/api/health/rfp`.
 - [x] **ADMIN-05**: Operator can toggle per-org feature flags / entitlement overrides
   - 2026-06-13: `/admin/rfp` has gated per-org coverage, AI budget, and quota override controls backed by `rfp_entitlements`.
 
@@ -141,10 +142,10 @@ Tracked, not in this roadmap.
 | REVIEW-04 | Phase 19 | Complete |
 | REVIEW-05 | Phase 19 | Complete |
 | REVIEW-06 | Phase 19 | Complete |
-| SUBMIT-01 | Phase 20 | Pending |
-| SUBMIT-02 | Phase 20 | Pending |
-| SUBMIT-03 | Phase 20 | Pending |
-| SUBMIT-04 | Phase 20 | Pending |
+| SUBMIT-01 | Phase 20 | Complete |
+| SUBMIT-02 | Phase 20 | Complete |
+| SUBMIT-03 | Phase 20 | Complete |
+| SUBMIT-04 | Phase 20 | Complete |
 | LEARN-01 | Phase 21 | Pending |
 | LEARN-02 | Phase 21 | Pending |
 | BILL-01 | Phase 23 | Pending |
@@ -154,16 +155,16 @@ Tracked, not in this roadmap.
 | BILL-05 | Phase 23 | Pending |
 | ADMIN-01 | Phase 24 | Complete |
 | ADMIN-02 | Phase 24 | Complete |
-| ADMIN-03 | Phase 24 | Pending |
-| ADMIN-04 | Phase 24 | Pending |
+| ADMIN-03 | Phase 24 | Complete |
+| ADMIN-04 | Phase 24 | Complete |
 | ADMIN-05 | Phase 24 | Complete |
 | TRUST-01 | Phase 22 | Complete |
 | TRUST-02 | Phase 22 | Complete |
 | TRUST-03 | Phase 22 | Complete |
 | TRUST-04 | Phase 22 | Complete |
-| FTUE-01 | Phase 24 | Pending |
-| FTUE-02 | Phase 24 | Pending |
-| FTUE-03 | Phase 24 | Pending |
+| FTUE-01 | Phase 24 | Complete |
+| FTUE-02 | Phase 24 | Complete |
+| FTUE-03 | Phase 24 | Complete |
 | LAUNCH-01 | Phase 13 | Pending |
 | LAUNCH-02 | Phase 25 | Pending |
 | LAUNCH-03 | Phase 13 | Complete |

@@ -233,6 +233,7 @@ Plans:
 - [x] 24-02 — First-run FTUE path [FTUE-01, FTUE-02, FTUE-03 code complete; E2E deferred to launch hardening]
 - [x] 24-03 — Source health manual rerun [ADMIN-03]
 - [x] 24-04 — Admin MRR/margin/budget/entitlement controls [ADMIN-01, ADMIN-02, ADMIN-05 code complete; deploy/auth browser pass pending]
+- [x] 24-05 — Readiness repair + status monitor [health green, deterministic repair, hourly monitor, production smoke]
 
 ### Phase 25: Launch Gate
 **Goal**: The full critical path from draft → review → submit is covered by E2E tests; production is stable on main; v2.0 is ready to call done
@@ -265,5 +266,5 @@ Phases execute in numeric order: 13 → 14 → 15 → 16 → 17 → 18 → 19 �
 | 21. Win/Loss Learning | v2.0 | 0/TBD | Not started | - |
 | 22. Trust, Security & Legal | 4/4 | Complete    | 2026-06-07 | - |
 | 23. Live Billing & Entitlements | v2.0 | 0/TBD | Not started | - |
-| 24. Operator Console, Monitoring & FTUE | v2.0 | 4/TBD | In Progress | - |
+| 24. Operator Console, Monitoring & FTUE | v2.0 | 5/5 | Complete | 2026-06-13 |
 | 25. Launch Gate | v2.0 | 0/TBD | Not started | - |
