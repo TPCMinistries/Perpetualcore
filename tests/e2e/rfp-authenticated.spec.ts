@@ -1,11 +1,11 @@
-import { expect, test } from "@playwright/test";
+import { expect, type Page, test } from "@playwright/test";
 
 const email = process.env.RFP_E2E_EMAIL;
 const password = process.env.RFP_E2E_PASSWORD;
 const orgId = process.env.RFP_E2E_ORG_ID;
 const proposalId = process.env.RFP_E2E_PROPOSAL_ID;
 
-async function signIn(page: Parameters<Parameters<typeof test>[1]>[0]["page"]) {
+async function signIn(page: Page) {
   await page.goto("/login");
   await page.locator('input[type="email"]').first().fill(email!);
   await page.locator('input[type="password"]').first().fill(password!);

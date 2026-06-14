@@ -6,7 +6,6 @@ import { extractPackageRequirements } from "@/lib/rfp/package/extract";
 import { extractRubricCriteria } from "@/lib/rfp/rubric/extract";
 import {
   guardedLLMCall,
-  budgetExceededResponse,
   BudgetExceededError,
 } from "@/lib/rfp/ai/guardrail";
 
