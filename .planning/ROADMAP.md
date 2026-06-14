@@ -104,7 +104,9 @@ Beachhead coverage uses what's ALREADY live: federal (SAM/Grants.gov/NIH/NSF) + 
   2. A simulated source failure (e.g., toggling the SAM.gov cron off) is detected within the SLA window and fires an operator alert
   3. An ingest run completes, retries on transient failure, and records last-success timestamp and row-delta in the source-health table — visible in logs or a query
   4. All three Level-1 sources (SAM.gov, Grants.gov, SBIR/STTR) have at least one successful ingest run recorded in production
-**Plans**: TBD
+**Plans**:
+- [x] 25-01 — Authenticated production E2E for proposal workroom/export/status path [LAUNCH-02 partial]
+- [ ] 25-02 — CI/main launch gate wiring [LAUNCH-02 closeout]
 
 ### Phase 16: Extended Discovery (Levels 2 & 3) + Saved Searches
 **Goal**: A declarative state-connector framework gives the product the ability to ingest ANY US state; tri-state (NY/NYC/NJ) + ≥20 states ship live via generic open-data connectors; National (IRS 990 foundations) and global (EU TED, UK, CanadaBuys) sources ingest and gate by entitlement; users can save searches and receive alerts. See `.planning/STATE-COVERAGE-PLAN.md`.
@@ -267,4 +269,4 @@ Phases execute in numeric order: 13 → 14 → 15 → 16 → 17 → 18 → 19 �
 | 22. Trust, Security & Legal | 4/4 | Complete    | 2026-06-07 | - |
 | 23. Live Billing & Entitlements | v2.0 | 0/TBD | Not started | - |
 | 24. Operator Console, Monitoring & FTUE | v2.0 | 5/5 | Complete | 2026-06-13 |
-| 25. Launch Gate | v2.0 | 0/TBD | Not started | - |
+| 25. Launch Gate | v2.0 | 1/2 | In Progress | - |

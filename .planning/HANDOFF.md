@@ -8,7 +8,7 @@
 
 ## Status
 
-Phase 19 and Phase 20 are closed. Phase 24 is in progress.
+Phase 19, Phase 20, and Phase 24 are closed. Phase 25 launch gate is in progress.
 
 The last production deployment from Phase 19 is:
 
@@ -171,7 +171,7 @@ Verified on production:
 Continue current phase per beachhead sequence:
 
 ```text
-Phase 24 — Operator Console, Monitoring & FTUE
+Phase 25 — Launch Gate
 ```
 
 Do not follow `gsd-tools` numeric next-phase output if it points elsewhere. The source of truth is ROADMAP "Execution Sequence":
@@ -191,7 +191,7 @@ Do not follow `gsd-tools` numeric next-phase output if it points elsewhere. The 
 
 ## Next Engineering Step
 
-Run an authenticated browser pass on `/admin/rfp` and continue with authenticated FTUE E2E. Remaining ADMIN-04 task is external uptime/status monitor wiring.
+Wire authenticated launch-gate E2E into CI/main branch protection, then run dogfood Uplift/IHA/TPC.
 
 ## Open Human Tasks
 

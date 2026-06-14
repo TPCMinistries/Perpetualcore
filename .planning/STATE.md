@@ -9,10 +9,10 @@ See: .planning/PROJECT.md (updated 2026-06-05)
 
 ## Current Position
 
-Phase: 24 of 25 IN PROGRESS — operator console, monitoring, FTUE
-Plan: 5 plans complete (24-01 health JSON; 24-02 FTUE; 24-03 source rerun controls; 24-04 admin margin/entitlement controls; 24-05 readiness repair)
-Status: Phase 24 core operator/admin/readiness work is production-green and deployed. External uptime monitor wiring and authenticated FTUE/admin browser passes remain.
-Last activity: 2026-06-13 — Production readiness repaired and deployed via `dpl_59P8uDKL6Bi7jTWCPxuJcWYN97mJ`. Score coverage recovered from 55.7% to 100.0%; `ca_grants` rerun succeeded with 1,932 fetched/upserted and 0 errors; 28 stale CA drift rows resolved; `/api/health/rfp` now returns `status=ok`, 27,225 / 27,225 expected matches, and 0 open drift events.
+Phase: 25 of 25 IN PROGRESS — launch gate
+Plan: 1 of 2 complete (25-01 authenticated production E2E; 25-02 CI/main launch gate wiring remains)
+Status: Phase 24 is complete. Phase 25 has authenticated production E2E coverage for the proposal workroom/export/status path; CI/main launch gating remains.
+Last activity: 2026-06-13 — Added authenticated launch-gate E2E for proposal workroom, submission bundle exports, readiness JSON, audit/manifest CSVs, bundle ZIP, and status transition/reset. Seeded a demo E2E org/user, removed duplicate demo orgs from repeat seed attempts, repaired deterministic coverage, and confirmed `/api/health/rfp` returns `status=ok`, 32,814 / 32,814 expected matches, 100% coverage, and 0 open drift events.
 
 Progress: [███████░░░] beachhead path 7/9 complete — next Phase 24 FTUE
 
@@ -125,6 +125,7 @@ Recent decisions affecting current work:
 - [Phase 24-04]: `/admin/rfp` now exposes active RFP MRR, AI spend, gross margin, and per-org entitlement override controls using existing `rfp_entitlements` nullable quota semantics.
 - [Phase 24-05]: Coverage repair and manual source reruns use deterministic no-AI scoring; health recovery no longer depends on external LLM credits.
 - [Phase 24-05]: Large match and state/city opportunity upserts are chunked to prevent PostgREST fetch failures and CA grants statement timeouts.
+- [Phase 25-01]: Authenticated production E2E now validates the proposal workroom, submission export endpoints, readiness JSON, and safe proposal status transitions.
 
 ### Pending Todos
 
@@ -141,5 +142,5 @@ Recent decisions affecting current work:
 ## Session Continuity
 
 Last session: 2026-06-13
-Stopped at: Phase 24 in progress. Admin controls and 24-05 readiness repair are deployed, smoke-tested, and production health is green. Authenticated `/admin/rfp` browser pass, external monitor wiring, and authenticated FTUE E2E remain.
-Resume file: `.planning/phases/24-operator-console-monitoring-ftue/24-05-SUMMARY.md` — next action is authenticated admin browser verification and FTUE E2E before dogfood Uplift/IHA/TPC.
+Stopped at: Phase 25 in progress. Authenticated production E2E passes for the proposal workroom/export/status path. Remaining launch work is CI/main launch-gate wiring and the human dogfood pass with Uplift/IHA/TPC.
+Resume file: `.planning/phases/25-launch-gate/25-01-SUMMARY.md` — next action is 25-02 CI/main launch-gate wiring, then dogfood Uplift/IHA/TPC.
