@@ -63,8 +63,8 @@ export const RFP_MODEL_RATES: Record<
 > = {
   'gpt-4o': { inputPerM: 2.5, outputPerM: 10.0 },
   'text-embedding-3-large': { inputPerM: 0.13, outputPerM: 0 },
-  'claude-sonnet-4-5': { inputPerM: 3.0, outputPerM: 15.0 },
-  'claude-haiku-4-5': { inputPerM: 0.25, outputPerM: 1.25 },
+  'claude-sonnet-4-5-20250929': { inputPerM: 3.0, outputPerM: 15.0 },
+  'claude-haiku-4-5-20251001': { inputPerM: 0.25, outputPerM: 1.25 },
 };
 
 /**

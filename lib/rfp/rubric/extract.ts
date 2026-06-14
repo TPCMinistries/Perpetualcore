@@ -6,8 +6,8 @@
  * text using Claude Structured Outputs + Zod schema validation.
  *
  * Model chain (Anthropic-first, mirrors lib/rfp/scoring/summary.ts exactly):
- *   Primary:    claude-sonnet-4-5
- *   Fallback:   claude-haiku-4-5
+ *   Primary:    claude-sonnet-4-5-20250929
+ *   Fallback:   claude-haiku-4-5-20251001
  *   Last resort: gpt-4o (added because Anthropic credit can exhaust)
  *
  * Hallucination guards (PITFALLS.md Pitfall 2 + Pitfall 6):
@@ -96,8 +96,8 @@ function getOpenAI(): OpenAI | null {
 // Model chain
 // ---------------------------------------------------------------------------
 
-const MODEL_PRIMARY = 'claude-sonnet-4-5';
-const MODEL_FALLBACK = 'claude-haiku-4-5';
+const MODEL_PRIMARY = 'claude-sonnet-4-5-20250929';
+const MODEL_FALLBACK = 'claude-haiku-4-5-20251001';
 const MODEL_OPENAI_FALLBACK = 'gpt-4o';
 const MODEL_CHAIN = [MODEL_PRIMARY, MODEL_FALLBACK, MODEL_OPENAI_FALLBACK];
 

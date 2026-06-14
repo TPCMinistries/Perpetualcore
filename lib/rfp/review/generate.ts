@@ -1,8 +1,9 @@
 /**
  * lib/rfp/review/generate.ts — Reviewer Agent v1 orchestrator.
  *
- * Phase 19-02 upgrade: Anthropic-first model chain (claude-sonnet-4-5 →
- * claude-haiku-4-5 → gpt-4o fallback), rubric-anchored criterion_id
+ * Phase 19-02 upgrade: Anthropic-first model chain
+ * (claude-sonnet-4-5-20250929 → claude-haiku-4-5-20251001 → gpt-4o fallback),
+ * rubric-anchored criterion_id
  * sanitization, and computeCostUsd from the guardrail.
  *
  * Contract (preserved from v1):
@@ -35,8 +36,8 @@ import { computeCostUsd } from "@/lib/rfp/ai/guardrail";
 // Model chain (mirrors lib/rfp/scoring/summary.ts pattern exactly)
 // ---------------------------------------------------------------------------
 
-const MODEL_PRIMARY = "claude-sonnet-4-5";
-const MODEL_FALLBACK = "claude-haiku-4-5";
+const MODEL_PRIMARY = "claude-sonnet-4-5-20250929";
+const MODEL_FALLBACK = "claude-haiku-4-5-20251001";
 const MODEL_OPENAI_FALLBACK = "gpt-4o";
 const MODEL_CHAIN = [MODEL_PRIMARY, MODEL_FALLBACK, MODEL_OPENAI_FALLBACK];
 

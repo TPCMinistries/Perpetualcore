@@ -514,7 +514,7 @@ export async function scoreOnePairV2(
 
       return {
         agent: 'scoring_v2' as const,
-        model: 'claude-sonnet-4-5', // primary model used by generateExplainedSummary
+        model: 'claude-sonnet-4-5-20250929', // primary model used by generateExplainedSummary
         tokensIn: summary.tokensIn,
         tokensOut: summary.tokensOut,
         costUsd: summary.costUsd,
