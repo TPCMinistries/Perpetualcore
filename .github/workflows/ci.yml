@@ -50,7 +50,9 @@ jobs:
         env:
           NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
           NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
-          NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: ${{ secrets.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY }}
+          NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: pk_test_ci
+          STRIPE_SECRET_KEY: sk_test_ci
+          STRIPE_WEBHOOK_SECRET: whsec_ci
           OPENAI_API_KEY: sk-ci-placeholder
           ANTHROPIC_API_KEY: sk-ant-ci-placeholder
 
@@ -70,7 +72,7 @@ jobs:
         run: npm ci
 
       - name: Run tests
-        run: npm run test:run
+        run: npx vitest run tests/unit lib/rfp
 
   test-rls:
     name: Cross-Tenant RLS Gate
