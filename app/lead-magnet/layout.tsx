@@ -1,13 +1,13 @@
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Free AI Productivity Guide - Download Now",
+  title: "AI Operating System Map - Download | Perpetual Core",
   description:
-    "Download our free guide to AI-powered productivity. Learn how to automate repetitive tasks, streamline communication, and make smarter decisions with AI.",
+    "Download the AI Operating System Map for leaders who need to connect sales, operations, knowledge, customer communication, and executive visibility.",
   openGraph: {
-    title: "Free AI Productivity Guide | Perpetual Core",
+    title: "AI Operating System Map | Perpetual Core",
     description:
-      "Learn how to automate tasks, streamline communication, and boost productivity with AI.",
+      "A practical map for deciding where AI should enter the company first and how it expands into an operating system.",
   },
 };
 

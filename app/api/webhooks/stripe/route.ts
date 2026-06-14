@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/server";
 import {
+  sendEmail,
   sendMarketplacePurchaseEmail,
   sendPaymentReceiptEmail,
   sendPaymentFailedEmail,
@@ -171,9 +172,219 @@ async function handleCheckoutCompleted(
     return;
   }
 
+  if (metadata.type === "perpetual_core_package") {
+    await handlePackageCheckoutCompleted(supabase, session, metadata);
+    return;
+  }
+
   // Otherwise, it's a regular subscription checkout
   // The subscription will be handled by customer.subscription.created
   console.log("Checkout completed for subscription:", session.subscription);
+}
+
+function getSalesOwnerUserId() {
+  return process.env.LORENZO_USER_ID || process.env.DEFAULT_WEBHOOK_USER_ID || process.env.SALES_OWNER_USER_ID || null;
+}
+
+function splitName(name: string) {
+  const parts = name.trim().split(/\s+/).filter(Boolean);
+  const firstName = parts[0] || name;
+  const lastName = parts.length > 1 ? parts.slice(1).join(" ") : null;
+  return { firstName, lastName };
+}
+
+function estimateValueForPackage(packageId: string, amountTotal: number | null) {
+  if (amountTotal && amountTotal > 0) return Math.round(amountTotal / 100);
+  if (packageId === "operating-lane-deposit") return 30000;
+  if (packageId === "first-workflow") return 12000;
+  if (packageId === "guided-setup") return 5000;
+  if (packageId === "software-access") return 499;
+  return null;
+}
+
+async function syncPackageBuyerLead(
+  supabase: any,
+  session: Stripe.Checkout.Session,
+  metadata: Stripe.Metadata,
+  formattedAmount: string,
+) {
+  const ownerUserId = getSalesOwnerUserId();
+  const customerEmail = session.customer_details?.email || session.customer_email || "";
+  const customerName = session.customer_details?.name || "Package buyer";
+  const customerPhone = session.customer_details?.phone || "";
+  const packageName = metadata.package_name || "Perpetual Core package";
+  const packageId = metadata.package_id || "unknown";
+  const metadataLeadId = metadata.lead_id || "";
+
+  if (!ownerUserId || !customerEmail) return metadataLeadId || "";
+
+  const now = new Date().toISOString();
+  const { firstName, lastName } = splitName(customerName);
+  const paymentNotes = [
+    "Paid Perpetual Core package",
+    `Package: ${packageName} (${packageId})`,
+    `Amount: ${formattedAmount}`,
+    `Stripe session: ${session.id}`,
+  ].join("\n");
+
+  const existingQuery = supabase
+    .from("leads")
+    .select("id, notes, metadata, tags, status, ai_insights")
+    .eq("user_id", ownerUserId)
+    .order("created_at", { ascending: false })
+    .limit(1);
+
+  const { data: existingLead } = metadataLeadId
+    ? await existingQuery.eq("id", metadataLeadId).maybeSingle()
+    : await existingQuery.eq("email", customerEmail).maybeSingle();
+
+  const currentMetadata =
+    existingLead?.metadata && typeof existingLead.metadata === "object" && !Array.isArray(existingLead.metadata)
+      ? existingLead.metadata
+      : {};
+  const currentInsights =
+    existingLead?.ai_insights && typeof existingLead.ai_insights === "object" && !Array.isArray(existingLead.ai_insights)
+      ? existingLead.ai_insights
+      : {};
+  const currentTags = Array.isArray(existingLead?.tags) ? existingLead.tags : [];
+  const leadPayload = {
+    user_id: ownerUserId,
+    name: customerName,
+    first_name: firstName,
+    last_name: lastName,
+    contact_name: customerName,
+    email: customerEmail,
+    contact_email: customerEmail,
+    phone: customerPhone || null,
+    company: session.customer_details?.name || customerName,
+    company_name: session.customer_details?.name || customerName,
+    title: `${packageName} buyer`,
+    status: "won",
+    stage: "paid_intake",
+    source: "stripe",
+    source_detail: packageId,
+    estimated_value: estimateValueForPackage(packageId, session.amount_total),
+    notes: existingLead?.notes ? `${existingLead.notes}\n\n---\n${paymentNotes}` : paymentNotes,
+    tags: Array.from(new Set([...currentTags, "paid-package", "stripe", packageId])),
+    metadata: {
+      ...currentMetadata,
+      stripePackageCheckout: {
+        packageId,
+        packageName,
+        amount: formattedAmount,
+        sessionId: session.id,
+        paymentStatus: session.payment_status,
+        submittedAt: now,
+      },
+    },
+    ai_insights: {
+      ...currentInsights,
+      contactSales: {
+        plan: packageId,
+        product: "paid-package",
+        nextAction: "Send package intake, confirm kickoff window, then generate the account operating plan.",
+      },
+      closePath: {
+        ...(typeof currentInsights.closePath === "object" && currentInsights.closePath && !Array.isArray(currentInsights.closePath)
+          ? currentInsights.closePath
+          : {}),
+        paymentStatus: "paid",
+        buyerStage: "paid_intake",
+        commercialNextStep: "Complete package intake and open kickoff handoff.",
+        updatedAt: now,
+      },
+      accountOfferName: packageName,
+      accountNextStep: "Complete package intake and open kickoff handoff.",
+    },
+    updated_at: now,
+  };
+
+  const leadResult = existingLead?.id
+    ? await supabase.from("leads").update(leadPayload).eq("id", existingLead.id).select("id").single()
+    : await supabase
+        .from("leads")
+        .insert({
+          ...leadPayload,
+          created_at: now,
+        })
+        .select("id")
+        .single();
+
+  if (leadResult.error || !leadResult.data?.id) {
+    console.error("Failed to sync paid package lead:", leadResult.error);
+    return metadataLeadId || "";
+  }
+
+  await supabase.from("lead_activities").insert({
+    lead_id: leadResult.data.id,
+    user_id: ownerUserId,
+    activity_type: "package_paid",
+    title: `Paid package: ${packageName}`,
+    description: paymentNotes,
+    to_value: formattedAmount,
+  });
+
+  return leadResult.data.id;
+}
+
+async function handlePackageCheckoutCompleted(
+  supabase: any,
+  session: Stripe.Checkout.Session,
+  metadata: Stripe.Metadata
+) {
+  const packageName = metadata.package_name || "Perpetual Core package";
+  const packageId = metadata.package_id || "unknown";
+  const customerEmail = session.customer_details?.email || session.customer_email || "";
+  const customerName = session.customer_details?.name || "Package buyer";
+  const customerPhone = session.customer_details?.phone || "";
+  const formattedAmount = new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: (session.currency || "usd").toUpperCase(),
+  }).format((session.amount_total || 0) / 100);
+  const leadId = await syncPackageBuyerLead(supabase, session, metadata, formattedAmount);
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://perpetualcore.com";
+  const intakeUrl = `${baseUrl}/package-intake?session_id=${encodeURIComponent(session.id)}&package=${encodeURIComponent(packageId)}${leadId ? `&lead=${encodeURIComponent(leadId)}` : ""}`;
+
+  const salesHtml = `
+    <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; line-height: 1.6; color: #111827;">
+      <h1>Paid Perpetual Core package</h1>
+      <p>A buyer completed checkout for <strong>${packageName}</strong>.</p>
+      <table cellpadding="8" style="border-collapse: collapse;">
+        <tr><td><strong>Amount</strong></td><td>${formattedAmount}</td></tr>
+        <tr><td><strong>Package ID</strong></td><td>${packageId}</td></tr>
+        <tr><td><strong>Name</strong></td><td>${customerName}</td></tr>
+        <tr><td><strong>Email</strong></td><td>${customerEmail || "Not provided"}</td></tr>
+        <tr><td><strong>Phone</strong></td><td>${customerPhone || "Not provided"}</td></tr>
+        <tr><td><strong>Stripe session</strong></td><td>${session.id}</td></tr>
+      </table>
+      <p><a href="${intakeUrl}">Buyer intake link</a></p>
+    </div>
+  `;
+
+  await sendEmail(
+    process.env.SALES_EMAIL || "sales@perpetualcore.com",
+    `Paid package: ${packageName} (${formattedAmount})`,
+    salesHtml
+  );
+
+  if (!customerEmail) return;
+
+  const buyerHtml = `
+    <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; line-height: 1.6; color: #111827;">
+      <h1>Payment received</h1>
+      <p>Hi ${customerName},</p>
+      <p>Your <strong>${packageName}</strong> payment was received.</p>
+      <p>The next step is intake context: company, workflow, data, and outcome details so we can orient the first operating lane.</p>
+      <p>
+        <a href="${intakeUrl}" style="display:inline-block;background:#111827;color:#ffffff;padding:12px 18px;border-radius:6px;text-decoration:none;font-weight:600;">
+          Send intake context
+        </a>
+      </p>
+      <p>You can also reply directly to this email if that is easier.</p>
+    </div>
+  `;
+
+  await sendEmail(customerEmail, "Next steps for your Perpetual Core package", buyerHtml);
 }
 
 /**

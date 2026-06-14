@@ -4,10 +4,15 @@ import { useState } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { Menu, X } from "lucide-react";
+import { Menu } from "lucide-react";
 
+/**
+ * Mobile nav for public marketing pages — mirrors the new studio-frame
+ * top-level (Studio | Products | Industries | Pricing | About).
+ */
 export function PublicMobileNav() {
   const [open, setOpen] = useState(false);
+  const close = () => setOpen(false);
 
   return (
     <Sheet open={open} onOpenChange={setOpen}>
@@ -15,105 +20,130 @@ export function PublicMobileNav() {
         <Button
           variant="ghost"
           size="icon"
-          className="md:hidden h-10 w-10 rounded-lg bg-primary/10 dark:bg-primary/20 hover:bg-primary/20 dark:hover:bg-primary/30 text-primary border border-primary/20 dark:border-primary/30 shadow-lg active:scale-95 transition-all"
+          className="md:hidden h-9 w-9 rounded-sm text-muted-foreground hover:text-foreground hover:bg-accent border border-border/60 shadow-none active:scale-95 transition-all"
         >
-          <Menu className="h-5 w-5" />
+          <Menu className="h-4 w-4" />
           <span className="sr-only">Toggle navigation menu</span>
         </Button>
       </SheetTrigger>
-      <SheetContent side="left" className="w-80 p-0 bg-white dark:bg-slate-900">
-        <div className="flex h-full flex-col bg-white dark:bg-slate-900">
-          {/* Logo/Brand */}
-          <div className="border-b border-slate-200 dark:border-slate-800 px-6 py-5 bg-gradient-to-r from-slate-50/50 to-blue-50/30 dark:from-slate-900/50 dark:to-blue-950/20">
-            <Link
-              href="/"
-              className="flex items-center space-x-3 group"
-              onClick={() => setOpen(false)}
-            >
-              <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-slate-900 to-slate-700 dark:from-slate-100 dark:to-slate-300 flex items-center justify-center font-bold text-white dark:text-slate-900 shadow-md">
-                AI
-              </div>
-              <span className="text-xl font-bold text-slate-900 dark:text-slate-100 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+      <SheetContent side="left" className="w-72 p-0 bg-background">
+        <div className="flex h-full flex-col bg-background">
+          {/* Wordmark */}
+          <div className="border-b border-border/60 px-6 py-5">
+            <Link href="/" className="flex items-center gap-2.5" onClick={close}>
+              <span aria-hidden className="block h-3 w-3 bg-foreground" />
+              <span className="text-[15px] font-semibold tracking-tight text-foreground">
                 Perpetual Core
               </span>
             </Link>
           </div>
 
-          {/* Navigation Links */}
-          <nav className="flex-1 px-4 py-6 overflow-y-auto">
-            <div className="space-y-2">
-              <Link
-                href="/"
-                onClick={() => setOpen(false)}
-                className="block px-4 py-3 text-base font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-slate-100 rounded-xl transition-all active:scale-[0.98]"
-              >
-                Home
+          {/* Nav Links */}
+          <nav className="flex-1 px-3 py-5 overflow-y-auto">
+            <div className="space-y-0.5">
+              <div className="px-4 py-2 text-xs font-medium text-muted-foreground/60 uppercase tracking-widest">
+                Studio
+              </div>
+              <Link href="/studio" onClick={close} className="block px-4 py-2.5 text-sm font-medium text-foreground hover:bg-accent rounded-sm transition-colors">
+                Overview
               </Link>
-              <Link
-                href="/solutions"
-                onClick={() => setOpen(false)}
-                className="block px-4 py-3 text-base font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-slate-100 rounded-xl transition-all active:scale-[0.98]"
-              >
-                Solutions
+              <Link href="/studio/retainers" onClick={close} className="block px-4 py-2.5 text-sm text-muted-foreground hover:text-foreground hover:bg-accent rounded-sm transition-colors">
+                Retainers
               </Link>
-              <Link
-                href="/#features"
-                onClick={() => setOpen(false)}
-                className="block px-4 py-3 text-base font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-slate-100 rounded-xl transition-all active:scale-[0.98]"
-              >
-                Features
+              <Link href="/studio/engagements" onClick={close} className="block px-4 py-2.5 text-sm text-muted-foreground hover:text-foreground hover:bg-accent rounded-sm transition-colors">
+                Engagements
               </Link>
-              <Link
-                href="/pricing"
-                onClick={() => setOpen(false)}
-                className="block px-4 py-3 text-base font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-slate-100 rounded-xl transition-all active:scale-[0.98]"
-              >
+              <Link href="/studio/methodology" onClick={close} className="block px-4 py-2.5 text-sm text-muted-foreground hover:text-foreground hover:bg-accent rounded-sm transition-colors">
+                Methodology
+              </Link>
+              <Link href="/studio/process" onClick={close} className="block px-4 py-2.5 text-sm text-muted-foreground hover:text-foreground hover:bg-accent rounded-sm transition-colors">
+                Process
+              </Link>
+              <Link href="/studio/case-studies" onClick={close} className="block px-4 py-2.5 text-sm text-muted-foreground hover:text-foreground hover:bg-accent rounded-sm transition-colors">
+                Case Studies
+              </Link>
+
+              <div className="border-t border-border/60 my-3" />
+              <div className="px-4 py-2 text-xs font-medium text-muted-foreground/60 uppercase tracking-widest">
+                Products
+              </div>
+              <Link href="/products" onClick={close} className="block px-4 py-2.5 text-sm font-medium text-foreground hover:bg-accent rounded-sm transition-colors">
+                Portfolio
+              </Link>
+              <Link href="/products/atlas" onClick={close} className="block px-4 py-2.5 text-sm text-muted-foreground hover:text-foreground hover:bg-accent rounded-sm transition-colors">
+                Atlas
+              </Link>
+              <Link href="/products/sentinel" onClick={close} className="block px-4 py-2.5 text-sm text-muted-foreground hover:text-foreground hover:bg-accent rounded-sm transition-colors">
+                Sentinel
+              </Link>
+              <Link href="/products/sage" onClick={close} className="block px-4 py-2.5 text-sm text-muted-foreground hover:text-foreground hover:bg-accent rounded-sm transition-colors">
+                Sage
+              </Link>
+              <Link href="/products/vellum" onClick={close} className="block px-4 py-2.5 text-sm text-muted-foreground hover:text-foreground hover:bg-accent rounded-sm transition-colors">
+                Vellum
+              </Link>
+              <a href="https://rfp.perpetualcore.com" target="_blank" rel="noopener noreferrer" onClick={close} className="block px-4 py-2.5 text-sm text-muted-foreground hover:text-foreground hover:bg-accent rounded-sm transition-colors">
+                RFP Engine ↗
+              </a>
+              <Link href="/products/rfp-sentry" onClick={close} className="block px-4 py-2.5 text-sm text-muted-foreground hover:text-foreground hover:bg-accent rounded-sm transition-colors">
+                RFP Sentry
+              </Link>
+
+              <div className="border-t border-border/60 my-3" />
+              <Link href="/fund" onClick={close} className="block px-4 py-2.5 text-sm font-medium text-foreground hover:bg-accent rounded-sm transition-colors">
+                Fund <span className="text-xs font-mono text-muted-foreground ml-2">DeepFutures</span>
+              </Link>
+              <Link href="/institute" onClick={close} className="block px-4 py-2.5 text-sm font-medium text-foreground hover:bg-accent rounded-sm transition-colors">
+                Institute <span className="text-xs font-mono text-muted-foreground ml-2">IHA</span>
+              </Link>
+              <Link href="/engine" onClick={close} className="block px-4 py-2.5 text-sm font-medium text-foreground hover:bg-accent rounded-sm transition-colors">
+                The Engine
+              </Link>
+
+              <div className="border-t border-border/60 my-3" />
+              <Link href="/solutions" onClick={close} className="block px-4 py-2.5 text-sm text-muted-foreground hover:text-foreground hover:bg-accent rounded-sm transition-colors">
+                Industries
+              </Link>
+              <Link href="/solutions/furniture-ff-e" onClick={close} className="block px-4 py-2.5 text-sm text-muted-foreground hover:text-foreground hover:bg-accent rounded-sm transition-colors">
+                Furniture / FF&E
+              </Link>
+              <Link href="/solutions/local-business" onClick={close} className="block px-4 py-2.5 text-sm text-muted-foreground hover:text-foreground hover:bg-accent rounded-sm transition-colors">
+                Local Business
+              </Link>
+              <Link href="/solutions/professional-services" onClick={close} className="block px-4 py-2.5 text-sm text-muted-foreground hover:text-foreground hover:bg-accent rounded-sm transition-colors">
+                Professional Services
+              </Link>
+              <Link href="/lead-magnet" onClick={close} className="block px-4 py-2.5 text-sm text-muted-foreground hover:text-foreground hover:bg-accent rounded-sm transition-colors">
+                AI OS Map
+              </Link>
+              <Link href="/pricing" onClick={close} className="block px-4 py-2.5 text-sm text-muted-foreground hover:text-foreground hover:bg-accent rounded-sm transition-colors">
                 Pricing
               </Link>
-
-              <div className="border-t border-slate-200 dark:border-slate-800 my-4" />
-
-              <div className="px-4 py-2 text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider">
-                Enterprise
-              </div>
-              <Link
-                href="/consultation"
-                onClick={() => setOpen(false)}
-                className="block px-4 py-3 text-base font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-slate-100 rounded-xl transition-all active:scale-[0.98]"
-              >
-                <div>Guided Implementation</div>
-                <div className="text-xs text-slate-600 dark:text-slate-400 font-normal">For teams of 10-100</div>
+              <Link href="/packages" onClick={close} className="block px-4 py-2.5 text-sm text-muted-foreground hover:text-foreground hover:bg-accent rounded-sm transition-colors">
+                Starter Packages
               </Link>
-              <Link
-                href="/enterprise-demo"
-                onClick={() => setOpen(false)}
-                className="block px-4 py-3 text-base font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-slate-100 rounded-xl transition-all active:scale-[0.98]"
-              >
-                <div>Enterprise Solutions</div>
-                <div className="text-xs text-slate-600 dark:text-slate-400 font-normal">White-glove for 100+</div>
+              <Link href="/compare" onClick={close} className="block px-4 py-2.5 text-sm text-muted-foreground hover:text-foreground hover:bg-accent rounded-sm transition-colors">
+                Compare
+              </Link>
+              <Link href="/about" onClick={close} className="block px-4 py-2.5 text-sm text-muted-foreground hover:text-foreground hover:bg-accent rounded-sm transition-colors">
+                About
               </Link>
 
-              <div className="border-t border-slate-200 dark:border-slate-800 my-4" />
-
-              <Link
-                href="/login"
-                onClick={() => setOpen(false)}
-                className="block px-4 py-3 text-base font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-slate-100 rounded-xl transition-all active:scale-[0.98]"
-              >
+              <div className="border-t border-border/60 my-3" />
+              <Link href="/login" onClick={close} className="block px-4 py-2.5 text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-accent rounded-sm transition-colors">
                 Sign In
               </Link>
             </div>
           </nav>
 
-          {/* CTA Section */}
-          <div className="border-t border-slate-200 dark:border-slate-800 p-4">
-            <Button asChild className="w-full shadow-lg hover:shadow-xl transition-all h-12 text-base font-semibold">
-              <Link href="/signup" onClick={() => setOpen(false)}>
-                Get Started Free
+          <div className="border-t border-border/60 p-4">
+            <Button asChild className="w-full text-sm font-medium shadow-none h-10">
+              <Link href="/contact-sales" onClick={close}>
+                Map My AI Operating System
               </Link>
             </Button>
-            <p className="text-center text-xs text-slate-600 dark:text-slate-400 mt-3">
-              14-day free trial • No credit card required
+            <p className="text-center text-xs text-muted-foreground mt-3">
+              Start with the strongest workflow. Build toward the full system.
             </p>
           </div>
         </div>

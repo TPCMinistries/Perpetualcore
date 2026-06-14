@@ -389,6 +389,18 @@ export const NAVIGATION_CONFIG: NavigationSection[] = [
         },
       },
       {
+        name: "Operating",
+        href: "/dashboard/operating",
+        icon: Building2,
+        adaptiveConfig: {
+          visibleFor: ["beginner", "intermediate", "advanced"],
+          complexity: "essential",
+          badge: "new",
+          isCore: true,
+          helpText: "Unified client operating dashboard for leads, packages, revenue, and active lanes",
+        },
+      },
+      {
         name: "Outreach",
         href: "/dashboard/outreach",
         icon: Send,
@@ -686,14 +698,14 @@ export const NAVIGATION_CONFIG_V2: NavigationSection[] = [
     bgColor: "bg-muted/30",
     items: [
       {
-        name: "Home",
+        name: "Briefing",
         href: "/dashboard/home",
         icon: LayoutDashboard,
         adaptiveConfig: {
           visibleFor: ["beginner", "intermediate", "advanced"],
           complexity: "essential",
           isCore: true,
-          helpText: "Your daily briefing - priorities, insights, and what needs attention",
+          helpText: "Daily briefing, priorities, insights, and what needs attention",
         },
       },
       {
@@ -730,6 +742,18 @@ export const NAVIGATION_CONFIG_V2: NavigationSection[] = [
     collapsible: true,
     defaultCollapsed: false,
     items: [
+      {
+        name: "Operating",
+        href: "/dashboard/operating",
+        icon: Network,
+        adaptiveConfig: {
+          visibleFor: ["beginner", "intermediate", "advanced"],
+          complexity: "essential",
+          badge: "new",
+          isCore: true,
+          helpText: "Unified Perpetual Core command center for leads, paid packages, client lanes, and next actions",
+        },
+      },
       {
         name: "Operate",
         href: "/dashboard/operate",

@@ -31,7 +31,7 @@ export const NurtureDay6: React.FC<NurtureDay6Props> = ({ firstName }) => (
         </Text>
 
         <Section style={recapBox}>
-          <Text style={recapItem}>✓ The AI Productivity Guide</Text>
+          <Text style={recapItem}>✓ The AI Operating System Map</Text>
           <Text style={recapItem}>✓ Common AI mistakes to avoid</Text>
           <Text style={recapItem}>✓ Real case studies with proven results</Text>
           <Text style={recapItem}>✓ 30-Day Implementation Roadmap</Text>
@@ -83,7 +83,7 @@ export const NurtureDay6: React.FC<NurtureDay6Props> = ({ firstName }) => (
           </Text>
           <Text style={pathTextHighlight}>
             <strong>Implementation:</strong> 2 weeks to full deployment<br />
-            <strong>Cost:</strong> Starting at $99/month (replaces 5+ tools)
+            <strong>Cost:</strong> Product pilots from $499/month; managed implementation scoped separately
           </Text>
         </Section>
 

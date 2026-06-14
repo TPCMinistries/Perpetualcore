@@ -59,6 +59,8 @@
     "@sentry/nextjs": "^10.29.0",
     "@slack/events-api": "^3.0.1",
     "@slack/web-api": "^7.13.0",
+    "@stripe/react-stripe-js": "^6.3.0",
+    "@stripe/stripe-js": "^9.4.0",
     "@supabase/auth-helpers-nextjs": "^0.10.0",
     "@supabase/ssr": "^0.7.0",
     "@supabase/storage-js": "^2.75.1",

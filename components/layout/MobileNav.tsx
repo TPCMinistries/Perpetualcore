@@ -94,7 +94,7 @@ export function MobileNav({ userProfile }: MobileNavProps) {
           {/* Logo/Brand */}
           <div className="px-6 py-5">
             <Link
-              href="/dashboard/home"
+              href="/dashboard/operating"
               className="flex items-center space-x-3 group"
               onClick={() => setOpen(false)}
             >

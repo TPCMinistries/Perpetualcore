@@ -74,7 +74,7 @@ function DashboardLayoutInner({
             {profile && <MobileNav userProfile={profile} />}
 
             {/* Brand on Mobile - Gradient logo */}
-            <Link href="/dashboard" className="md:hidden flex items-center space-x-2 group">
+            <Link href="/dashboard/operating" className="md:hidden flex items-center space-x-2 group">
               <div className="h-8 w-8 rounded-xl bg-gradient-to-br from-violet-500 via-blue-500 to-cyan-500 flex items-center justify-center text-white font-bold text-sm shadow-glow-sm">
                 AI
               </div>

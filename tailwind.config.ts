@@ -17,6 +17,11 @@ const config: Config = {
       },
     },
     extend: {
+      fontFamily: {
+        sans: ["var(--font-inter)", "system-ui", "sans-serif"],
+        mono: ["var(--font-mono)", "ui-monospace", "SFMono-Regular", "Menlo", "monospace"],
+        display: ["var(--font-display)", "Iowan Old Style", "Georgia", "serif"],
+      },
       colors: {
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
@@ -56,6 +61,20 @@ const config: Config = {
           hover: "hsl(var(--sidebar-hover))",
           active: "hsl(var(--sidebar-active))",
         },
+        ink: {
+          DEFAULT: "hsl(var(--ink))",
+          muted: "hsl(var(--ink-muted))",
+        },
+        surface: {
+          DEFAULT: "hsl(var(--surface))",
+          hover: "hsl(var(--surface-hover))",
+          dark: "hsl(var(--surface-dark))",
+        },
+        status: {
+          live: "hsl(var(--status-live))",
+          pilot: "hsl(var(--status-pilot))",
+          invite: "hsl(var(--status-invite))",
+        },
       },
       borderRadius: {
         lg: "var(--radius)",
@@ -87,6 +106,10 @@ const config: Config = {
           "0%": { transform: "translateX(-100%)" },
           "100%": { transform: "translateX(100%)" },
         },
+        "fade-up": {
+          "0%": { opacity: "0", transform: "translateY(12px)" },
+          "100%": { opacity: "1", transform: "translateY(0)" },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
@@ -97,6 +120,7 @@ const config: Config = {
         "gradient-shift": "gradient-shift 8s ease infinite",
         "pulse-soft": "pulse-soft 3s ease-in-out infinite",
         shimmer: "shimmer 2s linear infinite",
+        "fade-up": "fade-up 0.6s ease-out both",
       },
     },
   },

@@ -8,6 +8,7 @@ import { processScheduledBriefings } from "@/lib/briefings/morning-briefing";
 import { createAdminClient } from "@/lib/supabase/server";
 import { logger } from "@/lib/logging";
 import { processInbox } from "@/lib/agents/inbox/processor";
+import { isAuthorizedCronRequest } from "@/lib/cron/auth";
 
 interface AgentSchedule {
   agentType: string;
@@ -102,8 +103,7 @@ async function logAgentExecution(
 export async function GET(request: Request) {
   try {
     // Verify cron secret for security
-    const authHeader = request.headers.get("authorization");
-    if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
+    if (!isAuthorizedCronRequest(request)) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 

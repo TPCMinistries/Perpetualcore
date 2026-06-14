@@ -10,6 +10,9 @@ import {
   Zap, Lock, Building2, XCircle, AlertCircle, Play, ChevronDown, Minus, Plus,
   Sparkles, MessageSquare, Mail, Calendar, MapPin, Key
 } from "lucide-react";
+import { EngagementBanner } from "@/components/landing/EngagementBanner";
+import { Navbar } from "@/components/landing/Navbar";
+import { Footer } from "@/components/landing/Footer";
 
 export default function RealEstatePage() {
   // FAQ State
@@ -17,28 +20,9 @@ export default function RealEstatePage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white dark:from-gray-900 dark:to-gray-800">
-      {/* Header */}
-      <header className="border-b bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm sticky top-0 z-50">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <Link href="/" className="flex items-center space-x-2">
-            <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center text-primary-foreground font-bold">
-              AI
-            </div>
-            <span className="text-xl font-bold">Perpetual Core</span>
-          </Link>
-          <div className="flex items-center gap-4">
-            <Link href="#how-it-works" className="text-sm font-medium hover:underline hidden md:inline">
-              How It Works
-            </Link>
-            <Link href="#pricing" className="text-sm font-medium hover:underline hidden md:inline">
-              Pricing
-            </Link>
-            <Button asChild size="sm" className="md:size-default bg-gradient-to-r from-orange-500 to-red-600 hover:from-orange-600 hover:to-red-700">
-              <Link href="/contact-sales?plan=realestate">Schedule Demo →</Link>
-            </Button>
-          </div>
-        </div>
-      </header>
+      <Navbar />
+
+      <EngagementBanner />
 
       {/* Hero Section */}
       <section className="container mx-auto px-4 py-16 md:py-24 relative overflow-hidden">
@@ -325,7 +309,7 @@ export default function RealEstatePage() {
               <h3 className="text-3xl font-bold">Ask Anything, Anytime</h3>
               <p className="text-muted-foreground leading-relaxed">
                 Need to pull property details? Can't remember what a client said last week? Want to draft a follow-up email?
-                Just ask your AI Coach. It understands natural language and has perfect memory of every conversation and listing.
+                Just ask your AI Coach. It understands natural language and has complete context of every conversation and listing.
               </p>
 
               <div className="space-y-4">
@@ -995,7 +979,7 @@ export default function RealEstatePage() {
               <CardContent className="p-8">
                 <div className="grid md:grid-cols-2 gap-x-8 gap-y-3 mb-8">
                   {[
-                    "Infinite conversation memory",
+                    "Infinite conversation context",
                     "24/7 AI Coach",
                     "Smart listing creator",
                     "Client relationship manager",
@@ -1099,7 +1083,7 @@ export default function RealEstatePage() {
               },
               {
                 question: "What if I already use a CRM like Follow Up Boss?",
-                answer: "Great! Perpetual Core can work alongside your existing CRM or replace it entirely—your choice. Many agents use Perpetual Core as their primary system because it has smarter memory and better automation. But if you love your current CRM, Perpetual Core can integrate with it and add AI superpowers on top."
+                answer: "Great! Perpetual Core can work alongside your existing CRM or replace it entirely—your choice. Many agents use Perpetual Core as their primary system because it has smarter context and better automation. But if you love your current CRM, Perpetual Core can integrate with it and add AI superpowers on top."
               },
               {
                 question: "Will this replace my transaction coordinator or assistant?",
@@ -1111,7 +1095,7 @@ export default function RealEstatePage() {
               },
               {
                 question: "What if I'm working with multiple clients at the same time?",
-                answer: "That's exactly what Perpetual Core is built for! It tracks every client separately with perfect memory. Switch between clients instantly—AI knows exactly where you left off with each one. No more confusion or mixing up details."
+                answer: "That's exactly what Perpetual Core is built for! It tracks every client separately with complete context. Switch between clients instantly—AI knows exactly where you left off with each one. No more confusion or mixing up details."
               },
               {
                 question: "Do you offer training or onboarding?",
@@ -1228,59 +1212,7 @@ export default function RealEstatePage() {
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="border-t py-12 bg-muted/30">
-        <div className="container mx-auto px-4">
-          <div className="grid md:grid-cols-4 gap-8 mb-8">
-            <div>
-              <Link href="/" className="flex items-center space-x-2 mb-4">
-                <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center text-primary-foreground font-bold">
-                  AI
-                </div>
-                <span className="text-lg font-bold">Perpetual Core</span>
-              </Link>
-              <p className="text-sm text-muted-foreground">
-                Your AI-powered assistant for real estate success.
-              </p>
-            </div>
-            <div>
-              <h3 className="font-semibold mb-4">Product</h3>
-              <ul className="space-y-2 text-sm text-muted-foreground">
-                <li><Link href="/features" className="hover:underline">Features</Link></li>
-                <li><Link href="/pricing" className="hover:underline">Pricing</Link></li>
-                <li><Link href="/security" className="hover:underline">Security</Link></li>
-                <li><Link href="/integrations" className="hover:underline">Integrations</Link></li>
-              </ul>
-            </div>
-            <div>
-              <h3 className="font-semibold mb-4">Resources</h3>
-              <ul className="space-y-2 text-sm text-muted-foreground">
-                <li><Link href="/blog" className="hover:underline">Blog</Link></li>
-                <li><Link href="/tutorials" className="hover:underline">Tutorials</Link></li>
-                <li><Link href="/webinars" className="hover:underline">Webinars</Link></li>
-                <li><Link href="/support" className="hover:underline">Support</Link></li>
-              </ul>
-            </div>
-            <div>
-              <h3 className="font-semibold mb-4">Company</h3>
-              <ul className="space-y-2 text-sm text-muted-foreground">
-                <li><Link href="/about" className="hover:underline">About</Link></li>
-                <li><Link href="/contact-sales" className="hover:underline">Contact Sales</Link></li>
-                <li><Link href="/careers" className="hover:underline">Careers</Link></li>
-                <li><Link href="/legal" className="hover:underline">Legal</Link></li>
-              </ul>
-            </div>
-          </div>
-          <div className="border-t pt-8 text-center text-sm text-muted-foreground">
-            <p className="mb-2">
-              © 2024 AI Operating System. All rights reserved. | SOC 2 Certified | Bank-Level Security
-            </p>
-            <p className="text-xs">
-              Perpetual Core is a software tool designed to assist real estate professionals. Users are responsible for compliance with all applicable real estate laws and regulations.
-            </p>
-          </div>
-        </div>
-      </footer>
+      <Footer />
     </div>
   );
 }

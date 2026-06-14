@@ -1,612 +1,505 @@
-"use client";
+/**
+ * /pricing — commercial architecture for the Perpetual Engine.
+ *
+ * Pricing is intentionally split by buyer intent:
+ *   1. Product surfaces — paid products and pilots.
+ *   2. Managed lanes — recurring operating functions.
+ *   3. Studio installs — scoped custom builds and Engine installs.
+ */
 
-import { useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { ArrowRight, Check, Layers, ShieldCheck, Workflow } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Check, Zap, Crown, Building2, Sparkles, ArrowRight, Users, Briefcase, Rocket } from "lucide-react";
-import { toast } from "sonner";
-import { PublicMobileNav } from "@/components/layout/PublicMobileNav";
+import { Navbar } from "@/components/landing/Navbar";
+import { Footer } from "@/components/landing/Footer";
 import { PageViewTracker } from "@/components/analytics/PageViewTracker";
-import { trackClientEvent } from "@/lib/analytics/track-event";
+import { JsonLd } from "@/components/seo/JsonLd";
+import { faqSchema } from "@/lib/seo/structured-data";
 
-const PLANS = [
+const PRICING_FAQ = [
   {
-    id: "free",
-    name: "Free",
-    description: "Perfect for trying out Perpetual Core",
-    price: 0,
-    checkoutEnabled: false,
-    interval: "forever",
-    icon: Sparkles,
-    popular: false,
-    badge: null,
-    features: [
-      "Infinite conversation memory",
-      "Personal knowledge base (RAG)",
-      "Gemini model (unlimited)",
-      "5 documents",
-      "1 GB storage",
-      "5 basic automations",
-      "Community support",
-    ],
-    limits: {
-      ai_messages: -1,
-      documents: 5,
-      storage_gb: 1,
-      team_members: 1,
-    },
+    question: "Why did the old $49 and $99 plans move off the main page?",
+    answer:
+      "Those prices make sense for a narrow personal tool or beta subscription. They do not describe the value of Sentinel, Sage, Atlas, RFP, Vellum, Atelier, Janice, or a custom AI operating system install. The main pricing page now reflects the full commercial architecture.",
   },
   {
-    id: "starter",
-    name: "Starter",
-    description: "For individuals and professionals",
-    price: 49,
-    checkoutEnabled: true,
-    interval: "per month",
-    icon: Zap,
-    popular: true,
-    badge: "Most Popular",
-    features: [
-      "Everything in Free, plus:",
-      "GPT-4o Mini (unlimited)",
-      "100 premium model messages/mo (Claude, GPT-4)",
-      "Unlimited documents & knowledge base",
-      "10 GB storage",
-      "Email & Calendar integration",
-      "Unlimited automations & workflows",
-      "Priority email support",
-    ],
-    limits: {
-      ai_messages: -1,
-      documents: -1,
-      storage_gb: 10,
-      team_members: 1,
-    },
+    question: "Can a smaller company still work with Perpetual Core?",
+    answer:
+      "Yes. Smaller companies usually begin with a paid diagnostic, a product pilot, or a managed lane around one revenue-critical workflow. The first engagement should be narrow enough to approve, but serious enough to create operating leverage.",
   },
   {
-    id: "pro",
-    name: "Pro",
-    description: "Power users who need unlimited AI",
-    price: 99,
-    checkoutEnabled: true,
-    interval: "per month",
-    icon: Crown,
-    popular: false,
-    badge: null,
-    features: [
-      "Everything in Starter, plus:",
-      "Unlimited premium models (Claude, GPT-4, o1)",
-      "Advanced workflows & automations",
-      "50 GB storage",
-      "API access",
-      "Priority support (4-hour response)",
-      "Early access to new features",
-    ],
-    limits: {
-      ai_messages: -1,
-      documents: -1,
-      storage_gb: 50,
-      team_members: 1,
-    },
+    question: "What should a larger company or portfolio operator buy first?",
+    answer:
+      "Start with an AI OS Map or Atlas Discovery if the operating problem is unclear. Start with a managed lane when the workflow is already obvious: diligence, capture, knowledge, people operations, or executive operations. Move to an Engine Install when multiple departments need shared memory, workflows, agents, and governance.",
   },
   {
-    id: "team",
-    name: "Team",
-    description: "For small teams (up to 10 people)",
-    price: 499,
-    checkoutEnabled: false,
-    interval: "per month",
-    icon: Users,
-    popular: false,
-    badge: "Best Value",
-    features: [
-      "Everything in Pro, plus:",
-      "Up to 10 team members",
-      "Shared team knowledge base",
-      "Team automation library",
-      "Slack/Teams integration",
-      "Role-based access control",
-      "Team analytics dashboard",
-      "Implementation call included",
-      "Dedicated success manager",
-    ],
-    limits: {
-      ai_messages: -1,
-      documents: -1,
-      storage_gb: 500,
-      team_members: 10,
-    },
+    question: "How is this different from buying ChatGPT, Claude, HubSpot, or Zapier?",
+    answer:
+      "Those are tools. Perpetual Core installs and operates systems: persistent memory, workflow registries, agent skills, governance, and the human operating rhythm around them. Many clients will still keep the tools they already use; the Engine makes them coherent.",
   },
   {
-    id: "business",
-    name: "Business",
-    description: "For growing companies (up to 50 people)",
-    price: 1999,
-    checkoutEnabled: false,
-    interval: "per month",
-    icon: Briefcase,
-    popular: false,
-    badge: null,
-    features: [
-      "Everything in Team, plus:",
-      "Up to 50 team members",
-      "SSO & SAML authentication",
-      "Custom AI training on your data",
-      "Advanced security controls",
-      "Unlimited storage",
-      "Priority phone support (2-hour response)",
-      "Quarterly business reviews",
-      "Dedicated success manager",
-    ],
-    limits: {
-      ai_messages: -1,
-      documents: -1,
-      storage_gb: -1,
-      team_members: 50,
-    },
+    question: "Do you publish exact enterprise pricing?",
+    answer:
+      "We publish ranges so buyers know the order of magnitude before a call. Exact pricing depends on the number of workflows, systems, data sources, people, compliance requirements, and whether we are advising, operating, or building.",
   },
   {
-    id: "enterprise",
-    name: "Enterprise",
-    description: "For large organizations (100-250 people)",
-    price: 9999,
-    checkoutEnabled: false,
-    interval: "per month",
-    icon: Building2,
-    popular: false,
-    badge: null,
-    features: [
-      "Everything in Business, plus:",
-      "Up to 250 team members",
-      "White-glove implementation ($7,500)",
-      "Custom deployment options",
-      "Enterprise security (SOC 2 infrastructure)",
-      "White-label capabilities",
-      "Dedicated account team",
-      "Priority support with escalation path",
-      "Custom development available",
-    ],
-    limits: {
-      ai_messages: -1,
-      documents: -1,
-      storage_gb: -1,
-      team_members: 250,
-    },
-    borderColor: "border-purple-200 dark:border-purple-800",
-    bgColor: "bg-purple-50/50 dark:bg-purple-950/20",
-  },
-  {
-    id: "custom",
-    name: "Custom",
-    description: "For enterprises (250+ people)",
-    price: null,
-    checkoutEnabled: false,
-    interval: "custom",
-    icon: Rocket,
-    popular: false,
-    badge: "Contact Sales",
-    features: [
-      "Everything in Enterprise, plus:",
-      "Unlimited team members",
-      "On-premise deployment options",
-      "Custom SLAs & guarantees",
-      "Dedicated infrastructure",
-      "Custom integrations & development",
-      "Executive business reviews",
-      "Custom contract terms",
-      "Volume pricing available",
-    ],
-    limits: {
-      ai_messages: -1,
-      documents: -1,
-      storage_gb: -1,
-      team_members: -1,
-    },
-    borderColor: "border-amber-200 dark:border-amber-800",
-    bgColor: "bg-gradient-to-br from-amber-50 to-yellow-50 dark:from-amber-950/20 dark:to-yellow-950/20",
+    question: "Do you offer mission-driven discounts?",
+    answer:
+      "Yes. Verified mission-driven organizations can receive discounted product access or phased implementation scopes. The discount should protect access without underpricing the operating work.",
   },
 ];
 
-const FAQ_ITEMS = [
+const ENTRY_PATHS = [
   {
-    question: "How does the 'unlimited' AI work? Won't I get a surprise bill?",
-    answer: "No surprise bills! Starter includes unlimited GPT-4o Mini + 100 premium model messages (Claude, GPT-4). If you hit the 100 premium limit, you can still use GPT-4o Mini unlimited. Pro includes truly unlimited everything. We built this specifically to avoid surprise bills—you know exactly what you're paying.",
+    name: "Product surfaces",
+    price: "$149-$2.5K/mo",
+    icon: Layers,
+    body: "For individuals, teams, and departments adopting one product surface: Sage, Vellum, Atelier, Janice, Sentinel, or RFP.",
+    points: ["Fastest start", "Product-led pilot", "Can expand into a lane"],
+    href: "#products",
   },
   {
-    question: "What's the difference between GPT-4o Mini and premium models?",
-    answer: "GPT-4o Mini is fast, cheap, and great for 90% of tasks (writing emails, quick questions, summarization). Premium models (Claude Sonnet, GPT-4, o1) are more powerful for complex reasoning, coding, and analysis. Most users find Mini handles their daily work, and save premium messages for when they really need it.",
+    name: "Managed lanes",
+    price: "$5K-$35K/mo",
+    icon: Workflow,
+    body: "For buyers who want us to operate a named function with them: diligence, capture, knowledge, people, or executive operations.",
+    points: ["Monthly operating rhythm", "Defined output", "Credits toward install"],
+    href: "#lanes",
+    featured: true,
   },
   {
-    question: "How does team pricing work?",
-    answer: "Team plans ($499/mo for up to 10 users = $49.90/user), Business ($1,999/mo for up to 50 users = $39.98/user), Enterprise ($9,999/mo for up to 250 users = $39.99/user). Everyone on the team gets full access to all features. No per-user billing—one flat monthly price.",
-  },
-  {
-    question: "What's included in Enterprise implementation?",
-    answer: "Enterprise includes a one-time $7,500 white-glove implementation: custom deployment, SSO setup, team training (virtual or on-site), change management support, 90-day optimization period, and dedicated success manager. We ensure your team actually adopts it.",
-  },
-  {
-    question: "Can I change plans later?",
-    answer: "Yes! You can upgrade or downgrade anytime. Upgrades take effect immediately. Downgrades take effect at your next billing cycle. We prorate everything fairly.",
-  },
-  {
-    question: "What payment methods do you accept?",
-    answer: "All major credit cards (Visa, MasterCard, Amex) via Stripe. Business and Enterprise plans can pay via invoice (NET 30). Annual plans get 20% off and can pay via wire transfer.",
-  },
-  {
-    question: "Is there a free trial?",
-    answer: "Yes! Starter and Pro get 14-day free trials (no credit card required). Team, Business, and Enterprise get 30-day pilots with dedicated onboarding. Free plan is free forever.",
-  },
-  {
-    question: "What makes this different from ChatGPT?",
-    answer: "ChatGPT forgets. Perpetual Core never forgets—infinite conversation history, personal knowledge base (RAG on your docs), team collaboration, automation/workflows, and integrations (email, calendar, Slack). We're an AI Operating System, not just chat.",
+    name: "Studio installs",
+    price: "$30K-$500K+",
+    icon: ShieldCheck,
+    body: "For companies, funds, and institutions installing the Perpetual Engine across departments, workflows, and governance layers.",
+    points: ["Scoped build", "Production workflows", "Training and handoff"],
+    href: "#installs",
   },
 ];
+
+const PRODUCT_PRICES = [
+  {
+    name: "Sage",
+    price: "From $149/mo",
+    buyer: "Founder, operator, thought leader",
+    body: "Personal AI OS with voice, memory, calendar, writing, coaching, and operating support.",
+  },
+  {
+    name: "Vellum",
+    price: "From $299/mo",
+    buyer: "Teams with institutional knowledge",
+    body: "Queryable organizational memory across documents, calls, voice notes, transcripts, and channels.",
+  },
+  {
+    name: "Atelier",
+    price: "From $1.5K/mo",
+    buyer: "Teams running flows and agents",
+    body: "Shared workspace for projects, flows, approvals, client work, and agent-augmented execution.",
+  },
+  {
+    name: "Sentinel",
+    price: "From $750/vet",
+    buyer: "Diligence-heavy teams",
+    body: "Subject, company, and deal intelligence with clear deliverables and escalation paths.",
+  },
+  {
+    name: "RFP Engine + Sentry",
+    price: "From $499/mo",
+    buyer: "Capture and grant teams",
+    body: "Opportunity monitoring, fit scoring, compliance flags, and first-draft support.",
+  },
+  {
+    name: "Janice",
+    price: "From $499/mo",
+    buyer: "People-heavy organizations",
+    body: "Hiring, onboarding, document collection, lifecycle tracking, and staff/intern operations.",
+  },
+  {
+    name: "Atlas Discovery",
+    price: "From $25K",
+    buyer: "Funds and portcos",
+    body: "A 2-3 week operating audit that maps where an AI-native COO layer should be installed first.",
+  },
+  {
+    name: "Custom product build",
+    price: "From $30K",
+    buyer: "A business with a repeatable pain",
+    body: "A narrow productized workflow or internal tool built from the Engine pattern.",
+  },
+];
+
+const MANAGED_LANES = [
+  {
+    name: "Diligence Lane",
+    product: "Sentinel",
+    price: "$5K-$20K/mo",
+    body: "Recurring vets, company scans, deal screens, and investigation support. No unlimited-vets promise; scope defines volume and SLA.",
+  },
+  {
+    name: "Capture Lane",
+    product: "RFP Engine + Sentry",
+    price: "$7.5K-$35K/mo",
+    body: "RFP discovery, fit scoring, bid/no-bid judgment, drafting support, compliance review, and submission rhythm.",
+    featured: true,
+  },
+  {
+    name: "Knowledge Lane",
+    product: "Vellum",
+    price: "$10K-$30K/mo",
+    body: "Institutional memory ingestion, source governance, answer quality reviews, and recurring team enablement.",
+  },
+  {
+    name: "People Lane",
+    product: "Janice",
+    price: "$7.5K-$25K/mo",
+    body: "Candidate, staff, intern, partner, or client lifecycle operations with intake, documents, follow-up, and reporting.",
+  },
+  {
+    name: "Operator Lane",
+    product: "Atelier + Sage",
+    price: "$10K-$35K/mo",
+    body: "Monthly executive operating support, workflow tuning, skills builds, dashboard review, and AI adoption governance.",
+  },
+];
+
+const INSTALLS = [
+  {
+    name: "AI OS Map",
+    price: "$7.5K-$15K",
+    duration: "1-2 weeks",
+    body: "A paid diagnostic for smaller teams or relationship-led prospects. Identifies the first workflow, economics, and implementation path.",
+  },
+  {
+    name: "Studio Sprint",
+    price: "$30K-$75K",
+    duration: "4-8 weeks",
+    body: "One high-value workflow shipped into production: intake, reporting, capture, diligence, onboarding, or knowledge operations.",
+    featured: true,
+  },
+  {
+    name: "Department OS",
+    price: "$75K-$150K",
+    duration: "8-14 weeks",
+    body: "A department-level AI operating system with memory, workflows, skills, dashboards, training, and handoff.",
+  },
+  {
+    name: "Engine Install",
+    price: "$150K-$500K+",
+    duration: "90-180 days",
+    body: "Multi-department or portfolio implementation of the Perpetual Engine, including governance, training, and post-launch support.",
+  },
+];
+
+function SectionRail({ index, label }: { index: string; label: string }) {
+  return (
+    <div>
+      <p className="eyebrow mb-3">§ {index}</p>
+      <h2 className="text-xs uppercase tracking-[0.18em] font-mono text-foreground">{label}</h2>
+    </div>
+  );
+}
 
 export default function PricingPage() {
-  const router = useRouter();
-  const [billingInterval, setBillingInterval] = useState<"monthly" | "yearly">("monthly");
-  const [isLoading, setIsLoading] = useState<string | null>(null);
-
-  async function handleSubscribe(planId: string, checkoutEnabled: boolean) {
-    // Track CTA click
-    trackClientEvent("cta_click", {
-      event_name: `pricing_${planId}_start`,
-      metadata: { plan_id: planId, billing_interval: billingInterval },
-    });
-
-    // Handle free plan
-    if (planId === "free") {
-      router.push("/signup?plan=free");
-      return;
-    }
-
-    // Handle team/business - direct to consultation
-    if (planId === "team" || planId === "business") {
-      router.push("/consultation");
-      return;
-    }
-
-    // Handle enterprise/custom - direct to enterprise demo
-    if (planId === "enterprise" || planId === "custom") {
-      router.push("/enterprise-demo");
-      return;
-    }
-
-    // Self-serve checkout (starter, pro) — server resolves price IDs
-    if (!checkoutEnabled) {
-      router.push("/contact-sales?plan=" + planId);
-      return;
-    }
-
-    setIsLoading(planId);
-    try {
-      const response = await fetch("/api/stripe/checkout", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          plan: planId,
-          interval: billingInterval === "yearly" ? "annual" : "monthly",
-        }),
-      });
-
-      if (!response.ok) {
-        const data = await response.json().catch(() => ({}));
-        throw new Error(data.error || "Failed to create checkout session");
-      }
-
-      const { url } = await response.json();
-      window.location.href = url;
-    } catch (error) {
-      console.error("Checkout error:", error);
-      toast.error("Failed to start checkout. Please try again.");
-    } finally {
-      setIsLoading(null);
-    }
-  }
-
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white dark:from-gray-900 dark:to-gray-800">
+    <div className="min-h-screen bg-background">
+      <JsonLd data={faqSchema(PRICING_FAQ)} />
       <PageViewTracker />
-      {/* Header */}
-      <header className="border-b bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm sticky top-0 z-10">
-        <div className="container mx-auto px-3 sm:px-4 py-3 sm:py-4 flex items-center justify-between">
-          <Link href="/" className="flex items-center space-x-2">
-            <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center text-primary-foreground font-bold shadow-lg">
-              AI
-            </div>
-            <span className="text-lg sm:text-xl font-bold">Perpetual Core</span>
-          </Link>
-          <div className="flex items-center gap-2">
-            <div className="hidden sm:block">
-              <Link href="/login" className="text-sm font-medium hover:underline">
-                Sign In
-              </Link>
-            </div>
-            <div className="md:hidden">
-              <PublicMobileNav />
-            </div>
-            <Button asChild size="sm" className="h-9 shadow-md active:scale-95 transition-all">
-              <Link href="/signup">Get Started</Link>
-            </Button>
-          </div>
-        </div>
-      </header>
+      <Navbar />
 
-      <div className="container mx-auto px-4 py-12 sm:py-16">
-        {/* Hero Section */}
-        <div className="text-center mb-12 sm:mb-16">
-          <h1 className="text-4xl sm:text-5xl font-bold tracking-tight mb-4 px-4">
-            Simple, Transparent Pricing
+      <section className="container mx-auto px-6 sm:px-8 py-16 sm:py-24">
+        <div className="max-w-5xl">
+          <div className="flex items-center gap-3 mb-8">
+            <span aria-hidden className="block h-1.5 w-1.5 bg-primary" />
+            <p className="eyebrow !text-foreground/70">Commercial architecture · Products · Lanes · Installs</p>
+          </div>
+
+          <h1 className="text-5xl sm:text-6xl lg:text-7xl font-semibold tracking-[-0.045em] leading-[0.98] text-foreground mb-8 max-w-5xl">
+            Price the Engine by operating responsibility.
           </h1>
-          <p className="text-base sm:text-xl text-muted-foreground max-w-2xl mx-auto mb-6 sm:mb-8 px-4">
-            Choose the perfect plan for your needs. All plans include a 14-day free trial.
+
+          <p className="text-lg sm:text-xl text-muted-foreground leading-[1.6] mb-10 max-w-3xl">
+            Perpetual Core is not a cheap AI seat. It is a product ecosystem and venture studio
+            attached to the Perpetual Engine. Start with a product, hire a managed lane, or install
+            the operating system.
           </p>
 
-          {/* Billing Toggle */}
-          <div className="inline-flex items-center gap-2 sm:gap-4 p-1 bg-muted rounded-lg touch-manipulation">
-            <button
-              onClick={() => setBillingInterval("monthly")}
-              className={`px-4 sm:px-6 py-2 rounded-md font-medium transition active:scale-95 ${
-                billingInterval === "monthly"
-                  ? "bg-white dark:bg-gray-800 shadow"
-                  : "text-muted-foreground"
-              }`}
-            >
-              Monthly
-            </button>
-            <button
-              onClick={() => setBillingInterval("yearly")}
-              className={`px-4 sm:px-6 py-2 rounded-md font-medium transition active:scale-95 relative ${
-                billingInterval === "yearly"
-                  ? "bg-white dark:bg-gray-800 shadow"
-                  : "text-muted-foreground"
-              }`}
-            >
-              Yearly
-              <span className="absolute -top-2 -right-2 bg-green-500 text-white text-xs px-2 py-0.5 rounded-full shadow-md">
-                Save 20%
-              </span>
-            </button>
-          </div>
-
-          {/* Guarantees */}
-          <div className="mt-8 flex flex-wrap items-center justify-center gap-6 sm:gap-8 text-sm text-muted-foreground">
-            <div className="flex items-center gap-2">
-              <Check className="h-5 w-5 text-green-500" />
-              <span className="font-medium text-foreground">14-day free trial</span>
-            </div>
-            <div className="hidden sm:block h-4 w-px bg-border" />
-            <div className="flex items-center gap-2">
-              <Check className="h-5 w-5 text-green-500" />
-              <span className="font-medium text-foreground">No credit card required</span>
-            </div>
-            <div className="hidden sm:block h-4 w-px bg-border" />
-            <div className="flex items-center gap-2">
-              <Check className="h-5 w-5 text-green-500" />
-              <span className="font-medium text-foreground">Cancel anytime</span>
-            </div>
+          <div className="flex flex-col sm:flex-row items-start gap-4">
+            <Button size="lg" asChild className="text-sm font-medium px-7 h-11 shadow-none bg-primary text-primary-foreground hover:bg-primary/90 rounded-[6px]">
+              <Link href="/contact-sales?intent=ai-os-map">Map the first workflow <ArrowRight className="ml-2 h-4 w-4" /></Link>
+            </Button>
+            <Link href="#products" className="inline-flex items-center text-sm font-medium text-foreground hover:text-primary transition-colors py-3 border-b border-foreground/20 hover:border-primary">
+              Compare entry points <ArrowRight className="ml-1.5 h-3.5 w-3.5" />
+            </Link>
+            <Link href="/packages" className="inline-flex items-center text-sm font-medium text-foreground hover:text-primary transition-colors py-3 border-b border-foreground/20 hover:border-primary">
+              See starter packages <ArrowRight className="ml-1.5 h-3.5 w-3.5" />
+            </Link>
           </div>
         </div>
+      </section>
 
-        {/* Pricing Cards */}
-        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8 mb-12 sm:mb-16">
-          {PLANS.map((plan) => {
-            const Icon = plan.icon;
-            const yearlyPrice = plan.price ? Math.floor(plan.price * 12 * 0.8) : null;
-            const displayPrice =
-              billingInterval === "yearly" && yearlyPrice
-                ? Math.floor(yearlyPrice / 12)
-                : plan.price;
-
-            const monthlySavings = plan.price && yearlyPrice ? plan.price - Math.floor(yearlyPrice / 12) : 0;
-
-            return (
-              <Card
-                key={plan.id}
-                className={`relative ${
-                  plan.popular
-                    ? "border-primary shadow-lg scale-105"
-                    : (plan as any).borderColor || "border-border"
-                } ${(plan as any).bgColor || ""}`}
-              >
-                {(plan.popular || plan.badge) && (
-                  <div className="absolute -top-4 left-0 right-0 flex justify-center">
-                    <span className={`${plan.popular ? 'bg-primary text-primary-foreground' : 'bg-gradient-to-r from-amber-500 to-orange-500 text-white'} text-sm font-medium px-4 py-1 rounded-full shadow-lg`}>
-                      {plan.badge || "Most Popular"}
-                    </span>
-                  </div>
-                )}
-
-                <CardHeader className="text-center pb-8">
-                  <div className="mx-auto w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mb-4">
-                    <Icon className="h-6 w-6 text-primary" />
-                  </div>
-                  <CardTitle className="text-2xl">{plan.name}</CardTitle>
-                  <CardDescription>{plan.description}</CardDescription>
-
-                  <div className="mt-4">
-                    {plan.price === null ? (
-                      <div className="text-3xl font-bold">Custom</div>
-                    ) : plan.price === 0 ? (
-                      <div className="text-3xl font-bold">Free</div>
-                    ) : (
-                      <>
-                        <div className="text-4xl font-bold">
-                          ${displayPrice}
-                          <span className="text-lg text-muted-foreground font-normal">
-                            /month
-                          </span>
-                        </div>
-                        {billingInterval === "yearly" && yearlyPrice ? (
-                          <div className="text-sm mt-2">
-                            <div className="text-muted-foreground">
-                              ${yearlyPrice}/year (billed annually)
-                            </div>
-                            <div className="text-green-600 dark:text-green-400 font-semibold mt-1">
-                              Save ${monthlySavings * 12}/year
-                            </div>
-                          </div>
-                        ) : null}
-                      </>
+      <section className="border-t border-border py-16 sm:py-20 bg-surface-hover/40">
+        <div className="container mx-auto px-6 sm:px-8">
+          <div className="grid gap-4 md:grid-cols-3">
+            {ENTRY_PATHS.map((path) => {
+              const Icon = path.icon;
+              return (
+                <Link
+                  key={path.name}
+                  href={path.href}
+                  className={`group border border-border bg-card p-6 sm:p-7 transition-colors hover:border-primary/50 hover:bg-surface-hover ${
+                    path.featured ? "border-primary/40 bg-primary/[0.04]" : ""
+                  }`}
+                >
+                  <div className="flex items-start justify-between gap-6 mb-8">
+                    <Icon className="h-5 w-5 text-primary" />
+                    {path.featured && (
+                      <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-primary">
+                        Most common
+                      </span>
                     )}
                   </div>
-                </CardHeader>
-
-                <CardContent>
-                  <Button
-                    className={`w-full mb-6 ${
-                      plan.popular
-                        ? "bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 shadow-lg"
-                        : plan.id === "custom"
-                        ? "bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white shadow-lg"
-                        : ""
-                    }`}
-                    variant={plan.popular || plan.id === "custom" ? "default" : "outline"}
-                    onClick={() => handleSubscribe(plan.id, plan.checkoutEnabled)}
-                    disabled={isLoading === plan.id}
-                  >
-                    {isLoading === plan.id ? (
-                      "Loading..."
-                    ) : plan.id === "enterprise" || plan.id === "custom" ? (
-                      "Contact Sales"
-                    ) : plan.id === "free" ? (
-                      "Get Started Free"
-                    ) : (
-                      <>
-                        Start Free Trial <ArrowRight className="ml-2 h-4 w-4" />
-                      </>
-                    )}
-                  </Button>
-
-                  <ul className="space-y-3">
-                    {plan.features.map((feature, index) => (
-                      <li key={index} className="flex items-start gap-2">
-                        <Check className="h-5 w-5 text-green-500 flex-shrink-0 mt-0.5" />
-                        <span className="text-sm">{feature}</span>
+                  <h2 className="text-[11px] font-mono uppercase tracking-[0.22em] text-primary mb-3">
+                    {path.name}
+                  </h2>
+                  <p className="text-3xl sm:text-4xl font-semibold tracking-[-0.025em] text-foreground mb-5">
+                    {path.price}
+                  </p>
+                  <p className="text-sm text-muted-foreground leading-[1.65] mb-6">
+                    {path.body}
+                  </p>
+                  <ul className="space-y-2">
+                    {path.points.map((point) => (
+                      <li key={point} className="flex items-start gap-2 text-sm text-muted-foreground">
+                        <Check className="h-3.5 w-3.5 text-foreground/45 mt-1 flex-shrink-0" />
+                        <span>{point}</span>
                       </li>
                     ))}
                   </ul>
-                </CardContent>
-              </Card>
-            );
-          })}
+                </Link>
+              );
+            })}
+          </div>
         </div>
+      </section>
 
-        {/* Feature Comparison Table */}
-        <div className="mb-16">
-          <h2 className="text-3xl font-bold text-center mb-8">Compare Plans</h2>
-          <Card>
-            <CardContent className="p-0">
-              <div className="overflow-x-auto">
-                <table className="w-full">
-                  <thead className="border-b">
-                    <tr>
-                      <th className="text-left p-4 font-semibold">Features</th>
-                      {PLANS.map((plan) => (
-                        <th key={plan.id} className="text-center p-4 font-semibold">
-                          {plan.name}
-                        </th>
-                      ))}
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr className="border-b">
-                      <td className="p-4">AI Messages</td>
-                      {PLANS.map((plan) => (
-                        <td key={plan.id} className="text-center p-4">
-                          {plan.limits.ai_messages === -1
-                            ? "Unlimited"
-                            : plan.limits.ai_messages.toLocaleString()}
-                        </td>
-                      ))}
-                    </tr>
-                    <tr className="border-b">
-                      <td className="p-4">Documents</td>
-                      {PLANS.map((plan) => (
-                        <td key={plan.id} className="text-center p-4">
-                          {plan.limits.documents === -1
-                            ? "Unlimited"
-                            : plan.limits.documents.toLocaleString()}
-                        </td>
-                      ))}
-                    </tr>
-                    <tr className="border-b">
-                      <td className="p-4">Storage</td>
-                      {PLANS.map((plan) => (
-                        <td key={plan.id} className="text-center p-4">
-                          {plan.limits.storage_gb === -1
-                            ? "Unlimited"
-                            : `${plan.limits.storage_gb} GB`}
-                        </td>
-                      ))}
-                    </tr>
-                    <tr className="border-b">
-                      <td className="p-4">Team Members</td>
-                      {PLANS.map((plan) => (
-                        <td key={plan.id} className="text-center p-4">
-                          {plan.limits.team_members === -1
-                            ? "Unlimited"
-                            : plan.limits.team_members}
-                        </td>
-                      ))}
-                    </tr>
-                  </tbody>
-                </table>
+      <section id="products" className="border-t border-border py-20 sm:py-28">
+        <div className="container mx-auto px-6 sm:px-8">
+          <div className="grid lg:grid-cols-[280px_1fr] gap-12 lg:gap-20 mb-12">
+            <SectionRail index="01" label="Products" />
+            <div className="max-w-2xl">
+              <h3 className="text-3xl sm:text-4xl lg:text-5xl font-semibold leading-[1.1] tracking-[-0.025em] text-foreground mb-6">
+                Products are the on-ramp, not the ceiling.
+              </h3>
+              <p className="text-base text-muted-foreground leading-[1.7]">
+                These prices are for focused product access or product-led pilots. When the product
+                becomes operationally important, move it into a managed lane or studio install.
+              </p>
+            </div>
+          </div>
+
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {PRODUCT_PRICES.map((product, index) => (
+              <div
+                key={product.name}
+                className="border border-border bg-card p-6 sm:p-7 flex flex-col"
+              >
+                <span className="font-mono text-[10px] tracking-[0.18em] text-muted-foreground mb-8">
+                  {String(index + 1).padStart(2, "0")}
+                </span>
+                <h4 className="text-[11px] font-mono uppercase tracking-[0.22em] text-primary mb-3">
+                  {product.name}
+                </h4>
+                <p className="text-2xl font-semibold tracking-[-0.025em] text-foreground mb-2">
+                  {product.price}
+                </p>
+                <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground mb-6">
+                  {product.buyer}
+                </p>
+                <p className="text-sm text-muted-foreground leading-[1.65] flex-1">
+                  {product.body}
+                </p>
               </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* FAQ Section */}
-        <div className="max-w-3xl mx-auto">
-          <h2 className="text-3xl font-bold text-center mb-8">
-            Frequently Asked Questions
-          </h2>
-          <div className="space-y-4">
-            {FAQ_ITEMS.map((item, index) => (
-              <Card key={index}>
-                <CardHeader>
-                  <CardTitle className="text-lg">{item.question}</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-muted-foreground">{item.answer}</p>
-                </CardContent>
-              </Card>
             ))}
           </div>
         </div>
+      </section>
 
-        {/* CTA Section */}
-        <div className="mt-16 text-center">
-          <Card className="max-w-2xl mx-auto bg-primary text-primary-foreground">
-            <CardContent className="p-8">
-              <h2 className="text-3xl font-bold mb-4">Ready to get started?</h2>
-              <p className="text-lg mb-6 opacity-90">
-                Start your 14-day free trial and experience AI that never forgets.
+      <section id="lanes" className="border-t border-border py-20 sm:py-28 bg-surface-hover/40">
+        <div className="container mx-auto px-6 sm:px-8">
+          <div className="grid lg:grid-cols-[280px_1fr] gap-12 lg:gap-20 mb-12">
+            <SectionRail index="02" label="Managed lanes" />
+            <div className="max-w-2xl">
+              <h3 className="text-3xl sm:text-4xl lg:text-5xl font-semibold leading-[1.1] tracking-[-0.025em] text-foreground mb-6">
+                Retainers should buy an operating lane, not a bundle of hours.
+              </h3>
+              <p className="text-base text-muted-foreground leading-[1.7]">
+                This is the best fit for companies like regional furniture, healthcare, nonprofit,
+                education, construction, services, and professional firms that need one function to
+                get smarter every month.
               </p>
-              <Button size="lg" variant="secondary" asChild>
-                <Link href="/signup" onClick={() => trackClientEvent("cta_click", { event_name: "pricing_bottom_start_trial" })}>
-                  Start Free Trial <ArrowRight className="ml-2 h-5 w-5" />
-                </Link>
-              </Button>
-            </CardContent>
-          </Card>
-        </div>
-      </div>
+            </div>
+          </div>
 
-      {/* Footer */}
-      <footer className="border-t mt-16 py-8">
-        <div className="container mx-auto px-4 text-center text-sm text-muted-foreground">
-          <p>© 2025 Perpetual Core. All rights reserved.</p>
-          <div className="flex justify-center gap-6 mt-4">
-            <Link href="/terms" className="hover:underline">Terms</Link>
-            <Link href="/privacy" className="hover:underline">Privacy</Link>
-            <Link href="/cookies" className="hover:underline">Cookies</Link>
+          <div className="grid lg:grid-cols-[280px_1fr] gap-12 lg:gap-20">
+            <div />
+            <div className="space-y-4">
+              {MANAGED_LANES.map((lane, index) => (
+                <Link
+                  key={lane.name}
+                  href={`/contact-sales?lane=${encodeURIComponent(lane.name.toLowerCase())}`}
+                  className={`group grid gap-5 border border-border bg-card p-6 sm:p-7 md:grid-cols-[56px_1fr_180px] hover:border-primary/50 hover:bg-background transition-colors ${
+                    lane.featured ? "border-primary/40 bg-primary/[0.04]" : ""
+                  }`}
+                >
+                  <span className="font-mono text-[10px] tracking-[0.18em] text-muted-foreground">
+                    {String(index + 1).padStart(2, "0")}
+                  </span>
+                  <div>
+                    <div className="flex flex-wrap items-center gap-3 mb-2">
+                      <h4 className="text-lg font-semibold tracking-[-0.015em] text-foreground group-hover:text-primary transition-colors">
+                        {lane.name}
+                      </h4>
+                      <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
+                        {lane.product}
+                      </span>
+                    </div>
+                    <p className="text-sm text-muted-foreground leading-[1.65] max-w-2xl">
+                      {lane.body}
+                    </p>
+                  </div>
+                  <p className="font-mono text-sm sm:text-base font-semibold text-foreground md:text-right">
+                    {lane.price}
+                  </p>
+                </Link>
+              ))}
+            </div>
           </div>
         </div>
-      </footer>
+      </section>
+
+      <section id="installs" className="border-t border-border py-20 sm:py-28">
+        <div className="container mx-auto px-6 sm:px-8">
+          <div className="grid lg:grid-cols-[280px_1fr] gap-12 lg:gap-20 mb-12">
+            <SectionRail index="03" label="Studio installs" />
+            <div className="max-w-2xl">
+              <h3 className="text-3xl sm:text-4xl lg:text-5xl font-semibold leading-[1.1] tracking-[-0.025em] text-foreground mb-6">
+                Custom builds should be priced like operating leverage.
+              </h3>
+              <p className="text-base text-muted-foreground leading-[1.7]">
+                The first scope can be small, but the buyer should understand the path: diagnostic,
+                sprint, department OS, then full Engine install when the value is proven.
+              </p>
+            </div>
+          </div>
+
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {INSTALLS.map((install, index) => (
+              <div
+                key={install.name}
+                className={`border border-border bg-card p-6 sm:p-7 flex flex-col ${
+                  install.featured ? "border-primary/40 bg-primary/[0.04]" : ""
+                }`}
+              >
+                <div className="flex items-center justify-between gap-4 mb-8">
+                  <span className="font-mono text-[10px] tracking-[0.18em] text-muted-foreground">
+                    {String(index + 1).padStart(2, "0")}
+                  </span>
+                  {install.featured && (
+                    <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-primary">
+                      Best first paid build
+                    </span>
+                  )}
+                </div>
+                <h4 className="text-[11px] font-mono uppercase tracking-[0.22em] text-primary mb-3">
+                  {install.name}
+                </h4>
+                <p className="text-3xl font-semibold tracking-[-0.025em] text-foreground mb-2">
+                  {install.price}
+                </p>
+                <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground mb-6">
+                  {install.duration}
+                </p>
+                <p className="text-sm text-muted-foreground leading-[1.65] flex-1 mb-6">
+                  {install.body}
+                </p>
+                <Link
+                  href="/contact-sales?intent=studio-install"
+                  className="inline-flex items-center text-xs font-medium text-foreground hover:text-primary transition-colors"
+                >
+                  Scope this <ArrowRight className="ml-1 h-3 w-3" />
+                </Link>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="border-t border-border py-20 sm:py-28 bg-surface-hover/40">
+        <div className="container mx-auto px-6 sm:px-8">
+          <div className="grid lg:grid-cols-[280px_1fr] gap-12 lg:gap-20">
+            <SectionRail index="—" label="Recommendation" />
+            <div className="max-w-3xl border-l-2 border-primary/50 pl-6">
+              <h3 className="text-3xl sm:text-4xl lg:text-5xl font-semibold leading-[1.1] tracking-[-0.025em] text-foreground mb-6">
+                For Empire-sized prospects, sell the AI operating partner. For smaller companies,
+                sell the first operating lane.
+              </h3>
+              <p className="text-base text-muted-foreground leading-[1.7] mb-8">
+                Do not lead with a $49 subscription. Lead with the business problem: missed leads,
+                slow quoting, scattered product data, customer follow-up, delivery coordination,
+                hiring, reporting, and executive visibility. The first scope can be modest, but the
+                frame should be whole-system improvement.
+              </p>
+              <div className="flex flex-col sm:flex-row gap-3">
+                <Button asChild className="text-sm font-medium h-10 px-5 shadow-none bg-foreground text-background hover:bg-foreground/90 rounded-[6px]">
+                  <Link href="/contact-sales?intent=operating-partner">
+                    Start an operating partner conversation <ArrowRight className="ml-2 h-3.5 w-3.5" />
+                  </Link>
+                </Button>
+                <Button asChild variant="outline" className="text-sm font-medium h-10 px-5 shadow-none rounded-[6px]">
+                  <Link href="/packages">
+                    See starter packages
+                  </Link>
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="border-t border-border py-20 sm:py-28">
+        <div className="container mx-auto px-6 sm:px-8">
+          <div className="grid lg:grid-cols-[280px_1fr] gap-12 lg:gap-20">
+            <SectionRail index="—" label="Common questions" />
+            <div className="max-w-3xl">
+              <h3 className="text-3xl sm:text-4xl lg:text-5xl font-semibold leading-[1.1] tracking-[-0.025em] text-foreground mb-12">
+                Pricing, in plain English.
+              </h3>
+              <dl className="divide-y divide-border border-y border-border">
+                {PRICING_FAQ.map((item) => (
+                  <details key={item.question} className="group py-6">
+                    <summary className="flex cursor-pointer items-start justify-between gap-6 list-none">
+                      <dt className="text-base sm:text-lg font-medium text-foreground leading-snug">
+                        {item.question}
+                      </dt>
+                      <span
+                        className="font-mono text-xs text-muted-foreground mt-1 transition-transform group-open:rotate-45"
+                        aria-hidden
+                      >
+                        +
+                      </span>
+                    </summary>
+                    <dd className="mt-4 text-sm sm:text-base text-muted-foreground leading-[1.7]">
+                      {item.answer}
+                    </dd>
+                  </details>
+                ))}
+              </dl>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <Footer />
     </div>
   );
 }

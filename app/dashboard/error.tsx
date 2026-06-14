@@ -56,7 +56,7 @@ export default function DashboardError({
           </Button>
 
           <Button variant="outline" asChild className="gap-2">
-            <Link href="/dashboard/home">
+            <Link href="/dashboard/operating">
               <LayoutDashboard className="h-4 w-4" />
               Back to Dashboard
             </Link>

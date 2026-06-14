@@ -1,12 +1,39 @@
 import type { Metadata, Viewport } from "next";
-import { Inter } from "next/font/google";
+import { Inter, JetBrains_Mono, Instrument_Serif } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
 import { QueryProvider } from "@/lib/providers/query-provider";
 import { Analytics } from "@vercel/analytics/react";
 import { SpeedInsights } from "@vercel/speed-insights/next";
+import { JsonLd } from "@/components/seo/JsonLd";
+import { organizationSchema, websiteSchema } from "@/lib/seo/structured-data";
+import { CookieConsent } from "@/components/landing/CookieConsent";
+import { CrispChat } from "@/components/landing/CrispChat";
+import { ExitIntent } from "@/components/landing/ExitIntent";
+import { ServiceWorkerReset } from "@/components/system/ServiceWorkerReset";
 
-const inter = Inter({ subsets: ["latin"] });
+const inter = Inter({
+  subsets: ["latin"],
+  variable: "--font-inter",
+  display: "swap",
+});
+
+const jetbrainsMono = JetBrains_Mono({
+  subsets: ["latin"],
+  variable: "--font-mono",
+  display: "swap",
+  weight: ["400", "500"],
+});
+
+// Display serif — used only for hero h1s and rare editorial moments.
+// One distinctive voice in an otherwise sans-corporate page.
+const instrumentSerif = Instrument_Serif({
+  subsets: ["latin"],
+  variable: "--font-display",
+  display: "swap",
+  style: ["normal", "italic"],
+  weight: ["400"],
+});
 
 export const viewport: Viewport = {
   themeColor: [
@@ -19,21 +46,24 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || "https://perpetualcore.ai"),
+  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || "https://perpetualcore.com"),
   title: {
-    default: "Perpetual Core | AI-Powered Knowledge Platform",
+    default: "Perpetual Core — The venture studio attached to the Perpetual Engine",
     template: "%s | Perpetual Core",
   },
-  description: "Transform how your team works with AI-powered knowledge management. Persistent memory, RAG search, AI agents, and multi-model intelligence in one unified platform.",
+  description: "Perpetual Core is a first-of-its-kind AI venture studio powered by the Perpetual Engine. We build, install, and scale AI-native operating systems, products, and ventures for mission-driven institutions.",
   keywords: [
-    "AI knowledge management",
-    "RAG search",
-    "AI agents",
-    "document AI",
-    "enterprise AI",
-    "team collaboration",
-    "AI assistant",
-    "knowledge base",
+    "AI venture studio",
+    "AI implementation studio",
+    "AI-native venture studio",
+    "Perpetual Engine",
+    "AI operating system",
+    "mission-driven AI",
+    "nonprofit AI implementation",
+    "AI for healthcare",
+    "AI for foundations",
+    "Perpetual Engine",
+    "AI engagement studio",
   ],
   authors: [{ name: "Perpetual Core" }],
   creator: "Perpetual Core",
@@ -50,22 +80,22 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     siteName: "Perpetual Core",
-    title: "Perpetual Core | AI-Powered Knowledge Platform",
-    description: "Transform how your team works with AI-powered knowledge management. Persistent memory, RAG search, AI agents, and multi-model intelligence.",
+    title: "Perpetual Core — The venture studio attached to the Perpetual Engine",
+    description: "A first-of-its-kind AI venture studio building AI-native operating systems, products, and ventures for mission-driven institutions.",
     locale: "en_US",
     images: [
       {
         url: "/og-image.png",
         width: 1200,
         height: 630,
-        alt: "Perpetual Core - AI-Powered Knowledge Platform",
+        alt: "Perpetual Core — the venture studio attached to the Perpetual Engine",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Perpetual Core | AI-Powered Knowledge Platform",
-    description: "Transform how your team works with AI-powered knowledge management. Persistent memory, RAG search, AI agents, and multi-model intelligence.",
+    title: "Perpetual Core — The venture studio attached to the Perpetual Engine",
+    description: "A first-of-its-kind AI venture studio powered by the Perpetual Engine.",
     images: ["/og-image.png"],
   },
   robots: {
@@ -96,7 +126,17 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en" suppressHydrationWarning className={`${inter.variable} ${jetbrainsMono.variable} ${instrumentSerif.variable}`}>
+      <head>
+        <JsonLd id="ld-org" data={organizationSchema()} />
+        <JsonLd id="ld-website" data={websiteSchema()} />
+        <link
+          rel="alternate"
+          type="application/rss+xml"
+          title="Perpetual Core — Notes"
+          href="/blog/rss.xml"
+        />
+      </head>
       <body className={inter.className}>
         <QueryProvider>
           <ThemeProvider
@@ -108,6 +148,10 @@ export default function RootLayout({
             {children}
           </ThemeProvider>
         </QueryProvider>
+        <CookieConsent />
+        <CrispChat />
+        <ExitIntent />
+        <ServiceWorkerReset />
         <Analytics />
         <SpeedInsights />
       </body>

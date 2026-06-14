@@ -333,6 +333,43 @@ async function handleInvoicePaymentFailed(invoice: Stripe.Invoice) {
 async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
   const metadata = session.metadata;
 
+  if (metadata?.type === "perpetual_core_package") {
+    const supabase = createAdminClient();
+    const leadId = metadata.lead_id;
+    const packageName = metadata.package_name || "Perpetual Core package";
+
+    if (leadId) {
+      const now = new Date().toISOString();
+      const { data: lead } = await supabase
+        .from("leads")
+        .select("id, status, user_id")
+        .eq("id", leadId)
+        .single();
+
+      if (lead) {
+        await supabase
+          .from("leads")
+          .update({
+            status: "won",
+            converted_at: now,
+            updated_at: now,
+            last_contacted_at: now,
+          })
+          .eq("id", leadId);
+
+        await supabase.from("lead_activities").insert({
+          lead_id: leadId,
+          user_id: lead.user_id,
+          activity_type: "package_payment",
+          title: `${packageName} paid`,
+          description: `Stripe checkout completed for ${packageName}. Session: ${session.id}`,
+          from_value: lead.status,
+          to_value: "won",
+        });
+      }
+    }
+  }
+
   // Handle marketplace purchases
   if (metadata?.type === "marketplace_purchase") {
     const supabase = createAdminClient();

@@ -1,9 +1,5 @@
-import { redirect } from "next/navigation";
+import { OperatingDashboard } from "@/components/operate/OperatingDashboard";
 
-/**
- * Dashboard root redirects to the new Daily Briefing Home
- * The original dashboard is preserved at /dashboard/overview
- */
 export default function DashboardPage() {
-  redirect("/dashboard/home");
+  return <OperatingDashboard />;
 }

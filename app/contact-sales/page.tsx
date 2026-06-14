@@ -1,8 +1,17 @@
 "use client";
 
-import { useState, Suspense } from "react";
-import { useSearchParams } from "next/navigation";
+/**
+ * /contact-sales — primary B2B funnel destination.
+ * Accepts ?plan= and ?product= query params from solutions, pricing, and
+ * product pages. Posts to /api/contact-sales (rate-limited, writes to
+ * sales_contacts table, sends Resend confirmations).
+ * Visual register matches homepage v6.
+ */
+
+import { Suspense, useState, type FormEvent } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
+import { ArrowRight, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -14,13 +23,93 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { CheckCircle2, Building2, Users, Zap, Shield, HeadphonesIcon } from "lucide-react";
+import { Navbar } from "@/components/landing/Navbar";
+import { Footer } from "@/components/landing/Footer";
+import { JsonLd } from "@/components/seo/JsonLd";
+import { serviceSchema } from "@/lib/seo/structured-data";
 import { toast } from "sonner";
+
+type SubmitState = "idle" | "submitting" | "success" | "error";
+
+const PLAN_OPTIONS = [
+  { value: "software-access", label: "Software access" },
+  { value: "guided-setup", label: "Guided setup package" },
+  { value: "first-workflow", label: "First workflow package" },
+  { value: "operating-lane-deposit", label: "90-day operating lane deposit" },
+  { value: "manual-invoice", label: "Manual invoice / ACH" },
+  { value: "company-ai-os", label: "Company-wide AI operating system" },
+  { value: "department-ai-os", label: "Department or operating unit install" },
+  { value: "studio-sprint-30", label: "First workflow / proof-of-value sprint" },
+  { value: "studio-retainer", label: "Ongoing AI operating partner" },
+  { value: "product-subscription", label: "Product subscription or team product" },
+  { value: "venture-partner", label: "Venture, fund, or ecosystem partnership" },
+  { value: "institute-partner", label: "Institute / mission partnership" },
+  { value: "exploring", label: "Just exploring" },
+];
+
+const COMPANY_SIZE_OPTIONS = [
+  { value: "1-10", label: "1–10 employees" },
+  { value: "11-50", label: "11–50 employees" },
+  { value: "51-200", label: "51–200 employees" },
+  { value: "201-500", label: "201–500 employees" },
+  { value: "501-1000", label: "501–1,000 employees" },
+  { value: "1000+", label: "1,000+ employees" },
+];
+
+const WHAT_HAPPENS_NEXT = [
+  {
+    index: "01",
+    title: "Reply within one business day",
+    body: "A human on the team reads every submission. You get a real reply, not an autoresponder.",
+  },
+  {
+    index: "02",
+    title: "30-minute scoping call",
+    body: "We listen. You describe the operation, the constraints, the metrics that matter. No deck.",
+  },
+  {
+    index: "03",
+    title: "Engagement proposal or referral",
+    body: "If we're the right fit, you get a scoped proposal within a week. If we're not, we'll tell you who is.",
+  },
+];
+
+const INTAKE_PROMPTS = [
+  {
+    title: "Company map",
+    body: "Which teams, locations, roles, or customer handoffs should the operating system understand?",
+  },
+  {
+    title: "First workflow",
+    body: "Where is time, revenue, quality, reporting, or response speed being lost right now?",
+  },
+  {
+    title: "Existing systems",
+    body: "Which tools, docs, inboxes, CRMs, spreadsheets, or databases already hold the context?",
+  },
+  {
+    title: "Success metric",
+    body: "What would make the first package obviously worth continuing or expanding?",
+  },
+];
+
+function SectionRail({ index, label }: { index: string; label: string }) {
+  return (
+    <div className="flex items-baseline gap-3 text-muted-foreground">
+      <span className="font-mono text-[10px] uppercase tracking-[0.22em]">{index}</span>
+      <span className="font-mono text-[10px] uppercase tracking-[0.22em]">{label}</span>
+    </div>
+  );
+}
 
 function ContactSalesForm() {
   const searchParams = useSearchParams();
-  const planFromUrl = searchParams.get("plan") || "business";
+  const planFromUrl = searchParams.get("plan") || "";
+  const productFromUrl = searchParams.get("product") || "";
+  const intentFromUrl = searchParams.get("intent") || "";
+  const sessionFromUrl = searchParams.get("session_id") || "";
+  const isPostPaymentIntake = intentFromUrl === "post-payment-intake";
+  const isManualInvoice = intentFromUrl === "manual-invoice";
 
   const [formData, setFormData] = useState({
     name: "",
@@ -28,148 +117,155 @@ function ContactSalesForm() {
     company: "",
     phone: "",
     employees: "",
-    plan: planFromUrl,
-    message: "",
+    plan: planFromUrl || (isManualInvoice ? "manual-invoice" : isPostPaymentIntake ? "guided-setup" : "company-ai-os"),
+    product: productFromUrl,
+    message: isPostPaymentIntake
+      ? `I already completed a Perpetual Core package checkout${sessionFromUrl ? ` (${sessionFromUrl})` : ""}. Here is the operating context we should use for onboarding: `
+      : "",
   });
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isSubmitted, setIsSubmitted] = useState(false);
+  const [submitState, setSubmitState] = useState<SubmitState>("idle");
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleChange = (field: string, value: string) => {
+    setFormData((prev) => ({ ...prev, [field]: value }));
+  };
+
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    setIsSubmitting(true);
-
+    setSubmitState("submitting");
     try {
       const response = await fetch("/api/contact-sales", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),
       });
-
-      if (response.ok) {
-        setIsSubmitted(true);
-        toast.success("Thank you! Our team will contact you within 24 hours.");
-      } else {
+      if (!response.ok) {
         throw new Error("Failed to submit");
       }
-    } catch (error) {
-      console.error("Contact sales error:", error);
-      toast.error("Failed to submit. Please email sales@perpetualcore.com directly.");
-    } finally {
-      setIsSubmitting(false);
+      setSubmitState("success");
+      toast.success("Got it. We'll reply within one business day.");
+    } catch (err) {
+      console.error("Contact sales error:", err);
+      setSubmitState("error");
+      toast.error("Submit failed. Email lorenzo@perpetualcore.com directly.");
     }
   };
 
-  const handleChange = (field: string, value: string) => {
-    setFormData((prev) => ({ ...prev, [field]: value }));
-  };
-
-  if (isSubmitted) {
+  if (submitState === "success") {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white dark:from-gray-900 dark:to-gray-800 flex items-center justify-center p-4">
-        <Card className="max-w-lg w-full text-center">
-          <CardHeader>
-            <div className="mx-auto mb-4 h-16 w-16 rounded-full bg-green-100 dark:bg-green-900 flex items-center justify-center">
-              <CheckCircle2 className="h-8 w-8 text-green-600 dark:text-green-400" />
-            </div>
-            <CardTitle className="text-2xl">Thank You!</CardTitle>
-            <CardDescription className="text-base mt-2">
-              We've received your inquiry and will get back to you within 24 hours.
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <p className="text-sm text-muted-foreground">
-              In the meantime, check your email for a confirmation and some helpful resources to get you started.
-            </p>
-            <div className="flex gap-3 justify-center">
-              <Button asChild variant="outline">
-                <Link href="/pricing">View Pricing</Link>
-              </Button>
-              <Button asChild>
-                <Link href="/">Back to Home</Link>
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+      <section className="container mx-auto px-6 sm:px-8 py-32">
+        <div className="max-w-2xl mx-auto text-center">
+          <SectionRail index="—" label="Received" />
+          <h1 className="mt-6 font-display text-5xl sm:text-6xl leading-[1.05] tracking-[-0.02em] text-foreground">
+            Got it.
+          </h1>
+          <p className="mt-6 text-base text-muted-foreground leading-[1.7]">
+            A human on the team reads every submission. We'll reply to{" "}
+            <span className="text-foreground font-medium">{formData.email}</span>{" "}
+            within one business day with a 30-minute scoping window.
+          </p>
+          <div className="mt-10 flex flex-wrap gap-3 justify-center">
+            <Button asChild variant="outline" className="text-sm font-medium h-10 px-5 shadow-none rounded-[6px]">
+              <Link href="/">Back to home</Link>
+            </Button>
+            <Button asChild className="text-sm font-medium h-10 px-5 shadow-none bg-foreground text-background hover:bg-foreground/90 rounded-[6px]">
+              <Link href="/engine">Read the Engine <ArrowRight className="ml-2 h-3.5 w-3.5" /></Link>
+            </Button>
+          </div>
+        </div>
+      </section>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white dark:from-gray-900 dark:to-gray-800">
-      {/* Header */}
-      <header className="border-b bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm sticky top-0 z-10">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <Link href="/" className="flex items-center space-x-2">
-            <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center text-primary-foreground font-bold">
-              AI
-            </div>
-            <span className="text-xl font-bold">Perpetual Core</span>
-          </Link>
-          <div className="flex items-center gap-4">
-            <Link href="/pricing" className="text-sm font-medium hover:underline">
-              Pricing
-            </Link>
-            <Link href="/login" className="text-sm font-medium hover:underline">
-              Sign In
-            </Link>
+    <>
+      {/* Hero */}
+      <section className="container mx-auto px-6 sm:px-8 pt-20 pb-12 sm:pt-28 sm:pb-16">
+        <div className="grid lg:grid-cols-[280px_1fr] gap-12 lg:gap-20">
+            <SectionRail index="00" label="Map the operating system" />
+          <div className="max-w-3xl">
+            <h1 className="font-display text-5xl sm:text-6xl lg:text-7xl leading-[1.05] tracking-[-0.025em] text-foreground">
+              Tell us where AI needs to touch the company.
+            </h1>
+            <p className="mt-8 text-lg sm:text-xl text-muted-foreground leading-[1.65] max-w-2xl">
+              {isPostPaymentIntake
+                ? "Your payment is in. Use this form to send the operating context we need before the first onboarding call."
+                : isManualInvoice
+                  ? "Use this form when the buying process needs ACH, procurement review, a custom first payment, or a manual Stripe invoice."
+                : "Perpetual Core installs AI operating systems across sales, operations, knowledge, customer communication, and leadership visibility. We can start with one high-leverage workflow, but we scope it with the larger company system in view."}
+              {productFromUrl && (
+                <>
+                  {" "}
+                  You're asking about{" "}
+                  <span className="text-foreground font-medium capitalize">
+                    {productFromUrl.replace(/-/g, " ")}
+                  </span>
+                  .
+                </>
+              )}
+            </p>
           </div>
         </div>
-      </header>
+      </section>
 
-      <div className="container mx-auto px-4 py-16">
-        <div className="grid lg:grid-cols-2 gap-12 max-w-6xl mx-auto">
-          {/* Left Column - Form */}
-          <div>
-            <div className="mb-8">
-              <h1 className="text-4xl font-bold tracking-tight mb-4">
-                Let's Build Something Amazing Together
-              </h1>
-              <p className="text-xl text-muted-foreground">
-                Our enterprise team will help you transform your business with AI.
-                Fill out the form and we'll be in touch within 24 hours.
-              </p>
-            </div>
-
+      {/* Form + What happens next */}
+      <section className="border-t border-border py-16 sm:py-20">
+        <div className="container mx-auto px-6 sm:px-8">
+          <div className="grid lg:grid-cols-[1fr_320px] gap-12 lg:gap-16">
             <form onSubmit={handleSubmit} className="space-y-6">
+              <div className="grid gap-3 sm:grid-cols-2">
+                {INTAKE_PROMPTS.map((prompt) => (
+                  <div key={prompt.title} className="border border-border bg-surface-hover/40 p-4">
+                    <p className="text-sm font-medium text-foreground">{prompt.title}</p>
+                    <p className="mt-2 text-sm leading-5 text-muted-foreground">{prompt.body}</p>
+                  </div>
+                ))}
+              </div>
+
               <div className="grid sm:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="name">Full Name *</Label>
+                  <Label htmlFor="name" className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
+                    Name *
+                  </Label>
                   <Input
                     id="name"
                     required
                     value={formData.name}
                     onChange={(e) => handleChange("name", e.target.value)}
-                    placeholder="John Smith"
+                    placeholder="Jane Operator"
                   />
                 </div>
-
                 <div className="space-y-2">
-                  <Label htmlFor="email">Work Email *</Label>
+                  <Label htmlFor="email" className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
+                    Work email *
+                  </Label>
                   <Input
                     id="email"
                     type="email"
                     required
                     value={formData.email}
                     onChange={(e) => handleChange("email", e.target.value)}
-                    placeholder="john@company.com"
+                    placeholder="jane@yourcompany.com"
                   />
                 </div>
               </div>
 
               <div className="grid sm:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="company">Company *</Label>
+                  <Label htmlFor="company" className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
+                    Company *
+                  </Label>
                   <Input
                     id="company"
                     required
                     value={formData.company}
                     onChange={(e) => handleChange("company", e.target.value)}
-                    placeholder="Acme Inc"
+                    placeholder="Acme Holdings"
                   />
                 </div>
-
                 <div className="space-y-2">
-                  <Label htmlFor="phone">Phone Number</Label>
+                  <Label htmlFor="phone" className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
+                    Phone (optional)
+                  </Label>
                   <Input
                     id="phone"
                     type="tel"
@@ -182,179 +278,174 @@ function ContactSalesForm() {
 
               <div className="grid sm:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="employees">Company Size *</Label>
-                  <Select value={formData.employees} onValueChange={(value) => handleChange("employees", value)}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select company size" />
+                  <Label htmlFor="employees" className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
+                    Company size *
+                  </Label>
+                  <Select
+                    value={formData.employees}
+                    onValueChange={(value) => handleChange("employees", value)}
+                  >
+                    <SelectTrigger id="employees">
+                      <SelectValue placeholder="Select range" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="1-10">1-10 employees</SelectItem>
-                      <SelectItem value="11-50">11-50 employees</SelectItem>
-                      <SelectItem value="51-200">51-200 employees</SelectItem>
-                      <SelectItem value="201-500">201-500 employees</SelectItem>
-                      <SelectItem value="501-1000">501-1,000 employees</SelectItem>
-                      <SelectItem value="1000+">1,000+ employees</SelectItem>
+                      {COMPANY_SIZE_OPTIONS.map((o) => (
+                        <SelectItem key={o.value} value={o.value}>
+                          {o.label}
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                 </div>
-
                 <div className="space-y-2">
-                  <Label htmlFor="plan">Interested In *</Label>
-                  <Select value={formData.plan} onValueChange={(value) => handleChange("plan", value)}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select a plan" />
+                  <Label htmlFor="plan" className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
+                    Best-fit path *
+                  </Label>
+                  <Select
+                    value={formData.plan}
+                    onValueChange={(value) => handleChange("plan", value)}
+                  >
+                    <SelectTrigger id="plan">
+                      <SelectValue placeholder="Select band" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="business">Business Plan</SelectItem>
-                      <SelectItem value="enterprise">Enterprise Plan</SelectItem>
-                      <SelectItem value="custom">Custom Solution</SelectItem>
-                      <SelectItem value="consultation">Just Exploring</SelectItem>
+                      {PLAN_OPTIONS.map((o) => (
+                        <SelectItem key={o.value} value={o.value}>
+                          {o.label}
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                 </div>
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="message">Tell us about your needs</Label>
+                <Label htmlFor="message" className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
+                  Describe the operation *
+                </Label>
                 <Textarea
                   id="message"
+                  required
+                  rows={5}
                   value={formData.message}
                   onChange={(e) => handleChange("message", e.target.value)}
-                  placeholder="What are you looking to accomplish with Perpetual Core? Any specific requirements or questions?"
-                  rows={5}
+                  placeholder="What departments, workflows, customers, data, handoffs, reports, or revenue constraints need AI support? What has been tried?"
                 />
               </div>
 
-              <Button type="submit" className="w-full" size="lg" disabled={isSubmitting}>
-                {isSubmitting ? "Submitting..." : "Contact Sales"}
+              <Button
+                type="submit"
+                disabled={submitState === "submitting"}
+                className="text-sm font-medium h-11 px-6 shadow-none bg-foreground text-background hover:bg-foreground/90 rounded-[6px]"
+              >
+                {submitState === "submitting" ? "Sending…" : "Map My AI Operating System"}
+                {submitState !== "submitting" && (
+                  <ArrowRight className="ml-2 h-3.5 w-3.5" />
+                )}
               </Button>
 
-              <p className="text-xs text-muted-foreground text-center">
-                By submitting this form, you agree to our{" "}
-                <Link href="/terms" className="underline">
-                  Terms of Service
+              <p className="text-xs text-muted-foreground leading-[1.7]">
+                By submitting you agree to our{" "}
+                <Link href="/privacy" className="underline hover:text-foreground">
+                  Privacy Policy
                 </Link>{" "}
                 and{" "}
-                <Link href="/privacy" className="underline">
-                  Privacy Policy
+                <Link href="/terms" className="underline hover:text-foreground">
+                  Terms
                 </Link>
-                .
+                . We don't sell data. We don't spam. We reply.
               </p>
             </form>
-          </div>
 
-          {/* Right Column - Benefits */}
-          <div className="space-y-8">
-            <Card>
-              <CardHeader>
-                <CardTitle>What to Expect</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="flex gap-3">
-                  <div className="h-10 w-10 rounded-lg bg-blue-100 dark:bg-blue-900 flex items-center justify-center flex-shrink-0">
-                    <HeadphonesIcon className="h-5 w-5 text-blue-600 dark:text-blue-400" />
-                  </div>
-                  <div>
-                    <h3 className="font-semibold mb-1">24-Hour Response</h3>
-                    <p className="text-sm text-muted-foreground">
-                      Our enterprise team will reach out within one business day to schedule a personalized demo.
-                    </p>
-                  </div>
-                </div>
-
-                <div className="flex gap-3">
-                  <div className="h-10 w-10 rounded-lg bg-purple-100 dark:bg-purple-900 flex items-center justify-center flex-shrink-0">
-                    <Users className="h-5 w-5 text-purple-600 dark:text-purple-400" />
-                  </div>
-                  <div>
-                    <h3 className="font-semibold mb-1">Custom Demo</h3>
-                    <p className="text-sm text-muted-foreground">
-                      See Perpetual Core in action with examples tailored to your industry and use case.
-                    </p>
-                  </div>
-                </div>
-
-                <div className="flex gap-3">
-                  <div className="h-10 w-10 rounded-lg bg-green-100 dark:bg-green-900 flex items-center justify-center flex-shrink-0">
-                    <Building2 className="h-5 w-5 text-green-600 dark:text-green-400" />
-                  </div>
-                  <div>
-                    <h3 className="font-semibold mb-1">Tailored Proposal</h3>
-                    <p className="text-sm text-muted-foreground">
-                      Get a custom pricing and implementation plan designed for your organization.
-                    </p>
-                  </div>
-                </div>
-
-                <div className="flex gap-3">
-                  <div className="h-10 w-10 rounded-lg bg-orange-100 dark:bg-orange-900 flex items-center justify-center flex-shrink-0">
-                    <Shield className="h-5 w-5 text-orange-600 dark:text-orange-400" />
-                  </div>
-                  <div>
-                    <h3 className="font-semibold mb-1">Security & Compliance</h3>
-                    <p className="text-sm text-muted-foreground">
-                      Review our SOC 2, HIPAA, and enterprise security practices with our team.
-                    </p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card className="bg-gradient-to-br from-primary/10 to-primary/5 border-primary/20">
-              <CardHeader>
-                <CardTitle>Enterprise Includes</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-2">
-                {[
-                  "Dedicated success manager",
-                  "Custom AI model training",
-                  "SSO/SAML authentication",
-                  "99.9% uptime SLA",
-                  "24/7 priority support",
-                  "On-premise deployment option",
-                  "Custom integrations",
-                  "Unlimited API access",
-                  "Advanced analytics",
-                  "White-label options",
-                ].map((feature) => (
-                  <div key={feature} className="flex items-start gap-2">
-                    <CheckCircle2 className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
-                    <span className="text-sm">{feature}</span>
-                  </div>
+            {/* What happens next */}
+            <aside className="border border-border bg-card p-7 self-start">
+              <SectionRail index="—" label="What happens next" />
+              <ul className="mt-7 space-y-6">
+                {WHAT_HAPPENS_NEXT.map((step) => (
+                  <li key={step.index} className="flex gap-4">
+                    <span className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground pt-1">
+                      {step.index}
+                    </span>
+                    <div>
+                      <p className="text-sm font-medium text-foreground">{step.title}</p>
+                      <p className="mt-1 text-sm text-muted-foreground leading-[1.65]">
+                        {step.body}
+                      </p>
+                    </div>
+                  </li>
                 ))}
-              </CardContent>
-            </Card>
-
-            <div className="text-center p-6 bg-muted rounded-lg">
-              <p className="font-semibold mb-2">Need immediate assistance?</p>
-              <p className="text-sm text-muted-foreground mb-4">
-                Email us directly at{" "}
-                <a href="mailto:sales@perpetualcore.com" className="text-primary hover:underline">
-                  sales@perpetualcore.com
+              </ul>
+              <div className="mt-8 pt-6 border-t border-border">
+                <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground mb-3">
+                  Or email directly
+                </p>
+                <a
+                  href="mailto:lorenzo@perpetualcore.com"
+                  className="text-sm text-foreground hover:text-primary inline-flex items-center"
+                >
+                  lorenzo@perpetualcore.com
+                  <ArrowRight className="ml-2 h-3 w-3" />
                 </a>
-              </p>
-              <p className="text-xs text-muted-foreground">
-                Or call: +1 (800) 123-4567 (Mon-Fri, 9AM-6PM EST)
-              </p>
+              </div>
+            </aside>
+          </div>
+        </div>
+      </section>
+
+      {/* Enterprise / engagement essentials */}
+      <section className="border-t border-border py-20 sm:py-24">
+        <div className="container mx-auto px-6 sm:px-8">
+          <div className="grid lg:grid-cols-[280px_1fr] gap-12 lg:gap-20">
+            <SectionRail index="—" label="Engagement essentials" />
+            <div className="max-w-3xl grid sm:grid-cols-2 gap-x-10 gap-y-6">
+              {[
+                "AI operating partner on point",
+                "Company map before build",
+                "First workflow selected for measurable business value",
+                "Expansion path across departments",
+                "Outcome-eval scope written before build",
+                "SSO/SAML and SOC 2 process",
+                "HIPAA, IRB, and GDPR-equivalent handling",
+                "Audit log on every model call",
+                "10-15% of every dollar funds the Institute",
+              ].map((item) => (
+                <div key={item} className="flex items-start gap-3">
+                  <Check className="h-4 w-4 text-foreground mt-0.5 flex-shrink-0" />
+                  <span className="text-sm text-muted-foreground leading-[1.6]">{item}</span>
+                </div>
+              ))}
             </div>
           </div>
         </div>
-      </div>
-    </div>
+      </section>
+    </>
   );
 }
 
+const PAGE_LOADING_FALLBACK = (
+  <section className="container mx-auto px-6 sm:px-8 py-32 text-center">
+    <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
+      Loading…
+    </p>
+  </section>
+);
+
 export default function ContactSalesPage() {
   return (
-    <Suspense fallback={
-      <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white dark:from-gray-900 dark:to-gray-800 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
-          <p className="text-muted-foreground">Loading...</p>
-        </div>
-      </div>
-    }>
-      <ContactSalesForm />
-    </Suspense>
+    <div className="min-h-screen bg-background">
+      <JsonLd
+        data={serviceSchema({
+          name: "AI Implementation Engagement",
+          description:
+            "AI operating-system implementation for growing companies and mission-driven organizations.",
+          category: "AI Implementation Services",
+        })}
+      />
+      <Navbar />
+      <Suspense fallback={PAGE_LOADING_FALLBACK}>
+        <ContactSalesForm />
+      </Suspense>
+      <Footer />
+    </div>
   );
 }

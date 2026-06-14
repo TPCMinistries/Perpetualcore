@@ -86,15 +86,15 @@ export async function POST(request: NextRequest) {
     }
 
     // Send immediate welcome email with lead magnet
-    const leadMagnetUrl = `${process.env.NEXT_PUBLIC_APP_URL}/downloads/ai-productivity-guide.pdf`;
+    const leadMagnetUrl = `${process.env.NEXT_PUBLIC_APP_URL}/guide/ai-implementation-buyers-guide`;
 
     await resend.emails.send({
       from: EMAIL_FROM,
       to: email,
-      subject: `Welcome! Here's your AI Productivity Guide 📥`,
+      subject: "Welcome - your AI Operating System Map",
       react: NurtureDay1({
         firstName,
-        leadMagnetName: "AI Productivity Guide",
+        leadMagnetName: "AI Operating System Map",
         leadMagnetUrl,
       }),
     });
