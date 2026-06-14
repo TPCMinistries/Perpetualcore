@@ -19,7 +19,8 @@
     "playwright:install": "playwright install",
     "seed:rfp-demo": "tsx scripts/seed-rfp-demo-org.ts",
     "smoke:rfp-apis": "tsx scripts/smoke-test-rfp-apis.ts",
-    "types:supabase": "supabase gen types typescript --project-id hgxxxmtfmvguotkowxbu --schema public > lib/supabase/database.types.ts"
+    "types:supabase": "supabase gen types typescript --project-id hgxxxmtfmvguotkowxbu --schema public > lib/supabase/database.types.ts",
+    "verify:rfp-dedup": "tsx scripts/verify-rfp-dedup.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.67.0",

@@ -3,12 +3,11 @@ import { RfpAtmosphere } from "@/components/rfp/RfpAtmosphere";
 /**
  * (dashboard) route-group layout — applies to every /org/[orgId]/* surface.
  *
- * Why this exists: the root layout uses next-themes with defaultTheme="system",
- * so on a light-mode OS the body inherits light classes and the org pages
- * leak beige around their content. This wrapper hard-locks the dashboard
- * to the dark visual system that the rest of the RFP product uses, and
- * cascades the shared atmospheric backdrop so transitions between the
- * marketing site and the app feel like one product.
+ * Why this exists: the root layout uses next-themes with defaultTheme="system".
+ * This wrapper hard-locks the dashboard to the RFP Engine's premium LIGHT
+ * surface (warm off-white canvas) so the product reads as one cohesive,
+ * calm tool regardless of OS theme. Components below use explicit light
+ * colors (not `dark:` variants), so this scope is self-consistent.
  */
 export default function DashboardRouteGroupLayout({
   children,
@@ -16,8 +15,8 @@ export default function DashboardRouteGroupLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="dark relative min-h-screen bg-zinc-950 text-zinc-100 antialiased selection:bg-emerald-300/30 selection:text-emerald-100">
-      <RfpAtmosphere />
+    <div className="relative min-h-screen bg-[#f7f7f4] text-zinc-900 antialiased selection:bg-emerald-200/60 selection:text-emerald-900">
+      <RfpAtmosphere theme="light" />
       {children}
     </div>
   );

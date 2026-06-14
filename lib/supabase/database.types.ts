@@ -15258,6 +15258,30 @@ export type Database = {
           },
         ]
       }
+      rfp_api_key_health: {
+        Row: {
+          account_type: string | null
+          expires_at: string | null
+          key_name: string
+          last_alerted_at: string | null
+          updated_at: string
+        }
+        Insert: {
+          account_type?: string | null
+          expires_at?: string | null
+          key_name: string
+          last_alerted_at?: string | null
+          updated_at?: string
+        }
+        Update: {
+          account_type?: string | null
+          expires_at?: string | null
+          key_name?: string
+          last_alerted_at?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       rfp_capture_profiles: {
         Row: {
           created_at: string
@@ -15416,6 +15440,122 @@ export type Database = {
           },
         ]
       }
+      rfp_entitlements: {
+        Row: {
+          coverage_level: string
+          created_at: string
+          id: string
+          monthly_ai_budget_usd: number | null
+          monthly_draft_quota: number | null
+          monthly_review_quota: number | null
+          monthly_score_quota: number | null
+          monthly_vault_mb: number | null
+          org_id: string
+          override_at: string | null
+          override_by: string | null
+          override_reason: string | null
+          updated_at: string
+        }
+        Insert: {
+          coverage_level?: string
+          created_at?: string
+          id?: string
+          monthly_ai_budget_usd?: number | null
+          monthly_draft_quota?: number | null
+          monthly_review_quota?: number | null
+          monthly_score_quota?: number | null
+          monthly_vault_mb?: number | null
+          org_id: string
+          override_at?: string | null
+          override_by?: string | null
+          override_reason?: string | null
+          updated_at?: string
+        }
+        Update: {
+          coverage_level?: string
+          created_at?: string
+          id?: string
+          monthly_ai_budget_usd?: number | null
+          monthly_draft_quota?: number | null
+          monthly_review_quota?: number | null
+          monthly_score_quota?: number | null
+          monthly_vault_mb?: number | null
+          org_id?: string
+          override_at?: string | null
+          override_by?: string | null
+          override_reason?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "rfp_entitlements_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: true
+            referencedRelation: "rfp_orgs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      rfp_fit_evidence: {
+        Row: {
+          artifact_doc_id: string
+          artifact_id: string
+          artifact_title: string
+          artifact_type: string
+          created_at: string
+          dimension: string
+          excerpt: string
+          id: string
+          opp_id: string
+          org_id: string
+          scored_version: number
+          similarity: number
+        }
+        Insert: {
+          artifact_doc_id: string
+          artifact_id: string
+          artifact_title: string
+          artifact_type: string
+          created_at?: string
+          dimension: string
+          excerpt: string
+          id?: string
+          opp_id: string
+          org_id: string
+          scored_version: number
+          similarity: number
+        }
+        Update: {
+          artifact_doc_id?: string
+          artifact_id?: string
+          artifact_title?: string
+          artifact_type?: string
+          created_at?: string
+          dimension?: string
+          excerpt?: string
+          id?: string
+          opp_id?: string
+          org_id?: string
+          scored_version?: number
+          similarity?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "rfp_fit_evidence_opp_id_fkey"
+            columns: ["opp_id"]
+            isOneToOne: false
+            referencedRelation: "rfp_opportunities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "rfp_fit_evidence_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "rfp_orgs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       rfp_opp_matches: {
         Row: {
           chips: string[]
@@ -15500,15 +15640,22 @@ export type Database = {
           amount_max: number | null
           amount_min: number | null
           brief: string | null
+          cfda_numbers: string[]
+          cost_share_required: boolean | null
           created_at: string
           deadline: string | null
+          eligibility_types: string[]
+          funder_name: string | null
           geo: string | null
           id: string
           keywords: string[]
           last_seen_at: string | null
+          naics_codes: string[]
           needs_review: boolean
           posted_at: string | null
+          psc_code: string | null
           raw_json: Json
+          set_aside_code: string | null
           source: string
           source_id: string | null
           title: string
@@ -15520,15 +15667,22 @@ export type Database = {
           amount_max?: number | null
           amount_min?: number | null
           brief?: string | null
+          cfda_numbers?: string[]
+          cost_share_required?: boolean | null
           created_at?: string
           deadline?: string | null
+          eligibility_types?: string[]
+          funder_name?: string | null
           geo?: string | null
           id?: string
           keywords?: string[]
           last_seen_at?: string | null
+          naics_codes?: string[]
           needs_review?: boolean
           posted_at?: string | null
+          psc_code?: string | null
           raw_json?: Json
+          set_aside_code?: string | null
           source: string
           source_id?: string | null
           title: string
@@ -15540,15 +15694,22 @@ export type Database = {
           amount_max?: number | null
           amount_min?: number | null
           brief?: string | null
+          cfda_numbers?: string[]
+          cost_share_required?: boolean | null
           created_at?: string
           deadline?: string | null
+          eligibility_types?: string[]
+          funder_name?: string | null
           geo?: string | null
           id?: string
           keywords?: string[]
           last_seen_at?: string | null
+          naics_codes?: string[]
           needs_review?: boolean
           posted_at?: string | null
+          psc_code?: string | null
           raw_json?: Json
+          set_aside_code?: string | null
           source?: string
           source_id?: string | null
           title?: string
@@ -15975,6 +16136,8 @@ export type Database = {
       }
       rfp_proposals: {
         Row: {
+          ai_disclosure_acknowledged: boolean
+          ai_disclosure_acknowledged_at: string | null
           created_at: string
           due_date: string | null
           id: string
@@ -15987,6 +16150,8 @@ export type Database = {
           vault_chunks_used: Json
         }
         Insert: {
+          ai_disclosure_acknowledged?: boolean
+          ai_disclosure_acknowledged_at?: string | null
           created_at?: string
           due_date?: string | null
           id?: string
@@ -15999,6 +16164,8 @@ export type Database = {
           vault_chunks_used?: Json
         }
         Update: {
+          ai_disclosure_acknowledged?: boolean
+          ai_disclosure_acknowledged_at?: string | null
           created_at?: string
           due_date?: string | null
           id?: string
@@ -16071,6 +16238,63 @@ export type Database = {
             columns: ["org_id"]
             isOneToOne: false
             referencedRelation: "rfp_orgs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      rfp_rubric_criteria: {
+        Row: {
+          created_at: string
+          criterion_text: string
+          extracted_at: string
+          extracted_by: string
+          id: string
+          is_inferred: boolean
+          max_points: number | null
+          opp_id: string
+          package_doc_id: string | null
+          section_ref: string
+          weight: number | null
+        }
+        Insert: {
+          created_at?: string
+          criterion_text: string
+          extracted_at?: string
+          extracted_by?: string
+          id?: string
+          is_inferred?: boolean
+          max_points?: number | null
+          opp_id: string
+          package_doc_id?: string | null
+          section_ref: string
+          weight?: number | null
+        }
+        Update: {
+          created_at?: string
+          criterion_text?: string
+          extracted_at?: string
+          extracted_by?: string
+          id?: string
+          is_inferred?: boolean
+          max_points?: number | null
+          opp_id?: string
+          package_doc_id?: string | null
+          section_ref?: string
+          weight?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "rfp_rubric_criteria_opp_id_fkey"
+            columns: ["opp_id"]
+            isOneToOne: false
+            referencedRelation: "rfp_opportunities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "rfp_rubric_criteria_package_doc_id_fkey"
+            columns: ["package_doc_id"]
+            isOneToOne: false
+            referencedRelation: "rfp_package_documents"
             referencedColumns: ["id"]
           },
         ]
@@ -16231,6 +16455,45 @@ export type Database = {
           reason?: string
           resolved_at?: string | null
           source?: string
+        }
+        Relationships: []
+      }
+      rfp_state_coverage: {
+        Row: {
+          connector: string
+          display_name: string
+          feed_kind: string
+          last_success_at: string | null
+          opportunity_count: number | null
+          reliability: string | null
+          source_config: Json
+          state_code: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          connector: string
+          display_name: string
+          feed_kind?: string
+          last_success_at?: string | null
+          opportunity_count?: number | null
+          reliability?: string | null
+          source_config?: Json
+          state_code: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          connector?: string
+          display_name?: string
+          feed_kind?: string
+          last_success_at?: string | null
+          opportunity_count?: number | null
+          reliability?: string | null
+          source_config?: Json
+          state_code?: string
+          status?: string
+          updated_at?: string
         }
         Relationships: []
       }
@@ -16462,6 +16725,127 @@ export type Database = {
             columns: ["permission_id"]
             isOneToOne: false
             referencedRelation: "permissions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      sage_conversations: {
+        Row: {
+          created_at: string
+          id: string
+          mode: string
+          owner_user_id: string
+          title: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          mode?: string
+          owner_user_id?: string
+          title?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          mode?: string
+          owner_user_id?: string
+          title?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      sage_library: {
+        Row: {
+          content: string | null
+          conversation_id: string | null
+          created_at: string
+          id: string
+          kind: string
+          metadata: Json
+          owner_user_id: string
+          prompt: string
+          provider: string | null
+          status: string
+          storage_path: string | null
+          storage_url: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          content?: string | null
+          conversation_id?: string | null
+          created_at?: string
+          id?: string
+          kind: string
+          metadata?: Json
+          owner_user_id?: string
+          prompt: string
+          provider?: string | null
+          status?: string
+          storage_path?: string | null
+          storage_url?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          content?: string | null
+          conversation_id?: string | null
+          created_at?: string
+          id?: string
+          kind?: string
+          metadata?: Json
+          owner_user_id?: string
+          prompt?: string
+          provider?: string | null
+          status?: string
+          storage_path?: string | null
+          storage_url?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sage_library_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "sage_conversations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      sage_messages: {
+        Row: {
+          content: string
+          conversation_id: string
+          created_at: string
+          id: string
+          model_slug: string | null
+          role: string
+        }
+        Insert: {
+          content: string
+          conversation_id: string
+          created_at?: string
+          id?: string
+          model_slug?: string | null
+          role: string
+        }
+        Update: {
+          content?: string
+          conversation_id?: string
+          created_at?: string
+          id?: string
+          model_slug?: string | null
+          role?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sage_messages_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "sage_conversations"
             referencedColumns: ["id"]
           },
         ]
@@ -24149,6 +24533,17 @@ export type Database = {
           similarity: number
         }[]
       }
+      match_vault_docs: {
+        Args: { match_count?: number; org_id: string; query_embedding: string }
+        Returns: {
+          body: string
+          id: string
+          similarity: number
+          source_metadata: Json
+          title: string
+          type: string
+        }[]
+      }
       mnemo_search: {
         Args: {
           match_count?: number
@@ -24423,6 +24818,7 @@ export type Database = {
         Args: { perm_name: string; resource_uuid?: string; user_uuid: string }
         Returns: boolean
       }
+      user_org_ids: { Args: never; Returns: string[] }
       validate_api_key: {
         Args: { p_key_hash: string }
         Returns: {

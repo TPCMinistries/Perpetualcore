@@ -3,6 +3,11 @@ import { z } from "zod";
 import { createAdminClient, createClient } from "@/lib/supabase/server";
 import { fetchUrlContent } from "@/lib/rfp/import/fetch-url";
 import { extractPackageRequirements } from "@/lib/rfp/package/extract";
+import { extractRubricCriteria } from "@/lib/rfp/rubric/extract";
+import {
+  guardedLLMCall,
+  BudgetExceededError,
+} from "@/lib/rfp/ai/guardrail";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -24,6 +29,8 @@ const FieldsSchema = z.object({
   title: z.string().min(1).max(220),
   source_url: z.string().url().optional().or(z.literal("")),
   body: z.string().optional(),
+  solicitation_mode: z.enum(["true", "false"]).optional(),
+  force_re_extract: z.enum(["true", "false"]).optional(),
 });
 
 interface ProposalRow {
@@ -161,6 +168,8 @@ export async function POST(
     title: form.get("title"),
     source_url: form.get("source_url") ?? "",
     body: form.get("body") ?? "",
+    solicitation_mode: form.get("solicitation_mode") ?? undefined,
+    force_re_extract: form.get("force_re_extract") ?? undefined,
   });
   if (!parsedFields.success) {
     return NextResponse.json(
@@ -271,9 +280,169 @@ export async function POST(
     );
   }
 
-  return NextResponse.json({
+  // ── Rubric extraction (REVIEW-01) ─────────────────────────────────────────
+  // Runs only when solicitation_mode=true. Package upload itself always succeeds;
+  // rubric extraction failure is captured in rubric_skipped_reason, not a 5xx.
+
+  type RubricCriteriaRow = {
+    id: string;
+    opp_id: string;
+    package_doc_id: string | null;
+    section_ref: string;
+    criterion_text: string;
+    max_points: number | null;
+    weight: number | null;
+    is_inferred: boolean;
+    extracted_by: string;
+    extracted_at: string;
+  };
+
+  let rubric_criteria: RubricCriteriaRow[] = [];
+  let rubric_skipped_reason: string | undefined;
+
+  if (fields.solicitation_mode === "true") {
+    const oppId = access.proposal.opp_id;
+
+    if (!oppId) {
+      // Criteria are keyed per opp — cannot extract without an opp link
+      rubric_skipped_reason = "no_opportunity_linked";
+    } else {
+      const forceRe = fields.force_re_extract === "true";
+
+      // Cache check: if rows already exist and not forced, return cached
+      if (!forceRe) {
+        const { data: cachedRows } = await admin
+          .from("rfp_rubric_criteria")
+          .select("id, opp_id, package_doc_id, section_ref, criterion_text, max_points, weight, is_inferred, extracted_by, extracted_at")
+          .eq("opp_id", oppId)
+          .returns<RubricCriteriaRow[]>();
+
+        if (cachedRows && cachedRows.length > 0) {
+          rubric_criteria = cachedRows;
+          // Return cached — no LLM call needed (Pitfall 6)
+        }
+      }
+
+      // Only call the LLM if we don't have cached criteria (or force_re_extract)
+      if (rubric_criteria.length === 0 && !rubric_skipped_reason) {
+        // Scoring criteria from package extraction are hints only — not authoritative
+        const scoringHints = Array.isArray(
+          (extraction as { scoring_criteria?: string[] }).scoring_criteria
+        )
+          ? (extraction as { scoring_criteria: string[] }).scoring_criteria
+          : undefined;
+
+        try {
+          let capturedResult: Awaited<ReturnType<typeof extractRubricCriteria>> = null;
+
+          await guardedLLMCall(access.proposal.org_id, async () => {
+            const result = await extractRubricCriteria(text, {
+              scoring_criteria: scoringHints,
+            });
+            capturedResult = result;
+            if (!result) {
+              // Return a zero-cost meta so guardedLLMCall records the attempt
+              return {
+                agent: "rubric_extract_v1",
+                model: "none",
+                tokensIn: 0,
+                tokensOut: 0,
+                costUsd: 0,
+                sessionId: undefined,
+                proposalId,
+              };
+            }
+            return {
+              agent: "rubric_extract_v1",
+              model: result.model,
+              tokensIn: result.tokens_in,
+              tokensOut: result.tokens_out,
+              costUsd: result.cost_usd,
+              sessionId: result.session_id,
+              proposalId,
+            };
+          });
+
+          if (!capturedResult) {
+            rubric_skipped_reason = "extraction_failed";
+          } else {
+            const extractionResult = capturedResult;
+
+            // If force re-extract, delete existing rows first
+            if (forceRe) {
+              await admin
+                .from("rfp_rubric_criteria")
+                .delete()
+                .eq("opp_id", oppId);
+            }
+
+            // De-dupe section_refs before insert (enforce UNIQUE constraint client-side)
+            const seenSectionRefs = new Map<string, number>();
+            const deduped = extractionResult.criteria.map((c) => {
+              const count = seenSectionRefs.get(c.section_ref) ?? 0;
+              seenSectionRefs.set(c.section_ref, count + 1);
+              return {
+                ...c,
+                section_ref: count === 0 ? c.section_ref : `${c.section_ref} (${count + 1})`,
+              };
+            });
+
+            if (deduped.length > 0) {
+              const rowsToInsert = deduped.map((c) => ({
+                opp_id: oppId,
+                package_doc_id: packageDoc.id,
+                section_ref: c.section_ref,
+                criterion_text: c.criterion_text,
+                max_points: c.max_points ?? null,
+                weight: c.weight ?? null,
+                is_inferred: c.is_inferred,
+                extracted_by: extractionResult.model,
+              }));
+
+              const { data: insertedRows, error: rubricInsertError } = await admin
+                .from("rfp_rubric_criteria")
+                .insert(rowsToInsert)
+                .select("id, opp_id, package_doc_id, section_ref, criterion_text, max_points, weight, is_inferred, extracted_by, extracted_at")
+                .returns<RubricCriteriaRow[]>();
+
+              if (rubricInsertError) {
+                console.error(
+                  "[package/route] rubric_criteria insert failed (non-fatal):",
+                  rubricInsertError.message,
+                );
+                rubric_skipped_reason = "insert_failed";
+              } else {
+                rubric_criteria = insertedRows ?? [];
+              }
+            }
+            // If 0 criteria extracted — that's valid (document had no eval criteria)
+          }
+        } catch (err) {
+          if (err instanceof BudgetExceededError) {
+            // Budget exceeded: package upload succeeds, rubric extraction skipped
+            rubric_skipped_reason = "budget_exceeded";
+          } else {
+            const msg = err instanceof Error ? err.message : "unknown";
+            console.error("[package/route] rubric extraction error (non-fatal):", msg);
+            rubric_skipped_reason = "extraction_failed";
+          }
+        }
+      }
+    }
+  }
+
+  const response: Record<string, unknown> = {
     package_id: packageDoc.id,
     extraction,
     extracted_chars: text.length,
-  });
+  };
+
+  if (fields.solicitation_mode === "true") {
+    response.rubric_criteria = rubric_criteria;
+    if (rubric_skipped_reason) {
+      response.rubric_skipped_reason = rubric_skipped_reason;
+    }
+  }
+
+  return NextResponse.json(response);
 }

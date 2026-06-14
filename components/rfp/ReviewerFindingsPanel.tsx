@@ -35,24 +35,24 @@ const SEVERITY_CLASSES: Record<
   { chip: string; bar: string; label: string }
 > = {
   blocker: {
-    chip: "border-rose-500/40 bg-rose-500/10 text-rose-200",
-    bar: "bg-rose-500/40",
-    label: "text-rose-300",
+    chip: "border-rose-200 bg-rose-50 text-rose-700",
+    bar: "bg-rose-500",
+    label: "text-rose-700",
   },
   high: {
-    chip: "border-amber-500/40 bg-amber-500/10 text-amber-200",
-    bar: "bg-amber-500/40",
-    label: "text-amber-300",
+    chip: "border-amber-200 bg-amber-50 text-amber-700",
+    bar: "bg-amber-500",
+    label: "text-amber-700",
   },
   medium: {
-    chip: "border-zinc-500/40 bg-zinc-500/10 text-zinc-200",
-    bar: "bg-zinc-500/40",
-    label: "text-zinc-300",
+    chip: "border-zinc-300 bg-zinc-100 text-zinc-700",
+    bar: "bg-zinc-400",
+    label: "text-zinc-700",
   },
   low: {
-    chip: "border-zinc-700/60 bg-zinc-900/60 text-zinc-400",
-    bar: "bg-zinc-700/60",
-    label: "text-zinc-400",
+    chip: "border-zinc-200 bg-zinc-50 text-zinc-500",
+    bar: "bg-zinc-300",
+    label: "text-zinc-500",
   },
 };
 
@@ -78,16 +78,34 @@ const SECTION_LABEL: Record<string, string> = {
 };
 
 function scoreTone(score: number): string {
-  if (score >= 80) return "border-emerald-500/40 bg-emerald-500/10 text-emerald-200";
-  if (score >= 65) return "border-amber-500/40 bg-amber-500/10 text-amber-200";
-  return "border-rose-500/40 bg-rose-500/10 text-rose-200";
+  if (score >= 80) return "border-emerald-200 bg-emerald-50 text-emerald-700";
+  if (score >= 65) return "border-amber-200 bg-amber-50 text-amber-700";
+  return "border-rose-200 bg-rose-50 text-rose-700";
+}
+
+interface CriterionForPanel {
+  id: string;
+  section_ref: string;
 }
 
 interface ReviewerFindingsPanelProps {
   result: ReviewerResult;
+  /**
+   * Phase 19-02: rubric criteria for this opp. Used to resolve criterion_id
+   * on each finding to a human-readable section_ref chip. Default empty array
+   * = no criterion chips rendered (backward compatible).
+   */
+  criteria?: CriterionForPanel[];
 }
 
-export function ReviewerFindingsPanel({ result }: ReviewerFindingsPanelProps) {
+export function ReviewerFindingsPanel({
+  result,
+  criteria = [],
+}: ReviewerFindingsPanelProps) {
+  // Build id → section_ref lookup for O(1) resolution
+  const criterionMap = new Map<string, string>(
+    criteria.map((c) => [c.id, c.section_ref]),
+  );
   const grouped = new Map<FindingSeverity, ReviewerFinding[]>();
   for (const sev of SEVERITY_ORDER) grouped.set(sev, []);
   for (const f of result.findings) {
@@ -96,11 +114,11 @@ export function ReviewerFindingsPanel({ result }: ReviewerFindingsPanelProps) {
   }
 
   return (
-    <section className="mt-8 rounded-md border border-zinc-800 bg-zinc-900/40 p-6">
+    <section className="mt-8 rounded-md border border-zinc-200 bg-white p-6 shadow-sm">
       {/* Header */}
       <div className="flex items-start justify-between gap-4">
         <div>
-          <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-emerald-300">
+          <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-emerald-700">
             Reviewer pass · preview
           </p>
           <p className="mt-1 font-mono text-[10px] uppercase tracking-[0.18em] text-zinc-500">
@@ -123,7 +141,7 @@ export function ReviewerFindingsPanel({ result }: ReviewerFindingsPanelProps) {
       </div>
 
       {/* Summary */}
-      <p className="mt-4 text-[15px] leading-relaxed text-zinc-200">
+      <p className="mt-4 text-[15px] leading-relaxed text-zinc-700">
         {result.summary}
       </p>
 
@@ -149,7 +167,7 @@ export function ReviewerFindingsPanel({ result }: ReviewerFindingsPanelProps) {
                 {items.map((f, idx) => (
                   <li
                     key={`${sev}-${idx}`}
-                    className="rounded-md border border-zinc-800 bg-zinc-950 p-4"
+                    className="rounded-md border border-zinc-200 bg-zinc-50 p-4"
                   >
                     <div className="flex flex-wrap items-center gap-2">
                       <span
@@ -160,26 +178,37 @@ export function ReviewerFindingsPanel({ result }: ReviewerFindingsPanelProps) {
                       <span className="font-mono text-[9px] uppercase tracking-[0.22em] text-zinc-500">
                         {CATEGORY_LABEL[f.category] ?? f.category}
                       </span>
-                      <span className="font-mono text-[9px] uppercase tracking-[0.22em] text-zinc-600">
+                      <span className="font-mono text-[9px] uppercase tracking-[0.22em] text-zinc-400">
                         ·
                       </span>
                       <span className="font-mono text-[9px] uppercase tracking-[0.22em] text-zinc-500">
                         {SECTION_LABEL[f.section_type] ?? f.section_type}
                       </span>
+                      {/* Phase 19-02: criterion chip — show when finding has a known criterion_id */}
+                      {f.criterion_id && criterionMap.has(f.criterion_id) ? (
+                        <>
+                          <span className="font-mono text-[9px] uppercase tracking-[0.22em] text-zinc-400">
+                            ·
+                          </span>
+                          <span className="inline-flex items-center rounded-md border border-emerald-200 bg-emerald-50 px-2 py-0.5 font-mono text-[9px] uppercase tracking-[0.18em] text-emerald-700">
+                            {criterionMap.get(f.criterion_id)}
+                          </span>
+                        </>
+                      ) : null}
                     </div>
 
-                    <p className="mt-3 text-[14px] leading-relaxed text-zinc-100">
+                    <p className="mt-3 text-[14px] leading-relaxed text-zinc-900">
                       {f.finding}
                     </p>
 
                     {f.excerpt ? (
-                      <blockquote className="mt-3 border-l-2 border-zinc-700 pl-3 text-[13px] italic leading-relaxed text-zinc-400">
+                      <blockquote className="mt-3 border-l-2 border-zinc-300 pl-3 text-[13px] italic leading-relaxed text-zinc-500">
                         “{f.excerpt}”
                       </blockquote>
                     ) : null}
 
-                    <p className="mt-3 text-[13px] leading-relaxed text-emerald-200/90">
-                      <span className="font-mono text-[9px] uppercase tracking-[0.22em] text-emerald-400">
+                    <p className="mt-3 text-[13px] leading-relaxed text-emerald-700">
+                      <span className="font-mono text-[9px] uppercase tracking-[0.22em] text-emerald-600">
                         Suggestion ·{" "}
                       </span>
                       {f.suggestion}

@@ -3,9 +3,8 @@
  *
  * Server component. Same membership + role pattern as settings/voice/page.tsx.
  *
- * v1 honest scope: plaintext paste only. PDF/Docx upload arrives in Phase 2.
- * Retrieval is wired and queryable — but the drafter does NOT yet consume
- * vault chunks. Integration into the drafter ships in a follow-up commit.
+ * Supports plaintext paste plus PDF/DOCX extraction. Retrieved chunks are
+ * available to the drafter for grounded claims and VERIFY reduction.
  */
 
 import { notFound } from "next/navigation";
@@ -60,7 +59,7 @@ export default async function VaultSettingsPage({ params }: PageProps) {
     <div className="container max-w-3xl py-10">
       <Link
         href={`/org/${orgId}/discovery`}
-        className="font-mono text-[10px] uppercase tracking-[0.22em] text-zinc-500 hover:text-zinc-300"
+        className="font-mono text-[10px] uppercase tracking-[0.22em] text-zinc-500 hover:text-zinc-700"
       >
         ← Discovery
       </Link>
@@ -70,21 +69,15 @@ export default async function VaultSettingsPage({ params }: PageProps) {
           Settings · Vault
         </p>
         <h1
-          className="mt-2 text-3xl leading-tight italic text-zinc-100"
+          className="mt-2 text-3xl leading-tight italic text-zinc-900"
           style={{ fontFamily: "Georgia, serif" }}
         >
           {orgRow.name}&apos;s vault
         </h1>
-        <p className="mt-3 max-w-2xl text-sm text-zinc-400">
-          Vault — preview. Paste past proposals, annual reports, founder
-          letters. Each doc gets chunked, embedded, and stored as evidence the
-          drafter can retrieve when grounding claims. Today&apos;s v1 only
-          supports plaintext paste — PDF/Docx upload is Phase 2.
-        </p>
-        <p className="mt-2 max-w-2xl text-xs text-zinc-500">
-          Note: the drafter does not yet read from the vault. Retrieval ships
-          separately. Uploads you make today become available to the drafter
-          the moment that integration lands.
+        <p className="mt-3 max-w-2xl text-sm text-zinc-600">
+          Paste or upload past proposals, annual reports, founder letters, and
+          outcome summaries. Each document is chunked, embedded, and stored as
+          evidence the drafter can retrieve when grounding claims.
         </p>
       </header>
 
