@@ -6,8 +6,8 @@
  * durable, model-agnostic explanation; the summary is the narrative gloss.
  *
  * Model selection:
- *   - Primary: Claude Sonnet 4 (claude-sonnet-4-5)
- *   - Fallback: Claude Haiku 4.5 (claude-haiku-4-5)
+ *   - Primary: Claude Sonnet 4.5 (claude-sonnet-4-5-20250929)
+ *   - Fallback: Claude Haiku 4.5 (claude-haiku-4-5-20251001)
  *   - Last resort: OpenAI gpt-4o — same pattern as drafter/voice/reviewer,
  *     added 2026-06-09 because the Anthropic account ran out of credit and
  *     every summary silently nulled. Anthropic re-enables automatically when
@@ -65,9 +65,9 @@ function getOpenAI(): OpenAI | null {
 const PROFILE_PENDING_SUMMARY =
   'Capture profile not yet built. Score uses geo and deadline only.';
 
-/** Primary + fallback model ids. Sonnet 4.5 / Haiku 4.5 per Anthropic 2026 lineup. */
-const MODEL_PRIMARY = 'claude-sonnet-4-5';
-const MODEL_FALLBACK = 'claude-haiku-4-5';
+/** Primary + fallback model ids. Dated IDs are used because Anthropic rejected the aliases. */
+const MODEL_PRIMARY = 'claude-sonnet-4-5-20250929';
+const MODEL_FALLBACK = 'claude-haiku-4-5-20251001';
 /** Last-resort fallback when Anthropic is unavailable (e.g. credit exhausted). */
 const MODEL_OPENAI_FALLBACK = 'gpt-4o';
 const MODEL_CHAIN = [MODEL_PRIMARY, MODEL_FALLBACK, MODEL_OPENAI_FALLBACK];
