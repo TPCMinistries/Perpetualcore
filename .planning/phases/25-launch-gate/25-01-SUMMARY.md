@@ -38,6 +38,8 @@ Add production-authenticated E2E coverage for the RFP proposal workroom and subm
 
 ## Remaining Phase 25 Work
 
-- Add CI wiring so authenticated launch-gate E2E can block merge to main.
-- Decide whether the production demo E2E user should remain as a stable test fixture or be replaced by a staging-only fixture before public launch.
+- CI wiring is complete: `.github/workflows/ci.yml` now runs `RFP Launch Gate E2E` against production with the stable demo fixture.
+- GitHub Actions secrets are set for `RFP_E2E_EMAIL`, `RFP_E2E_PASSWORD`, `RFP_E2E_ORG_ID`, and `RFP_E2E_PROPOSAL_ID`.
+- Main branch protection now requires `RFP Launch Gate E2E` alongside `Cross-Tenant RLS Gate`.
+- Decide whether the production demo E2E user should remain as a stable test fixture or be replaced by a staging-only fixture before broad public launch.
 - Confirm production deployment should run from stable `main` for launch closeout.

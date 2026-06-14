@@ -98,3 +98,42 @@ jobs:
           NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
           NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+
+  rfp-launch-gate:
+    name: RFP Launch Gate E2E
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Playwright Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: Validate launch-gate secrets
+        run: |
+          test -n "$RFP_E2E_EMAIL"
+          test -n "$RFP_E2E_PASSWORD"
+          test -n "$RFP_E2E_ORG_ID"
+          test -n "$RFP_E2E_PROPOSAL_ID"
+        env:
+          RFP_E2E_EMAIL: ${{ secrets.RFP_E2E_EMAIL }}
+          RFP_E2E_PASSWORD: ${{ secrets.RFP_E2E_PASSWORD }}
+          RFP_E2E_ORG_ID: ${{ secrets.RFP_E2E_ORG_ID }}
+          RFP_E2E_PROPOSAL_ID: ${{ secrets.RFP_E2E_PROPOSAL_ID }}
+
+      - name: Authenticated RFP launch-gate E2E
+        run: npm run test:e2e:rfp-auth
+        env:
+          PLAYWRIGHT_BASE_URL: https://rfp.perpetualcore.com
+          RFP_E2E_EMAIL: ${{ secrets.RFP_E2E_EMAIL }}
+          RFP_E2E_PASSWORD: ${{ secrets.RFP_E2E_PASSWORD }}
+          RFP_E2E_ORG_ID: ${{ secrets.RFP_E2E_ORG_ID }}
+          RFP_E2E_PROPOSAL_ID: ${{ secrets.RFP_E2E_PROPOSAL_ID }}

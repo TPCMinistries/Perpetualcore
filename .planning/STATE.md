@@ -9,9 +9,9 @@ See: .planning/PROJECT.md (updated 2026-06-05)
 
 ## Current Position
 
-Phase: 25 of 25 IN PROGRESS — launch gate
-Plan: 1 of 2 complete (25-01 authenticated production E2E; 25-02 CI/main launch gate wiring remains)
-Status: Phase 24 is complete. Phase 25 has authenticated production E2E coverage for the proposal workroom/export/status path; CI/main launch gating remains.
+Phase: 25 of 25 COMPLETE — launch gate
+Plan: 2 of 2 complete (25-01 authenticated production E2E; 25-02 CI/main launch gate wiring)
+Status: Phase 24 and Phase 25 are complete. Production is health-green; authenticated launch-gate E2E is wired into CI and main branch protection.
 Last activity: 2026-06-13 — Added authenticated launch-gate E2E for proposal workroom, submission bundle exports, readiness JSON, audit/manifest CSVs, bundle ZIP, and status transition/reset. Seeded a demo E2E org/user, removed duplicate demo orgs from repeat seed attempts, repaired deterministic coverage, and confirmed `/api/health/rfp` returns `status=ok`, 32,814 / 32,814 expected matches, 100% coverage, and 0 open drift events.
 
 Progress: [███████░░░] beachhead path 7/9 complete — next Phase 24 FTUE
@@ -142,5 +142,5 @@ Recent decisions affecting current work:
 ## Session Continuity
 
 Last session: 2026-06-13
-Stopped at: Phase 25 in progress. Authenticated production E2E passes for the proposal workroom/export/status path. Remaining launch work is CI/main launch-gate wiring and the human dogfood pass with Uplift/IHA/TPC.
-Resume file: `.planning/phases/25-launch-gate/25-01-SUMMARY.md` — next action is 25-02 CI/main launch-gate wiring, then dogfood Uplift/IHA/TPC.
+Stopped at: Phase 25 complete. Authenticated production E2E passes for the proposal workroom/export/status path, and CI/main branch protection requires the launch-gate job. Remaining human/product work is dogfood Uplift/IHA/TPC and merge/deploy from stable `main` when ready.
+Resume file: `.planning/phases/25-launch-gate/25-01-SUMMARY.md` — next action is dogfood Uplift/IHA/TPC, then merge/deploy from stable `main`.

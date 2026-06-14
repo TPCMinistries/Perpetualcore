@@ -8,7 +8,7 @@
 
 ## Status
 
-Phase 19, Phase 20, and Phase 24 are closed. Phase 25 launch gate is in progress.
+Phase 19, Phase 20, Phase 24, and Phase 25 are closed.
 
 The last production deployment from Phase 19 is:
 
@@ -191,7 +191,7 @@ Do not follow `gsd-tools` numeric next-phase output if it points elsewhere. The 
 
 ## Next Engineering Step
 
-Wire authenticated launch-gate E2E into CI/main branch protection, then run dogfood Uplift/IHA/TPC.
+Run dogfood Uplift/IHA/TPC, then merge/deploy from stable `main` when ready.
 
 ## Open Human Tasks
 
