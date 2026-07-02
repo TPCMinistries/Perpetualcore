@@ -28,7 +28,6 @@ import { SubmissionReadinessPanel } from "@/components/rfp/SubmissionReadinessPa
 import { SubmissionBundlePanel } from "@/components/rfp/SubmissionBundlePanel";
 import { SubmissionPlanPanel } from "@/components/rfp/SubmissionPlanPanel";
 import { SubmissionWorkroom } from "@/components/rfp/SubmissionWorkroom";
-import { PursuitActionSummary } from "@/components/rfp/PursuitActionSummary";
 import { AiDisclosureBanner } from "@/components/rfp/AiDisclosureBanner";
 import type { CitationChunk } from "@/components/rfp/MarkupRenderer";
 import type { SubmissionTaskRow } from "@/lib/rfp/submission/tasks";
@@ -389,8 +388,9 @@ export default async function ProposalPage({
         </div>
 
         <h1
-          className="mt-3 text-3xl leading-tight italic text-zinc-900"
+          className="mt-3 text-3xl leading-tight italic text-zinc-900 line-clamp-3"
           style={{ fontFamily: "Georgia, serif" }}
+          title={proposal.title}
         >
           {proposal.title}
         </h1>
@@ -515,16 +515,9 @@ export default async function ProposalPage({
           <ReviewButton orgId={orgId} proposalId={proposalId} />
           <ExportProposalButton proposalId={proposalId} />
         </div>
-        <PursuitActionSummary
-          dueDate={proposal.due_date}
-          bidNoBid={bidNoBid}
-          complianceMatrix={complianceMatrix}
-          packetChecklist={packetChecklist}
-          reviewerResult={reviewerResult}
-          verifyMarkerCount={verifyMarkerCount}
-          sectionCount={visibleSections.length}
-          tasks={submissionTasks ?? []}
-        />
+        {/* PursuitActionSummary removed (Phase 26 Track D): its "Next moves" duplicated
+            SubmissionReadinessPanel's next-action off the same gate inputs and the two
+            could disagree. One canonical readiness verdict per screen. */}
         <SubmissionReadinessPanel
           bidNoBid={bidNoBid}
           complianceMatrix={complianceMatrix}

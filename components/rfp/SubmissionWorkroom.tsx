@@ -169,7 +169,7 @@ export function SubmissionWorkroom({
         <div className="flex flex-wrap items-center gap-2">
           <a
             href={`/api/rfp/proposals/${proposalId}/export/manifest-csv`}
-            className="rounded-md border border-sky-200 bg-sky-50 px-3 py-2 font-mono text-[10px] uppercase tracking-[0.18em] text-sky-700 transition hover:border-sky-300"
+            className="rounded-md border border-emerald-200 bg-emerald-50 px-3 py-2 font-mono text-[10px] uppercase tracking-[0.18em] text-emerald-700 transition hover:border-emerald-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2"
           >
             Export manifest
           </a>

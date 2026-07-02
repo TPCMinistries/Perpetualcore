@@ -156,6 +156,7 @@ export function FeedRow({
             className="ml-1 inline-flex shrink-0 items-center rounded border border-zinc-200 bg-white px-1.5 py-0.5 font-mono text-[10px] uppercase tracking-wide text-zinc-600"
             data-testid="feed-row-org-badge"
             title={`Scored for ${row.scored_for_org_name}`}
+            aria-label={`Scored for ${row.scored_for_org_name}`}
           >
             {orgTypeAbbrev(row.scored_for_org_type)} ·{" "}
             <span className="ml-1 max-w-[8rem] truncate inline-block align-bottom">

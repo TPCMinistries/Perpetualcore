@@ -155,6 +155,7 @@ export function ReviewerFindingsPanel({
             <div key={sev}>
               <div className="flex items-center gap-3">
                 <span
+                  aria-hidden="true"
                   className={`inline-block h-2 w-2 rounded-full ${classes.bar}`}
                 />
                 <h3

@@ -82,6 +82,19 @@ export function ProposalSectionEditor({
       ? "Last drafted by agent"
       : `Edited v${version}`;
 
+  // Warn before a full page unload discards unsaved edits. Scoped to
+  // editing-with-dirty-draft so Save/Cancel flows never trigger it. (Client-side
+  // route changes are not covered — this guards the destructive case: tab
+  // close, refresh, or hard navigation mid-edit.)
+  useEffect(() => {
+    if (!editing || draft === content) return;
+    const warn = (e: BeforeUnloadEvent) => {
+      e.preventDefault();
+    };
+    window.addEventListener("beforeunload", warn);
+    return () => window.removeEventListener("beforeunload", warn);
+  }, [editing, draft, content]);
+
   const onEnterEdit = useCallback(() => {
     setDraft(content);
     setError(null);

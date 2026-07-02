@@ -816,9 +816,30 @@ export function DetailPane({
             <span className="text-amber-700">Needs review</span>
           </>
         )}
+        {loading && !detail && (
+          <>
+            <span aria-hidden="true">·</span>
+            <span className="text-zinc-400" role="status">
+              Loading detail…
+            </span>
+          </>
+        )}
       </div>
 
-      <h2 className="mt-3 max-w-4xl text-3xl font-semibold leading-tight tracking-tight text-zinc-950">
+      {error && (
+        <p
+          className="mt-3 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs font-medium leading-5 text-amber-800"
+          role="alert"
+        >
+          Detail unavailable ({error}). Showing summary from list — some
+          sections below may be incomplete.
+        </p>
+      )}
+
+      <h2
+        className="mt-3 max-w-4xl text-3xl font-semibold leading-tight tracking-tight text-zinc-950 line-clamp-3"
+        title={row.title}
+      >
         {row.title}
       </h2>
 
@@ -909,6 +930,18 @@ export function DetailPane({
           <CalendarClock className="mb-3 h-4 w-4" />
           <p className="text-sm font-semibold">{deadline.label}</p>
           <p className="mt-1 text-xs leading-5 opacity-80">{deadline.detail}</p>
+          {enrichment?.timeline && enrichment.timeline.length > 0 && (
+            <div className="mt-2 flex flex-wrap gap-1.5">
+              {enrichment.timeline.map((item) => (
+                <span
+                  key={item}
+                  className="rounded border border-zinc-200 bg-white/70 px-2 py-0.5 font-mono text-[11px] opacity-90"
+                >
+                  {item}
+                </span>
+              ))}
+            </div>
+          )}
         </div>
         <div className="rounded-lg border border-zinc-200 bg-white p-4 text-zinc-700">
           {(row.amount_max ?? row.amount_min ?? null) !== null ? (
@@ -1149,7 +1182,7 @@ export function DetailPane({
               type="button"
               onClick={saveFunderSearch}
               disabled={funderSearchStatus === "saving" || funderSearchStatus === "saved"}
-              className="inline-flex h-9 cursor-pointer items-center gap-2 rounded-lg bg-zinc-950 px-3 text-sm font-medium text-white transition-colors duration-150 hover:bg-zinc-800 disabled:cursor-default disabled:bg-zinc-300 motion-reduce:transition-none"
+              className="inline-flex h-9 cursor-pointer items-center gap-2 rounded-lg bg-zinc-950 px-3 text-sm font-medium text-white transition-colors duration-150 hover:bg-zinc-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2 disabled:cursor-default disabled:bg-zinc-300 motion-reduce:transition-none"
             >
               <Save className="h-3.5 w-3.5" />
               {funderSearchStatus === "saving"
@@ -1162,7 +1195,7 @@ export function DetailPane({
               href={`/org/${orgId}/discovery?sources=${encodeURIComponent(row.source)}${
                 row.agency ? `&q=${encodeURIComponent(row.agency)}` : ""
               }`}
-              className="inline-flex h-9 items-center gap-2 rounded-lg border border-zinc-300 bg-white px-3 text-sm font-medium text-zinc-700 transition-colors duration-150 hover:bg-zinc-50 hover:text-zinc-950 motion-reduce:transition-none"
+              className="inline-flex h-9 items-center gap-2 rounded-lg border border-zinc-300 bg-white px-3 text-sm font-medium text-zinc-700 transition-colors duration-150 hover:bg-zinc-50 hover:text-zinc-950 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2 motion-reduce:transition-none"
             >
               Find similar <SearchCheck className="h-3.5 w-3.5" />
             </a>
@@ -1404,18 +1437,6 @@ export function DetailPane({
                   Submission/source link <ExternalLink className="h-3.5 w-3.5" />
                 </a>
               )}
-              {enrichment?.timeline && enrichment.timeline.length > 0 && (
-                <div className="flex flex-wrap gap-1.5 pt-1">
-                  {enrichment.timeline.map((item) => (
-                    <span
-                      key={item}
-                      className="rounded border border-zinc-200 bg-zinc-50 px-2 py-0.5 font-mono text-[11px] text-zinc-600"
-                    >
-                      {item}
-                    </span>
-                  ))}
-                </div>
-              )}
             </div>
           </CaptureCard>
 
@@ -1560,24 +1581,13 @@ export function DetailPane({
             href={row.url}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-1 text-sm font-medium text-zinc-700 underline-offset-4 hover:text-zinc-950 hover:underline"
+            className="inline-flex items-center gap-1 rounded text-sm font-medium text-zinc-700 underline-offset-4 hover:text-zinc-950 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2"
           >
             Open at source <ExternalLink className="h-3.5 w-3.5" />
           </a>
         )}
       </section>
 
-      {/* Loading / error overlays */}
-      {loading && !detail && (
-        <p className="mt-6 font-mono text-xs uppercase tracking-wide text-zinc-500">
-          Loading detail…
-        </p>
-      )}
-      {error && (
-        <p className="mt-6 font-mono text-xs text-amber-700">
-          Detail unavailable ({error}). Showing summary from list.
-        </p>
-      )}
     </div>
   );
 }

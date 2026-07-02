@@ -12,10 +12,7 @@ import type {
   PacketChecklistArtifact,
 } from "@/lib/rfp/compliance/types";
 import type { ReviewerResult } from "@/lib/rfp/review/rubric";
-import {
-  buildSubmitReadinessGate,
-  type SubmitGateStatus,
-} from "@/lib/rfp/submission/readiness-gate";
+import { buildSubmitReadinessGate } from "@/lib/rfp/submission/readiness-gate";
 import type { SubmissionTaskRow } from "@/lib/rfp/submission/tasks";
 
 interface SubmissionBundlePanelProps {
@@ -27,12 +24,6 @@ interface SubmissionBundlePanelProps {
   sectionCount: number;
   tasks: SubmissionTaskRow[];
 }
-
-const STATUS_CLASS: Record<SubmitGateStatus, string> = {
-  ready: "border-emerald-200 bg-emerald-50 text-emerald-700",
-  not_ready: "border-amber-200 bg-amber-50 text-amber-700",
-  not_run: "border-zinc-300 bg-zinc-100 text-zinc-700",
-};
 
 export function SubmissionBundlePanel({
   proposalId,
@@ -101,11 +92,9 @@ export function SubmissionBundlePanel({
             <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-emerald-700">
               Submission bundle
             </p>
-            <span
-              className={`rounded-full border px-2 py-1 font-mono text-[9px] uppercase tracking-[0.16em] ${STATUS_CLASS[gate.status]}`}
-            >
-              {gate.label}
-            </span>
+            {/* Gate-status badge removed (Phase 26 Track D): identical value already
+                shown by SubmissionReadinessPanel directly above, from the same
+                buildSubmitReadinessGate call. */}
           </div>
           <p className="mt-2 max-w-2xl text-sm leading-relaxed text-zinc-600">
             Export the full packet set from one place. The readiness gate is

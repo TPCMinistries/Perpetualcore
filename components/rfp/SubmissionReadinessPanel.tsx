@@ -93,7 +93,7 @@ export function SubmissionReadinessPanel({
                 <p className="text-sm font-medium text-zinc-900">{item.label}</p>
                 <p className="mt-1 text-[12px] leading-relaxed text-zinc-500">{item.detail}</p>
               </div>
-              <span className={`mt-1 h-2.5 w-2.5 shrink-0 rounded-full ${DOT_CLASS[item.severity]}`} />
+              <span aria-hidden="true" className={`mt-1 h-2.5 w-2.5 shrink-0 rounded-full ${DOT_CLASS[item.severity]}`} />
             </div>
             <p className="mt-2 font-mono text-[9px] uppercase tracking-[0.16em] text-zinc-400">
               {item.owner}
