@@ -435,11 +435,14 @@ export async function loadOrgBreakdown(limit = 50): Promise<OrgRow[]> {
 export async function loadScraperHealth(): Promise<ScraperHealthRow[]> {
   const admin = createAdminClient();
 
-  const [oppsRes, baselineRes, driftRes] = await Promise.all([
+  const [oppsRes, funderProfilesRes, baselineRes, driftRes] = await Promise.all([
     admin
       .from("rfp_opportunities")
       .select("source")
       .returns<{ source: string | null }[]>(),
+    (admin as unknown as { from: (table: string) => any })
+      .from("rfp_funder_profiles")
+      .select("source"),
     admin
       .from("rfp_source_baseline")
       .select("source, parsed_count, recorded_at")
@@ -467,6 +470,10 @@ export async function loadScraperHealth(): Promise<ScraperHealthRow[]> {
 
   const oppsBySource = new Map<string, number>();
   for (const r of oppsRes.data ?? []) {
+    const s = r.source ?? "unknown";
+    oppsBySource.set(s, (oppsBySource.get(s) ?? 0) + 1);
+  }
+  for (const r of funderProfilesRes.data ?? []) {
     const s = r.source ?? "unknown";
     oppsBySource.set(s, (oppsBySource.get(s) ?? 0) + 1);
   }

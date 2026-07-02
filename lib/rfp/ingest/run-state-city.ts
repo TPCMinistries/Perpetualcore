@@ -26,12 +26,17 @@ import { fetchNycDycdOpportunities } from "./scrape/nyc-dycd";
 import { fetchNycHraOpportunities } from "./scrape/nyc-hra";
 import { fetchNycDoeOpportunities } from "./scrape/nyc-doe";
 import { fetchCaGrantOpportunities } from "./scrape/ca-grants";
+import { fetchNjStartOpportunities } from "./scrape/nj-start";
+import { fetchCtCtsourceOpportunities } from "./scrape/ct-ctsource";
+import { fetchPaEMarketplaceOpportunities } from "./scrape/pa-emarketplace";
 import {
   getRollingBaseline,
   recordBaseline,
   recordDrift,
 } from "./scrape/drift";
 import type { OpportunityInput, StateCitySourceName } from "./scrape/types";
+
+export type { StateCitySourceName } from "./scrape/types";
 
 export interface StateCityIngestResult {
   source: StateCitySourceName;
@@ -51,6 +56,9 @@ const SCRAPERS: Array<{
   { source: "nyc_hra", fetch: fetchNycHraOpportunities },
   { source: "nyc_doe", fetch: fetchNycDoeOpportunities },
   { source: "ca_grants", fetch: fetchCaGrantOpportunities },
+  { source: "nj_grants", fetch: fetchNjStartOpportunities },
+  { source: "ct_grants", fetch: fetchCtCtsourceOpportunities },
+  { source: "pa_grants", fetch: fetchPaEMarketplaceOpportunities },
 ];
 
 export function isStateCityIngestSource(
@@ -61,8 +69,43 @@ export function isStateCityIngestSource(
 
 /** Anomaly threshold: parsed_count below 50% of rolling baseline triggers drift. */
 const COUNT_ANOMALY_FLOOR_PCT = 0.5;
-const UPSERT_BATCH_SIZE = 250;
+const UPSERT_BATCH_SIZE = 50;
 const LAST_SEEN_BATCH_SIZE = 500;
+const DB_RETRY_ATTEMPTS = 3;
+const DB_RETRY_BASE_DELAY_MS = 350;
+
+interface SupabaseMutationResult<T> {
+  data: T[] | null;
+  error: { message?: string } | null;
+}
+
+function sleep(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+async function runDbMutationWithRetry<T>(
+  operation: () => Promise<SupabaseMutationResult<T>>,
+): Promise<SupabaseMutationResult<T>> {
+  let lastError: { message?: string } | null = null;
+
+  for (let attempt = 1; attempt <= DB_RETRY_ATTEMPTS; attempt++) {
+    try {
+      const result = await operation();
+      if (!result.error) return result;
+      lastError = result.error;
+    } catch (err) {
+      lastError = {
+        message: err instanceof Error ? err.message : String(err),
+      };
+    }
+
+    if (attempt < DB_RETRY_ATTEMPTS) {
+      await sleep(DB_RETRY_BASE_DELAY_MS * attempt);
+    }
+  }
+
+  return { data: null, error: lastError ?? { message: "unknown database error" } };
+}
 
 export async function runStateCityIngest(options?: {
   sources?: StateCitySourceName[];
@@ -177,14 +220,12 @@ export async function runStateCityIngest(options?: {
       amount_max: o.amount_max ?? null,
       deadline: o.deadline ?? null,
       posted_at: o.posted_at ?? null,
+      brief: o.brief ?? null,
+      keywords: o.keywords ?? [],
+      geo: o.geo ?? null,
+      url: o.url ?? null,
+      needs_review: o.needs_review ?? false,
       raw_json: o.raw_json ?? {},
-      // 05-01 extension columns. Inserts succeed even without them because the
-      // columns are nullable / defaulted; if 05-01 lands first they get
-      // populated, if 05-02 lands first these are simply ignored (column
-      // doesn't exist yet → Supabase returns an error, which we'd want to
-      // surface). To stay forward-compatible, we DO NOT include columns that
-      // depend on 05-01 being applied. Once 05-01 lands, the next cron tick
-      // will start populating them.
     }));
 
     type IdRow = { id: string };
@@ -195,17 +236,19 @@ export async function runStateCityIngest(options?: {
     // hit Postgres statement timeouts while refreshing ~2K records.
     for (let start = 0; start < rows.length; start += UPSERT_BATCH_SIZE) {
       const batch = rows.slice(start, start + UPSERT_BATCH_SIZE);
-      const { data, error } = await supabase
-        .from("rfp_opportunities")
-        .upsert(batch as unknown as never[], {
-          onConflict: "source,source_id",
-          ignoreDuplicates: false,
-        })
-        .select("id");
+      const { data, error } = await runDbMutationWithRetry<IdRow>(() =>
+        supabase
+          .from("rfp_opportunities")
+          .upsert(batch as unknown as never[], {
+            onConflict: "source,source_id",
+            ignoreDuplicates: false,
+          })
+          .select("id"),
+      );
 
       if (error) {
-        upsertError = error.message;
-        result.errors.push(`upsert failed: ${error.message}`);
+        upsertError = error.message ?? "unknown database error";
+        result.errors.push(`upsert failed: ${upsertError}`);
         break;
       }
 
@@ -235,16 +278,21 @@ export async function runStateCityIngest(options?: {
       if (ids.length > 0) {
         for (let start = 0; start < ids.length; start += LAST_SEEN_BATCH_SIZE) {
           const batch = ids.slice(start, start + LAST_SEEN_BATCH_SIZE);
-          const touch = await supabase
-            .from("rfp_opportunities")
-            .update({ last_seen_at: now } as never)
-            .in("id", batch);
+          const touch = await runDbMutationWithRetry<never>(() =>
+            supabase
+              .from("rfp_opportunities")
+              .update({ last_seen_at: now } as never)
+              .in("id", batch),
+          );
           if (
             touch.error &&
-            !/column .* does not exist/i.test(touch.error.message)
+            !/column .* does not exist/i.test(
+              touch.error.message ?? "unknown database error",
+            )
           ) {
+            const touchError = touch.error.message ?? "unknown database error";
             result.errors.push(
-              `last_seen_at update failed: ${touch.error.message || "unknown error"}`
+              `last_seen_at update failed: ${touchError}`
             );
             break;
           }

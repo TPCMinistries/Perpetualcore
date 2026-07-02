@@ -149,14 +149,19 @@ export async function retrieveVaultChunks(
   // 14-04 will regenerate database.types.ts to include this RPC; until then
   // we cast through unknown to suppress the "unknown rpc" compile error.
   const { data: rpcData, error: rpcError } = await (
-    admin.rpc("match_vault_docs", {
+    (admin as unknown as {
+      rpc: (
+        fn: string,
+        args: Record<string, unknown>,
+      ) => Promise<{
+        data: MatchVaultDocsRow[] | null;
+        error: { message: string } | null;
+      }>;
+    }).rpc("match_vault_docs", {
       org_id: orgId,
       query_embedding: qvec,
       match_count: k,
-    }) as unknown as Promise<{
-      data: MatchVaultDocsRow[] | null;
-      error: { message: string } | null;
-    }>
+    })
   );
 
   if (!rpcError && rpcData !== null) {

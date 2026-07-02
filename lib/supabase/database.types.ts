@@ -16299,6 +16299,87 @@ export type Database = {
           },
         ]
       }
+      rfp_solicitation_amendments: {
+        Row: {
+          acknowledged_at: string | null
+          created_at: string
+          current_snapshot_id: string | null
+          diff_json: Json
+          id: string
+          material: boolean
+          material_reasons: string[]
+          opp_id: string
+          org_id: string
+          previous_snapshot_id: string | null
+          proposal_id: string | null
+          status: string
+        }
+        Insert: {
+          acknowledged_at?: string | null
+          created_at?: string
+          current_snapshot_id?: string | null
+          diff_json?: Json
+          id?: string
+          material?: boolean
+          material_reasons?: string[]
+          opp_id: string
+          org_id: string
+          previous_snapshot_id?: string | null
+          proposal_id?: string | null
+          status?: string
+        }
+        Update: {
+          acknowledged_at?: string | null
+          created_at?: string
+          current_snapshot_id?: string | null
+          diff_json?: Json
+          id?: string
+          material?: boolean
+          material_reasons?: string[]
+          opp_id?: string
+          org_id?: string
+          previous_snapshot_id?: string | null
+          proposal_id?: string | null
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "rfp_solicitation_amendments_current_snapshot_id_fkey"
+            columns: ["current_snapshot_id"]
+            isOneToOne: false
+            referencedRelation: "rfp_solicitation_snapshots"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "rfp_solicitation_amendments_opp_id_fkey"
+            columns: ["opp_id"]
+            isOneToOne: false
+            referencedRelation: "rfp_opportunities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "rfp_solicitation_amendments_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "rfp_orgs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "rfp_solicitation_amendments_previous_snapshot_id_fkey"
+            columns: ["previous_snapshot_id"]
+            isOneToOne: false
+            referencedRelation: "rfp_solicitation_snapshots"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "rfp_solicitation_amendments_proposal_id_fkey"
+            columns: ["proposal_id"]
+            isOneToOne: false
+            referencedRelation: "rfp_proposals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       rfp_saved_search_alert_log: {
         Row: {
           created_at: string
@@ -23714,6 +23795,10 @@ export type Database = {
       check_feature_access: {
         Args: { p_feature_slug: string; p_org_id: string }
         Returns: Json
+      }
+      check_ip_whitelist: {
+        Args: { check_ip: string; org_id: string }
+        Returns: boolean
       }
       check_overage_alerts: {
         Args: { p_org_id: string }

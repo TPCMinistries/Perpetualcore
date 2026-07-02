@@ -30,6 +30,7 @@ export type RfpOpportunitySource =
   | "sbir"
   | "fed_register"
   | "nih_grants"
+  | "nih_guide_notices"
   | "nsf_grants"
   | "ny_state"
   | "nyc_dycd"
@@ -37,6 +38,11 @@ export type RfpOpportunitySource =
   | "nyc_doe"
   | "nyc_passport"
   | "ca_grants"
+  | "nj_grants"
+  | "ct_grants"
+  | "pa_grants"
+  | "corporate_foundations"
+  | "bank_cra"
   | "foundation_url";
 
 export interface RfpSourceCatalogEntry {
@@ -60,6 +66,7 @@ export const RFP_ALLOWED_OPPORTUNITY_SOURCES: RfpOpportunitySource[] = [
   "sbir",
   "fed_register",
   "nih_grants",
+  "nih_guide_notices",
   "nsf_grants",
   "ny_state",
   "nyc_dycd",
@@ -67,6 +74,11 @@ export const RFP_ALLOWED_OPPORTUNITY_SOURCES: RfpOpportunitySource[] = [
   "nyc_doe",
   "nyc_passport",
   "ca_grants",
+  "nj_grants",
+  "ct_grants",
+  "pa_grants",
+  "corporate_foundations",
+  "bank_cra",
   "foundation_url",
 ];
 
@@ -244,53 +256,57 @@ export const RFP_SOURCE_CATALOG: RfpSourceCatalogEntry[] = [
     source: "nj_grants",
     label: "New Jersey grants and procurement",
     category: "state",
-    status: "planned",
+    status: "live",
     priority: "p0",
     ingestMode: "html_scrape",
     geography: "NJ",
     targetScale: "Regional nonprofit and workforce expansion",
     targetIndexedEstimate: 4_000,
-    canonicalUrl: "https://www.nj.gov",
-    nextStep: "Inventory official state sources and select canonical feed.",
+    canonicalUrl:
+      "https://www.njstart.gov/bso/view/search/external/advancedSearchBid.xhtml?openBids=true",
+    nextStep: "Monitor NJSTART parser drift and expand detail pagination after QA.",
   },
   {
     source: "ct_grants",
     label: "Connecticut grants and procurement",
     category: "state",
-    status: "planned",
+    status: "live",
     priority: "p1",
-    ingestMode: "html_scrape",
+    ingestMode: "api",
     geography: "CT",
     targetScale: "Regional nonprofit and workforce expansion",
     targetIndexedEstimate: 3_000,
-    canonicalUrl: "https://portal.ct.gov",
-    nextStep: "Inventory official state sources and select canonical feed.",
+    canonicalUrl: "https://portal.ct.gov/das/ctsource/bidboard",
+    nextStep:
+      "Monitor CTsource/Proactis parser drift and expand detail extraction after QA.",
   },
   {
     source: "pa_grants",
     label: "Pennsylvania grants and procurement",
     category: "state",
-    status: "planned",
+    status: "live",
     priority: "p1",
     ingestMode: "html_scrape",
     geography: "PA",
     targetScale: "Regional nonprofit and workforce expansion",
     targetIndexedEstimate: 4_000,
-    canonicalUrl: "https://www.pa.gov",
-    nextStep: "Inventory official state sources and select canonical feed.",
+    canonicalUrl: "https://www.emarketplace.state.pa.us/Search.aspx",
+    nextStep:
+      "Harden ASP.NET pagination beyond the first current-solicitations page.",
   },
   {
     source: "nih_guide_notices",
     label: "NIH Guide notices",
     category: "research",
-    status: "planned",
+    status: "live",
     priority: "p1",
-    ingestMode: "html_scrape",
+    ingestMode: "api",
     geography: "US",
     targetScale: "NIH policy and informational notices",
-    targetIndexedEstimate: null,
-    canonicalUrl: "https://grants.nih.gov/funding/searchguide/index.html",
-    nextStep: "Index notices separately from active NOFO opportunity records.",
+    targetIndexedEstimate: 500,
+    canonicalUrl: "https://grants.nih.gov/grants/guide/newsfeed/fundingopps.xml",
+    nextStep:
+      "Keep Guide notices clearly labeled apart from active NIH NOFOs, which remain sourced from Grants.gov.",
   },
   {
     source: "nsf_grants",
@@ -309,14 +325,15 @@ export const RFP_SOURCE_CATALOG: RfpSourceCatalogEntry[] = [
     source: "irs_990_foundations",
     label: "IRS 990 foundation intelligence",
     category: "foundation",
-    status: "planned",
+    status: "live",
     priority: "p1",
     ingestMode: "api",
     geography: "US",
-    targetScale: "Funder discovery, not open RFP inventory",
-    targetIndexedEstimate: null,
+    targetScale: "Funder discovery profiles, not open RFP inventory",
+    targetIndexedEstimate: 5_000,
     canonicalUrl: "https://www.irs.gov/charities-non-profits",
-    nextStep: "Ingest funder profiles separately from opportunity records.",
+    nextStep:
+      "Expand IRS BMF coverage beyond NY/NJ/CT/PA and add Form 990-PF grant-recipient extraction.",
   },
   {
     source: "candid_foundation_directory",
@@ -335,27 +352,29 @@ export const RFP_SOURCE_CATALOG: RfpSourceCatalogEntry[] = [
     source: "corporate_foundations",
     label: "Corporate foundation programs",
     category: "corporate",
-    status: "planned",
+    status: "live",
     priority: "p2",
     ingestMode: "curated",
     geography: "US",
     targetScale: "CSR and corporate giving programs",
     targetIndexedEstimate: 3_000,
     canonicalUrl: null,
-    nextStep: "Start with curated target list and manual QA before automation.",
+    nextStep:
+      "Expand curated official program coverage by sector and add application-window monitoring.",
   },
   {
     source: "bank_cra",
     label: "Bank CRA and community grants",
     category: "corporate",
-    status: "planned",
+    status: "live",
     priority: "p2",
     ingestMode: "curated",
     geography: "US",
     targetScale: "CRA-aligned community investment programs",
     targetIndexedEstimate: 2_000,
     canonicalUrl: null,
-    nextStep: "Create curated source list by geography and funding area.",
+    nextStep:
+      "Expand CRA-aligned bank foundation coverage by market and add deadline-window extraction.",
   },
 ];
 

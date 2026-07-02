@@ -33,6 +33,7 @@ import { fetchSimplerGrantsOpportunities } from "@/lib/rfp/ingest/simpler-grants
 import { fetchSbirOpportunities } from "@/lib/rfp/ingest/sbir";
 import { fetchFederalRegisterOpportunities } from "@/lib/rfp/ingest/federal-register";
 import { fetchNihGrantOpportunities } from "@/lib/rfp/ingest/nih-grants";
+import { fetchNihGuideNotices } from "@/lib/rfp/ingest/nih-guide-notices";
 import { fetchNsfGrantOpportunities } from "@/lib/rfp/ingest/nsf-grants";
 import type { RfpOpportunitySource } from "@/lib/rfp/source-catalog";
 
@@ -44,6 +45,7 @@ export interface IngestSourceResult {
     | "sbir_gov"
     | "fed_register"
     | "nih_grants"
+    | "nih_guide_notices"
     | "nsf_grants";
   fetched: number;
   upserted: number;
@@ -72,6 +74,7 @@ const FEDERAL_FETCHERS: FetcherSpec[] = [
   { name: "sbir_gov", run: () => fetchSbirOpportunities() },
   { name: "fed_register", run: () => fetchFederalRegisterOpportunities() },
   { name: "nih_grants", run: () => fetchNihGrantOpportunities() },
+  { name: "nih_guide_notices", run: () => fetchNihGuideNotices() },
   { name: "nsf_grants", run: () => fetchNsfGrantOpportunities() },
 ];
 

@@ -48,6 +48,19 @@ export interface SourceReadinessSummary {
   p0Remaining: number;
 }
 
+const SOURCE_READINESS_STATUS_ORDER: Record<SourceReadinessStatus, number> = {
+  degraded: 0,
+  planned: 1,
+  live: 2,
+  blocked: 3,
+};
+
+const SOURCE_READINESS_PRIORITY_ORDER: Record<SourceReadinessPriority, number> = {
+  p0: 0,
+  p1: 1,
+  p2: 2,
+};
+
 function toReadinessTarget(entry: RfpSourceCatalogEntry): SourceReadinessTarget {
   return {
     source: entry.source,
@@ -146,4 +159,28 @@ export function summarizeSourceReadiness(
       : null;
 
   return summary;
+}
+
+export function sourceReadinessGap(row: SourceReadinessRow): number {
+  if (row.targetIndexedEstimate === null) return 0;
+  return Math.max(0, row.targetIndexedEstimate - row.indexed);
+}
+
+export function buildSourcePriorityQueue(
+  rows: SourceReadinessRow[],
+  limit = 5,
+): SourceReadinessRow[] {
+  return [...rows]
+    .filter((row) => row.effectiveStatus !== "live" || row.openDrift > 0)
+    .sort((a, b) => {
+      return (
+        SOURCE_READINESS_STATUS_ORDER[a.effectiveStatus] -
+          SOURCE_READINESS_STATUS_ORDER[b.effectiveStatus] ||
+        SOURCE_READINESS_PRIORITY_ORDER[a.priority] -
+          SOURCE_READINESS_PRIORITY_ORDER[b.priority] ||
+        sourceReadinessGap(b) - sourceReadinessGap(a) ||
+        a.label.localeCompare(b.label)
+      );
+    })
+    .slice(0, limit);
 }

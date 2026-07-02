@@ -17,6 +17,8 @@ import {
   type OpportunityInput,
   extractTitleKeywords,
 } from "@/lib/rfp/ingest/normalize";
+import type { RfpSourceName } from "@/lib/rfp/sources";
+import type { RfpOpportunitySource } from "@/lib/rfp/source-catalog";
 
 export interface SocrataFieldMap {
   source_id: string;
@@ -33,7 +35,7 @@ export interface SocrataFieldMap {
 export interface SocrataSourceConfig {
   domain: string; // e.g. "data.cityofnewyork.us"
   dataset_id: string; // e.g. "dg92-zbpx"
-  source_tag: string; // stored as rfp_opportunities.source, e.g. "nyc_cityrecord"
+  source_tag: RfpSourceName | RfpOpportunitySource; // stored as rfp_opportunities.source
   field_map: SocrataFieldMap;
   geo?: string;
   /** Column used to decide "open" (deadline in the future). If absent, no date filter. */

@@ -16,6 +16,13 @@ import { NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/server";
 import { RFP_SOURCE_CATALOG } from "@/lib/rfp/source-catalog";
 import { summarizeRfpCronErrors } from "@/lib/rfp/monitoring/health";
+import { loadScraperHealth } from "@/lib/rfp/admin-metrics";
+import {
+  buildSourcePriorityQueue,
+  buildSourceReadiness,
+  summarizeSourceReadiness,
+  sourceReadinessGap,
+} from "@/lib/rfp/source-readiness";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -208,6 +215,24 @@ export async function GET(): Promise<NextResponse> {
       sourceTargetIndexedEstimate > 0
         ? Math.min(100, (opportunityCount / sourceTargetIndexedEstimate) * 100)
         : null;
+    const sourceReadiness = buildSourceReadiness(await loadScraperHealth());
+    const sourceReadinessSummary = summarizeSourceReadiness(sourceReadiness);
+    const sourcePriorityQueue = buildSourcePriorityQueue(sourceReadiness, 5).map(
+      (source) => ({
+        source: source.source,
+        label: source.label,
+        category: source.category,
+        status: source.effectiveStatus,
+        priority: source.priority,
+        geography: source.geography,
+        ingest_mode: source.ingestMode,
+        indexed: source.indexed,
+        target_indexed_estimate: source.targetIndexedEstimate,
+        gap: sourceReadinessGap(source),
+        open_drift_events: source.openDrift,
+        next_step: source.nextStep,
+      }),
+    );
     const liveSourceCount = RFP_SOURCE_CATALOG.filter(
       (source) => source.status === "live",
     ).length;
@@ -446,7 +471,9 @@ export async function GET(): Promise<NextResponse> {
         source_catalog_live: liveSourceCount,
         source_catalog_planned: plannedSourceCount,
         source_catalog_blocked: blockedSourceCount,
+        source_readiness_p0_remaining: sourceReadinessSummary.p0Remaining,
       },
+      source_priority_queue: sourcePriorityQueue,
       last_cron: lastCron.data
         ? {
             name: lastCron.data.cron_name,

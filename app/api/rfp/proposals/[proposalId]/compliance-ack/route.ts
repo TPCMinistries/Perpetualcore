@@ -31,7 +31,7 @@ const ParamsSchema = z.object({
 
 const BodySchema = z.object({
   acknowledged: z.literal(true, {
-    errorMap: () => ({ message: "acknowledged must be exactly true" }),
+    message: "acknowledged must be exactly true",
   }),
 });
 
@@ -74,7 +74,7 @@ export async function PATCH(
     const raw = await req.json();
     body = BodySchema.parse(raw);
   } catch (err) {
-    const message = err instanceof z.ZodError ? err.errors[0]?.message : "invalid_body";
+    const message = err instanceof z.ZodError ? err.issues[0]?.message : "invalid_body";
     return NextResponse.json({ error: message ?? "invalid_body" }, { status: 400 });
   }
 

@@ -7,11 +7,18 @@ import {
   isStateCityIngestSource,
   runStateCityIngest,
   type StateCityIngestResult,
+  type StateCitySourceName,
 } from "@/lib/rfp/ingest/run-state-city";
+import {
+  isCuratedIngestSource,
+  runCuratedIngest,
+  type CuratedIngestResult,
+  type CuratedSourceName,
+} from "@/lib/rfp/ingest/curated-programs";
 import { logRfpCronExecution } from "@/lib/rfp/cron-log";
 import { scoreMissingOpportunitiesForAllActiveOrgsNoAi } from "@/lib/rfp/scoring/recompute";
 
-export type ManualSourceRerunKind = "federal" | "state_city";
+export type ManualSourceRerunKind = "federal" | "state_city" | "curated";
 
 export interface ManualSourceRerunResult {
   source: string;
@@ -25,11 +32,20 @@ export interface ManualSourceRerunResult {
 }
 
 export function canManualRerunSource(source: string): boolean {
-  return isFederalIngestSource(source) || isStateCityIngestSource(source);
+  return (
+    isFederalIngestSource(source) ||
+    isStateCityIngestSource(source) ||
+    isCuratedIngestSource(source)
+  );
 }
 
 function totals(
-  rows: Array<Pick<StateCityIngestResult, "fetched" | "upserted" | "errors">>,
+  rows: Array<
+    Pick<
+      StateCityIngestResult | CuratedIngestResult,
+      "fetched" | "upserted" | "errors"
+    >
+  >,
 ): { fetched: number; upserted: number; errors: number } {
   return rows.reduce(
     (acc, row) => {
@@ -46,18 +62,38 @@ export async function rerunRfpSource(
   source: string,
 ): Promise<ManualSourceRerunResult> {
   const startedAt = Date.now();
-  const kind: ManualSourceRerunKind = isFederalIngestSource(source)
-    ? "federal"
-    : "state_city";
 
-  if (!canManualRerunSource(source)) {
-    throw new Error(`unsupported_source:${source}`);
+  if (isFederalIngestSource(source)) {
+    const results = await runFederalIngest({ sources: [source] });
+    return finalizeSourceRerun(source, "federal", startedAt, results);
   }
 
-  const results: IngestRunResult | StateCityIngestResult[] =
-    kind === "federal"
-      ? await runFederalIngest({ sources: [source] })
-      : await runStateCityIngest({ sources: [source] });
+  if (isStateCityIngestSource(source)) {
+    const results = await runStateCityIngest({
+      sources: [source as StateCitySourceName],
+    });
+    return finalizeSourceRerun(source, "state_city", startedAt, results);
+  }
+
+  if (isCuratedIngestSource(source)) {
+    const results = await runCuratedIngest({
+      sources: [source as CuratedSourceName],
+    });
+    return finalizeSourceRerun(source, "curated", startedAt, results);
+  }
+
+  throw new Error(`unsupported_source:${source}`);
+}
+
+async function finalizeSourceRerun(
+  source: string,
+  kind: ManualSourceRerunKind,
+  startedAt: number,
+  results: IngestRunResult | StateCityIngestResult[] | CuratedIngestResult[],
+): Promise<ManualSourceRerunResult> {
+  if (!Array.isArray(results)) {
+    throw new Error(`unsupported_source:${source}`);
+  }
   const aggregate = totals(results);
   const upsertedIds = results.flatMap((row) => row.upserted_ids);
 

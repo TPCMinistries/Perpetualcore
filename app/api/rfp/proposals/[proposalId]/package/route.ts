@@ -8,6 +8,8 @@ import {
   guardedLLMCall,
   BudgetExceededError,
 } from "@/lib/rfp/ai/guardrail";
+import type { Json } from "@/lib/supabase/database.types";
+import type { RubricExtractionResult } from "@/lib/rfp/rubric/extract";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -52,6 +54,16 @@ interface PackageDocRow {
   created_at: string;
 }
 
+type ProposalAccess =
+  | {
+      user: { id: string };
+      proposal: ProposalRow;
+      role: string;
+    }
+  | {
+      error: NextResponse;
+    };
+
 function normalizeText(text: string): string {
   return text.replace(/\u00a0/g, " ").replace(/\s+/g, " ").trim();
 }
@@ -82,7 +94,7 @@ async function extractTextFromFile(file: File): Promise<string> {
   throw new Error(`unsupported_file_type:${file.type || "unknown"}:${file.name}`);
 }
 
-async function requireProposalAccess(proposalId: string) {
+async function requireProposalAccess(proposalId: string): Promise<ProposalAccess> {
   const supabase = await createClient();
   const {
     data: { user },
@@ -234,6 +246,7 @@ export async function POST(
     sourceUrl,
     text,
   });
+  const extractionJson = extraction as unknown as Json;
 
   const admin = createAdminClient();
   const { data: packageDoc, error: insertError } = await admin
@@ -248,7 +261,7 @@ export async function POST(
       file_name: fileName,
       mime_type: mimeType,
       extracted_text: text,
-      extracted_json: extraction,
+      extracted_json: extractionJson,
       extracted_chars: text.length,
       uploaded_by: access.user.id,
     })
@@ -271,7 +284,7 @@ export async function POST(
     proposal_id: proposalId,
     check_type: "package_requirements_v1",
     status: extraction.risks.length > 0 ? "warn" : "pass",
-    details_json: extraction,
+    details_json: extractionJson,
   });
   if (checkError) {
     return NextResponse.json(
@@ -333,7 +346,7 @@ export async function POST(
           : undefined;
 
         try {
-          let capturedResult: Awaited<ReturnType<typeof extractRubricCriteria>> = null;
+          let capturedResult: RubricExtractionResult | null = null;
 
           await guardedLLMCall(access.proposal.org_id, async () => {
             const result = await extractRubricCriteria(text, {
@@ -363,11 +376,10 @@ export async function POST(
             };
           });
 
-          if (!capturedResult) {
+          const extractionResult = capturedResult as RubricExtractionResult | null;
+          if (!extractionResult) {
             rubric_skipped_reason = "extraction_failed";
           } else {
-            const extractionResult = capturedResult;
-
             // If force re-extract, delete existing rows first
             if (forceRe) {
               await admin

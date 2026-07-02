@@ -41,8 +41,10 @@ import {
   type ScraperHealthRow,
 } from "@/lib/rfp/admin-metrics";
 import {
+  buildSourcePriorityQueue,
   buildSourceReadiness,
   summarizeSourceReadiness,
+  sourceReadinessGap,
   type SourceReadinessRow,
   type SourceReadinessStatus,
   type SourceReadinessSummary,
@@ -481,6 +483,68 @@ function SourceReadinessTiles({
         value={formatNumber(summary.p0Remaining)}
         tone={summary.p0Remaining > 0 ? "amber" : "emerald"}
       />
+    </div>
+  );
+}
+
+function sourceActionLabel(row: SourceReadinessRow): string {
+  if (row.effectiveStatus === "degraded") return "Repair drift";
+  if (canManualRerunSource(row.source) && row.indexed === 0) return "Run ingest";
+  if (canManualRerunSource(row.source)) return "Rerun and QA";
+  if (row.effectiveStatus === "planned") return "Build connector";
+  if (row.effectiveStatus === "blocked") return "Keep blocked";
+  return "Monitor";
+}
+
+function SourcePriorityLadder({ rows }: { rows: SourceReadinessRow[] }) {
+  const ranked = buildSourcePriorityQueue(rows, 5);
+
+  if (ranked.length === 0) {
+    return (
+      <p className="mt-4 rounded-lg border border-emerald-500/20 bg-emerald-500/[0.04] p-5 text-sm text-emerald-100">
+        All catalog sources are live with no open drift. Keep monitoring daily
+        volume and freshness.
+      </p>
+    );
+  }
+
+  return (
+    <div className="mt-4 grid gap-3 lg:grid-cols-5">
+      {ranked.map((row, index) => (
+        <article
+          key={row.source}
+          className="rounded-lg border border-white/5 bg-white/[0.03] p-4"
+        >
+          <div className="flex items-center justify-between gap-3">
+            <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-zinc-500">
+              #{index + 1} · {row.priority.toUpperCase()}
+            </span>
+            <span
+              className={`rounded-full px-2 py-1 font-mono text-[10px] uppercase tracking-[0.14em] ${statusClass(
+                row.effectiveStatus,
+              )}`}
+            >
+              {row.effectiveStatus}
+            </span>
+          </div>
+          <h3 className="mt-3 text-sm font-semibold leading-5 text-zinc-100">
+            {row.label}
+          </h3>
+          <div className="mt-3 grid gap-1.5 font-mono text-[11px] uppercase tracking-[0.12em] text-zinc-500">
+            <span>{row.geography} · {row.ingestMode.replace("_", " ")}</span>
+            <span>
+              gap {formatNumber(sourceReadinessGap(row))} · indexed {formatNumber(row.indexed)}
+            </span>
+            {row.openDrift > 0 && (
+              <span className="text-amber-200">{row.openDrift} open drift</span>
+            )}
+          </div>
+          <p className="mt-3 text-xs leading-5 text-zinc-400">{row.nextStep}</p>
+          <div className="mt-4 font-mono text-[10px] uppercase tracking-[0.16em] text-emerald-200">
+            {sourceActionLabel(row)}
+          </div>
+        </article>
+      ))}
     </div>
   );
 }
@@ -1578,6 +1642,7 @@ export default async function AdminRfpPage() {
         the verified indexed count until the live source catalog supports a
         larger number.
       </p>
+      <SourcePriorityLadder rows={sourceReadiness} />
       <SourceReadinessTable rows={sourceReadiness} />
 
       <SectionHeader
