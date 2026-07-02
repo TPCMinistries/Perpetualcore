@@ -19,16 +19,19 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
           cache: npm
 
       - name: Install dependencies
         run: npm ci
 
       - name: ESLint
-        run: npx eslint app/api/rfp lib/rfp components/rfp "app/(dashboard)/org/[orgId]" tests/e2e/rfp-authenticated.spec.ts --ext .ts,.tsx --max-warnings=0
+        run: npx eslint app/api/rfp lib/rfp components/rfp "app/(dashboard)/org/[orgId]" tests/e2e/rfp-authenticated.spec.ts tests/e2e/rfp-visual.spec.ts --ext .ts,.tsx --max-warnings=0
         env:
           NODE_OPTIONS: --max-old-space-size=8192
+
+      - name: TypeScript release gate
+        run: npm run type-check:release
 
   build:
     name: Build
@@ -39,7 +42,7 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
           cache: npm
 
       - name: Install dependencies
@@ -68,7 +71,7 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
           cache: npm
 
       - name: Install dependencies
@@ -86,7 +89,7 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
           cache: npm
 
       - name: Install dependencies
@@ -108,7 +111,7 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
           cache: npm
 
       - name: Install dependencies
@@ -130,7 +133,7 @@ jobs:
           RFP_E2E_PROPOSAL_ID: ${{ secrets.RFP_E2E_PROPOSAL_ID }}
 
       - name: Authenticated RFP launch-gate E2E
-        run: npm run test:e2e:rfp-auth
+        run: npm run verify:rfp-production
         env:
           PLAYWRIGHT_BASE_URL: https://rfp.perpetualcore.com
           RFP_E2E_EMAIL: ${{ secrets.RFP_E2E_EMAIL }}

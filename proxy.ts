@@ -2,7 +2,6 @@ import { createServerClient, type CookieOptions } from '@supabase/ssr';
 import { NextResponse, type NextRequest } from 'next/server';
 import { Ratelimit } from '@upstash/ratelimit';
 import { Redis } from '@upstash/redis';
-import { isIPAllowed, getOrgIdForUser } from '@/lib/compliance/ip-check';
 import {
   extractUTMFromURL,
   serializeUTM,
@@ -72,6 +71,16 @@ function isRfpAppPath(pathname: string): boolean {
   return (
     pathname.startsWith('/api/') ||
     pathname.startsWith('/_next') ||
+    pathname === '/robots.txt' ||
+    pathname === '/sitemap.xml' ||
+    pathname === '/manifest.json' ||
+    pathname === '/favicon.ico' ||
+    pathname === '/icon' ||
+    pathname === '/apple-icon' ||
+    pathname.startsWith('/favicon-') ||
+    pathname.startsWith('/apple-touch-icon') ||
+    pathname.startsWith('/opengraph-image') ||
+    pathname.startsWith('/twitter-image') ||
     pathname.startsWith('/auth/') ||
     pathname.startsWith('/login') ||
     pathname.startsWith('/signup') ||
@@ -126,7 +135,7 @@ function setRfpIntentCookie(response: NextResponse, request: NextRequest): void 
   });
 }
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const host = request.headers.get('host');
   const pathname = request.nextUrl.pathname;
   const markRfpIntent = shouldMarkRfpIntent(request) || isRfpHost(host);
@@ -333,12 +342,36 @@ export async function middleware(request: NextRequest) {
   // IP Whitelist + Session Duration checks for authenticated users
   if (user) {
     try {
-      const orgId = await getOrgIdForUser(user.id);
+      const rfp = supabase as unknown as {
+        from: (table: string) => any;
+        rpc: (
+          fn: string,
+          args: Record<string, unknown>,
+        ) => Promise<{ data: boolean | null; error: { message: string } | null }>;
+      };
+      const { data: profile } = await rfp
+        .from('profiles')
+        .select('organization_id')
+        .eq('id', user.id)
+        .maybeSingle();
+      const orgId =
+        profile && typeof profile.organization_id === 'string'
+          ? profile.organization_id
+          : null;
       if (orgId) {
         const ip = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim()
           || request.headers.get('x-real-ip')
           || 'unknown';
-        const { allowed } = await isIPAllowed(ip, orgId);
+        const { data: allowed, error: ipCheckError } =
+          ip === 'unknown'
+            ? { data: true, error: null }
+            : await rfp.rpc('check_ip_whitelist', {
+                check_ip: ip,
+                org_id: orgId,
+              });
+        if (ipCheckError) {
+          console.error('IP whitelist check error:', ipCheckError);
+        }
         if (!allowed) {
           return NextResponse.json(
             { error: 'Access denied: IP not whitelisted' },

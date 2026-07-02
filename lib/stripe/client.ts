@@ -9,7 +9,7 @@ if (!process.env.STRIPE_SECRET_KEY) {
  * Configured with API version and TypeScript support
  */
 export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
-  apiVersion: "2024-12-18.acacia",
+  apiVersion: "2025-09-30.clover",
   typescript: true,
 });
 

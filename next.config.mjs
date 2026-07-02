@@ -1,81 +1,7 @@
-import withPWAInit from '@ducanh2912/next-pwa';
-
 // Polyfill 'self' for server-side builds (must be at top level)
 if (typeof self === 'undefined') {
   global.self = global;
 }
-
-const withPWA = withPWAInit({
-  dest: 'public',
-  disable: process.env.NODE_ENV === 'development', // Enable in production only
-  register: true,
-  skipWaiting: true,
-  sw: 'service-worker.js',
-  runtimeCaching: [
-    {
-      urlPattern: /^https:\/\/fonts\.(?:googleapis|gstatic)\.com\/.*/i,
-      handler: 'CacheFirst',
-      options: {
-        cacheName: 'google-fonts',
-        expiration: {
-          maxEntries: 4,
-          maxAgeSeconds: 365 * 24 * 60 * 60, // 1 year
-        },
-      },
-    },
-    {
-      urlPattern: /^https:\/\/.*\.supabase\.co\/.*/i,
-      handler: 'NetworkFirst',
-      options: {
-        cacheName: 'supabase-data',
-        networkTimeoutSeconds: 10,
-        expiration: {
-          maxEntries: 32,
-          maxAgeSeconds: 24 * 60 * 60, // 1 day
-        },
-      },
-    },
-    {
-      urlPattern: /\.(?:png|jpg|jpeg|svg|gif|webp|avif|ico)$/i,
-      handler: 'CacheFirst',
-      options: {
-        cacheName: 'static-images',
-        expiration: {
-          maxEntries: 64,
-          maxAgeSeconds: 30 * 24 * 60 * 60, // 30 days
-        },
-      },
-    },
-    {
-      urlPattern: /\.(?:js|css)$/i,
-      handler: 'StaleWhileRevalidate',
-      options: {
-        cacheName: 'static-resources',
-        expiration: {
-          maxEntries: 32,
-          maxAgeSeconds: 24 * 60 * 60, // 1 day
-        },
-      },
-    },
-    {
-      // Exclude voice API from caching - audio streams don't cache well
-      urlPattern: /^https:\/\/.*\/api\/voice\/.*/i,
-      handler: 'NetworkOnly',
-    },
-    {
-      urlPattern: /^https:\/\/.*\/api\/.*/i,
-      handler: 'NetworkFirst',
-      options: {
-        cacheName: 'api-cache',
-        networkTimeoutSeconds: 10,
-        expiration: {
-          maxEntries: 16,
-          maxAgeSeconds: 5 * 60, // 5 minutes
-        },
-      },
-    },
-  ],
-});
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
@@ -101,8 +27,6 @@ const nextConfig = {
     },
     // Enable optimized package imports for better tree-shaking
     optimizePackageImports: ['lucide-react', '@radix-ui/react-icons'],
-    // Enable instrumentation for server-side polyfills
-    instrumentationHook: true,
   },
 
   // Compiler optimizations
@@ -112,9 +36,19 @@ const nextConfig = {
   },
 
   // Production optimizations
-  swcMinify: true,
   compress: true,
   reactStrictMode: true,
+
+  webpack(config) {
+    config.ignoreWarnings = [
+      ...(config.ignoreWarnings ?? []),
+      {
+        module: /node_modules\/e2b\/dist\/index\.mjs/,
+        message: /Critical dependency: the request of a dependency is an expression/,
+      },
+    ];
+    return config;
+  },
 
   // Skip TypeScript checking during build - codebase is too large for Vercel's memory limits
   // Type checking is handled by: IDE (real-time), ESLint (via @typescript-eslint), and CI
@@ -122,29 +56,9 @@ const nextConfig = {
   typescript: {
     ignoreBuildErrors: true,
   },
-  eslint: {
-    ignoreDuringBuilds: true,
-  },
-
   // Performance optimizations
   poweredByHeader: false,
   generateEtags: true,
-
-  // Webpack optimizations
-  webpack: (config, { isServer, dev }) => {
-    // No special webpack configuration needed - pdf-parse v2 works with standard bundling
-    if (isServer) {
-      // Polyfill 'self' for server-side builds
-      if (typeof self === 'undefined') {
-        global.self = global;
-      }
-    }
-
-    // Production optimizations disabled - using Next.js defaults
-    // Custom splitChunks was causing chunk loading issues
-
-    return config;
-  },
 
   // 301 redirects for retired routes per BRAND_ARCHITECTURE §7
   async redirects() {
@@ -286,15 +200,6 @@ const nextConfig = {
         ],
       },
       {
-        source: '/_next/static/:path*',
-        headers: [
-          {
-            key: 'Cache-Control',
-            value: 'public, max-age=31536000, immutable',
-          },
-        ],
-      },
-      {
         // API routes - prevent caching of sensitive data
         source: '/api/:path*',
         headers: [
@@ -308,4 +213,4 @@ const nextConfig = {
   },
 };
 
-export default withPWA(nextConfig);
+export default nextConfig;
