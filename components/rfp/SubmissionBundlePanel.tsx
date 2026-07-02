@@ -132,7 +132,7 @@ export function SubmissionBundlePanel({
         </div>
       </div>
 
-      <div className="mt-5 grid gap-3 md:grid-cols-3 xl:grid-cols-6">
+      <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
         {bundleItems.map((item) => {
           const Icon = item.icon;
           return (

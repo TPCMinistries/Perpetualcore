@@ -92,6 +92,28 @@ function readinessClasses(level: NonNullable<FeedRowType["actionability"]>["leve
   return "border-zinc-200 bg-zinc-100 text-zinc-700";
 }
 
+function sourceBadge(row: FeedRowType): { label: string; className: string } | null {
+  if (row.source === "corporate_foundations") {
+    return {
+      label: "Corporate",
+      className: "border-emerald-200 bg-emerald-50 text-emerald-800",
+    };
+  }
+  if (row.source === "bank_cra") {
+    return {
+      label: "Bank CRA",
+      className: "border-blue-200 bg-blue-50 text-blue-800",
+    };
+  }
+  if (row.source === "foundation_url") {
+    return {
+      label: "Foundation",
+      className: "border-violet-200 bg-violet-50 text-violet-800",
+    };
+  }
+  return null;
+}
+
 export function FeedRow({
   row,
   selected,
@@ -111,6 +133,7 @@ export function FeedRow({
   const triage = triageLabel(row.triage_status);
   const sourceCount = row.canonical?.source_aliases.length ?? 0;
   const readiness = row.actionability;
+  const source = sourceBadge(row);
 
   return (
     <button
@@ -145,6 +168,14 @@ export function FeedRow({
             className={`inline-flex shrink-0 items-center rounded border px-1.5 py-0.5 font-mono text-[10px] uppercase tracking-wide ${triageClasses(row.triage_status)}`}
           >
             {triage}
+          </span>
+        )}
+        {source && (
+          <span
+            className={`inline-flex shrink-0 items-center rounded border px-1.5 py-0.5 font-mono text-[10px] uppercase tracking-wide ${source.className}`}
+            title={row.source.replace(/_/g, " ")}
+          >
+            {source.label}
           </span>
         )}
         {readiness && (

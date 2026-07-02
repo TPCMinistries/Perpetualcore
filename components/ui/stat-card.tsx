@@ -8,7 +8,7 @@ import { cn } from "@/lib/utils";
 
 function useCountUp(end: number, duration = 600) {
   const [count, setCount] = useState(0);
-  const rafRef = useRef<number>();
+  const rafRef = useRef<number | null>(null);
 
   useEffect(() => {
     if (end === 0) { setCount(0); return; }

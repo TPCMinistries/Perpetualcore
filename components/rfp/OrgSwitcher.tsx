@@ -92,14 +92,14 @@ export function OrgSwitcher({ currentOrgId }: OrgSwitcherProps) {
       <DropdownMenuTrigger asChild>
         <button
           type="button"
-          className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg border border-zinc-200 bg-white text-sm text-zinc-800 shadow-sm hover:bg-zinc-50 hover:border-zinc-300 transition-colors"
+          className="inline-flex max-w-[calc(100vw-6rem)] items-center gap-2 rounded-lg border border-zinc-200 bg-white px-3 py-1.5 text-sm text-zinc-800 shadow-sm transition-colors hover:border-zinc-300 hover:bg-zinc-50 sm:max-w-[320px]"
           aria-label="Switch organization"
           data-testid="org-switcher"
         >
           <span className="text-[10px] uppercase tracking-[0.2em] text-zinc-400 font-mono">
             Org
           </span>
-          <span className="max-w-[180px] truncate font-medium">
+          <span className="min-w-0 max-w-[180px] truncate font-medium">
             {current ? current.rfp_orgs.name : "Loading…"}
           </span>
           {current && (
