@@ -7,7 +7,7 @@ Milestone v1.0 Conversion Optimization shipped Phases 1-2 (Phase 3 superseded by
 ## Milestones
 
 - [x] **v1.0 Conversion Optimization** — Phases 1-2 (shipped 2026-02-23; Phase 3 superseded)
-- [ ] **v2.0 RFP Engine — Market-Ready & Best-in-Class** — Phases 13-24 (active)
+- [ ] **v2.0 RFP Engine — Market-Ready & Best-in-Class** — Phases 13-26 (active)
 
 ## Execution Sequence — BEACHHEAD-FIRST (overrides strict numeric order, 2026-06-06)
 
@@ -62,6 +62,7 @@ Beachhead coverage uses what's ALREADY live: federal (SAM/Grants.gov/NIH/NSF) + 
 ⏸ - [ ] **Phase 23: Live Billing & Entitlements** - Stripe live mode, self-serve trial → provisioning, Meters migration, transparent pricing
 - [ ] **Phase 24: Operator Console, Monitoring & FTUE** - Admin console, /api/health/rfp, status monitor, first-time UX (≤5-field setup → first scored opps, guided checklist, real empty states)
 ⏸ - [ ] **Phase 25: Launch Gate** - E2E coverage on draft → review → submit critical path; production stable
+- [ ] **Phase 26: Best-in-Market Readiness** - Launch blockers mostly cleared: SAM.gov verified, prod SEO files restored, health green, authenticated production E2E green including billing checkout, mobile/tablet/desktop visual regression gate wired, full RFP launch type-check gate added, high/critical production audit clean, E2B/custom static cache-control/Edge runtime build warnings removed, moderate audit exceptions documented; active work now shifts to category-leading opportunity/proposal depth and non-RFP legacy type-check slicing
 
 ## Phase Details
 

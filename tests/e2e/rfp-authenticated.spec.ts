@@ -133,4 +133,51 @@ test.describe("RFP authenticated workflow", () => {
       status: "draft",
     });
   });
+
+  test("validates owner billing page and checkout handoff", async ({ page }) => {
+    await signIn(page);
+
+    await page.goto(`/org/${orgId}/settings/billing`);
+    await expect(page.getByText(/Settings · Billing/i)).toBeVisible({
+      timeout: 20_000,
+    });
+    await expect(page.getByText(/Current subscription/i)).toBeVisible();
+    await expect(page.getByText(/Not subscribed/i)).toBeVisible();
+    await expect(page.getByRole("button", { name: /Pro · \$799\/mo/i })).toBeVisible();
+    await expect(page.getByRole("button", { name: /Agency · \$2,499\/mo/i })).toBeVisible();
+
+    const checkoutResponse = await page.request.post("/api/rfp/billing/checkout", {
+      data: {
+        org_id: orgId,
+        tier: "pro",
+      },
+    });
+    expect(checkoutResponse.status()).toBe(200);
+    const checkout = (await checkoutResponse.json()) as {
+      url?: string;
+      session_id?: string;
+    };
+    expect(checkout.url).toMatch(/^https:\/\/checkout\.stripe\.com\//);
+    expect(checkout.session_id).toMatch(/^cs_/);
+
+    const portalResponse = await page.request.post("/api/rfp/billing/portal", {
+      data: {
+        org_id: orgId,
+      },
+    });
+    expect([200, 502]).toContain(portalResponse.status());
+    const portal = (await portalResponse.json()) as {
+      url?: string;
+      error?: string;
+      detail?: string;
+    };
+    if (portalResponse.status() === 200) {
+      expect(portal.url).toMatch(/^https:\/\/billing\.stripe\.com\//);
+    } else {
+      expect(portal).toMatchObject({
+        error: "portal_failed",
+        detail: "no_customer_for_org",
+      });
+    }
+  });
 });
