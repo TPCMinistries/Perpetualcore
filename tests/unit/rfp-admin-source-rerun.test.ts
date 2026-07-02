@@ -20,11 +20,14 @@ describe("RFP admin source rerun", () => {
     expect(isStateCityIngestSource("nyc_dycd")).toBe(true);
     expect(isStateCityIngestSource("ca_grants")).toBe(true);
     expect(canManualRerunSource("ca_grants")).toBe(true);
+    // nj_grants gained an automated NJ START scraper (run-state-city SCRAPERS),
+    // so it is manually rerunnable now.
+    expect(isStateCityIngestSource("nj_grants")).toBe(true);
+    expect(canManualRerunSource("nj_grants")).toBe(true);
   });
 
   it("does not expose manual runners for planned, blocked, or manual-only sources", () => {
     expect(canManualRerunSource("foundation_url")).toBe(false);
     expect(canManualRerunSource("candid_foundation_directory")).toBe(false);
-    expect(canManualRerunSource("nj_grants")).toBe(false);
   });
 });
