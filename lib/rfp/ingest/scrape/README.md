@@ -16,8 +16,6 @@ If a source migrates to a JavaScript-rendered SPA, the corresponding scraper fil
 | NYC DYCD | `nyc_dycd` | `https://www.nyc.gov/site/dycd/funding/rfp-listings.page` | GET, no auth | Table-row regex; expects RFP # / Title / Released / Due columns | 2026-05-10 | 10–30 active |
 | NYC HRA | `nyc_hra` | `https://www.nyc.gov/site/hra/about/contracting-procurement.page` | GET, no auth | Table-row + anchor fallback (HRA links many opps to PASSPort, login-walled) | 2026-05-10 | 5–15 active |
 | NYC DOE | `nyc_doe` | `https://www.nyc.gov/site/doe/funding/contract-opportunities.page` | GET, no auth | Table-row + anchor fallback | 2026-05-10 | 5–25 active |
-| Connecticut CTsource | `ct_grants` | `https://portal.ct.gov/das/ctsource/bidboard` | GET JSON, no auth | CTsource/Proactis public bid-board search endpoint, Open status only, paginated to 250 records | 2026-06-17 | ~215 open |
-| Pennsylvania eMarketplace | `pa_grants` | `https://www.emarketplace.state.pa.us/Search.aspx` | GET, no auth | Current solicitations grid, page 1 only; ASP.NET all-rows postback needs hardening | 2026-06-17 | 10 active on page 1 |
 
 ## Throttling
 

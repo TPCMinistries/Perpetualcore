@@ -3,7 +3,7 @@
  *
  * Lists every proposal in the org, sorted by updated_at desc. Click-
  * through to the detail page. Adds a filterable status pill row at
- * the top: all / draft / submitted / won / lost / no-bid.
+ * the top: all / draft / submitted / won / lost / withdrawn.
  *
  * Closes the dead-end where typing /org/[id]/proposals 404'd — users
  * had to navigate back through /discovery to find a proposal again.
@@ -21,29 +21,23 @@ import {
 
 export const dynamic = "force-dynamic";
 
-type Status = "draft" | "submitted" | "won" | "lost" | "no_bid" | "withdrawn";
+type Status = "draft" | "submitted" | "won" | "lost" | "withdrawn";
 const STATUS_FILTERS: Array<Status | "all"> = [
   "all",
   "draft",
   "submitted",
   "won",
   "lost",
-  "no_bid",
+  "withdrawn",
 ];
 
 const STATUS_CHIP: Record<Status, string> = {
-  draft: "border-zinc-300 bg-zinc-100 text-zinc-700",
-  submitted: "border-amber-200 bg-amber-50 text-amber-700",
-  won: "border-emerald-200 bg-emerald-50 text-emerald-700",
-  lost: "border-rose-200 bg-rose-50 text-rose-700",
-  no_bid: "border-zinc-300 bg-zinc-100 text-zinc-500",
-  withdrawn: "border-zinc-300 bg-zinc-100 text-zinc-500",
+  draft: "border-zinc-700 bg-zinc-900 text-zinc-300",
+  submitted: "border-amber-500/40 bg-amber-500/10 text-amber-200",
+  won: "border-emerald-500/40 bg-emerald-500/10 text-emerald-200",
+  lost: "border-rose-500/40 bg-rose-500/10 text-rose-200",
+  withdrawn: "border-zinc-700 bg-zinc-900 text-zinc-500",
 };
-
-function statusLabel(status: Status | "all"): string {
-  if (status === "no_bid" || status === "withdrawn") return "no-bid";
-  return status;
-}
 
 interface PageProps {
   params: Promise<{ orgId: string }>;
@@ -113,10 +107,10 @@ interface TaskQueueSummary {
 }
 
 const READINESS_CHIP: Record<ReadinessSummary["tone"], string> = {
-  ready: "border-emerald-200 bg-emerald-50 text-emerald-700",
-  warn: "border-amber-200 bg-amber-50 text-amber-700",
-  blocked: "border-rose-200 bg-rose-50 text-rose-700",
-  empty: "border-zinc-200 bg-zinc-100 text-zinc-500",
+  ready: "border-emerald-500/40 bg-emerald-500/10 text-emerald-200",
+  warn: "border-amber-500/40 bg-amber-500/10 text-amber-200",
+  blocked: "border-rose-500/40 bg-rose-500/10 text-rose-200",
+  empty: "border-zinc-800 bg-zinc-900 text-zinc-400",
 };
 
 const PRIORITY_RANK: Record<string, number> = {
@@ -163,7 +157,6 @@ function coerceStatus(s: string | undefined): Status | "all" {
     s === "submitted" ||
     s === "won" ||
     s === "lost" ||
-    s === "no_bid" ||
     s === "withdrawn"
   ) {
     return s;
@@ -346,9 +339,7 @@ export default async function ProposalsListPage({
     .order("updated_at", { ascending: false })
     .limit(100);
 
-  if (activeFilter === "no_bid" || activeFilter === "withdrawn") {
-    query = query.in("status", ["no_bid", "withdrawn"]);
-  } else if (activeFilter !== "all") {
+  if (activeFilter !== "all") {
     query = query.eq("status", activeFilter);
   }
 
@@ -401,7 +392,6 @@ export default async function ProposalsListPage({
   for (const r of allForCounts ?? []) {
     counts[r.status] = (counts[r.status] ?? 0) + 1;
   }
-  counts.no_bid = (counts.no_bid ?? 0) + (counts.withdrawn ?? 0);
 
   const { data: activationMatches } =
     counts.all === 0
@@ -459,7 +449,7 @@ export default async function ProposalsListPage({
       <div className="mx-auto max-w-5xl px-6 py-12">
         <Link
           href={`/org/${orgId}/discovery`}
-          className="font-mono text-[10px] uppercase tracking-[0.22em] text-zinc-500 hover:text-zinc-700"
+          className="font-mono text-[10px] uppercase tracking-[0.22em] text-zinc-500 hover:text-zinc-300"
         >
           ← Discovery
         </Link>
@@ -468,7 +458,7 @@ export default async function ProposalsListPage({
           Proposals
         </div>
         <h1
-          className="mt-3 text-3xl italic text-zinc-900"
+          className="mt-3 text-3xl italic text-white"
           style={{ fontFamily: "Georgia, serif" }}
         >
           {counts.all === 0
@@ -493,11 +483,11 @@ export default async function ProposalsListPage({
                 href={href}
                 className={`inline-flex items-center gap-2 rounded-full border px-3 py-1 font-mono text-[10px] uppercase tracking-[0.18em] transition ${
                   isActive
-                    ? "border-emerald-200 bg-emerald-50 text-emerald-700"
-                    : "border-zinc-200 bg-white text-zinc-500 hover:border-zinc-300"
+                    ? "border-emerald-500/40 bg-emerald-500/10 text-emerald-200"
+                    : "border-zinc-800 bg-zinc-900 text-zinc-400 hover:border-zinc-700"
                 }`}
               >
-                {statusLabel(s)}
+                {s}
                 <span className="font-mono text-[9px] text-zinc-500">
                   {count}
                 </span>
@@ -507,12 +497,12 @@ export default async function ProposalsListPage({
         </div>
 
         {counts.all > 0 ? (
-          <section className="mt-8 overflow-hidden rounded-md border border-zinc-200 bg-white shadow-sm">
-            <div className="border-b border-zinc-200 bg-zinc-50 px-5 py-4">
-              <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-emerald-700">
+          <section className="mt-8 overflow-hidden rounded-md border border-zinc-900 bg-zinc-950">
+            <div className="border-b border-zinc-900 bg-zinc-900/70 px-5 py-4">
+              <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-emerald-300">
                 Pipeline command
               </p>
-              <p className="mt-2 max-w-3xl text-sm leading-relaxed text-zinc-600">
+              <p className="mt-2 max-w-3xl text-sm leading-relaxed text-zinc-400">
                 Active pursuit health across the org. Use this to decide whether
                 to clear blockers, move ready packets to submission, or start a
                 new opportunity from Discovery.
@@ -545,11 +535,11 @@ export default async function ProposalsListPage({
 
         {/* List */}
         {rows.length === 0 ? (
-          <div className="mt-10 rounded-lg border border-zinc-200 bg-white p-8 shadow-sm">
-            <p className="font-serif text-lg italic text-zinc-700">
+          <div className="mt-10 rounded-lg border border-zinc-900 bg-white/[0.02] p-8">
+            <p className="font-serif text-lg italic text-zinc-300">
               {activeFilter === "all"
                 ? "No proposals yet."
-                : `No proposals with status "${statusLabel(activeFilter)}".`}
+                : `No proposals with status "${activeFilter}".`}
             </p>
             <p className="mt-2 max-w-2xl text-[13px] leading-6 text-zinc-500">
               {activeFilter === "all" ? (
@@ -557,7 +547,7 @@ export default async function ProposalsListPage({
                   Start with one strong match below or open{" "}
                   <Link
                     href={`/org/${orgId}/discovery`}
-                    className="text-emerald-700 underline"
+                    className="text-emerald-300 underline"
                   >
                     Discovery
                   </Link>
@@ -569,7 +559,7 @@ export default async function ProposalsListPage({
                   Try{" "}
                   <Link
                     href={`/org/${orgId}/proposals`}
-                    className="text-emerald-700 underline"
+                    className="text-emerald-300 underline"
                   >
                     all
                   </Link>{" "}
@@ -585,31 +575,31 @@ export default async function ProposalsListPage({
                   return (
                     <article
                       key={match.opp_id}
-                      className="rounded-lg border border-zinc-200 bg-zinc-50 p-4 text-left"
+                      className="rounded-lg border border-zinc-800 bg-zinc-950 p-4 text-left"
                     >
                       <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
                         <div className="min-w-0 flex-1">
                           <div className="flex flex-wrap items-center gap-2">
-                            <span className="rounded-full border border-emerald-200 bg-emerald-50 px-2 py-1 font-mono text-[9px] uppercase tracking-[0.16em] text-emerald-700">
+                            <span className="rounded-full border border-emerald-500/30 bg-emerald-500/10 px-2 py-1 font-mono text-[9px] uppercase tracking-[0.16em] text-emerald-200">
                               Fit {Math.round(match.fit_score)}
                             </span>
-                            <span className="rounded-full border border-zinc-200 px-2 py-1 font-mono text-[9px] uppercase tracking-[0.16em] text-zinc-500">
+                            <span className="rounded-full border border-zinc-800 px-2 py-1 font-mono text-[9px] uppercase tracking-[0.16em] text-zinc-500">
                               {sourceLabel(opp.source)}
                             </span>
-                            <span className="rounded-full border border-zinc-200 px-2 py-1 font-mono text-[9px] uppercase tracking-[0.16em] text-zinc-500">
+                            <span className="rounded-full border border-zinc-800 px-2 py-1 font-mono text-[9px] uppercase tracking-[0.16em] text-zinc-500">
                               {fmtMoney(opp.amount_max)}
                             </span>
-                            <span className="rounded-full border border-zinc-200 px-2 py-1 font-mono text-[9px] uppercase tracking-[0.16em] text-zinc-500">
+                            <span className="rounded-full border border-zinc-800 px-2 py-1 font-mono text-[9px] uppercase tracking-[0.16em] text-zinc-500">
                               Due {fmtDate(opp.deadline)}
                             </span>
                           </div>
-                          <h2 className="mt-3 text-base font-semibold text-zinc-900">
+                          <h2 className="mt-3 text-base font-semibold text-zinc-100">
                             {opp.title}
                           </h2>
                           <p className="mt-1 text-[12px] text-zinc-500">
                             {opp.agency ?? "Agency not listed"}
                           </p>
-                          <p className="mt-3 max-w-3xl text-[13px] leading-6 text-zinc-600">
+                          <p className="mt-3 max-w-3xl text-[13px] leading-6 text-zinc-400">
                             {match.summary ?? opp.brief ?? "No summary available yet."}
                           </p>
                           {match.chips && match.chips.length > 0 ? (
@@ -617,7 +607,7 @@ export default async function ProposalsListPage({
                               {match.chips.slice(0, 5).map((chip) => (
                                 <span
                                   key={chip}
-                                  className="rounded-md bg-zinc-100 px-2 py-1 font-mono text-[9px] uppercase tracking-[0.14em] text-zinc-500"
+                                  className="rounded-md bg-white/[0.04] px-2 py-1 font-mono text-[9px] uppercase tracking-[0.14em] text-zinc-500"
                                 >
                                   {chip}
                                 </span>
@@ -633,7 +623,7 @@ export default async function ProposalsListPage({
                           />
                           <Link
                             href={`/org/${orgId}/pursuits/${match.opp_id}`}
-                            className="mt-3 inline-flex text-[12px] text-zinc-500 underline hover:text-zinc-700"
+                            className="mt-3 inline-flex text-[12px] text-zinc-500 underline hover:text-zinc-300"
                           >
                             Inspect opportunity first
                           </Link>
@@ -653,14 +643,13 @@ export default async function ProposalsListPage({
             ) : null}
           </div>
         ) : (
-          <ul className="mt-8 divide-y divide-zinc-200 overflow-hidden rounded-lg border border-zinc-200 bg-white shadow-sm">
+          <ul className="mt-8 divide-y divide-zinc-900 overflow-hidden rounded-lg border border-zinc-900 bg-white/[0.02]">
             {rows.map((p) => {
               const status = (
                 p.status === "draft" ||
                 p.status === "submitted" ||
                 p.status === "won" ||
                 p.status === "lost" ||
-                p.status === "no_bid" ||
                 p.status === "withdrawn"
                   ? p.status
                   : "draft"
@@ -680,15 +669,15 @@ export default async function ProposalsListPage({
                 <li key={p.id}>
                   <Link
                     href={`/org/${orgId}/proposals/${p.id}`}
-                    className="flex flex-col gap-3 px-5 py-4 transition hover:bg-zinc-50 sm:flex-row sm:items-center sm:gap-4"
+                    className="flex flex-col gap-3 px-5 py-4 transition hover:bg-white/[0.02] sm:flex-row sm:items-center sm:gap-4"
                   >
                     <span
                       className={`shrink-0 inline-flex items-center rounded-md border px-2 py-0.5 font-mono text-[9px] uppercase tracking-[0.18em] ${STATUS_CHIP[status]}`}
                     >
-                      {statusLabel(status)}
+                      {status}
                     </span>
                     <div className="min-w-0 flex-1">
-                      <div className="truncate text-[14px] text-zinc-900">
+                      <div className="truncate text-[14px] text-zinc-100">
                         {p.title}
                       </div>
                       <div className="mt-1 font-mono text-[10px] uppercase tracking-[0.18em] text-zinc-500">
@@ -702,11 +691,11 @@ export default async function ProposalsListPage({
                       >
                         {readiness.label}
                       </span>
-                      <span className="font-mono text-[9px] uppercase tracking-[0.16em] text-zinc-400">
+                      <span className="font-mono text-[9px] uppercase tracking-[0.16em] text-zinc-600">
                         {readiness.details.join(" · ")}
                       </span>
                       {taskQueue.open > 0 ? (
-                        <span className="font-mono text-[9px] uppercase tracking-[0.16em] text-amber-700">
+                        <span className="font-mono text-[9px] uppercase tracking-[0.16em] text-amber-300">
                           {taskQueue.open} task{taskQueue.open === 1 ? "" : "s"}
                         </span>
                       ) : null}
@@ -738,14 +727,14 @@ function PipelineMetric({
 }) {
   const valueClass =
     tone === "ready"
-      ? "text-emerald-700"
+      ? "text-emerald-200"
       : tone === "warn"
-        ? "text-amber-700"
+        ? "text-amber-200"
         : tone === "danger"
-          ? "text-rose-700"
-          : "text-zinc-900";
+          ? "text-rose-200"
+          : "text-zinc-100";
   return (
-    <div className="border-b border-r border-zinc-200 px-5 py-4 last:border-r-0 lg:border-b-0">
+    <div className="border-b border-r border-zinc-900 px-5 py-4 last:border-r-0 lg:border-b-0">
       <p className="font-mono text-[9px] uppercase tracking-[0.2em] text-zinc-500">
         {label}
       </p>

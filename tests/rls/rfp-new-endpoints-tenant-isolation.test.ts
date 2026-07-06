@@ -28,8 +28,6 @@ import { describe, it, expect, beforeAll, afterAll, vi } from "vitest";
 import { createClient as createSupaClient } from "@supabase/supabase-js";
 import * as fs from "fs";
 import * as path from "path";
-import { SECTION_TYPES } from "@/lib/rfp/draft/sections";
-import { REVIEWER_FINDINGS_SECTION_TYPE } from "@/lib/rfp/review/rubric";
 
 // ---------------------------------------------------------------------------
 // Load real env from .env.local (same pattern as sibling RLS test)
@@ -60,21 +58,15 @@ function loadEnvLocal(): Record<string, string> {
 
 const envVars = loadEnvLocal();
 
-function realEnv(key: string): string {
-  const value = process.env[key] ?? "";
-  if (value === "https://test.supabase.co" || value === "test-anon-key") return "";
-  return value;
-}
-
 const SUPABASE_URL =
-  realEnv("NEXT_PUBLIC_SUPABASE_URL") || envVars.NEXT_PUBLIC_SUPABASE_URL || "";
+  envVars.NEXT_PUBLIC_SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL || "";
 const SUPABASE_ANON_KEY =
-  realEnv("NEXT_PUBLIC_SUPABASE_ANON_KEY") ||
   envVars.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
   "";
 const SUPABASE_SERVICE_ROLE_KEY =
-  realEnv("SUPABASE_SERVICE_ROLE_KEY") ||
   envVars.SUPABASE_SERVICE_ROLE_KEY ||
+  process.env.SUPABASE_SERVICE_ROLE_KEY ||
   "";
 
 if (!SUPABASE_URL || !SUPABASE_ANON_KEY || !SUPABASE_SERVICE_ROLE_KEY) {
@@ -317,76 +309,6 @@ beforeAll(async () => {
     .single();
   if (prop.error) throw new Error(`Seed proposal: ${prop.error.message}`);
   proposalA = prop.data!.id;
-
-  const sections = await admin.from("rfp_proposal_sections").insert([
-    ...SECTION_TYPES.map((sectionType) => ({
-      proposal_id: proposalA,
-      section_type: sectionType,
-      content: `Submission-ready ${sectionType} narrative for tenant isolation. No unresolved markers remain.`,
-      version: 1,
-      last_drafted_by_agent_at: new Date().toISOString(),
-    })),
-    {
-      proposal_id: proposalA,
-      section_type: REVIEWER_FINDINGS_SECTION_TYPE,
-      content: JSON.stringify({
-        findings: [],
-        overall_score: 91,
-        summary: "Submission-ready draft for tenant isolation.",
-        tokens_in: 100,
-        tokens_out: 40,
-        cost_usd: 0,
-        model: "test-model",
-        session_id: `rls-review-${testRunId}`,
-      }),
-      version: 1,
-      last_drafted_by_agent_at: new Date().toISOString(),
-    },
-  ]);
-  if (sections.error) throw new Error(`Seed proposal sections: ${sections.error.message}`);
-
-  const readinessChecks = await admin.from("rfp_compliance_checks").insert([
-    {
-      proposal_id: proposalA,
-      check_type: "compliance_matrix_v1",
-      status: "pass",
-      details_json: {
-        kind: "compliance_matrix_v1",
-        overall_status: "pass",
-        missing_count: 0,
-        needs_review_count: 0,
-        critical_count: 0,
-        items: [],
-      },
-    },
-    {
-      proposal_id: proposalA,
-      check_type: "packet_checklist_v1",
-      status: "pass",
-      details_json: {
-        kind: "packet_checklist_v1",
-        overall_status: "pass",
-        due_date: "2026-07-10",
-        submission_url: "https://example.test/submit",
-        deadline_timezone: "America/New_York",
-        submission_method: "Portal upload",
-        submission_portal: "Example Portal",
-        forms: ["Narrative"],
-        question_deadlines: [],
-        items: [
-          {
-            id: "source-link",
-            label: "Source posting available",
-            status: "met",
-            notes: "Source URL is available.",
-          },
-        ],
-      },
-    },
-  ]);
-  if (readinessChecks.error) {
-    throw new Error(`Seed readiness checks: ${readinessChecks.error.message}`);
-  }
 }, 30000);
 
 // ---------------------------------------------------------------------------
@@ -571,13 +493,13 @@ describe("RFP new-endpoint tenant isolation", () => {
       await admin.from("rfp_proposals").update({ status: "draft" }).eq("id", proposalA);
     });
 
-    it("PATCH status='no_bid' succeeds (Phase 20 lifecycle vocabulary)", async () => {
+    it("PATCH status='withdrawn' succeeds (full lifecycle vocabulary)", async () => {
       const res = await withToken(userA.access_token, () =>
-        callPatchStatus(proposalA, { status: "no_bid" }),
+        callPatchStatus(proposalA, { status: "withdrawn" }),
       );
       expect(res.status).toBe(200);
       const body = await res.json();
-      expect(body.status).toBe("no_bid");
+      expect(body.status).toBe("withdrawn");
 
       await admin.from("rfp_proposals").update({ status: "draft" }).eq("id", proposalA);
     });

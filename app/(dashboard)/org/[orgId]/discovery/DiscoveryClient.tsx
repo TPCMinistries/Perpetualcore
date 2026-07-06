@@ -32,7 +32,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Building2, Database, Landmark, Search, SlidersHorizontal, Target } from "lucide-react";
+import { Database, Search, SlidersHorizontal, Target } from "lucide-react";
 import {
   FilterPills,
   type FilterValues,
@@ -61,7 +61,6 @@ interface DiscoveryClientProps {
   initialCursor: InitialCursor | null;
   initialFilters: FilterValues;
   opportunityInventoryCount: number;
-  sourceIntelligence: SourceIntelligenceSummary;
   /** Initial Mode selection — only meaningful when org.type === 'dual'. */
   initialMode?: ModeFilter;
   /**
@@ -70,17 +69,6 @@ interface DiscoveryClientProps {
    * immediately on first paint without a flicker.
    */
   initialEmptyReason?: "no_member_orgs" | null;
-}
-
-interface SourceIntelligenceSummary {
-  liveSourceCount: number;
-  curatedProgramCount: number;
-  channels: Array<{
-    source: string;
-    label: string;
-    category: string;
-    targetScale: string;
-  }>;
 }
 
 interface FeedApiResponse {
@@ -148,7 +136,6 @@ export function DiscoveryClient({
   initialCursor,
   initialFilters,
   opportunityInventoryCount,
-  sourceIntelligence,
   initialMode = "all",
   initialEmptyReason = null,
 }: DiscoveryClientProps) {
@@ -309,9 +296,6 @@ export function DiscoveryClient({
     (filters.actionability ? 1 : 0) +
     (filters.sort !== "fit" ? 1 : 0) +
     (isDualMode && mode !== "all" ? 1 : 0);
-  const curatedChannels = sourceIntelligence.channels.filter(
-    (channel) => channel.category === "corporate",
-  );
 
   return (
     <div className="flex min-h-[calc(100vh-3.5rem)] flex-col bg-[#f4f5f1] text-zinc-950 lg:h-[calc(100vh-3.5rem)]">
@@ -405,64 +389,6 @@ export function DiscoveryClient({
           </div>
         </div>
 
-        <div className="mt-4 grid gap-3 lg:grid-cols-[minmax(0,0.74fr)_minmax(280px,0.26fr)]">
-          <div className="grid gap-3 sm:grid-cols-2">
-            {curatedChannels.map((channel) => {
-              const isBank = channel.source === "bank_cra";
-              const Icon = isBank ? Landmark : Building2;
-              return (
-                <button
-                  key={channel.source}
-                  type="button"
-                  onClick={() => setFilters((prev) => ({
-                    ...prev,
-                    sources: prev.sources.includes(channel.source)
-                      ? prev.sources.filter((source) => source !== channel.source)
-                      : [...prev.sources, channel.source],
-                  }))}
-                  className={`group flex min-h-[104px] cursor-pointer items-start gap-3 rounded-xl border bg-white p-4 text-left shadow-sm transition-colors duration-150 hover:border-zinc-400 hover:bg-zinc-50 focus:outline-none focus:ring-2 focus:ring-zinc-950 focus:ring-offset-2 motion-reduce:transition-none ${
-                    filters.sources.includes(channel.source)
-                      ? "border-emerald-500 ring-1 ring-emerald-500"
-                      : "border-zinc-200"
-                  }`}
-                >
-                  <span
-                    className={`mt-0.5 inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border ${
-                      isBank
-                        ? "border-blue-200 bg-blue-50 text-blue-800"
-                        : "border-emerald-200 bg-emerald-50 text-emerald-800"
-                    }`}
-                  >
-                    <Icon className="h-4 w-4" />
-                  </span>
-                  <span className="min-w-0">
-                    <span className="block text-sm font-semibold text-zinc-950">
-                      {channel.label}
-                    </span>
-                    <span className="mt-1 block text-xs leading-5 text-zinc-600">
-                      {channel.targetScale}
-                    </span>
-                    <span className="mt-2 block font-mono text-[10px] uppercase tracking-[0.16em] text-zinc-500">
-                      {filters.sources.includes(channel.source) ? "Filter active" : "Tap to filter"}
-                    </span>
-                  </span>
-                </button>
-              );
-            })}
-          </div>
-          <div className="rounded-xl border border-zinc-200 bg-white p-4 shadow-sm">
-            <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-zinc-500">
-              Source network
-            </p>
-            <p className="mt-2 text-2xl font-semibold text-zinc-950">
-              {sourceIntelligence.liveSourceCount}
-            </p>
-            <p className="mt-1 text-xs leading-5 text-zinc-600">
-              Live source families feeding discovery, including {sourceIntelligence.curatedProgramCount} verified curated funder records.
-            </p>
-          </div>
-        </div>
-
         <div className="mt-4 space-y-3 rounded-xl border border-zinc-200 bg-white p-3 shadow-sm">
           <QuickImportBar orgId={orgId} onImported={handleImported} />
           <div className="flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
@@ -489,7 +415,7 @@ export function DiscoveryClient({
           {showNoMemberOrgsState ? (
             <div className="flex h-full items-center justify-center p-8">
               <div className="text-center max-w-sm">
-                <p className="text-zinc-700 italic font-serif text-lg mb-2">
+                <p className="text-zinc-300 italic font-serif text-lg mb-2">
                   No member orgs in{" "}
                   {mode === "all" ? "either side" : mode === "nonprofit" ? "nonprofit" : "for-profit"}.
                 </p>
@@ -500,7 +426,7 @@ export function DiscoveryClient({
                 </p>
                 <Link
                   href="/orgs/new"
-                  className="mt-4 inline-flex text-emerald-600 hover:text-emerald-700 text-sm uppercase tracking-wide font-mono"
+                  className="mt-4 inline-flex text-emerald-300 hover:text-emerald-200 text-sm uppercase tracking-wide font-mono"
                 >
                   + Create or join an org
                 </Link>

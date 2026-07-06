@@ -27,12 +27,12 @@ export function VaultPanel({ orgId, canWrite, canDelete }: VaultPanelProps) {
   return (
     <div className="flex flex-col gap-8">
       {canWrite && (
-        <div className="rounded-md border border-zinc-200 bg-white p-5 shadow-sm flex items-start justify-between gap-3">
+        <div className="rounded-md border border-zinc-900 bg-zinc-950 p-5 flex items-start justify-between gap-3">
           <div>
-            <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-emerald-700">
+            <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-emerald-400">
               No past docs handy?
             </p>
-            <p className="mt-1.5 text-sm text-zinc-700">
+            <p className="mt-1.5 text-sm text-zinc-300">
               Describe what your org has actually done — programs, outcomes,
               partners, geography, history. The AI expands it into a structured
               capacity narrative and indexes it for retrieval. Good enough to
@@ -51,8 +51,8 @@ export function VaultPanel({ orgId, canWrite, canDelete }: VaultPanelProps) {
           onUploaded={() => setRefreshKey((k) => k + 1)}
         />
       ) : (
-        <div className="rounded-md border border-amber-200 bg-amber-50 p-5 text-sm text-zinc-700">
-          <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-amber-700">
+        <div className="rounded-md border border-zinc-800 bg-zinc-950 p-5 text-sm text-zinc-300">
+          <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-amber-300">
             Read-only
           </p>
           <p className="mt-2">

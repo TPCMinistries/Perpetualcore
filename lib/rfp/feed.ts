@@ -303,7 +303,7 @@ function sortFeedRows(rows: FeedRow[], sort: DiscoverySort): FeedRow[] {
 }
 
 async function loadEnrichmentsForRows(
-  rfp: { from: (table: string) => any },
+  rfp: ReturnType<typeof createClient>,
   oppIds: string[],
 ): Promise<Map<string, EnrichmentShape>> {
   if (oppIds.length === 0) return new Map();

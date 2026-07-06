@@ -21,15 +21,15 @@ interface SubmissionReadinessPanelProps {
 }
 
 const GATE_CLASS = {
-  ready: "border-emerald-200 bg-emerald-50 text-emerald-700",
-  not_ready: "border-rose-200 bg-rose-50 text-rose-700",
-  not_run: "border-amber-200 bg-amber-50 text-amber-700",
+  ready: "border-emerald-500/40 bg-emerald-500/10 text-emerald-200",
+  not_ready: "border-rose-500/40 bg-rose-500/10 text-rose-200",
+  not_run: "border-amber-500/40 bg-amber-500/10 text-amber-200",
 } as const;
 
 const DOT_CLASS: Record<SubmitGateSeverity, string> = {
-  complete: "bg-emerald-500",
-  review: "bg-amber-500",
-  blocker: "bg-rose-500",
+  complete: "bg-emerald-400",
+  review: "bg-amber-400",
+  blocker: "bg-rose-400",
 };
 
 export function SubmissionReadinessPanel({
@@ -51,13 +51,13 @@ export function SubmissionReadinessPanel({
   const visibleItems = [...gate.blockers, ...gate.reviews, ...gate.completed].slice(0, 8);
 
   return (
-    <section className="mt-8 rounded-md border border-zinc-200 bg-white p-5 shadow-sm">
+    <section className="mt-8 rounded-md border border-zinc-800 bg-zinc-950 p-5">
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
-          <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-emerald-700">
+          <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-emerald-300">
             Ready to submit gate
           </p>
-          <p className="mt-2 text-sm leading-relaxed text-zinc-600">
+          <p className="mt-2 text-sm leading-relaxed text-zinc-400">
             {gate.summary}
           </p>
         </div>
@@ -78,24 +78,24 @@ export function SubmissionReadinessPanel({
         <Metric label="Critical tasks" value={String(gate.metrics.criticalTasks)} danger={gate.metrics.criticalTasks > 0} />
       </div>
 
-      <div className="mt-4 rounded-md border border-zinc-200 bg-zinc-50 p-4">
+      <div className="mt-4 rounded-md border border-zinc-800 bg-zinc-900/60 p-4">
         <p className="font-mono text-[9px] uppercase tracking-[0.22em] text-zinc-500">
           Next action
         </p>
-        <p className="mt-1 text-sm font-medium text-zinc-900">{gate.nextAction}</p>
+        <p className="mt-1 text-sm font-medium text-zinc-100">{gate.nextAction}</p>
       </div>
 
       <div className="mt-4 grid gap-2 sm:grid-cols-2">
         {visibleItems.map((item) => (
-          <div key={item.key} className="rounded-md border border-zinc-200 bg-zinc-50 p-3">
+          <div key={item.key} className="rounded-md border border-zinc-800 bg-zinc-950/80 p-3">
             <div className="flex items-start justify-between gap-3">
               <div>
-                <p className="text-sm font-medium text-zinc-900">{item.label}</p>
+                <p className="text-sm font-medium text-zinc-100">{item.label}</p>
                 <p className="mt-1 text-[12px] leading-relaxed text-zinc-500">{item.detail}</p>
               </div>
-              <span aria-hidden="true" className={`mt-1 h-2.5 w-2.5 shrink-0 rounded-full ${DOT_CLASS[item.severity]}`} />
+              <span className={`mt-1 h-2.5 w-2.5 shrink-0 rounded-full ${DOT_CLASS[item.severity]}`} />
             </div>
-            <p className="mt-2 font-mono text-[9px] uppercase tracking-[0.16em] text-zinc-400">
+            <p className="mt-2 font-mono text-[9px] uppercase tracking-[0.16em] text-zinc-600">
               {item.owner}
             </p>
           </div>
@@ -115,11 +115,11 @@ function Metric({
   danger?: boolean;
 }) {
   return (
-    <div className="rounded-md border border-zinc-200 bg-zinc-50 p-3">
+    <div className="rounded-md border border-zinc-800 bg-zinc-900/50 p-3">
       <p className="font-mono text-[9px] uppercase tracking-[0.2em] text-zinc-500">
         {label}
       </p>
-      <p className={`mt-2 text-xl font-semibold tabular-nums ${danger ? "text-rose-700" : "text-zinc-900"}`}>
+      <p className={`mt-2 text-xl font-semibold tabular-nums ${danger ? "text-rose-300" : "text-zinc-100"}`}>
         {value}
       </p>
     </div>

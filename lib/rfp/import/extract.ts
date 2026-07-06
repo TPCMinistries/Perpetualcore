@@ -13,8 +13,8 @@
  * the "save raw + flag" contract from 05-CONTEXT.md.
  *
  * Model selection mirrors `lib/rfp/scoring/summary.ts`:
- *   - Primary: claude-sonnet-4-5-20250929
- *   - Fallback: claude-haiku-4-5-20251001
+ *   - Primary: claude-sonnet-4-5
+ *   - Fallback: claude-haiku-4-5
  *
  * Why Sonnet for extraction (vs Haiku) — extraction quality on dense,
  * federal-grant-style PDFs is meaningfully better on Sonnet, and we're
@@ -35,8 +35,8 @@ function getAnthropic(): Anthropic | null {
   return anthropic;
 }
 
-const MODEL_PRIMARY = "claude-sonnet-4-5-20250929";
-const MODEL_FALLBACK = "claude-haiku-4-5-20251001";
+const MODEL_PRIMARY = "claude-sonnet-4-5";
+const MODEL_FALLBACK = "claude-haiku-4-5";
 const MAX_TOKENS = 800;
 /** Hard cap on the prompt body — keeps total tokens predictable. */
 const MAX_TEXT_INPUT_CHARS = 60_000;

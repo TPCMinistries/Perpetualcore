@@ -121,10 +121,7 @@ export function countVerifyMarkersFromSections(
 export function buildPursuitReadiness(input: PursuitReadinessInput): PursuitReadiness {
   const proposalStatus = input.proposalStatus ?? null;
   const submitted = proposalStatus === "submitted" || proposalStatus === "won";
-  const closed =
-    proposalStatus === "lost" ||
-    proposalStatus === "no_bid" ||
-    proposalStatus === "withdrawn";
+  const closed = proposalStatus === "lost" || proposalStatus === "withdrawn";
   const hasProposal = Boolean(proposalStatus);
   const task = taskMetrics(input.tasks);
   const complianceGaps = input.complianceMatrix?.missing_count ?? null;

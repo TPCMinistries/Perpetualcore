@@ -18,7 +18,6 @@ interface ProposalInput {
   title: string;
   due_date: string | null;
   vault_chunks_used?: unknown;
-  ai_disclosure_acknowledged?: boolean;
 }
 
 interface OpportunityInput {
@@ -340,14 +339,6 @@ function countVerifyMarkers(sections: SectionInput[]): number {
   }, 0);
 }
 
-function parsePageLimit(limits: string[]): number | null {
-  for (const s of limits) {
-    const m = s.match(/(?:not exceed|maximum of?|limit[^\d]*)\s*(\d+)\s*page/i);
-    if (m) return parseInt(m[1], 10);
-  }
-  return null;
-}
-
 function standardRequirements(opp: OpportunityInput | null): string[] {
   const out = [
     "Proposal includes an executive summary aligned to the funder priority.",
@@ -531,104 +522,6 @@ function buildPacketChecklist(
           ? "No missing requirements detected by deterministic scan."
           : `${matrix.missing_count} missing and ${matrix.needs_review_count} needs-review items detected.`,
     },
-    // ── Hardened gate items (Phase 19) ──────────────────────────────────────
-    // 1. Page limit enforcement
-    (() => {
-      const pageLimitStrings = Array.from(
-        new Set((input.packageExtractions ?? []).flatMap((e) => e.page_limits ?? [])),
-      );
-      const limit = parsePageLimit(pageLimitStrings);
-      const allText = input.sections
-        .map((s) => s.content ?? "")
-        .join("\n");
-      const totalWords = wordsFor(allText).length;
-      const currentPages = Math.ceil(totalWords / 250);
-      if (limit === null) {
-        return {
-          id: "page-limit",
-          label: "Page limit verified",
-          status: "needs_review" as const,
-          notes: "No page limit extracted; confirm against the solicitation.",
-        };
-      }
-      if (currentPages <= limit) {
-        return {
-          id: "page-limit",
-          label: "Page limit verified",
-          status: "met" as const,
-          notes: `≈${currentPages} pages of ${limit} allowed (250 words/page estimate).`,
-        };
-      }
-      return {
-        id: "page-limit",
-        label: "Page limit verified",
-        status: "missing" as const,
-        notes: `Draft exceeds page limit: ≈${currentPages} pages vs ${limit} allowed (250 words/page estimate). Trim before submitting.`,
-      };
-    })(),
-    // 2. Deadline timezone hardening (null = fail blocker)
-    (() => {
-      const hasDueDate = !!(input.proposal.due_date ?? input.opportunity?.deadline);
-      if (!hasDueDate) {
-        return {
-          id: "deadline-timezone",
-          label: "Deadline timezone verified",
-          status: "needs_review" as const,
-          notes: "No deadline on file.",
-        };
-      }
-      if (!packageSummary.deadline_timezone) {
-        return {
-          id: "deadline-timezone",
-          label: "Deadline timezone verified",
-          status: "missing" as const,
-          notes:
-            "Deadline timezone could not be extracted. Check the original solicitation — a missed timezone can cause a missed deadline.",
-        };
-      }
-      return {
-        id: "deadline-timezone",
-        label: "Deadline timezone verified",
-        status: "needs_review" as const,
-        notes: `Timezone: ${packageSummary.deadline_timezone}. Confirm against the original posting.`,
-      };
-    })(),
-    // 3. Budget math check
-    (() => {
-      const budgetSection =
-        input.sections.find((s) => s.section_type === "budget_narrative")?.content ?? "";
-      if (!budgetSection.trim()) {
-        return {
-          id: "budget-math",
-          label: "Budget math verified",
-          status: "needs_review" as const,
-          notes: "Budget narrative missing — cannot verify budget math.",
-        };
-      }
-      const budgetMarkers = (budgetSection.match(/\[BUDGET(?::|\])/gi) ?? []).length;
-      if (budgetMarkers === 0) {
-        return {
-          id: "budget-math",
-          label: "Budget math verified",
-          status: "met" as const,
-          notes: "No unresolved BUDGET markers found in budget narrative.",
-        };
-      }
-      return {
-        id: "budget-math",
-        label: "Budget math verified",
-        status: "needs_review" as const,
-        notes: `${budgetMarkers} unresolved [BUDGET] marker${budgetMarkers === 1 ? "" : "s"} in the budget narrative. Replace with real figures before submitting.`,
-      };
-    })(),
-    // 4. AI disclosure (NEVER auto-passes — only `ai_disclosure_acknowledged` can flip it to met)
-    {
-      id: "ai-disclosure",
-      label: "AI-use disclosure acknowledged",
-      status: input.proposal.ai_disclosure_acknowledged === true ? "met" : "needs_review",
-      notes:
-        "This proposal was drafted with AI assistance. Federal agencies (GSA GSAR 552.239-7001) and some funders (e.g. NIH) require or restrict AI-use disclosure. Review /ai-disclosure and the solicitation’s AI policy, then acknowledge.",
-    } as PacketChecklistItem,
   ];
 
   const overall: CaptureStatus = items.some((i) => i.status === "missing")

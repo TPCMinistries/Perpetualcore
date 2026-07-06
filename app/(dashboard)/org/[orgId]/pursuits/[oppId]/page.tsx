@@ -61,7 +61,7 @@ interface PageProps {
 }
 
 type TriageStatus = "watch" | "pursuing" | "passed" | "untriaged";
-type ProposalStatus = "draft" | "submitted" | "won" | "lost" | "no_bid" | "withdrawn";
+type ProposalStatus = "draft" | "submitted" | "won" | "lost" | "withdrawn";
 
 interface MatchRow {
   opp_id: string;
@@ -194,7 +194,6 @@ function normalizeStatus(status: string): ProposalStatus {
     status === "submitted" ||
     status === "won" ||
     status === "lost" ||
-    status === "no_bid" ||
     status === "withdrawn"
   ) {
     return status;

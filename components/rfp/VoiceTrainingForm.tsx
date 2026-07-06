@@ -131,14 +131,14 @@ export function VoiceTrainingForm({ orgId, initialFingerprint }: VoiceTrainingFo
   return (
     <div className="flex flex-col gap-10">
       {/* Honest framing block */}
-      <div className="rounded-md border border-zinc-200 bg-white p-5 shadow-sm">
+      <div className="rounded-md border border-zinc-800 bg-zinc-950 p-5">
         <div className="flex items-start justify-between gap-3">
           <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-zinc-500">
             Voice training · preview
           </p>
           <VoiceQuickTrainModal orgId={orgId} />
         </div>
-        <p className="mt-3 text-sm leading-relaxed text-zinc-700">
+        <p className="mt-3 text-sm leading-relaxed text-zinc-300">
           Paste 3–10 past proposals, annual reports, founder letters, or board
           memos. Better data = better drafts. Opus extracts a stylometric
           profile — this is not fine-tuning, it&apos;s a structured voice
@@ -148,27 +148,10 @@ export function VoiceTrainingForm({ orgId, initialFingerprint }: VoiceTrainingFo
           Each document needs at least {MIN_CHARS_PER_DOC} characters and is
           capped at {MAX_CHARS_PER_DOC.toLocaleString()} characters. No past
           docs handy? Use{" "}
-          <span className="text-emerald-600">Or describe your voice</span> at
+          <span className="text-emerald-400">Or describe your voice</span> at
           the top to synthesize a starting fingerprint you can replace later.
         </p>
       </div>
-
-      {!fingerprint ? (
-        <div className="rounded-md border border-zinc-200 bg-zinc-50 p-5">
-          <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-emerald-700">
-            Voice empty
-          </p>
-          <h2 className="mt-3 text-base font-semibold text-zinc-900">
-            Create a starting voice before the first qualified draft.
-          </h2>
-          <p className="mt-2 text-sm leading-6 text-zinc-600">
-            Use three pasted samples below, or use the describe-your-voice
-            shortcut above when past proposals are not handy. You can still
-            draft without this, but trained voice makes the first review pass
-            substantially easier.
-          </p>
-        </div>
-      ) : null}
 
       {/* Document slots */}
       <div className="flex flex-col gap-6">
@@ -186,7 +169,7 @@ export function VoiceTrainingForm({ orgId, initialFingerprint }: VoiceTrainingFo
                   Document {i + 1}
                   {chars > 0 ? (
                     <span
-                      className={`ml-3 normal-case tracking-normal ${tooShort || tooLong ? "text-amber-700" : "text-zinc-400"}`}
+                      className={`ml-3 normal-case tracking-normal ${tooShort || tooLong ? "text-amber-400" : "text-zinc-600"}`}
                     >
                       {chars.toLocaleString()} chars
                       {tooShort ? " · too short" : ""}
@@ -199,7 +182,7 @@ export function VoiceTrainingForm({ orgId, initialFingerprint }: VoiceTrainingFo
                     type="button"
                     onClick={() => removeSlot(i)}
                     disabled={busy}
-                    className="font-mono text-[10px] uppercase tracking-[0.22em] text-zinc-500 hover:text-rose-700 disabled:opacity-40"
+                    className="font-mono text-[10px] uppercase tracking-[0.22em] text-zinc-500 hover:text-rose-300 disabled:opacity-40"
                   >
                     Remove
                   </button>
@@ -212,7 +195,7 @@ export function VoiceTrainingForm({ orgId, initialFingerprint }: VoiceTrainingFo
                 disabled={busy}
                 rows={8}
                 placeholder="Paste full text. Plain text only. No PDFs."
-                className="w-full rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 placeholder:text-zinc-400 focus:border-emerald-500 focus:outline-none disabled:opacity-50"
+                className="w-full rounded-md border border-zinc-800 bg-zinc-950 px-3 py-2 text-sm text-zinc-100 placeholder:text-zinc-600 focus:border-emerald-500/40 focus:outline-none disabled:opacity-50"
               />
             </div>
           );
@@ -223,7 +206,7 @@ export function VoiceTrainingForm({ orgId, initialFingerprint }: VoiceTrainingFo
             type="button"
             onClick={addSlot}
             disabled={busy}
-            className="self-start font-mono text-[10px] uppercase tracking-[0.22em] text-zinc-500 hover:text-emerald-600 disabled:opacity-40"
+            className="self-start font-mono text-[10px] uppercase tracking-[0.22em] text-zinc-400 hover:text-emerald-300 disabled:opacity-40"
           >
             + Add document slot ({docs.length}/{MAX_DOCS})
           </button>
@@ -236,7 +219,7 @@ export function VoiceTrainingForm({ orgId, initialFingerprint }: VoiceTrainingFo
           type="button"
           onClick={onSubmit}
           disabled={!canSubmit}
-          className="inline-flex items-center justify-center gap-2 rounded-md bg-emerald-600 px-5 py-2.5 text-sm font-medium text-white transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-50"
+          className="inline-flex items-center justify-center gap-2 rounded-md border border-emerald-500/30 bg-emerald-500/10 px-5 py-2.5 text-sm font-medium text-emerald-100 transition hover:bg-emerald-500/15 disabled:cursor-not-allowed disabled:opacity-50"
         >
           {busy ? "Extracting voice…" : "Train voice fingerprint"}
         </button>
@@ -246,15 +229,15 @@ export function VoiceTrainingForm({ orgId, initialFingerprint }: VoiceTrainingFo
       </div>
 
       {error ? (
-        <p className="text-sm text-rose-700">Training failed: {error}</p>
+        <p className="text-sm text-rose-300">Training failed: {error}</p>
       ) : null}
 
       {result ? (
-        <div className="rounded-md border border-emerald-200 bg-emerald-50 p-4">
-          <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-emerald-700">
+        <div className="rounded-md border border-emerald-500/30 bg-emerald-500/5 p-4">
+          <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-emerald-300">
             Voice trained · v{result.version}
           </p>
-          <p className="mt-2 text-sm text-zinc-700">
+          <p className="mt-2 text-sm text-zinc-300">
             {result.tokens_in.toLocaleString()} in · {result.tokens_out.toLocaleString()} out ·{" "}
             {fmtCost(result.cost_usd)} on {result.model}
           </p>
@@ -269,26 +252,26 @@ export function VoiceTrainingForm({ orgId, initialFingerprint }: VoiceTrainingFo
 
 function FingerprintCard({ fp }: { fp: VoiceFingerprint }) {
   return (
-    <section className="rounded-md border border-zinc-200 bg-white p-6 shadow-sm">
-      <header className="flex items-baseline justify-between border-b border-zinc-200 pb-4">
+    <section className="rounded-md border border-zinc-900 bg-zinc-950 p-6">
+      <header className="flex items-baseline justify-between border-b border-zinc-900 pb-4">
         <h2 className="font-mono text-[10px] uppercase tracking-[0.25em] text-zinc-500">
           Current voice fingerprint
         </h2>
-        <span className="font-mono text-[10px] uppercase tracking-[0.22em] text-zinc-400">
+        <span className="font-mono text-[10px] uppercase tracking-[0.22em] text-zinc-600">
           v{fp.version} · {fp.source_doc_count} docs · {fmtDate(fp.extracted_at)}
         </span>
       </header>
 
       <div className="mt-5 space-y-5 text-sm">
         <Field label="Register">
-          <span className="font-mono text-xs uppercase tracking-[0.18em] text-emerald-600">
+          <span className="font-mono text-xs uppercase tracking-[0.18em] text-emerald-300">
             {fp.register}
           </span>
         </Field>
 
         <Field label="Voice summary">
           <p
-            className="text-zinc-700 italic leading-relaxed"
+            className="text-zinc-200 italic leading-relaxed"
             style={{ fontFamily: "Georgia, serif" }}
           >
             {fp.voice_summary}
@@ -296,7 +279,7 @@ function FingerprintCard({ fp }: { fp: VoiceFingerprint }) {
         </Field>
 
         <Field label="Sentence rhythm">
-          <p className="font-mono text-xs text-zinc-700">
+          <p className="font-mono text-xs text-zinc-300">
             ~{Math.round(fp.sentence_length.mean)} chars/sentence (±
             {Math.round(fp.sentence_length.stdev)}) · ~
             {Math.round(fp.paragraph_length.mean)} sentences/paragraph (±
@@ -305,24 +288,24 @@ function FingerprintCard({ fp }: { fp: VoiceFingerprint }) {
         </Field>
 
         <Field label={`Signature phrases (${fp.signature_phrases.length})`}>
-          <ul className="space-y-1 text-sm text-zinc-700">
+          <ul className="space-y-1 text-sm text-zinc-300">
             {fp.signature_phrases.map((p, i) => (
               <li key={i}>
-                <span className="text-zinc-400">·</span> {p}
+                <span className="text-zinc-500">·</span> {p}
               </li>
             ))}
           </ul>
         </Field>
 
         <Field label={`Avoided terms (${fp.avoided_terms.length})`}>
-          <p className="text-sm text-zinc-700">{fp.avoided_terms.join(", ")}</p>
+          <p className="text-sm text-zinc-300">{fp.avoided_terms.join(", ")}</p>
         </Field>
 
         <Field label={`Framing patterns (${fp.framing_patterns.length})`}>
-          <ol className="space-y-1 text-sm text-zinc-700">
+          <ol className="space-y-1 text-sm text-zinc-300">
             {fp.framing_patterns.map((p, i) => (
               <li key={i}>
-                <span className="text-zinc-400">{i + 1}.</span> {p}
+                <span className="text-zinc-500">{i + 1}.</span> {p}
               </li>
             ))}
           </ol>

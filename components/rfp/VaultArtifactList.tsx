@@ -9,7 +9,6 @@
  */
 
 import { useCallback, useEffect, useState } from "react";
-import Link from "next/link";
 
 interface VaultDoc {
   doc_id: string;
@@ -126,59 +125,35 @@ export function VaultArtifactList({
         <button
           type="button"
           onClick={() => void load()}
-          className="font-mono text-[10px] uppercase tracking-[0.18em] text-zinc-500 hover:text-zinc-700"
+          className="font-mono text-[10px] uppercase tracking-[0.18em] text-zinc-500 hover:text-zinc-200"
         >
           Refresh
         </button>
       </header>
 
       {error && (
-        <div className="rounded-md border border-red-200 bg-red-50 p-3 text-xs text-red-700">
+        <div className="rounded-md border border-red-900 bg-red-950/40 p-3 text-xs text-red-300">
           {error}
         </div>
       )}
 
       {docs === null ? (
-        <div className="rounded-md border border-zinc-200 bg-white p-6 text-xs text-zinc-500">
+        <div className="rounded-md border border-zinc-900 bg-zinc-950 p-6 text-xs text-zinc-500">
           Loading…
         </div>
       ) : docs.length === 0 ? (
-        <div className="rounded-md border border-zinc-200 bg-white p-6 shadow-sm">
-          <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-emerald-700">
-            Vault empty
-          </p>
-          <h3 className="mt-3 text-base font-semibold text-zinc-900">
-            Add one evidence source before the first qualified draft.
-          </h3>
-          <p className="mt-2 text-sm leading-6 text-zinc-600">
-            Paste a past proposal, annual report, outcome summary, or use the
-            quick-seed panel above. The drafter can then cite real capacity
-            facts instead of leaving every org-specific claim as VERIFY.
-          </p>
-          <div className="mt-5 flex flex-col gap-2 sm:flex-row">
-            <a
-              href="#vault-upload"
-              className="inline-flex h-10 items-center justify-center rounded-md bg-zinc-950 px-4 text-sm font-semibold text-white transition hover:bg-zinc-800"
-            >
-              Add evidence
-            </a>
-            <Link
-              href={`/org/${orgId}/discovery`}
-              className="inline-flex h-10 items-center justify-center rounded-md border border-zinc-300 bg-white px-4 text-sm font-medium text-zinc-800 transition hover:bg-zinc-50"
-            >
-              Open Discovery
-            </Link>
-          </div>
+        <div className="rounded-md border border-zinc-900 bg-zinc-950 p-6 text-xs text-zinc-500">
+          No vault documents yet. Upload one above to start grounding the drafter.
         </div>
       ) : (
         <ul className="flex flex-col gap-2">
           {docs.map((d) => (
             <li
               key={d.doc_id}
-              className="flex items-start justify-between gap-4 rounded-md border border-zinc-200 bg-white p-4 shadow-sm"
+              className="flex items-start justify-between gap-4 rounded-md border border-zinc-900 bg-zinc-950 p-4"
             >
               <div className="flex flex-col gap-1">
-                <p className="text-sm text-zinc-900">{d.doc_title}</p>
+                <p className="text-sm text-zinc-100">{d.doc_title}</p>
                 <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-zinc-500">
                   {TYPE_LABEL[d.doc_type] ?? d.doc_type} · {d.chunk_count} chunk
                   {d.chunk_count === 1 ? "" : "s"} · {d.total_chars.toLocaleString()} chars ·{" "}
@@ -190,7 +165,7 @@ export function VaultArtifactList({
                   type="button"
                   onClick={() => void handleDelete(d.doc_id, d.doc_title)}
                   disabled={deletingDocId === d.doc_id}
-                  className="shrink-0 rounded-md border border-red-200 px-3 py-1.5 font-mono text-[10px] uppercase tracking-[0.18em] text-red-700 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-40"
+                  className="shrink-0 rounded-md border border-red-900/60 px-3 py-1.5 font-mono text-[10px] uppercase tracking-[0.18em] text-red-300 hover:bg-red-950/40 disabled:cursor-not-allowed disabled:opacity-40"
                 >
                   {deletingDocId === d.doc_id ? "Deleting…" : "Delete"}
                 </button>

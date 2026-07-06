@@ -90,11 +90,11 @@ export default async function AlertsSettingsPage({ params }: PageProps) {
         <p className="text-xs uppercase tracking-wide text-zinc-500 font-mono mb-2">
           Settings · Alerts
         </p>
-        <h1 className="text-2xl font-semibold text-zinc-900">
+        <h1 className="text-2xl font-semibold text-zinc-100">
           High-fit opportunity alerts
         </h1>
         <p
-          className="mt-2 text-sm text-zinc-600 max-w-2xl"
+          className="mt-2 text-sm text-zinc-400 max-w-2xl"
           style={{ fontFamily: 'Georgia, serif', fontStyle: 'italic' }}
         >
           When the scanner finds an opportunity whose fit score meets your

@@ -145,7 +145,7 @@ export function VaultQuickSeedModal({
       <DialogContent className="sm:max-w-2xl max-h-[85vh] overflow-hidden flex flex-col">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <Sparkles className="h-4 w-4 text-emerald-600" />
+            <Sparkles className="h-4 w-4 text-emerald-400" />
             Seed vault from a description
           </DialogTitle>
           <DialogDescription>
@@ -195,7 +195,7 @@ export function VaultQuickSeedModal({
           )}
 
           {loading && (
-            <div className="rounded-lg border border-emerald-200 bg-emerald-50 p-4 space-y-2">
+            <div className="rounded-lg border border-emerald-500/20 bg-emerald-500/5 p-4 space-y-2">
               {LOADING_STEPS.map((step, i) => {
                 const status =
                   i < loadingStep
@@ -216,17 +216,17 @@ export function VaultQuickSeedModal({
                     }
                   >
                     {status === "done" ? (
-                      <Check className="h-3.5 w-3.5 text-emerald-600" />
+                      <Check className="h-3.5 w-3.5 text-emerald-400" />
                     ) : status === "active" ? (
-                      <Loader2 className="h-3.5 w-3.5 animate-spin text-emerald-600" />
+                      <Loader2 className="h-3.5 w-3.5 animate-spin text-emerald-400" />
                     ) : (
-                      <span className="h-3.5 w-3.5 rounded-full border border-zinc-300" />
+                      <span className="h-3.5 w-3.5 rounded-full border border-zinc-700" />
                     )}
                     <span
                       className={
                         status === "active"
-                          ? "text-emerald-900"
-                          : "text-zinc-600"
+                          ? "text-emerald-200"
+                          : "text-zinc-400"
                       }
                     >
                       {step}
@@ -262,15 +262,15 @@ function SeedResultView({
 }) {
   return (
     <div className="space-y-4">
-      <div className="rounded-lg border border-emerald-200 bg-emerald-50 p-4">
+      <div className="rounded-lg border border-emerald-500/30 bg-emerald-500/5 p-4">
         <div className="flex items-center gap-2">
-          <Check className="h-4 w-4 text-emerald-600" />
-          <h3 className="text-sm font-semibold text-emerald-800">
+          <Check className="h-4 w-4 text-emerald-400" />
+          <h3 className="text-sm font-semibold text-emerald-200">
             Vault seeded — {result.chunk_count} chunk
             {result.chunk_count === 1 ? "" : "s"} indexed
           </h3>
         </div>
-        <p className="text-xs text-emerald-700 mt-1">
+        <p className="text-xs text-emerald-100/70 mt-1">
           &ldquo;{result.suggested_title}&rdquo;. Drafts can now cite these
           as vault sources. Add real past proposals later to deepen the
           ground.
@@ -278,11 +278,11 @@ function SeedResultView({
       </div>
 
       {result.sections.length > 0 && (
-        <div className="rounded-lg border border-zinc-200 bg-zinc-50 p-4">
-          <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-emerald-700">
+        <div className="rounded-lg border border-zinc-800 bg-zinc-900/40 p-4">
+          <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-emerald-400">
             Sections indexed
           </p>
-          <ul className="text-xs text-zinc-700 mt-2 space-y-1 list-disc pl-4">
+          <ul className="text-xs text-zinc-300 mt-2 space-y-1 list-disc pl-4">
             {result.sections.map((s) => (
               <li key={s}>{s}</li>
             ))}
@@ -290,16 +290,16 @@ function SeedResultView({
         </div>
       )}
 
-      <details className="rounded-lg border border-zinc-200 bg-zinc-50 p-4">
-        <summary className="cursor-pointer font-mono text-[10px] uppercase tracking-[0.22em] text-emerald-700">
+      <details className="rounded-lg border border-zinc-800 bg-zinc-900/40 p-4">
+        <summary className="cursor-pointer font-mono text-[10px] uppercase tracking-[0.22em] text-emerald-400">
           Preview the generated document
         </summary>
-        <pre className="mt-3 whitespace-pre-wrap text-xs leading-relaxed text-zinc-700 font-sans">
+        <pre className="mt-3 whitespace-pre-wrap text-xs leading-relaxed text-zinc-300 font-sans">
           {result.body}
         </pre>
       </details>
 
-      <div className="flex items-center justify-between border-t border-zinc-200 pt-3">
+      <div className="flex items-center justify-between border-t border-zinc-800 pt-3">
         <p className="text-xs text-muted-foreground font-mono">
           {(result.cost_usd + result.expand_cost_usd).toFixed(4)} USD •{" "}
           {result.total_chars.toLocaleString()} chars indexed

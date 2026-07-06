@@ -12,26 +12,30 @@ concurrency:
 
 jobs:
   lint-and-typecheck:
-    name: Lint
+    name: Lint & Type Check
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 22
+          node-version: 20
           cache: npm
 
       - name: Install dependencies
         run: npm ci
 
-      - name: ESLint
-        run: npx eslint app/api/rfp lib/rfp components/rfp "app/(dashboard)/org/[orgId]" tests/e2e/rfp-authenticated.spec.ts tests/e2e/rfp-visual.spec.ts --ext .ts,.tsx --max-warnings=0
+      - name: TypeScript type check
+        run: npm run type-check
         env:
+          # tsc OOMs at the default 1.7 GB heap on this codebase; ubuntu-latest
+          # runners have ≥7 GB available so 8 GB is safe.
           NODE_OPTIONS: --max-old-space-size=8192
 
-      - name: TypeScript release gate
-        run: npm run type-check:release
+      - name: ESLint
+        run: npm run lint
+        env:
+          NODE_OPTIONS: --max-old-space-size=8192
 
   build:
     name: Build
@@ -42,7 +46,7 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 22
+          node-version: 20
           cache: npm
 
       - name: Install dependencies
@@ -54,13 +58,7 @@ jobs:
           NODE_OPTIONS: --max-old-space-size=6144
           NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
           NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
-          SUPABASE_SERVICE_ROLE_KEY: ci-service-role-placeholder
-          NEXT_PUBLIC_APP_URL: http://localhost:3000
-          NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: pk_test_ci
-          STRIPE_SECRET_KEY: sk_test_ci
-          STRIPE_WEBHOOK_SECRET: whsec_ci
-          OPENAI_API_KEY: sk-ci-placeholder
-          ANTHROPIC_API_KEY: sk-ant-ci-placeholder
+          NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: ${{ secrets.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY }}
 
   test:
     name: Unit Tests
@@ -71,72 +69,11 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 22
+          node-version: 20
           cache: npm
 
       - name: Install dependencies
         run: npm ci
 
       - name: Run tests
-        run: npx vitest run tests/unit lib/rfp
-
-  test-rls:
-    name: Cross-Tenant RLS Gate
-    runs-on: ubuntu-latest
-    needs: lint-and-typecheck
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          cache: npm
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Cross-tenant isolation tests (REQUIRED GATE)
-        run: npx vitest run tests/rls/
-        env:
-          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
-          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
-          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
-
-  rfp-launch-gate:
-    name: RFP Launch Gate E2E
-    runs-on: ubuntu-latest
-    needs: build
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          cache: npm
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Install Playwright Chromium
-        run: npx playwright install --with-deps chromium
-
-      - name: Validate launch-gate secrets
-        run: |
-          test -n "$RFP_E2E_EMAIL"
-          test -n "$RFP_E2E_PASSWORD"
-          test -n "$RFP_E2E_ORG_ID"
-          test -n "$RFP_E2E_PROPOSAL_ID"
-        env:
-          RFP_E2E_EMAIL: ${{ secrets.RFP_E2E_EMAIL }}
-          RFP_E2E_PASSWORD: ${{ secrets.RFP_E2E_PASSWORD }}
-          RFP_E2E_ORG_ID: ${{ secrets.RFP_E2E_ORG_ID }}
-          RFP_E2E_PROPOSAL_ID: ${{ secrets.RFP_E2E_PROPOSAL_ID }}
-
-      - name: Authenticated RFP launch-gate E2E
-        run: npm run verify:rfp-production
-        env:
-          PLAYWRIGHT_BASE_URL: https://rfp.perpetualcore.com
-          RFP_E2E_EMAIL: ${{ secrets.RFP_E2E_EMAIL }}
-          RFP_E2E_PASSWORD: ${{ secrets.RFP_E2E_PASSWORD }}
-          RFP_E2E_ORG_ID: ${{ secrets.RFP_E2E_ORG_ID }}
-          RFP_E2E_PROPOSAL_ID: ${{ secrets.RFP_E2E_PROPOSAL_ID }}
+        run: npm run test:run

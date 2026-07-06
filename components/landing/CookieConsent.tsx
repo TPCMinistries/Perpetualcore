@@ -48,8 +48,7 @@ export function CookieConsent() {
       path.startsWith("/signup") ||
       path.startsWith("/accept-invite") ||
       path.startsWith("/invite") ||
-      path.startsWith("/orgs") ||
-      path.startsWith("/org/")
+      path.startsWith("/orgs")
     ) {
       return;
     }

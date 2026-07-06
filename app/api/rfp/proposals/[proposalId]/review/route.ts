@@ -38,13 +38,7 @@ import {
   REVIEWER_AGENT,
   REVIEWER_FINDINGS_SECTION_TYPE,
   type ReviewerResult,
-  type RubricCriterion,
 } from "@/lib/rfp/review/rubric";
-import {
-  guardedLLMCall,
-  budgetExceededResponse,
-  BudgetExceededError,
-} from "@/lib/rfp/ai/guardrail";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -145,23 +139,6 @@ export async function POST(
     return NextResponse.json({ error: "opp_not_found" }, { status: 404 });
   }
 
-  // Phase 19-02: Load rubric criteria for this opp (if any).
-  // Criteria extraction only happens at package upload (solicitation_mode) — we
-  // never re-extract here. Zero criteria = v1 generic-rubric behavior.
-  const { data: rawCriteria } = await admin
-    .from("rfp_rubric_criteria")
-    .select("id, section_ref, criterion_text, max_points, weight")
-    .eq("opp_id", proposal.opp_id)
-    .order("created_at");
-  const criteriaRows = rawCriteria ?? [];
-  const rubricCriteria: RubricCriterion[] = criteriaRows.map((r) => ({
-    id: r.id,
-    section_ref: r.section_ref,
-    criterion_text: r.criterion_text,
-    max_points: r.max_points,
-    weight: r.weight,
-  }));
-
   // Load drafted sections. Filter out any prior reviewer rows so the model
   // doesn't critique its own past output.
   const { data: rawSections, error: sErr } = await admin
@@ -194,41 +171,11 @@ export async function POST(
     );
   }
 
-  // Call Opus — gated by per-tenant AI budget (Phase 17).
-  // guardedLLMCall runs checkBudget() BEFORE generateReview fires, so an
-  // over-budget org never reaches the model. recordCost() is called by the
-  // wrapper after the review returns; the inline rfp_agent_sessions insert
-  // that used to live below has been removed to avoid double-counting.
-  //
-  // We do NOT spread the ReviewerResult into the returned meta object to keep
-  // the response shape unchanged. Instead the meta is built from scalar fields
-  // only; the full `result` is captured in the outer `review` variable.
+  // Call Opus.
   let review: ReviewerResult;
   try {
-    let capturedReview: ReviewerResult | undefined;
-    await guardedLLMCall(proposal.org_id, async () => {
-      const result = await generateReview({
-        opportunity: opp,
-        sections: draftedSections,
-        rubric_criteria: rubricCriteria.length > 0 ? rubricCriteria : undefined,
-      });
-      capturedReview = result;
-      return {
-        agent: REVIEWER_AGENT,
-        model: result.model,
-        tokensIn: result.tokens_in,
-        tokensOut: result.tokens_out,
-        costUsd: result.cost_usd,
-        sessionId: result.session_id,
-        proposalId: proposal.id,
-      };
-    });
-    if (!capturedReview) {
-      throw new Error("review result was not captured");
-    }
-    review = capturedReview;
+    review = await generateReview({ opportunity: opp, sections: draftedSections });
   } catch (err) {
-    if (err instanceof BudgetExceededError) return budgetExceededResponse(err);
     const msg = err instanceof Error ? err.message : "unknown";
     return NextResponse.json(
       { error: "review_failed", detail: msg.slice(0, 200) },
@@ -275,8 +222,17 @@ export async function POST(
     );
   }
 
-  // The rfp_agent_sessions audit row is recorded by guardedLLMCall → recordCost
-  // (wrapper owns the single insert). No inline insert here.
+  // Audit row — model/tokens/cost only for v1 (matches drafter).
+  await admin.from("rfp_agent_sessions").insert({
+    proposal_id: proposal.id,
+    org_id: proposal.org_id,
+    agent: REVIEWER_AGENT,
+    session_id: review.session_id,
+    model: review.model,
+    tokens_in: review.tokens_in,
+    tokens_out: review.tokens_out,
+    cost_usd: review.cost_usd,
+  });
 
-  return NextResponse.json({ ...review, rubric_criteria_count: rubricCriteria.length });
+  return NextResponse.json(review);
 }

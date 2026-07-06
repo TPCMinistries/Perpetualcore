@@ -32,7 +32,6 @@ interface ProposalRow {
   title: string;
   due_date: string | null;
   vault_chunks_used: unknown;
-  ai_disclosure_acknowledged: boolean;
 }
 
 interface OpportunityRow {
@@ -113,7 +112,7 @@ export async function POST(
   const userDb = rfp(supabase);
   const { data: proposal, error: pErr } = await userDb
     .from("rfp_proposals")
-    .select("id, org_id, opp_id, title, due_date, vault_chunks_used, ai_disclosure_acknowledged")
+    .select("id, org_id, opp_id, title, due_date, vault_chunks_used")
     .eq("id", params.proposalId)
     .maybeSingle<ProposalRow>();
   if (pErr || !proposal) {

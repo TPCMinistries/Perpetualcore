@@ -35,7 +35,7 @@ export async function POST(req: NextRequest) {
 
     if (!fileType) {
       return NextResponse.json(
-        { error: 'Unsupported file type. Please upload CSV, XLSX, or vCard files.' },
+        { error: 'Unsupported file type. Please upload CSV, Excel, or vCard files.' },
         { status: 400 }
       );
     }
@@ -56,7 +56,7 @@ export async function POST(req: NextRequest) {
       totalRows = result.totalCount;
     } else {
       // CSV or Excel - parseExcelBuffer returns an array (one per sheet)
-      const results = await parseExcelBuffer(buffer, {
+      const results = parseExcelBuffer(buffer, {
         maxPreviewRows: MAX_PREVIEW_ROWS,
       });
 
@@ -106,7 +106,7 @@ export async function POST(req: NextRequest) {
 
 function getFileType(fileName: string): 'csv' | 'excel' | 'vcard' | null {
   if (fileName.endsWith('.csv')) return 'csv';
-  if (fileName.endsWith('.xlsx')) return 'excel';
+  if (fileName.endsWith('.xlsx') || fileName.endsWith('.xls')) return 'excel';
   if (fileName.endsWith('.vcf') || fileName.endsWith('.vcard')) return 'vcard';
   return null;
 }

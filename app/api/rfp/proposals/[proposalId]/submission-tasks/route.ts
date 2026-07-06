@@ -29,17 +29,7 @@ interface ComplianceCheckRow {
   created_at: string;
 }
 
-type ProposalAccess =
-  | {
-      user: { id: string };
-      proposal: ProposalRow;
-      role: string;
-    }
-  | {
-      error: NextResponse;
-    };
-
-async function requireProposalAccess(proposalId: string): Promise<ProposalAccess> {
+async function requireProposalAccess(proposalId: string) {
   const supabase = await createClient();
   const {
     data: { user },

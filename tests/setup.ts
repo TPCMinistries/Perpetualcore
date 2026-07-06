@@ -16,9 +16,9 @@ vi.mock("next/navigation", () => ({
 }));
 
 // Mock environment variables
-process.env.NEXT_PUBLIC_SUPABASE_URL ??= "https://test.supabase.co";
-process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ??= "test-anon-key";
-process.env.NEXT_PUBLIC_APP_URL ??= "http://localhost:3000";
+process.env.NEXT_PUBLIC_SUPABASE_URL = "https://test.supabase.co";
+process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY = "test-anon-key";
+process.env.NEXT_PUBLIC_APP_URL = "http://localhost:3000";
 
 // Mock ResizeObserver (not available in jsdom)
 global.ResizeObserver = vi.fn().mockImplementation(() => ({

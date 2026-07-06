@@ -27,10 +27,8 @@
 
 import { buildFeedQuery } from "@/lib/rfp/feed";
 import { getOpportunityInventoryCount } from "@/lib/rfp/inventory";
-import { getCuratedProgramCounts } from "@/lib/rfp/ingest/curated-programs";
 import { getOrgForUser, listUserOrgs } from "@/lib/rfp/orgs";
 import { getOnboardingState } from "@/lib/rfp/onboarding";
-import { RFP_SOURCE_CATALOG } from "@/lib/rfp/source-catalog";
 import { OnboardingChecklist } from "@/components/rfp/OnboardingChecklist";
 import { DeadlineTracker } from "@/components/rfp/DeadlineTracker";
 import { notFound } from "next/navigation";
@@ -174,22 +172,6 @@ export default async function DiscoveryPage({
     getOnboardingState(orgId),
     getOpportunityInventoryCount(),
   ]);
-  const curatedProgramCounts = getCuratedProgramCounts();
-  const sourceIntelligence = {
-    liveSourceCount: RFP_SOURCE_CATALOG.filter((source) => source.status === "live").length,
-    curatedProgramCount:
-      curatedProgramCounts.corporate_foundations + curatedProgramCounts.bank_cra,
-    channels: RFP_SOURCE_CATALOG.filter(
-      (source) =>
-        source.status === "live" &&
-        (source.source === "corporate_foundations" || source.source === "bank_cra"),
-    ).map((source) => ({
-      source: source.source,
-      label: source.label,
-      category: source.category,
-      targetScale: source.targetScale,
-    })),
-  };
 
   return (
     <>
@@ -217,7 +199,6 @@ export default async function DiscoveryPage({
         initialCursor={initialCursor}
         initialFilters={initialFilters}
         opportunityInventoryCount={opportunityInventoryCount}
-        sourceIntelligence={sourceIntelligence}
         initialMode={initialMode}
         initialEmptyReason={initialEmptyReason}
       />

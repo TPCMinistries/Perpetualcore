@@ -5,8 +5,8 @@
  * state. That keeps it correct without a sync job: train your voice and the
  * checklist updates next paint, no extra writes anywhere.
  *
- * First-run steps, in order:
- *   1. profile_complete  — capacity_summary has the five-field setup payload
+ * Five steps, in order:
+ *   1. org_created       — entering /org/[orgId] proves this is true
  *   2. voice_trained     — rfp_orgs.voice_fingerprint has a non-empty payload
  *   3. vault_seeded      — org has >= 3 chunks in rfp_vault_artifacts
  *   4. first_draft       — org has >= 1 proposal in rfp_proposals
@@ -57,9 +57,9 @@ export async function getOnboardingState(
     await Promise.all([
       admin
         .from("rfp_orgs")
-        .select("voice_fingerprint, capacity_summary")
+        .select("voice_fingerprint")
         .eq("id", orgId)
-        .maybeSingle<{ voice_fingerprint: unknown; capacity_summary: string | null }>(),
+        .maybeSingle<{ voice_fingerprint: unknown }>(),
       admin
         .from("rfp_vault_artifacts")
         .select("id", { count: "exact", head: true })
@@ -101,8 +101,6 @@ export async function getOnboardingState(
     ]);
 
   const voice_trained = isVoiceTrained(orgRes.data?.voice_fingerprint);
-  const profile_complete =
-    (orgRes.data?.capacity_summary?.trim().length ?? 0) >= 40;
   const vault_chunk_count = vaultRes.count ?? 0;
   const match_count = matchesRes.count ?? 0;
   const proposalRows = proposalsRes.data ?? [];
@@ -156,7 +154,6 @@ export async function getOnboardingState(
 
   const state: OnboardingState = {
     org_created: true,
-    profile_complete,
     voice_trained,
     vault_seeded: vault_chunk_count >= VAULT_SEEDED_THRESHOLD,
     first_match_selected: match_count > 0,
@@ -172,9 +169,7 @@ export async function getOnboardingState(
     all_complete: false,
   };
   state.all_complete =
-    state.profile_complete &&
-    state.voice_trained &&
-    state.vault_seeded &&
+    state.org_created &&
     state.first_match_selected &&
     state.first_draft &&
     state.first_review &&

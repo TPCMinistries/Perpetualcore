@@ -21,7 +21,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import {
   runFederalIngest,
-  toFederalFetcherSource,
   type IngestRunResult,
 } from "@/lib/rfp/ingest/run";
 import { scoreNewOpportunitiesForAllActiveOrgs } from "@/lib/rfp/scoring/recompute";
@@ -37,50 +36,11 @@ function isAuthorized(request: NextRequest): boolean {
   return Boolean(expected && authHeader === `Bearer ${expected}`);
 }
 
-function parseRequestedSources(request: NextRequest): {
-  rawSources: string[];
-  validSources: string[];
-  invalidSources: string[];
-} {
-  const raw =
-    request.nextUrl.searchParams.get("source") ??
-    request.nextUrl.searchParams.get("sources") ??
-    "";
-  const rawSources = raw
-    .split(",")
-    .map((source) => source.trim())
-    .filter(Boolean);
-  const validSources: string[] = [];
-  const invalidSources: string[] = [];
-
-  for (const source of rawSources) {
-    const mapped = toFederalFetcherSource(source);
-    if (mapped) validSources.push(mapped);
-    else invalidSources.push(source);
-  }
-
-  return { rawSources, validSources: [...new Set(validSources)], invalidSources };
-}
-
-async function runCron(request: NextRequest): Promise<NextResponse> {
+async function runCron(): Promise<NextResponse> {
   const startedAt = Date.now();
-  const { rawSources, validSources, invalidSources } = parseRequestedSources(request);
 
   try {
-    if (invalidSources.length > 0) {
-      return NextResponse.json(
-        {
-          ok: false,
-          error: "Invalid federal source",
-          invalid_sources: invalidSources,
-        },
-        { status: 400 },
-      );
-    }
-
-    const results: IngestRunResult = await runFederalIngest({
-      sources: validSources.length > 0 ? validSources : undefined,
-    });
+    const results: IngestRunResult = await runFederalIngest();
 
     const totalFetched = results.reduce((s, r) => s + r.fetched, 0);
     const totalUpserted = results.reduce((s, r) => s + r.upserted, 0);
@@ -114,7 +74,6 @@ async function runCron(request: NextRequest): Promise<NextResponse> {
         total_fetched: totalFetched,
         total_upserted: totalUpserted,
         total_errors: totalErrors,
-        requested_sources: rawSources.length > 0 ? rawSources : null,
         scored: "scored" in scored ? scored.scored : null,
         scoring_error: "error" in scored ? scored.error.slice(0, 200) : null,
         sources: results.map((row) => ({
@@ -153,7 +112,6 @@ async function runCron(request: NextRequest): Promise<NextResponse> {
         upserted: totalUpserted,
         errors: totalErrors,
       },
-      requested_sources: rawSources.length > 0 ? rawSources : null,
       warning:
         completedWithoutErrors
           ? null
@@ -187,7 +145,7 @@ async function runCron(request: NextRequest): Promise<NextResponse> {
  * browser visits stay explicit and do not leak route details.
  */
 export async function GET(request: NextRequest): Promise<NextResponse> {
-  if (isAuthorized(request)) return runCron(request);
+  if (isAuthorized(request)) return runCron();
   return new NextResponse(
     JSON.stringify({ error: "Method not allowed. Use authenticated GET or POST." }),
     {
@@ -207,5 +165,5 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
   if (!isAuthorized(request)) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
-  return runCron(request);
+  return runCron();
 }

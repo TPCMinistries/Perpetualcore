@@ -4,12 +4,10 @@
  * CreateOrgForm — Client form for creating a new RFP org (tenant).
  *
  * Submits to POST /api/orgs. On success, redirects to the live Discovery feed.
- * Five-field setup:
- *   - name
- *   - type
- *   - mission
- *   - geography
- *   - funding types
+ * Validation:
+ *   - name: 2–120 chars, required
+ *   - type: one of nonprofit | forprofit | dual, required
+ *   - naics: at least one 2–6-digit code required before submit
  */
 
 import { useState } from "react";
@@ -24,36 +22,41 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { NaicsAssistantModal } from "@/components/rfp/NaicsAssistantModal";
 
 type OrgType = "nonprofit" | "forprofit" | "dual";
-
-const FUNDING_TYPES = [
-  "Federal contracts",
-  "Federal grants",
-  "State/local RFPs",
-  "Foundation grants",
-  "Corporate philanthropy",
-] as const;
 
 export function CreateOrgForm() {
   const router = useRouter();
   const [name, setName] = useState("");
   const [type, setType] = useState<OrgType>("nonprofit");
-  const [mission, setMission] = useState("");
-  const [geography, setGeography] = useState("");
-  const [fundingTypes, setFundingTypes] = useState<string[]>([
-    "Federal grants",
-    "State/local RFPs",
-  ]);
+  const [naicsInput, setNaicsInput] = useState("");
+  const [naics, setNaics] = useState<string[]>([]);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const toggleFundingType = (value: string) => {
-    setFundingTypes((prev) =>
-      prev.includes(value)
-        ? prev.filter((item) => item !== value)
-        : [...prev, value],
-    );
+  /** Add a NAICS code from the text input if valid and not already present. */
+  const addNaics = () => {
+    const code = naicsInput.trim();
+    if (/^\d{2,6}$/.test(code) && !naics.includes(code)) {
+      setNaics([...naics, code]);
+      setNaicsInput("");
+    }
+  };
+
+  /** Add a NAICS code from the AI assistant. Validates + dedupes here too. */
+  const addNaicsFromAssistant = (code: string) => {
+    if (/^\d{2,6}$/.test(code) && !naics.includes(code)) {
+      setNaics((prev) => [...prev, code]);
+    }
+  };
+
+  /** Handle Enter key in the NAICS input. */
+  const onNaicsKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      addNaics();
+    }
   };
 
   const onSubmit = async (e: React.FormEvent) => {
@@ -61,16 +64,10 @@ export function CreateOrgForm() {
     setSubmitting(true);
     setError(null);
 
-    const capacity_summary = [
-      `Mission: ${mission.trim()}`,
-      `Geography: ${geography.trim()}`,
-      `Funding interests: ${fundingTypes.join(", ")}`,
-    ].join("\n");
-
     const res = await fetch("/api/orgs", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name, type, naics: [], capacity_summary }),
+      body: JSON.stringify({ name, type, naics }),
     });
 
     const data = await res.json();
@@ -83,13 +80,6 @@ export function CreateOrgForm() {
 
     router.push(`/org/${data.org.id}/discovery`);
   };
-
-  const canSubmit =
-    !submitting &&
-    name.trim().length >= 2 &&
-    mission.trim().length >= 20 &&
-    geography.trim().length >= 2 &&
-    fundingTypes.length > 0;
 
   return (
     <form onSubmit={onSubmit} className="space-y-6">
@@ -127,76 +117,58 @@ export function CreateOrgForm() {
         </Select>
       </div>
 
-      {/* Mission */}
+      {/* NAICS codes */}
       <div className="space-y-2">
-        <Label htmlFor="org-mission">Mission</Label>
-        <textarea
-          id="org-mission"
-          value={mission}
-          onChange={(e) => setMission(e.target.value)}
-          required
-          minLength={20}
-          maxLength={600}
-          rows={4}
-          placeholder="Who you serve, what you do, and the outcomes you are built to deliver."
-          disabled={submitting}
-          className="flex min-h-[112px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-        />
-        <p className="text-xs text-muted-foreground">
-          This becomes the first capacity signal for scoring and drafting.
-        </p>
-      </div>
-
-      {/* Geography */}
-      <div className="space-y-2">
-        <Label htmlFor="org-geography">Geography</Label>
-        <Input
-          id="org-geography"
-          value={geography}
-          onChange={(e) => setGeography(e.target.value)}
-          required
-          minLength={2}
-          maxLength={180}
-          placeholder="e.g. New York City, New York State, national"
-          disabled={submitting}
-        />
-      </div>
-
-      {/* Funding types */}
-      <fieldset className="space-y-2">
-        <legend className="text-sm font-medium leading-none">
-          Funding types
-        </legend>
-        <div className="grid gap-2 sm:grid-cols-2">
-          {FUNDING_TYPES.map((value) => {
-            const active = fundingTypes.includes(value);
-            return (
-              <button
-                key={value}
-                type="button"
-                onClick={() => toggleFundingType(value)}
-                disabled={submitting}
-                aria-pressed={active}
-                className={`min-h-11 rounded-md border px-3 py-2 text-left text-sm transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 ${
-                  active
-                    ? "border-emerald-300 bg-emerald-50 text-emerald-900"
-                    : "border-input bg-background text-foreground hover:bg-muted"
-                }`}
-              >
-                {value}
-              </button>
-            );
-          })}
+        <div className="flex items-center justify-between">
+          <Label htmlFor="org-naics">NAICS codes</Label>
+          <NaicsAssistantModal
+            onAdd={addNaicsFromAssistant}
+            existingCodes={naics}
+          />
+        </div>
+        <div className="flex gap-2">
+          <Input
+            id="org-naics"
+            value={naicsInput}
+            onChange={(e) => setNaicsInput(e.target.value)}
+            onKeyDown={onNaicsKeyDown}
+            placeholder="e.g. 541512"
+            disabled={submitting}
+          />
+          <Button
+            type="button"
+            variant="outline"
+            onClick={addNaics}
+            disabled={submitting}
+          >
+            Add
+          </Button>
         </div>
         <p className="text-xs text-muted-foreground">
-          Pick at least one. You can refine NAICS and scoring details later.
+          Enter 2–6 digit NAICS codes that describe your work. At least one is
+          required.
         </p>
-      </fieldset>
-
-      <div className="rounded-md border border-zinc-200 bg-zinc-50 p-3 text-xs leading-5 text-zinc-600">
-        After creation, the engine scores current opportunities automatically.
-        Voice and vault setup improve the first draft but are not required to
-        see your first matches.
+        {naics.length > 0 && (
+          <div className="flex flex-wrap gap-1 mt-2">
+            {naics.map((code) => (
+              <span
+                key={code}
+                className="inline-flex items-center gap-1 rounded-full bg-muted px-3 py-1 text-sm"
+              >
+                {code}
+                <button
+                  type="button"
+                  aria-label={`Remove NAICS code ${code}`}
+                  className="ml-1 text-muted-foreground hover:text-foreground"
+                  onClick={() => setNaics(naics.filter((c) => c !== code))}
+                  disabled={submitting}
+                >
+                  ×
+                </button>
+              </span>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Error display */}
@@ -209,7 +181,7 @@ export function CreateOrgForm() {
       {/* Submit */}
       <Button
         type="submit"
-        disabled={!canSubmit}
+        disabled={submitting || !name || naics.length === 0}
         className="w-full sm:w-auto"
       >
         {submitting ? "Creating…" : "Create organization"}

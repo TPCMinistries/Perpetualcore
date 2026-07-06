@@ -51,47 +51,20 @@ export function OnboardingChecklist({
   const inventoryLabel = opportunityInventoryCount.toLocaleString("en-US");
   const steps: Step[] = [
     {
-      done: state.profile_complete,
-      title: "Confirm profile",
-      hint: state.profile_complete
-        ? "Done — mission and capacity profile saved."
-        : "Add mission, geography, funding focus, and capacity details.",
-      href: `/org/${orgId}/settings`,
-      cta: state.profile_complete ? "Review" : "Finish",
-    },
-    {
-      done: state.voice_trained,
-      title: "Train voice",
-      hint: state.voice_trained
-        ? "Done — drafts can inherit your writing style."
-        : "Paste past writing or describe your voice.",
-      href: `/org/${orgId}/settings/voice`,
-      cta: state.voice_trained ? "Review" : "Train",
-    },
-    {
-      done: state.vault_seeded,
-      title: "Seed vault",
-      hint: state.vault_seeded
-        ? `Done — ${state.vault_chunk_count} evidence chunks.`
-        : `Add evidence docs or quick-seed capacity (${state.vault_chunk_count}/${VAULT_SEEDED_TARGET}).`,
-      href: `/org/${orgId}/settings/vault`,
-      cta: state.vault_seeded ? "Manage" : "Seed",
-    },
-    {
       done: state.first_match_selected,
-      title: "Pick a match",
+      title: "Select a match",
       hint: state.first_match_selected
         ? `Done — ${state.match_count} saved pursuit${state.match_count === 1 ? "" : "s"}.`
-        : "Choose a high-fit opportunity from Discovery.",
+        : "Save a strong opportunity as Watch or Pursue.",
       href: "#opportunity-feed",
       cta: "Browse",
     },
     {
       done: state.first_draft,
-      title: "Create draft",
+      title: "Create workroom",
       hint: state.first_draft
         ? `Done — ${state.proposal_count} proposal${state.proposal_count === 1 ? "" : "s"}.`
-        : "Start the first qualified draft from a match.",
+        : "Start the pursuit workflow from a match.",
       href: state.first_draft ? `/org/${orgId}/proposals` : "#opportunity-feed",
       cta: state.first_draft ? "Open" : "Start",
     },
@@ -105,15 +78,31 @@ export function OnboardingChecklist({
       cta: state.first_draft ? "Open draft" : "",
     },
     {
+      done: state.first_capture_readiness,
+      title: "Readiness matrix",
+      hint: state.first_capture_readiness
+        ? "Done — capture checks exist."
+        : "Generate bid/no-bid, compliance matrix, and packet checklist.",
+      href: state.first_draft ? `/org/${orgId}/proposals` : null,
+      cta: state.first_draft ? "Run checks" : "",
+    },
+    {
+      done: state.first_workroom,
+      title: "Task queue",
+      hint: state.first_workroom
+        ? `Done — ${state.submission_task_count} workroom task${state.submission_task_count === 1 ? "" : "s"}.`
+        : "Create the submission workroom task queue.",
+      href: state.first_draft ? `/org/${orgId}/proposals` : null,
+      cta: state.first_draft ? "Sync tasks" : "",
+    },
+    {
       done: state.first_export_ready,
-      title: "Review + export",
+      title: "Export-ready packet",
       hint: state.first_export_ready
         ? "Done — packet is ready to export."
-        : state.first_capture_readiness || state.first_workroom
-          ? "Clear reviewer findings, task gaps, and VERIFY markers."
-          : "Run reviewer and readiness checks before exporting.",
+        : "Clear VERIFY markers and export the DOCX packet.",
       href: state.first_draft ? `/org/${orgId}/proposals` : null,
-      cta: state.first_draft ? "Review" : "",
+      cta: state.first_draft ? "Export" : "",
     },
   ];
 
@@ -121,8 +110,8 @@ export function OnboardingChecklist({
   const setupItems = [
     {
       icon: Search,
-      title: `Score against ${inventoryLabel} indexed opportunities`,
-      body: "The first profile creates immediate matches; filters help narrow the qualified shortlist.",
+      title: `Search ${inventoryLabel} indexed opportunities`,
+      body: "Use keywords, source, deadline, amount, and fit signals while the source library keeps expanding.",
       href: "#opportunity-feed",
       cta: "Open discovery",
       accent: "text-blue-700",
@@ -130,22 +119,22 @@ export function OnboardingChecklist({
     {
       icon: ClipboardCheck,
       title: "Run a complete first proposal",
-      body: "The proof loop is profile, voice, vault, match, draft, reviewer, readiness, then export.",
+      body: "The proof loop is match, draft, reviewer, readiness matrix, workroom, then export.",
       href: `/org/${orgId}/proposals`,
       cta: state.first_draft ? "Open proposals" : "Start first run",
       accent: "text-sky-700",
     },
     {
       icon: Database,
-      title: "Finish the five-field profile",
-      body: "Mission, geography, funding focus, and capacity details sharpen matching before the first draft.",
+      title: "Tune your matching profile",
+      body: "NAICS codes, geography, and capacity details make the ranking sharper, but search works broadly.",
       href: `/org/${orgId}/settings`,
       cta: "Edit profile",
       accent: "text-emerald-700",
     },
     {
       icon: WandSparkles,
-      title: "Train proposal voice",
+      title: "Improve proposal voice",
       body: "Past writing samples help generated drafts sound like your organization.",
       href: `/org/${orgId}/settings/voice`,
       cta: state.voice_trained ? "Review voice" : "Train voice",
@@ -153,15 +142,15 @@ export function OnboardingChecklist({
     },
     {
       icon: Upload,
-      title: "Seed evidence vault",
-      body: `Evidence improves citations, outcomes, and past-performance claims (${state.vault_chunk_count}/${VAULT_SEEDED_TARGET}).`,
+      title: "Add evidence when ready",
+      body: `Vault docs improve citations, outcomes, and past-performance claims (${state.vault_chunk_count}/${VAULT_SEEDED_TARGET}).`,
       href: `/org/${orgId}/settings/vault`,
       cta: state.vault_seeded ? "Manage vault" : "Add docs",
       accent: "text-amber-700",
     },
     {
       icon: ListChecks,
-      title: "Work reviewer findings",
+      title: "Work the submission queue",
       body: "Reviewer findings and packet requirements become tasks your team can close before submission.",
       href: `/org/${orgId}/pursuits`,
       cta: "Open pursuits",
@@ -169,7 +158,7 @@ export function OnboardingChecklist({
     },
     {
       icon: FileDown,
-      title: "Export first packet",
+      title: "Export the packet",
       body: "DOCX export includes proposal sections and a readiness appendix for human QA.",
       href: `/org/${orgId}/proposals`,
       cta: "Export DOCX",
@@ -186,17 +175,17 @@ export function OnboardingChecklist({
               Discovery setup
             </span>
             <span className="rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 font-mono text-[10px] uppercase tracking-[0.2em] text-emerald-800">
-              {completed}/{steps.length} ready
+              {completed}/{steps.length} launch
             </span>
           </div>
           <h2 className="mt-4 max-w-2xl text-2xl font-semibold tracking-tight text-zinc-950 sm:text-3xl">
-            Get to the first qualified draft without extra setup.
+            Run your first proposal from match to export.
           </h2>
           <p className="mt-3 max-w-xl text-sm leading-6 text-zinc-600">
-            Start with five profile fields, then add voice and vault evidence
-            as accelerators. The first run turns one match into a draft,
+            The core engine is proven when one opportunity becomes a draft,
             reviewer pass, readiness matrix, workroom queue, and exportable
-            packet.
+            packet. Voice and vault improve quality, but they do not block the
+            first run.
           </p>
           <div className="mt-5 flex flex-col gap-2 sm:flex-row">
             <Link
@@ -222,21 +211,22 @@ export function OnboardingChecklist({
                 <Link
                   key={item.title}
                   href={item.href}
-                  className="group flex flex-col rounded-xl border border-zinc-200 bg-white p-4 transition hover:border-zinc-300 hover:shadow-[0_2px_8px_-2px_rgba(0,0,0,0.06)]"
+                  className="group rounded-xl border border-zinc-200 bg-white p-4 transition hover:border-zinc-300 hover:shadow-sm"
                 >
-                  <div className="flex items-start gap-3">
+                  <div className="flex gap-3">
                     <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-zinc-200 bg-zinc-50">
                       <Icon className={`h-4 w-4 ${item.accent}`} />
                     </div>
-                    <p className="pt-0.5 text-sm font-semibold leading-snug text-zinc-900">
-                      {item.title}
-                    </p>
+                    <div className="min-w-0">
+                      <div className="flex items-center justify-between gap-3">
+                        <p className="text-sm font-semibold text-zinc-950">{item.title}</p>
+                        <span className="shrink-0 font-mono text-[10px] uppercase tracking-[0.16em] text-zinc-500 group-hover:text-zinc-900">
+                          {item.cta}
+                        </span>
+                      </div>
+                      <p className="mt-1 text-xs leading-5 text-zinc-600">{item.body}</p>
+                    </div>
                   </div>
-                  <p className="mt-2 text-xs leading-5 text-zinc-600">{item.body}</p>
-                  <span className="mt-3 inline-flex items-center gap-1 font-mono text-[10px] uppercase tracking-[0.16em] text-zinc-400 transition-colors group-hover:text-emerald-700">
-                    {item.cta}
-                    <ArrowRight className="h-3 w-3 transition-transform group-hover:translate-x-0.5" />
-                  </span>
                 </Link>
               );
             })}
@@ -248,32 +238,28 @@ export function OnboardingChecklist({
         {steps.map((step, idx) => (
           <li
             key={idx}
-            className="flex min-h-[112px] flex-col gap-2 rounded-lg border border-zinc-200 bg-zinc-50 px-3 py-2.5"
+            className="flex items-start gap-2 rounded-lg border border-zinc-200 bg-zinc-50 px-3 py-2.5"
           >
-            <div className="flex items-start gap-2">
-              <span
-                className={`mt-[2px] inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full border font-mono text-[10px] ${
-                  step.done
-                    ? "border-emerald-200 bg-emerald-50 text-emerald-700"
-                    : "border-zinc-300 bg-white text-zinc-500"
-                }`}
-                aria-hidden
-              >
-                {step.done ? <Check className="h-3 w-3" /> : idx + 1}
-              </span>
-              <div className="min-w-0 flex-1">
-                <div className="text-[12px] font-medium text-zinc-900">
-                  {step.title}
-                </div>
-                <div className="mt-0.5 text-[12px] leading-4 text-zinc-500">
-                  {step.hint}
-                </div>
+            <span
+              className={`mt-[2px] inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full border font-mono text-[10px] ${
+                step.done
+                  ? "border-emerald-200 bg-emerald-50 text-emerald-700"
+                  : "border-zinc-300 bg-white text-zinc-500"
+              }`}
+              aria-hidden
+            >
+              {step.done ? <Check className="h-3 w-3" /> : idx + 1}
+            </span>
+            <div className="flex-1">
+              <div className="text-[12px] font-medium text-zinc-900">
+                {step.title}
               </div>
+              <div className="mt-0.5 text-[12px] text-zinc-500">{step.hint}</div>
             </div>
             {step.href && step.cta ? (
               <Link
                 href={step.href}
-                className="mt-auto inline-flex h-8 items-center justify-center rounded-md border border-zinc-300 bg-white px-2 text-[11px] font-medium text-zinc-700 transition hover:border-zinc-400 hover:bg-zinc-100"
+                className="hidden"
               >
                 {step.cta}
               </Link>

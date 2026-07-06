@@ -137,17 +137,16 @@ No migration conflicts detected. Both sides' migration files are in distinct dir
 
 ## Build Results
 
+(To be updated after real merge)
+
 | Check | Result |
 |-------|--------|
-| `npm run build` | PASS (exit 0, compiled with warnings only) |
-| `/rfp` marketing page | PASS — `/rfp` (7.88 kB, static) present in build |
-| `app/admin/rfp/page.tsx` | PASS — `/admin/rfp` (1.55 kB, dynamic) present |
-| `app/api/health/rfp/route.ts` | PASS — `/api/health/rfp` present in build |
-| `app/(dashboard)/org/[orgId]/discovery` | PASS — `/org/[orgId]/discovery` (24.7 kB, dynamic) |
-| All RFP cron routes | PASS — 10 cron routes all in build output |
-| Middleware RFP host-rewrite | PASS — `isRfpHost()` present, getUser() at line 254 before /api short-circuit at line 258 |
-| Wave 1 stabilization commits | PASS — 13-01/02/03 commits all reachable from merged main |
-| Merge commit SHA | `d5e9164` |
+| `npm run build` | PENDING |
+| `app/(rfp-marketing)/rfp/page.tsx` | PENDING |
+| `app/admin/rfp/page.tsx` | PENDING |
+| `app/api/health/rfp/route.ts` | PENDING |
+| `app/(dashboard)/org/[orgId]/discovery` | PENDING |
+| Merge commit SHA | PENDING |
 
 ---
 

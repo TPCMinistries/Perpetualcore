@@ -165,7 +165,7 @@ export default function RfpEnginePage() {
                   </Button>
                 </div>
                 <p className="mt-6 font-mono text-[11px] uppercase tracking-[0.18em] text-zinc-400">
-                  14-day trial · No credit card · Discovery feed after setup
+                  14-day trial · No credit card · Discovery feed in your inbox tomorrow
                 </p>
               </div>
 
@@ -215,7 +215,7 @@ export default function RfpEnginePage() {
                     ))}
                   </div>
                   <p className="mt-5 font-mono text-[9.5px] uppercase tracking-[0.18em] text-zinc-400">
-                    Illustrative sample · Live federal and grant sources run on scheduled discovery
+                    Illustrative · Live data resumes once SAM.gov reissues our API key
                   </p>
                 </div>
               </motion.div>
@@ -460,7 +460,7 @@ export default function RfpEnginePage() {
               </span>
             </h2>
             <p className="mx-auto mt-8 max-w-xl text-[15px] leading-[1.75] text-zinc-400">
-              14 days free. Tenant set up in four minutes. Discovery starts after setup.
+              14 days free. Tenant set up in four minutes. First Discovery feed in your inbox tomorrow morning.
             </p>
             <div className="mt-10 flex flex-col justify-center gap-3 sm:flex-row">
               <Button

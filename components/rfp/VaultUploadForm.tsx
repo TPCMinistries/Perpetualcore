@@ -126,9 +126,8 @@ export function VaultUploadForm({ orgId, onUploaded }: VaultUploadFormProps) {
 
   return (
     <form
-      id="vault-upload"
       onSubmit={handleSubmit}
-      className="flex flex-col gap-4 rounded-md border border-zinc-200 bg-white p-6 shadow-sm"
+      className="flex flex-col gap-4 rounded-md border border-zinc-900 bg-zinc-950 p-6"
     >
       <div className="flex flex-col gap-2">
         <label
@@ -145,7 +144,7 @@ export function VaultUploadForm({ orgId, onUploaded }: VaultUploadFormProps) {
           placeholder="e.g. 2024 DYCD Workforce Concept Paper"
           maxLength={200}
           disabled={busy}
-          className="rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 placeholder:text-zinc-400 focus:border-emerald-500 focus:outline-none"
+          className="rounded-md border border-zinc-800 bg-black px-3 py-2 text-sm text-zinc-100 placeholder:text-zinc-600 focus:border-zinc-600 focus:outline-none"
         />
       </div>
 
@@ -161,7 +160,7 @@ export function VaultUploadForm({ orgId, onUploaded }: VaultUploadFormProps) {
           value={docType}
           onChange={(e) => setDocType(e.target.value as DocType)}
           disabled={busy}
-          className="rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 focus:border-emerald-500 focus:outline-none"
+          className="rounded-md border border-zinc-800 bg-black px-3 py-2 text-sm text-zinc-100 focus:border-zinc-600 focus:outline-none"
         >
           {DOC_TYPES.map((t) => (
             <option key={t.value} value={t.value}>
@@ -171,15 +170,15 @@ export function VaultUploadForm({ orgId, onUploaded }: VaultUploadFormProps) {
         </select>
       </div>
 
-      <div className="flex gap-1 rounded-md border border-zinc-200 bg-zinc-100 p-1">
+      <div className="flex gap-1 rounded-md border border-zinc-800 bg-black p-1">
         <button
           type="button"
           onClick={() => setMode("paste")}
           disabled={busy}
           className={`flex-1 rounded px-3 py-1.5 font-mono text-[10px] uppercase tracking-[0.18em] transition ${
             mode === "paste"
-              ? "bg-white text-zinc-900 shadow-sm"
-              : "text-zinc-500 hover:text-zinc-700"
+              ? "bg-zinc-800 text-zinc-100"
+              : "text-zinc-500 hover:text-zinc-300"
           }`}
         >
           Paste text
@@ -190,8 +189,8 @@ export function VaultUploadForm({ orgId, onUploaded }: VaultUploadFormProps) {
           disabled={busy}
           className={`flex-1 rounded px-3 py-1.5 font-mono text-[10px] uppercase tracking-[0.18em] transition ${
             mode === "file"
-              ? "bg-white text-zinc-900 shadow-sm"
-              : "text-zinc-500 hover:text-zinc-700"
+              ? "bg-zinc-800 text-zinc-100"
+              : "text-zinc-500 hover:text-zinc-300"
           }`}
         >
           Upload PDF / DOCX
@@ -211,7 +210,7 @@ export function VaultUploadForm({ orgId, onUploaded }: VaultUploadFormProps) {
               className={`font-mono text-[10px] ${
                 bodyLen >= MIN_BODY_CHARS && bodyLen <= MAX_BODY_CHARS
                   ? "text-zinc-500"
-                  : "text-amber-700"
+                  : "text-amber-400"
               }`}
             >
               {bodyLen.toLocaleString()} / {MAX_BODY_CHARS.toLocaleString()} chars
@@ -227,7 +226,7 @@ export function VaultUploadForm({ orgId, onUploaded }: VaultUploadFormProps) {
             rows={14}
             placeholder="Paste the full document body here."
             disabled={busy}
-            className="rounded-md border border-zinc-300 bg-white px-3 py-2 font-mono text-xs text-zinc-900 placeholder:text-zinc-400 focus:border-emerald-500 focus:outline-none"
+            className="rounded-md border border-zinc-800 bg-black px-3 py-2 font-mono text-xs text-zinc-100 placeholder:text-zinc-600 focus:border-zinc-600 focus:outline-none"
           />
         </div>
       ) : (
@@ -245,14 +244,14 @@ export function VaultUploadForm({ orgId, onUploaded }: VaultUploadFormProps) {
             accept=".pdf,.docx,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
             onChange={(e) => setFile(e.target.files?.[0] ?? null)}
             disabled={busy}
-            className="block w-full rounded-md border border-zinc-300 bg-white px-3 py-2 text-xs text-zinc-900 file:mr-3 file:rounded file:border-0 file:bg-zinc-100 file:px-3 file:py-1 file:text-[11px] file:font-medium file:text-zinc-700 hover:file:bg-zinc-200"
+            className="block w-full rounded-md border border-zinc-800 bg-black px-3 py-2 text-xs text-zinc-100 file:mr-3 file:rounded file:border-0 file:bg-zinc-800 file:px-3 file:py-1 file:text-[11px] file:font-medium file:text-zinc-100 hover:file:bg-zinc-700"
           />
           {file ? (
             <div className="font-mono text-[10px] text-zinc-500">
               {file.name} · {(file.size / 1024).toFixed(1)} KB · {file.type || "unknown type"}
             </div>
           ) : (
-            <div className="font-mono text-[10px] text-zinc-400">
+            <div className="font-mono text-[10px] text-zinc-600">
               Server extracts text via pdf-parse or mammoth, then runs the same chunk + embed pipeline as paste mode.
             </div>
           )}
@@ -260,13 +259,13 @@ export function VaultUploadForm({ orgId, onUploaded }: VaultUploadFormProps) {
       )}
 
       {error && (
-        <div className="rounded-md border border-red-200 bg-red-50 p-3 text-xs text-red-700">
+        <div className="rounded-md border border-red-900 bg-red-950/40 p-3 text-xs text-red-300">
           {error}
         </div>
       )}
 
       {result && (
-        <div className="rounded-md border border-emerald-200 bg-emerald-50 p-3 text-xs text-emerald-700">
+        <div className="rounded-md border border-emerald-900 bg-emerald-950/30 p-3 text-xs text-emerald-300">
           Indexed {result.chunk_count} chunk{result.chunk_count === 1 ? "" : "s"} (
           {result.total_chars.toLocaleString()} chars) · {result.tokens.toLocaleString()} tokens
           · {fmtCost(result.cost_usd)} · model {result.model}
@@ -277,7 +276,7 @@ export function VaultUploadForm({ orgId, onUploaded }: VaultUploadFormProps) {
         <button
           type="submit"
           disabled={!canSubmit}
-          className="rounded-md bg-zinc-900 px-4 py-2 font-mono text-[11px] uppercase tracking-[0.18em] text-white hover:bg-zinc-800 disabled:cursor-not-allowed disabled:opacity-40"
+          className="rounded-md border border-zinc-700 bg-zinc-900 px-4 py-2 font-mono text-[11px] uppercase tracking-[0.18em] text-zinc-100 hover:bg-zinc-800 disabled:cursor-not-allowed disabled:opacity-40"
         >
           {busy ? "Indexing…" : "Upload + index"}
         </button>

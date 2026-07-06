@@ -52,7 +52,7 @@ const items: Record<Stage, Item[]> = {
   live: [
     {
       title: "Discovery every six hours",
-      desc: "SAM.gov, Grants.gov, SBIR, NY State, NYC PASSPort, and other configured sources run on scheduled discovery. Source health is tracked in the operator console.",
+      desc: "NY State Grants Gateway and NYC PASSPort flowing today. Federal sources (SAM.gov, Grants.gov, SBIR) restore the week SAM reissues our API key.",
     },
     {
       title: "Multi-tenant orgs and invites",
@@ -99,8 +99,8 @@ const items: Record<Stage, Item[]> = {
   ],
   next: [
     {
-      title: "Source coverage expansion",
-      desc: "Increase live source breadth, improve parser resilience, and expose source-level freshness so users know exactly which discovery channels are healthy.",
+      title: "Federal discovery restored",
+      desc: "SAM.gov reissues our API key end of May. The federal cron is built and dormant — it flips live the day the key lands. Simpler.Grants and Grants.gov follow.",
     },
     {
       title: "Self-serve checkout (Pro and Agency)",

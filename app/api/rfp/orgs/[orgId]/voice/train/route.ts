@@ -8,8 +8,8 @@
  *   1) rfp_orgs.voice_fingerprint           — the live JSONB used at draft time.
  *   2) rfp_capture_profiles                 — versioned audit/history snapshot.
  *
- * LLM usage is budget-gated via guardedLLMCall (Phase 17). The wrapper records
- * the rfp_agent_sessions row — do NOT insert a separate audit row here.
+ * Also logs an rfp_agent_sessions row with agent="voice_fingerprint_extractor_v1"
+ * so token + cost usage is visible alongside the rest of the agent surface.
  *
  * Honest framing: this is system-prompt augmentation, not fine-tuning, not
  * RAG. The drafter will speak in a closer cadence and use/avoid phrases the
@@ -38,11 +38,6 @@ import {
   MIN_DOCS,
   type VoiceFingerprint,
 } from "@/lib/rfp/voice/extract";
-import {
-  guardedLLMCall,
-  budgetExceededResponse,
-  BudgetExceededError,
-} from "@/lib/rfp/ai/guardrail";
 import type { Database } from "@/lib/supabase/database.types";
 
 /**
@@ -116,25 +111,11 @@ export async function POST(
     return NextResponse.json({ error: "forbidden" }, { status: 403 });
   }
 
-  // Extract via GPT-4o — budget-gated. The wrapper checks spend before calling
-  // fn() and records the session row after; no separate audit insert needed.
+  // Extract via Opus.
   let extraction;
   try {
-    extraction = await guardedLLMCall(orgId, async () => {
-      const result = await extractVoiceFingerprint(body.documents);
-      return {
-        agent: "voice_fingerprint_extractor_v1",
-        model: result.model,
-        tokensIn: result.tokens_in,
-        tokensOut: result.tokens_out,
-        costUsd: result.cost_usd,
-        sessionId: result.session_id,
-        // Pass the full result through so the route can use it.
-        _result: result,
-      };
-    });
+    extraction = await extractVoiceFingerprint(body.documents);
   } catch (err) {
-    if (err instanceof BudgetExceededError) return budgetExceededResponse(err);
     const msg = err instanceof Error ? err.message : "unknown";
     return NextResponse.json(
       { error: "extraction_failed", detail: msg.slice(0, 300) },
@@ -142,12 +123,10 @@ export async function POST(
     );
   }
 
-  const result = extraction._result;
-
   const admin = createAdminClient();
 
   // 1) Update rfp_orgs.voice_fingerprint with the live profile.
-  const fingerprintJson = toJsonb(result.fingerprint);
+  const fingerprintJson = toJsonb(extraction.fingerprint);
   const { error: orgUpdateErr } = await admin
     .from("rfp_orgs")
     .update({ voice_fingerprint: fingerprintJson })
@@ -184,18 +163,29 @@ export async function POST(
         error: "snapshot_insert_failed",
         detail: snapErr.message.slice(0, 200),
         partial_success: true,
-        fingerprint: result.fingerprint,
+        fingerprint: extraction.fingerprint,
       },
       { status: 500 },
     );
   }
 
+  // 3) Audit row.
+  await admin.from("rfp_agent_sessions").insert({
+    org_id: orgId,
+    agent: "voice_fingerprint_extractor_v1",
+    session_id: extraction.session_id,
+    model: extraction.model,
+    tokens_in: extraction.tokens_in,
+    tokens_out: extraction.tokens_out,
+    cost_usd: extraction.cost_usd,
+  });
+
   return NextResponse.json({
-    fingerprint: result.fingerprint,
+    fingerprint: extraction.fingerprint,
     version: nextVersion,
-    tokens_in: result.tokens_in,
-    tokens_out: result.tokens_out,
-    cost_usd: result.cost_usd,
-    model: result.model,
+    tokens_in: extraction.tokens_in,
+    tokens_out: extraction.tokens_out,
+    cost_usd: extraction.cost_usd,
+    model: extraction.model,
   });
 }

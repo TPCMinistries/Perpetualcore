@@ -8,16 +8,6 @@
  * embedder, same artifact rows, same audit hook. The only difference is
  * how the document body got generated.
  *
- * LLM cost-accounting note (Phase 17 — Pitfall 5):
- *   This route makes TWO model calls (expand via gpt-4o, then embed via
- *   text-embedding-3-large). Both are wrapped inside a SINGLE guardedLLMCall
- *   so budget is checked ONCE before expand fires and cost is recorded ONCE
- *   after embed completes — matching the existing single-insert pattern and
- *   producing exactly one rfp_agent_sessions row. The combined meta uses
- *   model: "gpt-4o" (dominant — expansion is the expensive half) and sums
- *   tokensIn (expand.tokens_in + embed.total_tokens), tokensOut
- *   (expand.tokens_out), and costUsd (expand.cost_usd + embed.cost_usd).
- *
  * Body: { description: string (80-3000), doc_title?: string (overrides
  *         the model's suggested title), doc_type?: VaultDocType (defaults
  *         to "policy" which is the best-fit closed-set value for a
@@ -30,14 +20,9 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
-import { createClient } from "@/lib/supabase/server";
+import { createClient, createAdminClient } from "@/lib/supabase/server";
 import { expandOrgDescription, MIN_DESCRIPTION_CHARS, MAX_DESCRIPTION_CHARS } from "@/lib/rfp/vault/expand";
 import { uploadDocument, VAULT_DOC_TYPES } from "@/lib/rfp/vault/upload";
-import {
-  guardedLLMCall,
-  budgetExceededResponse,
-  BudgetExceededError,
-} from "@/lib/rfp/ai/guardrail";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -84,58 +69,62 @@ export async function POST(
     return NextResponse.json({ error: "forbidden" }, { status: 403 });
   }
 
-  // Both model calls (expand + embed) run inside ONE guardedLLMCall.
-  //   - Budget is checked ONCE before expand fires.
-  //   - Cost is recorded ONCE after embed completes (summed across both calls).
-  //   - One rfp_agent_sessions row is produced — no double-counting.
-  // model label = "gpt-4o" (the dominant / expensive half of the pair).
-  let guardResult;
+  // Step 1: expand description into a structured capacity narrative.
+  let expansion;
   try {
-    guardResult = await guardedLLMCall(orgId, async () => {
-      // Step 1: expand description into a structured capacity narrative.
-      const expansion = await expandOrgDescription(body.description);
+    expansion = await expandOrgDescription(body.description);
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : "unknown";
+    return NextResponse.json(
+      { error: "expand_failed", detail: msg.slice(0, 300) },
+      { status: 502 },
+    );
+  }
 
-      const finalTitle = (body.doc_title ?? expansion.suggested_title).slice(0, 200);
-      const finalDocType = (body.doc_type ?? "policy") as (typeof VAULT_DOC_TYPES)[number];
+  const finalTitle = (body.doc_title ?? expansion.suggested_title).slice(0, 200);
+  const finalDocType = (body.doc_type ?? "policy") as (typeof VAULT_DOC_TYPES)[number];
 
-      // Step 2: run through the canonical upload pipeline (chunker → embed → insert).
-      const result = await uploadDocument({
-        orgId,
-        docTitle: finalTitle,
-        docType: finalDocType,
-        body: expansion.body,
-      });
-
-      // Combined meta: sum both costs into one ledger row.
-      return {
-        agent: "vault_indexer_v1",
-        // "gpt-4o" is the dominant (more expensive) model in this pair.
-        model: "gpt-4o",
-        tokensIn: expansion.tokens_in + result.tokens,
-        tokensOut: expansion.tokens_out,
-        costUsd: expansion.cost_usd + result.cost_usd,
-        sessionId: `vault_qs_${result.doc_id}`,
-        // Pass both payloads through for the response.
-        _expansion: expansion,
-        _result: result,
-      };
+  // Step 2: run through the canonical upload pipeline. Same chunker, same
+  // embedder, same artifact rows — the drafter cannot tell which path
+  // produced the chunks.
+  let result;
+  try {
+    result = await uploadDocument({
+      orgId,
+      docTitle: finalTitle,
+      docType: finalDocType,
+      body: expansion.body,
     });
   } catch (err) {
-    if (err instanceof BudgetExceededError) return budgetExceededResponse(err);
     const msg = err instanceof Error ? err.message : "unknown";
     const status = msg.startsWith("upload_bad_input") || msg.startsWith("chunker_") ? 400 : 502;
     return NextResponse.json(
       {
-        error: msg.startsWith("vault_expand") ? "expand_failed" : "upload_failed",
+        error: "upload_failed",
         detail: msg.slice(0, 300),
-        // Surface any partial expansion so the user doesn't lose what the model wrote.
-        // (Only available if expand succeeded but upload failed — not if expand threw.)
+        // Surface the expansion so the user doesn't lose what the model wrote.
+        expanded_body: expansion.body,
+        suggested_title: expansion.suggested_title,
       },
       { status },
     );
   }
 
-  const { _expansion: expansion, _result: result } = guardResult;
+  // Step 3: audit row. Best-effort like the canonical route.
+  try {
+    const admin = createAdminClient();
+    await admin.from("rfp_agent_sessions").insert({
+      org_id: orgId,
+      agent: "vault_indexer_v1",
+      session_id: `vault_qs_${result.doc_id}`,
+      model: result.model,
+      tokens_in: result.tokens + expansion.tokens_in,
+      tokens_out: expansion.tokens_out,
+      cost_usd: result.cost_usd + expansion.cost_usd,
+    });
+  } catch {
+    // Swallow audit failures.
+  }
 
   return NextResponse.json({
     ...result,

@@ -8,6 +8,7 @@ import { ToolExecutionContext } from "@/lib/ai/tools/schema";
 import { createAdminClient } from "@/lib/supabase/server";
 import { ExecutionRequest, ExecutionResult, DEFAULT_TIMEOUT, MAX_TIMEOUT } from "./types";
 import { checkExecutionQuota } from "./quota-checker";
+import { executeInSandbox } from "./e2b-executor";
 
 /**
  * Execute code in an isolated E2B sandbox.
@@ -71,9 +72,7 @@ export async function executeCode(
   const executionId = executionRecord?.id;
 
   try {
-    // Lazy-load E2B only when the execution path is actually used. This keeps
-    // the route's build trace from eagerly bundling E2B's dynamic internals.
-    const { executeInSandbox } = await import("./e2b-executor");
+    // Execute the code in E2B sandbox
     const result = await executeInSandbox(validatedRequest);
 
     // Update the execution record with results

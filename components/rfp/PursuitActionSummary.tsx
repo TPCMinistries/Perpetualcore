@@ -26,10 +26,10 @@ interface ActionItem {
 }
 
 const TONE_CLASS: Record<ActionTone, string> = {
-  ready: "border-emerald-200 bg-emerald-50 text-emerald-800",
-  warn: "border-amber-200 bg-amber-50 text-amber-800",
-  danger: "border-rose-200 bg-rose-50 text-rose-800",
-  neutral: "border-zinc-200 bg-zinc-50 text-zinc-700",
+  ready: "border-emerald-500/35 bg-emerald-500/10 text-emerald-100",
+  warn: "border-amber-500/35 bg-amber-500/10 text-amber-100",
+  danger: "border-rose-500/35 bg-rose-500/10 text-rose-100",
+  neutral: "border-zinc-700 bg-zinc-900/80 text-zinc-200",
 };
 
 const PRIORITY_RANK = {
@@ -205,23 +205,23 @@ export function PursuitActionSummary({
   const topTasks = open.slice(0, 3);
 
   return (
-    <section className="mt-8 overflow-hidden rounded-md border border-zinc-200 bg-white shadow-sm">
-      <div className="border-b border-zinc-200 bg-zinc-50 px-5 py-4">
+    <section className="mt-8 overflow-hidden rounded-md border border-zinc-800 bg-zinc-950">
+      <div className="border-b border-zinc-900 bg-zinc-900/70 px-5 py-4">
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div>
-            <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-emerald-700">
+            <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-emerald-300">
               Pursuit command
             </p>
-            <p className="mt-2 max-w-2xl text-sm leading-relaxed text-zinc-600">
+            <p className="mt-2 max-w-2xl text-sm leading-relaxed text-zinc-400">
               Live operating view for the proposal: decision, deadline pressure,
               reviewer risk, and the next work items that move this toward submission.
             </p>
           </div>
-          <div className="rounded-md border border-zinc-200 bg-white px-4 py-2 text-right">
+          <div className="rounded-md border border-zinc-800 bg-zinc-950 px-4 py-2 text-right">
             <p className="font-mono text-[9px] uppercase tracking-[0.2em] text-zinc-500">
               Deadline
             </p>
-            <p className="mt-1 text-sm font-semibold text-zinc-900">
+            <p className="mt-1 text-sm font-semibold text-zinc-100">
               {daysLeft === null
                 ? formatDate(dueDate)
                 : daysLeft < 0
@@ -234,7 +234,7 @@ export function PursuitActionSummary({
         </div>
       </div>
 
-      <div className="grid border-b border-zinc-200 sm:grid-cols-2 lg:grid-cols-5">
+      <div className="grid border-b border-zinc-900 sm:grid-cols-2 lg:grid-cols-5">
         <Metric label="Bid decision" value={decisionLabel(bidNoBid)} />
         <Metric label="Reviewer" value={reviewerLabel(reviewerResult)} />
         <Metric
@@ -247,7 +247,7 @@ export function PursuitActionSummary({
       </div>
 
       <div className="grid gap-0 lg:grid-cols-[1.1fr_0.9fr]">
-        <div className="border-b border-zinc-200 p-5 lg:border-b-0 lg:border-r">
+        <div className="border-b border-zinc-900 p-5 lg:border-b-0 lg:border-r">
           <p className="font-mono text-[9px] uppercase tracking-[0.22em] text-zinc-500">
             Next moves
           </p>
@@ -271,15 +271,15 @@ export function PursuitActionSummary({
             Priority queue
           </p>
           {topTasks.length === 0 ? (
-            <p className="mt-3 rounded-md border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-800">
+            <p className="mt-3 rounded-md border border-emerald-500/30 bg-emerald-500/10 p-3 text-sm text-emerald-100">
               No open workroom tasks. Final human review and export are the next step.
             </p>
           ) : (
-            <ul className="mt-3 divide-y divide-zinc-200 overflow-hidden rounded-md border border-zinc-200">
+            <ul className="mt-3 divide-y divide-zinc-900 overflow-hidden rounded-md border border-zinc-800">
               {topTasks.map((task) => (
-                <li key={task.id} className="bg-white p-3">
+                <li key={task.id} className="bg-zinc-950 p-3">
                   <div className="flex items-start justify-between gap-3">
-                    <p className="text-sm font-medium text-zinc-900">{task.title}</p>
+                    <p className="text-sm font-medium text-zinc-100">{task.title}</p>
                     <span className="shrink-0 font-mono text-[9px] uppercase tracking-[0.16em] text-zinc-500">
                       {task.priority}
                     </span>
@@ -307,13 +307,13 @@ function Metric({
   danger?: boolean;
 }) {
   return (
-    <div className="border-r border-zinc-200 px-5 py-4 last:border-r-0">
+    <div className="border-r border-zinc-900 px-5 py-4 last:border-r-0">
       <p className="font-mono text-[9px] uppercase tracking-[0.2em] text-zinc-500">
         {label}
       </p>
       <p
         className={`mt-2 text-sm font-semibold tabular-nums ${
-          danger ? "text-amber-700" : "text-zinc-900"
+          danger ? "text-amber-200" : "text-zinc-100"
         }`}
       >
         {value}

@@ -35,24 +35,24 @@ const SEVERITY_CLASSES: Record<
   { chip: string; dot: string; label: string }
 > = {
   blocker: {
-    chip: "border-rose-200 bg-rose-50 text-rose-700",
-    dot: "bg-rose-500",
-    label: "text-rose-700",
+    chip: "border-rose-500/40 bg-rose-500/10 text-rose-200",
+    dot: "bg-rose-500/60",
+    label: "text-rose-300",
   },
   high: {
-    chip: "border-amber-200 bg-amber-50 text-amber-700",
-    dot: "bg-amber-500",
-    label: "text-amber-700",
+    chip: "border-amber-500/40 bg-amber-500/10 text-amber-200",
+    dot: "bg-amber-500/60",
+    label: "text-amber-300",
   },
   medium: {
-    chip: "border-zinc-300 bg-zinc-100 text-zinc-700",
-    dot: "bg-zinc-400",
-    label: "text-zinc-700",
+    chip: "border-zinc-500/40 bg-zinc-500/10 text-zinc-200",
+    dot: "bg-zinc-500/60",
+    label: "text-zinc-300",
   },
   low: {
-    chip: "border-zinc-200 bg-zinc-50 text-zinc-500",
-    dot: "bg-zinc-300",
-    label: "text-zinc-500",
+    chip: "border-zinc-700/60 bg-zinc-900/60 text-zinc-400",
+    dot: "bg-zinc-700",
+    label: "text-zinc-400",
   },
 };
 
@@ -90,11 +90,11 @@ export function SectionFindings({ findings }: SectionFindingsProps) {
   const headerClasses = SEVERITY_CLASSES[worstSeverity];
 
   return (
-    <div className="mt-4 rounded-md border border-zinc-200 bg-white shadow-sm">
+    <div className="mt-4 rounded-md border border-zinc-800 bg-zinc-900/30">
       <button
         type="button"
         onClick={() => setExpanded((v) => !v)}
-        className="flex w-full items-center justify-between gap-3 px-4 py-2.5 text-left transition hover:bg-zinc-50"
+        className="flex w-full items-center justify-between gap-3 px-4 py-2.5 text-left transition hover:bg-zinc-900/50"
       >
         <div className="flex items-center gap-2">
           <span
@@ -112,14 +112,14 @@ export function SectionFindings({ findings }: SectionFindingsProps) {
       </button>
 
       {expanded ? (
-        <ul className="space-y-3 border-t border-zinc-200 px-4 py-3">
+        <ul className="space-y-3 border-t border-zinc-800 px-4 py-3">
           {SEVERITY_ORDER.flatMap((sev) =>
             (grouped.get(sev) ?? []).map((f, idx) => {
               const classes = SEVERITY_CLASSES[sev];
               return (
                 <li
                   key={`${sev}-${idx}`}
-                  className="rounded-md border border-zinc-200 bg-zinc-50 p-3"
+                  className="rounded-md border border-zinc-800 bg-zinc-950 p-3"
                 >
                   <div className="flex flex-wrap items-center gap-2">
                     <span
@@ -132,18 +132,18 @@ export function SectionFindings({ findings }: SectionFindingsProps) {
                     </span>
                   </div>
 
-                  <p className="mt-2 text-[13px] leading-relaxed text-zinc-900">
+                  <p className="mt-2 text-[13px] leading-relaxed text-zinc-100">
                     {f.finding}
                   </p>
 
                   {f.excerpt ? (
-                    <blockquote className="mt-2 border-l-2 border-zinc-300 pl-3 text-[12px] italic leading-relaxed text-zinc-500">
+                    <blockquote className="mt-2 border-l-2 border-zinc-700 pl-3 text-[12px] italic leading-relaxed text-zinc-400">
                       “{f.excerpt}”
                     </blockquote>
                   ) : null}
 
-                  <p className="mt-2 text-[12px] leading-relaxed text-emerald-700">
-                    <span className="font-mono text-[9px] uppercase tracking-[0.22em] text-emerald-600">
+                  <p className="mt-2 text-[12px] leading-relaxed text-emerald-200/90">
+                    <span className="font-mono text-[9px] uppercase tracking-[0.22em] text-emerald-400">
                       Suggestion ·{" "}
                     </span>
                     {f.suggestion}

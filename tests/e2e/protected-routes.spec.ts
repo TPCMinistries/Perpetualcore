@@ -51,18 +51,16 @@ test.describe("Protected API Routes", () => {
 
 test.describe("Cron Endpoints Require CRON_SECRET", () => {
   const cronEndpoints = [
-    { method: "GET" as const, path: "/api/cron/billing-sync" },
-    { method: "GET" as const, path: "/api/cron/sync-usage" },
-    { method: "GET" as const, path: "/api/cron/usage-alerts" },
-    { method: "GET" as const, path: "/api/cron/finalize-overages" },
-    { method: "POST" as const, path: "/api/cron/refresh-tokens" },
+    "/api/cron/billing-sync",
+    "/api/cron/sync-usage",
+    "/api/cron/usage-alerts",
+    "/api/cron/finalize-overages",
+    "/api/cron/refresh-tokens",
   ];
 
-  for (const { method, path } of cronEndpoints) {
-    test(`${method} ${path} returns 401 without CRON_SECRET`, async ({ request }) => {
-      const response = method === "GET"
-        ? await request.get(path)
-        : await request.post(path, { data: {} });
+  for (const endpoint of cronEndpoints) {
+    test(`${endpoint} returns 401 without CRON_SECRET`, async ({ request }) => {
+      const response = await request.get(endpoint);
 
       expect([401, 403]).toContain(response.status());
     });

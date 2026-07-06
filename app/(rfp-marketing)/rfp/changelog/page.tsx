@@ -134,7 +134,7 @@ const WEEKS: Week[] = [
       {
         tag: "feat",
         title: "Discovery v1 with NY State + NYC PASSPort",
-        body: "Scrapers across NY State Grants Gateway and NYC PASSPort flow to rfp_opportunities every six hours. Drift detector emails on schema changes. Federal discovery sources are tracked through source health and scheduled ingest jobs.",
+        body: "Scrapers across NY State Grants Gateway and NYC PASSPort flow to rfp_opportunities every six hours. Drift detector emails on schema changes. Federal sources (SAM.gov, Grants.gov, SBIR) pending API key reissue.",
       },
       {
         tag: "feat",

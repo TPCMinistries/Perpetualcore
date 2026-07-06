@@ -39,7 +39,6 @@ export interface CreateOrgInput {
   name: string;
   type: OrgType;
   naics: string[];
-  capacity_summary?: string | null;
 }
 
 // ── Server helpers ────────────────────────────────────────────────────────────
@@ -66,12 +65,7 @@ export async function createOrgWithOwner(
   // Step 1: insert the org
   const { data: org, error: orgErr } = await admin
     .from("rfp_orgs")
-    .insert({
-      name: input.name,
-      type: input.type,
-      naics: input.naics,
-      capacity_summary: input.capacity_summary?.trim() || null,
-    })
+    .insert({ name: input.name, type: input.type, naics: input.naics })
     .select()
     .single();
 

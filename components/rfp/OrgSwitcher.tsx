@@ -92,47 +92,47 @@ export function OrgSwitcher({ currentOrgId }: OrgSwitcherProps) {
       <DropdownMenuTrigger asChild>
         <button
           type="button"
-          className="inline-flex max-w-[calc(100vw-6rem)] items-center gap-2 rounded-lg border border-zinc-200 bg-white px-3 py-1.5 text-sm text-zinc-800 shadow-sm transition-colors hover:border-zinc-300 hover:bg-zinc-50 sm:max-w-[320px]"
+          className="inline-flex items-center gap-2 px-3 py-1.5 rounded-md border border-zinc-800 bg-zinc-950 text-sm text-zinc-200 hover:bg-zinc-900 transition-colors"
           aria-label="Switch organization"
           data-testid="org-switcher"
         >
-          <span className="text-[10px] uppercase tracking-[0.2em] text-zinc-400 font-mono">
+          <span className="text-[10px] uppercase tracking-[0.2em] text-zinc-500 font-mono">
             Org
           </span>
-          <span className="min-w-0 max-w-[180px] truncate font-medium">
+          <span className="font-medium">
             {current ? current.rfp_orgs.name : "Loading…"}
           </span>
           {current && (
             <span
               className={`text-[10px] uppercase tracking-wide font-mono ${
                 current.rfp_orgs.type === "dual"
-                  ? "text-emerald-600"
-                  : "text-zinc-400"
+                  ? "text-emerald-300"
+                  : "text-zinc-500"
               }`}
             >
               {current.rfp_orgs.type}
             </span>
           )}
-          <span aria-hidden="true" className="text-zinc-400">
+          <span aria-hidden="true" className="text-zinc-500">
             ▾
           </span>
         </button>
       </DropdownMenuTrigger>
       <DropdownMenuContent
         align="end"
-        className="w-64 bg-white border-zinc-200 text-zinc-700 shadow-lg shadow-zinc-900/[0.06]"
+        className="w-64 bg-zinc-950 border-zinc-800 text-zinc-200"
       >
-        <DropdownMenuLabel className="text-[10px] uppercase tracking-[0.2em] text-zinc-400 font-mono">
+        <DropdownMenuLabel className="text-[10px] uppercase tracking-[0.2em] text-zinc-500 font-mono">
           Your organizations
         </DropdownMenuLabel>
-        <DropdownMenuSeparator className="bg-zinc-100" />
+        <DropdownMenuSeparator className="bg-zinc-900" />
         {error && (
-          <div className="px-2 py-2 text-xs text-amber-600 font-mono">
+          <div className="px-2 py-2 text-xs text-amber-400 font-mono">
             Could not load orgs ({error})
           </div>
         )}
         {!orgs && !error && (
-          <div className="px-2 py-2 text-xs text-zinc-400 font-mono">
+          <div className="px-2 py-2 text-xs text-zinc-500 font-mono">
             Loading…
           </div>
         )}
@@ -148,14 +148,14 @@ export function OrgSwitcher({ currentOrgId }: OrgSwitcherProps) {
                   {/* Phase 05-06 — dual chip next to dual orgs' names */}
                   {current.rfp_orgs.type === "dual" && (
                     <span
-                      className="shrink-0 text-[10px] uppercase tracking-wide font-mono text-emerald-700 border border-emerald-200 bg-emerald-50 rounded px-1 py-0"
+                      className="shrink-0 text-[10px] uppercase tracking-wide font-mono text-emerald-300 border border-emerald-900/50 bg-emerald-950/40 rounded px-1 py-0"
                       data-testid="org-dual-chip"
                     >
                       dual
                     </span>
                   )}
                 </div>
-                <span className="ml-2 shrink-0 text-[10px] uppercase tracking-wide text-emerald-600">
+                <span className="ml-2 shrink-0 text-[10px] uppercase tracking-wide text-emerald-400">
                   Current
                 </span>
               </div>
@@ -173,7 +173,7 @@ export function OrgSwitcher({ currentOrgId }: OrgSwitcherProps) {
             onSelect={() => {
               router.push(rewritePathForOrg(pathname, o.rfp_orgs.id));
             }}
-            className="cursor-pointer focus:bg-zinc-100"
+            className="cursor-pointer focus:bg-zinc-900"
           >
             <div className="flex flex-col w-full min-w-0">
               <div className="flex items-center justify-between w-full min-w-0">
@@ -181,7 +181,7 @@ export function OrgSwitcher({ currentOrgId }: OrgSwitcherProps) {
                   <span className="truncate">{o.rfp_orgs.name}</span>
                   {o.rfp_orgs.type === "dual" && (
                     <span
-                      className="shrink-0 text-[10px] uppercase tracking-wide font-mono text-emerald-700 border border-emerald-200 bg-emerald-50 rounded px-1 py-0"
+                      className="shrink-0 text-[10px] uppercase tracking-wide font-mono text-emerald-300 border border-emerald-900/50 bg-emerald-950/40 rounded px-1 py-0"
                       data-testid="org-dual-chip"
                     >
                       dual
@@ -206,8 +206,8 @@ export function OrgSwitcher({ currentOrgId }: OrgSwitcherProps) {
             </div>
           </DropdownMenuItem>
         ))}
-        <DropdownMenuSeparator className="bg-zinc-100" />
-        <DropdownMenuItem asChild className="cursor-pointer focus:bg-zinc-100 text-emerald-700">
+        <DropdownMenuSeparator className="bg-zinc-900" />
+        <DropdownMenuItem asChild className="cursor-pointer focus:bg-zinc-900">
           <Link href="/orgs/new" className="block w-full">
             + New organization
           </Link>

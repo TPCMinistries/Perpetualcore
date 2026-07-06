@@ -93,7 +93,7 @@ export default async function SettingsHubPage({ params }: PageProps) {
       <div className="mx-auto max-w-3xl px-6 py-12">
         <Link
           href={`/org/${orgId}/discovery`}
-          className="font-mono text-[10px] uppercase tracking-[0.22em] text-zinc-500 hover:text-zinc-700"
+          className="font-mono text-[10px] uppercase tracking-[0.22em] text-zinc-500 hover:text-zinc-300"
         >
           ← Discovery
         </Link>
@@ -102,7 +102,7 @@ export default async function SettingsHubPage({ params }: PageProps) {
           Settings
         </div>
         <h1
-          className="mt-3 text-3xl italic text-zinc-900"
+          className="mt-3 text-3xl italic text-white"
           style={{ fontFamily: "Georgia, serif" }}
         >
           {org.name}
@@ -119,18 +119,18 @@ export default async function SettingsHubPage({ params }: PageProps) {
               <Link
                 key={card.href}
                 href={`/org/${orgId}/settings/${card.href}`}
-                className="group rounded-lg border border-zinc-200 bg-white p-4 shadow-sm transition hover:border-zinc-300 hover:bg-zinc-50"
+                className="group rounded-lg border border-zinc-900 bg-white/[0.02] p-4 transition hover:border-zinc-800 hover:bg-white/[0.04]"
               >
                 <div className="flex items-center gap-3">
-                  <span className="inline-flex h-8 w-8 items-center justify-center rounded-md bg-emerald-50 text-emerald-600">
+                  <span className="inline-flex h-8 w-8 items-center justify-center rounded-md bg-emerald-500/10 text-emerald-300">
                     <Icon className="h-4 w-4" />
                   </span>
-                  <span className="text-[14px] font-medium text-zinc-900">
+                  <span className="text-[14px] font-medium text-zinc-100">
                     {card.label}
                   </span>
-                  <ArrowRight className="ml-auto h-4 w-4 text-zinc-400 transition group-hover:text-zinc-600" />
+                  <ArrowRight className="ml-auto h-4 w-4 text-zinc-600 transition group-hover:text-zinc-300" />
                 </div>
-                <p className="mt-2 text-[12px] leading-relaxed text-zinc-500">
+                <p className="mt-2 text-[12px] leading-relaxed text-zinc-400">
                   {card.detail}
                 </p>
               </Link>
@@ -140,7 +140,7 @@ export default async function SettingsHubPage({ params }: PageProps) {
 
         {/* Org details — owner-editable */}
         <section className="mt-12">
-          <h2 className="font-mono text-[10px] uppercase tracking-[0.22em] text-zinc-500">
+          <h2 className="font-mono text-[10px] uppercase tracking-[0.22em] text-zinc-400">
             Org details
           </h2>
           <p className="mt-2 text-[12px] text-zinc-500">
