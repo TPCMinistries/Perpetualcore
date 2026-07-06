@@ -66,6 +66,27 @@ const Q_USER_SCOPED_COLUMNS = `
   where table_schema not in ${EXCLUDED_SCHEMAS}
     and lower(column_name) in (${USER_SCOPED_COLUMNS.map((c) => `'${c}'`).join(',')});`;
 
+/**
+ * Tables protected by a BEFORE UPDATE privilege-guard trigger. This is how the
+ * whole ecosystem actually closed the self-grant hole (SECURITY INVOKER trigger
+ * that RAISEs when a non-service role changes is_admin/role/tier — see memory
+ * sog-audit-and-privilege-escalation). A guarded table with no WITH CHECK is NOT
+ * a live hole, so we must not flag it critical. Match the guard by its signature:
+ * a BEFORE-UPDATE trigger whose function body touches a privilege column AND raises.
+ */
+const Q_GUARD_TRIGGERS = `
+  select distinct n.nspname as schema, c.relname as tbl
+  from pg_trigger t
+  join pg_class c on c.oid = t.tgrelid
+  join pg_namespace n on n.oid = c.relnamespace
+  join pg_proc p on p.oid = t.tgfoid
+  where not t.tgisinternal
+    and (t.tgtype & 2) <> 0    -- BEFORE
+    and (t.tgtype & 16) <> 0   -- UPDATE
+    and n.nspname not in ${EXCLUDED_SCHEMAS}
+    and pg_get_functiondef(p.oid) ~* '(is_admin|is_super|is_premium|is_founder|privilege|\\mrole\\M|\\mtier\\M)'
+    and pg_get_functiondef(p.oid) ~* 'raise';`;
+
 function norm(v: unknown): string {
   return String(v ?? '').trim().toLowerCase();
 }
@@ -84,12 +105,14 @@ async function auditTarget(ctx: OpsCtx, target: DbTarget): Promise<Finding[]> {
   let policies: Row[];
   let privCols: Row[];
   let userCols: Row[];
+  let guardRows: Row[];
   try {
-    [rlsState, policies, privCols, userCols] = await Promise.all([
+    [rlsState, policies, privCols, userCols, guardRows] = await Promise.all([
       ctx.runSql(target, Q_RLS_STATE),
       ctx.runSql(target, Q_POLICIES),
       ctx.runSql(target, Q_PRIV_COLUMNS),
       ctx.runSql(target, Q_USER_SCOPED_COLUMNS),
+      ctx.runSql(target, Q_GUARD_TRIGGERS),
     ]);
   } catch (err) {
     findings.push({
@@ -109,6 +132,8 @@ async function auditTarget(ctx: OpsCtx, target: DbTarget): Promise<Finding[]> {
   );
   const anyPrivTables = new Set(privCols.map((r) => `${norm(r.schema)}.${norm(r.tbl)}`));
   const userTables = new Set(userCols.map((r) => `${norm(r.schema)}.${norm(r.tbl)}`));
+  // tables whose self-grant surface is already closed by a BEFORE UPDATE guard trigger
+  const guardedTables = new Set(guardRows.map((r) => `${norm(r.schema)}.${norm(r.tbl)}`));
 
   // 1. RLS switched off entirely on a base table
   for (const r of rlsState) {
@@ -189,17 +214,28 @@ async function auditTarget(ctx: OpsCtx, target: DbTarget): Promise<Finding[]> {
     const noCheck = withCheck === null || withCheck === undefined;
     if ((cmd === 'update' || cmd === 'all') && noCheck && userFacing && anyPrivTables.has(table)) {
       const strong = strongPrivTables.has(table);
-      findings.push({
-        severity: strong ? 'critical' : 'warn',
-        project,
-        summary: strong
-          ? `No WITH CHECK on ${p.schema}.${p.tbl} (${p.policy}) — self-grant-admin risk`
-          : `No WITH CHECK on ${p.schema}.${p.tbl} (${p.policy}) — verify privilege column`,
-        detail: strong
-          ? `${p.cmd} policy has a USING clause but no WITH CHECK, and ${p.tbl} carries an auth-gating column. A user who can select their row can rewrite their own privilege. This is the SoG pattern (memory: sog-audit-and-privilege-escalation).`
-          : `${p.cmd} policy has no WITH CHECK and ${p.tbl} has a '${AMBIGUOUS_PRIV_COLUMNS.join("'/'")}' column — but that may be a non-auth enum (e.g. chat-message role). Verify before treating as a hole.`,
-        fixHint: `Add WITH CHECK pinning the privilege column, e.g. WITH CHECK (user_id = auth.uid() AND beta_tier = old_tier), or block privilege changes in the policy.`,
-      });
+      const guarded = guardedTables.has(table);
+      if (guarded) {
+        // a BEFORE UPDATE privilege-guard trigger already blocks escalation — not a hole
+        findings.push({
+          severity: 'info',
+          project,
+          summary: `${p.schema}.${p.tbl} (${p.policy}) — no WITH CHECK but guarded by a privilege trigger`,
+          detail: `Missing WITH CHECK, but a BEFORE UPDATE trigger raises on privilege/tier changes by non-service roles (the ecosystem's SoG guard). Self-grant is blocked; consider also pinning WITH CHECK belt-and-suspenders.`,
+        });
+      } else {
+        findings.push({
+          severity: strong ? 'critical' : 'warn',
+          project,
+          summary: strong
+            ? `No WITH CHECK on ${p.schema}.${p.tbl} (${p.policy}) — self-grant-admin risk`
+            : `No WITH CHECK on ${p.schema}.${p.tbl} (${p.policy}) — verify privilege column`,
+          detail: strong
+            ? `${p.cmd} policy has a USING clause but no WITH CHECK, and ${p.tbl} carries an auth-gating column, and NO privilege-guard trigger was found. A user who can select their row can rewrite their own privilege. This is the SoG pattern (memory: sog-audit-and-privilege-escalation).`
+            : `${p.cmd} policy has no WITH CHECK and ${p.tbl} has a '${AMBIGUOUS_PRIV_COLUMNS.join("'/'")}' column — but that may be a non-auth enum (e.g. chat-message role). Verify before treating as a hole.`,
+          fixHint: `Add WITH CHECK pinning the privilege column, e.g. WITH CHECK (user_id = auth.uid() AND beta_tier = old_tier), or block privilege changes in the policy.`,
+        });
+      }
     }
   }
 
