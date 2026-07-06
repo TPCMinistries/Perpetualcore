@@ -46,6 +46,20 @@ export interface OpsCtx {
   now: string;
 }
 
+/**
+ * One point in the deck_metrics time-series. Capabilities that track a number
+ * over time (revenue-pulse, pipeline) emit these alongside findings; they upsert
+ * into public.deck_metrics keyed by (day, source, segment, metric).
+ */
+export interface MetricRow {
+  day: string; // YYYY-MM-DD
+  source: string; // 'stripe:perpetualcore' | 'supabase:workforce' | 'crm'
+  segment: string; // product / entity / stage — NEVER lumped
+  metric: string; // 'gross_usd_24h' | 'active_subs' | 'mrr_usd' | 'new_users_24h'
+  value: number;
+  meta?: Record<string, unknown>;
+}
+
 /** A single audit result. Findings are the atomic unit that renders on a tile. */
 export interface Finding {
   severity: Severity;

@@ -46,6 +46,9 @@ export function createManagementExecutor(): (target: DbTarget, sql: string) => P
       headers: {
         Authorization: `Bearer ${pat}`,
         'Content-Type': 'application/json',
+        // Cloudflare in front of the Management API 403s (code 1010) requests with
+        // no User-Agent — see memory supabase-management-api-pattern.
+        'User-Agent': 'lorenzo-ops/1.0',
       },
       body: JSON.stringify({ query: sql }),
     });
