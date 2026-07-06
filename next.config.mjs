@@ -130,6 +130,23 @@ const nextConfig = {
         permanent: false,
       },
       {
+        // Branded review link for the HDGM site rebuild (Perpetual
+        // Core services build, separate Vercel app). Temporary:
+        // destination moves to hdgministries.org after the Wix DNS
+        // cutover — do not mark permanent or browsers will cache the
+        // vercel.app URL.
+        source: "/hdgm",
+        destination: "https://hdg-ministries.vercel.app",
+        permanent: false,
+      },
+      {
+        // Uppercase variant (Next redirects are case-sensitive; the
+        // link is shared as perpetualcore.com/HDGM).
+        source: "/HDGM",
+        destination: "https://hdg-ministries.vercel.app",
+        permanent: false,
+      },
+      {
         // /contact alias → existing /contact-sales surface.
         // The brief specifies CTAs like /contact?product=vellum on
         // /products/vellum; we don't have a /contact route, so this
