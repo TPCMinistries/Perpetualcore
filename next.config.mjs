@@ -120,6 +120,16 @@ const nextConfig = {
         permanent: true,
       },
       {
+        // Branded entry point for the DBNA Ops client platform
+        // (Perpetual Core services build, separate Vercel app).
+        // Temporary: destination moves to ops.thedbna.org once the
+        // custom-domain decision is made — do not mark permanent or
+        // browsers will cache the vercel.app URL.
+        source: "/dbna",
+        destination: "https://dbna-ops.vercel.app",
+        permanent: false,
+      },
+      {
         // /contact alias → existing /contact-sales surface.
         // The brief specifies CTAs like /contact?product=vellum on
         // /products/vellum; we don't have a /contact route, so this
