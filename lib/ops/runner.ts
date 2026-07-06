@@ -2,6 +2,7 @@ import type { Capability, Finding, OpsCtx } from './types';
 import { worstSeverity } from './types';
 import { createManagementExecutor } from './executor';
 import { writeFindings } from './writeback';
+import { pushFindings } from './deck-push';
 
 /**
  * The runner — the "RUNNER EXECUTES" box from the VAULT loop.
@@ -26,6 +27,13 @@ export async function runCapability(cap: Capability, ctx?: Partial<OpsCtx>): Pro
   const runSql = ctx?.runSql ?? createManagementExecutor();
   const findings = await cap.run({ runSql, now });
   const reportPath = await writeFindings(cap, findings, now);
+  // mirror into Brain DB for the Sage /deck HUD — vault markdown stays canonical.
+  // Never let a deck outage fail the sweep itself.
+  try {
+    await pushFindings(runSql, cap, findings, now);
+  } catch (err) {
+    console.error(`deck push failed (sweep unaffected): ${(err as Error).message}`);
+  }
   return {
     capabilityId: cap.id,
     findings,

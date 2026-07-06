@@ -26,7 +26,12 @@ function lit(v: string | null | undefined): string {
 }
 
 function jsonLit(v: unknown): string {
-  return `${lit(JSON.stringify(v))}::jsonb`;
+  // Dollar-quote the JSON so newlines / quotes / backslashes in large payloads
+  // (e.g. a whole markdown brief) never break SQL-string or JSON escaping.
+  const json = JSON.stringify(v);
+  const tag = '$deckjson$';
+  const safe = json.includes(tag) ? json.split('$').join('') : json;
+  return `${tag}${safe}${tag}::jsonb`;
 }
 
 export type RunSql = (target: DbTarget, sql: string) => Promise<Row[]>;
