@@ -17,10 +17,14 @@ import { getCapability } from '../../lib/ops/registry';
 import { scanFleet } from '../../lib/ops/fleet';
 import { extractNeedsYou } from '../../lib/ops/needs-you';
 import { pushSnapshot, BRAIN_TARGET } from '../../lib/ops/deck-push';
-import { composeBrief, type RevenuePoint, type SecurityRollup } from '../../lib/ops/brief';
+import { composeBrief, renderBriefTelegram, type RevenuePoint, type SecurityRollup, type TaskLite } from '../../lib/ops/brief';
+import { sendOpsTelegram } from '../../lib/ops/telegram';
 import type { Finding, Row } from '../../lib/ops/types';
 
 const OPS_DIR = path.join(os.homedir(), 'dev', 'LDC-Command-Center-Vault', '_claude', 'memory', 'ops-findings');
+
+// Owner Telegram chat (Lorenzo). Override with OPS_BRIEF_CHAT_ID if needed. Not a secret.
+const BRIEF_CHAT_ID = process.env.OPS_BRIEF_CHAT_ID || '6460142816';
 
 async function settled<T>(p: Promise<T>, fallback: T): Promise<T> {
   try {
@@ -93,8 +97,32 @@ async function main() {
   const fleet = await settled(Promise.resolve(scanFleet()), []);
   const needsYou = await settled(extractNeedsYou(), []);
 
+  // 3b) open tasks — the one live personal source (calendar/email dormant until Google reconnects)
+  const tasks: TaskLite[] = await settled(
+    runSql(
+      BRAIN_TARGET,
+      `select title, priority, due_date,
+              (due_date is not null and due_date < now()) as overdue,
+              (due_date::date = current_date) as due_today
+         from public.tasks
+        where coalesce(status,'') not in ('completed','archived','cancelled')
+          and coalesce(snoozed_until, now()) <= now()
+        order by (priority = 'high') desc, due_date asc nulls last, created_at desc
+        limit 12`,
+    ).then((rows) =>
+      (rows as Row[]).map((r) => ({
+        title: String(r.title ?? 'Untitled task'),
+        priority: (r.priority as string) ?? null,
+        dueDate: (r.due_date as string) ?? null,
+        overdue: r.overdue === true,
+        dueToday: r.due_today === true,
+      })),
+    ),
+    [],
+  );
+
   // 4) compose + persist
-  const md = composeBrief({
+  const briefInput = {
     now,
     revenue,
     cumulativeGrossUsd: revenue.length || cumulative.gross ? cumulative.gross : null,
@@ -104,12 +132,19 @@ async function main() {
     security,
     fleet,
     needsYou,
-  });
+    tasks,
+  };
+  const md = composeBrief(briefInput);
 
   await fs.mkdir(OPS_DIR, { recursive: true });
   const briefPath = path.join(OPS_DIR, `operator-brief-${now.slice(0, 10)}.md`);
   await fs.writeFile(briefPath, md, 'utf8');
   console.error(`brief → ${briefPath}`);
+
+  // Telegram delivery — the one morning message. Isolated: a Telegram outage
+  // never blocks the vault write or the deck snapshot.
+  const sent = await settled(sendOpsTelegram(BRIEF_CHAT_ID, renderBriefTelegram(briefInput)), false);
+  console.error(sent ? 'brief → telegram ✓' : 'brief → telegram skipped/failed');
 
   // deck snapshot for the Sage /deck tile — never let a deck outage fail the brief
   try {

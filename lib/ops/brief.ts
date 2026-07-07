@@ -28,6 +28,14 @@ export interface SecurityRollup {
   day: string;
 }
 
+export interface TaskLite {
+  title: string;
+  priority: string | null;
+  dueDate: string | null; // ISO or null
+  overdue: boolean;
+  dueToday: boolean;
+}
+
 export interface BriefInput {
   now: string;
   revenue: RevenuePoint[];
@@ -38,6 +46,7 @@ export interface BriefInput {
   security: SecurityRollup | null;
   fleet: FleetRepo[];
   needsYou: NeedsYouItem[];
+  tasks: TaskLite[];
 }
 
 interface Move {
@@ -68,6 +77,15 @@ function rankMoves(i: BriefInput): string[] {
     .slice(0, 2);
   for (const f of stale) moves.push({ weight: 70, text: `${f.project}: ${f.summary}` });
 
+  const overdue = i.tasks.filter((t) => t.overdue);
+  if (overdue.length) {
+    const lead = overdue[0].title;
+    moves.push({
+      weight: 60,
+      text: overdue.length === 1 ? `Overdue task: ${lead}` : `${overdue.length} overdue tasks — top: ${lead}`,
+    });
+  }
+
   const fresh = i.needsYou.slice(0, 2);
   for (const n of fresh) moves.push({ weight: 50, text: `${n.text}  _(${n.source})_` });
 
@@ -79,6 +97,55 @@ function rankMoves(i: BriefInput): string[] {
   moves.sort((a, b) => b.weight - a.weight);
   const top = moves.slice(0, 3).map((m) => m.text);
   return top.length ? top : ['Nothing urgent surfaced — a clean morning. Ship the next thing on the roadmap.'];
+}
+
+/**
+ * Telegram rendering — a phone-glanceable plain-text digest of the SAME signals
+ * as composeBrief. Plain text (no Markdown) so $, %, _ and branch names survive
+ * Telegram's parser. Kept short: Top-3 + revenue one-liner + security + up to 3
+ * needs-you. The full page always lives in the vault + /deck.
+ */
+export function renderBriefTelegram(i: BriefInput): string {
+  const day = i.now.slice(0, 10);
+  const out: string[] = [`☀️ Operator Brief — ${day}`, '', 'TOP 3 MOVES'];
+  rankMoves(i).forEach((t, n) => out.push(`${n + 1}. ${t.replace(/[*_`]/g, '')}`));
+  out.push('');
+
+  // Revenue — one compact line per stripe source + cumulative toward $1M
+  const stripe = i.revenue.filter((r) => r.source.startsWith('stripe:') && r.metric === 'gross_usd_24h');
+  if (stripe.length) {
+    out.push('💰 Revenue (24h): ' + stripe.map((p) => `${p.source.replace('stripe:', '')} ${usd(p.value)}`).join(' · '));
+  } else {
+    const badKey = i.pulseFindings.find((f) => /could not read stripe|no stripe secrets/i.test(f.summary));
+    out.push('💰 Revenue (24h): ' + (badKey ? '⚠ Stripe not reading' : 'none recorded'));
+  }
+  if (i.cumulativeGrossUsd !== null) {
+    out.push(`   Recorded gross: ${usd(i.cumulativeGrossUsd)} → $1M by Dec 2026`);
+  }
+
+  // Security
+  if (i.security) {
+    out.push(`🛡️ Security: ${i.security.worstIcon} ${i.security.crit} crit / ${i.security.warn} warn`);
+  }
+
+  // Tasks one-liner
+  if (i.tasks.length) {
+    const od = i.tasks.filter((t) => t.overdue).length;
+    out.push(`✅ Tasks: ${i.tasks.length} open${od ? ` (${od} overdue)` : ''}`);
+  }
+
+  // Fleet one-liner
+  const dirty = i.fleet.filter((r) => r.dirty > 0 || (r.unpushed ?? 0) > 0);
+  out.push(dirty.length ? `🗂️ Fleet: ${dirty.length} repo(s) dirty/unpushed` : '🗂️ Fleet: all clean ✅');
+
+  // Needs you (top 3)
+  if (i.needsYou.length) {
+    out.push('', '📌 NEEDS YOU');
+    for (const n of i.needsYou.slice(0, 3)) out.push(`• ${n.text.replace(/[*_`]/g, '')}`);
+  }
+
+  out.push('', 'Full brief → vault + sage.perpetualcore.com/deck');
+  return out.join('\n');
 }
 
 export function composeBrief(i: BriefInput): string {
@@ -141,6 +208,23 @@ export function composeBrief(i: BriefInput): string {
     L.push('- CRM not deployed yet — pipeline dormant (WS3 lights it up).');
   } else {
     for (const p of crm.sort((a, b) => b.value - a.value)) L.push(`- ${p.segment}: ${usd(p.value)}`);
+  }
+  L.push('');
+
+  // Tasks — the one live personal source (calendar/email dormant until Google reconnects)
+  L.push('## Tasks');
+  if (i.tasks.length === 0) {
+    L.push('- No open tasks.');
+  } else {
+    const overdue = i.tasks.filter((t) => t.overdue);
+    const today = i.tasks.filter((t) => t.dueToday && !t.overdue);
+    const rest = i.tasks.filter((t) => !t.overdue && !t.dueToday);
+    for (const t of overdue) L.push(`- 🔴 overdue — ${t.title}${t.priority ? ` (${t.priority})` : ''}`);
+    for (const t of today) L.push(`- ⏰ today — ${t.title}${t.priority ? ` (${t.priority})` : ''}`);
+    for (const t of rest.slice(0, Math.max(0, 8 - overdue.length - today.length))) {
+      L.push(`- ${t.title}${t.priority ? ` (${t.priority})` : ''}`);
+    }
+    if (i.tasks.length > 8) L.push(`- …and ${i.tasks.length - 8} more open`);
   }
   L.push('');
 
