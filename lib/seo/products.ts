@@ -60,4 +60,12 @@ export const PC_PRODUCTS: Record<string, ProductManifestEntry> = {
     category: "BusinessApplication",
     status: "invite",
   },
+  creatorstudio: {
+    slug: "creatorstudio",
+    name: "Creator Studio",
+    description:
+      "Media production system running the HeyGen, ElevenLabs, Opus Clips, and Descript jobs as open-source models on hardware we own. $0/month to run. By invitation.",
+    category: "BusinessApplication",
+    status: "invite",
+  },
 };

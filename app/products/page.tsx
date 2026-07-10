@@ -112,6 +112,16 @@ const PRODUCTS: Product[] = [
       "For nonprofits, agencies, and ecosystem operators running candidates, interns, staff, and partners through one shared lifecycle — templated intake, e-signature, per-person vaults, multi-tenant by default. Built internal-first for Uplift's intern pipeline and IHA's program staff; productized pilots start around $499/month.",
     cta: { label: "Visit Janice", href: "https://janice.perpetualcore.com", external: true },
   },
+  {
+    index: "09",
+    name: "Creator Studio",
+    status: "BY INVITATION",
+    statusColor: "invite",
+    headline: "The HeyGen, ElevenLabs, Opus Clips, and Descript jobs — run as one system we own.",
+    body:
+      "For operators and brands who want their long-form archive turned into scored, captioned shorts and cloned-voice narration without stacking four subscriptions. Open-source models on hardware we own. $0/month to run. Not self-serve — installed under your brand.",
+    cta: { label: "See Creator Studio", href: "/products/creatorstudio" },
+  },
 ];
 
 function StatusPill({ status, color }: { status: string; color: "live" | "pilot" | "invite" }) {
