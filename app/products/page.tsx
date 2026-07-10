@@ -114,13 +114,13 @@ const PRODUCTS: Product[] = [
   },
   {
     index: "09",
-    name: "Creator Studio",
+    name: "Press",
     status: "BY INVITATION",
     statusColor: "invite",
     headline: "The HeyGen, ElevenLabs, Opus Clips, and Descript jobs — run as one system we own.",
     body:
       "For operators and brands who want their long-form archive turned into scored, captioned shorts and cloned-voice narration without stacking four subscriptions. Open-source models on hardware we own. $0/month to run. Not self-serve — installed under your brand.",
-    cta: { label: "See Creator Studio", href: "/products/creatorstudio" },
+    cta: { label: "See Press", href: "/products/press" },
   },
 ];
 

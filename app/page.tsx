@@ -61,7 +61,7 @@ const PRODUCTS = [
   { index: "06", name: "RFP Engine", status: "LIVE", statusColor: "live" as const, tagline: "Find the right RFP. Draft it in your voice. Ship it clean.", href: "https://rfp.perpetualcore.com", external: true },
   { index: "07", name: "RFP Sentry", status: "BUILD", statusColor: "invite" as const, tagline: "Bid intelligence and compliance gate.", href: "/products/rfp-sentry", external: false },
   { index: "08", name: "Janice", status: "LIVE", statusColor: "live" as const, tagline: "Hiring and onboarding OS for people-heavy organizations.", href: "https://janice.perpetualcore.com", external: true },
-  { index: "09", name: "Creator Studio", status: "BY INVITATION", statusColor: "invite" as const, tagline: "The media production system we run our own content on. $0/month to run.", href: "/products/creatorstudio", external: false },
+  { index: "09", name: "Press", status: "BY INVITATION", statusColor: "invite" as const, tagline: "The media production system we run our own content on. $0/month to run.", href: "/products/press", external: false },
 ] as const;
 
 const PHASES = [

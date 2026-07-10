@@ -1,5 +1,5 @@
 /**
- * /products/creatorstudio — Creator Studio by Perpetual Core: media production system.
+ * /products/press — Press by Perpetual Core: media production system.
  * By invitation. Visual register matches vellum (app/products/vellum/page.tsx).
  */
 
@@ -13,7 +13,7 @@ import { productSchema, breadcrumbSchema } from "@/lib/seo/structured-data";
 import { PC_PRODUCTS } from "@/lib/seo/products";
 
 export const metadata = {
-  title: "Creator Studio by Perpetual Core — media production system",
+  title: "Press by Perpetual Core — media production system",
   description:
     "The HeyGen, ElevenLabs, Opus Clips, and Descript jobs running as open-source models on hardware we own. $0/month to run. By invitation.",
 };
@@ -79,11 +79,11 @@ export default function CreatorStudioPage() {
     <div className="min-h-screen bg-background">
       <JsonLd
         data={[
-          productSchema(PC_PRODUCTS.creatorstudio),
+          productSchema(PC_PRODUCTS.press),
           breadcrumbSchema([
             { name: "Home", path: "/" },
             { name: "Products", path: "/products" },
-            { name: "Creator Studio", path: "/products/creatorstudio" },
+            { name: "Press", path: "/products/press" },
           ]),
         ]}
       />
@@ -94,7 +94,7 @@ export default function CreatorStudioPage() {
         <div className="max-w-5xl">
           <div className="flex items-center gap-3 mb-12">
             <span aria-hidden className="block h-1.5 w-1.5 bg-status-invite" />
-            <p className="eyebrow !text-foreground/70">§ 02 · Products · Creator Studio</p>
+            <p className="eyebrow !text-foreground/70">§ 02 · Products · Press</p>
           </div>
 
           <h1 className="display-hero text-[40px] sm:text-[56px] lg:text-[80px] text-foreground mb-12 max-w-5xl leading-[1.05]">
@@ -104,7 +104,7 @@ export default function CreatorStudioPage() {
 
           <div className="space-y-5 text-lg sm:text-xl text-muted-foreground leading-[1.55] mb-12 max-w-3xl">
             <p>
-              Creator Studio is the media production system Perpetual Core built and operates for
+              Press is the media production system Perpetual Core built and operates for
               its own content — the HeyGen, ElevenLabs, Opus Clips, and Descript jobs running as
               open-source models on hardware we own. It runs long-form video into scored, captioned
               shorts, clones a voice from a 3-second sample, and edits from the transcript instead
@@ -119,7 +119,7 @@ export default function CreatorStudioPage() {
 
           <div className="flex flex-col sm:flex-row items-start gap-4">
             <Button size="lg" asChild className="text-sm font-medium px-7 h-11 shadow-none bg-foreground text-background hover:bg-foreground/90 rounded-[6px]">
-              <Link href="/contact-sales?product=creatorstudio">Request an invitation <ArrowRight className="ml-2 h-4 w-4" /></Link>
+              <Link href="/contact-sales?product=press">Request an invitation <ArrowRight className="ml-2 h-4 w-4" /></Link>
             </Button>
             <Link href="#how-it-works" className="inline-flex items-center text-sm font-medium text-foreground hover:text-primary transition-colors py-3 border-b border-foreground/20 hover:border-primary">
               See how it works <ArrowRight className="ml-1.5 h-3.5 w-3.5" />
@@ -176,8 +176,8 @@ export default function CreatorStudioPage() {
           </div>
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-10 sm:gap-16">
-            <PhoneDemo src="/media/creatorstudio/demo-punchy.mp4" label="Caption style — punchy" />
-            <PhoneDemo src="/media/creatorstudio/demo-serif.mp4" label="Caption style — serif" />
+            <PhoneDemo src="/media/press/demo-punchy.mp4" label="Caption style — punchy" />
+            <PhoneDemo src="/media/press/demo-serif.mp4" label="Caption style — serif" />
           </div>
         </div>
       </section>
@@ -246,7 +246,7 @@ export default function CreatorStudioPage() {
             <SectionRail index="—" label="By invitation" />
             <div className="max-w-2xl">
               <h3 className="text-3xl sm:text-4xl lg:text-5xl font-semibold leading-[1.1] tracking-[-0.025em] text-foreground mb-6">
-                Creator Studio is not self-serve. It is a system we build for operators.
+                Press is not self-serve. It is a system we build for operators.
               </h3>
               <p className="text-base text-muted-foreground leading-[1.7] mb-10">
                 We install the same pipeline under your brand voice, on your archive, pointed at
@@ -254,7 +254,7 @@ export default function CreatorStudioPage() {
               </p>
               <div className="flex flex-col sm:flex-row items-start gap-5">
                 <Button asChild className="text-sm font-medium h-10 px-5 shadow-none bg-foreground text-background hover:bg-foreground/90 rounded-[6px]">
-                  <Link href="/contact-sales?product=creatorstudio">Request an invitation <ArrowRight className="ml-2 h-3.5 w-3.5" /></Link>
+                  <Link href="/contact-sales?product=press">Request an invitation <ArrowRight className="ml-2 h-3.5 w-3.5" /></Link>
                 </Button>
                 <Link href="/studio/engagements" className="inline-flex items-center text-sm font-medium text-foreground hover:text-primary transition-colors py-2">
                   See engagements <ArrowRight className="ml-1.5 h-3.5 w-3.5" />
