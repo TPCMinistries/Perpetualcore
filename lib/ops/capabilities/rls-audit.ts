@@ -97,6 +97,20 @@ function isUserFacing(roles: string): boolean {
   return r.includes('public') || r.includes('anon') || r.includes('authenticated');
 }
 
+/**
+ * roles reachable by the UNAUTHENTICATED anon key = a true public leak (the
+ * anon key ships in the browser bundle). `public` is the catch-all role that
+ * includes anon; `authenticated`-only is NOT anon-reachable. This split is the
+ * verify-first lesson from the 2026-06 ecosystem sweep encoded permanently:
+ * a USING(true) reachable only by {authenticated} is intra-app horizontal
+ * access (real only if the app hands users JWTs), not a public exposure — so
+ * it's a warn to verify, not a critical. Prevents the guard crying wolf.
+ */
+function isAnonReachable(roles: string): boolean {
+  const r = norm(roles);
+  return r.includes('public') || r.includes('anon');
+}
+
 async function auditTarget(ctx: OpsCtx, target: DbTarget): Promise<Finding[]> {
   const findings: Finding[] = [];
   const project = target.label;
@@ -181,22 +195,29 @@ async function auditTarget(ctx: OpsCtx, target: DbTarget): Promise<Finding[]> {
 
     if (permissive && usingTrue && userFacing) {
       const userScoped = userTables.has(table);
+      // anon/public-reachable = true public leak (critical); authenticated-only =
+      // intra-app horizontal access to verify (warn), not a public exposure.
+      const anonReachable = isAnonReachable(String(p.roles ?? ''));
+      const reach = anonReachable ? 'critical' : 'warn';
+      const reachNote = anonReachable
+        ? `reachable by the anon key (${p.roles}) — public exposure.`
+        : `reachable only by {authenticated} (${p.roles}) — intra-app horizontal access; a real leak only if the app issues user JWTs. Verify, don't assume public.`;
       if (cmd === 'update' || cmd === 'delete' || cmd === 'all') {
         // always-true USING lets them TARGET any row for modify/delete
         findings.push({
-          severity: 'critical',
+          severity: reach,
           project,
           summary: `USING(true) ${cmd.toUpperCase()} on ${p.schema}.${p.tbl} (${p.policy})`,
-          detail: `Permissive ${p.cmd} with an always-true qualifier, reachable by ${p.roles}. Any of those roles can target every row.`,
+          detail: `Permissive ${p.cmd} with an always-true qualifier, ${reachNote} Any reachable role can target every row.`,
           fixHint: `Replace with an owner predicate, e.g. USING (user_id = auth.uid()).`,
         });
       } else if (cmd === 'select' && userScoped) {
-        // always-true READ on a table that holds user data = real leak (the SoG pattern)
+        // always-true READ on a table that holds user data = leak (the SoG pattern)
         findings.push({
-          severity: 'critical',
+          severity: reach,
           project,
           summary: `USING(true) READ on user-data table ${p.schema}.${p.tbl} (${p.policy})`,
-          detail: `Always-true SELECT on a table with user-scoped columns, reachable by ${p.roles}. Every user's rows are exposed to those roles.`,
+          detail: `Always-true SELECT on a table with user-scoped columns, ${reachNote} Every user's rows are exposed to reachable roles.`,
           fixHint: `Scope the read, e.g. USING (user_id = auth.uid()).`,
         });
       } else {
