@@ -3,7 +3,7 @@
  *
  *   npx tsx scripts/ops/daily-brief.ts
  *
- * Freshens the pulse (revenue-pulse + pipeline), then gathers metrics + security
+ * Freshens the pulse (revenue-pulse + pipeline + portfolio-pnl), then gathers metrics + security
  * rollup + fleet + needs-you and composes a deterministic brief to the vault
  * (canonical) and deck_snapshots.daily_brief (for the Sage /deck tile). Every
  * source is isolated with allSettled — one failure degrades that section only.
@@ -19,6 +19,7 @@ import { extractNeedsYou } from '../../lib/ops/needs-you';
 import { pushSnapshot, BRAIN_TARGET } from '../../lib/ops/deck-push';
 import { composeBrief, renderBriefTelegram, type RevenuePoint, type SecurityRollup, type TaskLite } from '../../lib/ops/brief';
 import { sendOpsTelegram } from '../../lib/ops/telegram';
+import { HEADLINE_PROJECT } from '../../lib/ops/capabilities/portfolio-pnl';
 import type { Finding, Row } from '../../lib/ops/types';
 
 const OPS_DIR = path.join(os.homedir(), 'dev', 'LDC-Command-Center-Vault', '_claude', 'memory', 'ops-findings');
@@ -57,12 +58,17 @@ async function main() {
   // 1) freshen the pulse (each capability isolated)
   const pulseCap = getCapability('revenue-pulse');
   const pipelineCap = getCapability('pipeline');
+  const pnlCap = getCapability('portfolio-pnl');
   const pulseFindings: Finding[] = pulseCap
     ? await settled(runCapability(pulseCap, { runSql, now }).then((r) => r.findings), [])
     : [];
   const pipelineFindings: Finding[] = pipelineCap
     ? await settled(runCapability(pipelineCap, { runSql, now }).then((r) => r.findings), [])
     : [];
+  const pnlFindings: Finding[] = pnlCap
+    ? await settled(runCapability(pnlCap, { runSql, now }).then((r) => r.findings), [])
+    : [];
+  const pnlHeadline = pnlFindings.find((f) => f.project === HEADLINE_PROJECT)?.summary ?? null;
 
   // 2) today's metrics + cumulative gross
   const revenue: RevenuePoint[] = await settled(
@@ -133,6 +139,7 @@ async function main() {
     fleet,
     needsYou,
     tasks,
+    pnlHeadline,
   };
   const md = composeBrief(briefInput);
 

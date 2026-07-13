@@ -47,6 +47,8 @@ export interface BriefInput {
   fleet: FleetRepo[];
   needsYou: NeedsYouItem[];
   tasks: TaskLite[];
+  /** one-line headline from the portfolio-pnl capability's first Finding, or null if unavailable */
+  pnlHeadline: string | null;
 }
 
 interface Move {
@@ -121,6 +123,11 @@ export function renderBriefTelegram(i: BriefInput): string {
   }
   if (i.cumulativeGrossUsd !== null) {
     out.push(`   Recorded gross: ${usd(i.cumulativeGrossUsd)} → $1M by Dec 2026`);
+  }
+
+  // Portfolio P&L headline (bank + Stripe truth, separate from the 24h pulse above)
+  if (i.pnlHeadline) {
+    out.push(`📊 Portfolio: ${i.pnlHeadline.replace(/[*_`]/g, '')}`);
   }
 
   // Security
@@ -199,6 +206,11 @@ export function composeBrief(i: BriefInput): string {
   if (signups.length) {
     L.push('- New signups (24h): ' + signups.map((s) => `${s.source.replace('supabase:', '')} +${s.value}`).join(' · '));
   }
+  L.push('');
+
+  // Portfolio P&L — bank + Stripe truth (point-in-time, separate from the 24h pulse above)
+  L.push('## Portfolio P&L');
+  L.push(i.pnlHeadline ? `- ${i.pnlHeadline}` : '- No portfolio-pnl snapshot found — run `npx tsx scripts/ops/run.ts portfolio-pnl`.');
   L.push('');
 
   // Pipeline

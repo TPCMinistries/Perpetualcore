@@ -2,6 +2,7 @@ import type { Capability } from './types';
 import { rlsAudit } from './capabilities/rls-audit';
 import { revenuePulse } from './capabilities/revenue-pulse';
 import { pipeline } from './capabilities/pipeline';
+import { portfolioPnl } from './capabilities/portfolio-pnl';
 
 /**
  * The Command Deck, as data. Every tile / voice-intent / cron job resolves a
@@ -13,6 +14,7 @@ export const CAPABILITIES: Capability[] = [
   rlsAudit,
   revenuePulse,
   pipeline,
+  portfolioPnl,
   // repo-sync, deliverability, env-check, ... land here as they're built.
 ];
 
