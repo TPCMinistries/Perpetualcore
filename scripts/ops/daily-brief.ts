@@ -17,6 +17,7 @@ import { getCapability } from '../../lib/ops/registry';
 import { scanFleet } from '../../lib/ops/fleet';
 import { extractNeedsYou } from '../../lib/ops/needs-you';
 import { pushSnapshot, BRAIN_TARGET } from '../../lib/ops/deck-push';
+import { pushHqSnapshot } from '../../lib/ops/hq-snapshot';
 import { composeBrief, renderBriefTelegram, type RevenuePoint, type SecurityRollup, type TaskLite } from '../../lib/ops/brief';
 import { sendOpsTelegram } from '../../lib/ops/telegram';
 import { HEADLINE_PROJECT } from '../../lib/ops/capabilities/portfolio-pnl';
@@ -159,6 +160,10 @@ async function main() {
   } catch (err) {
     console.error(`deck snapshot failed (brief still written): ${(err as Error).message}`);
   }
+
+  // hq snapshot for Perpetual Core's own /hq dashboard — same isolation posture
+  await pushHqSnapshot(runSql, now);
+  console.error('hq snapshot → pushed');
 }
 
 main().catch((err) => {

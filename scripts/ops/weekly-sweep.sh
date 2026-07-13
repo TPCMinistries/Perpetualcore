@@ -15,6 +15,8 @@ cd "$REPO"
   ./node_modules/.bin/tsx scripts/ops/run.ts revenue-probes
   # strategist runs compliance-watch in-process — no separate invocation needed
   ./node_modules/.bin/tsx scripts/ops/run.ts strategist
+  # refresh the /hq dashboard snapshot now that the weekly memo is fresh
+  ./node_modules/.bin/tsx scripts/ops/hq-snapshot.ts
   echo ""
 } >> "$LOG" 2>&1
 

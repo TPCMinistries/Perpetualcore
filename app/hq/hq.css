@@ -1,0 +1,98 @@
+/*
+ * /hq design system — scoped entirely to .hq-shell so it never leaks into
+ * (or is affected by) the site-wide Tailwind `dark:` class theme used
+ * elsewhere in this repo. Theme resolution order:
+ *   1. .hq-shell[data-theme="dark"|"light"]  — explicit user choice (toggle)
+ *   2. prefers-color-scheme                  — system default
+ *   3. light variables below                 — final fallback
+ */
+
+.hq-shell {
+  /* light (default / fallback) */
+  --hq-ground: #f7f5f0;
+  --hq-panel: #ffffff;
+  --hq-panel-2: #efebe2;
+  --hq-ink: #10141f;
+  --hq-ink-dim: rgba(16, 20, 31, 0.62);
+  --hq-gold: #8a6d1f;
+  --hq-green: #1f7a4f;
+  --hq-amber: #8a5a12;
+  --hq-red: #a33d3d;
+  --hq-border: rgba(16, 20, 31, 0.12);
+  --hq-border-strong: rgba(16, 20, 31, 0.28);
+  --hq-focus: #8a6d1f;
+
+  background: var(--hq-ground);
+  color: var(--hq-ink);
+  min-height: 100vh;
+  font-variant-numeric: tabular-nums;
+}
+
+@media (prefers-color-scheme: dark) {
+  .hq-shell:not([data-theme='light']) {
+    --hq-ground: #0b0f18;
+    --hq-panel: #121826;
+    --hq-panel-2: #161d2c;
+    --hq-ink: #e8e6df;
+    --hq-ink-dim: rgba(232, 230, 223, 0.62);
+    --hq-gold: #c9a75a;
+    --hq-green: #4cc38a;
+    --hq-amber: #e0a458;
+    --hq-red: #d97c7c;
+    --hq-border: rgba(232, 230, 223, 0.12);
+    --hq-border-strong: rgba(232, 230, 223, 0.28);
+    --hq-focus: #c9a75a;
+  }
+}
+
+.hq-shell[data-theme='dark'] {
+  --hq-ground: #0b0f18;
+  --hq-panel: #121826;
+  --hq-panel-2: #161d2c;
+  --hq-ink: #e8e6df;
+  --hq-ink-dim: rgba(232, 230, 223, 0.62);
+  --hq-gold: #c9a75a;
+  --hq-green: #4cc38a;
+  --hq-amber: #e0a458;
+  --hq-red: #d97c7c;
+  --hq-border: rgba(232, 230, 223, 0.12);
+  --hq-border-strong: rgba(232, 230, 223, 0.28);
+  --hq-focus: #c9a75a;
+}
+
+.hq-shell * {
+  border-color: var(--hq-border);
+}
+
+.hq-eyebrow {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--hq-gold);
+}
+
+.hq-panel {
+  background: var(--hq-panel);
+  border: 1px solid var(--hq-border);
+  border-radius: 10px;
+}
+
+.hq-tabular {
+  font-variant-numeric: tabular-nums;
+}
+
+.hq-focusable:focus-visible {
+  outline: 2px solid var(--hq-focus);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hq-shell,
+  .hq-shell * {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
