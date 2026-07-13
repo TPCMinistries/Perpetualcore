@@ -12,6 +12,9 @@ cd "$REPO"
   echo "════════ ops sweep $(date '+%Y-%m-%d %H:%M:%S') ════════"
   # PAT auto-resolves from the "Supabase Management API" keychain entry (see executor.ts)
   ./node_modules/.bin/tsx scripts/ops/run.ts rls-audit
+  ./node_modules/.bin/tsx scripts/ops/run.ts revenue-probes
+  # strategist runs compliance-watch in-process — no separate invocation needed
+  ./node_modules/.bin/tsx scripts/ops/run.ts strategist
   echo ""
 } >> "$LOG" 2>&1
 
