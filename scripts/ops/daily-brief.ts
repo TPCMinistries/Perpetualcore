@@ -21,6 +21,8 @@ import { pushHqSnapshot } from '../../lib/ops/hq-snapshot';
 import { composeBrief, renderBriefTelegram, type RevenuePoint, type SecurityRollup, type TaskLite } from '../../lib/ops/brief';
 import { sendOpsTelegram } from '../../lib/ops/telegram';
 import { HEADLINE_PROJECT } from '../../lib/ops/capabilities/portfolio-pnl';
+import { SPEED_TO_LEAD_HEADLINE } from '../../lib/ops/capabilities/speed-to-lead';
+import { REACTIVATION_HEADLINE } from '../../lib/ops/capabilities/reactivation';
 import type { Finding, Row } from '../../lib/ops/types';
 
 const OPS_DIR = path.join(os.homedir(), 'dev', 'LDC-Command-Center-Vault', '_claude', 'memory', 'ops-findings');
@@ -70,6 +72,20 @@ async function main() {
     ? await settled(runCapability(pnlCap, { runSql, now }).then((r) => r.findings), [])
     : [];
   const pnlHeadline = pnlFindings.find((f) => f.project === HEADLINE_PROJECT)?.summary ?? null;
+
+  // Revenue Crew — speed-to-lead + reactivation (queued outbound, never auto-sent)
+  const stlCap = getCapability('speed-to-lead');
+  const reactivationCap = getCapability('reactivation');
+  const stlFindings: Finding[] = stlCap
+    ? await settled(runCapability(stlCap, { runSql, now }).then((r) => r.findings), [])
+    : [];
+  const reactivationFindings: Finding[] = reactivationCap
+    ? await settled(runCapability(reactivationCap, { runSql, now }).then((r) => r.findings), [])
+    : [];
+  const stlHeadline = stlFindings.find((f) => f.project === SPEED_TO_LEAD_HEADLINE)?.summary ?? null;
+  const reactivationHeadline = reactivationFindings.find((f) => f.project === REACTIVATION_HEADLINE)?.summary ?? null;
+  const revenueCrewParts = [stlHeadline, reactivationHeadline].filter((s): s is string => s !== null);
+  const revenueCrewLine = revenueCrewParts.length ? revenueCrewParts.join(' · ') : null;
 
   // 2) today's metrics + cumulative gross
   const revenue: RevenuePoint[] = await settled(
@@ -141,6 +157,7 @@ async function main() {
     needsYou,
     tasks,
     pnlHeadline,
+    revenueCrewLine,
   };
   const md = composeBrief(briefInput);
 

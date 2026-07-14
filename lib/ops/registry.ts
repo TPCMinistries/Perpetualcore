@@ -6,6 +6,8 @@ import { portfolioPnl } from './capabilities/portfolio-pnl';
 import { complianceWatch } from './capabilities/compliance-watch';
 import { revenueProbes } from './capabilities/revenue-probes';
 import { strategist } from './capabilities/strategist';
+import { speedToLead } from './capabilities/speed-to-lead';
+import { reactivation } from './capabilities/reactivation';
 
 /**
  * The Command Deck, as data. Every tile / voice-intent / cron job resolves a
@@ -21,6 +23,8 @@ export const CAPABILITIES: Capability[] = [
   complianceWatch,
   revenueProbes,
   strategist,
+  speedToLead,
+  reactivation,
   // repo-sync, deliverability, env-check, ... land here as they're built.
 ];
 
