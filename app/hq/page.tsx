@@ -49,7 +49,7 @@ export default async function HqPage() {
 
       <Section id="board" eyebrow="Board" title="Portfolio at a glance">
         <div className="flex flex-col gap-6">
-          <KpiStrip headline={headline} spark={sparkSeries} />
+          <KpiStrip headline={headline} spark={sparkSeries} revenue={snapshot.revenue2026} />
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {engineCards.map((card) => (
               <EngineCard key={card.id} card={card} />

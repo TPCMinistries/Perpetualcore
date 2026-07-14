@@ -71,6 +71,31 @@ function tailLines(text: string, n: number): string {
   return text.replace(/\n+$/, '').split('\n').slice(-n).join('\n');
 }
 
+interface Revenue2026 {
+  totalUsd: number;
+  breakdown: string[];
+  asOf: string;
+}
+
+/**
+ * Parses the owner-attested manual-revenue ledger's summary block: the
+ * "Ecosystem known total 2026: ≈ $100,960." line becomes the headline
+ * number, and the bold summary lines become the breakdown. Null when the
+ * ledger or its total line is missing — the KPI card simply doesn't render.
+ */
+async function readRevenue2026(now: string): Promise<Revenue2026 | null> {
+  const raw = await readFileOrNull(path.join(OPS_DIR, 'manual-revenue.md'));
+  if (raw === null) return null;
+  const totalMatch = raw.match(/Ecosystem known total 2026:[^$]*\$([\d,]+(?:\.\d+)?)/i);
+  if (!totalMatch) return null;
+  const totalUsd = Number(totalMatch[1].replace(/,/g, ''));
+  if (!Number.isFinite(totalUsd)) return null;
+  const breakdown = [...raw.matchAll(/^\*\*([^*]+)\*\*(.*)$/gm)]
+    .map((m) => `${m[1]}${m[2]}`.replace(/\*\*/g, '').trim())
+    .filter((line) => !/Ecosystem known total/i.test(line));
+  return { totalUsd, breakdown, asOf: now.slice(0, 10) };
+}
+
 async function readMomentsTail(n: number): Promise<MomentEntry[] | null> {
   const raw = await readFileOrNull(MOMENTS_PATH);
   if (raw === null) return null;
@@ -119,6 +144,8 @@ export async function pushHqSnapshot(runSql: RunSql, now: string): Promise<void>
 
   const moments_tail = await readMomentsTail(15);
 
+  const revenue_2026 = await readRevenue2026(now);
+
   try {
     await syncHqQueue(runSql, now, compliance);
   } catch (err) {
@@ -135,6 +162,7 @@ export async function pushHqSnapshot(runSql: RunSql, now: string): Promise<void>
       probes,
       content_calendar_md,
       moments_tail,
+      revenue_2026,
     });
   } catch (err) {
     console.error(`hq snapshot push failed: ${(err as Error).message}`);

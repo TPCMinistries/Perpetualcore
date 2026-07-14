@@ -22,6 +22,12 @@ export interface MomentEntry {
   source: string;
 }
 
+export interface Revenue2026 {
+  totalUsd: number;
+  breakdown: string[];
+  asOf: string | null;
+}
+
 export interface HqSnapshot {
   generatedAt: string | null;
   pnlMd: string | null;
@@ -31,6 +37,7 @@ export interface HqSnapshot {
   probesMd: string | null;
   contentCalendarMd: string | null;
   momentsTail: MomentEntry[] | null;
+  revenue2026: Revenue2026 | null;
 }
 
 function createHqReaderClient() {
@@ -48,6 +55,14 @@ function findings(v: unknown): Finding[] | null {
   return v.filter(
     (f): f is Finding => typeof f === 'object' && f !== null && typeof (f as Finding).summary === 'string',
   );
+}
+
+function revenue(v: unknown): Revenue2026 | null {
+  if (!v || typeof v !== 'object') return null;
+  const r = v as Record<string, unknown>;
+  if (typeof r.totalUsd !== 'number' || !Number.isFinite(r.totalUsd)) return null;
+  const breakdown = Array.isArray(r.breakdown) ? r.breakdown.filter((b): b is string => typeof b === 'string') : [];
+  return { totalUsd: r.totalUsd, breakdown, asOf: typeof r.asOf === 'string' ? r.asOf : null };
 }
 
 function moments(v: unknown): MomentEntry[] | null {
@@ -69,6 +84,7 @@ function toHqSnapshot(raw: unknown): HqSnapshot {
     probesMd: str(data.probes),
     contentCalendarMd: str(data.content_calendar_md),
     momentsTail: moments(data.moments_tail),
+    revenue2026: revenue(data.revenue_2026),
   };
 }
 
@@ -81,6 +97,7 @@ const EMPTY_SNAPSHOT: HqSnapshot = {
   probesMd: null,
   contentCalendarMd: null,
   momentsTail: null,
+  revenue2026: null,
 };
 
 /**
