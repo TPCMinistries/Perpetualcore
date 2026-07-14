@@ -1,11 +1,14 @@
 import type { EngineCall, PnlEngineRow } from './parse';
 
 /**
- * The seven engines the Board tracks, in display order. Fixed roster (not
- * derived from the snapshot) so the Board always shows all seven — with
+ * The engines the Board tracks, in display order. Fixed roster (not
+ * derived from the snapshot) so the Board always shows every card — with
  * "unknown" chips — even before the strategist or portfolio-pnl have ever run.
+ * Perpetual Core LLC leads: the studio/services business itself (the entity
+ * Sentinel bills through and the $75K+ engagements sell under).
  */
 export const ENGINE_ROSTER = [
+  { id: 'pc-llc', label: 'Perpetual Core LLC' },
   { id: 'sentinel', label: 'Sentinel' },
   { id: 'janice', label: 'Janice' },
   { id: 'rfp', label: 'RFP Engine' },
