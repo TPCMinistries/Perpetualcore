@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { signInSchema, type SignInInput } from "@/lib/validations/auth";
-import { signIn } from "@/lib/auth/actions";
+import { signIn, signInWithMagicLink } from "@/lib/auth/actions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -31,6 +31,32 @@ export function LoginForm() {
   const searchParams = useSearchParams();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [magicLinkState, setMagicLinkState] = useState<"idle" | "sending" | "sent">("idle");
+
+  async function onMagicLink() {
+    setError(null);
+    const email = form.getValues("email");
+    const valid = await form.trigger("email");
+    if (!valid || !email) {
+      setError("Enter your email above first, then request a sign-in link.");
+      return;
+    }
+    setMagicLinkState("sending");
+    try {
+      const requestedNext =
+        safeNext(searchParams.get("next")) ?? safeNext(searchParams.get("redirect"));
+      const result = await signInWithMagicLink(email, requestedNext ?? undefined);
+      if (result.error) {
+        setError(result.error);
+        setMagicLinkState("idle");
+        return;
+      }
+      setMagicLinkState("sent");
+    } catch {
+      setError("Something went wrong. Please try again.");
+      setMagicLinkState("idle");
+    }
+  }
 
   const form = useForm<SignInInput>({
     resolver: zodResolver(signInSchema),
@@ -138,6 +164,30 @@ export function LoginForm() {
             "Sign in"
           )}
         </Button>
+
+        {magicLinkState === "sent" ? (
+          <div className="rounded-md bg-primary/10 p-3 text-sm">
+            Check your email — a one-time sign-in link is on its way. It signs
+            you in without a password.
+          </div>
+        ) : (
+          <Button
+            type="button"
+            variant="outline"
+            className="w-full"
+            disabled={isLoading || magicLinkState === "sending"}
+            onClick={onMagicLink}
+          >
+            {magicLinkState === "sending" ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Sending link...
+              </>
+            ) : (
+              "Email me a sign-in link instead"
+            )}
+          </Button>
+        )}
       </form>
     </Form>
   );

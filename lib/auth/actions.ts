@@ -325,6 +325,34 @@ export async function requestPasswordReset(email: string) {
   return { success: true };
 }
 
+export async function signInWithMagicLink(email: string, nextPath?: string) {
+  const supabase = await createClient();
+  const origin = await getRequestOrigin();
+  const next = safeAuthNext(nextPath);
+  const callbackUrl = new URL("/auth/callback", origin);
+  if (next) callbackUrl.searchParams.set("next", next);
+
+  const { error } = await supabase.auth.signInWithOtp({
+    email,
+    options: {
+      // Sign-in only: a typo'd email must not silently create a fresh empty
+      // account (see multi-account org-setup confusion this flow replaces).
+      shouldCreateUser: false,
+      emailRedirectTo: callbackUrl.toString(),
+    },
+  });
+
+  if (error) {
+    const msg = error.message.toLowerCase();
+    if (msg.includes("signup") || msg.includes("not allowed") || msg.includes("not found")) {
+      return { error: "No account exists for this email. Check the address or sign up first." };
+    }
+    return { error: error.message };
+  }
+
+  return { success: true };
+}
+
 export async function updatePassword(newPassword: string) {
   const supabase = await createClient();
 
