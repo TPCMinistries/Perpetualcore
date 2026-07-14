@@ -156,6 +156,22 @@ export function loadPersonalStripe(): PnlStripeAccount | null {
   };
 }
 
+/**
+ * TPC Ministries' Stripe account — read-only ministry income reporting, kept
+ * as its own entity (never blended into PC LLC totals). Null = keychain entry
+ * "stripe-tpc-live" missing.
+ */
+export function loadTpcStripe(): PnlStripeAccount | null {
+  const key = keychainSecret('stripe-tpc-live', 'tpc-ministries');
+  if (!key) return null;
+  return {
+    slug: 'tpc-ministries',
+    label: 'TPC Ministries (ministry entity)',
+    acctIdLast4: last4(key),
+    client: new Stripe(key, { maxNetworkRetries: 2 }),
+  };
+}
+
 export interface EngineProduct {
   productId: string;
   engine: string;

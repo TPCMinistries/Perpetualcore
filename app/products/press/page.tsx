@@ -11,6 +11,8 @@ import { Footer } from "@/components/landing/Footer";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { productSchema, breadcrumbSchema } from "@/lib/seo/structured-data";
 import { PC_PRODUCTS } from "@/lib/seo/products";
+import { ContentSlot } from "@/components/slots/ContentSlot";
+import { getSlotContent } from "@/lib/slots/read";
 
 export const metadata = {
   title: "Press by Perpetual Core — media production system",
@@ -71,6 +73,31 @@ function PhoneDemo({ src, label }: { src: string; label: string }) {
       </div>
       <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">{label}</p>
     </div>
+  );
+}
+
+/**
+ * "Latest from the build" — section chrome and all disappears while the
+ * pc-press-feed slot is empty (the slot read is cached, so the extra call
+ * inside ContentSlot dedupes).
+ */
+async function LatestFromBuildSection() {
+  const content = await getSlotContent("pc-press-feed");
+  if (!content || (content.type === "moments" && content.items.length === 0)) return null;
+  return (
+    <section className="border-t border-border py-24 sm:py-32">
+      <div className="container mx-auto px-6 sm:px-8">
+        <div className="grid lg:grid-cols-[280px_1fr] gap-12 lg:gap-20">
+          <SectionRail index="05" label="Latest from the build" />
+          <div className="max-w-2xl">
+            <h3 className="text-3xl sm:text-4xl lg:text-5xl font-semibold leading-[1.1] tracking-[-0.025em] text-foreground mb-10">
+              Shipped this week.
+            </h3>
+            <ContentSlot slotKey="pc-press-feed" />
+          </div>
+        </div>
+      </div>
+    </section>
   );
 }
 
@@ -264,6 +291,8 @@ export default function CreatorStudioPage() {
           </div>
         </div>
       </section>
+
+      <LatestFromBuildSection />
 
       <Footer />
     </div>

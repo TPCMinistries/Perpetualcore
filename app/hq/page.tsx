@@ -1,4 +1,6 @@
 import { getHqSnapshot } from '@/lib/hq/snapshot';
+import { getQueueItems } from '@/lib/hq/queue';
+import { getSparkSeries } from '@/lib/hq/metrics';
 import {
   parsePnlHeadline,
   parsePnlEngineRows,
@@ -17,9 +19,12 @@ import { FindingsList } from './_components/FindingsList';
 import { HqMarkdown } from './_components/HqMarkdown';
 import { MomentsTimeline } from './_components/MomentsTimeline';
 import { EmptyState } from './_components/EmptyState';
+import { QueueList } from './_components/QueueList';
 
 export default async function HqPage() {
   const snapshot = await getHqSnapshot();
+  const queueItems = await getQueueItems();
+  const sparkSeries = await getSparkSeries();
 
   const headline = parsePnlHeadline(snapshot.pnlMd);
   const engineCalls = parseEngineCalls(snapshot.strategistMemoMd);
@@ -44,7 +49,7 @@ export default async function HqPage() {
 
       <Section id="board" eyebrow="Board" title="Portfolio at a glance">
         <div className="flex flex-col gap-6">
-          <KpiStrip headline={headline} />
+          <KpiStrip headline={headline} spark={sparkSeries} />
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {engineCards.map((card) => (
               <EngineCard key={card.id} card={card} />
@@ -56,8 +61,17 @@ export default async function HqPage() {
       <Section id="queue" eyebrow="Queue" title="Needs Lorenzo">
         <div className="flex flex-col gap-6">
           <div>
-            <div className="hq-eyebrow mb-2 text-[10px]">From the strategist memo</div>
-            <BulletList items={needsLorenzo} emptyLabel="Nothing queued." />
+            {queueItems.length > 0 ? (
+              <>
+                <div className="hq-eyebrow mb-2 text-[10px]">Open items</div>
+                <QueueList items={queueItems} />
+              </>
+            ) : (
+              <>
+                <div className="hq-eyebrow mb-2 text-[10px]">From the strategist memo</div>
+                <BulletList items={needsLorenzo} emptyLabel="Nothing queued." />
+              </>
+            )}
           </div>
           <div>
             <div className="hq-eyebrow mb-2 text-[10px]">Compliance due within 7 days</div>

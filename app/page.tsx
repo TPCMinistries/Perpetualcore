@@ -14,6 +14,7 @@ import { Footer } from "@/components/landing/Footer";
 import { NewsletterCapture } from "@/components/landing/NewsletterCapture";
 import { Reveal } from "@/components/landing/Reveal";
 import { PageViewTracker } from "@/components/analytics/PageViewTracker";
+import { ContentSlot } from "@/components/slots/ContentSlot";
 
 export const metadata = {
   title: "Perpetual Core - AI operating systems for complex companies",
@@ -232,6 +233,7 @@ export default function HomePage() {
     <div className="min-h-screen bg-background">
       <PageViewTracker />
       <Navbar />
+      <ContentSlot slotKey="pc-home-banner" />
 
       <section className="relative overflow-hidden border-b border-border text-white engine-gradient">
         <div className="signal-grid absolute inset-0 opacity-70" />

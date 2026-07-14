@@ -5,6 +5,7 @@ import type { RunSql } from './deck-push';
 import { pushSnapshot } from './deck-push';
 import { runCapability } from './runner';
 import { complianceWatch } from './capabilities/compliance-watch';
+import { pullVerdictsToLedger, syncHqQueue } from './queue-sync';
 import type { Finding } from './types';
 
 /**
@@ -87,6 +88,14 @@ async function readMomentsTail(n: number): Promise<MomentEntry[] | null> {
 
 /** Composes and pushes the `hq` snapshot. Isolated end-to-end — never throws. */
 export async function pushHqSnapshot(runSql: RunSql, now: string): Promise<void> {
+  // Pull Lorenzo's decided hq_queue verdicts into the vault ledger FIRST, so
+  // the decision_ledger_tail read below already reflects them.
+  try {
+    await pullVerdictsToLedger(runSql);
+  } catch (err) {
+    console.error(`hq snapshot: pullVerdictsToLedger failed (continuing): ${(err as Error).message}`);
+  }
+
   const pnl_md = await readFileOrNull(path.join(OPS_DIR, 'portfolio-pnl.md'));
   const strategist_memo_md = await readFileOrNull(path.join(OPS_DIR, 'strategist-memo.md'));
 
@@ -109,6 +118,12 @@ export async function pushHqSnapshot(runSql: RunSql, now: string): Promise<void>
   const content_calendar_md = await readFileOrNull(path.join(OPS_DIR, 'content', 'CALENDAR.md'));
 
   const moments_tail = await readMomentsTail(15);
+
+  try {
+    await syncHqQueue(runSql, now, compliance);
+  } catch (err) {
+    console.error(`hq snapshot: syncHqQueue failed (continuing): ${(err as Error).message}`);
+  }
 
   try {
     await pushSnapshot(runSql, 'hq', {

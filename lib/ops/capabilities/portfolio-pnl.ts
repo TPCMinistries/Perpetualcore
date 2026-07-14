@@ -1,11 +1,13 @@
 import { promises as fs } from 'node:fs';
 import * as os from 'node:os';
 import * as path from 'node:path';
-import type { Capability, Finding, OpsCtx } from '../types';
+import type { Capability, Finding, MetricRow, OpsCtx } from '../types';
+import { pushMetrics } from '../deck-push';
 import {
   fetchMercurySnapshot,
   loadPcStudiosStripe,
   loadPersonalStripe,
+  loadTpcStripe,
   loadEngineProductMap,
   fetchStripeBalance,
   collectChargeSummary,
@@ -46,6 +48,7 @@ const OPS_DIR = path.join(os.homedir(), 'dev', 'LDC-Command-Center-Vault', '_cla
 export const HEADLINE_PROJECT = 'Portfolio P&L';
 
 interface StripeSection {
+  slug: string;
   label: string;
   acctIdLast4: string;
   balance: StripeBalanceUsd;
@@ -64,6 +67,8 @@ function renderSnapshot(opts: {
   mercuryError: string | null;
   stripeSections: StripeSection[];
   stripeUnavailable: Array<{ label: string; reason: string }>;
+  tpcSection: StripeSection | null;
+  tpcUnavailable: string | null;
   totalMrrUsd: number;
   total7dGrossUsd: number;
   engineRows: Array<{ engine: string; account: string; mrrUsd: number; gross7dUsd: number; lifetimeGrossUsd: number }>;
@@ -124,6 +129,19 @@ function renderSnapshot(opts: {
   for (const u of opts.stripeUnavailable) {
     L.push(`### ${u.label}`, '', `- source unavailable: ${u.reason}`, '');
   }
+
+  L.push('## Ministry (separate entity — NOT included in Portfolio totals below)', '');
+  if (opts.tpcSection) {
+    const s = opts.tpcSection;
+    L.push(`### ${s.label} (acct ••${s.acctIdLast4})`, '');
+    L.push(`- Balance: ${usd(s.balance.availableUsd)} available · ${usd(s.balance.pendingUsd)} pending`);
+    L.push(`- ${fmtChargeWindow('Last 7d', s.charges.window7d)}`);
+    L.push(`- ${fmtChargeWindow('Last 30d', s.charges.window30d)}`);
+    L.push(`- ${fmtChargeWindow('Lifetime', s.charges.lifetime)}${s.charges.lifetime.hasMore ? '' : ' _(exact — full charge history fits in one page)_'}`);
+  } else {
+    L.push(`- source unavailable: ${opts.tpcUnavailable ?? 'Stripe keychain entry "stripe-tpc-live" not found'}`);
+  }
+  L.push('');
 
   L.push('## Per-engine rollup', '');
   if (opts.engineRows.length === 0) {
@@ -186,6 +204,7 @@ export const portfolioPnl: Capability = {
           acct.client.accounts.retrieve().catch(() => null),
         ]);
         stripeSections.push({
+          slug: acct.slug,
           label: acct.label,
           // real account id when reachable; loader's key-derived fallback otherwise
           acctIdLast4: acctInfo ? last4(acctInfo.id) : acct.acctIdLast4,
@@ -209,6 +228,37 @@ export const portfolioPnl: Capability = {
         stripeUnavailable.push({ label: spec.label, reason });
         findings.push({ severity: 'warn', project: spec.label, summary: `Source unavailable: ${reason}` });
       }
+    }
+
+    // --- Stripe: TPC Ministries (separate entity — read-only ministry income; --
+    // --- never blended into PC LLC totals below) --------------------------------
+    let tpcSection: StripeSection | null = null;
+    let tpcUnavailable: string | null = null;
+    try {
+      const acct = loadTpcStripe();
+      if (!acct) {
+        tpcUnavailable = 'Stripe keychain entry "stripe-tpc-live" (account "tpc-ministries") not found';
+        findings.push({ severity: 'warn', project: 'TPC Ministries (ministry entity)', summary: `Source unavailable: ${tpcUnavailable}` });
+      } else {
+        const engineMap = await loadEngineProductMap(acct.client);
+        const [balance, charges, subs, acctInfo] = await Promise.all([
+          fetchStripeBalance(acct.client),
+          collectChargeSummary(acct.client, engineMap, ctx.now),
+          collectActiveSubsByEngine(acct.client, engineMap),
+          acct.client.accounts.retrieve().catch(() => null),
+        ]);
+        tpcSection = {
+          slug: acct.slug,
+          label: acct.label,
+          acctIdLast4: acctInfo ? last4(acctInfo.id) : acct.acctIdLast4,
+          balance,
+          charges,
+          subs,
+        };
+      }
+    } catch (err) {
+      tpcUnavailable = (err as Error).message.slice(0, 200);
+      findings.push({ severity: 'warn', project: 'TPC Ministries (ministry entity)', summary: `Source unavailable: ${tpcUnavailable}` });
     }
 
     // --- Per-engine rollup + totals --------------------------------------------
@@ -251,6 +301,8 @@ export const portfolioPnl: Capability = {
         mercuryError,
         stripeSections,
         stripeUnavailable,
+        tpcSection,
+        tpcUnavailable,
         totalMrrUsd,
         total7dGrossUsd,
         engineRows,
@@ -261,6 +313,30 @@ export const portfolioPnl: Capability = {
         severity: 'warn',
         project: 'portfolio-pnl.md',
         summary: 'Could not write snapshot file (findings still valid)',
+        detail: (err as Error).message.slice(0, 200),
+      });
+    }
+
+    // --- Daily metrics for the /hq P&L sparklines — only what we actually --------
+    // --- computed; a missing source is skipped, never faked as zero. -----------
+    try {
+      const day = ctx.now.slice(0, 10);
+      const metrics: MetricRow[] = [];
+      for (const section of [...stripeSections, ...(tpcSection ? [tpcSection] : [])]) {
+        const mrrUsd = round2(section.subs.reduce((s, sub) => s + sub.mrrUsd, 0));
+        metrics.push({ day, source: 'pnl', segment: section.slug, metric: 'gross_7d_usd', value: section.charges.window7d.grossUsd });
+        metrics.push({ day, source: 'pnl', segment: section.slug, metric: 'gross_30d_usd', value: section.charges.window30d.grossUsd });
+        metrics.push({ day, source: 'pnl', segment: section.slug, metric: 'mrr_usd', value: mrrUsd });
+      }
+      if (mercury) {
+        metrics.push({ day, source: 'pnl', segment: 'mercury', metric: 'available_usd', value: round2(mercuryBalanceUsd ?? 0) });
+      }
+      await pushMetrics(ctx.runSql, metrics);
+    } catch (err) {
+      findings.push({
+        severity: 'warn',
+        project: 'deck_metrics',
+        summary: 'Metrics upsert failed (P&L findings still valid)',
         detail: (err as Error).message.slice(0, 200),
       });
     }

@@ -82,6 +82,14 @@ const nextConfig = {
     ];
 
     return [
+      {
+        // hq.perpetualcore.com is a vanity host for the owner command center;
+        // the app itself serves /hq on every host, so only the root needs a hop.
+        source: "/",
+        has: [{ type: "host", value: "hq.perpetualcore.com" }],
+        destination: "https://perpetualcore.com/hq",
+        permanent: false,
+      },
       ...industryToSolution.map(([from, to]) => ({
         source: `/industries/${from}`,
         destination: `/solutions/${to}`,
