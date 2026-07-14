@@ -5,6 +5,7 @@ import type { Capability, Finding, OpsCtx } from '../types';
 import {
   fetchMercurySnapshot,
   loadPcStudiosStripe,
+  loadPersonalStripe,
   loadEngineProductMap,
   fetchStripeBalance,
   collectChargeSummary,
@@ -44,6 +45,14 @@ const OPS_DIR = path.join(os.homedir(), 'dev', 'LDC-Command-Center-Vault', '_cla
 
 export const HEADLINE_PROJECT = 'Portfolio P&L';
 
+interface StripeSection {
+  label: string;
+  acctIdLast4: string;
+  balance: StripeBalanceUsd;
+  charges: ChargeSummary;
+  subs: SubAgg[];
+}
+
 function fmtChargeWindow(label: string, w: { count: number; grossUsd: number; hasMore: boolean }): string {
   const caveat = w.hasMore ? ' _(sampled from most recent 25 charges — more exist)_' : '';
   return `${label}: ${w.count} charge${w.count === 1 ? '' : 's'}, ${usd(w.grossUsd)} gross${caveat}`;
@@ -53,15 +62,8 @@ function renderSnapshot(opts: {
   now: string;
   mercury: MercurySnapshot | null;
   mercuryError: string | null;
-  stripe: {
-    label: string;
-    acctIdLast4: string;
-    balance: StripeBalanceUsd;
-    charges: ChargeSummary;
-    subs: SubAgg[];
-  } | null;
-  stripeError: string | null;
-  personalStripeNote: string;
+  stripeSections: StripeSection[];
+  stripeUnavailable: Array<{ label: string; reason: string }>;
   totalMrrUsd: number;
   total7dGrossUsd: number;
   engineRows: Array<{ engine: string; account: string; mrrUsd: number; gross7dUsd: number; lifetimeGrossUsd: number }>;
@@ -103,8 +105,7 @@ function renderSnapshot(opts: {
   L.push('');
 
   L.push('## Stripe', '');
-  if (opts.stripe) {
-    const s = opts.stripe;
+  for (const s of opts.stripeSections) {
     L.push(`### ${s.label} (acct ••${s.acctIdLast4})`, '');
     L.push(`- Balance: ${usd(s.balance.availableUsd)} available · ${usd(s.balance.pendingUsd)} pending`);
     L.push(`- ${fmtChargeWindow('Last 7d', s.charges.window7d)}`);
@@ -118,13 +119,11 @@ function renderSnapshot(opts: {
         L.push(`  - ${sub.engine}: ${sub.count} sub${sub.count === 1 ? '' : 's'}, MRR ${usd(sub.mrrUsd)}`);
       }
     }
-  } else {
-    L.push(`- source unavailable: ${opts.stripeError ?? 'Stripe keychain entry "stripe-pc-studios-live" not found'}`);
+    L.push('');
   }
-  L.push('');
-  L.push(`### Lorenzo Daughtry-Chambers Personal (lorenzodc / Janice-current / Academy)`, '');
-  L.push(`- source unavailable: ${opts.personalStripeNote}`);
-  L.push('');
+  for (const u of opts.stripeUnavailable) {
+    L.push(`### ${u.label}`, '', `- source unavailable: ${u.reason}`, '');
+  }
 
   L.push('## Per-engine rollup', '');
   if (opts.engineRows.length === 0) {
@@ -164,21 +163,21 @@ export const portfolioPnl: Capability = {
       findings.push({ severity: 'warn', project: 'Mercury', summary: `Source unavailable: ${mercuryError}` });
     }
 
-    // --- Stripe PC Studios -----------------------------------------------------
-    let stripeSection: {
-      label: string;
-      acctIdLast4: string;
-      balance: StripeBalanceUsd;
-      charges: ChargeSummary;
-      subs: SubAgg[];
-    } | null = null;
-    let stripeError: string | null = null;
-    try {
-      const acct = loadPcStudiosStripe();
-      if (!acct) {
-        stripeError = 'Stripe keychain entry "stripe-pc-studios-live" (account "perpetual-core") not found';
-        findings.push({ severity: 'warn', project: 'Stripe (PC Studios)', summary: `Source unavailable: ${stripeError}` });
-      } else {
+    // --- Stripe accounts: PC Studios (products) + personal (coaching) ---------
+    const stripeSections: StripeSection[] = [];
+    const stripeUnavailable: Array<{ label: string; reason: string }> = [];
+    const accounts = [
+      { loader: loadPcStudiosStripe, label: 'The Perpetual Core LLC', missing: 'Stripe keychain entry "stripe-pc-studios-live" (account "perpetual-core") not found' },
+      { loader: loadPersonalStripe, label: 'Perpetual Core — Coaching (personal acct)', missing: 'Stripe keychain entry "stripe-personal-live" (account "perpetual-core") not found' },
+    ];
+    for (const spec of accounts) {
+      try {
+        const acct = spec.loader();
+        if (!acct) {
+          stripeUnavailable.push({ label: spec.label, reason: spec.missing });
+          findings.push({ severity: 'warn', project: spec.label, summary: `Source unavailable: ${spec.missing}` });
+          continue;
+        }
         const engineMap = await loadEngineProductMap(acct.client);
         const [balance, charges, subs, acctInfo] = await Promise.all([
           fetchStripeBalance(acct.client),
@@ -186,14 +185,14 @@ export const portfolioPnl: Capability = {
           collectActiveSubsByEngine(acct.client, engineMap),
           acct.client.accounts.retrieve().catch(() => null),
         ]);
-        stripeSection = {
+        stripeSections.push({
           label: acct.label,
           // real account id when reachable; loader's key-derived fallback otherwise
           acctIdLast4: acctInfo ? last4(acctInfo.id) : acct.acctIdLast4,
           balance,
           charges,
           subs,
-        };
+        });
 
         for (const sub of subs) {
           if (sub.engine === 'untagged') {
@@ -205,42 +204,33 @@ export const portfolioPnl: Capability = {
             });
           }
         }
+      } catch (err) {
+        const reason = (err as Error).message.slice(0, 200);
+        stripeUnavailable.push({ label: spec.label, reason });
+        findings.push({ severity: 'warn', project: spec.label, summary: `Source unavailable: ${reason}` });
       }
-    } catch (err) {
-      stripeError = (err as Error).message.slice(0, 200);
-      findings.push({ severity: 'warn', project: 'Stripe (PC Studios)', summary: `Source unavailable: ${stripeError}` });
     }
-
-    // --- Personal Stripe (always unwired from this repo) ----------------------
-    const personalStripeNote =
-      'no key reachable from perpetual-core (lives in another repo\'s .env.local) — not copied per security policy';
-    findings.push({
-      severity: 'info',
-      project: 'Stripe (Personal)',
-      summary: `Source unavailable: ${personalStripeNote}`,
-      detail: 'Engines pending this source: lorenzodc, Janice (current), Academy (current).',
-    });
 
     // --- Per-engine rollup + totals --------------------------------------------
     const engineRows: Array<{ engine: string; account: string; mrrUsd: number; gross7dUsd: number; lifetimeGrossUsd: number }> = [];
-    if (stripeSection) {
-      const engines = new Set<string>([...stripeSection.subs.map((s) => s.engine), ...stripeSection.charges.byEngine.keys()]);
+    for (const section of stripeSections) {
+      const engines = new Set<string>([...section.subs.map((s) => s.engine), ...section.charges.byEngine.keys()]);
       for (const engine of engines) {
-        const sub = stripeSection.subs.find((s) => s.engine === engine);
-        const chargeAgg = stripeSection.charges.byEngine.get(engine);
+        const sub = section.subs.find((s) => s.engine === engine);
+        const chargeAgg = section.charges.byEngine.get(engine);
         engineRows.push({
           engine,
-          account: stripeSection.label,
+          account: section.label,
           mrrUsd: sub?.mrrUsd ?? 0,
           gross7dUsd: chargeAgg?.gross7dUsd ?? 0,
           lifetimeGrossUsd: chargeAgg?.grossLifetimeUsd ?? 0,
         });
       }
-      engineRows.sort((a, b) => b.mrrUsd - a.mrrUsd);
     }
+    engineRows.sort((a, b) => b.mrrUsd - a.mrrUsd);
 
     const totalMrrUsd = round2(engineRows.reduce((s, r) => s + r.mrrUsd, 0));
-    const total7dGrossUsd = round2(stripeSection?.charges.window7d.grossUsd ?? 0);
+    const total7dGrossUsd = round2(stripeSections.reduce((s, x) => s + x.charges.window7d.grossUsd, 0));
 
     // --- Headline finding (first — daily-brief.ts pulls this by project name) --
     const mercuryBalanceUsd = mercury ? mercury.accounts.reduce((s, a) => s + a.availableUsd, 0) : null;
@@ -259,9 +249,8 @@ export const portfolioPnl: Capability = {
         now: ctx.now,
         mercury,
         mercuryError,
-        stripe: stripeSection,
-        stripeError,
-        personalStripeNote,
+        stripeSections,
+        stripeUnavailable,
         totalMrrUsd,
         total7dGrossUsd,
         engineRows,

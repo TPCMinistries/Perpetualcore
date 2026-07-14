@@ -140,6 +140,22 @@ export function loadPcStudiosStripe(): PnlStripeAccount | null {
   };
 }
 
+/**
+ * Lorenzo's personal Stripe (acct_1PaRTg…) — coaching services, classified
+ * under Perpetual Core per owner directive 2026-07-14. Null = keychain entry
+ * "stripe-personal-live" missing.
+ */
+export function loadPersonalStripe(): PnlStripeAccount | null {
+  const key = keychainSecret('stripe-personal-live', 'perpetual-core');
+  if (!key) return null;
+  return {
+    slug: 'pc-coaching',
+    label: 'Perpetual Core — Coaching (personal acct)',
+    acctIdLast4: last4(key),
+    client: new Stripe(key, { maxNetworkRetries: 2 }),
+  };
+}
+
 export interface EngineProduct {
   productId: string;
   engine: string;
