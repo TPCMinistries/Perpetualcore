@@ -22,6 +22,7 @@ const runSchema = z.object({
   queued_at: z.string(),
   finished_at: z.string().nullable(),
   error_message: z.string().nullable(),
+  dry_run: z.boolean(),
 });
 
 const metricSchema = z.object({
@@ -33,6 +34,7 @@ const metricSchema = z.object({
   direction: z.string(),
   engine_key: z.string().nullable(),
   measured_at: z.string(),
+  action_run_id: z.string().nullable(),
 });
 
 const queueStateSchema = z.object({
@@ -47,6 +49,7 @@ export interface HqOperationalStatus {
   queueCounts: Record<string, number>;
   executionStateCounts: Record<string, number>;
   outcomes: Array<Omit<z.infer<typeof metricSchema>, 'value'> & { value: number }>;
+  verifiedRunIds: string[];
 }
 
 const EMPTY: HqOperationalStatus = {
@@ -56,6 +59,7 @@ const EMPTY: HqOperationalStatus = {
   queueCounts: {},
   executionStateCounts: {},
   outcomes: [],
+  verifiedRunIds: [],
 };
 
 function countValues(values: string[]): Record<string, number> {
@@ -71,8 +75,8 @@ export async function getHqOperationalStatus(): Promise<HqOperationalStatus> {
     const admin = createAdminClient() as unknown as SupabaseClient;
     const [sourcesResult, runsResult, metricsResult, queueResult] = await Promise.all([
       admin.from('hq_source_freshness').select('source_key, display_name, status, observed_at, source_generated_at, expires_at, last_success_at, error_message, metadata').order('display_name'),
-      admin.from('hq_action_runs').select('id, queue_item_id, action_key, status, queued_at, finished_at, error_message').order('queued_at', { ascending: false }).limit(20),
-      admin.from('hq_outcome_metrics').select('id, metric_key, metric_name, value, unit, direction, engine_key, measured_at').order('measured_at', { ascending: false }).limit(40),
+      admin.from('hq_action_runs').select('id, queue_item_id, action_key, status, queued_at, finished_at, error_message, dry_run').order('queued_at', { ascending: false }).limit(100),
+      admin.from('hq_outcome_metrics').select('id, metric_key, metric_name, value, unit, direction, engine_key, measured_at, action_run_id').order('measured_at', { ascending: false }).limit(200),
       admin.from('hq_queue').select('status, execution_state').limit(500),
     ]);
     if (sourcesResult.error || runsResult.error || metricsResult.error || queueResult.error) return EMPTY;
@@ -84,10 +88,12 @@ export async function getHqOperationalStatus(): Promise<HqOperationalStatus> {
       const value = Number(metric.value);
       return Number.isFinite(value) ? [{ ...metric, value }] : [];
     });
-    const runCounts = countValues(recentRuns.map((run) => run.status));
+    const realRuns = recentRuns.filter((run) => !run.dry_run);
+    const runCounts = countValues(realRuns.map((run) => run.status));
     const queueCounts = countValues(queueStates.map((row) => row.status));
     const executionStateCounts = countValues(queueStates.map((row) => row.execution_state));
-    return { sources, recentRuns, runCounts, queueCounts, executionStateCounts, outcomes };
+    const verifiedRunIds = [...new Set(outcomes.flatMap((metric) => metric.action_run_id ? [metric.action_run_id] : []))];
+    return { sources, recentRuns, runCounts, queueCounts, executionStateCounts, outcomes, verifiedRunIds };
   } catch {
     return EMPTY;
   }

@@ -8,6 +8,8 @@ export interface ActionRunItem {
   queuedAt: string;
   finishedAt: string | null;
   errorMessage: string | null;
+  dryRun: boolean;
+  verified: boolean;
 }
 
 const TONE: Record<string, ChipTone> = {
@@ -44,7 +46,10 @@ export function ActionRunList({ runs }: { runs: ActionRunItem[] }) {
               </p>
             )}
           </div>
-          <StatusChip tone={TONE[run.status] ?? 'unknown'} label={run.status} />
+          <StatusChip
+            tone={run.verified ? 'ok' : TONE[run.status] ?? 'unknown'}
+            label={run.verified ? 'verified' : run.dryRun ? `preview ${run.status}` : run.status}
+          />
         </li>
       ))}
     </ul>

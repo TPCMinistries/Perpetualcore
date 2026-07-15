@@ -28,6 +28,7 @@ import { OperatingLoop } from './_components/OperatingLoop';
 import { SourceHealth, type SourceHealthItem } from './_components/SourceHealth';
 import { OutcomeStrip, type OutcomeMetric } from './_components/OutcomeStrip';
 import { ActionRunList } from './_components/ActionRunList';
+import { VerificationInbox } from './_components/VerificationInbox';
 
 function formatOutcomeValue(value: number, unit: string): string {
   if (unit === 'usd') {
@@ -73,6 +74,10 @@ export default async function HqPage() {
   }));
 
   const seenMetrics = new Set<string>();
+  const verifiedRunIds = new Set(operations.verifiedRunIds);
+  const realSucceededRuns = operations.recentRuns.filter((run) => run.status === 'succeeded' && !run.dry_run);
+  const runsAwaitingVerification = realSucceededRuns.filter((run) => !verifiedRunIds.has(run.id));
+  const verifiedRuns = realSucceededRuns.filter((run) => verifiedRunIds.has(run.id));
   const outcomes: OutcomeMetric[] = operations.outcomes.flatMap((metric) => {
     if (seenMetrics.has(metric.metric_key)) return [];
     seenMetrics.add(metric.metric_key);
@@ -139,8 +144,8 @@ export default async function HqPage() {
               proposed: operations.queueCounts.open ?? 0,
               approved: operations.queueCounts.approved ?? 0,
               running: operations.executionStateCounts.running ?? 0,
-              verify: operations.executionStateCounts.succeeded ?? 0,
-              completed: operations.runCounts.succeeded ?? 0,
+              verify: runsAwaitingVerification.length,
+              completed: verifiedRuns.length,
               failed: (operations.runCounts.failed ?? 0) + (operations.runCounts.blocked ?? 0),
             }}
           />
@@ -154,6 +159,18 @@ export default async function HqPage() {
                 queuedAt: run.queued_at,
                 finishedAt: run.finished_at,
                 errorMessage: run.error_message,
+                dryRun: run.dry_run,
+                verified: verifiedRunIds.has(run.id),
+              }))}
+            />
+          </div>
+          <div>
+            <div className="hq-eyebrow mb-2 text-[10px]">Verify completed work</div>
+            <VerificationInbox
+              runs={runsAwaitingVerification.map((run) => ({
+                id: run.id,
+                actionKey: run.action_key,
+                finishedAt: run.finished_at,
               }))}
             />
           </div>
