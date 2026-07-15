@@ -1,10 +1,17 @@
 import { describe, expect, it, vi } from 'vitest';
-import { buildFreshnessObservations, reconcileHq } from '@/lib/hq/reconciliation';
+import { buildFreshnessObservations, parseReconciliationQueueRows, reconcileHq } from '@/lib/hq/reconciliation';
 import { GET as reconcileRoute } from '@/app/api/cron/hq-reconcile/route';
 
 const NOW = '2026-07-15T16:00:00.000Z';
 
 describe('HQ cloud reconciliation', () => {
+  it('accepts Supabase timestamptz values with an explicit UTC offset', () => {
+    const rows = parseReconciliationQueueRows([
+      { id: 'q1', source: 'hq', status: 'open', last_seen: '2026-07-15T09:12:56.587+00:00' },
+    ]);
+    expect(rows[0].last_seen).toBe('2026-07-15T09:12:56.587+00:00');
+  });
+
   it('rejects a cron request without the shared secret', async () => {
     const previousSecret = process.env.CRON_SECRET;
     process.env.CRON_SECRET = 'test-cron-secret';

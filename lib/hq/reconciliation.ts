@@ -8,7 +8,7 @@ const HOUR_MS = 60 * 60 * 1000;
 const LOCAL_SOURCE_TTL_MS = 26 * HOUR_MS;
 
 const snapshotSchema = z.object({
-  updated_at: z.string().datetime().nullable().optional(),
+  updated_at: z.iso.datetime({ offset: true }).nullable().optional(),
   data: z.record(z.string(), z.unknown()),
 });
 
@@ -16,7 +16,7 @@ const queueRowSchema = z.object({
   id: z.string(),
   source: z.string(),
   status: z.string(),
-  last_seen: z.string().datetime().nullable(),
+  last_seen: z.iso.datetime({ offset: true }).nullable(),
   execution_state: z.string().nullable().optional(),
   action_key: z.string().nullable().optional(),
   risk_level: z.enum(['low', 'medium', 'high', 'prohibited']).nullable().optional(),
@@ -26,17 +26,21 @@ const queueRowSchema = z.object({
 const actionRunSchema = z.object({
   id: z.string(),
   status: z.string(),
-  created_at: z.string().datetime(),
-  finished_at: z.string().datetime().nullable().optional(),
+  created_at: z.iso.datetime({ offset: true }),
+  finished_at: z.iso.datetime({ offset: true }).nullable().optional(),
 });
 
 const publishedFreshnessSchema = z.record(z.string(), z.object({
-  generated_at: z.string().datetime(),
+  generated_at: z.iso.datetime({ offset: true }),
   ttl_minutes: z.number().int().positive().max(43_200).optional(),
   error: z.string().trim().min(1).max(2_000).nullable().optional(),
 }));
 
 export type FreshnessStatus = 'unknown' | 'fresh' | 'stale' | 'error';
+
+export function parseReconciliationQueueRows(data: unknown) {
+  return z.array(queueRowSchema).parse(data);
+}
 
 export interface FreshnessObservation {
   sourceKey: string;
@@ -322,7 +326,7 @@ function createSupabaseStore(): ReconciliationStore {
         .select('id, source, status, last_seen, execution_state, action_key, risk_level, side_effect_class')
         .limit(500);
       if (error) throw new Error(`HQ queue read failed: ${error.message}`);
-      return z.array(queueRowSchema).parse(data ?? []);
+      return parseReconciliationQueueRows(data ?? []);
     },
     async readActionRuns() {
       const { data, error } = await admin
