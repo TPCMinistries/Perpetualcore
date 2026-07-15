@@ -78,6 +78,35 @@
   border-radius: 10px;
 }
 
+.hq-command-panel {
+  background:
+    radial-gradient(circle at 85% 10%, color-mix(in srgb, var(--hq-gold) 16%, transparent), transparent 38%),
+    var(--hq-panel);
+  border: 1px solid var(--hq-border-strong);
+  border-radius: 14px;
+  box-shadow: 0 18px 45px color-mix(in srgb, var(--hq-ink) 8%, transparent);
+}
+
+.hq-report > summary::-webkit-details-marker {
+  display: none;
+}
+
+.hq-report[open] .hq-report-chevron {
+  transform: rotate(45deg);
+}
+
+.hq-report-chevron {
+  transition: transform 180ms ease;
+}
+
+.hq-nav {
+  scrollbar-width: none;
+}
+
+.hq-nav::-webkit-scrollbar {
+  display: none;
+}
+
 .hq-tabular {
   font-variant-numeric: tabular-nums;
 }

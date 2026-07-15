@@ -63,6 +63,10 @@
       "schedule": "*/30 * * * *"
     },
     {
+      "path": "/api/cron/hq-reconcile",
+      "schedule": "*/30 * * * *"
+    },
+    {
       "path": "/api/cron/sweep-plans",
       "schedule": "*/5 * * * *"
     },

@@ -54,6 +54,12 @@ interface QueueItem {
   severity: string;
 }
 
+function taskPriority(severity: string): 'low' | 'medium' | 'high' {
+  if (/^(critical|high)$/i.test(severity)) return 'high';
+  if (/^(warn|warning|medium)$/i.test(severity)) return 'medium';
+  return 'low';
+}
+
 async function readFileOrNull(filePath: string): Promise<string | null> {
   try {
     return await fs.readFile(filePath, 'utf8');
@@ -70,14 +76,49 @@ async function upsertQueueItems(runSql: RunSql, items: QueueItem[], now: string)
       .slice(i, i + chunk)
       .map((it) => {
         const id = queueId(it.source, it.title);
-        return `(${lit(id)}, ${lit(it.source)}, ${lit(it.title)}, ${lit(it.detail)}, ${lit(it.severity)}, ${lit(now)}, ${lit(now)})`;
+        const priority = taskPriority(it.severity);
+        const taskTitle = it.title.slice(0, 200);
+        const taskDescription = (it.detail ?? (taskTitle !== it.title ? it.title : null))?.slice(0, 4_000) ?? null;
+        const recommendedAction = `Create an internal task to resolve: ${it.title}`;
+        const expectedOutcome = `A tracked owner task exists for this ${it.source} exception.`;
+        const payload = `jsonb_strip_nulls(jsonb_build_object(
+          'title', ${lit(taskTitle)},
+          'description', ${lit(taskDescription)},
+          'priority', ${lit(priority)}
+        ))`;
+        return `(
+          ${lit(id)}, ${lit(it.source)}, ${lit(it.title)}, ${lit(it.detail)}, ${lit(it.severity)},
+          ${lit(now)}, ${lit(now)}, 'internal.create_task', ${lit(recommendedAction)},
+          ${lit(expectedOutcome)}, 'low', 'internal_write', true, 'hq-registry',
+          ${payload}, 'The created task can be closed or archived.', 'ready'
+        )`;
       })
       .join(',\n');
     await runSql(
       BRAIN,
-      `insert into public.hq_queue (id, source, title, detail, severity, first_seen, last_seen)
+      `insert into public.hq_queue (
+         id, source, title, detail, severity, first_seen, last_seen,
+         action_key, recommended_action, expected_outcome, risk_level,
+         side_effect_class, approval_required, executor, execution_payload,
+         rollback_plan, execution_state
+       )
        values ${values}
-       on conflict (id) do update set last_seen = now(), detail = excluded.detail;`,
+       on conflict (id) do update set
+         last_seen = now(),
+         detail = excluded.detail,
+         action_key = coalesce(hq_queue.action_key, excluded.action_key),
+         recommended_action = coalesce(hq_queue.recommended_action, excluded.recommended_action),
+         expected_outcome = coalesce(hq_queue.expected_outcome, excluded.expected_outcome),
+         executor = coalesce(hq_queue.executor, excluded.executor),
+         risk_level = case when hq_queue.action_key is null then excluded.risk_level else hq_queue.risk_level end,
+         side_effect_class = case when hq_queue.action_key is null then excluded.side_effect_class else hq_queue.side_effect_class end,
+         approval_required = case when hq_queue.action_key is null then excluded.approval_required else hq_queue.approval_required end,
+         execution_payload = case when hq_queue.action_key is null then excluded.execution_payload else hq_queue.execution_payload end,
+         rollback_plan = coalesce(hq_queue.rollback_plan, excluded.rollback_plan),
+         execution_state = case
+           when hq_queue.action_key is null and hq_queue.execution_state = 'not_ready' then 'ready'
+           else hq_queue.execution_state
+         end;`,
     );
   }
 }

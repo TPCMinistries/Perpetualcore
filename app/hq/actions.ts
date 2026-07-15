@@ -1,18 +1,55 @@
 'use server';
 
-import { createClient as createSupabaseClient } from '@supabase/supabase-js';
 import { revalidatePath } from 'next/cache';
+import type { SupabaseClient } from '@supabase/supabase-js';
 import { requireHqOwner } from '@/lib/hq/auth';
+import { createAdminClient } from '@/lib/supabase/server';
+import { executeHqQueueAction, toFriendlyExecutionError } from '@/lib/hq/execution';
 
 const VERDICTS = ['approved', 'dismissed', 'snoozed'] as const;
 export type QueueVerdict = (typeof VERDICTS)[number];
 
 const SNOOZE_DAYS = 7;
 
+type HqWriterDatabase = {
+  public: {
+    Tables: {
+      hq_queue: {
+        Row: { id: string };
+        Insert: { id: string };
+        Update: Record<string, unknown>;
+        Relationships: [];
+      };
+    };
+    Views: Record<string, never>;
+    Functions: Record<string, never>;
+    Enums: Record<string, never>;
+    CompositeTypes: Record<string, never>;
+  };
+};
+
 function createHqWriterClient() {
-  return createSupabaseClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!, {
-    auth: { autoRefreshToken: false, persistSession: false },
-  });
+  return createAdminClient() as unknown as SupabaseClient<HqWriterDatabase>;
+}
+
+export interface HqActionResponse {
+  ok: boolean;
+  message: string;
+  runId?: string;
+  duplicate?: boolean;
+}
+
+/** Owner-gated application action. Preview is the safe default. */
+export async function executeQueueItem(id: string, dryRun = true): Promise<HqActionResponse> {
+  const { email } = await requireHqOwner('/hq');
+  try {
+    const result = await executeHqQueueAction({ queueItemId: id, requestedBy: email, dryRun });
+    revalidatePath('/hq');
+    return { ok: result.ok, message: result.message, runId: result.run.id, duplicate: result.duplicate };
+  } catch (error) {
+    const safeError = toFriendlyExecutionError(error);
+    return { ok: false, message: safeError.message };
+  }
 }
 
 /**
