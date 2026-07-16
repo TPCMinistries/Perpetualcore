@@ -49,6 +49,7 @@ const PRODUCT_LINKS = [
   { label: "Vellum", href: "/products/vellum", description: "Institutional knowledge" },
   { label: "RFP Engine", href: "https://rfp.perpetualcore.com", description: "Find, draft, ship RFPs", external: true },
   { label: "RFP Sentry", href: "/products/rfp-sentry", description: "Bid intelligence + compliance gate" },
+  { label: "Press", href: "/products/press", description: "Owned media production system" },
 ];
 
 function DropdownPanel({

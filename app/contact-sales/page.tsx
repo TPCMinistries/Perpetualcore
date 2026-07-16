@@ -93,6 +93,25 @@ const INTAKE_PROMPTS = [
   },
 ];
 
+const PRESS_INTAKE_PROMPTS = [
+  {
+    title: "Source archive",
+    body: "What do you record, where does it live, and roughly how much new material arrives each month?",
+  },
+  {
+    title: "Production bottleneck",
+    body: "Where does the current workflow slow down: transcription, selecting moments, editing, captions, approvals, or packaging?",
+  },
+  {
+    title: "Brand and channels",
+    body: "Which voices, visual rules, formats, and publishing destinations should the system support?",
+  },
+  {
+    title: "Human approval",
+    body: "Who must approve voice use, edits, claims, and final media before anything can leave the system?",
+  },
+];
+
 function SectionRail({ index, label }: { index: string; label: string }) {
   return (
     <div className="flex items-baseline gap-3 text-muted-foreground">
@@ -110,6 +129,7 @@ function ContactSalesForm() {
   const sessionFromUrl = searchParams.get("session_id") || "";
   const isPostPaymentIntake = intentFromUrl === "post-payment-intake";
   const isManualInvoice = intentFromUrl === "manual-invoice";
+  const isPressInquiry = productFromUrl === "press";
 
   const [formData, setFormData] = useState({
     name: "",
@@ -117,13 +137,16 @@ function ContactSalesForm() {
     company: "",
     phone: "",
     employees: "",
-    plan: planFromUrl || (isManualInvoice ? "manual-invoice" : isPostPaymentIntake ? "guided-setup" : "company-ai-os"),
+    plan: planFromUrl || (isManualInvoice ? "manual-invoice" : isPostPaymentIntake ? "guided-setup" : isPressInquiry ? "product-subscription" : "company-ai-os"),
     product: productFromUrl,
     message: isPostPaymentIntake
       ? `I already completed a Perpetual Core package checkout${sessionFromUrl ? ` (${sessionFromUrl})` : ""}. Here is the operating context we should use for onboarding: `
-      : "",
+      : isPressInquiry
+        ? "Our source archive includes:\n\nWe publish to:\n\nOur current production bottleneck is:\n\nThe people who approve final media are:"
+        : "",
   });
   const [submitState, setSubmitState] = useState<SubmitState>("idle");
+  const [formError, setFormError] = useState("");
 
   const handleChange = (field: string, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
@@ -132,6 +155,7 @@ function ContactSalesForm() {
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setSubmitState("submitting");
+    setFormError("");
     try {
       const response = await fetch("/api/contact-sales", {
         method: "POST",
@@ -139,14 +163,17 @@ function ContactSalesForm() {
         body: JSON.stringify(formData),
       });
       if (!response.ok) {
-        throw new Error("Failed to submit");
+        const body = (await response.json().catch(() => null)) as { error?: string } | null;
+        throw new Error(body?.error || "We couldn't send the form. Please review the fields and try again.");
       }
       setSubmitState("success");
       toast.success("Got it. We'll reply within one business day.");
     } catch (err) {
       console.error("Contact sales error:", err);
       setSubmitState("error");
-      toast.error("Submit failed. Email lorenzo@perpetualcore.com directly.");
+      const message = err instanceof Error ? err.message : "Submit failed. Email lorenzo@perpetualcore.com directly.";
+      setFormError(message);
+      toast.error(message);
     }
   };
 
@@ -181,13 +208,15 @@ function ContactSalesForm() {
       {/* Hero */}
       <section className="container mx-auto px-6 sm:px-8 pt-20 pb-12 sm:pt-28 sm:pb-16">
         <div className="grid lg:grid-cols-[280px_1fr] gap-12 lg:gap-20">
-            <SectionRail index="00" label="Map the operating system" />
+            <SectionRail index="00" label={isPressInquiry ? "Scope Press" : "Map the operating system"} />
           <div className="max-w-3xl">
             <h1 className="font-display text-5xl sm:text-6xl lg:text-7xl leading-[1.05] tracking-[-0.025em] text-foreground">
-              Tell us where AI needs to touch the company.
+              {isPressInquiry ? "Show us the archive. We’ll map the pipeline." : "Tell us where AI needs to touch the company."}
             </h1>
             <p className="mt-8 text-lg sm:text-xl text-muted-foreground leading-[1.65] max-w-2xl">
-              {isPostPaymentIntake
+              {isPressInquiry
+                ? "Tell us what you record, where production slows down, which channels matter, and who approves the final work. We’ll reply with what should be automated, what should stay human, and the right first proof."
+                : isPostPaymentIntake
                 ? "Your payment is in. Use this form to send the operating context we need before the first onboarding call."
                 : isManualInvoice
                   ? "Use this form when the buying process needs ACH, procurement review, a custom first payment, or a manual Stripe invoice."
@@ -213,7 +242,7 @@ function ContactSalesForm() {
           <div className="grid lg:grid-cols-[1fr_320px] gap-12 lg:gap-16">
             <form onSubmit={handleSubmit} className="space-y-6">
               <div className="grid gap-3 sm:grid-cols-2">
-                {INTAKE_PROMPTS.map((prompt) => (
+                {(isPressInquiry ? PRESS_INTAKE_PROMPTS : INTAKE_PROMPTS).map((prompt) => (
                   <div key={prompt.title} className="border border-border bg-surface-hover/40 p-4">
                     <p className="text-sm font-medium text-foreground">{prompt.title}</p>
                     <p className="mt-2 text-sm leading-5 text-muted-foreground">{prompt.body}</p>
@@ -282,6 +311,7 @@ function ContactSalesForm() {
                     Company size *
                   </Label>
                   <Select
+                    required
                     value={formData.employees}
                     onValueChange={(value) => handleChange("employees", value)}
                   >
@@ -321,7 +351,7 @@ function ContactSalesForm() {
 
               <div className="space-y-2">
                 <Label htmlFor="message" className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
-                  Describe the operation *
+                  {isPressInquiry ? "Describe the media workflow *" : "Describe the operation *"}
                 </Label>
                 <Textarea
                   id="message"
@@ -329,16 +359,24 @@ function ContactSalesForm() {
                   rows={5}
                   value={formData.message}
                   onChange={(e) => handleChange("message", e.target.value)}
-                  placeholder="What departments, workflows, customers, data, handoffs, reports, or revenue constraints need AI support? What has been tried?"
+                  placeholder={isPressInquiry
+                    ? "What do you record, how much source material arrives, where does it live, what outputs do you need, and where does production slow down?"
+                    : "What departments, workflows, customers, data, handoffs, reports, or revenue constraints need AI support? What has been tried?"}
                 />
               </div>
+
+              {formError && (
+                <p role="alert" className="border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm leading-6 text-destructive">
+                  {formError}
+                </p>
+              )}
 
               <Button
                 type="submit"
                 disabled={submitState === "submitting"}
                 className="text-sm font-medium h-11 px-6 shadow-none bg-foreground text-background hover:bg-foreground/90 rounded-[6px]"
               >
-                {submitState === "submitting" ? "Sending…" : "Map My AI Operating System"}
+                {submitState === "submitting" ? "Sending…" : isPressInquiry ? "Scope My Press System" : "Map My AI Operating System"}
                 {submitState !== "submitting" && (
                   <ArrowRight className="ml-2 h-3.5 w-3.5" />
                 )}

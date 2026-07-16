@@ -100,6 +100,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     "sage",
     "vellum",
     "rfp-sentry",
+    "press",
   ].map((slug) => ({
     path: `/products/${slug}`,
     priority: 0.8,

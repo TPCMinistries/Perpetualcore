@@ -88,6 +88,9 @@ export function PublicMobileNav() {
               <Link href="/products/rfp-sentry" onClick={close} className="block px-4 py-2.5 text-sm text-muted-foreground hover:text-foreground hover:bg-accent rounded-sm transition-colors">
                 RFP Sentry
               </Link>
+              <Link href="/products/press" onClick={close} className="block px-4 py-2.5 text-sm text-muted-foreground hover:text-foreground hover:bg-accent rounded-sm transition-colors">
+                Press
+              </Link>
 
               <div className="border-t border-border/60 my-3" />
               <Link href="/fund" onClick={close} className="block px-4 py-2.5 text-sm font-medium text-foreground hover:bg-accent rounded-sm transition-colors">

@@ -19,6 +19,9 @@
     "playwright:install": "playwright install",
     "seed:rfp-demo": "tsx scripts/seed-rfp-demo-org.ts",
     "smoke:rfp-apis": "tsx scripts/smoke-test-rfp-apis.ts",
+    "press:worker": "tsx scripts/press/queue-worker.ts",
+    "press:type-check": "tsc --noEmit -p tsconfig.press.json",
+    "press:prepare": "tsx scripts/press/media-worker.ts",
     "types:supabase": "supabase gen types typescript --project-id hgxxxmtfmvguotkowxbu --schema public > lib/supabase/database.types.ts"
   },
   "dependencies": {

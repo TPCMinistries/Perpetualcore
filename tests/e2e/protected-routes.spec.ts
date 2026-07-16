@@ -11,6 +11,7 @@ test.describe("Protected Dashboard Routes", () => {
     "/dashboard/settings",
     "/dashboard/voice-memos",
     "/dashboard/meetings",
+    "/dashboard/press",
     "/dashboard/developer",
   ];
 
@@ -36,6 +37,9 @@ test.describe("Protected API Routes", () => {
     { method: "GET" as const, path: "/api/stripe/usage" },
     { method: "GET" as const, path: "/api/stripe/limits" },
     { method: "POST" as const, path: "/api/stripe/create-checkout-session" },
+    { method: "GET" as const, path: "/api/press/projects" },
+    { method: "GET" as const, path: "/api/press/projects/00000000-0000-0000-0000-000000000000/generations" },
+    { method: "POST" as const, path: "/api/press/projects/00000000-0000-0000-0000-000000000000/generations" },
   ];
 
   for (const { method, path } of protectedApis) {

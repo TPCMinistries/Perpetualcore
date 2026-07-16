@@ -1,48 +1,99 @@
 /**
- * /products/press — Press by Perpetual Core: media production system.
- * By invitation. Visual register matches vellum (app/products/vellum/page.tsx).
+ * /products/press — Press by Perpetual Core: invitation-only media system.
  */
 
 import Link from "next/link";
-import { ArrowRight } from "lucide-react";
+import {
+  ArrowRight,
+  Check,
+  FileVideo2,
+  Scissors,
+  Sparkles,
+  Waypoints,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Navbar } from "@/components/landing/Navbar";
 import { Footer } from "@/components/landing/Footer";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { productSchema, breadcrumbSchema } from "@/lib/seo/structured-data";
 import { PC_PRODUCTS } from "@/lib/seo/products";
-import { ContentSlot } from "@/components/slots/ContentSlot";
-import { getSlotContent } from "@/lib/slots/read";
 
 export const metadata = {
-  title: "Press by Perpetual Core — media production system",
+  title: "Press by Perpetual Core — owned media production system",
   description:
-    "The HeyGen, ElevenLabs, Opus Clips, and Descript jobs running as open-source models on hardware we own. $0/month to run. By invitation.",
+    "Turn long-form recordings into scored, captioned short-form media with an owned pipeline built around your archive, brand voice, and approval process.",
 };
 
-const REPLACES = [
-  { tool: "HeyGen", job: "Talking-head + avatar video", now: "SadTalker, on our hardware" },
-  { tool: "ElevenLabs", job: "Voice cloning + narration", now: "Kokoro / Qwen3-TTS, 3-second sample" },
-  { tool: "Opus Clips", job: "Long video → scored shorts", now: "Whisper + AI clip scoring, in-house" },
-  { tool: "Descript", job: "Transcript-driven editing", now: "Click-to-cut, silence removal, auto chapters" },
+const CTA_HREF = "/contact-sales?product=press&plan=product-subscription";
+
+const PROOF = [
+  { value: "2 GB", label: "maximum source upload" },
+  { value: "Private", label: "source and render storage" },
+  { value: "3", label: "vertical, square, and widescreen exports" },
+  { value: "1", label: "required human approval gate" },
 ];
 
-const STEPS = [
+const CONSOLIDATES = [
+  { tool: "Clip discovery", job: "Find and rank short-form moments", now: "In-house scoring with review" },
+  { tool: "Transcript review", job: "Correct copy and jump to source time", now: "One synchronized workspace" },
+  { tool: "Caption exports", job: "Render vertical, square, and widescreen variants", now: "One approved output queue" },
+  { tool: "Production tracking", job: "Track rights, status, approvals, and delivery", now: "One auditable project record" },
+];
+
+const RUN_STAGES = [
   {
-    name: "Ingest",
-    body: "Long-form video or audio comes in — a keynote, a podcast, a course recording. Whisper transcribes it in roughly 17 seconds per 3 minutes of source.",
+    icon: FileVideo2,
+    name: "Source",
+    detail: "A consented long-form video or audio recording enters once.",
+    result: "Private source archive",
   },
   {
-    name: "Cut",
-    body: "The transcript becomes the editing surface: click sentences to cut, silence and filler removed automatically — 22 seconds of dead air stripped from a 3-minute keynote without a human touching a timeline.",
+    icon: Scissors,
+    name: "Transcript",
+    detail: "Whisper transcribes it and the transcript becomes the edit surface.",
+    result: "Timestamped edit surface",
   },
   {
-    name: "Score and frame",
-    body: "Candidate clips are AI-scored for shareability, then face-tracked and framed into captioned 9:16 shorts.",
+    icon: Sparkles,
+    name: "Select",
+    detail: "Candidate moments are scored, then an operator adjusts timing and approves the cut.",
+    result: "Human-reviewed selection",
   },
   {
-    name: "Voice and distribute",
-    body: "Voice-cloned narration batches unattended across long runs — a 63-script course narrated in one pass — and per-brand caption and ad packs go out across up to seven brand voices.",
+    icon: Waypoints,
+    name: "Output",
+    detail: "Approved clips produce captioned vertical, square, and widescreen variants.",
+    result: "Three output ratios",
+  },
+];
+
+const FIT = [
+  {
+    title: "You already record",
+    body: "Keynotes, podcasts, courses, briefings, interviews, or founder updates are accumulating in an archive.",
+  },
+  {
+    title: "Production repeats",
+    body: "Your team keeps transcribing, finding moments, reframing, captioning, and packaging the same way.",
+  },
+  {
+    title: "You want to own the workflow",
+    body: "The goal is a documented system under your brand—not another seat-based editing subscription.",
+  },
+];
+
+const INSTALL_STEPS = [
+  {
+    name: "Map",
+    body: "We inspect the archive, brand rules, approval points, target channels, and the work your team repeats.",
+  },
+  {
+    name: "Prove",
+    body: "One representative recording runs through the pipeline so quality, speed, and human review are visible before expansion.",
+  },
+  {
+    name: "Install",
+    body: "The approved workflow is configured, documented, and handed to the operators who will own it.",
   },
 ];
 
@@ -50,58 +101,49 @@ function SectionRail({ index, label }: { index: string; label: string }) {
   return (
     <div>
       <p className="eyebrow mb-3">§ {index}</p>
-      <h2 className="text-xs uppercase tracking-[0.18em] font-mono text-foreground">{label}</h2>
+      <h2 className="font-mono text-xs uppercase tracking-[0.18em] text-foreground">{label}</h2>
     </div>
   );
 }
 
-function PhoneDemo({ src, label }: { src: string; label: string }) {
+function PhoneDemo({
+  src,
+  poster,
+  label,
+  description,
+}: {
+  src: string;
+  poster: string;
+  label: string;
+  description: string;
+}) {
   return (
-    <div className="flex flex-col items-center gap-4">
-      <div className="w-[220px] sm:w-[240px] rounded-[28px] border border-border bg-card p-2 shadow-sm">
-        <div className="rounded-[20px] overflow-hidden bg-black aspect-[9/16]">
+    <figure className="mx-auto w-full max-w-[280px]">
+      <div className="rounded-[30px] border border-border bg-card p-2 shadow-sm">
+        <div className="aspect-[9/16] overflow-hidden rounded-[22px] bg-black">
           <video
             src={src}
-            autoPlay
-            loop
+            poster={poster}
+            controls
+            controlsList="nodownload noremoteplayback"
+            disablePictureInPicture
             muted
             playsInline
+            preload="metadata"
             className="h-full w-full object-cover"
             aria-label={label}
           />
         </div>
       </div>
-      <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">{label}</p>
-    </div>
+      <figcaption className="mt-5">
+        <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-foreground">{label}</p>
+        <p className="mt-2 text-sm leading-6 text-muted-foreground">{description}</p>
+      </figcaption>
+    </figure>
   );
 }
 
-/**
- * "Latest from the build" — section chrome and all disappears while the
- * pc-press-feed slot is empty (the slot read is cached, so the extra call
- * inside ContentSlot dedupes).
- */
-async function LatestFromBuildSection() {
-  const content = await getSlotContent("pc-press-feed");
-  if (!content || (content.type === "moments" && content.items.length === 0)) return null;
-  return (
-    <section className="border-t border-border py-24 sm:py-32">
-      <div className="container mx-auto px-6 sm:px-8">
-        <div className="grid lg:grid-cols-[280px_1fr] gap-12 lg:gap-20">
-          <SectionRail index="05" label="Latest from the build" />
-          <div className="max-w-2xl">
-            <h3 className="text-3xl sm:text-4xl lg:text-5xl font-semibold leading-[1.1] tracking-[-0.025em] text-foreground mb-10">
-              Shipped this week.
-            </h3>
-            <ContentSlot slotKey="pc-press-feed" />
-          </div>
-        </div>
-      </div>
-    </section>
-  );
-}
-
-export default function CreatorStudioPage() {
+export default function PressPage() {
   return (
     <div className="min-h-screen bg-background">
       <JsonLd
@@ -114,185 +156,240 @@ export default function CreatorStudioPage() {
           ]),
         ]}
       />
+
+      <a
+        href="#main-content"
+        className="sr-only fixed left-4 top-4 z-[100] rounded-sm bg-foreground px-4 py-3 text-sm text-background focus:not-sr-only"
+      >
+        Skip to Press
+      </a>
       <Navbar />
 
-      {/* Hero */}
-      <section className="container mx-auto px-6 sm:px-8 pt-20 pb-20 sm:pt-28 sm:pb-28">
-        <div className="max-w-5xl">
-          <div className="flex items-center gap-3 mb-12">
+      <main id="main-content">
+        {/* Hero */}
+        <section className="container mx-auto px-6 pb-16 pt-16 sm:px-8 sm:pb-24 sm:pt-24">
+          <div className="mb-10 flex flex-wrap items-center gap-3">
             <span aria-hidden className="block h-1.5 w-1.5 bg-status-invite" />
-            <p className="eyebrow !text-foreground/70">§ 02 · Products · Press</p>
+            <p className="eyebrow !text-foreground/70">Product 09 · Press</p>
+            <span className="border border-border bg-surface-hover px-2 py-1 font-mono text-[9px] uppercase tracking-[0.18em] text-muted-foreground">
+              By invitation
+            </span>
           </div>
 
-          <h1 className="display-hero text-[40px] sm:text-[56px] lg:text-[80px] text-foreground mb-12 max-w-5xl leading-[1.05]">
-            We replaced four subscriptions with{" "}
-            <span className="italic text-foreground/85">a system.</span>
-          </h1>
-
-          <div className="space-y-5 text-lg sm:text-xl text-muted-foreground leading-[1.55] mb-12 max-w-3xl">
-            <p>
-              Press is the media production system Perpetual Core built and operates for
-              its own content — the HeyGen, ElevenLabs, Opus Clips, and Descript jobs running as
-              open-source models on hardware we own. It runs long-form video into scored, captioned
-              shorts, clones a voice from a 3-second sample, and edits from the transcript instead
-              of a timeline.
-            </p>
-            <p>
-              <span className="text-foreground font-medium">$0/month to run.</span> The same
-              engineering we apply for clients who want the same system installed under their own
-              brand.
-            </p>
-          </div>
-
-          <div className="flex flex-col sm:flex-row items-start gap-4">
-            <Button size="lg" asChild className="text-sm font-medium px-7 h-11 shadow-none bg-foreground text-background hover:bg-foreground/90 rounded-[6px]">
-              <Link href="/contact-sales?product=press">Request an invitation <ArrowRight className="ml-2 h-4 w-4" /></Link>
-            </Button>
-            <Link href="#how-it-works" className="inline-flex items-center text-sm font-medium text-foreground hover:text-primary transition-colors py-3 border-b border-foreground/20 hover:border-primary">
-              See how it works <ArrowRight className="ml-1.5 h-3.5 w-3.5" />
-            </Link>
-          </div>
-        </div>
-      </section>
-
-      {/* What it replaces */}
-      <section className="border-t border-border py-24 sm:py-32 bg-surface-hover/40">
-        <div className="container mx-auto px-6 sm:px-8">
-          <div className="grid lg:grid-cols-[280px_1fr] gap-12 lg:gap-20 mb-12">
-            <SectionRail index="01" label="What it replaces" />
-            <div className="max-w-2xl">
-              <h3 className="text-3xl sm:text-4xl lg:text-5xl font-semibold leading-[1.1] tracking-[-0.025em] text-foreground">
-                Four vendor subscriptions collapse into one system.
-              </h3>
-            </div>
-          </div>
-
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 border border-border bg-card divide-y sm:divide-y-0 sm:divide-x divide-border">
-            {REPLACES.map((r, i) => (
-              <div key={r.tool} className={`p-6 sm:p-7 flex flex-col ${i >= 2 ? "sm:border-t lg:border-t-0" : ""} border-border`}>
-                <span className="font-mono text-[10px] tracking-[0.18em] text-muted-foreground mb-10">
-                  0{i + 1}
-                </span>
-                <p className="text-base font-semibold leading-[1.3] tracking-[-0.01em] text-foreground mb-2">
-                  {r.tool}
-                </p>
-                <p className="text-sm text-muted-foreground leading-[1.5] mb-4">{r.job}</p>
-                <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-primary mt-auto pt-4 border-t border-border/60">
-                  {r.now}
-                </p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Demo */}
-      <section className="border-t border-border py-24 sm:py-32">
-        <div className="container mx-auto px-6 sm:px-8">
-          <div className="grid lg:grid-cols-[280px_1fr] gap-12 lg:gap-20 mb-16">
-            <SectionRail index="02" label="Output" />
-            <div className="max-w-2xl">
-              <h3 className="text-3xl sm:text-4xl lg:text-5xl font-semibold leading-[1.1] tracking-[-0.025em] text-foreground mb-6">
-                Two clips, same source, same system.
-              </h3>
-              <p className="text-base text-muted-foreground leading-[1.7]">
-                Face-tracked framing, burned captions, AI-scored clip selection. The caption style
-                changes per brand voice — the pipeline underneath does not.
+          <div className="grid items-end gap-14 lg:grid-cols-[minmax(0,1fr)_360px] lg:gap-16">
+            <div className="max-w-5xl">
+              <h1 className="display-hero max-w-5xl text-[42px] leading-[1.02] text-foreground sm:text-[60px] lg:text-[76px]">
+                Turn the archive into a media system you own.
+              </h1>
+              <p className="mt-9 max-w-3xl text-lg leading-[1.65] text-muted-foreground sm:text-xl">
+                Press turns long-form recordings into scored, captioned short-form media—using
+                your archive, your brand rules, and an approval process your operators control.
               </p>
-            </div>
-          </div>
-
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-10 sm:gap-16">
-            <PhoneDemo src="/media/press/demo-punchy.mp4" label="Caption style — punchy" />
-            <PhoneDemo src="/media/press/demo-serif.mp4" label="Caption style — serif" />
-          </div>
-        </div>
-      </section>
-
-      {/* How it works */}
-      <section id="how-it-works" className="border-t border-border py-24 sm:py-32 bg-surface-hover/40">
-        <div className="container mx-auto px-6 sm:px-8">
-          <div className="grid lg:grid-cols-[280px_1fr] gap-12 lg:gap-20 mb-12">
-            <SectionRail index="03" label="How it works" />
-            <div className="max-w-2xl">
-              <h3 className="text-3xl sm:text-4xl lg:text-5xl font-semibold leading-[1.1] tracking-[-0.025em] text-foreground">
-                Transcript in, distributed content out.
-              </h3>
-            </div>
-          </div>
-
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 border border-border bg-card divide-y sm:divide-y-0 sm:divide-x divide-border">
-            {STEPS.map((s, i) => (
-              <div key={s.name} className={`p-6 sm:p-7 flex flex-col ${i >= 2 ? "sm:border-t lg:border-t-0" : ""} border-border`}>
-                <span className="font-mono text-[10px] tracking-[0.18em] text-muted-foreground mb-10">
-                  0{i + 1}
-                </span>
-                <p className="text-base font-semibold leading-[1.3] tracking-[-0.01em] text-foreground mb-4">
-                  {s.name}.
-                </p>
-                <p className="text-sm text-muted-foreground leading-[1.65]">{s.body}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Honest engineering */}
-      <section className="border-t border-border py-24 sm:py-32">
-        <div className="container mx-auto px-6 sm:px-8">
-          <div className="grid lg:grid-cols-[280px_1fr] gap-12 lg:gap-20">
-            <SectionRail index="04" label="The engineering" />
-            <div className="max-w-2xl">
-              <h3 className="text-3xl sm:text-4xl lg:text-5xl font-semibold leading-[1.1] tracking-[-0.025em] text-foreground mb-10">
-                Open models. Our hardware. No per-seat rent.
-              </h3>
-              <div className="space-y-5 text-base text-muted-foreground leading-[1.7]">
-                <p>
-                  The stack is Apache- and MIT-licensed open models — Whisper, Kokoro, Qwen3-TTS,
-                  SadTalker — running on Apple Silicon we own, orchestrated by Claude agents. No
-                  HeyGen render queue, no ElevenLabs character limit, no per-seat Descript license.
-                </p>
-                <p>
-                  A performance loop closes the pipeline: real analytics CSVs feed back into clip
-                  selection, so the system gets better at picking winners instead of running the
-                  same scoring heuristic forever.
-                </p>
-                <p className="text-foreground font-medium">
-                  Nothing here is a demo. It runs our own content pipeline today.
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Closing CTA */}
-      <section className="border-t border-border py-24 sm:py-32 bg-surface-hover/40">
-        <div className="container mx-auto px-6 sm:px-8">
-          <div className="grid lg:grid-cols-[280px_1fr] gap-12 lg:gap-20">
-            <SectionRail index="—" label="By invitation" />
-            <div className="max-w-2xl">
-              <h3 className="text-3xl sm:text-4xl lg:text-5xl font-semibold leading-[1.1] tracking-[-0.025em] text-foreground mb-6">
-                Press is not self-serve. It is a system we build for operators.
-              </h3>
-              <p className="text-base text-muted-foreground leading-[1.7] mb-10">
-                We install the same pipeline under your brand voice, on your archive, pointed at
-                your distribution. Tell us the archive you have and the channels you publish to.
+              <p className="mt-5 max-w-3xl text-base leading-[1.7] text-muted-foreground">
+                <span className="font-medium text-foreground">No recurring model or editing-seat subscription after installation.</span>{" "}
+                Hardware, implementation, maintenance, and any third-party distribution costs are scoped separately.
               </p>
-              <div className="flex flex-col sm:flex-row items-start gap-5">
-                <Button asChild className="text-sm font-medium h-10 px-5 shadow-none bg-foreground text-background hover:bg-foreground/90 rounded-[6px]">
-                  <Link href="/contact-sales?product=press">Request an invitation <ArrowRight className="ml-2 h-3.5 w-3.5" /></Link>
+              <div className="mt-10 flex flex-col items-start gap-4 sm:flex-row">
+                <Button size="lg" asChild className="h-11 rounded-[6px] bg-foreground px-7 text-sm font-medium text-background shadow-none hover:bg-foreground/90">
+                  <Link href={CTA_HREF}>Scope a Press system <ArrowRight className="ml-2 h-4 w-4" /></Link>
                 </Button>
-                <Link href="/studio/engagements" className="inline-flex items-center text-sm font-medium text-foreground hover:text-primary transition-colors py-2">
-                  See engagements <ArrowRight className="ml-1.5 h-3.5 w-3.5" />
+                <Link href="#system-view" className="inline-flex min-h-11 items-center border-b border-foreground/20 text-sm font-medium text-foreground transition-colors hover:border-primary hover:text-primary">
+                  See a real run <ArrowRight className="ml-1.5 h-3.5 w-3.5" />
                 </Link>
               </div>
             </div>
-          </div>
-        </div>
-      </section>
 
-      <LatestFromBuildSection />
+            <aside className="border border-foreground/15 bg-foreground p-6 text-background sm:p-7" aria-label="Press system summary">
+              <div className="flex items-center justify-between gap-4 border-b border-background/20 pb-5">
+                <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-background/60">Owned pipeline</p>
+                <span className="flex items-center gap-2 font-mono text-[9px] uppercase tracking-[0.18em] text-background/70">
+                  <span aria-hidden className="h-1.5 w-1.5 bg-emerald-400" /> Human approved
+                </span>
+              </div>
+              <ol className="mt-6 space-y-5">
+                {["One source recording", "Transcript-led edit", "Scored short-form moments", "Brand-ready output pack"].map((item, index) => (
+                  <li key={item} className="flex items-center gap-4">
+                    <span className="font-mono text-[10px] text-background/45">0{index + 1}</span>
+                    <span className="text-sm text-background/90">{item}</span>
+                  </li>
+                ))}
+              </ol>
+              <p className="mt-7 border-t border-background/20 pt-5 text-xs leading-5 text-background/55">
+                The authenticated Press console supports direct upload, transcript review, clip approval,
+                secure export, and a human-controlled publishing record.
+              </p>
+            </aside>
+          </div>
+        </section>
+
+        {/* Proof strip */}
+        <section className="border-y border-border" aria-label="Observed Press production metrics">
+          <div className="container mx-auto grid grid-cols-2 px-6 sm:px-8 lg:grid-cols-4">
+            {PROOF.map((proof, index) => (
+              <div key={proof.label} className={`py-7 sm:py-9 ${index % 2 === 0 ? "pr-5" : "border-l border-border pl-5"} ${index > 1 ? "border-t lg:border-t-0" : ""} lg:border-l lg:border-t-0 lg:px-7 lg:first:border-l-0 lg:first:pl-0`}>
+                <p className="text-2xl font-semibold tracking-[-0.03em] text-foreground sm:text-3xl">{proof.value}</p>
+                <p className="mt-2 max-w-[180px] text-xs leading-5 text-muted-foreground">{proof.label}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* Workflow consolidation */}
+        <section className="border-b border-border bg-surface-hover/40 py-20 sm:py-28">
+          <div className="container mx-auto px-6 sm:px-8">
+            <div className="mb-12 grid gap-8 lg:grid-cols-[280px_1fr] lg:gap-20">
+              <SectionRail index="01" label="What it consolidates" />
+              <h3 className="max-w-3xl text-3xl font-semibold leading-[1.1] tracking-[-0.025em] text-foreground sm:text-4xl lg:text-5xl">
+                Four recurring production jobs move into one owned workflow.
+              </h3>
+            </div>
+            <div className="grid gap-px border border-border bg-border sm:grid-cols-2 lg:grid-cols-4">
+              {CONSOLIDATES.map((item, index) => (
+                <article key={item.tool} className="flex min-h-[230px] flex-col bg-card p-6 sm:p-7">
+                  <span className="font-mono text-[10px] tracking-[0.18em] text-muted-foreground">0{index + 1}</span>
+                  <h4 className="mt-9 text-base font-semibold tracking-[-0.01em] text-foreground">{item.tool}</h4>
+                  <p className="mt-2 text-sm leading-6 text-muted-foreground">{item.job}</p>
+                  <p className="mt-auto border-t border-border/60 pt-4 font-mono text-[10px] uppercase tracking-[0.16em] text-primary">{item.now}</p>
+                </article>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* System view */}
+        <section id="system-view" className="scroll-mt-24 border-b border-border py-20 sm:py-28">
+          <div className="container mx-auto px-6 sm:px-8">
+            <div className="mb-12 grid gap-8 lg:grid-cols-[280px_1fr] lg:gap-20">
+              <SectionRail index="02" label="System view" />
+              <div className="max-w-3xl">
+                <h3 className="text-3xl font-semibold leading-[1.1] tracking-[-0.025em] text-foreground sm:text-4xl lg:text-5xl">One source. A visible production chain.</h3>
+                <p className="mt-6 max-w-2xl text-base leading-[1.7] text-muted-foreground">
+                  These are observed steps from the working pipeline—not a mock dashboard standing in for a product that does not exist.
+                </p>
+              </div>
+            </div>
+            <ol className="grid gap-px border border-border bg-border lg:grid-cols-4">
+              {RUN_STAGES.map((stage, index) => {
+                const Icon = stage.icon;
+                return (
+                  <li key={stage.name} className="relative bg-foreground p-6 text-background sm:p-7">
+                    <div className="flex items-center justify-between">
+                      <Icon className="h-5 w-5 text-background/75" aria-hidden />
+                      <span className="font-mono text-[10px] text-background/35">0{index + 1}</span>
+                    </div>
+                    <h4 className="mt-10 text-lg font-semibold">{stage.name}</h4>
+                    <p className="mt-3 min-h-[72px] text-sm leading-6 text-background/60">{stage.detail}</p>
+                    <p className="mt-6 border-t border-background/20 pt-4 font-mono text-[10px] uppercase tracking-[0.16em] text-background/85">{stage.result}</p>
+                  </li>
+                );
+              })}
+            </ol>
+          </div>
+        </section>
+
+        {/* Output */}
+        <section className="border-b border-border bg-surface-hover/40 py-20 sm:py-28">
+          <div className="container mx-auto px-6 sm:px-8">
+            <div className="mb-14 grid gap-8 lg:grid-cols-[280px_1fr] lg:gap-20">
+              <SectionRail index="03" label="Output proof" />
+              <div className="max-w-3xl">
+                <h3 className="text-3xl font-semibold leading-[1.1] tracking-[-0.025em] text-foreground sm:text-4xl lg:text-5xl">Two treatments from the same source.</h3>
+                <p className="mt-6 max-w-2xl text-base leading-[1.7] text-muted-foreground">
+                  The framing and burned captions change with the brand preset; the production chain underneath stays consistent.
+                </p>
+                <p className="mt-3 text-sm leading-6 text-muted-foreground">
+                  These published samples demonstrate framing and captions and contain no audio track. A consented voice example will be added before Press is presented as a complete public demo.
+                </p>
+              </div>
+            </div>
+            <div className="grid items-start gap-12 sm:grid-cols-2 sm:gap-10 lg:mx-auto lg:max-w-3xl">
+              <PhoneDemo
+                src="/media/press/demo-punchy.mp4"
+                poster="/media/press/demo-punchy-poster.jpg"
+                label="Punchy caption preset · 00:38"
+                description="High-contrast captions and vertical framing for a faster editorial register."
+              />
+              <PhoneDemo
+                src="/media/press/demo-serif.mp4"
+                poster="/media/press/demo-serif-poster.jpg"
+                label="Serif caption preset · 00:30"
+                description="A quieter typography treatment from the same source and the same underlying pipeline."
+              />
+            </div>
+          </div>
+        </section>
+
+        {/* Fit */}
+        <section className="border-b border-border py-20 sm:py-28">
+          <div className="container mx-auto px-6 sm:px-8">
+            <div className="grid gap-10 lg:grid-cols-[280px_1fr] lg:gap-20">
+              <SectionRail index="04" label="Good fit" />
+              <div>
+                <h3 className="max-w-3xl text-3xl font-semibold leading-[1.1] tracking-[-0.025em] text-foreground sm:text-4xl lg:text-5xl">Built for archive-rich operators, not one-off edits.</h3>
+                <div className="mt-12 grid gap-px border border-border bg-border md:grid-cols-3">
+                  {FIT.map((item) => (
+                    <article key={item.title} className="bg-card p-6 sm:p-7">
+                      <Check className="h-4 w-4 text-primary" aria-hidden />
+                      <h4 className="mt-7 text-base font-semibold text-foreground">{item.title}</h4>
+                      <p className="mt-3 text-sm leading-6 text-muted-foreground">{item.body}</p>
+                    </article>
+                  ))}
+                </div>
+                <p className="mt-6 max-w-3xl text-sm leading-6 text-muted-foreground">
+                  Press is not a fit for anonymous voice cloning, fully unattended publishing, or a single video that simply needs an editor. Consent, retention, and human approval rules are defined before installation.
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Installation */}
+        <section id="how-it-works" className="scroll-mt-24 border-b border-border bg-surface-hover/40 py-20 sm:py-28">
+          <div className="container mx-auto px-6 sm:px-8">
+            <div className="grid gap-10 lg:grid-cols-[280px_1fr] lg:gap-20">
+              <SectionRail index="05" label="How it starts" />
+              <div>
+                <h3 className="max-w-3xl text-3xl font-semibold leading-[1.1] tracking-[-0.025em] text-foreground sm:text-4xl lg:text-5xl">Map one recording before installing the whole system.</h3>
+                <ol className="mt-12 border-y border-border">
+                  {INSTALL_STEPS.map((step, index) => (
+                    <li key={step.name} className="grid gap-4 border-b border-border py-7 last:border-b-0 sm:grid-cols-[56px_140px_1fr] sm:items-start">
+                      <span className="font-mono text-[10px] text-muted-foreground">0{index + 1}</span>
+                      <h4 className="text-base font-semibold text-foreground">{step.name}</h4>
+                      <p className="max-w-2xl text-sm leading-6 text-muted-foreground">{step.body}</p>
+                    </li>
+                  ))}
+                </ol>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Closing CTA */}
+        <section className="bg-foreground py-20 text-background sm:py-28">
+          <div className="container mx-auto px-6 sm:px-8">
+            <div className="grid gap-10 lg:grid-cols-[280px_1fr] lg:gap-20">
+              <div>
+                <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-background/50">§ 06</p>
+                <h2 className="mt-3 font-mono text-xs uppercase tracking-[0.18em] text-background">By invitation</h2>
+              </div>
+              <div className="max-w-3xl">
+                <h3 className="text-3xl font-semibold leading-[1.08] tracking-[-0.025em] sm:text-4xl lg:text-5xl">Bring one recording. We’ll map the first run.</h3>
+                <p className="mt-6 max-w-2xl text-base leading-[1.7] text-background/65">
+                  Tell us what you record, where the archive lives, which channels matter, and where production slows down. We’ll reply with what should be automated, what should stay human, and the right first proof.
+                </p>
+                <div className="mt-10 flex flex-col items-start gap-5 sm:flex-row">
+                  <Button asChild className="h-11 rounded-[6px] bg-background px-6 text-sm font-medium text-foreground shadow-none hover:bg-background/90">
+                    <Link href={CTA_HREF}>Scope my media system <ArrowRight className="ml-2 h-3.5 w-3.5" /></Link>
+                  </Button>
+                  <Link href="/studio/engagements" className="inline-flex min-h-11 items-center text-sm font-medium text-background/75 transition-colors hover:text-background">
+                    See installation engagements <ArrowRight className="ml-1.5 h-3.5 w-3.5" />
+                  </Link>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+      </main>
 
       <Footer />
     </div>
