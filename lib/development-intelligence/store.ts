@@ -1,5 +1,4 @@
 import { createHmac } from "node:crypto";
-import type { SupabaseClient } from "@supabase/supabase-js";
 import { createAdminClient } from "@/lib/supabase/server";
 import type {
   AnalysisRequest,
@@ -9,8 +8,8 @@ import type { AnalysisRun } from "./analyzer";
 import { HDI_PROMPT_VERSION, HDI_SCHEMA_VERSION } from "./analyzer";
 import { getRubric } from "./rubrics";
 
-function getAdmin(): SupabaseClient {
-  return createAdminClient() as unknown as SupabaseClient;
+function getAdmin() {
+  return createAdminClient();
 }
 
 export interface RequestIdentity {
@@ -278,7 +277,7 @@ export async function reviewAnalysis(
     p_reviewer_id: identity.userId,
     p_analysis_id: analysisId,
     p_status: review.status,
-    p_note: review.note || null,
+    p_note: review.note || "",
   });
 
   if (error) throw new Error(error.message);
