@@ -29,6 +29,8 @@ import { SourceHealth, type SourceHealthItem } from './_components/SourceHealth'
 import { OutcomeStrip, type OutcomeMetric } from './_components/OutcomeStrip';
 import { ActionRunList } from './_components/ActionRunList';
 import { VerificationInbox } from './_components/VerificationInbox';
+import { DevelopmentSummary } from './_components/DevelopmentSummary';
+import { getHdiOperationalSummary } from '@/lib/hq/development-intelligence';
 
 function formatOutcomeValue(value: number, unit: string): string {
   if (unit === 'usd') {
@@ -40,11 +42,12 @@ function formatOutcomeValue(value: number, unit: string): string {
 }
 
 export default async function HqPage() {
-  const [snapshot, queueItems, sparkSeries, operations] = await Promise.all([
+  const [snapshot, queueItems, sparkSeries, operations, development] = await Promise.all([
     getHqSnapshot(),
     getQueueItems(),
     getSparkSeries(),
     getHqOperationalStatus(),
+    getHdiOperationalSummary(),
   ]);
 
   const headline = parsePnlHeadline(snapshot.pnlMd);
@@ -183,6 +186,10 @@ export default async function HqPage() {
 
       <Section id="outcomes" eyebrow="Verify" title="Measured outcomes">
         <OutcomeStrip metrics={outcomes} />
+      </Section>
+
+      <Section id="development" eyebrow="Develop" title="Human development intelligence">
+        <DevelopmentSummary summary={development} />
       </Section>
 
       <Section id="board" eyebrow="Board" title="Portfolio at a glance">

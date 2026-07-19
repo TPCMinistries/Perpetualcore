@@ -7,6 +7,7 @@ const NAV = [
   { href: '#execution', label: 'Execute', icon: StrategyIcon },
   { href: '#sources', label: 'Sources', icon: ComplianceIcon },
   { href: '#outcomes', label: 'Outcomes', icon: BoardIcon },
+  { href: '#development', label: 'Develop', icon: StrategyIcon },
   { href: '#board', label: 'Board', icon: BoardIcon },
   { href: '#strategy', label: 'Strategy', icon: StrategyIcon },
   { href: '#marketing', label: 'Marketing', icon: MarketingIcon },

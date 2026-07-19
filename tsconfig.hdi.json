@@ -1,0 +1,18 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "incremental": false,
+    "skipLibCheck": true
+  },
+  "include": [
+    "next-env.d.ts",
+    "lib/development-intelligence/**/*.ts",
+    "lib/hq/development-intelligence.ts",
+    "app/api/development-intelligence/**/*.ts",
+    "app/dashboard/development/**/*.tsx",
+    "components/development-intelligence/**/*.tsx",
+    "app/hq/_components/DevelopmentSummary.tsx",
+    "tests/unit/development-intelligence.test.ts"
+  ],
+  "exclude": ["node_modules"]
+}
