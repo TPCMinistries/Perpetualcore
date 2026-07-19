@@ -28,6 +28,52 @@ export const analysisRequestSchema = z
   })
   .strict();
 
+const mediaTypes = [
+  "audio/mpeg",
+  "audio/mp3",
+  "audio/mp4",
+  "audio/x-m4a",
+  "audio/wav",
+  "audio/x-wav",
+  "audio/webm",
+  "video/mp4",
+  "video/webm",
+] as const;
+
+export const mediaIngestionRequestSchema = z
+  .object({
+    title: z.string().trim().min(3).max(160),
+    lens: developmentLensSchema,
+    occurredAt: z.string().datetime().optional(),
+    consentConfirmed: z.literal(true),
+    participantLabels: z
+      .array(z.string().trim().min(1).max(80))
+      .max(25)
+      .default([]),
+    fileName: z.string().trim().min(1).max(255),
+    fileSize: z.number().int().min(1).max(25 * 1024 * 1024),
+    contentType: z.enum(mediaTypes),
+  })
+  .strict();
+
+export const mediaProcessRequestSchema = z
+  .object({
+    ingestionId: z.string().uuid(),
+  })
+  .strict();
+
+export const timedTranscriptSegmentSchema = z
+  .object({
+    speakerLabel: z.string().trim().min(1).max(80),
+    startMs: z.number().int().nonnegative(),
+    endMs: z.number().int().nonnegative(),
+    text: z.string().trim().min(1),
+  })
+  .strict()
+  .refine((value) => value.endMs >= value.startMs, {
+    message: "endMs must be greater than or equal to startMs",
+  });
+
 export const evidenceObservationSchema = z
   .object({
     criterionKey: z.string().trim().min(1).max(80),
@@ -111,6 +157,12 @@ export const humanReviewSchema = z
   });
 
 export type AnalysisRequest = z.infer<typeof analysisRequestSchema>;
+export type MediaIngestionRequest = z.infer<typeof mediaIngestionRequestSchema>;
+export type TimedTranscriptSegment = z.infer<typeof timedTranscriptSegmentSchema>;
+export type DevelopmentAnalysisInput = Omit<AnalysisRequest, "sourceType"> & {
+  sourceType: "transcript_paste" | "media_upload";
+  timedSegments?: TimedTranscriptSegment[];
+};
 export type DevelopmentAnalysisOutput = z.infer<
   typeof developmentAnalysisOutputSchema
 >;

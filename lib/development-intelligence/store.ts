@@ -1,8 +1,9 @@
 import { createHmac } from "node:crypto";
 import { createAdminClient } from "@/lib/supabase/server";
 import type {
-  AnalysisRequest,
+  DevelopmentAnalysisInput,
   DevelopmentAnalysisOutput,
+  MediaIngestionRequest,
 } from "./schemas";
 import type { AnalysisRun } from "./analyzer";
 import { HDI_PROMPT_VERSION, HDI_SCHEMA_VERSION } from "./analyzer";
@@ -39,7 +40,7 @@ export interface DevelopmentAnalysisRecord {
 
 export async function beginAnalysisSession(
   identity: RequestIdentity,
-  request: AnalysisRequest
+  request: DevelopmentAnalysisInput
 ): Promise<string> {
   const hashSecret = process.env.HDI_SOURCE_HASH_SECRET;
   if (!hashSecret || hashSecret.length < 32) {
@@ -70,7 +71,7 @@ export async function beginAnalysisSession(
 export async function persistAnalysis(
   identity: RequestIdentity,
   sessionId: string,
-  request: AnalysisRequest,
+  request: DevelopmentAnalysisInput,
   run: AnalysisRun
 ): Promise<string> {
   const supabase = getAdmin();
@@ -122,6 +123,195 @@ export async function persistAnalysis(
   }
 
   return analysisId as string;
+}
+
+export interface MediaIngestionClaim {
+  sessionId: string;
+  storageBucket: string;
+  storagePath: string;
+  contentType: MediaIngestionRequest["contentType"];
+  byteSize: number;
+  title: string;
+  lens: DevelopmentAnalysisInput["lens"];
+  occurredAt: string;
+}
+
+export async function beginMediaIngestion(
+  identity: RequestIdentity,
+  request: MediaIngestionRequest,
+  sourceHash: string,
+  extension: string
+): Promise<{ sessionId: string; ingestionId: string; storagePath: string }> {
+  const { data, error } = await getAdmin().rpc("hdi_begin_media_ingestion", {
+    p_organization_id: identity.organizationId,
+    p_requested_by: identity.userId,
+    p_session: {
+      title: request.title,
+      lens: request.lens,
+      source_hash: sourceHash,
+      participant_labels: request.participantLabels,
+      occurred_at: request.occurredAt || new Date().toISOString(),
+    },
+    p_media: {
+      content_type: request.contentType,
+      byte_size: request.fileSize,
+      extension,
+    },
+  });
+  if (error || !data || typeof data !== "object") {
+    throw new Error(`Unable to create HDI media ingestion: ${error?.message || "unknown error"}`);
+  }
+  const value = data as Record<string, unknown>;
+  if (
+    typeof value.session_id !== "string" ||
+    typeof value.ingestion_id !== "string" ||
+    typeof value.storage_path !== "string"
+  ) {
+    throw new Error("HDI media ingestion returned an invalid record");
+  }
+  return {
+    sessionId: value.session_id,
+    ingestionId: value.ingestion_id,
+    storagePath: value.storage_path,
+  };
+}
+
+export async function claimMediaIngestion(
+  identity: RequestIdentity,
+  ingestionId: string
+): Promise<MediaIngestionClaim> {
+  const { data, error } = await getAdmin().rpc("hdi_claim_media_ingestion", {
+    p_organization_id: identity.organizationId,
+    p_requested_by: identity.userId,
+    p_ingestion_id: ingestionId,
+  });
+  if (error || !data || typeof data !== "object") {
+    throw new Error(`Unable to claim HDI media ingestion: ${error?.message || "unknown error"}`);
+  }
+  const value = data as Record<string, unknown>;
+  const requiredStrings = [
+    "session_id", "storage_bucket", "storage_path", "content_type",
+    "title", "lens", "occurred_at",
+  ] as const;
+  if (
+    requiredStrings.some((key) => typeof value[key] !== "string") ||
+    typeof value.byte_size !== "number"
+  ) {
+    throw new Error("HDI media claim returned invalid metadata");
+  }
+  return {
+    sessionId: value.session_id as string,
+    storageBucket: value.storage_bucket as string,
+    storagePath: value.storage_path as string,
+    contentType: value.content_type as MediaIngestionRequest["contentType"],
+    byteSize: value.byte_size as number,
+    title: value.title as string,
+    lens: value.lens as DevelopmentAnalysisInput["lens"],
+    occurredAt: value.occurred_at as string,
+  };
+}
+
+export async function finalizeMediaIngestion(
+  identity: RequestIdentity,
+  ingestionId: string,
+  status: "completed" | "failed" | "expired",
+  errorCode?: string
+): Promise<void> {
+  const { error } = await getAdmin().rpc("hdi_finalize_media_ingestion", {
+    p_organization_id: identity.organizationId,
+    p_requested_by: identity.userId,
+    p_ingestion_id: ingestionId,
+    p_status: status,
+    p_error_code: errorCode,
+  });
+  if (error) throw new Error(`Unable to finalize HDI media ingestion: ${error.message}`);
+}
+
+export interface ExpiredMediaIngestion {
+  ingestionId: string;
+  organizationId: string;
+  createdBy: string;
+  storageBucket: string;
+  storagePath: string;
+}
+
+export async function listExpiredMediaIngestions(
+  limit: number
+): Promise<ExpiredMediaIngestion[]> {
+  const { data, error } = await getAdmin().rpc(
+    "hdi_list_expired_media_ingestions",
+    { p_limit: limit }
+  );
+  if (error) throw new Error(`Unable to list expired HDI media: ${error.message}`);
+  if (!Array.isArray(data)) return [];
+  return data.flatMap((item) => {
+    if (!item || typeof item !== "object") return [];
+    const value = item as Record<string, unknown>;
+    if (
+      typeof value.ingestion_id !== "string" ||
+      typeof value.organization_id !== "string" ||
+      typeof value.created_by !== "string" ||
+      typeof value.storage_bucket !== "string" ||
+      typeof value.storage_path !== "string"
+    ) return [];
+    return [{
+      ingestionId: value.ingestion_id,
+      organizationId: value.organization_id,
+      createdBy: value.created_by,
+      storageBucket: value.storage_bucket,
+      storagePath: value.storage_path,
+    }];
+  });
+}
+
+export async function persistMediaAnalysis(
+  identity: RequestIdentity,
+  sessionId: string,
+  request: DevelopmentAnalysisInput,
+  run: AnalysisRun
+): Promise<string> {
+  const rubric = getRubric(request.lens);
+  const { data, error } = await getAdmin().rpc("hdi_persist_media_analysis", {
+    p_organization_id: identity.organizationId,
+    p_requested_by: identity.userId,
+    p_session_id: sessionId,
+    p_analysis: {
+      rubric_key: rubric.key,
+      rubric_version: rubric.version,
+      model: run.model,
+      model_response_id: run.responseId,
+      prompt_version: HDI_PROMPT_VERSION,
+      schema_version: HDI_SCHEMA_VERSION,
+      summary: run.output.summary,
+      strengths: run.output.strengths,
+      growth_areas: run.output.growthAreas,
+      limitations: run.output.limitations,
+      safety_flags: run.output.safetyFlags,
+      processing_duration_ms: run.durationMs,
+    },
+    p_observations: run.output.observations.map((observation) => ({
+      criterion_key: observation.criterionKey,
+      criterion_label: observation.criterionLabel,
+      evidence_level: observation.evidenceLevel,
+      observation: observation.observation,
+      evidence_quote: observation.evidenceQuote,
+      speaker_label: observation.speakerLabel,
+      start_ms: observation.startMs,
+      end_ms: observation.endMs,
+      confidence: observation.confidence,
+      developmental_action: observation.developmentalAction,
+    })),
+    p_commitments: run.output.commitments.map((commitment) => ({
+      statement: commitment.statement,
+      owner_label: commitment.ownerLabel,
+      due_date: commitment.dueDate,
+      evidence_quote: commitment.evidenceQuote,
+    })),
+  });
+  if (error || typeof data !== "string") {
+    throw new Error(`Unable to persist HDI media analysis: ${error?.message || "unknown error"}`);
+  }
+  return data;
 }
 
 export async function markAnalysisSessionFailed(

@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { FileText, Loader2, ShieldCheck, Sparkles } from "lucide-react";
+import { FileAudio, FileText, Loader2, ShieldCheck, Sparkles, Upload } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -16,6 +16,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { createClient } from "@/lib/supabase/client";
 import { toast } from "sonner";
 
 const lenses = [
@@ -48,9 +50,76 @@ export function AnalysisComposer() {
     "enterprise_meeting"
   );
   const [transcript, setTranscript] = useState("");
+  const [sourceMode, setSourceMode] = useState<"media" | "transcript">("media");
+  const [mediaFile, setMediaFile] = useState<File | null>(null);
   const [participants, setParticipants] = useState("");
   const [consentConfirmed, setConsentConfirmed] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+
+  async function submitMediaAnalysis() {
+    if (!mediaFile) {
+      toast.error("Choose an authorized audio or video file.");
+      return;
+    }
+    if (!consentConfirmed) {
+      toast.error("Confirm recording, transcription, and analysis consent first.");
+      return;
+    }
+    setSubmitting(true);
+    try {
+      const initResponse = await fetch("/api/development-intelligence/media", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          title,
+          lens,
+          fileName: mediaFile.name,
+          fileSize: mediaFile.size,
+          contentType: mediaFile.type,
+          consentConfirmed: true,
+          participantLabels: participants
+            .split(",")
+            .map((label) => label.trim())
+            .filter(Boolean),
+        }),
+      });
+      const upload = await initResponse.json();
+      if (!initResponse.ok) {
+        throw new Error(upload.error || "Unable to authorize media upload");
+      }
+
+      toast.message("Secure upload authorized. Uploading directly to the private staging vault...");
+      const { error: uploadError } = await createClient()
+        .storage
+        .from(upload.bucket)
+        .uploadToSignedUrl(upload.path, upload.token, mediaFile, {
+          contentType: mediaFile.type,
+          upsert: false,
+        });
+      if (uploadError) throw new Error(uploadError.message);
+
+      toast.message("Upload complete. Separating speakers and analyzing evidence...");
+      const processResponse = await fetch(
+        "/api/development-intelligence/media/process",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ ingestionId: upload.ingestionId }),
+        }
+      );
+      const payload = await processResponse.json();
+      if (!processResponse.ok) {
+        throw new Error(payload.error || "Media analysis failed");
+      }
+      toast.success("Speaker-aware evidence report is ready for human review.");
+      router.push(`/dashboard/development/analyses/${payload.analysisId}`);
+      router.refresh();
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Unable to process media");
+    } finally {
+      setSubmitting(false);
+    }
+  }
 
   async function submitAnalysis() {
     if (!consentConfirmed) {
@@ -155,24 +224,58 @@ export function AnalysisComposer() {
           </p>
         </div>
 
-        <div className="space-y-2">
-          <Label htmlFor="transcript">Transcript</Label>
-          <div className="relative">
-            <FileText className="absolute left-3 top-3 h-4 w-4 text-slate-400" />
-            <Textarea
-              id="transcript"
-              value={transcript}
-              onChange={(event) => setTranscript(event.target.value)}
-              placeholder="Paste an authorized transcript with speaker labels..."
-              className="min-h-56 pl-10"
-              maxLength={120_000}
-            />
-          </div>
-          <div className="flex justify-between text-xs text-slate-500">
-            <span>Minimum 80 characters</span>
-            <span>{transcript.length.toLocaleString()} / 120,000</span>
-          </div>
-        </div>
+        <Tabs
+          value={sourceMode}
+          onValueChange={(value) => setSourceMode(value as "media" | "transcript")}
+        >
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="media"><FileAudio className="mr-2 h-4 w-4" />Audio or video</TabsTrigger>
+            <TabsTrigger value="transcript"><FileText className="mr-2 h-4 w-4" />Paste transcript</TabsTrigger>
+          </TabsList>
+          <TabsContent value="media" className="mt-4 space-y-2">
+            <Label htmlFor="media-file">Authorized meeting or interview recording</Label>
+            <label
+              htmlFor="media-file"
+              className="flex min-h-44 cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed border-cyan-200 bg-white px-6 text-center transition hover:border-cyan-500 hover:bg-cyan-50/50 focus-within:ring-2 focus-within:ring-cyan-700 focus-within:ring-offset-2"
+            >
+              <Upload className="mb-3 h-8 w-8 text-cyan-700" />
+              <span className="font-medium text-slate-900">
+                {mediaFile ? mediaFile.name : "Choose an audio or video file"}
+              </span>
+              <span className="mt-1 text-xs text-slate-500">
+                MP3, MP4, M4A, WAV, or WebM · 25 MB maximum
+              </span>
+              <Input
+                id="media-file"
+                type="file"
+                accept="audio/mpeg,audio/mp3,audio/mp4,audio/x-m4a,audio/wav,audio/x-wav,audio/webm,video/mp4,video/webm"
+                className="sr-only"
+                onChange={(event) => setMediaFile(event.target.files?.[0] || null)}
+              />
+            </label>
+            <p className="text-xs leading-5 text-slate-500">
+              The file uploads directly to a private, two-hour staging vault. It is deleted before the report is saved. Speaker labels are neutral unless separately verified by a reviewer.
+            </p>
+          </TabsContent>
+          <TabsContent value="transcript" className="mt-4 space-y-2">
+            <Label htmlFor="transcript">Transcript</Label>
+            <div className="relative">
+              <FileText className="absolute left-3 top-3 h-4 w-4 text-slate-400" />
+              <Textarea
+                id="transcript"
+                value={transcript}
+                onChange={(event) => setTranscript(event.target.value)}
+                placeholder="Paste an authorized transcript with speaker labels..."
+                className="min-h-56 pl-10"
+                maxLength={120_000}
+              />
+            </div>
+            <div className="flex justify-between text-xs text-slate-500">
+              <span>Minimum 80 characters</span>
+              <span>{transcript.length.toLocaleString()} / 120,000</span>
+            </div>
+          </TabsContent>
+        </Tabs>
 
         <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-4">
           <div className="flex gap-3">
@@ -184,7 +287,7 @@ export function AnalysisComposer() {
             />
             <div>
               <Label htmlFor="consent" className="cursor-pointer text-emerald-950">
-                I confirm that recording and AI analysis are authorized.
+                I confirm that recording, transcription, and AI analysis are authorized.
               </Label>
               <p className="mt-1 text-xs leading-5 text-emerald-800">
                 This report supports coaching and human review. It must not be used
@@ -201,11 +304,11 @@ export function AnalysisComposer() {
             Evidence-linked observations · human review required
           </div>
           <Button
-            onClick={submitAnalysis}
+            onClick={sourceMode === "media" ? submitMediaAnalysis : submitAnalysis}
             disabled={
               submitting ||
               title.trim().length < 3 ||
-              transcript.trim().length < 80 ||
+              (sourceMode === "media" ? !mediaFile : transcript.trim().length < 80) ||
               !consentConfirmed
             }
             className="min-h-11 bg-cyan-800 hover:bg-cyan-900"
@@ -213,7 +316,7 @@ export function AnalysisComposer() {
             {submitting ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Analyzing evidence...
+                {sourceMode === "media" ? "Transcribing and analyzing..." : "Analyzing evidence..."}
               </>
             ) : (
               <>

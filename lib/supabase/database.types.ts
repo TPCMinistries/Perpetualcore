@@ -12434,6 +12434,78 @@ export type Database = {
           },
         ]
       }
+      hdi_media_ingestions: {
+        Row: {
+          attempts: number
+          byte_size: number
+          content_type: string
+          created_at: string
+          created_by: string
+          error_code: string | null
+          expires_at: string
+          id: string
+          lease_until: string | null
+          media_deleted_at: string | null
+          organization_id: string
+          session_id: string
+          status: string
+          storage_bucket: string
+          storage_path: string | null
+          updated_at: string
+        }
+        Insert: {
+          attempts?: number
+          byte_size: number
+          content_type: string
+          created_at?: string
+          created_by: string
+          error_code?: string | null
+          expires_at: string
+          id?: string
+          lease_until?: string | null
+          media_deleted_at?: string | null
+          organization_id: string
+          session_id: string
+          status?: string
+          storage_bucket?: string
+          storage_path?: string | null
+          updated_at?: string
+        }
+        Update: {
+          attempts?: number
+          byte_size?: number
+          content_type?: string
+          created_at?: string
+          created_by?: string
+          error_code?: string | null
+          expires_at?: string
+          id?: string
+          lease_until?: string | null
+          media_deleted_at?: string | null
+          organization_id?: string
+          session_id?: string
+          status?: string
+          storage_bucket?: string
+          storage_path?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "hdi_media_ingestions_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "hdi_media_ingestions_session_id_organization_id_fkey"
+            columns: ["session_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "hdi_sessions"
+            referencedColumns: ["id", "organization_id"]
+          },
+        ]
+      }
       hdi_profile_observations: {
         Row: {
           analysis_id: string
@@ -22750,6 +22822,196 @@ export type Database = {
           },
         ]
       }
+      sage_action_events: {
+        Row: {
+          created_at: string
+          event_type: string
+          id: string
+          payload: Json
+          run_id: string
+          sequence: number
+          step_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          event_type: string
+          id?: string
+          payload?: Json
+          run_id: string
+          sequence?: never
+          step_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          event_type?: string
+          id?: string
+          payload?: Json
+          run_id?: string
+          sequence?: never
+          step_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sage_action_events_run_id_fkey"
+            columns: ["run_id"]
+            isOneToOne: false
+            referencedRelation: "sage_action_runs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sage_action_events_step_id_run_id_fkey"
+            columns: ["step_id", "run_id"]
+            isOneToOne: false
+            referencedRelation: "sage_action_steps"
+            referencedColumns: ["id", "run_id"]
+          },
+        ]
+      }
+      sage_action_runs: {
+        Row: {
+          command_hash: string
+          command_text: string
+          completed_at: string | null
+          conversation_id: string | null
+          created_at: string
+          data_zone: string
+          id: string
+          idempotency_key: string
+          owner_user_id: string
+          plan: Json
+          plan_version: number
+          project_slug: string
+          request_hash: string
+          source_surface: string
+          state: string
+          updated_at: string
+        }
+        Insert: {
+          command_hash: string
+          command_text: string
+          completed_at?: string | null
+          conversation_id?: string | null
+          created_at?: string
+          data_zone: string
+          id?: string
+          idempotency_key: string
+          owner_user_id: string
+          plan?: Json
+          plan_version?: number
+          project_slug: string
+          request_hash: string
+          source_surface: string
+          state?: string
+          updated_at?: string
+        }
+        Update: {
+          command_hash?: string
+          command_text?: string
+          completed_at?: string | null
+          conversation_id?: string | null
+          created_at?: string
+          data_zone?: string
+          id?: string
+          idempotency_key?: string
+          owner_user_id?: string
+          plan?: Json
+          plan_version?: number
+          project_slug?: string
+          request_hash?: string
+          source_surface?: string
+          state?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sage_action_runs_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "sage_conversations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      sage_action_steps: {
+        Row: {
+          approval_required: boolean
+          approval_snapshot: Json | null
+          approval_state: string
+          attempt_count: number
+          canonical_input: Json
+          completed_at: string | null
+          created_at: string
+          error_message: string | null
+          id: string
+          input_hash: string
+          invocation_id: string
+          lease_expires_at: string | null
+          receipt: Json | null
+          receipt_id: string | null
+          risk: string
+          run_id: string
+          sequence: number
+          started_at: string | null
+          state: string
+          tool_name: string
+          updated_at: string
+        }
+        Insert: {
+          approval_required?: boolean
+          approval_snapshot?: Json | null
+          approval_state?: string
+          attempt_count?: number
+          canonical_input: Json
+          completed_at?: string | null
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          input_hash: string
+          invocation_id: string
+          lease_expires_at?: string | null
+          receipt?: Json | null
+          receipt_id?: string | null
+          risk?: string
+          run_id: string
+          sequence: number
+          started_at?: string | null
+          state?: string
+          tool_name: string
+          updated_at?: string
+        }
+        Update: {
+          approval_required?: boolean
+          approval_snapshot?: Json | null
+          approval_state?: string
+          attempt_count?: number
+          canonical_input?: Json
+          completed_at?: string | null
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          input_hash?: string
+          invocation_id?: string
+          lease_expires_at?: string | null
+          receipt?: Json | null
+          receipt_id?: string | null
+          risk?: string
+          run_id?: string
+          sequence?: number
+          started_at?: string | null
+          state?: string
+          tool_name?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sage_action_steps_run_id_fkey"
+            columns: ["run_id"]
+            isOneToOne: false
+            referencedRelation: "sage_action_runs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       sage_autonomy_settings: {
         Row: {
           category: string
@@ -23003,6 +23265,7 @@ export type Database = {
       }
       sage_live_approval_grants: {
         Row: {
+          action_run_id: string | null
           consumed_at: string | null
           conversation_id: string
           created_at: string
@@ -23014,6 +23277,7 @@ export type Database = {
           tool: string
         }
         Insert: {
+          action_run_id?: string | null
           consumed_at?: string | null
           conversation_id: string
           created_at?: string
@@ -23025,6 +23289,7 @@ export type Database = {
           tool: string
         }
         Update: {
+          action_run_id?: string | null
           consumed_at?: string | null
           conversation_id?: string
           created_at?: string
@@ -23036,6 +23301,13 @@ export type Database = {
           tool?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "sage_live_approval_grants_action_run_id_fkey"
+            columns: ["action_run_id"]
+            isOneToOne: false
+            referencedRelation: "sage_action_runs"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "sage_live_approval_grants_conversation_id_fkey"
             columns: ["conversation_id"]
@@ -30288,6 +30560,22 @@ export type Database = {
         Returns: boolean
       }
       auth_user_organization_id: { Args: never; Returns: string }
+      begin_sage_action_step: {
+        Args: {
+          p_approval_required: boolean
+          p_approval_snapshot?: Json
+          p_approval_state?: string
+          p_canonical_input: Json
+          p_conversation_id: string
+          p_input_hash: string
+          p_invocation_id: string
+          p_owner_user_id: string
+          p_risk: string
+          p_run_id: string
+          p_tool_name: string
+        }
+        Returns: Json
+      }
       block_task_execution: {
         Args: { reason: string; task_id: string }
         Returns: undefined
@@ -30358,6 +30646,20 @@ export type Database = {
           p_provider: string
           p_request_hash: string
           p_task_id?: string
+        }
+        Returns: Json
+      }
+      claim_sage_action_step_with_grant: {
+        Args: {
+          p_canonical_input: Json
+          p_conversation_id: string
+          p_grant_id: string
+          p_input_hash: string
+          p_invocation_id: string
+          p_owner_user_id: string
+          p_risk: string
+          p_run_id: string
+          p_tool_name: string
         }
         Returns: Json
       }
@@ -30457,6 +30759,21 @@ export type Database = {
           p_team_id?: string
         }
         Returns: string
+      }
+      create_sage_action_run: {
+        Args: {
+          p_command_hash: string
+          p_command_text: string
+          p_conversation_id: string
+          p_idempotency_key: string
+          p_owner_user_id: string
+          p_plan?: Json
+          p_project_slug: string
+          p_request_hash: string
+          p_requested_data_zone: string
+          p_source_surface: string
+        }
+        Returns: Json
       }
       create_subtask: {
         Args: {
@@ -30730,6 +31047,22 @@ export type Database = {
           relationship_strength: string
           relevance_score: number
         }[]
+      }
+      finish_sage_action_run: {
+        Args: { p_owner_user_id: string; p_run_id: string; p_status: string }
+        Returns: Json
+      }
+      finish_sage_action_step: {
+        Args: {
+          p_error_message?: string
+          p_invocation_id: string
+          p_owner_user_id: string
+          p_receipt: Json
+          p_receipt_id: string
+          p_run_id: string
+          p_status: string
+        }
+        Returns: Json
       }
       generate_certificate_number: { Args: never; Returns: string }
       get_accessible_documents: {
@@ -31260,6 +31593,15 @@ export type Database = {
           workflow_name: string
         }[]
       }
+      hdi_begin_media_ingestion: {
+        Args: {
+          p_media: Json
+          p_organization_id: string
+          p_requested_by: string
+          p_session: Json
+        }
+        Returns: Json
+      }
       hdi_begin_session: {
         Args: {
           p_organization_id: string
@@ -31267,6 +31609,14 @@ export type Database = {
           p_session: Json
         }
         Returns: string
+      }
+      hdi_claim_media_ingestion: {
+        Args: {
+          p_ingestion_id: string
+          p_organization_id: string
+          p_requested_by: string
+        }
+        Returns: Json
       }
       hdi_fail_session: {
         Args: {
@@ -31276,7 +31626,57 @@ export type Database = {
         }
         Returns: undefined
       }
+      hdi_finalize_media_ingestion: {
+        Args: {
+          p_error_code?: string
+          p_ingestion_id: string
+          p_organization_id: string
+          p_requested_by: string
+          p_status: string
+        }
+        Returns: undefined
+      }
+      hdi_list_expired_media_ingestions: {
+        Args: { p_limit?: number }
+        Returns: {
+          created_by: string
+          ingestion_id: string
+          organization_id: string
+          storage_bucket: string
+          storage_path: string
+        }[]
+      }
+      hdi_media_session_is_eligible: {
+        Args: {
+          p_organization_id: string
+          p_requested_by: string
+          p_session_id: string
+        }
+        Returns: boolean
+      }
       hdi_persist_analysis: {
+        Args: {
+          p_analysis: Json
+          p_commitments: Json
+          p_observations: Json
+          p_organization_id: string
+          p_requested_by: string
+          p_session_id: string
+        }
+        Returns: string
+      }
+      hdi_persist_analysis_before_media: {
+        Args: {
+          p_analysis: Json
+          p_commitments: Json
+          p_observations: Json
+          p_organization_id: string
+          p_requested_by: string
+          p_session_id: string
+        }
+        Returns: string
+      }
+      hdi_persist_media_analysis: {
         Args: {
           p_analysis: Json
           p_commitments: Json
@@ -31338,6 +31738,20 @@ export type Database = {
       is_sender_blocked: {
         Args: { p_from_email: string; p_user_id: string }
         Returns: boolean
+      }
+      issue_sage_action_step_approval: {
+        Args: {
+          p_canonical_input: Json
+          p_conversation_id: string
+          p_input_hash: string
+          p_invocation_id: string
+          p_owner_user_id: string
+          p_risk: string
+          p_run_id: string
+          p_tool_name: string
+          p_ttl_seconds?: number
+        }
+        Returns: Json
       }
       issue_sage_live_approval_grant: {
         Args: {

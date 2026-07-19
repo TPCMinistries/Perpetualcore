@@ -2,10 +2,12 @@ import { describe, expect, it } from "vitest";
 import {
   analysisRequestSchema,
   developmentAnalysisOutputSchema,
+  mediaIngestionRequestSchema,
 } from "@/lib/development-intelligence/schemas";
 import { getRubric } from "@/lib/development-intelligence/rubrics";
 import { buildDevelopmentAnalysisPrompt } from "@/lib/development-intelligence/prompt";
 import { validateGroundedAnalysis } from "@/lib/development-intelligence/analyzer";
+import { asMediaAnalysisInput, buildTimedTranscript } from "@/lib/development-intelligence/media";
 
 describe("Development Intelligence safety contract", () => {
   it("requires explicit consent and rejects unexpected fields", () => {
@@ -174,5 +176,79 @@ describe("Development Intelligence safety contract", () => {
         ],
       })
     ).toThrow("unknown rubric criterion");
+  });
+
+  it("accepts only bounded supported media with explicit consent", () => {
+    const base = {
+      title: "Authorized interview practice",
+      lens: "interview_coaching",
+      consentConfirmed: true,
+      participantLabels: [],
+      fileName: "practice.webm",
+      fileSize: 2_000_000,
+      contentType: "audio/webm",
+    };
+    expect(mediaIngestionRequestSchema.safeParse(base).success).toBe(true);
+    expect(
+      mediaIngestionRequestSchema.safeParse({
+        ...base,
+        fileSize: 26 * 1024 * 1024,
+      }).success
+    ).toBe(false);
+    expect(
+      mediaIngestionRequestSchema.safeParse({
+        ...base,
+        contentType: "application/octet-stream",
+      }).success
+    ).toBe(false);
+  });
+
+  it("requires media evidence to match one diarized speaker segment exactly", () => {
+    const segments = [
+      {
+        speakerLabel: "Speaker A",
+        startMs: 1_200,
+        endMs: 4_800,
+        text: "Our priority is enrollment this quarter.",
+      },
+    ];
+    const request = asMediaAnalysisInput({
+      title: "Leadership meeting",
+      lens: "leadership_coaching",
+      occurredAt: "2026-07-19T12:00:00.000Z",
+      transcript: buildTimedTranscript(segments),
+      segments,
+      participantLabels: ["Speaker A"],
+    });
+    const output = developmentAnalysisOutputSchema.parse({
+      summary: "One priority was stated.",
+      strengths: ["The priority was explicit."],
+      growthAreas: [],
+      observations: [
+        {
+          criterionKey: "direction",
+          criterionLabel: "Direction",
+          evidenceLevel: "demonstrated",
+          observation: "A quarterly priority was named.",
+          evidenceQuote: "Our priority is enrollment",
+          speakerLabel: "Speaker A",
+          startMs: 1_200,
+          endMs: 4_800,
+          confidence: 0.92,
+          developmentalAction: "Connect the priority to a measurable target.",
+        },
+      ],
+      commitments: [],
+      limitations: ["Only one segment was supplied."],
+      safetyFlags: [],
+    });
+
+    expect(() => validateGroundedAnalysis(request, output)).not.toThrow();
+    expect(() =>
+      validateGroundedAnalysis(request, {
+        ...output,
+        observations: [{ ...output.observations[0], startMs: 1_201 }],
+      })
+    ).toThrow("ungrounded media timestamps");
   });
 });

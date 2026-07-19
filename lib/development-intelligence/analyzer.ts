@@ -1,7 +1,7 @@
 import OpenAI from "openai";
 import {
   developmentAnalysisOutputSchema,
-  type AnalysisRequest,
+  type DevelopmentAnalysisInput,
   type DevelopmentAnalysisOutput,
 } from "./schemas";
 import { buildDevelopmentAnalysisPrompt } from "./prompt";
@@ -120,7 +120,7 @@ export interface AnalysisRun {
 }
 
 export function validateGroundedAnalysis(
-  request: AnalysisRequest,
+  request: DevelopmentAnalysisInput,
   output: DevelopmentAnalysisOutput
 ): void {
   const rubric = getRubric(request.lens);
@@ -129,7 +129,9 @@ export function validateGroundedAnalysis(
   );
   for (const observation of output.observations) {
     if (criteria.get(observation.criterionKey) !== observation.criterionLabel) {
-      throw new Error("Model output referenced an unknown rubric criterion");
+      throw new Error(
+        `Model output referenced an unknown rubric criterion: ${observation.criterionKey}/${observation.criterionLabel}`
+      );
     }
     if (!request.transcript.includes(observation.evidenceQuote)) {
       throw new Error("Model output included an ungrounded evidence quote");
@@ -147,6 +149,18 @@ export function validateGroundedAnalysis(
     ) {
       throw new Error("Model output invented timestamps for an untimed transcript");
     }
+    if (request.sourceType === "media_upload") {
+      const matchingSegment = request.timedSegments?.find(
+        (segment) =>
+          segment.speakerLabel === observation.speakerLabel &&
+          segment.startMs === observation.startMs &&
+          segment.endMs === observation.endMs &&
+          segment.text.includes(observation.evidenceQuote)
+      );
+      if (!matchingSegment) {
+        throw new Error("Model output included ungrounded media timestamps");
+      }
+    }
   }
   for (const commitment of output.commitments) {
     if (!request.transcript.includes(commitment.evidenceQuote)) {
@@ -156,7 +170,7 @@ export function validateGroundedAnalysis(
 }
 
 export async function analyzeDevelopmentTranscript(
-  request: AnalysisRequest
+  request: DevelopmentAnalysisInput
 ): Promise<AnalysisRun> {
   const apiKey = process.env.OPENAI_API_KEY;
   if (!apiKey) {
@@ -166,6 +180,29 @@ export async function analyzeDevelopmentTranscript(
   const model = process.env.HDI_ANALYSIS_MODEL || DEFAULT_MODEL;
   const openai = new OpenAI({ apiKey });
   const rubric = getRubric(request.lens);
+  const rubricBoundOutputSchema = {
+    ...outputJsonSchema,
+    properties: {
+      ...outputJsonSchema.properties,
+      observations: {
+        ...outputJsonSchema.properties.observations,
+        items: {
+          ...outputJsonSchema.properties.observations.items,
+          properties: {
+            ...outputJsonSchema.properties.observations.items.properties,
+            criterionKey: {
+              type: "string",
+              enum: rubric.criteria.map((criterion) => criterion.key),
+            },
+            criterionLabel: {
+              type: "string",
+              enum: rubric.criteria.map((criterion) => criterion.label),
+            },
+          },
+        },
+      },
+    },
+  } as const;
   const startedAt = Date.now();
   const response = await openai.responses.create({
     model,
@@ -185,7 +222,7 @@ export async function analyzeDevelopmentTranscript(
         type: "json_schema",
         name: "development_intelligence_analysis",
         strict: true,
-        schema: outputJsonSchema,
+        schema: rubricBoundOutputSchema,
       },
     },
   });

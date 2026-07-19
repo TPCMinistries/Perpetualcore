@@ -91,6 +91,10 @@
       "schedule": "0 3 * * *"
     },
     {
+      "path": "/api/cron/hdi-media-cleanup",
+      "schedule": "17 * * * *"
+    },
+    {
       "path": "/api/cron/refresh-funnel",
       "schedule": "0 * * * *"
     },

@@ -27,12 +27,15 @@ Perpetual Core stores:
 - human-review decisions
 - longitudinal self-baseline observations
 
-Perpetual Core does not store the full raw transcript or media in the LDC Brain
-AI database. The API hashes the transient transcript, sends it to OpenAI with
-response storage disabled, stores a derived personal-data envelope including
-short evidence excerpts, and discards the full request content. Evidence
-envelopes are not automatically anonymous and must be handled as confidential
-person data.
+Perpetual Core does not durably retain a full raw transcript or media in the LDC
+Brain AI database. Pasted transcripts are processed transiently. Direct media
+uploads go from the browser to a purpose-isolated private staging bucket using a
+two-hour signed upload token; the object is deleted before the evidence report
+is persisted. An hourly cleanup removes abandoned or expired uploads. Full
+transcripts are never written to Postgres. The analyzer uses OpenAI response
+storage disabled, stores a derived personal-data envelope including short
+evidence excerpts, and discards the full request content. Evidence envelopes are
+not automatically anonymous and must be handled as confidential person data.
 
 Workforce candidate and student recordings remain in the Uplift Workforce
 Supabase project. Perpetual Core may receive minimized derived result envelopes
@@ -40,12 +43,17 @@ only.
 
 ## Current product boundary
 
-This release analyzes authorized pasted transcripts. Direct audio/video upload,
-diarization, acoustic features, meeting-platform imports, longitudinal subject
-profiles, consent withdrawal, governed deletion, and the separate child/family
-vault are later activation phases. Acoustic measures must remain coaching
-signals (for example pace and turn-taking), never emotion, integrity, deception,
-diagnostic, accent, or employment-decision scores.
+This release analyzes authorized pasted transcripts and direct audio/video files
+up to 25 MB in supported MP3, MP4, M4A, WAV, or WebM formats. Media is transcribed
+with speaker diarization and segment timestamps; evidence timestamps must match
+one returned speaker segment exactly. Speaker labels remain neutral unless a
+human reviewer separately verifies identity.
+
+Acoustic features, meeting-platform imports, longitudinal subject profiles,
+consent withdrawal, and the separate child/family vault remain later activation
+phases. Acoustic measures must remain coaching signals (for example pace and
+turn-taking), never emotion, integrity, deception, diagnostic, accent, or
+employment-decision scores.
 
 ## Prohibited use
 
@@ -63,12 +71,14 @@ evidence. Every report remains provisional until human review.
 
 ## Activation
 
-1. Review `supabase/migrations/20260716_hdi_foundation.sql`.
-2. Apply only that migration through the guarded database workflow.
+1. Review `supabase/migrations/20260716_hdi_foundation.sql` and
+   `supabase/migrations/20260719_hdi_media_ingestion.sql`.
+2. Apply only those reviewed migrations through the guarded database workflow.
 3. Regenerate Supabase types with `npm run types:supabase`.
 4. Configure `OPENAI_API_KEY` and a unique 32+ character `HDI_SOURCE_HASH_SECRET`.
 5. Optionally set `HDI_ANALYSIS_MODEL`; the default is `gpt-5.6-terra`.
-6. Verify `/dashboard/development` and the aggregate `/hq#development` section.
+6. Verify pasted transcript and synthetic media upload flows at
+   `/dashboard/development`, then verify the aggregate `/hq#development` section.
 
 The feature is restricted to organization owners and admins in this release.
 Before real-person production use, approve the consent language, retention and
