@@ -12,7 +12,7 @@ See: .planning/PROJECT.md (updated 2026-06-05)
 Phase: 13 of 25 (Pre-Work Stabilization)
 Plan: 2 of 4 in current phase (13-01 + 13-02 complete; 13-03 + 13-04 pending)
 Status: In progress — Phase 13 executing (parallel wave 1)
-Last activity: 2026-06-06 — 13-02 drift triage complete; all 18 rfp_source_drift events classified + annotated
+Last activity: 2026-07-14 - Completed quick task 1: Revenue Crew Wave 1 (speed-to-lead + reactivation ops capabilities)
 
 Progress: [█░░░░░░░░░] ~8% (v2.0 phases — Phase 13 of 13 phases in v2.0)
 
@@ -62,6 +62,12 @@ Recent decisions affecting current work:
 - Swap industry logo placeholders in SocialProofBanner with real partner logos (from v1.0)
 - Submit SAM.gov system account re-registration (Day-1 action, unblocks L1 federal ingest)
 - Set up 90-day calendar alert for SAM.gov key expiry before Phase 13 closes
+
+### Quick Tasks Completed
+
+| # | Description | Date | Commit | Status | Directory |
+|---|-------------|------|--------|--------|-----------|
+| 1 | Revenue Crew Wave 1: speed-to-lead + reactivation ops capabilities | 2026-07-14 | eeaf8ee | Verified | [1-revenue-crew-wave-1-speed-to-lead-reacti](./quick/1-revenue-crew-wave-1-speed-to-lead-reacti/) |
 
 ### Blockers/Concerns
 

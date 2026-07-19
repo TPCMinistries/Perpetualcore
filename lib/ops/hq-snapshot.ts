@@ -50,8 +50,8 @@ async function readFileOrNull(filePath: string): Promise<string | null> {
   }
 }
 
-/** Most recent `<prefix>-YYYY-MM-DD.md` file's content in the vault ops-findings dir, or null. */
-async function latestDatedOrNull(prefix: string): Promise<string | null> {
+/** Most recent `<prefix>-YYYY-MM-DD.md` file in the vault ops-findings dir, or null. */
+async function latestDatedPathOrNull(prefix: string): Promise<string | null> {
   let files: string[];
   try {
     files = await fs.readdir(OPS_DIR);
@@ -64,7 +64,20 @@ async function latestDatedOrNull(prefix: string): Promise<string | null> {
     .filter((x): x is { f: string; m: RegExpMatchArray } => x.m !== null)
     .sort((a, b) => (a.m[1] < b.m[1] ? 1 : -1));
   if (dated.length === 0) return null;
-  return readFileOrNull(path.join(OPS_DIR, dated[0].f));
+  return path.join(OPS_DIR, dated[0].f);
+}
+
+async function modifiedAtOrNull(filePath: string | null): Promise<string | null> {
+  if (!filePath) return null;
+  try {
+    return (await fs.stat(filePath)).mtime.toISOString();
+  } catch {
+    return null;
+  }
+}
+
+function freshnessEntry(generatedAt: string | null, ttlMinutes: number, error?: string | null) {
+  return generatedAt ? { generated_at: generatedAt, ttl_minutes: ttlMinutes, error: error ?? null } : null;
 }
 
 function tailLines(text: string, n: number): string {
@@ -121,10 +134,16 @@ export async function pushHqSnapshot(runSql: RunSql, now: string): Promise<void>
     console.error(`hq snapshot: pullVerdictsToLedger failed (continuing): ${(err as Error).message}`);
   }
 
-  const pnl_md = await readFileOrNull(path.join(OPS_DIR, 'portfolio-pnl.md'));
-  const strategist_memo_md = await readFileOrNull(path.join(OPS_DIR, 'strategist-memo.md'));
+  const pnlPath = path.join(OPS_DIR, 'portfolio-pnl.md');
+  const strategistPath = path.join(OPS_DIR, 'strategist-memo.md');
+  const ledgerPath = path.join(OPS_DIR, 'decision-ledger.md');
+  const calendarPath = path.join(OPS_DIR, 'content', 'CALENDAR.md');
+  const manualRevenuePath = path.join(OPS_DIR, 'manual-revenue.md');
 
-  const ledgerRaw = await readFileOrNull(path.join(OPS_DIR, 'decision-ledger.md'));
+  const pnl_md = await readFileOrNull(pnlPath);
+  const strategist_memo_md = await readFileOrNull(strategistPath);
+
+  const ledgerRaw = await readFileOrNull(ledgerPath);
   const decision_ledger_tail = ledgerRaw ? tailLines(ledgerRaw, 40) : null;
 
   let compliance: Finding[] | null = null;
@@ -138,13 +157,45 @@ export async function pushHqSnapshot(runSql: RunSql, now: string): Promise<void>
   // Latest revenue-probes report IF one already exists — never run the probes
   // capability from here (it creates real Stripe checkout sessions and must
   // stay a weekly, explicit step).
-  const probes = await latestDatedOrNull('revenue-probes');
+  const probesPath = await latestDatedPathOrNull('revenue-probes');
+  const probes = probesPath ? await readFileOrNull(probesPath) : null;
 
-  const content_calendar_md = await readFileOrNull(path.join(OPS_DIR, 'content', 'CALENDAR.md'));
+  const content_calendar_md = await readFileOrNull(calendarPath);
 
   const moments_tail = await readMomentsTail(15);
 
   const revenue_2026 = await readRevenue2026(now);
+
+  const [
+    pnlGeneratedAt,
+    strategistGeneratedAt,
+    ledgerGeneratedAt,
+    probesGeneratedAt,
+    calendarGeneratedAt,
+    momentsGeneratedAt,
+    manualRevenueGeneratedAt,
+  ] = await Promise.all([
+    modifiedAtOrNull(pnlPath),
+    modifiedAtOrNull(strategistPath),
+    modifiedAtOrNull(ledgerPath),
+    modifiedAtOrNull(probesPath),
+    modifiedAtOrNull(calendarPath),
+    modifiedAtOrNull(MOMENTS_PATH),
+    modifiedAtOrNull(manualRevenuePath),
+  ]);
+
+  const source_freshness = Object.fromEntries(
+    Object.entries({
+      portfolio_pnl: freshnessEntry(pnlGeneratedAt, 26 * 60),
+      strategist_memo: freshnessEntry(strategistGeneratedAt, 8 * 24 * 60),
+      decision_ledger: freshnessEntry(ledgerGeneratedAt, 8 * 24 * 60),
+      compliance_watch: freshnessEntry(now, 26 * 60),
+      revenue_probes: freshnessEntry(probesGeneratedAt, 8 * 24 * 60),
+      content_calendar: freshnessEntry(calendarGeneratedAt, 8 * 24 * 60),
+      moments: freshnessEntry(momentsGeneratedAt, 8 * 24 * 60),
+      manual_revenue: freshnessEntry(manualRevenueGeneratedAt, 8 * 24 * 60),
+    }).filter(([, value]) => value !== null),
+  );
 
   try {
     await syncHqQueue(runSql, now, compliance);
@@ -163,6 +214,7 @@ export async function pushHqSnapshot(runSql: RunSql, now: string): Promise<void>
       content_calendar_md,
       moments_tail,
       revenue_2026,
+      source_freshness,
     });
   } catch (err) {
     console.error(`hq snapshot push failed: ${(err as Error).message}`);

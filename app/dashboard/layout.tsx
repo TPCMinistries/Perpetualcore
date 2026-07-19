@@ -13,6 +13,7 @@ const primaryNav = [
   { label: "Packages", href: "/packages" },
   { label: "Briefing", href: "/dashboard/home" },
   { label: "Operate", href: "/dashboard/operate" },
+  { label: "Development", href: "/dashboard/development" },
   { label: "Ecosystem", href: "/dashboard/ecosystem" },
 ];
 

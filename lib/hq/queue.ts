@@ -21,6 +21,17 @@ export interface QueueItem {
   syncedToLedger: boolean;
   firstSeen: string | null;
   lastSeen: string | null;
+  actionKey: string | null;
+  recommendedAction: string | null;
+  expectedOutcome: string | null;
+  riskLevel: 'low' | 'medium' | 'high' | 'prohibited';
+  sideEffectClass: string;
+  approvalRequired: boolean;
+  executor: string | null;
+  executionPayload: unknown;
+  rollbackPlan: string | null;
+  executionState: string;
+  lastExecutionError: string | null;
 }
 
 function createHqReaderClient() {
@@ -35,6 +46,10 @@ function str(v: unknown): string | null {
 
 function reqStr(v: unknown, fallback: string): string {
   return typeof v === 'string' ? v : fallback;
+}
+
+function risk(v: unknown): QueueItem['riskLevel'] {
+  return v === 'low' || v === 'medium' || v === 'high' || v === 'prohibited' ? v : 'prohibited';
 }
 
 /** Defensive shape coercion — a malformed row is dropped, never throws. */
@@ -56,6 +71,17 @@ function toQueueItem(raw: unknown): QueueItem | null {
     syncedToLedger: r.synced_to_ledger === true,
     firstSeen: str(r.first_seen),
     lastSeen: str(r.last_seen),
+    actionKey: str(r.action_key),
+    recommendedAction: str(r.recommended_action),
+    expectedOutcome: str(r.expected_outcome),
+    riskLevel: risk(r.risk_level),
+    sideEffectClass: reqStr(r.side_effect_class, 'internal_write'),
+    approvalRequired: r.approval_required !== false,
+    executor: str(r.executor),
+    executionPayload: r.execution_payload ?? null,
+    rollbackPlan: str(r.rollback_plan),
+    executionState: reqStr(r.execution_state, 'not_ready'),
+    lastExecutionError: str(r.last_execution_error),
   };
 }
 
@@ -85,7 +111,9 @@ export async function getQueueItems(): Promise<QueueItem[]> {
     const { data, error } = await supabase
       .from('hq_queue')
       .select('*')
-      .or(`status.eq.open,and(status.eq.snoozed,snooze_until.lt.${nowIso})`)
+      .or(
+        `status.eq.open,and(status.eq.snoozed,snooze_until.lt.${nowIso}),and(status.eq.approved,execution_state.in.(ready,queued,running,failed,blocked))`,
+      )
       .limit(200);
     if (error || !data) return [];
 

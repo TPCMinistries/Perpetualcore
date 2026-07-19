@@ -16,9 +16,9 @@ export default async function HqLayout({ children }: { children: ReactNode }) {
   return (
     <div id="hq-shell" className="hq-shell">
       <ThemeScript />
-      <div className="mx-auto flex max-w-7xl gap-4 p-4">
+      <div className="mx-auto flex max-w-[1440px] flex-col gap-4 p-2 sm:p-4 md:flex-row">
         <LeftRail ownerEmail={email} />
-        <main className="min-w-0 flex-1">{children}</main>
+        <main className="min-w-0 flex-1 px-2 pt-2 sm:px-0 md:pt-0">{children}</main>
       </div>
     </div>
   );

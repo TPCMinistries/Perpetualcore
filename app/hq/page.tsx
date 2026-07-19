@@ -1,12 +1,14 @@
 import { getHqSnapshot } from '@/lib/hq/snapshot';
 import { getQueueItems } from '@/lib/hq/queue';
 import { getSparkSeries } from '@/lib/hq/metrics';
+import { getHqOperationalStatus } from '@/lib/hq/operational-status';
 import {
   parsePnlHeadline,
   parsePnlEngineRows,
   parseEngineCalls,
   parseNeedsLorenzo,
   parseMarketingDirectives,
+  parseMemoHeadline,
   complianceDueSoon,
 } from '@/lib/hq/parse';
 import { buildEngineCards } from '@/lib/hq/engines';
@@ -20,11 +22,33 @@ import { HqMarkdown } from './_components/HqMarkdown';
 import { MomentsTimeline } from './_components/MomentsTimeline';
 import { EmptyState } from './_components/EmptyState';
 import { QueueList } from './_components/QueueList';
+import { TodayBrief } from './_components/TodayBrief';
+import { ReportPanel } from './_components/ReportPanel';
+import { OperatingLoop } from './_components/OperatingLoop';
+import { SourceHealth, type SourceHealthItem } from './_components/SourceHealth';
+import { OutcomeStrip, type OutcomeMetric } from './_components/OutcomeStrip';
+import { ActionRunList } from './_components/ActionRunList';
+import { VerificationInbox } from './_components/VerificationInbox';
+import { DevelopmentSummary } from './_components/DevelopmentSummary';
+import { getHdiOperationalSummary } from '@/lib/hq/development-intelligence';
+
+function formatOutcomeValue(value: number, unit: string): string {
+  if (unit === 'usd') {
+    return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(value);
+  }
+  if (unit === 'percent') return `${value.toLocaleString()}%`;
+  if (unit === 'hours') return `${value.toLocaleString()}h`;
+  return value.toLocaleString();
+}
 
 export default async function HqPage() {
-  const snapshot = await getHqSnapshot();
-  const queueItems = await getQueueItems();
-  const sparkSeries = await getSparkSeries();
+  const [snapshot, queueItems, sparkSeries, operations, development] = await Promise.all([
+    getHqSnapshot(),
+    getQueueItems(),
+    getSparkSeries(),
+    getHqOperationalStatus(),
+    getHdiOperationalSummary(),
+  ]);
 
   const headline = parsePnlHeadline(snapshot.pnlMd);
   const engineCalls = parseEngineCalls(snapshot.strategistMemoMd);
@@ -34,18 +58,139 @@ export default async function HqPage() {
   const needsLorenzo = parseNeedsLorenzo(snapshot.strategistMemoMd);
   const complianceSoon = complianceDueSoon(snapshot.compliance);
   const marketingDirectives = parseMarketingDirectives(snapshot.strategistMemoMd);
+  const memoHeadline = parseMemoHeadline(snapshot.strategistMemoMd);
+
+  const sourceHealth: SourceHealthItem[] = operations.sources.map((source) => ({
+    key: source.source_key,
+    label: source.display_name,
+    state:
+      source.status === 'fresh'
+        ? 'healthy'
+        : source.status === 'error'
+          ? 'degraded'
+          : source.status,
+    lastSuccessAt: source.last_success_at,
+    detail:
+      source.error_message ??
+      (typeof source.metadata.note === 'string' ? source.metadata.note : null),
+    localOnly: source.metadata.runtime === 'local',
+  }));
+
+  const seenMetrics = new Set<string>();
+  const verifiedRunIds = new Set(operations.verifiedRunIds);
+  const realSucceededRuns = operations.recentRuns.filter((run) => run.status === 'succeeded' && !run.dry_run);
+  const runsAwaitingVerification = realSucceededRuns.filter((run) => !verifiedRunIds.has(run.id));
+  const verifiedRuns = realSucceededRuns.filter((run) => verifiedRunIds.has(run.id));
+  const outcomes: OutcomeMetric[] = operations.outcomes.flatMap((metric) => {
+    if (seenMetrics.has(metric.metric_key)) return [];
+    seenMetrics.add(metric.metric_key);
+    return [{
+      key: metric.metric_key,
+      label: metric.metric_name,
+      value: formatOutcomeValue(metric.value, metric.unit),
+      detail: metric.engine_key ? `${metric.engine_key} · measured ${new Date(metric.measured_at).toLocaleDateString('en-US')}` : `Measured ${new Date(metric.measured_at).toLocaleDateString('en-US')}`,
+      direction:
+        metric.direction === 'increase'
+          ? 'positive' as const
+          : metric.direction === 'decrease'
+            ? 'negative' as const
+            : 'neutral' as const,
+    }];
+  }).slice(0, 8);
 
   return (
     <div className="pb-16">
-      <div className="mb-6 flex items-center justify-between">
+      <div className="mb-8 flex flex-col gap-3 border-b pb-5 sm:flex-row sm:items-end sm:justify-between" style={{ borderColor: 'var(--hq-border)' }}>
         <div>
-          <div className="hq-eyebrow">Command Center</div>
-          <h1 className="text-2xl font-semibold" style={{ color: 'var(--hq-ink)' }}>
+          <div className="hq-eyebrow mb-1">Owner operating system</div>
+          <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl" style={{ color: 'var(--hq-ink)' }}>
             Perpetual Core HQ
           </h1>
+          <p className="mt-1 text-sm" style={{ color: 'var(--hq-ink-dim)' }}>
+            Decide, unblock, and move the portfolio forward.
+          </p>
         </div>
         <Freshness generatedAt={snapshot.generatedAt} />
       </div>
+
+      <Section id="today" eyebrow="Today" title="What needs your attention">
+        <TodayBrief
+          headline={memoHeadline}
+          openDecisions={queueItems.length || needsLorenzo.length}
+          compliance={complianceSoon}
+          engines={engineCards}
+        />
+      </Section>
+
+      <Section id="queue" eyebrow="Decide" title="Needs Lorenzo">
+        <div className="flex flex-col gap-6">
+          <div>
+            {queueItems.length > 0 ? (
+              <QueueList items={queueItems} />
+            ) : (
+              <BulletList items={needsLorenzo} emptyLabel="Nothing is waiting on you." />
+            )}
+          </div>
+          {complianceSoon.length > 0 && (
+            <div>
+              <div className="hq-eyebrow mb-2 text-[10px]">Deadline exceptions</div>
+              <FindingsList findings={complianceSoon} emptyLabel="Nothing due within 7 days." />
+            </div>
+          )}
+        </div>
+      </Section>
+
+      <Section id="execution" eyebrow="Execute" title="Operating loop">
+        <div className="flex flex-col gap-6">
+          <OperatingLoop
+            counts={{
+              proposed: operations.queueCounts.open ?? 0,
+              approved: operations.queueCounts.approved ?? 0,
+              running: operations.executionStateCounts.running ?? 0,
+              verify: runsAwaitingVerification.length,
+              completed: verifiedRuns.length,
+              failed: (operations.runCounts.failed ?? 0) + (operations.runCounts.blocked ?? 0),
+            }}
+          />
+          <div>
+            <div className="hq-eyebrow mb-2 text-[10px]">Recent action history</div>
+            <ActionRunList
+              runs={operations.recentRuns.map((run) => ({
+                id: run.id,
+                actionKey: run.action_key,
+                status: run.status,
+                queuedAt: run.queued_at,
+                finishedAt: run.finished_at,
+                errorMessage: run.error_message,
+                dryRun: run.dry_run,
+                verified: verifiedRunIds.has(run.id),
+              }))}
+            />
+          </div>
+          <div>
+            <div className="hq-eyebrow mb-2 text-[10px]">Verify completed work</div>
+            <VerificationInbox
+              runs={runsAwaitingVerification.map((run) => ({
+                id: run.id,
+                actionKey: run.action_key,
+                finishedAt: run.finished_at,
+              }))}
+            />
+          </div>
+        </div>
+      </Section>
+
+      <Section id="sources" eyebrow="Observe" title="Source health">
+        <SourceHealth items={sourceHealth} />
+      </Section>
+
+      <Section id="outcomes" eyebrow="Verify" title="Measured outcomes">
+        <OutcomeStrip metrics={outcomes} />
+      </Section>
+
+      <Section id="development" eyebrow="Develop" title="Human development intelligence">
+        <DevelopmentSummary summary={development} />
+      </Section>
 
       <Section id="board" eyebrow="Board" title="Portfolio at a glance">
         <div className="flex flex-col gap-6">
@@ -58,47 +203,22 @@ export default async function HqPage() {
         </div>
       </Section>
 
-      <Section id="queue" eyebrow="Queue" title="Needs Lorenzo">
-        <div className="flex flex-col gap-6">
-          <div>
-            {queueItems.length > 0 ? (
-              <>
-                <div className="hq-eyebrow mb-2 text-[10px]">Open items</div>
-                <QueueList items={queueItems} />
-              </>
-            ) : (
-              <>
-                <div className="hq-eyebrow mb-2 text-[10px]">From the strategist memo</div>
-                <BulletList items={needsLorenzo} emptyLabel="Nothing queued." />
-              </>
-            )}
-          </div>
-          <div>
-            <div className="hq-eyebrow mb-2 text-[10px]">Compliance due within 7 days</div>
-            <FindingsList findings={snapshot.compliance ? complianceSoon : null} emptyLabel="Nothing due within 7 days." />
-          </div>
-        </div>
-      </Section>
-
       <Section id="strategy" eyebrow="Strategy" title="Operator memo & decision ledger">
         <div className="flex flex-col gap-6">
-          <div className="hq-panel p-5">
+          <ReportPanel title="Open the full strategist memo" defaultOpen={!memoHeadline}>
             {snapshot.strategistMemoMd ? (
               <HqMarkdown content={snapshot.strategistMemoMd} />
             ) : (
               <EmptyState label="No strategist memo yet — waiting for the next weekly sweep." />
             )}
-          </div>
-          <div>
-            <div className="hq-eyebrow mb-2 text-[10px]">Decision ledger (recent)</div>
-            <div className="hq-panel p-5">
-              {snapshot.decisionLedgerTail ? (
-                <HqMarkdown content={snapshot.decisionLedgerTail} />
-              ) : (
-                <EmptyState label="No decision-ledger entries yet." />
-              )}
-            </div>
-          </div>
+          </ReportPanel>
+          <ReportPanel title="Open the recent decision ledger">
+            {snapshot.decisionLedgerTail ? (
+              <HqMarkdown content={snapshot.decisionLedgerTail} />
+            ) : (
+              <EmptyState label="No decision-ledger entries yet." />
+            )}
+          </ReportPanel>
           {marketingDirectives.length > 0 && (
             <div>
               <div className="hq-eyebrow mb-2 text-[10px]">This week&apos;s autonomous reallocation</div>
@@ -110,13 +230,13 @@ export default async function HqPage() {
 
       <Section id="marketing" eyebrow="Marketing" title="Content calendar & moments">
         <div className="flex flex-col gap-6">
-          <div className="hq-panel p-5">
+          <ReportPanel title="Open the content calendar">
             {snapshot.contentCalendarMd ? (
               <HqMarkdown content={snapshot.contentCalendarMd} />
             ) : (
               <EmptyState label="No content calendar yet." />
             )}
-          </div>
+          </ReportPanel>
           <div>
             <div className="hq-eyebrow mb-2 text-[10px]">Recent moments</div>
             <MomentsTimeline moments={snapshot.momentsTail} />
@@ -129,13 +249,13 @@ export default async function HqPage() {
           <FindingsList findings={snapshot.compliance} emptyLabel="No compliance findings yet." />
           <div>
             <div className="hq-eyebrow mb-2 text-[10px]">Revenue probes (latest run)</div>
-            <div className="hq-panel p-5">
+            <ReportPanel title="Open the latest revenue-probe report">
               {snapshot.probesMd ? (
                 <HqMarkdown content={snapshot.probesMd} />
               ) : (
                 <EmptyState label="No revenue-probes report yet — runs weekly." />
               )}
-            </div>
+            </ReportPanel>
           </div>
         </div>
       </Section>

@@ -49,6 +49,8 @@ export interface BriefInput {
   tasks: TaskLite[];
   /** one-line headline from the portfolio-pnl capability's first Finding, or null if unavailable */
   pnlHeadline: string | null;
+  /** combined speed-to-lead + reactivation headline line, or null if neither ran */
+  revenueCrewLine: string | null;
 }
 
 interface Move {
@@ -128,6 +130,11 @@ export function renderBriefTelegram(i: BriefInput): string {
   // Portfolio P&L headline (bank + Stripe truth, separate from the 24h pulse above)
   if (i.pnlHeadline) {
     out.push(`📊 Portfolio: ${i.pnlHeadline.replace(/[*_`]/g, '')}`);
+  }
+
+  // Revenue Crew (speed-to-lead + reactivation — queued outbound, never auto-sent)
+  if (i.revenueCrewLine) {
+    out.push(`🤝 Revenue Crew: ${i.revenueCrewLine.replace(/[*_`]/g, '')}`);
   }
 
   // Security
@@ -211,6 +218,11 @@ export function composeBrief(i: BriefInput): string {
   // Portfolio P&L — bank + Stripe truth (point-in-time, separate from the 24h pulse above)
   L.push('## Portfolio P&L');
   L.push(i.pnlHeadline ? `- ${i.pnlHeadline}` : '- No portfolio-pnl snapshot found — run `npx tsx scripts/ops/run.ts portfolio-pnl`.');
+  L.push('');
+
+  // Revenue Crew — queued outbound (speed-to-lead + reactivation), never auto-sent
+  L.push('## Revenue Crew');
+  L.push(i.revenueCrewLine ? `- ${i.revenueCrewLine}` : '- No revenue-crew run found — run `npx tsx scripts/ops/run.ts speed-to-lead`.');
   L.push('');
 
   // Pipeline
