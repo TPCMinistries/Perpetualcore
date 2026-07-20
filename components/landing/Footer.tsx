@@ -27,6 +27,7 @@ const PRODUCT_LINKS = [
   { label: "Sage", href: "/products/sage", external: false },
   { label: "Atelier", href: "https://atelier.perpetualcore.com", external: true },
   { label: "Vellum", href: "/products/vellum", external: false },
+  { label: "Development Intelligence", href: "/products/development-intelligence", external: false },
   { label: "RFP Engine", href: "https://rfp.perpetualcore.com", external: true },
   { label: "RFP Sentry", href: "/products/rfp-sentry", external: false },
   { label: "Janice", href: "https://janice.perpetualcore.com", external: true },

@@ -47,6 +47,7 @@ const PRODUCT_LINKS = [
   { label: "Sentinel", href: "/products/sentinel", description: "Due diligence and intel — live" },
   { label: "Sage", href: "/products/sage", description: "Personal AI OS with ambient context + voice" },
   { label: "Vellum", href: "/products/vellum", description: "Institutional knowledge" },
+  { label: "Development Intelligence", href: "/products/development-intelligence", description: "Evidence-linked coaching + progress" },
   { label: "RFP Engine", href: "https://rfp.perpetualcore.com", description: "Find, draft, ship RFPs", external: true },
   { label: "RFP Sentry", href: "/products/rfp-sentry", description: "Bid intelligence + compliance gate" },
 ];

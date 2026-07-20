@@ -1,0 +1,30 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "incremental": false,
+    "skipLibCheck": true
+  },
+  "include": [
+    "next-env.d.ts",
+    "lib/development-intelligence/store.ts",
+    "lib/development-intelligence/analyzer.ts",
+    "lib/development-intelligence/rubrics.ts",
+    "lib/development-intelligence/schemas.ts",
+    "lib/development-intelligence/identity.ts",
+    "lib/development-intelligence/media.ts",
+    "lib/development-intelligence/prompt.ts",
+    "app/api/development-intelligence/analyses/**/*.ts",
+    "app/dashboard/development/**/*.tsx",
+    "app/products/development-intelligence/**/*.tsx",
+    "app/products/page.tsx",
+    "components/development-intelligence/**/*.tsx",
+    "components/landing/Navbar.tsx",
+    "components/landing/Footer.tsx",
+    "components/landing/ExitIntent.tsx",
+    "components/seo/JsonLd.tsx",
+    "lib/seo/products.ts",
+    "lib/seo/structured-data.ts",
+    "tests/unit/development-intelligence.test.ts"
+  ],
+  "exclude": ["node_modules"]
+}
