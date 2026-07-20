@@ -44,7 +44,7 @@ export function HumanReviewPanel({
   }
 
   return (
-    <Card className="border-amber-200 bg-amber-50/60">
+    <Card className="border-amber-200 bg-amber-50/60 print:hidden">
       <CardHeader>
         <CardTitle className="text-base">Human review gate</CardTitle>
         <p className="text-sm leading-6 text-slate-600">

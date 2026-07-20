@@ -17,6 +17,7 @@ import Link from "next/link";
 
 const STORAGE_KEY = "pc_ai_os_map_prompt_seen";
 const TRIGGER_PATHS = ["/", "/pricing", "/products", "/studio", "/solutions"];
+const EXCLUDED_TRIGGER_PATHS = ["/products/development-intelligence"];
 const TIME_TRIGGER_MS = 42000;
 const EXIT_ARMING_DELAY_MS = 8000;
 const SCROLL_TRIGGER_RATIO = 0.52;
@@ -24,6 +25,9 @@ const SCROLL_TRIGGER_RATIO = 0.52;
 type State = "idle" | "open" | "submitting" | "success" | "error" | "dismissed";
 
 function pathMatchesTrigger(path: string): boolean {
+  if (EXCLUDED_TRIGGER_PATHS.some((p) => path === p || path.startsWith(p + "/"))) {
+    return false;
+  }
   return TRIGGER_PATHS.some((p) => path === p || path.startsWith(p + "/"));
 }
 

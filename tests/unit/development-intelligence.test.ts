@@ -8,6 +8,7 @@ import { getRubric } from "@/lib/development-intelligence/rubrics";
 import { buildDevelopmentAnalysisPrompt } from "@/lib/development-intelligence/prompt";
 import { validateGroundedAnalysis } from "@/lib/development-intelligence/analyzer";
 import { asMediaAnalysisInput, buildTimedTranscript } from "@/lib/development-intelligence/media";
+import { buildDevelopmentTrajectory } from "@/lib/development-intelligence/store";
 
 describe("Development Intelligence safety contract", () => {
   it("requires explicit consent and rejects unexpected fields", () => {
@@ -250,5 +251,53 @@ describe("Development Intelligence safety contract", () => {
         observations: [{ ...output.observations[0], startMs: 1_201 }],
       })
     ).toThrow("ungrounded media timestamps");
+  });
+
+  it("builds a self-baselined trajectory from repeated evidence", () => {
+    const trajectory = buildDevelopmentTrajectory(
+      [
+        {
+          id: "analysis-1",
+          humanReviewStatus: "approved",
+          title: "First leadership meeting",
+          lens: "leadership_coaching",
+          occurredAt: "2026-07-01T12:00:00.000Z",
+        },
+        {
+          id: "analysis-2",
+          humanReviewStatus: "pending",
+          title: "Second leadership meeting",
+          lens: "leadership_coaching",
+          occurredAt: "2026-07-15T12:00:00.000Z",
+        },
+      ],
+      [
+        {
+          analysisId: "analysis-1",
+          criterionKey: "direction",
+          criterionLabel: "Direction",
+          evidenceLevel: "emerging",
+          developmentalAction: "Name the outcome and owner.",
+        },
+        {
+          analysisId: "analysis-2",
+          criterionKey: "direction",
+          criterionLabel: "Direction",
+          evidenceLevel: "demonstrated",
+          developmentalAction: "Add the due date to the stated outcome.",
+        },
+      ]
+    );
+
+    expect(trajectory.reportCount).toBe(2);
+    expect(trajectory.approvedCount).toBe(1);
+    expect(trajectory.metrics[0]).toMatchObject({
+      label: "Direction",
+      direction: "improving",
+      currentLevel: "demonstrated",
+      previousLevel: "emerging",
+      observations: 2,
+    });
+    expect(trajectory.sessions[0].title).toBe("Second leadership meeting");
   });
 });

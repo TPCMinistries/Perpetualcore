@@ -38,6 +38,154 @@ export interface DevelopmentAnalysisRecord {
   commitment_count?: number;
 }
 
+export type EvidenceLevel = "demonstrated" | "emerging" | "not_observed";
+
+export interface DevelopmentTrajectorySession {
+  id: string;
+  title: string;
+  lens: string;
+  occurredAt: string;
+  reviewStatus: string;
+  evidenceCount: number;
+  demonstratedPercent: number;
+}
+
+export interface DevelopmentTrajectoryMetric {
+  key: string;
+  label: string;
+  lens: string;
+  currentLevel: EvidenceLevel;
+  previousLevel: EvidenceLevel | null;
+  direction: "improving" | "steady" | "watch" | "new";
+  observations: number;
+  demonstratedCount: number;
+  emergingCount: number;
+  latestAction: string;
+}
+
+export interface DevelopmentTrajectory {
+  reportCount: number;
+  approvedCount: number;
+  lensCount: number;
+  sessions: DevelopmentTrajectorySession[];
+  metrics: DevelopmentTrajectoryMetric[];
+}
+
+interface TrajectoryAnalysisRow {
+  id: string;
+  humanReviewStatus: string;
+  title: string;
+  lens: string;
+  occurredAt: string;
+}
+
+interface TrajectoryEvidenceRow {
+  analysisId: string;
+  criterionKey: string;
+  criterionLabel: string;
+  evidenceLevel: EvidenceLevel;
+  developmentalAction: string;
+}
+
+const evidenceScore: Record<EvidenceLevel, number> = {
+  demonstrated: 2,
+  emerging: 1,
+  not_observed: 0,
+};
+
+export function buildDevelopmentTrajectory(
+  analyses: TrajectoryAnalysisRow[],
+  evidence: TrajectoryEvidenceRow[]
+): DevelopmentTrajectory {
+  const analysisById = new Map(analyses.map((analysis) => [analysis.id, analysis]));
+  const evidenceByAnalysis = new Map<string, TrajectoryEvidenceRow[]>();
+
+  for (const item of evidence) {
+    const existing = evidenceByAnalysis.get(item.analysisId) || [];
+    existing.push(item);
+    evidenceByAnalysis.set(item.analysisId, existing);
+  }
+
+  const sessions = analyses
+    .map((analysis) => {
+      const items = evidenceByAnalysis.get(analysis.id) || [];
+      const demonstrated = items.filter(
+        (item) => item.evidenceLevel === "demonstrated"
+      ).length;
+      return {
+        id: analysis.id,
+        title: analysis.title,
+        lens: analysis.lens,
+        occurredAt: analysis.occurredAt,
+        reviewStatus: analysis.humanReviewStatus,
+        evidenceCount: items.length,
+        demonstratedPercent: items.length
+          ? Math.round((demonstrated / items.length) * 100)
+          : 0,
+      };
+    })
+    .sort(
+      (a, b) =>
+        new Date(b.occurredAt).getTime() - new Date(a.occurredAt).getTime()
+    );
+
+  const grouped = new Map<
+    string,
+    Array<TrajectoryEvidenceRow & { occurredAt: string; lens: string }>
+  >();
+  for (const item of evidence) {
+    const analysis = analysisById.get(item.analysisId);
+    if (!analysis) continue;
+    const key = `${analysis.lens}:${item.criterionKey}`;
+    const existing = grouped.get(key) || [];
+    existing.push({ ...item, occurredAt: analysis.occurredAt, lens: analysis.lens });
+    grouped.set(key, existing);
+  }
+
+  const metrics = Array.from(grouped.entries())
+    .map(([key, items]) => {
+      const ordered = items.sort(
+        (a, b) =>
+          new Date(a.occurredAt).getTime() - new Date(b.occurredAt).getTime()
+      );
+      const current = ordered.at(-1)!;
+      const previous = ordered.at(-2) || null;
+      let direction: DevelopmentTrajectoryMetric["direction"] = "new";
+      if (previous) {
+        const change = evidenceScore[current.evidenceLevel] - evidenceScore[previous.evidenceLevel];
+        direction = change > 0 ? "improving" : change < 0 ? "watch" : "steady";
+      }
+      return {
+        key,
+        label: current.criterionLabel,
+        lens: current.lens,
+        currentLevel: current.evidenceLevel,
+        previousLevel: previous?.evidenceLevel || null,
+        direction,
+        observations: ordered.length,
+        demonstratedCount: ordered.filter(
+          (item) => item.evidenceLevel === "demonstrated"
+        ).length,
+        emergingCount: ordered.filter((item) => item.evidenceLevel === "emerging").length,
+        latestAction: current.developmentalAction,
+      };
+    })
+    .sort((a, b) => {
+      const directionOrder = { improving: 0, watch: 1, steady: 2, new: 3 };
+      return directionOrder[a.direction] - directionOrder[b.direction];
+    });
+
+  return {
+    reportCount: analyses.length,
+    approvedCount: analyses.filter(
+      (analysis) => analysis.humanReviewStatus === "approved"
+    ).length,
+    lensCount: new Set(analyses.map((analysis) => analysis.lens)).size,
+    sessions,
+    metrics,
+  };
+}
+
 export async function beginAnalysisSession(
   identity: RequestIdentity,
   request: DevelopmentAnalysisInput
@@ -371,6 +519,63 @@ export async function listAnalyses(
       occurred_at: session.occurred_at,
     };
   });
+}
+
+export async function getDevelopmentTrajectory(
+  identity: RequestIdentity,
+  limit = 100
+): Promise<DevelopmentTrajectory> {
+  const supabase = getAdmin();
+  const { data: analysisRows, error: analysisError } = await supabase
+    .from("hdi_analyses")
+    .select(
+      "id,human_review_status,hdi_sessions!inner(title,lens,occurred_at)"
+    )
+    .eq("organization_id", identity.organizationId)
+    .order("created_at", { ascending: false })
+    .limit(Math.min(Math.max(limit, 1), 250));
+
+  if (analysisError) throw new Error(analysisError.message);
+
+  const analyses: TrajectoryAnalysisRow[] = (analysisRows || []).map((row) => {
+    const session = row.hdi_sessions as unknown as {
+      title: string;
+      lens: string;
+      occurred_at: string;
+    };
+    return {
+      id: row.id as string,
+      humanReviewStatus: row.human_review_status as string,
+      title: session.title,
+      lens: session.lens,
+      occurredAt: session.occurred_at,
+    };
+  });
+
+  if (analyses.length === 0) return buildDevelopmentTrajectory([], []);
+
+  const { data: evidenceRows, error: evidenceError } = await supabase
+    .from("hdi_evidence")
+    .select(
+      "analysis_id,criterion_key,criterion_label,evidence_level,developmental_action"
+    )
+    .eq("organization_id", identity.organizationId)
+    .in(
+      "analysis_id",
+      analyses.map((analysis) => analysis.id)
+    );
+
+  if (evidenceError) throw new Error(evidenceError.message);
+
+  const evidence: TrajectoryEvidenceRow[] = (evidenceRows || []).map((row) => ({
+    analysisId: row.analysis_id as string,
+    criterionKey: row.criterion_key as string,
+    criterionLabel: row.criterion_label as string,
+    evidenceLevel: row.evidence_level as EvidenceLevel,
+    developmentalAction: row.developmental_action as string,
+  }));
+
+  return buildDevelopmentTrajectory(analyses, evidence);
 }
 
 export async function getAnalysis(

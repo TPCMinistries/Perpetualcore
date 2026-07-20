@@ -52,6 +52,14 @@ export const PC_PRODUCTS: Record<string, ProductManifestEntry> = {
     category: "BusinessApplication",
     status: "invite",
   },
+  "development-intelligence": {
+    slug: "development-intelligence",
+    name: "Development Intelligence",
+    description:
+      "Evidence-linked conversation analysis for workforce development, interviews, meetings, and leadership coaching—with human review and longitudinal progress built in.",
+    category: "BusinessApplication",
+    status: "live",
+  },
   "rfp-sentry": {
     slug: "rfp-sentry",
     name: "RFP Sentry",

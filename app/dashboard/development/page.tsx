@@ -10,6 +10,7 @@ import {
   ShieldCheck,
   Sparkles,
   Target,
+  TrendingUp,
   Users,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
@@ -163,13 +164,20 @@ export default async function DevelopmentIntelligencePage() {
       </section>
 
       <section id="reports" className="scroll-mt-24">
-        <div className="mb-5 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+        <div className="mb-5 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <div>
             <p className="text-sm font-semibold text-indigo-700">Your reports</p>
             <h2 className="mt-1 text-2xl font-semibold tracking-tight text-slate-950">Review evidence and approve what is usable.</h2>
             <p className="mt-2 text-sm text-slate-600">AI findings stay provisional until a qualified person reviews them.</p>
           </div>
-          {analyses.length > 0 && <Badge variant="outline" className="w-fit">{analyses.length} recent</Badge>}
+          {analyses.length > 0 && (
+            <Button asChild variant="outline" className="min-h-11 w-fit border-indigo-200 text-indigo-800 hover:bg-indigo-50">
+              <Link href="/dashboard/development/trajectory">
+                <TrendingUp className="mr-2 h-4 w-4" />
+                View development trajectory
+              </Link>
+            </Button>
+          )}
         </div>
         <AnalysisList analyses={analyses} />
       </section>

@@ -1,6 +1,6 @@
 /**
  * /products — portfolio overview (arm 02 of the company).
- * Eight products with status pills, mono indices, hairline grid.
+ * Ten products with status pills, mono indices, hairline grid.
  * Visual register matches homepage v5.
  *
  * Order: Atlas → Sentinel → Sage → Atelier → Vellum → RFP Engine → RFP Sentry → Janice.
@@ -16,7 +16,7 @@ import { DecisionTree } from "@/components/products/DecisionTree";
 export const metadata = {
   title: "Products — Perpetual Core",
   description:
-    "Eight AI-native products that act as front doors into the Perpetual Core studio: diligence, RFPs, knowledge, hiring, personal OS, and team operations.",
+    "Ten AI-native products that act as front doors into the Perpetual Core studio: diligence, RFPs, knowledge, development, hiring, personal OS, and team operations.",
 };
 
 type Product = {
@@ -121,6 +121,16 @@ const PRODUCTS: Product[] = [
     body:
       "For operators and brands who want their long-form archive turned into scored, captioned shorts and cloned-voice narration without stacking four subscriptions. Open-source models on hardware we own. $0/month to run. Not self-serve — installed under your brand.",
     cta: { label: "See Press", href: "/products/press" },
+  },
+  {
+    index: "10",
+    name: "Development Intelligence",
+    status: "LIVE",
+    statusColor: "live",
+    headline: "Turn conversations into coaching people can trust.",
+    body:
+      "For workforce leaders, interviewers, and executive teams who need evidence-linked development—not personality or integrity scores. Analyze authorized meetings and interviews, review exact excerpts, approve coaching actions, and track observable progress over time.",
+    cta: { label: "See Development Intelligence", href: "/products/development-intelligence" },
   },
 ];
 
