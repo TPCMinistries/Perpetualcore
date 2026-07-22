@@ -14,6 +14,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { DevelopmentNav } from "@/components/development-intelligence/DevelopmentNav";
 import { getDevelopmentIdentity } from "@/lib/development-intelligence/identity";
 import {
   getDevelopmentTrajectory,
@@ -69,6 +70,7 @@ export default async function DevelopmentTrajectoryPage() {
 
   return (
     <div className="space-y-8 pb-12">
+      <DevelopmentNav />
       <Link
         href="/dashboard/development"
         className="inline-flex min-h-11 items-center gap-2 text-sm font-medium text-slate-600 transition-colors hover:text-indigo-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-600 focus-visible:ring-offset-2"

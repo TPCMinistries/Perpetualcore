@@ -216,7 +216,7 @@ export function AnalysisComposer() {
               className={`flex min-h-20 cursor-pointer items-center gap-4 rounded-xl border px-4 text-left transition-colors duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-600 focus-visible:ring-offset-2 ${sourceMode === "media" ? "border-indigo-500 bg-indigo-50" : "border-slate-200 hover:border-indigo-300"}`}
             >
               <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white text-indigo-700"><FileAudio className="h-5 w-5" /></span>
-              <span><span className="block text-sm font-semibold text-slate-950">Upload audio or video</span><span className="mt-1 block text-xs text-slate-600">Best when you have the original recording</span></span>
+              <span><span className="block text-sm font-semibold text-slate-950">Upload audio or video</span><span className="mt-1 block text-xs text-slate-600">Original file or a Zoom, Teams, or Meet export</span></span>
             </button>
             <button
               type="button"
@@ -252,6 +252,10 @@ export function AnalysisComposer() {
                 <Input id="media-file" type="file" accept="audio/mpeg,audio/mp3,audio/mp4,audio/x-m4a,audio/wav,audio/x-wav,audio/webm,video/mp4,video/webm" className="sr-only" onChange={(event) => setMediaFile(event.target.files?.[0] || null)} />
               </label>
               <p className="text-xs leading-5 text-slate-500">The recording is processed in a private two-hour staging vault, then removed. The saved report contains only analysis and short evidence excerpts.</p>
+              <div className="flex gap-3 rounded-xl border border-slate-200 bg-slate-50 p-4 text-xs leading-5 text-slate-700">
+                <MessagesSquare className="mt-0.5 h-4 w-4 shrink-0 text-indigo-700" aria-hidden="true" />
+                <p><span className="font-semibold text-slate-950">Using a meeting platform?</span> Export the authorized recording or transcript from Zoom, Microsoft Teams, or Google Meet, then add it here. Direct account connections are not required.</p>
+              </div>
             </div>
           ) : (
             <div className="mt-5 space-y-2">

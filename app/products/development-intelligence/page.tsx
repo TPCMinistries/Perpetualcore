@@ -35,7 +35,7 @@ const useCases = [
 const steps = [
   { number: "01", title: "Add an authorized conversation", body: "Upload audio or video, or paste an existing transcript. Every source requires explicit authorization.", icon: Upload },
   { number: "02", title: "Inspect the evidence report", body: "Each finding links to a short exact excerpt, with strengths, coaching actions, and commitments separated clearly.", icon: MessageSquareQuote },
-  { number: "03", title: "Approve and track development", body: "A qualified person reviews the report before action. Repeated conversations form a self-baselined trajectory.", icon: BarChart3 },
+  { number: "03", title: "Approve and track development", body: "A qualified person reviews the report before action. With separate longitudinal consent, approved evidence can form a self-baselined profile.", icon: BarChart3 },
 ];
 
 export default function DevelopmentIntelligenceProductPage() {
@@ -67,7 +67,7 @@ export default function DevelopmentIntelligenceProductPage() {
               <div className="mt-7 flex flex-wrap gap-x-5 gap-y-2 text-sm text-slate-600">
                 <span className="inline-flex items-center gap-1.5"><CheckCircle2 className="h-4 w-4 text-emerald-600" />Audio, video, or transcript</span>
                 <span className="inline-flex items-center gap-1.5"><CheckCircle2 className="h-4 w-4 text-emerald-600" />Exact evidence excerpts</span>
-                <span className="inline-flex items-center gap-1.5"><CheckCircle2 className="h-4 w-4 text-emerald-600" />Human approval gate</span>
+                <span className="inline-flex items-center gap-1.5"><CheckCircle2 className="h-4 w-4 text-emerald-600" />Consent-controlled profiles</span>
               </div>
             </div>
 
@@ -85,7 +85,7 @@ export default function DevelopmentIntelligenceProductPage() {
           <div className="container mx-auto px-6 sm:px-8">
             <div className="grid gap-12 lg:grid-cols-[280px_1fr] lg:gap-20">
               <div><p className="eyebrow mb-3">§ 01</p><h2 className="font-mono text-xs uppercase tracking-[0.18em] text-foreground">What changes</h2></div>
-              <div><h3 className="max-w-3xl text-3xl font-semibold leading-[1.1] tracking-[-0.03em] text-foreground sm:text-5xl">Most conversation tools tell you what was said. This one helps you develop what happens next.</h3><div className="mt-10 grid gap-4 md:grid-cols-3">{[{ title: "Evidence, not impressions", body: "Every observation can be inspected against the source excerpt.", icon: ShieldCheck }, { title: "Coaching, not scoring", body: "Reports separate demonstrated strengths from specific next actions.", icon: Target }, { title: "Progress, not snapshots", body: "Repeated reports show observable movement against the same baseline.", icon: TrendingUp }].map((item) => <div key={item.title} className="border border-border bg-card p-6"><item.icon className="h-6 w-6 text-indigo-600" /><h4 className="mt-5 font-semibold text-foreground">{item.title}</h4><p className="mt-2 text-sm leading-6 text-muted-foreground">{item.body}</p></div>)}</div></div>
+              <div><h3 className="max-w-3xl text-3xl font-semibold leading-[1.1] tracking-[-0.03em] text-foreground sm:text-5xl">Most conversation tools tell you what was said. This one helps you develop what happens next.</h3><div className="mt-10 grid gap-4 md:grid-cols-3">{[{ title: "Evidence, not impressions", body: "Every observation can be inspected against the source excerpt.", icon: ShieldCheck }, { title: "Coaching, not scoring", body: "Reports separate demonstrated strengths from specific next actions.", icon: Target }, { title: "Progress with permission", body: "Approved evidence enters a self-baselined profile only with separate, withdrawable consent.", icon: TrendingUp }].map((item) => <div key={item.title} className="border border-border bg-card p-6"><item.icon className="h-6 w-6 text-indigo-600" /><h4 className="mt-5 font-semibold text-foreground">{item.title}</h4><p className="mt-2 text-sm leading-6 text-muted-foreground">{item.body}</p></div>)}</div></div>
             </div>
           </div>
         </section>
