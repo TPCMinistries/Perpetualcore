@@ -21,6 +21,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { HumanReviewPanel } from "@/components/development-intelligence/HumanReviewPanel";
 import { ReportActions } from "@/components/development-intelligence/ReportActions";
+import { DevelopmentNav } from "@/components/development-intelligence/DevelopmentNav";
+import { LinkReportToProfile } from "@/components/development-intelligence/LinkReportToProfile";
 import { getDevelopmentIdentity } from "@/lib/development-intelligence/identity";
 import { getAnalysis } from "@/lib/development-intelligence/store";
 
@@ -57,14 +59,17 @@ export default async function DevelopmentAnalysisPage({ params }: { params: Prom
   const emerging = evidence.filter((item) => item.evidenceLevel === "emerging").length;
   const demonstratedPercent = evidence.length ? Math.round((demonstrated / evidence.length) * 100) : 0;
   const reviewApproved = analysis.human_review_status === "approved";
+  const participantLabels = Array.from(new Set(evidence.map((item) => item.speakerLabel).filter((label): label is string => Boolean(label))));
 
   return (
     <div className="space-y-7 pb-12 print:space-y-4">
+      <div className="print:hidden"><DevelopmentNav /></div>
       <div className="flex flex-col gap-3 print:hidden sm:flex-row sm:items-center sm:justify-between">
         <Link href="/dashboard/development" className="inline-flex min-h-11 items-center gap-2 text-sm font-medium text-slate-600 transition-colors hover:text-indigo-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-600 focus-visible:ring-offset-2">
           <ArrowLeft className="h-4 w-4" /> Development Intelligence
         </Link>
         <div className="flex flex-wrap gap-2">
+          {reviewApproved && participantLabels.length > 0 && <LinkReportToProfile sessionId={analysis.session_id} participantLabels={participantLabels} />}
           <Button asChild variant="outline" className="min-h-11">
             <Link href="/dashboard/development/trajectory"><TrendingUp className="mr-2 h-4 w-4" />View trajectory</Link>
           </Button>

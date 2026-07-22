@@ -12,8 +12,13 @@
     "lib/development-intelligence/schemas.ts",
     "lib/development-intelligence/identity.ts",
     "lib/development-intelligence/media.ts",
+    "lib/development-intelligence/operations.ts",
+    "lib/development-intelligence/profile-schemas.ts",
+    "lib/development-intelligence/profile-store.ts",
     "lib/development-intelligence/prompt.ts",
     "app/api/development-intelligence/analyses/**/*.ts",
+    "app/api/development-intelligence/commitments/**/*.ts",
+    "app/api/development-intelligence/subjects/**/*.ts",
     "app/dashboard/development/**/*.tsx",
     "app/products/development-intelligence/**/*.tsx",
     "app/products/page.tsx",
@@ -24,7 +29,9 @@
     "components/seo/JsonLd.tsx",
     "lib/seo/products.ts",
     "lib/seo/structured-data.ts",
-    "tests/unit/development-intelligence.test.ts"
+    "tests/unit/development-intelligence.test.ts",
+    "tests/unit/development-intelligence-operations.test.ts",
+    "tests/unit/development-intelligence-profiles.test.ts"
   ],
   "exclude": ["node_modules"]
 }

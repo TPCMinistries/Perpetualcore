@@ -49,9 +49,16 @@ with speaker diarization and segment timestamps; evidence timestamps must match
 one returned speaker segment exactly. Speaker labels remain neutral unless a
 human reviewer separately verifies identity.
 
-Acoustic features, meeting-platform imports, longitudinal subject profiles,
-consent withdrawal, and the separate child/family vault remain later activation
-phases. Acoustic measures must remain coaching signals (for example pace and
+Consent-based adult longitudinal profiles and withdrawal are active for
+organization owners/admins. A profile can link only an approved report, only
+the exact participant label selected by the reviewer, and only while the latest
+longitudinal consent event remains active. Withdrawal archives the profile and
+blocks future links without rewriting the append-only consent or audit history.
+
+Acoustic features, direct meeting-platform OAuth imports, and the separate
+child/family vault remain later activation phases. Authorized Zoom, Microsoft
+Teams, and Google Meet exports can use the existing media or transcript path.
+Acoustic measures must remain coaching signals (for example pace and
 turn-taking), never emotion, integrity, deception, diagnostic, accent, or
 employment-decision scores.
 
@@ -72,13 +79,16 @@ evidence. Every report remains provisional until human review.
 ## Activation
 
 1. Review `supabase/migrations/20260716_hdi_foundation.sql` and
-   `supabase/migrations/20260719_hdi_media_ingestion.sql`.
+   `supabase/migrations/20260719_hdi_media_ingestion.sql`, then separately review
+   `supabase/migrations/20260722_hdi_profile_operations.sql`.
 2. Apply only those reviewed migrations through the guarded database workflow.
 3. Regenerate Supabase types with `npm run types:supabase`.
 4. Configure `OPENAI_API_KEY` and a unique 32+ character `HDI_SOURCE_HASH_SECRET`.
 5. Optionally set `HDI_ANALYSIS_MODEL`; the default is `gpt-5.6-terra`.
 6. Verify pasted transcript and synthetic media upload flows at
-   `/dashboard/development`, then verify the aggregate `/hq#development` section.
+   `/dashboard/development`, profile linking and withdrawal with synthetic
+   subjects at `/dashboard/development/profiles`, the review and quality pages,
+   then the aggregate `/hq#development` section.
 
 The feature is restricted to organization owners and admins in this release.
 Before real-person production use, approve the consent language, retention and

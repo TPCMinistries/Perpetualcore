@@ -18,6 +18,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { AnalysisComposer } from "@/components/development-intelligence/AnalysisComposer";
 import { AnalysisList } from "@/components/development-intelligence/AnalysisList";
+import { DevelopmentNav } from "@/components/development-intelligence/DevelopmentNav";
 import { getDevelopmentIdentity } from "@/lib/development-intelligence/identity";
 import { listAnalyses } from "@/lib/development-intelligence/store";
 import type { DevelopmentAnalysisRecord } from "@/lib/development-intelligence/store";
@@ -61,6 +62,7 @@ export default async function DevelopmentIntelligencePage() {
 
   return (
     <div className="space-y-10 pb-12">
+      <DevelopmentNav />
       <section className="relative overflow-hidden rounded-[28px] border border-indigo-200 bg-[#f5f3ff] px-6 py-8 sm:px-10 sm:py-12 lg:px-12">
         <div className="absolute -right-20 -top-24 h-72 w-72 rounded-full border-[48px] border-indigo-100/80" aria-hidden="true" />
         <div className="relative grid items-center gap-10 lg:grid-cols-[1.08fr_0.92fr]">
