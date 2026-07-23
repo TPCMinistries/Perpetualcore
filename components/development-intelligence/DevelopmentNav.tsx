@@ -11,6 +11,7 @@ import {
   Sparkles,
   TrendingUp,
   Users,
+  Workflow,
 } from "lucide-react";
 
 const destinations = [
@@ -18,6 +19,7 @@ const destinations = [
   { href: "/dashboard/development/agent", label: "Agent", icon: Sparkles },
   { href: "/dashboard/development/playbooks", label: "Playbooks", icon: BookOpenCheck },
   { href: "/dashboard/development/intelligence", label: "Intelligence", icon: BrainCircuit },
+  { href: "/dashboard/development/operations", label: "Operations", icon: Workflow },
   { href: "/dashboard/development/profiles", label: "People", icon: Users },
   { href: "/dashboard/development/review", label: "Review", icon: FileSearch },
   { href: "/dashboard/development/trajectory", label: "Trajectory", icon: TrendingUp },
