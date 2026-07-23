@@ -53,7 +53,6 @@ const agenticPlanJsonSchema = {
       type: "array",
       minItems: 2,
       maxItems: 5,
-      uniqueItems: true,
       items: {
         type: "string",
         enum: [
@@ -133,7 +132,6 @@ const agenticPlanJsonSchema = {
       type: "array",
       minItems: 8,
       maxItems: 8,
-      uniqueItems: true,
       items: { type: "string", enum: [...prohibitedActions] },
     },
   },
