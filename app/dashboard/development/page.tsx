@@ -72,22 +72,22 @@ export default async function DevelopmentIntelligencePage() {
               Perpetual Core Development Intelligence
             </Badge>
             <h1 className="mt-5 max-w-3xl text-4xl font-semibold tracking-[-0.035em] text-[#1e1b4b] sm:text-5xl lg:text-[56px] lg:leading-[1.06]">
-              Understand what happened. Decide what to coach next.
+              Start with the question. Let the agent build the investigation.
             </h1>
             <p className="mt-5 max-w-2xl text-base leading-7 text-slate-700 sm:text-lg">
-              Upload an authorized meeting or interview. Get an evidence-linked report showing strengths, growth opportunities, and commitments—with human review built in.
+              Describe what you are trying to understand. Development Intelligence builds an inspectable rubric, selects specialist perspectives, challenges weak claims, and produces an evidence-linked synthesis for human review.
             </p>
             <div className="mt-7 flex flex-col gap-3 sm:flex-row">
               <Button asChild size="lg" className="min-h-12 bg-indigo-600 px-6 text-base hover:bg-indigo-700">
-                <Link href="#new-analysis">
-                  Analyze a conversation
+                <Link href="/dashboard/development/agent">
+                  Open the agent studio
                   <ArrowRight className="ml-2 h-4 w-4" />
                 </Link>
               </Button>
               <Button asChild variant="outline" size="lg" className="min-h-12 border-indigo-200 bg-white px-6 text-base text-indigo-950 hover:bg-indigo-50">
-                <Link href="#report-preview">
+                <Link href="#new-analysis">
                   <PlayCircle className="mr-2 h-4 w-4" />
-                  See what the report includes
+                  Use a standard evidence lens
                 </Link>
               </Button>
             </div>

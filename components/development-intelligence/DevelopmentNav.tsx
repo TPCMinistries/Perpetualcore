@@ -4,14 +4,20 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
   BarChart3,
+  BookOpenCheck,
+  BrainCircuit,
   FileSearch,
   LayoutDashboard,
+  Sparkles,
   TrendingUp,
   Users,
 } from "lucide-react";
 
 const destinations = [
   { href: "/dashboard/development", label: "Workspace", icon: LayoutDashboard },
+  { href: "/dashboard/development/agent", label: "Agent", icon: Sparkles },
+  { href: "/dashboard/development/playbooks", label: "Playbooks", icon: BookOpenCheck },
+  { href: "/dashboard/development/intelligence", label: "Intelligence", icon: BrainCircuit },
   { href: "/dashboard/development/profiles", label: "People", icon: Users },
   { href: "/dashboard/development/review", label: "Review", icon: FileSearch },
   { href: "/dashboard/development/trajectory", label: "Trajectory", icon: TrendingUp },

@@ -9,6 +9,11 @@ decisions.
 
 Organization owners and admins can:
 
+- describe an open-ended development question and inspect the AI-built plan
+- review or save a versioned playbook before applying it to a source
+- run bounded evidence, commitment, coaching, interaction, and safety specialists
+- inspect specialist agreement, disagreement, evidence links, and limitations
+- ask enterprise questions grounded only in approved, minimized HDI findings
 - analyze an authorized pasted transcript or supported audio/video file
 - use enterprise meeting, interview coaching, interviewer practice, or
   leadership conversation rubrics
@@ -37,16 +42,22 @@ construct validity, or developmental outcomes.
 2. Give every participant the approved notice before recording or analysis.
 3. Confirm that recording, transcription, development analysis, human review,
    and any longitudinal use are within the consented scope.
-4. Submit only the minimum source material required for the selected rubric.
-5. Open the Review workspace and inspect every evidence item against its quote
+4. In the Agent workspace, state the development goal and inspect the proposed
+   specialists, rubric, evidence requirements, exclusions, and limitations.
+5. Revise or reject the plan when it exceeds the consented purpose, asks an
+   unsupported question, or could produce a prohibited people judgment.
+6. Submit only the minimum source material required for the approved plan.
+7. Inspect the specialist trace and synthesis, including disagreements and the
+   mandatory safety challenge.
+8. Open the Review workspace and inspect every evidence item against its quote
    and, for media, its timestamp.
-6. Check the report for prohibited inference, irrelevant employment criteria,
+9. Check the report for prohibited inference, irrelevant employment criteria,
    unsupported generalization, missing context, and identity assumptions.
-7. Approve only supported, appropriately limited findings. Otherwise request a
+10. Approve only supported, appropriately limited findings. Otherwise request a
    documented revision or reject the report.
-8. Use an approved report for coaching conversation preparation. Never use it
+11. Use an approved report for coaching conversation preparation. Never use it
    as an automatic decision or as the sole basis for a consequential action.
-9. Review Quality indicators at an agreed cadence and investigate safety flags,
+12. Review Quality indicators at an agreed cadence and investigate safety flags,
    low-support evidence, missing quotes, and an incomplete review queue.
 
 ## Meeting-export workflow

@@ -3,12 +3,34 @@
 Human Development Intelligence (HDI) is Perpetual Core's evidence-first
 conversation development layer.
 
-## Active first-release lenses
+## Agentic operating model
+
+The primary workflow starts with a natural-language development goal rather
+than a fixed conversation-type selector. A planning agent produces an
+inspectable plan containing a purpose-specific rubric, evidence requirements,
+explicit exclusions, limitations, and selected specialist roles. Independent
+specialists examine the same authorized source for evidence grounding,
+decisions and commitments, interaction dynamics, and development coaching. A
+mandatory safety challenge tests unsupported or prohibited claims before a
+final synthesis is presented for human review.
+
+Plans and playbooks are versioned. Runs record model, prompt, schema, plan, and
+review provenance, but never persist the complete source transcript. The agent
+may recommend coaching and follow-up actions; it cannot approve a report,
+publish findings, contact participants, or make a consequential people
+decision.
+
+## Available starting playbooks
 
 - Enterprise meeting effectiveness
 - Workforce interview coaching
 - Interviewer quality
 - Leadership communication coaching
+
+These are reusable starting points, not the boundary of what the planner can
+analyze. A custom goal is allowed only when the planned rubric can be grounded
+in observable conversation evidence and remains inside the prohibited-use
+policy.
 
 Family and child speech development is intentionally not active in this
 database. It requires a separate guardian-controlled data vault, child-specific
@@ -26,6 +48,7 @@ Perpetual Core stores:
 - explicit commitments
 - human-review decisions
 - longitudinal self-baseline observations
+- versioned agent plans, playbooks, specialist traces, and human-review state
 
 Perpetual Core does not durably retain a full raw transcript or media in the LDC
 Brain AI database. Pasted transcripts are processed transiently. Direct media
