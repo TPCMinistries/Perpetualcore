@@ -55,11 +55,70 @@ const SCRAPERS: Array<{
 
 /** Anomaly threshold: parsed_count below 50% of rolling baseline triggers drift. */
 const COUNT_ANOMALY_FLOOR_PCT = 0.5;
+const UPSERT_BATCH_SIZE = 50;
 const LAST_SEEN_BATCH_SIZE = 500;
+const DB_RETRY_ATTEMPTS = 3;
+const DB_RETRY_BASE_DELAY_MS = 350;
 
-export async function runStateCityIngest(): Promise<StateCityIngestResult[]> {
+interface SupabaseMutationResult<T> {
+  data: T[] | null;
+  error: { message?: string } | null;
+}
+
+export function chunkStateCityMutationRows<T>(
+  rows: T[],
+  batchSize = UPSERT_BATCH_SIZE
+): T[][] {
+  if (!Number.isInteger(batchSize) || batchSize < 1) {
+    throw new Error("batchSize must be a positive integer");
+  }
+
+  const batches: T[][] = [];
+  for (let start = 0; start < rows.length; start += batchSize) {
+    batches.push(rows.slice(start, start + batchSize));
+  }
+  return batches;
+}
+
+async function runDbMutationWithRetry<T>(
+  operation: () => Promise<SupabaseMutationResult<T>>
+): Promise<SupabaseMutationResult<T>> {
+  let lastError: { message?: string } | null = null;
+
+  for (let attempt = 1; attempt <= DB_RETRY_ATTEMPTS; attempt++) {
+    try {
+      const result = await operation();
+      if (!result.error) return result;
+      lastError = result.error;
+    } catch (error) {
+      lastError = {
+        message: error instanceof Error ? error.message : String(error),
+      };
+    }
+
+    if (attempt < DB_RETRY_ATTEMPTS) {
+      await new Promise((resolve) =>
+        setTimeout(resolve, DB_RETRY_BASE_DELAY_MS * attempt)
+      );
+    }
+  }
+
+  return {
+    data: null,
+    error: lastError ?? { message: "unknown database error" },
+  };
+}
+
+export async function runStateCityIngest(options?: {
+  sources?: StateCitySourceName[];
+}): Promise<StateCityIngestResult[]> {
+  const requestedSources = new Set(options?.sources ?? []);
+  const scrapers =
+    requestedSources.size > 0
+      ? SCRAPERS.filter(({ source }) => requestedSources.has(source))
+      : SCRAPERS;
   const settled = await Promise.allSettled(
-    SCRAPERS.map(async ({ source, fetch }) => {
+    scrapers.map(async ({ source, fetch }) => {
       const opportunities = await fetch();
       return { source, opportunities };
     })
@@ -74,7 +133,7 @@ export async function runStateCityIngest(): Promise<StateCityIngestResult[]> {
   const results: StateCityIngestResult[] = [];
 
   for (let i = 0; i < settled.length; i++) {
-    const { source } = SCRAPERS[i];
+    const { source } = scrapers[i];
     const settledResult = settled[i];
 
     const result: StateCityIngestResult = {
@@ -173,51 +232,64 @@ export async function runStateCityIngest(): Promise<StateCityIngestResult[]> {
       // will start populating them.
     }));
 
-    // Cast through unknown to bypass the generated Database type — the new
-    // columns (last_seen_at) and new source enum values ('nyc_hra', 'nyc_doe')
-    // from the 05-01 / 05-02 migrations aren't reflected in
-    // lib/supabase/database.types.ts yet. Matches the pattern used in
-    // lib/rfp/ingest/run.ts (federal orchestrator).
-    const { data, error } = await supabase
-      .from("rfp_opportunities")
-      .upsert(rows as unknown as never[], {
-        onConflict: "source,source_id",
-        ignoreDuplicates: false,
-      })
-      .select("id");
+    type IdRow = { id: string };
+    const idRows: IdRow[] = [];
+    let upsertError: string | null = null;
 
-    if (error) {
-      result.errors.push(`upsert failed: ${error.message}`);
+    for (const batch of chunkStateCityMutationRows(rows)) {
+      const { data, error } = await runDbMutationWithRetry<IdRow>(() =>
+        supabase
+          .from("rfp_opportunities")
+          .upsert(batch as unknown as never[], {
+            onConflict: "source,source_id",
+            ignoreDuplicates: false,
+          })
+          .select("id")
+      );
+
+      if (error) {
+        upsertError = error.message ?? "unknown database error";
+        result.errors.push(`upsert failed: ${upsertError}`);
+        break;
+      }
+
+      idRows.push(...((data ?? []) as IdRow[]));
+    }
+
+    if (upsertError) {
       await recordDrift({
         source,
-        reason: "shape_mismatch",
+        reason: "database_error",
         details: {
           stage: "upsert",
-          message: error.message,
+          message: upsertError,
           sample_count: rows.length,
+          batch_size: UPSERT_BATCH_SIZE,
         },
       }).catch(() => {});
     } else {
-      type IdRow = { id: string };
-      const idRows = (data ?? []) as IdRow[];
       result.upserted = idRows.length;
       result.upserted_ids = idRows.map((r: IdRow) => String(r.id));
     }
 
     // Touch last_seen_at separately if the column exists. Failure here is
     // non-fatal (column may not exist yet pre-05-01).
-    if (rows.length > 0 && !error) {
+    if (rows.length > 0 && !upsertError) {
       const ids = result.upserted_ids;
       if (ids.length > 0) {
         for (let start = 0; start < ids.length; start += LAST_SEEN_BATCH_SIZE) {
           const batch = ids.slice(start, start + LAST_SEEN_BATCH_SIZE);
-          const touch = await supabase
-            .from("rfp_opportunities")
-            .update({ last_seen_at: now } as never)
-            .in("id", batch);
+          const touch = await runDbMutationWithRetry<never>(() =>
+            supabase
+              .from("rfp_opportunities")
+              .update({ last_seen_at: now } as never)
+              .in("id", batch)
+          );
           if (
             touch.error &&
-            !/column .* does not exist/i.test(touch.error.message)
+            !/column .* does not exist/i.test(
+              touch.error.message ?? "unknown database error"
+            )
           ) {
             result.errors.push(
               `last_seen_at update failed: ${touch.error.message || "unknown error"}`
