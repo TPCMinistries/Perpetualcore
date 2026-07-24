@@ -3,7 +3,6 @@ import { Inter, JetBrains_Mono, Instrument_Serif } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
 import { QueryProvider } from "@/lib/providers/query-provider";
-import { Analytics } from "@vercel/analytics/react";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { organizationSchema, websiteSchema } from "@/lib/seo/structured-data";
 import { CookieConsent } from "@/components/landing/CookieConsent";
@@ -142,7 +141,6 @@ export default function RootLayout({
         <CrispChat />
         <ExitIntent />
         <ServiceWorkerReset />
-        <Analytics />
       </body>
     </html>
   );
