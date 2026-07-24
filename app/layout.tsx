@@ -48,10 +48,10 @@ export const viewport: Viewport = {
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || "https://perpetualcore.com"),
   title: {
-    default: "Perpetual Core — The venture studio attached to the Perpetual Engine",
+    default: "Perpetual Core — AI systems that work as one company",
     template: "%s | Perpetual Core",
   },
-  description: "Perpetual Core is a first-of-its-kind AI venture studio powered by the Perpetual Engine. We build, install, and scale AI-native operating systems, products, and ventures for mission-driven institutions.",
+  description: "Perpetual Core is an operator-built AI systems company: a governed intelligence platform, a marketplace of specialized products and capabilities, and a studio that installs them into real organizations.",
   keywords: [
     "AI venture studio",
     "AI implementation studio",
@@ -80,22 +80,22 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     siteName: "Perpetual Core",
-    title: "Perpetual Core — The venture studio attached to the Perpetual Engine",
-    description: "A first-of-its-kind AI venture studio building AI-native operating systems, products, and ventures for mission-driven institutions.",
+    title: "Perpetual Core — AI systems that work as one company",
+    description: "Governed company context, specialized AI systems, and human-approved workflows. Start with one capability and expand into a company-wide operating system.",
     locale: "en_US",
     images: [
       {
         url: "/og-image.png",
         width: 1200,
         height: 630,
-        alt: "Perpetual Core — the venture studio attached to the Perpetual Engine",
+        alt: "Perpetual Core — governed intelligence and specialized AI systems for companies",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Perpetual Core — The venture studio attached to the Perpetual Engine",
-    description: "A first-of-its-kind AI venture studio powered by the Perpetual Engine.",
+    title: "Perpetual Core — AI systems that work as one company",
+    description: "A governed intelligence platform, capability marketplace, and implementation studio.",
     images: ["/og-image.png"],
   },
   robots: {
@@ -108,15 +108,6 @@ export const metadata: Metadata = {
       "max-image-preview": "large",
       "max-snippet": -1,
     },
-  },
-  icons: {
-    icon: [
-      { url: "/favicon.ico" },
-      { url: "/favicon-16x16.png", sizes: "16x16", type: "image/png" },
-      { url: "/favicon-32x32.png", sizes: "32x32", type: "image/png" },
-    ],
-    apple: [{ url: "/apple-touch-icon.png", sizes: "180x180" }],
-    shortcut: "/favicon.ico",
   },
 };
 
