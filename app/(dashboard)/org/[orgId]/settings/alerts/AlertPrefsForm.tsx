@@ -182,24 +182,24 @@ function PrefsColumn(props: PrefsColumnProps) {
   return (
     <form
       onSubmit={onSubmit}
-      className="rounded-lg border border-zinc-800 bg-zinc-950 p-6 space-y-6"
+      className="rounded-lg border border-zinc-200 bg-white p-6 shadow-sm space-y-6"
       aria-label={`${props.title} alert preferences`}
     >
       <header>
         <p className="text-[11px] font-mono uppercase tracking-[0.12em] text-zinc-500">
           {props.eyebrow}
         </p>
-        <h2 className="mt-1 text-lg font-semibold text-zinc-100">
+        <h2 className="mt-1 text-lg font-semibold text-zinc-900">
           {props.title}
         </h2>
         <p
-          className="mt-1 text-sm text-zinc-400"
+          className="mt-1 text-sm text-zinc-600"
           style={{ fontFamily: 'Georgia, serif', fontStyle: 'italic' }}
         >
           {props.subtitle}
         </p>
         {props.disabled && props.disabledReason && (
-          <p className="mt-2 text-xs text-amber-400">{props.disabledReason}</p>
+          <p className="mt-2 text-xs text-amber-700">{props.disabledReason}</p>
         )}
         {!props.existed && !props.disabled && (
           <p className="mt-2 text-xs text-zinc-500">
@@ -213,11 +213,11 @@ function PrefsColumn(props: PrefsColumnProps) {
         <div className="flex items-baseline justify-between">
           <Label
             htmlFor={`${props.scope}-threshold`}
-            className="text-zinc-200"
+            className="text-zinc-700"
           >
             Threshold
           </Label>
-          <span className="text-sm font-mono text-emerald-300">
+          <span className="text-sm font-mono text-emerald-600">
             ≥ {state.threshold}
           </span>
         </div>
@@ -311,13 +311,13 @@ function PrefsColumn(props: PrefsColumnProps) {
 
       {/* Digest mode */}
       <fieldset
-        className="flex items-start justify-between gap-3 rounded border border-zinc-800 bg-zinc-900/40 p-3"
+        className="flex items-start justify-between gap-3 rounded border border-zinc-200 bg-zinc-50 p-3"
         disabled={props.disabled || saving}
       >
         <div className="space-y-1">
           <Label
             htmlFor={`${props.scope}-digest-mode`}
-            className="text-zinc-200"
+            className="text-zinc-700"
           >
             Digest mode
           </Label>
@@ -334,17 +334,17 @@ function PrefsColumn(props: PrefsColumnProps) {
       </fieldset>
 
       <div className="flex flex-col gap-2">
-        <p className="text-[10px] text-zinc-600">
+        <p className="text-[10px] text-zinc-400">
           Slack support is on the roadmap — coming after MVP.
         </p>
 
         {error && (
-          <p role="alert" className="text-sm text-red-400">
+          <p role="alert" className="text-sm text-red-700">
             {error}
           </p>
         )}
         {saved && (
-          <p role="status" className="text-sm text-emerald-300">
+          <p role="status" className="text-sm text-emerald-600">
             Saved.
           </p>
         )}
@@ -352,7 +352,7 @@ function PrefsColumn(props: PrefsColumnProps) {
         <Button
           type="submit"
           disabled={props.disabled || saving}
-          className="bg-emerald-300 hover:bg-emerald-200 text-emerald-950 self-start"
+          className="bg-emerald-600 hover:bg-emerald-700 text-white self-start"
         >
           {saving ? 'Saving…' : 'Save'}
         </Button>
@@ -374,13 +374,13 @@ interface ChannelBlockProps {
 function ChannelBlock(props: ChannelBlockProps) {
   return (
     <fieldset
-      className="space-y-2 rounded border border-zinc-800 bg-zinc-900/40 p-3"
+      className="space-y-2 rounded border border-zinc-200 bg-zinc-50 p-3"
       disabled={props.disabled}
     >
       <div className="flex items-center justify-between gap-3">
         <Label
           htmlFor={`${props.scope}-${props.channel}-enabled`}
-          className="text-zinc-200"
+          className="text-zinc-700"
         >
           {props.label}
         </Label>

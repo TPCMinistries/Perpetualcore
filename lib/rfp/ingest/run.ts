@@ -33,7 +33,9 @@ import { fetchSimplerGrantsOpportunities } from "@/lib/rfp/ingest/simpler-grants
 import { fetchSbirOpportunities } from "@/lib/rfp/ingest/sbir";
 import { fetchFederalRegisterOpportunities } from "@/lib/rfp/ingest/federal-register";
 import { fetchNihGrantOpportunities } from "@/lib/rfp/ingest/nih-grants";
+import { fetchNihGuideNotices } from "@/lib/rfp/ingest/nih-guide-notices";
 import { fetchNsfGrantOpportunities } from "@/lib/rfp/ingest/nsf-grants";
+import type { RfpOpportunitySource } from "@/lib/rfp/source-catalog";
 
 export interface IngestSourceResult {
   source:
@@ -43,6 +45,7 @@ export interface IngestSourceResult {
     | "sbir_gov"
     | "fed_register"
     | "nih_grants"
+    | "nih_guide_notices"
     | "nsf_grants";
   fetched: number;
   upserted: number;
@@ -62,6 +65,37 @@ export type IngestRunResult = IngestSourceResult[];
 interface FetcherSpec {
   name: IngestSourceResult["source"];
   run: () => Promise<OpportunityInput[]>;
+}
+
+const FEDERAL_FETCHERS: FetcherSpec[] = [
+  { name: "sam_gov", run: () => fetchSamGovOpportunities() },
+  { name: "grants_gov", run: () => fetchGrantsGovOpportunities() },
+  { name: "simpler_grants", run: () => fetchSimplerGrantsOpportunities() },
+  { name: "sbir_gov", run: () => fetchSbirOpportunities() },
+  { name: "fed_register", run: () => fetchFederalRegisterOpportunities() },
+  { name: "nih_grants", run: () => fetchNihGrantOpportunities() },
+  { name: "nih_guide_notices", run: () => fetchNihGuideNotices() },
+  { name: "nsf_grants", run: () => fetchNsfGrantOpportunities() },
+];
+
+const SCHEMA_SOURCE_TO_FETCHER_SOURCE: Partial<
+  Record<RfpOpportunitySource, IngestSourceResult["source"]>
+> = {
+  sbir: "sbir_gov",
+};
+
+export function toFederalFetcherSource(
+  source: string,
+): IngestSourceResult["source"] | null {
+  const mapped =
+    SCHEMA_SOURCE_TO_FETCHER_SOURCE[source as RfpOpportunitySource] ?? source;
+  return FEDERAL_FETCHERS.some((fetcher) => fetcher.name === mapped)
+    ? (mapped as IngestSourceResult["source"])
+    : null;
+}
+
+export function isFederalIngestSource(source: string): boolean {
+  return toFederalFetcherSource(source) !== null;
 }
 
 /**
@@ -148,16 +182,18 @@ async function upsertBatch(rows: OpportunityRow[]): Promise<{
  *
  * Returns one IngestSourceResult per source. Never throws.
  */
-export async function runFederalIngest(): Promise<IngestRunResult> {
-  const fetchers: FetcherSpec[] = [
-    { name: "sam_gov", run: () => fetchSamGovOpportunities() },
-    { name: "grants_gov", run: () => fetchGrantsGovOpportunities() },
-    { name: "simpler_grants", run: () => fetchSimplerGrantsOpportunities() },
-    { name: "sbir_gov", run: () => fetchSbirOpportunities() },
-    { name: "fed_register", run: () => fetchFederalRegisterOpportunities() },
-    { name: "nih_grants", run: () => fetchNihGrantOpportunities() },
-    { name: "nsf_grants", run: () => fetchNsfGrantOpportunities() },
-  ];
+export async function runFederalIngest(options?: {
+  sources?: string[];
+}): Promise<IngestRunResult> {
+  const requestedSources = new Set(
+    (options?.sources ?? [])
+      .map(toFederalFetcherSource)
+      .filter((source): source is IngestSourceResult["source"] => source !== null),
+  );
+  const fetchers =
+    requestedSources.size > 0
+      ? FEDERAL_FETCHERS.filter((fetcher) => requestedSources.has(fetcher.name))
+      : FEDERAL_FETCHERS;
 
   const settled = await Promise.allSettled(fetchers.map((f) => f.run()));
 

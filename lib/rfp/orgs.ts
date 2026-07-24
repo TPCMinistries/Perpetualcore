@@ -11,6 +11,9 @@
 import { createClient, createAdminClient } from "@/lib/supabase/server";
 import { enrollInSequence } from "./sequences";
 import { recomputeAllForOrg } from "./scoring/recompute";
+import { buildStarterProfileJson } from "./research/starter-profile";
+import { buildRichProfile } from "./research/profile-builder";
+import type { Json } from "@/lib/supabase/database.types";
 
 // ── RFP domain types ─────────────────────────────────────────────────────────
 
@@ -39,6 +42,7 @@ export interface CreateOrgInput {
   name: string;
   type: OrgType;
   naics: string[];
+  capacity_summary?: string | null;
 }
 
 // ── Server helpers ────────────────────────────────────────────────────────────
@@ -65,7 +69,12 @@ export async function createOrgWithOwner(
   // Step 1: insert the org
   const { data: org, error: orgErr } = await admin
     .from("rfp_orgs")
-    .insert({ name: input.name, type: input.type, naics: input.naics })
+    .insert({
+      name: input.name,
+      type: input.type,
+      naics: input.naics,
+      capacity_summary: input.capacity_summary?.trim() || null,
+    })
     .select()
     .single();
 
@@ -105,6 +114,42 @@ export async function createOrgWithOwner(
       err instanceof Error ? err.message.slice(0, 120) : "unknown",
     );
   }
+
+  // Seed a starter capture profile so the recompute below has something to
+  // score against — without this, rfp_capture_profiles has no row for the
+  // org, scoreOpportunity() takes the profile-pending path, and every
+  // opportunity scores 0 (dead Discovery feed). Best-effort like the
+  // trial-onboarding enroll above: a failure here must not block org
+  // creation, and recompute should still fire (it just degrades to
+  // profile-pending until a real profile is saved later).
+  try {
+    await admin.from("rfp_capture_profiles").insert({
+      org_id: org.id,
+      version: 1,
+      profile_json: buildStarterProfileJson({
+        name: org.name,
+        type: org.type,
+        naics: org.naics,
+        capacity_summary: org.capacity_summary,
+      }) as unknown as Json,
+      voice_examples: [],
+    });
+  } catch (err) {
+    console.warn(
+      "[orgs] starter capture profile insert skipped:",
+      err instanceof Error ? err.message.slice(0, 120) : "unknown",
+    );
+  }
+
+  // Fire-and-forget: upgrade the heuristic starter profile with an agentic
+  // web-researched one (website + public filings). Runs async so org creation
+  // stays fast; on success it inserts profile v2 and triggers its own rescore.
+  void buildRichProfile(org.id).catch((err) => {
+    console.warn(
+      "[orgs] rich profile build skipped:",
+      err instanceof Error ? err.message.slice(0, 120) : "unknown",
+    );
+  });
 
   // Fire-and-forget: score the org against all current opportunities so the
   // Discovery feed isn't empty the first time the user lands on it. Idempotent

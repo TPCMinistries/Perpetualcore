@@ -18,6 +18,7 @@ import { createClient } from "@/lib/supabase/server";
 import { SECTION_SPECS, SECTION_TYPES, type SectionType } from "@/lib/rfp/draft/sections";
 import { ReviewButton } from "@/components/rfp/ReviewButton";
 import { ReviewerFindingsPanel } from "@/components/rfp/ReviewerFindingsPanel";
+import { RubricCriteriaPanel } from "@/components/rfp/RubricCriteriaPanel";
 import { ProposalSectionEditor } from "@/components/rfp/ProposalSectionEditor";
 import { ProposalStatusControl } from "@/components/rfp/ProposalStatusControl";
 import { CaptureReadinessButton } from "@/components/rfp/CaptureReadinessButton";
@@ -27,7 +28,7 @@ import { SubmissionReadinessPanel } from "@/components/rfp/SubmissionReadinessPa
 import { SubmissionBundlePanel } from "@/components/rfp/SubmissionBundlePanel";
 import { SubmissionPlanPanel } from "@/components/rfp/SubmissionPlanPanel";
 import { SubmissionWorkroom } from "@/components/rfp/SubmissionWorkroom";
-import { PursuitActionSummary } from "@/components/rfp/PursuitActionSummary";
+import { AiDisclosureBanner } from "@/components/rfp/AiDisclosureBanner";
 import type { CitationChunk } from "@/components/rfp/MarkupRenderer";
 import type { SubmissionTaskRow } from "@/lib/rfp/submission/tasks";
 import type {
@@ -50,6 +51,8 @@ interface ProposalRow {
   opp_id: string | null;
   created_at: string;
   vault_chunks_used: unknown;
+  ai_disclosure_acknowledged: boolean;
+  ai_disclosure_acknowledged_at: string | null;
 }
 
 /**
@@ -103,6 +106,15 @@ interface ComplianceCheckRow {
   check_type: string;
   details_json: unknown;
   created_at: string;
+}
+
+interface RubricCriteriaRow {
+  id: string;
+  section_ref: string;
+  criterion_text: string;
+  max_points: number | null;
+  weight: number | null;
+  is_inferred: boolean;
 }
 
 /**
@@ -214,7 +226,7 @@ export default async function ProposalPage({
 
   const { data: proposal } = await supabase
     .from("rfp_proposals")
-    .select("id, title, status, due_date, opp_id, created_at, vault_chunks_used")
+    .select("id, title, status, due_date, opp_id, created_at, vault_chunks_used, ai_disclosure_acknowledged, ai_disclosure_acknowledged_at")
     .eq("id", proposalId)
     .eq("org_id", orgId)
     .maybeSingle<ProposalRow>();
@@ -223,7 +235,7 @@ export default async function ProposalPage({
   const vaultChunks = parseVaultChunks(proposal.vault_chunks_used);
 
   // Resolve caller's role on this org so we can gate the status control.
-  // Owners and writers can mark submitted/won/lost/withdrawn; reviewers
+  // Owners and writers can mark submitted/won/lost/no-bid; reviewers
   // and viewers see status read-only.
   const {
     data: { user },
@@ -271,6 +283,19 @@ export default async function ProposalPage({
     ])
     .order("created_at", { ascending: false })
     .returns<ComplianceCheckRow[]>();
+
+  // Phase 19-02: load rubric criteria for this opp (if any).
+  // RLS SELECT policy allows read when user has a proposal on the opp.
+  const rubricCriteria: RubricCriteriaRow[] = [];
+  if (proposal.opp_id) {
+    const { data: criteriaData } = await supabase
+      .from("rfp_rubric_criteria")
+      .select("id, section_ref, criterion_text, max_points, weight, is_inferred")
+      .eq("opp_id", proposal.opp_id)
+      .order("created_at")
+      .returns<RubricCriteriaRow[]>();
+    rubricCriteria.push(...(criteriaData ?? []));
+  }
 
   const { data: submissionTasks } = await supabase
     .from("rfp_submission_tasks")
@@ -344,7 +369,7 @@ export default async function ProposalPage({
         {/* Breadcrumb */}
         <Link
           href={`/org/${orgId}/discovery`}
-          className="font-mono text-[10px] uppercase tracking-[0.22em] text-zinc-500 hover:text-zinc-300"
+          className="font-mono text-[10px] uppercase tracking-[0.22em] text-zinc-500 hover:text-zinc-700"
         >
           ← Discovery
         </Link>
@@ -363,8 +388,9 @@ export default async function ProposalPage({
         </div>
 
         <h1
-          className="mt-3 text-3xl leading-tight italic text-zinc-100"
+          className="mt-3 text-3xl leading-tight italic text-zinc-900 line-clamp-3"
           style={{ fontFamily: "Georgia, serif" }}
+          title={proposal.title}
         >
           {proposal.title}
         </h1>
@@ -373,13 +399,13 @@ export default async function ProposalPage({
           <div
             className={`mt-6 rounded-md border p-4 ${
               pursuitStatus === "ready"
-                ? "border-emerald-500/30 bg-emerald-500/10"
-                : "border-amber-500/30 bg-amber-500/10"
+                ? "border-emerald-200 bg-emerald-50"
+                : "border-amber-200 bg-amber-50"
             }`}
           >
             <p
               className={`font-mono text-[10px] uppercase tracking-[0.22em] ${
-                pursuitStatus === "ready" ? "text-emerald-200" : "text-amber-200"
+                pursuitStatus === "ready" ? "text-emerald-700" : "text-amber-700"
               }`}
             >
               {pursuitStatus === "ready"
@@ -390,7 +416,7 @@ export default async function ProposalPage({
                   ? "Pursuit workspace resumed with gaps"
                   : "Pursuit engine partially completed"}
             </p>
-            <p className="mt-2 text-sm leading-6 text-zinc-300">
+            <p className="mt-2 text-sm leading-6 text-zinc-700">
               {pursuitStatus === "ready"
                 ? pursuitMode === "resume"
                   ? "An existing proposal for this opportunity was found. Reviewer, readiness, and workroom artifacts were refreshed."
@@ -408,8 +434,8 @@ export default async function ProposalPage({
             used the org's Voice Fingerprint v1 profile and/or any vault
             chunks. voiceApplied===null + vaultChunksUsed===0 means this
             draft predates the tracking suffixes. */}
-        <div className="mt-6 rounded-md border border-amber-500/30 bg-amber-500/5 p-4">
-          <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-amber-300">
+        <div className="mt-6 rounded-md border border-amber-200 bg-amber-50 p-4">
+          <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-amber-700">
             {[
               "First-pass draft",
               voiceApplied === true ? "voice-trained" : null,
@@ -421,7 +447,7 @@ export default async function ProposalPage({
               .filter(Boolean)
               .join(" · ")}
           </p>
-          <p className="mt-2 text-sm text-zinc-300">
+          <p className="mt-2 text-sm text-zinc-700">
             {voiceApplied === true || vaultChunksUsed > 0 ? (
               <>
                 This first pass applied{" "}
@@ -453,32 +479,32 @@ export default async function ProposalPage({
 
         {/* Audit row */}
         {session ? (
-          <div className="mt-6 grid grid-cols-2 gap-4 rounded-md border border-zinc-900 bg-zinc-950 p-4 font-mono text-[11px] text-zinc-400 sm:grid-cols-4">
+          <div className="mt-6 grid grid-cols-2 gap-4 rounded-md border border-zinc-200 bg-white p-4 font-mono text-[11px] text-zinc-600 shadow-sm sm:grid-cols-4">
             <div>
-              <div className="text-[9px] uppercase tracking-[0.22em] text-zinc-600">
+              <div className="text-[9px] uppercase tracking-[0.22em] text-zinc-400">
                 Agent
               </div>
-              <div className="mt-1 text-zinc-200">{session.agent}</div>
+              <div className="mt-1 text-zinc-900">{session.agent}</div>
             </div>
             <div>
-              <div className="text-[9px] uppercase tracking-[0.22em] text-zinc-600">
+              <div className="text-[9px] uppercase tracking-[0.22em] text-zinc-400">
                 Model
               </div>
-              <div className="mt-1 text-zinc-200">{session.model ?? "—"}</div>
+              <div className="mt-1 text-zinc-900">{session.model ?? "—"}</div>
             </div>
             <div>
-              <div className="text-[9px] uppercase tracking-[0.22em] text-zinc-600">
+              <div className="text-[9px] uppercase tracking-[0.22em] text-zinc-400">
                 Tokens
               </div>
-              <div className="mt-1 text-zinc-200">
+              <div className="mt-1 text-zinc-900">
                 {session.tokens_in ?? "—"} in · {session.tokens_out ?? "—"} out
               </div>
             </div>
             <div>
-              <div className="text-[9px] uppercase tracking-[0.22em] text-zinc-600">
+              <div className="text-[9px] uppercase tracking-[0.22em] text-zinc-400">
                 Cost
               </div>
-              <div className="mt-1 text-zinc-200">{fmtCost(session.cost_usd)}</div>
+              <div className="mt-1 text-zinc-900">{fmtCost(session.cost_usd)}</div>
             </div>
           </div>
         ) : null}
@@ -489,16 +515,9 @@ export default async function ProposalPage({
           <ReviewButton orgId={orgId} proposalId={proposalId} />
           <ExportProposalButton proposalId={proposalId} />
         </div>
-        <PursuitActionSummary
-          dueDate={proposal.due_date}
-          bidNoBid={bidNoBid}
-          complianceMatrix={complianceMatrix}
-          packetChecklist={packetChecklist}
-          reviewerResult={reviewerResult}
-          verifyMarkerCount={verifyMarkerCount}
-          sectionCount={visibleSections.length}
-          tasks={submissionTasks ?? []}
-        />
+        {/* PursuitActionSummary removed (Phase 26 Track D): its "Next moves" duplicated
+            SubmissionReadinessPanel's next-action off the same gate inputs and the two
+            could disagree. One canonical readiness verdict per screen. */}
         <SubmissionReadinessPanel
           bidNoBid={bidNoBid}
           complianceMatrix={complianceMatrix}
@@ -536,8 +555,27 @@ export default async function ProposalPage({
           complianceMatrix={complianceMatrix}
           packetChecklist={packetChecklist}
         />
+        {/* Phase 19-02: Evaluation rubric panel — shown when criteria exist for the opp */}
+        {rubricCriteria.length > 0 ? (
+          <RubricCriteriaPanel criteria={rubricCriteria} />
+        ) : null}
+
         {reviewerResultGlobalOnly ? (
-          <ReviewerFindingsPanel result={reviewerResultGlobalOnly} />
+          <ReviewerFindingsPanel
+            result={reviewerResultGlobalOnly}
+            criteria={rubricCriteria}
+          />
+        ) : null}
+
+        {/* AI-use disclosure banner — shown when at least one section has been drafted */}
+        {visibleSections.some((s) => s.content && s.content.trim().length > 0) ? (
+          <div className="mt-8">
+            <AiDisclosureBanner
+              proposalId={proposalId}
+              initialAcknowledged={proposal.ai_disclosure_acknowledged ?? false}
+              acknowledgedAt={proposal.ai_disclosure_acknowledged_at ?? null}
+            />
+          </div>
         ) : null}
 
         {/* Sections in canonical order */}

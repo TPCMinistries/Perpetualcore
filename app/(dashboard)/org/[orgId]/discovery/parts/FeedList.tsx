@@ -149,12 +149,6 @@ function EmptyFeed({ orgId }: { orgId?: string }) {
   return (
     <div className="flex h-full items-center justify-center p-10">
       <div className="relative w-full max-w-sm text-center">
-        {/* Soft emerald halo behind the card */}
-        <div
-          aria-hidden
-          className="pointer-events-none absolute -inset-12 -z-10 rounded-full bg-[radial-gradient(closest-side,rgba(16,185,129,0.18),transparent)] blur-2xl"
-        />
-
         <div className="rounded-xl border border-zinc-200 bg-white p-8 shadow-sm">
           <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl bg-emerald-700 text-white">
             <Sparkles className="h-5 w-5" />

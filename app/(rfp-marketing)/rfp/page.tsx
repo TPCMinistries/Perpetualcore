@@ -6,13 +6,13 @@ import { Button } from "@/components/ui/button";
 import {
   ArrowRight,
   Search,
-  FileText,
   Sparkles,
   Mic,
   CheckCircle2,
   XCircle,
-  Building2,
   Lock,
+  Globe,
+  Radar,
 } from "lucide-react";
 
 // Status tags surface what ships today vs. what's in beta.
@@ -27,48 +27,48 @@ const stageMeta: Record<Stage, { label: string; tone: string }> = {
 
 const features: { icon: typeof Search; title: string; desc: string; stage: Stage }[] = [
   {
+    icon: Globe,
+    title: "Deep Research agent",
+    desc: "One click sends a research agent across the live web — foundations, state agencies, federal programs, corporate philanthropy — and it verifies every lead on the funder's own page before it enters your feed. Databases go stale. The web doesn't.",
+    stage: "live",
+  },
+  {
     icon: Search,
     title: "Discovery, every six hours",
-    desc: "Scrapers across SAM.gov, Grants.gov, NY State, NYC DYCD, foundation directories, and SBIR.gov. Each opportunity is scored against your org profile. You see the fits — not the noise.",
+    desc: "Scrapers across SAM.gov, Grants.gov, NIH, NSF, NY/NJ/CT/CA/PA, NYC agencies, and curated foundation programs. Each opportunity is scored against your capture profile with the reasoning shown — you see the fits, not the noise.",
     stage: "live",
   },
   {
-    icon: Building2,
-    title: "Multi-tenant orgs and invites",
-    desc: "Run one nonprofit, a portfolio of clients, or a dual nonprofit/for-profit stack from one console. Per-org RLS. Invite teammates by email.",
-    stage: "live",
-  },
-  {
-    icon: Lock,
-    title: "Audit-grade activity log",
-    desc: "Every prompt, retrieval, and edit lands in an append-only table. Exportable for FOIA, OIG, and funder audits — the disclosure trail federal buyers are starting to require.",
+    icon: Radar,
+    title: "Funder dossiers + cycle watch",
+    desc: "Before you write, the agent briefs you: giving history, typical award size, recent grantees like you, next cycle. Watch an annual-cycle funder and we re-verify their page weekly and email you the moment the window opens.",
     stage: "live",
   },
   {
     icon: Mic,
-    title: "Voice fingerprint",
-    desc: "Trained on your past wins, annual reports, and founder letters so drafts read like you, not like a vendor. In private beta now.",
-    stage: "beta",
-  },
-  {
-    icon: FileText,
-    title: "Vault-grounded drafting",
-    desc: "Every claim cites a real artifact in your vault. Anything we can't ground gets a [VERIFY] flag. Hallucinated partners and fabricated outcomes do not ship. Private beta this month.",
-    stage: "beta",
+    title: "Voice-trained, vault-grounded drafting",
+    desc: "Trained on your past wins and annual reports so drafts read like you. Every claim cites a real artifact in your vault; anything we can't ground gets a [VERIFY] flag. Fabricated outcomes do not ship.",
+    stage: "live",
   },
   {
     icon: Sparkles,
     title: "Reviewer + compliance gate",
-    desc: "An Opus reviewer scores your draft against the funder's rubric. A deterministic compliance gate checks page rules, attachments, budget math, and deadlines before submit. Ships after the first paid customer files.",
-    stage: "next",
+    desc: "An adversarial reviewer scores your draft against the funder's actual rubric. A deterministic compliance gate checks page rules, attachments, budget math, and deadlines before you submit.",
+    stage: "live",
+  },
+  {
+    icon: Lock,
+    title: "Multi-entity, audit-grade",
+    desc: "Run a nonprofit, a portfolio of clients, or a dual nonprofit/for-profit stack from one console — with every prompt, retrieval, and edit in an append-only log, exportable for FOIA, OIG, and funder audits.",
+    stage: "live",
   },
 ];
 
 const competitors = [
-  { name: "Instrumentl", role: "Grant database", gap: "Discovery only. You still write everything." },
+  { name: "Cleatus / GovDash / Sweetspot", role: "Govcon AI", gap: "Contracts only. Blind to the foundation half of your funding." },
+  { name: "Instrumentl / Granted", role: "Grant discovery & writing", gap: "Foundations only, from a static database refreshed on a lag. No contracts, no live-web research." },
   { name: "GovWin / Bloomberg", role: "Federal contract intel", gap: "$15K+/yr, no drafting, for-profits only." },
-  { name: "Submittable / Bonterra", role: "Grant management", gap: "Built for grantmakers, not the people chasing the money." },
-  { name: "ChatGPT / Claude direct", role: "Generic AI", gap: "No voice training, no vault grounding, no audit trail." },
+  { name: "ChatGPT / Claude direct", role: "Generic AI", gap: "No verified discovery, no voice training, no vault grounding, no audit trail." },
   { name: "Capture consultants", role: "Human capture-as-a-service", gap: "$150–$400/hr. Doesn't scale. Misses opportunities while waiting on humans." },
 ];
 
@@ -120,7 +120,7 @@ export default function RfpEnginePage() {
                 <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-400" />
               </span>
               <span className="font-mono text-[11px] uppercase tracking-[0.22em] text-zinc-400">
-                Capture operations for nonprofits and small for-profits
+                Grants + government contracts · one capture console
               </span>
             </div>
 
@@ -142,7 +142,7 @@ export default function RfpEnginePage() {
             <div className="mt-10 grid gap-10 md:grid-cols-12 md:gap-8">
               <div className="md:col-span-7">
                 <p className="text-lg leading-[1.7] text-zinc-300 md:text-xl">
-                  The capture team most nonprofits and small mission-driven companies can&apos;t afford to hire. Discovery now. Voice-trained drafting in private beta. Compliance gate next this quarter.
+                  The capture team most nonprofits and small mission-driven companies can&apos;t afford to hire — with a research agent that sweeps the live web, verifies every lead on the funder&apos;s own page, and briefs you on the funder before you write a word.
                 </p>
                 <div className="mt-9 flex flex-col gap-3 sm:flex-row">
                   <Button
@@ -165,7 +165,7 @@ export default function RfpEnginePage() {
                   </Button>
                 </div>
                 <p className="mt-6 font-mono text-[11px] uppercase tracking-[0.18em] text-zinc-400">
-                  14-day trial · No credit card · Discovery feed in your inbox tomorrow
+                  14-day trial · No credit card · Discovery feed after setup
                 </p>
               </div>
 
@@ -190,8 +190,8 @@ export default function RfpEnginePage() {
                   <div className="space-y-3">
                     {[
                       { src: "SAM.gov", code: "DOL-ETA-25-014", fit: 94 },
+                      { src: "AI Researched · verified", code: "NYS-DOH-HELP", fit: 91 },
                       { src: "Foundation", code: "RWJF-HE-7821", fit: 88 },
-                      { src: "City of NY", code: "DYCD-WLG-2026", fit: 91 },
                     ].map((row) => (
                       <div
                         key={row.code}
@@ -215,7 +215,7 @@ export default function RfpEnginePage() {
                     ))}
                   </div>
                   <p className="mt-5 font-mono text-[9.5px] uppercase tracking-[0.18em] text-zinc-400">
-                    Illustrative · Live data resumes once SAM.gov reissues our API key
+                    Illustrative sample · Scrapers every six hours + a web-research agent that verifies leads on the funder&apos;s own page
                   </p>
                 </div>
               </motion.div>
@@ -244,7 +244,7 @@ export default function RfpEnginePage() {
             </h2>
             <div className="mt-12 grid gap-10 md:grid-cols-12">
               <p className="text-[15px] leading-[1.8] text-zinc-400 md:col-span-7">
-                Below that line, capture happens in the hours an ED steals from their program staff. Deadlines get missed. Funders get the same recycled past performance. Fits go unwritten. We&apos;re closing that gap — discovery now, drafting in private beta, the rest this quarter.
+                Below that line, capture happens in the hours an ED steals from their program staff. Deadlines get missed. Funders get the same recycled past performance. Fits go unwritten. That&apos;s the job we automated — a research agent that finds, verifies, and briefs, so the hours you do have go into the proposal itself.
               </p>
               <div className="md:col-span-5">
                 <div className="border-l-2 border-emerald-400/60 pl-6">
@@ -260,6 +260,83 @@ export default function RfpEnginePage() {
                 </div>
               </div>
             </div>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* THE AGENT — the differentiated loop */}
+      <section className="relative border-b border-white/5">
+        <div className="container mx-auto px-4 py-28">
+          <motion.div
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, margin: "-100px" }}
+            variants={fadeUp}
+            transition={{ duration: 0.6 }}
+            className="mx-auto max-w-5xl"
+          >
+            <Eyebrow>What no database can do</Eyebrow>
+            <h2 className="max-w-3xl text-[clamp(1.85rem,4vw,3rem)] font-semibold leading-[1.1] tracking-tight text-white">
+              Every other tool searches a database.{" "}
+              <span
+                className="italic text-emerald-300"
+                style={{ fontFamily: "Georgia, 'Times New Roman', serif" }}
+              >
+                Ours reads the web.
+              </span>
+            </h2>
+            <p className="mt-5 max-w-2xl text-[15px] leading-[1.75] text-zinc-400">
+              Foundation databases are built from filings that are months old. State programs live on
+              agency pages no scraper covers. The Deep Research agent works the way a human capture
+              lead does — in sequence:
+            </p>
+
+            <div className="mt-12 grid gap-px overflow-hidden rounded-2xl border border-white/10 bg-white/5 sm:grid-cols-2 lg:grid-cols-5">
+              {[
+                {
+                  step: "01",
+                  title: "Sweep",
+                  desc: "Searches the live web across four funder universes, parameterized by your capture profile.",
+                },
+                {
+                  step: "02",
+                  title: "Verify",
+                  desc: "Opens the funder's own page for every lead. Unverified leads are flagged, never hidden.",
+                },
+                {
+                  step: "03",
+                  title: "Score",
+                  desc: "Ranks each verified lead against your keywords, geography, award band, and past funders.",
+                },
+                {
+                  step: "04",
+                  title: "Brief",
+                  desc: "Builds a funder dossier — giving history, typical award, recent grantees like you.",
+                },
+                {
+                  step: "05",
+                  title: "Watch",
+                  desc: "Re-verifies annual cycles weekly and emails you the moment a window opens.",
+                },
+              ].map((s, i) => (
+                <motion.div
+                  key={s.step}
+                  initial={{ opacity: 0 }}
+                  whileInView={{ opacity: 1 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.4, delay: i * 0.06 }}
+                  className="bg-zinc-950 p-6"
+                >
+                  <p className="font-mono text-[11px] tracking-[0.2em] text-emerald-300/80">{s.step}</p>
+                  <h3 className="mt-3 text-[15px] font-semibold tracking-tight text-white">{s.title}</h3>
+                  <p className="mt-2 text-[13px] leading-[1.65] text-zinc-400">{s.desc}</p>
+                </motion.div>
+              ))}
+            </div>
+
+            <p className="mt-8 font-mono text-[11px] uppercase tracking-[0.2em] text-zinc-500">
+              Every run is budget-capped per organization and logged to your audit trail.
+            </p>
           </motion.div>
         </div>
       </section>
@@ -280,7 +357,9 @@ export default function RfpEnginePage() {
               The product, honestly labeled.
             </h2>
             <p className="mt-5 max-w-2xl text-[15px] leading-[1.75] text-zinc-400">
-              Three pieces are live for paying users today. Three more are in private beta. Nothing on this page is marketing wishful thinking.
+              Everything below is live in the product today — not a roadmap dressed up as a feature
+              list. What&apos;s still ahead (submission tracking, win/loss learning) stays off this
+              page until it ships.
             </p>
           </motion.div>
 
@@ -387,7 +466,10 @@ export default function RfpEnginePage() {
                   </p>
                 </div>
                 <p className="flex-1 text-[14px] leading-[1.7] text-zinc-300">
-                  Discovery, voice-trained drafting, reviewer, compliance, and audit log in one workspace. Multi-entity from day one. Built by operators chasing real federal grants — not by a vendor watching from outside.
+                  The only platform that covers grants <em>and</em> contracts for small organizations —
+                  with a live-web research agent, funder dossiers, voice-trained drafting, reviewer,
+                  compliance gate, and audit log in one workspace. Built by operators chasing real
+                  federal grants — not by a vendor watching from outside.
                 </p>
               </div>
             </motion.div>
@@ -460,7 +542,7 @@ export default function RfpEnginePage() {
               </span>
             </h2>
             <p className="mx-auto mt-8 max-w-xl text-[15px] leading-[1.75] text-zinc-400">
-              14 days free. Tenant set up in four minutes. First Discovery feed in your inbox tomorrow morning.
+              14 days free. Tenant set up in four minutes. Discovery starts after setup.
             </p>
             <div className="mt-10 flex flex-col justify-center gap-3 sm:flex-row">
               <Button

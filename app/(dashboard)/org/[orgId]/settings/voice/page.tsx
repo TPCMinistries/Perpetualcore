@@ -66,7 +66,7 @@ export default async function VoiceSettingsPage({ params }: PageProps) {
     <div className="container max-w-3xl py-10">
       <Link
         href={`/org/${orgId}/discovery`}
-        className="font-mono text-[10px] uppercase tracking-[0.22em] text-zinc-500 hover:text-zinc-300"
+        className="font-mono text-[10px] uppercase tracking-[0.22em] text-zinc-500 hover:text-zinc-700"
       >
         ← Discovery
       </Link>
@@ -76,12 +76,12 @@ export default async function VoiceSettingsPage({ params }: PageProps) {
           Settings · Voice
         </p>
         <h1
-          className="mt-2 text-3xl leading-tight italic text-zinc-100"
+          className="mt-2 text-3xl leading-tight italic text-zinc-900"
           style={{ fontFamily: "Georgia, serif" }}
         >
           Train {orgRow.name}&apos;s voice
         </h1>
-        <p className="mt-3 max-w-2xl text-sm text-zinc-400">
+        <p className="mt-3 max-w-2xl text-sm text-zinc-600">
           The drafter normally writes in a generic voice and flags every
           org-specific fact as [VERIFY]. When you train a voice fingerprint
           here, the drafter inherits your cadence, signature phrases, and the
@@ -107,11 +107,11 @@ function ReadOnlyState({
 }) {
   return (
     <div className="flex flex-col gap-6">
-      <div className="rounded-md border border-zinc-800 bg-zinc-950 p-5">
-        <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-amber-300">
+      <div className="rounded-md border border-amber-200 bg-amber-50 p-5">
+        <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-amber-700">
           Read-only · {role}
         </p>
-        <p className="mt-3 text-sm text-zinc-300">
+        <p className="mt-3 text-sm text-zinc-700">
           You can see the current voice fingerprint but not retrain it. Ask an
           owner or writer to update the org&apos;s voice.
         </p>
@@ -119,12 +119,12 @@ function ReadOnlyState({
       {fingerprint ? (
         // Re-uses the form's renderer indirectly by reusing the same fields layout
         // is overkill — the simplest honest path is to inline a minimal summary.
-        <section className="rounded-md border border-zinc-900 bg-zinc-950 p-6">
+        <section className="rounded-md border border-zinc-200 bg-white p-6 shadow-sm">
           <h2 className="font-mono text-[10px] uppercase tracking-[0.25em] text-zinc-500">
             Current voice fingerprint
           </h2>
           <p
-            className="mt-4 text-zinc-200 italic leading-relaxed"
+            className="mt-4 text-zinc-700 italic leading-relaxed"
             style={{ fontFamily: "Georgia, serif" }}
           >
             {fingerprint.voice_summary}
@@ -135,8 +135,8 @@ function ReadOnlyState({
           </p>
         </section>
       ) : (
-        <div className="rounded-md border border-zinc-900 bg-zinc-950 p-6">
-          <p className="text-sm text-zinc-400">Not trained yet.</p>
+        <div className="rounded-md border border-zinc-200 bg-white p-6">
+          <p className="text-sm text-zinc-500">Not trained yet.</p>
         </div>
       )}
     </div>

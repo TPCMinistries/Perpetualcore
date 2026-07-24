@@ -37,9 +37,9 @@ function daysUntil(iso: string | null): number | null {
 }
 
 function urgencyClasses(days: number): string {
-  if (days <= 1) return "border-rose-500/40 bg-rose-500/[0.06] text-rose-200";
-  if (days <= 3) return "border-amber-500/40 bg-amber-500/[0.06] text-amber-200";
-  return "border-emerald-500/30 bg-emerald-500/[0.05] text-emerald-200";
+  if (days <= 1) return "border-rose-200 bg-rose-50 text-rose-700";
+  if (days <= 3) return "border-amber-200 bg-amber-50 text-amber-700";
+  return "border-emerald-200 bg-emerald-50 text-emerald-700";
 }
 
 function urgencyLabel(days: number): string {
@@ -64,9 +64,9 @@ export function DeadlineTracker({ orgId, rows }: DeadlineTrackerProps) {
 
   return (
     <section className="mx-auto mb-4 max-w-5xl px-6">
-      <div className="rounded-lg border border-white/5 bg-white/[0.02] p-4">
+      <div className="rounded-lg border border-zinc-200 bg-white p-4 shadow-sm">
         <div className="flex items-baseline justify-between gap-3">
-          <h2 className="font-mono text-[10px] uppercase tracking-[0.22em] text-zinc-400">
+          <h2 className="font-mono text-[10px] uppercase tracking-[0.22em] text-zinc-500">
             Closing soon
           </h2>
           <span className="font-mono text-[10px] text-zinc-500">
@@ -78,7 +78,7 @@ export function DeadlineTracker({ orgId, rows }: DeadlineTrackerProps) {
             <li key={row.opp_id}>
               <Link
                 href={`/org/${orgId}/discovery?opp=${row.opp_id}`}
-                className="block rounded-md border border-zinc-900 bg-zinc-950 p-3 transition hover:border-zinc-800"
+                className="block rounded-md border border-zinc-200 bg-zinc-50 p-3 transition hover:border-zinc-300"
               >
                 <div className="flex items-start gap-2">
                   <span
@@ -87,7 +87,7 @@ export function DeadlineTracker({ orgId, rows }: DeadlineTrackerProps) {
                     {urgencyLabel(days)}
                   </span>
                 </div>
-                <div className="mt-2 line-clamp-2 text-[13px] leading-snug text-zinc-100">
+                <div className="mt-2 line-clamp-2 text-[13px] leading-snug text-zinc-900">
                   {row.title}
                 </div>
                 {row.agency ? (
