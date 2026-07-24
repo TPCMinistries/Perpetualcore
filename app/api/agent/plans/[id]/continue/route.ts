@@ -9,7 +9,6 @@
  */
 
 import { NextRequest, NextResponse } from "next/server";
-import { orchestratePlan } from "@/lib/agents/executor";
 
 export async function POST(
   request: NextRequest,
@@ -24,6 +23,10 @@ export async function POST(
 
     const { id: planId } = await params;
 
+    // Keep the provider-heavy agent/tool graph out of route module evaluation.
+    // Next.js imports route modules while collecting build metadata, before any
+    // request exists and without runtime provider credentials.
+    const { orchestratePlan } = await import("@/lib/agents/executor");
     const plan = await orchestratePlan(planId);
 
     return NextResponse.json({

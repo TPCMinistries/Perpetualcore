@@ -4,9 +4,17 @@ import { NextRequest, NextResponse } from "next/server";
 import Anthropic from "@anthropic-ai/sdk";
 import { rateLimiters, checkRateLimit } from "@/lib/rate-limit";
 
-const anthropic = new Anthropic({
-  apiKey: process.env.ANTHROPIC_API_KEY,
-});
+let anthropicClient: Anthropic | null = null;
+
+function getAnthropicClient(): Anthropic {
+  const apiKey = process.env.ANTHROPIC_API_KEY;
+  if (!apiKey) {
+    throw new Error("ANTHROPIC_API_KEY is not configured");
+  }
+
+  anthropicClient ??= new Anthropic({ apiKey });
+  return anthropicClient;
+}
 
 const SYSTEM_PROMPT = `You are an AI Coach for "Perpetual Core" - a platform that serves as a digital brain for users. Your role is to help users learn how to use the platform effectively.
 
@@ -69,7 +77,7 @@ export async function POST(request: NextRequest) {
     });
 
     // Call Claude API
-    const response = await anthropic.messages.create({
+    const response = await getAnthropicClient().messages.create({
       model: "claude-3-haiku-20240307",
       max_tokens: 1024,
       system: SYSTEM_PROMPT,

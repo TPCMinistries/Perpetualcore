@@ -5,9 +5,17 @@ import OpenAI from "openai";
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
+let openAIClient: OpenAI | null = null;
+
+function getOpenAIClient(): OpenAI {
+  const apiKey = process.env.OPENAI_API_KEY;
+  if (!apiKey) {
+    throw new Error("OPENAI_API_KEY is not configured");
+  }
+
+  openAIClient ??= new OpenAI({ apiKey });
+  return openAIClient;
+}
 
 export async function POST(req: NextRequest) {
   try {
@@ -62,7 +70,7 @@ export async function POST(req: NextRequest) {
     });
 
     // Get AI response
-    const completion = await openai.chat.completions.create({
+    const completion = await getOpenAIClient().chat.completions.create({
       model: "gpt-4o-mini",
       messages,
       temperature: 0.8,

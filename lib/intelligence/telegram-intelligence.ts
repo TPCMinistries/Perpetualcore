@@ -6,9 +6,16 @@
 import { createAdminClient } from "@/lib/supabase/server";
 import OpenAI from "openai";
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY!,
-});
+let openai: OpenAI | null = null;
+
+function getOpenAI(): OpenAI {
+  const apiKey = process.env.OPENAI_API_KEY;
+  if (!apiKey) {
+    throw new Error("OPENAI_API_KEY is required for Telegram intelligence");
+  }
+  openai ??= new OpenAI({ apiKey });
+  return openai;
+}
 
 export interface TelegramInsight {
   type: "usage_pattern" | "intent_distribution" | "peak_times" | "topic_cluster" | "automation_opportunity";
@@ -207,7 +214,7 @@ export async function extractTelegramInsights(
         .map((i) => i.message_text)
         .join("\n---\n");
 
-      const completion = await openai.chat.completions.create({
+      const completion = await getOpenAI().chat.completions.create({
         model: "gpt-4o-mini",
         messages: [
           {

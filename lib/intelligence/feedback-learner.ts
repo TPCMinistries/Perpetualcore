@@ -6,9 +6,17 @@
 import { createClient } from "@/lib/supabase/server";
 import OpenAI from "openai";
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY!,
-});
+let openai: OpenAI | null = null;
+
+function getOpenAIClient(): OpenAI {
+  const apiKey = process.env.OPENAI_API_KEY;
+  if (!apiKey) {
+    throw new Error("OPENAI_API_KEY is required to analyze feedback");
+  }
+
+  openai ??= new OpenAI({ apiKey });
+  return openai;
+}
 
 export type FeedbackType =
   | "suggestion_accepted"
@@ -402,7 +410,7 @@ async function analyzeAndLearnFromFeedbackReason(
   context: string
 ): Promise<void> {
   try {
-    const response = await openai.chat.completions.create({
+    const response = await getOpenAIClient().chat.completions.create({
       model: "gpt-4o-mini",
       messages: [
         {

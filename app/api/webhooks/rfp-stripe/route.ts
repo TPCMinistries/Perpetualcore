@@ -19,7 +19,7 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import type Stripe from "stripe";
-import { stripe } from "@/lib/stripe/client";
+import { getStripe } from "@/lib/stripe/client";
 import { createAdminClient } from "@/lib/supabase/server";
 import { getTierForPriceId } from "@/lib/rfp/billing";
 
@@ -157,6 +157,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
   const raw = await req.text();
   let event: Stripe.Event;
   try {
+    const stripe = getStripe();
     event = stripe.webhooks.constructEvent(raw, signature, SIGNING_SECRET);
   } catch (err) {
     const msg = err instanceof Error ? err.message : "unknown";
@@ -179,6 +180,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
   }
 
   let processed = false;
+  const stripe = getStripe();
 
   switch (event.type) {
     case "checkout.session.completed": {
