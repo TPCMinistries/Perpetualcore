@@ -4,14 +4,14 @@
 
 ## Product Overview
 
-**One-liner:** Perpetual Core is an operator-built AI systems company: a
-governed intelligence platform, a marketplace of specialized products and
-capabilities, and a studio that installs them into real organizations.
+**One-liner:** Perpetual Core is an AI systems company building the operating
+infrastructure for the next generation of organizations.
 
-**What it does:** Perpetual Core connects approved company context, specialized
-AI systems, and human-reviewed workflows across opportunity, operations, people,
-knowledge, and media. A buyer can start with one product, install a connected
-company system, or build and scale a venture-shaped operating pattern.
+**What it does:** Perpetual Core builds and operates specialized intelligence
+systems across opportunity, research, people, education, care, and media.
+Sage connects approved context across the network while consequential actions
+remain under explicit human authority. A buyer can deploy a product, install a
+connected company system, or build a venture with Perpetual Core.
 
 **Product category:** AI operating systems and specialized enterprise AI
 products.
@@ -120,10 +120,26 @@ Use only current, verifiable product availability, deployments, operating
 constraints, and approved evidence. Do not infer customer outcomes, adoption,
 revenue, creator counts, or marketplace volume from configured software.
 
+**Canonical product hierarchy:**
+
+- Core live systems: Sage, RFP Engine, Sentinel, and Janice.
+- Private releases: Press and Scribe.
+- Pilots and engagements: Atlas and Atelier.
+- Built on the Engine: IHA AI Academy, IHA Care, and Uplift Workforce.
+- Internal infrastructure such as Company Graph, Shared Brain, Development
+  Intelligence, and Studio Control Plane is proof of the operating layer, not a
+  separate marketplace shelf.
+
+**Canonical names:**
+
+- Press is the public product; Creator Studio is the internal runtime/repo name.
+- Janice is the public product; Janus is an internal repo/schema name.
+- Sage is one public family; Command Center and Sage Learning are implementations,
+  not separate marketplace products.
+
 ## Goals
 
 **Business goal:** Make the scale and coherence of Perpetual Core understandable
 without reducing it to a consultancy.
 
 **Conversion actions:** Explore the marketplace or map the company.
-

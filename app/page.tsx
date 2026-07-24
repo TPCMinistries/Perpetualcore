@@ -3,10 +3,14 @@ import {
   ArrowRight,
   ArrowUpRight,
   BrainCircuit,
-  BriefcaseBusiness,
-  Check,
-  Clapperboard,
-  Network,
+  ChevronRight,
+  Circle,
+  Cpu,
+  FileSearch,
+  GraduationCap,
+  HeartPulse,
+  Layers3,
+  Radio,
   SearchCheck,
   ShieldCheck,
   Sparkles,
@@ -15,458 +19,547 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { SkipLink } from "@/components/ui/accessibility";
-import { Navbar } from "@/components/landing/Navbar";
-import { Footer } from "@/components/landing/Footer";
 import { PageViewTracker } from "@/components/analytics/PageViewTracker";
 import { ContentSlot } from "@/components/slots/ContentSlot";
-import { LivingCompanyCanvas } from "@/components/landing/v3/LivingCompanyCanvas";
-import { ProductPreview } from "@/components/landing/v3/ProductPreview";
-import {
-  MARKETPLACE_ITEMS,
-  MARKETPLACE_STATUS_LABELS,
-  type MarketplaceItem,
-} from "@/lib/marketplace/catalog";
+import { OperatingNetwork } from "@/components/landing/v4/OperatingNetwork";
 
 export const metadata = {
-  title: "Perpetual Core — AI systems that work as one company",
+  title: "Perpetual Core — AI systems that run real companies",
   description:
-    "Specialized AI products for opportunity, operations, people, knowledge, and media—connected through Sage as your company grows.",
+    "Perpetual Core builds and operates specialized intelligence systems across opportunity, research, people, education, care, and media—connected through Sage.",
 };
 
-const OUTCOMES = [
+const CORE_SYSTEMS = [
   {
-    label: "Win work",
-    body: "Find opportunities, make bid decisions, and manage proposals.",
-    icon: Sparkles,
-    href: "/marketplace#find-win",
-    color: "#3276e8",
+    name: "Sage",
+    category: "Operating intelligence",
+    status: "Private live system",
+    headline: "Persistent context for operators carrying more than one company.",
+    href: "https://sage.perpetualcore.com",
+    accent: "#8b7cff",
+    icon: BrainCircuit,
+    span: "lg:col-span-7",
   },
   {
-    label: "Run operations",
-    body: "Coordinate priorities, handoffs, recurring work, and follow-through.",
-    icon: BriefcaseBusiness,
-    href: "/marketplace#run-coordinate",
-    color: "#ff6b4a",
+    name: "RFP Engine",
+    category: "Opportunity intelligence",
+    status: "Live",
+    headline: "Find, qualify, and develop the right grants and contracts.",
+    href: "https://rfp.perpetualcore.com",
+    accent: "#4ea7ff",
+    icon: FileSearch,
+    span: "lg:col-span-5",
   },
   {
-    label: "Know and decide",
-    body: "Investigate, preserve knowledge, and make evidence-backed decisions.",
+    name: "Sentinel",
+    category: "Diligence intelligence",
+    status: "Live",
+    headline: "Evidence-backed research for consequential people and company decisions.",
+    href: "https://sentinel.perpetualcore.com",
+    accent: "#54e6b1",
     icon: SearchCheck,
-    href: "/marketplace#know-decide",
-    color: "#6b52d9",
+    span: "lg:col-span-6",
   },
   {
-    label: "Develop people",
-    body: "Run hiring, onboarding, coaching, and workforce journeys.",
+    name: "Janice",
+    category: "People operations",
+    status: "Live",
+    headline: "Hiring, agreements, onboarding, and the people lifecycle in one system.",
+    href: "https://janice.perpetualcore.com",
+    accent: "#ffb85c",
     icon: UsersRound,
-    href: "/marketplace#hire-develop",
-    color: "#168a72",
-  },
-  {
-    label: "Create media",
-    body: "Turn long-form ideas into governed media workflows.",
-    icon: Clapperboard,
-    href: "/marketplace#create-distribute",
-    color: "#e04d7f",
+    span: "lg:col-span-6",
   },
 ] as const;
 
-const FEATURED_SLUGS = [
-  "sage",
-  "rfp-engine",
-  "sentinel",
-  "janice",
-  "atelier",
-  "press",
+const PRIVATE_SYSTEMS = [
+  {
+    name: "Press",
+    status: "By invitation",
+    body: "A governed media production system for transcription, editing, clips, voice, and distribution.",
+    href: "/products/press",
+  },
+  {
+    name: "Scribe",
+    status: "Private release",
+    body: "A voice-led publishing studio for turning recorded thinking into refined work.",
+    href: "https://scribe.perpetualcore.com",
+  },
+  {
+    name: "Atlas",
+    status: "In pilot",
+    body: "An AI-native COO system for funds, operating partners, and portfolio companies.",
+    href: "/products/atlas",
+  },
+  {
+    name: "Atelier",
+    status: "In pilot",
+    body: "An agent-augmented workspace for repeatable projects, flows, and team execution.",
+    href: "https://atelier.perpetualcore.com",
+  },
 ] as const;
 
-const FEATURED_PRODUCTS = FEATURED_SLUGS.map((slug) =>
-  MARKETPLACE_ITEMS.find((item) => item.slug === slug)
-).filter((item): item is MarketplaceItem => Boolean(item));
-
-const CARD_LAYOUTS: Record<string, string> = {
-  sage: "lg:col-span-7 lg:row-span-2",
-  "rfp-engine": "lg:col-span-5",
-  sentinel: "lg:col-span-5",
-  janice: "lg:col-span-4",
-  atelier: "lg:col-span-4",
-  press: "lg:col-span-4",
-};
-
-const START_PATHS = [
+const OPERATED_SYSTEMS = [
   {
-    label: "01",
-    title: "Use a product",
-    body: "The job is clear and a live product already fits.",
-    cta: "Browse live products",
-    href: "/marketplace",
+    name: "IHA AI Academy",
+    status: "Live learning platform",
+    body: "Applied AI education with a course-scoped Sage learning experience.",
+    href: "https://academy.humanadvancementinstitute.org",
+    icon: GraduationCap,
   },
   {
-    label: "02",
-    title: "Request access",
-    body: "The system is private, in pilot, or available by invitation.",
-    cta: "See current availability",
-    href: "/marketplace",
+    name: "IHA Care",
+    status: "Live demonstration",
+    body: "A synthetic-data care operations environment built for governed buyer evaluation.",
+    href: "https://care.theiha.org",
+    icon: HeartPulse,
   },
   {
-    label: "03",
-    title: "Install a company system",
-    body: "The workflow crosses tools, teams, or departments.",
-    cta: "Map the workflow",
+    name: "Uplift Workforce",
+    status: "Live program platform",
+    body: "A production workforce system supporting real healthcare training operations.",
+    href: "https://workforce.upliftcommunities.com",
+    icon: UsersRound,
+  },
+] as const;
+
+const ENGAGEMENTS = [
+  {
+    number: "01",
+    title: "Deploy a system",
+    body: "Use a specialized product for an urgent operating job.",
+    href: "/marketplace",
+    cta: "Explore systems",
+  },
+  {
+    number: "02",
+    title: "Install intelligence",
+    body: "Connect approved context, people, and workflows across the company.",
     href: "/contact-sales",
+    cta: "Design the operating layer",
+  },
+  {
+    number: "03",
+    title: "Build a venture",
+    body: "Turn a repeatable intelligence system into a company with us.",
+    href: "/fund",
+    cta: "Build with Perpetual Core",
   },
 ] as const;
 
-function ProductLink({
-  product,
-  children,
-  className,
-}: {
-  product: MarketplaceItem;
-  children: React.ReactNode;
-  className: string;
-}) {
-  if (product.external) {
-    return (
-      <a
-        href={product.href}
-        target="_blank"
-        rel="noopener noreferrer"
-        className={className}
-      >
-        {children}
-      </a>
-    );
-  }
-
+function SiteHeader() {
   return (
-    <Link href={product.href} className={className}>
-      {children}
-    </Link>
+    <header className="sticky top-0 z-50 border-b border-white/10 bg-[#050507]/82 backdrop-blur-xl">
+      <div className="mx-auto flex min-h-[72px] max-w-[1440px] items-center justify-between px-5 sm:px-8">
+        <Link
+          href="/"
+          className="flex min-h-11 items-center gap-3 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8b7cff]"
+          aria-label="Perpetual Core home"
+        >
+          <span className="relative flex h-5 w-5 items-center justify-center" aria-hidden="true">
+            <span className="absolute inset-0 rotate-45 border border-[#8b7cff]" />
+            <span className="h-1.5 w-1.5 bg-[#54e6b1]" />
+          </span>
+          <span className="text-[14px] font-semibold tracking-[-0.01em] text-white">
+            PERPETUAL CORE
+          </span>
+        </Link>
+
+        <nav className="hidden items-center gap-8 lg:flex" aria-label="Primary navigation">
+          {[
+            ["Systems", "/marketplace"],
+            ["Intelligence layer", "/#intelligence-layer"],
+            ["Studio", "/studio"],
+            ["Company", "/about"],
+          ].map(([label, href]) => (
+            <Link
+              key={href}
+              href={href}
+              className="inline-flex min-h-11 items-center text-sm text-white/58 transition-colors hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8b7cff]"
+            >
+              {label}
+            </Link>
+          ))}
+        </nav>
+
+        <Button
+          asChild
+          size="sm"
+          className="min-h-10 rounded-none border border-white/18 bg-white px-4 text-xs font-semibold uppercase tracking-[0.08em] text-black hover:bg-[#54e6b1]"
+        >
+          <Link href="/contact-sales">
+            <span className="sm:hidden">Enter</span>
+            <span className="hidden sm:inline">Enter the network</span>
+            <ArrowRight className="ml-2 h-3.5 w-3.5" />
+          </Link>
+        </Button>
+      </div>
+    </header>
+  );
+}
+
+function StatusMark({ label }: { label: string }) {
+  return (
+    <span className="inline-flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.14em] text-white/54">
+      <span className="relative flex h-2 w-2">
+        <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[#54e6b1] opacity-35 motion-reduce:animate-none" />
+        <span className="relative inline-flex h-2 w-2 rounded-full bg-[#54e6b1]" />
+      </span>
+      {label}
+    </span>
   );
 }
 
 export default function HomePage() {
   return (
-    <div className="pc-v3 public-light min-h-screen bg-[#f7f6f2] text-[#17171b]">
+    <div className="pc-v4 min-h-screen bg-[#050507] text-white">
       <PageViewTracker />
       <SkipLink />
-      <Navbar />
+      <SiteHeader />
       <ContentSlot slotKey="pc-home-banner" />
 
       <main id="main-content">
-        <section className="relative overflow-hidden border-b border-black/8">
+        <section className="relative isolate overflow-hidden border-b border-white/10">
+          <div className="pc-v4-grid absolute inset-0 opacity-45" aria-hidden="true" />
           <div
-            className="absolute inset-0 bg-[radial-gradient(circle_at_18%_16%,rgba(115,96,255,0.16),transparent_30%),radial-gradient(circle_at_88%_8%,rgba(76,205,178,0.17),transparent_28%),linear-gradient(180deg,#fbfaf7_0%,#f4f1fb_100%)]"
+            className="absolute inset-0 bg-[radial-gradient(circle_at_75%_42%,rgba(109,91,255,0.16),transparent_34%),radial-gradient(circle_at_20%_0%,rgba(84,230,177,0.07),transparent_28%),linear-gradient(180deg,transparent_65%,#050507_100%)]"
             aria-hidden="true"
           />
-          <div className="relative mx-auto grid max-w-[1280px] gap-12 px-6 pb-16 pt-14 sm:px-8 sm:pb-20 sm:pt-20 lg:min-h-[720px] lg:grid-cols-[0.88fr_1.12fr] lg:items-center lg:gap-14">
-            <div className="max-w-[610px]">
-              <div className="inline-flex items-center gap-2 rounded-full border border-[#5548d9]/16 bg-white/70 px-3 py-1.5 text-xs font-semibold text-[#4f46c8] shadow-sm backdrop-blur">
-                <span className="h-2 w-2 rounded-full bg-[#5548d9]" aria-hidden="true" />
-                AI systems for real operating work
+
+          <div className="relative mx-auto grid max-w-[1440px] gap-14 px-5 pb-12 pt-16 sm:px-8 sm:pb-16 sm:pt-24 lg:min-h-[790px] lg:grid-cols-[0.82fr_1.18fr] lg:items-center lg:gap-8 lg:pb-20 lg:pt-20">
+            <div className="max-w-[680px]">
+              <div className="flex items-center gap-3 font-mono text-[10px] uppercase tracking-[0.18em] text-[#54e6b1]">
+                <Radio className="h-3.5 w-3.5" aria-hidden="true" />
+                Perpetual Core / AI operating network
               </div>
 
-              <h1 className="mt-7 text-[46px] font-semibold leading-[0.98] tracking-[-0.055em] text-[#151519] sm:text-[62px] lg:text-[70px]">
-                Start with one.
-                <span className="block text-[#5548d9]">Connect the company.</span>
+              <h1 className="mt-8 text-[52px] font-semibold leading-[0.91] tracking-[-0.065em] text-white sm:text-[72px] lg:text-[86px]">
+                AI systems that
+                <span className="block text-white/42">run real companies.</span>
               </h1>
 
-              <p className="mt-7 max-w-[590px] text-[18px] leading-8 text-[#565661] sm:text-[20px]">
-                Perpetual Core builds specialized AI products for opportunity,
-                operations, people, knowledge, and media. Use one now—or connect
-                them through Sage as your company grows.
+              <p className="mt-8 max-w-[630px] text-[17px] leading-8 text-white/64 sm:text-[20px]">
+                Perpetual Core builds and operates specialized intelligence
+                systems across opportunity, research, people, education, care,
+                and media—connected through Sage.
               </p>
 
-              <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+              <div className="mt-9 flex flex-col gap-3 sm:flex-row">
                 <Button
                   asChild
                   size="lg"
-                  className="min-h-12 rounded-full bg-[#17171b] px-6 text-base text-white shadow-[0_14px_32px_rgba(23,23,27,0.16)] hover:bg-[#34343c]"
+                  className="min-h-12 rounded-none bg-white px-6 text-sm font-semibold uppercase tracking-[0.06em] text-black hover:bg-[#54e6b1]"
                 >
                   <Link href="/marketplace">
-                    Browse products <ArrowRight className="ml-2 h-4 w-4" />
+                    Explore live systems <ArrowRight className="ml-2 h-4 w-4" />
                   </Link>
                 </Button>
                 <Button
                   asChild
                   size="lg"
                   variant="outline"
-                  className="min-h-12 rounded-full border-black/14 bg-white/70 px-6 text-base text-[#222228] hover:bg-white"
+                  className="min-h-12 rounded-none border-white/18 bg-transparent px-6 text-sm font-semibold text-white hover:bg-white/8 hover:text-white"
                 >
-                  <Link href="/contact-sales">Map a workflow</Link>
+                  <Link href="/#intelligence-layer">See how Sage connects them</Link>
                 </Button>
               </div>
 
-              <div className="mt-8 flex items-start gap-3 rounded-2xl border border-black/8 bg-white/55 p-4 text-sm leading-6 text-[#61616b] backdrop-blur">
-                <ShieldCheck className="mt-0.5 h-5 w-5 shrink-0 text-[#168a72]" aria-hidden="true" />
-                <p>
-                  Sage coordinates approved context. Protected records stay in
-                  their source systems, and consequential actions remain
-                  human-approved.
-                </p>
+              <div className="mt-9 flex items-center gap-3 font-mono text-[10px] uppercase tracking-[0.14em] text-white/42">
+                <ShieldCheck className="h-4 w-4 text-[#8b7cff]" aria-hidden="true" />
+                Persistent intelligence. Explicit authority.
               </div>
             </div>
 
-            <LivingCompanyCanvas />
+            <OperatingNetwork />
+          </div>
+
+          <div className="relative border-t border-white/10">
+            <div className="mx-auto flex max-w-[1440px] gap-0 overflow-x-auto px-5 sm:px-8">
+              {["Sage", "RFP Engine", "Sentinel", "Janice", "Press", "Scribe"].map(
+                (product, index) => (
+                  <div
+                    key={product}
+                    className="flex min-w-[170px] flex-1 items-center gap-3 border-l border-white/10 px-5 py-5 last:border-r"
+                  >
+                    <span className="font-mono text-[9px] text-white/24">
+                      0{index + 1}
+                    </span>
+                    <span className="text-xs font-medium uppercase tracking-[0.08em] text-white/68">
+                      {product}
+                    </span>
+                  </div>
+                )
+              )}
+            </div>
           </div>
         </section>
 
-        <section className="border-b border-black/8 bg-[#f7f6f2] py-16 sm:py-20">
-          <div className="mx-auto max-w-[1280px] px-6 sm:px-8">
-            <div className="flex flex-col justify-between gap-5 md:flex-row md:items-end">
+        <section className="border-b border-white/10 bg-[#08080b] py-20 sm:py-28">
+          <div className="mx-auto max-w-[1440px] px-5 sm:px-8">
+            <div className="grid gap-8 lg:grid-cols-[0.85fr_1.15fr] lg:items-end">
               <div>
-                <p className="text-sm font-semibold text-[#5548d9]">Browse by outcome</p>
-                <h2 className="mt-3 text-3xl font-semibold tracking-[-0.04em] text-[#17171b] sm:text-4xl">
-                  What needs to move?
+                <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-[#54e6b1]">
+                  Verified core systems
+                </p>
+                <h2 className="mt-5 max-w-3xl text-4xl font-semibold leading-[0.98] tracking-[-0.05em] sm:text-6xl">
+                  The network is already operating.
                 </h2>
               </div>
-              <p className="max-w-xl text-base leading-7 text-[#62626d]">
-                Choose the work—not the technology. Each product is built around
-                a real operating job.
+              <p className="max-w-2xl text-base leading-8 text-white/54 lg:justify-self-end">
+                Not a collection of concept demos. Distinct systems are deployed
+                for real operating jobs, with availability stated plainly.
               </p>
             </div>
 
-            <div className="mt-9 grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
-              {OUTCOMES.map((outcome) => (
-                <Link
-                  key={outcome.label}
-                  href={outcome.href}
-                  className="group rounded-[22px] border border-black/8 bg-white p-5 shadow-[0_10px_34px_rgba(30,28,45,0.04)] transition duration-200 hover:-translate-y-1 hover:shadow-[0_18px_42px_rgba(30,28,45,0.09)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#5548d9]"
+            <div className="mt-12 grid gap-px overflow-hidden border border-white/10 bg-white/10 lg:grid-cols-12">
+              {CORE_SYSTEMS.map((system) => (
+                <a
+                  key={system.name}
+                  href={system.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={`group relative min-h-[330px] overflow-hidden bg-[#0b0b0f] p-7 transition-colors duration-300 hover:bg-[#101017] focus-visible:z-10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8b7cff] sm:p-9 ${system.span}`}
                 >
-                  <span
-                    className="flex h-10 w-10 items-center justify-center rounded-2xl text-white"
-                    style={{ backgroundColor: outcome.color }}
-                  >
-                    <outcome.icon className="h-4 w-4" aria-hidden="true" />
-                  </span>
-                  <h3 className="mt-7 text-base font-semibold text-[#222227]">
-                    {outcome.label}
-                  </h3>
-                  <p className="mt-2 text-sm leading-6 text-[#696973]">{outcome.body}</p>
-                  <ArrowRight className="mt-5 h-4 w-4 text-[#8a8a94] transition-transform group-hover:translate-x-1 group-hover:text-[#5548d9]" />
-                </Link>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        <section className="bg-[#eeece6] py-16 sm:py-24">
-          <div className="mx-auto max-w-[1280px] px-6 sm:px-8">
-            <div className="flex flex-col justify-between gap-6 lg:flex-row lg:items-end">
-              <div className="max-w-2xl">
-                <p className="text-sm font-semibold text-[#5548d9]">Featured systems</p>
-                <h2 className="mt-3 text-4xl font-semibold leading-[1.04] tracking-[-0.045em] text-[#17171b] sm:text-5xl">
-                  Products built around the job.
-                </h2>
-              </div>
-              <div className="max-w-xl">
-                <p className="text-base leading-7 text-[#5f5f69]">
-                  Each system can stand alone. When work crosses tools or teams,
-                  they connect through the wider Perpetual Core operating layer.
-                </p>
-                <Link
-                  href="/marketplace"
-                  className="mt-4 inline-flex min-h-11 items-center text-sm font-semibold text-[#312b78] hover:text-[#5548d9] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#5548d9]"
-                >
-                  View all {MARKETPLACE_ITEMS.length} systems and offerings
-                  <ArrowRight className="ml-2 h-4 w-4" />
-                </Link>
-              </div>
-            </div>
-
-            <div className="mt-10 grid gap-4 lg:grid-cols-12">
-              {FEATURED_PRODUCTS.map((product) => (
-                <ProductLink
-                  key={product.slug}
-                  product={product}
-                  className={`group flex flex-col rounded-[28px] border border-black/8 bg-[#fbfaf7] p-4 shadow-[0_18px_55px_rgba(29,27,40,0.06)] transition duration-200 hover:-translate-y-1 hover:shadow-[0_26px_70px_rgba(29,27,40,0.11)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#5548d9] ${CARD_LAYOUTS[product.slug] ?? "lg:col-span-4"}`}
-                >
-                  <ProductPreview
-                    slug={product.slug}
-                    label={product.name}
-                    className={product.slug === "sage" ? "lg:[&>div:last-child]:h-[260px]" : ""}
+                  <div
+                    className="absolute -right-24 -top-24 h-64 w-64 rounded-full opacity-0 blur-[90px] transition-opacity duration-500 group-hover:opacity-20"
+                    style={{ backgroundColor: system.accent }}
+                    aria-hidden="true"
                   />
-                  <div className="flex flex-1 flex-col px-2 pb-2 pt-5">
-                    <div className="flex items-center justify-between gap-4">
-                      <h3 className="text-xl font-semibold tracking-[-0.025em] text-[#202024]">
-                        {product.name}
-                      </h3>
-                      <span className="text-xs font-medium text-[#73737c]">
-                        {MARKETPLACE_STATUS_LABELS[product.status]} · {product.delivery}
+                  <div className="relative flex h-full flex-col">
+                    <div className="flex items-start justify-between gap-4">
+                      <span
+                        className="flex h-11 w-11 items-center justify-center border"
+                        style={{ borderColor: `${system.accent}66`, color: system.accent }}
+                      >
+                        <system.icon className="h-5 w-5" aria-hidden="true" />
                       </span>
+                      <StatusMark label={system.status} />
                     </div>
-                    <p className="mt-2 max-w-xl text-sm leading-6 text-[#64646e]">
-                      {product.headline}
-                    </p>
-                    <span className="mt-5 inline-flex items-center text-sm font-semibold text-[#373145]">
-                      Explore {product.name}
-                      {product.external ? (
-                        <ArrowUpRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
-                      ) : (
-                        <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
-                      )}
-                    </span>
+                    <div className="mt-auto pt-20">
+                      <p className="font-mono text-[10px] uppercase tracking-[0.16em] text-white/36">
+                        {system.category}
+                      </p>
+                      <div className="mt-4 flex items-end justify-between gap-6">
+                        <div>
+                          <h3 className="text-3xl font-semibold tracking-[-0.04em] text-white sm:text-4xl">
+                            {system.name}
+                          </h3>
+                          <p className="mt-3 max-w-xl text-sm leading-6 text-white/52">
+                            {system.headline}
+                          </p>
+                        </div>
+                        <ArrowUpRight className="h-5 w-5 shrink-0 text-white/34 transition group-hover:-translate-y-1 group-hover:translate-x-1 group-hover:text-white" />
+                      </div>
+                    </div>
                   </div>
-                </ProductLink>
+                </a>
               ))}
             </div>
           </div>
         </section>
 
-        <section id="operating-layer" className="scroll-mt-24 bg-[#17171b] py-16 text-white sm:py-24">
-          <div className="mx-auto max-w-[1280px] px-6 sm:px-8">
-            <div className="grid gap-12 lg:grid-cols-[0.78fr_1.22fr] lg:items-center lg:gap-20">
-              <div>
-                <span className="inline-flex items-center gap-2 rounded-full bg-white/8 px-3 py-1.5 text-xs font-semibold text-[#c9c4ff]">
-                  <Network className="h-3.5 w-3.5" aria-hidden="true" />
-                  How Sage connects the work
-                </span>
-                <h2 className="mt-6 text-4xl font-semibold leading-[1.04] tracking-[-0.045em] text-white sm:text-5xl">
-                  One product solves a job. Sage connects the context.
-                </h2>
-                <p className="mt-6 text-[17px] leading-8 text-white/78">
-                  Products can share approved priorities, evidence pointers,
-                  source health, and outcome receipts without collapsing every
-                  company or protected record into one database.
-                </p>
-                <Link
-                  href="/engine"
-                  className="mt-7 inline-flex min-h-11 items-center text-sm font-semibold text-white hover:text-[#c9c4ff] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#c9c4ff]"
-                >
-                  See the architecture
-                  <ArrowRight className="ml-2 h-4 w-4" />
-                </Link>
+        <section id="intelligence-layer" className="scroll-mt-20 border-b border-white/10 py-20 sm:py-28">
+          <div className="mx-auto grid max-w-[1440px] gap-14 px-5 sm:px-8 lg:grid-cols-[0.76fr_1.24fr] lg:items-center">
+            <div>
+              <div className="flex items-center gap-3 font-mono text-[10px] uppercase tracking-[0.18em] text-[#8b7cff]">
+                <Cpu className="h-4 w-4" aria-hidden="true" />
+                One intelligence layer
               </div>
-
-              <div className="rounded-[28px] border border-white/12 bg-white/[0.055] p-5 sm:p-7">
-                <div className="grid gap-3 sm:grid-cols-[1fr_auto_1.15fr_auto_1fr] sm:items-center">
-                  <div className="rounded-2xl bg-white/8 p-4">
-                    <p className="text-xs font-semibold text-white">Existing systems</p>
-                    <div className="mt-3 space-y-2 text-xs text-white/70">
-                      <p>Documents and calls</p>
-                      <p>CRM and operations</p>
-                      <p>Protected systems</p>
-                    </div>
-                  </div>
-                  <ArrowRight className="mx-auto hidden h-5 w-5 text-white/32 sm:block" aria-hidden="true" />
-                  <div className="rounded-2xl bg-[#6658e8] p-5 text-center shadow-[0_20px_55px_rgba(102,88,232,0.28)]">
-                    <BrainCircuit className="mx-auto h-6 w-6 text-white" aria-hidden="true" />
-                    <p className="mt-3 text-sm font-semibold text-white">Sage + Company Graph</p>
-                    <p className="mt-2 text-xs leading-5 text-white/78">
-                      Approved context and bounded receipts
-                    </p>
-                  </div>
-                  <ArrowRight className="mx-auto hidden h-5 w-5 text-white/32 sm:block" aria-hidden="true" />
-                  <div className="rounded-2xl bg-white/8 p-4">
-                    <p className="text-xs font-semibold text-white">Approved workflows</p>
-                    <div className="mt-3 space-y-2 text-xs text-white/70">
-                      <p>Products coordinate</p>
-                      <p>People review</p>
-                      <p>Outcomes get recorded</p>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="mt-4 flex items-start gap-3 rounded-2xl border border-[#9a8fff]/24 bg-[#7465ed]/10 p-4">
-                  <ShieldCheck className="mt-0.5 h-5 w-5 shrink-0 text-[#b9b2ff]" aria-hidden="true" />
-                  <p className="text-sm leading-6 text-white/78">
-                    Publishing, money, protected records, migrations, and other
-                    consequential actions stay behind explicit human approval.
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <section className="border-b border-black/8 bg-[#f7f6f2] py-16 sm:py-24">
-          <div className="mx-auto max-w-[1280px] px-6 sm:px-8">
-            <div className="max-w-2xl">
-              <p className="text-sm font-semibold text-[#5548d9]">Choose the right starting level</p>
-              <h2 className="mt-3 text-4xl font-semibold tracking-[-0.045em] text-[#17171b] sm:text-5xl">
-                Start where the work is.
+              <h2 className="mt-6 text-4xl font-semibold leading-[1] tracking-[-0.05em] sm:text-6xl">
+                Sage holds the thread.
               </h2>
+              <p className="mt-6 max-w-xl text-[17px] leading-8 text-white/56">
+                Sage coordinates approved priorities, evidence pointers, source
+                health, and outcome receipts across the network. It does not
+                collapse every company or protected record into one unrestricted
+                database.
+              </p>
+              <Link
+                href="/engine"
+                className="mt-8 inline-flex min-h-11 items-center border-b border-white/24 text-sm font-semibold text-white transition hover:border-[#54e6b1] hover:text-[#54e6b1] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8b7cff]"
+              >
+                Inspect the architecture <ArrowRight className="ml-2 h-4 w-4" />
+              </Link>
             </div>
 
-            <div className="mt-10 grid overflow-hidden rounded-[28px] border border-black/8 bg-white lg:grid-cols-3">
-              {START_PATHS.map((path, index) => (
-                <div
-                  key={path.title}
-                  className={`flex flex-col p-7 sm:p-8 ${
-                    index > 0 ? "border-t border-black/8 lg:border-l lg:border-t-0" : ""
-                  }`}
-                >
-                  <span className="text-xs font-semibold text-[#5548d9]">{path.label}</span>
-                  <h3 className="mt-8 text-2xl font-semibold tracking-[-0.03em] text-[#222227]">
-                    {path.title}
-                  </h3>
-                  <p className="mt-3 flex-1 text-base leading-7 text-[#666670]">
-                    {path.body}
-                  </p>
-                  <Link
-                    href={path.href}
-                    className="mt-7 inline-flex min-h-11 items-center text-sm font-semibold text-[#322c70] hover:text-[#5548d9] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#5548d9]"
-                  >
-                    {path.cta} <ArrowRight className="ml-2 h-4 w-4" />
-                  </Link>
-                </div>
-              ))}
-            </div>
-
-            <div className="mt-8 flex flex-col gap-4 rounded-[24px] bg-[#e9e5db] p-6 sm:flex-row sm:items-center sm:justify-between">
-              <div className="flex items-start gap-3">
-                <Check className="mt-1 h-5 w-5 shrink-0 text-[#168a72]" aria-hidden="true" />
-                <p className="max-w-3xl text-sm leading-6 text-[#53535c]">
-                  Built through real work in workforce development, education,
-                  proposals, people operations, multi-entity leadership, and
-                  media production.
+            <div className="relative border border-white/12 bg-[#09090d] p-6 sm:p-9">
+              <div className="pc-v4-grid absolute inset-0 opacity-20" aria-hidden="true" />
+              <div className="relative grid gap-px bg-white/10 sm:grid-cols-3">
+                {[
+                  ["01", "Observe", "Authorized sources emit bounded signals."],
+                  ["02", "Reason", "Systems use context with provenance intact."],
+                  ["03", "Act", "Consequential actions wait for human authority."],
+                ].map(([number, title, body]) => (
+                  <div key={number} className="bg-[#0d0d12] p-6">
+                    <span className="font-mono text-[9px] text-[#54e6b1]">{number}</span>
+                    <h3 className="mt-10 text-xl font-semibold text-white">{title}</h3>
+                    <p className="mt-3 text-sm leading-6 text-white/46">{body}</p>
+                  </div>
+                ))}
+              </div>
+              <div className="relative mt-px flex items-start gap-4 bg-[#111019] p-6">
+                <ShieldCheck className="mt-0.5 h-5 w-5 shrink-0 text-[#8b7cff]" aria-hidden="true" />
+                <p className="text-sm leading-6 text-white/58">
+                  Publishing, money, protected records, migrations, and provider
+                  actions remain behind explicit approval.
                 </p>
               </div>
-              <span className="shrink-0 text-xs font-semibold text-[#65656d]">
-                Operator-built, not hypothetical
-              </span>
             </div>
           </div>
         </section>
 
-        <section className="relative overflow-hidden bg-[#5548d9] py-16 text-white sm:py-24">
+        <section className="border-b border-white/10 bg-[#08080b] py-20 sm:py-28">
+          <div className="mx-auto max-w-[1440px] px-5 sm:px-8">
+            <div className="grid gap-10 lg:grid-cols-[0.72fr_1.28fr]">
+              <div>
+                <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-[#ffb85c]">
+                  Private releases and pilots
+                </p>
+                <h2 className="mt-5 text-4xl font-semibold leading-[1] tracking-[-0.05em]">
+                  The next systems are already taking shape.
+                </h2>
+              </div>
+              <div className="border-t border-white/12">
+                {PRIVATE_SYSTEMS.map((system) => (
+                  <Link
+                    key={system.name}
+                    href={system.href}
+                    className="group grid gap-4 border-b border-white/12 py-6 transition-colors hover:bg-white/[0.025] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8b7cff] sm:grid-cols-[0.5fr_0.7fr_1.6fr_auto] sm:items-center sm:px-4"
+                  >
+                    <span className="text-xl font-semibold tracking-[-0.03em] text-white">
+                      {system.name}
+                    </span>
+                    <span className="font-mono text-[9px] uppercase tracking-[0.13em] text-[#ffb85c]">
+                      {system.status}
+                    </span>
+                    <span className="text-sm leading-6 text-white/46">{system.body}</span>
+                    <ChevronRight className="h-4 w-4 text-white/28 transition-transform group-hover:translate-x-1 group-hover:text-white" />
+                  </Link>
+                ))}
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section className="border-b border-white/10 py-20 sm:py-28">
+          <div className="mx-auto max-w-[1440px] px-5 sm:px-8">
+            <div className="max-w-3xl">
+              <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-[#4ea7ff]">
+                Built on the Engine
+              </p>
+              <h2 className="mt-5 text-4xl font-semibold leading-[1] tracking-[-0.05em] sm:text-5xl">
+                The architecture is operating beyond the marketplace.
+              </h2>
+              <p className="mt-5 max-w-2xl text-base leading-8 text-white/52">
+                These are portfolio and program platforms—not extra Core SKUs.
+                They prove the Engine across education, care, and workforce operations.
+              </p>
+            </div>
+
+            <div className="mt-12 grid gap-px border border-white/10 bg-white/10 lg:grid-cols-3">
+              {OPERATED_SYSTEMS.map((system) => (
+                <a
+                  key={system.name}
+                  href={system.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="group bg-[#09090d] p-7 transition hover:bg-[#0f0f15] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8b7cff] sm:p-9"
+                >
+                  <div className="flex items-center justify-between">
+                    <system.icon className="h-5 w-5 text-[#4ea7ff]" aria-hidden="true" />
+                    <ArrowUpRight className="h-4 w-4 text-white/26 transition group-hover:-translate-y-1 group-hover:translate-x-1 group-hover:text-white" />
+                  </div>
+                  <p className="mt-16 font-mono text-[9px] uppercase tracking-[0.14em] text-[#4ea7ff]">
+                    {system.status}
+                  </p>
+                  <h3 className="mt-4 text-2xl font-semibold tracking-[-0.035em]">{system.name}</h3>
+                  <p className="mt-3 text-sm leading-6 text-white/46">{system.body}</p>
+                </a>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        <section className="border-b border-white/10 bg-[#08080b] py-20 sm:py-28">
+          <div className="mx-auto max-w-[1440px] px-5 sm:px-8">
+            <div className="flex items-end justify-between gap-8">
+              <div>
+                <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-[#54e6b1]">
+                  Work with Perpetual Core
+                </p>
+                <h2 className="mt-5 text-4xl font-semibold tracking-[-0.05em] sm:text-5xl">
+                  Three ways into the network.
+                </h2>
+              </div>
+              <Layers3 className="hidden h-9 w-9 text-white/18 sm:block" aria-hidden="true" />
+            </div>
+
+            <div className="mt-12 grid gap-px border border-white/10 bg-white/10 lg:grid-cols-3">
+              {ENGAGEMENTS.map((item) => (
+                <Link
+                  key={item.number}
+                  href={item.href}
+                  className="group flex min-h-[310px] flex-col bg-[#0a0a0e] p-7 transition hover:bg-[#111119] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8b7cff] sm:p-9"
+                >
+                  <span className="font-mono text-[9px] text-white/26">{item.number}</span>
+                  <Workflow className="mt-12 h-5 w-5 text-[#8b7cff]" aria-hidden="true" />
+                  <h3 className="mt-5 text-2xl font-semibold tracking-[-0.03em]">{item.title}</h3>
+                  <p className="mt-3 text-sm leading-6 text-white/46">{item.body}</p>
+                  <span className="mt-auto inline-flex items-center pt-10 text-sm font-semibold text-white">
+                    {item.cta}
+                    <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
+                  </span>
+                </Link>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        <section className="relative overflow-hidden py-24 sm:py-36">
+          <div className="pc-v4-grid absolute inset-0 opacity-25" aria-hidden="true" />
           <div
-            className="absolute inset-0 bg-[radial-gradient(circle_at_80%_10%,rgba(255,255,255,0.20),transparent_28%),radial-gradient(circle_at_10%_90%,rgba(88,227,188,0.25),transparent_30%)]"
+            className="absolute inset-0 bg-[radial-gradient(circle_at_50%_100%,rgba(109,91,255,0.28),transparent_40%)]"
             aria-hidden="true"
           />
-          <div className="relative mx-auto max-w-[1000px] px-6 text-center sm:px-8">
-            <Workflow className="mx-auto h-7 w-7 text-[#d7d2ff]" aria-hidden="true" />
-            <h2 className="mt-6 text-4xl font-semibold leading-[1.04] tracking-[-0.045em] sm:text-5xl lg:text-6xl">
-              Where is work losing time, context, or follow-through?
+          <div className="relative mx-auto max-w-[1100px] px-5 text-center sm:px-8">
+            <Sparkles className="mx-auto h-6 w-6 text-[#54e6b1]" aria-hidden="true" />
+            <h2 className="mt-7 text-5xl font-semibold leading-[0.94] tracking-[-0.06em] sm:text-7xl">
+              Build the company
+              <span className="block text-white/38">that can keep learning.</span>
             </h2>
-            <p className="mx-auto mt-5 max-w-2xl text-[17px] leading-8 text-white/82">
-              Show us the workflow. We will identify the smallest useful starting point.
+            <p className="mx-auto mt-7 max-w-2xl text-[17px] leading-8 text-white/52">
+              Deploy one system, install a connected operating layer, or build
+              the next intelligence company with us.
             </p>
-            <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row">
-              <Button
-                asChild
-                size="lg"
-                className="min-h-12 rounded-full bg-white px-6 text-base text-[#30296f] hover:bg-[#f2f0ff]"
-              >
-                <Link href="/contact-sales">
-                  Map my first workflow <ArrowRight className="ml-2 h-4 w-4" />
-                </Link>
-              </Button>
-              <Button
-                asChild
-                size="lg"
-                variant="outline"
-                className="min-h-12 rounded-full border-white/28 bg-transparent px-6 text-base text-white hover:bg-white/10 hover:text-white"
-              >
-                <Link href="/marketplace">Browse products</Link>
-              </Button>
-            </div>
+            <Button
+              asChild
+              size="lg"
+              className="mt-9 min-h-12 rounded-none bg-white px-7 text-sm font-semibold uppercase tracking-[0.06em] text-black hover:bg-[#54e6b1]"
+            >
+              <Link href="/contact-sales">
+                Enter the network <ArrowRight className="ml-2 h-4 w-4" />
+              </Link>
+            </Button>
           </div>
         </section>
       </main>
 
-      <Footer />
+      <footer className="border-t border-white/10 bg-[#050507]">
+        <div className="mx-auto flex max-w-[1440px] flex-col gap-8 px-5 py-10 text-xs text-white/36 sm:px-8 lg:flex-row lg:items-center lg:justify-between">
+          <div className="flex items-center gap-3">
+            <Circle className="h-3 w-3 fill-[#54e6b1] text-[#54e6b1]" aria-hidden="true" />
+            <span>© 2026 Perpetual Core · AI systems company</span>
+          </div>
+          <div className="flex flex-wrap gap-6">
+            <Link href="/privacy" className="hover:text-white">Privacy</Link>
+            <Link href="/terms" className="hover:text-white">Terms</Link>
+            <Link href="/about" className="hover:text-white">Company</Link>
+            <a href="https://theiha.org" target="_blank" rel="noopener noreferrer" className="hover:text-white">
+              Supporting human advancement
+            </a>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 }

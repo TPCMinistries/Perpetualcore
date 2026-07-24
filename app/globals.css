@@ -314,10 +314,60 @@
   color: #17171b;
 }
 
+/* Perpetual Core public V4 — dark operating-network surface. */
+.pc-v4 {
+  color-scheme: dark;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+}
+
+.pc-v4 ::selection {
+  background: rgba(84, 230, 177, 0.28);
+  color: #ffffff;
+}
+
+.pc-v4-grid {
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.032) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.032) 1px, transparent 1px);
+  background-size: 44px 44px;
+  mask-image: linear-gradient(to bottom, black, transparent 94%);
+}
+
+@keyframes pc-v4-scan {
+  0% {
+    transform: translateY(0);
+    opacity: 0;
+  }
+  12% {
+    opacity: 0.85;
+  }
+  80% {
+    opacity: 0.25;
+  }
+  100% {
+    transform: translateY(590px);
+    opacity: 0;
+  }
+}
+
+.pc-v4-scan {
+  animation: pc-v4-scan 7s linear infinite;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .pc-v3 *,
   .pc-v3 *::before,
   .pc-v3 *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+
+  .pc-v4 *,
+  .pc-v4 *::before,
+  .pc-v4 *::after {
     scroll-behavior: auto !important;
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
