@@ -6,9 +6,16 @@
 import { createClient } from "@/lib/supabase/server";
 import OpenAI from "openai";
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY!,
-});
+let openai: OpenAI | null = null;
+
+function getOpenAI(): OpenAI {
+  const apiKey = process.env.OPENAI_API_KEY;
+  if (!apiKey) {
+    throw new Error("OPENAI_API_KEY is required to extract insights");
+  }
+  openai ??= new OpenAI({ apiKey });
+  return openai;
+}
 
 export interface ExtractedInsight {
   type: 'preference' | 'pattern' | 'trend' | 'relationship' | 'recommendation';
@@ -134,7 +141,7 @@ Return a JSON array of insights, each with:
 
 Be thorough but concise. Extract 3-7 insights.`;
 
-    const response = await openai.chat.completions.create({
+    const response = await getOpenAI().chat.completions.create({
       model: "gpt-4o-mini",
       messages: [
         {
@@ -245,7 +252,7 @@ Return JSON with preferences array, each with:
 - value: any (the preference value)
 - confidence: number (0.0 to 1.0)`;
 
-    const response = await openai.chat.completions.create({
+    const response = await getOpenAI().chat.completions.create({
       model: "gpt-4o-mini",
       messages: [
         {
@@ -382,7 +389,7 @@ Return JSON with patterns array, each with:
 - confidence: number (0.0 to 1.0)
 - conversationIds: string[] (which conversations show this pattern)`;
 
-    const response = await openai.chat.completions.create({
+    const response = await getOpenAI().chat.completions.create({
       model: "gpt-4o-mini",
       messages: [
         {
@@ -405,6 +412,5 @@ Return JSON with patterns array, each with:
     return [];
   }
 }
-
 
 

@@ -1,11 +1,11 @@
-import * as XLSX from "xlsx";
+import ExcelJS from "exceljs";
 
 export interface ParsedExcelData {
   headers: string[];
-  rows: Record<string, any>[];
+  rows: Record<string, unknown>[];
   sheetName: string;
   totalRows: number;
-  preview: Record<string, any>[];
+  preview: Record<string, unknown>[];
 }
 
 export interface ExcelParseOptions {
@@ -19,10 +19,10 @@ export interface ExcelParseOptions {
 /**
  * Parse an Excel file buffer into structured data
  */
-export function parseExcelBuffer(
-  buffer: ArrayBuffer,
+export async function parseExcelBuffer(
+  buffer: ArrayBuffer | Buffer,
   options: ExcelParseOptions = {}
-): ParsedExcelData[] {
+): Promise<ParsedExcelData[]> {
   const {
     sheetIndex,
     sheetName,
@@ -31,34 +31,49 @@ export function parseExcelBuffer(
     dateFields = [],
   } = options;
 
-  const workbook = XLSX.read(buffer, { type: "array", cellDates: true });
+  const nodeBuffer = Buffer.isBuffer(buffer)
+    ? buffer
+    : Buffer.from(buffer);
+
+  if (!isXlsxBuffer(nodeBuffer)) {
+    return parseDelimitedBuffer(nodeBuffer, {
+      sheetName: sheetName ?? "CSV",
+      headerRow,
+      maxPreviewRows,
+      dateFields,
+    });
+  }
+
+  const workbook = new ExcelJS.Workbook();
+  await workbook.xlsx.load(nodeBuffer);
 
   const results: ParsedExcelData[] = [];
 
   // Determine which sheets to process
-  let sheetsToProcess = workbook.SheetNames;
+  let worksheetsToProcess = workbook.worksheets;
   if (sheetName) {
-    sheetsToProcess = [sheetName];
+    const namedSheet = workbook.getWorksheet(sheetName);
+    worksheetsToProcess = namedSheet ? [namedSheet] : [];
   } else if (sheetIndex !== undefined) {
-    sheetsToProcess = [workbook.SheetNames[sheetIndex]];
+    const indexedSheet = workbook.worksheets[sheetIndex];
+    worksheetsToProcess = indexedSheet ? [indexedSheet] : [];
   }
 
-  for (const name of sheetsToProcess) {
-    const worksheet = workbook.Sheets[name];
-    if (!worksheet) continue;
-
-    // Convert to JSON
-    const rawData = XLSX.utils.sheet_to_json(worksheet, {
-      header: 1,
-      defval: "",
-      raw: false,
-    }) as any[][];
+  for (const worksheet of worksheetsToProcess) {
+    const rawData: unknown[][] = [];
+    worksheet.eachRow({ includeEmpty: false }, (row) => {
+      const values: unknown[] = [];
+      for (let col = 1; col <= worksheet.columnCount; col++) {
+        values.push(normalizeCellValue(row.getCell(col).value));
+      }
+      rawData.push(values);
+    });
 
     if (rawData.length <= headerRow) {
       results.push({
         headers: [],
         rows: [],
-        sheetName: name,
+        sheetName: worksheet.name,
         totalRows: 0,
         preview: [],
       });
@@ -66,17 +81,17 @@ export function parseExcelBuffer(
     }
 
     // Extract headers
-    const headers = (rawData[headerRow] as string[]).map((h, i) =>
+    const headers = rawData[headerRow].map((h, i) =>
       String(h || `Column_${i + 1}`).trim()
     );
 
     // Extract data rows
-    const rows: Record<string, any>[] = [];
+    const rows: Record<string, unknown>[] = [];
     for (let i = headerRow + 1; i < rawData.length; i++) {
       const row = rawData[i];
       if (!row || row.every((cell) => !cell)) continue; // Skip empty rows
 
-      const rowData: Record<string, any> = {};
+      const rowData: Record<string, unknown> = {};
       headers.forEach((header, j) => {
         let value = row[j];
 
@@ -94,7 +109,7 @@ export function parseExcelBuffer(
     results.push({
       headers,
       rows,
-      sheetName: name,
+      sheetName: worksheet.name,
       totalRows: rows.length,
       preview: rows.slice(0, maxPreviewRows),
     });
@@ -106,7 +121,7 @@ export function parseExcelBuffer(
 /**
  * Parse an Excel date value
  */
-function parseExcelDate(value: any): Date | null {
+function parseExcelDate(value: unknown): Date | null {
   if (value instanceof Date) return value;
 
   if (typeof value === "number") {
@@ -127,16 +142,21 @@ function parseExcelDate(value: any): Date | null {
 /**
  * Get sheet names from an Excel file
  */
-export function getSheetNames(buffer: ArrayBuffer): string[] {
-  const workbook = XLSX.read(buffer, { type: "array" });
-  return workbook.SheetNames;
+export async function getSheetNames(buffer: ArrayBuffer | Buffer): Promise<string[]> {
+  const nodeBuffer = Buffer.isBuffer(buffer)
+    ? buffer
+    : Buffer.from(buffer);
+  if (!isXlsxBuffer(nodeBuffer)) return ["CSV"];
+  const workbook = new ExcelJS.Workbook();
+  await workbook.xlsx.load(nodeBuffer);
+  return workbook.worksheets.map((worksheet) => worksheet.name);
 }
 
 /**
  * Infer column types from data
  */
 export function inferColumnTypes(
-  data: Record<string, any>[]
+  data: Record<string, unknown>[]
 ): Record<string, "string" | "number" | "boolean" | "date" | "mixed"> {
   const types: Record<string, Set<string>> = {};
 
@@ -192,20 +212,20 @@ export interface ColumnMapping {
   target: string;
   type?: "string" | "number" | "boolean" | "date";
   required?: boolean;
-  default?: any;
-  transform?: (value: any) => any;
+  default?: unknown;
+  transform?: (value: unknown) => unknown;
 }
 
 export function transformData(
-  rows: Record<string, any>[],
+  rows: Record<string, unknown>[],
   mappings: ColumnMapping[]
-): { data: Record<string, any>[]; errors: string[] } {
-  const data: Record<string, any>[] = [];
+): { data: Record<string, unknown>[]; errors: string[] } {
+  const data: Record<string, unknown>[] = [];
   const errors: string[] = [];
 
   for (let i = 0; i < rows.length; i++) {
     const row = rows[i];
-    const transformed: Record<string, any> = {};
+    const transformed: Record<string, unknown> = {};
     let hasError = false;
 
     for (const mapping of mappings) {
@@ -266,4 +286,130 @@ export function transformData(
   }
 
   return { data, errors };
+}
+
+function isXlsxBuffer(buffer: Buffer): boolean {
+  return buffer.length >= 4 && buffer[0] === 0x50 && buffer[1] === 0x4b;
+}
+
+function normalizeCellValue(value: ExcelJS.CellValue): unknown {
+  if (value == null) return "";
+  if (value instanceof Date) return value;
+  if (typeof value === "string" || typeof value === "number" || typeof value === "boolean") {
+    return value;
+  }
+  if (typeof value === "object") {
+    if ("text" in value && typeof value.text === "string") return value.text;
+    if ("result" in value) return normalizeCellValue(value.result as ExcelJS.CellValue);
+    if ("richText" in value && Array.isArray(value.richText)) {
+      return value.richText.map((part) => part.text).join("");
+    }
+    if ("hyperlink" in value && typeof value.hyperlink === "string") return value.hyperlink;
+  }
+  return String(value);
+}
+
+function parseDelimitedBuffer(
+  buffer: Buffer,
+  options: Required<Pick<ExcelParseOptions, "headerRow" | "maxPreviewRows" | "dateFields">> & {
+    sheetName: string;
+  },
+): ParsedExcelData[] {
+  const text = buffer.toString("utf8").replace(/^\uFEFF/, "");
+  const delimiter = detectDelimiter(text);
+  const rawData = parseDelimitedRows(text, delimiter);
+
+  if (rawData.length <= options.headerRow) {
+    return [{
+      headers: [],
+      rows: [],
+      sheetName: options.sheetName,
+      totalRows: 0,
+      preview: [],
+    }];
+  }
+
+  const headers = rawData[options.headerRow].map((h, i) =>
+    String(h || `Column_${i + 1}`).trim(),
+  );
+  const rows: Record<string, unknown>[] = [];
+
+  for (let i = options.headerRow + 1; i < rawData.length; i++) {
+    const row = rawData[i];
+    if (!row || row.every((cell) => !cell)) continue;
+    const rowData: Record<string, unknown> = {};
+    headers.forEach((header, j) => {
+      let value: unknown = row[j] ?? "";
+      if (options.dateFields.includes(header) && value) {
+        const parsed = parseExcelDate(value);
+        if (parsed) value = parsed.toISOString();
+      }
+      rowData[header] = value;
+    });
+    rows.push(rowData);
+  }
+
+  return [{
+    headers,
+    rows,
+    sheetName: options.sheetName,
+    totalRows: rows.length,
+    preview: rows.slice(0, options.maxPreviewRows),
+  }];
+}
+
+function detectDelimiter(text: string): "," | "\t" | ";" {
+  const firstLine = text.split(/\r?\n/, 1)[0] ?? "";
+  const candidates: Array<"," | "\t" | ";"> = [",", "\t", ";"];
+  return candidates.reduce((best, candidate) =>
+    firstLine.split(candidate).length > firstLine.split(best).length
+      ? candidate
+      : best,
+  );
+}
+
+function parseDelimitedRows(text: string, delimiter: string): string[][] {
+  const rows: string[][] = [];
+  let row: string[] = [];
+  let field = "";
+  let quoted = false;
+
+  for (let i = 0; i < text.length; i++) {
+    const char = text[i];
+    const next = text[i + 1];
+
+    if (char === '"') {
+      if (quoted && next === '"') {
+        field += '"';
+        i++;
+      } else {
+        quoted = !quoted;
+      }
+      continue;
+    }
+
+    if (char === delimiter && !quoted) {
+      row.push(field);
+      field = "";
+      continue;
+    }
+
+    if ((char === "\n" || char === "\r") && !quoted) {
+      if (char === "\r" && next === "\n") i++;
+      row.push(field);
+      rows.push(row);
+      row = [];
+      field = "";
+      continue;
+    }
+
+    field += char;
+  }
+
+  if (field.length > 0 || row.length > 0) {
+    row.push(field);
+    rows.push(row);
+  }
+
+  return rows;
 }

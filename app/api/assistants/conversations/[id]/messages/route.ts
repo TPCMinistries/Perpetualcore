@@ -5,9 +5,17 @@ import OpenAI from "openai";
 import { buildMemoryContext, extractMemoriesFromConversation } from "@/lib/ai/memory";
 import { selectBestModel } from "@/lib/ai/model-router";
 
-const anthropic = new Anthropic({
-  apiKey: process.env.ANTHROPIC_API_KEY!,
-});
+let anthropicClient: Anthropic | null = null;
+
+function getAnthropicClient(): Anthropic {
+  const apiKey = process.env.ANTHROPIC_API_KEY;
+  if (!apiKey) {
+    throw new Error("ANTHROPIC_API_KEY is not configured");
+  }
+
+  anthropicClient ??= new Anthropic({ apiKey });
+  return anthropicClient;
+}
 
 export async function GET(
   request: Request,
@@ -225,7 +233,7 @@ export async function POST(
           controller.enqueue(encoder.encode(`data: ${userMessageData}\n\n`));
 
           // Stream from Claude API
-          const messageStream = await anthropic.messages.stream({
+          const messageStream = await getAnthropicClient().messages.stream({
             model: actualModel,
             max_tokens: assistant.max_tokens || 2000,
             temperature: assistant.temperature ? Number(assistant.temperature) : 0.7,

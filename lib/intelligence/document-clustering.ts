@@ -6,9 +6,16 @@
 import { createClient } from "@/lib/supabase/server";
 import OpenAI from "openai";
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY!,
-});
+let openai: OpenAI | null = null;
+
+function getOpenAI(): OpenAI {
+  const apiKey = process.env.OPENAI_API_KEY;
+  if (!apiKey) {
+    throw new Error("OPENAI_API_KEY is required to label document clusters");
+  }
+  openai ??= new OpenAI({ apiKey });
+  return openai;
+}
 
 export interface DocumentCluster {
   id: string;
@@ -276,7 +283,7 @@ async function generateClusterMetadata(
       summary: d.summary?.substring(0, 200) || "No summary"
     }));
 
-    const response = await openai.chat.completions.create({
+    const response = await getOpenAI().chat.completions.create({
       model: "gpt-4o-mini",
       messages: [
         {

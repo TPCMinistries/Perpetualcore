@@ -153,7 +153,7 @@ export function VoiceQuickTrainModal({ orgId }: VoiceQuickTrainModalProps) {
       <DialogContent className="sm:max-w-2xl max-h-[85vh] overflow-hidden flex flex-col">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <Sparkles className="h-4 w-4 text-emerald-400" />
+            <Sparkles className="h-4 w-4 text-emerald-600" />
             Describe your voice
           </DialogTitle>
           <DialogDescription>
@@ -226,7 +226,7 @@ export function VoiceQuickTrainModal({ orgId }: VoiceQuickTrainModalProps) {
           )}
 
           {loading && (
-            <div className="rounded-lg border border-emerald-500/20 bg-emerald-500/5 p-4 space-y-2">
+            <div className="rounded-lg border border-emerald-200 bg-emerald-50 p-4 space-y-2">
               {LOADING_STEPS.map((step, i) => {
                 const status =
                   i < loadingStep
@@ -247,17 +247,17 @@ export function VoiceQuickTrainModal({ orgId }: VoiceQuickTrainModalProps) {
                     }
                   >
                     {status === "done" ? (
-                      <Check className="h-3.5 w-3.5 text-emerald-400" />
+                      <Check className="h-3.5 w-3.5 text-emerald-600" />
                     ) : status === "active" ? (
-                      <Loader2 className="h-3.5 w-3.5 animate-spin text-emerald-400" />
+                      <Loader2 className="h-3.5 w-3.5 animate-spin text-emerald-600" />
                     ) : (
-                      <span className="h-3.5 w-3.5 rounded-full border border-zinc-700" />
+                      <span className="h-3.5 w-3.5 rounded-full border border-zinc-300" />
                     )}
                     <span
                       className={
                         status === "active"
-                          ? "text-emerald-200"
-                          : "text-zinc-400"
+                          ? "text-emerald-900"
+                          : "text-zinc-600"
                       }
                     >
                       {step}
@@ -304,32 +304,32 @@ function FingerprintPreview({
 }) {
   return (
     <div className="space-y-4">
-      <div className="rounded-lg border border-emerald-500/30 bg-emerald-500/5 p-4">
+      <div className="rounded-lg border border-emerald-200 bg-emerald-50 p-4">
         <div className="flex items-center gap-2">
-          <Check className="h-4 w-4 text-emerald-400" />
-          <h3 className="text-sm font-semibold text-emerald-200">
+          <Check className="h-4 w-4 text-emerald-600" />
+          <h3 className="text-sm font-semibold text-emerald-800">
             Fingerprint saved — version {version}
           </h3>
         </div>
-        <p className="text-xs text-emerald-100/70 mt-1">
+        <p className="text-xs text-emerald-700 mt-1">
           Drafts will now use this voice. You can replace it any time with
           real past proposals via the main training form.
         </p>
       </div>
 
-      <div className="rounded-lg border border-zinc-800 bg-zinc-900/40 p-4 space-y-3">
+      <div className="rounded-lg border border-zinc-200 bg-zinc-50 p-4 space-y-3">
         <div>
-          <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-emerald-400">
+          <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-emerald-700">
             Register
           </p>
-          <p className="text-sm text-zinc-200 capitalize mt-0.5">{fp.register}</p>
+          <p className="text-sm text-zinc-900 capitalize mt-0.5">{fp.register}</p>
         </div>
 
         <div>
-          <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-emerald-400">
+          <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-emerald-700">
             Voice summary
           </p>
-          <p className="text-sm leading-relaxed text-zinc-300 mt-0.5">
+          <p className="text-sm leading-relaxed text-zinc-700 mt-0.5">
             {fp.voice_summary}
           </p>
         </div>
@@ -339,7 +339,7 @@ function FingerprintPreview({
         <FingerprintList label="Avoided terms" items={fp.avoided_terms} />
       </div>
 
-      <div className="flex items-center justify-between border-t border-zinc-800 pt-3">
+      <div className="flex items-center justify-between border-t border-zinc-200 pt-3">
         <p className="text-xs text-muted-foreground font-mono">
           {cost < 0.01 ? `$${cost.toFixed(4)}` : `$${cost.toFixed(2)}`} •{" "}
           gpt-4o
@@ -356,10 +356,10 @@ function FingerprintList({ label, items }: { label: string; items: string[] }) {
   if (!items || items.length === 0) return null;
   return (
     <div>
-      <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-emerald-400">
+      <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-emerald-700">
         {label}
       </p>
-      <ul className="text-xs text-zinc-300 mt-1 space-y-0.5 list-disc pl-4">
+      <ul className="text-xs text-zinc-700 mt-1 space-y-0.5 list-disc pl-4">
         {items.map((s, i) => (
           <li key={`${label}-${i}`}>{s}</li>
         ))}

@@ -33,7 +33,16 @@ interface CalendarInsight {
   attendeeNotes: string | null;
 }
 
-const anthropic = new Anthropic();
+let anthropic: Anthropic | null = null;
+
+function getAnthropic(): Anthropic {
+  const apiKey = process.env.ANTHROPIC_API_KEY;
+  if (!apiKey) {
+    throw new Error("ANTHROPIC_API_KEY is required to analyze calendar events");
+  }
+  anthropic ??= new Anthropic({ apiKey });
+  return anthropic;
+}
 
 /**
  * Analyze a calendar event using AI
@@ -75,7 +84,7 @@ Consider:
 Return ONLY valid JSON, no markdown.`;
 
   try {
-    const response = await anthropic.messages.create({
+    const response = await getAnthropic().messages.create({
       model: "claude-3-5-haiku-latest",
       max_tokens: 500,
       messages: [{ role: "user", content: prompt }],

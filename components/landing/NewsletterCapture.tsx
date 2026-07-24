@@ -19,6 +19,7 @@ type Props = {
   variant?: Variant;
   source?: string;
   className?: string;
+  tone?: "light" | "dark";
 };
 
 type SubmitState = "idle" | "submitting" | "success" | "error";
@@ -27,6 +28,7 @@ export function NewsletterCapture({
   variant = "footer",
   source = "newsletter",
   className = "",
+  tone = "light",
 }: Props) {
   const [firstName, setFirstName] = useState("");
   const [email, setEmail] = useState("");
@@ -59,7 +61,11 @@ export function NewsletterCapture({
     return (
       <div
         className={`flex items-center gap-3 text-sm ${
-          variant === "inline" ? "text-foreground" : "text-muted-foreground"
+          variant === "inline"
+            ? "text-foreground"
+            : tone === "dark"
+              ? "text-white/72"
+              : "text-muted-foreground"
         } ${className}`}
       >
         <Check className="h-4 w-4 text-emerald-500" />
@@ -118,6 +124,8 @@ export function NewsletterCapture({
   }
 
   // footer variant — single row, compact
+  const dark = tone === "dark";
+
   return (
     <form
       onSubmit={handleSubmit}
@@ -135,7 +143,11 @@ export function NewsletterCapture({
           onChange={(e) => setFirstName(e.target.value)}
           placeholder="First name"
           autoComplete="given-name"
-          className="h-9 px-3 bg-background border border-border text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-foreground transition"
+          className={`h-10 border px-3 text-xs transition focus:outline-none focus:ring-2 ${
+            dark
+              ? "border-white/16 bg-white/[0.04] text-white placeholder:text-white/48 focus:border-[#8b7cff] focus:ring-[#8b7cff]/40"
+              : "border-border bg-background text-foreground placeholder:text-muted-foreground focus:border-foreground focus:ring-[#5548d9]/20"
+          }`}
         />
         <label className="sr-only" htmlFor="nl-email-footer">
           Email
@@ -148,13 +160,21 @@ export function NewsletterCapture({
           onChange={(e) => setEmail(e.target.value)}
           placeholder="you@company.com"
           autoComplete="email"
-          className="h-9 px-3 bg-background border border-border text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-foreground transition"
+          className={`h-10 border px-3 text-xs transition focus:outline-none focus:ring-2 ${
+            dark
+              ? "border-white/16 bg-white/[0.04] text-white placeholder:text-white/48 focus:border-[#8b7cff] focus:ring-[#8b7cff]/40"
+              : "border-border bg-background text-foreground placeholder:text-muted-foreground focus:border-foreground focus:ring-[#5548d9]/20"
+          }`}
         />
       </div>
       <button
         type="submit"
         disabled={state === "submitting"}
-        className="h-9 px-4 bg-foreground text-background text-xs font-medium hover:bg-foreground/90 transition disabled:opacity-60 rounded-[6px]"
+        className={`h-10 px-4 text-xs font-semibold transition disabled:opacity-60 ${
+          dark
+            ? "rounded-none bg-white text-black hover:bg-[#54e6b1]"
+            : "rounded-[6px] bg-foreground text-background hover:bg-foreground/90"
+        }`}
       >
         {state === "submitting" ? "…" : "Subscribe"}
       </button>

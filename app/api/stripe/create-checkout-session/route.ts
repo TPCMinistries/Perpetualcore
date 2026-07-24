@@ -2,9 +2,19 @@ import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import Stripe from "stripe";
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: "2024-12-18.acacia",
-});
+let stripeClient: Stripe | null = null;
+
+function getStripe(): Stripe {
+  if (stripeClient) return stripeClient;
+
+  const secretKey = process.env.STRIPE_SECRET_KEY;
+  if (!secretKey) throw new Error("STRIPE_SECRET_KEY is not set");
+
+  stripeClient = new Stripe(secretKey, {
+    apiVersion: "2024-12-18.acacia",
+  });
+  return stripeClient;
+}
 
 export async function POST(request: Request) {
   try {
@@ -49,6 +59,7 @@ export async function POST(request: Request) {
       .single();
 
     let customerId = existingSub?.stripe_customer_id;
+    const stripe = getStripe();
 
     // Create or retrieve Stripe customer
     if (!customerId) {

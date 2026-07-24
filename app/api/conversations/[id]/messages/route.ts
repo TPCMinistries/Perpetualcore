@@ -2,9 +2,17 @@ import { NextRequest } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import Anthropic from "@anthropic-ai/sdk";
 
-const anthropic = new Anthropic({
-  apiKey: process.env.ANTHROPIC_API_KEY!,
-});
+let anthropicClient: Anthropic | null = null;
+
+function getAnthropicClient(): Anthropic {
+  const apiKey = process.env.ANTHROPIC_API_KEY;
+  if (!apiKey) {
+    throw new Error("ANTHROPIC_API_KEY is not configured");
+  }
+
+  anthropicClient ??= new Anthropic({ apiKey });
+  return anthropicClient;
+}
 
 // POST /api/conversations/[id]/messages - Send a message in a conversation
 export async function POST(
@@ -113,7 +121,7 @@ export async function POST(
       }));
 
     // Generate AI response
-    const response = await anthropic.messages.create({
+    const response = await getAnthropicClient().messages.create({
       model: "claude-3-haiku-20240307",
       max_tokens: 2048,
       system: systemPrompt,

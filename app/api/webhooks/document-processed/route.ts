@@ -7,11 +7,24 @@ export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 export const maxDuration = 120;
 
-// Service role client for webhook processing (bypasses RLS)
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
+type ServiceClient = ReturnType<typeof createClient>;
+
+let serviceClient: ServiceClient | null = null;
+
+function getServiceClient(): ServiceClient {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  if (!supabaseUrl) {
+    throw new Error("NEXT_PUBLIC_SUPABASE_URL is not configured");
+  }
+
+  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!serviceRoleKey) {
+    throw new Error("SUPABASE_SERVICE_ROLE_KEY is not configured");
+  }
+
+  serviceClient ??= createClient(supabaseUrl, serviceRoleKey);
+  return serviceClient;
+}
 
 /**
  * POST /api/webhooks/document-processed
@@ -54,6 +67,8 @@ export async function POST(req: NextRequest) {
     if (!payload.content || payload.content.length < 10) {
       return Response.json({ error: "content is required and must be at least 10 characters" }, { status: 400 });
     }
+
+    const supabase = getServiceClient();
 
     // Get user's organization_id
     const { data: profile } = await supabase

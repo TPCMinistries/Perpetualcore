@@ -7,13 +7,15 @@
  * Honest framing: PDF/Docx upload is Phase 2. The drafter does NOT yet
  * consume vault retrieval — that wiring is a follow-up commit.
  *
+ * LLM usage is budget-gated via guardedLLMCall (Phase 17). The wrapper records
+ * the rfp_agent_sessions row — do NOT insert a separate audit row here.
+ *
  * Auth + RLS pattern mirrors app/api/rfp/draft/route.ts:
  *   - createClient() to authenticate and verify owner/writer membership
  *     against rfp_user_orgs.
  *   - createAdminClient() (inside uploadDocument) for the multi-row insert,
  *     since vault rows are written behind RLS but the membership has just
  *     been verified.
- *   - Audit row in rfp_agent_sessions with agent="vault_indexer_v1".
  *
  * Returns: { doc_id, chunk_count, total_chars, tokens, cost_usd, model }.
  */
@@ -27,7 +29,11 @@ import {
   MIN_DOC_BODY_CHARS,
   MAX_DOC_BODY_CHARS,
 } from "@/lib/rfp/vault/upload";
-import { createAdminClient } from "@/lib/supabase/server";
+import {
+  guardedLLMCall,
+  budgetExceededResponse,
+  BudgetExceededError,
+} from "@/lib/rfp/ai/guardrail";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -79,16 +85,31 @@ export async function POST(
     return NextResponse.json({ error: "forbidden" }, { status: 403 });
   }
 
-  // Run the pipeline.
-  let result;
+  // Run the pipeline — budget-gated. The wrapper checks spend before calling
+  // fn() and records the session row after; no separate audit insert needed.
+  // Embeddings have no output tokens (tokensOut: 0); cost is input-only.
+  let guardResult;
   try {
-    result = await uploadDocument({
-      orgId,
-      docTitle: body.doc_title,
-      docType: body.doc_type as (typeof VAULT_DOC_TYPES)[number],
-      body: body.body,
+    guardResult = await guardedLLMCall(orgId, async () => {
+      const result = await uploadDocument({
+        orgId,
+        docTitle: body.doc_title,
+        docType: body.doc_type as (typeof VAULT_DOC_TYPES)[number],
+        body: body.body,
+      });
+      return {
+        agent: "vault_indexer_v1",
+        model: result.model,
+        tokensIn: result.tokens,
+        tokensOut: 0,
+        costUsd: result.cost_usd,
+        sessionId: `vault_${result.doc_id}`,
+        // Pass the full result through so the route can return it.
+        _result: result,
+      };
     });
   } catch (err) {
+    if (err instanceof BudgetExceededError) return budgetExceededResponse(err);
     const msg = err instanceof Error ? err.message : "unknown";
     // Distinguish operator error from infra error.
     const status = msg.startsWith("upload_bad_input") || msg.startsWith("chunker_") ? 400 : 502;
@@ -98,23 +119,5 @@ export async function POST(
     );
   }
 
-  // Audit row — proposal_id is null (vault upload isn't tied to a proposal).
-  // The column is nullable per database.types.ts; if the insert fails for any
-  // reason we don't fail the whole request — the upload itself succeeded.
-  try {
-    const admin = createAdminClient();
-    await admin.from("rfp_agent_sessions").insert({
-      org_id: orgId,
-      agent: "vault_indexer_v1",
-      session_id: `vault_${result.doc_id}`,
-      model: result.model,
-      tokens_in: result.tokens,
-      tokens_out: 0,
-      cost_usd: result.cost_usd,
-    });
-  } catch {
-    // Swallow audit failures; the user-visible result is the upload.
-  }
-
-  return NextResponse.json(result);
+  return NextResponse.json(guardResult._result);
 }

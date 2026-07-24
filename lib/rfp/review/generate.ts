@@ -1,22 +1,26 @@
 /**
  * lib/rfp/review/generate.ts — Reviewer Agent v1 orchestrator.
  *
- * Single GPT-4o pass that reads the five drafted sections against the funder's
- * opportunity brief and emits structured findings + an overall score + an
- * executive summary. No streaming, no inline annotation, no iterative critique
- * — those are Phase 2.
+ * Phase 19-02 upgrade: Anthropic-first model chain
+ * (claude-sonnet-4-5-20250929 → claude-haiku-4-5-20251001 → gpt-4o fallback),
+ * rubric-anchored criterion_id
+ * sanitization, and computeCostUsd from the guardrail.
  *
- * Cost: ~$0.10-0.25/run at typical proposal size. GPT-4o pricing $2.50/M input
- * + $10/M output. The route persists the actual measured cost on the audit row.
- * JSON-mode is enforced so the structured output is reliably parseable.
+ * Contract (preserved from v1):
+ *   - Returns ReviewerResult on success.
+ *   - Throws only when the full model chain has been exhausted — the route
+ *     turns that into a 502 so the user can retry rather than store junk.
  *
  * Honest defaults:
- *  - If the model returns malformed JSON we throw rather than persist garbage.
- *    The route turns that into a 502 so the user can retry.
+ *  - If a model returns malformed JSON or a Zod parse failure, we fall through
+ *    to the next model in the chain. Only after all three fail do we throw.
  *  - We trim excerpts to 280 chars before persistence to keep the row under
  *    the MAX_PERSISTED_BYTES ceiling.
+ *  - criterion_id values are sanitized against the provided rubric_criteria ids
+ *    after Zod parse — unknown ids are set to null, the finding is kept.
  */
 
+import Anthropic from "@anthropic-ai/sdk";
 import OpenAI from "openai";
 import {
   buildReviewerUserPrompt,
@@ -26,13 +30,38 @@ import {
   type ReviewerResult,
   type ReviewerFinding,
 } from "./rubric";
+import { computeCostUsd } from "@/lib/rfp/ai/guardrail";
 
-const MODEL = "gpt-4o";
+// ---------------------------------------------------------------------------
+// Model chain (mirrors lib/rfp/scoring/summary.ts pattern exactly)
+// ---------------------------------------------------------------------------
 
-// GPT-4o pricing (USD per million tokens). Keep in sync with
-// lib/rfp/voice/extract.ts and lib/rfp/draft/generate.ts.
-const PRICE_PER_M_INPUT = 2.5;
-const PRICE_PER_M_OUTPUT = 10.0;
+const MODEL_PRIMARY = "claude-sonnet-4-5-20250929";
+const MODEL_FALLBACK = "claude-haiku-4-5-20251001";
+const MODEL_OPENAI_FALLBACK = "gpt-4o";
+const MODEL_CHAIN = [MODEL_PRIMARY, MODEL_FALLBACK, MODEL_OPENAI_FALLBACK];
+
+// ---------------------------------------------------------------------------
+// Lazy client init (matches summary.ts pattern)
+// ---------------------------------------------------------------------------
+
+let anthropic: Anthropic | null = null;
+function getAnthropic(): Anthropic | null {
+  if (anthropic) return anthropic;
+  const key = process.env.ANTHROPIC_API_KEY;
+  if (!key) return null;
+  anthropic = new Anthropic({ apiKey: key });
+  return anthropic;
+}
+
+let openaiClient: OpenAI | null = null;
+function getOpenAI(): OpenAI | null {
+  if (openaiClient) return openaiClient;
+  const key = process.env.OPENAI_API_KEY;
+  if (!key) return null;
+  openaiClient = new OpenAI({ apiKey: key });
+  return openaiClient;
+}
 
 // Defensive cap for excerpt length before persistence. Keeps the persisted
 // JSON well under MAX_PERSISTED_BYTES even with ~15 findings.
@@ -57,62 +86,140 @@ function truncateExcerpt(f: ReviewerFinding): ReviewerFinding {
   return f;
 }
 
+/**
+ * Sanitize criterion_id values against provided criteria ids.
+ * Unknown/malformed ids → null; finding is kept (never dropped).
+ */
+function sanitizeCriterionId(
+  f: ReviewerFinding,
+  knownIds: Set<string>,
+): ReviewerFinding {
+  if (f.criterion_id == null) return f;
+  if (!knownIds.has(f.criterion_id)) {
+    return { ...f, criterion_id: null };
+  }
+  return f;
+}
+
+/**
+ * Call one model and return raw text + usage, or null on any per-model failure.
+ * Dispatches on model id: gpt-* → OpenAI, else → Anthropic. Never throws.
+ */
+async function callModel(
+  model: string,
+  systemPrompt: string,
+  userPrompt: string,
+): Promise<{ rawText: string; tokensIn: number; tokensOut: number } | null> {
+  try {
+    if (model.startsWith("gpt-")) {
+      const client = getOpenAI();
+      if (!client) return null;
+      const resp = await client.chat.completions.create({
+        model,
+        max_tokens: 4096,
+        response_format: { type: "json_object" },
+        messages: [
+          { role: "system", content: systemPrompt },
+          { role: "user", content: userPrompt },
+        ],
+      });
+      const rawText = (resp.choices[0]?.message?.content ?? "").trim();
+      if (!rawText) return null;
+      return {
+        rawText,
+        tokensIn: resp.usage?.prompt_tokens ?? 0,
+        tokensOut: resp.usage?.completion_tokens ?? 0,
+      };
+    } else {
+      // Anthropic branch
+      const client = getAnthropic();
+      if (!client) return null;
+      const resp = await client.messages.create({
+        model,
+        max_tokens: 4096,
+        system: systemPrompt,
+        messages: [{ role: "user", content: userPrompt }],
+      });
+      const rawText = resp.content
+        .filter((b) => b.type === "text")
+        .map((b) => (b as { type: "text"; text: string }).text)
+        .join("")
+        .trim();
+      if (!rawText) return null;
+      return {
+        rawText,
+        tokensIn: resp.usage?.input_tokens ?? 0,
+        tokensOut: resp.usage?.output_tokens ?? 0,
+      };
+    }
+  } catch {
+    return null;
+  }
+}
+
 export async function generateReview(
   input: ReviewerInput,
 ): Promise<ReviewerResult> {
-  const apiKey = process.env.OPENAI_API_KEY;
-  if (!apiKey) {
-    throw new Error("OPENAI_API_KEY not set");
-  }
-
-  const client = new OpenAI({ apiKey });
   const session_id = `review_${Date.now().toString(36)}_${Math.random()
     .toString(36)
     .slice(2, 8)}`;
 
-  const res = await client.chat.completions.create({
-    model: MODEL,
-    // Reviews are bounded — ~15 findings * ~300 chars + summary fits in <3k tokens.
-    // 4096 leaves headroom without enabling rambling.
-    max_tokens: 4096,
-    response_format: { type: "json_object" },
-    messages: [
-      { role: "system", content: REVIEWER_SYSTEM_PROMPT },
-      { role: "user", content: buildReviewerUserPrompt(input) },
-    ],
-  });
+  const userPrompt = buildReviewerUserPrompt(input);
+  const knownCriterionIds = new Set(
+    (input.rubric_criteria ?? []).map((c) => c.id),
+  );
 
-  const text = res.choices[0]?.message?.content ?? "";
+  let lastError = "all models in chain failed";
 
-  if (!text.trim()) {
-    throw new Error("reviewer model returned empty content");
+  for (const model of MODEL_CHAIN) {
+    let raw: { rawText: string; tokensIn: number; tokensOut: number } | null =
+      null;
+    try {
+      raw = await callModel(model, REVIEWER_SYSTEM_PROMPT, userPrompt);
+    } catch {
+      // callModel never throws, but be safe
+      continue;
+    }
+
+    if (!raw) continue;
+    if (!raw.rawText.trim()) continue;
+
+    // Attempt Zod parse — fall through on failure
+    const candidate = extractJson(raw.rawText);
+    let parsed;
+    try {
+      parsed = ReviewerModelOutputSchema.parse(JSON.parse(candidate));
+    } catch (err) {
+      lastError =
+        err instanceof Error
+          ? `${model}: JSON/Zod parse failed: ${err.message.slice(0, 200)}`
+          : `${model}: parse failed`;
+      continue;
+    }
+
+    // Sanitize findings: truncate excerpts + null-out unknown criterion_ids
+    const findings = parsed.findings
+      .map(truncateExcerpt)
+      .map((f) =>
+        knownCriterionIds.size > 0 ? sanitizeCriterionId(f, knownCriterionIds) : f,
+      );
+
+    const tokens_in = raw.tokensIn;
+    const tokens_out = raw.tokensOut;
+    const cost_usd = computeCostUsd(model, tokens_in, tokens_out);
+
+    return {
+      findings,
+      overall_score: Math.round(parsed.overall_score),
+      summary: parsed.summary,
+      tokens_in,
+      tokens_out,
+      cost_usd,
+      model,
+      session_id,
+    };
   }
 
-  const candidate = extractJson(text);
-  let parsed;
-  try {
-    parsed = ReviewerModelOutputSchema.parse(JSON.parse(candidate));
-  } catch (err) {
-    const detail = err instanceof Error ? err.message : "unknown";
-    throw new Error(`reviewer JSON parse failed: ${detail.slice(0, 200)}`);
-  }
-
-  const findings = parsed.findings.map(truncateExcerpt);
-
-  const tokens_in = res.usage?.prompt_tokens ?? 0;
-  const tokens_out = res.usage?.completion_tokens ?? 0;
-  const cost_usd =
-    (tokens_in / 1_000_000) * PRICE_PER_M_INPUT +
-    (tokens_out / 1_000_000) * PRICE_PER_M_OUTPUT;
-
-  return {
-    findings,
-    overall_score: Math.round(parsed.overall_score),
-    summary: parsed.summary,
-    tokens_in,
-    tokens_out,
-    cost_usd,
-    model: MODEL,
-    session_id,
-  };
+  // Full chain exhausted — throw (route converts to 502, user can retry)
+  throw new Error(`reviewer model chain exhausted: ${lastError}`);
 }

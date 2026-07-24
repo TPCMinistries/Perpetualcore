@@ -1,589 +1,510 @@
-/**
- * Perpetual Core homepage
- *
- * Direction: practical AI operating-system implementation first. The venture
- * studio and Perpetual Engine are the deeper credibility layer, not the first
- * thing a buyer has to decode.
- */
-
 import Link from "next/link";
-import { ArrowRight, ArrowUpRight } from "lucide-react";
+import { Suspense } from "react";
+import {
+  ArrowRight,
+  ArrowUpRight,
+  BrainCircuit,
+  ChevronRight,
+  Cpu,
+  FileSearch,
+  GraduationCap,
+  HeartPulse,
+  Layers3,
+  Radio,
+  SearchCheck,
+  ShieldCheck,
+  Sparkles,
+  UsersRound,
+  Workflow,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Navbar } from "@/components/landing/Navbar";
-import { Footer } from "@/components/landing/Footer";
-import { NewsletterCapture } from "@/components/landing/NewsletterCapture";
-import { Reveal } from "@/components/landing/Reveal";
+import { SkipLink } from "@/components/ui/accessibility";
 import { PageViewTracker } from "@/components/analytics/PageViewTracker";
 import { ContentSlot } from "@/components/slots/ContentSlot";
+import { OperatingNetwork } from "@/components/landing/v4/OperatingNetwork";
+import { Navbar } from "@/components/landing/Navbar";
+import { Footer } from "@/components/landing/Footer";
 
 export const metadata = {
-  title: "Perpetual Core - AI operating systems for complex companies",
+  title: "Perpetual Core — AI systems that run real companies",
   description:
-    "Perpetual Core installs AI operating systems across sales, operations, knowledge, customer communication, and executive visibility for growing companies and mission-driven institutions.",
+    "Perpetual Core builds and operates specialized intelligence systems across opportunity, research, people, education, care, and media—connected through Sage.",
 };
 
-const ARMS = [
+const CORE_SYSTEMS = [
   {
-    index: "01",
-    name: "Studio",
-    summary: "Maps the company, installs the first operating layer, trains the team, and expands across the business.",
-    meta: "Implementation",
-    href: "/studio",
+    name: "Sage",
+    category: "Operating intelligence",
+    status: "Private live system",
+    headline: "Persistent context for operators carrying more than one company.",
+    audience: "For founders and multi-company operators",
+    href: "https://sage.perpetualcore.com",
+    accent: "#8b7cff",
+    icon: BrainCircuit,
+    span: "lg:col-span-7",
   },
   {
-    index: "02",
-    name: "Products",
-    summary: "Specific tools for diligence, proposals, knowledge, hiring, sales support, and team operations.",
-    meta: "Specific jobs",
-    href: "/products",
+    name: "RFP Engine",
+    category: "Opportunity intelligence",
+    status: "Live",
+    headline: "Find, qualify, and develop the right grants and contracts.",
+    audience: "For teams pursuing grants and contracts",
+    href: "https://rfp.perpetualcore.com",
+    accent: "#4ea7ff",
+    icon: FileSearch,
+    span: "lg:col-span-5",
   },
   {
-    index: "03",
-    name: "Fund",
-    summary: "DeepFutures backs venture-shaped patterns that emerge from repeatable operating-system work.",
-    meta: "Scale path",
-    href: "/fund",
+    name: "Sentinel",
+    category: "Diligence intelligence",
+    status: "Live",
+    headline: "Evidence-backed research for consequential people and company decisions.",
+    audience: "For leaders making high-stakes decisions",
+    href: "https://sentinel.perpetualcore.com",
+    accent: "#54e6b1",
+    icon: SearchCheck,
+    span: "lg:col-span-6",
   },
   {
-    index: "04",
-    name: "Institute",
-    summary: "IHA trains the founders, operators, and workforce communities who should own this AI shift.",
-    meta: "Mission layer",
-    href: "/institute",
-  },
-] as const;
-
-const PRODUCTS = [
-  { index: "01", name: "Atlas", status: "IN PILOT", statusColor: "pilot" as const, tagline: "AI-native COO for fund-backed portcos.", href: "/products/atlas", external: false },
-  { index: "02", name: "Sentinel", status: "LIVE", statusColor: "live" as const, tagline: "Due diligence and intel for the people Kroll won't take calls from.", href: "https://sentinel.perpetualcore.com", external: true },
-  { index: "03", name: "Sage", status: "LIVE", statusColor: "live" as const, tagline: "Personal AI OS with ambient context and your voice.", href: "/products/sage", external: false },
-  { index: "04", name: "Atelier", status: "LIVE", statusColor: "live" as const, tagline: "Agent-augmented workspace for teams and clients.", href: "https://atelier.perpetualcore.com", external: true },
-  { index: "05", name: "Vellum", status: "BUILD", statusColor: "invite" as const, tagline: "Institutional memory across calls, docs, voice notes, and channels.", href: "/products/vellum", external: false },
-  { index: "06", name: "RFP Engine", status: "LIVE", statusColor: "live" as const, tagline: "Find the right RFP. Draft it in your voice. Ship it clean.", href: "https://rfp.perpetualcore.com", external: true },
-  { index: "07", name: "RFP Sentry", status: "BUILD", statusColor: "invite" as const, tagline: "Bid intelligence and compliance gate.", href: "/products/rfp-sentry", external: false },
-  { index: "08", name: "Janice", status: "LIVE", statusColor: "live" as const, tagline: "Hiring and onboarding OS for people-heavy organizations.", href: "https://janice.perpetualcore.com", external: true },
-  { index: "09", name: "Press", status: "BY INVITATION", statusColor: "invite" as const, tagline: "The media production system we run our own content on. $0/month to run.", href: "/products/press", external: false },
-] as const;
-
-const PHASES = [
-  { step: "Map", body: "Understand sales, operations, knowledge, projects, customers, data, and the handoffs where work gets stuck." },
-  { step: "Install", body: "Build the first AI operating layer against live work, not a demo disconnected from the business." },
-  { step: "Train", body: "Put the system into team rituals: intake, follow-up, proposals, reporting, service, and decision review." },
-  { step: "Expand", body: "Move from the first high-leverage workflow into the full company operating system." },
-];
-
-const ENGINE_STATS = [
-  { value: "Sales", label: "Follow-up, proposals, pipeline, and reactivation" },
-  { value: "Ops", label: "Projects, handoffs, delivery, service, and exceptions" },
-  { value: "Intel", label: "Knowledge, reporting, dashboards, and decisions" },
-];
-
-const INSTITUTE_PROGRAMS = [
-  { name: "IHA Founders 1,000", body: "AI-native founder training with emerging markets focus." },
-  { name: "IHA Academy", body: "AI literacy and applied skills for non-technical operators." },
-  { name: "IHA Advance", body: "Kenya delegation and East Africa field programs." },
-  { name: "Workforce", body: "Healthcare and community workforce development for low-income New Yorkers." },
-];
-
-const FIELD_NOTES = [
-  {
-    index: "001",
-    date: "2026-05-22",
-    title: "How to start before a full company-wide install.",
-    summary: "Use one workflow as the wedge, then expand into the operating system when the proof is there.",
-    href: "/studio/retainers",
-  },
-  {
-    index: "002",
-    date: "2026-05-20",
-    title: "What an AI install actually costs.",
-    summary: "Vendor subscriptions, engineering time, integration debt, and outcome evaluation.",
-    href: "/blog/what-an-ai-install-actually-costs",
-  },
-  {
-    index: "003",
-    date: "2026-05-20",
-    title: "Outcome-eval, the line item every AI install skips.",
-    summary: "Without it, you have a demo that ran once, not an operating system.",
-    href: "/blog/outcome-eval-the-line-item-every-ai-install-skips",
+    name: "Janice",
+    category: "People operations",
+    status: "Live",
+    headline: "Hiring, agreements, onboarding, and the people lifecycle in one system.",
+    audience: "For teams managing the people lifecycle",
+    href: "https://janice.perpetualcore.com",
+    accent: "#ffb85c",
+    icon: UsersRound,
+    span: "lg:col-span-6",
   },
 ] as const;
 
-const INVITATION_ROWS = [
+const PRIVATE_SYSTEMS = [
   {
-    tag: "Organizations",
-    title: "Install AI across the company you already run.",
-    body: "For businesses ready to modernize sales, operations, knowledge, customer communication, and reporting.",
-    cta: "Map the system",
+    name: "Press",
+    status: "By invitation",
+    body: "A governed media production system for transcription, editing, clips, voice, and distribution.",
+    href: "/products/press",
+  },
+  {
+    name: "Scribe",
+    status: "Private release",
+    body: "A voice-led publishing studio for turning recorded thinking into refined work.",
+    href: "https://scribe.perpetualcore.com",
+  },
+  {
+    name: "Atlas",
+    status: "In pilot",
+    body: "An AI-native COO system for funds, operating partners, and portfolio companies.",
+    href: "/products/atlas",
+  },
+  {
+    name: "Atelier",
+    status: "In pilot",
+    body: "An agent-augmented workspace for repeatable projects, flows, and team execution.",
+    href: "https://atelier.perpetualcore.com",
+  },
+] as const;
+
+const OPERATED_SYSTEMS = [
+  {
+    name: "IHA AI Academy",
+    status: "Live learning platform",
+    body: "Applied AI education with a course-scoped Sage learning experience.",
+    href: "https://academy.humanadvancementinstitute.org",
+    icon: GraduationCap,
+  },
+  {
+    name: "IHA Care",
+    status: "Live demonstration",
+    body: "A synthetic-data care operations environment built for governed buyer evaluation.",
+    href: "https://care.theiha.org",
+    icon: HeartPulse,
+  },
+  {
+    name: "Uplift Workforce",
+    status: "Live program platform",
+    body: "A production workforce system supporting real healthcare training operations.",
+    href: "https://workforce.upliftcommunities.com",
+    icon: UsersRound,
+  },
+] as const;
+
+const ENGAGEMENTS = [
+  {
+    number: "01",
+    title: "Deploy a system",
+    body: "Use a specialized product for an urgent operating job.",
+    href: "/marketplace",
+    cta: "Explore systems",
+  },
+  {
+    number: "02",
+    title: "Install intelligence",
+    body: "Connect approved context, people, and workflows across the company.",
     href: "/contact-sales",
+    cta: "Design the operating layer",
   },
   {
-    tag: "Operators",
-    title: "Use a product when the job is already clear.",
-    body: "Start with RFPs, diligence, knowledge, hiring, team operations, or a focused AI assistant.",
-    cta: "View products",
-    href: "/products",
+    number: "03",
+    title: "Build a venture",
+    body: "Turn a repeatable intelligence system into a company with us.",
+    href: "/fund",
+    cta: "Build with Perpetual Core",
   },
-  {
-    tag: "Founders",
-    title: "Build an Engine-aligned venture.",
-    body: "Structure the company from day one with operating rigor and mission funding built into the model.",
-    cta: "Read spec",
-    href: "/engine/spec",
-  },
-  {
-    tag: "Mission partners",
-    title: "Train the people who should own this next layer.",
-    body: "Partner with IHA across founders, workforce, AI literacy, and field programs.",
-    cta: "Visit IHA",
-    href: "/institute",
-  },
-];
+] as const;
 
-function StatusPill({ status, color }: { status: string; color: "live" | "pilot" | "invite" }) {
-  const dot = { live: "bg-status-live", pilot: "bg-status-pilot", invite: "bg-status-invite" }[color];
+function StatusMark({ label }: { label: string }) {
   return (
-    <span className="inline-flex items-center gap-1.5 font-mono text-[10px] tracking-[0.18em] uppercase text-muted-foreground">
-      <span className={`block h-1.5 w-1.5 rounded-full ${dot} ${color === "live" ? "animate-pulse-dot" : ""}`} />
-      {status}
+    <span className="inline-flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.12em] text-white/72">
+      <span className="relative flex h-2 w-2">
+        <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[#54e6b1] opacity-35 motion-reduce:animate-none" />
+        <span className="relative inline-flex h-2 w-2 rounded-full bg-[#54e6b1]" />
+      </span>
+      {label}
     </span>
-  );
-}
-
-function SectionRail({ index, label }: { index: string; label: string }) {
-  return (
-    <div>
-      <p className="eyebrow mb-3">§ {index}</p>
-      <h2 className="text-xs uppercase tracking-[0.18em] font-mono text-foreground">{label}</h2>
-    </div>
-  );
-}
-
-function EngineArchitecture() {
-  const arms = [
-    { x: 100, label: "01 · STUDIO" },
-    { x: 280, label: "02 · PRODUCTS" },
-    { x: 460, label: "03 · FUND" },
-    { x: 640, label: "04 · INSTITUTE" },
-  ];
-
-  return (
-    <figure>
-      <svg
-        viewBox="0 0 740 240"
-        className="w-full text-foreground"
-        role="img"
-        aria-label="Four arms flowing into the Perpetual Engine substrate."
-      >
-        {arms.map((a) => (
-          <text
-            key={`label-${a.label}`}
-            x={a.x}
-            y={28}
-            textAnchor="middle"
-            className="fill-current font-mono"
-            fontSize="9"
-            letterSpacing="1.5"
-            style={{ fontFamily: "var(--font-mono), monospace" }}
-          >
-            {a.label}
-          </text>
-        ))}
-        {arms.map((a) => (
-          <g key={`node-${a.label}`}>
-            <rect x={a.x - 14} y={42} width="28" height="28" className="fill-background stroke-foreground" strokeWidth="1.25" />
-            <rect x={a.x - 5} y={51} width="10" height="10" className="fill-foreground" />
-            <line x1={a.x} y1={70} x2={a.x} y2={170} stroke="currentColor" strokeWidth="1" className="animate-flow text-foreground/55" />
-            <circle cx={a.x} cy={170} r="2" className="fill-foreground" />
-          </g>
-        ))}
-        <rect x="40" y="170" width="660" height="40" className="fill-foreground" />
-        <text
-          x={370}
-          y={195}
-          textAnchor="middle"
-          className="fill-background font-mono"
-          fontSize="11"
-          letterSpacing="2"
-          fontWeight="500"
-          style={{ fontFamily: "var(--font-mono), monospace" }}
-        >
-          § 05 · THE ENGINE · STRUCTURAL STANDARD
-        </text>
-        <line x1="40" y1="165" x2="40" y2="215" stroke="currentColor" strokeWidth="1" className="text-foreground/45" />
-        <line x1="700" y1="165" x2="700" y2="215" stroke="currentColor" strokeWidth="1" className="text-foreground/45" />
-        <text
-          x={370}
-          y={232}
-          textAnchor="middle"
-          className="fill-current font-mono opacity-50"
-          fontSize="8.5"
-          letterSpacing="1.5"
-          style={{ fontFamily: "var(--font-mono), monospace" }}
-        >
-          ONE SUBSTRATE FOR THE STUDIO, PRODUCTS, FUND, AND INSTITUTE
-        </text>
-      </svg>
-    </figure>
   );
 }
 
 export default function HomePage() {
   return (
-    <div className="min-h-screen bg-background">
+    <div className="pc-v4 min-h-screen bg-[#050507] text-white">
       <PageViewTracker />
-      <Navbar />
-      <ContentSlot slotKey="pc-home-banner" />
+      <SkipLink />
+      <Navbar tone="dark" />
+      <Suspense fallback={null}>
+        <ContentSlot slotKey="pc-home-banner" />
+      </Suspense>
 
-      <section className="relative overflow-hidden border-b border-border text-white engine-gradient">
-        <div className="signal-grid absolute inset-0 opacity-70" />
-        <div className="absolute left-1/2 top-10 h-[420px] w-[420px] -translate-x-1/2 rounded-full bg-[#4b35ff]/25 blur-3xl" />
-        <div className="absolute right-[-140px] top-32 h-[360px] w-[360px] rounded-full bg-[#00d4ff]/20 blur-3xl" />
-        <div className="relative container mx-auto px-6 sm:px-8 min-h-[calc(100vh-73px)] py-16 sm:py-24 flex flex-col justify-between gap-16">
-          <div className="grid lg:grid-cols-[1fr_340px] gap-14 lg:gap-20 items-start">
-            <div className="max-w-5xl">
-              <div className="flex items-center gap-3 mb-10">
-                <span aria-hidden className="block h-2 w-2 bg-[#26f2a8] shadow-[0_0_18px_rgba(38,242,168,0.75)]" />
-                <p className="eyebrow !text-white/70">Perpetual Core · Engine reference studio</p>
+      <main id="main-content">
+        <section className="relative isolate overflow-hidden border-b border-white/10">
+          <div className="pc-v4-grid absolute inset-0 opacity-45" aria-hidden="true" />
+          <div
+            className="absolute inset-0 bg-[radial-gradient(circle_at_75%_42%,rgba(109,91,255,0.16),transparent_34%),radial-gradient(circle_at_20%_0%,rgba(84,230,177,0.07),transparent_28%),linear-gradient(180deg,transparent_65%,#050507_100%)]"
+            aria-hidden="true"
+          />
+
+          <div className="relative mx-auto grid max-w-[1440px] gap-14 px-5 pb-12 pt-16 sm:px-8 sm:pb-16 sm:pt-24 lg:min-h-[790px] lg:grid-cols-[0.82fr_1.18fr] lg:items-center lg:gap-8 lg:pb-20 lg:pt-20">
+            <div className="max-w-[680px]">
+              <div className="flex items-center gap-3 font-mono text-[11px] uppercase tracking-[0.16em] text-[#54e6b1]">
+                <Radio className="h-3.5 w-3.5" aria-hidden="true" />
+                Perpetual Core / AI operating network
               </div>
-              <h1 className="display-hero text-[52px] sm:text-[76px] lg:text-[112px] text-white leading-[0.95] mb-10 max-w-5xl">
-                Install an AI operating system{" "}
-                <span className="italic text-gradient">inside your company.</span>
+
+              <h1 className="mt-8 text-[52px] font-semibold leading-[0.91] tracking-[-0.065em] text-white sm:text-[72px] lg:text-[86px]">
+                AI systems that
+                <span className="block text-white/52">run real companies.</span>
               </h1>
-              <p className="text-lg sm:text-xl text-white/72 leading-[1.55] max-w-3xl mb-10">
-                Perpetual Core helps growing companies turn sales, operations, knowledge,
-                customer communication, and leadership reporting into AI-enabled systems. We start
-                where the fastest measurable win lives, then expand across the business.
+
+              <p className="mt-8 max-w-[630px] text-[17px] leading-8 text-white/64 sm:text-[20px]">
+                Perpetual Core builds and operates specialized intelligence
+                systems across opportunity, research, people, education, care,
+                and media—connected through Sage.
               </p>
-              <div className="flex flex-col sm:flex-row items-start gap-4">
+
+              <div className="mt-9 flex flex-col gap-3 sm:flex-row">
                 <Button
-                  size="lg"
                   asChild
-                  className="h-12 px-7 rounded-[6px] bg-[#26f2a8] text-[#05060b] shadow-[0_0_32px_rgba(38,242,168,0.22)] hover:bg-[#7dffd0]"
+                  size="lg"
+                  className="min-h-12 rounded-none bg-white px-6 text-sm font-semibold uppercase tracking-[0.06em] text-black hover:bg-[#54e6b1]"
                 >
-                  <Link href="/contact-sales">
-                    Map my AI operating system <ArrowRight className="ml-2 h-4 w-4" />
+                  <Link href="/marketplace">
+                    Explore live systems <ArrowRight className="ml-2 h-4 w-4" />
                   </Link>
                 </Button>
-                <Link
-                  href="/studio"
-                  className="inline-flex items-center py-3 text-sm font-medium text-white border-b border-white/25 hover:border-[#00d4ff] hover:text-[#00d4ff] transition-colors"
+                <Button
+                  asChild
+                  size="lg"
+                  variant="outline"
+                  className="min-h-12 rounded-none border-white/18 bg-transparent px-6 text-sm font-semibold text-white hover:bg-white/8 hover:text-white"
                 >
-                  See studio services <ArrowRight className="ml-2 h-3.5 w-3.5" />
-                </Link>
+                  <Link href="/#intelligence-layer">See the operating layer</Link>
+                </Button>
+              </div>
+
+              <div className="mt-9 flex items-center gap-3 font-mono text-[11px] uppercase tracking-[0.12em] text-white/64">
+                <ShieldCheck className="h-4 w-4 text-[#8b7cff]" aria-hidden="true" />
+                Persistent intelligence. Explicit authority.
               </div>
             </div>
 
-            <aside className="border border-white/15 bg-white/[0.06] backdrop-blur-xl shadow-[0_20px_80px_rgba(0,0,0,0.28)]">
-              <div className="p-6 border-b border-white/15">
-                <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-[#00d4ff] mb-4">
-                  What we install
-                </p>
-                <p className="text-2xl font-semibold tracking-[-0.02em] text-white mb-3">
-                  Whole-company AI infrastructure.
-                </p>
-                <p className="text-sm text-white/62 leading-[1.65]">
-                  Not random tools. A practical operating layer across the places where revenue,
-                  customers, projects, people, and decisions already move.
-                </p>
-              </div>
-              <div className="divide-y divide-white/12">
-                {[
-                  ["For larger companies", "System install"],
-                  ["For smaller companies", "Practical AI ops"],
-                  ["First wedge", "Fastest measurable win"],
-                  ["Scale path", "Department → company"],
-                ].map(([label, value]) => (
-                  <div key={label} className="flex items-baseline justify-between gap-4 px-6 py-4">
-                    <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-white/45">{label}</span>
-                    <span className="text-sm font-semibold text-white">{value}</span>
-                  </div>
-                ))}
-              </div>
-            </aside>
+            <OperatingNetwork />
           </div>
 
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 border border-white/15 bg-white/[0.055] backdrop-blur-md divide-y sm:divide-y-0 sm:divide-x divide-white/12">
-            {ARMS.map((arm) => (
-              <Link key={arm.name} href={arm.href} className="group p-5 sm:p-6 hover:bg-white/[0.08] transition-colors">
-                <div className="flex items-center justify-between gap-4 mb-10">
-                  <span className="font-mono text-[10px] tracking-[0.18em] text-[#00d4ff]">§ {arm.index}</span>
-                  <span className="font-mono text-[10px] uppercase tracking-[0.16em] text-white/45">{arm.meta}</span>
-                </div>
-                <h2 className="text-2xl font-semibold tracking-[-0.02em] text-white mb-3 group-hover:text-[#26f2a8] transition-colors">
-                  {arm.name}
-                </h2>
-                <p className="text-sm text-white/58 leading-[1.6]">{arm.summary}</p>
-              </Link>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <Reveal as="section" className="border-b border-border bg-[#f5f7ff]">
-        <div className="container mx-auto px-6 sm:px-8 py-20 sm:py-24">
-          <div className="grid lg:grid-cols-[280px_1fr] gap-12 lg:gap-20 items-start">
-            <SectionRail index="01" label="Who this is for" />
-            <div>
-              <div className="max-w-3xl mb-10">
-                <h2 className="font-display text-4xl sm:text-5xl lg:text-6xl font-normal tracking-[-0.025em] leading-[1.02] text-foreground mb-6">
-                  Built for companies with real moving parts.
-                </h2>
-                <p className="text-base sm:text-lg text-muted-foreground leading-[1.65]">
-                  Regional companies, project-based businesses, family-owned operators, professional services firms,
-                  nonprofits, and institutions all share the same problem: knowledge, customers, projects, and decisions
-                  move through too many disconnected places.
-                </p>
-              </div>
-              <div className="grid md:grid-cols-2 gap-px bg-[#d9ddff] border border-[#d9ddff] shadow-[0_24px_80px_rgba(75,53,255,0.08)]">
-                {[
-                  ["Complex regional companies", "For businesses coordinating customers, vendors, salespeople, project managers, inventory, delivery, service, and leadership reporting."],
-                  ["Owner-led smaller companies", "For founders and operators who need to sell more, respond faster, organize knowledge, and stop losing work in the cracks."],
-                  ["Project-based teams", "For companies where every win creates handoffs: proposal, scope, vendor coordination, client updates, delivery, and follow-up."],
-                  ["Mission institutions", "For teams that need AI capability with real governance, human context, and durable operating discipline."],
-                ].map(([title, body]) => (
-                  <div key={title} className="bg-background p-6 sm:p-7">
-                    <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-primary mb-4">
-                      Fit
-                    </p>
-                    <h3 className="text-xl font-semibold tracking-[-0.015em] text-foreground mb-3">{title}</h3>
-                    <p className="text-sm text-muted-foreground leading-[1.65]">{body}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        </div>
-      </Reveal>
-
-      <Reveal as="section" className="border-b border-border">
-        <div className="container mx-auto px-6 sm:px-8 py-20 sm:py-28">
-          <div className="grid lg:grid-cols-[280px_1fr] gap-12 lg:gap-20">
-            <SectionRail index="02" label="Where AI goes" />
-            <div>
-              <h2 className="font-display text-4xl sm:text-5xl lg:text-6xl font-normal tracking-[-0.025em] leading-[1.02] text-foreground mb-10 max-w-3xl">
-                We install AI where the business actually runs.
-              </h2>
-              <div className="border-y border-border">
-                {[
-                  ["Sales", "Pipeline & follow-up", "Lead response, account notes, proposals, quote drafts, reactivation, handoff to operations, and sales coaching.", "/contact-sales", "#4b35ff"],
-                  ["Operations", "Projects & delivery", "Project coordination, service issues, vendor handoffs, delivery exceptions, internal requests, and team accountability.", "/contact-sales", "#00a8ff"],
-                  ["Knowledge", "Company memory", "Product/vendor knowledge, policies, call notes, SOPs, customer context, onboarding, and searchable institutional memory.", "/products/vellum", "#12b981"],
-                  ["Leadership", "Visibility & decisions", "Dashboards, operating reviews, decision logs, risk signals, bottlenecks, and what needs executive attention.", "/studio", "#26f2a8"],
-                ].map(([stage, type, body, href, color]) => (
-                  <Link
-                    key={stage}
-                    href={href}
-                    className="group grid sm:grid-cols-[10px_110px_170px_1fr_auto] gap-3 sm:gap-8 py-6 border-b border-border last:border-b-0 hover:bg-surface-hover transition-colors"
+          <div className="relative border-t border-white/10">
+            <div className="mx-auto flex max-w-[1440px] gap-0 overflow-x-auto px-5 sm:px-8">
+              {["Sage", "RFP Engine", "Sentinel", "Janice", "Press", "Scribe"].map(
+                (product, index) => (
+                  <div
+                    key={product}
+                    className="flex min-w-[170px] flex-1 items-center gap-3 border-l border-white/10 px-5 py-5 last:border-r"
                   >
-                    <span className="hidden sm:block h-full min-h-12 w-1.5" style={{ backgroundColor: color }} aria-hidden />
-                    <span className="font-mono text-[11px] uppercase tracking-[0.16em] text-muted-foreground">{stage}</span>
-                    <span className="text-lg font-semibold tracking-[-0.01em] text-foreground group-hover:text-primary transition-colors">{type}</span>
-                    <span className="text-sm text-muted-foreground leading-[1.65]">{body}</span>
-                    <ArrowRight className="hidden sm:block h-4 w-4 text-muted-foreground mt-1 transition-transform group-hover:translate-x-1 group-hover:text-primary" />
-                  </Link>
-                ))}
-              </div>
-              <div className="grid sm:grid-cols-4 border border-border border-t-0 bg-card divide-y sm:divide-y-0 sm:divide-x divide-border">
-                {PHASES.map((phase, index) => (
-                  <div key={phase.step} className="p-5">
-                    <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-primary mb-4">
+                    <span className="font-mono text-[9px] text-white/24">
                       0{index + 1}
-                    </p>
-                    <h3 className="text-base font-semibold text-foreground mb-2">{phase.step}</h3>
-                    <p className="text-xs text-muted-foreground leading-[1.6]">{phase.body}</p>
+                    </span>
+                    <span className="text-xs font-medium uppercase tracking-[0.08em] text-white/68">
+                      {product}
+                    </span>
+                  </div>
+                )
+              )}
+            </div>
+          </div>
+        </section>
+
+        <section className="border-b border-white/10 bg-[#08080b] py-20 sm:py-24">
+          <div className="mx-auto max-w-[1440px] px-5 sm:px-8">
+            <div className="grid gap-8 lg:grid-cols-[0.85fr_1.15fr] lg:items-end">
+              <div>
+                <p className="font-mono text-[11px] uppercase tracking-[0.16em] text-[#54e6b1]">
+                  Verified core systems
+                </p>
+                <h2 className="mt-5 max-w-3xl text-4xl font-semibold leading-[0.98] tracking-[-0.05em] sm:text-6xl">
+                  The network is already operating.
+                </h2>
+              </div>
+              <p className="max-w-2xl text-base leading-8 text-white/54 lg:justify-self-end">
+                Not a collection of concept demos. Distinct systems are deployed
+                for real operating jobs, with availability stated plainly.
+              </p>
+            </div>
+
+            <div className="mt-12 grid gap-px overflow-hidden border border-white/10 bg-white/10 lg:grid-cols-12">
+              {CORE_SYSTEMS.map((system) => (
+                <a
+                  key={system.name}
+                  href={system.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={`group relative min-h-[310px] overflow-hidden bg-[#0b0b0f] p-7 transition-colors duration-300 hover:bg-[#101017] focus-visible:z-10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8b7cff] sm:p-9 ${system.span}`}
+                >
+                  <div
+                    className="absolute -right-24 -top-24 h-64 w-64 rounded-full opacity-0 blur-[90px] transition-opacity duration-500 group-hover:opacity-20"
+                    style={{ backgroundColor: system.accent }}
+                    aria-hidden="true"
+                  />
+                  <div className="relative flex h-full flex-col">
+                    <div className="flex items-start justify-between gap-4">
+                      <span
+                        className="flex h-11 w-11 items-center justify-center border"
+                        style={{ borderColor: `${system.accent}66`, color: system.accent }}
+                      >
+                        <system.icon className="h-5 w-5" aria-hidden="true" />
+                      </span>
+                      <StatusMark label={system.status} />
+                    </div>
+                    <div className="mt-auto pt-20">
+                      <p className="font-mono text-[11px] uppercase tracking-[0.14em] text-white/62">
+                        {system.category}
+                      </p>
+                      <p className="mt-3 text-xs font-medium text-white/68">
+                        {system.audience}
+                      </p>
+                      <div className="mt-5 flex items-end justify-between gap-6">
+                        <div>
+                          <h3 className="text-3xl font-semibold tracking-[-0.04em] text-white sm:text-4xl">
+                            {system.name}
+                          </h3>
+                          <p className="mt-3 max-w-xl text-sm leading-6 text-white/66">
+                            {system.headline}
+                          </p>
+                        </div>
+                        <ArrowUpRight className="h-5 w-5 shrink-0 text-white/34 transition group-hover:-translate-y-1 group-hover:translate-x-1 group-hover:text-white" />
+                      </div>
+                    </div>
+                  </div>
+                </a>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        <section id="intelligence-layer" className="scroll-mt-20 border-b border-white/10 py-20 sm:py-24">
+          <div className="mx-auto grid max-w-[1440px] gap-14 px-5 sm:px-8 lg:grid-cols-[0.76fr_1.24fr] lg:items-center">
+            <div>
+              <div className="flex items-center gap-3 font-mono text-[11px] uppercase tracking-[0.16em] text-[#a79cff]">
+                <Cpu className="h-4 w-4" aria-hidden="true" />
+                One intelligence layer
+              </div>
+              <h2 className="mt-6 text-4xl font-semibold leading-[1] tracking-[-0.05em] sm:text-6xl">
+                Sage holds the thread.
+              </h2>
+              <p className="mt-6 max-w-xl text-[17px] leading-8 text-white/68">
+                Sage coordinates approved priorities, evidence pointers, source
+                health, and outcome receipts across the network. It does not
+                collapse every company or protected record into one unrestricted
+                database.
+              </p>
+              <Link
+                href="/engine"
+                className="mt-8 inline-flex min-h-11 items-center border-b border-white/24 text-sm font-semibold text-white transition hover:border-[#54e6b1] hover:text-[#54e6b1] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8b7cff]"
+              >
+                Inspect the architecture <ArrowRight className="ml-2 h-4 w-4" />
+              </Link>
+            </div>
+
+            <div className="relative border border-white/12 bg-[#09090d] p-6 sm:p-9">
+              <div className="pc-v4-grid absolute inset-0 opacity-20" aria-hidden="true" />
+              <div className="relative grid gap-px bg-white/10 sm:grid-cols-3">
+                {[
+                  ["01", "Observe", "Authorized sources emit bounded signals."],
+                  ["02", "Reason", "Systems use context with provenance intact."],
+                  ["03", "Act", "Consequential actions wait for human authority."],
+                ].map(([number, title, body]) => (
+                  <div key={number} className="bg-[#0d0d12] p-6">
+                    <span className="font-mono text-[11px] text-[#54e6b1]">{number}</span>
+                    <h3 className="mt-10 text-xl font-semibold text-white">{title}</h3>
+                    <p className="mt-3 text-sm leading-6 text-white/64">{body}</p>
                   </div>
                 ))}
               </div>
-            </div>
-          </div>
-        </div>
-      </Reveal>
-
-      <Reveal as="section" className="border-b border-border bg-[#fbfcff]">
-        <div className="container mx-auto px-6 sm:px-8 py-20 sm:py-28">
-          <div className="grid lg:grid-cols-[280px_1fr] gap-12 lg:gap-20">
-            <SectionRail index="03" label="How it starts" />
-            <div>
-              <div className="max-w-3xl mb-12">
-                <h2 className="font-display text-4xl sm:text-5xl lg:text-6xl font-normal tracking-[-0.025em] leading-[1.02] text-foreground mb-6">
-                  Start focused. Keep the full system in view.
-                </h2>
-                <p className="text-base sm:text-lg text-muted-foreground leading-[1.65]">
-                  A company-wide AI operating system is the destination. The smartest first move is
-                  usually the highest-leverage workflow: the place where speed, quality, revenue, or
-                  visibility improves fast enough for the team to believe.
+              <div className="relative mt-px flex items-start gap-4 bg-[#111019] p-6">
+                <ShieldCheck className="mt-0.5 h-5 w-5 shrink-0 text-[#8b7cff]" aria-hidden="true" />
+                <p className="text-sm leading-6 text-white/58">
+                  Publishing, money, protected records, migrations, and provider
+                  actions remain behind explicit approval.
                 </p>
               </div>
-              <div className="grid md:grid-cols-2 gap-px bg-border border border-border shadow-[0_18px_60px_rgba(10,12,24,0.06)]">
-                {PRODUCTS.map((product) => {
-                  const inner = (
-                    <>
-                      <div className="flex items-start justify-between gap-4 mb-10">
-                        <span className="font-mono text-[10px] tracking-[0.18em] text-muted-foreground">§ {product.index}</span>
-                        <StatusPill status={product.status} color={product.statusColor} />
-                      </div>
-                      <h3 className="text-2xl font-semibold tracking-[-0.02em] text-foreground mb-3 group-hover:text-primary transition-colors">
-                        {product.name}
-                      </h3>
-                      <p className="text-sm text-muted-foreground leading-[1.6]">{product.tagline}</p>
-                    </>
-                  );
-
-                  return product.external ? (
-                    <a key={product.name} href={product.href} target="_blank" rel="noopener noreferrer" className="group bg-background p-6 hover:bg-[#f3f5ff] transition-colors">
-                      {inner}
-                    </a>
-                  ) : (
-                    <Link key={product.name} href={product.href} className="group bg-background p-6 hover:bg-[#f3f5ff] transition-colors">
-                      {inner}
-                    </Link>
-                  );
-                })}
-              </div>
             </div>
           </div>
-        </div>
-      </Reveal>
+        </section>
 
-      <Reveal as="section" className="relative overflow-hidden border-b border-border text-white engine-gradient">
-        <div className="signal-grid absolute inset-0 opacity-50" />
-        <div className="grain" />
-        <div className="relative container mx-auto px-6 sm:px-8 py-20 sm:py-28">
-          <div className="grid lg:grid-cols-[280px_1fr] gap-12 lg:gap-20">
-            <div>
-              <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-white/45 mb-3">§ 04</p>
-              <h2 className="text-xs uppercase tracking-[0.18em] font-mono text-white">The deeper layer</h2>
-            </div>
-            <div>
-              <h2 className="display-hero text-[40px] sm:text-[58px] lg:text-[82px] leading-[1] text-white mb-10 max-w-4xl">
-                The Perpetual Engine is the structure behind the work.
-              </h2>
-              <p className="text-base sm:text-lg text-white/65 leading-[1.7] max-w-3xl mb-12">
-                The homepage sells the practical business outcome first: install AI into the company.
-                Underneath that, the Engine gives the work a repeatable architecture for systems,
-                products, ventures, and mission capacity.
-              </p>
-              <div className="grid sm:grid-cols-3 border border-white/15 divide-y sm:divide-y-0 sm:divide-x divide-white/15 mb-12">
-                {ENGINE_STATS.map((stat) => (
-                  <div key={stat.value} className="p-6">
-                    <p className="text-3xl sm:text-4xl font-semibold tracking-[-0.03em] text-white mb-3">{stat.value}</p>
-                    <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-white/45 leading-[1.5]">{stat.label}</p>
-                  </div>
-                ))}
+        <section className="border-b border-white/10 bg-[#08080b] py-20 sm:py-24">
+          <div className="mx-auto max-w-[1440px] px-5 sm:px-8">
+            <div className="grid gap-10 lg:grid-cols-[0.72fr_1.28fr]">
+              <div>
+                <p className="font-mono text-[11px] uppercase tracking-[0.16em] text-[#ffc774]">
+                  Private releases and pilots
+                </p>
+                <h2 className="mt-5 text-4xl font-semibold leading-[1] tracking-[-0.05em]">
+                  The next systems are already taking shape.
+                </h2>
               </div>
-              <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-px bg-white/15 border border-white/15">
-                {INSTITUTE_PROGRAMS.map((program) => (
-                  <div key={program.name} className="bg-[#0d0d12] p-5">
-                    <h3 className="text-sm font-semibold text-white mb-2">{program.name}</h3>
-                    <p className="text-xs text-white/55 leading-[1.6]">{program.body}</p>
-                  </div>
+              <div className="border-t border-white/12">
+                {PRIVATE_SYSTEMS.map((system) => (
+                  <Link
+                    key={system.name}
+                    href={system.href}
+                    className="group grid gap-4 border-b border-white/12 py-6 transition-colors hover:bg-white/[0.025] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8b7cff] sm:grid-cols-[0.5fr_0.7fr_1.6fr_auto] sm:items-center sm:px-4"
+                  >
+                    <span className="text-xl font-semibold tracking-[-0.03em] text-white">
+                      {system.name}
+                    </span>
+                    <span className="font-mono text-[11px] uppercase tracking-[0.12em] text-[#ffc774]">
+                      {system.status}
+                    </span>
+                    <span className="text-sm leading-6 text-white/64">{system.body}</span>
+                    <ChevronRight className="h-4 w-4 text-white/28 transition-transform group-hover:translate-x-1 group-hover:text-white" />
+                  </Link>
                 ))}
               </div>
             </div>
           </div>
-        </div>
-      </Reveal>
+        </section>
 
-      <Reveal as="section" className="border-b border-border">
-        <div className="container mx-auto px-6 sm:px-8 py-20 sm:py-28">
-          <div className="grid lg:grid-cols-[280px_1fr] gap-12 lg:gap-20">
-            <SectionRail index="05" label="Field notes" />
-            <div>
-              <div className="grid lg:grid-cols-[1fr_360px] gap-12">
-                <div>
-                  <h2 className="font-display text-4xl sm:text-5xl lg:text-6xl font-normal tracking-[-0.025em] leading-[1.02] text-foreground mb-8">
-                    Publish the math. Publish the method.
-                  </h2>
-                  <div className="border-y border-border">
-                    {FIELD_NOTES.map((note) => (
-                      <Link key={note.index} href={note.href} className="group block py-6 border-b border-border last:border-b-0 hover:bg-surface-hover transition-colors">
-                        <div className="flex items-baseline gap-4 mb-3">
-                          <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-primary">{note.index}</span>
-                          <span className="font-mono text-[10px] uppercase tracking-[0.16em] text-muted-foreground">{note.date}</span>
-                        </div>
-                        <h3 className="text-lg font-semibold tracking-[-0.01em] text-foreground mb-2 group-hover:text-primary transition-colors">{note.title}</h3>
-                        <p className="text-sm text-muted-foreground leading-[1.6]">{note.summary}</p>
-                      </Link>
-                    ))}
-                  </div>
-                </div>
-                <aside className="border border-border bg-card p-6 self-start">
-                  <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-primary mb-5">
-                    Open invitation
-                  </p>
-                  <div className="space-y-5">
-                    {INVITATION_ROWS.map((row) => (
-                      <Link key={row.tag} href={row.href} className="group block border-b border-border pb-5 last:border-b-0 last:pb-0">
-                        <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground mb-2">{row.tag}</p>
-                        <h3 className="text-sm font-semibold text-foreground mb-1.5 group-hover:text-primary transition-colors">{row.title}</h3>
-                        <p className="text-xs text-muted-foreground leading-[1.55] mb-2">{row.body}</p>
-                        <span className="inline-flex items-center text-xs font-medium text-foreground">
-                          {row.cta} <ArrowRight className="ml-1.5 h-3 w-3" />
-                        </span>
-                      </Link>
-                    ))}
-                  </div>
-                </aside>
-              </div>
-            </div>
-          </div>
-        </div>
-      </Reveal>
-
-      <Reveal as="section" className="border-b border-border bg-[#eef2ff]">
-        <div className="container mx-auto px-6 sm:px-8 py-20 sm:py-28">
-          <div className="grid lg:grid-cols-[280px_1fr] gap-12 lg:gap-20">
-            <SectionRail index="06" label="Start" />
+        <section className="border-b border-white/10 py-20 sm:py-24">
+          <div className="mx-auto max-w-[1440px] px-5 sm:px-8">
             <div className="max-w-3xl">
-              <h2 className="font-display text-4xl sm:text-5xl lg:text-6xl font-normal tracking-[-0.025em] leading-[1.02] text-foreground mb-6">
-                Map the operating system.
-              </h2>
-              <p className="text-base sm:text-lg text-muted-foreground leading-[1.65] mb-10">
-                The first conversation is not “what package do you want?” It is “where does the
-                company lose time, customers, knowledge, visibility, or follow-through?” From there,
-                we identify the first wedge and the larger system it should grow into.
+              <p className="font-mono text-[11px] uppercase tracking-[0.16em] text-[#69b6ff]">
+                Built on the Engine
               </p>
-              <div className="flex flex-col sm:flex-row items-start gap-4">
-                <Button asChild size="lg" className="h-11 px-7 rounded-[6px] bg-primary text-primary-foreground shadow-[0_14px_42px_rgba(75,53,255,0.22)] hover:bg-[#3324d9]">
-                  <Link href="/contact-sales">
-                    Map my AI operating system <ArrowRight className="ml-2 h-4 w-4" />
-                  </Link>
-                </Button>
-                <Button asChild size="lg" variant="outline" className="h-11 px-7 rounded-[6px] shadow-none">
-                  <Link href="/studio">
-                    See studio services <ArrowUpRight className="ml-2 h-4 w-4" />
-                  </Link>
-                </Button>
+              <h2 className="mt-5 text-4xl font-semibold leading-[1] tracking-[-0.05em] sm:text-5xl">
+                The architecture is operating beyond the marketplace.
+              </h2>
+              <p className="mt-5 max-w-2xl text-base leading-8 text-white/66">
+                These are portfolio and program platforms—not extra Core SKUs.
+                They prove the Engine across education, care, and workforce operations.
+              </p>
+            </div>
+
+            <div className="mt-12 grid gap-px border border-white/10 bg-white/10 lg:grid-cols-3">
+              {OPERATED_SYSTEMS.map((system) => (
+                <a
+                  key={system.name}
+                  href={system.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="group bg-[#09090d] p-7 transition hover:bg-[#0f0f15] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8b7cff] sm:p-9"
+                >
+                  <div className="flex items-center justify-between">
+                    <system.icon className="h-5 w-5 text-[#4ea7ff]" aria-hidden="true" />
+                    <ArrowUpRight className="h-4 w-4 text-white/26 transition group-hover:-translate-y-1 group-hover:translate-x-1 group-hover:text-white" />
+                  </div>
+                  <p className="mt-16 font-mono text-[11px] uppercase tracking-[0.12em] text-[#69b6ff]">
+                    {system.status}
+                  </p>
+                  <h3 className="mt-4 text-2xl font-semibold tracking-[-0.035em]">{system.name}</h3>
+                  <p className="mt-3 text-sm leading-6 text-white/64">{system.body}</p>
+                </a>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        <section className="border-b border-white/10 bg-[#08080b] py-20 sm:py-24">
+          <div className="mx-auto max-w-[1440px] px-5 sm:px-8">
+            <div className="flex items-end justify-between gap-8">
+              <div>
+                <p className="font-mono text-[11px] uppercase tracking-[0.16em] text-[#54e6b1]">
+                  Work with Perpetual Core
+                </p>
+                <h2 className="mt-5 text-4xl font-semibold tracking-[-0.05em] sm:text-5xl">
+                  Three ways into the network.
+                </h2>
               </div>
+              <Layers3 className="hidden h-9 w-9 text-white/18 sm:block" aria-hidden="true" />
+            </div>
+
+            <div className="mt-12 grid gap-px border border-white/10 bg-white/10 lg:grid-cols-3">
+              {ENGAGEMENTS.map((item) => (
+                <Link
+                  key={item.number}
+                  href={item.href}
+                  className="group flex min-h-[280px] flex-col bg-[#0a0a0e] p-7 transition hover:bg-[#111119] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8b7cff] sm:p-9"
+                >
+                  <span className="font-mono text-[11px] text-white/56">{item.number}</span>
+                  <Workflow className="mt-12 h-5 w-5 text-[#8b7cff]" aria-hidden="true" />
+                  <h3 className="mt-5 text-2xl font-semibold tracking-[-0.03em]">{item.title}</h3>
+                  <p className="mt-3 text-sm leading-6 text-white/64">{item.body}</p>
+                  <span className="mt-auto inline-flex items-center pt-10 text-sm font-semibold text-white">
+                    {item.cta}
+                    <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
+                  </span>
+                </Link>
+              ))}
             </div>
           </div>
-        </div>
-      </Reveal>
+        </section>
 
-      <section className="bg-background py-16 sm:py-20">
-        <div className="container mx-auto px-6 sm:px-8">
-          <div className="grid lg:grid-cols-[280px_1fr] gap-12 lg:gap-20">
-            <div className="flex items-baseline gap-3 text-muted-foreground">
-              <span className="font-mono text-[10px] uppercase tracking-[0.22em]">—</span>
-              <span className="font-mono text-[10px] uppercase tracking-[0.22em]">
-                Notes from the operating layer
-              </span>
-            </div>
-            <div className="max-w-2xl">
-              <h2 className="text-3xl sm:text-4xl font-semibold leading-[1.1] tracking-[-0.025em] text-foreground mb-5">
-                Stay close to the work.
-              </h2>
-              <p className="text-base text-muted-foreground leading-[1.7] mb-8">
-                Occasional dispatches on AI installs, the Engine commitment, and what we are shipping.
-              </p>
-              <NewsletterCapture variant="inline" source="home_inline" />
-            </div>
+        <section className="relative overflow-hidden py-24 sm:py-36">
+          <div className="pc-v4-grid absolute inset-0 opacity-25" aria-hidden="true" />
+          <div
+            className="absolute inset-0 bg-[radial-gradient(circle_at_50%_100%,rgba(109,91,255,0.28),transparent_40%)]"
+            aria-hidden="true"
+          />
+          <div className="relative mx-auto max-w-[1100px] px-5 text-center sm:px-8">
+            <Sparkles className="mx-auto h-6 w-6 text-[#54e6b1]" aria-hidden="true" />
+            <h2 className="mt-7 text-5xl font-semibold leading-[0.94] tracking-[-0.06em] sm:text-7xl">
+              Build the company
+              <span className="block text-white/38">that can keep learning.</span>
+            </h2>
+            <p className="mx-auto mt-7 max-w-2xl text-[17px] leading-8 text-white/68">
+              Deploy one system, install a connected operating layer, or build
+              the next intelligence company with us.
+            </p>
+            <Button
+              asChild
+              size="lg"
+              className="mt-9 min-h-12 rounded-none bg-white px-7 text-sm font-semibold uppercase tracking-[0.06em] text-black hover:bg-[#54e6b1]"
+            >
+              <Link href="/contact-sales">
+                Design your AI operating system <ArrowRight className="ml-2 h-4 w-4" />
+              </Link>
+            </Button>
           </div>
-        </div>
-      </section>
+        </section>
+      </main>
 
-      <Footer />
+      <Footer tone="dark" />
     </div>
   );
 }

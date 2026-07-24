@@ -18,14 +18,20 @@
  * marketing surface rhythm.
  */
 
-import { useEffect, useState, type ReactNode } from "react";
+import { useEffect, useCallback, useState, type ReactNode } from "react";
 import { FitScoreChip } from "./FitScoreChip";
+import { FitReasoningPanel, type FitReasoningData } from "./FitReasoningPanel";
+import { FunderDossierPanel } from "./FunderDossierPanel";
 import { DraftButton } from "@/components/rfp/DraftButton";
 import { PursuitDecisionBar } from "@/components/rfp/PursuitDecisionBar";
 import type { OpportunityTriageStatus } from "@/components/rfp/OpportunityTriageControl";
 import { buildPursuitDecisionSummary } from "@/lib/rfp/pursuit-decision";
+import type {
+  PursuitDecisionSummary,
+} from "@/lib/rfp/pursuit-decision";
 import {
   AlertTriangle,
+  Building2,
   CalendarClock,
   CheckCircle2,
   CircleDollarSign,
@@ -35,12 +41,16 @@ import {
   FileText,
   ListChecks,
   Mail,
+  Megaphone,
   Route,
+  Save,
   SearchCheck,
   ShieldCheck,
   Sparkles,
+  Landmark,
 } from "lucide-react";
 import type { FeedRow } from "@/lib/rfp/feed";
+import type { ActionabilityResult } from "@/lib/rfp/actionability";
 
 interface DetailPaneProps {
   orgId: string;
@@ -59,6 +69,22 @@ interface OppDetail extends FeedRow {
   geo: string | null;
   raw_json: unknown;
   enrichment: OpportunityEnrichment | null;
+  fit_reasoning?: FitReasoningData;
+  amendments?: AmendmentSummary[];
+}
+
+interface AmendmentSummary {
+  id: string;
+  material: boolean;
+  material_reasons: string[] | null;
+  diff_json: {
+    summary?: string;
+    field_changes?: Array<{ field: string; before: string | number | null; after: string | number | null }>;
+    added_lines?: string[];
+    removed_lines?: string[];
+  } | null;
+  status: string;
+  created_at: string;
 }
 
 interface OpportunityEnrichment {
@@ -74,6 +100,28 @@ interface OpportunityEnrichment {
   risks: string[];
   missing_fields: string[];
   quality_score: number;
+}
+
+interface CuratedProgramMetadata {
+  source?: string;
+  title?: string;
+  agency?: string;
+  type?: string;
+  url?: string;
+  brief?: string;
+  keywords?: string[];
+  focus_areas?: string[];
+  markets?: string[];
+  cycle?: string;
+  eligibility?: string;
+  application_mode?: "open" | "invitation" | "letter_of_interest" | "rolling" | "cycle";
+  needs_review?: boolean;
+}
+
+interface SourceMonitoringMetadata {
+  application_window_status?: "open" | "rolling" | "invitation_only" | "cycle_watch" | "verify";
+  review_cadence_days?: number;
+  next_verification?: string;
 }
 
 function normalizeTriageStatus(status: string): OpportunityTriageStatus {
@@ -216,6 +264,7 @@ function sourceLabel(source: string): string {
   const labels: Record<string, string> = {
     grants_gov: "Grants.gov",
     nih_grants: "NIH Grants",
+    nih_guide_notices: "NIH Guide Notices",
     nsf_grants: "NSF Grants",
     fed_register: "Federal Register",
     sam_gov: "SAM.gov",
@@ -225,7 +274,13 @@ function sourceLabel(source: string): string {
     nyc_dycd: "NYC DYCD",
     nyc_hra: "NYC HRA",
     nyc_doe: "NYC DOE",
+    nyc_passport: "NYC PASSPort",
     ca_grants: "CA Grants",
+    nj_grants: "NJ Grants",
+    ct_grants: "CT Grants",
+    pa_grants: "PA Grants",
+    corporate_foundations: "Corporate Foundations",
+    bank_cra: "Bank CRA",
     foundation_url: "Foundation",
   };
   return labels[source] ?? source.replace(/_/g, " ");
@@ -276,6 +331,333 @@ function CaptureCard({
   );
 }
 
+interface CommandBriefItem {
+  label: string;
+  detail: string;
+  tone: "ready" | "warn" | "danger" | "neutral";
+}
+
+function commandToneClasses(tone: CommandBriefItem["tone"]): string {
+  if (tone === "ready") return "border-emerald-200 bg-emerald-50 text-emerald-950";
+  if (tone === "warn") return "border-amber-200 bg-amber-50 text-amber-950";
+  if (tone === "danger") return "border-rose-200 bg-rose-50 text-rose-950";
+  return "border-zinc-200 bg-zinc-50 text-zinc-800";
+}
+
+function buildCommandBrief({
+  actionability,
+  bidDecision,
+  enrichment,
+  amendments,
+  row,
+}: {
+  actionability: ActionabilityResult | null;
+  bidDecision: PursuitDecisionSummary;
+  enrichment: OpportunityEnrichment | null;
+  amendments: AmendmentSummary[];
+  row: FeedRow;
+}): {
+  primaryAction: string;
+  owner: string;
+  confirmations: CommandBriefItem[];
+  blockers: CommandBriefItem[];
+  workplan: CommandBriefItem[];
+} {
+  const blockers: CommandBriefItem[] = [];
+  const confirmations: CommandBriefItem[] = [];
+
+  for (const blocker of actionability?.blockers ?? []) {
+    blockers.push({
+      label: "Blocker",
+      detail: blocker,
+      tone: blocker.toLowerCase().includes("deadline") ? "danger" : "warn",
+    });
+  }
+
+  if (amendments.some((amendment) => amendment.material)) {
+    blockers.push({
+      label: "Amendment",
+      detail: "Material solicitation change detected. Re-check requirements before drafting or submitting.",
+      tone: "warn",
+    });
+  }
+
+  if (row.needs_review) {
+    confirmations.push({
+      label: "Source QA",
+      detail: "Open the source and confirm extracted fields before assigning drafting time.",
+      tone: "warn",
+    });
+  }
+
+  for (const missing of actionability?.missing ?? []) {
+    confirmations.push({
+      label: "Confirm",
+      detail: missing,
+      tone: "neutral",
+    });
+  }
+
+  if ((enrichment?.risks.length ?? 0) > 0) {
+    for (const risk of enrichment?.risks.slice(0, 2) ?? []) {
+      confirmations.push({ label: "Risk", detail: risk, tone: "warn" });
+    }
+  }
+
+  const workplan = bidDecision.nextActions.slice(0, 3).map((action) => ({
+    label: "Next",
+    detail: action,
+    tone: "neutral" as const,
+  }));
+
+  if ((enrichment?.required_documents.length ?? 0) > 0) {
+    workplan.push({
+      label: "Package",
+      detail: `${enrichment?.required_documents.length ?? 0} required document${(enrichment?.required_documents.length ?? 0) === 1 ? "" : "s"} identified.`,
+      tone: "ready",
+    });
+  }
+
+  return {
+    primaryAction:
+      bidDecision.recommendation === "pursue"
+        ? "Open pursuit workroom"
+        : bidDecision.recommendation === "maybe"
+          ? "Run bid/no-bid review"
+          : "Archive unless source improves",
+    owner:
+      actionability?.level === "ready"
+        ? "Capture lead"
+        : actionability?.level === "blocked"
+          ? "Executive reviewer"
+          : "Proposal manager",
+    confirmations: confirmations.slice(0, 4),
+    blockers: blockers.slice(0, 3),
+    workplan: workplan.slice(0, 4),
+  };
+}
+
+function fallbackCommandItem(detail: string, tone: CommandBriefItem["tone"]): CommandBriefItem {
+  return { label: "Clear", detail, tone };
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+function stringArray(value: unknown): string[] {
+  if (!Array.isArray(value)) return [];
+  return value.filter((item): item is string => typeof item === "string" && item.trim().length > 0);
+}
+
+function getCuratedProgram(rawJson: unknown): CuratedProgramMetadata | null {
+  if (!isRecord(rawJson) || !isRecord(rawJson.curated_program)) return null;
+  const raw = rawJson.curated_program;
+  const applicationMode = raw.application_mode;
+  return {
+    source: typeof raw.source === "string" ? raw.source : undefined,
+    title: typeof raw.title === "string" ? raw.title : undefined,
+    agency: typeof raw.agency === "string" ? raw.agency : undefined,
+    type: typeof raw.type === "string" ? raw.type : undefined,
+    url: typeof raw.url === "string" ? raw.url : undefined,
+    brief: typeof raw.brief === "string" ? raw.brief : undefined,
+    keywords: stringArray(raw.keywords),
+    focus_areas: stringArray(raw.focus_areas),
+    markets: stringArray(raw.markets),
+    cycle: typeof raw.cycle === "string" ? raw.cycle : undefined,
+    eligibility: typeof raw.eligibility === "string" ? raw.eligibility : undefined,
+    application_mode:
+      applicationMode === "open" ||
+      applicationMode === "invitation" ||
+      applicationMode === "letter_of_interest" ||
+      applicationMode === "rolling" ||
+      applicationMode === "cycle"
+        ? applicationMode
+        : undefined,
+    needs_review: typeof raw.needs_review === "boolean" ? raw.needs_review : undefined,
+  };
+}
+
+function getSourceMonitoring(rawJson: unknown): SourceMonitoringMetadata | null {
+  if (!isRecord(rawJson) || !isRecord(rawJson.source_monitoring)) return null;
+  const raw = rawJson.source_monitoring;
+  const status = raw.application_window_status;
+  return {
+    application_window_status:
+      status === "open" ||
+      status === "rolling" ||
+      status === "invitation_only" ||
+      status === "cycle_watch" ||
+      status === "verify"
+        ? status
+        : undefined,
+    review_cadence_days:
+      typeof raw.review_cadence_days === "number" && Number.isFinite(raw.review_cadence_days)
+        ? raw.review_cadence_days
+        : undefined,
+    next_verification:
+      typeof raw.next_verification === "string" ? raw.next_verification : undefined,
+  };
+}
+
+function applicationModeLabel(mode: CuratedProgramMetadata["application_mode"]): string {
+  if (mode === "open") return "Open application";
+  if (mode === "invitation") return "Invitation likely";
+  if (mode === "letter_of_interest") return "LOI first";
+  if (mode === "rolling") return "Rolling";
+  if (mode === "cycle") return "Cycle based";
+  return "Verify on source";
+}
+
+function monitoringStatusLabel(status: SourceMonitoringMetadata["application_window_status"]): string {
+  if (status === "open") return "Open now";
+  if (status === "rolling") return "Rolling watch";
+  if (status === "invitation_only") return "Invitation path";
+  if (status === "cycle_watch") return "Cycle watch";
+  return "Verify window";
+}
+
+function monitoringTone(status: SourceMonitoringMetadata["application_window_status"]): CommandBriefItem["tone"] {
+  if (status === "open" || status === "rolling") return "ready";
+  if (status === "invitation_only" || status === "cycle_watch") return "warn";
+  return "neutral";
+}
+
+function funderSourceLabel(source: string): string {
+  if (source === "bank_cra") return "Bank / CRA funder";
+  if (source === "corporate_foundations") return "Corporate funder";
+  if (source === "foundation_url") return "Foundation funder";
+  return "Funder";
+}
+
+function funderActionLabel({
+  bidDecision,
+  actionability,
+  row,
+}: {
+  bidDecision: PursuitDecisionSummary;
+  actionability: ActionabilityResult | null;
+  row: FeedRow;
+}): { label: string; detail: string; tone: CommandBriefItem["tone"] } {
+  if (daysUntil(row.deadline) !== null && (daysUntil(row.deadline) ?? 0) < 0) {
+    return {
+      label: "Watch",
+      detail: "Deadline appears closed. Keep the funder for future cycles.",
+      tone: "neutral",
+    };
+  }
+  if (bidDecision.recommendation === "pursue" && actionability?.level === "ready") {
+    return {
+      label: "Pursue",
+      detail: "Strong fit with enough structured source intelligence to assign capture work.",
+      tone: "ready",
+    };
+  }
+  if (bidDecision.recommendation === "maybe" || actionability?.level === "review") {
+    return {
+      label: "Research first",
+      detail: "Good prospect, but confirm eligibility, source instructions, or application window before drafting.",
+      tone: "warn",
+    };
+  }
+  if (actionability?.level === "blocked") {
+    return {
+      label: "Do not draft yet",
+      detail: "Resolve blockers before spending proposal capacity.",
+      tone: "danger",
+    };
+  }
+  return {
+    label: "Monitor",
+    detail: "Useful funder intelligence. Save a search or revisit when fit improves.",
+    tone: "neutral",
+  };
+}
+
+function isFunderOpportunity(row: FeedRow): boolean {
+  return (
+    row.source === "corporate_foundations" ||
+    row.source === "bank_cra" ||
+    row.source === "foundation_url" ||
+    row.source === "ai_research"
+  );
+}
+
+function sourceQualitySignals({
+  row,
+  enrichment,
+  curatedProgram,
+}: {
+  row: FeedRow;
+  enrichment: OpportunityEnrichment | null;
+  curatedProgram: CuratedProgramMetadata | null;
+}): CommandBriefItem[] {
+  const signals: CommandBriefItem[] = [];
+  if (curatedProgram) {
+    signals.push({
+      label: "Official source",
+      detail: "Curated from an official funder program page.",
+      tone: "ready",
+    });
+  } else {
+    signals.push({
+      label: "Source",
+      detail: `${sourceLabel(row.source)} record normalized into discovery.`,
+      tone: "neutral",
+    });
+  }
+
+  if (enrichment) {
+    signals.push({
+      label: "Source depth",
+      detail: `${enrichment.quality_score}% structured intelligence extracted.`,
+      tone:
+        enrichment.quality_score >= 75
+          ? "ready"
+          : enrichment.quality_score >= 45
+            ? "warn"
+            : "neutral",
+    });
+  } else {
+    signals.push({
+      label: "Source depth",
+      detail: "Structured enrichment has not loaded yet.",
+      tone: "neutral",
+    });
+  }
+
+  if (row.needs_review || curatedProgram?.needs_review) {
+    signals.push({
+      label: "Human QA",
+      detail: "Confirm the source page before assigning proposal capacity.",
+      tone: "warn",
+    });
+  } else {
+    signals.push({
+      label: "QA status",
+      detail: "No source-review flag is currently attached.",
+      tone: "ready",
+    });
+  }
+
+  const missing = enrichment?.missing_fields ?? [];
+  if (missing.length > 0) {
+    signals.push({
+      label: "Missing fields",
+      detail: missing.slice(0, 3).join(", "),
+      tone: "warn",
+    });
+  } else if (enrichment) {
+    signals.push({
+      label: "Completeness",
+      detail: "No major enrichment fields are missing.",
+      tone: "ready",
+    });
+  }
+
+  return signals.slice(0, 4);
+}
+
 export function DetailPane({
   orgId,
   selected,
@@ -284,12 +666,23 @@ export function DetailPane({
   const [detail, setDetail] = useState<OppDetail | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  // Incrementing this triggers a re-fetch after an on-demand rescore.
+  const [rescoreKey, setRescoreKey] = useState(0);
+  const [funderSearchStatus, setFunderSearchStatus] = useState<
+    "idle" | "saving" | "saved" | "error"
+  >("idle");
 
-  // Fetch single-opp detail whenever the selected row changes.
+  // Re-fetch after rescore; stable reference so FitReasoningPanel's dep array is stable.
+  const handleRescored = useCallback(() => {
+    setRescoreKey((k) => k + 1);
+  }, []);
+
+  // Fetch single-opp detail whenever the selected row changes (or after rescore).
   useEffect(() => {
     if (!selected) {
       setDetail(null);
       setError(null);
+      setFunderSearchStatus("idle");
       return;
     }
     let cancelled = false;
@@ -316,7 +709,11 @@ export function DetailPane({
     return () => {
       cancelled = true;
     };
-  }, [orgId, selected]);
+  }, [orgId, selected, rescoreKey]);
+
+  useEffect(() => {
+    setFunderSearchStatus("idle");
+  }, [selected?.opp_id]);
 
   // Empty state
   if (!selected) {
@@ -351,6 +748,58 @@ export function DetailPane({
   const sourceAliases = row.canonical?.source_aliases ?? [];
   const sourceCount = sourceAliases.length;
   const actionability = row.actionability;
+  const amendments = detail?.amendments ?? [];
+  const commandBrief = buildCommandBrief({
+    actionability,
+    bidDecision,
+    enrichment,
+    amendments,
+    row,
+  });
+  const curatedProgram = detail ? getCuratedProgram(detail.raw_json) : null;
+  const sourceMonitoring = detail ? getSourceMonitoring(detail.raw_json) : null;
+  const showFunderFit = isFunderOpportunity(row);
+  const funderAction = funderActionLabel({ bidDecision, actionability, row });
+  const focusAreas = [
+    ...(curatedProgram?.focus_areas ?? []),
+    ...(curatedProgram?.keywords ?? []).slice(0, 3),
+  ].filter((item, index, items) => items.indexOf(item) === index);
+  const funderRisks = [
+    ...(enrichment?.risks ?? []),
+    ...(actionability?.missing ?? []).map((item) => `Missing: ${item}`),
+  ];
+  const sourceSignals = sourceQualitySignals({ row, enrichment, curatedProgram });
+
+  async function saveFunderSearch(): Promise<void> {
+    if (funderSearchStatus === "saving") return;
+    setFunderSearchStatus("saving");
+    try {
+      const res = await fetch(`/api/rfp/orgs/${orgId}/saved-searches`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: `${funderSourceLabel(row.source)}: ${row.agency ?? sourceLabel(row.source)}`.slice(0, 80),
+          filters: {
+            query: row.agency ?? "",
+            sources: [row.source],
+            deadline_within_days: null,
+            min_amount: null,
+            actionability: null,
+            sort: "fit",
+          },
+          mode: "all",
+          is_shared: false,
+          alert_enabled: true,
+          alert_frequency: "weekly",
+          min_fit_score: 70,
+        }),
+      });
+      if (!res.ok) throw new Error("save_failed");
+      setFunderSearchStatus("saved");
+    } catch {
+      setFunderSearchStatus("error");
+    }
+  }
 
   return (
     <div className="h-full overflow-y-auto p-6 lg:p-8">
@@ -369,9 +818,30 @@ export function DetailPane({
             <span className="text-amber-700">Needs review</span>
           </>
         )}
+        {loading && !detail && (
+          <>
+            <span aria-hidden="true">·</span>
+            <span className="text-zinc-400" role="status">
+              Loading detail…
+            </span>
+          </>
+        )}
       </div>
 
-      <h2 className="mt-3 max-w-4xl text-3xl font-semibold leading-tight tracking-tight text-zinc-950">
+      {error && (
+        <p
+          className="mt-3 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs font-medium leading-5 text-amber-800"
+          role="alert"
+        >
+          Detail unavailable ({error}). Showing summary from list — some
+          sections below may be incomplete.
+        </p>
+      )}
+
+      <h2
+        className="mt-3 max-w-4xl text-3xl font-semibold leading-tight tracking-tight text-zinc-950 line-clamp-3"
+        title={row.title}
+      >
         {row.title}
       </h2>
 
@@ -394,6 +864,23 @@ export function DetailPane({
           {moneyParts.join(" · ")}
         </p>
       )}
+
+      <section className="mt-5 grid gap-2 rounded-xl border border-zinc-200 bg-white p-3 shadow-sm sm:grid-cols-2 xl:grid-cols-4">
+        {sourceSignals.map((signal) => (
+          <div
+            key={`${signal.label}-${signal.detail}`}
+            className={`rounded-lg border px-3 py-2 ${commandToneClasses(signal.tone)}`}
+          >
+            <div className="flex items-center gap-2">
+              <ShieldCheck className="h-3.5 w-3.5 shrink-0" />
+              <p className="font-mono text-[10px] uppercase tracking-[0.16em] opacity-70">
+                {signal.label}
+              </p>
+            </div>
+            <p className="mt-1 text-xs leading-5">{signal.detail}</p>
+          </div>
+        ))}
+      </section>
 
       {sourceCount > 1 && (
         <section className="mt-5 rounded-xl border border-blue-100 bg-blue-50/70 p-4">
@@ -445,6 +932,18 @@ export function DetailPane({
           <CalendarClock className="mb-3 h-4 w-4" />
           <p className="text-sm font-semibold">{deadline.label}</p>
           <p className="mt-1 text-xs leading-5 opacity-80">{deadline.detail}</p>
+          {enrichment?.timeline && enrichment.timeline.length > 0 && (
+            <div className="mt-2 flex flex-wrap gap-1.5">
+              {enrichment.timeline.map((item) => (
+                <span
+                  key={item}
+                  className="rounded border border-zinc-200 bg-white/70 px-2 py-0.5 font-mono text-[11px] opacity-90"
+                >
+                  {item}
+                </span>
+              ))}
+            </div>
+          )}
         </div>
         <div className="rounded-lg border border-zinc-200 bg-white p-4 text-zinc-700">
           {(row.amount_max ?? row.amount_min ?? null) !== null ? (
@@ -454,6 +953,90 @@ export function DetailPane({
           )}
           <p className="text-sm font-semibold">{effort.label}</p>
           <p className="mt-1 text-xs leading-5 text-zinc-500">{effort.detail}</p>
+        </div>
+      </section>
+
+      <section className="mt-6 rounded-xl border border-zinc-200 bg-white p-4 shadow-sm">
+        <div className="flex flex-wrap items-start justify-between gap-4">
+          <div>
+            <h3 className="font-mono text-[10px] uppercase tracking-[0.25em] text-zinc-500">
+              Command brief
+            </h3>
+            <p className="mt-2 text-xl font-semibold text-zinc-950">
+              {commandBrief.primaryAction}
+            </p>
+            <p className="mt-1 text-sm leading-6 text-zinc-600">
+              Route this to {commandBrief.owner.toLowerCase()} with the checks below before committing proposal capacity.
+            </p>
+          </div>
+          <span className="rounded-full border border-zinc-200 bg-zinc-50 px-3 py-1 font-mono text-[10px] uppercase tracking-[0.16em] text-zinc-500">
+            {bidDecision.confidence.replace("-", " ")}
+          </span>
+        </div>
+
+        <div className="mt-4 grid gap-3 lg:grid-cols-3">
+          <div className="rounded-lg border border-zinc-200 bg-zinc-50 p-3">
+            <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-zinc-500">
+              Blockers
+            </p>
+            <div className="mt-2 space-y-2">
+              {(commandBrief.blockers.length > 0
+                ? commandBrief.blockers
+                : [fallbackCommandItem("No hard blockers detected.", "ready")]
+              ).map((item) => (
+                <div
+                  key={`${item.label}-${item.detail}`}
+                  className={`rounded-md border px-3 py-2 text-xs leading-5 ${commandToneClasses(item.tone)}`}
+                >
+                  <span className="font-mono text-[10px] uppercase tracking-[0.14em] opacity-70">
+                    {item.label}
+                  </span>
+                  <span className="mt-1 block">{item.detail}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="rounded-lg border border-zinc-200 bg-zinc-50 p-3">
+            <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-zinc-500">
+              Confirmations
+            </p>
+            <div className="mt-2 space-y-2">
+              {(commandBrief.confirmations.length > 0
+                ? commandBrief.confirmations
+                : [fallbackCommandItem("Core source fields are ready for capture review.", "ready")]
+              ).map((item) => (
+                <div
+                  key={`${item.label}-${item.detail}`}
+                  className={`rounded-md border px-3 py-2 text-xs leading-5 ${commandToneClasses(item.tone)}`}
+                >
+                  <span className="font-mono text-[10px] uppercase tracking-[0.14em] opacity-70">
+                    {item.label}
+                  </span>
+                  <span className="mt-1 block">{item.detail}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="rounded-lg border border-zinc-200 bg-zinc-50 p-3">
+            <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-zinc-500">
+              Workplan
+            </p>
+            <div className="mt-2 space-y-2">
+              {commandBrief.workplan.map((item) => (
+                <div
+                  key={item.detail}
+                  className={`rounded-md border px-3 py-2 text-xs leading-5 ${commandToneClasses(item.tone)}`}
+                >
+                  <span className="font-mono text-[10px] uppercase tracking-[0.14em] opacity-70">
+                    {item.label}
+                  </span>
+                  <span className="mt-1 block">{item.detail}</span>
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
       </section>
 
@@ -478,6 +1061,162 @@ export function DetailPane({
           }}
         />
       </div>
+
+      {showFunderFit && (
+        <section className="mt-6 rounded-xl border border-zinc-200 bg-white p-4 shadow-sm">
+          <div className="flex flex-wrap items-start justify-between gap-4">
+            <div className="flex gap-3">
+              <span
+                className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border ${
+                  row.source === "bank_cra"
+                    ? "border-blue-200 bg-blue-50 text-blue-800"
+                    : "border-emerald-200 bg-emerald-50 text-emerald-800"
+                }`}
+              >
+                {row.source === "bank_cra" ? (
+                  <Landmark className="h-4 w-4" />
+                ) : (
+                  <Building2 className="h-4 w-4" />
+                )}
+              </span>
+              <div>
+                <h3 className="font-mono text-[10px] uppercase tracking-[0.25em] text-zinc-500">
+                  Funder fit
+                </h3>
+                <p className="mt-2 text-xl font-semibold text-zinc-950">
+                  {funderAction.label} · {applicationModeLabel(curatedProgram?.application_mode)}
+                </p>
+                <p className="mt-1 max-w-2xl text-sm leading-6 text-zinc-600">
+                  {funderAction.detail}
+                </p>
+              </div>
+            </div>
+            <span
+              className={`rounded-full border px-3 py-1 font-mono text-[10px] uppercase tracking-[0.16em] ${commandToneClasses(funderAction.tone)}`}
+            >
+              {funderSourceLabel(row.source)}
+            </span>
+          </div>
+
+          <div className="mt-4 grid gap-3 lg:grid-cols-2 xl:grid-cols-4">
+            <div
+              className={`rounded-lg border p-3 ${commandToneClasses(
+                monitoringTone(sourceMonitoring?.application_window_status),
+              )}`}
+            >
+              <p className="font-mono text-[10px] uppercase tracking-[0.18em] opacity-70">
+                Window monitor
+              </p>
+              <p className="mt-2 text-sm font-semibold">
+                {monitoringStatusLabel(sourceMonitoring?.application_window_status)}
+              </p>
+              <p className="mt-1 text-xs leading-5 opacity-80">
+                {sourceMonitoring?.next_verification ??
+                  "Open the official source page and classify the application window before pursuit."}
+              </p>
+              <p className="mt-2 font-mono text-[10px] uppercase tracking-[0.14em] opacity-70">
+                Review every {sourceMonitoring?.review_cadence_days ?? 60} days
+              </p>
+            </div>
+
+            <div className="rounded-lg border border-zinc-200 bg-zinc-50 p-3">
+              <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-zinc-500">
+                Fit signals
+              </p>
+              <ul className="mt-2 space-y-2 text-xs leading-5 text-zinc-700">
+                {shortList(
+                  focusAreas.slice(0, 5),
+                  "No focus areas were structured. Review the funder source before pursuit.",
+                ).map((item) => (
+                  <li key={item} className="flex gap-2">
+                    <CheckCircle2 className="mt-0.5 h-3.5 w-3.5 shrink-0 text-emerald-600" />
+                    <span>{item}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            <div className="rounded-lg border border-zinc-200 bg-zinc-50 p-3">
+              <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-zinc-500">
+                Eligibility and market
+              </p>
+              <div className="mt-2 space-y-2 text-xs leading-5 text-zinc-700">
+                <p>
+                  {curatedProgram?.eligibility ??
+                    enrichment?.eligibility?.[0] ??
+                    "Eligibility needs source confirmation before drafting."}
+                </p>
+                <div className="flex flex-wrap gap-1.5">
+                  {shortList(curatedProgram?.markets ?? [], "US / source-defined market").map((item) => (
+                    <span
+                      key={item}
+                      className="rounded border border-zinc-200 bg-white px-2 py-0.5 font-mono text-[10px] uppercase tracking-[0.12em] text-zinc-600"
+                    >
+                      {item}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            <div className="rounded-lg border border-zinc-200 bg-zinc-50 p-3">
+              <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-zinc-500">
+                Risks to clear
+              </p>
+              <ul className="mt-2 space-y-2 text-xs leading-5 text-zinc-700">
+                {shortList(
+                  funderRisks.slice(0, 4),
+                  curatedProgram?.needs_review || row.needs_review
+                    ? "Source review required before relying on this funder record."
+                    : "No major funder-specific risk detected.",
+                ).map((item) => (
+                  <li key={item} className="flex gap-2">
+                    <AlertTriangle className="mt-0.5 h-3.5 w-3.5 shrink-0 text-amber-600" />
+                    <span>{item}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+
+          <div className="mt-4 flex flex-wrap items-center gap-2">
+            <button
+              type="button"
+              onClick={saveFunderSearch}
+              disabled={funderSearchStatus === "saving" || funderSearchStatus === "saved"}
+              className="inline-flex h-9 cursor-pointer items-center gap-2 rounded-lg bg-zinc-950 px-3 text-sm font-medium text-white transition-colors duration-150 hover:bg-zinc-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2 disabled:cursor-default disabled:bg-zinc-300 motion-reduce:transition-none"
+            >
+              <Save className="h-3.5 w-3.5" />
+              {funderSearchStatus === "saving"
+                ? "Saving"
+                : funderSearchStatus === "saved"
+                  ? "Saved search"
+                  : "Save similar funders"}
+            </button>
+            <a
+              href={`/org/${orgId}/discovery?sources=${encodeURIComponent(row.source)}${
+                row.agency ? `&q=${encodeURIComponent(row.agency)}` : ""
+              }`}
+              className="inline-flex h-9 items-center gap-2 rounded-lg border border-zinc-300 bg-white px-3 text-sm font-medium text-zinc-700 transition-colors duration-150 hover:bg-zinc-50 hover:text-zinc-950 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2 motion-reduce:transition-none"
+            >
+              Find similar <SearchCheck className="h-3.5 w-3.5" />
+            </a>
+            {funderSearchStatus === "error" && (
+              <span className="text-xs font-medium text-rose-700">
+                Could not save search.
+              </span>
+            )}
+          </div>
+        </section>
+      )}
+
+      {showFunderFit && (
+        <FunderDossierPanel
+          orgId={orgId}
+          oppId={row.opp_id}
+          funderLabel={row.agency ?? null}
+        />
+      )}
 
       {actionability && (
         <section
@@ -548,6 +1287,68 @@ export function DetailPane({
         </section>
       )}
 
+      {amendments.length > 0 && (
+        <section className="mt-6 rounded-xl border border-amber-200 bg-amber-50 p-4 shadow-sm">
+          <div className="flex flex-wrap items-start justify-between gap-4">
+            <div className="flex gap-3">
+              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-white text-amber-700">
+                <Megaphone className="h-4 w-4" />
+              </span>
+              <div>
+                <h3 className="font-mono text-[10px] uppercase tracking-[0.25em] text-amber-700">
+                  Solicitation amendments
+                </h3>
+                <p className="mt-1 text-sm leading-6 text-amber-950">
+                  {amendments[0]?.material
+                    ? "Material change detected. Review the task queue before submitting."
+                    : "Changes were detected since the last solicitation snapshot."}
+                </p>
+              </div>
+            </div>
+            <span className="rounded-full border border-amber-200 bg-white px-3 py-1 font-mono text-[10px] uppercase tracking-[0.16em] text-amber-700">
+              {amendments.length} update{amendments.length === 1 ? "" : "s"}
+            </span>
+          </div>
+          <div className="mt-4 space-y-3">
+            {amendments.slice(0, 3).map((amendment) => (
+              <article
+                key={amendment.id}
+                className="rounded-lg border border-amber-200 bg-white p-3"
+              >
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="font-mono text-[10px] uppercase tracking-[0.16em] text-amber-700">
+                    {amendment.material ? "Material" : "Changed"}
+                  </span>
+                  <span className="text-xs text-zinc-500">
+                    {formatDate(amendment.created_at, "detected")}
+                  </span>
+                </div>
+                <p className="mt-2 text-sm leading-6 text-zinc-700">
+                  {amendment.diff_json?.summary ?? "Solicitation changed."}
+                </p>
+                {(amendment.material_reasons ?? []).length > 0 && (
+                  <div className="mt-2 flex flex-wrap gap-1.5">
+                    {(amendment.material_reasons ?? []).map((reason) => (
+                      <span
+                        key={reason}
+                        className="rounded border border-amber-200 bg-amber-50 px-2 py-0.5 font-mono text-[10px] uppercase tracking-[0.12em] text-amber-800"
+                      >
+                        {reason}
+                      </span>
+                    ))}
+                  </div>
+                )}
+                {(amendment.diff_json?.added_lines ?? []).length > 0 && (
+                  <p className="mt-2 text-xs leading-5 text-zinc-500">
+                    Added: {amendment.diff_json?.added_lines?.[0]}
+                  </p>
+                )}
+              </article>
+            ))}
+          </div>
+        </section>
+      )}
+
       <section className="mt-6 rounded-xl border border-zinc-200 bg-white p-4 shadow-sm">
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div>
@@ -569,7 +1370,7 @@ export function DetailPane({
           {bidDecision.signals.slice(0, 3).map((signal) => (
             <div
               key={`${signal.label}-${signal.detail}`}
-              className={`rounded-lg border p-3 ${decisionToneClasses(signal.tone === "ready" ? "emerald" : signal.tone === "warn" || signal.tone === "danger" ? "amber" : "zinc")}`}
+              className={`rounded-lg border p-3 ${commandToneClasses(signal.tone)}`}
             >
               <p className="text-sm font-semibold">{signal.label}</p>
               <p className="mt-1 text-xs leading-5 opacity-80">{signal.detail}</p>
@@ -646,18 +1447,6 @@ export function DetailPane({
                   Submission/source link <ExternalLink className="h-3.5 w-3.5" />
                 </a>
               )}
-              {enrichment?.timeline && enrichment.timeline.length > 0 && (
-                <div className="flex flex-wrap gap-1.5 pt-1">
-                  {enrichment.timeline.map((item) => (
-                    <span
-                      key={item}
-                      className="rounded border border-zinc-200 bg-zinc-50 px-2 py-0.5 font-mono text-[11px] text-zinc-600"
-                    >
-                      {item}
-                    </span>
-                  ))}
-                </div>
-              )}
             </div>
           </CaptureCard>
 
@@ -723,6 +1512,17 @@ export function DetailPane({
           </div>
         </div>
       </section>
+
+      {/* Phase 18: Fit reasoning panel — SCORE-01/02/03/04. */}
+      {/* Renders above AI summary; only available once detail is loaded. */}
+      {detail?.fit_reasoning && (
+        <FitReasoningPanel
+          oppId={detail.opp_id}
+          orgId={orgId}
+          fitReasoning={detail.fit_reasoning}
+          onRescored={handleRescored}
+        />
+      )}
 
       {/* AI summary — REQUIRED render; null falls back to literal string. */}
       <section className="mt-6">
@@ -791,24 +1591,13 @@ export function DetailPane({
             href={row.url}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-1 text-sm font-medium text-zinc-700 underline-offset-4 hover:text-zinc-950 hover:underline"
+            className="inline-flex items-center gap-1 rounded text-sm font-medium text-zinc-700 underline-offset-4 hover:text-zinc-950 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2"
           >
             Open at source <ExternalLink className="h-3.5 w-3.5" />
           </a>
         )}
       </section>
 
-      {/* Loading / error overlays */}
-      {loading && !detail && (
-        <p className="mt-6 font-mono text-xs uppercase tracking-wide text-zinc-500">
-          Loading detail…
-        </p>
-      )}
-      {error && (
-        <p className="mt-6 font-mono text-xs text-amber-700">
-          Detail unavailable ({error}). Showing summary from list.
-        </p>
-      )}
     </div>
   );
 }

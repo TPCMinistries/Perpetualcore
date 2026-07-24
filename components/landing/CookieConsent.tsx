@@ -48,7 +48,8 @@ export function CookieConsent() {
       path.startsWith("/signup") ||
       path.startsWith("/accept-invite") ||
       path.startsWith("/invite") ||
-      path.startsWith("/orgs")
+      path.startsWith("/orgs") ||
+      path.startsWith("/org/")
     ) {
       return;
     }
@@ -80,35 +81,36 @@ export function CookieConsent() {
       role="dialog"
       aria-labelledby="cookie-consent-heading"
       aria-describedby="cookie-consent-desc"
-      className="fixed bottom-4 left-4 right-4 sm:left-6 sm:right-auto sm:max-w-md z-[100] border border-border bg-card shadow-xl rounded-[8px] p-5"
+      className="fixed bottom-3 left-1/2 z-40 w-[calc(100%-1.5rem)] max-w-4xl -translate-x-1/2 rounded-[20px] border border-black/10 bg-white/94 p-3.5 shadow-[0_22px_70px_rgba(23,23,27,0.18)] backdrop-blur-xl sm:flex sm:items-center sm:gap-5 sm:px-4"
     >
-      <p
-        id="cookie-consent-heading"
-        className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground mb-3"
-      >
-        Cookies
-      </p>
-      <p id="cookie-consent-desc" className="text-sm text-foreground leading-[1.6] mb-4">
-        We use a small set of first-party cookies to understand which marketing
-        channels send the people we should pay attention to. No third-party ad
-        pixels. No data sold.{" "}
-        <Link href="/cookies" className="underline hover:no-underline">
-          Read the cookie policy
-        </Link>
-        .
-      </p>
-      <div className="flex flex-wrap gap-2">
+      <div className="flex-1">
+        <p
+          id="cookie-consent-heading"
+          className="text-xs font-semibold text-[#35353b]"
+        >
+          Cookie choice
+        </p>
+        <p id="cookie-consent-desc" className="mt-1 text-xs leading-5 text-[#62626c]">
+          We use limited first-party analytics cookies. No advertising pixels and
+          no data sold.{" "}
+          <Link href="/cookies" className="underline underline-offset-2 hover:no-underline">
+            Read the policy
+          </Link>
+          .
+        </p>
+      </div>
+      <div className="mt-3 flex shrink-0 flex-wrap gap-2 sm:mt-0">
         <button
           type="button"
           onClick={handleAccept}
-          className="h-9 px-4 bg-foreground text-background text-xs font-medium hover:bg-foreground/90 transition rounded-[6px]"
+          className="min-h-11 cursor-pointer rounded-full bg-[#17171b] px-4 text-xs font-semibold text-white transition hover:bg-[#34343c] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#5548d9] focus-visible:ring-offset-2"
         >
           Accept
         </button>
         <button
           type="button"
           onClick={handleReject}
-          className="h-9 px-4 bg-background border border-border text-foreground text-xs font-medium hover:bg-card transition rounded-[6px]"
+          className="min-h-11 cursor-pointer rounded-full border border-black/10 bg-white px-4 text-xs font-semibold text-[#393940] transition hover:bg-[#f1f0ec] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#5548d9] focus-visible:ring-offset-2"
         >
           Reject non-essential
         </button>

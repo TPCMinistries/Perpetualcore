@@ -3,10 +3,10 @@
  * Phase 04-01: Foundations & Salvage Port
  *
  * Proves that no cross-tenant read or write is possible via RLS.
- * Runs against the LIVE LDC Brain AI database (hgxxxmtfmvguotkowxbu).
+ * Runs only against an explicitly configured, dedicated RLS test database.
  * Self-cleaning: beforeAll creates ephemeral users/orgs, afterAll tears them down.
  *
- * IMPORTANT: Requires .env.local with:
+ * IMPORTANT: Set RUN_RFP_RLS_TESTS=true and provide:
  *   NEXT_PUBLIC_SUPABASE_URL
  *   NEXT_PUBLIC_SUPABASE_ANON_KEY
  *   SUPABASE_SERVICE_ROLE_KEY
@@ -61,17 +61,17 @@ const SUPABASE_SERVICE_ROLE_KEY =
   process.env.SUPABASE_SERVICE_ROLE_KEY ||
   "";
 
-if (!SUPABASE_URL || !SUPABASE_ANON_KEY || !SUPABASE_SERVICE_ROLE_KEY) {
-  throw new Error(
-    "RLS test requires NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_ANON_KEY, " +
-    "and SUPABASE_SERVICE_ROLE_KEY in .env.local"
-  );
-}
+const RLS_TESTS_ENABLED =
+  process.env.RUN_RFP_RLS_TESTS === "true" &&
+  Boolean(SUPABASE_URL && SUPABASE_ANON_KEY && SUPABASE_SERVICE_ROLE_KEY);
+const RLS_TEST_URL = SUPABASE_URL || "http://127.0.0.1:54321";
+const RLS_TEST_SERVICE_ROLE_KEY =
+  SUPABASE_SERVICE_ROLE_KEY || "rls-service-role-placeholder";
 
 // ---------------------------------------------------------------------------
 // Clients
 // ---------------------------------------------------------------------------
-const admin = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
+const admin = createClient(RLS_TEST_URL, RLS_TEST_SERVICE_ROLE_KEY, {
   auth: { persistSession: false },
 });
 
@@ -184,7 +184,7 @@ function clientFor(accessToken: string) {
 // ---------------------------------------------------------------------------
 // Test cases
 // ---------------------------------------------------------------------------
-describe("RFP tenant isolation", () => {
+describe.skipIf(!RLS_TESTS_ENABLED)("RFP tenant isolation", () => {
   it("User A cannot read Org B vault artifacts", async () => {
     const c = clientFor(userA.access_token);
     const { data, error } = await c

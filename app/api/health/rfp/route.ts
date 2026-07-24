@@ -15,12 +15,22 @@
 import { NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/server";
 import { RFP_SOURCE_CATALOG } from "@/lib/rfp/source-catalog";
+import { summarizeRfpCronErrors } from "@/lib/rfp/monitoring/health";
+import { loadScraperHealth } from "@/lib/rfp/admin-metrics";
+import {
+  buildSourcePriorityQueue,
+  buildSourceReadiness,
+  summarizeSourceReadiness,
+  sourceReadinessGap,
+} from "@/lib/rfp/source-readiness";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 const OPPORTUNITY_FRESH_HOURS = 72;
 const CRON_FRESH_HOURS = 36;
+const SCRAPER_SUCCESS_FRESH_HOURS = 36;
+const CRON_ERROR_RATE_WARN_PERCENT = 10;
 const AI_COST_24H_WARN_USD = 50;
 const SOURCE_SCALE_WARN_COVERAGE_PERCENT = 2;
 
@@ -89,6 +99,8 @@ export async function GET(): Promise<NextResponse> {
       proposals,
       opportunities,
       lastCron,
+      recentCrons,
+      lastScraperSuccess,
       lastOpp,
       openDrift,
       cost24hRows,
@@ -110,6 +122,20 @@ export async function GET(): Promise<NextResponse> {
         .order("executed_at", { ascending: false })
         .limit(1)
         .maybeSingle<{ cron_name: string; executed_at: string; status: string | null }>(),
+      admin
+        .from("cron_executions")
+        .select("cron_name, executed_at, status")
+        .ilike("cron_name", "%rfp%")
+        .gte("executed_at", dayAgo)
+        .returns<
+          { cron_name: string; executed_at: string | null; status: string | null }[]
+        >(),
+      admin
+        .from("rfp_source_baseline")
+        .select("source, recorded_at")
+        .order("recorded_at", { ascending: false })
+        .limit(1)
+        .maybeSingle<{ source: string; recorded_at: string }>(),
       admin
         .from("rfp_opportunities")
         .select("created_at")
@@ -143,6 +169,8 @@ export async function GET(): Promise<NextResponse> {
       errorDetail("rfp_proposals", proposals),
       errorDetail("rfp_opportunities.count", opportunities),
       errorDetail("cron_executions.latest", lastCron),
+      errorDetail("cron_executions.recent", recentCrons),
+      errorDetail("rfp_source_baseline.latest", lastScraperSuccess),
       errorDetail("rfp_opportunities.latest", lastOpp),
       errorDetail("rfp_source_drift", openDrift),
       errorDetail("rfp_agent_sessions.cost_24h", cost24hRows),
@@ -157,8 +185,10 @@ export async function GET(): Promise<NextResponse> {
       (sum, r) => sum + toNum(r.cost_usd),
       0,
     );
+    const cronErrorSummary = summarizeRfpCronErrors(recentCrons.data ?? []);
     const lastOppAgeHours = hoursSince(lastOpp.data?.created_at);
     const lastCronAgeHours = hoursSince(lastCron.data?.executed_at);
+    const lastScraperSuccessAgeHours = hoursSince(lastScraperSuccess.data?.recorded_at);
     const lastCronStatus = lastCron.data?.status ?? null;
     const activeOrgCount = new Set((memberships.data ?? []).map((row) => row.org_id)).size;
     const opportunityCount = opportunities.count ?? 0;
@@ -185,6 +215,24 @@ export async function GET(): Promise<NextResponse> {
       sourceTargetIndexedEstimate > 0
         ? Math.min(100, (opportunityCount / sourceTargetIndexedEstimate) * 100)
         : null;
+    const sourceReadiness = buildSourceReadiness(await loadScraperHealth());
+    const sourceReadinessSummary = summarizeSourceReadiness(sourceReadiness);
+    const sourcePriorityQueue = buildSourcePriorityQueue(sourceReadiness, 5).map(
+      (source) => ({
+        source: source.source,
+        label: source.label,
+        category: source.category,
+        status: source.effectiveStatus,
+        priority: source.priority,
+        geography: source.geography,
+        ingest_mode: source.ingestMode,
+        indexed: source.indexed,
+        target_indexed_estimate: source.targetIndexedEstimate,
+        gap: sourceReadinessGap(source),
+        open_drift_events: source.openDrift,
+        next_step: source.nextStep,
+      }),
+    );
     const liveSourceCount = RFP_SOURCE_CATALOG.filter(
       (source) => source.status === "live",
     ).length;
@@ -242,6 +290,21 @@ export async function GET(): Promise<NextResponse> {
           : lastOppAgeHours === null
           ? "No opportunity ingestion timestamp found."
           : `Latest opportunity ingested ${formatHours(lastOppAgeHours)} ago.`,
+      ),
+      check(
+        "scraper_last_success",
+        lastScraperSuccess.error
+          ? "fail"
+          : lastScraperSuccessAgeHours === null
+            ? "warn"
+            : lastScraperSuccessAgeHours <= SCRAPER_SUCCESS_FRESH_HOURS
+              ? "ok"
+              : "warn",
+        lastScraperSuccess.error
+          ? "Latest source baseline query failed."
+          : lastScraperSuccessAgeHours === null
+            ? "No successful scraper baseline found."
+            : `Latest successful scraper baseline for ${lastScraperSuccess.data?.source ?? "unknown"} recorded ${formatHours(lastScraperSuccessAgeHours)} ago.`,
       ),
       check(
         "scoring_coverage",
@@ -304,6 +367,21 @@ export async function GET(): Promise<NextResponse> {
           : `Latest RFP cron ran ${formatHours(lastCronAgeHours)} ago.`,
       ),
       check(
+        "cron_error_rate_24h",
+        recentCrons.error
+          ? "fail"
+          : cronErrorSummary.error_rate_percent === null
+            ? "warn"
+            : cronErrorSummary.error_rate_percent <= CRON_ERROR_RATE_WARN_PERCENT
+              ? "ok"
+              : "warn",
+        recentCrons.error
+          ? "Recent cron execution query failed."
+          : cronErrorSummary.error_rate_percent === null
+            ? "No RFP cron executions found in the last 24h."
+            : `${cronErrorSummary.failures} failed / ${cronErrorSummary.total} RFP cron run${cronErrorSummary.total === 1 ? "" : "s"} in the last 24h (${cronErrorSummary.error_rate_percent.toFixed(1)}%).`,
+      ),
+      check(
         "cron_status",
         lastCron.error
           ? "fail"
@@ -364,6 +442,8 @@ export async function GET(): Promise<NextResponse> {
       thresholds: {
         opportunity_fresh_hours: OPPORTUNITY_FRESH_HOURS,
         cron_fresh_hours: CRON_FRESH_HOURS,
+        scraper_success_fresh_hours: SCRAPER_SUCCESS_FRESH_HOURS,
+        cron_error_rate_warn_percent: CRON_ERROR_RATE_WARN_PERCENT,
         ai_cost_24h_warn_usd: AI_COST_24H_WARN_USD,
         source_scale_warn_coverage_percent: SOURCE_SCALE_WARN_COVERAGE_PERCENT,
       },
@@ -391,7 +471,9 @@ export async function GET(): Promise<NextResponse> {
         source_catalog_live: liveSourceCount,
         source_catalog_planned: plannedSourceCount,
         source_catalog_blocked: blockedSourceCount,
+        source_readiness_p0_remaining: sourceReadinessSummary.p0Remaining,
       },
+      source_priority_queue: sourcePriorityQueue,
       last_cron: lastCron.data
         ? {
             name: lastCron.data.cron_name,
@@ -399,6 +481,22 @@ export async function GET(): Promise<NextResponse> {
             status: lastCron.data.status,
           }
         : null,
+      scraper_last_success: lastScraperSuccess.data
+        ? {
+            source: lastScraperSuccess.data.source,
+            recorded_at: lastScraperSuccess.data.recorded_at,
+          }
+        : null,
+      cron_24h: {
+        runs: cronErrorSummary.total,
+        successes: cronErrorSummary.successes,
+        warnings: cronErrorSummary.warnings,
+        failures: cronErrorSummary.failures,
+        error_rate: cronErrorSummary.error_rate,
+        error_rate_percent: cronErrorSummary.error_rate_percent,
+        latest_run_at: cronErrorSummary.latest_run_at,
+        latest_success_at: cronErrorSummary.latest_success_at,
+      },
       last_opportunity_ingested_at: lastOpp.data?.created_at ?? null,
       open_drift_events: openDrift.count ?? 0,
       ai_cost_24h_usd: Math.round(ai_cost_24h_usd * 10000) / 10000,

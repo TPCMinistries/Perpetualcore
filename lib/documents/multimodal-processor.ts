@@ -6,9 +6,16 @@
 import { createClient } from "@/lib/supabase/server";
 import OpenAI from "openai";
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY!,
-});
+let openai: OpenAI | null = null;
+
+function getOpenAI(): OpenAI {
+  const apiKey = process.env.OPENAI_API_KEY;
+  if (!apiKey) {
+    throw new Error("OPENAI_API_KEY is required to process multimodal documents");
+  }
+  openai ??= new OpenAI({ apiKey });
+  return openai;
+}
 
 export type MediaType = "document" | "image" | "audio" | "video" | "web_clip";
 
@@ -74,7 +81,7 @@ export async function processImage(
 ): Promise<ProcessingResult> {
   try {
     // Use OpenAI Vision to describe the image
-    const visionResponse = await openai.chat.completions.create({
+    const visionResponse = await getOpenAI().chat.completions.create({
       model: "gpt-4o",
       messages: [
         {
@@ -165,7 +172,7 @@ export async function processAudio(
     });
 
     // Transcribe with Whisper
-    const transcription = await openai.audio.transcriptions.create({
+    const transcription = await getOpenAI().audio.transcriptions.create({
       file: audioFile,
       model: "whisper-1",
       language: "en",
@@ -245,7 +252,7 @@ export async function processVideo(
     });
 
     // Transcribe with Whisper
-    const transcription = await openai.audio.transcriptions.create({
+    const transcription = await getOpenAI().audio.transcriptions.create({
       file: videoFile,
       model: "whisper-1",
       language: "en",

@@ -38,7 +38,7 @@ interface PageProps {
   params: Promise<{ orgId: string }>;
 }
 
-type ProposalStatus = "draft" | "submitted" | "won" | "lost" | "withdrawn";
+type ProposalStatus = "draft" | "submitted" | "won" | "lost" | "no_bid" | "withdrawn";
 type TriageStatus = "watch" | "pursuing";
 type Tone = "ready" | "warn" | "danger" | "neutral";
 
@@ -133,7 +133,8 @@ const STATUS_LABEL: Record<ProposalStatus, string> = {
   submitted: "Submitted",
   won: "Won",
   lost: "Lost",
-  withdrawn: "Withdrawn",
+  no_bid: "No-bid",
+  withdrawn: "No-bid",
 };
 
 function normalizeProposalStatus(status: string): ProposalStatus {
@@ -142,6 +143,7 @@ function normalizeProposalStatus(status: string): ProposalStatus {
     status === "submitted" ||
     status === "won" ||
     status === "lost" ||
+    status === "no_bid" ||
     status === "withdrawn"
   ) {
     return status;
@@ -208,7 +210,7 @@ function stageFor(item: PursuitItem): {
       icon: CheckCircle2,
     };
   }
-  if (status === "lost" || status === "withdrawn") {
+  if (status === "lost" || status === "no_bid" || status === "withdrawn") {
     return {
       label: STATUS_LABEL[status],
       detail: "Closed pursuit. Keep for learning and future reuse.",

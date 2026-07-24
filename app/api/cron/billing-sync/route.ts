@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/server";
-import { stripe } from "@/lib/stripe/client";
+import { getStripe } from "@/lib/stripe/client";
 import { sendEmail } from "@/lib/email";
 import { logger } from "@/lib/logging";
 import { isAuthorizedCronRequest } from "@/lib/cron/auth";
@@ -54,6 +54,7 @@ export async function GET(request: Request) {
     for (const sub of subscriptions || []) {
       try {
         // Fetch latest subscription status from Stripe
+        const stripe = getStripe();
         const stripeSubscription = await stripe.subscriptions.retrieve(sub.stripe_subscription_id);
 
         const email = (sub.organizations as any)?.owner_email;

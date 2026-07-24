@@ -1,5 +1,5 @@
 import { createAdminClient } from "@/lib/supabase/server";
-import { stripe } from "@/lib/stripe/client";
+import { getStripe } from "@/lib/stripe/client";
 import { getUsageSummary, MeterType, MeterUsageResult, getOrganizationMeters } from "./metering";
 import { logger } from "@/lib/logging";
 
@@ -354,6 +354,7 @@ export async function finalizeOverages(): Promise<{
         const description = `${label} Overage: ${meter.overage_units.toLocaleString()} units @ $${meter.overage_price_per_unit}/unit`;
 
         try {
+          const stripe = getStripe();
           await stripe.invoiceItems.create({
             customer: sub.stripe_customer_id,
             amount: amountCents,

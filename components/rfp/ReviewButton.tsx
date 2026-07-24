@@ -13,6 +13,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { ShieldCheck } from "lucide-react";
 
 interface ReviewButtonProps {
   orgId: string;
@@ -58,15 +59,16 @@ export function ReviewButton({ orgId: _orgId, proposalId }: ReviewButtonProps) {
         type="button"
         onClick={onClick}
         disabled={busy}
-        className="inline-flex items-center justify-center gap-2 rounded-md border border-emerald-500/30 bg-emerald-500/10 px-4 py-2 text-sm font-medium text-emerald-100 transition hover:bg-emerald-500/15 disabled:cursor-not-allowed disabled:opacity-50"
+        className="inline-flex min-h-11 items-center justify-center gap-2 rounded-md border border-emerald-200 bg-emerald-50 px-4 py-2 text-sm font-semibold text-emerald-800 transition hover:border-emerald-300 hover:bg-emerald-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2 focus-visible:ring-offset-white disabled:cursor-not-allowed disabled:opacity-50"
       >
+        <ShieldCheck className="h-4 w-4" aria-hidden="true" />
         {busy ? "Reviewing…" : "Run reviewer pass"}
       </button>
       <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-zinc-500">
         Preview · Opus rubric review · ~$0.70/run
       </p>
       {error ? (
-        <p className="text-[12px] text-rose-300">Review failed: {error}</p>
+        <p className="text-[12px] text-rose-600">Review failed: {error}</p>
       ) : null}
     </div>
   );
