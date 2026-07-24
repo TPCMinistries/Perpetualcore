@@ -12,6 +12,9 @@ import { CrispChat } from "@/components/landing/CrispChat";
 import { ExitIntent } from "@/components/landing/ExitIntent";
 import { ServiceWorkerReset } from "@/components/system/ServiceWorkerReset";
 
+const speedInsightsEnabled =
+  process.env.NEXT_PUBLIC_ENABLE_SPEED_INSIGHTS === "true";
+
 const inter = Inter({
   subsets: ["latin"],
   variable: "--font-inter",
@@ -144,7 +147,7 @@ export default function RootLayout({
         <ExitIntent />
         <ServiceWorkerReset />
         <Analytics />
-        <SpeedInsights />
+        {speedInsightsEnabled ? <SpeedInsights /> : null}
       </body>
     </html>
   );

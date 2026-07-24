@@ -1,10 +1,10 @@
 import Link from "next/link";
+import { Suspense } from "react";
 import {
   ArrowRight,
   ArrowUpRight,
   BrainCircuit,
   ChevronRight,
-  Circle,
   Cpu,
   FileSearch,
   GraduationCap,
@@ -22,6 +22,8 @@ import { SkipLink } from "@/components/ui/accessibility";
 import { PageViewTracker } from "@/components/analytics/PageViewTracker";
 import { ContentSlot } from "@/components/slots/ContentSlot";
 import { OperatingNetwork } from "@/components/landing/v4/OperatingNetwork";
+import { Navbar } from "@/components/landing/Navbar";
+import { Footer } from "@/components/landing/Footer";
 
 export const metadata = {
   title: "Perpetual Core — AI systems that run real companies",
@@ -35,6 +37,7 @@ const CORE_SYSTEMS = [
     category: "Operating intelligence",
     status: "Private live system",
     headline: "Persistent context for operators carrying more than one company.",
+    audience: "For founders and multi-company operators",
     href: "https://sage.perpetualcore.com",
     accent: "#8b7cff",
     icon: BrainCircuit,
@@ -45,6 +48,7 @@ const CORE_SYSTEMS = [
     category: "Opportunity intelligence",
     status: "Live",
     headline: "Find, qualify, and develop the right grants and contracts.",
+    audience: "For teams pursuing grants and contracts",
     href: "https://rfp.perpetualcore.com",
     accent: "#4ea7ff",
     icon: FileSearch,
@@ -55,6 +59,7 @@ const CORE_SYSTEMS = [
     category: "Diligence intelligence",
     status: "Live",
     headline: "Evidence-backed research for consequential people and company decisions.",
+    audience: "For leaders making high-stakes decisions",
     href: "https://sentinel.perpetualcore.com",
     accent: "#54e6b1",
     icon: SearchCheck,
@@ -65,6 +70,7 @@ const CORE_SYSTEMS = [
     category: "People operations",
     status: "Live",
     headline: "Hiring, agreements, onboarding, and the people lifecycle in one system.",
+    audience: "For teams managing the people lifecycle",
     href: "https://janice.perpetualcore.com",
     accent: "#ffb85c",
     icon: UsersRound,
@@ -147,60 +153,9 @@ const ENGAGEMENTS = [
   },
 ] as const;
 
-function SiteHeader() {
-  return (
-    <header className="sticky top-0 z-50 border-b border-white/10 bg-[#050507]/82 backdrop-blur-xl">
-      <div className="mx-auto flex min-h-[72px] max-w-[1440px] items-center justify-between px-5 sm:px-8">
-        <Link
-          href="/"
-          className="flex min-h-11 items-center gap-3 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8b7cff]"
-          aria-label="Perpetual Core home"
-        >
-          <span className="relative flex h-5 w-5 items-center justify-center" aria-hidden="true">
-            <span className="absolute inset-0 rotate-45 border border-[#8b7cff]" />
-            <span className="h-1.5 w-1.5 bg-[#54e6b1]" />
-          </span>
-          <span className="text-[14px] font-semibold tracking-[-0.01em] text-white">
-            PERPETUAL CORE
-          </span>
-        </Link>
-
-        <nav className="hidden items-center gap-8 lg:flex" aria-label="Primary navigation">
-          {[
-            ["Systems", "/marketplace"],
-            ["Intelligence layer", "/#intelligence-layer"],
-            ["Studio", "/studio"],
-            ["Company", "/about"],
-          ].map(([label, href]) => (
-            <Link
-              key={href}
-              href={href}
-              className="inline-flex min-h-11 items-center text-sm text-white/58 transition-colors hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8b7cff]"
-            >
-              {label}
-            </Link>
-          ))}
-        </nav>
-
-        <Button
-          asChild
-          size="sm"
-          className="min-h-10 rounded-none border border-white/18 bg-white px-4 text-xs font-semibold uppercase tracking-[0.08em] text-black hover:bg-[#54e6b1]"
-        >
-          <Link href="/contact-sales">
-            <span className="sm:hidden">Enter</span>
-            <span className="hidden sm:inline">Enter the network</span>
-            <ArrowRight className="ml-2 h-3.5 w-3.5" />
-          </Link>
-        </Button>
-      </div>
-    </header>
-  );
-}
-
 function StatusMark({ label }: { label: string }) {
   return (
-    <span className="inline-flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.14em] text-white/54">
+    <span className="inline-flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.12em] text-white/72">
       <span className="relative flex h-2 w-2">
         <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[#54e6b1] opacity-35 motion-reduce:animate-none" />
         <span className="relative inline-flex h-2 w-2 rounded-full bg-[#54e6b1]" />
@@ -215,8 +170,10 @@ export default function HomePage() {
     <div className="pc-v4 min-h-screen bg-[#050507] text-white">
       <PageViewTracker />
       <SkipLink />
-      <SiteHeader />
-      <ContentSlot slotKey="pc-home-banner" />
+      <Navbar tone="dark" />
+      <Suspense fallback={null}>
+        <ContentSlot slotKey="pc-home-banner" />
+      </Suspense>
 
       <main id="main-content">
         <section className="relative isolate overflow-hidden border-b border-white/10">
@@ -228,14 +185,14 @@ export default function HomePage() {
 
           <div className="relative mx-auto grid max-w-[1440px] gap-14 px-5 pb-12 pt-16 sm:px-8 sm:pb-16 sm:pt-24 lg:min-h-[790px] lg:grid-cols-[0.82fr_1.18fr] lg:items-center lg:gap-8 lg:pb-20 lg:pt-20">
             <div className="max-w-[680px]">
-              <div className="flex items-center gap-3 font-mono text-[10px] uppercase tracking-[0.18em] text-[#54e6b1]">
+              <div className="flex items-center gap-3 font-mono text-[11px] uppercase tracking-[0.16em] text-[#54e6b1]">
                 <Radio className="h-3.5 w-3.5" aria-hidden="true" />
                 Perpetual Core / AI operating network
               </div>
 
               <h1 className="mt-8 text-[52px] font-semibold leading-[0.91] tracking-[-0.065em] text-white sm:text-[72px] lg:text-[86px]">
                 AI systems that
-                <span className="block text-white/42">run real companies.</span>
+                <span className="block text-white/52">run real companies.</span>
               </h1>
 
               <p className="mt-8 max-w-[630px] text-[17px] leading-8 text-white/64 sm:text-[20px]">
@@ -260,11 +217,11 @@ export default function HomePage() {
                   variant="outline"
                   className="min-h-12 rounded-none border-white/18 bg-transparent px-6 text-sm font-semibold text-white hover:bg-white/8 hover:text-white"
                 >
-                  <Link href="/#intelligence-layer">See how Sage connects them</Link>
+                  <Link href="/#intelligence-layer">See the operating layer</Link>
                 </Button>
               </div>
 
-              <div className="mt-9 flex items-center gap-3 font-mono text-[10px] uppercase tracking-[0.14em] text-white/42">
+              <div className="mt-9 flex items-center gap-3 font-mono text-[11px] uppercase tracking-[0.12em] text-white/64">
                 <ShieldCheck className="h-4 w-4 text-[#8b7cff]" aria-hidden="true" />
                 Persistent intelligence. Explicit authority.
               </div>
@@ -294,11 +251,11 @@ export default function HomePage() {
           </div>
         </section>
 
-        <section className="border-b border-white/10 bg-[#08080b] py-20 sm:py-28">
+        <section className="border-b border-white/10 bg-[#08080b] py-20 sm:py-24">
           <div className="mx-auto max-w-[1440px] px-5 sm:px-8">
             <div className="grid gap-8 lg:grid-cols-[0.85fr_1.15fr] lg:items-end">
               <div>
-                <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-[#54e6b1]">
+                <p className="font-mono text-[11px] uppercase tracking-[0.16em] text-[#54e6b1]">
                   Verified core systems
                 </p>
                 <h2 className="mt-5 max-w-3xl text-4xl font-semibold leading-[0.98] tracking-[-0.05em] sm:text-6xl">
@@ -318,7 +275,7 @@ export default function HomePage() {
                   href={system.href}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className={`group relative min-h-[330px] overflow-hidden bg-[#0b0b0f] p-7 transition-colors duration-300 hover:bg-[#101017] focus-visible:z-10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8b7cff] sm:p-9 ${system.span}`}
+                  className={`group relative min-h-[310px] overflow-hidden bg-[#0b0b0f] p-7 transition-colors duration-300 hover:bg-[#101017] focus-visible:z-10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8b7cff] sm:p-9 ${system.span}`}
                 >
                   <div
                     className="absolute -right-24 -top-24 h-64 w-64 rounded-full opacity-0 blur-[90px] transition-opacity duration-500 group-hover:opacity-20"
@@ -336,15 +293,18 @@ export default function HomePage() {
                       <StatusMark label={system.status} />
                     </div>
                     <div className="mt-auto pt-20">
-                      <p className="font-mono text-[10px] uppercase tracking-[0.16em] text-white/36">
+                      <p className="font-mono text-[11px] uppercase tracking-[0.14em] text-white/62">
                         {system.category}
                       </p>
-                      <div className="mt-4 flex items-end justify-between gap-6">
+                      <p className="mt-3 text-xs font-medium text-white/68">
+                        {system.audience}
+                      </p>
+                      <div className="mt-5 flex items-end justify-between gap-6">
                         <div>
                           <h3 className="text-3xl font-semibold tracking-[-0.04em] text-white sm:text-4xl">
                             {system.name}
                           </h3>
-                          <p className="mt-3 max-w-xl text-sm leading-6 text-white/52">
+                          <p className="mt-3 max-w-xl text-sm leading-6 text-white/66">
                             {system.headline}
                           </p>
                         </div>
@@ -358,17 +318,17 @@ export default function HomePage() {
           </div>
         </section>
 
-        <section id="intelligence-layer" className="scroll-mt-20 border-b border-white/10 py-20 sm:py-28">
+        <section id="intelligence-layer" className="scroll-mt-20 border-b border-white/10 py-20 sm:py-24">
           <div className="mx-auto grid max-w-[1440px] gap-14 px-5 sm:px-8 lg:grid-cols-[0.76fr_1.24fr] lg:items-center">
             <div>
-              <div className="flex items-center gap-3 font-mono text-[10px] uppercase tracking-[0.18em] text-[#8b7cff]">
+              <div className="flex items-center gap-3 font-mono text-[11px] uppercase tracking-[0.16em] text-[#a79cff]">
                 <Cpu className="h-4 w-4" aria-hidden="true" />
                 One intelligence layer
               </div>
               <h2 className="mt-6 text-4xl font-semibold leading-[1] tracking-[-0.05em] sm:text-6xl">
                 Sage holds the thread.
               </h2>
-              <p className="mt-6 max-w-xl text-[17px] leading-8 text-white/56">
+              <p className="mt-6 max-w-xl text-[17px] leading-8 text-white/68">
                 Sage coordinates approved priorities, evidence pointers, source
                 health, and outcome receipts across the network. It does not
                 collapse every company or protected record into one unrestricted
@@ -391,9 +351,9 @@ export default function HomePage() {
                   ["03", "Act", "Consequential actions wait for human authority."],
                 ].map(([number, title, body]) => (
                   <div key={number} className="bg-[#0d0d12] p-6">
-                    <span className="font-mono text-[9px] text-[#54e6b1]">{number}</span>
+                    <span className="font-mono text-[11px] text-[#54e6b1]">{number}</span>
                     <h3 className="mt-10 text-xl font-semibold text-white">{title}</h3>
-                    <p className="mt-3 text-sm leading-6 text-white/46">{body}</p>
+                    <p className="mt-3 text-sm leading-6 text-white/64">{body}</p>
                   </div>
                 ))}
               </div>
@@ -408,11 +368,11 @@ export default function HomePage() {
           </div>
         </section>
 
-        <section className="border-b border-white/10 bg-[#08080b] py-20 sm:py-28">
+        <section className="border-b border-white/10 bg-[#08080b] py-20 sm:py-24">
           <div className="mx-auto max-w-[1440px] px-5 sm:px-8">
             <div className="grid gap-10 lg:grid-cols-[0.72fr_1.28fr]">
               <div>
-                <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-[#ffb85c]">
+                <p className="font-mono text-[11px] uppercase tracking-[0.16em] text-[#ffc774]">
                   Private releases and pilots
                 </p>
                 <h2 className="mt-5 text-4xl font-semibold leading-[1] tracking-[-0.05em]">
@@ -429,10 +389,10 @@ export default function HomePage() {
                     <span className="text-xl font-semibold tracking-[-0.03em] text-white">
                       {system.name}
                     </span>
-                    <span className="font-mono text-[9px] uppercase tracking-[0.13em] text-[#ffb85c]">
+                    <span className="font-mono text-[11px] uppercase tracking-[0.12em] text-[#ffc774]">
                       {system.status}
                     </span>
-                    <span className="text-sm leading-6 text-white/46">{system.body}</span>
+                    <span className="text-sm leading-6 text-white/64">{system.body}</span>
                     <ChevronRight className="h-4 w-4 text-white/28 transition-transform group-hover:translate-x-1 group-hover:text-white" />
                   </Link>
                 ))}
@@ -441,16 +401,16 @@ export default function HomePage() {
           </div>
         </section>
 
-        <section className="border-b border-white/10 py-20 sm:py-28">
+        <section className="border-b border-white/10 py-20 sm:py-24">
           <div className="mx-auto max-w-[1440px] px-5 sm:px-8">
             <div className="max-w-3xl">
-              <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-[#4ea7ff]">
+              <p className="font-mono text-[11px] uppercase tracking-[0.16em] text-[#69b6ff]">
                 Built on the Engine
               </p>
               <h2 className="mt-5 text-4xl font-semibold leading-[1] tracking-[-0.05em] sm:text-5xl">
                 The architecture is operating beyond the marketplace.
               </h2>
-              <p className="mt-5 max-w-2xl text-base leading-8 text-white/52">
+              <p className="mt-5 max-w-2xl text-base leading-8 text-white/66">
                 These are portfolio and program platforms—not extra Core SKUs.
                 They prove the Engine across education, care, and workforce operations.
               </p>
@@ -469,22 +429,22 @@ export default function HomePage() {
                     <system.icon className="h-5 w-5 text-[#4ea7ff]" aria-hidden="true" />
                     <ArrowUpRight className="h-4 w-4 text-white/26 transition group-hover:-translate-y-1 group-hover:translate-x-1 group-hover:text-white" />
                   </div>
-                  <p className="mt-16 font-mono text-[9px] uppercase tracking-[0.14em] text-[#4ea7ff]">
+                  <p className="mt-16 font-mono text-[11px] uppercase tracking-[0.12em] text-[#69b6ff]">
                     {system.status}
                   </p>
                   <h3 className="mt-4 text-2xl font-semibold tracking-[-0.035em]">{system.name}</h3>
-                  <p className="mt-3 text-sm leading-6 text-white/46">{system.body}</p>
+                  <p className="mt-3 text-sm leading-6 text-white/64">{system.body}</p>
                 </a>
               ))}
             </div>
           </div>
         </section>
 
-        <section className="border-b border-white/10 bg-[#08080b] py-20 sm:py-28">
+        <section className="border-b border-white/10 bg-[#08080b] py-20 sm:py-24">
           <div className="mx-auto max-w-[1440px] px-5 sm:px-8">
             <div className="flex items-end justify-between gap-8">
               <div>
-                <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-[#54e6b1]">
+                <p className="font-mono text-[11px] uppercase tracking-[0.16em] text-[#54e6b1]">
                   Work with Perpetual Core
                 </p>
                 <h2 className="mt-5 text-4xl font-semibold tracking-[-0.05em] sm:text-5xl">
@@ -499,12 +459,12 @@ export default function HomePage() {
                 <Link
                   key={item.number}
                   href={item.href}
-                  className="group flex min-h-[310px] flex-col bg-[#0a0a0e] p-7 transition hover:bg-[#111119] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8b7cff] sm:p-9"
+                  className="group flex min-h-[280px] flex-col bg-[#0a0a0e] p-7 transition hover:bg-[#111119] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8b7cff] sm:p-9"
                 >
-                  <span className="font-mono text-[9px] text-white/26">{item.number}</span>
+                  <span className="font-mono text-[11px] text-white/56">{item.number}</span>
                   <Workflow className="mt-12 h-5 w-5 text-[#8b7cff]" aria-hidden="true" />
                   <h3 className="mt-5 text-2xl font-semibold tracking-[-0.03em]">{item.title}</h3>
-                  <p className="mt-3 text-sm leading-6 text-white/46">{item.body}</p>
+                  <p className="mt-3 text-sm leading-6 text-white/64">{item.body}</p>
                   <span className="mt-auto inline-flex items-center pt-10 text-sm font-semibold text-white">
                     {item.cta}
                     <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
@@ -527,7 +487,7 @@ export default function HomePage() {
               Build the company
               <span className="block text-white/38">that can keep learning.</span>
             </h2>
-            <p className="mx-auto mt-7 max-w-2xl text-[17px] leading-8 text-white/52">
+            <p className="mx-auto mt-7 max-w-2xl text-[17px] leading-8 text-white/68">
               Deploy one system, install a connected operating layer, or build
               the next intelligence company with us.
             </p>
@@ -537,29 +497,14 @@ export default function HomePage() {
               className="mt-9 min-h-12 rounded-none bg-white px-7 text-sm font-semibold uppercase tracking-[0.06em] text-black hover:bg-[#54e6b1]"
             >
               <Link href="/contact-sales">
-                Enter the network <ArrowRight className="ml-2 h-4 w-4" />
+                Design your AI operating system <ArrowRight className="ml-2 h-4 w-4" />
               </Link>
             </Button>
           </div>
         </section>
       </main>
 
-      <footer className="border-t border-white/10 bg-[#050507]">
-        <div className="mx-auto flex max-w-[1440px] flex-col gap-8 px-5 py-10 text-xs text-white/36 sm:px-8 lg:flex-row lg:items-center lg:justify-between">
-          <div className="flex items-center gap-3">
-            <Circle className="h-3 w-3 fill-[#54e6b1] text-[#54e6b1]" aria-hidden="true" />
-            <span>© 2026 Perpetual Core · AI systems company</span>
-          </div>
-          <div className="flex flex-wrap gap-6">
-            <Link href="/privacy" className="hover:text-white">Privacy</Link>
-            <Link href="/terms" className="hover:text-white">Terms</Link>
-            <Link href="/about" className="hover:text-white">Company</Link>
-            <a href="https://theiha.org" target="_blank" rel="noopener noreferrer" className="hover:text-white">
-              Supporting human advancement
-            </a>
-          </div>
-        </div>
-      </footer>
+      <Footer tone="dark" />
     </div>
   );
 }

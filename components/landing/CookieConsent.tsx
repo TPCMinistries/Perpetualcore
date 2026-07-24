@@ -81,7 +81,7 @@ export function CookieConsent() {
       role="dialog"
       aria-labelledby="cookie-consent-heading"
       aria-describedby="cookie-consent-desc"
-      className="fixed bottom-3 left-1/2 z-[100] w-[calc(100%-1.5rem)] max-w-4xl -translate-x-1/2 rounded-[20px] border border-black/10 bg-white/94 p-3.5 shadow-[0_22px_70px_rgba(23,23,27,0.18)] backdrop-blur-xl sm:flex sm:items-center sm:gap-5 sm:px-4"
+      className="fixed bottom-3 left-1/2 z-40 w-[calc(100%-1.5rem)] max-w-4xl -translate-x-1/2 rounded-[20px] border border-black/10 bg-white/94 p-3.5 shadow-[0_22px_70px_rgba(23,23,27,0.18)] backdrop-blur-xl sm:flex sm:items-center sm:gap-5 sm:px-4"
     >
       <div className="flex-1">
         <p
