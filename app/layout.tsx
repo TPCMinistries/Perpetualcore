@@ -4,16 +4,12 @@ import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
 import { QueryProvider } from "@/lib/providers/query-provider";
 import { Analytics } from "@vercel/analytics/react";
-import { SpeedInsights } from "@vercel/speed-insights/next";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { organizationSchema, websiteSchema } from "@/lib/seo/structured-data";
 import { CookieConsent } from "@/components/landing/CookieConsent";
 import { CrispChat } from "@/components/landing/CrispChat";
 import { ExitIntent } from "@/components/landing/ExitIntent";
 import { ServiceWorkerReset } from "@/components/system/ServiceWorkerReset";
-
-const speedInsightsEnabled =
-  process.env.NEXT_PUBLIC_ENABLE_SPEED_INSIGHTS === "true";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -147,7 +143,6 @@ export default function RootLayout({
         <ExitIntent />
         <ServiceWorkerReset />
         <Analytics />
-        {speedInsightsEnabled ? <SpeedInsights /> : null}
       </body>
     </html>
   );
