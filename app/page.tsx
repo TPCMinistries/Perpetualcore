@@ -2,588 +2,464 @@ import Link from "next/link";
 import {
   ArrowRight,
   ArrowUpRight,
-  Bot,
-  Boxes,
-  Building2,
-  CheckCircle2,
-  CircleDollarSign,
-  Compass,
-  GraduationCap,
-  Layers3,
+  BrainCircuit,
+  BriefcaseBusiness,
+  Check,
+  Clapperboard,
   Network,
+  SearchCheck,
   ShieldCheck,
   Sparkles,
+  UsersRound,
   Workflow,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { SkipLink } from "@/components/ui/accessibility";
 import { Navbar } from "@/components/landing/Navbar";
 import { Footer } from "@/components/landing/Footer";
-import { OperatingSystemMap } from "@/components/landing/OperatingSystemMap";
-import { MarketplaceExplorer } from "@/components/marketplace/MarketplaceExplorer";
 import { PageViewTracker } from "@/components/analytics/PageViewTracker";
 import { ContentSlot } from "@/components/slots/ContentSlot";
-import { MARKETPLACE_ITEMS } from "@/lib/marketplace/catalog";
+import { LivingCompanyCanvas } from "@/components/landing/v3/LivingCompanyCanvas";
+import { ProductPreview } from "@/components/landing/v3/ProductPreview";
+import {
+  MARKETPLACE_ITEMS,
+  MARKETPLACE_STATUS_LABELS,
+  type MarketplaceItem,
+} from "@/lib/marketplace/catalog";
 
 export const metadata = {
-  title: "Perpetual Core — The intelligence layer for companies",
+  title: "Perpetual Core — AI systems that work as one company",
   description:
-    "Perpetual Core connects governed company context, specialized AI systems, and human-approved workflows. Start with one capability. Expand into a company-wide operating system.",
+    "Specialized AI products for opportunity, operations, people, knowledge, and media—connected through Sage as your company grows.",
 };
 
-const ENTRY_POINTS = [
+const OUTCOMES = [
   {
-    label: "Platform",
-    title: "Connect the company’s intelligence.",
-    body:
-      "Sage and the Company Graph coordinate approved context, priorities, evidence, and receipts across the systems where work already lives.",
-    cta: "See the operating layer",
-    href: "#operating-layer",
-    icon: Network,
-  },
-  {
-    label: "Marketplace",
-    title: "Start with the job closest to the pain.",
-    body:
-      "Use a specialized product for opportunity, diligence, knowledge, people, team execution, or media—then connect it to the wider system.",
-    cta: "Explore capabilities",
-    href: "#marketplace",
-    icon: Boxes,
-  },
-  {
-    label: "Studio",
-    title: "Install the system around your company.",
-    body:
-      "When the problem crosses departments or tools, the studio maps the operation, installs the first wedge, trains the team, and expands.",
-    cta: "See studio engagements",
-    href: "/studio",
-    icon: Building2,
-  },
-] as const;
-
-const BUYER_PATHS = [
-  {
-    eyebrow: "One urgent job",
-    title: "Use a product.",
-    body:
-      "The buyer already knows the job: find RFPs, run diligence, organize knowledge, coordinate people, or turn recordings into development evidence.",
-    cta: "Browse the marketplace",
-    href: "/marketplace",
+    label: "Win work",
+    body: "Find opportunities, make bid decisions, and manage proposals.",
     icon: Sparkles,
+    href: "/marketplace#find-win",
+    color: "#3276e8",
   },
   {
-    eyebrow: "A connected workflow",
-    title: "Install a company system.",
-    body:
-      "The work crosses tools, teams, or departments. We map the handoffs and install a governed operating lane around live work.",
-    cta: "Map the first workflow",
+    label: "Run operations",
+    body: "Coordinate priorities, handoffs, recurring work, and follow-through.",
+    icon: BriefcaseBusiness,
+    href: "/marketplace#run-coordinate",
+    color: "#ff6b4a",
+  },
+  {
+    label: "Know and decide",
+    body: "Investigate, preserve knowledge, and make evidence-backed decisions.",
+    icon: SearchCheck,
+    href: "/marketplace#know-decide",
+    color: "#6b52d9",
+  },
+  {
+    label: "Develop people",
+    body: "Run hiring, onboarding, coaching, and workforce journeys.",
+    icon: UsersRound,
+    href: "/marketplace#hire-develop",
+    color: "#168a72",
+  },
+  {
+    label: "Create media",
+    body: "Turn long-form ideas into governed media workflows.",
+    icon: Clapperboard,
+    href: "/marketplace#create-distribute",
+    color: "#e04d7f",
+  },
+] as const;
+
+const FEATURED_SLUGS = [
+  "sage",
+  "rfp-engine",
+  "sentinel",
+  "janice",
+  "atelier",
+  "press",
+] as const;
+
+const FEATURED_PRODUCTS = FEATURED_SLUGS.map((slug) =>
+  MARKETPLACE_ITEMS.find((item) => item.slug === slug)
+).filter((item): item is MarketplaceItem => Boolean(item));
+
+const CARD_LAYOUTS: Record<string, string> = {
+  sage: "lg:col-span-7 lg:row-span-2",
+  "rfp-engine": "lg:col-span-5",
+  sentinel: "lg:col-span-5",
+  janice: "lg:col-span-4",
+  atelier: "lg:col-span-4",
+  press: "lg:col-span-4",
+};
+
+const START_PATHS = [
+  {
+    label: "01",
+    title: "Use a product",
+    body: "The job is clear and a live product already fits.",
+    cta: "Browse live products",
+    href: "/marketplace",
+  },
+  {
+    label: "02",
+    title: "Request access",
+    body: "The system is private, in pilot, or available by invitation.",
+    cta: "See current availability",
+    href: "/marketplace",
+  },
+  {
+    label: "03",
+    title: "Install a company system",
+    body: "The workflow crosses tools, teams, or departments.",
+    cta: "Map the workflow",
     href: "/contact-sales",
-    icon: Workflow,
-  },
-  {
-    eyebrow: "A venture-shaped pattern",
-    title: "Build and scale it.",
-    body:
-      "A repeatable operating pattern can become a product or venture, with the Engine beneath it and DeepFutures as the scale path.",
-    cta: "Understand the Engine",
-    href: "/engine",
-    icon: Layers3,
   },
 ] as const;
 
-const FLYWHEEL = [
-  {
-    index: "01",
-    title: "Operate",
-    body: "Run real programs and companies under real constraints.",
-  },
-  {
-    index: "02",
-    title: "Learn",
-    body: "Capture bounded evidence about what works, fails, and needs attention.",
-  },
-  {
-    index: "03",
-    title: "Productize",
-    body: "Turn repeatable operating patterns into products, skills, and company systems.",
-  },
-  {
-    index: "04",
-    title: "Install",
-    body: "Deploy the proven pattern into another organization with training and governance.",
-  },
-  {
-    index: "05",
-    title: "Scale",
-    body: "Back venture-shaped patterns and fund human capacity through the wider ecosystem.",
-  },
-] as const;
+function ProductLink({
+  product,
+  children,
+  className,
+}: {
+  product: MarketplaceItem;
+  children: React.ReactNode;
+  className: string;
+}) {
+  if (product.external) {
+    return (
+      <a
+        href={product.href}
+        target="_blank"
+        rel="noopener noreferrer"
+        className={className}
+      >
+        {children}
+      </a>
+    );
+  }
 
-const LIVE_COUNT = MARKETPLACE_ITEMS.filter(
-  (item) => item.status === "live"
-).length;
-const PRIVATE_COUNT = MARKETPLACE_ITEMS.filter(
-  (item) => item.status === "private" || item.status === "invitation"
-).length;
+  return (
+    <Link href={product.href} className={className}>
+      {children}
+    </Link>
+  );
+}
 
 export default function HomePage() {
   return (
-    <div className="public-light min-h-screen bg-background">
+    <div className="pc-v3 public-light min-h-screen bg-[#f7f6f2] text-[#17171b]">
       <PageViewTracker />
       <SkipLink />
       <Navbar />
       <ContentSlot slotKey="pc-home-banner" />
 
       <main id="main-content">
-        <section className="relative overflow-hidden border-b border-white/10 bg-[#070914] text-white">
-          <div className="signal-grid absolute inset-0 opacity-60" aria-hidden="true" />
+        <section className="relative overflow-hidden border-b border-black/8">
           <div
-            className="absolute left-[-12rem] top-24 h-[34rem] w-[34rem] rounded-full bg-[#4b35ff]/25 blur-[120px]"
+            className="absolute inset-0 bg-[radial-gradient(circle_at_18%_16%,rgba(115,96,255,0.16),transparent_30%),radial-gradient(circle_at_88%_8%,rgba(76,205,178,0.17),transparent_28%),linear-gradient(180deg,#fbfaf7_0%,#f4f1fb_100%)]"
             aria-hidden="true"
           />
-          <div
-            className="absolute right-[-10rem] top-8 h-[30rem] w-[30rem] rounded-full bg-[#00d4ff]/15 blur-[120px]"
-            aria-hidden="true"
-          />
-
-          <div className="relative mx-auto max-w-[1500px] px-6 pb-16 pt-16 sm:px-8 sm:pb-20 sm:pt-24">
-            <div className="grid gap-14 lg:grid-cols-[1.05fr_0.95fr] lg:items-center xl:gap-20">
-              <div className="max-w-4xl">
-                <div className="flex items-center gap-3">
-                  <span
-                    className="h-2 w-2 bg-[#26f2a8] shadow-[0_0_18px_rgba(38,242,168,0.8)]"
-                    aria-hidden="true"
-                  />
-                  <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-white/62 sm:text-[11px]">
-                    Operator-built AI systems company
-                  </p>
-                </div>
-
-                <h1 className="mt-8 max-w-5xl text-[48px] font-semibold leading-[0.96] tracking-[-0.055em] text-white sm:text-[70px] lg:text-[82px] xl:text-[94px]">
-                  Run your company with intelligence{" "}
-                  <span className="font-display font-normal italic text-gradient">
-                    that compounds.
-                  </span>
-                </h1>
-
-                <p className="mt-8 max-w-3xl text-lg leading-8 text-white/68 sm:text-xl">
-                  Perpetual Core connects governed company context, specialized AI
-                  systems, and human-approved workflows across opportunity,
-                  operations, people, knowledge, and media. Start with one
-                  capability. Expand into a company-wide operating system.
-                </p>
-
-                <div className="mt-9 flex flex-col gap-3 sm:flex-row sm:items-center">
-                  <Button
-                    asChild
-                    size="lg"
-                    className="min-h-12 rounded-md bg-[#26f2a8] px-7 text-base font-semibold text-[#070914] shadow-[0_0_36px_rgba(38,242,168,0.18)] hover:bg-[#7dffd0]"
-                  >
-                    <Link href="/marketplace">
-                      Explore the marketplace
-                      <ArrowRight className="ml-2 h-4 w-4" />
-                    </Link>
-                  </Button>
-                  <Button
-                    asChild
-                    size="lg"
-                    variant="outline"
-                    className="min-h-12 rounded-md border-white/25 bg-white/[0.04] px-7 text-base text-white hover:border-white/45 hover:bg-white/10 hover:text-white"
-                  >
-                    <Link href="/contact-sales">Map my company</Link>
-                  </Button>
-                </div>
-
-                <div className="mt-10 flex flex-wrap gap-x-6 gap-y-3 text-sm text-white/52">
-                  <span className="inline-flex items-center gap-2">
-                    <ShieldCheck className="h-4 w-4 text-[#26f2a8]" aria-hidden="true" />
-                    Governed by default
-                  </span>
-                  <span className="inline-flex items-center gap-2">
-                    <CheckCircle2 className="h-4 w-4 text-[#6dd7ff]" aria-hidden="true" />
-                    Human authority retained
-                  </span>
-                  <span className="inline-flex items-center gap-2">
-                    <Bot className="h-4 w-4 text-[#b99cff]" aria-hidden="true" />
-                    Products that work together
-                  </span>
-                </div>
+          <div className="relative mx-auto grid max-w-[1280px] gap-12 px-6 pb-16 pt-14 sm:px-8 sm:pb-20 sm:pt-20 lg:min-h-[720px] lg:grid-cols-[0.88fr_1.12fr] lg:items-center lg:gap-14">
+            <div className="max-w-[610px]">
+              <div className="inline-flex items-center gap-2 rounded-full border border-[#5548d9]/16 bg-white/70 px-3 py-1.5 text-xs font-semibold text-[#4f46c8] shadow-sm backdrop-blur">
+                <span className="h-2 w-2 rounded-full bg-[#5548d9]" aria-hidden="true" />
+                AI systems for real operating work
               </div>
 
-              <OperatingSystemMap />
-            </div>
+              <h1 className="mt-7 text-[46px] font-semibold leading-[0.98] tracking-[-0.055em] text-[#151519] sm:text-[62px] lg:text-[70px]">
+                Start with one.
+                <span className="block text-[#5548d9]">Connect the company.</span>
+              </h1>
 
-            <div className="mt-14 grid overflow-hidden rounded-lg border border-white/12 bg-white/[0.04] sm:grid-cols-3">
-              <div className="p-5 sm:border-r sm:border-white/12">
-                <p className="text-3xl font-semibold tracking-[-0.04em] text-white">
-                  {MARKETPLACE_ITEMS.length}
-                </p>
-                <p className="mt-1 font-mono text-[9px] uppercase tracking-[0.18em] text-white/40">
-                  Capability surfaces
-                </p>
+              <p className="mt-7 max-w-[590px] text-[18px] leading-8 text-[#565661] sm:text-[20px]">
+                Perpetual Core builds specialized AI products for opportunity,
+                operations, people, knowledge, and media. Use one now—or connect
+                them through Sage as your company grows.
+              </p>
+
+              <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+                <Button
+                  asChild
+                  size="lg"
+                  className="min-h-12 rounded-full bg-[#17171b] px-6 text-base text-white shadow-[0_14px_32px_rgba(23,23,27,0.16)] hover:bg-[#34343c]"
+                >
+                  <Link href="/marketplace">
+                    Browse products <ArrowRight className="ml-2 h-4 w-4" />
+                  </Link>
+                </Button>
+                <Button
+                  asChild
+                  size="lg"
+                  variant="outline"
+                  className="min-h-12 rounded-full border-black/14 bg-white/70 px-6 text-base text-[#222228] hover:bg-white"
+                >
+                  <Link href="/contact-sales">Map a workflow</Link>
+                </Button>
               </div>
-              <div className="border-t border-white/12 p-5 sm:border-r sm:border-t-0">
-                <p className="text-3xl font-semibold tracking-[-0.04em] text-white">
-                  {LIVE_COUNT}
-                </p>
-                <p className="mt-1 font-mono text-[9px] uppercase tracking-[0.18em] text-white/40">
-                  Live surfaces
-                </p>
-              </div>
-              <div className="border-t border-white/12 p-5 sm:border-t-0">
-                <p className="text-3xl font-semibold tracking-[-0.04em] text-white">
-                  {PRIVATE_COUNT}
-                </p>
-                <p className="mt-1 font-mono text-[9px] uppercase tracking-[0.18em] text-white/40">
-                  Private or invitation releases
+
+              <div className="mt-8 flex items-start gap-3 rounded-2xl border border-black/8 bg-white/55 p-4 text-sm leading-6 text-[#61616b] backdrop-blur">
+                <ShieldCheck className="mt-0.5 h-5 w-5 shrink-0 text-[#168a72]" aria-hidden="true" />
+                <p>
+                  Sage coordinates approved context. Protected records stay in
+                  their source systems, and consequential actions remain
+                  human-approved.
                 </p>
               </div>
             </div>
+
+            <LivingCompanyCanvas />
           </div>
         </section>
 
-        <section className="border-b border-border bg-[#f5f7ff] py-20 sm:py-28">
-          <div className="container mx-auto px-6 sm:px-8">
-            <div className="grid gap-10 lg:grid-cols-[0.75fr_1.25fr] lg:gap-20">
+        <section className="border-b border-black/8 bg-[#f7f6f2] py-16 sm:py-20">
+          <div className="mx-auto max-w-[1280px] px-6 sm:px-8">
+            <div className="flex flex-col justify-between gap-5 md:flex-row md:items-end">
               <div>
-                <p className="eyebrow text-primary">What Perpetual Core is</p>
-                <h2 className="mt-5 max-w-xl text-4xl font-semibold leading-[1.04] tracking-[-0.045em] text-foreground sm:text-5xl lg:text-6xl">
-                  One company. Three ways in.
+                <p className="text-sm font-semibold text-[#5548d9]">Browse by outcome</p>
+                <h2 className="mt-3 text-3xl font-semibold tracking-[-0.04em] text-[#17171b] sm:text-4xl">
+                  What needs to move?
                 </h2>
               </div>
-              <p className="max-w-3xl text-lg leading-8 text-muted-foreground lg:pt-8">
-                Perpetual Core is a governed intelligence platform, a marketplace
-                of specialized systems, and a studio that installs them into real
-                organizations. The platform connects the context. The marketplace
-                solves specific jobs. The studio handles the work between them.
+              <p className="max-w-xl text-base leading-7 text-[#62626d]">
+                Choose the work—not the technology. Each product is built around
+                a real operating job.
               </p>
             </div>
 
-            <div className="mt-12 grid gap-px overflow-hidden rounded-lg border border-[#d9ddff] bg-[#d9ddff] lg:grid-cols-3">
-              {ENTRY_POINTS.map((item) => (
+            <div className="mt-9 grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
+              {OUTCOMES.map((outcome) => (
                 <Link
-                  key={item.label}
-                  href={item.href}
-                  className="group cursor-pointer bg-white p-7 transition-colors duration-200 hover:bg-[#fafaff] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary sm:p-8"
+                  key={outcome.label}
+                  href={outcome.href}
+                  className="group rounded-[22px] border border-black/8 bg-white p-5 shadow-[0_10px_34px_rgba(30,28,45,0.04)] transition duration-200 hover:-translate-y-1 hover:shadow-[0_18px_42px_rgba(30,28,45,0.09)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#5548d9]"
                 >
-                  <div className="flex items-center justify-between">
-                    <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-primary">
-                      {item.label}
-                    </span>
-                    <item.icon className="h-5 w-5 text-primary/60" aria-hidden="true" />
-                  </div>
-                  <h3 className="mt-14 text-2xl font-semibold tracking-[-0.03em] text-foreground">
-                    {item.title}
-                  </h3>
-                  <p className="mt-4 text-sm leading-6 text-muted-foreground">
-                    {item.body}
-                  </p>
-                  <span className="mt-8 inline-flex items-center text-sm font-semibold text-foreground group-hover:text-primary">
-                    {item.cta}
-                    <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
+                  <span
+                    className="flex h-10 w-10 items-center justify-center rounded-2xl text-white"
+                    style={{ backgroundColor: outcome.color }}
+                  >
+                    <outcome.icon className="h-4 w-4" aria-hidden="true" />
                   </span>
+                  <h3 className="mt-7 text-base font-semibold text-[#222227]">
+                    {outcome.label}
+                  </h3>
+                  <p className="mt-2 text-sm leading-6 text-[#696973]">{outcome.body}</p>
+                  <ArrowRight className="mt-5 h-4 w-4 text-[#8a8a94] transition-transform group-hover:translate-x-1 group-hover:text-[#5548d9]" />
                 </Link>
               ))}
             </div>
           </div>
         </section>
 
-        <section
-          id="operating-layer"
-          className="scroll-mt-24 border-b border-border py-20 sm:py-28"
-        >
-          <div className="container mx-auto px-6 sm:px-8">
-            <div className="grid gap-12 lg:grid-cols-[0.8fr_1.2fr] lg:items-start lg:gap-20">
-              <div>
-                <p className="eyebrow text-primary">The operating layer</p>
-                <h2 className="mt-5 text-4xl font-semibold leading-[1.04] tracking-[-0.045em] text-foreground sm:text-5xl lg:text-6xl">
-                  Shared intelligence without one giant data pile.
-                </h2>
-                <p className="mt-6 max-w-xl text-base leading-7 text-muted-foreground sm:text-lg">
-                  Sage and the Company Graph coordinate priorities, approved
-                  context, source health, evidence pointers, and outcome receipts.
-                  Each product keeps its own authority boundary and protected data
-                  stays where it belongs.
-                </p>
-                <Link
-                  href="/engine"
-                  className="mt-8 inline-flex min-h-11 items-center text-sm font-semibold text-foreground transition-colors hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
-                >
-                  See the architecture beneath it
-                  <ArrowRight className="ml-2 h-4 w-4" />
-                </Link>
-              </div>
-
-              <div className="overflow-hidden rounded-lg border border-border bg-card shadow-[0_24px_80px_rgba(75,53,255,0.08)]">
-                {[
-                  {
-                    icon: Compass,
-                    title: "Observe",
-                    body: "Collect bounded signals, freshness, approvals, and non-secret evidence pointers.",
-                  },
-                  {
-                    icon: Network,
-                    title: "Reconcile",
-                    body: "Resolve what changed, what conflicts, and what needs operator attention.",
-                  },
-                  {
-                    icon: Sparkles,
-                    title: "Propose",
-                    body: "Rank the next best actions and show the evidence behind the recommendation.",
-                  },
-                  {
-                    icon: ShieldCheck,
-                    title: "Review and execute",
-                    body: "Keep publishing, money, protected records, migrations, and consequential actions behind explicit authority.",
-                  },
-                  {
-                    icon: CheckCircle2,
-                    title: "Verify and learn",
-                    body: "Record actual outcomes and limitations rather than calling configured systems successful.",
-                  },
-                ].map((item, index) => (
-                  <div
-                    key={item.title}
-                    className="grid grid-cols-[42px_1fr] gap-4 border-b border-border p-5 last:border-b-0 sm:grid-cols-[48px_170px_1fr] sm:items-center sm:gap-6 sm:p-6"
-                  >
-                    <div className="flex h-10 w-10 items-center justify-center rounded-md bg-primary/8 text-primary">
-                      <item.icon className="h-5 w-5" aria-hidden="true" />
-                    </div>
-                    <div>
-                      <p className="font-mono text-[9px] uppercase tracking-[0.18em] text-muted-foreground">
-                        0{index + 1}
-                      </p>
-                      <h3 className="mt-1 font-semibold text-foreground">
-                        {item.title}
-                      </h3>
-                    </div>
-                    <p className="col-start-2 text-sm leading-6 text-muted-foreground sm:col-start-auto">
-                      {item.body}
-                    </p>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <section
-          id="marketplace"
-          className="scroll-mt-24 border-b border-white/10 bg-[#080a13] py-20 text-white sm:py-28"
-        >
-          <div className="mx-auto max-w-[1500px] px-6 sm:px-8">
-            <div className="mb-12 grid gap-8 lg:grid-cols-[0.8fr_1.2fr] lg:items-end lg:gap-20">
-              <div>
-                <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-[#6dd7ff]">
-                  The marketplace
-                </p>
-                <h2 className="mt-5 text-4xl font-semibold leading-[1.03] tracking-[-0.045em] text-white sm:text-5xl lg:text-6xl">
-                  Start with the job. See the larger system.
+        <section className="bg-[#eeece6] py-16 sm:py-24">
+          <div className="mx-auto max-w-[1280px] px-6 sm:px-8">
+            <div className="flex flex-col justify-between gap-6 lg:flex-row lg:items-end">
+              <div className="max-w-2xl">
+                <p className="text-sm font-semibold text-[#5548d9]">Featured systems</p>
+                <h2 className="mt-3 text-4xl font-semibold leading-[1.04] tracking-[-0.045em] text-[#17171b] sm:text-5xl">
+                  Products built around the job.
                 </h2>
               </div>
-              <div>
-                <p className="max-w-3xl text-lg leading-8 text-white/60">
-                  These are not disconnected side projects. They are specialized
-                  surfaces for recurring company jobs—and designed to connect as
-                  the operating system grows.
+              <div className="max-w-xl">
+                <p className="text-base leading-7 text-[#5f5f69]">
+                  Each system can stand alone. When work crosses tools or teams,
+                  they connect through the wider Perpetual Core operating layer.
                 </p>
                 <Link
                   href="/marketplace"
-                  className="mt-6 inline-flex min-h-11 items-center text-sm font-semibold text-white transition-colors hover:text-[#26f2a8] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#26f2a8]"
+                  className="mt-4 inline-flex min-h-11 items-center text-sm font-semibold text-[#312b78] hover:text-[#5548d9] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#5548d9]"
                 >
-                  Open the full marketplace
+                  View all {MARKETPLACE_ITEMS.length} systems and offerings
                   <ArrowRight className="ml-2 h-4 w-4" />
                 </Link>
               </div>
             </div>
 
-            <MarketplaceExplorer />
+            <div className="mt-10 grid gap-4 lg:grid-cols-12">
+              {FEATURED_PRODUCTS.map((product) => (
+                <ProductLink
+                  key={product.slug}
+                  product={product}
+                  className={`group flex flex-col rounded-[28px] border border-black/8 bg-[#fbfaf7] p-4 shadow-[0_18px_55px_rgba(29,27,40,0.06)] transition duration-200 hover:-translate-y-1 hover:shadow-[0_26px_70px_rgba(29,27,40,0.11)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#5548d9] ${CARD_LAYOUTS[product.slug] ?? "lg:col-span-4"}`}
+                >
+                  <ProductPreview
+                    slug={product.slug}
+                    label={product.name}
+                    className={product.slug === "sage" ? "lg:[&>div:last-child]:h-[260px]" : ""}
+                  />
+                  <div className="flex flex-1 flex-col px-2 pb-2 pt-5">
+                    <div className="flex items-center justify-between gap-4">
+                      <h3 className="text-xl font-semibold tracking-[-0.025em] text-[#202024]">
+                        {product.name}
+                      </h3>
+                      <span className="text-xs font-medium text-[#73737c]">
+                        {MARKETPLACE_STATUS_LABELS[product.status]} · {product.delivery}
+                      </span>
+                    </div>
+                    <p className="mt-2 max-w-xl text-sm leading-6 text-[#64646e]">
+                      {product.headline}
+                    </p>
+                    <span className="mt-5 inline-flex items-center text-sm font-semibold text-[#373145]">
+                      Explore {product.name}
+                      {product.external ? (
+                        <ArrowUpRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+                      ) : (
+                        <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
+                      )}
+                    </span>
+                  </div>
+                </ProductLink>
+              ))}
+            </div>
           </div>
         </section>
 
-        <section className="border-b border-border bg-[#fbfcff] py-20 sm:py-28">
-          <div className="container mx-auto px-6 sm:px-8">
-            <div className="max-w-4xl">
-              <p className="eyebrow text-primary">Choose your starting level</p>
-              <h2 className="mt-5 text-4xl font-semibold leading-[1.04] tracking-[-0.045em] text-foreground sm:text-5xl lg:text-6xl">
-                Buy the smallest thing that can prove the next thing.
+        <section id="operating-layer" className="scroll-mt-24 bg-[#17171b] py-16 text-white sm:py-24">
+          <div className="mx-auto max-w-[1280px] px-6 sm:px-8">
+            <div className="grid gap-12 lg:grid-cols-[0.78fr_1.22fr] lg:items-center lg:gap-20">
+              <div>
+                <span className="inline-flex items-center gap-2 rounded-full bg-white/8 px-3 py-1.5 text-xs font-semibold text-[#c9c4ff]">
+                  <Network className="h-3.5 w-3.5" aria-hidden="true" />
+                  How Sage connects the work
+                </span>
+                <h2 className="mt-6 text-4xl font-semibold leading-[1.04] tracking-[-0.045em] text-white sm:text-5xl">
+                  One product solves a job. Sage connects the context.
+                </h2>
+                <p className="mt-6 text-[17px] leading-8 text-white/78">
+                  Products can share approved priorities, evidence pointers,
+                  source health, and outcome receipts without collapsing every
+                  company or protected record into one database.
+                </p>
+                <Link
+                  href="/engine"
+                  className="mt-7 inline-flex min-h-11 items-center text-sm font-semibold text-white hover:text-[#c9c4ff] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#c9c4ff]"
+                >
+                  See the architecture
+                  <ArrowRight className="ml-2 h-4 w-4" />
+                </Link>
+              </div>
+
+              <div className="rounded-[28px] border border-white/12 bg-white/[0.055] p-5 sm:p-7">
+                <div className="grid gap-3 sm:grid-cols-[1fr_auto_1.15fr_auto_1fr] sm:items-center">
+                  <div className="rounded-2xl bg-white/8 p-4">
+                    <p className="text-xs font-semibold text-white">Existing systems</p>
+                    <div className="mt-3 space-y-2 text-xs text-white/70">
+                      <p>Documents and calls</p>
+                      <p>CRM and operations</p>
+                      <p>Protected systems</p>
+                    </div>
+                  </div>
+                  <ArrowRight className="mx-auto hidden h-5 w-5 text-white/32 sm:block" aria-hidden="true" />
+                  <div className="rounded-2xl bg-[#6658e8] p-5 text-center shadow-[0_20px_55px_rgba(102,88,232,0.28)]">
+                    <BrainCircuit className="mx-auto h-6 w-6 text-white" aria-hidden="true" />
+                    <p className="mt-3 text-sm font-semibold text-white">Sage + Company Graph</p>
+                    <p className="mt-2 text-xs leading-5 text-white/78">
+                      Approved context and bounded receipts
+                    </p>
+                  </div>
+                  <ArrowRight className="mx-auto hidden h-5 w-5 text-white/32 sm:block" aria-hidden="true" />
+                  <div className="rounded-2xl bg-white/8 p-4">
+                    <p className="text-xs font-semibold text-white">Approved workflows</p>
+                    <div className="mt-3 space-y-2 text-xs text-white/70">
+                      <p>Products coordinate</p>
+                      <p>People review</p>
+                      <p>Outcomes get recorded</p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="mt-4 flex items-start gap-3 rounded-2xl border border-[#9a8fff]/24 bg-[#7465ed]/10 p-4">
+                  <ShieldCheck className="mt-0.5 h-5 w-5 shrink-0 text-[#b9b2ff]" aria-hidden="true" />
+                  <p className="text-sm leading-6 text-white/78">
+                    Publishing, money, protected records, migrations, and other
+                    consequential actions stay behind explicit human approval.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section className="border-b border-black/8 bg-[#f7f6f2] py-16 sm:py-24">
+          <div className="mx-auto max-w-[1280px] px-6 sm:px-8">
+            <div className="max-w-2xl">
+              <p className="text-sm font-semibold text-[#5548d9]">Choose the right starting level</p>
+              <h2 className="mt-3 text-4xl font-semibold tracking-[-0.045em] text-[#17171b] sm:text-5xl">
+                Start where the work is.
               </h2>
             </div>
 
-            <div className="mt-12 grid gap-5 lg:grid-cols-3">
-              {BUYER_PATHS.map((path) => (
+            <div className="mt-10 grid overflow-hidden rounded-[28px] border border-black/8 bg-white lg:grid-cols-3">
+              {START_PATHS.map((path, index) => (
                 <div
                   key={path.title}
-                  className="flex flex-col rounded-lg border border-border bg-white p-7 shadow-[0_14px_50px_rgba(10,12,24,0.045)] sm:p-8"
+                  className={`flex flex-col p-7 sm:p-8 ${
+                    index > 0 ? "border-t border-black/8 lg:border-l lg:border-t-0" : ""
+                  }`}
                 >
-                  <div className="flex items-center justify-between">
-                    <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-primary">
-                      {path.eyebrow}
-                    </p>
-                    <path.icon className="h-5 w-5 text-primary/60" aria-hidden="true" />
-                  </div>
-                  <h3 className="mt-14 text-3xl font-semibold tracking-[-0.035em] text-foreground">
+                  <span className="text-xs font-semibold text-[#5548d9]">{path.label}</span>
+                  <h3 className="mt-8 text-2xl font-semibold tracking-[-0.03em] text-[#222227]">
                     {path.title}
                   </h3>
-                  <p className="mt-4 flex-1 text-sm leading-6 text-muted-foreground">
+                  <p className="mt-3 flex-1 text-base leading-7 text-[#666670]">
                     {path.body}
                   </p>
                   <Link
                     href={path.href}
-                    className="mt-8 inline-flex min-h-11 items-center text-sm font-semibold text-foreground transition-colors hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                    className="mt-7 inline-flex min-h-11 items-center text-sm font-semibold text-[#322c70] hover:text-[#5548d9] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#5548d9]"
                   >
-                    {path.cta}
-                    <ArrowRight className="ml-2 h-4 w-4" />
+                    {path.cta} <ArrowRight className="ml-2 h-4 w-4" />
                   </Link>
                 </div>
               ))}
             </div>
-          </div>
-        </section>
 
-        <section className="border-b border-border py-20 sm:py-28">
-          <div className="container mx-auto px-6 sm:px-8">
-            <div className="grid gap-12 lg:grid-cols-[0.8fr_1.2fr] lg:gap-20">
-              <div>
-                <p className="eyebrow text-primary">Built in the field</p>
-                <h2 className="mt-5 text-4xl font-semibold leading-[1.04] tracking-[-0.045em] text-foreground sm:text-5xl">
-                  The portfolio comes from operating, not brainstorming.
-                </h2>
-              </div>
-              <div>
-                <p className="max-w-3xl text-lg leading-8 text-muted-foreground">
-                  Perpetual Core’s systems are shaped inside the wider IHA and
-                  Uplift ecosystem: workforce programs, education, multi-entity
-                  operations, field programs, proposals, media, people
-                  coordination, and leadership review. We publish verified
-                  constraints and current availability—not invented customer
-                  outcomes.
+            <div className="mt-8 flex flex-col gap-4 rounded-[24px] bg-[#e9e5db] p-6 sm:flex-row sm:items-center sm:justify-between">
+              <div className="flex items-start gap-3">
+                <Check className="mt-1 h-5 w-5 shrink-0 text-[#168a72]" aria-hidden="true" />
+                <p className="max-w-3xl text-sm leading-6 text-[#53535c]">
+                  Built through real work in workforce development, education,
+                  proposals, people operations, multi-entity leadership, and
+                  media production.
                 </p>
-                <div className="mt-10 grid gap-px overflow-hidden rounded-lg border border-border bg-border sm:grid-cols-3">
-                  {[
-                    {
-                      icon: Building2,
-                      label: "Operations",
-                      body: "Real organizations and programs expose the workflow.",
-                    },
-                    {
-                      icon: GraduationCap,
-                      label: "Human capacity",
-                      body: "IHA and Uplift keep learning and workforce outcomes in view.",
-                    },
-                    {
-                      icon: ShieldCheck,
-                      label: "Governance",
-                      body: "Consent, provenance, review, and authority shape the product.",
-                    },
-                  ].map((item) => (
-                    <div key={item.label} className="bg-white p-6">
-                      <item.icon className="h-5 w-5 text-primary" aria-hidden="true" />
-                      <h3 className="mt-5 font-semibold text-foreground">{item.label}</h3>
-                      <p className="mt-2 text-sm leading-6 text-muted-foreground">
-                        {item.body}
-                      </p>
-                    </div>
-                  ))}
-                </div>
               </div>
+              <span className="shrink-0 text-xs font-semibold text-[#65656d]">
+                Operator-built, not hypothetical
+              </span>
             </div>
           </div>
         </section>
 
-        <section className="relative overflow-hidden border-b border-white/10 bg-[#070914] py-20 text-white sm:py-28">
-          <div className="signal-grid absolute inset-0 opacity-35" aria-hidden="true" />
-          <div className="relative container mx-auto px-6 sm:px-8">
-            <div className="grid gap-10 lg:grid-cols-[0.75fr_1.25fr] lg:gap-20">
-              <div>
-                <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-[#6dd7ff]">
-                  The company flywheel
-                </p>
-                <h2 className="mt-5 text-4xl font-semibold leading-[1.04] tracking-[-0.045em] text-white sm:text-5xl">
-                  The work compounds into products, ventures, and human capacity.
-                </h2>
-              </div>
-              <div className="divide-y divide-white/12 border-y border-white/12">
-                {FLYWHEEL.map((item) => (
-                  <div
-                    key={item.index}
-                    className="grid grid-cols-[48px_110px_1fr] gap-4 py-5 sm:grid-cols-[64px_150px_1fr] sm:gap-6"
-                  >
-                    <span className="font-mono text-[10px] tracking-[0.18em] text-[#6dd7ff]">
-                      {item.index}
-                    </span>
-                    <h3 className="font-semibold text-white">{item.title}</h3>
-                    <p className="text-sm leading-6 text-white/52">{item.body}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <div className="mt-12 grid gap-px overflow-hidden rounded-lg border border-white/12 bg-white/12 sm:grid-cols-3">
-              <Link
-                href="/studio"
-                className="group bg-white/[0.045] p-6 transition-colors hover:bg-white/[0.08]"
-              >
-                <Building2 className="h-5 w-5 text-[#26f2a8]" aria-hidden="true" />
-                <h3 className="mt-5 font-semibold text-white">Studio</h3>
-                <p className="mt-2 text-sm leading-6 text-white/52">
-                  Installs and adapts the system.
-                </p>
-                <span className="mt-5 inline-flex items-center text-sm text-white">
-                  Explore the studio <ArrowRight className="ml-2 h-4 w-4" />
-                </span>
-              </Link>
-              <Link
-                href="/fund"
-                className="group bg-white/[0.045] p-6 transition-colors hover:bg-white/[0.08]"
-              >
-                <CircleDollarSign className="h-5 w-5 text-[#6dd7ff]" aria-hidden="true" />
-                <h3 className="mt-5 font-semibold text-white">DeepFutures</h3>
-                <p className="mt-2 text-sm leading-6 text-white/52">
-                  Scales venture-shaped patterns.
-                </p>
-                <span className="mt-5 inline-flex items-center text-sm text-white">
-                  See the fund <ArrowRight className="ml-2 h-4 w-4" />
-                </span>
-              </Link>
-              <a
-                href="https://theiha.org"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="group bg-white/[0.045] p-6 transition-colors hover:bg-white/[0.08]"
-              >
-                <GraduationCap className="h-5 w-5 text-[#b99cff]" aria-hidden="true" />
-                <h3 className="mt-5 font-semibold text-white">IHA</h3>
-                <p className="mt-2 text-sm leading-6 text-white/52">
-                  Expands learning, workforce, and founder capacity.
-                </p>
-                <span className="mt-5 inline-flex items-center text-sm text-white">
-                  Visit the Institute
-                  <ArrowUpRight className="ml-2 h-4 w-4" />
-                </span>
-              </a>
-            </div>
-          </div>
-        </section>
-
-        <section className="py-20 sm:py-28">
-          <div className="container mx-auto px-6 text-center sm:px-8">
-            <p className="eyebrow text-primary">Start with the real company</p>
-            <h2 className="mx-auto mt-5 max-w-5xl text-4xl font-semibold leading-[1.02] tracking-[-0.05em] text-foreground sm:text-6xl lg:text-7xl">
-              Where does work lose time, context, customers, or follow-through?
+        <section className="relative overflow-hidden bg-[#5548d9] py-16 text-white sm:py-24">
+          <div
+            className="absolute inset-0 bg-[radial-gradient(circle_at_80%_10%,rgba(255,255,255,0.20),transparent_28%),radial-gradient(circle_at_10%_90%,rgba(88,227,188,0.25),transparent_30%)]"
+            aria-hidden="true"
+          />
+          <div className="relative mx-auto max-w-[1000px] px-6 text-center sm:px-8">
+            <Workflow className="mx-auto h-7 w-7 text-[#d7d2ff]" aria-hidden="true" />
+            <h2 className="mt-6 text-4xl font-semibold leading-[1.04] tracking-[-0.045em] sm:text-5xl lg:text-6xl">
+              Where is work losing time, context, or follow-through?
             </h2>
-            <p className="mx-auto mt-6 max-w-2xl text-lg leading-8 text-muted-foreground">
-              We will map the first high-leverage workflow and show which product,
-              capability, or company system should come first.
+            <p className="mx-auto mt-5 max-w-2xl text-[17px] leading-8 text-white/82">
+              Show us the workflow. We will identify the smallest useful starting point.
             </p>
-            <div className="mt-9 flex flex-col items-center justify-center gap-3 sm:flex-row">
-              <Button asChild size="lg" className="min-h-12 px-7 text-base">
+            <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row">
+              <Button
+                asChild
+                size="lg"
+                className="min-h-12 rounded-full bg-white px-6 text-base text-[#30296f] hover:bg-[#f2f0ff]"
+              >
                 <Link href="/contact-sales">
-                  Map my company <ArrowRight className="ml-2 h-4 w-4" />
+                  Map my first workflow <ArrowRight className="ml-2 h-4 w-4" />
                 </Link>
               </Button>
-              <Button asChild size="lg" variant="outline" className="min-h-12 px-7 text-base">
-                <Link href="/marketplace">Explore the marketplace</Link>
+              <Button
+                asChild
+                size="lg"
+                variant="outline"
+                className="min-h-12 rounded-full border-white/28 bg-transparent px-6 text-base text-white hover:bg-white/10 hover:text-white"
+              >
+                <Link href="/marketplace">Browse products</Link>
               </Button>
             </div>
           </div>

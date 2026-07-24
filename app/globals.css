@@ -301,3 +301,26 @@
   line-height: 1;
   font-weight: 400;
 }
+
+/* Perpetual Core public V3 — warm, product-led marketing surface. */
+.pc-v3 {
+  color-scheme: light;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+}
+
+.pc-v3 ::selection {
+  background: rgba(85, 72, 217, 0.2);
+  color: #17171b;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pc-v3 *,
+  .pc-v3 *::before,
+  .pc-v3 *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

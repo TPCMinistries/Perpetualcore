@@ -38,32 +38,35 @@ export function PublicMobileNav() {
         <Button
           variant="ghost"
           size="icon"
-          className="min-h-10 min-w-10 rounded-sm border border-border/70 text-muted-foreground shadow-none hover:bg-accent hover:text-foreground"
+          className="min-h-10 min-w-10 rounded-full border border-black/10 bg-white text-[#5f5f68] shadow-none hover:bg-[#f1f0ec] hover:text-[#202024]"
         >
           <Menu className="h-4 w-4" aria-hidden="true" />
           <span className="sr-only">Open navigation menu</span>
         </Button>
       </SheetTrigger>
-      <SheetContent side="left" className="w-[min(88vw,340px)] bg-background p-0">
+      <SheetContent side="left" className="w-[min(88vw,340px)] bg-[#fbfaf7] p-0">
         <SheetTitle className="sr-only">Perpetual Core navigation</SheetTitle>
         <SheetDescription className="sr-only">
           Navigate the platform, marketplace, studio, and company.
         </SheetDescription>
 
         <div className="flex h-full flex-col">
-          <div className="border-b border-border/70 px-6 py-6">
+          <div className="border-b border-black/8 px-6 py-6">
             <Link
               href="/"
               className="flex min-h-11 items-center gap-2.5"
               onClick={close}
             >
-              <span aria-hidden="true" className="h-3.5 w-3.5 bg-primary" />
-              <span className="text-[15px] font-semibold tracking-tight text-foreground">
+              <span
+                aria-hidden="true"
+                className="h-4 w-4 rounded-[5px] bg-[linear-gradient(135deg,#5548d9,#806dff_55%,#64d6b0)]"
+              />
+              <span className="text-[15px] font-semibold tracking-[-0.02em] text-[#202024]">
                 Perpetual Core
               </span>
             </Link>
-            <p className="mt-3 text-xs leading-5 text-muted-foreground">
-              Governed intelligence, specialized systems, and an implementation studio.
+            <p className="mt-3 text-xs leading-5 text-[#6a6a73]">
+              Specialized AI products that connect through Sage.
             </p>
           </div>
 
@@ -74,20 +77,20 @@ export function PublicMobileNav() {
                   key={link.href}
                   href={link.href}
                   onClick={close}
-                  className="block min-h-11 rounded-md px-3 py-3 transition-colors hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                  className="block min-h-11 rounded-xl px-3 py-3 transition-colors hover:bg-[#f0eee8] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#5548d9]"
                 >
-                  <span className="block text-sm font-semibold text-foreground">
+                  <span className="block text-sm font-semibold text-[#26262b]">
                     {link.label}
                   </span>
-                  <span className="mt-1 block text-xs text-muted-foreground">
+                  <span className="mt-1 block text-xs text-[#707079]">
                     {link.description}
                   </span>
                 </Link>
               ))}
             </div>
 
-            <div className="my-5 border-t border-border/70" />
-            <p className="px-3 font-mono text-[9px] uppercase tracking-[0.18em] text-muted-foreground">
+            <div className="my-5 border-t border-black/8" />
+            <p className="px-3 text-xs font-semibold uppercase tracking-[0.12em] text-[#777780]">
               More from the company
             </p>
             <div className="mt-2 space-y-0.5">
@@ -96,7 +99,7 @@ export function PublicMobileNav() {
                   key={link.href}
                   href={link.href}
                   onClick={close}
-                  className="flex min-h-11 items-center rounded-md px-3 text-sm text-muted-foreground transition-colors hover:bg-accent hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                  className="flex min-h-11 items-center rounded-xl px-3 text-sm text-[#66666f] transition-colors hover:bg-[#f0eee8] hover:text-[#26262b] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#5548d9]"
                 >
                   {link.label}
                 </Link>
@@ -104,17 +107,20 @@ export function PublicMobileNav() {
               <Link
                 href="/login"
                 onClick={close}
-                className="flex min-h-11 items-center rounded-md px-3 text-sm font-medium text-foreground transition-colors hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                className="flex min-h-11 items-center rounded-xl px-3 text-sm font-medium text-[#26262b] transition-colors hover:bg-[#f0eee8] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#5548d9]"
               >
                 Sign in
               </Link>
             </div>
           </nav>
 
-          <div className="border-t border-border/70 p-4">
-            <Button asChild className="min-h-11 w-full">
+          <div className="border-t border-black/8 p-4">
+            <Button
+              asChild
+              className="min-h-11 w-full rounded-full bg-[#5548d9] text-white hover:bg-[#4338b6]"
+            >
               <Link href="/contact-sales" onClick={close}>
-                Map my company
+                Map a workflow
               </Link>
             </Button>
           </div>

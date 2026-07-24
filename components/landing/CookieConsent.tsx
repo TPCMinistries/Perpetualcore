@@ -81,16 +81,16 @@ export function CookieConsent() {
       role="dialog"
       aria-labelledby="cookie-consent-heading"
       aria-describedby="cookie-consent-desc"
-      className="fixed bottom-4 left-1/2 z-[100] w-[calc(100%-2rem)] max-w-5xl -translate-x-1/2 rounded-[8px] border border-border bg-card p-4 shadow-xl sm:flex sm:items-center sm:gap-6"
+      className="fixed bottom-3 left-1/2 z-[100] w-[calc(100%-1.5rem)] max-w-4xl -translate-x-1/2 rounded-[20px] border border-black/10 bg-white/94 p-3.5 shadow-[0_22px_70px_rgba(23,23,27,0.18)] backdrop-blur-xl sm:flex sm:items-center sm:gap-5 sm:px-4"
     >
       <div className="flex-1">
         <p
           id="cookie-consent-heading"
-          className="font-mono text-[9px] uppercase tracking-[0.2em] text-muted-foreground"
+          className="text-xs font-semibold text-[#35353b]"
         >
           Cookie choice
         </p>
-        <p id="cookie-consent-desc" className="mt-2 text-xs leading-5 text-foreground sm:mt-1">
+        <p id="cookie-consent-desc" className="mt-1 text-xs leading-5 text-[#62626c]">
           We use limited first-party analytics cookies. No advertising pixels and
           no data sold.{" "}
           <Link href="/cookies" className="underline underline-offset-2 hover:no-underline">
@@ -103,14 +103,14 @@ export function CookieConsent() {
         <button
           type="button"
           onClick={handleAccept}
-          className="min-h-11 cursor-pointer rounded-[6px] bg-foreground px-4 text-xs font-medium text-background transition hover:bg-foreground/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+          className="min-h-11 cursor-pointer rounded-full bg-[#17171b] px-4 text-xs font-semibold text-white transition hover:bg-[#34343c] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#5548d9] focus-visible:ring-offset-2"
         >
           Accept
         </button>
         <button
           type="button"
           onClick={handleReject}
-          className="min-h-11 cursor-pointer rounded-[6px] border border-border bg-background px-4 text-xs font-medium text-foreground transition hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+          className="min-h-11 cursor-pointer rounded-full border border-black/10 bg-white px-4 text-xs font-semibold text-[#393940] transition hover:bg-[#f1f0ec] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#5548d9] focus-visible:ring-offset-2"
         >
           Reject non-essential
         </button>

@@ -48,7 +48,7 @@ export const viewport: Viewport = {
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || "https://perpetualcore.com"),
   title: {
-    default: "Perpetual Core — The intelligence layer for companies",
+    default: "Perpetual Core — AI systems that work as one company",
     template: "%s | Perpetual Core",
   },
   description: "Perpetual Core is an operator-built AI systems company: a governed intelligence platform, a marketplace of specialized products and capabilities, and a studio that installs them into real organizations.",
@@ -80,7 +80,7 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     siteName: "Perpetual Core",
-    title: "Perpetual Core — The intelligence layer for companies",
+    title: "Perpetual Core — AI systems that work as one company",
     description: "Governed company context, specialized AI systems, and human-approved workflows. Start with one capability and expand into a company-wide operating system.",
     locale: "en_US",
     images: [
@@ -94,7 +94,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Perpetual Core — The intelligence layer for companies",
+    title: "Perpetual Core — AI systems that work as one company",
     description: "A governed intelligence platform, capability marketplace, and implementation studio.",
     images: ["/og-image.png"],
   },
