@@ -92,6 +92,30 @@
     --status-pilot: 38 78% 56%;
     --status-invite: 220 9% 60%;
   }
+
+  /* Public company pages intentionally keep a high-contrast light editorial
+     canvas while their engine/marketplace sections opt into explicit dark
+     surfaces. This prevents system dark mode from producing light text on the
+     deliberately light marketplace and company sections. */
+  .public-light {
+    --background: 0 0% 100%;
+    --foreground: 220 13% 11%;
+    --card: 0 0% 100%;
+    --card-foreground: 220 13% 11%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 220 13% 11%;
+    --primary: 247 100% 62%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 226 34% 96%;
+    --secondary-foreground: 220 13% 11%;
+    --muted: 226 34% 96%;
+    --muted-foreground: 220 11% 42%;
+    --accent: 247 100% 97%;
+    --accent-foreground: 220 13% 11%;
+    --border: 220 13% 91%;
+    --input: 220 13% 91%;
+    --ring: 247 100% 62%;
+  }
 }
 
 @layer base {

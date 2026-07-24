@@ -81,35 +81,36 @@ export function CookieConsent() {
       role="dialog"
       aria-labelledby="cookie-consent-heading"
       aria-describedby="cookie-consent-desc"
-      className="fixed bottom-4 left-4 right-4 sm:left-6 sm:right-auto sm:max-w-md z-[100] border border-border bg-card shadow-xl rounded-[8px] p-5"
+      className="fixed bottom-4 left-1/2 z-[100] w-[calc(100%-2rem)] max-w-5xl -translate-x-1/2 rounded-[8px] border border-border bg-card p-4 shadow-xl sm:flex sm:items-center sm:gap-6"
     >
-      <p
-        id="cookie-consent-heading"
-        className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground mb-3"
-      >
-        Cookies
-      </p>
-      <p id="cookie-consent-desc" className="text-sm text-foreground leading-[1.6] mb-4">
-        We use a small set of first-party cookies to understand which marketing
-        channels send the people we should pay attention to. No third-party ad
-        pixels. No data sold.{" "}
-        <Link href="/cookies" className="underline hover:no-underline">
-          Read the cookie policy
-        </Link>
-        .
-      </p>
-      <div className="flex flex-wrap gap-2">
+      <div className="flex-1">
+        <p
+          id="cookie-consent-heading"
+          className="font-mono text-[9px] uppercase tracking-[0.2em] text-muted-foreground"
+        >
+          Cookie choice
+        </p>
+        <p id="cookie-consent-desc" className="mt-2 text-xs leading-5 text-foreground sm:mt-1">
+          We use limited first-party analytics cookies. No advertising pixels and
+          no data sold.{" "}
+          <Link href="/cookies" className="underline underline-offset-2 hover:no-underline">
+            Read the policy
+          </Link>
+          .
+        </p>
+      </div>
+      <div className="mt-3 flex shrink-0 flex-wrap gap-2 sm:mt-0">
         <button
           type="button"
           onClick={handleAccept}
-          className="h-9 px-4 bg-foreground text-background text-xs font-medium hover:bg-foreground/90 transition rounded-[6px]"
+          className="min-h-11 cursor-pointer rounded-[6px] bg-foreground px-4 text-xs font-medium text-background transition hover:bg-foreground/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
         >
           Accept
         </button>
         <button
           type="button"
           onClick={handleReject}
-          className="h-9 px-4 bg-background border border-border text-foreground text-xs font-medium hover:bg-card transition rounded-[6px]"
+          className="min-h-11 cursor-pointer rounded-[6px] border border-border bg-background px-4 text-xs font-medium text-foreground transition hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
         >
           Reject non-essential
         </button>
