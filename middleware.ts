@@ -174,6 +174,14 @@ export async function middleware(request: NextRequest) {
     return publicResponse;
   }
 
+  // Machine-to-machine Company Graph receipts are authenticated inside the
+  // route with a dedicated timing-safe bearer token. Skip session refresh and
+  // the shared Redis limiter so an exhausted public API quota cannot interrupt
+  // this bounded internal health signal.
+  if (pathname === '/api/internal/company-graph-readiness') {
+    return NextResponse.next();
+  }
+
   let response = NextResponse.next({
     request: {
       headers: request.headers,
