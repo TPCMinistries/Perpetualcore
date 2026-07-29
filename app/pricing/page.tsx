@@ -12,7 +12,6 @@ import { ArrowRight, Check, Layers, ShieldCheck, Workflow } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Navbar } from "@/components/landing/Navbar";
 import { Footer } from "@/components/landing/Footer";
-import { PageViewTracker } from "@/components/analytics/PageViewTracker";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { faqSchema } from "@/lib/seo/structured-data";
 
@@ -203,7 +202,6 @@ export default function PricingPage() {
   return (
     <div className="min-h-screen bg-background">
       <JsonLd data={faqSchema(PRICING_FAQ)} />
-      <PageViewTracker />
       <Navbar />
 
       <section className="container mx-auto px-6 sm:px-8 py-16 sm:py-24">

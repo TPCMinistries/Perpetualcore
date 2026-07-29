@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import { getUser, signOut } from "@/lib/auth/actions";
 import { ConfirmProvider } from "@/components/ui/confirm-dialog";
+import { QueryProvider } from "@/lib/providers/query-provider";
 
 const primaryNav = [
   { label: "Operating", href: "/dashboard" },
@@ -29,6 +30,7 @@ export default async function DashboardLayout({
   }
 
   return (
+    <QueryProvider>
     <div className="min-h-screen bg-[#f7f7fb] text-slate-950">
       <header className="sticky top-0 z-30 border-b border-slate-200 bg-white/95 backdrop-blur">
         <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
@@ -74,5 +76,6 @@ export default async function DashboardLayout({
         </main>
       </ConfirmProvider>
     </div>
+    </QueryProvider>
   );
 }

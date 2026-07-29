@@ -218,11 +218,26 @@ export function MarketplaceExplorer() {
                 target="_blank"
                 rel="noopener noreferrer"
                 className={className}
+                data-pc-event="marketplace_product_open"
+                data-product={item.name}
+                data-placement="marketplace-explorer"
+                data-status={MARKETPLACE_STATUS_LABELS[item.status]}
+                data-delivery={item.delivery}
+                data-destination-host={new URL(item.href).host}
               >
                 {content}
               </a>
             ) : (
-              <Link key={item.slug} href={item.href} className={className}>
+              <Link
+                key={item.slug}
+                href={item.href}
+                className={className}
+                data-pc-event="marketplace_product_open"
+                data-product={item.name}
+                data-placement="marketplace-explorer"
+                data-status={MARKETPLACE_STATUS_LABELS[item.status]}
+                data-delivery={item.delivery}
+              >
                 {content}
               </Link>
             );

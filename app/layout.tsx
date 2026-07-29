@@ -2,13 +2,12 @@ import type { Metadata, Viewport } from "next";
 import { Inter, JetBrains_Mono, Instrument_Serif } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
-import { QueryProvider } from "@/lib/providers/query-provider";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { organizationSchema, websiteSchema } from "@/lib/seo/structured-data";
 import { CookieConsent } from "@/components/landing/CookieConsent";
-import { CrispChat } from "@/components/landing/CrispChat";
-import { ExitIntent } from "@/components/landing/ExitIntent";
-import { ServiceWorkerReset } from "@/components/system/ServiceWorkerReset";
+import { DeferredPublicRuntime } from "@/components/landing/DeferredPublicRuntime";
+import { PublicWebVitals } from "@/components/analytics/PublicWebVitals";
+import { PublicConversionTracker } from "@/components/analytics/PublicConversionTracker";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -29,6 +28,7 @@ const instrumentSerif = Instrument_Serif({
   subsets: ["latin"],
   variable: "--font-display",
   display: "swap",
+  preload: false,
   style: ["normal", "italic"],
   weight: ["400"],
 });
@@ -127,20 +127,18 @@ export default function RootLayout({
         />
       </head>
       <body className={inter.className}>
-        <QueryProvider>
-          <ThemeProvider
-            attribute="class"
-            defaultTheme="system"
-            enableSystem
-            disableTransitionOnChange
-          >
-            {children}
-          </ThemeProvider>
-        </QueryProvider>
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
+        >
+          {children}
+        </ThemeProvider>
         <CookieConsent />
-        <CrispChat />
-        <ExitIntent />
-        <ServiceWorkerReset />
+        <DeferredPublicRuntime />
+        <PublicConversionTracker />
+        <PublicWebVitals />
       </body>
     </html>
   );

@@ -19,42 +19,48 @@ export const metadata = {
     "Browse Perpetual Core products for opportunity, operations, intelligence, people, knowledge, and media—with current availability clearly labeled.",
 };
 
+const AVAILABLE_NOW = MARKETPLACE_ITEMS.filter((item) =>
+  ["sage", "rfp-engine", "sentinel", "janice"].includes(item.slug)
+);
+
 export default function MarketplacePage() {
   return (
-    <div className="pc-v3 public-light min-h-screen bg-[#f7f6f2] text-[#17171b]">
+    <div className="pc-v4 min-h-screen bg-[#050507] text-white">
       <SkipLink />
-      <Navbar />
+      <Navbar tone="dark" />
 
       <main id="main-content">
-        <section className="relative overflow-hidden border-b border-black/8">
+        <section className="relative overflow-hidden border-b border-white/10">
+          <div className="pc-v4-grid absolute inset-0 opacity-40" aria-hidden="true" />
           <div
-            className="absolute inset-0 bg-[radial-gradient(circle_at_10%_0%,rgba(115,96,255,0.17),transparent_30%),radial-gradient(circle_at_88%_8%,rgba(255,107,74,0.13),transparent_28%),linear-gradient(180deg,#fbfaf7_0%,#f2eff8_100%)]"
+            className="absolute inset-0 bg-[radial-gradient(circle_at_16%_0%,rgba(84,230,177,0.11),transparent_28%),radial-gradient(circle_at_88%_22%,rgba(109,91,255,0.24),transparent_34%),linear-gradient(180deg,transparent_50%,#050507_100%)]"
             aria-hidden="true"
           />
-          <div className="relative mx-auto max-w-[1280px] px-6 py-16 sm:px-8 sm:py-20">
+          <div className="relative mx-auto max-w-[1440px] px-5 py-20 sm:px-8 sm:py-28">
             <div className="grid gap-8 lg:grid-cols-[1fr_0.72fr] lg:items-end lg:gap-16">
               <div>
-                <span className="inline-flex items-center gap-2 rounded-full border border-[#5548d9]/16 bg-white/70 px-3 py-1.5 text-xs font-semibold text-[#4f46c8]">
+                <span className="inline-flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.16em] text-[#54e6b1]">
                   <Sparkles className="h-3.5 w-3.5" aria-hidden="true" />
-                  Perpetual Core marketplace
+                  Perpetual Core / capability network
                 </span>
-                <h1 className="mt-6 max-w-[780px] text-[44px] font-semibold leading-[1.02] tracking-[-0.05em] text-[#17171b] sm:text-[58px] lg:text-[66px]">
-                  Find the system for the job in front of you.
+                <h1 className="mt-7 max-w-[880px] text-[50px] font-semibold leading-[0.94] tracking-[-0.06em] text-white sm:text-[70px] lg:text-[84px]">
+                  Start with one job.
+                  <span className="block text-white/42">Expand into a system.</span>
                 </h1>
               </div>
               <div>
-                <p className="text-[17px] leading-8 text-[#5d5d67]">
-                  Browse products for opportunities, operations, intelligence,
-                  people, knowledge, and media. Every listing shows what is
-                  available now and how it is delivered.
+                <p className="text-[17px] leading-8 text-white/66">
+                  Deploy a specialized capability now, then connect approved
+                  context, workflows, and outcome evidence through Sage. Every
+                  listing states its real availability and delivery model.
                 </p>
-                <div className="mt-5 flex flex-wrap gap-x-5 gap-y-2 text-sm text-[#66666f]">
+                <div className="mt-6 flex flex-wrap gap-x-5 gap-y-2 text-sm text-white/60">
                   <span className="inline-flex items-center gap-2">
-                    <Check className="h-4 w-4 text-[#168a72]" aria-hidden="true" />
+                    <Check className="h-4 w-4 text-[#54e6b1]" aria-hidden="true" />
                     {MARKETPLACE_ITEMS.length} current systems
                   </span>
                   <span className="inline-flex items-center gap-2">
-                    <ShieldCheck className="h-4 w-4 text-[#5548d9]" aria-hidden="true" />
+                    <ShieldCheck className="h-4 w-4 text-[#a79cff]" aria-hidden="true" />
                     Availability shown honestly
                   </span>
                 </div>
@@ -63,7 +69,57 @@ export default function MarketplacePage() {
           </div>
         </section>
 
-        <section className="pb-16 sm:pb-24">
+        <section className="border-b border-white/10 bg-[#08080b] py-16 sm:py-20">
+          <div className="mx-auto max-w-[1440px] px-5 sm:px-8">
+            <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
+              <div>
+                <p className="font-mono text-[11px] uppercase tracking-[0.16em] text-[#54e6b1]">
+                  Available now
+                </p>
+                <h2 className="mt-4 text-3xl font-semibold tracking-[-0.045em] sm:text-5xl">
+                  The operating core.
+                </h2>
+              </div>
+              <p className="max-w-xl text-sm leading-6 text-white/54">
+                Four entry points spanning company context, opportunity,
+                diligence, and people operations.
+              </p>
+            </div>
+            <div className="mt-10 grid gap-px border border-white/10 bg-white/10 md:grid-cols-2 xl:grid-cols-4">
+              {AVAILABLE_NOW.map((item, index) => (
+                <Link
+                  key={item.slug}
+                  href={item.href}
+                  className="group flex min-h-[260px] flex-col bg-[#0b0b0f] p-7 transition hover:bg-[#111119] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8b7cff]"
+                  data-pc-event="marketplace_product_open"
+                  data-product={item.name}
+                  data-placement="available-now"
+                  data-status={item.status}
+                  data-delivery={item.delivery}
+                >
+                  <div className="flex items-center justify-between">
+                    <span className="font-mono text-[10px] text-white/34">
+                      0{index + 1}
+                    </span>
+                    <span className="font-mono text-[10px] uppercase tracking-[0.12em] text-[#54e6b1]">
+                      {item.delivery}
+                    </span>
+                  </div>
+                  <h3 className="mt-auto pt-16 text-2xl font-semibold tracking-[-0.04em]">
+                    {item.name}
+                  </h3>
+                  <p className="mt-3 text-sm leading-6 text-white/58">{item.headline}</p>
+                  <span className="mt-6 inline-flex items-center text-sm font-semibold">
+                    Inspect system
+                    <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
+                  </span>
+                </Link>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        <section className="public-light bg-[#f7f6f2] pb-16 text-[#17171b] sm:pb-24">
           <div className="mx-auto max-w-[1280px] px-6 sm:px-8">
             <MarketplaceExplorer />
           </div>
@@ -127,7 +183,7 @@ export default function MarketplacePage() {
         </section>
       </main>
 
-      <Footer />
+      <Footer tone="dark" />
     </div>
   );
 }

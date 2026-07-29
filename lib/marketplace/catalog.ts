@@ -85,9 +85,8 @@ export const MARKETPLACE_ITEMS: ReadonlyArray<MarketplaceItem> = [
     headline: "A context-aware partner for operators carrying more than one company.",
     description:
       "Sage holds approved context across voice, web, and messaging, then helps an operator think, plan, and coordinate without starting over every morning.",
-    status: "live",
-    href: "https://sage.perpetualcore.com",
-    external: true,
+    status: "private",
+    href: "/products/sage",
     categoryIds: ["run-coordinate", "know-decide"],
     capabilities: ["Ambient context", "Voice", "Planning", "Company graph"],
     buyer: "Founders and multi-entity operators",
@@ -100,7 +99,7 @@ export const MARKETPLACE_ITEMS: ReadonlyArray<MarketplaceItem> = [
     headline: "The place teams turn AI capability into repeatable flows.",
     description:
       "Projects hold Flows, and Flows coordinate specialized products and agents for staff, interns, partners, and clients.",
-    status: "live",
+    status: "pilot",
     href: "https://atelier.perpetualcore.com",
     external: true,
     categoryIds: ["run-coordinate", "create-distribute"],
@@ -173,8 +172,7 @@ export const MARKETPLACE_ITEMS: ReadonlyArray<MarketplaceItem> = [
     description:
       "A governed research surface for attorneys, investigators, journalists, and operators working beyond the limits of commodity background checks.",
     status: "live",
-    href: "https://sentinel.perpetualcore.com",
-    external: true,
+    href: "/products/sentinel",
     categoryIds: ["know-decide"],
     capabilities: ["Investigations", "Source trails", "Risk review", "Diligence"],
     buyer: "Legal, investigative, media, and operating teams",
@@ -202,8 +200,7 @@ export const MARKETPLACE_ITEMS: ReadonlyArray<MarketplaceItem> = [
     description:
       "Templated intake, signatures, per-person workspaces, and multi-tenant coordination for organizations where people operations are the operation.",
     status: "live",
-    href: "https://janice.perpetualcore.com",
-    external: true,
+    href: "/contact-sales?product=janice",
     categoryIds: ["hire-develop", "run-coordinate"],
     capabilities: ["Hiring", "Onboarding", "Intake", "People workspaces"],
     buyer: "Nonprofits, agencies, and people-heavy organizations",
