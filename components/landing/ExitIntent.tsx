@@ -36,6 +36,7 @@ export function ExitIntent() {
   const [firstName, setFirstName] = useState("");
   const [email, setEmail] = useState("");
   const [company, setCompany] = useState("");
+  const [marketingConsent, setMarketingConsent] = useState(false);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -92,7 +93,7 @@ export function ExitIntent() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!firstName.trim() || !email.trim()) return;
+    if (!firstName.trim() || !email.trim() || !marketingConsent) return;
     setState("submitting");
     try {
       const res = await fetch("/api/leads/capture", {
@@ -104,6 +105,7 @@ export function ExitIntent() {
           company: company.trim() || undefined,
           source: "ai_os_map_prompt",
           leadMagnet: "ai_os_map",
+          marketingConsent,
           metadata: {
             magnet: "ai-operating-system-map",
             path: window.location.pathname,
@@ -216,6 +218,16 @@ export function ExitIntent() {
                 autoComplete="organization"
                 className="w-full h-11 px-4 bg-background border border-border text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-foreground transition rounded-[6px]"
               />
+              <label className="flex cursor-pointer items-start gap-2 text-xs leading-5 text-muted-foreground">
+                <input
+                  type="checkbox"
+                  required
+                  checked={marketingConsent}
+                  onChange={(event) => setMarketingConsent(event.target.checked)}
+                  className="mt-0.5 h-4 w-4"
+                />
+                Email me the map and occasional operating notes. Unsubscribe any time.
+              </label>
               <button
                 type="submit"
                 disabled={state === "submitting"}

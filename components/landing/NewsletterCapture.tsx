@@ -12,6 +12,7 @@
 
 import { useState, type FormEvent } from "react";
 import { ArrowRight, Check } from "lucide-react";
+import { trackClientEvent } from "@/lib/analytics/track-event";
 
 type Variant = "inline" | "footer";
 
@@ -33,10 +34,11 @@ export function NewsletterCapture({
   const [firstName, setFirstName] = useState("");
   const [email, setEmail] = useState("");
   const [state, setState] = useState<SubmitState>("idle");
+  const [marketingConsent, setMarketingConsent] = useState(false);
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    if (!firstName.trim() || !email.trim()) return;
+    if (!firstName.trim() || !email.trim() || !marketingConsent) return;
     setState("submitting");
     try {
       const res = await fetch("/api/leads/capture", {
@@ -46,10 +48,15 @@ export function NewsletterCapture({
           firstName: firstName.trim(),
           email: email.trim().toLowerCase(),
           source,
+          marketingConsent,
           metadata: { variant },
         }),
       });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      trackClientEvent("cta_click", {
+        event_name: "newsletter_submit_success",
+        metadata: { surface: "public", placement: variant },
+      });
       setState("success");
     } catch (err) {
       console.error("Newsletter capture error:", err);
@@ -114,6 +121,16 @@ export function NewsletterCapture({
           {state === "submitting" ? "Sending…" : "Subscribe"}
           {state !== "submitting" && <ArrowRight className="ml-2 h-3.5 w-3.5" />}
         </button>
+        <label className="sm:col-span-3 flex cursor-pointer items-start gap-2 text-xs leading-5 text-muted-foreground">
+          <input
+            type="checkbox"
+            required
+            checked={marketingConsent}
+            onChange={(event) => setMarketingConsent(event.target.checked)}
+            className="mt-0.5 h-4 w-4"
+          />
+          Email me this resource and occasional Perpetual Core operating notes. I can unsubscribe any time.
+        </label>
         {state === "error" && (
           <p className="sm:col-span-3 text-xs text-red-500">
             Submit failed. Try again, or email lorenzo@perpetualcore.com.
@@ -178,6 +195,20 @@ export function NewsletterCapture({
       >
         {state === "submitting" ? "…" : "Subscribe"}
       </button>
+      <label
+        className={`col-span-2 flex cursor-pointer items-start gap-2 text-[11px] leading-4 ${
+          dark ? "text-white/54" : "text-muted-foreground"
+        }`}
+      >
+        <input
+          type="checkbox"
+          required
+          checked={marketingConsent}
+          onChange={(event) => setMarketingConsent(event.target.checked)}
+          className="mt-0.5 h-3.5 w-3.5"
+        />
+        Send me the resource and occasional operating notes. Unsubscribe any time.
+      </label>
       {state === "error" && (
         <p className="col-span-2 text-xs text-red-500">
           Submit failed. Try again.

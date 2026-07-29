@@ -28,6 +28,7 @@ import { JsonLd } from "@/components/seo/JsonLd";
 import { serviceSchema } from "@/lib/seo/structured-data";
 import { toast } from "sonner";
 import { SkipLink } from "@/components/ui/accessibility";
+import { trackClientEvent } from "@/lib/analytics/track-event";
 
 type SubmitState = "idle" | "submitting" | "success" | "error";
 
@@ -59,8 +60,8 @@ const COMPANY_SIZE_OPTIONS = [
 const WHAT_HAPPENS_NEXT = [
   {
     index: "01",
-    title: "Reply within one business day",
-    body: "A human on the team reads every submission. You get a real reply, not an autoresponder.",
+    title: "Target: reply within one business day",
+    body: "A human reviews every durably received submission. You get a real reply, not an automated qualification decision.",
   },
   {
     index: "02",
@@ -162,8 +163,25 @@ function ContactSalesForm() {
       if (!response.ok) {
         throw new Error("Failed to submit");
       }
+      const result: unknown = await response.json();
+      if (
+        !result ||
+        typeof result !== "object" ||
+        !("persisted" in result) ||
+        result.persisted !== true
+      ) {
+        throw new Error("Inquiry was not durably stored");
+      }
+      trackClientEvent("cta_click", {
+        event_name: "contact_sales_submit_success",
+        metadata: {
+          surface: "public",
+          placement: "contact-sales-form",
+          product: formData.product || "general",
+        },
+      });
       setSubmitState("success");
-      toast.success("Got it. We'll reply within one business day.");
+      toast.success("Got it. Your inquiry was safely received.");
     } catch (err) {
       console.error("Contact sales error:", err);
       setSubmitState("error");
@@ -182,7 +200,7 @@ function ContactSalesForm() {
           <p className="mt-6 text-base text-muted-foreground leading-[1.7]">
             A human on the team reads every submission. We'll reply to{" "}
             <span className="text-foreground font-medium">{formData.email}</span>{" "}
-            within one business day with a 30-minute scoping window.
+            after review. Our target is one business day.
           </p>
           <div className="mt-10 flex flex-wrap gap-3 justify-center">
             <Button asChild variant="outline" className="text-sm font-medium h-10 px-5 shadow-none rounded-[6px]">
@@ -372,6 +390,8 @@ function ContactSalesForm() {
                 disabled={submitState === "submitting"}
                 aria-describedby={submitState === "error" ? "contact-submit-error" : undefined}
                 className="text-sm font-medium h-11 px-6 shadow-none bg-foreground text-background hover:bg-foreground/90 rounded-[6px]"
+                data-pc-event="marketplace_contact_intent"
+                data-placement="contact-sales-form"
               >
                 {submitState === "submitting" ? "Sending…" : "Map My AI Operating System"}
                 {submitState !== "submitting" && (

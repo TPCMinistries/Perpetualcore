@@ -19,7 +19,6 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { SkipLink } from "@/components/ui/accessibility";
-import { PageViewTracker } from "@/components/analytics/PageViewTracker";
 import { ContentSlot } from "@/components/slots/ContentSlot";
 import { OperatingNetwork } from "@/components/landing/v4/OperatingNetwork";
 import { Navbar } from "@/components/landing/Navbar";
@@ -112,6 +111,8 @@ const OPERATED_SYSTEMS = [
     body: "Applied AI education with a course-scoped Sage learning experience.",
     href: "https://academy.humanadvancementinstitute.org",
     icon: GraduationCap,
+    evidence: "Production software is deployed and serving the learning environment.",
+    boundary: "Pilot, payment, completion, and learner-outcome proof are still being gathered.",
   },
   {
     name: "IHA Care",
@@ -119,6 +120,8 @@ const OPERATED_SYSTEMS = [
     body: "A synthetic-data care operations environment built for governed buyer evaluation.",
     href: "https://care.theiha.org",
     icon: HeartPulse,
+    evidence: "The live environment supports a bounded, synthetic-data buyer evaluation.",
+    boundary: "It is not presented as unrestricted PHI production or evidence of clinical outcomes.",
   },
   {
     name: "Uplift Workforce",
@@ -126,6 +129,8 @@ const OPERATED_SYSTEMS = [
     body: "A production workforce system supporting real healthcare training operations.",
     href: "https://workforce.upliftcommunities.com",
     icon: UsersRound,
+    evidence: "Production software supports active healthcare-training operations.",
+    boundary: "Placement, completion, and efficiency totals require separate verified receipts.",
   },
 ] as const;
 
@@ -168,7 +173,6 @@ function StatusMark({ label }: { label: string }) {
 export default function HomePage() {
   return (
     <div className="pc-v4 min-h-screen bg-[#050507] text-white">
-      <PageViewTracker />
       <SkipLink />
       <Navbar tone="dark" />
       <Suspense fallback={null}>
@@ -207,7 +211,11 @@ export default function HomePage() {
                   size="lg"
                   className="min-h-12 rounded-none bg-white px-6 text-sm font-semibold uppercase tracking-[0.06em] text-black hover:bg-[#54e6b1]"
                 >
-                  <Link href="/marketplace">
+                  <Link
+                    href="/marketplace"
+                    data-pc-event="home_primary_marketplace"
+                    data-placement="hero"
+                  >
                     Explore live systems <ArrowRight className="ml-2 h-4 w-4" />
                   </Link>
                 </Button>
@@ -275,6 +283,10 @@ export default function HomePage() {
                   href={system.href}
                   target="_blank"
                   rel="noopener noreferrer"
+                  data-pc-event="home_product_open"
+                  data-product={system.name}
+                  data-placement="verified-core-systems"
+                  data-status={system.status}
                   className={`group relative min-h-[310px] overflow-hidden bg-[#0b0b0f] p-7 transition-colors duration-300 hover:bg-[#101017] focus-visible:z-10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8b7cff] sm:p-9 ${system.span}`}
                 >
                   <div
@@ -423,6 +435,9 @@ export default function HomePage() {
                   href={system.href}
                   target="_blank"
                   rel="noopener noreferrer"
+                  data-pc-event="home_operated_system_open"
+                  data-product={system.name}
+                  data-placement="operated-systems"
                   className="group bg-[#09090d] p-7 transition hover:bg-[#0f0f15] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8b7cff] sm:p-9"
                 >
                   <div className="flex items-center justify-between">
@@ -434,6 +449,16 @@ export default function HomePage() {
                   </p>
                   <h3 className="mt-4 text-2xl font-semibold tracking-[-0.035em]">{system.name}</h3>
                   <p className="mt-3 text-sm leading-6 text-white/64">{system.body}</p>
+                  <div className="mt-5 space-y-2 border-t border-white/10 pt-4 text-xs leading-5">
+                    <p className="text-white/72">
+                      <span className="font-semibold text-[#54e6b1]">Evidence:</span>{" "}
+                      {system.evidence}
+                    </p>
+                    <p className="text-white/48">
+                      <span className="font-semibold text-white/62">Boundary:</span>{" "}
+                      {system.boundary}
+                    </p>
+                  </div>
                 </a>
               ))}
             </div>
@@ -459,6 +484,9 @@ export default function HomePage() {
                 <Link
                   key={item.number}
                   href={item.href}
+                  data-pc-event="home_engagement_open"
+                  data-placement="ways-into-network"
+                  data-product={item.title}
                   className="group flex min-h-[280px] flex-col bg-[#0a0a0e] p-7 transition hover:bg-[#111119] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8b7cff] sm:p-9"
                 >
                   <span className="font-mono text-[11px] text-white/56">{item.number}</span>
@@ -496,7 +524,11 @@ export default function HomePage() {
               size="lg"
               className="mt-9 min-h-12 rounded-none bg-white px-7 text-sm font-semibold uppercase tracking-[0.06em] text-black hover:bg-[#54e6b1]"
             >
-              <Link href="/contact-sales">
+              <Link
+                href="/contact-sales"
+                data-pc-event="home_primary_contact"
+                data-placement="closing-cta"
+              >
                 Design your AI operating system <ArrowRight className="ml-2 h-4 w-4" />
               </Link>
             </Button>
