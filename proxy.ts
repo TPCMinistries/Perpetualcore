@@ -126,7 +126,7 @@ function setRfpIntentCookie(response: NextResponse, request: NextRequest): void 
   });
 }
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const host = request.headers.get('host');
   const pathname = request.nextUrl.pathname;
   const markRfpIntent = shouldMarkRfpIntent(request) || isRfpHost(host);
@@ -194,10 +194,13 @@ export async function middleware(request: NextRequest) {
   }
 
   // Machine-to-machine Company Graph receipts are authenticated inside the
-  // route with a dedicated timing-safe bearer token. Skip session refresh and
-  // the shared Redis limiter so an exhausted public API quota cannot interrupt
-  // this bounded internal health signal.
-  if (pathname === '/api/internal/company-graph-readiness') {
+  // These routes perform their own server-side bearer authentication. Skip
+  // session refresh and the shared Redis limiter so an exhausted public API
+  // quota cannot interrupt bounded internal health signals.
+  if (
+    pathname === '/api/internal/company-graph-readiness'
+    || pathname === '/api/internal/operating-health'
+  ) {
     return NextResponse.next();
   }
 

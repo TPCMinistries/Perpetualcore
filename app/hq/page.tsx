@@ -31,6 +31,8 @@ import { ActionRunList } from './_components/ActionRunList';
 import { VerificationInbox } from './_components/VerificationInbox';
 import { DevelopmentSummary } from './_components/DevelopmentSummary';
 import { getHdiOperationalSummary } from '@/lib/hq/development-intelligence';
+import { extractOperatingHealthItems } from '@/lib/hq/operating-health';
+import { OperatingHealth } from './_components/OperatingHealth';
 
 function formatOutcomeValue(value: number, unit: string): string {
   if (unit === 'usd') {
@@ -75,6 +77,8 @@ export default async function HqPage() {
       (typeof source.metadata.note === 'string' ? source.metadata.note : null),
     localOnly: source.metadata.runtime === 'local',
   }));
+  const operatingHealth = extractOperatingHealthItems(operations.sources);
+  const generalSourceHealth = sourceHealth.filter((source) => !source.key.startsWith('operating_health:'));
 
   const seenMetrics = new Set<string>();
   const verifiedRunIds = new Set(operations.verifiedRunIds);
@@ -180,8 +184,12 @@ export default async function HqPage() {
         </div>
       </Section>
 
+      <Section id="cost-health" eyebrow="Control" title="Cost & runaway health">
+        <OperatingHealth items={operatingHealth} />
+      </Section>
+
       <Section id="sources" eyebrow="Observe" title="Source health">
-        <SourceHealth items={sourceHealth} />
+        <SourceHealth items={generalSourceHealth} />
       </Section>
 
       <Section id="outcomes" eyebrow="Verify" title="Measured outcomes">

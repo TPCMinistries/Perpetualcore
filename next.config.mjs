@@ -25,6 +25,13 @@ const nextConfig = {
     serverActions: {
       bodySizeLimit: '10mb',
     },
+    // This application has hundreds of routes. Keep compilation in a build
+    // worker and trade a small amount of build time for a lower memory peak.
+    // The previous custom Webpack callback disabled the worker automatically,
+    // which caused Vercel's 8 GB builder to be SIGKILLed.
+    webpackBuildWorker: true,
+    webpackMemoryOptimizations: true,
+    serverSourceMaps: false,
     // Enable optimized package imports for better tree-shaking
     optimizePackageImports: ['lucide-react', '@radix-ui/react-icons'],
   },
@@ -38,6 +45,7 @@ const nextConfig = {
   // Production optimizations
   compress: true,
   reactStrictMode: true,
+  productionBrowserSourceMaps: false,
 
   webpack(config) {
     config.ignoreWarnings = [
