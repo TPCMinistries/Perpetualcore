@@ -20,7 +20,7 @@ const PUBLIC_CTA_EVENTS = [
 ];
 
 function authorized(request: Request): boolean {
-  const expected = process.env.PERPETUAL_CORE_COMPANY_GRAPH_TOKEN;
+  const expected = process.env.PERPETUAL_CORE_COMPANY_GRAPH_TOKEN?.trim();
   const supplied = request.headers.get("authorization")?.replace(/^Bearer\s+/i, "");
   if (!expected || !supplied) return false;
 
