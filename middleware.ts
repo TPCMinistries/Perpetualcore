@@ -17,8 +17,9 @@ import {
 const PRODUCT_INTENT_COOKIE = 'pc_product_intent';
 const RFP_INTENT_MAX_AGE = 60 * 60 * 24; // 24 hours
 
-// Blanket API rate limiter — 200 requests per minute per IP
-// Individual routes can enforce stricter limits on top of this
+// Shared unauthenticated API rate limiter — 200 requests per minute per IP.
+// Authenticated product traffic uses route-level controls so normal dashboard
+// polling does not spend distributed Redis commands on every request.
 let apiRateLimiter: Ratelimit | null = null;
 try {
   if (process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN) {
@@ -29,7 +30,7 @@ try {
       }),
       limiter: Ratelimit.fixedWindow(200, '60 s'),
       prefix: 'mw:api',
-      analytics: true,
+      analytics: false,
     });
   }
 } catch {
@@ -174,6 +175,24 @@ export async function middleware(request: NextRequest) {
     return publicResponse;
   }
 
+  // The legacy Mac worker API was removed when Press moved to the Mac Mini
+  // private runtime. Return a stable terminal response before session refresh
+  // or Redis so stale workers cannot create a paid retry loop.
+  if (pathname === '/api/press/worker/jobs/claim') {
+    return NextResponse.json(
+      {
+        error: 'Press worker endpoint retired',
+        code: 'PRESS_WORKER_ENDPOINT_RETIRED',
+      },
+      {
+        status: 410,
+        headers: {
+          'Cache-Control': 'public, max-age=3600',
+        },
+      }
+    );
+  }
+
   // Machine-to-machine Company Graph receipts are authenticated inside the
   // route with a dedicated timing-safe bearer token. Skip session refresh and
   // the shared Redis limiter so an exhausted public API quota cannot interrupt
@@ -261,11 +280,13 @@ export async function middleware(request: NextRequest) {
   // immediately before looked signed-in.
   const { data: { user } } = await supabase.auth.getUser();
 
-  // Rate limit API routes (after session refresh so the route handler sees
-  // a valid cookie), then short-circuit before analytics + IP whitelist.
+  // Rate limit unauthenticated API routes (after session refresh so the route
+  // handler sees a valid cookie), then short-circuit before analytics + IP
+  // whitelist. Authenticated APIs use their route-level controls.
   if (request.nextUrl.pathname.startsWith('/api/')) {
     if (
       apiRateLimiter &&
+      !user &&
       !request.nextUrl.pathname.startsWith('/api/cron/') &&
       !request.nextUrl.pathname.startsWith('/api/webhooks/')
     ) {
