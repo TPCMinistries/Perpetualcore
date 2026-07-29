@@ -272,20 +272,30 @@ export async function middleware(request: NextRequest) {
       const ip = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim()
         || request.headers.get('x-real-ip')
         || 'unknown';
-      const result = await apiRateLimiter.limit(`mw:${ip}`);
-      if (!result.success) {
-        const reset = Math.ceil((result.reset - Date.now()) / 1000);
-        return NextResponse.json(
-          { error: 'Too many requests', retryAfter: reset },
-          {
-            status: 429,
-            headers: {
-              'Retry-After': reset.toString(),
-              'X-RateLimit-Limit': result.limit.toString(),
-              'X-RateLimit-Remaining': '0',
-            },
-          }
-        );
+      try {
+        const result = await apiRateLimiter.limit(`mw:${ip}`);
+        if (!result.success) {
+          const reset = Math.ceil((result.reset - Date.now()) / 1000);
+          return NextResponse.json(
+            { error: 'Too many requests', retryAfter: reset },
+            {
+              status: 429,
+              headers: {
+                'Retry-After': reset.toString(),
+                'X-RateLimit-Limit': result.limit.toString(),
+                'X-RateLimit-Remaining': '0',
+              },
+            }
+          );
+        }
+      } catch {
+        // Availability fallback only. Route handlers continue to apply their
+        // own validation and any tighter route-level controls.
+        console.warn(JSON.stringify({
+          level: 'warning',
+          message: 'Shared API rate limiter unavailable; route-level controls remain active',
+          route: request.nextUrl.pathname,
+        }));
       }
     }
     if (markRfpIntent) setRfpIntentCookie(response, request);
