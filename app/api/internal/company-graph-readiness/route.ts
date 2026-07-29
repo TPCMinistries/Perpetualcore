@@ -1,5 +1,9 @@
 import { timingSafeEqual } from "node:crypto";
 import { NextResponse } from "next/server";
+import {
+  summarizeOperatingHealth,
+  type OperatingHealthSourceRow,
+} from "@/lib/hq/operating-health";
 import { createAdminClient } from "@/lib/supabase/server";
 
 export const runtime = "nodejs";
@@ -83,6 +87,7 @@ export async function GET(request: Request) {
     signups,
     salesInquiries,
     demoRequests,
+    operatingHealthResult,
   ] = await Promise.all([
     count("analytics_events", (query) =>
       query.eq("event_type", "page_view").eq("event_name", "public_page_view")
@@ -93,7 +98,26 @@ export async function GET(request: Request) {
     count("analytics_events", (query) => query.eq("event_type", "signup")),
     count("sales_contacts"),
     count("enterprise_demo_requests"),
+    supabase
+      .from("hq_source_freshness")
+      .select("source_key, display_name, status, observed_at, expires_at, error_message, metadata")
+      .like("source_key", "operating_health:%"),
   ]);
+  if (operatingHealthResult.error) queryErrorCount += 1;
+  const operatingHealth = operatingHealthResult.error
+    ? {
+        status: "unknown" as const,
+        sourceCount: 0,
+        healthy: 0,
+        warning: 0,
+        critical: 0,
+        unknown: 0,
+        stale: 0,
+      }
+    : summarizeOperatingHealth(
+        (operatingHealthResult.data ?? []) as OperatingHealthSourceRow[],
+        checkedAt.toISOString(),
+      );
 
   const responseMs = Math.round(performance.now() - startedAt);
   const dbReachable = queryErrorCount < 5;
@@ -117,6 +141,7 @@ export async function GET(request: Request) {
         salesInquiries,
         demoRequests,
       },
+      operatingHealth,
     },
     { headers: { "Cache-Control": "no-store" } }
   );

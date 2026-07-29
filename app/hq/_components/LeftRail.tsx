@@ -5,6 +5,7 @@ const NAV = [
   { href: '#today', label: 'Today', icon: BoardIcon },
   { href: '#queue', label: 'Decide', icon: QueueIcon },
   { href: '#execution', label: 'Execute', icon: StrategyIcon },
+  { href: '#cost-health', label: 'Costs', icon: ComplianceIcon },
   { href: '#sources', label: 'Sources', icon: ComplianceIcon },
   { href: '#outcomes', label: 'Outcomes', icon: BoardIcon },
   { href: '#development', label: 'Develop', icon: StrategyIcon },
