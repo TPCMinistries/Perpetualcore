@@ -176,7 +176,7 @@ async function resolveSupersededQueueItems(
             decided_by = coalesce(decided_by, 'system:queue-reconciler'),
             snooze_until = null,
             execution_state = case
-              when execution_state in ('not_ready', 'ready') then 'cancelled'
+              when execution_state = 'ready' then 'cancelled'
               else execution_state
             end,
             updated_at = ${lit(now)}::timestamptz
