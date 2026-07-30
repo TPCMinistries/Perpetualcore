@@ -1,5 +1,5 @@
 import { getHqSnapshot } from '@/lib/hq/snapshot';
-import { getQueueItems } from '@/lib/hq/queue';
+import { getQueueItems, partitionQueueItems } from '@/lib/hq/queue';
 import { getSparkSeries } from '@/lib/hq/metrics';
 import { getHqOperationalStatus } from '@/lib/hq/operational-status';
 import {
@@ -58,6 +58,7 @@ export default async function HqPage() {
   const engineCards = buildEngineCards(engineCalls, pnlRows);
 
   const needsLorenzo = parseNeedsLorenzo(snapshot.strategistMemoMd);
+  const priorityQueue = partitionQueueItems(queueItems).priority;
   const complianceSoon = complianceDueSoon(snapshot.compliance);
   const marketingDirectives = parseMarketingDirectives(snapshot.strategistMemoMd);
   const memoHeadline = parseMemoHeadline(snapshot.strategistMemoMd);
@@ -120,7 +121,7 @@ export default async function HqPage() {
       <Section id="today" eyebrow="Today" title="What needs your attention">
         <TodayBrief
           headline={memoHeadline}
-          openDecisions={queueItems.length || needsLorenzo.length}
+          openDecisions={priorityQueue.length || needsLorenzo.length}
           compliance={complianceSoon}
           engines={engineCards}
         />
