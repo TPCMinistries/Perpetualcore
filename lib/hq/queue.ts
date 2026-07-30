@@ -99,6 +99,34 @@ function severityRank(s: string): number {
   return SEVERITY_RANK[s.toLowerCase()] ?? 3;
 }
 
+function queuePriority(item: QueueItem): number {
+  if (item.status === 'approved' || ['failed', 'blocked', 'running'].includes(item.executionState)) return 0;
+  if (item.source === 'operating_health') return 1;
+  if (item.source === 'strategist') return 2;
+  if (item.source === 'compliance' && severityRank(item.severity) <= 1) return 3;
+  if (item.source === 'handoff' && severityRank(item.severity) === 0) return 4;
+  return 5;
+}
+
+function compareQueueItems(a: QueueItem, b: QueueItem): number {
+  const priorityDiff = queuePriority(a) - queuePriority(b);
+  if (priorityDiff !== 0) return priorityDiff;
+  const rankDiff = severityRank(a.severity) - severityRank(b.severity);
+  if (rankDiff !== 0) return rankDiff;
+  return (b.lastSeen ?? '').localeCompare(a.lastSeen ?? '');
+}
+
+export function partitionQueueItems(
+  items: QueueItem[],
+  priorityLimit = 5,
+): { priority: QueueItem[]; background: QueueItem[] } {
+  const sorted = [...items].sort(compareQueueItems);
+  return {
+    priority: sorted.slice(0, priorityLimit),
+    background: sorted.slice(priorityLimit),
+  };
+}
+
 /**
  * Open (or lapsed-snooze) queue items, severity-first then most-recently-seen.
  * Never throws — the Queue section must render even before the first ops
@@ -118,11 +146,7 @@ export async function getQueueItems(): Promise<QueueItem[]> {
     if (error || !data) return [];
 
     const items = (data as unknown[]).map(toQueueItem).filter((i): i is QueueItem => i !== null);
-    return items.sort((a, b) => {
-      const rankDiff = severityRank(a.severity) - severityRank(b.severity);
-      if (rankDiff !== 0) return rankDiff;
-      return (b.lastSeen ?? '').localeCompare(a.lastSeen ?? '');
-    });
+    return items.sort(compareQueueItems);
   } catch {
     return [];
   }
