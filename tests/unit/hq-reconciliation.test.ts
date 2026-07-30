@@ -132,4 +132,61 @@ describe('HQ cloud reconciliation', () => {
     expect(result.dispatch.attempted).toBe(0);
     expect(result.warnings.join(' ')).toContain('execution actor');
   });
+
+  it('synchronizes operating-health exceptions before rolling up the queue', async () => {
+    const critical = {
+      source_key: 'operating_health:upstash.commands',
+      display_name: 'Upstash command budget',
+      status: 'fresh' as const,
+      observed_at: NOW,
+      expires_at: '2026-07-16T16:00:00.000Z',
+      error_message: null,
+      metadata: {
+        operatingHealth: true,
+        schemaVersion: 1,
+        provider: 'upstash',
+        summary: 'Quota exhausted.',
+        healthState: 'critical',
+        metrics: [{
+          key: 'commands',
+          label: 'Commands',
+          value: 100,
+          limit: 100,
+          unit: 'commands',
+          ratio: 1,
+          state: 'critical',
+        }],
+        evidence: [],
+        history: [],
+      },
+    };
+    const store = {
+      readSnapshot: vi.fn().mockResolvedValue(null),
+      reopenExpiredSnoozes: vi.fn().mockResolvedValue(0),
+      readQueue: vi.fn()
+        .mockResolvedValueOnce([])
+        .mockResolvedValueOnce([{
+          id: 'health-exception:upstash.commands',
+          source: 'operating_health',
+          status: 'open',
+          last_seen: NOW,
+          execution_state: 'ready',
+          action_key: 'internal.create_task',
+          risk_level: 'low',
+          side_effect_class: 'internal_write',
+        }]),
+      readActionRuns: vi.fn().mockResolvedValue([]),
+      upsertFreshness: vi.fn().mockResolvedValue(undefined),
+      writeHeartbeat: vi.fn().mockResolvedValue(undefined),
+      readOperatingHealthSources: vi.fn().mockResolvedValue([critical]),
+      readHealthExceptions: vi.fn().mockResolvedValue([]),
+      upsertHealthExceptions: vi.fn().mockResolvedValue(undefined),
+    };
+    const result = await reconcileHq(store, NOW);
+    expect(store.upsertHealthExceptions).toHaveBeenCalledOnce();
+    expect(store.readQueue).toHaveBeenCalledTimes(2);
+    expect(result.queue).toEqual({ open: 1 });
+    expect(result.healthExceptions).toMatchObject({ active: 1, created: 1 });
+    expect(result.warnings.join(' ')).toContain('operating-health exception');
+  });
 });

@@ -110,7 +110,9 @@ function QueueRow({ item, onDecided }: { item: QueueItem; onDecided: (id: string
       {item.actionKey && (
         <div className="rounded-md border p-3" style={{ borderColor: 'var(--hq-border)', background: 'var(--hq-panel-2)' }}>
           <div className="mb-2 flex flex-wrap items-center gap-2">
-            <span className="hq-eyebrow text-[10px]">Proposed action</span>
+            <span className="hq-eyebrow text-[10px]">
+              {item.source === 'operating_health' ? 'Sage recommendation' : 'Proposed action'}
+            </span>
             <StatusChip tone={item.riskLevel === 'low' ? 'ok' : item.riskLevel === 'medium' ? 'warn' : 'crit'} label={`${item.riskLevel} risk`} />
           </div>
           <p className="text-sm font-medium" style={{ color: 'var(--hq-ink)' }}>

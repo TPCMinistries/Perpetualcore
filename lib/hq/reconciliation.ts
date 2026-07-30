@@ -3,6 +3,15 @@ import type { SupabaseClient } from '@supabase/supabase-js';
 import { z } from 'zod';
 import { createAdminClient } from '@/lib/supabase/server';
 import { executeHqQueueAction } from '@/lib/hq/execution';
+import {
+  parseExistingHealthExceptions,
+  parseOperatingHealthSources,
+  planHealthExceptionSync,
+  type ExistingHealthException,
+  type HealthExceptionQueueRow,
+  type HealthExceptionSyncPlan,
+} from '@/lib/hq/health-exceptions';
+import type { OperatingHealthSourceRow } from '@/lib/hq/operating-health';
 
 const HOUR_MS = 60 * 60 * 1000;
 const LOCAL_SOURCE_TTL_MS = 26 * HOUR_MS;
@@ -63,6 +72,7 @@ export interface ReconciliationResult {
   queue: Record<string, number>;
   actionRuns: Record<string, number>;
   dispatch: { eligible: number; attempted: number; succeeded: number; failed: number; duplicate: number };
+  healthExceptions: Omit<HealthExceptionSyncPlan, 'rows'>;
   sources: FreshnessObservation[];
   warnings: string[];
 }
@@ -79,6 +89,9 @@ interface ReconciliationStore {
   readActionRuns(): Promise<z.infer<typeof actionRunSchema>[]>;
   upsertFreshness(observations: FreshnessObservation[]): Promise<void>;
   writeHeartbeat(result: ReconciliationResult): Promise<void>;
+  readOperatingHealthSources?(): Promise<OperatingHealthSourceRow[]>;
+  readHealthExceptions?(): Promise<ExistingHealthException[]>;
+  upsertHealthExceptions?(rows: HealthExceptionQueueRow[]): Promise<void>;
 }
 
 type DispatchApprovedAction = (input: {
@@ -217,11 +230,35 @@ export async function reconcileHq(
 ): Promise<ReconciliationResult> {
   const warnings: string[] = [];
   const reopenedSnoozes = await store.reopenExpiredSnoozes(now);
-  const [snapshot, queueRows, actionRuns] = await Promise.all([
+  const [snapshot, initialQueueRows, actionRuns] = await Promise.all([
     store.readSnapshot(),
     store.readQueue(),
     store.readActionRuns(),
   ]);
+  let queueRows = initialQueueRows;
+  let healthExceptionPlan: HealthExceptionSyncPlan = {
+    rows: [],
+    active: 0,
+    created: 0,
+    updated: 0,
+    reopened: 0,
+    resolved: 0,
+  };
+  if (
+    store.readOperatingHealthSources
+    && store.readHealthExceptions
+    && store.upsertHealthExceptions
+  ) {
+    const [operatingSources, existingExceptions] = await Promise.all([
+      store.readOperatingHealthSources(),
+      store.readHealthExceptions(),
+    ]);
+    healthExceptionPlan = planHealthExceptionSync(operatingSources, existingExceptions, now);
+    if (healthExceptionPlan.rows.length > 0) {
+      await store.upsertHealthExceptions(healthExceptionPlan.rows);
+      queueRows = await store.readQueue();
+    }
+  }
   const queue = countBy(queueRows);
   let actionRunCounts = countBy(actionRuns);
   const eligible = queueRows
@@ -282,6 +319,9 @@ export async function reconcileHq(
   if ((actionRunCounts.failed ?? 0) > 0 || (actionRunCounts.blocked ?? 0) > 0) {
     warnings.push('One or more action runs need attention.');
   }
+  if (healthExceptionPlan.active > 0) {
+    warnings.push(`${healthExceptionPlan.active} operating-health exception${healthExceptionPlan.active === 1 ? '' : 's'} need owner attention.`);
+  }
 
   const result: ReconciliationResult = {
     ok: true,
@@ -291,6 +331,13 @@ export async function reconcileHq(
     queue,
     actionRuns: actionRunCounts,
     dispatch,
+    healthExceptions: {
+      active: healthExceptionPlan.active,
+      created: healthExceptionPlan.created,
+      updated: healthExceptionPlan.updated,
+      reopened: healthExceptionPlan.reopened,
+      resolved: healthExceptionPlan.resolved,
+    },
     sources,
     warnings,
   };
@@ -336,6 +383,28 @@ function createSupabaseStore(): ReconciliationStore {
         .limit(500);
       if (error) throw new Error(`HQ action-run read failed: ${error.message}`);
       return z.array(actionRunSchema).parse(data ?? []);
+    },
+    async readOperatingHealthSources() {
+      const { data, error } = await admin
+        .from('hq_source_freshness')
+        .select('source_key, display_name, status, observed_at, expires_at, error_message, metadata')
+        .like('source_key', 'operating_health:%');
+      if (error) throw new Error(`operating-health source read failed: ${error.message}`);
+      return parseOperatingHealthSources(data ?? []);
+    },
+    async readHealthExceptions() {
+      const { data, error } = await admin
+        .from('hq_queue')
+        .select(
+          'id,source,title,detail,severity,status,verdict_note,decided_at,decided_by,snooze_until,synced_to_ledger,first_seen,last_seen,contract_version,action_key,idempotency_key,recommended_action,expected_outcome,risk_level,side_effect_class,approval_required,executor,execution_payload,rollback_plan,execution_state,execution_requested_at,execution_started_at,execution_finished_at,last_execution_error',
+        )
+        .eq('source', 'operating_health');
+      if (error) throw new Error(`operating-health exception read failed: ${error.message}`);
+      return parseExistingHealthExceptions(data ?? []);
+    },
+    async upsertHealthExceptions(rows) {
+      const { error } = await admin.from('hq_queue').upsert(rows, { onConflict: 'id' });
+      if (error) throw new Error(`operating-health exception sync failed: ${error.message}`);
     },
     async upsertFreshness(observations) {
       const rows = observations.map((source) => ({
