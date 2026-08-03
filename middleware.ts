@@ -379,6 +379,10 @@ export const config = {
      * - favicon.ico (favicon file)
      * Feel free to modify this pattern to include more paths.
      */
-    '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
+    /*
+     * meridian and meridian-static are rewritten to a separate Next.js zone
+     * (see next.config.mjs). Auth middleware must not touch them.
+     */
+    '/((?!_next/static|_next/image|favicon.ico|meridian|meridian-static|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
   ],
 };
