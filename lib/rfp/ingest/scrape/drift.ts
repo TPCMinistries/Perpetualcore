@@ -32,7 +32,8 @@ export type DriftReason =
   | "http_status"
   | "shape_mismatch"
   | "fetch_error"
-  | "count_anomaly";
+  | "count_anomaly"
+  | "database_error";
 
 export interface RecordDriftOpts {
   /** Source key — matches `rfp_source_drift.source` (e.g. 'ny_state'). */

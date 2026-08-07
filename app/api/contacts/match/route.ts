@@ -7,9 +7,17 @@ import OpenAI from "openai";
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
+let openAIClient: OpenAI | null = null;
+
+function getOpenAIClient(): OpenAI {
+  const apiKey = process.env.OPENAI_API_KEY;
+  if (!apiKey) {
+    throw new Error("OPENAI_API_KEY is not configured");
+  }
+
+  openAIClient ??= new OpenAI({ apiKey });
+  return openAIClient;
+}
 
 /**
  * POST - Find contacts that match a project or task
@@ -125,7 +133,7 @@ export async function POST(req: NextRequest) {
       summary: c.ai_summary,
     }));
 
-    const aiResponse = await openai.chat.completions.create({
+    const aiResponse = await getOpenAIClient().chat.completions.create({
       model: "gpt-4o-mini",
       messages: [
         {

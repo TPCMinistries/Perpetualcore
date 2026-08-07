@@ -39,6 +39,7 @@ type Page = {
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const baseUrl = getBaseUrl();
+  const isRfpSite = new URL(baseUrl).hostname === "rfp.perpetualcore.com";
 
   const mainPages: Page[] = [
     { path: "", priority: 1.0, changeFrequency: "daily" },
@@ -135,6 +136,10 @@ export default function sitemap(): MetadataRoute.Sitemap {
   ];
 
   const lastModified = new Date();
+
+  if (isRfpSite) {
+    return rfpPages;
+  }
 
   return [
     ...allPages.map((page) => ({

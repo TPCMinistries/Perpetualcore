@@ -1,9 +1,17 @@
 import { createAdminClient } from "@/lib/supabase/server";
 import OpenAI from "openai";
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY!,
-});
+let openai: OpenAI | null = null;
+
+function getOpenAIClient(): OpenAI {
+  const apiKey = process.env.OPENAI_API_KEY;
+  if (!apiKey) {
+    throw new Error("OPENAI_API_KEY is required for document search");
+  }
+
+  openai ??= new OpenAI({ apiKey });
+  return openai;
+}
 
 export interface RelevantDocument {
   documentId: string;
@@ -39,7 +47,7 @@ export async function searchDocuments(
     console.log("🔍 [RAG] Generating embedding for query:", query.substring(0, 50) + "...");
 
     // Generate embedding for the query
-    const embeddingResponse = await openai.embeddings.create({
+    const embeddingResponse = await getOpenAIClient().embeddings.create({
       model: "text-embedding-3-small",
       input: query,
       dimensions: 1536,

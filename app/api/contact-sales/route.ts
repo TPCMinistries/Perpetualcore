@@ -198,10 +198,17 @@ export async function POST(request: Request) {
     });
 
     if (dbError) {
-      // Log error but continue - we'll still try to send emails
       if (process.env.NODE_ENV === "development") {
         console.error("Failed to save contact to database:", dbError);
       }
+      return NextResponse.json(
+        {
+          error:
+            "We could not safely store this inquiry. Please try again or email lorenzo@perpetualcore.com.",
+          persisted: false,
+        },
+        { status: 503 }
+      );
     }
 
     const ownerUserId = getSalesOwnerUserId();
@@ -325,7 +332,8 @@ export async function POST(request: Request) {
 
     return NextResponse.json({
       success: true,
-      message: "Contact information received. Our team will reach out within 24 hours.",
+      persisted: true,
+      message: "Contact information received.",
     });
   } catch (error: unknown) {
     const errorMessage = error instanceof Error ? error.message : "Failed to submit contact form";

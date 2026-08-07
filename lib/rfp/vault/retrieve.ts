@@ -1,17 +1,25 @@
 /**
  * lib/rfp/vault/retrieve.ts — Vault Grounding v1 retrieval helper.
  *
- * Embeds the query, fetches the org's vault chunks via the admin client, and
- * computes cosine similarity in Node. Returns top-k chunks.
+ * Embeds the query, calls the match_vault_docs() Postgres RPC (HNSW-backed,
+ * SECURITY DEFINER, tenant-isolated), and returns top-k chunks.
  *
- * Why in-Node similarity instead of pgvector's `<=>` operator?
- *  - The Supabase JS client cannot send the `<=>` operator inside a
- *    PostgREST `.select()` projection, and the project does NOT have a
- *    SECURITY DEFINER RPC for rfp_vault_artifacts. Adding one is a
- *    migration, which is forbidden by this task's scope.
- *  - In-Node cosine is correct and adequate for v1: per-doc chunk cap is 200,
- *    so a typical org with 5 docs holds ~500 chunks ≈ 2MB of vector payload
- *    per query. Slow at 50+ docs; Phase 2 should add the RPC.
+ * Primary path (Phase 14+): calls match_vault_docs() RPC via admin client.
+ * Fallback path (local dev / RPC unavailable): fetches all org chunks and
+ * computes cosine similarity in Node. The fallback is RETAINED — do not
+ * remove it. It degrades gracefully when the RPC is not yet deployed.
+ *
+ * Why the RPC replaced in-Node cosine as the primary path?
+ *  - At >50 docs/org the old path fetched MB-scale embedding payloads per
+ *    query. The HNSW RPC executes the ANN search inside Postgres and returns
+ *    only the top-k matching rows.
+ *  - Phase 18 scoring depends on this RPC being the authoritative retrieval
+ *    path. Phase 14 (FND-03) is the foundational gate.
+ *
+ * Note on database.types.ts: the match_vault_docs RPC is not yet reflected in
+ * database.types.ts (Plan 14-04 regenerates types). The rpc() call is cast via
+ * `as unknown as` to avoid the unknown-rpc compile error; 14-04 regen will
+ * remove that cast.
  *
  * Background/server operation: uses createAdminClient() per CLAUDE.md.
  * The caller is responsible for RLS authorization BEFORE invoking this.
@@ -49,6 +57,16 @@ export interface RetrievedChunk {
   doc_id: string;
   /** Original row created_at ISO timestamp. */
   created_at: string;
+}
+
+/** Row shape returned by the match_vault_docs() Postgres RPC. */
+interface MatchVaultDocsRow {
+  id: string;
+  body: string | null;
+  title: string;
+  type: string;
+  source_metadata: Record<string, unknown> | null;
+  similarity: number;
 }
 
 interface VaultRow {
@@ -125,9 +143,60 @@ export async function retrieveVaultChunks(
     );
   }
 
-  // 2) Fetch all this org's chunks (with embeddings). RLS is bypassed via
-  // the admin client; the CALLER is responsible for authorization.
   const admin = createAdminClient();
+
+  // ─── Primary path: match_vault_docs RPC (HNSW in Postgres) ──────────────
+  // 14-04 will regenerate database.types.ts to include this RPC; until then
+  // we cast through unknown to suppress the "unknown rpc" compile error.
+  const { data: rpcData, error: rpcError } = await (
+    (admin as unknown as {
+      rpc: (
+        fn: string,
+        args: Record<string, unknown>,
+      ) => Promise<{
+        data: MatchVaultDocsRow[] | null;
+        error: { message: string } | null;
+      }>;
+    }).rpc("match_vault_docs", {
+      org_id: orgId,
+      query_embedding: qvec,
+      match_count: k,
+    })
+  );
+
+  if (!rpcError && rpcData !== null) {
+    return rpcData.map((row) => {
+      const meta = (row.source_metadata ?? {}) as ChunkMetadata;
+      return {
+        id: row.id,
+        similarity_score: row.similarity,
+        text: row.body ?? "",
+        doc_title:
+          typeof meta.doc_title === "string" ? meta.doc_title : row.title,
+        doc_type:
+          typeof meta.doc_type === "string" ? meta.doc_type : row.type,
+        chunk_index:
+          typeof meta.chunk_index === "number" ? meta.chunk_index : 0,
+        doc_id: typeof meta.doc_id === "string" ? meta.doc_id : row.id,
+        // RPC does not return created_at — return empty string; callers treat
+        // this as informational only.
+        created_at: "",
+      };
+    });
+  }
+
+  // Log the RPC error so it is visible in Vercel logs, then fall through.
+  if (rpcError) {
+    console.error(
+      "[retrieve] match_vault_docs RPC error — falling back to in-Node cosine:",
+      rpcError.message,
+    );
+  }
+
+  // ─── Fallback path: in-Node cosine (local dev / RPC unavailable) ─────────
+  // Retained from Phase 13. Not removed — provides safe degradation when the
+  // RPC is not yet deployed or when running against a local Supabase stack
+  // that hasn't had the migration applied.
   const { data, error } = await admin
     .from("rfp_vault_artifacts")
     .select("id, body, type, title, embedding, source_metadata, created_at")
@@ -138,7 +207,7 @@ export async function retrieveVaultChunks(
   const rows = (data ?? []) as VaultRow[];
   if (rows.length === 0) return [];
 
-  // 3) Score in-process.
+  // Score in-process.
   const scored: RetrievedChunk[] = [];
   for (const r of rows) {
     if (!r.embedding || !r.body) continue;
@@ -167,7 +236,7 @@ export async function retrieveVaultChunks(
     });
   }
 
-  // 4) Top-K by similarity desc.
+  // Top-K by similarity desc.
   scored.sort((a, b) => b.similarity_score - a.similarity_score);
   return scored.slice(0, k);
 }

@@ -75,7 +75,7 @@ export function BillingActions({ orgId, isActive }: BillingActionsProps) {
           type="button"
           onClick={onPortal}
           disabled={loading !== null}
-          className="inline-flex items-center justify-center rounded-md border border-emerald-500/30 bg-emerald-500/10 px-4 py-2 text-sm font-medium text-emerald-100 transition hover:bg-emerald-500/15 disabled:cursor-not-allowed disabled:opacity-50"
+          className="inline-flex items-center justify-center rounded-md bg-emerald-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-50"
         >
           {loading === "portal" ? "Opening portal…" : "Manage subscription"}
         </button>
@@ -83,7 +83,7 @@ export function BillingActions({ orgId, isActive }: BillingActionsProps) {
           Stripe customer portal · upgrade / downgrade / cancel
         </p>
         {error ? (
-          <p className="mt-2 text-[12px] text-rose-300">Error: {error}</p>
+          <p className="mt-2 text-[12px] text-rose-700">Error: {error}</p>
         ) : null}
       </div>
     );
@@ -96,12 +96,12 @@ export function BillingActions({ orgId, isActive }: BillingActionsProps) {
           type="button"
           onClick={() => void onSubscribe("pro")}
           disabled={loading !== null}
-          className="flex flex-col items-start rounded-md border border-emerald-500/30 bg-emerald-500/[0.06] px-4 py-3 text-left transition hover:bg-emerald-500/10 disabled:cursor-not-allowed disabled:opacity-50"
+          className="flex flex-col items-start rounded-md border border-emerald-200 bg-emerald-50 px-4 py-3 text-left transition hover:bg-emerald-100 disabled:cursor-not-allowed disabled:opacity-50"
         >
-          <span className="font-mono text-[10px] uppercase tracking-[0.22em] text-emerald-300">
+          <span className="font-mono text-[10px] uppercase tracking-[0.22em] text-emerald-700">
             Pro · $799/mo
           </span>
-          <span className="mt-1 text-[13px] text-zinc-100">
+          <span className="mt-1 text-[13px] text-zinc-900">
             {loading === "pro" ? "Opening Stripe…" : "Start 14-day trial"}
           </span>
         </button>
@@ -109,18 +109,18 @@ export function BillingActions({ orgId, isActive }: BillingActionsProps) {
           type="button"
           onClick={() => void onSubscribe("agency")}
           disabled={loading !== null}
-          className="flex flex-col items-start rounded-md border border-white/10 bg-white/[0.02] px-4 py-3 text-left transition hover:bg-white/[0.04] disabled:cursor-not-allowed disabled:opacity-50"
+          className="flex flex-col items-start rounded-md border border-zinc-200 bg-white px-4 py-3 text-left transition hover:bg-zinc-50 disabled:cursor-not-allowed disabled:opacity-50"
         >
-          <span className="font-mono text-[10px] uppercase tracking-[0.22em] text-zinc-400">
+          <span className="font-mono text-[10px] uppercase tracking-[0.22em] text-zinc-500">
             Agency · $2,499/mo
           </span>
-          <span className="mt-1 text-[13px] text-zinc-100">
+          <span className="mt-1 text-[13px] text-zinc-900">
             {loading === "agency" ? "Opening Stripe…" : "Start 14-day trial"}
           </span>
         </button>
       </div>
       {error ? (
-        <p className="mt-3 text-[12px] text-rose-300">Error: {error}</p>
+        <p className="mt-3 text-[12px] text-rose-700">Error: {error}</p>
       ) : null}
     </div>
   );

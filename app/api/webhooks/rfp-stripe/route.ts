@@ -19,7 +19,7 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import type Stripe from "stripe";
-import { stripe } from "@/lib/stripe/client";
+import { getStripe } from "@/lib/stripe/client";
 import { createAdminClient } from "@/lib/supabase/server";
 import { getTierForPriceId } from "@/lib/rfp/billing";
 
@@ -122,6 +122,23 @@ async function upsertFromSubscription(
   await admin
     .from("rfp_org_subscriptions")
     .upsert(payload as never, { onConflict: "org_id" });
+
+  // Upsert entitlement atomically alongside the subscription row so there
+  // is never a subscription without a corresponding entitlement (pitfall #4).
+  // Tier → coverage mapping: null/trial → free, pro → l1, agency → l2.
+  // Only provide org_id + coverage_level + updated_at — onConflict update
+  // of ONLY these keys leaves operator override fields (override_by,
+  // override_reason, override_at) untouched if an operator set them.
+  const tierToCoverage = (t: string | null): "free" | "l1" | "l2" =>
+    t === "pro" ? "l1" : t === "agency" ? "l2" : "free";
+  const entPayload = {
+    org_id: orgId,
+    coverage_level: tierToCoverage(tier),
+    updated_at: new Date().toISOString(),
+  };
+  await admin
+    .from("rfp_entitlements")
+    .upsert(entPayload as never, { onConflict: "org_id" });
 }
 
 export async function POST(req: NextRequest): Promise<NextResponse> {
@@ -140,6 +157,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
   const raw = await req.text();
   let event: Stripe.Event;
   try {
+    const stripe = getStripe();
     event = stripe.webhooks.constructEvent(raw, signature, SIGNING_SECRET);
   } catch (err) {
     const msg = err instanceof Error ? err.message : "unknown";
@@ -162,6 +180,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
   }
 
   let processed = false;
+  const stripe = getStripe();
 
   switch (event.type) {
     case "checkout.session.completed": {

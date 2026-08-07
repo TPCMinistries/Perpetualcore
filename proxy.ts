@@ -17,8 +17,9 @@ import {
 const PRODUCT_INTENT_COOKIE = 'pc_product_intent';
 const RFP_INTENT_MAX_AGE = 60 * 60 * 24; // 24 hours
 
-// Blanket API rate limiter — 200 requests per minute per IP
-// Individual routes can enforce stricter limits on top of this
+// Shared unauthenticated API rate limiter — 200 requests per minute per IP.
+// Authenticated product traffic uses route-level controls so normal dashboard
+// polling does not spend distributed Redis commands on every request.
 let apiRateLimiter: Ratelimit | null = null;
 try {
   if (process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN) {
@@ -29,7 +30,7 @@ try {
       }),
       limiter: Ratelimit.fixedWindow(200, '60 s'),
       prefix: 'mw:api',
-      analytics: true,
+      analytics: false,
     });
   }
 } catch {
@@ -125,7 +126,7 @@ function setRfpIntentCookie(response: NextResponse, request: NextRequest): void 
   });
 }
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const host = request.headers.get('host');
   const pathname = request.nextUrl.pathname;
   const markRfpIntent = shouldMarkRfpIntent(request) || isRfpHost(host);
@@ -172,6 +173,35 @@ export async function middleware(request: NextRequest) {
     const publicResponse = NextResponse.next();
     if (markRfpIntent) setRfpIntentCookie(publicResponse, request);
     return publicResponse;
+  }
+
+  // The legacy Mac worker API was removed when Press moved to the Mac Mini
+  // private runtime. Return a stable terminal response before session refresh
+  // or Redis so stale workers cannot create a paid retry loop.
+  if (pathname === '/api/press/worker/jobs/claim') {
+    return NextResponse.json(
+      {
+        error: 'Press worker endpoint retired',
+        code: 'PRESS_WORKER_ENDPOINT_RETIRED',
+      },
+      {
+        status: 410,
+        headers: {
+          'Cache-Control': 'public, max-age=3600',
+        },
+      }
+    );
+  }
+
+  // Machine-to-machine Company Graph receipts are authenticated inside the
+  // These routes perform their own server-side bearer authentication. Skip
+  // session refresh and the shared Redis limiter so an exhausted public API
+  // quota cannot interrupt bounded internal health signals.
+  if (
+    pathname === '/api/internal/company-graph-readiness'
+    || pathname === '/api/internal/operating-health'
+  ) {
+    return NextResponse.next();
   }
 
   let response = NextResponse.next({
@@ -253,31 +283,43 @@ export async function middleware(request: NextRequest) {
   // immediately before looked signed-in.
   const { data: { user } } = await supabase.auth.getUser();
 
-  // Rate limit API routes (after session refresh so the route handler sees
-  // a valid cookie), then short-circuit before analytics + IP whitelist.
+  // Rate limit unauthenticated API routes (after session refresh so the route
+  // handler sees a valid cookie), then short-circuit before analytics + IP
+  // whitelist. Authenticated APIs use their route-level controls.
   if (request.nextUrl.pathname.startsWith('/api/')) {
     if (
       apiRateLimiter &&
+      !user &&
       !request.nextUrl.pathname.startsWith('/api/cron/') &&
       !request.nextUrl.pathname.startsWith('/api/webhooks/')
     ) {
       const ip = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim()
         || request.headers.get('x-real-ip')
         || 'unknown';
-      const result = await apiRateLimiter.limit(`mw:${ip}`);
-      if (!result.success) {
-        const reset = Math.ceil((result.reset - Date.now()) / 1000);
-        return NextResponse.json(
-          { error: 'Too many requests', retryAfter: reset },
-          {
-            status: 429,
-            headers: {
-              'Retry-After': reset.toString(),
-              'X-RateLimit-Limit': result.limit.toString(),
-              'X-RateLimit-Remaining': '0',
-            },
-          }
-        );
+      try {
+        const result = await apiRateLimiter.limit(`mw:${ip}`);
+        if (!result.success) {
+          const reset = Math.ceil((result.reset - Date.now()) / 1000);
+          return NextResponse.json(
+            { error: 'Too many requests', retryAfter: reset },
+            {
+              status: 429,
+              headers: {
+                'Retry-After': reset.toString(),
+                'X-RateLimit-Limit': result.limit.toString(),
+                'X-RateLimit-Remaining': '0',
+              },
+            }
+          );
+        }
+      } catch {
+        // Availability fallback only. Route handlers continue to apply their
+        // own validation and any tighter route-level controls.
+        console.warn(JSON.stringify({
+          level: 'warning',
+          message: 'Shared API rate limiter unavailable; route-level controls remain active',
+          route: request.nextUrl.pathname,
+        }));
       }
     }
     if (markRfpIntent) setRfpIntentCookie(response, request);

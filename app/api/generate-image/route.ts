@@ -3,9 +3,17 @@ import OpenAI from "openai";
 import { createClient } from "@/lib/supabase/server";
 import { rateLimiters, checkRateLimit } from "@/lib/rate-limit";
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY!,
-});
+let openai: OpenAI | null = null;
+
+function getOpenAIClient(): OpenAI {
+  const apiKey = process.env.OPENAI_API_KEY;
+  if (!apiKey) {
+    throw new Error("OPENAI_API_KEY is required to generate images");
+  }
+
+  openai ??= new OpenAI({ apiKey });
+  return openai;
+}
 
 const isDev = process.env.NODE_ENV === "development";
 
@@ -69,7 +77,7 @@ export async function POST(req: NextRequest) {
     });
 
     // Generate image with DALL-E 3
-    const response = await openai.images.generate({
+    const response = await getOpenAIClient().images.generate({
       model: "dall-e-3",
       prompt,
       n: 1,

@@ -5,7 +5,17 @@ import Anthropic from "@anthropic-ai/sdk";
 export const runtime = "nodejs";
 export const maxDuration = 60;
 
-const anthropic = new Anthropic();
+let anthropicClient: Anthropic | null = null;
+
+function getAnthropicClient(): Anthropic {
+  const apiKey = process.env.ANTHROPIC_API_KEY;
+  if (!apiKey) {
+    throw new Error("ANTHROPIC_API_KEY is not configured");
+  }
+
+  anthropicClient ??= new Anthropic({ apiKey });
+  return anthropicClient;
+}
 
 interface ParsedEntity {
   name: string;
@@ -89,7 +99,7 @@ Output JSON only:`;
 
     let response;
     try {
-      response = await anthropic.messages.create({
+      response = await getAnthropicClient().messages.create({
         model: "claude-3-haiku-20240307",
         max_tokens: 4096,
         messages: [

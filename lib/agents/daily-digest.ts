@@ -53,7 +53,16 @@ interface GeneratedDigest {
   priorityActions: string[];
 }
 
-const anthropic = new Anthropic();
+let anthropic: Anthropic | null = null;
+
+function getAnthropic(): Anthropic {
+  const apiKey = process.env.ANTHROPIC_API_KEY;
+  if (!apiKey) {
+    throw new Error("ANTHROPIC_API_KEY is required to generate daily digests");
+  }
+  anthropic ??= new Anthropic({ apiKey });
+  return anthropic;
+}
 
 /**
  * Gather all data needed for the daily digest
@@ -234,7 +243,7 @@ Generate a JSON response with:
 Be practical and actionable. Return ONLY valid JSON, no markdown.`;
 
   try {
-    const response = await anthropic.messages.create({
+    const response = await getAnthropic().messages.create({
       model: "claude-3-5-haiku-latest",
       max_tokens: 800,
       messages: [{ role: "user", content: prompt }],

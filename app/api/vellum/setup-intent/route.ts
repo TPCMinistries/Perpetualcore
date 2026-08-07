@@ -23,9 +23,19 @@ import { NextResponse } from "next/server";
 import Stripe from "stripe";
 import { z } from "zod";
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: "2024-12-18.acacia",
-});
+let stripeClient: Stripe | null = null;
+
+function getStripe(): Stripe {
+  if (stripeClient) return stripeClient;
+
+  const secretKey = process.env.STRIPE_SECRET_KEY;
+  if (!secretKey) throw new Error("STRIPE_SECRET_KEY is not set");
+
+  stripeClient = new Stripe(secretKey, {
+    apiVersion: "2024-12-18.acacia",
+  });
+  return stripeClient;
+}
 
 const schema = z.object({
   email: z
@@ -57,6 +67,7 @@ export async function POST(req: Request) {
   const { email, tier_preference, is_501c3 } = parsed.data;
 
   try {
+    const stripe = getStripe();
     // Find or create a Stripe Customer — keyed by email so re-signups
     // dedupe to a single customer record.
     const existing = await stripe.customers.list({ email, limit: 1 });

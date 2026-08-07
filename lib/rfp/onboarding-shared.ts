@@ -10,6 +10,7 @@
 
 export interface OnboardingState {
   org_created: boolean;
+  profile_complete: boolean;
   voice_trained: boolean;
   vault_seeded: boolean;
   first_match_selected: boolean;

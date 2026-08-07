@@ -24,10 +24,10 @@ interface PlanStep {
 }
 
 const STATUS_CLASS: Record<PlanStatus, string> = {
-  done: "border-emerald-500/40 bg-emerald-500/10 text-emerald-200",
-  active: "border-cyan-500/40 bg-cyan-500/10 text-cyan-200",
-  blocked: "border-rose-500/40 bg-rose-500/10 text-rose-200",
-  pending: "border-zinc-700 bg-zinc-900 text-zinc-400",
+  done: "border-emerald-200 bg-emerald-50 text-emerald-700",
+  active: "border-cyan-200 bg-cyan-50 text-cyan-700",
+  blocked: "border-rose-200 bg-rose-50 text-rose-700",
+  pending: "border-zinc-300 bg-zinc-100 text-zinc-500",
 };
 
 function daysUntil(iso: string | null): number | null {
@@ -206,21 +206,21 @@ export function SubmissionPlanPanel({
     steps.some((step) => step.status === "blocked" || step.status === "active");
 
   return (
-    <section className="mt-8 rounded-md border border-zinc-800 bg-zinc-950 p-5">
+    <section className="mt-8 rounded-md border border-zinc-200 bg-white p-5 shadow-sm">
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
-          <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-cyan-300">
+          <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-cyan-700">
             Submission plan
           </p>
-          <p className="mt-2 text-sm leading-relaxed text-zinc-400">
+          <p className="mt-2 text-sm leading-relaxed text-zinc-600">
             Deadline-aware work plan for moving from draft to submitted packet.
           </p>
         </div>
         <div
           className={`rounded-md border px-4 py-2 text-center font-mono ${
             urgent
-              ? "border-rose-500/40 bg-rose-500/10 text-rose-200"
-              : "border-zinc-700 bg-zinc-900 text-zinc-300"
+              ? "border-rose-200 bg-rose-50 text-rose-700"
+              : "border-zinc-300 bg-zinc-100 text-zinc-700"
           }`}
         >
           <div className="text-[9px] uppercase tracking-[0.22em] opacity-80">
@@ -238,36 +238,36 @@ export function SubmissionPlanPanel({
         </div>
       </div>
 
-      <div className="mt-4 rounded-md border border-zinc-800 bg-zinc-900/50 px-4 py-3">
+      <div className="mt-4 rounded-md border border-zinc-200 bg-zinc-50 px-4 py-3">
         <p className="font-mono text-[9px] uppercase tracking-[0.2em] text-zinc-500">
           Deadline
         </p>
-        <p className="mt-1 text-sm text-zinc-100">{formatDueDate(deadline)}</p>
+        <p className="mt-1 text-sm text-zinc-900">{formatDueDate(deadline)}</p>
         {packetChecklist?.deadline_timezone ||
         packetChecklist?.submission_portal ||
         packetChecklist?.submission_method ? (
-          <div className="mt-3 grid gap-2 border-t border-zinc-800 pt-3 text-[12px] leading-relaxed text-zinc-400 md:grid-cols-3">
+          <div className="mt-3 grid gap-2 border-t border-zinc-200 pt-3 text-[12px] leading-relaxed text-zinc-600 md:grid-cols-3">
             <div>
-              <span className="font-mono text-[9px] uppercase tracking-[0.16em] text-zinc-600">
+              <span className="font-mono text-[9px] uppercase tracking-[0.16em] text-zinc-400">
                 Timezone
               </span>
-              <p className="mt-1 text-zinc-200">
+              <p className="mt-1 text-zinc-700">
                 {packetChecklist.deadline_timezone ?? "Confirm manually"}
               </p>
             </div>
             <div>
-              <span className="font-mono text-[9px] uppercase tracking-[0.16em] text-zinc-600">
+              <span className="font-mono text-[9px] uppercase tracking-[0.16em] text-zinc-400">
                 Portal
               </span>
-              <p className="mt-1 text-zinc-200">
+              <p className="mt-1 text-zinc-700">
                 {packetChecklist.submission_portal ?? "Not extracted"}
               </p>
             </div>
             <div>
-              <span className="font-mono text-[9px] uppercase tracking-[0.16em] text-zinc-600">
+              <span className="font-mono text-[9px] uppercase tracking-[0.16em] text-zinc-400">
                 Forms
               </span>
-              <p className="mt-1 text-zinc-200">
+              <p className="mt-1 text-zinc-700">
                 {(packetChecklist.forms?.length ?? 0) > 0
                   ? `${packetChecklist.forms?.length} required`
                   : "No forms extracted"}
@@ -277,21 +277,21 @@ export function SubmissionPlanPanel({
         ) : null}
       </div>
 
-      <ol className="mt-4 divide-y divide-zinc-900 overflow-hidden rounded-md border border-zinc-800">
+      <ol className="mt-4 divide-y divide-zinc-200 overflow-hidden rounded-md border border-zinc-200">
         {steps.map((step) => (
-          <li key={step.label} className="grid gap-3 bg-zinc-950/70 p-4 md:grid-cols-[120px_1fr_120px]">
+          <li key={step.label} className="grid gap-3 bg-zinc-50 p-4 md:grid-cols-[120px_1fr_120px]">
             <div>
               <span
                 className={`inline-flex rounded-md border px-2 py-0.5 font-mono text-[9px] uppercase tracking-[0.16em] ${STATUS_CLASS[step.status]}`}
               >
                 {statusLabel(step.status)}
               </span>
-              <p className="mt-2 font-mono text-[9px] uppercase tracking-[0.18em] text-zinc-600">
+              <p className="mt-2 font-mono text-[9px] uppercase tracking-[0.18em] text-zinc-400">
                 {step.timing}
               </p>
             </div>
             <div>
-              <p className="text-sm font-medium text-zinc-100">{step.label}</p>
+              <p className="text-sm font-medium text-zinc-900">{step.label}</p>
               <p className="mt-1 text-[12px] leading-relaxed text-zinc-500">
                 {step.detail}
               </p>

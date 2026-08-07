@@ -23,7 +23,17 @@ import { trackActivity } from "@/lib/activity-feed/tracker";
 import { resolveWorkspace, buildWorkspaceSystemPrompt } from "@/lib/agent-workspace/workspace-router";
 import { isChannelLinked, generatePairingCode, buildPairingMessage } from "@/lib/channels/pairing";
 
-const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+let anthropic: Anthropic | null = null;
+
+function getAnthropicClient(): Anthropic {
+  const apiKey = process.env.ANTHROPIC_API_KEY;
+  if (!apiKey) {
+    throw new Error("ANTHROPIC_API_KEY is required to route channel messages");
+  }
+
+  anthropic ??= new Anthropic({ apiKey });
+  return anthropic;
+}
 
 /** Profile fields used for channel user lookup */
 const CHANNEL_ID_COLUMNS: Record<ChannelType, string> = {
@@ -189,7 +199,7 @@ export async function routeMessage(
 
   try {
     if (process.env.ANTHROPIC_API_KEY) {
-      const completion = await anthropic.messages.create({
+      const completion = await getAnthropicClient().messages.create({
         model: "claude-sonnet-4-20250514",
         max_tokens: 1024,
         system: systemPrompt,

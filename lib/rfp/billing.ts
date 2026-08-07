@@ -1,7 +1,7 @@
 /**
  * lib/rfp/billing.ts — RFP-product Stripe billing helpers.
  *
- * Reuses the singleton `stripe` client from lib/stripe/client.ts but has
+ * Reuses the lazy Stripe client from lib/stripe/client.ts but has
  * its own product/price wiring + its own subscription tracker
  * (rfp_org_subscriptions). The legacy `subscriptions` table belongs to
  * the Perpetual Core SaaS marketing flow and is not touched here.
@@ -13,7 +13,7 @@
  *   NEXT_PUBLIC_APP_URL              for absolute return URLs
  */
 
-import { stripe } from "@/lib/stripe/client";
+import { getStripe } from "@/lib/stripe/client";
 import { createAdminClient } from "@/lib/supabase/server";
 
 export type RfpTier = "pro" | "agency";
@@ -77,6 +77,7 @@ async function getOrCreateCustomer(opts: {
   const existing = await getSubscriptionForOrg(opts.orgId);
   if (existing?.stripe_customer_id) return existing.stripe_customer_id;
 
+  const stripe = getStripe();
   const customer = await stripe.customers.create({
     email: opts.email,
     name: opts.orgName,
@@ -122,6 +123,7 @@ export async function createRfpCheckoutSession(opts: {
     userId: opts.userId,
   });
 
+  const stripe = getStripe();
   const session = await stripe.checkout.sessions.create({
     mode: "subscription",
     customer: customerId,
@@ -165,6 +167,7 @@ export async function createRfpPortalSession(opts: {
     throw new Error("no_customer_for_org");
   }
   const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://rfp.perpetualcore.com";
+  const stripe = getStripe();
   const portal = await stripe.billingPortal.sessions.create({
     customer: sub.stripe_customer_id,
     return_url: `${appUrl}/org/${opts.orgId}/settings/billing`,

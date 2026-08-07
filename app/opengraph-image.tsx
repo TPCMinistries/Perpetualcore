@@ -1,6 +1,4 @@
 import { ImageResponse } from "next/og";
-
-export const runtime = "edge";
 export const alt = "Perpetual Core - AI-Powered Knowledge Platform";
 export const size = {
   width: 1200,

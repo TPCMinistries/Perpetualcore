@@ -90,7 +90,7 @@ export function MarkupRenderer({ text, vaultChunks }: MarkupRendererProps) {
           return (
             <span
               key={`${baseId}-${i}`}
-              className="rounded-sm bg-amber-300/15 px-1 text-amber-300"
+              className="rounded-sm border border-amber-200 bg-amber-50 px-1 text-amber-700"
               title="AI inferred this — please confirm before submission"
             >
               {p.raw}
@@ -103,7 +103,7 @@ export function MarkupRenderer({ text, vaultChunks }: MarkupRendererProps) {
           return (
             <span
               key={`${baseId}-${i}`}
-              className="inline-flex items-center rounded-full border border-zinc-700 bg-zinc-900 px-1.5 text-[10px] font-mono text-zinc-500"
+              className="inline-flex items-center rounded-full border border-zinc-300 bg-zinc-100 px-1.5 text-[10px] font-mono text-zinc-500"
               title={`Citation vault-${p.n} — source unavailable in this proposal's vault snapshot`}
             >
               vault-{p.n}
@@ -115,7 +115,7 @@ export function MarkupRenderer({ text, vaultChunks }: MarkupRendererProps) {
             <PopoverTrigger asChild>
               <button
                 type="button"
-                className="mx-0.5 inline-flex items-center rounded-full border border-emerald-500/40 bg-emerald-500/10 px-1.5 align-[1px] text-[10px] font-mono text-emerald-200 transition hover:bg-emerald-500/20 focus:outline-none focus:ring-1 focus:ring-emerald-500/50"
+                className="mx-0.5 inline-flex items-center rounded-full border border-emerald-200 bg-emerald-50 px-1.5 align-[1px] text-[10px] font-mono text-emerald-700 transition hover:bg-emerald-100 focus:outline-none focus:ring-1 focus:ring-emerald-300"
                 aria-label={`Citation ${p.n} — source: ${chunk.doc_title}`}
               >
                 {p.n}
@@ -123,10 +123,10 @@ export function MarkupRenderer({ text, vaultChunks }: MarkupRendererProps) {
             </PopoverTrigger>
             <PopoverContent
               align="start"
-              className="w-96 border-zinc-800 bg-zinc-950 p-4 text-zinc-200"
+              className="w-96 border-zinc-200 bg-white p-4 text-zinc-700"
             >
               <div className="flex items-center justify-between gap-2">
-                <span className="font-mono text-[9px] uppercase tracking-[0.22em] text-emerald-300">
+                <span className="font-mono text-[9px] uppercase tracking-[0.22em] text-emerald-700">
                   Vault citation · {p.n}
                 </span>
                 <span className="font-mono text-[9px] uppercase tracking-[0.18em] text-zinc-500">
@@ -134,7 +134,7 @@ export function MarkupRenderer({ text, vaultChunks }: MarkupRendererProps) {
                 </span>
               </div>
               <div
-                className="mt-2 text-[13px] italic text-zinc-100"
+                className="mt-2 text-[13px] italic text-zinc-900"
                 style={{ fontFamily: "Georgia, serif" }}
               >
                 {chunk.doc_title}
@@ -145,7 +145,7 @@ export function MarkupRenderer({ text, vaultChunks }: MarkupRendererProps) {
                   ? ` · chunk ${chunk.chunk_index + 1}`
                   : ""}
               </div>
-              <blockquote className="mt-3 max-h-48 overflow-y-auto border-l-2 border-zinc-700 pl-3 text-[12px] leading-relaxed text-zinc-300">
+              <blockquote className="mt-3 max-h-48 overflow-y-auto border-l-2 border-zinc-300 pl-3 text-[12px] leading-relaxed text-zinc-600">
                 {chunk.text_preview}
               </blockquote>
             </PopoverContent>

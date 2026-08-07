@@ -121,6 +121,8 @@ function sourceTierChip(source: string): string {
       return 'NYC';
     case 'foundation_url':
       return 'Foundation';
+    case 'ai_research':
+      return 'AI Researched';
     default:
       return 'Other source';
   }

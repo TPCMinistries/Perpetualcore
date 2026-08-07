@@ -32,12 +32,11 @@ export async function POST(req: NextRequest) {
     // Validate file type
     const validTypes = [
       "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-      "application/vnd.ms-excel",
       "text/csv",
     ];
-    if (!validTypes.includes(file.type) && !file.name.match(/\.(xlsx|xls|csv)$/i)) {
+    if (!validTypes.includes(file.type) && !file.name.match(/\.(xlsx|csv)$/i)) {
       return NextResponse.json(
-        { error: "Invalid file type. Please upload an Excel or CSV file." },
+        { error: "Invalid file type. Please upload an XLSX or CSV file." },
         { status: 400 }
       );
     }
@@ -45,7 +44,7 @@ export async function POST(req: NextRequest) {
     const buffer = await file.arrayBuffer();
 
     // Parse the Excel file
-    const parsedSheets = parseExcelBuffer(buffer, { maxPreviewRows: 20 });
+    const parsedSheets = await parseExcelBuffer(buffer, { maxPreviewRows: 20 });
 
     if (parsedSheets.length === 0 || parsedSheets[0].totalRows === 0) {
       return NextResponse.json(

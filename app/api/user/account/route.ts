@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createClient, createAdminClient } from "@/lib/supabase/server";
 import { rateLimiters } from "@/lib/rate-limit";
 import { logger } from "@/lib/logging";
-import { stripe } from "@/lib/stripe/client";
+import { getStripe } from "@/lib/stripe/client";
 
 /**
  * DELETE /api/user/account
@@ -60,6 +60,7 @@ export async function DELETE(request: NextRequest) {
           .single();
 
         if (subscription?.stripe_subscription_id) {
+          const stripe = getStripe();
           await stripe.subscriptions.cancel(
             subscription.stripe_subscription_id,
             { prorate: true }

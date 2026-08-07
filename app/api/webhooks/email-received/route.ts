@@ -1,11 +1,24 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 
-// Initialize Supabase with service role key for webhook access
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
+type ServiceClient = ReturnType<typeof createClient>;
+
+let serviceClient: ServiceClient | null = null;
+
+function getServiceClient(): ServiceClient {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  if (!supabaseUrl) {
+    throw new Error("NEXT_PUBLIC_SUPABASE_URL is not configured");
+  }
+
+  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!serviceRoleKey) {
+    throw new Error("SUPABASE_SERVICE_ROLE_KEY is not configured");
+  }
+
+  serviceClient ??= createClient(supabaseUrl, serviceRoleKey);
+  return serviceClient;
+}
 
 // Webhook secret for n8n authentication
 const WEBHOOK_SECRET = process.env.N8N_WEBHOOK_SECRET || process.env.WEBHOOK_SECRET;
@@ -26,6 +39,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
+    const supabase = getServiceClient();
     const body = await request.json();
 
     // Support both single email and batch

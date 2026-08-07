@@ -18,11 +18,9 @@ import {
   Target,
   Clock,
   DollarSign,
-  Users,
-  Zap,
   Download,
 } from "lucide-react";
-import type { LeadSegment, SegmentationResult } from "@/lib/leads/segmentation";
+import type { SegmentationResult } from "@/lib/leads/segmentation";
 import { getThankYouMessage } from "@/lib/leads/segmentation";
 
 interface QuizAnswer {
@@ -112,6 +110,7 @@ export default function AIReadinessQuiz() {
     lastName: "",
     email: "",
     company: "",
+    marketingConsent: false,
   });
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -135,7 +134,7 @@ export default function AIReadinessQuiz() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!formData.email || !formData.firstName) {
+    if (!formData.email || !formData.firstName || !formData.marketingConsent) {
       toast.error("Please fill in all required fields");
       return;
     }
@@ -165,7 +164,7 @@ export default function AIReadinessQuiz() {
       setSegmentData(result.segmentData);
       setStep(step + 1);
       toast.success("Success! Check your email for your personalized report.");
-    } catch (error) {
+    } catch {
       toast.error("Something went wrong. Please try again.");
     } finally {
       setLoading(false);
@@ -411,6 +410,18 @@ export default function AIReadinessQuiz() {
                 {loading ? "Calculating..." : "Show My Results"}
                 <ArrowRight className="ml-2 h-5 w-5" />
               </Button>
+              <label className="flex cursor-pointer items-start gap-2 text-sm leading-5 text-slate-600 dark:text-slate-400">
+                <input
+                  type="checkbox"
+                  required
+                  checked={formData.marketingConsent}
+                  onChange={(event) =>
+                    setFormData({ ...formData, marketingConsent: event.target.checked })
+                  }
+                  className="mt-0.5 h-4 w-4"
+                />
+                Email me my results and occasional Perpetual Core operating notes. Unsubscribe any time.
+              </label>
 
               <p className="text-xs text-center text-slate-500 dark:text-slate-500">
                 100% Free • Instant Results • Unsubscribe Anytime

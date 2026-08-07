@@ -33,6 +33,7 @@ import { RFP_ALLOWED_OPPORTUNITY_SOURCES } from "@/lib/rfp/source-catalog";
 export interface PlatformTotals {
   orgs: number;
   active_orgs: number;
+  mrr_usd: number;
   proposals: number;
   proposals_7d: number;
   reviewer_runs: number;
@@ -42,6 +43,8 @@ export interface PlatformTotals {
   expected_matches: number;
   scoring_coverage_percent: number | null;
   ai_cost_30d_usd: number;
+  gross_margin_30d_usd: number;
+  gross_margin_percent: number | null;
 }
 
 export interface OrgRow {
@@ -53,6 +56,19 @@ export interface OrgRow {
   proposals: number;
   proposals_7d: number;
   ai_cost_30d_usd: number;
+  mrr_usd: number;
+  gross_margin_30d_usd: number;
+  gross_margin_percent: number | null;
+  subscription_tier: string | null;
+  subscription_status: string | null;
+  coverage_level: string | null;
+  monthly_ai_budget_usd: number | null;
+  monthly_score_quota: number | null;
+  monthly_draft_quota: number | null;
+  monthly_review_quota: number | null;
+  monthly_vault_mb: number | null;
+  override_reason: string | null;
+  override_at: string | null;
 }
 
 export interface ScraperHealthRow {
@@ -164,6 +180,24 @@ function toNumeric(v: number | string | null | undefined): number {
   return Number.isFinite(n) ? n : 0;
 }
 
+function tierMrrUsd(tier: string | null | undefined): number {
+  switch ((tier ?? "").toLowerCase()) {
+    case "pro":
+      return 799;
+    case "agency":
+      return 2499;
+    case "enterprise":
+      return 0;
+    default:
+      return 0;
+  }
+}
+
+function marginPercent(revenue: number, cost: number): number | null {
+  if (revenue <= 0) return null;
+  return Math.round(((revenue - cost) / revenue) * 1000) / 10;
+}
+
 // ── Queries ──────────────────────────────────────────────────────────────────
 
 export async function loadPlatformTotals(): Promise<PlatformTotals> {
@@ -181,6 +215,7 @@ export async function loadPlatformTotals(): Promise<PlatformTotals> {
     memberships,
     matches,
     aiCostRows,
+    subscriptions,
   ] = await Promise.all([
     admin.from("rfp_orgs").select("id", { count: "exact", head: true }),
     admin.from("rfp_proposals").select("id", { count: "exact", head: true }),
@@ -201,12 +236,22 @@ export async function loadPlatformTotals(): Promise<PlatformTotals> {
       .select("cost_usd")
       .gte("created_at", thirtyDaysAgo)
       .returns<{ cost_usd: number | string | null }[]>(),
+    admin
+      .from("rfp_org_subscriptions")
+      .select("tier, status")
+      .in("status", ["trialing", "active"])
+      .returns<{ tier: string | null; status: string | null }[]>(),
   ]);
 
   const ai_cost_30d_usd = (aiCostRows.data ?? []).reduce(
     (sum, r) => sum + toNumeric(r.cost_usd),
     0,
   );
+  const mrr_usd = (subscriptions.data ?? []).reduce(
+    (sum, r) => sum + tierMrrUsd(r.tier),
+    0,
+  );
+  const gross_margin_30d_usd = mrr_usd - ai_cost_30d_usd;
   const activeOrgCount = new Set((memberships.data ?? []).map((row) => row.org_id)).size;
   const opportunityCount = opportunities.count ?? 0;
   const matchCount = matches.count ?? 0;
@@ -217,6 +262,7 @@ export async function loadPlatformTotals(): Promise<PlatformTotals> {
   return {
     orgs: orgs.count ?? 0,
     active_orgs: activeOrgCount,
+    mrr_usd,
     proposals: proposals.count ?? 0,
     proposals_7d: proposals7d.count ?? 0,
     reviewer_runs: reviewerRuns.count ?? 0,
@@ -227,6 +273,8 @@ export async function loadPlatformTotals(): Promise<PlatformTotals> {
     scoring_coverage_percent:
       scoringCoverage === null ? null : Math.round(scoringCoverage * 10) / 10,
     ai_cost_30d_usd,
+    gross_margin_30d_usd,
+    gross_margin_percent: marginPercent(mrr_usd, ai_cost_30d_usd),
   };
 }
 
@@ -250,7 +298,8 @@ export async function loadOrgBreakdown(limit = 50): Promise<OrgRow[]> {
   // the JS client, so we fetch the relevant rows and aggregate in Node.
   // Acceptable at platform scale (handful of orgs, tens of thousands of
   // session rows worst-case). Trade complexity for query simplicity.
-  const [memberRowsRes, proposalRowsRes, costRowsRes] = await Promise.all([
+  const [memberRowsRes, proposalRowsRes, costRowsRes, subscriptionsRes, entitlementsRes] =
+    await Promise.all([
     admin
       .from("rfp_user_orgs")
       .select("org_id")
@@ -267,6 +316,32 @@ export async function loadOrgBreakdown(limit = 50): Promise<OrgRow[]> {
       .in("org_id", orgIds)
       .gte("created_at", thirtyDaysAgo)
       .returns<{ org_id: string; cost_usd: number | string | null }[]>(),
+    admin
+      .from("rfp_org_subscriptions")
+      .select("org_id, tier, status")
+      .in("org_id", orgIds)
+      .returns<
+        { org_id: string; tier: string | null; status: string | null }[]
+      >(),
+    admin
+      .from("rfp_entitlements")
+      .select(
+        "org_id, coverage_level, monthly_ai_budget_usd, monthly_score_quota, monthly_draft_quota, monthly_review_quota, monthly_vault_mb, override_reason, override_at",
+      )
+      .in("org_id", orgIds)
+      .returns<
+        {
+          org_id: string;
+          coverage_level: string;
+          monthly_ai_budget_usd: number | string | null;
+          monthly_score_quota: number | null;
+          monthly_draft_quota: number | null;
+          monthly_review_quota: number | null;
+          monthly_vault_mb: number | null;
+          override_reason: string | null;
+          override_at: string | null;
+        }[]
+      >(),
   ]);
 
   const memberCounts = new Map<string, number>();
@@ -289,23 +364,85 @@ export async function loadOrgBreakdown(limit = 50): Promise<OrgRow[]> {
     costSums.set(r.org_id, (costSums.get(r.org_id) ?? 0) + toNumeric(r.cost_usd));
   }
 
-  return orgs.map((o) => ({
-    ...o,
-    members: memberCounts.get(o.id) ?? 0,
-    proposals: proposalCounts.get(o.id) ?? 0,
-    proposals_7d: proposalCounts7d.get(o.id) ?? 0,
-    ai_cost_30d_usd: costSums.get(o.id) ?? 0,
-  }));
+  const subscriptionByOrg = new Map<
+    string,
+    { tier: string | null; status: string | null }
+  >();
+  for (const row of subscriptionsRes.data ?? []) {
+    subscriptionByOrg.set(row.org_id, {
+      tier: row.tier,
+      status: row.status,
+    });
+  }
+
+  const entitlementByOrg = new Map<
+    string,
+    {
+      coverage_level: string;
+      monthly_ai_budget_usd: number | null;
+      monthly_score_quota: number | null;
+      monthly_draft_quota: number | null;
+      monthly_review_quota: number | null;
+      monthly_vault_mb: number | null;
+      override_reason: string | null;
+      override_at: string | null;
+    }
+  >();
+  for (const row of entitlementsRes.data ?? []) {
+    entitlementByOrg.set(row.org_id, {
+      coverage_level: row.coverage_level,
+      monthly_ai_budget_usd:
+        row.monthly_ai_budget_usd === null
+          ? null
+          : toNumeric(row.monthly_ai_budget_usd),
+      monthly_score_quota: row.monthly_score_quota,
+      monthly_draft_quota: row.monthly_draft_quota,
+      monthly_review_quota: row.monthly_review_quota,
+      monthly_vault_mb: row.monthly_vault_mb,
+      override_reason: row.override_reason,
+      override_at: row.override_at,
+    });
+  }
+
+  return orgs.map((o) => {
+    const subscription = subscriptionByOrg.get(o.id);
+    const entitlement = entitlementByOrg.get(o.id);
+    const mrr = tierMrrUsd(subscription?.tier);
+    const cost = costSums.get(o.id) ?? 0;
+    return {
+      ...o,
+      members: memberCounts.get(o.id) ?? 0,
+      proposals: proposalCounts.get(o.id) ?? 0,
+      proposals_7d: proposalCounts7d.get(o.id) ?? 0,
+      ai_cost_30d_usd: cost,
+      mrr_usd: mrr,
+      gross_margin_30d_usd: mrr - cost,
+      gross_margin_percent: marginPercent(mrr, cost),
+      subscription_tier: subscription?.tier ?? null,
+      subscription_status: subscription?.status ?? null,
+      coverage_level: entitlement?.coverage_level ?? null,
+      monthly_ai_budget_usd: entitlement?.monthly_ai_budget_usd ?? null,
+      monthly_score_quota: entitlement?.monthly_score_quota ?? null,
+      monthly_draft_quota: entitlement?.monthly_draft_quota ?? null,
+      monthly_review_quota: entitlement?.monthly_review_quota ?? null,
+      monthly_vault_mb: entitlement?.monthly_vault_mb ?? null,
+      override_reason: entitlement?.override_reason ?? null,
+      override_at: entitlement?.override_at ?? null,
+    };
+  });
 }
 
 export async function loadScraperHealth(): Promise<ScraperHealthRow[]> {
   const admin = createAdminClient();
 
-  const [oppsRes, baselineRes, driftRes] = await Promise.all([
+  const [oppsRes, funderProfilesRes, baselineRes, driftRes] = await Promise.all([
     admin
       .from("rfp_opportunities")
       .select("source")
       .returns<{ source: string | null }[]>(),
+    (admin as unknown as { from: (table: string) => any })
+      .from("rfp_funder_profiles")
+      .select("source"),
     admin
       .from("rfp_source_baseline")
       .select("source, parsed_count, recorded_at")
@@ -333,6 +470,10 @@ export async function loadScraperHealth(): Promise<ScraperHealthRow[]> {
 
   const oppsBySource = new Map<string, number>();
   for (const r of oppsRes.data ?? []) {
+    const s = r.source ?? "unknown";
+    oppsBySource.set(s, (oppsBySource.get(s) ?? 0) + 1);
+  }
+  for (const r of funderProfilesRes.data ?? []) {
     const s = r.source ?? "unknown";
     oppsBySource.set(s, (oppsBySource.get(s) ?? 0) + 1);
   }

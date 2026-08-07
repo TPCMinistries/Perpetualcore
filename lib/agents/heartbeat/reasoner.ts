@@ -10,7 +10,16 @@
 import Anthropic from "@anthropic-ai/sdk";
 import { CheckResult, HeartbeatInsight } from "./types";
 
-const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+let anthropic: Anthropic | null = null;
+
+function getAnthropic(): Anthropic {
+  const apiKey = process.env.ANTHROPIC_API_KEY;
+  if (!apiKey) {
+    throw new Error("ANTHROPIC_API_KEY is required for heartbeat reasoning");
+  }
+  anthropic ??= new Anthropic({ apiKey });
+  return anthropic;
+}
 
 /**
  * Analyze all check results and generate actionable insights.
@@ -58,7 +67,7 @@ export async function analyzeCheckResults(
   }));
 
   try {
-    const completion = await anthropic.messages.create({
+    const completion = await getAnthropic().messages.create({
       model: "claude-haiku-4-20250514",
       max_tokens: 1024,
       system: `You are an executive assistant analyzing a user's daily status report.

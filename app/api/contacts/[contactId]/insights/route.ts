@@ -9,7 +9,17 @@ interface RouteContext {
   params: Promise<{ contactId: string }>;
 }
 
-const anthropic = new Anthropic();
+let anthropicClient: Anthropic | null = null;
+
+function getAnthropicClient(): Anthropic {
+  const apiKey = process.env.ANTHROPIC_API_KEY;
+  if (!apiKey) {
+    throw new Error("ANTHROPIC_API_KEY is not configured");
+  }
+
+  anthropicClient ??= new Anthropic({ apiKey });
+  return anthropicClient;
+}
 
 // GET - Get AI-powered insights about a contact
 export async function GET(req: NextRequest, context: RouteContext) {
@@ -113,7 +123,7 @@ Return JSON with:
 
 Respond with valid JSON only, no markdown.`;
 
-    const response = await anthropic.messages.create({
+    const response = await getAnthropicClient().messages.create({
       model: "claude-sonnet-4-20250514",
       max_tokens: 1024,
       messages: [

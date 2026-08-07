@@ -4,7 +4,7 @@
  * Status transitions for a proposal. The text column on rfp_proposals
  * has no enum constraint; we constrain the writable set here.
  *
- * Allowed statuses: draft | submitted | won | lost | withdrawn
+ * Allowed statuses: draft | submitted | won | lost | no_bid | withdrawn
  *
  * Body: { status, notes?: string }
  *
@@ -33,6 +33,7 @@ const ALLOWED_STATUSES = [
   "submitted",
   "won",
   "lost",
+  "no_bid",
   "withdrawn",
 ] as const;
 

@@ -64,16 +64,19 @@ async function runCron(): Promise<NextResponse> {
       { fetched: 0, upserted: 0, errors: 0 }
     );
 
-    // Hand off to Phase 05-03 scoring. Use the upserted_ids surfaced by the
-    // state/city orchestrator (StateCityIngestResult.upserted_ids, added in
-    // Plan 05-02). Scoring failure is non-fatal: ingest already landed.
-    const upsertedIds = results.flatMap((r) => r.upserted_ids);
+    // Scheduled discovery scores only rows created during this ingest run.
+    // upserted_ids remains the all-touched set used by manual rerun recovery.
+    // Scoring failure is non-fatal: ingest already landed.
+    const scoringCandidateIds = results.flatMap(
+      (r) => r.scoring_candidate_ids
+    );
     let scored: { scored: number; orgs: number } | { error: string } = {
       scored: 0,
       orgs: 0,
     };
     try {
-      scored = await scoreNewOpportunitiesForAllActiveOrgs(upsertedIds);
+      scored =
+        await scoreNewOpportunitiesForAllActiveOrgs(scoringCandidateIds);
     } catch (e) {
       const message = e instanceof Error ? e.message : String(e);
       console.error(
@@ -94,6 +97,7 @@ async function runCron(): Promise<NextResponse> {
         total_fetched: totals.fetched,
         total_upserted: totals.upserted,
         total_errors: totals.errors,
+        scoring_candidates: scoringCandidateIds.length,
         scored: "scored" in scored ? scored.scored : null,
         scoring_error: "error" in scored ? scored.error.slice(0, 200) : null,
         sources: results.map((row) => ({

@@ -1,5 +1,5 @@
 import { getHqSnapshot } from '@/lib/hq/snapshot';
-import { getQueueItems } from '@/lib/hq/queue';
+import { getQueueItems, partitionQueueItems } from '@/lib/hq/queue';
 import { getSparkSeries } from '@/lib/hq/metrics';
 import { getHqOperationalStatus } from '@/lib/hq/operational-status';
 import {
@@ -31,6 +31,8 @@ import { ActionRunList } from './_components/ActionRunList';
 import { VerificationInbox } from './_components/VerificationInbox';
 import { DevelopmentSummary } from './_components/DevelopmentSummary';
 import { getHdiOperationalSummary } from '@/lib/hq/development-intelligence';
+import { extractOperatingHealthItems } from '@/lib/hq/operating-health';
+import { OperatingHealth } from './_components/OperatingHealth';
 
 function formatOutcomeValue(value: number, unit: string): string {
   if (unit === 'usd') {
@@ -56,6 +58,7 @@ export default async function HqPage() {
   const engineCards = buildEngineCards(engineCalls, pnlRows);
 
   const needsLorenzo = parseNeedsLorenzo(snapshot.strategistMemoMd);
+  const priorityQueue = partitionQueueItems(queueItems).priority;
   const complianceSoon = complianceDueSoon(snapshot.compliance);
   const marketingDirectives = parseMarketingDirectives(snapshot.strategistMemoMd);
   const memoHeadline = parseMemoHeadline(snapshot.strategistMemoMd);
@@ -75,6 +78,8 @@ export default async function HqPage() {
       (typeof source.metadata.note === 'string' ? source.metadata.note : null),
     localOnly: source.metadata.runtime === 'local',
   }));
+  const operatingHealth = extractOperatingHealthItems(operations.sources);
+  const generalSourceHealth = sourceHealth.filter((source) => !source.key.startsWith('operating_health:'));
 
   const seenMetrics = new Set<string>();
   const verifiedRunIds = new Set(operations.verifiedRunIds);
@@ -116,7 +121,7 @@ export default async function HqPage() {
       <Section id="today" eyebrow="Today" title="What needs your attention">
         <TodayBrief
           headline={memoHeadline}
-          openDecisions={queueItems.length || needsLorenzo.length}
+          openDecisions={priorityQueue.length || needsLorenzo.length}
           compliance={complianceSoon}
           engines={engineCards}
         />
@@ -180,8 +185,12 @@ export default async function HqPage() {
         </div>
       </Section>
 
+      <Section id="cost-health" eyebrow="Control" title="Cost & runaway health">
+        <OperatingHealth items={operatingHealth} />
+      </Section>
+
       <Section id="sources" eyebrow="Observe" title="Source health">
-        <SourceHealth items={sourceHealth} />
+        <SourceHealth items={generalSourceHealth} />
       </Section>
 
       <Section id="outcomes" eyebrow="Verify" title="Measured outcomes">

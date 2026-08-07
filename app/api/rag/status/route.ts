@@ -4,11 +4,24 @@ import { createClient } from "@supabase/supabase-js";
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-// Service role client for n8n webhook calls (bypasses RLS)
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
+type ServiceClient = ReturnType<typeof createClient>;
+
+let serviceClient: ServiceClient | null = null;
+
+function getServiceClient(): ServiceClient {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  if (!supabaseUrl) {
+    throw new Error("NEXT_PUBLIC_SUPABASE_URL is not configured");
+  }
+
+  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!serviceRoleKey) {
+    throw new Error("SUPABASE_SERVICE_ROLE_KEY is not configured");
+  }
+
+  serviceClient ??= createClient(supabaseUrl, serviceRoleKey);
+  return serviceClient;
+}
 
 /**
  * GET /api/rag/status
@@ -57,6 +70,7 @@ export async function GET(req: NextRequest) {
 
     const { searchParams } = new URL(req.url);
     const userId = searchParams.get("user_id");
+    const supabase = getServiceClient();
 
     let organizationId: string | null = null;
 

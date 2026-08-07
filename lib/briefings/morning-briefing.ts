@@ -9,7 +9,16 @@ import { createAdminClient } from "@/lib/supabase/server";
 import { sendSlackMessage, getSlackCredentials } from "@/lib/slack/client";
 import OpenAI from "openai";
 
-const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY! });
+let openai: OpenAI | null = null;
+
+function getOpenAI(): OpenAI {
+  const apiKey = process.env.OPENAI_API_KEY;
+  if (!apiKey) {
+    throw new Error("OPENAI_API_KEY is required to generate morning briefings");
+  }
+  openai ??= new OpenAI({ apiKey });
+  return openai;
+}
 
 // Channel configs
 const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
@@ -326,7 +335,7 @@ Generate JSON with:
 Be warm but professional. Use ${data.user.name}'s name. Make it feel personal, not robotic.`;
 
   try {
-    const response = await openai.chat.completions.create({
+    const response = await getOpenAI().chat.completions.create({
       model: "gpt-4o-mini",
       messages: [{ role: "user", content: prompt }],
       response_format: { type: "json_object" },

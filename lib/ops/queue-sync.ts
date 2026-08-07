@@ -30,6 +30,7 @@ const BRAIN: DbTarget = {
 };
 
 const OPS_DIR = path.join(os.homedir(), 'dev', 'LDC-Command-Center-Vault', '_claude', 'memory', 'ops-findings');
+const HANDOFFS_DIR = path.join(os.homedir(), 'dev', 'LDC-Command-Center-Vault', '_claude', 'handoffs');
 const LEDGER_PATH = path.join(OPS_DIR, 'decision-ledger.md');
 
 /** SQL text literal — single-quote escape, matching deck-push.ts's `lit`. */
@@ -42,9 +43,26 @@ function normalizeTitle(title: string): string {
   return title.trim().toLowerCase().replace(/\s+/g, ' ');
 }
 
-/** First 16 hex chars of sha1(`${source}|${normalized title}`) — stable across re-runs. */
-function queueId(source: string, title: string): string {
-  return crypto.createHash('sha1').update(`${source}|${normalizeTitle(title)}`).digest('hex').slice(0, 16);
+/**
+ * Remove countdown wording that changes every day while preserving the
+ * underlying compliance item. Other sources keep their full normalized title.
+ */
+export function canonicalQueueIdentity(source: string, title: string): string {
+  const normalized = normalizeTitle(title);
+  if (source !== 'compliance') return normalized;
+  return normalized.replace(
+    /\s+—\s+(?:\d+d overdue \(was \d{4}-\d{2}-\d{2}\)|due \d{4}-\d{2}-\d{2} \(\d+d out\))$/,
+    '',
+  );
+}
+
+/** First 16 hex chars of sha1(`${source}|${canonical identity}`). */
+export function queueId(source: string, title: string): string {
+  return crypto
+    .createHash('sha1')
+    .update(`${source}|${canonicalQueueIdentity(source, title)}`)
+    .digest('hex')
+    .slice(0, 16);
 }
 
 interface QueueItem {
@@ -70,9 +88,10 @@ async function readFileOrNull(filePath: string): Promise<string | null> {
 
 async function upsertQueueItems(runSql: RunSql, items: QueueItem[], now: string): Promise<void> {
   if (items.length === 0) return;
+  const uniqueItems = [...new Map(items.map((item) => [queueId(item.source, item.title), item])).values()];
   const chunk = 50;
-  for (let i = 0; i < items.length; i += chunk) {
-    const values = items
+  for (let i = 0; i < uniqueItems.length; i += chunk) {
+    const values = uniqueItems
       .slice(i, i + chunk)
       .map((it) => {
         const id = queueId(it.source, it.title);
@@ -105,15 +124,30 @@ async function upsertQueueItems(runSql: RunSql, items: QueueItem[], now: string)
        values ${values}
        on conflict (id) do update set
          last_seen = now(),
-         detail = excluded.detail,
+         title = case when hq_queue.status in ('open', 'snoozed') then excluded.title else hq_queue.title end,
+         detail = case when hq_queue.status in ('open', 'snoozed') then excluded.detail else hq_queue.detail end,
+         severity = case when hq_queue.status in ('open', 'snoozed') then excluded.severity else hq_queue.severity end,
          action_key = coalesce(hq_queue.action_key, excluded.action_key),
-         recommended_action = coalesce(hq_queue.recommended_action, excluded.recommended_action),
-         expected_outcome = coalesce(hq_queue.expected_outcome, excluded.expected_outcome),
+         recommended_action = case
+           when hq_queue.status in ('open', 'snoozed') and hq_queue.execution_state in ('not_ready', 'ready')
+             then excluded.recommended_action
+           else coalesce(hq_queue.recommended_action, excluded.recommended_action)
+         end,
+         expected_outcome = case
+           when hq_queue.status in ('open', 'snoozed') and hq_queue.execution_state in ('not_ready', 'ready')
+             then excluded.expected_outcome
+           else coalesce(hq_queue.expected_outcome, excluded.expected_outcome)
+         end,
          executor = coalesce(hq_queue.executor, excluded.executor),
          risk_level = case when hq_queue.action_key is null then excluded.risk_level else hq_queue.risk_level end,
          side_effect_class = case when hq_queue.action_key is null then excluded.side_effect_class else hq_queue.side_effect_class end,
          approval_required = case when hq_queue.action_key is null then excluded.approval_required else hq_queue.approval_required end,
-         execution_payload = case when hq_queue.action_key is null then excluded.execution_payload else hq_queue.execution_payload end,
+         execution_payload = case
+           when hq_queue.status in ('open', 'snoozed') and hq_queue.execution_state in ('not_ready', 'ready')
+             then excluded.execution_payload
+           when hq_queue.action_key is null then excluded.execution_payload
+           else hq_queue.execution_payload
+         end,
          rollback_plan = coalesce(hq_queue.rollback_plan, excluded.rollback_plan),
          execution_state = case
            when hq_queue.action_key is null and hq_queue.execution_state = 'not_ready' then 'ready'
@@ -121,6 +155,36 @@ async function upsertQueueItems(runSql: RunSql, items: QueueItem[], now: string)
          end;`,
     );
   }
+}
+
+async function resolveSupersededQueueItems(
+  runSql: RunSql,
+  source: string,
+  activeItems: QueueItem[],
+  now: string,
+): Promise<void> {
+  const activeIds = [...new Set(activeItems.map((item) => queueId(item.source, item.title)))];
+  const activeClause = activeIds.length > 0
+    ? `and id not in (${activeIds.map((id) => lit(id)).join(', ')})`
+    : '';
+  await runSql(
+    BRAIN,
+    `update public.hq_queue
+        set status = 'resolved',
+            verdict_note = coalesce(verdict_note, 'Superseded automatically by the latest successful ${source} source reconciliation.'),
+            decided_at = coalesce(decided_at, ${lit(now)}::timestamptz),
+            decided_by = coalesce(decided_by, 'system:queue-reconciler'),
+            snooze_until = null,
+            execution_state = case
+              when execution_state = 'ready' then 'cancelled'
+              else execution_state
+            end,
+            updated_at = ${lit(now)}::timestamptz
+      where source = ${lit(source)}
+        and status in ('open', 'snoozed')
+        and execution_state in ('not_ready', 'ready')
+        ${activeClause};`,
+  );
 }
 
 /**
@@ -131,12 +195,14 @@ async function upsertQueueItems(runSql: RunSql, items: QueueItem[], now: string)
  */
 export async function syncHqQueue(runSql: RunSql, now: string, complianceFindings: Finding[] | null): Promise<void> {
   const items: QueueItem[] = [];
+  const successfullyReadSources = new Set<string>();
 
   try {
     const memoMd = await readFileOrNull(path.join(OPS_DIR, 'strategist-memo.md'));
     for (const bullet of parseNeedsLorenzo(memoMd)) {
       items.push({ source: 'strategist', title: bullet, detail: null, severity: 'high' });
     }
+    if (memoMd !== null) successfullyReadSources.add('strategist');
   } catch (err) {
     console.error(`queue-sync: strategist source failed (continuing): ${(err as Error).message}`);
   }
@@ -145,11 +211,13 @@ export async function syncHqQueue(runSql: RunSql, now: string, complianceFinding
     for (const f of complianceDueSoon(complianceFindings)) {
       items.push({ source: 'compliance', title: f.summary, detail: f.detail ?? null, severity: f.severity });
     }
+    if (complianceFindings !== null) successfullyReadSources.add('compliance');
   } catch (err) {
     console.error(`queue-sync: compliance source failed (continuing): ${(err as Error).message}`);
   }
 
   try {
+    await fs.access(HANDOFFS_DIR);
     const handoffItems = await extractNeedsYou(new Date(now));
     for (const h of handoffItems) {
       const severity = /blockers?\b/i.test(h.heading) ? 'high' : 'info';
@@ -160,12 +228,21 @@ export async function syncHqQueue(runSql: RunSql, now: string, complianceFinding
         severity,
       });
     }
+    successfullyReadSources.add('handoff');
   } catch (err) {
     console.error(`queue-sync: handoff source failed (continuing): ${(err as Error).message}`);
   }
 
   try {
     await upsertQueueItems(runSql, items, now);
+    for (const source of successfullyReadSources) {
+      await resolveSupersededQueueItems(
+        runSql,
+        source,
+        items.filter((item) => item.source === source),
+        now,
+      );
+    }
   } catch (err) {
     console.error(`queue-sync: upsert failed: ${(err as Error).message}`);
   }

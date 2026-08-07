@@ -7,14 +7,14 @@
  */
 
 import { logRfpCronExecution } from "@/lib/rfp/cron-log";
-import { scoreNewOpportunitiesForAllActiveOrgs } from "@/lib/rfp/scoring/recompute";
+import { scoreMissingOpportunitiesForAllActiveOrgsNoAi } from "@/lib/rfp/scoring/recompute";
 import { createAdminClient } from "@/lib/supabase/server";
 
 export const RFP_SCORE_COVERAGE_REPAIR_CRON = "rfp-score-coverage-repair";
 export const DEFAULT_SCORE_COVERAGE_MAX_REPAIR = 500;
 export const DEFAULT_SCORE_COVERAGE_SCAN_LIMIT = 20_000;
 
-const PAGE_SIZE = 500;
+const PAGE_SIZE = 100;
 
 interface OrgMembershipRow {
   org_id: string;
@@ -171,7 +171,7 @@ export async function runScoreCoverageRepair(
       orgs: orgIds.length,
     };
     try {
-      scored = await scoreNewOpportunitiesForAllActiveOrgs(coverage.ids);
+      scored = await scoreMissingOpportunitiesForAllActiveOrgsNoAi(coverage.ids);
     } catch (err) {
       scored = { error: err instanceof Error ? err.message : String(err) };
     }

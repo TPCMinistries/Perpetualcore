@@ -1,5 +1,5 @@
 import { createAdminClient } from "@/lib/supabase/server";
-import { stripe } from "@/lib/stripe/client";
+import { getStripe } from "@/lib/stripe/client";
 
 export type MeterType = 'ai_tokens' | 'api_calls' | 'storage_gb' | 'premium_models' | 'agents';
 
@@ -181,6 +181,7 @@ export async function syncUsageToStripe(organizationId: string): Promise<{
       // Report usage to Stripe using Usage Records
       // Note: This requires metered billing set up in Stripe
       if (meter.stripe_meter_id && meter.overage_units > 0) {
+        const stripe = getStripe();
         // Get subscription item for this meter
         const subscriptionItems = await stripe.subscriptionItems.list({
           subscription: subscription.stripe_subscription_id,

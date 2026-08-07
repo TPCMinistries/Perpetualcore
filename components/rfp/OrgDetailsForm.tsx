@@ -85,7 +85,7 @@ export function OrgDetailsForm({
   const disabled = !canEdit || saving;
 
   return (
-    <div className="space-y-4 rounded-lg border border-zinc-900 bg-white/[0.02] p-5">
+    <div className="space-y-4 rounded-lg border border-zinc-200 bg-white p-5 shadow-sm">
       <div>
         <label className="font-mono text-[10px] uppercase tracking-[0.22em] text-zinc-500">
           Name
@@ -96,7 +96,7 @@ export function OrgDetailsForm({
           onChange={(e) => setName(e.target.value)}
           disabled={disabled}
           maxLength={200}
-          className="mt-1 w-full rounded-md border border-zinc-800 bg-black px-3 py-2 text-[14px] text-zinc-100 disabled:opacity-60 focus:border-zinc-600 focus:outline-none"
+          className="mt-1 w-full rounded-md border border-zinc-300 bg-white px-3 py-2 text-[14px] text-zinc-900 disabled:opacity-60 focus:border-emerald-500 focus:outline-none"
         />
       </div>
 
@@ -108,7 +108,7 @@ export function OrgDetailsForm({
           value={type}
           onChange={(e) => setType(e.target.value as OrgType)}
           disabled={disabled}
-          className="mt-1 w-full rounded-md border border-zinc-800 bg-black px-3 py-2 text-[14px] text-zinc-100 disabled:opacity-60 focus:border-zinc-600 focus:outline-none"
+          className="mt-1 w-full rounded-md border border-zinc-300 bg-white px-3 py-2 text-[14px] text-zinc-900 disabled:opacity-60 focus:border-emerald-500 focus:outline-none"
         >
           {(Object.keys(TYPE_LABEL) as OrgType[]).map((t) => (
             <option key={t} value={t}>
@@ -116,7 +116,7 @@ export function OrgDetailsForm({
             </option>
           ))}
         </select>
-        <p className="mt-1 font-mono text-[10px] text-zinc-600">
+        <p className="mt-1 font-mono text-[10px] text-zinc-400">
           "Dual" unions discovery across nonprofit and for-profit member orgs — fiscal sponsors, capture consultants.
         </p>
       </div>
@@ -131,9 +131,9 @@ export function OrgDetailsForm({
           onChange={(e) => setNaicsRaw(e.target.value)}
           disabled={disabled}
           placeholder="e.g. 624190, 611310"
-          className="mt-1 w-full rounded-md border border-zinc-800 bg-black px-3 py-2 font-mono text-[13px] text-zinc-100 disabled:opacity-60 focus:border-zinc-600 focus:outline-none"
+          className="mt-1 w-full rounded-md border border-zinc-300 bg-white px-3 py-2 font-mono text-[13px] text-zinc-900 disabled:opacity-60 focus:border-emerald-500 focus:outline-none"
         />
-        <p className="mt-1 font-mono text-[10px] text-zinc-600">
+        <p className="mt-1 font-mono text-[10px] text-zinc-400">
           Comma-separated. Used to score federal opportunities against your scope.
         </p>
       </div>
@@ -149,9 +149,9 @@ export function OrgDetailsForm({
           maxLength={MAX_CAPACITY_CHARS}
           rows={6}
           placeholder="2-4 paragraphs about what your org does, who you serve, scale of operations, named programs and outcomes. The drafter uses this to shape the organizational_capacity section."
-          className="mt-1 w-full rounded-md border border-zinc-800 bg-black px-3 py-2 text-[13px] leading-relaxed text-zinc-100 disabled:opacity-60 focus:border-zinc-600 focus:outline-none"
+          className="mt-1 w-full rounded-md border border-zinc-300 bg-white px-3 py-2 text-[13px] leading-relaxed text-zinc-900 disabled:opacity-60 focus:border-emerald-500 focus:outline-none"
         />
-        <p className="mt-1 font-mono text-[10px] text-zinc-600">
+        <p className="mt-1 font-mono text-[10px] text-zinc-400">
           {capacitySummary.length.toLocaleString()} / {MAX_CAPACITY_CHARS.toLocaleString()} chars · feeds the drafter's system prompt.
         </p>
       </div>
@@ -162,17 +162,17 @@ export function OrgDetailsForm({
             type="button"
             onClick={() => void onSave()}
             disabled={saving}
-            className="rounded-md border border-emerald-500/30 bg-emerald-500/10 px-4 py-2 text-[13px] font-medium text-emerald-100 transition hover:bg-emerald-500/15 disabled:cursor-not-allowed disabled:opacity-50"
+            className="rounded-md bg-emerald-600 px-4 py-2 text-[13px] font-medium text-white transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-50"
           >
             {saving ? "Saving…" : "Save changes"}
           </button>
           {saved ? (
-            <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-emerald-300">
+            <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-emerald-600">
               saved
             </span>
           ) : null}
           {error ? (
-            <span className="text-[12px] text-rose-300">{error}</span>
+            <span className="text-[12px] text-rose-700">{error}</span>
           ) : null}
         </div>
       ) : null}

@@ -1,4 +1,4 @@
-import { stripe, STRIPE_PLANS, PlanType } from "./client";
+import { getStripe, STRIPE_PLANS, PlanType } from "./client";
 import { createClient } from "@/lib/supabase/server";
 
 /**
@@ -23,7 +23,7 @@ export async function getOrCreateCustomer(
   }
 
   // Create new Stripe customer
-  const customer = await stripe.customers.create({
+  const customer = await getStripe().customers.create({
     email,
     metadata: {
       userId,
@@ -69,7 +69,7 @@ export async function createCheckoutSession(
     throw new Error(`Price ID not configured for ${plan} plan (${interval})`);
   }
 
-  const session = await stripe.checkout.sessions.create({
+  const session = await getStripe().checkout.sessions.create({
     customer: customerId,
     mode: "subscription",
     payment_method_types: ["card"],
@@ -127,7 +127,7 @@ export async function createPortalSession(
     throw new Error("No Stripe customer found");
   }
 
-  const session = await stripe.billingPortal.sessions.create({
+  const session = await getStripe().billingPortal.sessions.create({
     customer: subscription.stripe_customer_id,
     return_url: returnUrl,
   });
@@ -242,7 +242,7 @@ export async function cancelSubscription(
     throw new Error("No active subscription found");
   }
 
-  await stripe.subscriptions.update(subscription.stripe_subscription_id, {
+  await getStripe().subscriptions.update(subscription.stripe_subscription_id, {
     cancel_at_period_end: cancelAtPeriodEnd,
   });
 
@@ -274,7 +274,7 @@ export async function reactivateSubscription(
     throw new Error("No subscription found");
   }
 
-  await stripe.subscriptions.update(subscription.stripe_subscription_id, {
+  await getStripe().subscriptions.update(subscription.stripe_subscription_id, {
     cancel_at_period_end: false,
   });
 

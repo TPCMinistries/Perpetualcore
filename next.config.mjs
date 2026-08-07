@@ -25,6 +25,7 @@ const nextConfig = {
     serverActions: {
       bodySizeLimit: '10mb',
     },
+    serverSourceMaps: false,
     // Enable optimized package imports for better tree-shaking
     optimizePackageImports: ['lucide-react', '@radix-ui/react-icons'],
   },
@@ -38,17 +39,7 @@ const nextConfig = {
   // Production optimizations
   compress: true,
   reactStrictMode: true,
-
-  webpack(config) {
-    config.ignoreWarnings = [
-      ...(config.ignoreWarnings ?? []),
-      {
-        module: /node_modules\/e2b\/dist\/index\.mjs/,
-        message: /Critical dependency: the request of a dependency is an expression/,
-      },
-    ];
-    return config;
-  },
+  productionBrowserSourceMaps: false,
 
   // Skip TypeScript checking during build - codebase is too large for Vercel's memory limits
   // Type checking is handled by: IDE (real-time), ESLint (via @typescript-eslint), and CI

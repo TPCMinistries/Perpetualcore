@@ -15,9 +15,19 @@ export const dynamic = "force-dynamic";
 
 const isDev = process.env.NODE_ENV === "development";
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: "2024-12-18.acacia",
-});
+let stripeClient: Stripe | null = null;
+
+function getStripe(): Stripe {
+  if (stripeClient) return stripeClient;
+
+  const secretKey = process.env.STRIPE_SECRET_KEY;
+  if (!secretKey) throw new Error("STRIPE_SECRET_KEY is not set");
+
+  stripeClient = new Stripe(secretKey, {
+    apiVersion: "2024-12-18.acacia",
+  });
+  return stripeClient;
+}
 
 const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET!;
 
@@ -72,6 +82,7 @@ export async function POST(req: NextRequest) {
   let event: Stripe.Event;
 
   try {
+    const stripe = getStripe();
     event = stripe.webhooks.constructEvent(body, signature, webhookSecret);
   } catch (err: unknown) {
     const errorMessage = err instanceof Error ? err.message : "Unknown error";
@@ -489,6 +500,7 @@ async function handleSubscriptionCreated(
   const status = subscription.status;
 
   // Get customer email
+  const stripe = getStripe();
   const customer = await stripe.customers.retrieve(customerId);
   const email = (customer as Stripe.Customer).email;
 
@@ -629,6 +641,7 @@ async function handleSubscriptionDeleted(
   // Send cancellation email
   const customerId = subscription.customer as string;
   try {
+    const stripe = getStripe();
     const customer = await stripe.customers.retrieve(customerId);
     const customerEmail = (customer as Stripe.Customer).email;
     if (customerEmail) {

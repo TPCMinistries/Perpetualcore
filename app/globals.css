@@ -92,6 +92,30 @@
     --status-pilot: 38 78% 56%;
     --status-invite: 220 9% 60%;
   }
+
+  /* Public company pages intentionally keep a high-contrast light editorial
+     canvas while their engine/marketplace sections opt into explicit dark
+     surfaces. This prevents system dark mode from producing light text on the
+     deliberately light marketplace and company sections. */
+  .public-light {
+    --background: 0 0% 100%;
+    --foreground: 220 13% 11%;
+    --card: 0 0% 100%;
+    --card-foreground: 220 13% 11%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 220 13% 11%;
+    --primary: 247 100% 62%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 226 34% 96%;
+    --secondary-foreground: 220 13% 11%;
+    --muted: 226 34% 96%;
+    --muted-foreground: 220 11% 42%;
+    --accent: 247 100% 97%;
+    --accent-foreground: 220 13% 11%;
+    --border: 220 13% 91%;
+    --input: 220 13% 91%;
+    --ring: 247 100% 62%;
+  }
 }
 
 @layer base {
@@ -276,4 +300,77 @@
   letter-spacing: -0.025em;
   line-height: 1;
   font-weight: 400;
+}
+
+/* Perpetual Core public V3 — warm, product-led marketing surface. */
+.pc-v3 {
+  color-scheme: light;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+}
+
+.pc-v3 ::selection {
+  background: rgba(85, 72, 217, 0.2);
+  color: #17171b;
+}
+
+/* Perpetual Core public V4 — dark operating-network surface. */
+.pc-v4 {
+  color-scheme: dark;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+}
+
+.pc-v4 ::selection {
+  background: rgba(84, 230, 177, 0.28);
+  color: #ffffff;
+}
+
+.pc-v4-grid {
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.032) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.032) 1px, transparent 1px);
+  background-size: 44px 44px;
+  mask-image: linear-gradient(to bottom, black, transparent 94%);
+}
+
+@keyframes pc-v4-scan {
+  0% {
+    transform: translateY(0);
+    opacity: 0;
+  }
+  12% {
+    opacity: 0.85;
+  }
+  80% {
+    opacity: 0.25;
+  }
+  100% {
+    transform: translateY(590px);
+    opacity: 0;
+  }
+}
+
+.pc-v4-scan {
+  animation: pc-v4-scan 7s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pc-v3 *,
+  .pc-v3 *::before,
+  .pc-v3 *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+
+  .pc-v4 *,
+  .pc-v4 *::before,
+  .pc-v4 *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }

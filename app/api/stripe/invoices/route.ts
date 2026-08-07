@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
-import { stripe } from "@/lib/stripe/client";
+import { getStripe } from "@/lib/stripe/client";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -43,6 +43,7 @@ export async function GET(req: NextRequest) {
     }
 
     // Fetch invoices from Stripe
+    const stripe = getStripe();
     const invoices = await stripe.invoices.list({
       customer: subscription.stripe_customer_id,
       limit: 24,

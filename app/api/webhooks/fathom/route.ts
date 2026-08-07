@@ -5,11 +5,24 @@ import crypto from "crypto";
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-// Use service role for webhook processing (bypasses RLS)
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
+type ServiceClient = ReturnType<typeof createClient>;
+
+let serviceClient: ServiceClient | null = null;
+
+function getServiceClient(): ServiceClient {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  if (!supabaseUrl) {
+    throw new Error("NEXT_PUBLIC_SUPABASE_URL is not configured");
+  }
+
+  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!serviceRoleKey) {
+    throw new Error("SUPABASE_SERVICE_ROLE_KEY is not configured");
+  }
+
+  serviceClient ??= createClient(supabaseUrl, serviceRoleKey);
+  return serviceClient;
+}
 
 // Fathom webhook secret for signature verification
 const FATHOM_WEBHOOK_SECRET = process.env.FATHOM_WEBHOOK_SECRET;
@@ -133,6 +146,8 @@ export async function POST(req: NextRequest) {
 
     // Parse payload
     const payload = JSON.parse(rawBody);
+
+    const supabase = getServiceClient();
 
     // Log webhook receipt immediately
     const { data: logEntry, error: logError } = await supabase

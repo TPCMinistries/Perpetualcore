@@ -6,6 +6,11 @@ import { SECTION_TYPES } from "@/lib/rfp/draft/sections";
 import type { PackageExtraction } from "@/lib/rfp/package/extract";
 import { isVoiceFingerprint, type VoiceFingerprint } from "@/lib/rfp/voice/extract";
 import { retrieveVaultChunks } from "@/lib/rfp/vault/retrieve";
+import {
+  guardedLLMCall,
+  budgetExceededResponse,
+  BudgetExceededError,
+} from "@/lib/rfp/ai/guardrail";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -161,20 +166,40 @@ export async function POST(
     );
   }
 
-  let draft;
+  // Generate — gated by per-tenant AI budget (Phase 17).
+  // guardedLLMCall runs checkBudget() BEFORE generateDraft fires, so an
+  // over-budget org never reaches the model. recordCost() is called by the
+  // wrapper after the draft returns; the inline rfp_agent_sessions insert
+  // that used to live below has been removed to avoid double-counting.
+  // proposal_id is known here so it is included in the session meta.
+  let draft: Awaited<ReturnType<typeof generateDraft>> & { agent: string; tokensIn: number; tokensOut: number; costUsd: number; sessionId?: string };
   try {
-    draft = await generateDraft({
-      opportunity: opp,
-      org: {
-        name: org.name,
-        type: org.type,
-        capacity_summary: org.capacity_summary,
-      },
-      voiceFingerprint,
-      vaultChunks,
-      packageExtractions,
+    draft = await guardedLLMCall(proposal.org_id, async () => {
+      const result = await generateDraft({
+        opportunity: opp,
+        org: {
+          name: org.name,
+          type: org.type,
+          capacity_summary: org.capacity_summary,
+        },
+        voiceFingerprint,
+        vaultChunks,
+        packageExtractions,
+      });
+      const sessionIdWithFlags = `${result.session_id}__redraft=package__voice=${result.voice_applied ? "true" : "false"}__vault=${result.vault_chunks_used}__package=${packageExtractions.length}`;
+      return {
+        ...result,
+        agent: "drafter_v1" as const,
+        model: result.model,
+        tokensIn: result.tokens_in,
+        tokensOut: result.tokens_out,
+        costUsd: result.cost_usd,
+        sessionId: sessionIdWithFlags,
+        proposalId: proposal.id,
+      };
     });
   } catch (err) {
+    if (err instanceof BudgetExceededError) return budgetExceededResponse(err);
     const msg = err instanceof Error ? err.message : "unknown";
     return NextResponse.json(
       { error: "generation_failed", detail: msg.slice(0, 200) },
@@ -234,17 +259,8 @@ export async function POST(
     })
     .eq("id", proposal.id);
 
-  const sessionIdWithFlags = `${draft.session_id}__redraft=package__voice=${draft.voice_applied ? "true" : "false"}__vault=${draft.vault_chunks_used}__package=${packageExtractions.length}`;
-  await admin.from("rfp_agent_sessions").insert({
-    proposal_id: proposal.id,
-    org_id: proposal.org_id,
-    agent: "drafter_v1",
-    session_id: sessionIdWithFlags,
-    model: draft.model,
-    tokens_in: draft.tokens_in,
-    tokens_out: draft.tokens_out,
-    cost_usd: draft.cost_usd,
-  });
+  // The rfp_agent_sessions audit row is recorded by guardedLLMCall → recordCost
+  // (wrapper owns the single insert). No inline insert here.
 
   return NextResponse.json({
     proposal_id: proposal.id,

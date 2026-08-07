@@ -1,19 +1,22 @@
 import { createClient } from "@/lib/supabase/server";
 import { NextRequest, NextResponse } from "next/server";
 import { searchDocuments, buildRAGContext } from "@/lib/documents/rag";
-import OpenAI from "openai";
 import Anthropic from "@anthropic-ai/sdk";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY!,
-});
+let anthropicClient: Anthropic | null = null;
 
-const anthropic = new Anthropic({
-  apiKey: process.env.ANTHROPIC_API_KEY!,
-});
+function getAnthropicClient(): Anthropic {
+  const apiKey = process.env.ANTHROPIC_API_KEY;
+  if (!apiKey) {
+    throw new Error("ANTHROPIC_API_KEY is not configured");
+  }
+
+  anthropicClient ??= new Anthropic({ apiKey });
+  return anthropicClient;
+}
 
 const LIBRARY_SYSTEM_PROMPT = `You are a helpful AI library assistant for Perpetual Core. Your role is to help users discover and understand their documents.
 
@@ -102,7 +105,7 @@ export async function POST(req: NextRequest) {
     ];
 
     // Use Claude for library chat (better at synthesis)
-    const response = await anthropic.messages.create({
+    const response = await getAnthropicClient().messages.create({
       model: "claude-sonnet-4-20250514",
       max_tokens: 2000,
       system: LIBRARY_SYSTEM_PROMPT,

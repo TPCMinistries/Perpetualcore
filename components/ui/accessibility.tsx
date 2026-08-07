@@ -242,7 +242,7 @@ interface HeadingProps extends React.HTMLAttributes<HTMLHeadingElement> {
 }
 
 export function Heading({ level, as, children, className, ...props }: HeadingProps) {
-  const Tag = `h${as || level}` as keyof JSX.IntrinsicElements;
+  const Tag: React.ElementType = `h${as || level}`;
 
   // Map visual styles based on level
   const styles: Record<number, string> = {

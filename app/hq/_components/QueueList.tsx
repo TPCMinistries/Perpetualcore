@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useTransition } from 'react';
-import type { QueueItem } from '@/lib/hq/queue';
+import { partitionQueueItems, type QueueItem } from '@/lib/hq/queue';
 import { decideQueueItem, executeQueueItem, type QueueVerdict } from '../actions';
 import { StatusChip, type ChipTone } from './StatusChip';
 import { EmptyState } from './EmptyState';
@@ -110,7 +110,9 @@ function QueueRow({ item, onDecided }: { item: QueueItem; onDecided: (id: string
       {item.actionKey && (
         <div className="rounded-md border p-3" style={{ borderColor: 'var(--hq-border)', background: 'var(--hq-panel-2)' }}>
           <div className="mb-2 flex flex-wrap items-center gap-2">
-            <span className="hq-eyebrow text-[10px]">Proposed action</span>
+            <span className="hq-eyebrow text-[10px]">
+              {item.source === 'operating_health' ? 'Sage recommendation' : 'Proposed action'}
+            </span>
             <StatusChip tone={item.riskLevel === 'low' ? 'ok' : item.riskLevel === 'medium' ? 'warn' : 'crit'} label={`${item.riskLevel} risk`} />
           </div>
           <p className="text-sm font-medium" style={{ color: 'var(--hq-ink)' }}>
@@ -206,15 +208,39 @@ function QueueRow({ item, onDecided }: { item: QueueItem; onDecided: (id: string
 
 export function QueueList({ items }: { items: QueueItem[] }) {
   const [removedIds, setRemovedIds] = useState<Set<string>>(new Set());
+  const [showBackground, setShowBackground] = useState(false);
 
   const visible = items.filter((i) => !removedIds.has(i.id));
   if (visible.length === 0) return <EmptyState label="Nothing queued." />;
+  const { priority, background } = partitionQueueItems(visible);
+  const rendered = showBackground ? [...priority, ...background] : priority;
 
   return (
-    <ul className="flex flex-col gap-2">
-      {visible.map((item) => (
-        <QueueRow key={item.id} item={item} onDecided={(id) => setRemovedIds((prev) => new Set(prev).add(id))} />
-      ))}
-    </ul>
+    <div className="flex flex-col gap-3">
+      <div className="flex flex-wrap items-end justify-between gap-3">
+        <div>
+          <div className="hq-eyebrow text-[10px]">Sage priority inbox</div>
+          <p className="mt-1 text-xs" style={{ color: 'var(--hq-ink-dim)' }}>
+            The five highest-leverage decisions and exceptions. Background evidence stays available below.
+          </p>
+        </div>
+        {background.length > 0 && (
+          <button
+            type="button"
+            aria-expanded={showBackground}
+            onClick={() => setShowBackground((value) => !value)}
+            className="hq-focusable min-h-11 cursor-pointer rounded-md border px-3 py-2 text-xs font-medium"
+            style={{ borderColor: 'var(--hq-border-strong)', color: 'var(--hq-ink)' }}
+          >
+            {showBackground ? 'Hide background' : `Review ${background.length} background items`}
+          </button>
+        )}
+      </div>
+      <ul className="flex flex-col gap-2">
+        {rendered.map((item) => (
+          <QueueRow key={item.id} item={item} onDecided={(id) => setRemovedIds((prev) => new Set(prev).add(id))} />
+        ))}
+      </ul>
+    </div>
   );
 }

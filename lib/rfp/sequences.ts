@@ -184,7 +184,7 @@ const leadCapture: Sequence = {
             <p>You just created an account on rfp.perpetualcore.com. Welcome.</p>
             <p>Before you dive into the dashboard, here's the 90-second version of what the engine does, in order:</p>
             <ol style="color:#d4d4d8;padding-left:20px;line-height:1.7;">
-              <li><strong>Discovery</strong> — we scan NY State, NYC PASSPort, NYC HRA every six hours. Federal sources (SAM.gov, Grants.gov, SBIR) restore the week our SAM key reissues.</li>
+              <li><strong>Discovery</strong> — we scan federal, state, city, and configured foundation sources on scheduled discovery, with source health tracked by the operator console.</li>
               <li><strong>Voice fingerprint</strong> — train it once from 3-10 past proposals; future drafts read like you, not like a vendor template.</li>
               <li><strong>Vault grounding</strong> — upload past docs; every claim cites a real chunk; [VERIFY] markers flag anything we can't ground.</li>
               <li><strong>Reviewer agent</strong> — Opus pass against the funder brief, 0-100 score, severity-graded findings.</li>
