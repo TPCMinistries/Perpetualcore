@@ -51,6 +51,22 @@ const nextConfig = {
   poweredByHeader: false,
   generateEtags: true,
 
+  // Multi-zone: /meridian is served by the standalone Meridian app (Next 16 +
+  // three.js), not by this codebase. Only these three path prefixes leave this
+  // deployment; everything else is unaffected. Set MERIDIAN_ZONE_URL in Vercel
+  // to the Meridian production URL — when it is unset these rewrites are
+  // omitted entirely so a missing env var can never break the site.
+  async rewrites() {
+    const zone = process.env.MERIDIAN_ZONE_URL;
+    if (!zone) return [];
+    const origin = zone.startsWith('http') ? zone : `https://${zone}`;
+    return [
+      { source: '/meridian', destination: `${origin}/meridian` },
+      { source: '/meridian/:path*', destination: `${origin}/meridian/:path*` },
+      { source: '/meridian-static/:path*', destination: `${origin}/meridian-static/:path*` },
+    ];
+  },
+
   // 301 redirects for retired routes per BRAND_ARCHITECTURE §7
   async redirects() {
     // /industries/* → /solutions/* canonical. The site previously had two
