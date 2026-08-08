@@ -13,6 +13,10 @@ import Stripe from "stripe";
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
+// Informational chatter stays behind isDev to keep production logs readable.
+// Errors never do: this route is how money becomes entitlement, and a payment
+// that fails to process silently is indistinguishable from one that never
+// happened. Every console.error below runs in every environment.
 const isDev = process.env.NODE_ENV === "development";
 
 let stripeClient: Stripe | null = null;
@@ -86,7 +90,7 @@ export async function POST(req: NextRequest) {
     event = stripe.webhooks.constructEvent(body, signature, webhookSecret);
   } catch (err: unknown) {
     const errorMessage = err instanceof Error ? err.message : "Unknown error";
-    if (isDev) console.error(`Webhook signature verification failed:`, errorMessage);
+    console.error(`[stripe-webhook] signature verification failed:`, errorMessage);
     return NextResponse.json(
       { error: `Webhook Error: ${errorMessage}` },
       { status: 400 }
@@ -155,7 +159,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ received: true });
   } catch (error: unknown) {
     const errorMessage = error instanceof Error ? error.message : "Unknown error";
-    if (isDev) console.error(`Error processing webhook:`, errorMessage);
+    console.error(`[stripe-webhook] processing failed for ${event.type} (${event.id}):`, errorMessage);
 
     // Mark event as failed (but still record it to prevent infinite retries)
     await markEventProcessed(supabase, event.id, event.type, "failed", errorMessage);
