@@ -10,7 +10,7 @@
     "lint": "NODE_OPTIONS='--max-old-space-size=4096' eslint app lib components --ext .ts,.tsx",
     "type-check": "npm run type-check:release",
     "type-check:legacy": "tsc --noEmit",
-    "type-check:release": "npm run type-check:rfp",
+    "type-check:release": "tsc --noEmit --project tsconfig.ci.json --pretty false",
     "type-check:rfp": "npm run type-check:rfp:launch",
     "type-check:rfp:launch": "tsc --noEmit --project tsconfig.rfp-launch.json --pretty false",
     "type-check:rfp:marketing": "tsc --noEmit --project tsconfig.rfp-marketing.json --pretty false",
