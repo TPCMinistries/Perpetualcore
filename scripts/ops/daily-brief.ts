@@ -87,6 +87,18 @@ async function main() {
   const revenueCrewParts = [stlHeadline, reactivationHeadline].filter((s): s is string => s !== null);
   const revenueCrewLine = revenueCrewParts.length ? revenueCrewParts.join(' · ') : null;
 
+  // Funnel — demand by source, and whether the instrument measuring it is alive.
+  // Worst severity wins so a dead measurement outranks a healthy-looking count.
+  const funnelCap = getCapability('funnel');
+  const funnelFindings: Finding[] = funnelCap
+    ? await settled(runCapability(funnelCap, { runSql, now }).then((r) => r.findings), [])
+    : [];
+  const funnelLine =
+    funnelFindings.find((f) => f.severity === 'critical')?.summary ??
+    funnelFindings.find((f) => f.severity === 'warn')?.summary ??
+    funnelFindings.find((f) => f.severity === 'ok')?.summary ??
+    null;
+
   // 2) today's metrics + cumulative gross
   const revenue: RevenuePoint[] = await settled(
     runSql(
@@ -158,6 +170,7 @@ async function main() {
     tasks,
     pnlHeadline,
     revenueCrewLine,
+    funnelLine,
   };
   const md = composeBrief(briefInput);
 
