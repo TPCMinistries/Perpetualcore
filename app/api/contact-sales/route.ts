@@ -200,9 +200,14 @@ export async function POST(request: Request) {
     });
 
     if (dbError) {
-      if (process.env.NODE_ENV === "development") {
-        console.error("Failed to save contact to database:", dbError);
-      }
+      // Log in every environment. Gated on development, this hid a CHECK
+      // constraint violation that 503'd every single submission — the form was
+      // returning an error to visitors and recording nothing anywhere.
+      console.error("[contact-sales] sales_contacts insert failed", {
+        code: dbError.code,
+        message: dbError.message,
+        details: dbError.details,
+      });
       return NextResponse.json(
         {
           error:
