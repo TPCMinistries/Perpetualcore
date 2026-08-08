@@ -670,7 +670,7 @@ export default function InboxPage() {
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="outline" className="gap-2 min-w-[200px] justify-between">
-                <span className="h-6 w-6 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
+                <span className="h-6 w-6 rounded-full bg-gradient-to-br from-blue-500 to-primary flex items-center justify-center">
                   <Mail className="h-3 w-3 text-white" />
                 </span>
                 <span className="font-medium">
@@ -798,7 +798,7 @@ export default function InboxPage() {
               setComposerMode("new");
               setShowComposer(true);
             }}
-            className="gap-2 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+            className="gap-2 bg-gradient-to-r from-blue-600 to-primary hover:from-blue-700 hover:to-primary"
           >
             <Send className="h-4 w-4" />
             Compose
@@ -1207,7 +1207,7 @@ export default function InboxPage() {
               {/* AI Insights */}
               {(triaging || selectedEmail.ai_triaged_at || selectedEmail.ai_summary) && (
                 <div
-                  className="px-6 py-3 bg-gradient-to-r from-violet-50 to-blue-50 dark:from-violet-950/30 dark:to-blue-950/30 border-b cursor-pointer hover:from-violet-100 hover:to-blue-100 dark:hover:from-violet-950/50 dark:hover:to-blue-950/50 transition-colors"
+                  className="px-6 py-3 bg-primary border-b cursor-pointer transition-colors"
                   onClick={() => !triaging && setAiInsightsExpanded(!aiInsightsExpanded)}
                 >
                   <div className="flex items-center gap-4">
@@ -1454,7 +1454,7 @@ export default function InboxPage() {
                     setComposerMode("ai-reply");
                     setShowComposer(true);
                   }}
-                  className="gap-2 bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-700 hover:to-purple-700"
+                  className="gap-2 bg-primary"
                 >
                   <Sparkles className="h-4 w-4" />
                   AI Reply

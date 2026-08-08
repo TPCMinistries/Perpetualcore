@@ -235,7 +235,7 @@ export function ActivityFeed({
                     <div className="flex items-start gap-3">
                       {/* Avatar */}
                       <div className="relative flex-shrink-0">
-                        <div className="h-9 w-9 rounded-full bg-gradient-to-br from-violet-500 to-purple-500 flex items-center justify-center text-sm font-medium text-white">
+                        <div className="h-9 w-9 rounded-full bg-primary flex items-center justify-center text-sm font-medium text-white">
                           {activity.userAvatar ? (
                             <img
                               src={activity.userAvatar}

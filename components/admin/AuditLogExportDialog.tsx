@@ -161,7 +161,7 @@ export default function AuditLogExportDialog({
           <Button
             onClick={handleExport}
             disabled={exporting}
-            className="bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-700 hover:to-purple-700 text-white"
+            className="bg-primary text-white"
           >
             {exporting ? (
               <>

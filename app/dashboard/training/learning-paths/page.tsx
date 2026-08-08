@@ -127,7 +127,7 @@ export default function LearningPathsPage() {
       completedSteps: 0,
       totalSteps: 6,
       icon: Zap,
-      gradient: "from-purple-500 to-pink-500",
+      gradient: "from-primary to-primary",
       category: "Automation",
       steps: [
         {
@@ -300,7 +300,7 @@ export default function LearningPathsPage() {
       completedSteps: 0,
       totalSteps: 4,
       icon: Users,
-      gradient: "from-indigo-500 to-purple-500",
+      gradient: "from-primary to-primary",
       category: "Collaboration",
       steps: [
         {
@@ -360,15 +360,15 @@ export default function LearningPathsPage() {
   return (
     <div className="space-y-8">
       {/* Hero Header */}
-      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-purple-50 via-pink-50 to-orange-50 dark:from-purple-950/30 dark:via-pink-950/30 dark:to-orange-950/30 border border-purple-100 dark:border-purple-900/20 p-8 md:p-12">
+      <div className="relative overflow-hidden rounded-3xl bg-primary dark:to-orange-950/30 border border-purple-100 dark:border-purple-900/20 p-8 md:p-12">
         <div className="absolute inset-0 bg-grid-pattern opacity-5"></div>
         <div className="relative z-10">
           <div className="flex items-center gap-4 mb-6">
-            <div className="h-16 w-16 rounded-2xl bg-gradient-to-br from-purple-500 via-pink-500 to-orange-500 flex items-center justify-center shadow-lg shadow-purple-500/50">
+            <div className="h-16 w-16 rounded-2xl bg-primary flex items-center justify-center shadow-lg shadow-purple-500/50">
               <GraduationCap className="h-8 w-8 text-white" />
             </div>
             <div>
-              <h1 className="text-4xl md:text-5xl font-bold tracking-tight bg-gradient-to-r from-purple-900 via-pink-800 to-orange-900 dark:from-purple-100 dark:via-pink-100 dark:to-orange-100 bg-clip-text text-transparent">
+              <h1 className="text-4xl md:text-5xl font-bold tracking-tight text-primary">
                 Learning Center
               </h1>
               <p className="text-purple-700 dark:text-purple-300 mt-1">
@@ -390,7 +390,7 @@ export default function LearningPathsPage() {
                 </div>
               </div>
               <div className="text-right">
-                <div className="text-3xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+                <div className="text-3xl font-bold text-primary">
                   {progress.percentage}%
                 </div>
                 <p className="text-xs text-muted-foreground">Complete</p>

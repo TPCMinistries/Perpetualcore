@@ -46,11 +46,11 @@ const CATEGORY_CONFIG: Record<
 > = {
   "Strategic Leadership": {
     icon: Crown,
-    gradient: "from-violet-500/10 via-purple-500/5 to-transparent",
+    gradient: "from-primary/10 via-primary/5 to-transparent",
     badgeBg: "bg-violet-100 dark:bg-violet-900/30",
     badgeText: "text-violet-700 dark:text-violet-400",
     cardBorder: "hover:border-violet-400/50 dark:hover:border-violet-600/50",
-    headerGradient: "from-violet-600 to-purple-600",
+    headerGradient: "from-primary to-primary",
     order: 1,
   },
   "Revenue & Growth": {
@@ -150,7 +150,7 @@ export default async function ExecutiveDashboardPage() {
         <div className="max-w-7xl mx-auto px-6 py-8">
           {/* Header */}
           <div className="mb-8 flex items-center gap-4">
-            <div className="h-12 w-12 rounded-2xl bg-gradient-to-br from-violet-500 to-purple-600 shadow-lg shadow-violet-500/20 flex items-center justify-center">
+            <div className="h-12 w-12 rounded-2xl bg-primary shadow-lg shadow-violet-500/20 flex items-center justify-center">
               <Crown className="h-6 w-6 text-white" />
             </div>
             <div>
@@ -167,7 +167,7 @@ export default async function ExecutiveDashboardPage() {
           <Card className="border-dashed border-2 border-violet-300/50 dark:border-violet-700/50">
             <CardContent className="py-20">
               <div className="text-center max-w-lg mx-auto">
-                <div className="mx-auto w-20 h-20 rounded-3xl bg-gradient-to-br from-violet-500/10 to-purple-500/10 dark:from-violet-500/20 dark:to-purple-500/20 flex items-center justify-center mb-6">
+                <div className="mx-auto w-20 h-20 rounded-3xl bg-gradient-to-br from-primary/10 to-primary/10 dark:from-primary/20 dark:to-primary/20 flex items-center justify-center mb-6">
                   <Users className="h-10 w-10 text-violet-500 dark:text-violet-400" />
                 </div>
                 <h2 className="text-xl font-semibold text-foreground mb-3">
@@ -180,7 +180,7 @@ export default async function ExecutiveDashboardPage() {
                 </p>
                 <Button
                   asChild
-                  className="h-12 px-8 bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-700 hover:to-purple-700 text-white shadow-lg shadow-violet-500/25 rounded-xl text-base"
+                  className="h-12 px-8 bg-primary text-white shadow-lg shadow-violet-500/25 rounded-xl text-base"
                 >
                   <Link href="/api/assistants/seed" prefetch={false}>
                     <Sparkles className="mr-2 h-5 w-5" />
@@ -206,7 +206,7 @@ export default async function ExecutiveDashboardPage() {
         {/* Header */}
         <div className="mb-8 flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <div className="h-12 w-12 rounded-2xl bg-gradient-to-br from-violet-500 to-purple-600 shadow-lg shadow-violet-500/20 flex items-center justify-center">
+            <div className="h-12 w-12 rounded-2xl bg-primary shadow-lg shadow-violet-500/20 flex items-center justify-center">
               <Crown className="h-6 w-6 text-white" />
             </div>
             <div>

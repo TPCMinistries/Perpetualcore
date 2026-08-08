@@ -336,7 +336,7 @@ export default function IdeasPage() {
       </div>
 
       {/* Quick Capture */}
-      <div className="p-6 border-b bg-gradient-to-r from-purple-50 to-blue-50">
+      <div className="p-6 border-b bg-primary">
         <div className="max-w-2xl mx-auto">
           <div className="flex items-center gap-2 mb-2">
             <Lightbulb className="h-5 w-5 text-purple-600" />
@@ -782,7 +782,7 @@ export default function IdeasPage() {
                     <TabsContent value="ai" className="mt-4 space-y-4">
                       {/* AI Score */}
                       {selectedIdea.ai_potential_score && (
-                        <Card className="bg-gradient-to-br from-purple-50 to-blue-50">
+                        <Card className="bg-primary">
                           <CardContent className="p-4">
                             <div className="flex items-center gap-2 mb-2">
                               <Sparkles className="h-4 w-4 text-purple-600" />

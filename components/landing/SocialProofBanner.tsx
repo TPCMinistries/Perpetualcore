@@ -13,7 +13,7 @@ export function SocialProofBanner() {
       <div className="max-w-4xl mx-auto text-center">
         {/* Counter */}
         <div className="mb-4">
-          <span className="text-5xl md:text-6xl font-black bg-gradient-to-r from-primary via-purple-600 to-primary bg-clip-text text-transparent">
+          <span className="text-5xl md:text-6xl font-black bg-gradient-to-r from-primary via-primary to-primary bg-clip-text text-transparent">
             50+
           </span>
           <span className="ml-3 text-3xl md:text-4xl font-black text-foreground">Organizations</span>

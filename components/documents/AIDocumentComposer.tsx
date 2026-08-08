@@ -435,7 +435,7 @@ export function AIDocumentComposer({
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b bg-muted">
           <div className="flex items-center gap-3">
-            <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-violet-600 to-purple-600 flex items-center justify-center">
+            <div className="h-10 w-10 rounded-xl bg-primary flex items-center justify-center">
               <Sparkles className="h-5 w-5 text-white" />
             </div>
             <div>
@@ -491,7 +491,7 @@ export function AIDocumentComposer({
                       className={cn(
                         "h-8 w-8 rounded-full flex items-center justify-center flex-shrink-0",
                         message.role === "assistant"
-                          ? "bg-gradient-to-br from-violet-600 to-purple-600"
+                          ? "bg-primary"
                           : "bg-muted"
                       )}
                     >
@@ -553,7 +553,7 @@ export function AIDocumentComposer({
                     animate={{ opacity: 1 }}
                     className="flex gap-3"
                   >
-                    <div className="h-8 w-8 rounded-full bg-gradient-to-br from-violet-600 to-purple-600 flex items-center justify-center">
+                    <div className="h-8 w-8 rounded-full bg-primary flex items-center justify-center">
                       <Loader2 className="h-4 w-4 text-white animate-spin" />
                     </div>
                     <div className="bg-muted rounded-2xl px-4 py-3">
@@ -858,7 +858,7 @@ export function AIDocumentComposer({
                 <Button
                   onClick={handleSave}
                   disabled={saving || !title.trim()}
-                  className="bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-700 hover:to-purple-700"
+                  className="bg-primary"
                 >
                   {saving ? (
                     <>

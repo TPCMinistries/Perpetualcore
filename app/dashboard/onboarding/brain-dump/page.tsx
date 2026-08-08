@@ -296,7 +296,7 @@ export default function BrainDumpPage() {
       {/* Header */}
       <div className="text-center space-y-2">
         <div className="flex justify-center">
-          <div className="h-16 w-16 rounded-2xl bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center">
+          <div className="h-16 w-16 rounded-2xl bg-primary flex items-center justify-center">
             <Brain className="h-8 w-8 text-white" />
           </div>
         </div>
@@ -369,7 +369,7 @@ export default function BrainDumpPage() {
                   <Button
                     onClick={handleProcess}
                     disabled={!brainDump.trim()}
-                    className="bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-700 hover:to-purple-700"
+                    className="bg-primary"
                   >
                     <Sparkles className="h-4 w-4 mr-2" />
                     Organize with AI
@@ -722,7 +722,7 @@ export default function BrainDumpPage() {
               <Button
                 size="lg"
                 onClick={handleCreate}
-                className="bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-700 hover:to-purple-700"
+                className="bg-primary"
               >
                 <Rocket className="h-5 w-5 mr-2" />
                 Create Everything
@@ -811,7 +811,7 @@ export default function BrainDumpPage() {
                   </Button>
                   <Button
                     onClick={() => router.push("/dashboard/home")}
-                    className="bg-gradient-to-r from-violet-600 to-purple-600"
+                    className="bg-primary"
                   >
                     Go to Dashboard
                     <ArrowRight className="h-4 w-4 ml-2" />

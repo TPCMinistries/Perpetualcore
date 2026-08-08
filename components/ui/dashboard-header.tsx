@@ -30,17 +30,17 @@ interface DashboardHeaderProps {
 }
 
 const iconColors = {
-  violet: "from-violet-500 to-purple-600 shadow-violet-500/20",
+  violet: "from-primary to-primary shadow-violet-500/20",
   blue: "from-blue-500 to-cyan-600 shadow-blue-500/20",
   green: "from-emerald-500 to-teal-600 shadow-emerald-500/20",
   amber: "from-amber-500 to-orange-600 shadow-amber-500/20",
-  rose: "from-rose-500 to-pink-600 shadow-rose-500/20",
-  indigo: "from-indigo-500 to-blue-600 shadow-indigo-500/20",
+  rose: "from-rose-500 to-primary shadow-rose-500/20",
+  indigo: "from-primary to-blue-600 shadow-indigo-500/20",
   slate: "from-slate-600 to-slate-800 shadow-slate-500/20",
 };
 
 const buttonVariants = {
-  primary: "bg-gradient-to-r from-primary to-purple-600 hover:from-primary/90 hover:to-purple-600/90 text-white shadow-lg shadow-primary/20 border-0 rounded-xl",
+  primary: "bg-primary text-white shadow-lg shadow-primary/20 border-0 rounded-xl",
   secondary: "bg-foreground hover:bg-foreground/90 text-background rounded-xl",
   outline: "border hover:bg-accent rounded-xl",
   ghost: "hover:bg-accent rounded-xl",

@@ -17,7 +17,7 @@ const securityFeatures = [
   {
     icon: Lock,
     color: "text-blue-500",
-    gradient: "from-blue-500 to-indigo-600",
+    gradient: "from-blue-500 to-primary",
     title: "Never Used for Training",
     description:
       "Your conversations, documents, and data are never used to train AI models. Your intellectual property stays yours.",
@@ -25,7 +25,7 @@ const securityFeatures = [
   {
     icon: Database,
     color: "text-purple-500",
-    gradient: "from-purple-500 to-violet-600",
+    gradient: "from-primary to-primary",
     title: "Your Personal AI Brain",
     description:
       "Private vector database per workspace. Your knowledge base is isolated, searchable, and exclusively yours.",
@@ -62,7 +62,7 @@ export function SecuritySection() {
           <Shield className="h-4 w-4" />
           <span>Enterprise-Grade Security</span>
         </div>
-        <h2 className="text-4xl sm:text-5xl md:text-6xl font-bold tracking-tighter mb-4 bg-gradient-to-r from-foreground via-primary to-purple-600 bg-clip-text text-transparent">
+        <h2 className="text-4xl sm:text-5xl md:text-6xl font-bold tracking-tighter mb-4 bg-gradient-to-r from-foreground via-primary to-primary bg-clip-text text-transparent">
           Your Data Stays Yours
         </h2>
         <p className="text-lg sm:text-xl text-muted-foreground max-w-2xl mx-auto">

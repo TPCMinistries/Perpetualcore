@@ -36,7 +36,7 @@ export function ChatMessages({
           <div className="flex gap-4 max-w-full">
             {message.role === "assistant" && (
               <div className="flex-shrink-0">
-                <div className="h-7 w-7 rounded-md bg-gradient-to-br from-purple-500 to-blue-600 flex items-center justify-center">
+                <div className="h-7 w-7 rounded-md bg-primary flex items-center justify-center">
                   <Bot className="h-4 w-4 text-white" />
                 </div>
               </div>

@@ -235,7 +235,7 @@ export function PageHelp({ title, description, quickActions }: PageHelpProps) {
       initial={{ opacity: 0, y: -10 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, height: 0 }}
-      className="bg-gradient-to-r from-violet-50 to-purple-50 dark:from-violet-950/30 dark:to-purple-950/30 border border-violet-200 dark:border-violet-800 rounded-lg p-4 mb-6"
+      className="bg-primary border border-violet-200 dark:border-violet-800 rounded-lg p-4 mb-6"
     >
       <div className="flex items-start gap-4">
         <div className="p-2 rounded-lg bg-violet-100 dark:bg-violet-900">

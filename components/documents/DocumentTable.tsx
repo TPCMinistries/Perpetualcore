@@ -377,7 +377,7 @@ export function DocumentTable({
                 {/* Type */}
                 <div className="text-center">
                   {doc.document_type ? (
-                    <span className="inline-flex items-center text-xs px-2.5 py-1 bg-gradient-to-r from-purple-500/10 to-indigo-500/10 text-purple-600 dark:text-purple-400 border border-purple-500/30 rounded-lg font-medium">
+                    <span className="inline-flex items-center text-xs px-2.5 py-1 bg-gradient-to-r from-primary/10 to-primary/10 text-purple-600 dark:text-purple-400 border border-purple-500/30 rounded-lg font-medium">
                       {doc.document_type}
                     </span>
                   ) : (

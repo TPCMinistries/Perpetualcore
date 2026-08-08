@@ -223,7 +223,7 @@ When suggesting content changes, format them clearly so the user can easily copy
       <SheetContent className="w-full sm:max-w-lg flex flex-col p-0">
         <SheetHeader className="px-6 py-4 border-b border-slate-200 dark:border-slate-700">
           <SheetTitle className="flex items-center gap-2">
-            <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center">
+            <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center">
               <Bot className="h-4 w-4 text-white" />
             </div>
             AI Assistant
@@ -241,7 +241,7 @@ When suggesting content changes, format them clearly so the user can easily copy
               )}
             >
               {message.role === "assistant" && (
-                <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center flex-shrink-0">
+                <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center flex-shrink-0">
                   <Bot className="h-4 w-4 text-white" />
                 </div>
               )}
@@ -305,7 +305,7 @@ When suggesting content changes, format them clearly so the user can easily copy
           ))}
           {loading && (
             <div className="flex gap-3">
-              <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center flex-shrink-0">
+              <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center flex-shrink-0">
                 <Bot className="h-4 w-4 text-white" />
               </div>
               <div className="bg-slate-100 dark:bg-slate-800 rounded-xl px-4 py-3">
@@ -356,7 +356,7 @@ When suggesting content changes, format them clearly so the user can easily copy
             <Button
               onClick={sendMessage}
               disabled={!input.trim() || loading}
-              className="bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-700 hover:to-purple-700 text-white border-0 px-3"
+              className="bg-primary text-white border-0 px-3"
             >
               {loading ? (
                 <Loader2 className="h-4 w-4 animate-spin" />

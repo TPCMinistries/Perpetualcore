@@ -87,7 +87,7 @@ export default function QuickStartLesson2() {
             </ol>
 
             <Link href="/dashboard/agents/templates" target="_blank">
-              <Button className="w-full bg-gradient-to-r from-purple-600 to-pink-600">
+              <Button className="w-full bg-primary">
                 <Bot className="h-4 w-4 mr-2" />
                 Browse Agent Templates
               </Button>
@@ -256,7 +256,7 @@ export default function QuickStartLesson2() {
         Congratulations on creating your first AI Agent! Now let's practice what you've learned:
       </p>
 
-      <Card className="p-6 bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-950/20 dark:to-pink-950/20">
+      <Card className="p-6 bg-primary">
         <h3 className="font-semibold text-lg mb-4">Challenge: Create a Second Agent</h3>
         <p className="mb-4">
           Go back to the templates and create an <strong>Email Organizer Agent</strong>. This agent will:
@@ -279,7 +279,7 @@ export default function QuickStartLesson2() {
       </Card>
 
       <Link href="/dashboard/agents/templates" target="_blank">
-        <Button className="w-full bg-gradient-to-r from-purple-600 to-pink-600">
+        <Button className="w-full bg-primary">
           Start Practice Exercise
         </Button>
       </Link>

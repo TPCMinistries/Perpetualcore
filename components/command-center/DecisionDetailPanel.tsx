@@ -1061,7 +1061,7 @@ export function DecisionDetailPanel({
                   {stakeholders.map((stakeholder) => (
                     <Card key={stakeholder.id} className="p-3">
                       <div className="flex items-center gap-3">
-                        <div className="h-10 w-10 rounded-full bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center text-white font-medium">
+                        <div className="h-10 w-10 rounded-full bg-gradient-to-br from-blue-500 to-primary flex items-center justify-center text-white font-medium">
                           {stakeholder.stakeholder_name?.charAt(0) || "?"}
                         </div>
                         <div className="flex-1">
@@ -1190,7 +1190,7 @@ export function DecisionDetailPanel({
                 <div className="space-y-3">
                   {comments.map((comment) => (
                     <div key={comment.id} className="flex gap-3">
-                      <div className="h-8 w-8 rounded-full bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center text-white text-sm font-medium flex-shrink-0">
+                      <div className="h-8 w-8 rounded-full bg-gradient-to-br from-blue-500 to-primary flex items-center justify-center text-white text-sm font-medium flex-shrink-0">
                         {comment.author_name?.charAt(0) || "?"}
                       </div>
                       <div className="flex-1">

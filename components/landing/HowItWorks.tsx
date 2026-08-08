@@ -7,21 +7,21 @@ const steps = [
   {
     number: 1,
     icon: UserPlus,
-    gradient: "from-primary to-purple-600",
+    gradient: "from-primary to-primary",
     title: "Sign Up",
     description: "Create your free account in seconds. No credit card required.",
   },
   {
     number: 2,
     icon: Cable,
-    gradient: "from-purple-600 to-pink-600",
+    gradient: "from-primary to-primary",
     title: "Connect",
     description: "Import documents, connect email & calendar. Build your knowledge base.",
   },
   {
     number: 3,
     icon: Rocket,
-    gradient: "from-pink-600 to-orange-500",
+    gradient: "from-primary to-orange-500",
     title: "Transform",
     description: "Start chatting with AI that knows everything about your work.",
   },
@@ -38,7 +38,7 @@ export function HowItWorks() {
         transition={{ duration: 0.6 }}
         className="text-center mb-14 sm:mb-20"
       >
-        <h2 className="text-4xl sm:text-5xl md:text-6xl font-bold tracking-tighter mb-4 bg-gradient-to-r from-foreground via-primary to-purple-600 bg-clip-text text-transparent">
+        <h2 className="text-4xl sm:text-5xl md:text-6xl font-bold tracking-tighter mb-4 bg-gradient-to-r from-foreground via-primary to-primary bg-clip-text text-transparent">
           Get started in minutes
         </h2>
         <p className="text-lg sm:text-xl text-muted-foreground max-w-xl mx-auto">

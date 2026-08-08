@@ -4,9 +4,15 @@
 
 @layer base {
   :root {
-    /* Engine editorial — high-contrast institutional base with electric
-       signal color. The brand should feel like an operating standard, not a
-       generic SaaS landing page. */
+    /* Engine editorial — high-contrast institutional base.
+       The brand should feel like an operating standard, not a generic SaaS
+       landing page. That intent was already written here; the execution had
+       drifted away from it. The primary was an electric indigo (247 100% 62%)
+       and 258 violet/purple/pink gradients had accumulated on top of it, which
+       is the visual vocabulary of an AI demo rather than software a company
+       trusts with its operations. Primary is now a deep institutional blue.
+       Change this ONE value to re-tune the product; do not reach for a
+       gradient to make a surface feel important. */
 
     --background: 0 0% 100%;          /* pure white */
     --foreground: 220 13% 11%;        /* near-black, cool */
@@ -16,7 +22,7 @@
     --popover: 0 0% 100%;
     --popover-foreground: 220 13% 11%;
 
-    --primary: 247 100% 62%;
+    --primary: 201 96% 32%;        /* #0369A1 — institutional blue */
     --primary-foreground: 0 0% 100%;
 
     --secondary: 226 34% 96%;
@@ -30,7 +36,7 @@
     --destructive-foreground: 0 0% 100%;
     --border: 220 13% 91%;
     --input: 220 13% 91%;
-    --ring: 247 100% 62%;
+    --ring: 201 96% 32%;
     --radius: 0.25rem;
 
     /* Semantic surfaces */
@@ -43,10 +49,10 @@
 
     --sidebar-bg: 220 18% 9%;
     --sidebar-hover: 220 14% 16%;
-    --sidebar-active: 247 100% 62%;
+    --sidebar-active: 201 96% 32%;
 
-    --glow-primary: 247 100% 62% / 0.18;
-    --shadow-colored: 247 100% 62% / 0.08;
+    --glow-primary: 201 96% 32% / 0.18;
+    --shadow-colored: 201 96% 32% / 0.08;
 
     /* Status colors for product pills */
     --status-live: 168 88% 34%;        /* teal for LIVE */
@@ -61,7 +67,7 @@
     --card-foreground: 220 14% 96%;
     --popover: 220 18% 10%;
     --popover-foreground: 220 14% 96%;
-    --primary: 258 65% 68%;
+    --primary: 200 90% 62%;        /* lighter blue — the light-mode value has no contrast here */
     --primary-foreground: 220 18% 9%;
     --secondary: 220 14% 14%;
     --secondary-foreground: 220 14% 96%;
@@ -73,7 +79,7 @@
     --destructive-foreground: 220 14% 96%;
     --border: 220 14% 18%;
     --input: 220 14% 18%;
-    --ring: 258 65% 68%;
+    --ring: 200 90% 62%;
 
     --ink: 220 14% 96%;
     --ink-muted: 220 9% 60%;
@@ -83,10 +89,10 @@
 
     --sidebar-bg: 220 18% 7%;
     --sidebar-hover: 220 14% 14%;
-    --sidebar-active: 258 65% 68%;
+    --sidebar-active: 200 90% 62%;
 
-    --glow-primary: 258 65% 68% / 0.18;
-    --shadow-colored: 258 65% 68% / 0.10;
+    --glow-primary: 200 90% 62% / 0.18;
+    --shadow-colored: 200 90% 62% / 0.10;
 
     --status-live: 142 50% 50%;
     --status-pilot: 38 78% 56%;
@@ -104,17 +110,17 @@
     --card-foreground: 220 13% 11%;
     --popover: 0 0% 100%;
     --popover-foreground: 220 13% 11%;
-    --primary: 247 100% 62%;
+    --primary: 201 96% 32%;
     --primary-foreground: 0 0% 100%;
     --secondary: 226 34% 96%;
     --secondary-foreground: 220 13% 11%;
     --muted: 226 34% 96%;
     --muted-foreground: 220 11% 42%;
-    --accent: 247 100% 97%;
+    --accent: 201 96% 96%;
     --accent-foreground: 220 13% 11%;
     --border: 220 13% 91%;
     --input: 220 13% 91%;
-    --ring: 247 100% 62%;
+    --ring: 201 96% 32%;
   }
 }
 

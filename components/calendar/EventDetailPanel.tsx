@@ -260,7 +260,7 @@ export function EventDetailPanel({ event, onClose }: EventDetailPanelProps) {
 
               {/* AI Meeting Prep */}
               {event.type === "event" && (
-                <div className="bg-gradient-to-br from-violet-50 to-purple-50 dark:from-violet-950/30 dark:to-purple-950/30 rounded-xl p-4 border border-violet-200 dark:border-violet-800">
+                <div className="bg-primary rounded-xl p-4 border border-violet-200 dark:border-violet-800">
                   <h3 className="text-sm font-medium text-violet-900 dark:text-violet-100 mb-3 flex items-center gap-2">
                     <Sparkles className="h-4 w-4 text-violet-600" />
                     AI Meeting Prep

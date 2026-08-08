@@ -74,7 +74,7 @@ export default function EnterpriseDemoBookingForm() {
 
   if (isSuccess) {
     return (
-      <div className="bg-gradient-to-br from-purple-50 to-indigo-50 dark:from-purple-950/30 dark:to-indigo-950/30 rounded-2xl p-8 border border-purple-200 dark:border-purple-800">
+      <div className="bg-primary rounded-2xl p-8 border border-purple-200 dark:border-purple-800">
         <div className="text-center">
           <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-purple-100 dark:bg-purple-900/50 mb-4">
             <CheckCircle2 className="h-8 w-8 text-purple-600 dark:text-purple-400" />
@@ -358,7 +358,7 @@ export default function EnterpriseDemoBookingForm() {
       <button
         type="submit"
         disabled={isSubmitting}
-        className="w-full px-6 py-4 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white font-bold rounded-xl transition-all shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+        className="w-full px-6 py-4 bg-primary text-white font-bold rounded-xl transition-all shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
       >
         {isSubmitting ? (
           <>

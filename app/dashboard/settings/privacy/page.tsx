@@ -122,7 +122,7 @@ export default function PrivacySettingsPage() {
   return (
     <div className="space-y-8 pb-16">
       {/* Header */}
-      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-red-50 via-pink-50 to-rose-50 dark:from-red-950/20 dark:via-pink-950/20 dark:to-rose-950/20 border border-red-100 dark:border-red-900/20 p-8 shadow-lg">
+      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-red-50 via-primary to-rose-50 dark:from-red-950/20 dark:via-primary/20 dark:to-rose-950/20 border border-red-100 dark:border-red-900/20 p-8 shadow-lg">
         <div className="absolute inset-0 bg-grid-pattern opacity-5"></div>
         <div className="relative flex items-center justify-between">
           <div className="flex items-center gap-4">
@@ -130,7 +130,7 @@ export default function PrivacySettingsPage() {
               <Shield className="h-8 w-8 text-white" />
             </div>
             <div>
-              <h1 className="text-3xl font-bold bg-gradient-to-r from-red-900 via-pink-800 to-rose-900 dark:from-red-100 dark:via-pink-100 dark:to-rose-100 bg-clip-text text-transparent">
+              <h1 className="text-3xl font-bold bg-gradient-to-r from-red-900 via-primary to-rose-900 dark:from-red-100 dark:via-primary dark:to-rose-100 bg-clip-text text-transparent">
                 Privacy Settings
               </h1>
               <p className="text-red-700 dark:text-red-300 mt-1">

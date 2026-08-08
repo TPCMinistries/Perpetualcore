@@ -1817,7 +1817,7 @@ export default function AccountDetailPage() {
         </CardContent>
       </Card>
 
-      <Card className="rounded-lg border-violet-200 bg-gradient-to-br from-violet-50 via-white to-white shadow-none">
+      <Card className="rounded-lg border-violet-200 bg-gradient-to-br from-primary via-white to-white shadow-none">
         <CardHeader>
           <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
             <div>

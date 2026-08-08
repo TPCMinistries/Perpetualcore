@@ -254,15 +254,15 @@ export default function BotsPage() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-violet-50 via-purple-50 to-fuchsia-50 dark:from-violet-950/20 dark:via-purple-950/20 dark:to-fuchsia-950/20 border border-violet-100 dark:border-violet-900/20 p-8 shadow-lg">
+      <div className="relative overflow-hidden rounded-3xl bg-primary border border-violet-100 dark:border-violet-900/20 p-8 shadow-lg">
         <div className="absolute inset-0 bg-grid-pattern opacity-5"></div>
         <div className="relative flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <div className="h-16 w-16 rounded-2xl bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center shadow-lg">
+            <div className="h-16 w-16 rounded-2xl bg-primary flex items-center justify-center shadow-lg">
               <Bot className="h-8 w-8 text-white" />
             </div>
             <div>
-              <h1 className="text-3xl font-bold bg-gradient-to-r from-violet-900 via-purple-800 to-fuchsia-900 dark:from-violet-100 dark:via-purple-100 dark:to-fuchsia-100 bg-clip-text text-transparent">
+              <h1 className="text-3xl font-bold text-primary">
                 Bot Builder
               </h1>
               <p className="text-violet-700 dark:text-violet-300 mt-1">
@@ -272,7 +272,7 @@ export default function BotsPage() {
           </div>
           <Button
             asChild
-            className="bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-700 hover:to-purple-700 shadow-md"
+            className="bg-primary shadow-md"
           >
             <Link href="/dashboard/bots/builder">
               <Plus className="h-4 w-4 mr-2" />
@@ -336,7 +336,7 @@ export default function BotsPage() {
                   <CardHeader className="pb-3">
                     <div className="flex items-start justify-between">
                       <div className="flex items-center gap-3">
-                        <div className="h-10 w-10 rounded-lg bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center">
+                        <div className="h-10 w-10 rounded-lg bg-primary flex items-center justify-center">
                           <Workflow className="h-5 w-5 text-white" />
                         </div>
                         <div>

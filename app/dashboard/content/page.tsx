@@ -643,7 +643,7 @@ export default function ContentPage() {
                 else setShowNewContent(true);
               }}>
                 <DialogTrigger asChild>
-                  <Button className="bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-700 hover:to-purple-700 text-white shadow-lg shadow-violet-500/25">
+                  <Button className="bg-primary text-white shadow-lg shadow-violet-500/25">
                     <Plus className="h-4 w-4 mr-2" />
                     Create Content
                   </Button>
@@ -812,7 +812,7 @@ export default function ContentPage() {
                             <Button
                               onClick={saveSelectedVariation}
                               disabled={submitting || selectedVariation === null}
-                              className="bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-700 hover:to-purple-700 text-white"
+                              className="bg-primary text-white"
                             >
                               {submitting ? (
                                 <><Loader2 className="h-4 w-4 mr-2 animate-spin" />Saving...</>
@@ -1009,7 +1009,7 @@ export default function ContentPage() {
                           <Button
                             onClick={generateFromTemplate}
                             disabled={submitting || !newContent.title.trim() || !selectedTemplate.fields.filter((f) => f.required).every((f) => templateValues[f.key]?.trim())}
-                            className="bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-700 hover:to-purple-700 text-white"
+                            className="bg-primary text-white"
                           >
                             {submitting ? (
                               <><Loader2 className="h-4 w-4 mr-2 animate-spin" />Generating...</>
@@ -1021,7 +1021,7 @@ export default function ContentPage() {
                           <Button
                             onClick={createContent}
                             disabled={submitting || !newContent.title.trim()}
-                            className="bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-700 hover:to-purple-700 text-white"
+                            className="bg-primary text-white"
                           >
                             {submitting ? (
                               <><Loader2 className="h-4 w-4 mr-2 animate-spin" />Generating...</>

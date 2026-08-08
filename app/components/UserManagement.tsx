@@ -123,7 +123,7 @@ export default function UserManagement() {
               <tr key={user.id} className="hover:bg-slate-700/20">
                 <td className="px-6 py-4">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-gradient-to-r from-cyan-500 to-purple-500 rounded-full flex items-center justify-center text-sm font-bold">
+                    <div className="w-10 h-10 bg-gradient-to-r from-cyan-500 to-primary rounded-full flex items-center justify-center text-sm font-bold">
                       {(user.full_name?.[0] || user.email[0]).toUpperCase()}
                     </div>
                     <div>
@@ -195,7 +195,7 @@ export default function UserManagement() {
               {/* User Info */}
               <div className="bg-slate-700/30 rounded-lg p-4">
                 <div className="flex items-center gap-3 mb-3">
-                  <div className="w-12 h-12 bg-gradient-to-r from-cyan-500 to-purple-500 rounded-full flex items-center justify-center text-lg font-bold">
+                  <div className="w-12 h-12 bg-gradient-to-r from-cyan-500 to-primary rounded-full flex items-center justify-center text-lg font-bold">
                     {(selectedUser.full_name?.[0] || selectedUser.email[0]).toUpperCase()}
                   </div>
                   <div className="flex-1 min-w-0">

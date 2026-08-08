@@ -289,7 +289,7 @@ export function DashboardContent({ userId, userName }: DashboardContentProps) {
           </p>
           <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2">
             <greeting.Icon className={`h-6 w-6 ${greeting.color}`} />
-            {greeting.text}, <span className="bg-gradient-to-r from-primary to-purple-500 bg-clip-text text-transparent">{userName}</span>
+            {greeting.text}, <span className="text-primary">{userName}</span>
           </h1>
         </motion.div>
         <Button

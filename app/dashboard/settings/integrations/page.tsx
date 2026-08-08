@@ -391,15 +391,15 @@ export default function IntegrationsPage() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-indigo-50 via-purple-50 to-violet-50 dark:from-indigo-950/20 dark:via-purple-950/20 dark:to-violet-950/20 border border-indigo-100 dark:border-indigo-900/20 p-8 shadow-lg">
+      <div className="relative overflow-hidden rounded-3xl bg-primary border border-indigo-100 dark:border-indigo-900/20 p-8 shadow-lg">
         <div className="absolute inset-0 bg-grid-pattern opacity-5"></div>
         <div className="relative flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <div className="h-16 w-16 rounded-2xl bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center shadow-lg">
+            <div className="h-16 w-16 rounded-2xl bg-primary flex items-center justify-center shadow-lg">
               <LinkIcon className="h-8 w-8 text-white" />
             </div>
             <div>
-              <h1 className="text-3xl font-bold bg-gradient-to-r from-indigo-900 via-purple-800 to-violet-900 dark:from-indigo-100 dark:via-purple-100 dark:to-violet-100 bg-clip-text text-transparent">
+              <h1 className="text-3xl font-bold text-primary">
                 Integrations
               </h1>
               <p className="text-indigo-700 dark:text-indigo-300 mt-1">
@@ -534,7 +534,7 @@ export default function IntegrationsPage() {
                 ) : (
                   <Button
                     size="sm"
-                    className="flex-1 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700"
+                    className="flex-1 bg-primary"
                     onClick={() => handleConnect(integration)}
                   >
                     {integration.oauth ? (
@@ -669,7 +669,7 @@ export default function IntegrationsPage() {
             <Button
               onClick={handleSaveConfig}
               disabled={saving}
-              className="bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700"
+              className="bg-primary"
             >
               {saving ? (
                 <>

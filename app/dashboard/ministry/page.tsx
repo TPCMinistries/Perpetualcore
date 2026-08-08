@@ -529,7 +529,7 @@ export default function MinistryPage() {
         {/* Prayer Tab */}
         <TabsContent value="prayer" className="flex-1 overflow-auto p-6">
           {/* Quick Prayer Capture */}
-          <Card className="mb-6 bg-gradient-to-r from-pink-50 to-purple-50">
+          <Card className="mb-6 bg-primary">
             <CardContent className="p-4">
               <div className="flex items-center gap-2 mb-2">
                 <Heart className="h-5 w-5 text-pink-600" />

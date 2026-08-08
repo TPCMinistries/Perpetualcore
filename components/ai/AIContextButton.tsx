@@ -172,7 +172,7 @@ export function AIContextButton({
       className={`rounded-full shadow-lg ${
         isOpen
           ? "bg-violet-600 hover:bg-violet-700"
-          : "bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-700 hover:to-purple-700"
+          : "bg-primary"
       }`}
       size="lg"
     >
@@ -219,7 +219,7 @@ export function AIContextButton({
                 className="absolute bottom-16 right-0 w-80 sm:w-96 bg-background border rounded-xl shadow-2xl overflow-hidden"
               >
                 {/* Header */}
-                <div className="p-3 border-b bg-gradient-to-r from-violet-50 to-purple-50 dark:from-violet-950/50 dark:to-purple-950/50">
+                <div className="p-3 border-b bg-primary">
                   <div className="flex items-center gap-2">
                     <Bot className="h-5 w-5 text-violet-600" />
                     <span className="font-medium">AI Assistant</span>

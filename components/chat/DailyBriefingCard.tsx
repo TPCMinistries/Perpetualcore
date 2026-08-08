@@ -79,7 +79,7 @@ export function DailyBriefingCard() {
 
   if (loading) {
     return (
-      <Card className="p-4 bg-gradient-to-br from-violet-50 to-purple-50 dark:from-violet-950/30 dark:to-purple-950/30 border-violet-200 dark:border-violet-800">
+      <Card className="p-4 bg-primary border-violet-200 dark:border-violet-800">
         <Skeleton className="h-4 w-24 mb-2" />
         <Skeleton className="h-3 w-32 mb-3" />
         <Skeleton className="h-8 w-full" />
@@ -111,7 +111,7 @@ export function DailyBriefingCard() {
       transition={{ duration: 0.3 }}
     >
       <Card
-        className="p-4 bg-gradient-to-br from-violet-50 to-purple-50 dark:from-violet-950/30 dark:to-purple-950/30 border-violet-200 dark:border-violet-800 cursor-pointer hover:shadow-md transition-shadow"
+        className="p-4 bg-primary border-violet-200 dark:border-violet-800 cursor-pointer hover:shadow-md transition-shadow"
         onClick={() => setExpanded(!expanded)}
       >
         {/* Header */}

@@ -598,7 +598,7 @@ export default function LibraryPage() {
   const pendingSummaries = stats.total - stats.withSummaries;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-slate-100 to-violet-50 dark:from-slate-950 dark:via-slate-900 dark:to-violet-950/20">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-slate-100 to-primary dark:from-slate-950 dark:via-slate-900 dark:to-primary/20">
       {/* Ambient glow effects */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-0 left-1/4 w-96 h-96 bg-violet-500/10 rounded-full blur-3xl" />
@@ -611,7 +611,7 @@ export default function LibraryPage() {
           <div className="flex items-start justify-between">
             <div className="flex items-center gap-5">
               <motion.div
-                className="h-16 w-16 rounded-2xl bg-gradient-to-br from-violet-600 via-purple-600 to-indigo-600 flex items-center justify-center shadow-xl shadow-purple-500/30"
+                className="h-16 w-16 rounded-2xl bg-primary flex items-center justify-center shadow-xl shadow-purple-500/30"
                 whileHover={{ scale: 1.05, boxShadow: "0 0 30px rgba(139, 92, 246, 0.5)" }}
                 transition={{ type: "spring", stiffness: 400, damping: 10 }}
               >
@@ -716,7 +716,7 @@ export default function LibraryPage() {
 
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button className="bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-700 hover:to-purple-700 text-white shadow-lg shadow-purple-500/25">
+                  <Button className="bg-primary text-white shadow-lg shadow-purple-500/25">
                     <Plus className="h-4 w-4 mr-2" />
                     New Doc
                   </Button>
@@ -953,7 +953,7 @@ export default function LibraryPage() {
                     <button
                       onClick={generateCollections}
                       disabled={isLoadingCollections}
-                      className="px-4 py-2 rounded-full text-sm font-medium bg-gradient-to-r from-violet-600 to-purple-600 text-white flex items-center gap-2 hover:shadow-lg hover:shadow-violet-500/25 transition-all flex-shrink-0"
+                      className="px-4 py-2 rounded-full text-sm font-medium bg-primary text-white flex items-center gap-2 hover:shadow-lg hover:shadow-violet-500/25 transition-all flex-shrink-0"
                     >
                       {isLoadingCollections ? (
                         <Loader2 className="h-4 w-4 animate-spin" />

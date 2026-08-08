@@ -243,7 +243,7 @@ export default function QuickStartLesson3() {
             </div>
           </div>
 
-          <Card className="p-6 bg-gradient-to-br from-purple-50 to-blue-50 dark:from-purple-950/20 dark:to-blue-950/20 border-purple-200">
+          <Card className="p-6 bg-primary dark:to-blue-950/20 border-purple-200">
             <h4 className="font-semibold mb-3">Recommended Trigger for Daily Summary</h4>
             <div className="p-4 bg-card rounded-lg border">
               <p className="font-medium text-sm mb-2">Schedule: Every Weekday at 8:00 AM</p>

@@ -213,7 +213,7 @@ export function MediaPreview({
         )}
 
         {type === "audio" && (
-          <div className="p-6 bg-gradient-to-br from-purple-500/10 to-violet-500/10">
+          <div className="p-6 bg-gradient-to-br from-primary/10 to-primary/10">
             <audio ref={audioRef} src={url} preload="metadata" />
 
             <div className="flex items-center gap-4">

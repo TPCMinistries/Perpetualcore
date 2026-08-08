@@ -2440,7 +2440,7 @@ function PeopleAndTasks() {
                       selectedPerson === person.person_id && "bg-muted"
                     )}
                   >
-                    <div className="h-8 w-8 rounded-full bg-gradient-to-br from-blue-400 to-purple-500 flex items-center justify-center text-white text-xs font-medium">
+                    <div className="h-8 w-8 rounded-full bg-gradient-to-br from-blue-400 to-primary flex items-center justify-center text-white text-xs font-medium">
                       {person.full_name?.split(" ").map((n: string) => n[0]).join("").slice(0, 2)}
                     </div>
                     <div className="flex-1 min-w-0">
@@ -3594,7 +3594,7 @@ function OpportunityDetailPanel({
                   className="flex items-center justify-between p-2 rounded-lg bg-muted/50"
                 >
                   <div className="flex items-center gap-3">
-                    <div className="h-8 w-8 rounded-full bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center text-white text-sm font-medium">
+                    <div className="h-8 w-8 rounded-full bg-gradient-to-br from-blue-500 to-primary flex items-center justify-center text-white text-sm font-medium">
                       {stakeholder.stakeholder_name?.charAt(0) || "?"}
                     </div>
                     <div>

@@ -71,7 +71,7 @@ export function PricingTeaser() {
         transition={{ duration: 0.6 }}
         className="text-center mb-12 sm:mb-16"
       >
-        <h2 className="text-4xl sm:text-5xl md:text-6xl font-bold tracking-tighter mb-4 bg-gradient-to-r from-foreground via-primary to-purple-600 bg-clip-text text-transparent">
+        <h2 className="text-4xl sm:text-5xl md:text-6xl font-bold tracking-tighter mb-4 bg-gradient-to-r from-foreground via-primary to-primary bg-clip-text text-transparent">
           11 Models. One Price.
         </h2>
         <p className="text-lg sm:text-xl text-muted-foreground max-w-xl mx-auto">
@@ -129,7 +129,7 @@ export function PricingTeaser() {
             </div>
 
             {/* Perpetual Core */}
-            <div className="rounded-xl bg-gradient-to-r from-primary/10 via-purple-500/10 to-blue-500/10 border border-primary/20 p-4">
+            <div className="rounded-xl bg-gradient-to-r from-primary/10 via-primary/10 to-blue-500/10 border border-primary/20 p-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <span className="h-5 w-5 rounded-full bg-green-500 flex items-center justify-center flex-shrink-0">
@@ -170,7 +170,7 @@ export function PricingTeaser() {
             {/* Popular Badge */}
             {plan.popular && (
               <div className="absolute -top-3 left-1/2 -translate-x-1/2 z-10">
-                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-gradient-to-r from-primary to-purple-600 text-white text-xs font-semibold shadow-lg shadow-primary/25">
+                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary text-white text-xs font-semibold shadow-lg shadow-primary/25">
                   <Sparkles className="h-3 w-3" />
                   Best Value
                 </div>
@@ -231,7 +231,7 @@ export function PricingTeaser() {
                 <Button
                   className={`w-full rounded-xl group/btn ${
                     plan.popular
-                      ? "bg-gradient-to-r from-primary to-purple-600 hover:from-primary/90 hover:to-purple-600/90 text-white shadow-lg shadow-primary/25"
+                      ? "bg-primary text-white shadow-lg shadow-primary/25"
                       : ""
                   }`}
                   variant={plan.popular ? "default" : "outline"}

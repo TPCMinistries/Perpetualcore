@@ -135,7 +135,7 @@ export function ContactsListView({
             {/* Avatar */}
             <Avatar className="h-10 w-10 flex-shrink-0">
               <AvatarImage src={contact.avatar_url || ""} />
-              <AvatarFallback className="bg-gradient-to-br from-violet-500 to-purple-600 text-white text-sm">
+              <AvatarFallback className="bg-primary text-white text-sm">
                 {getInitials(contact.full_name)}
               </AvatarFallback>
             </Avatar>

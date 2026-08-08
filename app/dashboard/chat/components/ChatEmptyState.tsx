@@ -38,7 +38,7 @@ export function ChatEmptyState({ selectedModel, onSuggestionClick }: ChatEmptySt
       <div className="w-full space-y-6">
         {/* Hero Section */}
         <div className="py-8">
-          <div className="h-16 w-16 rounded-full bg-gradient-to-br from-purple-500 to-blue-600 flex items-center justify-center mx-auto mb-6">
+          <div className="h-16 w-16 rounded-full bg-primary flex items-center justify-center mx-auto mb-6">
             <Bot className="h-8 w-8 text-white" />
           </div>
           <h2 className="text-3xl font-semibold mb-3 text-foreground dark:text-foreground">

@@ -45,7 +45,7 @@ const demoMessages: ChatMessage[] = [
 const features = [
   {
     icon: Eye,
-    gradient: "from-purple-500 to-violet-600",
+    gradient: "from-primary to-primary",
     title: "Learns Your Style",
     description: "Adapts tone, format, and detail level to match your preferences.",
   },
@@ -89,7 +89,7 @@ export function InteractiveChatDemo() {
         transition={{ duration: 0.6 }}
         className="text-center mb-12 sm:mb-16"
       >
-        <h2 className="text-4xl sm:text-5xl md:text-6xl font-bold tracking-tighter mb-4 bg-gradient-to-r from-foreground via-primary to-purple-600 bg-clip-text text-transparent">
+        <h2 className="text-4xl sm:text-5xl md:text-6xl font-bold tracking-tighter mb-4 bg-gradient-to-r from-foreground via-primary to-primary bg-clip-text text-transparent">
           Watch It Learn
         </h2>
         <p className="text-lg sm:text-xl text-muted-foreground max-w-2xl mx-auto">
@@ -107,13 +107,13 @@ export function InteractiveChatDemo() {
       >
         {/* Outer Glow */}
         <div className="relative">
-          <div className="absolute -inset-4 bg-gradient-to-r from-primary/20 via-purple-500/20 to-pink-500/20 rounded-[3rem] blur-3xl" />
+          <div className="absolute -inset-4 bg-gradient-to-r from-primary/20 via-primary/20 to-primary/20 rounded-[3rem] blur-3xl" />
 
           {/* Chat Container */}
           <div className="relative backdrop-blur-xl bg-card/90 border border-border/50 rounded-2xl sm:rounded-[2rem] overflow-hidden shadow-2xl">
             {/* Header Bar */}
             <div className="flex items-center gap-3 px-5 sm:px-6 py-4 border-b border-border/50 bg-card/60">
-              <div className="h-9 w-9 rounded-xl bg-gradient-to-br from-primary to-purple-600 flex items-center justify-center shadow-lg">
+              <div className="h-9 w-9 rounded-xl bg-primary flex items-center justify-center shadow-lg">
                 <Brain className="h-5 w-5 text-white" />
               </div>
               <div className="flex-1">
@@ -143,7 +143,7 @@ export function InteractiveChatDemo() {
                   >
                     {msg.role === "ai" && (
                       <div className="flex-shrink-0 mr-2 mt-1">
-                        <div className="h-7 w-7 rounded-lg bg-gradient-to-br from-primary/20 to-purple-500/20 border border-border/50 flex items-center justify-center">
+                        <div className="h-7 w-7 rounded-lg bg-gradient-to-br from-primary/20 to-primary/20 border border-border/50 flex items-center justify-center">
                           <Brain className="h-3.5 w-3.5 text-primary" />
                         </div>
                       </div>
@@ -151,7 +151,7 @@ export function InteractiveChatDemo() {
                     <div
                       className={`max-w-[80%] rounded-2xl px-4 py-3 text-sm leading-relaxed whitespace-pre-line ${
                         msg.role === "user"
-                          ? "bg-gradient-to-br from-primary to-purple-600 text-white"
+                          ? "bg-primary text-white"
                           : "backdrop-blur-sm bg-muted/60 border border-border/40 text-foreground"
                       }`}
                     >
@@ -190,7 +190,7 @@ export function InteractiveChatDemo() {
                   >
                     {demoMessages[visibleMessages]?.role === "ai" && (
                       <div className="flex-shrink-0 mr-2 mt-1">
-                        <div className="h-7 w-7 rounded-lg bg-gradient-to-br from-primary/20 to-purple-500/20 border border-border/50 flex items-center justify-center">
+                        <div className="h-7 w-7 rounded-lg bg-gradient-to-br from-primary/20 to-primary/20 border border-border/50 flex items-center justify-center">
                           <Brain className="h-3.5 w-3.5 text-primary" />
                         </div>
                       </div>
@@ -198,7 +198,7 @@ export function InteractiveChatDemo() {
                     <div
                       className={`rounded-2xl px-4 py-3 ${
                         demoMessages[visibleMessages]?.role === "user"
-                          ? "bg-gradient-to-br from-primary to-purple-600"
+                          ? "bg-primary"
                           : "backdrop-blur-sm bg-muted/60 border border-border/40"
                       }`}
                     >
@@ -220,7 +220,7 @@ export function InteractiveChatDemo() {
                 </span>
                 <Button
                   size="icon"
-                  className="h-8 w-8 rounded-lg bg-gradient-to-br from-primary to-purple-600 hover:from-primary/90 hover:to-purple-600/90 shadow-lg"
+                  className="h-8 w-8 rounded-lg bg-primary shadow-lg"
                 >
                   <Send className="h-4 w-4 text-white" />
                 </Button>

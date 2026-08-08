@@ -82,10 +82,10 @@ export function WorkspaceSwitcher({ collapsed, className }: WorkspaceSwitcherPro
               className={cn(
                 "h-8 w-8 rounded-lg flex items-center justify-center text-lg",
                 "bg-gradient-to-br",
-                currentWorkspace.accentColor === "violet" && "from-violet-100 to-purple-100 dark:from-violet-900/30 dark:to-purple-900/30",
+                currentWorkspace.accentColor === "violet" && "from-primary to-primary dark:from-primary/30 dark:to-primary/30",
                 currentWorkspace.accentColor === "slate" && "from-slate-100 to-gray-100 dark:from-slate-800 dark:to-gray-800",
                 currentWorkspace.accentColor === "emerald" && "from-emerald-100 to-green-100 dark:from-emerald-900/30 dark:to-green-900/30",
-                currentWorkspace.accentColor === "blue" && "from-blue-100 to-indigo-100 dark:from-blue-900/30 dark:to-indigo-900/30",
+                currentWorkspace.accentColor === "blue" && "from-blue-100 to-primary dark:from-blue-900/30 dark:to-primary/30",
                 currentWorkspace.accentColor === "orange" && "from-orange-100 to-amber-100 dark:from-orange-900/30 dark:to-amber-900/30"
               )}
             >
@@ -120,10 +120,10 @@ export function WorkspaceSwitcher({ collapsed, className }: WorkspaceSwitcherPro
               className={cn(
                 "h-8 w-8 rounded-lg flex items-center justify-center text-lg flex-shrink-0",
                 "bg-gradient-to-br",
-                workspace.accentColor === "violet" && "from-violet-100 to-purple-100 dark:from-violet-900/30 dark:to-purple-900/30",
+                workspace.accentColor === "violet" && "from-primary to-primary dark:from-primary/30 dark:to-primary/30",
                 workspace.accentColor === "slate" && "from-slate-100 to-gray-100 dark:from-slate-800 dark:to-gray-800",
                 workspace.accentColor === "emerald" && "from-emerald-100 to-green-100 dark:from-emerald-900/30 dark:to-green-900/30",
-                workspace.accentColor === "blue" && "from-blue-100 to-indigo-100 dark:from-blue-900/30 dark:to-indigo-900/30",
+                workspace.accentColor === "blue" && "from-blue-100 to-primary dark:from-blue-900/30 dark:to-primary/30",
                 workspace.accentColor === "orange" && "from-orange-100 to-amber-100 dark:from-orange-900/30 dark:to-amber-900/30"
               )}
             >

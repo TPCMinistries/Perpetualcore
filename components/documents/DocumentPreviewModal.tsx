@@ -445,7 +445,7 @@ export function DocumentPreviewModal({
         <DialogHeader className="px-6 pt-6 pb-4 border-b border-border">
           <div className="flex items-center justify-between">
             <DialogTitle className="flex items-center gap-3 text-xl">
-              <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center shadow-lg">
+              <div className="h-12 w-12 rounded-xl bg-primary flex items-center justify-center shadow-lg">
                 <FileText className="h-6 w-6 text-white" />
               </div>
               <div>
@@ -539,7 +539,7 @@ export function DocumentPreviewModal({
                 <ScrollArea className="h-full">
                   <div className="p-6 space-y-6">
                     {/* AI Summary Section */}
-                    <div className="rounded-xl border border-violet-200 dark:border-violet-800 bg-gradient-to-br from-violet-50 to-purple-50 dark:from-violet-950/30 dark:to-purple-950/30 p-6">
+                    <div className="rounded-xl border border-violet-200 dark:border-violet-800 bg-primary p-6">
                       <div className="flex items-center justify-between mb-4">
                         <div className="flex items-center gap-2">
                           <Sparkles className="h-5 w-5 text-violet-600 dark:text-violet-400" />
@@ -551,7 +551,7 @@ export function DocumentPreviewModal({
                           onClick={handleGenerateSummary}
                           disabled={generatingSummary || doc.status === "processing"}
                           className={cn(
-                            !hasSummary && "bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-700 hover:to-purple-700"
+                            !hasSummary && "bg-primary"
                           )}
                         >
                           {generatingSummary ? (

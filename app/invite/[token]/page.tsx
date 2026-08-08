@@ -100,10 +100,10 @@ export default function InviteAcceptPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 via-purple-50 to-blue-50 dark:from-slate-950 dark:via-purple-950/20 dark:to-blue-950/20 p-4">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 via-primary to-blue-50 dark:from-slate-950 dark:via-primary/20 dark:to-blue-950/20 p-4">
       <Card className="w-full max-w-md shadow-xl">
         <CardHeader className="text-center space-y-4">
-          <div className="mx-auto h-16 w-16 rounded-full bg-gradient-to-br from-purple-500 to-blue-600 flex items-center justify-center shadow-lg">
+          <div className="mx-auto h-16 w-16 rounded-full bg-primary flex items-center justify-center shadow-lg">
             <Brain className="h-8 w-8 text-white" />
           </div>
           <div>
@@ -179,7 +179,7 @@ export default function InviteAcceptPage() {
               ) : (
                 <>
                   {/* Valid invitation */}
-                  <div className="rounded-xl bg-gradient-to-br from-purple-50 to-blue-50 dark:from-purple-950/30 dark:to-blue-950/30 border border-purple-200 dark:border-purple-800 p-6 space-y-4">
+                  <div className="rounded-xl bg-primary dark:to-blue-950/30 border border-purple-200 dark:border-purple-800 p-6 space-y-4">
                     <div className="flex items-center gap-3">
                       <Users className="h-5 w-5 text-purple-600" />
                       <div>
@@ -230,7 +230,7 @@ export default function InviteAcceptPage() {
                         </div>
                       )}
                       <Button
-                        className="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
+                        className="w-full bg-primary hover:to-blue-700"
                         onClick={handleAccept}
                         disabled={accepting}
                       >

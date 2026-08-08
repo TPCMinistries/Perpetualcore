@@ -242,7 +242,7 @@ export default function DeveloperPortalPage() {
                   {(usageStats?.tokens_used || 0).toLocaleString()}
                 </p>
               </div>
-              <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-purple-500/10 to-purple-600/10 flex items-center justify-center">
+              <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-primary/10 to-primary/10 flex items-center justify-center">
                 <Zap className="h-6 w-6 text-purple-600" />
               </div>
             </div>
@@ -486,7 +486,7 @@ export default function DeveloperPortalPage() {
         <Card className="hover:shadow-lg transition-shadow">
           <CardHeader>
             <div className="flex items-center gap-3">
-              <div className="h-10 w-10 rounded-lg bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center">
+              <div className="h-10 w-10 rounded-lg bg-gradient-to-br from-blue-500 to-primary flex items-center justify-center">
                 <BookOpen className="h-5 w-5 text-white" />
               </div>
               <div>

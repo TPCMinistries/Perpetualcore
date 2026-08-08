@@ -336,9 +336,9 @@ export default async function DashboardPage() {
           
           {/* Intelligence System Link */}
           <Link href="/dashboard/intelligence" className="block">
-            <div className="group relative overflow-hidden rounded-xl border-2 border-primary/20 bg-gradient-to-br from-primary/5 via-purple-500/5 to-blue-500/5 p-6 transition-all hover:border-primary/40 hover:shadow-lg">
+            <div className="group relative overflow-hidden rounded-xl border-2 border-primary/20 bg-gradient-to-br from-primary/5 via-primary/5 to-blue-500/5 p-6 transition-all hover:border-primary/40 hover:shadow-lg">
               <div className="flex items-start gap-4">
-                <div className="flex-shrink-0 h-12 w-12 rounded-xl bg-gradient-to-br from-primary via-purple-600 to-primary flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
+                <div className="flex-shrink-0 h-12 w-12 rounded-xl bg-gradient-to-br from-primary via-primary to-primary flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
                   <Brain className="h-6 w-6 text-white" />
                 </div>
                 <div className="flex-1">

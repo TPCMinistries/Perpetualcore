@@ -68,7 +68,7 @@ export function HeroSection() {
             <span className="block bg-gradient-to-r from-foreground via-foreground to-foreground/70 bg-clip-text text-transparent">
               The AI Operating System
             </span>
-            <span className="block bg-gradient-to-r from-primary via-purple-500 to-blue-500 bg-clip-text text-transparent">
+            <span className="block text-primary">
               For How You Actually Work.
             </span>
           </motion.h1>
@@ -94,7 +94,7 @@ export function HeroSection() {
             <Button
               asChild
               size="lg"
-              className="rounded-xl bg-gradient-to-r from-primary via-purple-600 to-purple-700 hover:shadow-lg hover:shadow-primary/25 transition-all duration-300 border-0 text-base px-8 h-12"
+              className="rounded-xl bg-primary hover:shadow-lg hover:shadow-primary/25 transition-all duration-300 border-0 text-base px-8 h-12"
             >
               <Link href="/signup">
                 Start Free Trial

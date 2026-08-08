@@ -40,7 +40,7 @@ export default function AgenciesPage() {
 
       {/* Hero Section */}
       <section className="container mx-auto px-4 py-16 md:py-24 relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-purple-500/5 via-pink-500/5 to-transparent"></div>
+        <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-primary/5 to-transparent"></div>
 
         <div className="max-w-5xl mx-auto relative z-10">
           <div className="grid md:grid-cols-2 gap-12 items-center">
@@ -63,7 +63,7 @@ export default function AgenciesPage() {
               </p>
 
               <div className="flex flex-col sm:flex-row gap-4 mb-8">
-                <Button size="lg" asChild className="text-lg px-8 shadow-lg bg-gradient-to-r from-primary to-purple-600 hover:from-primary/90 hover:to-purple-700">
+                <Button size="lg" asChild className="text-lg px-8 shadow-lg bg-primary">
                   <Link href="/contact-sales?plan=agency">
                     Schedule Demo <ArrowRight className="ml-2 h-5 w-5" />
                   </Link>
@@ -277,7 +277,7 @@ export default function AgenciesPage() {
             </div>
 
             {/* Bottom Impact Summary */}
-            <Card className="mt-8 border-2 border-primary bg-gradient-to-r from-primary/5 to-purple-500/5">
+            <Card className="mt-8 border-2 border-primary bg-gradient-to-r from-primary/5 to-primary/5">
               <CardContent className="p-8">
                 <div className="text-center">
                   <p className="text-sm text-muted-foreground mb-4">
@@ -363,7 +363,7 @@ export default function AgenciesPage() {
 
             {/* Right: Example Interaction */}
             <Card className="border-2 border-primary">
-              <CardHeader className="bg-gradient-to-r from-primary/5 to-purple-500/5">
+              <CardHeader className="bg-gradient-to-r from-primary/5 to-primary/5">
                 <CardTitle className="flex items-center gap-2">
                   <Brain className="h-5 w-5" />
                   AI Coach in Action
@@ -482,7 +482,7 @@ export default function AgenciesPage() {
             {/* Agency Brain */}
             <Card className="border-2 hover:border-primary transition-all hover:shadow-xl group">
               <CardContent className="p-8">
-                <div className="h-16 w-16 rounded-2xl bg-gradient-to-br from-purple-500 to-pink-600 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                <div className="h-16 w-16 rounded-2xl bg-primary flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
                   <Brain className="h-8 w-8 text-white" />
                 </div>
                 <h3 className="text-2xl font-bold mb-3">Your Agency's AI Brain</h3>
@@ -510,7 +510,7 @@ export default function AgenciesPage() {
             {/* Infinite Memory */}
             <Card className="border-2 hover:border-primary transition-all hover:shadow-xl group">
               <CardContent className="p-8">
-                <div className="h-16 w-16 rounded-2xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                <div className="h-16 w-16 rounded-2xl bg-gradient-to-br from-blue-500 to-primary flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
                   <Infinity className="h-8 w-8 text-white" />
                 </div>
                 <h3 className="text-2xl font-bold mb-3">Never Forgets</h3>
@@ -567,7 +567,7 @@ export default function AgenciesPage() {
       </section>
 
       {/* How It Works */}
-      <section id="how-it-works" className="bg-gradient-to-b from-primary/5 to-purple-500/5 py-20">
+      <section id="how-it-works" className="bg-gradient-to-b from-primary/5 to-primary/5 py-20">
         <div className="container mx-auto px-4">
           <div className="max-w-6xl mx-auto">
             <div className="text-center mb-16">
@@ -995,7 +995,7 @@ export default function AgenciesPage() {
             </div>
 
             {/* Real-World Example */}
-            <Card className="border-2 border-primary bg-gradient-to-r from-primary/5 to-purple-500/5">
+            <Card className="border-2 border-primary bg-gradient-to-r from-primary/5 to-primary/5">
               <CardContent className="p-8">
                 <div className="flex items-start gap-4 mb-6">
                   <div className="h-12 w-12 rounded-full bg-primary flex items-center justify-center flex-shrink-0">
@@ -1198,7 +1198,7 @@ export default function AgenciesPage() {
           </div>
 
           <Card className="border-2 border-primary">
-            <CardHeader className="text-center bg-gradient-to-r from-primary/5 to-purple-500/5 pb-8">
+            <CardHeader className="text-center bg-gradient-to-r from-primary/5 to-primary/5 pb-8">
               <div className="inline-flex items-center gap-2 bg-primary text-primary-foreground px-4 py-2 rounded-full text-sm font-semibold mb-4">
                 Most Popular • Agency Plan
               </div>
@@ -1290,7 +1290,7 @@ export default function AgenciesPage() {
             </div>
 
             <Card className="border-2 border-primary">
-              <CardHeader className="bg-gradient-to-r from-primary/5 to-purple-500/5">
+              <CardHeader className="bg-gradient-to-r from-primary/5 to-primary/5">
                 <CardTitle className="text-2xl">Interactive ROI Calculator</CardTitle>
                 <CardDescription>Adjust the values below to match your agency's profile</CardDescription>
               </CardHeader>
@@ -1492,7 +1492,7 @@ export default function AgenciesPage() {
             ))}
           </div>
 
-          <Card className="mt-12 border-2 border-primary bg-gradient-to-r from-primary/5 to-purple-500/5">
+          <Card className="mt-12 border-2 border-primary bg-gradient-to-r from-primary/5 to-primary/5">
             <CardContent className="p-8 text-center">
               <h3 className="text-2xl font-bold mb-3">Still have questions?</h3>
               <p className="text-muted-foreground mb-6">
@@ -1514,7 +1514,7 @@ export default function AgenciesPage() {
       </section>
 
       {/* Final CTA */}
-      <section className="bg-gradient-to-r from-primary to-purple-600 text-white py-20">
+      <section className="bg-primary text-white py-20">
         <div className="container mx-auto px-4 text-center">
           <h2 className="text-4xl md:text-5xl font-bold mb-4">
             Ready to Try Perpetual Core?

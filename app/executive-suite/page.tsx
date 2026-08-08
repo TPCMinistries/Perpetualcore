@@ -50,13 +50,13 @@ const EXECUTIVE_ROLES = [
     icon: Code,
     title: "CTO Advisor",
     description: "Technology strategy, architecture decisions, build vs buy analysis, and technical roadmaps.",
-    color: "from-purple-500 to-violet-500",
+    color: "from-primary to-primary",
   },
   {
     icon: Megaphone,
     title: "CMO Advisor",
     description: "Marketing strategy, brand positioning, campaign planning, and customer acquisition.",
-    color: "from-pink-500 to-rose-500",
+    color: "from-primary to-rose-500",
   },
   {
     icon: TrendingUp,
@@ -86,7 +86,7 @@ const EXECUTIVE_ROLES = [
     icon: BarChart3,
     title: "Data Analyst",
     description: "Data interpretation, KPI tracking, trend analysis, and reporting insights.",
-    color: "from-indigo-500 to-blue-500",
+    color: "from-primary to-blue-500",
   },
   {
     icon: Lightbulb,
@@ -98,7 +98,7 @@ const EXECUTIVE_ROLES = [
     icon: Target,
     title: "Strategy Consultant",
     description: "Market positioning, competitive strategy, growth planning, and M&A analysis.",
-    color: "from-violet-500 to-purple-600",
+    color: "from-primary to-primary",
   },
   {
     icon: Handshake,
@@ -136,7 +136,7 @@ export default function ExecutiveSuitePage() {
       <header className="border-b bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm sticky top-0 z-10">
         <div className="container mx-auto px-3 sm:px-4 py-3 sm:py-4 flex items-center justify-between">
           <Link href="/" className="flex items-center space-x-2">
-            <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-primary to-purple-600 flex items-center justify-center text-primary-foreground font-bold shadow-lg">
+            <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center text-primary-foreground font-bold shadow-lg">
               AI
             </div>
             <span className="text-lg sm:text-xl font-bold">Perpetual Core</span>

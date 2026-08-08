@@ -213,14 +213,14 @@ export default function AIReadinessQuiz() {
   // Intro Screen
   if (step === 0) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-cyan-50 dark:from-slate-950 dark:via-purple-950 dark:to-slate-900 flex items-center justify-center p-4">
+      <div className="min-h-screen bg-primary dark:from-slate-950 dark:to-slate-900 flex items-center justify-center p-4">
         <Card className="max-w-2xl w-full">
           <CardContent className="p-12">
             <div className="text-center mb-8">
-              <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-gradient-to-br from-purple-600 to-blue-600 shadow-lg mb-6">
+              <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-primary shadow-lg mb-6">
                 <Sparkles className="h-10 w-10 text-white" />
               </div>
-              <h1 className="text-4xl font-bold mb-4 bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
+              <h1 className="text-4xl font-bold mb-4 text-primary">
                 AI Readiness Assessment
               </h1>
               <p className="text-lg text-slate-600 dark:text-slate-400 mb-6">
@@ -247,7 +247,7 @@ export default function AIReadinessQuiz() {
             <Button
               onClick={() => setStep(1)}
               size="lg"
-              className="w-full h-14 text-lg bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white shadow-xl font-bold"
+              className="w-full h-14 text-lg bg-primary hover:to-blue-700 text-white shadow-xl font-bold"
             >
               Start Assessment
               <ArrowRight className="ml-2 h-5 w-5" />
@@ -268,7 +268,7 @@ export default function AIReadinessQuiz() {
     const currentAnswer = answers.find(a => a.questionId === currentQuestion.id);
 
     return (
-      <div className="min-h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-cyan-50 dark:from-slate-950 dark:via-purple-950 dark:to-slate-900 flex items-center justify-center p-4">
+      <div className="min-h-screen bg-primary dark:from-slate-950 dark:to-slate-900 flex items-center justify-center p-4">
         <Card className="max-w-3xl w-full">
           <CardContent className="p-8">
             <div className="mb-6">
@@ -329,11 +329,11 @@ export default function AIReadinessQuiz() {
   // Email Capture
   if (step === questions.length + 1 && !submitted) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-cyan-50 dark:from-slate-950 dark:via-purple-950 dark:to-slate-900 flex items-center justify-center p-4">
+      <div className="min-h-screen bg-primary dark:from-slate-950 dark:to-slate-900 flex items-center justify-center p-4">
         <Card className="max-w-2xl w-full">
           <CardContent className="p-12">
             <div className="text-center mb-8">
-              <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-br from-purple-600 to-blue-600 shadow-lg mb-4">
+              <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary shadow-lg mb-4">
                 <Sparkles className="h-8 w-8 text-white" />
               </div>
               <h2 className="text-3xl font-bold text-slate-900 dark:text-slate-100 mb-3">
@@ -405,7 +405,7 @@ export default function AIReadinessQuiz() {
                 type="submit"
                 disabled={loading}
                 size="lg"
-                className="w-full h-14 text-lg bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white shadow-xl font-bold"
+                className="w-full h-14 text-lg bg-primary hover:to-blue-700 text-white shadow-xl font-bold"
               >
                 {loading ? "Calculating..." : "Show My Results"}
                 <ArrowRight className="ml-2 h-5 w-5" />
@@ -443,7 +443,7 @@ export default function AIReadinessQuiz() {
   const thankYouMessage = getThankYouMessage(segment);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-cyan-50 dark:from-slate-950 dark:via-purple-950 dark:to-slate-900 py-12 px-4">
+    <div className="min-h-screen bg-primary dark:from-slate-950 dark:to-slate-900 py-12 px-4">
       <div className="max-w-4xl mx-auto space-y-6">
         {/* Score Card */}
         <Card className="border-2 border-purple-200 dark:border-purple-800">
@@ -461,7 +461,7 @@ export default function AIReadinessQuiz() {
               <div className="relative">
                 <div className="w-48 h-48 rounded-full border-8 border-slate-200 dark:border-slate-800 flex items-center justify-center">
                   <div className="text-center">
-                    <div className="text-6xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
+                    <div className="text-6xl font-bold text-primary">
                       {percentageScore}
                     </div>
                     <div className="text-sm text-slate-600 dark:text-slate-400 font-medium">
@@ -521,7 +521,7 @@ export default function AIReadinessQuiz() {
               </div>
             </div>
 
-            <div className="bg-gradient-to-r from-purple-100 to-blue-100 dark:from-purple-950 dark:to-blue-950 rounded-lg p-6">
+            <div className="bg-primary dark:to-blue-950 rounded-lg p-6">
               <h3 className="font-bold text-slate-900 dark:text-slate-100 mb-3 flex items-center gap-2">
                 <Rocket className="h-5 w-5" />
                 {thankYouMessage.title}
@@ -549,7 +549,7 @@ export default function AIReadinessQuiz() {
         </Card>
 
         {/* CTA Card */}
-        <Card className="bg-gradient-to-r from-purple-600 to-blue-600 text-white border-0">
+        <Card className="bg-primary text-white border-0">
           <CardContent className="p-8 text-center">
             <h2 className="text-3xl font-bold mb-4">
               Ready to Transform Your Workflow?

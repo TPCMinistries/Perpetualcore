@@ -66,7 +66,7 @@ function MetricCard({ title, value, change, icon: Icon, trend }: MetricCardProps
     <Card className="border-2 hover:shadow-lg transition-all">
       <CardContent className="pt-6">
         <div className="flex items-center justify-between mb-4">
-          <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-primary to-purple-600 flex items-center justify-center">
+          <div className="h-12 w-12 rounded-xl bg-primary flex items-center justify-center">
             <Icon className="h-6 w-6 text-white" />
           </div>
           <div className={`flex items-center gap-1 text-sm font-semibold ${isPositive ? "text-green-600" : "text-red-600"}`}>
@@ -268,7 +268,7 @@ export function ExecutiveMetrics() {
       </div>
 
       {/* Performance Metrics */}
-      <Card className="border-2 bg-gradient-to-br from-primary/5 to-purple-500/5">
+      <Card className="border-2 bg-gradient-to-br from-primary/5 to-primary/5">
         <CardHeader>
           <CardTitle>Platform Performance</CardTitle>
           <CardDescription>Real-time system metrics and health indicators</CardDescription>

@@ -194,7 +194,7 @@ export function QuickStartTemplates({ onDismiss, compact = false }: QuickStartTe
 
   if (compact) {
     return (
-      <Card className="border-dashed border-2 border-violet-200 dark:border-violet-800 bg-gradient-to-br from-violet-50/50 to-purple-50/50 dark:from-violet-950/20 dark:to-purple-950/20">
+      <Card className="border-dashed border-2 border-violet-200 dark:border-violet-800 bg-gradient-to-br from-primary/50 to-primary/50 dark:from-primary/20 dark:to-primary/20">
         <CardContent className="p-4">
           <div className="flex items-center gap-3">
             <div className="p-2 rounded-lg bg-violet-100 dark:bg-violet-900">

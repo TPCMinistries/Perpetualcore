@@ -246,7 +246,7 @@ export default function ProfilePage() {
                 <div className="relative">
                   <Avatar className="h-32 w-32 ring-4 ring-white dark:ring-slate-800 shadow-xl">
                     <AvatarImage src={profile.avatar_url || undefined} />
-                    <AvatarFallback className="text-2xl bg-gradient-to-br from-violet-500 to-purple-600 text-white">
+                    <AvatarFallback className="text-2xl bg-primary text-white">
                       {getInitials(profile.full_name || "U")}
                     </AvatarFallback>
                   </Avatar>
@@ -292,7 +292,7 @@ export default function ProfilePage() {
                   </div>
                   <div className="h-2 bg-muted dark:bg-card rounded-full overflow-hidden">
                     <motion.div
-                      className="h-full bg-gradient-to-r from-violet-500 to-purple-600 rounded-full"
+                      className="h-full bg-primary rounded-full"
                       initial={{ width: 0 }}
                       animate={{ width: `${completionPercent}%` }}
                       transition={{ duration: 0.8, ease: "easeOut" }}
@@ -513,7 +513,7 @@ export default function ProfilePage() {
                 <Button
                   onClick={handleSave}
                   disabled={saving}
-                  className="w-full sm:w-auto bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-700 hover:to-purple-700 shadow-lg shadow-violet-500/25"
+                  className="w-full sm:w-auto bg-primary shadow-lg shadow-violet-500/25"
                 >
                   {saving ? (
                     <>

@@ -628,7 +628,7 @@ export default function PermanentAccountPage() {
         ))}
       </div>
 
-      <Card className="overflow-hidden rounded-lg border-violet-200 bg-gradient-to-br from-white via-violet-50/40 to-white shadow-none">
+      <Card className="overflow-hidden rounded-lg border-violet-200 bg-gradient-to-br from-white via-primary/40 to-white shadow-none">
         <CardHeader>
           <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
             <div>

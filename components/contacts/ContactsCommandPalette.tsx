@@ -232,7 +232,7 @@ export function ContactsCommandPalette({
                 >
                   <Avatar className="h-8 w-8">
                     <AvatarImage src={contact.avatar_url || ""} />
-                    <AvatarFallback className="bg-gradient-to-br from-violet-500 to-purple-600 text-white text-xs">
+                    <AvatarFallback className="bg-primary text-white text-xs">
                       {getInitials(contact.full_name)}
                     </AvatarFallback>
                   </Avatar>

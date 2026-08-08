@@ -87,7 +87,7 @@ export function MobileBriefing({ userId }: MobileBriefingProps) {
       {/* Top Priority Card */}
       {summary.topPriority && (
         <Link href={`/dashboard/tasks?id=${summary.topPriority.id}`}>
-          <Card className="bg-gradient-to-br from-violet-500 to-purple-600 text-white border-0">
+          <Card className="bg-primary text-white border-0">
             <CardContent className="p-4">
               <div className="flex items-start justify-between">
                 <div className="flex-1">

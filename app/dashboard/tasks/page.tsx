@@ -369,7 +369,7 @@ export default function TasksPage() {
           actions={
             <Button
               onClick={() => setShowNewTask(!showNewTask)}
-              className="bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-700 hover:to-purple-700 text-white shadow-lg shadow-violet-500/25"
+              className="bg-primary text-white shadow-lg shadow-violet-500/25"
             >
               <Plus className="h-4 w-4 mr-2" />
               New Task
@@ -495,7 +495,7 @@ export default function TasksPage() {
                     </Button>
                     <Button
                       onClick={createTask}
-                      className="bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-700 hover:to-purple-700 text-white"
+                      className="bg-primary text-white"
                     >
                       Create
                     </Button>

@@ -322,7 +322,7 @@ export default function ScheduledJobsPage() {
           </div>
         </Card>
 
-        <Card className="p-6 bg-gradient-to-br from-purple-50 to-indigo-50 dark:from-purple-950/20 dark:to-indigo-950/20 border-purple-100 dark:border-purple-900/20 hover:shadow-lg transition-all duration-300">
+        <Card className="p-6 bg-primary border-purple-100 dark:border-purple-900/20 hover:shadow-lg transition-all duration-300">
           <div className="flex items-center justify-between">
             <div>
               <div className="h-12 w-12 rounded-xl bg-purple-100 dark:bg-purple-900/40 flex items-center justify-center mb-3 shadow-sm">
@@ -381,9 +381,9 @@ export default function ScheduledJobsPage() {
 
       {/* Job Templates Suggestions */}
       {jobs.length === 0 && (
-        <Card className="p-6 bg-gradient-to-br from-purple-50/50 to-pink-50/50 dark:from-purple-950/20 dark:to-pink-950/20 border-purple-100 dark:border-purple-900/20">
+        <Card className="p-6 bg-gradient-to-br from-primary/50 to-primary/50 dark:from-primary/20 dark:to-primary/20 border-purple-100 dark:border-purple-900/20">
           <div className="flex items-center gap-3 mb-6">
-            <div className="h-10 w-10 rounded-lg bg-gradient-to-br from-purple-500 to-pink-600 flex items-center justify-center shadow-md">
+            <div className="h-10 w-10 rounded-lg bg-primary flex items-center justify-center shadow-md">
               <Zap className="h-5 w-5 text-white" />
             </div>
             <div>

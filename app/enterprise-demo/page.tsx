@@ -22,7 +22,7 @@ export default function EnterpriseDemoPage() {
             <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold mb-6 text-white">
               Transform Your Enterprise
               <br />
-              <span className="bg-gradient-to-r from-purple-400 via-blue-400 to-cyan-400 bg-clip-text text-transparent">
+              <span className="text-primary">
                 At Scale
               </span>
             </h1>
@@ -153,7 +153,7 @@ export default function EnterpriseDemoPage() {
                 ].map((item, i) => (
                   <div key={i} className="flex gap-4 p-6 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
                     <div className="flex-shrink-0">
-                      <div className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-500 to-blue-600 flex items-center justify-center text-white font-bold text-sm">
+                      <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-white font-bold text-sm">
                         {i + 1}
                       </div>
                     </div>
@@ -169,7 +169,7 @@ export default function EnterpriseDemoPage() {
                 ))}
               </div>
 
-              <div className="mt-8 bg-gradient-to-br from-purple-50 to-blue-50 dark:from-purple-950/30 dark:to-blue-950/30 rounded-2xl p-8 border border-purple-200 dark:border-purple-800">
+              <div className="mt-8 bg-primary dark:to-blue-950/30 rounded-2xl p-8 border border-purple-200 dark:border-purple-800">
                 <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-4">
                   Enterprise Plan Pricing
                 </h3>
@@ -233,7 +233,7 @@ export default function EnterpriseDemoPage() {
               {/* Booking Form Card */}
               <div className="bg-white dark:bg-slate-900 rounded-2xl p-8 shadow-2xl border border-slate-200 dark:border-slate-800">
                 <div className="text-center mb-6">
-                  <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-purple-500 to-blue-600 mb-4">
+                  <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-primary mb-4">
                     <Building2 className="h-8 w-8 text-white" />
                   </div>
                   <h3 className="text-2xl font-bold mb-2 text-slate-900 dark:text-white">

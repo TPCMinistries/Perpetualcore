@@ -96,7 +96,7 @@ export const AssistantNode = memo(({ data, selected }: NodeProps) => {
         position={Position.Top}
         className="!w-3 !h-3 !bg-purple-500 !border-2 !border-white dark:!border-slate-900"
       />
-      <div className="flex items-center gap-2 px-3 py-2 rounded-t-lg bg-gradient-to-r from-purple-500 to-violet-600">
+      <div className="flex items-center gap-2 px-3 py-2 rounded-t-lg bg-primary">
         <div className="h-6 w-6 rounded-md bg-white/20 flex items-center justify-center">
           <Icon className="h-4 w-4 text-white" />
         </div>
@@ -205,7 +205,7 @@ export const OutputNode = memo(({ data, selected }: NodeProps) => {
         position={Position.Top}
         className="!w-3 !h-3 !bg-blue-500 !border-2 !border-white dark:!border-slate-900"
       />
-      <div className="flex items-center gap-2 px-3 py-2 rounded-t-lg bg-gradient-to-r from-blue-500 to-indigo-600">
+      <div className="flex items-center gap-2 px-3 py-2 rounded-t-lg bg-gradient-to-r from-blue-500 to-primary">
         <div className="h-6 w-6 rounded-md bg-white/20 flex items-center justify-center">
           <Icon className="h-4 w-4 text-white" />
         </div>

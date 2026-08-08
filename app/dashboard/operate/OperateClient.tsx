@@ -109,8 +109,8 @@ export function OperateClient({
         </div>
 
         {/* Upgrade Card */}
-        <div className="rounded-2xl border bg-gradient-to-br from-violet-500/5 via-background to-blue-500/5 p-8 text-center">
-          <div className="mx-auto w-16 h-16 rounded-2xl bg-gradient-to-br from-violet-500 to-blue-500 flex items-center justify-center mb-6">
+        <div className="rounded-2xl border bg-gradient-to-br from-primary/5 via-background to-blue-500/5 p-8 text-center">
+          <div className="mx-auto w-16 h-16 rounded-2xl bg-primary flex items-center justify-center mb-6">
             <Building2 className="h-8 w-8 text-white" />
           </div>
           <h2 className="text-xl font-semibold mb-2">
@@ -131,7 +131,7 @@ export function OperateClient({
           <Link href="/dashboard/settings">
             <Button
               size="lg"
-              className="bg-gradient-to-r from-violet-600 to-blue-600 hover:from-violet-700 hover:to-blue-700"
+              className="bg-primary hover:to-blue-700"
             >
               Upgrade to Pro
               <ArrowRight className="ml-2 h-4 w-4" />
@@ -169,7 +169,7 @@ export function OperateClient({
           </p>
         </div>
 
-        <div className="rounded-2xl border bg-gradient-to-br from-green-500/5 via-background to-violet-500/5 p-8 text-center">
+        <div className="rounded-2xl border bg-gradient-to-br from-green-500/5 via-background to-primary/5 p-8 text-center">
           <div className="mx-auto w-16 h-16 rounded-2xl bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center mb-6">
             <Rocket className="h-8 w-8 text-white" />
           </div>

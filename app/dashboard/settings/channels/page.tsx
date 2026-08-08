@@ -302,7 +302,7 @@ export default function ChannelsSettingsPage() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-cyan-50 via-blue-50 to-indigo-50 dark:from-cyan-950/20 dark:via-blue-950/20 dark:to-indigo-950/20 border border-cyan-100 dark:border-cyan-900/20 p-8 shadow-lg">
+      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-cyan-50 via-blue-50 to-primary dark:from-cyan-950/20 dark:via-blue-950/20 dark:to-primary/20 border border-cyan-100 dark:border-cyan-900/20 p-8 shadow-lg">
         <div className="absolute inset-0 bg-grid-pattern opacity-5" />
         <div className="relative flex items-center justify-between">
           <div className="flex items-center gap-4">
@@ -310,7 +310,7 @@ export default function ChannelsSettingsPage() {
               <Radio className="h-8 w-8 text-white" />
             </div>
             <div>
-              <h1 className="text-3xl font-bold bg-gradient-to-r from-cyan-900 via-blue-800 to-indigo-900 dark:from-cyan-100 dark:via-blue-100 dark:to-indigo-100 bg-clip-text text-transparent">
+              <h1 className="text-3xl font-bold bg-gradient-to-r from-cyan-900 via-blue-800 to-primary dark:from-cyan-100 dark:via-blue-100 dark:to-primary bg-clip-text text-transparent">
                 Channels
               </h1>
               <p className="text-cyan-700 dark:text-cyan-300 mt-1">

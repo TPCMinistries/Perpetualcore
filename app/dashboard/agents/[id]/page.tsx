@@ -251,7 +251,7 @@ export default function AgentDetailPage({ params }: { params: { id: string } }) 
         <CardHeader>
           <div className="flex items-start justify-between">
             <div className="flex items-start gap-4">
-              <div className="h-16 w-16 rounded-xl bg-gradient-to-br from-purple-500 to-purple-700 flex items-center justify-center text-2xl">
+              <div className="h-16 w-16 rounded-xl bg-primary flex items-center justify-center text-2xl">
                 🤖
               </div>
               <div>

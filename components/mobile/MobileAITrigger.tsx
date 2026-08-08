@@ -17,8 +17,8 @@ export function MobileAITrigger({ onClick, hasUnread, className }: MobileAITrigg
       size="lg"
       className={cn(
         "fixed bottom-20 right-4 z-40 h-14 w-14 rounded-full shadow-lg",
-        "bg-gradient-to-br from-violet-500 to-purple-600",
-        "hover:from-violet-600 hover:to-purple-700",
+        "bg-primary",
+        "hover:from-primary hover:to-primary",
         "text-white",
         "md:hidden", // Only show on mobile
         className

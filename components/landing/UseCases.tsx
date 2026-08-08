@@ -16,16 +16,16 @@ const useCases = [
   },
   {
     icon: Briefcase,
-    gradient: "from-blue-500 to-indigo-600",
-    hoverGlow: "from-blue-500/20 to-indigo-500/20",
+    gradient: "from-blue-500 to-primary",
+    hoverGlow: "from-blue-500/20 to-primary/20",
     title: "Working Professionals",
     description:
       "Stop context-switching between AI tools. One platform that remembers every project, every client, every conversation \u2014 forever.",
   },
   {
     icon: Sparkles,
-    gradient: "from-pink-500 to-rose-600",
-    hoverGlow: "from-pink-500/20 to-rose-500/20",
+    gradient: "from-primary to-rose-600",
+    hoverGlow: "from-primary/20 to-rose-500/20",
     title: "Creators & Writers",
     description:
       "Build a creative partner that knows your voice, your style, and your audience. Draft, refine, and publish faster than ever.",
@@ -40,8 +40,8 @@ const useCases = [
   },
   {
     icon: FileText,
-    gradient: "from-purple-500 to-pink-600",
-    hoverGlow: "from-purple-500/20 to-pink-500/20",
+    gradient: "from-primary to-primary",
+    hoverGlow: "from-primary/20 to-primary/20",
     title: "Researchers & Analysts",
     description:
       "Upload papers, reports, and datasets. Ask questions across your entire knowledge base with RAG-powered vector search.",
@@ -71,7 +71,7 @@ export function UseCases() {
           <Users className="h-4 w-4" />
           <span>Built For Everyone</span>
         </div>
-        <h2 className="text-4xl sm:text-5xl md:text-6xl font-bold tracking-tighter mb-4 bg-gradient-to-r from-foreground via-primary to-purple-600 bg-clip-text text-transparent">
+        <h2 className="text-4xl sm:text-5xl md:text-6xl font-bold tracking-tighter mb-4 bg-gradient-to-r from-foreground via-primary to-primary bg-clip-text text-transparent">
           Your AI Brain, Your Way
         </h2>
         <p className="text-lg sm:text-xl text-muted-foreground max-w-2xl mx-auto">
@@ -125,7 +125,7 @@ export function UseCases() {
       >
         <Button
           size="lg"
-          className="bg-gradient-to-r from-primary to-purple-600 hover:from-primary/90 hover:to-purple-600/90 text-white rounded-xl px-8 shadow-lg shadow-primary/25 group"
+          className="bg-primary text-white rounded-xl px-8 shadow-lg shadow-primary/25 group"
         >
           Get Started Free
           <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />

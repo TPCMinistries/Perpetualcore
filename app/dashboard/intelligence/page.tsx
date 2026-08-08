@@ -257,7 +257,7 @@ export default function IntelligenceDashboard() {
                 <Button
                   onClick={generateSuggestions}
                   disabled={generating}
-                  className="bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-700 hover:to-purple-700"
+                  className="bg-primary"
                 >
                   {generating ? (
                     <Loader2 className="h-4 w-4 mr-2 animate-spin" />

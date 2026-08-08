@@ -96,7 +96,7 @@ export function FloatingAIAssistant() {
                   initial={{ rotate: -180, scale: 0 }}
                   animate={{ rotate: 0, scale: 1 }}
                   transition={{ type: "spring", stiffness: 200, damping: 15 }}
-                  className="h-10 w-10 rounded-xl bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center shadow-lg shadow-violet-500/25"
+                  className="h-10 w-10 rounded-xl bg-primary flex items-center justify-center shadow-lg shadow-violet-500/25"
                 >
                   <Sparkles className="h-5 w-5 text-white" />
                 </motion.div>
@@ -267,7 +267,7 @@ export function FloatingAIAssistant() {
                       <Button
                         type="submit"
                         disabled={!input.trim() || isLoading}
-                        className="bg-gradient-to-br from-violet-500 to-purple-600 hover:from-violet-600 hover:to-purple-700 text-white shadow-lg shadow-violet-500/25"
+                        className="bg-primary text-white shadow-lg shadow-violet-500/25"
                       >
                         {isLoading ? (
                           <Loader2 className="h-4 w-4 animate-spin" />

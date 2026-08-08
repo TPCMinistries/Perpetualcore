@@ -176,7 +176,7 @@ export function EmptyState({
             animate={{ opacity: 1, y: 0 }}
             className="text-center mb-8 mt-6"
           >
-            <div className="inline-flex h-14 w-14 rounded-full bg-gradient-to-br from-purple-500 via-blue-500 to-indigo-600 items-center justify-center mb-4 shadow-lg">
+            <div className="inline-flex h-14 w-14 rounded-full bg-primary items-center justify-center mb-4 shadow-lg">
               <Sparkles className="h-7 w-7 text-white" />
             </div>
             <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100 mb-2">
@@ -200,7 +200,7 @@ export function EmptyState({
               </p>
               <button
                 onClick={() => onSuggestionClick(firstChatPrompt)}
-                className="w-full p-4 rounded-xl border-2 border-purple-200 dark:border-purple-800 bg-gradient-to-r from-purple-50 to-blue-50 dark:from-purple-950/30 dark:to-blue-950/30 hover:border-purple-400 dark:hover:border-purple-600 hover:shadow-md transition-all text-left group"
+                className="w-full p-4 rounded-xl border-2 border-purple-200 dark:border-purple-800 bg-primary dark:to-blue-950/30 hover:border-purple-400 dark:hover:border-purple-600 hover:shadow-md transition-all text-left group"
               >
                 <div className="flex items-center justify-between gap-3">
                   <p className="text-sm font-medium text-slate-700 dark:text-slate-200 leading-relaxed">
@@ -355,7 +355,7 @@ export function EmptyState({
             transition={{ delay: 0.2 }}
             className="mt-auto"
           >
-            <div className="bg-gradient-to-b from-violet-50 to-slate-50 dark:from-violet-950/30 dark:to-slate-900 rounded-xl border border-violet-200 dark:border-violet-800/50 overflow-hidden">
+            <div className="bg-primary dark:to-slate-900 rounded-xl border border-violet-200 dark:border-violet-800/50 overflow-hidden">
               {/* Header with toggle */}
               <button
                 onClick={() => setShowConversations(!showConversations)}

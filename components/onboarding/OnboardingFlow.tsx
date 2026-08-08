@@ -324,9 +324,9 @@ function QuickActionsStep() {
         </p>
       </div>
       <div className="space-y-4">
-        <Card className="p-6 bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-950/20 dark:to-pink-950/20 border-purple-200">
+        <Card className="p-6 bg-primary border-purple-200">
           <div className="flex items-start gap-4">
-            <div className="h-10 w-10 rounded-full bg-gradient-to-br from-purple-600 to-pink-600 flex items-center justify-center flex-shrink-0">
+            <div className="h-10 w-10 rounded-full bg-primary flex items-center justify-center flex-shrink-0">
               <Sparkles className="h-5 w-5 text-white" />
             </div>
             <div className="flex-1">
@@ -337,7 +337,7 @@ function QuickActionsStep() {
               <p className="text-sm text-muted-foreground mb-3">
                 Interactive 5-lesson guide (10 min)
               </p>
-              <Button size="sm" className="bg-gradient-to-r from-purple-600 to-pink-600" onClick={() => handleActionClick('/dashboard/training/lessons/quick-start-1')}>
+              <Button size="sm" className="bg-primary" onClick={() => handleActionClick('/dashboard/training/lessons/quick-start-1')}>
                 Start Guide
               </Button>
             </div>
@@ -402,14 +402,14 @@ function CompleteStep() {
       </p>
 
       <div className="grid grid-cols-1 gap-4 w-full max-w-md mb-6">
-        <Card className="p-5 bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-950/20 dark:to-indigo-950/20 border-blue-200 dark:border-blue-900/20">
+        <Card className="p-5 bg-gradient-to-br from-blue-50 to-primary dark:from-blue-950/20 dark:to-primary/20 border-blue-200 dark:border-blue-900/20">
           <h3 className="font-semibold mb-2 text-blue-900 dark:text-blue-100">🎯 Next Steps</h3>
           <p className="text-sm text-muted-foreground">
             Start the Quick Start Guide from Settings, or explore features at your own pace. Everything is ready for you!
           </p>
         </Card>
 
-        <Card className="p-5 bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-950/20 dark:to-pink-950/20 border-purple-200 dark:border-purple-900/20">
+        <Card className="p-5 bg-primary border-purple-200 dark:border-purple-900/20">
           <h3 className="font-semibold mb-2 text-purple-900 dark:text-purple-100">💡 Need Help?</h3>
           <p className="text-sm text-muted-foreground">
             Access this tour anytime from Settings. Check documentation or contact support whenever you need assistance.

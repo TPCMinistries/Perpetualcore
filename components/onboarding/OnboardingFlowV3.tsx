@@ -365,7 +365,7 @@ function WelcomeStep({
             </div>
           )}
           <div className="flex items-center gap-3 mb-3">
-            <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center">
+            <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-blue-500 to-primary flex items-center justify-center">
               <LayoutGrid className="h-6 w-6 text-white" />
             </div>
             <div>
@@ -916,7 +916,7 @@ function FirstActionStep({
           title: "Upload your first operating document",
           description: "Add a file so the workspace has real context to organize and search.",
           action: "/dashboard/library",
-          color: "from-blue-600 to-indigo-600",
+          color: "from-blue-600 to-primary",
         },
         secondary: {
           icon: Brain,

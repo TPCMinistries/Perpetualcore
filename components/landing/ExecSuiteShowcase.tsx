@@ -17,7 +17,7 @@ const suites = [
   },
   {
     icon: TrendingUp,
-    gradient: "from-purple-500 to-pink-600",
+    gradient: "from-primary to-primary",
     glowColor: "group-hover:shadow-purple-500/20",
     title: "Revenue & Growth",
     roles: "Sales, Marketing, Social Media, BizDev, Customer Success",
@@ -57,7 +57,7 @@ export function ExecSuiteShowcase() {
           <Sparkles className="h-4 w-4" />
           <span>NEW: AI Executive Suite</span>
         </div>
-        <h2 className="text-4xl sm:text-5xl md:text-6xl font-bold tracking-tighter mb-4 bg-gradient-to-r from-foreground via-primary to-purple-600 bg-clip-text text-transparent">
+        <h2 className="text-4xl sm:text-5xl md:text-6xl font-bold tracking-tighter mb-4 bg-gradient-to-r from-foreground via-primary to-primary bg-clip-text text-transparent">
           Build Your AI Executive Team
         </h2>
         <p className="text-lg sm:text-xl text-muted-foreground max-w-2xl mx-auto">
@@ -127,13 +127,13 @@ export function ExecSuiteShowcase() {
 
             {/* Right: Big Number + CTA */}
             <div className="text-center lg:text-right flex-shrink-0">
-              <span className="text-7xl sm:text-8xl font-black bg-gradient-to-r from-primary via-purple-400 to-pink-400 bg-clip-text text-transparent">
+              <span className="text-7xl sm:text-8xl font-black text-primary">
                 15
               </span>
               <p className="text-lg font-semibold text-slate-300 mb-6">Executive Advisors</p>
               <Button
                 size="lg"
-                className="bg-gradient-to-r from-primary to-purple-600 hover:from-primary/90 hover:to-purple-600/90 text-white rounded-xl px-8 shadow-lg shadow-primary/25 group"
+                className="bg-primary text-white rounded-xl px-8 shadow-lg shadow-primary/25 group"
               >
                 Explore the Suite
                 <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />

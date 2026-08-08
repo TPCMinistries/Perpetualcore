@@ -179,7 +179,7 @@ export default function NewConversationPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background to-indigo-500/5">
+    <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5">
       <div className="container mx-auto p-6 max-w-4xl space-y-6">
         {/* Header */}
         <div className="flex items-center gap-4">
@@ -190,7 +190,7 @@ export default function NewConversationPage() {
             </Button>
           </Link>
           <div>
-            <h1 className="text-4xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent flex items-center gap-3">
+            <h1 className="text-4xl font-bold text-primary flex items-center gap-3">
               <MessageSquare className="h-10 w-10 text-indigo-600" />
               New Team Conversation
             </h1>
@@ -499,7 +499,7 @@ export default function NewConversationPage() {
                         onChange={() => toggleParticipant(member.id)}
                         className="h-4 w-4"
                       />
-                      <div className="h-8 w-8 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white text-sm font-semibold">
+                      <div className="h-8 w-8 rounded-full bg-primary flex items-center justify-center text-white text-sm font-semibold">
                         {member.full_name?.[0]?.toUpperCase() ||
                           member.email[0].toUpperCase()}
                       </div>
@@ -534,7 +534,7 @@ export default function NewConversationPage() {
               </Link>
               <Button
                 type="submit"
-                className="flex-1 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white"
+                className="flex-1 bg-primary text-white"
                 disabled={loading}
               >
                 {loading ? (

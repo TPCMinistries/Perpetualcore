@@ -158,14 +158,14 @@ export default function AdvancedAutomation1() {
             </ol>
 
             <Link href="/dashboard/workflows/create" target="_blank">
-              <Button className="w-full bg-gradient-to-r from-blue-600 to-purple-600">
+              <Button className="w-full bg-gradient-to-r from-blue-600 to-primary">
                 <Workflow className="h-4 w-4 mr-2" />
                 Open Workflow Builder
               </Button>
             </Link>
           </Card>
 
-          <div className="bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-950/20 dark:to-pink-950/20 border border-purple-200 rounded-lg p-6">
+          <div className="bg-primary border border-purple-200 rounded-lg p-6">
             <h4 className="font-semibold mb-3">Builder Interface Tour</h4>
             <div className="space-y-3">
               <div className="flex gap-3">
@@ -442,7 +442,7 @@ return result;`}
         Now it's time to build a custom workflow from scratch using the visual builder!
       </p>
 
-      <Card className="p-6 bg-gradient-to-br from-blue-50 to-purple-50 dark:from-blue-950/20 dark:to-purple-950/20">
+      <Card className="p-6 bg-gradient-to-br from-blue-50 to-primary dark:from-blue-950/20 dark:to-primary/20">
         <h3 className="font-semibold text-lg mb-4">Challenge: Build a "Content Aggregator" Workflow</h3>
         <p className="mb-4">
           Create a workflow that collects content from multiple sources and generates a digest:
@@ -488,7 +488,7 @@ return result;`}
       </Card>
 
       <Link href="/dashboard/workflows/create" target="_blank">
-        <Button className="w-full bg-gradient-to-r from-blue-600 to-purple-600">
+        <Button className="w-full bg-gradient-to-r from-blue-600 to-primary">
           Start Building
         </Button>
       </Link>

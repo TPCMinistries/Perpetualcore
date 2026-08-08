@@ -268,7 +268,7 @@ export function NetworkOpportunities({
             return (
               <div
                 key={`${opp.project_id}-${opp.contact_id}`}
-                className="flex items-start gap-3 p-3 rounded-lg border bg-gradient-to-r from-purple-50/50 to-transparent dark:from-purple-950/20 hover:shadow-sm transition-all group"
+                className="flex items-start gap-3 p-3 rounded-lg border bg-gradient-to-r from-primary/50 to-transparent dark:from-primary/20 hover:shadow-sm transition-all group"
               >
                 <Avatar className="h-10 w-10">
                   <AvatarImage src={opp.contact_avatar || undefined} />

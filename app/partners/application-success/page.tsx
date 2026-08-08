@@ -76,7 +76,7 @@ export default function PartnerApplicationSuccessPage() {
           </Card>
 
           {/* Earning Potential */}
-          <Card className="mb-8 bg-gradient-to-r from-purple-500/10 to-pink-500/10 border-purple-200 dark:border-purple-800">
+          <Card className="mb-8 bg-gradient-to-r from-primary/10 to-primary/10 border-purple-200 dark:border-purple-800">
             <CardContent className="pt-6">
               <h3 className="font-semibold mb-3">Your Earning Potential</h3>
               <div className="grid md:grid-cols-3 gap-4 text-sm">

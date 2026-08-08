@@ -218,7 +218,7 @@ export default function AnalyticsPage() {
         <Card className="mb-8 overflow-hidden">
           <CardHeader className="border-b border-border">
             <CardTitle className="flex items-center gap-3">
-              <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center shadow-lg shadow-violet-500/25">
+              <div className="h-10 w-10 rounded-xl bg-primary flex items-center justify-center shadow-lg shadow-violet-500/25">
                 <TrendingUp className="h-5 w-5 text-white" />
               </div>
               <div>
@@ -269,7 +269,7 @@ export default function AnalyticsPage() {
                       initial={{ height: 0 }}
                       animate={{ height: `${Math.max(height, 2)}%` }}
                       transition={{ delay: index * 0.02, duration: 0.5 }}
-                      className="w-full bg-gradient-to-t from-violet-600 to-purple-500 rounded-t hover:from-violet-500 hover:to-purple-400 transition-colors cursor-pointer shadow-sm"
+                      className="w-full bg-primary rounded-t transition-colors cursor-pointer shadow-sm"
                       style={{
                         minHeight: total > 0 ? "4px" : "0",
                       }}
@@ -355,10 +355,10 @@ export default function AnalyticsPage() {
                   <span className="font-semibold text-foreground">{data.ai.aiNotifications}</span>
                 </div>
 
-                <div className="mt-4 p-4 bg-gradient-to-r from-violet-500/10 to-purple-500/10 dark:from-violet-500/20 dark:to-purple-500/20 rounded-xl border border-violet-200 dark:border-violet-800">
+                <div className="mt-4 p-4 bg-gradient-to-r from-primary/10 to-primary/10 dark:from-primary/20 dark:to-primary/20 rounded-xl border border-violet-200 dark:border-violet-800">
                   <div className="flex items-center justify-between">
                     <span className="font-semibold text-foreground">Total AI Interactions</span>
-                    <span className="text-2xl font-bold bg-gradient-to-r from-violet-600 to-purple-600 bg-clip-text text-transparent">
+                    <span className="text-2xl font-bold text-primary">
                       {data.ai.totalAIInteractions}
                     </span>
                   </div>

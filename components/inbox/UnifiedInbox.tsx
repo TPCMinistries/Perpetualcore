@@ -846,7 +846,7 @@ export function UnifiedInbox() {
 
             {/* AI Insights Panel - Shows when triaging or has AI data */}
             {selectedMessage.type === "email" && (triaging || selectedMessage.ai_triaged_at || selectedMessage.ai_summary || selectedMessage.ai_priority_score !== null) && (
-              <div className="px-6 py-3 bg-gradient-to-r from-violet-50 to-blue-50 dark:from-violet-950/30 dark:to-blue-950/30 border-b">
+              <div className="px-6 py-3 bg-primary dark:to-blue-950/30 border-b">
                 <div className="flex items-start gap-4">
                   <div className="flex items-center gap-2 text-violet-600 dark:text-violet-400">
                     {triaging ? (

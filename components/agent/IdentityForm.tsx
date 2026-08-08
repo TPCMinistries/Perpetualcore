@@ -407,7 +407,7 @@ export function IdentityForm({ identity, onSave, onDelete, saving }: IdentityFor
           <Button
             onClick={handleSave}
             disabled={saving || !name.trim()}
-            className="bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-700 hover:to-blue-700 text-white shadow-lg shadow-indigo-500/25"
+            className="bg-primary hover:to-blue-700 text-white shadow-lg shadow-indigo-500/25"
           >
             {saving ? (
               <>

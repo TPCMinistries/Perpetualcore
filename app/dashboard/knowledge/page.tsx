@@ -270,7 +270,7 @@ export default function KnowledgePage() {
               <Button
                 onClick={findPath}
                 disabled={searchingPath || !searchConcept || !targetConcept}
-                className="h-11 px-6 bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-700 hover:to-purple-700 shadow-lg shadow-violet-500/25"
+                className="h-11 px-6 bg-primary shadow-lg shadow-violet-500/25"
               >
                 {searchingPath ? (
                   <Loader2 className="h-4 w-4 animate-spin" />
@@ -529,7 +529,7 @@ export default function KnowledgePage() {
                           className={cn(
                             "px-4 py-2.5 rounded-full border-2 transition-all cursor-pointer shadow-sm",
                             isHighConnection
-                              ? "bg-gradient-to-r from-violet-100 to-purple-100 dark:from-violet-900/40 dark:to-purple-900/40 border-violet-300 dark:border-violet-600 shadow-violet-200 dark:shadow-violet-900/30"
+                              ? "bg-primary border-violet-300 dark:border-violet-600 shadow-violet-200 dark:shadow-violet-900/30"
                               : isMediumConnection
                               ? "bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-700"
                               : "bg-card border-border dark:border-border",

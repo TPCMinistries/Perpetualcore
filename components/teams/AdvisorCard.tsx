@@ -103,7 +103,7 @@ export function AdvisorCard({
   }
 
   return (
-    <Card className="overflow-hidden border-violet-200 dark:border-violet-800 bg-gradient-to-br from-violet-50 to-white dark:from-violet-950/20 dark:to-slate-900">
+    <Card className="overflow-hidden border-violet-200 dark:border-violet-800 bg-gradient-to-br from-primary to-white dark:from-primary/20 dark:to-slate-900">
       <CardHeader className="pb-3">
         <div className="flex items-start justify-between">
           <div className="flex items-center gap-3">

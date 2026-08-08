@@ -494,7 +494,7 @@ export default function AssistantsPage() {
 
                       <div className="flex items-center gap-2 pt-2">
                         <Button
-                          className="flex-1 bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-700 hover:to-purple-700 text-white shadow-lg shadow-violet-500/25"
+                          className="flex-1 bg-primary text-white shadow-lg shadow-violet-500/25"
                           onClick={() => router.push(`/dashboard/assistants/${assistant.id}/chat`)}
                         >
                           <MessageSquare className="mr-2 h-4 w-4" />

@@ -293,7 +293,7 @@ export function CommentsSection({
                 {/* Author and time */}
                 <div className="flex items-center justify-between mb-2">
                   <div className="flex items-center gap-2">
-                    <div className="h-7 w-7 rounded-full bg-gradient-to-br from-violet-500 to-purple-500 flex items-center justify-center text-xs font-medium text-white">
+                    <div className="h-7 w-7 rounded-full bg-primary flex items-center justify-center text-xs font-medium text-white">
                       {annotation.userAvatar ? (
                         <img
                           src={annotation.userAvatar}

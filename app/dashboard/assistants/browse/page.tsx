@@ -141,7 +141,7 @@ export default function BrowseTemplatesPage() {
   return (
     <div className="space-y-8">
       {/* Header Section with Gradient Background */}
-      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-purple-50 via-pink-50 to-orange-50 dark:from-purple-950/20 dark:via-pink-950/20 dark:to-orange-950/20 border border-purple-100 dark:border-purple-900/20 p-8 shadow-lg">
+      <div className="relative overflow-hidden rounded-3xl bg-primary dark:to-orange-950/20 border border-purple-100 dark:border-purple-900/20 p-8 shadow-lg">
         <div className="absolute inset-0 bg-grid-pattern opacity-5"></div>
         <div className="relative">
           <Button variant="ghost" size="sm" asChild className="mb-4">
@@ -153,11 +153,11 @@ export default function BrowseTemplatesPage() {
 
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3 mb-2">
-              <div className="h-12 w-12 rounded-2xl bg-gradient-to-br from-purple-600 to-pink-600 flex items-center justify-center shadow-lg">
+              <div className="h-12 w-12 rounded-2xl bg-primary flex items-center justify-center shadow-lg">
                 <Bot className="h-6 w-6 text-white" />
               </div>
               <div>
-                <div className="text-3xl font-bold bg-gradient-to-r from-purple-900 via-pink-800 to-orange-900 dark:from-purple-100 dark:via-pink-100 dark:to-orange-100 bg-clip-text text-transparent">
+                <div className="text-3xl font-bold text-primary">
                   Assistant Templates
                 </div>
                 <p className="text-purple-700 dark:text-purple-300 text-sm">
@@ -288,7 +288,7 @@ export default function BrowseTemplatesPage() {
 
                 {/* Install Button */}
                 <Button
-                  className="w-full mt-auto bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
+                  className="w-full mt-auto bg-primary"
                   onClick={() => installTemplate(template.id, template.name)}
                   disabled={installingId === template.id}
                 >

@@ -216,7 +216,7 @@ export default function NewAgentPage() {
 
       <div className="max-w-3xl">
         <div className="flex items-center gap-3 mb-2">
-          <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-purple-500 to-purple-700 flex items-center justify-center">
+          <div className="h-12 w-12 rounded-xl bg-primary flex items-center justify-center">
             <Sparkles className="h-6 w-6 text-white" />
           </div>
           <div>
@@ -231,7 +231,7 @@ export default function NewAgentPage() {
       </div>
 
       {/* How AI Agents Work - Info Card */}
-      <Card className="max-w-3xl border-border bg-gradient-to-br from-purple-50 to-blue-50 dark:from-purple-950/20 dark:to-blue-950/20">
+      <Card className="max-w-3xl border-border bg-primary dark:to-blue-950/20">
         <CardHeader>
           <CardTitle className="text-lg text-foreground">
             How AI Agents Work
@@ -684,7 +684,7 @@ export default function NewAgentPage() {
               <Button
                 type="submit"
                 disabled={loading}
-                className="bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white"
+                className="bg-primary text-white"
               >
                 {loading ? (
                   <>

@@ -110,7 +110,7 @@ function getInsightColor(type: Insight["type"]) {
     case "prediction":
       return "from-blue-500 to-cyan-500";
     case "recommendation":
-      return "from-purple-500 to-pink-500";
+      return "from-primary to-primary";
     case "alert":
       return "from-orange-500 to-red-500";
     case "opportunity":
@@ -133,11 +133,11 @@ export function AIInsights() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <Card className="border-2 bg-gradient-to-br from-primary/10 via-purple-500/10 to-pink-500/10">
+      <Card className="border-2 bg-gradient-to-br from-primary/10 via-primary/10 to-primary/10">
         <CardHeader>
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-primary to-purple-600 flex items-center justify-center">
+              <div className="h-12 w-12 rounded-xl bg-primary flex items-center justify-center">
                 <Brain className="h-6 w-6 text-white" />
               </div>
               <div>
@@ -147,7 +147,7 @@ export function AIInsights() {
                 </CardDescription>
               </div>
             </div>
-            <Badge className="bg-gradient-to-r from-primary to-purple-600 text-white border-0 text-sm px-4 py-2">
+            <Badge className="bg-primary text-white border-0 text-sm px-4 py-2">
               <Sparkles className="mr-2 h-4 w-4" />
               Powered by Claude
             </Badge>
@@ -244,10 +244,10 @@ export function AIInsights() {
       </Card>
 
       {/* AI Summary */}
-      <Card className="border-2 bg-gradient-to-br from-primary/5 to-purple-500/5">
+      <Card className="border-2 bg-gradient-to-br from-primary/5 to-primary/5">
         <CardContent className="p-6">
           <div className="flex items-start gap-4">
-            <div className="h-10 w-10 rounded-full bg-gradient-to-br from-primary to-purple-600 flex items-center justify-center">
+            <div className="h-10 w-10 rounded-full bg-primary flex items-center justify-center">
               <Sparkles className="h-5 w-5 text-white" />
             </div>
             <div className="flex-1">

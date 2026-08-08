@@ -105,7 +105,7 @@ export default function QuickStartLesson4() {
             </ol>
 
             <Link href="/dashboard/knowledge" target="_blank">
-              <Button className="w-full bg-gradient-to-r from-purple-600 to-indigo-600">
+              <Button className="w-full bg-primary">
                 <BookOpen className="h-4 w-4 mr-2" />
                 Open Knowledge Library
               </Button>
@@ -283,7 +283,7 @@ export default function QuickStartLesson4() {
           </div>
 
           <Link href="/dashboard/search" target="_blank">
-            <Button className="w-full bg-gradient-to-r from-blue-600 to-purple-600">
+            <Button className="w-full bg-gradient-to-r from-blue-600 to-primary">
               <Search className="h-4 w-4 mr-2" />
               Try Knowledge Base Search
             </Button>
@@ -412,7 +412,7 @@ export default function QuickStartLesson4() {
         Excellent work setting up your Knowledge Base! Now let's put it to the test with a practical exercise:
       </p>
 
-      <Card className="p-6 bg-gradient-to-br from-purple-50 to-indigo-50 dark:from-purple-950/20 dark:to-indigo-950/20">
+      <Card className="p-6 bg-primary">
         <h3 className="font-semibold text-lg mb-4">Challenge: Build a Department Knowledge Collection</h3>
         <p className="mb-4">
           Create a specialized collection for a specific purpose:
@@ -437,7 +437,7 @@ export default function QuickStartLesson4() {
       </Card>
 
       <Link href="/dashboard/knowledge" target="_blank">
-        <Button className="w-full bg-gradient-to-r from-purple-600 to-indigo-600">
+        <Button className="w-full bg-primary">
           Start Practice Exercise
         </Button>
       </Link>

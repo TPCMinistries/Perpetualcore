@@ -233,8 +233,8 @@ export function DocumentCard({
       onMouseLeave={() => setIsHovered(false)}
     >
       {/* Magnetic tile ambient glow - multiple layers */}
-      <div className="absolute -inset-3 bg-gradient-to-br from-blue-500/0 via-indigo-500/0 to-purple-500/0 group-hover:from-blue-500/20 group-hover:via-indigo-500/15 group-hover:to-purple-500/10 rounded-[2rem] blur-2xl transition-all duration-700 opacity-0 group-hover:opacity-100" />
-      <div className="absolute -inset-1 bg-gradient-to-r from-blue-500/0 to-indigo-500/0 group-hover:from-blue-500/10 group-hover:to-indigo-500/10 rounded-3xl blur-xl transition-all duration-500" />
+      <div className="absolute -inset-3 bg-gradient-to-br from-blue-500/0 via-primary/0 to-primary/0 group-hover:from-blue-500/20 group-hover:via-primary/15 group-hover:to-primary/10 rounded-[2rem] blur-2xl transition-all duration-700 opacity-0 group-hover:opacity-100" />
+      <div className="absolute -inset-1 bg-gradient-to-r from-blue-500/0 to-primary/0 group-hover:from-blue-500/10 group-hover:to-primary/10 rounded-3xl blur-xl transition-all duration-500" />
 
       {/* Main card with enhanced depth and spacious layout */}
       <Card className="relative backdrop-blur-2xl bg-white/95 dark:bg-slate-900/95 border-2 border-slate-200/50 dark:border-slate-800/50 hover:border-blue-300/60 dark:hover:border-blue-600/40 transition-all duration-500 shadow-2xl shadow-slate-900/5 dark:shadow-black/30 hover:shadow-3xl hover:shadow-blue-500/20 dark:hover:shadow-blue-500/10 p-10 flex flex-col h-full rounded-3xl group-hover:scale-[1.02] group-hover:-translate-y-1">
@@ -242,7 +242,7 @@ export function DocumentCard({
         <div className="flex items-start gap-6 mb-8">
           {/* File icon with glow - Much larger */}
           <div className="relative flex-shrink-0 group/icon">
-            <div className="absolute -inset-3 bg-gradient-to-br from-blue-500/0 to-indigo-500/0 group-hover/icon:from-blue-500/20 group-hover/icon:to-indigo-500/20 rounded-3xl blur-xl transition-all duration-300" />
+            <div className="absolute -inset-3 bg-gradient-to-br from-blue-500/0 to-primary/0 group-hover/icon:from-blue-500/20 group-hover/icon:to-primary/20 rounded-3xl blur-xl transition-all duration-300" />
             <div className="relative p-5 rounded-3xl bg-gradient-to-br from-slate-100/80 to-slate-50/80 dark:from-slate-800/80 dark:to-slate-900/80 backdrop-blur-xl border border-slate-200/60 dark:border-slate-700/60 shadow-xl group-hover/icon:shadow-2xl group-hover/icon:scale-110 transition-all duration-300">
               {getFileTypeIcon(doc.file_type)}
             </div>
@@ -279,7 +279,7 @@ export function DocumentCard({
             </div>
           )}
           {doc.status === "completed" && doc.document_type && (
-            <span className="text-xs px-3 py-1.5 bg-gradient-to-r from-purple-500/10 to-indigo-500/10 text-purple-600 dark:text-purple-400 border border-purple-500/30 rounded-xl font-semibold backdrop-blur-xl">
+            <span className="text-xs px-3 py-1.5 bg-gradient-to-r from-primary/10 to-primary/10 text-purple-600 dark:text-purple-400 border border-purple-500/30 rounded-xl font-semibold backdrop-blur-xl">
               {doc.document_type}
             </span>
           )}
@@ -446,11 +446,11 @@ export function DocumentCard({
         <div className="mt-auto pt-6 border-t border-slate-200/60 dark:border-slate-800/60 space-y-3">
           <div className="flex gap-3">
             <div className="relative flex-1 group/btn">
-              <div className="absolute -inset-0.5 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-2xl opacity-0 group-hover/btn:opacity-50 blur transition-all duration-300" />
+              <div className="absolute -inset-0.5 bg-gradient-to-r from-blue-600 to-primary rounded-2xl opacity-0 group-hover/btn:opacity-50 blur transition-all duration-300" />
               <Button
                 variant="default"
                 size="sm"
-                className="relative w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white shadow-xl shadow-blue-500/30 hover:shadow-2xl hover:shadow-blue-500/40 transition-all duration-300 font-semibold h-11 rounded-2xl"
+                className="relative w-full bg-gradient-to-r from-blue-600 to-primary hover:from-blue-500 hover:to-primary text-white shadow-xl shadow-blue-500/30 hover:shadow-2xl hover:shadow-blue-500/40 transition-all duration-300 font-semibold h-11 rounded-2xl"
                 onClick={() => onOpenChat(doc)}
               >
                 <MessageSquare className="h-4 w-4 mr-2" strokeWidth={2.5} />
@@ -466,7 +466,7 @@ export function DocumentCard({
                 <Button
                   variant="outline"
                   size="sm"
-                  className="flex-1 backdrop-blur-xl bg-gradient-to-r from-purple-500/10 to-indigo-500/10 border-purple-500/30 hover:bg-purple-500/20 hover:border-purple-500/50 text-purple-600 dark:text-purple-400 font-semibold h-11 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300"
+                  className="flex-1 backdrop-blur-xl bg-gradient-to-r from-primary/10 to-primary/10 border-purple-500/30 hover:bg-purple-500/20 hover:border-purple-500/50 text-purple-600 dark:text-purple-400 font-semibold h-11 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300"
                   onClick={() => onGenerateSummary(doc.id)}
                   disabled={generatingSummary === doc.id}
                 >

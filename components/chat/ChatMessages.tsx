@@ -73,7 +73,7 @@ export function ChatMessages({
             >
               {/* Assistant Avatar */}
               {message.role === "assistant" && (
-                <div className="flex-shrink-0 w-8 h-8 rounded-full bg-gradient-to-br from-violet-500 to-purple-600 shadow-lg shadow-violet-500/20 flex items-center justify-center">
+                <div className="flex-shrink-0 w-8 h-8 rounded-full bg-primary shadow-lg shadow-violet-500/20 flex items-center justify-center">
                   <Bot className="h-4 w-4 text-white" />
                 </div>
               )}
@@ -89,7 +89,7 @@ export function ChatMessages({
                   className={cn(
                     "rounded-2xl px-4 py-3",
                     message.role === "user"
-                      ? "bg-gradient-to-br from-primary via-purple-600 to-purple-700 text-white"
+                      ? "bg-primary text-white"
                       : "bg-card/80 backdrop-blur-sm border border-border/50 text-foreground"
                   )}
                 >
@@ -204,7 +204,7 @@ export function ChatMessages({
               animate={{ opacity: 1, y: 0 }}
               className="flex gap-4"
             >
-              <div className="flex-shrink-0 w-8 h-8 rounded-full bg-gradient-to-br from-violet-500 to-purple-600 shadow-lg shadow-violet-500/20 flex items-center justify-center">
+              <div className="flex-shrink-0 w-8 h-8 rounded-full bg-primary shadow-lg shadow-violet-500/20 flex items-center justify-center">
                 <Bot className="h-4 w-4 text-white" />
               </div>
               <div className="bg-card/80 backdrop-blur-sm border border-border/50 rounded-2xl px-4 py-3">

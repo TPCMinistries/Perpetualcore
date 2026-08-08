@@ -940,7 +940,7 @@ export default function ContactDetailPage() {
               </CardHeader>
               <CardContent className="space-y-4">
                 {contact.ai_summary && (
-                  <div className="p-3 rounded-lg bg-gradient-to-br from-violet-50 to-purple-50 dark:from-violet-900/20 dark:to-purple-900/20 border border-violet-100 dark:border-violet-800">
+                  <div className="p-3 rounded-lg bg-primary border border-violet-100 dark:border-violet-800">
                     <div className="flex items-center gap-2 mb-2">
                       <Sparkles className="h-4 w-4 text-violet-500" />
                       <Label className="text-violet-700 dark:text-violet-300 font-medium">AI Summary</Label>

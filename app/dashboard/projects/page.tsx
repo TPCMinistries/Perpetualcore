@@ -738,7 +738,7 @@ Respond ONLY with valid JSON, no other text.`
             <DialogContent className="max-w-2xl">
               <DialogHeader>
                 <div className="flex items-center gap-3">
-                  <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center">
+                  <div className="h-10 w-10 rounded-xl bg-primary flex items-center justify-center">
                     <Sparkles className="h-5 w-5 text-white" />
                   </div>
                   <div>
@@ -786,11 +786,11 @@ Respond ONLY with valid JSON, no other text.`
                       className={cn(
                         "w-full flex items-center gap-4 p-4 rounded-xl border-2 text-left transition-all",
                         aiSetupMode
-                          ? "border-violet-500 bg-gradient-to-r from-violet-50 to-purple-50 dark:from-violet-950/30 dark:to-purple-950/30"
+                          ? "border-violet-500 bg-primary"
                           : "border-dashed border-border dark:border-border hover:border-violet-300 dark:hover:border-violet-700"
                       )}
                     >
-                      <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center flex-shrink-0">
+                      <div className="h-12 w-12 rounded-xl bg-primary flex items-center justify-center flex-shrink-0">
                         <Sparkles className="h-6 w-6 text-white" />
                       </div>
                       <div className="flex-1">
@@ -870,7 +870,7 @@ Respond ONLY with valid JSON, no other text.`
                         <Button
                           onClick={handleAiSetup}
                           disabled={aiGenerating || (!aiProjectDescription.trim() && !aiFileContent)}
-                          className="w-full bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-700 hover:to-purple-700 text-white border-0"
+                          className="w-full bg-primary text-white border-0"
                         >
                           {aiGenerating ? (
                             <>
@@ -939,7 +939,7 @@ Respond ONLY with valid JSON, no other text.`
                 <div className="py-4 space-y-5 max-h-[500px] overflow-y-auto pr-2">
                   {/* AI Suggestions Banner */}
                   {aiSuggestions && (aiSuggestions.milestones?.length || aiSuggestions.tasks?.length) && (
-                    <div className="p-4 rounded-xl bg-gradient-to-r from-violet-50 to-purple-50 dark:from-violet-950/30 dark:to-purple-950/30 border border-violet-200 dark:border-violet-800">
+                    <div className="p-4 rounded-xl bg-primary border border-violet-200 dark:border-violet-800">
                       <div className="flex items-center gap-2 mb-3">
                         <Sparkles className="h-4 w-4 text-violet-500" />
                         <span className="text-sm font-medium">AI Suggested Structure</span>
@@ -1325,7 +1325,7 @@ Respond ONLY with valid JSON, no other text.`
                                   : "border-border dark:border-border hover:border-violet-300"
                               )}
                             >
-                              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-violet-400 to-purple-500 flex items-center justify-center text-white text-xs font-medium">
+                              <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-white text-xs font-medium">
                                 {member.full_name?.charAt(0) || "?"}
                               </div>
                               <span className="text-sm truncate">{member.full_name}</span>
@@ -1368,7 +1368,7 @@ Respond ONLY with valid JSON, no other text.`
                   {createStep === 1 ? (
                     <Button
                       onClick={() => setCreateStep(2)}
-                      className="bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-700 hover:to-purple-700 text-white border-0"
+                      className="bg-primary text-white border-0"
                     >
                       Continue
                       <ChevronRight className="h-4 w-4 ml-1" />
@@ -1392,7 +1392,7 @@ Respond ONLY with valid JSON, no other text.`
                       <Button
                         onClick={handleCreateProject}
                         disabled={creating || !newProjectName.trim()}
-                        className="bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-700 hover:to-purple-700 text-white border-0"
+                        className="bg-primary text-white border-0"
                       >
                         {creating ? "Creating..." : "Create Project"}
                       </Button>
@@ -1401,7 +1401,7 @@ Respond ONLY with valid JSON, no other text.`
                     <Button
                       onClick={handleCreateProject}
                       disabled={creating || !newProjectName.trim()}
-                      className="bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-700 hover:to-purple-700 text-white border-0"
+                      className="bg-primary text-white border-0"
                     >
                       {creating ? "Creating..." : "Create Project"}
                     </Button>

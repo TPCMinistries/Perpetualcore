@@ -305,7 +305,7 @@ export default function OrganizationSettingsPage() {
                     className="h-16 w-16 rounded-xl object-cover border-2 border-border"
                   />
                 ) : (
-                  <div className="h-16 w-16 rounded-xl bg-gradient-to-br from-violet-100 to-purple-100 dark:from-violet-900/40 dark:to-purple-900/40 flex items-center justify-center border-2 border-dashed border-violet-300 dark:border-violet-700">
+                  <div className="h-16 w-16 rounded-xl bg-primary flex items-center justify-center border-2 border-dashed border-violet-300 dark:border-violet-700">
                     <Building2 className="h-8 w-8 text-violet-500 dark:text-violet-400" />
                   </div>
                 )}
@@ -754,7 +754,7 @@ export default function OrganizationSettingsPage() {
         <Button
           onClick={handleSave}
           disabled={saving}
-          className="bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-700 hover:to-purple-700 shadow-lg shadow-violet-500/25"
+          className="bg-primary shadow-lg shadow-violet-500/25"
         >
           {saving ? (
             <>

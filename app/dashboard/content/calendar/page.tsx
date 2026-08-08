@@ -220,7 +220,7 @@ export default function ContentCalendarPage() {
               </Button>
               <Button
                 onClick={() => router.push("/dashboard/content?create=true")}
-                className="bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-700 hover:to-purple-700 text-white border-0"
+                className="bg-primary text-white border-0"
               >
                 <Plus className="h-4 w-4 mr-2" />
                 Create Content

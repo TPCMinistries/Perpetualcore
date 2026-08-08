@@ -240,7 +240,7 @@ export function SimpleModeDashboard({ userName, userId }: SimpleModeDashboardPro
 
       {/* Setup CTA (if not seeded) */}
       {!seeded && (
-        <Card className="bg-gradient-to-r from-indigo-500/10 to-purple-500/10 border-indigo-200 dark:border-indigo-800">
+        <Card className="bg-gradient-to-r from-primary/10 to-primary/10 border-indigo-200 dark:border-indigo-800">
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div className="space-y-1">

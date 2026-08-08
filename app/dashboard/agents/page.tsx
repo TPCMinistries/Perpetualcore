@@ -345,7 +345,7 @@ export default function AgentsPage() {
                 </Button>
               </Link>
               <Link href="/dashboard/agents/new">
-                <Button className="bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-700 hover:to-purple-700 text-white shadow-lg shadow-violet-500/25">
+                <Button className="bg-primary text-white shadow-lg shadow-violet-500/25">
                   <Plus className="h-4 w-4 mr-2" />
                   New Agent
                 </Button>
@@ -645,7 +645,7 @@ export default function AgentsPage() {
                             <div
                               className={`h-14 w-14 rounded-xl flex items-center justify-center flex-shrink-0 ${
                                 agent.enabled
-                                  ? "bg-gradient-to-br from-violet-100 to-purple-100 dark:from-violet-900/30 dark:to-purple-900/30"
+                                  ? "bg-primary"
                                   : "bg-muted"
                               }`}
                             >

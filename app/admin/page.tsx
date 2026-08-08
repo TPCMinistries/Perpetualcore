@@ -111,7 +111,7 @@ export default function AdminPage() {
               </Link>
               <div className="h-8 w-px bg-slate-200 dark:bg-slate-800" />
               <div className="flex items-center gap-3">
-                <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-br from-cyan-500 to-purple-500">
+                <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-br from-cyan-500 to-primary">
                   <Shield className="h-5 w-5 text-white" />
                 </div>
                 <div>
@@ -287,7 +287,7 @@ function RevenueAnalytics() {
         </div>
 
         {/* ARR */}
-        <div className="bg-gradient-to-br from-purple-50 to-violet-50 dark:from-purple-950/20 dark:to-violet-950/20 rounded-xl border border-purple-200 dark:border-purple-800 p-6">
+        <div className="bg-primary rounded-xl border border-purple-200 dark:border-purple-800 p-6">
           <div className="flex items-center justify-between mb-2">
             <div className="text-sm font-medium text-purple-700 dark:text-purple-400">ARR</div>
             <TrendingUp className="h-5 w-5 text-purple-600 dark:text-purple-400" />
@@ -555,7 +555,7 @@ function BetaInvitations() {
         </div>
         <button
           onClick={() => setShowCreateModal(true)}
-          className="px-4 py-2 bg-gradient-to-r from-cyan-500 to-purple-500 hover:from-cyan-600 hover:to-purple-600 text-white rounded-lg transition-all duration-200 shadow-sm"
+          className="px-4 py-2 bg-gradient-to-r from-cyan-500 to-primary hover:from-cyan-600 hover:to-primary text-white rounded-lg transition-all duration-200 shadow-sm"
         >
           + Create Code
         </button>
@@ -672,7 +672,7 @@ function BetaInvitations() {
                 </button>
                 <button
                   onClick={createInvitation}
-                  className="flex-1 px-4 py-2 bg-gradient-to-r from-cyan-500 to-purple-500 text-white rounded-lg font-medium hover:from-cyan-600 hover:to-purple-600 transition-all shadow-sm"
+                  className="flex-1 px-4 py-2 bg-gradient-to-r from-cyan-500 to-primary text-white rounded-lg font-medium hover:from-cyan-600 hover:to-primary transition-all shadow-sm"
                 >
                   Create Code
                 </button>
@@ -826,7 +826,7 @@ function LeadsManagement() {
         </div>
 
         {/* Quick Actions */}
-        <div className="bg-gradient-to-br from-purple-50 to-violet-50 dark:from-purple-950/20 dark:to-violet-950/20 rounded-xl border border-purple-200 dark:border-purple-800 p-6">
+        <div className="bg-primary rounded-xl border border-purple-200 dark:border-purple-800 p-6">
           <div className="flex items-center justify-between mb-2">
             <div className="text-sm font-medium text-purple-700 dark:text-purple-400">Quick Stats</div>
             <Building2 className="h-5 w-5 text-purple-600 dark:text-purple-400" />
@@ -1357,7 +1357,7 @@ function MarketplaceManagement() {
           <div className="text-2xl font-bold text-red-900 dark:text-red-100">{data.summary.rejected}</div>
         </div>
 
-        <div className="bg-gradient-to-br from-purple-50 to-violet-50 dark:from-purple-950/20 dark:to-violet-950/20 rounded-xl border border-purple-200 dark:border-purple-800 p-4">
+        <div className="bg-primary rounded-xl border border-purple-200 dark:border-purple-800 p-4">
           <div className="text-sm font-medium text-purple-700 dark:text-purple-400">Agents</div>
           <div className="text-2xl font-bold text-purple-900 dark:text-purple-100">{data.summary.agents}</div>
         </div>

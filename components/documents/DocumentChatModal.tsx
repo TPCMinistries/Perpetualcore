@@ -162,7 +162,7 @@ export function DocumentChatModal({
                   <div
                     className={`max-w-[80%] rounded-2xl px-4 py-3 ${
                       message.role === "user"
-                        ? "bg-gradient-to-br from-purple-500 to-pink-600 text-white"
+                        ? "bg-primary text-white"
                         : "bg-muted/50 text-foreground border border-border"
                     }`}
                   >
@@ -183,7 +183,7 @@ export function DocumentChatModal({
                   </div>
 
                   {message.role === "user" && (
-                    <div className="h-8 w-8 rounded-full bg-gradient-to-br from-purple-500 to-pink-600 flex items-center justify-center flex-shrink-0">
+                    <div className="h-8 w-8 rounded-full bg-primary flex items-center justify-center flex-shrink-0">
                       <User className="h-5 w-5 text-white" />
                     </div>
                   )}
@@ -223,7 +223,7 @@ export function DocumentChatModal({
             <Button
               type="submit"
               disabled={!input.trim() || isLoading}
-              className="px-6 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white border-0"
+              className="px-6 bg-primary text-white border-0"
             >
               {isLoading ? (
                 <Loader2 className="h-5 w-5 animate-spin" />

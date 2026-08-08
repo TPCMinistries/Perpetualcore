@@ -467,7 +467,7 @@ export default function AuditLogsPage() {
               <div className="flex gap-2">
                 <Button
                   onClick={() => fetchLogs()}
-                  className="bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-700 hover:to-purple-700 text-white"
+                  className="bg-primary text-white"
                 >
                   <Search className="h-4 w-4 mr-2" />
                   Apply Filters

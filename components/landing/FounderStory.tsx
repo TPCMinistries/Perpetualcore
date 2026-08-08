@@ -11,7 +11,7 @@ export function FounderStory() {
             <Heart className="h-4 w-4" />
             <span>Mission-Driven</span>
           </div>
-          <h2 className="text-4xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-gray-900 via-primary to-purple-600 dark:from-white dark:via-primary dark:to-purple-400 bg-clip-text text-transparent">
+          <h2 className="text-4xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-gray-900 via-primary to-primary dark:from-white dark:via-primary dark:to-primary bg-clip-text text-transparent">
             Built By a Builder, Not a Board Room
           </h2>
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
@@ -31,7 +31,7 @@ export function FounderStory() {
                   aria-label="Lorenzo Daughtry-Chambers, Founder"
                 >
                   <div className="text-center">
-                    <div className="h-16 w-16 rounded-xl bg-gradient-to-br from-primary to-purple-600 flex items-center justify-center mx-auto mb-3 shadow-lg">
+                    <div className="h-16 w-16 rounded-xl bg-primary flex items-center justify-center mx-auto mb-3 shadow-lg">
                       <span className="text-2xl font-black text-white">LDC</span>
                     </div>
                     <span className="text-xs text-muted-foreground font-medium">Founder Photo</span>
@@ -42,7 +42,7 @@ export function FounderStory() {
               {/* Founder Info */}
               <div className="flex-1 text-center md:text-left">
                 {/* Badge */}
-                <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full backdrop-blur-2xl bg-gradient-to-r from-primary/15 to-purple-500/15 border border-primary/25 text-primary text-sm font-semibold mb-4 shadow-lg">
+                <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full backdrop-blur-2xl bg-gradient-to-r from-primary/15 to-primary/15 border border-primary/25 text-primary text-sm font-semibold mb-4 shadow-lg">
                   <Building2 className="h-3.5 w-3.5" />
                   <span>Founder-Led &amp; Mission-Driven</span>
                 </div>

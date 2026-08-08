@@ -191,7 +191,7 @@ export function SmartCollections({
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-purple-600 to-pink-600 flex items-center justify-center">
+          <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center">
             <Sparkles className="h-4 w-4 text-white" />
           </div>
           <div>
@@ -221,7 +221,7 @@ export function SmartCollections({
       <Button
         onClick={generateClusters}
         disabled={isGenerating}
-        className="w-full bg-gradient-to-r from-purple-600/20 to-pink-600/20 hover:from-purple-600/30 hover:to-pink-600/30 text-white border border-purple-500/30 hover:border-purple-500/50"
+        className="w-full bg-gradient-to-r from-primary/20 to-primary/20 hover:from-primary/30 hover:to-primary/30 text-white border border-purple-500/30 hover:border-purple-500/50"
       >
         {isGenerating ? (
           <>

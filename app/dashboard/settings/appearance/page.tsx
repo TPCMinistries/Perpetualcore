@@ -146,14 +146,14 @@ export default function AppearanceSettingsPage() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-purple-50 via-fuchsia-50 to-pink-50 dark:from-purple-950/20 dark:via-fuchsia-950/20 dark:to-pink-950/20 border border-purple-100 dark:border-purple-900/20 p-8 shadow-lg">
+      <div className="relative overflow-hidden rounded-3xl bg-primary border border-purple-100 dark:border-purple-900/20 p-8 shadow-lg">
         <div className="absolute inset-0 bg-grid-pattern opacity-5"></div>
         <div className="relative flex items-center gap-4">
-          <div className="h-16 w-16 rounded-2xl bg-gradient-to-br from-purple-500 to-pink-600 flex items-center justify-center shadow-lg">
+          <div className="h-16 w-16 rounded-2xl bg-primary flex items-center justify-center shadow-lg">
             <Palette className="h-8 w-8 text-white" />
           </div>
           <div>
-            <h1 className="text-3xl font-bold bg-gradient-to-r from-purple-900 via-fuchsia-800 to-pink-900 dark:from-purple-100 dark:via-fuchsia-100 dark:to-pink-100 bg-clip-text text-transparent">
+            <h1 className="text-3xl font-bold text-primary">
               Appearance Settings
             </h1>
             <p className="text-purple-700 dark:text-purple-300 mt-1">
@@ -430,7 +430,7 @@ export default function AppearanceSettingsPage() {
         <CardContent>
           <div className="rounded-lg border p-4 space-y-4">
             <div className="flex items-center gap-3">
-              <div className="h-10 w-10 rounded-full bg-gradient-to-br from-purple-500 to-pink-600 flex items-center justify-center text-white font-semibold">
+              <div className="h-10 w-10 rounded-full bg-primary flex items-center justify-center text-white font-semibold">
                 AI
               </div>
               <div>
@@ -451,7 +451,7 @@ export default function AppearanceSettingsPage() {
         <Button
           onClick={handleSave}
           disabled={saving}
-          className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
+          className="bg-primary"
         >
           {saving ? (
             <>

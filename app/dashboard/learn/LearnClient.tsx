@@ -28,7 +28,7 @@ const ACADEMY_TRACKS = [
     description: "Advanced AI integration — automation, agents, and business workflows",
     modules: 5,
     price: "$497",
-    color: "from-violet-500 to-purple-500",
+    color: "from-primary to-primary",
   },
   {
     tier: "Tier 3",
@@ -86,9 +86,9 @@ export function LearnClient({ userEmail, userName }: LearnClientProps) {
       </div>
 
       {/* Hero Card */}
-      <div className="rounded-2xl border bg-gradient-to-br from-violet-500/5 via-background to-blue-500/5 p-8">
+      <div className="rounded-2xl border bg-gradient-to-br from-primary/5 via-background to-blue-500/5 p-8">
         <div className="flex flex-col md:flex-row items-start md:items-center gap-6">
-          <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-violet-500 to-blue-500 flex items-center justify-center flex-shrink-0">
+          <div className="w-16 h-16 rounded-2xl bg-primary flex items-center justify-center flex-shrink-0">
             <GraduationCap className="h-8 w-8 text-white" />
           </div>
           <div className="flex-1">
@@ -101,7 +101,7 @@ export function LearnClient({ userEmail, userName }: LearnClientProps) {
               translate directly into career advancement and business growth.
             </p>
             <a href={academyUrl} target="_blank" rel="noopener noreferrer">
-              <Button className="bg-gradient-to-r from-violet-600 to-blue-600 hover:from-violet-700 hover:to-blue-700 gap-2">
+              <Button className="bg-primary hover:to-blue-700 gap-2">
                 Start Learning
                 <ArrowRight className="h-4 w-4" />
               </Button>

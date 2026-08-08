@@ -221,7 +221,7 @@ export function LibraryAssistant({
         </Button>
 
         <div className="flex flex-col items-center gap-3">
-          <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-blue-600 to-purple-600 flex items-center justify-center shadow-lg shadow-purple-500/20">
+          <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-blue-600 to-primary flex items-center justify-center shadow-lg shadow-purple-500/20">
             <Brain className="h-5 w-5 text-white" />
           </div>
           <div className="w-8 h-px bg-white/10" />
@@ -249,7 +249,7 @@ export function LibraryAssistant({
       {/* Header */}
       <div className="flex items-center justify-between p-4 border-b border-white/10">
         <div className="flex items-center gap-3">
-          <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-blue-600 to-purple-600 flex items-center justify-center shadow-lg shadow-purple-500/20">
+          <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-blue-600 to-primary flex items-center justify-center shadow-lg shadow-purple-500/20">
             <Brain className="h-5 w-5 text-white" />
           </div>
           <div>
@@ -362,7 +362,7 @@ export function LibraryAssistant({
                 className={cn(
                   "max-w-[90%] rounded-2xl px-4 py-3",
                   message.role === "user"
-                    ? "bg-gradient-to-r from-blue-600 to-purple-600 text-white"
+                    ? "bg-gradient-to-r from-blue-600 to-primary text-white"
                     : "bg-white/10 text-white border border-white/10"
                 )}
               >
@@ -471,7 +471,7 @@ export function LibraryAssistant({
           <button
             type="submit"
             disabled={!input.trim() || isLoading}
-            className="absolute right-2 top-1/2 -translate-y-1/2 h-8 w-8 rounded-lg bg-gradient-to-r from-blue-600 to-purple-600 flex items-center justify-center text-white disabled:opacity-50 disabled:cursor-not-allowed hover:shadow-lg hover:shadow-purple-500/20 transition-all"
+            className="absolute right-2 top-1/2 -translate-y-1/2 h-8 w-8 rounded-lg bg-gradient-to-r from-blue-600 to-primary flex items-center justify-center text-white disabled:opacity-50 disabled:cursor-not-allowed hover:shadow-lg hover:shadow-purple-500/20 transition-all"
           >
             <Send className="h-4 w-4" />
           </button>
@@ -479,7 +479,7 @@ export function LibraryAssistant({
       </form>
 
       {/* Ambient glow */}
-      <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-purple-600/10 to-transparent pointer-events-none" />
+      <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-primary/10 to-transparent pointer-events-none" />
     </motion.div>
   );
 }

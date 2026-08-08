@@ -164,7 +164,7 @@ export default function AgentSettingsPage({ params }: { params: { id: string } }
 
       <div className="max-w-3xl">
         <div className="flex items-center gap-3 mb-2">
-          <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-purple-500 to-purple-700 flex items-center justify-center">
+          <div className="h-12 w-12 rounded-xl bg-primary flex items-center justify-center">
             <SettingsIcon className="h-6 w-6 text-white" />
           </div>
           <div>
@@ -306,7 +306,7 @@ export default function AgentSettingsPage({ params }: { params: { id: string } }
               <Button
                 type="submit"
                 disabled={saving}
-                className="bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white"
+                className="bg-primary text-white"
               >
                 {saving ? (
                   <>

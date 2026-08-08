@@ -398,7 +398,7 @@ export default function ConversationPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-background via-background to-indigo-500/5 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5 flex items-center justify-center">
         <div className="text-center">
           <div className="h-12 w-12 rounded-full border-4 border-indigo-200 border-t-indigo-600 animate-spin mx-auto mb-4"></div>
           <p className="text-muted-foreground">Loading conversation...</p>
@@ -412,7 +412,7 @@ export default function ConversationPage() {
   }
 
   return (
-    <div className="h-[calc(100vh-8rem)] flex flex-col bg-gradient-to-br from-background via-background to-indigo-500/5">
+    <div className="h-[calc(100vh-8rem)] flex flex-col bg-gradient-to-br from-background via-background to-primary/5">
       {/* Header */}
       <div className="border-b border-border bg-card/50 backdrop-blur-xl px-6 py-4">
         <div className="flex items-start justify-between">
@@ -470,7 +470,7 @@ export default function ConversationPage() {
               {conversation.conversation_participants?.slice(0, 5).map((participant: any) => (
                 <div
                   key={participant.id}
-                  className="h-10 w-10 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white text-sm font-semibold border-2 border-background"
+                  className="h-10 w-10 rounded-full bg-primary flex items-center justify-center text-white text-sm font-semibold border-2 border-background"
                   title={participant.profiles?.full_name || participant.profiles?.email}
                 >
                   {participant.profiles?.full_name?.[0]?.toUpperCase() ||
@@ -533,7 +533,7 @@ export default function ConversationPage() {
         {messages.length === 0 ? (
           <div className="flex items-center justify-center h-full">
             <div className="text-center max-w-md">
-              <div className="h-16 w-16 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white mx-auto mb-4">
+              <div className="h-16 w-16 rounded-full bg-primary flex items-center justify-center text-white mx-auto mb-4">
                 <MessageSquare className="h-8 w-8" />
               </div>
               <h3 className="text-xl font-semibold mb-2">Start the conversation</h3>
@@ -554,7 +554,7 @@ export default function ConversationPage() {
               {/* Avatar */}
               <div className="flex-shrink-0">
                 {message.role === "assistant" ? (
-                  <div className="h-10 w-10 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white">
+                  <div className="h-10 w-10 rounded-full bg-primary flex items-center justify-center text-white">
                     <Bot className="h-5 w-5" />
                   </div>
                 ) : (
@@ -612,7 +612,7 @@ export default function ConversationPage() {
             {sending && (
               <div className="flex gap-3 bg-indigo-50/50 dark:bg-indigo-950/20 -mx-6 px-6 py-4 animate-fade-in">
                 <div className="flex-shrink-0">
-                  <div className="h-10 w-10 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white">
+                  <div className="h-10 w-10 rounded-full bg-primary flex items-center justify-center text-white">
                     <Bot className="h-5 w-5" />
                   </div>
                 </div>
@@ -657,7 +657,7 @@ export default function ConversationPage() {
           <Button
             type="submit"
             disabled={sending || !newMessage.trim()}
-            className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white self-end"
+            className="bg-primary text-white self-end"
             size="lg"
           >
             {sending ? (

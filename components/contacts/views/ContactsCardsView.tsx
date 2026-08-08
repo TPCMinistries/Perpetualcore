@@ -158,7 +158,7 @@ export function ContactsCardsView({
             <div className="flex items-start gap-3">
               <Avatar className="h-12 w-12">
                 <AvatarImage src={contact.avatar_url || ""} />
-                <AvatarFallback className="bg-gradient-to-br from-violet-500 to-purple-600 text-white">
+                <AvatarFallback className="bg-primary text-white">
                   {getInitials(contact.full_name)}
                 </AvatarFallback>
               </Avatar>

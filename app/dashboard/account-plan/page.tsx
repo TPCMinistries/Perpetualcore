@@ -509,7 +509,7 @@ export default function AccountPlanPage() {
       <Card className="overflow-hidden rounded-lg border-violet-200 bg-white shadow-none">
         <CardContent className="p-0">
           <div className="grid gap-0 lg:grid-cols-[0.95fr_1.05fr]">
-            <div className="border-b border-violet-100 bg-gradient-to-br from-violet-50 via-white to-slate-50 p-5 lg:border-b-0 lg:border-r">
+            <div className="border-b border-violet-100 bg-gradient-to-br from-primary via-white to-slate-50 p-5 lg:border-b-0 lg:border-r">
               <div className="flex items-start justify-between gap-4">
                 <div>
                   <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-violet-700">

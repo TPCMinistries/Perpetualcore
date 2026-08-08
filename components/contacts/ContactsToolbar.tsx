@@ -201,7 +201,7 @@ export function ContactsToolbar({
           {onAddContact && (
             <Button
               onClick={onAddContact}
-              className="gap-2 h-10 rounded-xl bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-700 hover:to-purple-700 shadow-lg shadow-violet-500/25 border-0"
+              className="gap-2 h-10 rounded-xl bg-primary shadow-lg shadow-violet-500/25 border-0"
             >
               <UserPlus className="h-4 w-4" />
               <span className="hidden sm:inline">Add Contact</span>

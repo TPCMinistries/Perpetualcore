@@ -61,7 +61,7 @@ export function SmartCoachingCard({ suggestion, onDismiss, onComplete }: SmartCo
       case "opportunity":
         return {
           icon: Target,
-          gradient: "from-purple-500/10 to-pink-500/10",
+          gradient: "from-primary/10 to-primary/10",
           border: "border-purple-200 dark:border-purple-800",
           iconBg: "bg-purple-100 dark:bg-purple-900/30",
           iconColor: "text-purple-600 dark:text-purple-400",

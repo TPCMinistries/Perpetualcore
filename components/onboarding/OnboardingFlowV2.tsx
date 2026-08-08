@@ -198,11 +198,11 @@ function WelcomeStep({
 }) {
   return (
     <div className="text-center space-y-6 py-8">
-      <div className="inline-flex h-24 w-24 rounded-full bg-gradient-to-br from-purple-500 via-blue-500 to-indigo-600 items-center justify-center mb-4 shadow-lg">
+      <div className="inline-flex h-24 w-24 rounded-full bg-primary items-center justify-center mb-4 shadow-lg">
         <Brain className="h-12 w-12 text-white animate-pulse" />
       </div>
       <div>
-        <h1 className="text-4xl font-bold mb-3 bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
+        <h1 className="text-4xl font-bold mb-3 text-primary">
           Welcome, {firstName}!
         </h1>
         <p className="text-xl text-slate-600 dark:text-slate-300 mb-2">
@@ -214,7 +214,7 @@ function WelcomeStep({
       </div>
 
       <div className="grid grid-cols-3 gap-4 max-w-xl mx-auto pt-4">
-        <Card className="p-4 bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-950/30 dark:to-purple-900/30 border-purple-200 dark:border-purple-800">
+        <Card className="p-4 bg-primary border-purple-200 dark:border-purple-800">
           <FileText className="h-8 w-8 text-purple-600 dark:text-purple-400 mx-auto mb-2" />
           <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">Infinite Documents</p>
           <p className="text-xs text-slate-600 dark:text-slate-400">Upload & search everything</p>
@@ -224,7 +224,7 @@ function WelcomeStep({
           <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">Infinite Memory</p>
           <p className="text-xs text-slate-600 dark:text-slate-400">AI that remembers</p>
         </Card>
-        <Card className="p-4 bg-gradient-to-br from-indigo-50 to-indigo-100 dark:from-indigo-950/30 dark:to-indigo-900/30 border-indigo-200 dark:border-indigo-800">
+        <Card className="p-4 bg-primary border-indigo-200 dark:border-indigo-800">
           <Users className="h-8 w-8 text-indigo-600 dark:text-indigo-400 mx-auto mb-2" />
           <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">Infinite Teams</p>
           <p className="text-xs text-slate-600 dark:text-slate-400">Collaborate & share</p>
@@ -235,7 +235,7 @@ function WelcomeStep({
         onClick={onNext}
         disabled={isLoading}
         size="lg"
-        className="mt-6 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
+        className="mt-6 bg-primary hover:to-blue-700"
       >
         Let's Build Your Brain <ArrowRight className="ml-2 h-5 w-5" />
       </Button>
@@ -353,7 +353,7 @@ function FirstActionStep({
         title: "Upload Your First Document",
         description: "Add a work document and watch AI instantly understand it",
         action: "/dashboard/library",
-        color: "from-blue-600 to-indigo-600",
+        color: "from-blue-600 to-primary",
       },
       secondary: {
         icon: MessageSquare,
@@ -368,7 +368,7 @@ function FirstActionStep({
         title: "Upload Research Papers",
         description: "Add papers and AI will help you connect the dots",
         action: "/dashboard/library",
-        color: "from-purple-600 to-pink-600",
+        color: "from-primary to-primary",
       },
       secondary: {
         icon: MessageSquare,
@@ -398,7 +398,7 @@ function FirstActionStep({
         title: "Have Your First Conversation",
         description: "Start chatting with your AI brain",
         action: "/dashboard/chat",
-        color: "from-purple-600 to-blue-600",
+        color: "from-primary to-blue-600",
       },
       secondary: {
         icon: Upload,
@@ -581,7 +581,7 @@ function CompleteStep({
         </p>
       </div>
 
-      <Card className="p-6 max-w-xl mx-auto bg-gradient-to-br from-purple-50 to-blue-50 dark:from-purple-950/30 dark:to-blue-950/30 border-purple-200 dark:border-purple-800">
+      <Card className="p-6 max-w-xl mx-auto bg-primary dark:to-blue-950/30 border-purple-200 dark:border-purple-800">
         <h3 className="font-semibold text-lg mb-4 text-slate-900 dark:text-white">What happens next:</h3>
         <div className="space-y-3 text-left">
           <div className="flex items-start gap-3">
@@ -615,7 +615,7 @@ function CompleteStep({
         onClick={onGetStarted}
         disabled={isLoading}
         size="lg"
-        className="mt-6 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-lg px-8"
+        className="mt-6 bg-primary hover:to-blue-700 text-lg px-8"
       >
         <Sparkles className="mr-2 h-5 w-5" />
         Start Using My AI Brain
