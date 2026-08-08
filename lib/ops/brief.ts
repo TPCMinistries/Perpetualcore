@@ -54,6 +54,9 @@ export interface BriefInput {
   /** worst-severity headline from the funnel capability — demand and whether the
    *  instrument measuring it is alive — or null if it did not run */
   funnelLine: string | null;
+  /** worst-severity headline from intake-contract — whether the public forms can
+   *  still store what they send — or null if it did not run */
+  intakeLine: string | null;
 }
 
 interface Move {
@@ -143,6 +146,11 @@ export function renderBriefTelegram(i: BriefInput): string {
   // Funnel — demand, and whether the thing measuring demand is alive
   if (i.funnelLine) {
     out.push(`🫗 Funnel: ${i.funnelLine.replace(/[*_`]/g, '')}`);
+  }
+
+  // Intake contract — can the public forms still store what they send
+  if (i.intakeLine) {
+    out.push(`📥 Intake: ${i.intakeLine.replace(/[*_`]/g, '')}`);
   }
 
   // Security
@@ -236,6 +244,11 @@ export function composeBrief(i: BriefInput): string {
   // Funnel — demand by source, plus a check that the instrument itself is alive
   L.push('## Funnel');
   L.push(i.funnelLine ? `- ${i.funnelLine}` : '- No funnel run found — run `npx tsx scripts/ops/run.ts funnel`.');
+  L.push('');
+
+  // Intake contract — the public forms' ability to store what they send
+  L.push('## Intake contract');
+  L.push(i.intakeLine ? `- ${i.intakeLine}` : '- No intake-contract run found — run `npx tsx scripts/ops/run.ts intake-contract`.');
   L.push('');
 
   // Pipeline
