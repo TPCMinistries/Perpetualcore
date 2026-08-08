@@ -415,8 +415,8 @@ export function RecentAutomationsWidget() {
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <div className="h-8 w-8 rounded-lg bg-violet-100 dark:bg-violet-900/50 flex items-center justify-center">
-              <Bot className="h-4 w-4 text-violet-600" />
+            <div className="h-8 w-8 rounded-lg bg-primary/10 dark:bg-primary/50 flex items-center justify-center">
+              <Bot className="h-4 w-4 text-primary" />
             </div>
             <div>
               <CardTitle className="text-base">Recent Automations</CardTitle>
@@ -429,7 +429,7 @@ export function RecentAutomationsWidget() {
             variant="ghost"
             size="sm"
             onClick={() => router.push("/dashboard/automation")}
-            className="text-violet-600 text-xs"
+            className="text-primary text-xs"
           >
             View all <ChevronRight className="h-3 w-3 ml-1" />
           </Button>

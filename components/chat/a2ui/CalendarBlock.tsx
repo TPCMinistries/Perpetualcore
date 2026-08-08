@@ -10,7 +10,7 @@ interface CalendarBlockProps {
 }
 
 const DEFAULT_EVENT_COLORS = [
-  "bg-violet-100 dark:bg-violet-900/40 text-violet-800 dark:text-violet-300 border-l-violet-500",
+  "bg-primary/10 dark:bg-primary/40 text-primary border-l-violet-500",
   "bg-blue-100 dark:bg-blue-900/40 text-blue-800 dark:text-blue-300 border-l-blue-500",
   "bg-emerald-100 dark:bg-emerald-900/40 text-emerald-800 dark:text-emerald-300 border-l-emerald-500",
   "bg-amber-100 dark:bg-amber-900/40 text-amber-800 dark:text-amber-300 border-l-amber-500",

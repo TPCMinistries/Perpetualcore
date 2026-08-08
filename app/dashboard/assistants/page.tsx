@@ -431,7 +431,7 @@ export default function AssistantsPage() {
                 >
                   <Card
                     className={cn(
-                      "hover:shadow-lg transition-all hover:border-violet-300 dark:hover:border-violet-700",
+                      "hover:shadow-lg transition-all hover:border-primary/20 dark:hover:border-primary/40",
                       !isActive && "opacity-60"
                     )}
                   >
@@ -466,7 +466,7 @@ export default function AssistantsPage() {
                         )}
                         {assistant.team && (
                           <Link href={`/dashboard/teams/${assistant.team.id}`}>
-                            <Badge className="bg-violet-100 dark:bg-violet-900/30 text-violet-700 dark:text-violet-400 border-0 cursor-pointer hover:bg-violet-200 dark:hover:bg-violet-900/50">
+                            <Badge className="bg-primary/10 dark:bg-primary/30 text-primary border-0 cursor-pointer hover:bg-primary/20 dark:hover:bg-primary/50">
                               <Users className="h-3 w-3 mr-1" />
                               {assistant.team.emoji && <span className="mr-1">{assistant.team.emoji}</span>}
                               {assistant.team.name}
@@ -494,7 +494,7 @@ export default function AssistantsPage() {
 
                       <div className="flex items-center gap-2 pt-2">
                         <Button
-                          className="flex-1 bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-700 hover:to-purple-700 text-white shadow-lg shadow-violet-500/25"
+                          className="flex-1 bg-primary text-white shadow-lg shadow-primary/25"
                           onClick={() => router.push(`/dashboard/assistants/${assistant.id}/chat`)}
                         >
                           <MessageSquare className="mr-2 h-4 w-4" />

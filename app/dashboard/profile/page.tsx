@@ -246,11 +246,11 @@ export default function ProfilePage() {
                 <div className="relative">
                   <Avatar className="h-32 w-32 ring-4 ring-white dark:ring-slate-800 shadow-xl">
                     <AvatarImage src={profile.avatar_url || undefined} />
-                    <AvatarFallback className="text-2xl bg-gradient-to-br from-violet-500 to-purple-600 text-white">
+                    <AvatarFallback className="text-2xl bg-primary text-white">
                       {getInitials(profile.full_name || "U")}
                     </AvatarFallback>
                   </Avatar>
-                  <button className="absolute bottom-0 right-0 p-2 rounded-full bg-violet-600 text-white shadow-lg hover:bg-violet-700 transition-colors">
+                  <button className="absolute bottom-0 right-0 p-2 rounded-full bg-primary text-white shadow-lg hover:bg-primary transition-colors">
                     <Camera className="h-4 w-4" />
                   </button>
                 </div>
@@ -286,13 +286,13 @@ export default function ProfilePage() {
                     <span className="text-sm text-muted-foreground dark:text-muted-foreground">
                       {completedFields} of {totalFields} fields
                     </span>
-                    <span className="text-sm font-semibold text-violet-600 dark:text-violet-400">
+                    <span className="text-sm font-semibold text-primary">
                       {completionPercent}%
                     </span>
                   </div>
                   <div className="h-2 bg-muted dark:bg-card rounded-full overflow-hidden">
                     <motion.div
-                      className="h-full bg-gradient-to-r from-violet-500 to-purple-600 rounded-full"
+                      className="h-full bg-primary rounded-full"
                       initial={{ width: 0 }}
                       animate={{ width: `${completionPercent}%` }}
                       transition={{ duration: 0.8, ease: "easeOut" }}
@@ -381,7 +381,7 @@ export default function ProfilePage() {
                       id="full_name"
                       value={profile.full_name}
                       onChange={(e) => setProfile({ ...profile, full_name: e.target.value })}
-                      className="pl-10 h-11 bg-card border-border dark:border-border focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500"
+                      className="pl-10 h-11 bg-card border-border dark:border-border focus:ring-2 focus:ring-primary/20 focus:border-primary/40"
                       placeholder="John Doe"
                     />
                   </div>
@@ -418,7 +418,7 @@ export default function ProfilePage() {
                       id="phone"
                       value={profile.phone || ""}
                       onChange={(e) => setProfile({ ...profile, phone: e.target.value })}
-                      className="pl-10 h-11 bg-card border-border dark:border-border focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500"
+                      className="pl-10 h-11 bg-card border-border dark:border-border focus:ring-2 focus:ring-primary/20 focus:border-primary/40"
                       placeholder="+1 (555) 123-4567"
                     />
                   </div>
@@ -434,7 +434,7 @@ export default function ProfilePage() {
                       id="location"
                       value={profile.location || ""}
                       onChange={(e) => setProfile({ ...profile, location: e.target.value })}
-                      className="pl-10 h-11 bg-card border-border dark:border-border focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500"
+                      className="pl-10 h-11 bg-card border-border dark:border-border focus:ring-2 focus:ring-primary/20 focus:border-primary/40"
                       placeholder="San Francisco, CA"
                     />
                   </div>
@@ -453,7 +453,7 @@ export default function ProfilePage() {
                       id="company"
                       value={profile.company || ""}
                       onChange={(e) => setProfile({ ...profile, company: e.target.value })}
-                      className="pl-10 h-11 bg-card border-border dark:border-border focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500"
+                      className="pl-10 h-11 bg-card border-border dark:border-border focus:ring-2 focus:ring-primary/20 focus:border-primary/40"
                       placeholder="Acme Inc"
                     />
                   </div>
@@ -467,7 +467,7 @@ export default function ProfilePage() {
                     id="title"
                     value={profile.title || ""}
                     onChange={(e) => setProfile({ ...profile, title: e.target.value })}
-                    className="h-11 bg-card border-border dark:border-border focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500"
+                    className="h-11 bg-card border-border dark:border-border focus:ring-2 focus:ring-primary/20 focus:border-primary/40"
                     placeholder="Product Manager"
                   />
                 </div>
@@ -484,7 +484,7 @@ export default function ProfilePage() {
                     id="website"
                     value={profile.website || ""}
                     onChange={(e) => setProfile({ ...profile, website: e.target.value })}
-                    className="pl-10 h-11 bg-card border-border dark:border-border focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500"
+                    className="pl-10 h-11 bg-card border-border dark:border-border focus:ring-2 focus:ring-primary/20 focus:border-primary/40"
                     placeholder="https://yourwebsite.com"
                   />
                 </div>
@@ -501,7 +501,7 @@ export default function ProfilePage() {
                   onChange={(e) => setProfile({ ...profile, bio: e.target.value })}
                   placeholder="Tell us about yourself..."
                   rows={4}
-                  className="bg-card border-border dark:border-border focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 resize-none"
+                  className="bg-card border-border dark:border-border focus:ring-2 focus:ring-primary/20 focus:border-primary/40 resize-none"
                 />
                 <p className="text-xs text-muted-foreground dark:text-muted-foreground">
                   Brief description for your profile. Max 500 characters.
@@ -513,7 +513,7 @@ export default function ProfilePage() {
                 <Button
                   onClick={handleSave}
                   disabled={saving}
-                  className="w-full sm:w-auto bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-700 hover:to-purple-700 shadow-lg shadow-violet-500/25"
+                  className="w-full sm:w-auto bg-primary shadow-lg shadow-primary/25"
                 >
                   {saving ? (
                     <>

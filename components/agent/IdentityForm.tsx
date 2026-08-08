@@ -161,7 +161,7 @@ export function IdentityForm({ identity, onSave, onDelete, saving }: IdentityFor
         <Card>
           <CardHeader className="border-b border-border bg-muted/50">
             <div className="flex items-center gap-2">
-              <Bot className="h-5 w-5 text-indigo-500" />
+              <Bot className="h-5 w-5 text-primary" />
               <CardTitle className="text-base">Identity</CardTitle>
             </div>
             <CardDescription>
@@ -179,7 +179,7 @@ export function IdentityForm({ identity, onSave, onDelete, saving }: IdentityFor
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   placeholder="Atlas"
-                  className="h-11 bg-card border-border focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
+                  className="h-11 bg-card border-border focus:ring-2 focus:ring-primary/20 focus:border-primary/40"
                 />
                 <p className="text-xs text-muted-foreground">
                   e.g., Atlas, Jarvis, Friday, Nova
@@ -212,7 +212,7 @@ export function IdentityForm({ identity, onSave, onDelete, saving }: IdentityFor
                 onChange={(e) => setPersona(e.target.value)}
                 placeholder="A helpful AI assistant that specializes in productivity and business strategy"
                 rows={3}
-                className="bg-card border-border focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 resize-none"
+                className="bg-card border-border focus:ring-2 focus:ring-primary/20 focus:border-primary/40 resize-none"
               />
               <p className="text-xs text-muted-foreground">
                 Describe what your agent is and what it specializes in
@@ -277,7 +277,7 @@ export function IdentityForm({ identity, onSave, onDelete, saving }: IdentityFor
                 onChange={(e) => setPersonality(e.target.value)}
                 placeholder="Helpful, knowledgeable, and proactive"
                 rows={2}
-                className="bg-card border-border focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 resize-none"
+                className="bg-card border-border focus:ring-2 focus:ring-primary/20 focus:border-primary/40 resize-none"
               />
             </div>
 
@@ -300,7 +300,7 @@ export function IdentityForm({ identity, onSave, onDelete, saving }: IdentityFor
                   value={greeting}
                   onChange={(e) => setGreeting(e.target.value)}
                   placeholder="Hello! How can I help you today?"
-                  className="h-11 bg-card border-border focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
+                  className="h-11 bg-card border-border focus:ring-2 focus:ring-primary/20 focus:border-primary/40"
                 />
               </div>
 
@@ -313,7 +313,7 @@ export function IdentityForm({ identity, onSave, onDelete, saving }: IdentityFor
                   value={signoff}
                   onChange={(e) => setSignoff(e.target.value)}
                   placeholder="(Optional) e.g., Stay sharp!"
-                  className="h-11 bg-card border-border focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
+                  className="h-11 bg-card border-border focus:ring-2 focus:ring-primary/20 focus:border-primary/40"
                 />
               </div>
             </div>
@@ -407,7 +407,7 @@ export function IdentityForm({ identity, onSave, onDelete, saving }: IdentityFor
           <Button
             onClick={handleSave}
             disabled={saving || !name.trim()}
-            className="bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-700 hover:to-blue-700 text-white shadow-lg shadow-indigo-500/25"
+            className="bg-primary hover:to-blue-700 text-white shadow-lg shadow-primary/25"
           >
             {saving ? (
               <>

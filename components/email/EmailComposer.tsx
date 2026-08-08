@@ -342,15 +342,15 @@ export function EmailComposer({
     <div className={compact ? "space-y-4" : "p-6 space-y-4"}>
       {/* Contact Context Banner */}
       {contactContext && contactContext.count > 0 && (
-        <div className="flex items-center gap-2 p-3 bg-violet-50 dark:bg-violet-900/20 rounded-lg border border-violet-200 dark:border-violet-800">
-          <div className="h-8 w-8 rounded-full bg-violet-100 dark:bg-violet-800 flex items-center justify-center">
-            <Send className="h-4 w-4 text-violet-600 dark:text-violet-300" />
+        <div className="flex items-center gap-2 p-3 bg-primary/10 dark:bg-primary/20 rounded-lg border border-primary/20 dark:border-primary/40">
+          <div className="h-8 w-8 rounded-full bg-primary/10 dark:bg-primary flex items-center justify-center">
+            <Send className="h-4 w-4 text-primary" />
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-sm font-medium text-violet-900 dark:text-violet-100">
+            <p className="text-sm font-medium text-primary">
               Emailing {contactContext.count} contact{contactContext.count !== 1 ? "s" : ""}
             </p>
-            <p className="text-xs text-violet-600 dark:text-violet-300 truncate">
+            <p className="text-xs text-primary truncate">
               {contactContext.names.slice(0, 3).join(", ")}
               {contactContext.names.length > 3 && ` +${contactContext.names.length - 3} more`}
             </p>

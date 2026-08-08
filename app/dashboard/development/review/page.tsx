@@ -56,16 +56,16 @@ export default async function DevelopmentReviewPage() {
       <DevelopmentNav />
       <Link
         href="/dashboard/development"
-        className="inline-flex min-h-11 items-center gap-2 text-sm font-medium text-slate-600 transition-colors duration-200 hover:text-indigo-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-600 focus-visible:ring-offset-2"
+        className="inline-flex min-h-11 items-center gap-2 text-sm font-medium text-slate-600 transition-colors duration-200 hover:text-primary focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
       >
         <ArrowLeft className="h-4 w-4" aria-hidden="true" />
         Development Intelligence
       </Link>
 
-      <section className="overflow-hidden rounded-[28px] border border-indigo-200 bg-[#f5f3ff] p-6 sm:p-9">
+      <section className="overflow-hidden rounded-[28px] border border-primary/20 bg-[#f5f3ff] p-6 sm:p-9">
         <div className="grid gap-7 lg:grid-cols-[1fr_auto] lg:items-end">
           <div>
-            <Badge className="border border-indigo-200 bg-white text-indigo-800 hover:bg-white">
+            <Badge className="border border-primary/20 bg-white text-primary hover:bg-white">
               <ClipboardCheck className="mr-1.5 h-3.5 w-3.5" aria-hidden="true" />
               Human review workspace
             </Badge>
@@ -76,7 +76,7 @@ export default async function DevelopmentReviewPage() {
               Every AI-generated finding stays provisional until an authorized reviewer checks the source evidence, scope, limitations, and prohibited-inference guardrails.
             </p>
           </div>
-          <div className="rounded-2xl border border-indigo-200 bg-white p-4 text-sm text-slate-700">
+          <div className="rounded-2xl border border-primary/20 bg-white p-4 text-sm text-slate-700">
             <p className="font-semibold text-slate-950">{snapshot.quality.actionableReviewCount} open reviews</p>
             <p className="mt-1">{snapshot.quality.reviewCompletionRate}% of recent reports reviewed</p>
           </div>
@@ -97,7 +97,7 @@ export default async function DevelopmentReviewPage() {
         ].map((item) => (
           <Card key={item.title} className="border-slate-200 shadow-none">
             <CardContent className="p-5">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-50 text-indigo-700"><item.icon className="h-5 w-5" aria-hidden="true" /></div>
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary"><item.icon className="h-5 w-5" aria-hidden="true" /></div>
               <h2 id={item.title.startsWith("1.") ? "review-guidance-heading" : undefined} className="mt-4 font-semibold text-slate-950">{item.title}</h2>
               <p className="mt-2 text-sm leading-6 text-slate-600">{item.description}</p>
             </CardContent>

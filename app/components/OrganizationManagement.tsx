@@ -121,7 +121,7 @@ export default function OrganizationManagement() {
         </div>
         <button
           onClick={() => setShowCreateModal(true)}
-          className="px-4 py-2 bg-gradient-to-r from-cyan-500 to-purple-500 hover:from-cyan-600 hover:to-purple-600 text-white rounded-xl transition-all duration-200"
+          className="px-4 py-2 bg-gradient-to-r from-cyan-500 to-primary hover:from-cyan-600 hover:to-primary text-white rounded-xl transition-all duration-200"
         >
           + Create Organization
         </button>
@@ -141,7 +141,7 @@ export default function OrganizationManagement() {
                 <p className="text-sm text-slate-400 truncate">/{org.slug}</p>
               </div>
               {org.is_beta_tester && (
-                <span className="px-2 py-1 bg-purple-500/20 text-purple-400 text-xs rounded-full whitespace-nowrap ml-2">
+                <span className="px-2 py-1 bg-primary/20 text-primary text-xs rounded-full whitespace-nowrap ml-2">
                   Beta
                 </span>
               )}
@@ -153,7 +153,7 @@ export default function OrganizationManagement() {
                 <span>{org.member_count} members</span>
               </div>
               <span className={`px-2 py-1 rounded-full text-xs ${
-                org.subscription_tier === 'enterprise' ? 'bg-purple-500/20 text-purple-400' :
+                org.subscription_tier === 'enterprise' ? 'bg-primary/20 text-primary' :
                 org.subscription_tier === 'team' ? 'bg-cyan-500/20 text-cyan-400' :
                 'bg-slate-500/20 text-slate-400'
               }`}>
@@ -174,7 +174,7 @@ export default function OrganizationManagement() {
           <p className="text-slate-400 mb-4">No organizations yet</p>
           <button
             onClick={() => setShowCreateModal(true)}
-            className="px-4 py-2 bg-gradient-to-r from-cyan-500 to-purple-500 text-white rounded-xl"
+            className="px-4 py-2 bg-gradient-to-r from-cyan-500 to-primary text-white rounded-xl"
           >
             Create First Organization
           </button>
@@ -234,7 +234,7 @@ export default function OrganizationManagement() {
                 </button>
                 <button
                   onClick={createOrganization}
-                  className="flex-1 px-4 py-2 bg-gradient-to-r from-cyan-500 to-purple-500 text-white rounded-xl font-medium transition-colors"
+                  className="flex-1 px-4 py-2 bg-gradient-to-r from-cyan-500 to-primary text-white rounded-xl font-medium transition-colors"
                 >
                   Create Organization
                 </button>
@@ -295,7 +295,7 @@ export default function OrganizationManagement() {
                       className="flex items-center justify-between p-3 bg-slate-700/30 rounded-lg"
                     >
                       <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 bg-gradient-to-r from-cyan-500 to-purple-500 rounded-full flex items-center justify-center text-sm font-bold">
+                        <div className="w-8 h-8 bg-gradient-to-r from-cyan-500 to-primary rounded-full flex items-center justify-center text-sm font-bold">
                           {member.user_email[0].toUpperCase()}
                         </div>
                         <div>

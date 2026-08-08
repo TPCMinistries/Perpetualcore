@@ -19,16 +19,16 @@ export function AnalysisList({
 }) {
   if (analyses.length === 0) {
     return (
-      <Card className="border-dashed border-indigo-200 bg-indigo-50/40 shadow-none">
+      <Card className="border-dashed border-primary/20 bg-primary/40 shadow-none">
         <CardContent className="flex flex-col items-center px-6 py-12 text-center">
-          <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-white text-indigo-700">
+          <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-white text-primary">
             <FileSearch className="h-6 w-6" />
           </div>
           <h3 className="text-lg font-semibold text-slate-950">Your first report starts with one conversation.</h3>
           <p className="mt-2 max-w-lg text-sm leading-6 text-slate-600">
             Upload a meeting or interview recording, or paste a transcript. You’ll receive evidence, coaching actions, and commitments ready for human review.
           </p>
-          <Button asChild className="mt-5 min-h-11 bg-indigo-600 hover:bg-indigo-700">
+          <Button asChild className="mt-5 min-h-11 bg-primary hover:bg-primary">
             <Link href="#new-analysis"><Sparkles className="mr-2 h-4 w-4" />Create my first report</Link>
           </Button>
         </CardContent>
@@ -42,9 +42,9 @@ export function AnalysisList({
         <Link
           key={analysis.id}
           href={`/dashboard/development/analyses/${analysis.id}`}
-          className="group block cursor-pointer rounded-xl focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-600 focus-visible:ring-offset-2"
+          className="group block cursor-pointer rounded-xl focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
         >
-          <Card className="border-slate-200 shadow-none transition-colors duration-200 group-hover:border-indigo-300 group-hover:bg-indigo-50/30">
+          <Card className="border-slate-200 shadow-none transition-colors duration-200 group-hover:border-primary/20 group-hover:bg-primary/30">
             <CardContent className="flex items-start gap-4 p-5">
               <div
                 className={`mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${
@@ -84,7 +84,7 @@ export function AnalysisList({
                   {new Date(analysis.occurred_at).toLocaleString()}
                 </p>
               </div>
-              <ArrowRight className="mt-2 h-5 w-5 shrink-0 text-slate-400 transition-colors duration-200 group-hover:text-indigo-700" />
+              <ArrowRight className="mt-2 h-5 w-5 shrink-0 text-slate-400 transition-colors duration-200 group-hover:text-primary" />
             </CardContent>
           </Card>
         </Link>

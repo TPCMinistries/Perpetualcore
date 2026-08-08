@@ -43,7 +43,7 @@ export function OvernightSummary({ summary }: OvernightSummaryProps) {
     <Card>
       <CardHeader className="pb-3">
         <CardTitle className="text-base font-medium flex items-center gap-2">
-          <Sparkles className="h-4 w-4 text-violet-500" />
+          <Sparkles className="h-4 w-4 text-primary" />
           While You Were Away
         </CardTitle>
       </CardHeader>
@@ -83,7 +83,7 @@ export function OvernightSummary({ summary }: OvernightSummaryProps) {
                       key={index}
                       className="text-sm text-muted-foreground flex items-start gap-2"
                     >
-                      <span className="text-violet-500 mt-1">•</span>
+                      <span className="text-primary mt-1">•</span>
                       {highlight}
                     </li>
                   ))}

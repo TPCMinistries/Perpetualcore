@@ -151,7 +151,7 @@ export function AITaskRunner({
           {loading ? (
             <Loader2 className="h-4 w-4 animate-spin" />
           ) : (
-            <Sparkles className="h-4 w-4 text-purple-500" />
+            <Sparkles className="h-4 w-4 text-primary" />
           )}
           {size !== "sm" && (loading ? "Running..." : "Run with AI")}
         </Button>
@@ -167,7 +167,7 @@ export function AITaskRunner({
           {loading ? (
             <Loader2 className="h-4 w-4 animate-spin" />
           ) : (
-            <Sparkles className="h-4 w-4 text-purple-500" />
+            <Sparkles className="h-4 w-4 text-primary" />
           )}
         </Button>
       )}

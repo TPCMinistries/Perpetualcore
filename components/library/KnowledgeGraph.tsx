@@ -29,8 +29,8 @@ const ForceGraph2D = dynamic(() => import("react-force-graph-2d"), {
   loading: () => (
     <div className="w-full h-full flex items-center justify-center">
       <div className="flex flex-col items-center gap-3">
-        <div className="h-12 w-12 rounded-xl bg-purple-500/20 flex items-center justify-center animate-pulse">
-          <RefreshCw className="h-6 w-6 text-purple-400 animate-spin" />
+        <div className="h-12 w-12 rounded-xl bg-primary/20 flex items-center justify-center animate-pulse">
+          <RefreshCw className="h-6 w-6 text-primary animate-spin" />
         </div>
         <p className="text-sm text-slate-400">Loading knowledge graph...</p>
       </div>
@@ -282,7 +282,7 @@ export function KnowledgeGraph({
           onClick={() => setShowFilters(!showFilters)}
           className={cn(
             "bg-white/5 backdrop-blur-xl border border-white/10 text-white hover:bg-white/10",
-            showFilters && "bg-purple-500/20 border-purple-500/50"
+            showFilters && "bg-primary/20 border-primary/50"
           )}
         >
           <Filter className="h-4 w-4" />
@@ -429,7 +429,7 @@ export function KnowledgeGraph({
       {isLoading && (
         <div className="absolute inset-0 flex items-center justify-center bg-slate-950/80 backdrop-blur-sm">
           <div className="flex flex-col items-center gap-3">
-            <RefreshCw className="h-8 w-8 text-purple-400 animate-spin" />
+            <RefreshCw className="h-8 w-8 text-primary animate-spin" />
             <p className="text-sm text-slate-400">Building knowledge graph...</p>
           </div>
         </div>

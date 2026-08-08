@@ -159,25 +159,25 @@ export default function ApiKeysPage() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-violet-50 via-purple-50 to-fuchsia-50 dark:from-violet-950/20 dark:via-purple-950/20 dark:to-fuchsia-950/20 border border-violet-100 dark:border-violet-900/20 p-8 shadow-lg">
+      <div className="relative overflow-hidden rounded-3xl bg-primary border border-primary/20 p-8 shadow-lg">
         <div className="absolute inset-0 bg-grid-pattern opacity-5"></div>
         <div className="relative flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <div className="h-16 w-16 rounded-2xl bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center shadow-lg">
+            <div className="h-16 w-16 rounded-2xl bg-primary flex items-center justify-center shadow-lg">
               <Key className="h-8 w-8 text-white" />
             </div>
             <div>
-              <h1 className="text-3xl font-bold bg-gradient-to-r from-violet-900 via-purple-800 to-fuchsia-900 dark:from-violet-100 dark:via-purple-100 dark:to-fuchsia-100 bg-clip-text text-transparent">
+              <h1 className="text-3xl font-bold text-primary">
                 API Keys
               </h1>
-              <p className="text-violet-700 dark:text-violet-300 mt-1">
+              <p className="text-primary mt-1">
                 Manage your API keys for programmatic access
               </p>
             </div>
           </div>
           <Dialog open={createDialogOpen} onOpenChange={setCreateDialogOpen}>
             <DialogTrigger asChild>
-              <Button className="bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-700 hover:to-purple-700 shadow-md">
+              <Button className="bg-primary shadow-md">
                 <Plus className="h-4 w-4 mr-2" />
                 Create API Key
               </Button>
@@ -334,7 +334,7 @@ export default function ApiKeysPage() {
               </p>
               <Button
                 onClick={() => setCreateDialogOpen(true)}
-                className="bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-700 hover:to-purple-700"
+                className="bg-primary"
               >
                 <Plus className="h-4 w-4 mr-2" />
                 Create API Key
@@ -348,7 +348,7 @@ export default function ApiKeysPage() {
                   className="flex items-center justify-between p-4 rounded-lg border hover:bg-muted/50 transition-colors"
                 >
                   <div className="flex items-center gap-4 flex-1">
-                    <div className="h-10 w-10 rounded-lg bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center flex-shrink-0">
+                    <div className="h-10 w-10 rounded-lg bg-primary flex items-center justify-center flex-shrink-0">
                       <Code className="h-5 w-5 text-white" />
                     </div>
                     <div className="flex-1">

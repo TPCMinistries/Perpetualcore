@@ -289,7 +289,7 @@ export function DashboardContent({ userId, userName }: DashboardContentProps) {
           </p>
           <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2">
             <greeting.Icon className={`h-6 w-6 ${greeting.color}`} />
-            {greeting.text}, <span className="bg-gradient-to-r from-primary to-purple-500 bg-clip-text text-transparent">{userName}</span>
+            {greeting.text}, <span className="text-primary">{userName}</span>
           </h1>
         </motion.div>
         <Button
@@ -438,7 +438,7 @@ export function DashboardContent({ userId, userName }: DashboardContentProps) {
             >
               <div className="rounded-xl border border-border/50 bg-card p-4">
                 <div className="flex items-center gap-2 mb-3">
-                  <Bot className="h-4 w-4 text-violet-500" />
+                  <Bot className="h-4 w-4 text-primary" />
                   <h3 className="text-sm font-semibold">Recent Agent Activity</h3>
                   <span className="ml-auto text-xs text-muted-foreground">
                     {data.agentActivity.todayCount} today

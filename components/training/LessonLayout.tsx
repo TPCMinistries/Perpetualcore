@@ -131,7 +131,7 @@ export function LessonLayout({
   return (
     <div className="max-w-4xl mx-auto space-y-6">
       {/* Header */}
-      <div className="bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 dark:from-blue-950/30 dark:via-purple-950/30 dark:to-pink-950/30 border border-blue-100 dark:border-blue-900/20 rounded-xl p-8">
+      <div className="bg-gradient-to-br from-blue-50 via-primary to-primary dark:from-blue-950/30 dark:via-primary/30 dark:to-primary/30 border border-blue-100 dark:border-blue-900/20 rounded-xl p-8">
         <div className="flex items-start justify-between mb-4">
           <div className="flex-1">
             <div className="flex items-center gap-2 mb-3">
@@ -149,7 +149,7 @@ export function LessonLayout({
                 </Badge>
               )}
             </div>
-            <h1 className="text-3xl md:text-4xl font-bold mb-2 bg-gradient-to-r from-blue-900 to-purple-800 dark:from-blue-100 dark:to-purple-100 bg-clip-text text-transparent">
+            <h1 className="text-3xl md:text-4xl font-bold mb-2 bg-gradient-to-r from-blue-900 to-primary dark:from-blue-100 dark:to-primary bg-clip-text text-transparent">
               {title}
             </h1>
             <p className="text-muted-foreground">{description}</p>
@@ -219,10 +219,10 @@ export function LessonLayout({
 
       {/* Practice Exercise (if provided) */}
       {practiceExercise && currentSection === sections.length && (
-        <Card className="border-purple-200 dark:border-purple-800">
+        <Card className="border-primary/20 dark:border-primary/40">
           <CardContent className="p-8">
             <div className="flex items-center gap-3 mb-6">
-              <Target className="h-6 w-6 text-purple-600" />
+              <Target className="h-6 w-6 text-primary" />
               <h2 className="text-2xl font-bold">Practice Exercise</h2>
             </div>
             {practiceExercise}
@@ -309,7 +309,7 @@ export function LessonLayout({
         {(currentSection === sections.length || !quiz) && (
           <Button
             onClick={handleNextLesson}
-            className="bg-gradient-to-r from-blue-600 to-purple-600"
+            className="bg-gradient-to-r from-blue-600 to-primary"
           >
             {!isCompleted && <CheckCircle2 className="h-4 w-4 mr-2" />}
             {nextLesson ? `Next: ${nextLesson.title}` : "Complete & Return"}

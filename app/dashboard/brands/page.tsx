@@ -92,7 +92,7 @@ export default function BrandsPage() {
       case "casual":
         return "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400";
       case "pastoral":
-        return "bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400";
+        return "bg-primary/10 text-primary dark:bg-primary/30 dark:text-primary";
       case "academic":
         return "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400";
       case "friendly":

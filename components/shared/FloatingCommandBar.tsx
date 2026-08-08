@@ -41,7 +41,7 @@ export function FloatingCommandBar({
       }`}
     >
       {/* Ambient glow effect */}
-      <div className="absolute -inset-1 bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500 rounded-3xl opacity-0 group-hover:opacity-30 blur-2xl transition-opacity duration-700 animate-pulse" />
+      <div className="absolute -inset-1 bg-gradient-to-r from-blue-500 via-primary to-primary rounded-3xl opacity-0 group-hover:opacity-30 blur-2xl transition-opacity duration-700 animate-pulse" />
 
       {/* Main command bar */}
       <div className="relative group">
@@ -50,7 +50,7 @@ export function FloatingCommandBar({
 
           {/* Search section */}
           <div className="flex items-center gap-3 flex-1 relative group/search">
-            <div className="absolute -inset-2 bg-gradient-to-r from-blue-500/0 to-indigo-500/0 group-hover/search:from-blue-500/5 group-hover/search:to-indigo-500/5 rounded-2xl blur-xl transition-all duration-300" />
+            <div className="absolute -inset-2 bg-gradient-to-r from-blue-500/0 to-primary/0 group-hover/search:from-blue-500/5 group-hover/search:to-primary/5 rounded-2xl blur-xl transition-all duration-300" />
 
             <div className="relative flex items-center gap-3 flex-1">
               <Search className="w-5 h-5 text-slate-400 dark:text-slate-500 transition-colors group-hover/search:text-blue-500" />
@@ -82,9 +82,9 @@ export function FloatingCommandBar({
             <Button
               onClick={onUpload}
               size="sm"
-              className="relative group/btn bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white border-0 shadow-lg shadow-blue-500/25 hover:shadow-xl hover:shadow-blue-500/40 transition-all duration-300 rounded-xl px-4 py-2 h-auto"
+              className="relative group/btn bg-gradient-to-r from-blue-600 to-primary hover:from-blue-500 hover:to-primary text-white border-0 shadow-lg shadow-blue-500/25 hover:shadow-xl hover:shadow-blue-500/40 transition-all duration-300 rounded-xl px-4 py-2 h-auto"
             >
-              <div className="absolute -inset-0.5 bg-gradient-to-r from-blue-400 to-indigo-400 rounded-xl opacity-0 group-hover/btn:opacity-50 blur transition-opacity duration-300" />
+              <div className="absolute -inset-0.5 bg-gradient-to-r from-blue-400 to-primary rounded-xl opacity-0 group-hover/btn:opacity-50 blur transition-opacity duration-300" />
               <div className="relative flex items-center gap-2">
                 <Upload className="w-4 h-4" />
                 <span className="text-sm font-medium">Upload</span>
@@ -98,8 +98,8 @@ export function FloatingCommandBar({
               variant="ghost"
               className="relative group/folder hover:bg-slate-100 dark:hover:bg-slate-800/60 transition-all duration-300 rounded-xl px-3 py-2 h-auto"
             >
-              <div className="absolute -inset-1 bg-gradient-to-r from-indigo-500/0 to-purple-500/0 group-hover/folder:from-indigo-500/10 group-hover/folder:to-purple-500/10 rounded-xl blur transition-all duration-300" />
-              <FolderPlus className="w-4 h-4 text-slate-600 dark:text-slate-400 group-hover/folder:text-indigo-600 dark:group-hover/folder:text-indigo-400 transition-colors relative" />
+              <div className="absolute -inset-1 bg-gradient-to-r from-primary/0 to-primary/0 group-hover/folder:from-primary/10 group-hover/folder:to-primary/10 rounded-xl blur transition-all duration-300" />
+              <FolderPlus className="w-4 h-4 text-slate-600 dark:text-slate-400 group-hover/folder:text-primary dark:group-hover/folder:text-primary transition-colors relative" />
             </Button>
 
             {/* AI Assistant quick access */}
@@ -108,8 +108,8 @@ export function FloatingCommandBar({
               variant="ghost"
               className="relative group/ai hover:bg-slate-100 dark:hover:bg-slate-800/60 transition-all duration-300 rounded-xl px-3 py-2 h-auto"
             >
-              <div className="absolute -inset-1 bg-gradient-to-r from-purple-500/0 to-pink-500/0 group-hover/ai:from-purple-500/10 group-hover/ai:to-pink-500/10 rounded-xl blur transition-all duration-300" />
-              <Sparkles className="w-4 h-4 text-slate-600 dark:text-slate-400 group-hover/ai:text-purple-600 dark:group-hover/ai:text-purple-400 transition-colors relative" />
+              <div className="absolute -inset-1 bg-gradient-to-r from-primary/0 to-primary/0 group-hover/ai:from-primary/10 group-hover/ai:to-primary/10 rounded-xl blur transition-all duration-300" />
+              <Sparkles className="w-4 h-4 text-slate-600 dark:text-slate-400 group-hover/ai:text-primary dark:group-hover/ai:text-primary transition-colors relative" />
             </Button>
 
             {/* Settings */}

@@ -87,16 +87,16 @@ export const AssistantNode = memo(({ data, selected }: NodeProps) => {
     <div
       className={cn(
         "min-w-[180px] rounded-xl border-2 bg-white dark:bg-slate-900 shadow-lg transition-all",
-        selected ? "ring-2 ring-purple-500 ring-offset-2" : "",
-        "border-purple-300 dark:border-purple-700"
+        selected ? "ring-2 ring-primary ring-offset-2" : "",
+        "border-primary/20 dark:border-primary/40"
       )}
     >
       <Handle
         type="target"
         position={Position.Top}
-        className="!w-3 !h-3 !bg-purple-500 !border-2 !border-white dark:!border-slate-900"
+        className="!w-3 !h-3 !bg-primary !border-2 !border-white dark:!border-slate-900"
       />
-      <div className="flex items-center gap-2 px-3 py-2 rounded-t-lg bg-gradient-to-r from-purple-500 to-violet-600">
+      <div className="flex items-center gap-2 px-3 py-2 rounded-t-lg bg-primary">
         <div className="h-6 w-6 rounded-md bg-white/20 flex items-center justify-center">
           <Icon className="h-4 w-4 text-white" />
         </div>
@@ -111,7 +111,7 @@ export const AssistantNode = memo(({ data, selected }: NodeProps) => {
       )}
       {nodeData.config &&
         Object.keys(nodeData.config).length > 0 && (
-          <div className="px-3 pb-2 text-xs text-purple-600 dark:text-purple-400">
+          <div className="px-3 pb-2 text-xs text-primary">
             {(nodeData.config as Record<string, unknown>).model
               ? `Model: ${(nodeData.config as Record<string, unknown>).model}`
               : "Configured"}
@@ -120,7 +120,7 @@ export const AssistantNode = memo(({ data, selected }: NodeProps) => {
       <Handle
         type="source"
         position={Position.Bottom}
-        className="!w-3 !h-3 !bg-purple-500 !border-2 !border-white dark:!border-slate-900"
+        className="!w-3 !h-3 !bg-primary !border-2 !border-white dark:!border-slate-900"
       />
     </div>
   );
@@ -205,7 +205,7 @@ export const OutputNode = memo(({ data, selected }: NodeProps) => {
         position={Position.Top}
         className="!w-3 !h-3 !bg-blue-500 !border-2 !border-white dark:!border-slate-900"
       />
-      <div className="flex items-center gap-2 px-3 py-2 rounded-t-lg bg-gradient-to-r from-blue-500 to-indigo-600">
+      <div className="flex items-center gap-2 px-3 py-2 rounded-t-lg bg-gradient-to-r from-blue-500 to-primary">
         <div className="h-6 w-6 rounded-md bg-white/20 flex items-center justify-center">
           <Icon className="h-4 w-4 text-white" />
         </div>

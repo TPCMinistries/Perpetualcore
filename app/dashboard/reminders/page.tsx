@@ -359,8 +359,8 @@ export default function RemindersPage() {
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
-              <div className="p-2 rounded-lg bg-purple-100">
-                <Calendar className="h-4 w-4 text-purple-600" />
+              <div className="p-2 rounded-lg bg-primary/10">
+                <Calendar className="h-4 w-4 text-primary" />
               </div>
               <span className="text-2xl font-bold">{stats?.todayCount || 0}</span>
             </div>

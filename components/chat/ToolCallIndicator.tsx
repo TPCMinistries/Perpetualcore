@@ -82,7 +82,7 @@ export function ToolCallIndicator({ activities }: ToolCallIndicatorProps) {
                 className={cn(
                   "inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium transition-colors",
                   activity.status === "running" &&
-                    "bg-indigo-50 text-indigo-700 dark:bg-indigo-950/40 dark:text-indigo-300",
+                    "bg-primary/10 text-primary dark:bg-primary/40 dark:text-primary",
                   activity.status === "complete" &&
                     "bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300 cursor-pointer",
                   activity.status === "error" &&

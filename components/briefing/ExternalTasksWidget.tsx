@@ -90,7 +90,7 @@ export function ExternalTasksWidget({ limit = 5, compact = false }: ExternalTask
 
   const getSourceColor = (source: string) => {
     if (source === "todoist") return "text-red-500";
-    if (source === "linear") return "text-violet-500";
+    if (source === "linear") return "text-primary";
     return "text-gray-500";
   };
 
@@ -141,8 +141,8 @@ export function ExternalTasksWidget({ limit = 5, compact = false }: ExternalTask
       <Card className="border-dashed">
         <CardContent className="py-6">
           <div className="flex flex-col items-center text-center space-y-3">
-            <div className="h-10 w-10 rounded-full bg-violet-100 dark:bg-violet-900/30 flex items-center justify-center">
-              <Boxes className="h-5 w-5 text-violet-600 dark:text-violet-400" />
+            <div className="h-10 w-10 rounded-full bg-primary/10 dark:bg-primary/30 flex items-center justify-center">
+              <Boxes className="h-5 w-5 text-primary" />
             </div>
             <div className="space-y-1">
               <p className="font-medium">Connect Your Task Apps</p>
@@ -179,7 +179,7 @@ export function ExternalTasksWidget({ limit = 5, compact = false }: ExternalTask
     <Card>
       <CardHeader className={`${compact ? "pb-2" : "pb-3"} flex flex-row items-center justify-between`}>
         <CardTitle className="text-base font-semibold flex items-center gap-2">
-          <Boxes className="h-4 w-4 text-violet-500" />
+          <Boxes className="h-4 w-4 text-primary" />
           External Tasks
         </CardTitle>
         <div className="flex items-center gap-2">

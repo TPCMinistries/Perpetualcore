@@ -39,7 +39,7 @@ export function BulkActionsBar({
           <div className="flex items-center gap-1 px-3 py-2 bg-slate-900 dark:bg-slate-100 rounded-2xl shadow-2xl shadow-slate-900/50 dark:shadow-slate-900/20 border border-slate-700/50 dark:border-slate-300 backdrop-blur-xl">
             {/* Selection count */}
             <div className="flex items-center gap-2 px-3 py-1">
-              <div className="h-6 w-6 rounded-lg bg-violet-500 flex items-center justify-center">
+              <div className="h-6 w-6 rounded-lg bg-primary flex items-center justify-center">
                 <span className="text-xs font-bold text-white">{selectedCount}</span>
               </div>
               <span className="text-sm font-medium text-white dark:text-slate-900">

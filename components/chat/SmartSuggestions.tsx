@@ -72,7 +72,7 @@ export function SmartSuggestions({
       case "contact":
         return "bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400 border-green-200 dark:border-green-800";
       case "document":
-        return "bg-violet-100 dark:bg-violet-900/30 text-violet-600 dark:text-violet-400 border-violet-200 dark:border-violet-800";
+        return "bg-primary/10 dark:bg-primary/30 text-primary border-primary/20 dark:border-primary/40";
       case "pattern":
         return "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-700";
       default:

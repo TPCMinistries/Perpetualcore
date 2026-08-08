@@ -136,7 +136,7 @@ export function UpcomingMeetings({ meetings }: UpcomingMeetingsProps) {
                   {meeting.aiPrep && (
                     <div className="mt-2 pt-2 border-t border-border">
                       <div className="flex items-start gap-1.5">
-                        <Sparkles className="h-3 w-3 text-violet-500 mt-0.5 flex-shrink-0" />
+                        <Sparkles className="h-3 w-3 text-primary mt-0.5 flex-shrink-0" />
                         <p className="text-xs text-muted-foreground line-clamp-2">
                           {meeting.aiPrep}
                         </p>

@@ -237,7 +237,7 @@ export function DocumentTimeline({
                         {relativeDate && (
                           <p className={cn(
                             "text-xs mt-0.5",
-                            event.isPast ? "text-muted-foreground" : "text-violet-500"
+                            event.isPast ? "text-muted-foreground" : "text-primary"
                           )}>
                             {relativeDate}
                           </p>
@@ -249,7 +249,7 @@ export function DocumentTimeline({
                     <div className="mt-3 flex items-center gap-2">
                       <div className="flex-1 h-1.5 bg-muted rounded-full overflow-hidden">
                         <div
-                          className="h-full bg-violet-500 rounded-full"
+                          className="h-full bg-primary rounded-full"
                           style={{ width: `${event.confidence * 100}%` }}
                         />
                       </div>

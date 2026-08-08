@@ -4189,7 +4189,7 @@ Reference path: ${packageLink}`;
                           <Sparkles className="h-3 w-3" />
                           AI Insights
                         </Label>
-                        <Card className="mt-2 bg-gradient-to-br from-purple-50 to-blue-50">
+                        <Card className="mt-2 bg-primary">
                           <CardContent className="p-3 text-sm">
                             {typeof selectedLead.ai_insights === "string"
                               ? selectedLead.ai_insights

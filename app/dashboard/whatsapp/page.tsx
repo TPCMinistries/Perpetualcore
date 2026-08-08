@@ -413,8 +413,8 @@ export default function WhatsAppPage() {
                 {messages.filter((m) => m.ai_response).length}
               </p>
             </div>
-            <div className="h-10 w-10 rounded-lg bg-purple-50 dark:bg-purple-950/30 flex items-center justify-center">
-              <Sparkles className="h-5 w-5 text-purple-600 dark:text-purple-400" />
+            <div className="h-10 w-10 rounded-lg bg-primary/10 dark:bg-primary/30 flex items-center justify-center">
+              <Sparkles className="h-5 w-5 text-primary" />
             </div>
           </div>
         </Card>

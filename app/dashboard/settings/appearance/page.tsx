@@ -146,17 +146,17 @@ export default function AppearanceSettingsPage() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-purple-50 via-fuchsia-50 to-pink-50 dark:from-purple-950/20 dark:via-fuchsia-950/20 dark:to-pink-950/20 border border-purple-100 dark:border-purple-900/20 p-8 shadow-lg">
+      <div className="relative overflow-hidden rounded-3xl bg-primary border border-primary/20 p-8 shadow-lg">
         <div className="absolute inset-0 bg-grid-pattern opacity-5"></div>
         <div className="relative flex items-center gap-4">
-          <div className="h-16 w-16 rounded-2xl bg-gradient-to-br from-purple-500 to-pink-600 flex items-center justify-center shadow-lg">
+          <div className="h-16 w-16 rounded-2xl bg-primary flex items-center justify-center shadow-lg">
             <Palette className="h-8 w-8 text-white" />
           </div>
           <div>
-            <h1 className="text-3xl font-bold bg-gradient-to-r from-purple-900 via-fuchsia-800 to-pink-900 dark:from-purple-100 dark:via-fuchsia-100 dark:to-pink-100 bg-clip-text text-transparent">
+            <h1 className="text-3xl font-bold text-primary">
               Appearance Settings
             </h1>
-            <p className="text-purple-700 dark:text-purple-300 mt-1">
+            <p className="text-primary mt-1">
               Customize how Perpetual Core looks and feels
             </p>
           </div>
@@ -348,10 +348,10 @@ export default function AppearanceSettingsPage() {
       </Card>
 
       {/* Dashboard Mode */}
-      <Card className="border-2 border-violet-200 dark:border-violet-800">
+      <Card className="border-2 border-primary/20 dark:border-primary/40">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <Users className="h-5 w-5 text-violet-600" />
+            <Users className="h-5 w-5 text-primary" />
             Dashboard Mode
           </CardTitle>
           <CardDescription>
@@ -366,10 +366,10 @@ export default function AppearanceSettingsPage() {
           >
             <Label
               htmlFor="mode-simple"
-              className="flex flex-col items-center justify-between rounded-lg border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground cursor-pointer [&:has([data-state=checked])]:border-violet-500"
+              className="flex flex-col items-center justify-between rounded-lg border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground cursor-pointer [&:has([data-state=checked])]:border-primary/40"
             >
               <RadioGroupItem value="simple" id="mode-simple" className="sr-only" />
-              <Users className="mb-3 h-8 w-8 text-violet-600" />
+              <Users className="mb-3 h-8 w-8 text-primary" />
               <span className="font-medium">Simple Mode</span>
               <span className="text-xs text-muted-foreground text-center mt-1">
                 AI Employees dashboard - clean, focused
@@ -378,10 +378,10 @@ export default function AppearanceSettingsPage() {
 
             <Label
               htmlFor="mode-full"
-              className="flex flex-col items-center justify-between rounded-lg border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground cursor-pointer [&:has([data-state=checked])]:border-violet-500"
+              className="flex flex-col items-center justify-between rounded-lg border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground cursor-pointer [&:has([data-state=checked])]:border-primary/40"
             >
               <RadioGroupItem value="full" id="mode-full" className="sr-only" />
-              <LayoutGrid className="mb-3 h-8 w-8 text-violet-600" />
+              <LayoutGrid className="mb-3 h-8 w-8 text-primary" />
               <span className="font-medium">Full Mode</span>
               <span className="text-xs text-muted-foreground text-center mt-1">
                 Complete dashboard with all features
@@ -430,7 +430,7 @@ export default function AppearanceSettingsPage() {
         <CardContent>
           <div className="rounded-lg border p-4 space-y-4">
             <div className="flex items-center gap-3">
-              <div className="h-10 w-10 rounded-full bg-gradient-to-br from-purple-500 to-pink-600 flex items-center justify-center text-white font-semibold">
+              <div className="h-10 w-10 rounded-full bg-primary flex items-center justify-center text-white font-semibold">
                 AI
               </div>
               <div>
@@ -451,7 +451,7 @@ export default function AppearanceSettingsPage() {
         <Button
           onClick={handleSave}
           disabled={saving}
-          className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
+          className="bg-primary"
         >
           {saving ? (
             <>

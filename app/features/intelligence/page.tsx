@@ -24,7 +24,7 @@ export default function IntelligenceFeaturesPage() {
           </div>
           
           <h1 className="text-5xl md:text-7xl font-black tracking-tight mb-6">
-            <span className="bg-gradient-to-r from-primary via-purple-600 to-primary bg-clip-text text-transparent">
+            <span className="bg-gradient-to-r from-primary via-primary to-primary bg-clip-text text-transparent">
               Intelligence That Learns
             </span>
           </h1>

@@ -65,7 +65,7 @@ export default async function DevelopmentAnalysisPage({ params }: { params: Prom
     <div className="space-y-7 pb-12 print:space-y-4">
       <div className="print:hidden"><DevelopmentNav /></div>
       <div className="flex flex-col gap-3 print:hidden sm:flex-row sm:items-center sm:justify-between">
-        <Link href="/dashboard/development" className="inline-flex min-h-11 items-center gap-2 text-sm font-medium text-slate-600 transition-colors hover:text-indigo-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-600 focus-visible:ring-offset-2">
+        <Link href="/dashboard/development" className="inline-flex min-h-11 items-center gap-2 text-sm font-medium text-slate-600 transition-colors hover:text-primary focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2">
           <ArrowLeft className="h-4 w-4" /> Development Intelligence
         </Link>
         <div className="flex flex-wrap gap-2">
@@ -77,12 +77,12 @@ export default async function DevelopmentAnalysisPage({ params }: { params: Prom
         </div>
       </div>
 
-      <section className="overflow-hidden rounded-[28px] border border-indigo-200 bg-[#f5f3ff] p-6 sm:p-9">
+      <section className="overflow-hidden rounded-[28px] border border-primary/20 bg-[#f5f3ff] p-6 sm:p-9">
         <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
           <div className="max-w-3xl">
             <div className="flex flex-wrap items-center gap-2">
-              <Badge className="border border-indigo-200 bg-white text-indigo-800 hover:bg-white">Evidence report</Badge>
-              <Badge variant="outline" className="border-indigo-200 bg-indigo-50 text-indigo-800">{lensLabels[analysis.lens] || analysis.lens.replaceAll("_", " ")}</Badge>
+              <Badge className="border border-primary/20 bg-white text-primary hover:bg-white">Evidence report</Badge>
+              <Badge variant="outline" className="border-primary/20 bg-primary/10 text-primary">{lensLabels[analysis.lens] || analysis.lens.replaceAll("_", " ")}</Badge>
               <Badge className={reviewApproved ? "bg-emerald-100 text-emerald-800 hover:bg-emerald-100" : "bg-amber-100 text-amber-800 hover:bg-amber-100"}>{reviewApproved ? "Human approved" : "Review required"}</Badge>
             </div>
             <h1 className="mt-4 text-3xl font-semibold tracking-[-0.03em] text-[#1e1b4b] sm:text-4xl">{analysis.title}</h1>
@@ -97,9 +97,9 @@ export default async function DevelopmentAnalysisPage({ params }: { params: Prom
           </div>
         </div>
 
-        <div className="mt-8 border-t border-indigo-200 pt-6">
-          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-indigo-700">Executive readout</p>
-          <p className="mt-3 max-w-4xl text-lg leading-8 text-indigo-950">{analysis.summary}</p>
+        <div className="mt-8 border-t border-primary/20 pt-6">
+          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">Executive readout</p>
+          <p className="mt-3 max-w-4xl text-lg leading-8 text-primary">{analysis.summary}</p>
         </div>
       </section>
 
@@ -112,7 +112,7 @@ export default async function DevelopmentAnalysisPage({ params }: { params: Prom
         ].map((item) => (
           <Card key={item.label} className="border-slate-200 shadow-none">
             <CardContent className="flex items-center gap-4 p-5">
-              <div className={`rounded-xl p-3 ${item.tone === "emerald" ? "bg-emerald-50 text-emerald-700" : item.tone === "amber" ? "bg-amber-50 text-amber-700" : "bg-indigo-50 text-indigo-700"}`}><item.icon className="h-5 w-5" /></div>
+              <div className={`rounded-xl p-3 ${item.tone === "emerald" ? "bg-emerald-50 text-emerald-700" : item.tone === "amber" ? "bg-amber-50 text-amber-700" : "bg-primary/10 text-primary"}`}><item.icon className="h-5 w-5" /></div>
               <div><p className="text-2xl font-semibold text-slate-950">{item.value}</p><p className="text-sm font-medium text-slate-700">{item.label}</p><p className="text-xs text-slate-500">{item.detail}</p></div>
             </CardContent>
           </Card>
@@ -137,18 +137,18 @@ export default async function DevelopmentAnalysisPage({ params }: { params: Prom
             <Card className="border-emerald-200 bg-emerald-50/40 shadow-none"><CardContent className="p-6"><div className="flex items-center gap-2 font-semibold text-emerald-950"><CheckCircle2 className="h-5 w-5 text-emerald-700" />What was demonstrated</div><ul className="mt-4 space-y-3">{analysis.strengths.map((strength) => <li key={strength} className="flex gap-2 text-sm leading-6 text-emerald-950"><CheckCircle2 className="mt-1 h-4 w-4 shrink-0 text-emerald-700" />{strength}</li>)}</ul></CardContent></Card>
             <Card className="border-amber-200 bg-amber-50/40 shadow-none"><CardContent className="p-6"><div className="flex items-center gap-2 font-semibold text-amber-950"><Target className="h-5 w-5 text-amber-700" />What to coach next</div><ul className="mt-4 space-y-3">{analysis.growth_areas.map((area) => <li key={area} className="flex gap-2 text-sm leading-6 text-amber-950"><ArrowRight className="mt-1 h-4 w-4 shrink-0 text-amber-700" />{area}</li>)}</ul></CardContent></Card>
           </div>
-          <Card className="border-indigo-200 bg-indigo-50/40 shadow-none"><CardContent className="p-6"><p className="text-xs font-semibold uppercase tracking-[0.14em] text-indigo-700">Recommended coaching actions</p><div className="mt-4 grid gap-3 md:grid-cols-2">{evidence.filter((item) => item.evidenceLevel !== "not_observed").map((item, index) => <div key={`${item.criterionKey}-${index}`} className="rounded-xl border border-indigo-100 bg-white p-4"><p className="text-sm font-semibold text-indigo-950">{item.criterionLabel}</p><p className="mt-2 text-sm leading-6 text-slate-700">{item.developmentalAction}</p></div>)}</div></CardContent></Card>
+          <Card className="border-primary/20 bg-primary/40 shadow-none"><CardContent className="p-6"><p className="text-xs font-semibold uppercase tracking-[0.14em] text-primary">Recommended coaching actions</p><div className="mt-4 grid gap-3 md:grid-cols-2">{evidence.filter((item) => item.evidenceLevel !== "not_observed").map((item, index) => <div key={`${item.criterionKey}-${index}`} className="rounded-xl border border-primary/20 bg-white p-4"><p className="text-sm font-semibold text-primary">{item.criterionLabel}</p><p className="mt-2 text-sm leading-6 text-slate-700">{item.developmentalAction}</p></div>)}</div></CardContent></Card>
           {analysis.limitations.length > 0 && <Card className="border-slate-200 shadow-none"><CardContent className="p-6"><p className="text-sm font-semibold text-slate-950">What this report cannot establish</p><ul className="mt-3 space-y-2 text-sm leading-6 text-slate-600">{analysis.limitations.map((limitation) => <li key={limitation} className="flex gap-2"><CircleDashed className="mt-1 h-4 w-4 shrink-0" />{limitation}</li>)}</ul></CardContent></Card>}
         </TabsContent>
 
         <TabsContent value="evidence" className="mt-5 space-y-4">
           {evidence.map((item, index) => (
-            <Card key={`${item.criterionKey}-${index}`} className="border-slate-200 shadow-none"><CardContent className="p-6"><div className="flex flex-col gap-5 md:flex-row md:items-start"><div className="flex flex-1 items-start gap-3"><EvidenceIcon level={item.evidenceLevel} /><div><h3 className="font-semibold text-slate-950">{item.criterionLabel}</h3><Badge variant="outline" className={`mt-2 ${levelStyle(item.evidenceLevel)}`}>{item.evidenceLevel.replaceAll("_", " ")}</Badge><p className="mt-4 text-sm leading-6 text-slate-700">{item.observation}</p></div></div><blockquote className="md:w-[42%] rounded-xl border-l-4 border-indigo-500 bg-indigo-50 px-4 py-3"><div className="flex gap-2"><Quote className="mt-0.5 h-4 w-4 shrink-0 text-indigo-700" /><p className="text-sm italic leading-6 text-indigo-950">“{item.evidenceQuote}”</p></div>{item.speakerLabel && <p className="mt-2 text-xs font-medium text-indigo-700">{item.speakerLabel}</p>}</blockquote></div><div className="mt-5 rounded-xl bg-slate-50 p-4"><p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Development action</p><p className="mt-1 text-sm leading-6 text-slate-700">{item.developmentalAction}</p></div></CardContent></Card>
+            <Card key={`${item.criterionKey}-${index}`} className="border-slate-200 shadow-none"><CardContent className="p-6"><div className="flex flex-col gap-5 md:flex-row md:items-start"><div className="flex flex-1 items-start gap-3"><EvidenceIcon level={item.evidenceLevel} /><div><h3 className="font-semibold text-slate-950">{item.criterionLabel}</h3><Badge variant="outline" className={`mt-2 ${levelStyle(item.evidenceLevel)}`}>{item.evidenceLevel.replaceAll("_", " ")}</Badge><p className="mt-4 text-sm leading-6 text-slate-700">{item.observation}</p></div></div><blockquote className="md:w-[42%] rounded-xl border-l-4 border-primary/40 bg-primary/10 px-4 py-3"><div className="flex gap-2"><Quote className="mt-0.5 h-4 w-4 shrink-0 text-primary" /><p className="text-sm italic leading-6 text-primary">“{item.evidenceQuote}”</p></div>{item.speakerLabel && <p className="mt-2 text-xs font-medium text-primary">{item.speakerLabel}</p>}</blockquote></div><div className="mt-5 rounded-xl bg-slate-50 p-4"><p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Development action</p><p className="mt-1 text-sm leading-6 text-slate-700">{item.developmentalAction}</p></div></CardContent></Card>
           ))}
         </TabsContent>
 
         <TabsContent value="commitments" className="mt-5 space-y-3">
-          {commitments.length === 0 ? <Card className="border-dashed shadow-none"><CardContent className="py-12 text-center"><FileCheck2 className="mx-auto h-7 w-7 text-slate-400" /><p className="mt-3 text-sm font-medium text-slate-700">No explicit commitments were supported by the source.</p></CardContent></Card> : commitments.map((commitment, index) => <Card key={`${commitment.statement}-${index}`} className="border-slate-200 shadow-none"><CardContent className="p-6"><div className="flex items-start gap-3"><div className="rounded-full bg-indigo-50 p-2 text-indigo-700"><FileCheck2 className="h-4 w-4" /></div><div className="flex-1"><p className="font-semibold text-slate-950">{commitment.statement}</p><div className="mt-2 flex flex-wrap gap-x-5 gap-y-1 text-xs text-slate-500"><span>Owner: {commitment.ownerLabel || "Not explicitly named"}</span><span>Due: {commitment.dueDate || "Not explicitly stated"}</span></div><p className="mt-4 rounded-xl bg-slate-50 p-4 text-sm italic leading-6 text-slate-600">“{commitment.evidenceQuote}”</p></div></div></CardContent></Card>)}
+          {commitments.length === 0 ? <Card className="border-dashed shadow-none"><CardContent className="py-12 text-center"><FileCheck2 className="mx-auto h-7 w-7 text-slate-400" /><p className="mt-3 text-sm font-medium text-slate-700">No explicit commitments were supported by the source.</p></CardContent></Card> : commitments.map((commitment, index) => <Card key={`${commitment.statement}-${index}`} className="border-slate-200 shadow-none"><CardContent className="p-6"><div className="flex items-start gap-3"><div className="rounded-full bg-primary/10 p-2 text-primary"><FileCheck2 className="h-4 w-4" /></div><div className="flex-1"><p className="font-semibold text-slate-950">{commitment.statement}</p><div className="mt-2 flex flex-wrap gap-x-5 gap-y-1 text-xs text-slate-500"><span>Owner: {commitment.ownerLabel || "Not explicitly named"}</span><span>Due: {commitment.dueDate || "Not explicitly stated"}</span></div><p className="mt-4 rounded-xl bg-slate-50 p-4 text-sm italic leading-6 text-slate-600">“{commitment.evidenceQuote}”</p></div></div></CardContent></Card>)}
         </TabsContent>
       </Tabs>
 

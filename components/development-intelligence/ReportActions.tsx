@@ -19,7 +19,7 @@ export function ReportActions() {
         {copied ? <Check className="mr-2 h-4 w-4 text-emerald-600" /> : <Copy className="mr-2 h-4 w-4" />}
         {copied ? "Link copied" : "Copy report link"}
       </Button>
-      <Button onClick={() => window.print()} className="min-h-11 cursor-pointer bg-indigo-600 hover:bg-indigo-700">
+      <Button onClick={() => window.print()} className="min-h-11 cursor-pointer bg-primary hover:bg-primary">
         <Download className="mr-2 h-4 w-4" />
         Save as PDF
       </Button>

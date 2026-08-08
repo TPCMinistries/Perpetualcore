@@ -191,7 +191,7 @@ export default function ContentCalendarPage() {
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white dark:from-slate-950 dark:to-slate-900 flex items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-violet-500" />
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
     );
   }
@@ -220,7 +220,7 @@ export default function ContentCalendarPage() {
               </Button>
               <Button
                 onClick={() => router.push("/dashboard/content?create=true")}
-                className="bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-700 hover:to-purple-700 text-white border-0"
+                className="bg-primary text-white border-0"
               >
                 <Plus className="h-4 w-4 mr-2" />
                 Create Content
@@ -323,7 +323,7 @@ export default function ContentCalendarPage() {
                     <span
                       className={cn(
                         "text-sm font-medium w-7 h-7 flex items-center justify-center rounded-full",
-                        isTodayDay && "bg-violet-600 text-white",
+                        isTodayDay && "bg-primary text-white",
                         !isTodayDay && isCurrentMonthDay && "text-foreground dark:text-white",
                         !isTodayDay && !isCurrentMonthDay && "text-muted-foreground dark:text-muted-foreground"
                       )}
@@ -373,7 +373,7 @@ export default function ContentCalendarPage() {
           <Card className="border-0 shadow-lg shadow-slate-200/50 dark:shadow-none bg-card/50">
             <CardHeader>
               <CardTitle className="text-base flex items-center gap-2">
-                <CalendarIcon className="h-4 w-4 text-violet-500" />
+                <CalendarIcon className="h-4 w-4 text-primary" />
                 Scheduled This Week
               </CardTitle>
             </CardHeader>
@@ -434,7 +434,7 @@ export default function ContentCalendarPage() {
                             variant="secondary"
                             className={cn(
                               "text-xs",
-                              item.status === "scheduled" && "bg-violet-100 text-violet-700 dark:bg-violet-900/30 dark:text-violet-400"
+                              item.status === "scheduled" && "bg-primary/10 text-primary dark:bg-primary/30 dark:text-primary"
                             )}
                           >
                             {item.status}

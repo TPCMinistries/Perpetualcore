@@ -121,7 +121,7 @@ export default function AdminSeedPage() {
 
       <div className="text-center text-sm text-muted-foreground">
         After seeding, go to{" "}
-        <a href="/dashboard/home" className="text-violet-600 hover:underline">
+        <a href="/dashboard/home" className="text-primary hover:underline">
           Dashboard
         </a>{" "}
         to see your data.

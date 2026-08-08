@@ -86,7 +86,7 @@ export function ComparisonTable() {
       <div className="max-w-5xl mx-auto">
         {/* Section Header */}
         <div className="text-center mb-12">
-          <h2 className="text-4xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-gray-900 via-primary to-purple-600 dark:from-white dark:via-primary dark:to-purple-400 bg-clip-text text-transparent">
+          <h2 className="text-4xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-gray-900 via-primary to-primary dark:from-white dark:via-primary dark:to-primary bg-clip-text text-transparent">
             How Perpetual Core Compares
           </h2>
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
@@ -98,7 +98,7 @@ export function ComparisonTable() {
         <div className="overflow-x-auto rounded-2xl border-2 border-border shadow-2xl">
           <table className="w-full min-w-[640px] text-sm">
             <thead>
-              <tr className="bg-gradient-to-r from-primary/10 via-purple-500/10 to-primary/10 border-b-2 border-border">
+              <tr className="bg-gradient-to-r from-primary/10 via-primary/10 to-primary/10 border-b-2 border-border">
                 <th className="px-6 py-4 text-left font-semibold text-muted-foreground w-[30%]">Feature</th>
                 <th className="px-6 py-4 text-center font-bold text-primary w-[25%]">
                   <div className="flex flex-col items-center gap-1">

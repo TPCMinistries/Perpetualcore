@@ -50,7 +50,7 @@ export function TodaysPriorities({ priorities }: TodaysPrioritiesProps) {
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
           <CardTitle className="text-base font-medium flex items-center gap-2">
-            <Brain className="h-4 w-4 text-violet-500" />
+            <Brain className="h-4 w-4 text-primary" />
             Today&apos;s Priorities
             <Badge variant="secondary" className="ml-2 text-xs">
               AI Ranked

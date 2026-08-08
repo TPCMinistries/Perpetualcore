@@ -152,7 +152,7 @@ export function EventDetailPanel({ event, onClose }: EventDetailPanelProps) {
                         "text-xs",
                         event.type === "event" && "bg-blue-100 text-blue-700",
                         event.type === "task" && "bg-amber-100 text-amber-700",
-                        event.type === "followup" && "bg-violet-100 text-violet-700"
+                        event.type === "followup" && "bg-primary/10 text-primary"
                       )}
                     >
                       {event.type === "event"
@@ -260,9 +260,9 @@ export function EventDetailPanel({ event, onClose }: EventDetailPanelProps) {
 
               {/* AI Meeting Prep */}
               {event.type === "event" && (
-                <div className="bg-gradient-to-br from-violet-50 to-purple-50 dark:from-violet-950/30 dark:to-purple-950/30 rounded-xl p-4 border border-violet-200 dark:border-violet-800">
-                  <h3 className="text-sm font-medium text-violet-900 dark:text-violet-100 mb-3 flex items-center gap-2">
-                    <Sparkles className="h-4 w-4 text-violet-600" />
+                <div className="bg-primary rounded-xl p-4 border border-primary/20 dark:border-primary/40">
+                  <h3 className="text-sm font-medium text-primary mb-3 flex items-center gap-2">
+                    <Sparkles className="h-4 w-4 text-primary" />
                     AI Meeting Prep
                   </h3>
 
@@ -294,7 +294,7 @@ export function EventDetailPanel({ event, onClose }: EventDetailPanelProps) {
                                 key={idx}
                                 className="text-sm text-slate-700 dark:text-slate-300 flex items-start gap-2"
                               >
-                                <ArrowRight className="h-3 w-3 mt-1 text-violet-500 flex-shrink-0" />
+                                <ArrowRight className="h-3 w-3 mt-1 text-primary flex-shrink-0" />
                                 {point}
                               </li>
                             ))}
@@ -314,7 +314,7 @@ export function EventDetailPanel({ event, onClose }: EventDetailPanelProps) {
                               <Badge
                                 key={idx}
                                 variant="outline"
-                                className="text-xs cursor-pointer hover:bg-violet-100 dark:hover:bg-violet-900"
+                                className="text-xs cursor-pointer hover:bg-primary/10 dark:hover:bg-primary"
                               >
                                 {action}
                               </Badge>
@@ -360,8 +360,8 @@ export function EventDetailPanel({ event, onClose }: EventDetailPanelProps) {
 
               {/* Follow-up specific content */}
               {event.type === "followup" && (
-                <div className="bg-violet-50 dark:bg-violet-950/30 rounded-xl p-4 border border-violet-200 dark:border-violet-800">
-                  <h3 className="text-sm font-medium text-violet-900 dark:text-violet-100 mb-2 flex items-center gap-2">
+                <div className="bg-primary/10 dark:bg-primary/30 rounded-xl p-4 border border-primary/20 dark:border-primary/40">
+                  <h3 className="text-sm font-medium text-primary mb-2 flex items-center gap-2">
                     <UserCircle className="h-4 w-4" />
                     Contact Follow-up
                   </h3>

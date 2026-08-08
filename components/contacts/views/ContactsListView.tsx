@@ -115,7 +115,7 @@ export function ContactsListView({
               "group flex items-center gap-4 p-4 cursor-pointer transition-colors",
               "hover:bg-muted/30",
               isSelected && "bg-primary/5",
-              isFocused && "ring-2 ring-inset ring-violet-500"
+              isFocused && "ring-2 ring-inset ring-primary"
             )}
           >
             {/* Checkbox */}
@@ -135,7 +135,7 @@ export function ContactsListView({
             {/* Avatar */}
             <Avatar className="h-10 w-10 flex-shrink-0">
               <AvatarImage src={contact.avatar_url || ""} />
-              <AvatarFallback className="bg-gradient-to-br from-violet-500 to-purple-600 text-white text-sm">
+              <AvatarFallback className="bg-primary text-white text-sm">
                 {getInitials(contact.full_name)}
               </AvatarFallback>
             </Avatar>

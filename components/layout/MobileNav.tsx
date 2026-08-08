@@ -98,7 +98,7 @@ export function MobileNav({ userProfile }: MobileNavProps) {
               className="flex items-center space-x-3 group"
               onClick={() => setOpen(false)}
             >
-              <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-violet-500 via-blue-500 to-cyan-400 flex items-center justify-center font-bold text-white shadow-glow-sm">
+              <div className="h-10 w-10 rounded-xl bg-primary flex items-center justify-center font-bold text-white shadow-glow-sm">
                 AI
               </div>
               <span className="text-lg font-semibold text-gradient">Perpetual Core</span>
@@ -171,7 +171,7 @@ export function MobileNav({ userProfile }: MobileNavProps) {
                           className={cn(
                             "relative flex items-center justify-between rounded-xl px-3 py-2.5 text-[13px] font-medium transition-all active:scale-[0.98]",
                             active
-                              ? "bg-gradient-to-r from-violet-600/90 to-violet-500/80 text-white shadow-glow-sm"
+                              ? "bg-gradient-to-r from-primary/90 to-primary/80 text-white shadow-glow-sm"
                               : "text-white/50 hover:text-white/90 hover:bg-white/[0.06]"
                           )}
                           title={item.adaptiveConfig.helpText}
@@ -190,7 +190,7 @@ export function MobileNav({ userProfile }: MobileNavProps) {
                                 "text-[10px] font-medium px-1.5 py-0.5 rounded-md",
                                 active
                                   ? "bg-white/20 text-white"
-                                  : "bg-violet-500/20 text-violet-300"
+                                  : "bg-primary/20 text-primary"
                               )}
                             >
                               {item.adaptiveConfig.badge === "coming-soon"

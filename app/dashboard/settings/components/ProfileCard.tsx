@@ -65,7 +65,7 @@ export function ProfileCard({
                 id="fullName"
                 value={profile.fullName}
                 onChange={(e) => setProfile({ ...profile, fullName: e.target.value })}
-                className="border-border dark:border-border focus:border-violet-500 dark:focus:border-violet-500"
+                className="border-border dark:border-border focus:border-primary/40 dark:focus:border-primary/40"
               />
             </div>
             <div className="space-y-2">

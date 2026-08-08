@@ -13,7 +13,7 @@ const badges = [
   {
     icon: ShieldCheck,
     iconColor: "text-blue-600 dark:text-blue-400",
-    iconBg: "from-blue-500 to-indigo-600",
+    iconBg: "from-blue-500 to-primary",
     title: "Enterprise SSO",
     subtitle: "SAML & OAuth 2.0",
     description: "Seamless single sign-on with your existing identity provider. SAML 2.0, OAuth, and SCIM provisioning.",
@@ -21,7 +21,7 @@ const badges = [
   {
     icon: Clock,
     iconColor: "text-purple-600 dark:text-purple-400",
-    iconBg: "from-purple-500 to-violet-600",
+    iconBg: "from-primary to-primary",
     title: "99.9% Uptime SLA",
     subtitle: "Guaranteed availability",
     description: "Mission-critical reliability backed by Vercel and Supabase enterprise infrastructure with global CDN.",

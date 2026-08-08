@@ -325,7 +325,7 @@ export function ConversationSidebar({
       {/* New Chat Button */}
       <Button
         onClick={onNewConversation}
-        className="w-full mb-4 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+        className="w-full mb-4 bg-gradient-to-r from-blue-600 to-primary hover:from-blue-700 hover:to-primary"
       >
         <Plus className="h-4 w-4 mr-2" />
         New Chat
@@ -471,7 +471,7 @@ export function ConversationSidebar({
                         key={conv.id}
                         className={`p-3 transition-all duration-200 hover:bg-accent/50 ${
                           currentConversationId === conv.id
-                            ? "bg-gradient-to-r from-blue-500/10 to-purple-500/10 border-blue-500/30"
+                            ? "bg-gradient-to-r from-blue-500/10 to-primary/10 border-blue-500/30"
                             : "bg-card/50"
                         }`}
                       >
@@ -594,7 +594,7 @@ export function ConversationSidebar({
                           key={conv.id}
                           className={`p-3 transition-all duration-200 hover:bg-accent/50 ${
                             currentConversationId === conv.id
-                              ? "bg-gradient-to-r from-blue-500/10 to-purple-500/10 border-blue-500/30"
+                              ? "bg-gradient-to-r from-blue-500/10 to-primary/10 border-blue-500/30"
                               : "bg-card/50"
                           }`}
                         >

@@ -130,13 +130,13 @@ export function ContactsToolbar({
 
         {/* Search */}
         <div className="relative flex-1 max-w-md group">
-          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 group-focus-within:text-violet-500 transition-colors" />
+          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 group-focus-within:text-primary transition-colors" />
           <Input
             placeholder="Search contacts..."
             value={state.search}
             onChange={(e) => setSearch(e.target.value)}
             onClick={openCommandPalette}
-            className="pl-10 pr-20 h-10 bg-slate-50 dark:bg-slate-800/50 border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all"
+            className="pl-10 pr-20 h-10 bg-slate-50 dark:bg-slate-800/50 border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary/40 transition-all"
           />
           <kbd className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none hidden sm:inline-flex h-6 select-none items-center gap-1 rounded-lg bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 px-2 font-mono text-[10px] font-medium text-slate-500 dark:text-slate-400 shadow-sm">
             <Command className="h-3 w-3" />K
@@ -201,7 +201,7 @@ export function ContactsToolbar({
           {onAddContact && (
             <Button
               onClick={onAddContact}
-              className="gap-2 h-10 rounded-xl bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-700 hover:to-purple-700 shadow-lg shadow-violet-500/25 border-0"
+              className="gap-2 h-10 rounded-xl bg-primary shadow-lg shadow-primary/25 border-0"
             >
               <UserPlus className="h-4 w-4" />
               <span className="hidden sm:inline">Add Contact</span>
@@ -286,7 +286,7 @@ export function ContactsToolbar({
         {activeFiltersCount > 0 && (
           <>
             <div className="w-px h-6 bg-slate-200 dark:bg-slate-700 mx-3" />
-            <Badge className="bg-violet-100 text-violet-700 dark:bg-violet-900/40 dark:text-violet-300 border border-violet-200 dark:border-violet-800 gap-1 px-2.5 py-1">
+            <Badge className="bg-primary/10 text-primary dark:bg-primary/40 dark:text-primary border border-primary/20 dark:border-primary/40 gap-1 px-2.5 py-1">
               {activeFiltersCount} filter{activeFiltersCount > 1 ? "s" : ""}
             </Badge>
             <Button

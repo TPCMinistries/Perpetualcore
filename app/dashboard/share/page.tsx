@@ -124,10 +124,10 @@ export default function SharePage() {
       <div className="container mx-auto max-w-4xl space-y-6">
         {/* Header */}
         <div className="text-center space-y-3 mb-8">
-          <div className="inline-flex h-16 w-16 rounded-full bg-gradient-to-br from-purple-500 to-blue-600 items-center justify-center mb-4 shadow-lg">
+          <div className="inline-flex h-16 w-16 rounded-full bg-primary items-center justify-center mb-4 shadow-lg">
             <Share2 className="h-8 w-8 text-white" />
           </div>
-          <h1 className="text-4xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
+          <h1 className="text-4xl font-bold text-primary">
             Share Your AI Brain
           </h1>
           <p className="text-lg text-muted-foreground dark:text-muted-foreground max-w-2xl mx-auto">
@@ -138,9 +138,9 @@ export default function SharePage() {
 
         {/* Stats */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <Card className="bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-950/30 dark:to-purple-900/30 border-purple-200 dark:border-purple-800">
+          <Card className="bg-primary border-primary/20 dark:border-primary/40">
             <CardContent className="p-6 text-center">
-              <div className="text-3xl font-bold text-purple-600 dark:text-purple-400 mb-1">
+              <div className="text-3xl font-bold text-primary mb-1">
                 {stats.invitesSent}
               </div>
               <p className="text-sm text-muted-foreground dark:text-muted-foreground">Invites Sent</p>
@@ -160,9 +160,9 @@ export default function SharePage() {
               <p className="text-sm text-muted-foreground dark:text-muted-foreground">Shared Docs</p>
             </CardContent>
           </Card>
-          <Card className="bg-gradient-to-br from-indigo-50 to-indigo-100 dark:from-indigo-950/30 dark:to-indigo-900/30 border-indigo-200 dark:border-indigo-800">
+          <Card className="bg-primary border-primary/20 dark:border-primary/40">
             <CardContent className="p-6 text-center">
-              <div className="text-3xl font-bold text-indigo-600 dark:text-indigo-400 mb-1">
+              <div className="text-3xl font-bold text-primary mb-1">
                 <Sparkles className="h-8 w-8 mx-auto" />
               </div>
               <p className="text-sm text-muted-foreground dark:text-muted-foreground">Infinite Memory</p>
@@ -174,7 +174,7 @@ export default function SharePage() {
         <Card className="border-border dark:border-border">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <LinkIcon className="h-5 w-5 text-purple-600 dark:text-purple-400" />
+              <LinkIcon className="h-5 w-5 text-primary" />
               Your Personal Invite Link
             </CardTitle>
           </CardHeader>
@@ -258,7 +258,7 @@ export default function SharePage() {
             <Button
               onClick={handleSendInvite}
               disabled={isSending || !email}
-              className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700"
+              className="w-full bg-gradient-to-r from-blue-600 to-primary hover:from-blue-700 hover:to-primary"
             >
               {isSending ? (
                 <>Sending...</>
@@ -273,18 +273,18 @@ export default function SharePage() {
         </Card>
 
         {/* Benefits of Inviting */}
-        <Card className="bg-gradient-to-br from-purple-50 to-blue-50 dark:from-purple-950/20 dark:to-blue-950/20 border-purple-200 dark:border-purple-800">
+        <Card className="bg-primary dark:to-blue-950/20 border-primary/20 dark:border-primary/40">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <Gift className="h-5 w-5 text-purple-600 dark:text-purple-400" />
+              <Gift className="h-5 w-5 text-primary" />
               Why Invite Others?
             </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="grid md:grid-cols-3 gap-4">
               <div className="space-y-2">
-                <div className="h-10 w-10 rounded-lg bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center mb-2">
-                  <Users className="h-5 w-5 text-purple-600 dark:text-purple-400" />
+                <div className="h-10 w-10 rounded-lg bg-primary/10 dark:bg-primary/30 flex items-center justify-center mb-2">
+                  <Users className="h-5 w-5 text-primary" />
                 </div>
                 <h3 className="font-semibold text-foreground dark:text-white">Shared Knowledge</h3>
                 <p className="text-sm text-muted-foreground dark:text-muted-foreground">
@@ -301,8 +301,8 @@ export default function SharePage() {
                 </p>
               </div>
               <div className="space-y-2">
-                <div className="h-10 w-10 rounded-lg bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center mb-2">
-                  <MessageSquare className="h-5 w-5 text-indigo-600 dark:text-indigo-400" />
+                <div className="h-10 w-10 rounded-lg bg-primary/10 dark:bg-primary/30 flex items-center justify-center mb-2">
+                  <MessageSquare className="h-5 w-5 text-primary" />
                 </div>
                 <h3 className="font-semibold text-foreground dark:text-white">Team Conversations</h3>
                 <p className="text-sm text-muted-foreground dark:text-muted-foreground">

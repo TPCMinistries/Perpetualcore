@@ -87,7 +87,7 @@ export function ImageGenerator() {
   return (
     <Card className="p-6 space-y-6">
       <div className="flex items-center gap-3">
-        <div className="h-10 w-10 rounded-lg bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center">
+        <div className="h-10 w-10 rounded-lg bg-primary flex items-center justify-center">
           <Sparkles className="h-5 w-5 text-white" />
         </div>
         <div>

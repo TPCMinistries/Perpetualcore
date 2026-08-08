@@ -846,9 +846,9 @@ export function UnifiedInbox() {
 
             {/* AI Insights Panel - Shows when triaging or has AI data */}
             {selectedMessage.type === "email" && (triaging || selectedMessage.ai_triaged_at || selectedMessage.ai_summary || selectedMessage.ai_priority_score !== null) && (
-              <div className="px-6 py-3 bg-gradient-to-r from-violet-50 to-blue-50 dark:from-violet-950/30 dark:to-blue-950/30 border-b">
+              <div className="px-6 py-3 bg-primary dark:to-blue-950/30 border-b">
                 <div className="flex items-start gap-4">
-                  <div className="flex items-center gap-2 text-violet-600 dark:text-violet-400">
+                  <div className="flex items-center gap-2 text-primary">
                     {triaging ? (
                       <RefreshCw className="w-4 h-4 animate-spin" />
                     ) : (
@@ -937,7 +937,7 @@ export function UnifiedInbox() {
                   setComposerMode("ai-reply");
                   setShowComposer(true);
                 }}
-                className="border-violet-300 text-violet-700 hover:bg-violet-50 dark:border-violet-700 dark:text-violet-400 dark:hover:bg-violet-950"
+                className="border-primary/20 text-primary hover:bg-primary/10 dark:border-primary/40 dark:text-primary dark:hover:bg-primary"
               >
                 <svg className="mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />

@@ -147,7 +147,7 @@ export default function TrainingHubPage() {
                   {stats.totalEnrollments}
                 </h3>
               </div>
-              <div className="h-12 w-12 rounded-lg bg-gradient-to-br from-purple-500 to-pink-600 flex items-center justify-center">
+              <div className="h-12 w-12 rounded-lg bg-primary flex items-center justify-center">
                 <Users className="h-6 w-6 text-white" />
               </div>
             </div>

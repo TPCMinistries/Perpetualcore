@@ -41,13 +41,13 @@ export default function SolutionsPage() {
   const gradients: { [key: string]: string } = {
     "law-firm": "from-blue-600 to-cyan-600",
     healthcare: "from-emerald-600 to-green-600",
-    sales: "from-purple-600 to-pink-600",
+    sales: "from-primary to-primary",
     "real-estate": "from-orange-600 to-amber-600",
-    "non-profit": "from-rose-600 to-pink-600",
+    "non-profit": "from-rose-600 to-primary",
     education: "from-amber-600 to-orange-600",
-    agency: "from-indigo-600 to-purple-600",
-    accounting: "from-blue-600 to-indigo-600",
-    church: "from-violet-600 to-purple-600",
+    agency: "from-primary to-primary",
+    accounting: "from-blue-600 to-primary",
+    church: "from-primary to-primary",
     consulting: "from-cyan-600 to-blue-600",
     "financial-advisor": "from-green-600 to-emerald-600",
     "it-services": "from-sky-600 to-blue-600",
@@ -77,7 +77,7 @@ export default function SolutionsPage() {
       <header className="border-b backdrop-blur-2xl bg-card/80 sticky top-0 z-50 shadow-sm">
         <div className="container mx-auto px-3 sm:px-4 py-3 sm:py-4 flex items-center justify-between">
           <Link href="/" className="flex items-center space-x-2">
-            <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-primary to-purple-600 flex items-center justify-center text-primary-foreground font-bold shadow-lg">
+            <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center text-primary-foreground font-bold shadow-lg">
               AI
             </div>
             <span className="text-lg sm:text-xl font-bold">Perpetual Core</span>
@@ -110,12 +110,12 @@ export default function SolutionsPage() {
       {/* Hero Section */}
       <section className="container mx-auto px-4 py-16 sm:py-24 md:py-32">
         <div className="max-w-4xl mx-auto text-center">
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full backdrop-blur-2xl bg-gradient-to-r from-primary/20 to-purple-500/20 border-2 border-primary/30 text-primary text-xs sm:text-sm font-medium mb-6 sm:mb-8 shadow-xl">
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full backdrop-blur-2xl bg-gradient-to-r from-primary/20 to-primary/20 border-2 border-primary/30 text-primary text-xs sm:text-sm font-medium mb-6 sm:mb-8 shadow-xl">
             <Briefcase className="h-4 w-4 flex-shrink-0" />
             <span className="font-semibold">12+ Industry Solutions</span>
           </div>
 
-          <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-8xl font-extrabold tracking-tight mb-6 sm:mb-8 bg-gradient-to-r from-gray-900 via-primary to-purple-600 dark:from-white dark:via-primary dark:to-purple-400 bg-clip-text text-transparent leading-tight px-4">
+          <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-8xl font-extrabold tracking-tight mb-6 sm:mb-8 bg-gradient-to-r from-gray-900 via-primary to-primary dark:from-white dark:via-primary dark:to-primary bg-clip-text text-transparent leading-tight px-4">
             Built for Your Industry
           </h1>
 
@@ -164,7 +164,7 @@ export default function SolutionsPage() {
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
             {allIndustries.map((industry) => {
               const Icon = industry.icon;
-              const gradient = gradients[industry.key] || "from-blue-600 to-purple-600";
+              const gradient = gradients[industry.key] || "from-blue-600 to-primary";
 
               return (
                 <Link key={industry.key} href={industry.url} className="group relative block">
@@ -203,7 +203,7 @@ export default function SolutionsPage() {
 
       {/* CTA Section */}
       <section className="container mx-auto px-4 py-20">
-        <Card className="max-w-4xl mx-auto bg-gradient-to-r from-primary to-purple-600 text-primary-foreground border-0 shadow-2xl">
+        <Card className="max-w-4xl mx-auto bg-primary text-primary-foreground border-0 shadow-2xl">
           <CardContent className="p-12 text-center">
             <h2 className="text-4xl md:text-5xl font-bold mb-4">
               Ready to Transform Your Work?
@@ -239,7 +239,7 @@ export default function SolutionsPage() {
           <div className="grid md:grid-cols-4 gap-8 mb-8">
             <div>
               <div className="flex items-center space-x-2 mb-4">
-                <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-primary to-purple-600 flex items-center justify-center text-primary-foreground font-bold shadow-lg">
+                <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center text-primary-foreground font-bold shadow-lg">
                   AI
                 </div>
                 <span className="text-lg font-bold">Perpetual Core</span>

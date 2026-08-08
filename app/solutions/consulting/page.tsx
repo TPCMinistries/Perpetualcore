@@ -220,7 +220,7 @@ export default function ConsultingPage() {
             </div>
 
             {/* Bottom Impact Summary */}
-            <Card className="mt-8 border-2 border-primary bg-gradient-to-r from-primary/5 to-purple-500/5">
+            <Card className="mt-8 border-2 border-primary bg-gradient-to-r from-primary/5 to-primary/5">
               <CardContent className="p-8">
                 <div className="text-center">
                   <p className="text-sm text-muted-foreground mb-4">
@@ -252,7 +252,7 @@ export default function ConsultingPage() {
         <div className="container mx-auto px-4">
           <div className="max-w-6xl mx-auto">
             <div className="text-center mb-16">
-              <div className="inline-flex items-center gap-2 bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 px-4 py-2 rounded-full text-sm font-semibold mb-4">
+              <div className="inline-flex items-center gap-2 bg-primary/10 dark:bg-primary/30 text-primary px-4 py-2 rounded-full text-sm font-semibold mb-4">
                 <Brain className="h-4 w-4" />
                 Your Firm's Institutional Brain
               </div>
@@ -377,7 +377,7 @@ export default function ConsultingPage() {
 
             {/* Real-World Example */}
             <Card className="border-2 border-primary">
-              <CardHeader className="bg-gradient-to-r from-primary/5 to-purple-500/5">
+              <CardHeader className="bg-gradient-to-r from-primary/5 to-primary/5">
                 <CardTitle className="text-2xl">Real-World Example: Senior Partner with 20 Years of M&A Expertise</CardTitle>
                 <CardDescription className="text-base">
                   How one firm preserved two decades of mergers & acquisitions consulting wisdom
@@ -400,7 +400,7 @@ export default function ConsultingPage() {
 
                   <div>
                     <h4 className="font-semibold mb-2 flex items-center gap-2">
-                      <Zap className="h-5 w-5 text-purple-600" />
+                      <Zap className="h-5 w-5 text-primary" />
                       The Perpetual Core Solution
                     </h4>
                     <p className="text-muted-foreground mb-3">
@@ -531,7 +531,7 @@ export default function ConsultingPage() {
 
             {/* Right: Example Interaction */}
             <Card className="border-2 border-primary">
-              <CardHeader className="bg-gradient-to-r from-primary/5 to-purple-500/5">
+              <CardHeader className="bg-gradient-to-r from-primary/5 to-primary/5">
                 <CardTitle className="flex items-center gap-2">
                   <Brain className="h-5 w-5" />
                   AI Coach in Action
@@ -734,7 +734,7 @@ export default function ConsultingPage() {
             {/* Client Proposal Development */}
             <Card className="border-2 hover:border-primary transition-all hover:shadow-xl">
               <CardHeader>
-                <div className="h-14 w-14 rounded-xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center mb-4">
+                <div className="h-14 w-14 rounded-xl bg-gradient-to-br from-blue-500 to-primary flex items-center justify-center mb-4">
                   <FileText className="h-7 w-7 text-white" />
                 </div>
                 <CardTitle className="text-2xl mb-3">Client Proposal Development</CardTitle>
@@ -796,7 +796,7 @@ export default function ConsultingPage() {
             {/* Industry Analysis */}
             <Card className="border-2 hover:border-primary transition-all hover:shadow-xl">
               <CardHeader>
-                <div className="h-14 w-14 rounded-xl bg-gradient-to-br from-purple-500 to-pink-600 flex items-center justify-center mb-4">
+                <div className="h-14 w-14 rounded-xl bg-primary flex items-center justify-center mb-4">
                   <LineChart className="h-7 w-7 text-white" />
                 </div>
                 <CardTitle className="text-2xl mb-3">Industry Analysis</CardTitle>
@@ -858,7 +858,7 @@ export default function ConsultingPage() {
       </section>
 
       {/* How It Works Section */}
-      <section className="bg-gradient-to-b from-primary/5 to-purple-500/5 py-20">
+      <section className="bg-gradient-to-b from-primary/5 to-primary/5 py-20">
         <div className="container mx-auto px-4">
           <div className="max-w-6xl mx-auto">
             <div className="text-center mb-16">
@@ -1209,7 +1209,7 @@ export default function ConsultingPage() {
             ))}
           </div>
 
-          <Card className="mt-12 border-2 border-primary bg-gradient-to-r from-primary/5 to-purple-500/5">
+          <Card className="mt-12 border-2 border-primary bg-gradient-to-r from-primary/5 to-primary/5">
             <CardContent className="p-8 text-center">
               <h3 className="text-2xl font-bold mb-3">Still have questions?</h3>
               <p className="text-muted-foreground mb-6">
@@ -1326,7 +1326,7 @@ export default function ConsultingPage() {
 
       {/* Final CTA Section */}
       <section className="container mx-auto px-4 py-20">
-        <Card className="bg-gradient-to-r from-primary to-purple-600 text-white border-0">
+        <Card className="bg-primary text-white border-0">
           <CardContent className="p-12 text-center">
             <h2 className="text-4xl font-bold mb-4">
               Ready to Preserve Your Firm's Expertise?

@@ -92,7 +92,7 @@ export function StatCard({
     >
       <Card className={cn("relative overflow-hidden hover:shadow-md transition-all duration-300 hover:-translate-y-0.5 group", className)}>
         {/* Gradient top accent */}
-        <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-primary/60 via-purple-500/60 to-blue-500/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+        <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-primary/60 via-primary/60 to-blue-500/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
         <CardContent className="pt-6">
           <div className="flex items-center gap-4">
             <motion.div

@@ -116,7 +116,7 @@ export default function FeaturesPage() {
       <header className="border-b bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm sticky top-0 z-10">
         <div className="container mx-auto px-3 sm:px-4 py-3 sm:py-4 flex items-center justify-between">
           <Link href="/" className="flex items-center space-x-2">
-            <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-primary to-purple-600 flex items-center justify-center text-primary-foreground font-bold shadow-lg">
+            <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center text-primary-foreground font-bold shadow-lg">
               AI
             </div>
             <span className="text-lg sm:text-xl font-bold">Perpetual Core</span>
@@ -146,7 +146,7 @@ export default function FeaturesPage() {
           </div>
           <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight mb-6">
             Everything You Need in
-            <span className="bg-gradient-to-r from-primary to-purple-600 bg-clip-text text-transparent"> One Platform</span>
+            <span className="text-primary"> One Platform</span>
           </h1>
           <p className="text-lg sm:text-xl text-muted-foreground max-w-3xl mx-auto mb-8">
             Perpetual Core combines infinite memory, multi-model AI, document intelligence, and team collaboration
@@ -180,7 +180,7 @@ export default function FeaturesPage() {
                   key={index}
                   className={`relative overflow-hidden ${
                     feature.highlight
-                      ? "border-primary/50 bg-gradient-to-br from-primary/5 to-purple-500/5"
+                      ? "border-primary/50 bg-gradient-to-br from-primary/5 to-primary/5"
                       : ""
                   }`}
                 >
@@ -246,10 +246,10 @@ export default function FeaturesPage() {
             {ENTERPRISE_FEATURES.map((feature, index) => {
               const Icon = feature.icon;
               return (
-                <Card key={index} className="border-purple-200 dark:border-purple-800 bg-purple-50/50 dark:bg-purple-950/20">
+                <Card key={index} className="border-primary/20 dark:border-primary/40 bg-primary/50 dark:bg-primary/20">
                   <CardHeader className="pb-2">
-                    <div className="w-10 h-10 rounded-lg bg-purple-100 dark:bg-purple-900 flex items-center justify-center mb-3">
-                      <Icon className="h-5 w-5 text-purple-600 dark:text-purple-400" />
+                    <div className="w-10 h-10 rounded-lg bg-primary/10 dark:bg-primary flex items-center justify-center mb-3">
+                      <Icon className="h-5 w-5 text-primary" />
                     </div>
                     <CardTitle className="text-lg">{feature.title}</CardTitle>
                   </CardHeader>
@@ -330,7 +330,7 @@ export default function FeaturesPage() {
 
         {/* CTA Section */}
         <section className="text-center">
-          <Card className="max-w-2xl mx-auto bg-gradient-to-r from-primary to-purple-600 text-white border-0">
+          <Card className="max-w-2xl mx-auto bg-primary text-white border-0">
             <CardContent className="p-8 sm:p-12">
               <h2 className="text-3xl sm:text-4xl font-bold mb-4">Ready to Get Started?</h2>
               <p className="text-lg mb-8 opacity-90">

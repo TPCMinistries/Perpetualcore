@@ -42,7 +42,7 @@ export function PageHeader({
       className={`relative overflow-hidden border rounded-2xl p-8 bg-white/80 dark:bg-white/[0.04] backdrop-blur-sm ${className}`}
     >
       {/* Background decoration */}
-      <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-br from-violet-500/10 to-cyan-500/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
+      <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-br from-primary/10 to-cyan-500/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
 
       <div className="relative flex items-center justify-between">
         <div className="flex items-center gap-4">
@@ -51,7 +51,7 @@ export function PageHeader({
               initial={{ scale: 0, rotate: -180 }}
               animate={{ scale: 1, rotate: 0 }}
               transition={{ type: "spring", stiffness: 200, damping: 15, delay: 0.2 }}
-              className="h-12 w-12 rounded-xl bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center shadow-glow-sm"
+              className="h-12 w-12 rounded-xl bg-primary flex items-center justify-center shadow-glow-sm"
             >
               {icon}
             </motion.div>

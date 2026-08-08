@@ -218,8 +218,8 @@ export default function NotificationsPage() {
               <p className="text-sm text-muted-foreground dark:text-muted-foreground">Total</p>
               <p className="text-3xl font-semibold text-foreground dark:text-foreground mt-1">{notifications.length}</p>
             </div>
-            <div className="h-10 w-10 rounded-lg bg-indigo-50 dark:bg-indigo-950/30 flex items-center justify-center">
-              <Bell className="h-5 w-5 text-indigo-600 dark:text-indigo-400" />
+            <div className="h-10 w-10 rounded-lg bg-primary/10 dark:bg-primary/30 flex items-center justify-center">
+              <Bell className="h-5 w-5 text-primary" />
             </div>
           </div>
         </Card>
@@ -244,8 +244,8 @@ export default function NotificationsPage() {
                 {notifications.filter((n) => n.ai_priority_score && n.ai_priority_score > 7).length}
               </p>
             </div>
-            <div className="h-10 w-10 rounded-lg bg-purple-50 dark:bg-purple-950/30 flex items-center justify-center">
-              <Zap className="h-5 w-5 text-purple-600 dark:text-purple-400" />
+            <div className="h-10 w-10 rounded-lg bg-primary/10 dark:bg-primary/30 flex items-center justify-center">
+              <Zap className="h-5 w-5 text-primary" />
             </div>
           </div>
         </Card>
@@ -297,8 +297,8 @@ export default function NotificationsPage() {
       <div className="space-y-3">
         {notifications.length === 0 ? (
           <Card className="p-12 text-center border-border dark:border-border bg-card">
-            <div className="h-20 w-20 rounded-2xl bg-indigo-50 dark:bg-indigo-950/30 flex items-center justify-center mx-auto mb-4">
-              <Bell className="h-10 w-10 text-indigo-600 dark:text-indigo-400" />
+            <div className="h-20 w-20 rounded-2xl bg-primary/10 dark:bg-primary/30 flex items-center justify-center mx-auto mb-4">
+              <Bell className="h-10 w-10 text-primary" />
             </div>
             <h3 className="text-lg font-semibold text-foreground dark:text-foreground mb-2">No notifications</h3>
             <p className="text-muted-foreground dark:text-muted-foreground">
@@ -340,8 +340,8 @@ export default function NotificationsPage() {
                       </h3>
                       <div className="flex items-center gap-2">
                         {notification.ai_priority_score && notification.ai_priority_score > 7 && (
-                          <div className="h-6 w-6 rounded-lg bg-purple-50 dark:bg-purple-950/30 flex items-center justify-center" title={`AI Priority: ${notification.ai_priority_score}/10`}>
-                            <Zap className="h-3 w-3 text-purple-600 dark:text-purple-400" />
+                          <div className="h-6 w-6 rounded-lg bg-primary/10 dark:bg-primary/30 flex items-center justify-center" title={`AI Priority: ${notification.ai_priority_score}/10`}>
+                            <Zap className="h-3 w-3 text-primary" />
                           </div>
                         )}
                         <span className="text-xs text-muted-foreground dark:text-muted-foreground whitespace-nowrap">
@@ -360,13 +360,13 @@ export default function NotificationsPage() {
 
                     {/* AI Urgency Reason */}
                     {notification.ai_urgency_reason && (
-                      <div className="flex items-start gap-2 text-xs bg-purple-50 dark:bg-purple-950/30 border border-purple-200 dark:border-purple-800 rounded-lg p-3 mb-3">
-                        <div className="h-5 w-5 rounded-md bg-purple-100 dark:bg-purple-900/50 flex items-center justify-center flex-shrink-0">
-                          <Zap className="h-3 w-3 text-purple-600 dark:text-purple-400" />
+                      <div className="flex items-start gap-2 text-xs bg-primary/10 dark:bg-primary/30 border border-primary/20 dark:border-primary/40 rounded-lg p-3 mb-3">
+                        <div className="h-5 w-5 rounded-md bg-primary/10 dark:bg-primary/50 flex items-center justify-center flex-shrink-0">
+                          <Zap className="h-3 w-3 text-primary" />
                         </div>
                         <div>
-                          <p className="font-medium text-purple-900 dark:text-purple-100 mb-1">AI Insight</p>
-                          <p className="text-purple-700 dark:text-purple-300">{notification.ai_urgency_reason}</p>
+                          <p className="font-medium text-primary mb-1">AI Insight</p>
+                          <p className="text-primary">{notification.ai_urgency_reason}</p>
                         </div>
                       </div>
                     )}

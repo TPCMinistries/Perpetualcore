@@ -227,8 +227,8 @@ export default function IntelligenceDashboard() {
           <CardHeader className="border-b border-border dark:border-border bg-muted/50 dark:bg-card/30">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className="p-2 rounded-lg bg-violet-100 dark:bg-violet-900/30">
-                  <Sparkles className="h-4 w-4 text-violet-600 dark:text-violet-400" />
+                <div className="p-2 rounded-lg bg-primary/10 dark:bg-primary/30">
+                  <Sparkles className="h-4 w-4 text-primary" />
                 </div>
                 <div>
                   <CardTitle className="text-base">Predictive Suggestions</CardTitle>
@@ -257,7 +257,7 @@ export default function IntelligenceDashboard() {
                 <Button
                   onClick={generateSuggestions}
                   disabled={generating}
-                  className="bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-700 hover:to-purple-700"
+                  className="bg-primary"
                 >
                   {generating ? (
                     <Loader2 className="h-4 w-4 mr-2 animate-spin" />
@@ -275,7 +275,7 @@ export default function IntelligenceDashboard() {
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: i * 0.05 }}
-                    className="p-4 rounded-xl bg-muted dark:bg-card/50 border border-border dark:border-border hover:border-violet-300 dark:hover:border-violet-700 transition-colors"
+                    className="p-4 rounded-xl bg-muted dark:bg-card/50 border border-border dark:border-border hover:border-primary/20 dark:hover:border-primary/40 transition-colors"
                   >
                     <div className="flex items-start justify-between gap-4">
                       <div className="flex-1 min-w-0">

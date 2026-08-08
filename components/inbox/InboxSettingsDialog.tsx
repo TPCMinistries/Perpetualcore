@@ -414,8 +414,8 @@ export function InboxSettingsDialog({
 
               <div className="flex items-center justify-between p-4 rounded-lg border hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
                 <div className="flex items-center gap-3">
-                  <div className="h-10 w-10 rounded-lg bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center">
-                    <Newspaper className="h-5 w-5 text-purple-600 dark:text-purple-400" />
+                  <div className="h-10 w-10 rounded-lg bg-primary/10 dark:bg-primary/30 flex items-center justify-center">
+                    <Newspaper className="h-5 w-5 text-primary" />
                   </div>
                   <div>
                     <p className="font-medium">Forums</p>

@@ -152,14 +152,14 @@ export default function IntegrationsPage() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-sky-50 via-blue-50 to-indigo-50 dark:from-sky-950/20 dark:via-blue-950/20 dark:to-indigo-950/20 border border-sky-100 dark:border-sky-900/20 p-8 shadow-lg">
+      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-sky-50 via-blue-50 to-primary dark:from-sky-950/20 dark:via-blue-950/20 dark:to-primary/20 border border-sky-100 dark:border-sky-900/20 p-8 shadow-lg">
         <div className="absolute inset-0 bg-grid-pattern opacity-5"></div>
         <div className="relative flex items-center gap-4">
-          <div className="h-16 w-16 rounded-2xl bg-gradient-to-br from-sky-500 to-indigo-600 flex items-center justify-center shadow-lg">
+          <div className="h-16 w-16 rounded-2xl bg-gradient-to-br from-sky-500 to-primary flex items-center justify-center shadow-lg">
             <Settings className="h-8 w-8 text-white" />
           </div>
           <div>
-            <h1 className="text-3xl font-bold bg-gradient-to-r from-sky-900 via-blue-800 to-indigo-900 dark:from-sky-100 dark:via-blue-100 dark:to-indigo-100 bg-clip-text text-transparent">Integrations</h1>
+            <h1 className="text-3xl font-bold bg-gradient-to-r from-sky-900 via-blue-800 to-primary dark:from-sky-100 dark:via-blue-100 dark:to-primary bg-clip-text text-transparent">Integrations</h1>
             <p className="text-sky-700 dark:text-sky-300 mt-1">
               Connect your favorite tools and services to automate workflows
             </p>

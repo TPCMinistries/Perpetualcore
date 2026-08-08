@@ -52,10 +52,10 @@ const colorClasses: Record<string, string> = {
   emerald:
     "from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700",
   purple:
-    "from-purple-500 to-violet-600 hover:from-purple-600 hover:to-violet-700",
+    "from-primary to-primary hover:from-primary hover:to-primary",
   amber:
     "from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700",
-  blue: "from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700",
+  blue: "from-blue-500 to-primary hover:from-blue-600 hover:to-primary",
   slate: "from-slate-500 to-slate-700 hover:from-slate-600 hover:to-slate-800",
 };
 

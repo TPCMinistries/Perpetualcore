@@ -1181,7 +1181,7 @@ export default function ProposalsPage() {
             <div className="flex min-h-full flex-col rounded-lg border bg-slate-950 p-4 text-white">
               <div className="mb-4 flex items-center justify-between gap-4">
                 <div>
-                  <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-violet-200">
+                  <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-primary">
                     Generated draft
                   </p>
                   <p className="mt-1 text-sm text-slate-300">
@@ -1369,13 +1369,13 @@ export default function ProposalsPage() {
         </CardContent>
       </Card>
 
-      <Card className="rounded-lg border-violet-200 bg-violet-50/40 shadow-none">
+      <Card className="rounded-lg border-primary/20 bg-primary/40 shadow-none">
         <CardHeader>
           <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
             <div>
               <div className="flex items-center gap-3">
                 <CardTitle className="text-xl">Proposal to handoff</CardTitle>
-                <ShieldCheck className="h-5 w-5 text-violet-600" />
+                <ShieldCheck className="h-5 w-5 text-primary" />
               </div>
               <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-600">
                 Once the buyer approves, turn the proposal into durable account
@@ -1415,7 +1415,7 @@ export default function ProposalsPage() {
             ].map((step) => (
               <div key={step.title} className="rounded-lg border bg-white p-4">
                 <CheckCircle2
-                  className={`h-5 w-5 ${step.done ? "text-violet-600" : "text-slate-300"}`}
+                  className={`h-5 w-5 ${step.done ? "text-primary" : "text-slate-300"}`}
                 />
                 <p className="mt-4 text-sm font-semibold text-slate-950">
                   {step.title}

@@ -96,7 +96,7 @@ export default function BetaTestersPage() {
   function getTierBadgeColor(tier: string) {
     switch (tier) {
       case "unlimited":
-        return "bg-purple-500 text-white";
+        return "bg-primary text-white";
       case "premium":
         return "bg-blue-500 text-white";
       default:

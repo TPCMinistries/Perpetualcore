@@ -179,7 +179,7 @@ export default function AdminOperatePage() {
             {provisionedCount} provisioned
           </span>
           <span className="flex items-center gap-1">
-            <Shield className="h-4 w-4 text-violet-500" />
+            <Shield className="h-4 w-4 text-primary" />
             {eligibleCount} eligible
           </span>
         </div>
@@ -195,7 +195,7 @@ export default function AdminOperatePage() {
         </Card>
         <Card>
           <CardContent className="pt-6">
-            <div className="text-2xl font-bold text-violet-600">
+            <div className="text-2xl font-bold text-primary">
               {eligibleCount}
             </div>
             <p className="text-xs text-muted-foreground">

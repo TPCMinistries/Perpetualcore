@@ -196,16 +196,16 @@ export default function AdminOverviewPage() {
           value={`${summary.trial_conversion_rate.toFixed(1)}%`}
           subtitle="of trials convert"
           icon={UserPlus}
-          iconColor="text-indigo-600"
-          iconBg="bg-indigo-50"
+          iconColor="text-primary"
+          iconBg="bg-primary/10"
         />
         <MetricCard
           title="Estimated LTV"
           value={`$${summary.estimated_ltv.toLocaleString()}`}
           subtitle={`avg ${summary.avg_subscription_age_days}d tenure`}
           icon={Crown}
-          iconColor="text-purple-600"
-          iconBg="bg-purple-50"
+          iconColor="text-primary"
+          iconBg="bg-primary/10"
         />
         <MetricCard
           title="Invoice Revenue"

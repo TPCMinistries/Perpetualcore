@@ -21,11 +21,11 @@ export function PlanDelegationCard({
       initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3, ease: "easeOut" }}
-      className="my-3 rounded-xl border border-indigo-200 dark:border-indigo-800 bg-indigo-50/50 dark:bg-indigo-950/20 p-4"
+      className="my-3 rounded-xl border border-primary/20 dark:border-primary/40 bg-primary/50 dark:bg-primary/20 p-4"
     >
       <div className="flex items-start gap-3">
-        <div className="flex-shrink-0 h-9 w-9 rounded-lg bg-indigo-100 dark:bg-indigo-500/10 flex items-center justify-center">
-          <Target className="h-4.5 w-4.5 text-indigo-600 dark:text-indigo-400" />
+        <div className="flex-shrink-0 h-9 w-9 rounded-lg bg-primary/10 flex items-center justify-center">
+          <Target className="h-4.5 w-4.5 text-primary" />
         </div>
         <div className="flex-1 min-w-0">
           <p className="text-sm font-medium text-slate-900 dark:text-white">

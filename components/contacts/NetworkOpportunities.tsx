@@ -176,7 +176,7 @@ export function NetworkOpportunities({
       <Card>
         <CardHeader className="pb-3">
           <div className="flex items-center gap-2">
-            <Sparkles className="h-5 w-5 text-purple-500" />
+            <Sparkles className="h-5 w-5 text-primary" />
             <Skeleton className="h-5 w-40" />
           </div>
         </CardHeader>
@@ -203,7 +203,7 @@ export function NetworkOpportunities({
         <CardHeader className="pb-3">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <Sparkles className="h-5 w-5 text-purple-500" />
+              <Sparkles className="h-5 w-5 text-primary" />
               <CardTitle className="text-base">Network Opportunities</CardTitle>
             </div>
             <Button
@@ -238,12 +238,12 @@ export function NetworkOpportunities({
   }
 
   return (
-    <Card className="border-purple-200 dark:border-purple-800">
+    <Card className="border-primary/20 dark:border-primary/40">
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <div className="h-8 w-8 rounded-lg bg-purple-500/10 flex items-center justify-center">
-              <Sparkles className="h-4 w-4 text-purple-600" />
+            <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center">
+              <Sparkles className="h-4 w-4 text-primary" />
             </div>
             <div>
               <CardTitle className="text-base">Network Opportunities</CardTitle>
@@ -268,7 +268,7 @@ export function NetworkOpportunities({
             return (
               <div
                 key={`${opp.project_id}-${opp.contact_id}`}
-                className="flex items-start gap-3 p-3 rounded-lg border bg-gradient-to-r from-purple-50/50 to-transparent dark:from-purple-950/20 hover:shadow-sm transition-all group"
+                className="flex items-start gap-3 p-3 rounded-lg border bg-gradient-to-r from-primary/50 to-transparent dark:from-primary/20 hover:shadow-sm transition-all group"
               >
                 <Avatar className="h-10 w-10">
                   <AvatarImage src={opp.contact_avatar || undefined} />
@@ -308,7 +308,7 @@ export function NetworkOpportunities({
                       {opp.match_reasons.slice(0, 2).map((reason, i) => (
                         <span
                           key={i}
-                          className="text-[10px] px-2 py-0.5 rounded-full bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300"
+                          className="text-[10px] px-2 py-0.5 rounded-full bg-primary/10 dark:bg-primary/30 text-primary"
                         >
                           {reason}
                         </span>

@@ -20,7 +20,7 @@ function getGreetingIcon() {
   const hour = new Date().getHours();
   if (hour < 12) return <Sunrise className="h-4 w-4 text-amber-500" />;
   if (hour < 18) return <Sun className="h-4 w-4 text-amber-500" />;
-  return <Moon className="h-4 w-4 text-indigo-400" />;
+  return <Moon className="h-4 w-4 text-primary" />;
 }
 
 function getTimeGreeting() {
@@ -79,7 +79,7 @@ export function DailyBriefingCard() {
 
   if (loading) {
     return (
-      <Card className="p-4 bg-gradient-to-br from-violet-50 to-purple-50 dark:from-violet-950/30 dark:to-purple-950/30 border-violet-200 dark:border-violet-800">
+      <Card className="p-4 bg-primary border-primary/20 dark:border-primary/40">
         <Skeleton className="h-4 w-24 mb-2" />
         <Skeleton className="h-3 w-32 mb-3" />
         <Skeleton className="h-8 w-full" />
@@ -111,19 +111,19 @@ export function DailyBriefingCard() {
       transition={{ duration: 0.3 }}
     >
       <Card
-        className="p-4 bg-gradient-to-br from-violet-50 to-purple-50 dark:from-violet-950/30 dark:to-purple-950/30 border-violet-200 dark:border-violet-800 cursor-pointer hover:shadow-md transition-shadow"
+        className="p-4 bg-primary border-primary/20 dark:border-primary/40 cursor-pointer hover:shadow-md transition-shadow"
         onClick={() => setExpanded(!expanded)}
       >
         {/* Header */}
         <div className="flex items-center gap-2 mb-1">
           {getGreetingIcon()}
-          <span className="text-sm font-medium text-violet-900 dark:text-violet-100">
+          <span className="text-sm font-medium text-primary">
             Daily Briefing
           </span>
         </div>
 
         {/* Date */}
-        <p className="text-xs text-violet-600 dark:text-violet-400 mb-3">
+        <p className="text-xs text-primary mb-3">
           {briefing.date}
         </p>
 
@@ -146,7 +146,7 @@ export function DailyBriefingCard() {
                       : highlight.type === "task"
                       ? "bg-amber-100 dark:bg-amber-900/30 text-amber-600"
                       : highlight.type === "agent"
-                      ? "bg-violet-100 dark:bg-violet-900/30 text-violet-600"
+                      ? "bg-primary/10 dark:bg-primary/30 text-primary"
                       : "bg-slate-100 dark:bg-slate-800 text-slate-600"
                   }`}
                 >
@@ -169,7 +169,7 @@ export function DailyBriefingCard() {
         {briefing.highlights.length > 0 && (
           <div className="flex items-center justify-center mt-2">
             <ChevronRight
-              className={`h-4 w-4 text-violet-400 transition-transform ${
+              className={`h-4 w-4 text-primary transition-transform ${
                 expanded ? "rotate-90" : ""
               }`}
             />

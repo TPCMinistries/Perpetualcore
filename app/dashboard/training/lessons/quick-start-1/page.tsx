@@ -46,10 +46,10 @@ export default function QuickStartLesson1() {
           </p>
 
           <div className="grid md:grid-cols-2 gap-4">
-            <Card className="p-6 border-purple-200 dark:border-purple-800">
+            <Card className="p-6 border-primary/20 dark:border-primary/40">
               <div className="flex items-center gap-3 mb-3">
-                <div className="h-10 w-10 rounded-lg bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center">
-                  <Bot className="h-5 w-5 text-purple-600" />
+                <div className="h-10 w-10 rounded-lg bg-primary/10 dark:bg-primary/30 flex items-center justify-center">
+                  <Bot className="h-5 w-5 text-primary" />
                 </div>
                 <h4 className="font-semibold">AI Agents</h4>
               </div>
@@ -106,7 +106,7 @@ export default function QuickStartLesson1() {
             AI Agents are the heart of Perpetual Core. Unlike traditional automation that follows rigid rules, AI Agents can understand context, make decisions, and adapt to different situations.
           </p>
 
-          <div className="bg-purple-50 dark:bg-purple-950/20 border border-purple-200 dark:border-purple-800 rounded-lg p-6">
+          <div className="bg-primary/10 dark:bg-primary/20 border border-primary/20 dark:border-primary/40 rounded-lg p-6">
             <h4 className="font-semibold mb-3">Real-World Example: Customer Support Agent</h4>
             <p className="text-sm mb-4">
               Imagine an AI Agent monitoring your customer support inbox:

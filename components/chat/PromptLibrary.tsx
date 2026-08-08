@@ -53,12 +53,12 @@ export default function PromptLibrary({
 
   const getCategoryColor = (categoryId: string) => {
     const colors: Record<string, string> = {
-      creative: "from-purple-500 to-pink-500",
+      creative: "from-primary to-primary",
       code: "from-blue-500 to-cyan-500",
       writing: "from-green-500 to-emerald-500",
       analysis: "from-orange-500 to-amber-500",
-      research: "from-pink-500 to-rose-500",
-      business: "from-indigo-500 to-blue-500",
+      research: "from-primary to-rose-500",
+      business: "from-primary to-blue-500",
       learning: "from-yellow-500 to-orange-500",
       productivity: "from-cyan-500 to-teal-500",
     };

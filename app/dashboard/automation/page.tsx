@@ -40,7 +40,7 @@ export default async function AutomationPage() {
       {/* Header */}
       <div className="border border-border dark:border-border rounded-xl p-8 bg-card">
         <div className="flex items-center gap-4">
-          <div className="h-12 w-12 rounded-lg bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center">
+          <div className="h-12 w-12 rounded-lg bg-primary flex items-center justify-center">
             <Workflow className="h-6 w-6 text-white" />
           </div>
           <div>

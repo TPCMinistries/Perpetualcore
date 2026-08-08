@@ -256,7 +256,7 @@ export default function PromisesPage() {
         <div className="mb-8">
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center gap-4">
-              <div className="h-14 w-14 rounded-2xl bg-gradient-to-br from-rose-500 to-pink-600 flex items-center justify-center shadow-lg shadow-rose-500/25">
+              <div className="h-14 w-14 rounded-2xl bg-gradient-to-br from-rose-500 to-primary flex items-center justify-center shadow-lg shadow-rose-500/25">
                 <Handshake className="h-7 w-7 text-white" />
               </div>
               <div>
@@ -269,7 +269,7 @@ export default function PromisesPage() {
 
             <Dialog open={showNewPromise} onOpenChange={setShowNewPromise}>
               <DialogTrigger asChild>
-                <Button className="h-11 px-5 bg-gradient-to-r from-rose-600 to-pink-600 hover:from-rose-700 hover:to-pink-700 text-white shadow-lg shadow-rose-500/25 border-0">
+                <Button className="h-11 px-5 bg-gradient-to-r from-rose-600 to-primary hover:from-rose-700 hover:to-primary text-white shadow-lg shadow-rose-500/25 border-0">
                   <Plus className="h-4 w-4 mr-2" />
                   Add Promise
                 </Button>
@@ -331,7 +331,7 @@ export default function PromisesPage() {
                   <Button
                     onClick={createPromise}
                     disabled={submitting || !newPromise.promise_text.trim()}
-                    className="bg-gradient-to-r from-rose-600 to-pink-600 hover:from-rose-700 hover:to-pink-700 text-white border-0"
+                    className="bg-gradient-to-r from-rose-600 to-primary hover:from-rose-700 hover:to-primary text-white border-0"
                   >
                     {submitting ? (
                       <>

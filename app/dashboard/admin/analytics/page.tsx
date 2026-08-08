@@ -134,7 +134,7 @@ export default function AnalyticsPage() {
       <Card>
         <CardHeader className="pb-2">
           <div className="flex items-center gap-2">
-            <TrendingUp className="h-5 w-5 text-indigo-500" />
+            <TrendingUp className="h-5 w-5 text-primary" />
             <CardTitle className="text-lg">Daily Trend</CardTitle>
           </div>
         </CardHeader>
@@ -147,7 +147,7 @@ export default function AnalyticsPage() {
       <Card>
         <CardHeader className="pb-2">
           <div className="flex items-center gap-2">
-            <Funnel className="h-5 w-5 text-violet-500" />
+            <Funnel className="h-5 w-5 text-primary" />
             <CardTitle className="text-lg">Conversion Funnel</CardTitle>
           </div>
         </CardHeader>

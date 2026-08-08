@@ -89,7 +89,7 @@ export function CalendarEvent({
         className={cn(
           "w-full text-left p-2 rounded-lg border",
           "transition-colors hover:bg-slate-50 dark:hover:bg-slate-800",
-          "focus:outline-none focus:ring-2 focus:ring-violet-500 focus:ring-offset-1",
+          "focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-1",
           className
         )}
       >

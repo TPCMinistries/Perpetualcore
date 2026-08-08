@@ -147,7 +147,7 @@ export function OutreachMessageGenerator({
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <Sparkles className="h-5 w-5 text-purple-500" />
+            <Sparkles className="h-5 w-5 text-primary" />
             Reach Out to {contactName}
           </DialogTitle>
           <DialogDescription>
@@ -170,15 +170,15 @@ export function OutreachMessageGenerator({
                       className={cn(
                         "flex items-center gap-2 p-3 rounded-lg border text-left transition-all",
                         messageType === type
-                          ? "border-purple-500 bg-purple-50 dark:bg-purple-950/30"
-                          : "border-border hover:border-purple-300"
+                          ? "border-primary/40 bg-primary/10 dark:bg-primary/30"
+                          : "border-border hover:border-primary/20"
                       )}
                     >
                       <div
                         className={cn(
                           "shrink-0",
                           messageType === type
-                            ? "text-purple-600"
+                            ? "text-primary"
                             : "text-muted-foreground"
                         )}
                       >

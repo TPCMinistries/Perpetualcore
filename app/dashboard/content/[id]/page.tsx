@@ -255,7 +255,7 @@ export default function ContentEditorPage({ params }: { params: Promise<{ id: st
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white dark:from-slate-950 dark:to-slate-900 flex items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-violet-500" />
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
     );
   }
@@ -331,7 +331,7 @@ export default function ContentEditorPage({ params }: { params: Promise<{ id: st
               <Button
                 onClick={saveContent}
                 disabled={saving}
-                className="bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-700 hover:to-purple-700 text-white border-0"
+                className="bg-primary text-white border-0"
               >
                 {saving ? (
                   <Loader2 className="h-4 w-4 mr-2 animate-spin" />
@@ -438,12 +438,12 @@ export default function ContentEditorPage({ params }: { params: Promise<{ id: st
                 </Select>
 
                 {content.scheduled_for && (
-                  <div className="mt-4 p-3 rounded-lg bg-violet-50 dark:bg-violet-900/20">
-                    <p className="text-sm text-violet-600 dark:text-violet-400 flex items-center gap-2">
+                  <div className="mt-4 p-3 rounded-lg bg-primary/10 dark:bg-primary/20">
+                    <p className="text-sm text-primary flex items-center gap-2">
                       <Clock className="h-4 w-4" />
                       Scheduled for
                     </p>
-                    <p className="font-medium text-violet-700 dark:text-violet-300">
+                    <p className="font-medium text-primary">
                       {new Date(content.scheduled_for).toLocaleString()}
                     </p>
                   </div>

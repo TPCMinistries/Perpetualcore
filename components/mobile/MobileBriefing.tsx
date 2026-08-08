@@ -87,7 +87,7 @@ export function MobileBriefing({ userId }: MobileBriefingProps) {
       {/* Top Priority Card */}
       {summary.topPriority && (
         <Link href={`/dashboard/tasks?id=${summary.topPriority.id}`}>
-          <Card className="bg-gradient-to-br from-violet-500 to-purple-600 text-white border-0">
+          <Card className="bg-primary text-white border-0">
             <CardContent className="p-4">
               <div className="flex items-start justify-between">
                 <div className="flex-1">
@@ -165,12 +165,12 @@ export function MobileBriefing({ userId }: MobileBriefingProps) {
                 "p-2 rounded-lg",
                 summary.automationAlerts > 0
                   ? "bg-red-50 dark:bg-red-950/30"
-                  : "bg-violet-50 dark:bg-violet-950/30"
+                  : "bg-primary/10 dark:bg-primary/30"
               )}>
                 {summary.automationAlerts > 0 ? (
                   <AlertCircle className="h-5 w-5 text-red-500" />
                 ) : (
-                  <Zap className="h-5 w-5 text-violet-500" />
+                  <Zap className="h-5 w-5 text-primary" />
                 )}
               </div>
               <div>

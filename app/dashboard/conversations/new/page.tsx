@@ -179,7 +179,7 @@ export default function NewConversationPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background to-indigo-500/5">
+    <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5">
       <div className="container mx-auto p-6 max-w-4xl space-y-6">
         {/* Header */}
         <div className="flex items-center gap-4">
@@ -190,8 +190,8 @@ export default function NewConversationPage() {
             </Button>
           </Link>
           <div>
-            <h1 className="text-4xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent flex items-center gap-3">
-              <MessageSquare className="h-10 w-10 text-indigo-600" />
+            <h1 className="text-4xl font-bold text-primary flex items-center gap-3">
+              <MessageSquare className="h-10 w-10 text-primary" />
               New Team Conversation
             </h1>
             <p className="text-muted-foreground mt-2">
@@ -245,12 +245,12 @@ export default function NewConversationPage() {
                   onClick={() => setFormData({ ...formData, conversation_type: "channel" })}
                   className={`p-4 rounded-lg border-2 transition-all ${
                     formData.conversation_type === "channel"
-                      ? "border-indigo-600 bg-indigo-50 dark:bg-indigo-950/30"
-                      : "border-border hover:border-indigo-300"
+                      ? "border-primary/40 bg-primary/10 dark:bg-primary/30"
+                      : "border-border hover:border-primary/20"
                   }`}
                 >
                   <div className="flex flex-col items-center gap-2 text-center">
-                    <Hash className="h-5 w-5 text-indigo-600" />
+                    <Hash className="h-5 w-5 text-primary" />
                     <div className="font-semibold">Channel</div>
                     <div className="text-xs text-muted-foreground">
                       Team collaboration
@@ -263,12 +263,12 @@ export default function NewConversationPage() {
                   onClick={() => setFormData({ ...formData, conversation_type: "dm" })}
                   className={`p-4 rounded-lg border-2 transition-all ${
                     formData.conversation_type === "dm"
-                      ? "border-indigo-600 bg-indigo-50 dark:bg-indigo-950/30"
-                      : "border-border hover:border-indigo-300"
+                      ? "border-primary/40 bg-primary/10 dark:bg-primary/30"
+                      : "border-border hover:border-primary/20"
                   }`}
                 >
                   <div className="flex flex-col items-center gap-2 text-center">
-                    <UserCircle className="h-5 w-5 text-indigo-600" />
+                    <UserCircle className="h-5 w-5 text-primary" />
                     <div className="font-semibold">Direct Message</div>
                     <div className="text-xs text-muted-foreground">
                       1-on-1 chat
@@ -281,12 +281,12 @@ export default function NewConversationPage() {
                   onClick={() => setFormData({ ...formData, conversation_type: "group_dm" })}
                   className={`p-4 rounded-lg border-2 transition-all ${
                     formData.conversation_type === "group_dm"
-                      ? "border-indigo-600 bg-indigo-50 dark:bg-indigo-950/30"
-                      : "border-border hover:border-indigo-300"
+                      ? "border-primary/40 bg-primary/10 dark:bg-primary/30"
+                      : "border-border hover:border-primary/20"
                   }`}
                 >
                   <div className="flex flex-col items-center gap-2 text-center">
-                    <Users className="h-5 w-5 text-indigo-600" />
+                    <Users className="h-5 w-5 text-primary" />
                     <div className="font-semibold">Group DM</div>
                     <div className="text-xs text-muted-foreground">
                       Small group
@@ -444,12 +444,12 @@ export default function NewConversationPage() {
                   onClick={() => setFormData({ ...formData, is_private: false })}
                   className={`flex-1 p-4 rounded-lg border-2 transition-all ${
                     !formData.is_private
-                      ? "border-indigo-600 bg-indigo-50 dark:bg-indigo-950/30"
-                      : "border-border hover:border-indigo-300"
+                      ? "border-primary/40 bg-primary/10 dark:bg-primary/30"
+                      : "border-border hover:border-primary/20"
                   }`}
                 >
                   <div className="flex items-center gap-3">
-                    <Globe className="h-5 w-5 text-indigo-600" />
+                    <Globe className="h-5 w-5 text-primary" />
                     <div className="text-left">
                       <div className="font-semibold">Team Visible</div>
                       <div className="text-xs text-muted-foreground">
@@ -464,12 +464,12 @@ export default function NewConversationPage() {
                   onClick={() => setFormData({ ...formData, is_private: true })}
                   className={`flex-1 p-4 rounded-lg border-2 transition-all ${
                     formData.is_private
-                      ? "border-indigo-600 bg-indigo-50 dark:bg-indigo-950/30"
-                      : "border-border hover:border-indigo-300"
+                      ? "border-primary/40 bg-primary/10 dark:bg-primary/30"
+                      : "border-border hover:border-primary/20"
                   }`}
                 >
                   <div className="flex items-center gap-3">
-                    <Lock className="h-5 w-5 text-indigo-600" />
+                    <Lock className="h-5 w-5 text-primary" />
                     <div className="text-left">
                       <div className="font-semibold">Private</div>
                       <div className="text-xs text-muted-foreground">
@@ -499,7 +499,7 @@ export default function NewConversationPage() {
                         onChange={() => toggleParticipant(member.id)}
                         className="h-4 w-4"
                       />
-                      <div className="h-8 w-8 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white text-sm font-semibold">
+                      <div className="h-8 w-8 rounded-full bg-primary flex items-center justify-center text-white text-sm font-semibold">
                         {member.full_name?.[0]?.toUpperCase() ||
                           member.email[0].toUpperCase()}
                       </div>
@@ -534,7 +534,7 @@ export default function NewConversationPage() {
               </Link>
               <Button
                 type="submit"
-                className="flex-1 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white"
+                className="flex-1 bg-primary text-white"
                 disabled={loading}
               >
                 {loading ? (

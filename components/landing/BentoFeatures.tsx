@@ -16,7 +16,7 @@ interface Pillar {
 const pillars: Pillar[] = [
   {
     icon: Brain,
-    gradient: "from-purple-500 to-pink-600",
+    gradient: "from-primary to-primary",
     title: "Your AI Command Center",
     tagline: "Chat, email, calendar, docs, tasks, and contacts — all connected with persistent memory and RAG-powered search.",
     bullets: [
@@ -176,7 +176,7 @@ export function BentoFeatures() {
       >
         <h2 className="text-3xl sm:text-4xl md:text-5xl font-black tracking-tighter mb-4">
           Everything You Need.{" "}
-          <span className="bg-gradient-to-r from-primary via-purple-500 to-blue-500 bg-clip-text text-transparent">
+          <span className="text-primary">
             One Operating System.
           </span>
         </h2>

@@ -233,8 +233,8 @@ export default function KnowledgePage() {
         <Card>
           <CardHeader className="border-b border-border dark:border-border bg-muted/50 dark:bg-card/30">
             <div className="flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-violet-100 dark:bg-violet-900/30">
-                <Search className="h-4 w-4 text-violet-600 dark:text-violet-400" />
+              <div className="p-2 rounded-lg bg-primary/10 dark:bg-primary/30">
+                <Search className="h-4 w-4 text-primary" />
               </div>
               <div>
                 <CardTitle className="text-base">Find Connection Path</CardTitle>
@@ -252,7 +252,7 @@ export default function KnowledgePage() {
                   value={searchConcept}
                   onChange={(e) => setSearchConcept(e.target.value)}
                   list="concepts-list"
-                  className="h-11 bg-card border-border dark:border-border focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500"
+                  className="h-11 bg-card border-border dark:border-border focus:ring-2 focus:ring-primary/20 focus:border-primary/40"
                 />
               </div>
               <div className="flex items-center justify-center w-10 h-10 rounded-full bg-muted dark:bg-card">
@@ -264,13 +264,13 @@ export default function KnowledgePage() {
                   value={targetConcept}
                   onChange={(e) => setTargetConcept(e.target.value)}
                   list="concepts-list"
-                  className="h-11 bg-card border-border dark:border-border focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500"
+                  className="h-11 bg-card border-border dark:border-border focus:ring-2 focus:ring-primary/20 focus:border-primary/40"
                 />
               </div>
               <Button
                 onClick={findPath}
                 disabled={searchingPath || !searchConcept || !targetConcept}
-                className="h-11 px-6 bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-700 hover:to-purple-700 shadow-lg shadow-violet-500/25"
+                className="h-11 px-6 bg-primary shadow-lg shadow-primary/25"
               >
                 {searchingPath ? (
                   <Loader2 className="h-4 w-4 animate-spin" />
@@ -491,8 +491,8 @@ export default function KnowledgePage() {
         <Card>
           <CardHeader className="border-b border-border dark:border-border bg-muted/50 dark:bg-card/30">
             <div className="flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-violet-100 dark:bg-violet-900/30">
-                <Network className="h-4 w-4 text-violet-600 dark:text-violet-400" />
+              <div className="p-2 rounded-lg bg-primary/10 dark:bg-primary/30">
+                <Network className="h-4 w-4 text-primary" />
               </div>
               <div>
                 <CardTitle className="text-base">Knowledge Network</CardTitle>
@@ -505,7 +505,7 @@ export default function KnowledgePage() {
               <div className="relative min-h-[400px] bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-800/50 dark:to-slate-900/50 rounded-xl p-8 overflow-hidden border border-border dark:border-border">
                 {/* Decorative background elements */}
                 <div className="absolute inset-0 opacity-30">
-                  <div className="absolute top-10 left-10 w-32 h-32 bg-violet-200 dark:bg-violet-900/30 rounded-full blur-3xl" />
+                  <div className="absolute top-10 left-10 w-32 h-32 bg-primary/20 dark:bg-primary/30 rounded-full blur-3xl" />
                   <div className="absolute bottom-10 right-10 w-40 h-40 bg-blue-200 dark:bg-blue-900/30 rounded-full blur-3xl" />
                 </div>
 
@@ -529,7 +529,7 @@ export default function KnowledgePage() {
                           className={cn(
                             "px-4 py-2.5 rounded-full border-2 transition-all cursor-pointer shadow-sm",
                             isHighConnection
-                              ? "bg-gradient-to-r from-violet-100 to-purple-100 dark:from-violet-900/40 dark:to-purple-900/40 border-violet-300 dark:border-violet-600 shadow-violet-200 dark:shadow-violet-900/30"
+                              ? "bg-primary border-primary/20 dark:border-primary/40 shadow-primary dark:shadow-primary/30"
                               : isMediumConnection
                               ? "bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-700"
                               : "bg-card border-border dark:border-border",
@@ -538,7 +538,7 @@ export default function KnowledgePage() {
                         >
                           <span className={cn(
                             "text-sm font-medium whitespace-nowrap",
-                            isHighConnection ? "text-violet-700 dark:text-violet-300" : "text-foreground dark:text-muted-foreground"
+                            isHighConnection ? "text-primary" : "text-foreground dark:text-muted-foreground"
                           )}>
                             {node.label}
                           </span>
@@ -608,7 +608,7 @@ export default function KnowledgePage() {
                     <div className="flex items-center gap-3 mb-3">
                       <div className={cn(
                         "p-1.5 rounded-lg",
-                        i === 0 ? "bg-violet-100 dark:bg-violet-900/30" :
+                        i === 0 ? "bg-primary/10 dark:bg-primary/30" :
                         i === 1 ? "bg-blue-100 dark:bg-blue-900/30" :
                         i === 2 ? "bg-emerald-100 dark:bg-emerald-900/30" :
                         i === 3 ? "bg-amber-100 dark:bg-amber-900/30" :
@@ -616,7 +616,7 @@ export default function KnowledgePage() {
                       )}>
                         <Layers className={cn(
                           "h-4 w-4",
-                          i === 0 ? "text-violet-600 dark:text-violet-400" :
+                          i === 0 ? "text-primary" :
                           i === 1 ? "text-blue-600 dark:text-blue-400" :
                           i === 2 ? "text-emerald-600 dark:text-emerald-400" :
                           i === 3 ? "text-amber-600 dark:text-amber-400" :

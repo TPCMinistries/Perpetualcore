@@ -162,12 +162,12 @@ export function DocumentChatModal({
                   <div
                     className={`max-w-[80%] rounded-2xl px-4 py-3 ${
                       message.role === "user"
-                        ? "bg-gradient-to-br from-purple-500 to-pink-600 text-white"
+                        ? "bg-primary text-white"
                         : "bg-muted/50 text-foreground border border-border"
                     }`}
                   >
                     {message.role === "assistant" ? (
-                      <div className="prose prose-sm dark:prose-invert max-w-none prose-headings:text-foreground prose-headings:font-semibold prose-p:text-foreground prose-p:leading-relaxed prose-strong:text-foreground prose-strong:font-semibold prose-ul:text-foreground prose-ol:text-foreground prose-li:text-foreground prose-blockquote:border-purple-500 prose-blockquote:text-muted-foreground prose-blockquote:italic">
+                      <div className="prose prose-sm dark:prose-invert max-w-none prose-headings:text-foreground prose-headings:font-semibold prose-p:text-foreground prose-p:leading-relaxed prose-strong:text-foreground prose-strong:font-semibold prose-ul:text-foreground prose-ol:text-foreground prose-li:text-foreground prose-blockquote:border-primary/40 prose-blockquote:text-muted-foreground prose-blockquote:italic">
                         <ReactMarkdown>{message.content}</ReactMarkdown>
                       </div>
                     ) : (
@@ -183,7 +183,7 @@ export function DocumentChatModal({
                   </div>
 
                   {message.role === "user" && (
-                    <div className="h-8 w-8 rounded-full bg-gradient-to-br from-purple-500 to-pink-600 flex items-center justify-center flex-shrink-0">
+                    <div className="h-8 w-8 rounded-full bg-primary flex items-center justify-center flex-shrink-0">
                       <User className="h-5 w-5 text-white" />
                     </div>
                   )}
@@ -218,12 +218,12 @@ export function DocumentChatModal({
               onKeyDown={handleKeyDown}
               placeholder="Ask a question about this document..."
               disabled={isLoading}
-              className="flex-1 px-4 py-3 bg-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500/50 text-foreground placeholder:text-muted-foreground disabled:opacity-50"
+              className="flex-1 px-4 py-3 bg-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 text-foreground placeholder:text-muted-foreground disabled:opacity-50"
             />
             <Button
               type="submit"
               disabled={!input.trim() || isLoading}
-              className="px-6 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white border-0"
+              className="px-6 bg-primary text-white border-0"
             >
               {isLoading ? (
                 <Loader2 className="h-5 w-5 animate-spin" />

@@ -13,16 +13,16 @@ export default function ConsultationPage() {
         <div className="absolute inset-0 bg-grid-slate-100 [mask-image:linear-gradient(0deg,white,rgba(255,255,255,0.6))] dark:bg-grid-slate-700/25 dark:[mask-image:linear-gradient(0deg,rgba(255,255,255,0.1),rgba(255,255,255,0.5))]" />
         <div className="relative max-w-7xl mx-auto px-4 py-24 sm:px-6 lg:px-8">
           <div className="text-center">
-            <div className="inline-flex items-center gap-2 bg-gradient-to-r from-purple-100 to-blue-100 dark:from-purple-900/30 dark:to-blue-900/30 px-4 py-2 rounded-full mb-6 border border-purple-200 dark:border-purple-800">
-              <Sparkles className="h-4 w-4 text-purple-600 dark:text-purple-400" />
-              <span className="text-sm font-semibold text-purple-900 dark:text-purple-100">
+            <div className="inline-flex items-center gap-2 bg-primary dark:to-blue-900/30 px-4 py-2 rounded-full mb-6 border border-primary/20 dark:border-primary/40">
+              <Sparkles className="h-4 w-4 text-primary" />
+              <span className="text-sm font-semibold text-primary">
                 Guided Implementation
               </span>
             </div>
             <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold mb-6 text-slate-900 dark:text-white">
               Transform Your Team with
               <br />
-              <span className="bg-gradient-to-r from-purple-600 via-blue-600 to-cyan-600 bg-clip-text text-transparent">
+              <span className="text-primary">
                 Expert AI Implementation
               </span>
             </h1>
@@ -68,7 +68,7 @@ export default function ConsultationPage() {
                 ].map((item, i) => (
                   <div key={i} className="flex gap-4 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 hover:shadow-lg transition-shadow">
                     <div className="flex-shrink-0">
-                      <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-purple-500 to-blue-600 flex items-center justify-center">
+                      <div className="w-12 h-12 rounded-xl bg-primary flex items-center justify-center">
                         <item.icon className="h-6 w-6 text-white" />
                       </div>
                     </div>
@@ -115,7 +115,7 @@ export default function ConsultationPage() {
               </h2>
 
               {/* Team Tier */}
-              <div className="bg-gradient-to-br from-purple-50 to-blue-50 dark:from-purple-950/30 dark:to-blue-950/30 rounded-2xl p-8 border border-purple-200 dark:border-purple-800 mb-6">
+              <div className="bg-primary dark:to-blue-950/30 rounded-2xl p-8 border border-primary/20 dark:border-primary/40 mb-6">
                 <div className="mb-6">
                   <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-2">
                     Team Plan (Up to 10 Users)
@@ -133,13 +133,13 @@ export default function ConsultationPage() {
                       "50 GB storage",
                     ].map((item, i) => (
                       <li key={i} className="flex items-start gap-3 text-slate-700 dark:text-slate-300">
-                        <CheckCircle2 className="h-5 w-5 text-purple-600 dark:text-purple-400 flex-shrink-0 mt-0.5" />
+                        <CheckCircle2 className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" />
                         <span>{item}</span>
                       </li>
                     ))}
                   </ul>
                 </div>
-                <div className="border-t border-purple-200 dark:border-purple-700 pt-6">
+                <div className="border-t border-primary/20 dark:border-primary/40 pt-6">
                   <div className="flex items-baseline gap-2 mb-2">
                     <span className="text-4xl font-bold text-slate-900 dark:text-white">$499</span>
                     <span className="text-slate-600 dark:text-slate-400">/month</span>
@@ -216,7 +216,7 @@ export default function ConsultationPage() {
               {/* Booking Form Card */}
               <div className="bg-white dark:bg-slate-900 rounded-2xl p-8 shadow-2xl border border-slate-200 dark:border-slate-800">
                 <div className="text-center mb-6">
-                  <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-purple-500 to-blue-600 mb-4">
+                  <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-primary mb-4">
                     <Calendar className="h-8 w-8 text-white" />
                   </div>
                   <h3 className="text-2xl font-bold mb-2 text-slate-900 dark:text-white">
@@ -250,8 +250,8 @@ export default function ConsultationPage() {
                 </h4>
                 <div className="space-y-4 text-sm">
                   <div className="flex items-start gap-3">
-                    <div className="flex-shrink-0 w-8 h-8 rounded-lg bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center">
-                      <span className="text-lg font-bold text-purple-600 dark:text-purple-400">4.9</span>
+                    <div className="flex-shrink-0 w-8 h-8 rounded-lg bg-primary/10 dark:bg-primary/30 flex items-center justify-center">
+                      <span className="text-lg font-bold text-primary">4.9</span>
                     </div>
                     <div>
                       <p className="font-medium text-slate-900 dark:text-white">Average Rating</p>
@@ -286,7 +286,7 @@ export default function ConsultationPage() {
                 </p>
                 <a
                   href="mailto:consulting@perpetualcore.com"
-                  className="text-sm font-semibold text-purple-600 dark:text-purple-400 hover:underline"
+                  className="text-sm font-semibold text-primary hover:underline"
                 >
                   consulting@perpetualcore.com
                 </a>

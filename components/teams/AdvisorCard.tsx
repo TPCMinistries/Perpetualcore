@@ -103,11 +103,11 @@ export function AdvisorCard({
   }
 
   return (
-    <Card className="overflow-hidden border-violet-200 dark:border-violet-800 bg-gradient-to-br from-violet-50 to-white dark:from-violet-950/20 dark:to-slate-900">
+    <Card className="overflow-hidden border-primary/20 dark:border-primary/40 bg-gradient-to-br from-primary to-white dark:from-primary/20 dark:to-slate-900">
       <CardHeader className="pb-3">
         <div className="flex items-start justify-between">
           <div className="flex items-center gap-3">
-            <div className="text-4xl p-2 bg-violet-100 dark:bg-violet-900/30 rounded-xl">
+            <div className="text-4xl p-2 bg-primary/10 dark:bg-primary/30 rounded-xl">
               {advisor.avatar_emoji}
             </div>
             <div>
@@ -163,7 +163,7 @@ export function AdvisorCard({
         {/* Action button */}
         <Button
           onClick={onChat}
-          className="w-full bg-violet-600 hover:bg-violet-700"
+          className="w-full bg-primary hover:bg-primary"
         >
           <MessageSquare className="h-4 w-4 mr-2" />
           Chat with Advisor

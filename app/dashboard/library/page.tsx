@@ -598,10 +598,10 @@ export default function LibraryPage() {
   const pendingSummaries = stats.total - stats.withSummaries;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-slate-100 to-violet-50 dark:from-slate-950 dark:via-slate-900 dark:to-violet-950/20">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-slate-100 to-primary dark:from-slate-950 dark:via-slate-900 dark:to-primary/20">
       {/* Ambient glow effects */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-0 left-1/4 w-96 h-96 bg-violet-500/10 rounded-full blur-3xl" />
+        <div className="absolute top-0 left-1/4 w-96 h-96 bg-primary/10 rounded-full blur-3xl" />
         <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl" />
       </div>
 
@@ -611,7 +611,7 @@ export default function LibraryPage() {
           <div className="flex items-start justify-between">
             <div className="flex items-center gap-5">
               <motion.div
-                className="h-16 w-16 rounded-2xl bg-gradient-to-br from-violet-600 via-purple-600 to-indigo-600 flex items-center justify-center shadow-xl shadow-purple-500/30"
+                className="h-16 w-16 rounded-2xl bg-primary flex items-center justify-center shadow-xl shadow-primary/30"
                 whileHover={{ scale: 1.05, boxShadow: "0 0 30px rgba(139, 92, 246, 0.5)" }}
                 transition={{ type: "spring", stiffness: 400, damping: 10 }}
               >
@@ -635,7 +635,7 @@ export default function LibraryPage() {
                   className={cn(
                     "px-4 py-2 rounded-lg text-sm font-medium transition-all",
                     viewMode === "files"
-                      ? "bg-card dark:bg-muted text-foreground dark:text-white shadow-md shadow-violet-500/10"
+                      ? "bg-card dark:bg-muted text-foreground dark:text-white shadow-md shadow-primary/10"
                       : "text-muted-foreground dark:text-muted-foreground hover:text-foreground dark:hover:text-white hover:bg-card/50 dark:hover:bg-muted/50"
                   )}
                 >
@@ -647,7 +647,7 @@ export default function LibraryPage() {
                   className={cn(
                     "px-4 py-2 rounded-lg text-sm font-medium transition-all",
                     viewMode === "graph"
-                      ? "bg-card dark:bg-muted text-foreground dark:text-white shadow-md shadow-violet-500/10"
+                      ? "bg-card dark:bg-muted text-foreground dark:text-white shadow-md shadow-primary/10"
                       : "text-muted-foreground dark:text-muted-foreground hover:text-foreground dark:hover:text-white hover:bg-card/50 dark:hover:bg-muted/50"
                   )}
                 >
@@ -663,7 +663,7 @@ export default function LibraryPage() {
                 className={cn(
                   "gap-2 border-2 transition-all",
                   isAiPanelOpen
-                    ? "border-violet-500 bg-violet-50 dark:bg-violet-950/50 text-violet-700 dark:text-violet-300"
+                    ? "border-primary/40 bg-primary/10 dark:bg-primary/50 text-primary"
                     : "border-border dark:border-border"
                 )}
               >
@@ -716,14 +716,14 @@ export default function LibraryPage() {
 
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button className="bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-700 hover:to-purple-700 text-white shadow-lg shadow-purple-500/25">
+                  <Button className="bg-primary text-white shadow-lg shadow-primary/25">
                     <Plus className="h-4 w-4 mr-2" />
                     New Doc
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
                   <DropdownMenuItem onClick={() => setAiComposerOpen(true)} className="gap-2">
-                    <Sparkles className="h-4 w-4 text-violet-500" />
+                    <Sparkles className="h-4 w-4 text-primary" />
                     <div>
                       <div className="font-medium">AI Composer</div>
                       <div className="text-xs text-muted-foreground">Collaborate with AI to write</div>
@@ -813,7 +813,7 @@ export default function LibraryPage() {
                     <Card className={cn(
                       "p-6 cursor-pointer group transition-all duration-300",
                       glassClasses.card,
-                      "hover:shadow-[0_0_30px_rgba(168,85,247,0.15)] hover:border-purple-300 dark:hover:border-purple-700"
+                      "hover:shadow-[0_0_30px_rgba(168,85,247,0.15)] hover:border-primary/20 dark:hover:border-primary/40"
                     )}>
                       <div className="flex items-center justify-between">
                         <div>
@@ -824,8 +824,8 @@ export default function LibraryPage() {
                             {pendingSummaries} pending
                           </p>
                         </div>
-                        <div className="h-14 w-14 rounded-2xl bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center group-hover:scale-110 group-hover:shadow-[0_0_20px_rgba(168,85,247,0.4)] transition-all">
-                          <Sparkles className="h-7 w-7 text-purple-600 dark:text-purple-400" />
+                        <div className="h-14 w-14 rounded-2xl bg-primary/10 dark:bg-primary/30 flex items-center justify-center group-hover:scale-110 group-hover:shadow-[0_0_20px_rgba(168,85,247,0.4)] transition-all">
+                          <Sparkles className="h-7 w-7 text-primary" />
                         </div>
                       </div>
                     </Card>
@@ -835,19 +835,19 @@ export default function LibraryPage() {
                     <Card className={cn(
                       "p-6 cursor-pointer group transition-all duration-300",
                       glassClasses.card,
-                      "hover:shadow-[0_0_30px_rgba(139,92,246,0.15)] hover:border-violet-300 dark:hover:border-violet-700"
+                      "hover:shadow-[0_0_30px_rgba(139,92,246,0.15)] hover:border-primary/20 dark:hover:border-primary/40"
                     )}>
                       <div className="flex items-center justify-between">
                         <div>
                           <p className="text-sm font-medium text-muted-foreground dark:text-muted-foreground">Collections</p>
                           <h3 className="text-4xl font-bold text-foreground dark:text-white mt-2">{collections.length}</h3>
-                          <p className="text-sm text-violet-600 dark:text-violet-400 mt-1 flex items-center gap-1">
+                          <p className="text-sm text-primary mt-1 flex items-center gap-1">
                             <Layers className="h-3.5 w-3.5" />
                             Auto-organized
                           </p>
                         </div>
-                        <div className="h-14 w-14 rounded-2xl bg-violet-100 dark:bg-violet-900/30 flex items-center justify-center group-hover:scale-110 group-hover:shadow-[0_0_20px_rgba(139,92,246,0.4)] transition-all">
-                          <FolderOpen className="h-7 w-7 text-violet-600 dark:text-violet-400" />
+                        <div className="h-14 w-14 rounded-2xl bg-primary/10 dark:bg-primary/30 flex items-center justify-center group-hover:scale-110 group-hover:shadow-[0_0_20px_rgba(139,92,246,0.4)] transition-all">
+                          <FolderOpen className="h-7 w-7 text-primary" />
                         </div>
                       </div>
                     </Card>
@@ -869,7 +869,7 @@ export default function LibraryPage() {
                       placeholder="Search your library..."
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
-                      className="pl-12 h-12 text-base bg-card border-border dark:border-border focus:border-violet-500 focus:ring-violet-500/20"
+                      className="pl-12 h-12 text-base bg-card border-border dark:border-border focus:border-primary/40 focus:ring-primary/20"
                     />
                     {searchQuery && (
                       <button
@@ -918,7 +918,7 @@ export default function LibraryPage() {
                     className={cn(
                       "px-4 py-2 rounded-full text-sm font-medium transition-all flex-shrink-0",
                       selectedCollectionId === null
-                        ? "bg-violet-600 text-white shadow-md shadow-violet-500/25"
+                        ? "bg-primary text-white shadow-md shadow-primary/25"
                         : "bg-muted dark:bg-card text-muted-foreground dark:text-muted-foreground hover:bg-muted dark:hover:bg-muted"
                     )}
                   >
@@ -939,7 +939,7 @@ export default function LibraryPage() {
                       className={cn(
                         "px-4 py-2 rounded-full text-sm font-medium transition-all flex-shrink-0 flex items-center gap-2",
                         selectedCollectionId === collection.id
-                          ? "bg-violet-600 text-white shadow-md shadow-violet-500/25"
+                          ? "bg-primary text-white shadow-md shadow-primary/25"
                           : "bg-muted dark:bg-card text-muted-foreground dark:text-muted-foreground hover:bg-muted dark:hover:bg-muted"
                       )}
                     >
@@ -953,7 +953,7 @@ export default function LibraryPage() {
                     <button
                       onClick={generateCollections}
                       disabled={isLoadingCollections}
-                      className="px-4 py-2 rounded-full text-sm font-medium bg-gradient-to-r from-violet-600 to-purple-600 text-white flex items-center gap-2 hover:shadow-lg hover:shadow-violet-500/25 transition-all flex-shrink-0"
+                      className="px-4 py-2 rounded-full text-sm font-medium bg-primary text-white flex items-center gap-2 hover:shadow-lg hover:shadow-primary/25 transition-all flex-shrink-0"
                     >
                       {isLoadingCollections ? (
                         <Loader2 className="h-4 w-4 animate-spin" />
@@ -1029,7 +1029,7 @@ export default function LibraryPage() {
                           className={cn(
                             "p-6 group cursor-pointer transition-all duration-300",
                             glassClasses.card,
-                            "hover:shadow-[0_0_30px_rgba(139,92,246,0.1)] hover:border-violet-300 dark:hover:border-violet-700"
+                            "hover:shadow-[0_0_30px_rgba(139,92,246,0.1)] hover:border-primary/20 dark:hover:border-primary/40"
                           )}
                           onClick={() => handleOpenPreview(doc)}
                         >
@@ -1049,14 +1049,14 @@ export default function LibraryPage() {
                               ? "bg-red-100 dark:bg-red-900/30"
                               : doc.status === "processing"
                               ? "bg-amber-100 dark:bg-amber-900/30"
-                              : "bg-muted dark:bg-card group-hover:bg-violet-100 dark:group-hover:bg-violet-900/30"
+                              : "bg-muted dark:bg-card group-hover:bg-primary/10 dark:group-hover:bg-primary/30"
                           )}>
                             {doc.status === "failed" ? (
                               <AlertTriangle className="h-6 w-6 text-red-500 dark:text-red-400" />
                             ) : doc.status === "processing" ? (
                               <Loader2 className="h-6 w-6 text-amber-500 dark:text-amber-400 animate-spin" />
                             ) : (
-                              <FileText className="h-6 w-6 text-muted-foreground dark:text-muted-foreground group-hover:text-violet-600 dark:group-hover:text-violet-400 transition-colors" />
+                              <FileText className="h-6 w-6 text-muted-foreground dark:text-muted-foreground group-hover:text-primary dark:group-hover:text-primary transition-colors" />
                             )}
                           </div>
 
@@ -1064,7 +1064,7 @@ export default function LibraryPage() {
                           <div className="flex-1 min-w-0">
                             <div className="flex items-start justify-between gap-4">
                               <div className="flex-1 min-w-0">
-                                <h3 className="text-lg font-semibold text-foreground dark:text-white group-hover:text-violet-600 dark:group-hover:text-violet-400 transition-colors truncate">
+                                <h3 className="text-lg font-semibold text-foreground dark:text-white group-hover:text-primary dark:group-hover:text-primary transition-colors truncate">
                                   {doc.title}
                                 </h3>
                                 <div className="flex items-center gap-4 mt-1.5 text-sm text-muted-foreground dark:text-muted-foreground">
@@ -1121,7 +1121,7 @@ export default function LibraryPage() {
                                       e.stopPropagation();
                                       handleOpenChat(doc);
                                     }}
-                                    className="text-muted-foreground hover:text-violet-600 dark:hover:text-violet-400"
+                                    className="text-muted-foreground hover:text-primary dark:hover:text-primary"
                                   >
                                     <MessageSquare className="h-4 w-4 mr-1" />
                                     Chat

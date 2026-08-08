@@ -14,7 +14,7 @@ export default function EnterpriseDemoPage() {
         <div className="relative max-w-7xl mx-auto px-4 py-24 sm:px-6 lg:px-8">
           <div className="text-center">
             <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm px-4 py-2 rounded-full mb-6 border border-white/20">
-              <Building2 className="h-4 w-4 text-purple-400" />
+              <Building2 className="h-4 w-4 text-primary" />
               <span className="text-sm font-semibold text-white">
                 Enterprise Solution
               </span>
@@ -22,7 +22,7 @@ export default function EnterpriseDemoPage() {
             <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold mb-6 text-white">
               Transform Your Enterprise
               <br />
-              <span className="bg-gradient-to-r from-purple-400 via-blue-400 to-cyan-400 bg-clip-text text-transparent">
+              <span className="text-primary">
                 At Scale
               </span>
             </h1>
@@ -153,7 +153,7 @@ export default function EnterpriseDemoPage() {
                 ].map((item, i) => (
                   <div key={i} className="flex gap-4 p-6 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
                     <div className="flex-shrink-0">
-                      <div className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-500 to-blue-600 flex items-center justify-center text-white font-bold text-sm">
+                      <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-white font-bold text-sm">
                         {i + 1}
                       </div>
                     </div>
@@ -169,7 +169,7 @@ export default function EnterpriseDemoPage() {
                 ))}
               </div>
 
-              <div className="mt-8 bg-gradient-to-br from-purple-50 to-blue-50 dark:from-purple-950/30 dark:to-blue-950/30 rounded-2xl p-8 border border-purple-200 dark:border-purple-800">
+              <div className="mt-8 bg-primary dark:to-blue-950/30 rounded-2xl p-8 border border-primary/20 dark:border-primary/40">
                 <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-4">
                   Enterprise Plan Pricing
                 </h3>
@@ -210,7 +210,7 @@ export default function EnterpriseDemoPage() {
                     </p>
                   </div>
 
-                  <div className="border-t border-purple-200 dark:border-purple-700 pt-4">
+                  <div className="border-t border-primary/20 dark:border-primary/40 pt-4">
                     <p className="text-sm font-semibold text-slate-900 dark:text-white mb-2">
                       Need more than 250 users?
                     </p>
@@ -233,7 +233,7 @@ export default function EnterpriseDemoPage() {
               {/* Booking Form Card */}
               <div className="bg-white dark:bg-slate-900 rounded-2xl p-8 shadow-2xl border border-slate-200 dark:border-slate-800">
                 <div className="text-center mb-6">
-                  <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-purple-500 to-blue-600 mb-4">
+                  <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-primary mb-4">
                     <Building2 className="h-8 w-8 text-white" />
                   </div>
                   <h3 className="text-2xl font-bold mb-2 text-slate-900 dark:text-white">
@@ -268,8 +268,8 @@ export default function EnterpriseDemoPage() {
                 </h4>
                 <div className="space-y-4 text-sm">
                   <div className="flex items-start gap-3">
-                    <div className="flex-shrink-0 w-10 h-10 rounded-lg bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center">
-                      <span className="text-lg font-bold text-purple-600 dark:text-purple-400">$2.1M</span>
+                    <div className="flex-shrink-0 w-10 h-10 rounded-lg bg-primary/10 dark:bg-primary/30 flex items-center justify-center">
+                      <span className="text-lg font-bold text-primary">$2.1M</span>
                     </div>
                     <div>
                       <p className="font-medium text-slate-900 dark:text-white">Avg Annual Savings</p>
@@ -304,7 +304,7 @@ export default function EnterpriseDemoPage() {
                 </p>
                 <a
                   href="mailto:enterprise@perpetualcore.com"
-                  className="text-sm font-semibold text-purple-600 dark:text-purple-400 hover:underline"
+                  className="text-sm font-semibold text-primary hover:underline"
                 >
                   enterprise@perpetualcore.com
                 </a>
@@ -322,7 +322,7 @@ export default function EnterpriseDemoPage() {
           </h2>
           <div className="grid md:grid-cols-3 gap-8 text-center">
             <div className="p-6">
-              <p className="text-5xl font-bold text-purple-400 mb-2">99.9%</p>
+              <p className="text-5xl font-bold text-primary mb-2">99.9%</p>
               <p className="text-sm text-slate-300">Uptime SLA with Enterprise Support</p>
             </div>
             <div className="p-6">

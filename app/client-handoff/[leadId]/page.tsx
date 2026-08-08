@@ -284,7 +284,7 @@ export default async function ClientHandoffPage({
       <header className="border-b bg-white">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
           <Link href="/" className="flex items-center gap-3 text-sm font-semibold">
-            <span aria-hidden className="h-3 w-3 bg-violet-600" />
+            <span aria-hidden className="h-3 w-3 bg-primary" />
             Perpetual Core
           </Link>
           <Badge variant="outline" className="rounded-md">
@@ -296,7 +296,7 @@ export default async function ClientHandoffPage({
       <section className="mx-auto grid max-w-6xl gap-8 px-6 py-10 lg:grid-cols-[1fr_360px] lg:py-14">
         <div>
           <div className="mb-4 flex flex-wrap items-center gap-2">
-            <Badge className="rounded-md bg-violet-600">{offerName}</Badge>
+            <Badge className="rounded-md bg-primary">{offerName}</Badge>
             <Badge variant="outline" className="rounded-md">
               {normalizeStatus(lead.stage || "delivery handoff")}
             </Badge>
@@ -326,7 +326,7 @@ export default async function ClientHandoffPage({
 
         <aside className="rounded-lg border bg-white p-5">
           <div className="flex items-center gap-3">
-            <ShieldCheck className="h-5 w-5 text-violet-600" />
+            <ShieldCheck className="h-5 w-5 text-primary" />
             <p className="text-sm font-semibold">What we need from you</p>
           </div>
           <p className="mt-4 whitespace-pre-wrap text-sm leading-6 text-slate-600">{plan.accessNeeded}</p>
@@ -356,7 +356,7 @@ export default async function ClientHandoffPage({
       <section id="kickoff-context" className="mx-auto grid max-w-6xl gap-6 px-6 pb-12 lg:grid-cols-[1.1fr_0.9fr]">
         <div className="rounded-lg border bg-white p-6">
           <div className="flex items-center gap-3">
-            <ListChecks className="h-5 w-5 text-violet-600" />
+            <ListChecks className="h-5 w-5 text-primary" />
             <h2 className="text-xl font-semibold">Context to send before kickoff</h2>
           </div>
           <p className="mt-3 max-w-2xl text-sm leading-6 text-slate-600">
@@ -367,7 +367,7 @@ export default async function ClientHandoffPage({
             {contextItems.map((item) => (
               <div key={item.title} className="rounded-lg border bg-slate-50 p-4">
                 <div className="flex items-start gap-3">
-                  <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-violet-600" />
+                  <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
                   <div>
                     <p className="text-sm font-semibold text-slate-950">{item.title}</p>
                     <p className="mt-1 text-sm leading-5 text-slate-600">{item.detail}</p>
@@ -387,20 +387,20 @@ export default async function ClientHandoffPage({
 
         <div className="rounded-lg border bg-white p-6">
           <div className="flex items-center gap-3">
-            <Sparkles className="h-5 w-5 text-violet-600" />
+            <Sparkles className="h-5 w-5 text-primary" />
             <h2 className="text-xl font-semibold">What happens next</h2>
           </div>
           <div className="mt-5 space-y-3">
             {nextSteps.map((step, index) => (
               <div key={step} className="flex gap-4 rounded-lg border bg-slate-50 p-4">
-                <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-violet-100 text-xs font-semibold text-violet-700">
+                <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary/10 text-xs font-semibold text-primary">
                   {index + 1}
                 </span>
                 <p className="text-sm leading-6 text-slate-700">{step}</p>
               </div>
             ))}
           </div>
-          <div className="mt-5 rounded-lg border border-violet-100 bg-violet-50 p-4">
+          <div className="mt-5 rounded-lg border border-primary/20 bg-primary/10 p-4">
             <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-slate-500">
               Current commercial step
             </p>
@@ -417,7 +417,7 @@ export default async function ClientHandoffPage({
       <section className="mx-auto grid max-w-6xl gap-6 px-6 pb-12 lg:grid-cols-[0.95fr_1.05fr]">
         <div className="rounded-lg border bg-white p-6">
           <div className="flex items-center gap-3">
-            <Target className="h-5 w-5 text-violet-600" />
+            <Target className="h-5 w-5 text-primary" />
             <h2 className="text-xl font-semibold">First deliverables</h2>
           </div>
           <div className="mt-5 grid gap-4">
@@ -435,7 +435,7 @@ export default async function ClientHandoffPage({
 
         <div className="rounded-lg border bg-white p-6">
           <div className="flex items-center gap-3">
-            <ClipboardList className="h-5 w-5 text-violet-600" />
+            <ClipboardList className="h-5 w-5 text-primary" />
             <h2 className="text-xl font-semibold">Working plan</h2>
           </div>
           <div className="mt-5 space-y-3">
@@ -453,7 +453,7 @@ export default async function ClientHandoffPage({
                 ))
               : milestones.map((milestone, index) => (
                   <div key={milestone.id || milestone.title || index} className="flex gap-4 rounded-lg border bg-slate-50 p-4">
-                    <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-violet-100 text-xs font-semibold text-violet-700">
+                    <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary/10 text-xs font-semibold text-primary">
                       {index + 1}
                     </span>
                     <div>
@@ -470,7 +470,7 @@ export default async function ClientHandoffPage({
         <div className="mx-auto flex max-w-6xl flex-col gap-5 px-6 py-8 md:flex-row md:items-center md:justify-between">
           <div>
             <div className="flex items-center gap-3">
-              <PackageCheck className="h-5 w-5 text-violet-600" />
+              <PackageCheck className="h-5 w-5 text-primary" />
               <p className="text-sm font-semibold">Ready for kickoff</p>
             </div>
             <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-600">

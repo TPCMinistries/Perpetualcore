@@ -52,16 +52,16 @@ export default async function DevelopmentEvaluationPage() {
       <DevelopmentNav />
       <Link
         href="/dashboard/development"
-        className="inline-flex min-h-11 items-center gap-2 text-sm font-medium text-slate-600 transition-colors duration-200 hover:text-indigo-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-600 focus-visible:ring-offset-2"
+        className="inline-flex min-h-11 items-center gap-2 text-sm font-medium text-slate-600 transition-colors duration-200 hover:text-primary focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
       >
         <ArrowLeft className="h-4 w-4" aria-hidden="true" />
         Development Intelligence
       </Link>
 
-      <section className="overflow-hidden rounded-[28px] border border-indigo-200 bg-[#f5f3ff] p-6 sm:p-9">
+      <section className="overflow-hidden rounded-[28px] border border-primary/20 bg-[#f5f3ff] p-6 sm:p-9">
         <div className="grid gap-8 lg:grid-cols-[1fr_auto] lg:items-end">
           <div>
-            <Badge className="border border-indigo-200 bg-white text-indigo-800 hover:bg-white">
+            <Badge className="border border-primary/20 bg-white text-primary hover:bg-white">
               <FlaskConical className="mr-1.5 h-3.5 w-3.5" aria-hidden="true" />
               Pilot quality indicators
             </Badge>
@@ -72,7 +72,7 @@ export default async function DevelopmentEvaluationPage() {
               Track evidence coverage, traceability, model-support distribution, human review completion, and guardrail flags. These operational indicators do not establish model accuracy or validity.
             </p>
           </div>
-          <Button asChild size="lg" className="min-h-12 bg-indigo-600 hover:bg-indigo-700">
+          <Button asChild size="lg" className="min-h-12 bg-primary hover:bg-primary">
             <Link href="/dashboard/development/review">
               <ClipboardCheck className="mr-2 h-4 w-4" aria-hidden="true" />
               Open review queue
@@ -92,7 +92,7 @@ export default async function DevelopmentEvaluationPage() {
       <section className="rounded-2xl border border-slate-200 bg-white p-6 sm:p-8">
         <div className="grid gap-6 lg:grid-cols-[1fr_1fr]">
           <div>
-            <div className="flex items-center gap-2 text-sm font-semibold text-indigo-700"><BarChart3 className="h-5 w-5" aria-hidden="true" /> What this page can establish</div>
+            <div className="flex items-center gap-2 text-sm font-semibold text-primary"><BarChart3 className="h-5 w-5" aria-hidden="true" /> What this page can establish</div>
             <p className="mt-3 text-sm leading-6 text-slate-600">Whether recent reports contain evidence, quotes are present, review decisions are recorded, confidence values are distributed as expected, and safety flags are reaching human reviewers.</p>
           </div>
           <div>

@@ -84,7 +84,7 @@ export function PackageRedraftButton({
         type="button"
         onClick={() => void run()}
         disabled={disabled}
-        className="inline-flex items-center justify-center gap-2 rounded-md border border-violet-500/30 bg-violet-500/10 px-4 py-2 text-sm font-medium text-violet-100 transition hover:bg-violet-500/15 disabled:cursor-not-allowed disabled:opacity-50"
+        className="inline-flex items-center justify-center gap-2 rounded-md border border-primary/30 bg-primary/10 px-4 py-2 text-sm font-medium text-primary transition hover:bg-primary/15 disabled:cursor-not-allowed disabled:opacity-50"
       >
         {busy ? (
           <>

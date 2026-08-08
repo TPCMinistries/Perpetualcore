@@ -90,8 +90,8 @@ const iconMap: Record<string, any> = {
 
 const colorClasses: Record<string, string> = {
   amber: "from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700",
-  blue: "from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700",
-  purple: "from-purple-500 to-violet-600 hover:from-purple-600 hover:to-violet-700",
+  blue: "from-blue-500 to-primary hover:from-blue-600 hover:to-primary",
+  purple: "from-primary to-primary hover:from-primary hover:to-primary",
   emerald: "from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700",
 };
 

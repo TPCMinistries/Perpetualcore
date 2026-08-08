@@ -338,7 +338,7 @@ export default function ResearchPage() {
         actions={
           <Dialog open={showNewRequest} onOpenChange={setShowNewRequest}>
             <DialogTrigger asChild>
-              <Button className="h-11 px-5 bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-700 hover:to-purple-700 text-white shadow-lg shadow-violet-500/25 border-0">
+              <Button className="h-11 px-5 bg-primary text-white shadow-lg shadow-primary/25 border-0">
                 <Plus className="h-4 w-4 mr-2" />
                 New Research
               </Button>
@@ -440,7 +440,7 @@ export default function ResearchPage() {
                 <Button
                   onClick={createRequest}
                   disabled={submitting || !newRequest.subject.trim()}
-                  className="bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-700 hover:to-purple-700 text-white border-0"
+                  className="bg-primary text-white border-0"
                 >
                   {submitting ? (
                     <>
@@ -574,7 +574,7 @@ export default function ResearchPage() {
               >
                 <Card
                   onClick={() => router.push(`/dashboard/research/${request.id}`)}
-                  className="border-border dark:border-border bg-card hover:shadow-lg hover:shadow-violet-500/5 hover:border-violet-200 dark:hover:border-violet-800/50 transition-all cursor-pointer group"
+                  className="border-border dark:border-border bg-card hover:shadow-lg hover:shadow-primary/5 hover:border-primary/20 dark:hover:border-primary/50 transition-all cursor-pointer group"
                 >
                   <CardContent className="p-6">
                     <div className="flex items-start justify-between">
@@ -610,7 +610,7 @@ export default function ResearchPage() {
                           </Badge>
                         </div>
 
-                        <h3 className="text-lg font-semibold text-foreground dark:text-white mb-1 group-hover:text-violet-600 dark:group-hover:text-violet-400 transition-colors">
+                        <h3 className="text-lg font-semibold text-foreground dark:text-white mb-1 group-hover:text-primary dark:group-hover:text-primary transition-colors">
                           {request.subject}
                         </h3>
 

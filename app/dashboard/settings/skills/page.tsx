@@ -476,7 +476,7 @@ export default function SkillsSettingsPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
-        <Loader2 className="h-8 w-8 animate-spin text-indigo-500" />
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
     );
   }
@@ -484,17 +484,17 @@ export default function SkillsSettingsPage() {
   return (
     <div className="space-y-8">
       {/* Header */}
-      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-indigo-50 via-purple-50 to-violet-50 dark:from-indigo-950/20 dark:via-purple-950/20 dark:to-violet-950/20 border border-indigo-100 dark:border-indigo-900/20 p-8 shadow-lg">
+      <div className="relative overflow-hidden rounded-3xl bg-primary border border-primary/20 p-8 shadow-lg">
         <div className="absolute inset-0 bg-grid-pattern opacity-5"></div>
         <div className="relative flex items-center gap-4">
-          <div className="h-16 w-16 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg">
+          <div className="h-16 w-16 rounded-2xl bg-primary flex items-center justify-center shadow-lg">
             <Sparkles className="h-8 w-8 text-white" />
           </div>
           <div>
-            <h1 className="text-3xl font-bold bg-gradient-to-r from-indigo-900 via-purple-800 to-violet-900 dark:from-indigo-100 dark:via-purple-100 dark:to-violet-100 bg-clip-text text-transparent">
+            <h1 className="text-3xl font-bold text-primary">
               AI Skills
             </h1>
-            <p className="text-indigo-700 dark:text-indigo-300 mt-1">
+            <p className="text-primary mt-1">
               Connect your tools and supercharge your AI assistant
             </p>
           </div>
@@ -648,7 +648,7 @@ export default function SkillsSettingsPage() {
       {customSkills.length > 0 && (
         <div className="space-y-4">
           <div className="flex items-center gap-2">
-            <Puzzle className="h-5 w-5 text-purple-500" />
+            <Puzzle className="h-5 w-5 text-primary" />
             <h2 className="text-xl font-semibold">Your Custom Skills</h2>
             <Badge variant="secondary">{customSkills.length}</Badge>
           </div>
@@ -657,8 +657,8 @@ export default function SkillsSettingsPage() {
               <Card key={skill.id} className="hover:shadow-lg transition-all duration-300">
                 <CardContent className="pt-6">
                   <div className="flex items-start gap-4 mb-4">
-                    <div className="h-12 w-12 rounded-xl bg-purple-50 dark:bg-purple-950/30 flex items-center justify-center">
-                      <Puzzle className="h-6 w-6 text-purple-500" />
+                    <div className="h-12 w-12 rounded-xl bg-primary/10 dark:bg-primary/30 flex items-center justify-center">
+                      <Puzzle className="h-6 w-6 text-primary" />
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 mb-1">
@@ -748,7 +748,7 @@ export default function SkillsSettingsPage() {
                     href={configDialog.skill.docsUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-indigo-600 hover:underline inline-flex items-center gap-1"
+                    className="text-primary hover:underline inline-flex items-center gap-1"
                   >
                     Get your API key here
                     <ExternalLink className="h-3 w-3" />

@@ -136,7 +136,7 @@ export function DocumentTable({
     if (fileType.includes("csv") || fileType.includes("sheet"))
       return <Sheet className={`${iconProps} text-green-500`} strokeWidth={1.5} />;
     if (fileType.includes("markdown"))
-      return <FileText className={`${iconProps} text-purple-500`} strokeWidth={1.5} />;
+      return <FileText className={`${iconProps} text-primary`} strokeWidth={1.5} />;
     return <File className={`${iconProps} text-gray-400`} strokeWidth={1.5} />;
   }
 
@@ -377,7 +377,7 @@ export function DocumentTable({
                 {/* Type */}
                 <div className="text-center">
                   {doc.document_type ? (
-                    <span className="inline-flex items-center text-xs px-2.5 py-1 bg-gradient-to-r from-purple-500/10 to-indigo-500/10 text-purple-600 dark:text-purple-400 border border-purple-500/30 rounded-lg font-medium">
+                    <span className="inline-flex items-center text-xs px-2.5 py-1 bg-gradient-to-r from-primary/10 to-primary/10 text-primary border border-primary/30 rounded-lg font-medium">
                       {doc.document_type}
                     </span>
                   ) : (
@@ -552,13 +552,13 @@ export function DocumentTable({
                   {/* Summary */}
                   <div>
                     <div className="flex items-center gap-2 mb-2">
-                      <Sparkles className="h-4 w-4 text-purple-500" />
+                      <Sparkles className="h-4 w-4 text-primary" />
                       <span className="text-xs font-semibold text-slate-700 dark:text-slate-300">AI Summary</span>
                       {!doc.summary && doc.status === "completed" && (
                         <Button
                           variant="ghost"
                           size="sm"
-                          className="h-6 text-xs text-purple-600 dark:text-purple-400 hover:bg-purple-500/10 ml-auto"
+                          className="h-6 text-xs text-primary hover:bg-primary/10 ml-auto"
                           onClick={() => onGenerateSummary(doc.id)}
                           disabled={generatingSummary === doc.id}
                         >
@@ -580,7 +580,7 @@ export function DocumentTable({
                             <ul className="space-y-1">
                               {doc.key_points.map((point, idx) => (
                                 <li key={idx} className="flex items-start gap-2 text-xs text-slate-600 dark:text-slate-400">
-                                  <span className="text-purple-500 mt-0.5">•</span>
+                                  <span className="text-primary mt-0.5">•</span>
                                   <span>{point}</span>
                                 </li>
                               ))}

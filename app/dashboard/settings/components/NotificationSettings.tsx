@@ -77,7 +77,7 @@ export function NotificationSettings({ preferences, onUpdatePreference }: Notifi
 
         <div className="flex items-center justify-between p-4 rounded-lg border border-border dark:border-border hover:bg-muted dark:hover:bg-muted/50 transition-colors">
           <div className="flex items-center gap-3">
-            <Users className="h-5 w-5 text-purple-500" />
+            <Users className="h-5 w-5 text-primary" />
             <div>
               <p className="font-medium text-foreground dark:text-white">Team Activity</p>
               <p className="text-sm text-muted-foreground dark:text-muted-foreground">Get notified of team member actions</p>
@@ -91,7 +91,7 @@ export function NotificationSettings({ preferences, onUpdatePreference }: Notifi
 
         <div className="flex items-center justify-between p-4 rounded-lg border border-border dark:border-border hover:bg-muted dark:hover:bg-muted/50 transition-colors">
           <div className="flex items-center gap-3">
-            <BarChart3 className="h-5 w-5 text-indigo-500" />
+            <BarChart3 className="h-5 w-5 text-primary" />
             <div>
               <p className="font-medium text-foreground dark:text-white">Weekly Digest</p>
               <p className="text-sm text-muted-foreground dark:text-muted-foreground">Summary email every Monday morning</p>

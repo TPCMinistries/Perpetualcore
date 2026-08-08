@@ -311,7 +311,7 @@ export default function TaskDetailPage() {
       case "linkedin":
         return "bg-blue-600";
       case "instagram":
-        return "bg-gradient-to-br from-purple-500 to-pink-500";
+        return "bg-primary";
       case "facebook":
         return "bg-blue-500";
       case "youtube":
@@ -374,7 +374,7 @@ export default function TaskDetailPage() {
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white dark:from-slate-950 dark:to-slate-900 flex items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-violet-500" />
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
     );
   }
@@ -421,7 +421,7 @@ export default function TaskDetailPage() {
                     {task.status === "done" ? (
                       <CheckCircle2 className="h-7 w-7 text-green-500" />
                     ) : (
-                      <Circle className="h-7 w-7 text-muted-foreground dark:text-muted-foreground group-hover:text-violet-500 transition-colors" />
+                      <Circle className="h-7 w-7 text-muted-foreground dark:text-muted-foreground group-hover:text-primary transition-colors" />
                     )}
                   </button>
                   <h1
@@ -498,7 +498,7 @@ export default function TaskDetailPage() {
                 variant={task.status === "done" ? "outline" : "default"}
                 size="sm"
                 onClick={handleStatusToggle}
-                className={task.status !== "done" ? "bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-700 hover:to-purple-700 text-white border-0" : ""}
+                className={task.status !== "done" ? "bg-primary text-white border-0" : ""}
               >
                 {task.status === "done" ? (
                   <>
@@ -520,7 +520,7 @@ export default function TaskDetailPage() {
         <div className="bg-card/50 rounded-2xl border border-border dark:border-border/50 p-6 mb-6">
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center gap-3">
-              <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center">
+              <div className="h-10 w-10 rounded-xl bg-primary flex items-center justify-center">
                 <Sparkles className="h-5 w-5 text-white" />
               </div>
               <div>
@@ -584,7 +584,7 @@ export default function TaskDetailPage() {
                           "h-8 w-8 rounded-lg flex items-center justify-center text-white",
                           platform.id === "twitter" ? "bg-sky-500" :
                           platform.id === "linkedin" ? "bg-blue-600" :
-                          platform.id === "instagram" ? "bg-gradient-to-br from-purple-500 to-pink-500" :
+                          platform.id === "instagram" ? "bg-primary" :
                           platform.id === "youtube" ? "bg-red-600" :
                           "bg-blue-500"
                         )}>
@@ -604,7 +604,7 @@ export default function TaskDetailPage() {
                   <Button
                     onClick={generateMore}
                     disabled={generating || selectedPlatforms.length === 0}
-                    className="bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-700 hover:to-purple-700 text-white border-0"
+                    className="bg-primary text-white border-0"
                   >
                     {generating ? (
                       <Loader2 className="h-4 w-4 mr-2 animate-spin" />
@@ -633,7 +633,7 @@ export default function TaskDetailPage() {
               <Button
                 onClick={() => setGenerateDialogOpen(true)}
                 disabled={generating}
-                className="bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-700 hover:to-purple-700 text-white border-0"
+                className="bg-primary text-white border-0"
               >
                 {generating ? (
                   <Loader2 className="h-4 w-4 mr-2 animate-spin" />
@@ -678,7 +678,7 @@ export default function TaskDetailPage() {
                             }
                           </span>
                           {deliverable.ai_generated && (
-                            <span className="ml-2 text-xs text-violet-600 dark:text-violet-400">AI Generated</span>
+                            <span className="ml-2 text-xs text-primary">AI Generated</span>
                           )}
                         </div>
                       </div>
@@ -794,7 +794,7 @@ export default function TaskDetailPage() {
                     ) : (
                       <div
                         onClick={() => startEditing(deliverable)}
-                        className="bg-card rounded-lg p-4 border border-border dark:border-border cursor-text hover:border-violet-300 dark:hover:border-violet-500/50 hover:shadow-sm transition-all group/content"
+                        className="bg-card rounded-lg p-4 border border-border dark:border-border cursor-text hover:border-primary/20 dark:hover:border-primary/50 hover:shadow-sm transition-all group/content"
                       >
                         <p className="whitespace-pre-wrap text-sm text-foreground dark:text-muted-foreground">
                           {deliverable.content}
@@ -842,7 +842,7 @@ export default function TaskDetailPage() {
               {subtasks.map((subtask) => (
                 <div
                   key={subtask.id}
-                  className="flex items-center gap-3 p-3 rounded-xl bg-muted dark:bg-card/50 border border-border dark:border-border/50 hover:border-violet-300 dark:hover:border-violet-500/50 cursor-pointer transition-all"
+                  className="flex items-center gap-3 p-3 rounded-xl bg-muted dark:bg-card/50 border border-border dark:border-border/50 hover:border-primary/20 dark:hover:border-primary/50 cursor-pointer transition-all"
                   onClick={() => router.push(`/dashboard/tasks/${subtask.id}`)}
                 >
                   {subtask.status === "done" ? (
@@ -874,7 +874,7 @@ export default function TaskDetailPage() {
         {/* Related Items Section */}
         <div className="bg-card/50 rounded-2xl border border-border dark:border-border/50 p-6 mb-6">
           <h2 className="text-lg font-semibold text-foreground dark:text-white mb-4 flex items-center gap-2">
-            <span className="h-8 w-8 rounded-lg bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center">
+            <span className="h-8 w-8 rounded-lg bg-gradient-to-br from-blue-500 to-primary flex items-center justify-center">
               <span className="text-white text-sm">🔗</span>
             </span>
             Related Items
@@ -900,7 +900,7 @@ export default function TaskDetailPage() {
           <Button
             variant={task.status === "done" ? "outline" : "default"}
             onClick={handleStatusToggle}
-            className={task.status !== "done" ? "bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-700 hover:to-purple-700 text-white border-0" : ""}
+            className={task.status !== "done" ? "bg-primary text-white border-0" : ""}
           >
             {task.status === "done" ? (
               <>

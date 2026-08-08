@@ -204,7 +204,7 @@ function BotBuilderContent() {
           </Button>
           <div className="h-8 w-px bg-border" />
           <div className="flex items-center gap-3">
-            <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center shadow">
+            <div className="h-10 w-10 rounded-xl bg-primary flex items-center justify-center shadow">
               <Bot className="h-5 w-5 text-white" />
             </div>
             <div>

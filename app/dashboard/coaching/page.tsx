@@ -410,7 +410,7 @@ export default function CoachingPage() {
             <Card>
               <CardContent className="p-4">
                 <div className="flex items-center justify-between">
-                  <Target className="h-5 w-5 text-purple-500" />
+                  <Target className="h-5 w-5 text-primary" />
                   <span className="text-2xl font-bold">
                     {clients.reduce((sum, c) => sum + (c.session_counts?.completed || 0), 0)}
                   </span>

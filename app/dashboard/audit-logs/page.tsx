@@ -379,8 +379,8 @@ export default function AuditLogsPage() {
           <Card className="border-border dark:border-border bg-card overflow-hidden">
             <CardHeader className="border-b border-border dark:border-border bg-muted/50 dark:bg-card/30 py-4">
               <div className="flex items-center gap-3">
-                <div className="p-2 rounded-lg bg-violet-100 dark:bg-violet-900/30">
-                  <Filter className="h-4 w-4 text-violet-600 dark:text-violet-400" />
+                <div className="p-2 rounded-lg bg-primary/10 dark:bg-primary/30">
+                  <Filter className="h-4 w-4 text-primary" />
                 </div>
                 <CardTitle className="text-base font-semibold text-foreground dark:text-foreground">
                   Filters
@@ -467,7 +467,7 @@ export default function AuditLogsPage() {
               <div className="flex gap-2">
                 <Button
                   onClick={() => fetchLogs()}
-                  className="bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-700 hover:to-purple-700 text-white"
+                  className="bg-primary text-white"
                 >
                   <Search className="h-4 w-4 mr-2" />
                   Apply Filters
@@ -516,7 +516,7 @@ export default function AuditLogsPage() {
                       variants={cardVariants}
                       initial="hidden"
                       animate="visible"
-                      className="flex items-start justify-between p-4 rounded-xl border border-border dark:border-border bg-card hover:border-violet-300 dark:hover:border-violet-700 hover:shadow-md transition-all cursor-pointer"
+                      className="flex items-start justify-between p-4 rounded-xl border border-border dark:border-border bg-card hover:border-primary/20 dark:hover:border-primary/40 hover:shadow-md transition-all cursor-pointer"
                       onClick={() => {
                         setSelectedLogId(log.id);
                         setDetailOpen(true);

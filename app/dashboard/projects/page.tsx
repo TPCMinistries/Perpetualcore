@@ -738,7 +738,7 @@ Respond ONLY with valid JSON, no other text.`
             <DialogContent className="max-w-2xl">
               <DialogHeader>
                 <div className="flex items-center gap-3">
-                  <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center">
+                  <div className="h-10 w-10 rounded-xl bg-primary flex items-center justify-center">
                     <Sparkles className="h-5 w-5 text-white" />
                   </div>
                   <div>
@@ -755,21 +755,21 @@ Respond ONLY with valid JSON, no other text.`
                   <div className="flex items-center gap-1 flex-1">
                     <div className={cn(
                       "flex-1 h-1.5 rounded-full transition-colors",
-                      createStep >= 1 ? "bg-violet-500" : "bg-muted dark:bg-muted"
+                      createStep >= 1 ? "bg-primary" : "bg-muted dark:bg-muted"
                     )} />
                     <span className="text-[10px] text-muted-foreground">Type</span>
                   </div>
                   <div className="flex items-center gap-1 flex-1">
                     <div className={cn(
                       "flex-1 h-1.5 rounded-full transition-colors",
-                      createStep >= 2 ? "bg-violet-500" : "bg-muted dark:bg-muted"
+                      createStep >= 2 ? "bg-primary" : "bg-muted dark:bg-muted"
                     )} />
                     <span className="text-[10px] text-muted-foreground">Details</span>
                   </div>
                   <div className="flex items-center gap-1 flex-1">
                     <div className={cn(
                       "flex-1 h-1.5 rounded-full transition-colors",
-                      createStep >= 3 ? "bg-violet-500" : "bg-muted dark:bg-muted"
+                      createStep >= 3 ? "bg-primary" : "bg-muted dark:bg-muted"
                     )} />
                     <span className="text-[10px] text-muted-foreground">Setup</span>
                   </div>
@@ -786,11 +786,11 @@ Respond ONLY with valid JSON, no other text.`
                       className={cn(
                         "w-full flex items-center gap-4 p-4 rounded-xl border-2 text-left transition-all",
                         aiSetupMode
-                          ? "border-violet-500 bg-gradient-to-r from-violet-50 to-purple-50 dark:from-violet-950/30 dark:to-purple-950/30"
-                          : "border-dashed border-border dark:border-border hover:border-violet-300 dark:hover:border-violet-700"
+                          ? "border-primary/40 bg-primary"
+                          : "border-dashed border-border dark:border-border hover:border-primary/20 dark:hover:border-primary/40"
                       )}
                     >
-                      <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center flex-shrink-0">
+                      <div className="h-12 w-12 rounded-xl bg-primary flex items-center justify-center flex-shrink-0">
                         <Sparkles className="h-6 w-6 text-white" />
                       </div>
                       <div className="flex-1">
@@ -799,7 +799,7 @@ Respond ONLY with valid JSON, no other text.`
                           Describe what you're working on and AI will suggest the structure, tasks, and milestones
                         </p>
                       </div>
-                      {aiSetupMode && <Check className="h-5 w-5 text-violet-500 flex-shrink-0" />}
+                      {aiSetupMode && <Check className="h-5 w-5 text-primary flex-shrink-0" />}
                     </button>
 
                     {aiSetupMode && (
@@ -819,8 +819,8 @@ Respond ONLY with valid JSON, no other text.`
                             <label className={cn(
                               "flex-1 flex items-center justify-center gap-2 px-4 py-3 border-2 border-dashed rounded-lg cursor-pointer transition-colors",
                               aiFileContent
-                                ? "border-violet-500 bg-violet-50 dark:bg-violet-950/30"
-                                : "border-border dark:border-border hover:border-violet-400"
+                                ? "border-primary/40 bg-primary/10 dark:bg-primary/30"
+                                : "border-border dark:border-border hover:border-primary/40"
                             )}>
                               <input
                                 type="file"
@@ -843,8 +843,8 @@ Respond ONLY with valid JSON, no other text.`
                               />
                               {aiFileContent ? (
                                 <>
-                                  <Check className="h-4 w-4 text-violet-500" />
-                                  <span className="text-sm text-violet-700 dark:text-violet-300">{aiFileName}</span>
+                                  <Check className="h-4 w-4 text-primary" />
+                                  <span className="text-sm text-primary">{aiFileName}</span>
                                   <button
                                     type="button"
                                     onClick={(e) => {
@@ -870,7 +870,7 @@ Respond ONLY with valid JSON, no other text.`
                         <Button
                           onClick={handleAiSetup}
                           disabled={aiGenerating || (!aiProjectDescription.trim() && !aiFileContent)}
-                          className="w-full bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-700 hover:to-purple-700 text-white border-0"
+                          className="w-full bg-primary text-white border-0"
                         >
                           {aiGenerating ? (
                             <>
@@ -911,9 +911,9 @@ Respond ONLY with valid JSON, no other text.`
                                   key={type.id}
                                   onClick={() => handleProjectTypeSelect(type.id)}
                                   className={cn(
-                                    "flex items-center gap-3 p-3 rounded-xl border-2 text-left transition-all hover:border-violet-300 dark:hover:border-violet-700",
+                                    "flex items-center gap-3 p-3 rounded-xl border-2 text-left transition-all hover:border-primary/20 dark:hover:border-primary/40",
                                     newProjectType === type.id
-                                      ? "border-violet-500 bg-violet-50 dark:bg-violet-950/30"
+                                      ? "border-primary/40 bg-primary/10 dark:bg-primary/30"
                                       : "border-border dark:border-border"
                                   )}
                                 >
@@ -923,7 +923,7 @@ Respond ONLY with valid JSON, no other text.`
                                     <p className="text-xs text-muted-foreground line-clamp-1">{type.description}</p>
                                   </div>
                                   {newProjectType === type.id && (
-                                    <Check className="h-4 w-4 text-violet-500 flex-shrink-0" />
+                                    <Check className="h-4 w-4 text-primary flex-shrink-0" />
                                   )}
                                 </button>
                               ))}
@@ -939,9 +939,9 @@ Respond ONLY with valid JSON, no other text.`
                 <div className="py-4 space-y-5 max-h-[500px] overflow-y-auto pr-2">
                   {/* AI Suggestions Banner */}
                   {aiSuggestions && (aiSuggestions.milestones?.length || aiSuggestions.tasks?.length) && (
-                    <div className="p-4 rounded-xl bg-gradient-to-r from-violet-50 to-purple-50 dark:from-violet-950/30 dark:to-purple-950/30 border border-violet-200 dark:border-violet-800">
+                    <div className="p-4 rounded-xl bg-primary border border-primary/20 dark:border-primary/40">
                       <div className="flex items-center gap-2 mb-3">
-                        <Sparkles className="h-4 w-4 text-violet-500" />
+                        <Sparkles className="h-4 w-4 text-primary" />
                         <span className="text-sm font-medium">AI Suggested Structure</span>
                       </div>
                       {aiSuggestions.milestones && aiSuggestions.milestones.length > 0 && (
@@ -1001,7 +1001,7 @@ Respond ONLY with valid JSON, no other text.`
                           onClick={() => setNewProjectEmoji(emoji)}
                           className={cn(
                             "w-8 h-8 rounded-lg text-lg hover:bg-muted dark:hover:bg-muted transition-colors",
-                            newProjectEmoji === emoji && "bg-violet-100 dark:bg-violet-900/30"
+                            newProjectEmoji === emoji && "bg-primary/10 dark:bg-primary/30"
                           )}
                         >
                           {emoji}
@@ -1053,8 +1053,8 @@ Respond ONLY with valid JSON, no other text.`
                           className={cn(
                             "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm transition-colors border",
                             newProjectTeams.includes(team.id)
-                              ? "border-violet-500 bg-violet-50 dark:bg-violet-950/30 text-violet-700 dark:text-violet-300"
-                              : "border-border dark:border-border hover:border-violet-300 dark:hover:border-violet-600"
+                              ? "border-primary/40 bg-primary/10 dark:bg-primary/30 text-primary"
+                              : "border-border dark:border-border hover:border-primary/20 dark:hover:border-primary/40"
                           )}
                         >
                           <span>{team.emoji}</span>
@@ -1136,7 +1136,7 @@ Respond ONLY with valid JSON, no other text.`
                           className={cn(
                             "px-3 py-1.5 rounded-full text-xs font-medium transition-colors",
                             newProjectTags.includes(tag)
-                              ? "bg-violet-100 dark:bg-violet-900/30 text-violet-700 dark:text-violet-300"
+                              ? "bg-primary/10 dark:bg-primary/30 text-primary"
                               : "bg-muted dark:bg-card text-muted-foreground dark:text-muted-foreground hover:bg-muted dark:hover:bg-muted"
                           )}
                         >
@@ -1269,7 +1269,7 @@ Respond ONLY with valid JSON, no other text.`
                         {newProjectMilestones.map((milestone, i) => (
                           <span
                             key={i}
-                            className="inline-flex items-center gap-1 px-3 py-1.5 bg-violet-100 dark:bg-violet-900/30 text-violet-700 dark:text-violet-300 rounded-full text-xs"
+                            className="inline-flex items-center gap-1 px-3 py-1.5 bg-primary/10 dark:bg-primary/30 text-primary rounded-full text-xs"
                           >
                             {milestone}
                             <button
@@ -1293,7 +1293,7 @@ Respond ONLY with valid JSON, no other text.`
                               key={i}
                               type="button"
                               onClick={() => setNewProjectMilestones(prev => [...prev, m])}
-                              className="px-2 py-1 bg-muted dark:bg-card hover:bg-violet-100 dark:hover:bg-violet-900/30 rounded text-xs transition-colors"
+                              className="px-2 py-1 bg-muted dark:bg-card hover:bg-primary/10 dark:hover:bg-primary/30 rounded text-xs transition-colors"
                             >
                               + {m}
                             </button>
@@ -1321,16 +1321,16 @@ Respond ONLY with valid JSON, no other text.`
                               className={cn(
                                 "flex items-center gap-2 p-2 rounded-lg border text-left transition-colors",
                                 newProjectMembers.includes(member.id)
-                                  ? "border-violet-500 bg-violet-50 dark:bg-violet-950/30"
-                                  : "border-border dark:border-border hover:border-violet-300"
+                                  ? "border-primary/40 bg-primary/10 dark:bg-primary/30"
+                                  : "border-border dark:border-border hover:border-primary/20"
                               )}
                             >
-                              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-violet-400 to-purple-500 flex items-center justify-center text-white text-xs font-medium">
+                              <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-white text-xs font-medium">
                                 {member.full_name?.charAt(0) || "?"}
                               </div>
                               <span className="text-sm truncate">{member.full_name}</span>
                               {newProjectMembers.includes(member.id) && (
-                                <Check className="h-4 w-4 text-violet-500 ml-auto" />
+                                <Check className="h-4 w-4 text-primary ml-auto" />
                               )}
                             </button>
                           ))}
@@ -1368,7 +1368,7 @@ Respond ONLY with valid JSON, no other text.`
                   {createStep === 1 ? (
                     <Button
                       onClick={() => setCreateStep(2)}
-                      className="bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-700 hover:to-purple-700 text-white border-0"
+                      className="bg-primary text-white border-0"
                     >
                       Continue
                       <ChevronRight className="h-4 w-4 ml-1" />
@@ -1392,7 +1392,7 @@ Respond ONLY with valid JSON, no other text.`
                       <Button
                         onClick={handleCreateProject}
                         disabled={creating || !newProjectName.trim()}
-                        className="bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-700 hover:to-purple-700 text-white border-0"
+                        className="bg-primary text-white border-0"
                       >
                         {creating ? "Creating..." : "Create Project"}
                       </Button>
@@ -1401,7 +1401,7 @@ Respond ONLY with valid JSON, no other text.`
                     <Button
                       onClick={handleCreateProject}
                       disabled={creating || !newProjectName.trim()}
-                      className="bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-700 hover:to-purple-700 text-white border-0"
+                      className="bg-primary text-white border-0"
                     >
                       {creating ? "Creating..." : "Create Project"}
                     </Button>

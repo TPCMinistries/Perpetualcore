@@ -19,7 +19,7 @@ export default async function PremiumDashboardPage() {
   return (
     <div className="space-y-8">
       {/* Premium Header */}
-      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary via-purple-600 to-pink-600 p-8 md:p-12 text-white">
+      <div className="relative overflow-hidden rounded-2xl bg-primary p-8 md:p-12 text-white">
         <div className="relative z-10">
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center gap-3">
@@ -147,7 +147,7 @@ export default async function PremiumDashboardPage() {
         <Card className="border-2 hover:shadow-lg transition-all">
           <CardContent className="p-6">
             <div className="flex items-center gap-4 mb-4">
-              <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center">
+              <div className="h-12 w-12 rounded-xl bg-primary flex items-center justify-center">
                 <Zap className="h-6 w-6 text-white" />
               </div>
               <div>

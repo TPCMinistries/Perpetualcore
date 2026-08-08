@@ -41,7 +41,7 @@ export function StorageUsageBar({ usedBytes, limitGB, className }: StorageUsageB
                 ? "bg-red-500"
                 : isWarning
                 ? "bg-amber-500"
-                : "bg-violet-500"
+                : "bg-primary"
             )}
             style={{ width: `${percentage}%` }}
           />

@@ -61,14 +61,14 @@ export function AccountManager({
   ];
 
   return (
-    <Card className="border-2 bg-gradient-to-br from-primary/5 via-purple-500/5 to-pink-500/5">
+    <Card className="border-2 bg-gradient-to-br from-primary/5 via-primary/5 to-primary/5">
       <CardHeader>
         <div className="flex items-center justify-between">
           <div>
             <CardTitle className="text-2xl">Your Account Manager</CardTitle>
             <CardDescription>White-glove support for premium customers</CardDescription>
           </div>
-          <Badge className="bg-gradient-to-r from-primary to-purple-600 text-white border-0">
+          <Badge className="bg-primary text-white border-0">
             Premium Support
           </Badge>
         </div>
@@ -78,7 +78,7 @@ export function AccountManager({
         <div className="flex items-start gap-6 p-6 rounded-xl bg-background border-2">
           <Avatar className="h-24 w-24 border-4 border-primary/20">
             <AvatarImage src={avatarUrl} alt={name} />
-            <AvatarFallback className="bg-gradient-to-br from-primary to-purple-600 text-white text-2xl font-bold">
+            <AvatarFallback className="bg-primary text-white text-2xl font-bold">
               {name.split(" ").map(n => n[0]).join("")}
             </AvatarFallback>
           </Avatar>
@@ -112,7 +112,7 @@ export function AccountManager({
             </div>
 
             <div className="flex gap-2">
-              <Button size="sm" className="bg-gradient-to-r from-primary to-purple-600">
+              <Button size="sm" className="bg-primary">
                 <Video className="mr-2 h-4 w-4" />
                 Schedule Call
               </Button>

@@ -240,7 +240,7 @@ agent = response.json()`,
         </Card>
         <Card className="hover:shadow-lg transition-all cursor-pointer">
           <CardContent className="pt-6">
-            <Zap className="h-8 w-8 text-purple-600 mb-3" />
+            <Zap className="h-8 w-8 text-primary mb-3" />
             <h3 className="font-semibold mb-1">Rate Limits</h3>
             <p className="text-sm text-muted-foreground">Request quotas & limits</p>
           </CardContent>

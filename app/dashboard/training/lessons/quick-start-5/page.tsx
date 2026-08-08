@@ -17,7 +17,7 @@ export default function QuickStartLesson5() {
             Perpetual Core becomes exponentially more powerful when connected to the tools you already use every day. Integrations enable AI Agents and Workflows to read your emails, manage your calendar, send messages, and much more - all automatically.
           </p>
 
-          <div className="bg-gradient-to-br from-blue-50 to-purple-50 dark:from-blue-950/20 dark:to-purple-950/20 border border-blue-200 dark:border-blue-800 rounded-lg p-6">
+          <div className="bg-gradient-to-br from-blue-50 to-primary dark:from-blue-950/20 dark:to-primary/20 border border-blue-200 dark:border-blue-800 rounded-lg p-6">
             <h4 className="font-semibold mb-3">What Integrations Unlock</h4>
             <div className="grid md:grid-cols-2 gap-4">
               <div className="space-y-2">
@@ -87,10 +87,10 @@ export default function QuickStartLesson5() {
               </p>
             </Card>
 
-            <Card className="p-4 border-purple-200 dark:border-purple-800">
+            <Card className="p-4 border-primary/20 dark:border-primary/40">
               <div className="flex items-center gap-3 mb-3">
-                <div className="h-10 w-10 rounded-lg bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center">
-                  <MessageSquare className="h-5 w-5 text-purple-600" />
+                <div className="h-10 w-10 rounded-lg bg-primary/10 dark:bg-primary/30 flex items-center justify-center">
+                  <MessageSquare className="h-5 w-5 text-primary" />
                 </div>
                 <div>
                   <h4 className="font-semibold text-sm">Communication</h4>
@@ -132,10 +132,10 @@ export default function QuickStartLesson5() {
               </p>
             </Card>
 
-            <Card className="p-4 border-indigo-200 dark:border-indigo-800">
+            <Card className="p-4 border-primary/20 dark:border-primary/40">
               <div className="flex items-center gap-3 mb-3">
-                <div className="h-10 w-10 rounded-lg bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center">
-                  <Zap className="h-5 w-5 text-indigo-600" />
+                <div className="h-10 w-10 rounded-lg bg-primary/10 dark:bg-primary/30 flex items-center justify-center">
+                  <Zap className="h-5 w-5 text-primary" />
                 </div>
                 <div>
                   <h4 className="font-semibold text-sm">Developer Tools</h4>
@@ -148,7 +148,7 @@ export default function QuickStartLesson5() {
             </Card>
           </div>
 
-          <div className="bg-purple-50 dark:bg-purple-950/20 border border-purple-200 dark:border-purple-800 rounded-lg p-4">
+          <div className="bg-primary/10 dark:bg-primary/20 border border-primary/20 dark:border-primary/40 rounded-lg p-4">
             <p className="text-sm">
               <strong>New integrations are added regularly!</strong> Check the Integrations page for the full list of 50+ supported tools.
             </p>
@@ -189,7 +189,7 @@ export default function QuickStartLesson5() {
             </ol>
 
             <Link href="/dashboard/integrations" target="_blank">
-              <Button className="w-full bg-gradient-to-r from-blue-600 to-purple-600">
+              <Button className="w-full bg-gradient-to-r from-blue-600 to-primary">
                 <Plug className="h-4 w-4 mr-2" />
                 Open Integrations
               </Button>
@@ -314,7 +314,7 @@ export default function QuickStartLesson5() {
               </Link>
             </Card>
 
-            <Card className="p-6 bg-gradient-to-br from-blue-50 to-purple-50 dark:from-blue-950/20 dark:to-purple-950/20">
+            <Card className="p-6 bg-gradient-to-br from-blue-50 to-primary dark:from-blue-950/20 dark:to-primary/20">
               <h4 className="font-semibold mb-4">Test 2: Ask AI About Your Schedule</h4>
               <p className="text-sm text-muted-foreground mb-3">
                 With calendar connected, AI Chat can now answer questions about your real schedule.
@@ -329,13 +329,13 @@ export default function QuickStartLesson5() {
                 </ul>
               </div>
               <Link href="/dashboard/chat" target="_blank">
-                <Button className="w-full bg-gradient-to-r from-blue-600 to-purple-600">
+                <Button className="w-full bg-gradient-to-r from-blue-600 to-primary">
                   Try AI Chat
                 </Button>
               </Link>
             </Card>
 
-            <Card className="p-6 bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-950/20 dark:to-pink-950/20">
+            <Card className="p-6 bg-primary">
               <h4 className="font-semibold mb-4">Test 3: Email-Powered Agent</h4>
               <p className="text-sm text-muted-foreground mb-3">
                 Your Customer Support Agent can now read and respond to real emails!
@@ -350,7 +350,7 @@ export default function QuickStartLesson5() {
                 </ul>
               </div>
               <Link href="/dashboard/agents" target="_blank">
-                <Button className="w-full bg-gradient-to-r from-purple-600 to-pink-600">
+                <Button className="w-full bg-primary">
                   Configure Agent
                 </Button>
               </Link>
@@ -399,7 +399,7 @@ export default function QuickStartLesson5() {
               </ul>
             </div>
 
-            <div className="p-4 bg-purple-50 dark:bg-purple-950/20 rounded-lg border border-purple-200">
+            <div className="p-4 bg-primary/10 dark:bg-primary/20 rounded-lg border border-primary/20">
               <h4 className="font-semibold text-sm mb-2">🤖 Build Specialized Agents</h4>
               <p className="text-xs text-muted-foreground mb-2">
                 Create agents for specific use cases:
@@ -424,7 +424,7 @@ export default function QuickStartLesson5() {
             </div>
           </div>
 
-          <div className="bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 dark:from-blue-950/20 dark:via-purple-950/20 dark:to-pink-950/20 border border-blue-200 dark:border-blue-800 rounded-lg p-6">
+          <div className="bg-gradient-to-br from-blue-50 via-primary to-primary dark:from-blue-950/20 dark:via-primary/20 dark:to-primary/20 border border-blue-200 dark:border-blue-800 rounded-lg p-6">
             <h4 className="font-semibold mb-3">Integration Best Practices</h4>
             <ul className="space-y-2 ml-6 text-sm">
               <li className="list-disc"><strong>Start small:</strong> Connect essential tools first, add more as needed</li>
@@ -446,7 +446,7 @@ export default function QuickStartLesson5() {
           </div>
 
           <Link href="/dashboard/training/learning-paths" target="_blank">
-            <Button className="w-full bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600">
+            <Button className="w-full bg-gradient-to-r from-blue-600 via-primary to-primary">
               Explore More Learning Paths
             </Button>
           </Link>
@@ -461,7 +461,7 @@ export default function QuickStartLesson5() {
         Fantastic work! You've completed the Quick Start guide. Here's a final challenge to put everything together:
       </p>
 
-      <Card className="p-6 bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 dark:from-blue-950/20 dark:via-purple-950/20 dark:to-pink-950/20">
+      <Card className="p-6 bg-gradient-to-br from-blue-50 via-primary to-primary dark:from-blue-950/20 dark:via-primary/20 dark:to-primary/20">
         <h3 className="font-semibold text-lg mb-4">Final Challenge: Build an End-to-End Automation</h3>
         <p className="mb-4">
           Create a complete automation that combines everything you've learned:
@@ -501,7 +501,7 @@ export default function QuickStartLesson5() {
           </div>
         </div>
 
-        <div className="mt-4 p-4 bg-purple-50 dark:bg-purple-950/20 rounded-lg">
+        <div className="mt-4 p-4 bg-primary/10 dark:bg-primary/20 rounded-lg">
           <p className="text-sm font-medium mb-2">Bonus Points:</p>
           <ul className="text-sm text-muted-foreground space-y-1">
             <li>• Add conditional logic (different format for busy vs. light weeks)</li>
@@ -512,7 +512,7 @@ export default function QuickStartLesson5() {
       </Card>
 
       <Link href="/dashboard/workflows/create" target="_blank">
-        <Button className="w-full bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600">
+        <Button className="w-full bg-gradient-to-r from-blue-600 via-primary to-primary">
           Start Final Challenge
         </Button>
       </Link>

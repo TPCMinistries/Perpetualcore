@@ -200,12 +200,12 @@ export function BulkActionsDialog({ contacts }: BulkActionsDialogProps) {
                       <Badge
                         key={tag}
                         variant="secondary"
-                        className="bg-violet-100 text-violet-700 dark:bg-violet-900/30 dark:text-violet-300 pr-1"
+                        className="bg-primary/10 text-primary dark:bg-primary/30 dark:text-primary pr-1"
                       >
                         {tag}
                         <button
                           onClick={() => handleToggleTag(tag)}
-                          className="ml-1 hover:bg-violet-200 dark:hover:bg-violet-800 rounded-full p-0.5"
+                          className="ml-1 hover:bg-primary/20 dark:hover:bg-primary rounded-full p-0.5"
                         >
                           <X className="h-3 w-3" />
                         </button>
@@ -230,7 +230,7 @@ export function BulkActionsDialog({ contacts }: BulkActionsDialogProps) {
                           className={cn(
                             "cursor-pointer hover:bg-accent transition-colors",
                             selectedTags.has(tag) &&
-                              "bg-violet-100 text-violet-700 border-violet-300"
+                              "bg-primary/10 text-primary border-primary/20"
                           )}
                           onClick={() => handleToggleTag(tag)}
                         >
@@ -257,7 +257,7 @@ export function BulkActionsDialog({ contacts }: BulkActionsDialogProps) {
                         className={cn(
                           "cursor-pointer hover:bg-accent transition-colors",
                           selectedTags.has(tag) &&
-                            "bg-violet-100 text-violet-700 border-violet-300"
+                            "bg-primary/10 text-primary border-primary/20"
                         )}
                         onClick={() => handleToggleTag(tag)}
                       >
@@ -296,7 +296,7 @@ export function BulkActionsDialog({ contacts }: BulkActionsDialogProps) {
               <Button
                 onClick={handleApplyTags}
                 disabled={selectedTags.size === 0 || bulkTagContacts.isPending}
-                className="bg-violet-600 hover:bg-violet-700"
+                className="bg-primary hover:bg-primary"
               >
                 {bulkTagContacts.isPending ? (
                   <Loader2 className="h-4 w-4 mr-2 animate-spin" />
@@ -402,7 +402,7 @@ export function BulkActionsDialog({ contacts }: BulkActionsDialogProps) {
           <>
             <DialogHeader>
               <DialogTitle className="flex items-center gap-2">
-                <Mail className="h-5 w-5 text-violet-600" />
+                <Mail className="h-5 w-5 text-primary" />
                 Compose Email
               </DialogTitle>
               <DialogDescription>

@@ -169,7 +169,7 @@ export function ChatHeader({
                   <div className="text-xs text-slate-500">{advisor.description}</div>
                 </div>
                 {currentAdvisor.id === advisor.id && (
-                  <Check className="h-4 w-4 text-violet-600" />
+                  <Check className="h-4 w-4 text-primary" />
                 )}
               </DropdownMenuItem>
             ))}
@@ -177,7 +177,7 @@ export function ChatHeader({
             <DropdownMenuItem asChild>
               <a
                 href="/dashboard/assistants"
-                className="flex items-center gap-2 text-violet-600 dark:text-violet-400"
+                className="flex items-center gap-2 text-primary"
               >
                 <Sparkles className="h-4 w-4" />
                 <span>See all advisors</span>
@@ -224,8 +224,8 @@ export function ChatHeader({
                     </div>
                   )}
                   {model.provider === "auto" && (
-                    <div className="w-6 h-6 rounded bg-violet-100 dark:bg-violet-900/30 flex items-center justify-center">
-                      <Zap className="h-3 w-3 text-violet-600" />
+                    <div className="w-6 h-6 rounded bg-primary/10 dark:bg-primary/30 flex items-center justify-center">
+                      <Zap className="h-3 w-3 text-primary" />
                     </div>
                   )}
                 </div>
@@ -241,7 +241,7 @@ export function ChatHeader({
                   <div className="text-xs text-slate-500 truncate">{model.description}</div>
                 </div>
                 {selectedModel === model.id && (
-                  <Check className="h-4 w-4 text-violet-600 flex-shrink-0" />
+                  <Check className="h-4 w-4 text-primary flex-shrink-0" />
                 )}
               </DropdownMenuItem>
             ))}
@@ -250,7 +250,7 @@ export function ChatHeader({
 
         {/* RAG Indicator */}
         {ragInfo?.used && (
-          <div className="hidden md:flex items-center gap-1.5 px-2 py-1 rounded-full bg-violet-100 dark:bg-violet-900/30 text-xs text-violet-600 dark:text-violet-400">
+          <div className="hidden md:flex items-center gap-1.5 px-2 py-1 rounded-full bg-primary/10 dark:bg-primary/30 text-xs text-primary">
             <Sparkles className="h-3 w-3" />
             <span>{ragInfo.documentsCount} sources</span>
           </div>
@@ -273,7 +273,7 @@ export function ChatHeader({
           onClick={onVoiceToggle}
           className={cn(
             "flex items-center gap-2",
-            isVoiceMode && "bg-violet-600 hover:bg-violet-700"
+            isVoiceMode && "bg-primary hover:bg-primary"
           )}
         >
           <Mic className="h-4 w-4" />

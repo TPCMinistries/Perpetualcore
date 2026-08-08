@@ -195,7 +195,7 @@ function DefaultShell({
 }) {
   void brand;
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 p-4">
+    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-blue-50 via-white to-primary dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 p-4">
       <div className={`w-full ${widthClass} rounded-xl border bg-card text-card-foreground shadow-lg`}>
         <div className="flex flex-col space-y-1.5 p-6 text-center">
           <h2 className="text-2xl font-semibold leading-none tracking-tight">{title}</h2>

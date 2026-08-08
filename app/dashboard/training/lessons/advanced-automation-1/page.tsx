@@ -17,7 +17,7 @@ export default function AdvancedAutomation1() {
             You've learned how to create simple workflows with templates. Now it's time to master the Workflow Builder - a powerful visual tool that lets you design complex automations from scratch.
           </p>
 
-          <div className="bg-purple-50 dark:bg-purple-950/20 border border-purple-200 dark:border-purple-800 rounded-lg p-6">
+          <div className="bg-primary/10 dark:bg-primary/20 border border-primary/20 dark:border-primary/40 rounded-lg p-6">
             <h4 className="font-semibold mb-3">What You'll Learn</h4>
             <ul className="space-y-2 ml-6 text-sm">
               <li className="list-disc">The anatomy of a workflow - triggers, steps, and outputs</li>
@@ -117,9 +117,9 @@ export default function AdvancedAutomation1() {
               </div>
             </div>
 
-            <div className="bg-purple-50 dark:bg-purple-950/20 border border-purple-200 dark:border-purple-800 rounded-lg p-6">
+            <div className="bg-primary/10 dark:bg-primary/20 border border-primary/20 dark:border-primary/40 rounded-lg p-6">
               <div className="flex items-center gap-3 mb-3">
-                <div className="h-10 w-10 rounded-full bg-purple-600 text-white flex items-center justify-center font-semibold">
+                <div className="h-10 w-10 rounded-full bg-primary text-white flex items-center justify-center font-semibold">
                   3
                 </div>
                 <h4 className="font-semibold">Outputs</h4>
@@ -158,18 +158,18 @@ export default function AdvancedAutomation1() {
             </ol>
 
             <Link href="/dashboard/workflows/create" target="_blank">
-              <Button className="w-full bg-gradient-to-r from-blue-600 to-purple-600">
+              <Button className="w-full bg-gradient-to-r from-blue-600 to-primary">
                 <Workflow className="h-4 w-4 mr-2" />
                 Open Workflow Builder
               </Button>
             </Link>
           </Card>
 
-          <div className="bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-950/20 dark:to-pink-950/20 border border-purple-200 rounded-lg p-6">
+          <div className="bg-primary border border-primary/20 rounded-lg p-6">
             <h4 className="font-semibold mb-3">Builder Interface Tour</h4>
             <div className="space-y-3">
               <div className="flex gap-3">
-                <Layers className="h-5 w-5 text-purple-600 flex-shrink-0 mt-0.5" />
+                <Layers className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" />
                 <div>
                   <p className="font-medium text-sm">Left Sidebar: Step Library</p>
                   <p className="text-xs text-muted-foreground">Browse and search all available steps. Drag them onto the canvas.</p>
@@ -251,7 +251,7 @@ export default function AdvancedAutomation1() {
 
               <div className="p-4 bg-card rounded-lg border">
                 <div className="flex items-center gap-2 mb-2">
-                  <div className="px-2 py-1 bg-purple-100 dark:bg-purple-900/30 rounded text-xs font-medium">Step 3</div>
+                  <div className="px-2 py-1 bg-primary/10 dark:bg-primary/30 rounded text-xs font-medium">Step 3</div>
                   <p className="font-medium text-sm">Send Slack Message</p>
                 </div>
                 <p className="text-xs text-muted-foreground mb-2">Input: summary (from Step 2)</p>
@@ -328,7 +328,7 @@ return result;`}
 
             <Card className="p-4">
               <h4 className="font-semibold text-sm mb-2 flex items-center gap-2">
-                <Zap className="h-4 w-4 text-purple-600" />
+                <Zap className="h-4 w-4 text-primary" />
                 AI Step
               </h4>
               <p className="text-xs text-muted-foreground mb-3">
@@ -442,7 +442,7 @@ return result;`}
         Now it's time to build a custom workflow from scratch using the visual builder!
       </p>
 
-      <Card className="p-6 bg-gradient-to-br from-blue-50 to-purple-50 dark:from-blue-950/20 dark:to-purple-950/20">
+      <Card className="p-6 bg-gradient-to-br from-blue-50 to-primary dark:from-blue-950/20 dark:to-primary/20">
         <h3 className="font-semibold text-lg mb-4">Challenge: Build a "Content Aggregator" Workflow</h3>
         <p className="mb-4">
           Create a workflow that collects content from multiple sources and generates a digest:
@@ -488,7 +488,7 @@ return result;`}
       </Card>
 
       <Link href="/dashboard/workflows/create" target="_blank">
-        <Button className="w-full bg-gradient-to-r from-blue-600 to-purple-600">
+        <Button className="w-full bg-gradient-to-r from-blue-600 to-primary">
           Start Building
         </Button>
       </Link>

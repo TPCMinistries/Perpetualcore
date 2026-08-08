@@ -109,8 +109,8 @@ export function OperateClient({
         </div>
 
         {/* Upgrade Card */}
-        <div className="rounded-2xl border bg-gradient-to-br from-violet-500/5 via-background to-blue-500/5 p-8 text-center">
-          <div className="mx-auto w-16 h-16 rounded-2xl bg-gradient-to-br from-violet-500 to-blue-500 flex items-center justify-center mb-6">
+        <div className="rounded-2xl border bg-gradient-to-br from-primary/5 via-background to-blue-500/5 p-8 text-center">
+          <div className="mx-auto w-16 h-16 rounded-2xl bg-primary flex items-center justify-center mb-6">
             <Building2 className="h-8 w-8 text-white" />
           </div>
           <h2 className="text-xl font-semibold mb-2">
@@ -131,7 +131,7 @@ export function OperateClient({
           <Link href="/dashboard/settings">
             <Button
               size="lg"
-              className="bg-gradient-to-r from-violet-600 to-blue-600 hover:from-violet-700 hover:to-blue-700"
+              className="bg-primary hover:to-blue-700"
             >
               Upgrade to Pro
               <ArrowRight className="ml-2 h-4 w-4" />
@@ -146,7 +146,7 @@ export function OperateClient({
               key={feature.title}
               className="rounded-xl border bg-card p-5 opacity-60"
             >
-              <feature.icon className="h-5 w-5 text-violet-500 mb-3" />
+              <feature.icon className="h-5 w-5 text-primary mb-3" />
               <h3 className="font-medium text-sm mb-1">{feature.title}</h3>
               <p className="text-xs text-muted-foreground">
                 {feature.description}
@@ -169,7 +169,7 @@ export function OperateClient({
           </p>
         </div>
 
-        <div className="rounded-2xl border bg-gradient-to-br from-green-500/5 via-background to-violet-500/5 p-8 text-center">
+        <div className="rounded-2xl border bg-gradient-to-br from-green-500/5 via-background to-primary/5 p-8 text-center">
           <div className="mx-auto w-16 h-16 rounded-2xl bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center mb-6">
             <Rocket className="h-8 w-8 text-white" />
           </div>
@@ -211,7 +211,7 @@ export function OperateClient({
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {OPERATE_FEATURES.map((feature) => (
             <div key={feature.title} className="rounded-xl border bg-card p-5">
-              <feature.icon className="h-5 w-5 text-violet-500 mb-3" />
+              <feature.icon className="h-5 w-5 text-primary mb-3" />
               <h3 className="font-medium text-sm mb-1">{feature.title}</h3>
               <p className="text-xs text-muted-foreground">
                 {feature.description}

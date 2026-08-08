@@ -17,33 +17,33 @@ export default function QuickStartLesson2() {
             The fastest way to create your first AI Agent is to start with a pre-built template. Templates are professionally designed agents that solve common problems - you can use them as-is or customize them to your needs.
           </p>
 
-          <div className="bg-purple-50 dark:bg-purple-950/20 border border-purple-200 dark:border-purple-800 rounded-lg p-6">
+          <div className="bg-primary/10 dark:bg-primary/20 border border-primary/20 dark:border-primary/40 rounded-lg p-6">
             <h4 className="font-semibold mb-3">Popular Agent Templates</h4>
             <div className="grid md:grid-cols-2 gap-3">
               <div className="p-3 bg-card rounded border">
                 <div className="flex items-center gap-2 mb-1">
-                  <Bot className="h-4 w-4 text-purple-600" />
+                  <Bot className="h-4 w-4 text-primary" />
                   <span className="font-medium text-sm">Customer Support Agent</span>
                 </div>
                 <p className="text-xs text-muted-foreground">Handles 80% of common customer questions automatically</p>
               </div>
               <div className="p-3 bg-card rounded border">
                 <div className="flex items-center gap-2 mb-1">
-                  <Bot className="h-4 w-4 text-purple-600" />
+                  <Bot className="h-4 w-4 text-primary" />
                   <span className="font-medium text-sm">Email Organizer</span>
                 </div>
                 <p className="text-xs text-muted-foreground">Sorts, labels, and prioritizes your inbox</p>
               </div>
               <div className="p-3 bg-card rounded border">
                 <div className="flex items-center gap-2 mb-1">
-                  <Bot className="h-4 w-4 text-purple-600" />
+                  <Bot className="h-4 w-4 text-primary" />
                   <span className="font-medium text-sm">Meeting Notes Agent</span>
                 </div>
                 <p className="text-xs text-muted-foreground">Summarizes meetings and extracts action items</p>
               </div>
               <div className="p-3 bg-card rounded border">
                 <div className="flex items-center gap-2 mb-1">
-                  <Bot className="h-4 w-4 text-purple-600" />
+                  <Bot className="h-4 w-4 text-primary" />
                   <span className="font-medium text-sm">Content Moderator</span>
                 </div>
                 <p className="text-xs text-muted-foreground">Reviews user-generated content for policy violations</p>
@@ -87,7 +87,7 @@ export default function QuickStartLesson2() {
             </ol>
 
             <Link href="/dashboard/agents/templates" target="_blank">
-              <Button className="w-full bg-gradient-to-r from-purple-600 to-pink-600">
+              <Button className="w-full bg-primary">
                 <Bot className="h-4 w-4 mr-2" />
                 Browse Agent Templates
               </Button>
@@ -228,7 +228,7 @@ export default function QuickStartLesson2() {
                 How many times the agent has been triggered. This shows usage and impact.
               </p>
             </div>
-            <div className="p-4 bg-purple-50 dark:bg-purple-950/20 rounded-lg border border-purple-200">
+            <div className="p-4 bg-primary/10 dark:bg-primary/20 rounded-lg border border-primary/20">
               <h4 className="font-semibold text-sm mb-2">Response Time</h4>
               <p className="text-xs text-muted-foreground">
                 How quickly the agent responds. Most agents respond in under 3 seconds.
@@ -236,7 +236,7 @@ export default function QuickStartLesson2() {
             </div>
           </div>
 
-          <div className="bg-purple-50 dark:bg-purple-950/20 border border-purple-200 dark:border-purple-800 rounded-lg p-6 mt-4">
+          <div className="bg-primary/10 dark:bg-primary/20 border border-primary/20 dark:border-primary/40 rounded-lg p-6 mt-4">
             <h4 className="font-semibold mb-3">Next Steps to Improve Your Agent</h4>
             <ul className="space-y-2 ml-6 text-sm">
               <li className="list-disc">Upload company FAQs to the Knowledge Base for more accurate answers</li>
@@ -256,7 +256,7 @@ export default function QuickStartLesson2() {
         Congratulations on creating your first AI Agent! Now let's practice what you've learned:
       </p>
 
-      <Card className="p-6 bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-950/20 dark:to-pink-950/20">
+      <Card className="p-6 bg-primary">
         <h3 className="font-semibold text-lg mb-4">Challenge: Create a Second Agent</h3>
         <p className="mb-4">
           Go back to the templates and create an <strong>Email Organizer Agent</strong>. This agent will:
@@ -279,7 +279,7 @@ export default function QuickStartLesson2() {
       </Card>
 
       <Link href="/dashboard/agents/templates" target="_blank">
-        <Button className="w-full bg-gradient-to-r from-purple-600 to-pink-600">
+        <Button className="w-full bg-primary">
           Start Practice Exercise
         </Button>
       </Link>

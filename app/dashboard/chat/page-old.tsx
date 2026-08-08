@@ -84,7 +84,7 @@ const CONVERSATION_MODES = [
     id: "auto",
     name: "Auto",
     icon: Sparkles,
-    color: "from-violet-500 to-purple-600",
+    color: "from-primary to-primary",
     bgColor: "bg-violet-50 dark:bg-violet-950/30",
     borderColor: "border-violet-200 dark:border-violet-800",
     description: "AI picks the best approach",
@@ -124,7 +124,7 @@ const CONVERSATION_MODES = [
     id: "writing",
     name: "Writing",
     icon: PenLine,
-    color: "from-pink-500 to-rose-600",
+    color: "from-primary to-rose-600",
     bgColor: "bg-pink-50 dark:bg-pink-950/30",
     borderColor: "border-pink-200 dark:border-pink-800",
     description: "Polish & craft content",
@@ -1012,7 +1012,7 @@ export default function ChatPage() {
                 className={cn(
                   "flex items-end gap-2 p-2 rounded-2xl border transition-all",
                   isDragging
-                    ? "border-violet-400 bg-violet-50 dark:bg-violet-950/20"
+                    ? "border-primary/40 bg-primary/10 dark:bg-primary/20"
                     : "border-border dark:border-border bg-card hover:border-border dark:hover:border-border"
                 )}
               >

@@ -235,9 +235,9 @@ export default function ContentReviewPage() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-muted-foreground">Scheduled</p>
-                <p className="text-2xl font-bold text-violet-600">{stats.scheduled || 0}</p>
+                <p className="text-2xl font-bold text-primary">{stats.scheduled || 0}</p>
               </div>
-              <Calendar className="h-8 w-8 text-violet-500/50" />
+              <Calendar className="h-8 w-8 text-primary/50" />
             </div>
           </CardContent>
         </Card>

@@ -73,16 +73,16 @@ export default async function DevelopmentTrajectoryPage() {
       <DevelopmentNav />
       <Link
         href="/dashboard/development"
-        className="inline-flex min-h-11 items-center gap-2 text-sm font-medium text-slate-600 transition-colors hover:text-indigo-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-600 focus-visible:ring-offset-2"
+        className="inline-flex min-h-11 items-center gap-2 text-sm font-medium text-slate-600 transition-colors hover:text-primary focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
       >
         <ArrowLeft className="h-4 w-4" />
         Development Intelligence
       </Link>
 
-      <section className="overflow-hidden rounded-[28px] border border-indigo-200 bg-[#f5f3ff] p-6 sm:p-9">
+      <section className="overflow-hidden rounded-[28px] border border-primary/20 bg-[#f5f3ff] p-6 sm:p-9">
         <div className="grid gap-8 lg:grid-cols-[1fr_auto] lg:items-end">
           <div>
-            <Badge className="border border-indigo-200 bg-white text-indigo-800 hover:bg-white">
+            <Badge className="border border-primary/20 bg-white text-primary hover:bg-white">
               <TrendingUp className="mr-1.5 h-3.5 w-3.5" />
               Longitudinal development
             </Badge>
@@ -93,7 +93,7 @@ export default async function DevelopmentTrajectoryPage() {
               This trajectory compares observable evidence across your organization&apos;s reports. It shows recurring strengths, coaching priorities, and movement over time—never personality or integrity scores.
             </p>
           </div>
-          <Button asChild size="lg" className="min-h-12 bg-indigo-600 hover:bg-indigo-700">
+          <Button asChild size="lg" className="min-h-12 bg-primary hover:bg-primary">
             <Link href="/dashboard/development#new-analysis">
               Analyze another conversation
               <ArrowRight className="ml-2 h-4 w-4" />
@@ -103,16 +103,16 @@ export default async function DevelopmentTrajectoryPage() {
       </section>
 
       {trajectory.reportCount === 0 ? (
-        <Card className="border-dashed border-indigo-200 bg-indigo-50/40 shadow-none">
+        <Card className="border-dashed border-primary/20 bg-primary/40 shadow-none">
           <CardContent className="flex flex-col items-center px-6 py-14 text-center">
-            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-white text-indigo-700">
+            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-white text-primary">
               <BarChart3 className="h-6 w-6" />
             </div>
             <h2 className="mt-4 text-xl font-semibold text-slate-950">Your trajectory begins with the first report.</h2>
             <p className="mt-2 max-w-lg text-sm leading-6 text-slate-600">
               After two or more conversations use the same coaching lens, Development Intelligence can show movement in the evidence.
             </p>
-            <Button asChild className="mt-5 min-h-11 bg-indigo-600 hover:bg-indigo-700">
+            <Button asChild className="mt-5 min-h-11 bg-primary hover:bg-primary">
               <Link href="/dashboard/development#new-analysis">
                 <Sparkles className="mr-2 h-4 w-4" />
                 Create the first report
@@ -131,7 +131,7 @@ export default async function DevelopmentTrajectoryPage() {
             ].map((item) => (
               <Card key={item.label} className="border-slate-200 shadow-none">
                 <CardContent className="flex items-center gap-4 p-5">
-                  <div className={`rounded-xl p-3 ${item.tone === "amber" ? "bg-amber-50 text-amber-700" : item.tone === "emerald" ? "bg-emerald-50 text-emerald-700" : "bg-indigo-50 text-indigo-700"}`}>
+                  <div className={`rounded-xl p-3 ${item.tone === "amber" ? "bg-amber-50 text-amber-700" : item.tone === "emerald" ? "bg-emerald-50 text-emerald-700" : "bg-primary/10 text-primary"}`}>
                     <item.icon className="h-5 w-5" />
                   </div>
                   <div><p className="text-2xl font-semibold text-slate-950">{item.value}</p><p className="text-sm text-slate-600">{item.label}</p></div>
@@ -142,7 +142,7 @@ export default async function DevelopmentTrajectoryPage() {
 
           <section>
             <div className="mb-5 max-w-3xl">
-              <p className="text-sm font-semibold text-indigo-700">Development signals</p>
+              <p className="text-sm font-semibold text-primary">Development signals</p>
               <h2 className="mt-1 text-2xl font-semibold tracking-tight text-slate-950">What the evidence is doing over time</h2>
               <p className="mt-2 text-sm leading-6 text-slate-600">A direction appears after the same criterion is observed in more than one report. Open any report to inspect the underlying quotes.</p>
             </div>
@@ -163,16 +163,16 @@ export default async function DevelopmentTrajectoryPage() {
                       <div className="mt-5">
                         <div className="mb-2 flex justify-between text-xs text-slate-500"><span>Demonstrated evidence</span><span>{demonstratedPercent}% across {metric.observations} observations</span></div>
                         <div className="h-2 overflow-hidden rounded-full bg-slate-100" role="img" aria-label={`${metric.label}: ${demonstratedPercent}% demonstrated evidence`}>
-                          <div className="h-full rounded-full bg-indigo-600" style={{ width: `${demonstratedPercent}%` }} />
+                          <div className="h-full rounded-full bg-primary" style={{ width: `${demonstratedPercent}%` }} />
                         </div>
                       </div>
                       <div className="mt-4 flex flex-wrap gap-2 text-xs">
                         <span className="rounded-full bg-slate-100 px-3 py-1 text-slate-700">Current: {formatLevel(metric.currentLevel)}</span>
                         {metric.previousLevel && <span className="rounded-full bg-slate-100 px-3 py-1 text-slate-700">Previous: {formatLevel(metric.previousLevel)}</span>}
                       </div>
-                      <div className="mt-4 rounded-xl bg-indigo-50 p-4">
-                        <p className="text-xs font-semibold uppercase tracking-wide text-indigo-700">Recommended next action</p>
-                        <p className="mt-1 text-sm leading-6 text-indigo-950">{metric.latestAction}</p>
+                      <div className="mt-4 rounded-xl bg-primary/10 p-4">
+                        <p className="text-xs font-semibold uppercase tracking-wide text-primary">Recommended next action</p>
+                        <p className="mt-1 text-sm leading-6 text-primary">{metric.latestAction}</p>
                       </div>
                     </CardContent>
                   </Card>
@@ -183,17 +183,17 @@ export default async function DevelopmentTrajectoryPage() {
 
           <section>
             <div className="mb-5">
-              <p className="text-sm font-semibold text-indigo-700">Conversation history</p>
+              <p className="text-sm font-semibold text-primary">Conversation history</p>
               <h2 className="mt-1 text-2xl font-semibold tracking-tight text-slate-950">Reports included in this trajectory</h2>
             </div>
             <div className="space-y-3">
               {trajectory.sessions.map((session) => (
-                <Link key={session.id} href={`/dashboard/development/analyses/${session.id}`} className="group flex min-h-20 cursor-pointer flex-col gap-3 rounded-xl border border-slate-200 bg-white p-4 transition-colors duration-200 hover:border-indigo-300 hover:bg-indigo-50/30 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-600 focus-visible:ring-offset-2 sm:flex-row sm:items-center sm:justify-between">
+                <Link key={session.id} href={`/dashboard/development/analyses/${session.id}`} className="group flex min-h-20 cursor-pointer flex-col gap-3 rounded-xl border border-slate-200 bg-white p-4 transition-colors duration-200 hover:border-primary/20 hover:bg-primary/30 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 sm:flex-row sm:items-center sm:justify-between">
                   <div className="flex items-start gap-3">
-                    <div className="mt-0.5 rounded-xl bg-indigo-50 p-2.5 text-indigo-700"><Eye className="h-5 w-5" /></div>
+                    <div className="mt-0.5 rounded-xl bg-primary/10 p-2.5 text-primary"><Eye className="h-5 w-5" /></div>
                     <div><p className="font-semibold text-slate-950">{session.title}</p><p className="mt-1 text-sm text-slate-500">{lensLabels[session.lens] || formatLevel(session.lens)} · {new Date(session.occurredAt).toLocaleDateString()}</p></div>
                   </div>
-                  <div className="flex items-center gap-3 pl-12 sm:pl-0"><Badge variant="outline">{session.evidenceCount} signals</Badge><span className="text-sm font-medium text-indigo-700">{session.demonstratedPercent}% demonstrated</span><ArrowRight className="h-4 w-4 text-slate-400 transition-colors group-hover:text-indigo-700" /></div>
+                  <div className="flex items-center gap-3 pl-12 sm:pl-0"><Badge variant="outline">{session.evidenceCount} signals</Badge><span className="text-sm font-medium text-primary">{session.demonstratedPercent}% demonstrated</span><ArrowRight className="h-4 w-4 text-slate-400 transition-colors group-hover:text-primary" /></div>
                 </Link>
               ))}
             </div>

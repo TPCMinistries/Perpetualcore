@@ -309,7 +309,7 @@ export function EcosystemDashboard() {
         <StatCard icon={<Users className="h-5 w-5 text-sky-500" />} label="Total Users" value={summary.totalUsersAcrossAll} sublabel={`across ${liveData.crossDbConnected.length} DBs`} />
         <StatCard icon={<Boxes className="h-5 w-5 text-blue-500" />} label="Active" value={summary.activeProjects} sublabel={`of ${summary.totalProjects} projects`} />
         <StatCard icon={<Rocket className="h-5 w-5 text-emerald-500" />} label="Deploys" value={deployedCount} sublabel={errorCount > 0 ? `${errorCount} errors` : "all green"} alert={errorCount > 0} />
-        <StatCard icon={<Database className="h-5 w-5 text-purple-500" />} label="Databases" value={summary.connectedDatabases} sublabel={`of ${summary.totalDatabases}`} />
+        <StatCard icon={<Database className="h-5 w-5 text-primary" />} label="Databases" value={summary.connectedDatabases} sublabel={`of ${summary.totalDatabases}`} />
         <StatCard icon={<Zap className="h-5 w-5 text-amber-500" />} label="Cron Jobs" value={summary.totalCronJobs} sublabel="scheduled" />
         <StatCard icon={<CreditCard className="h-5 w-5 text-emerald-500" />} label="Stripe" value={summary.stripeProjects} sublabel="integrated" />
       </div>
@@ -391,7 +391,7 @@ export function EcosystemDashboard() {
           <CardHeader className="pb-3">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <Brain className="h-5 w-5 text-violet-500" />
+                <Brain className="h-5 w-5 text-primary" />
                 <CardTitle className="text-lg">Brain Intelligence</CardTitle>
               </div>
               <a
@@ -421,7 +421,7 @@ export function EcosystemDashboard() {
           <CardHeader className="pb-3">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <Database className="h-5 w-5 text-purple-500" />
+                <Database className="h-5 w-5 text-primary" />
                 <CardTitle className="text-lg">Cross-Database Intel</CardTitle>
               </div>
               <a
@@ -514,7 +514,7 @@ export function EcosystemDashboard() {
       <Card>
         <CardHeader className="pb-3">
           <div className="flex items-center gap-2">
-            <Database className="h-5 w-5 text-purple-500" />
+            <Database className="h-5 w-5 text-primary" />
             <CardTitle className="text-lg">Database Architecture</CardTitle>
           </div>
         </CardHeader>

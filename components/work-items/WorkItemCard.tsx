@@ -188,12 +188,12 @@ export function WorkItemCard({
 
             {/* AI Insights */}
             {item.ai_insights && !compact && (
-              <div className="mt-2 p-2 rounded-md bg-purple-50 dark:bg-purple-950/20 border border-purple-200 dark:border-purple-800">
-                <div className="flex items-center gap-1 text-[10px] font-medium text-purple-700 dark:text-purple-300 mb-0.5">
+              <div className="mt-2 p-2 rounded-md bg-primary/10 dark:bg-primary/20 border border-primary/20 dark:border-primary/40">
+                <div className="flex items-center gap-1 text-[10px] font-medium text-primary mb-0.5">
                   <Bot className="h-3 w-3" />
                   AI Insight
                 </div>
-                <p className="text-[11px] text-purple-600 dark:text-purple-400 line-clamp-2">
+                <p className="text-[11px] text-primary line-clamp-2">
                   {typeof item.ai_insights === 'string'
                     ? item.ai_insights
                     : JSON.stringify(item.ai_insights).slice(0, 100)}

@@ -145,7 +145,7 @@ export function FeatureSpotlight({
       {/* Pulsing ring around the element */}
       <div className="absolute inset-0 -m-1 rounded-lg">
         <motion.div
-          className="absolute inset-0 rounded-lg border-2 border-violet-500"
+          className="absolute inset-0 rounded-lg border-2 border-primary/40"
           animate={{
             scale: [1, 1.05, 1],
             opacity: [1, 0.5, 1],
@@ -176,10 +176,10 @@ export function FeatureSpotlight({
               : "left-full ml-2"
           }`}
         >
-          <div className="bg-violet-600 text-white rounded-lg shadow-lg p-3 relative">
+          <div className="bg-primary text-white rounded-lg shadow-lg p-3 relative">
             {/* Arrow */}
             <div
-              className={`absolute w-2 h-2 bg-violet-600 rotate-45 ${
+              className={`absolute w-2 h-2 bg-primary rotate-45 ${
                 position === "top"
                   ? "bottom-0 left-1/2 -translate-x-1/2 translate-y-1/2"
                   : position === "bottom"
@@ -194,11 +194,11 @@ export function FeatureSpotlight({
               <Sparkles className="h-4 w-4 mt-0.5 flex-shrink-0" />
               <div className="flex-1 min-w-0">
                 <p className="font-medium text-sm">{title}</p>
-                <p className="text-xs text-violet-200 mt-0.5">{description}</p>
+                <p className="text-xs text-primary mt-0.5">{description}</p>
               </div>
               <button
                 onClick={handleDismiss}
-                className="p-0.5 hover:bg-violet-500 rounded transition-colors flex-shrink-0"
+                className="p-0.5 hover:bg-primary rounded transition-colors flex-shrink-0"
               >
                 <X className="h-3 w-3" />
               </button>
@@ -235,11 +235,11 @@ export function PageHelp({ title, description, quickActions }: PageHelpProps) {
       initial={{ opacity: 0, y: -10 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, height: 0 }}
-      className="bg-gradient-to-r from-violet-50 to-purple-50 dark:from-violet-950/30 dark:to-purple-950/30 border border-violet-200 dark:border-violet-800 rounded-lg p-4 mb-6"
+      className="bg-primary border border-primary/20 dark:border-primary/40 rounded-lg p-4 mb-6"
     >
       <div className="flex items-start gap-4">
-        <div className="p-2 rounded-lg bg-violet-100 dark:bg-violet-900">
-          <Lightbulb className="h-5 w-5 text-violet-600 dark:text-violet-400" />
+        <div className="p-2 rounded-lg bg-primary/10 dark:bg-primary">
+          <Lightbulb className="h-5 w-5 text-primary" />
         </div>
         <div className="flex-1 min-w-0">
           <h3 className="font-medium text-sm">{title}</h3>
@@ -260,7 +260,7 @@ export function PageHelp({ title, description, quickActions }: PageHelpProps) {
         </div>
         <button
           onClick={() => setDismissed(true)}
-          className="p-1 hover:bg-violet-100 dark:hover:bg-violet-800 rounded transition-colors"
+          className="p-1 hover:bg-primary/10 dark:hover:bg-primary rounded transition-colors"
         >
           <X className="h-4 w-4 text-muted-foreground" />
         </button>

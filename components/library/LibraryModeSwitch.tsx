@@ -36,7 +36,7 @@ export function LibraryModeSwitch({ mode, onModeChange }: LibraryModeSwitchProps
             {isActive && (
               <motion.div
                 layoutId="activeMode"
-                className="absolute inset-0 rounded-lg bg-gradient-to-r from-blue-600 via-purple-600 to-violet-600 shadow-lg"
+                className="absolute inset-0 rounded-lg bg-gradient-to-r from-blue-600 via-primary to-primary shadow-lg"
                 style={{
                   boxShadow: "0 0 20px rgba(139, 92, 246, 0.5), 0 0 40px rgba(59, 130, 246, 0.3)",
                 }}
@@ -52,7 +52,7 @@ export function LibraryModeSwitch({ mode, onModeChange }: LibraryModeSwitchProps
       })}
 
       {/* Glow effect */}
-      <div className="absolute -inset-1 bg-gradient-to-r from-blue-600/20 via-purple-600/20 to-violet-600/20 rounded-xl blur-xl opacity-50 -z-10" />
+      <div className="absolute -inset-1 bg-gradient-to-r from-blue-600/20 via-primary/20 to-primary/20 rounded-xl blur-xl opacity-50 -z-10" />
     </div>
   );
 }

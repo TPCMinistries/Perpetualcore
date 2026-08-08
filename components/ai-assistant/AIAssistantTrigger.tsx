@@ -20,7 +20,7 @@ export function AIAssistantTrigger({ className, showLabel = false }: AIAssistant
       size={showLabel ? "default" : "icon"}
       className={cn(
         "fixed bottom-6 right-6 z-40 rounded-full shadow-lg",
-        "bg-gradient-to-br from-violet-500 to-purple-600 hover:from-violet-600 hover:to-purple-700",
+        "bg-primary",
         "text-white",
         isOpen && "opacity-0 pointer-events-none",
         className

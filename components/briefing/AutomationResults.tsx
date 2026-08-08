@@ -51,7 +51,7 @@ export function AutomationResults({ results }: AutomationResultsProps) {
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
           <CardTitle className="text-base font-medium flex items-center gap-2">
-            <Zap className="h-4 w-4 text-violet-500" />
+            <Zap className="h-4 w-4 text-primary" />
             Automation Results
             {failedCount > 0 && (
               <Badge variant="destructive" className="text-xs">

@@ -83,12 +83,12 @@ export default function IndustryPage({ params }: PageProps) {
       {/* Hero Section - Industry Specific */}
       <section className="container mx-auto px-4 py-20 md:py-32 relative overflow-hidden">
         <div className="max-w-5xl mx-auto text-center relative z-10">
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-primary/20 to-purple-500/20 border border-primary/30 text-primary text-sm font-medium mb-6 backdrop-blur-sm">
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-primary/20 to-primary/20 border border-primary/30 text-primary text-sm font-medium mb-6 backdrop-blur-sm">
             <Icon className="h-4 w-4" />
             <span className="font-semibold">Built for {config.name}</span>
           </div>
 
-          <h1 className="text-5xl md:text-7xl font-extrabold tracking-tight mb-6 bg-gradient-to-r from-gray-900 via-primary to-purple-600 dark:from-white dark:via-primary dark:to-purple-400 bg-clip-text text-transparent">
+          <h1 className="text-5xl md:text-7xl font-extrabold tracking-tight mb-6 bg-gradient-to-r from-gray-900 via-primary to-primary dark:from-white dark:via-primary dark:to-primary bg-clip-text text-transparent">
             {config.headline}
           </h1>
 
@@ -126,9 +126,9 @@ export default function IndustryPage({ params }: PageProps) {
 
       {/* Primary Metric Highlight */}
       <section className="container mx-auto px-4 py-16">
-        <Card className="max-w-4xl mx-auto border-2 border-primary/20 bg-gradient-to-br from-primary/5 to-purple-500/5">
+        <Card className="max-w-4xl mx-auto border-2 border-primary/20 bg-gradient-to-br from-primary/5 to-primary/5">
           <CardContent className="p-12 text-center">
-            <div className="h-20 w-20 rounded-2xl bg-gradient-to-br from-primary to-purple-600 flex items-center justify-center mx-auto mb-6 shadow-lg">
+            <div className="h-20 w-20 rounded-2xl bg-primary flex items-center justify-center mx-auto mb-6 shadow-lg">
               <MetricIcon className="h-10 w-10 text-white" />
             </div>
             <h2 className="text-3xl font-bold mb-4">{config.primaryMetric.label}</h2>
@@ -156,17 +156,17 @@ export default function IndustryPage({ params }: PageProps) {
               const ActionIcon = action.icon;
               const gradients: { [key: string]: string } = {
                 blue: "from-blue-500 to-cyan-600",
-                purple: "from-purple-500 to-pink-600",
+                purple: "from-primary to-primary",
                 green: "from-green-500 to-emerald-600",
                 orange: "from-orange-500 to-amber-600",
                 cyan: "from-cyan-500 to-blue-600",
-                pink: "from-pink-500 to-rose-600",
-                indigo: "from-indigo-500 to-purple-600",
-                violet: "from-violet-500 to-purple-600",
+                pink: "from-primary to-rose-600",
+                indigo: "from-primary to-primary",
+                violet: "from-primary to-primary",
                 sky: "from-sky-500 to-blue-600",
                 emerald: "from-emerald-500 to-green-600",
               };
-              const gradient = gradients[action.color] || "from-blue-500 to-purple-600";
+              const gradient = gradients[action.color] || "from-blue-500 to-primary";
 
               return (
                 <Card key={action.label} className="border-2 hover:border-primary transition-all hover:shadow-xl group">

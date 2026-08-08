@@ -1163,7 +1163,7 @@ export default function AccountDetailPage() {
   if (loading) {
     return (
       <div className="flex min-h-[420px] items-center justify-center">
-        <Loader2 className="h-6 w-6 animate-spin text-violet-600" />
+        <Loader2 className="h-6 w-6 animate-spin text-primary" />
       </div>
     );
   }
@@ -1602,7 +1602,7 @@ export default function AccountDetailPage() {
         <div className="grid gap-6 lg:grid-cols-[1fr_360px]">
           <div>
             <div className="mb-3 flex flex-wrap items-center gap-2">
-              <Badge className="rounded-md bg-violet-600">{normalizeStatus(lead.status)}</Badge>
+              <Badge className="rounded-md bg-primary">{normalizeStatus(lead.status)}</Badge>
               <Badge variant="outline" className="rounded-md">
                 {normalizeStatus(lead.stage || "account")}
               </Badge>
@@ -1635,8 +1635,8 @@ export default function AccountDetailPage() {
       </section>
 
       <section className="grid gap-3 md:grid-cols-3">
-        <div className="rounded-lg border border-violet-200 bg-violet-50 p-4">
-          <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-violet-700">
+        <div className="rounded-lg border border-primary/20 bg-primary/10 p-4">
+          <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-primary">
             Permanent account
           </p>
           <p className="mt-2 text-sm font-semibold text-slate-950">
@@ -1675,7 +1675,7 @@ export default function AccountDetailPage() {
             <div>
               <div className="flex items-center gap-3">
                 <CardTitle className="text-xl">AI operating brief</CardTitle>
-                <Bot className="h-5 w-5 text-violet-600" />
+                <Bot className="h-5 w-5 text-primary" />
               </div>
               <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-600">
                 A compact readout for your assistant: what is known, what is missing, and the next
@@ -1756,13 +1756,13 @@ export default function AccountDetailPage() {
             <div className="bg-slate-950 p-5 text-white">
               <div className="flex items-start justify-between gap-4">
                 <div>
-                  <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-violet-200">
+                  <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-primary">
                     Account execution cockpit
                   </p>
                   <h2 className="mt-3 text-2xl font-semibold tracking-tight">{operatingMode} mode</h2>
                   <p className="mt-3 text-sm leading-6 text-slate-300">{operatingModeDetail}</p>
                 </div>
-                <Bot className="h-5 w-5 shrink-0 text-violet-300" />
+                <Bot className="h-5 w-5 shrink-0 text-primary" />
               </div>
               <div className="mt-5 grid gap-3 sm:grid-cols-3">
                 {[
@@ -1778,7 +1778,7 @@ export default function AccountDetailPage() {
               </div>
               <Button
                 type="button"
-                className="mt-5 rounded-md bg-white text-slate-950 hover:bg-violet-100"
+                className="mt-5 rounded-md bg-white text-slate-950 hover:bg-primary/10"
                 onClick={() => copyText("Execution brief", executionBrief)}
               >
                 <Clipboard className="mr-2 h-4 w-4" />
@@ -1804,9 +1804,9 @@ export default function AccountDetailPage() {
                     key={move.label}
                     type="button"
                     onClick={() => copyText(move.label, move.body)}
-                    className="rounded-lg border bg-white p-4 text-left transition hover:border-violet-300 hover:bg-violet-50/40"
+                    className="rounded-lg border bg-white p-4 text-left transition hover:border-primary/20 hover:bg-primary/40"
                   >
-                    <Sparkles className="h-4 w-4 text-violet-600" />
+                    <Sparkles className="h-4 w-4 text-primary" />
                     <p className="mt-3 text-sm font-semibold text-slate-950">{move.label}</p>
                     <p className="mt-2 text-sm leading-5 text-slate-600">{move.detail}</p>
                   </button>
@@ -1817,13 +1817,13 @@ export default function AccountDetailPage() {
         </CardContent>
       </Card>
 
-      <Card className="rounded-lg border-violet-200 bg-gradient-to-br from-violet-50 via-white to-white shadow-none">
+      <Card className="rounded-lg border-primary/20 bg-gradient-to-br from-primary via-white to-white shadow-none">
         <CardHeader>
           <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
             <div>
               <div className="flex items-center gap-3">
                 <CardTitle className="text-xl">Account launch control</CardTitle>
-                <Target className="h-5 w-5 text-violet-600" />
+                <Target className="h-5 w-5 text-primary" />
               </div>
               <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-600">
                 This is the account start sequence: clear the money path, sync durable account memory,
@@ -1873,7 +1873,7 @@ export default function AccountDetailPage() {
               <div
                 key={step.title}
                 className={`flex min-h-[220px] flex-col rounded-lg border p-4 ${
-                  step.complete ? "border-violet-200 bg-white" : "border-amber-200 bg-amber-50/60"
+                  step.complete ? "border-primary/20 bg-white" : "border-amber-200 bg-amber-50/60"
                 }`}
               >
                 <div className="flex items-start justify-between gap-3">
@@ -1908,7 +1908,7 @@ export default function AccountDetailPage() {
             <div>
               <div className="flex items-center gap-3">
                 <CardTitle className="text-xl">Operator command pack</CardTitle>
-                <Sparkles className="h-5 w-5 text-violet-600" />
+                <Sparkles className="h-5 w-5 text-primary" />
               </div>
               <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-600">
                 Copy structured operating language for you, your AI assistant, or a teammate without
@@ -1926,10 +1926,10 @@ export default function AccountDetailPage() {
               key={command.label}
               type="button"
               onClick={() => copyText(command.label, command.body)}
-              className="rounded-lg border bg-white p-4 text-left transition hover:border-violet-300 hover:bg-violet-50/40"
+              className="rounded-lg border bg-white p-4 text-left transition hover:border-primary/20 hover:bg-primary/40"
             >
               <div className="flex items-center justify-between gap-3">
-                <span className="rounded-md bg-violet-50 p-2 text-violet-700">
+                <span className="rounded-md bg-primary/10 p-2 text-primary">
                   <command.icon className="h-4 w-4" />
                 </span>
                 <Clipboard className="h-4 w-4 text-slate-400" />
@@ -1947,7 +1947,7 @@ export default function AccountDetailPage() {
             <div>
               <div className="flex items-center gap-3">
                 <CardTitle className="text-xl">Close/start path</CardTitle>
-                <ArrowRight className="h-5 w-5 text-violet-600" />
+                <ArrowRight className="h-5 w-5 text-primary" />
               </div>
               <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-600">
                 Move this account from buyer interest into paid work, permanent account memory, tasked
@@ -2069,7 +2069,7 @@ export default function AccountDetailPage() {
               <div
                 key={item.title}
                 className={`flex min-h-[190px] flex-col rounded-lg border p-4 ${
-                  item.complete ? "border-violet-200 bg-violet-50/70" : "bg-white"
+                  item.complete ? "border-primary/20 bg-primary/70" : "bg-white"
                 }`}
               >
                 <div className="flex items-start justify-between gap-3">
@@ -2113,7 +2113,7 @@ export default function AccountDetailPage() {
             <div>
               <div className="flex items-center gap-3">
                 <CardTitle className="text-xl">Payment path command</CardTitle>
-                <PackageCheck className="h-5 w-5 text-violet-600" />
+                <PackageCheck className="h-5 w-5 text-primary" />
               </div>
               <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-600">
                 Pick the cleanest way this buyer can start: checkout, invoice, procurement, or signed
@@ -2136,12 +2136,12 @@ export default function AccountDetailPage() {
                 key={action.label}
                 type="button"
                 onClick={action.onClick}
-                className={`rounded-lg border p-4 text-left transition hover:border-violet-300 hover:bg-violet-50/50 ${
-                  action.primary ? "border-violet-200 bg-violet-50" : "bg-white"
+                className={`rounded-lg border p-4 text-left transition hover:border-primary/20 hover:bg-primary/50 ${
+                  action.primary ? "border-primary/20 bg-primary/10" : "bg-white"
                 }`}
               >
                 <div className="flex items-center justify-between gap-3">
-                  <span className="rounded-md bg-white p-2 text-violet-700 shadow-sm">
+                  <span className="rounded-md bg-white p-2 text-primary shadow-sm">
                     <action.icon className="h-4 w-4" />
                   </span>
                   <ArrowRight className="h-4 w-4 text-slate-400" />
@@ -2170,7 +2170,7 @@ export default function AccountDetailPage() {
                   <span
                     className={`mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full border ${
                       item.complete
-                        ? "border-violet-600 bg-violet-600 text-white"
+                        ? "border-primary/40 bg-primary text-white"
                         : "border-slate-300 bg-white text-slate-400"
                     }`}
                   >
@@ -2193,7 +2193,7 @@ export default function AccountDetailPage() {
             <div>
               <div className="flex items-center gap-3">
                 <CardTitle className="text-xl">Client handoff context</CardTitle>
-                <Clipboard className="h-5 w-5 text-violet-600" />
+                <Clipboard className="h-5 w-5 text-primary" />
               </div>
               <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-600">
                 Context submitted from the secure client handoff page. Use this to map the first
@@ -2218,7 +2218,7 @@ export default function AccountDetailPage() {
                   </div>
                 ))}
               </div>
-              <div className="flex flex-col gap-3 rounded-lg border border-violet-100 bg-violet-50/60 p-4 md:flex-row md:items-center md:justify-between">
+              <div className="flex flex-col gap-3 rounded-lg border border-primary/20 bg-primary/60 p-4 md:flex-row md:items-center md:justify-between">
                 <div>
                   <p className="text-sm font-semibold text-slate-950">Turn this handoff into kickoff tasks.</p>
                   <p className="mt-1 text-sm leading-6 text-slate-600">
@@ -2258,7 +2258,7 @@ export default function AccountDetailPage() {
           <CardHeader>
             <div className="flex items-center justify-between gap-4">
               <CardTitle className="text-xl">Operating plan</CardTitle>
-              <Target className="h-5 w-5 text-violet-600" />
+              <Target className="h-5 w-5 text-primary" />
             </div>
             <p className="text-sm leading-6 text-slate-600">
               Keep the account flexible: this records the next lane without locking the client into one
@@ -2299,7 +2299,7 @@ export default function AccountDetailPage() {
             <CardHeader>
               <div className="flex items-center justify-between gap-4">
                 <CardTitle className="text-xl">AI actions</CardTitle>
-                <Bot className="h-5 w-5 text-violet-600" />
+                <Bot className="h-5 w-5 text-primary" />
               </div>
             </CardHeader>
             <CardContent className="space-y-3">
@@ -2333,10 +2333,10 @@ export default function AccountDetailPage() {
                   key={item.label}
                   type="button"
                   onClick={item.action}
-                  className="flex w-full cursor-pointer items-center justify-between rounded-lg border bg-white p-4 text-left transition hover:border-violet-300 hover:bg-violet-50/40"
+                  className="flex w-full cursor-pointer items-center justify-between rounded-lg border bg-white p-4 text-left transition hover:border-primary/20 hover:bg-primary/40"
                 >
                   <span className="flex items-center gap-3 text-sm font-semibold text-slate-950">
-                    <item.icon className="h-4 w-4 text-violet-600" />
+                    <item.icon className="h-4 w-4 text-primary" />
                     {item.label}
                   </span>
                   <ArrowRight className="h-4 w-4 text-slate-400" />
@@ -2349,7 +2349,7 @@ export default function AccountDetailPage() {
             <CardHeader>
               <div className="flex items-center justify-between gap-4">
                 <CardTitle className="text-xl">Source notes</CardTitle>
-                <PackageCheck className="h-5 w-5 text-violet-600" />
+                <PackageCheck className="h-5 w-5 text-primary" />
               </div>
             </CardHeader>
             <CardContent>
@@ -2370,7 +2370,7 @@ export default function AccountDetailPage() {
             <div>
               <div className="flex items-center gap-3">
                 <CardTitle className="text-xl">Account tasks</CardTitle>
-                <ListChecks className="h-5 w-5 text-violet-600" />
+                <ListChecks className="h-5 w-5 text-primary" />
               </div>
               <p className="mt-2 text-sm leading-6 text-slate-600">
                 Turn the operating plan into real tasks in the main Perpetual Core task system. These
@@ -2484,7 +2484,7 @@ export default function AccountDetailPage() {
         <CardHeader>
           <div className="flex items-center justify-between gap-4">
             <CardTitle className="text-xl">Account update</CardTitle>
-            <CalendarClock className="h-5 w-5 text-violet-600" />
+            <CalendarClock className="h-5 w-5 text-primary" />
           </div>
           <p className="text-sm leading-6 text-slate-600">
             Save calls, decisions, risks, and next steps as delivery memory. This keeps the assistant
@@ -2528,7 +2528,7 @@ export default function AccountDetailPage() {
         <CardHeader>
           <div className="flex items-center justify-between gap-4">
             <CardTitle className="text-xl">Delivery milestones</CardTitle>
-            <CheckCircle2 className="h-5 w-5 text-violet-600" />
+            <CheckCircle2 className="h-5 w-5 text-primary" />
           </div>
           <p className="text-sm leading-6 text-slate-600">
             These are now editable operating checkpoints. Save the plan when owner, dates, or notes
@@ -2624,7 +2624,7 @@ export default function AccountDetailPage() {
         <CardHeader>
           <div className="flex items-center justify-between gap-4">
             <CardTitle className="text-xl">Engagement timeline</CardTitle>
-            <CalendarClock className="h-5 w-5 text-violet-600" />
+            <CalendarClock className="h-5 w-5 text-primary" />
           </div>
           <p className="text-sm leading-6 text-slate-600">
             A combined delivery trail from account tasks, saved updates, milestones, account sync, and

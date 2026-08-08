@@ -286,7 +286,7 @@ export function NotificationBell() {
                     key={notification.id}
                     className={`px-4 py-3 hover:bg-muted/50 transition-colors cursor-pointer ${
                       !notification.is_read
-                        ? "bg-violet-50/30 dark:bg-violet-950/10"
+                        ? "bg-primary/30 dark:bg-primary/10"
                         : ""
                     }`}
                     onClick={() => {
@@ -302,14 +302,14 @@ export function NotificationBell() {
                         <div
                           className={`h-8 w-8 rounded-lg flex items-center justify-center ${
                             !notification.is_read
-                              ? "bg-violet-100 dark:bg-violet-900/30"
+                              ? "bg-primary/10 dark:bg-primary/30"
                               : "bg-muted"
                           }`}
                         >
                           <Icon
                             className={`h-4 w-4 ${
                               !notification.is_read
-                                ? "text-violet-600 dark:text-violet-400"
+                                ? "text-primary"
                                 : "text-muted-foreground"
                             }`}
                           />
@@ -336,7 +336,7 @@ export function NotificationBell() {
                             {formatTimeAgo(notification.created_at)}
                           </span>
                           {notification.ai_priority_score && notification.ai_priority_score > 7 && (
-                            <span className="text-[10px] text-purple-600 dark:text-purple-400 flex items-center gap-0.5">
+                            <span className="text-[10px] text-primary flex items-center gap-0.5">
                               <Zap className="h-2.5 w-2.5" />
                               AI Priority
                             </span>
@@ -369,7 +369,7 @@ export function NotificationBell() {
           <Link
             href="/dashboard/notifications"
             onClick={() => setIsOpen(false)}
-            className="flex items-center justify-center gap-1.5 text-xs font-medium text-violet-600 dark:text-violet-400 hover:text-violet-700 dark:hover:text-violet-300 transition-colors"
+            className="flex items-center justify-center gap-1.5 text-xs font-medium text-primary hover:text-primary dark:hover:text-primary transition-colors"
           >
             View all notifications
             <ExternalLink className="h-3 w-3" />

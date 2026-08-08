@@ -272,8 +272,8 @@ export default function UsageAnalyticsPage() {
               <p className="text-sm text-muted-foreground dark:text-muted-foreground">AI Tokens Used</p>
               <p className="text-3xl font-semibold text-foreground dark:text-foreground mt-1">{formatNumber(stats?.tokens_used || 0)}</p>
             </div>
-            <div className="h-10 w-10 rounded-lg bg-purple-50 dark:bg-purple-950/30 flex items-center justify-center">
-              <Zap className="h-5 w-5 text-purple-600 dark:text-purple-400" />
+            <div className="h-10 w-10 rounded-lg bg-primary/10 dark:bg-primary/30 flex items-center justify-center">
+              <Zap className="h-5 w-5 text-primary" />
             </div>
           </div>
           <div className="flex items-center gap-1 text-xs text-green-600 dark:text-green-400 mt-3">
@@ -446,8 +446,8 @@ export default function UsageAnalyticsPage() {
 
             <div className="flex items-center justify-between p-4 rounded-lg bg-muted/50">
               <div className="flex items-center gap-3">
-                <div className="h-10 w-10 rounded-lg bg-purple-100 dark:bg-purple-900/40 flex items-center justify-center">
-                  <Zap className="h-5 w-5 text-purple-600 dark:text-purple-400" />
+                <div className="h-10 w-10 rounded-lg bg-primary/10 dark:bg-primary/40 flex items-center justify-center">
+                  <Zap className="h-5 w-5 text-primary" />
                 </div>
                 <div>
                   <p className="font-medium">AI Tokens</p>
