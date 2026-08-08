@@ -339,8 +339,8 @@ export default function IdeasPage() {
       <div className="p-6 border-b bg-primary">
         <div className="max-w-2xl mx-auto">
           <div className="flex items-center gap-2 mb-2">
-            <Lightbulb className="h-5 w-5 text-purple-600" />
-            <span className="font-medium text-purple-900">Quick Capture</span>
+            <Lightbulb className="h-5 w-5 text-primary" />
+            <span className="font-medium text-primary">Quick Capture</span>
           </div>
           <div className="flex gap-2">
             <Textarea
@@ -785,10 +785,10 @@ export default function IdeasPage() {
                         <Card className="bg-primary">
                           <CardContent className="p-4">
                             <div className="flex items-center gap-2 mb-2">
-                              <Sparkles className="h-4 w-4 text-purple-600" />
+                              <Sparkles className="h-4 w-4 text-primary" />
                               <span className="font-medium">Potential Score</span>
                             </div>
-                            <div className="text-3xl font-bold text-purple-700">
+                            <div className="text-3xl font-bold text-primary">
                               {selectedIdea.ai_potential_score}%
                             </div>
                           </CardContent>

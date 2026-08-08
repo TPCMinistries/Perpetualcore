@@ -75,7 +75,7 @@ export function FunnelChart({ steps }: FunnelChartProps) {
                     {data.count.toLocaleString()} total events
                   </p>
                   {data.conversion_rate > 0 && (
-                    <p className="text-indigo-600 dark:text-indigo-400 font-medium mt-1">
+                    <p className="text-primary font-medium mt-1">
                       {data.conversion_rate}% from previous step
                     </p>
                   )}

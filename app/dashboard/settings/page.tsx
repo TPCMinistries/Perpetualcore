@@ -664,7 +664,7 @@ export default function SettingsPage() {
                       id="fullName"
                       value={profile.fullName}
                       onChange={(e) => setProfile({ ...profile, fullName: e.target.value })}
-                      className="border-border focus:border-violet-500 dark:focus:border-violet-500"
+                      className="border-border focus:border-primary/40 dark:focus:border-primary/40"
                     />
                   </div>
                   <div className="space-y-2">
@@ -866,7 +866,7 @@ export default function SettingsPage() {
 
                 <div className="flex items-center justify-between p-4 rounded-lg border border-border hover:bg-muted/50 transition-colors">
                   <div className="flex items-center gap-3">
-                    <Database className="h-5 w-5 text-purple-500" />
+                    <Database className="h-5 w-5 text-primary" />
                     <div>
                       <p className="font-medium text-foreground">Enable RAG (Retrieval)</p>
                       <p className="text-sm text-muted-foreground">Search uploaded documents for relevant context</p>
@@ -951,7 +951,7 @@ export default function SettingsPage() {
 
                 <div className="flex items-center justify-between p-4 rounded-lg border border-border hover:bg-muted/50 transition-colors">
                   <div className="flex items-center gap-3">
-                    <Users className="h-5 w-5 text-purple-500" />
+                    <Users className="h-5 w-5 text-primary" />
                     <div>
                       <p className="font-medium text-foreground">Team Activity</p>
                       <p className="text-sm text-muted-foreground">Get notified of team member actions</p>
@@ -965,7 +965,7 @@ export default function SettingsPage() {
 
                 <div className="flex items-center justify-between p-4 rounded-lg border border-border hover:bg-muted/50 transition-colors">
                   <div className="flex items-center gap-3">
-                    <BarChart3 className="h-5 w-5 text-indigo-500" />
+                    <BarChart3 className="h-5 w-5 text-primary" />
                     <div>
                       <p className="font-medium text-foreground">Weekly Digest</p>
                       <p className="text-sm text-muted-foreground">Summary email every Monday morning</p>
@@ -1036,7 +1036,7 @@ export default function SettingsPage() {
 
                 <div className="flex items-center justify-between p-4 rounded-lg border border-border hover:bg-muted/50 transition-colors">
                   <div className="flex items-center gap-3">
-                    <AlignLeft className="h-5 w-5 text-purple-500" />
+                    <AlignLeft className="h-5 w-5 text-primary" />
                     <div>
                       <p className="font-medium text-foreground">Line Numbers</p>
                       <p className="text-sm text-muted-foreground">Show line numbers in code editor</p>
@@ -1229,7 +1229,7 @@ export default function SettingsPage() {
 
                 <div className="flex items-center justify-between p-4 rounded-lg border border-border hover:bg-muted/50 transition-colors">
                   <div className="flex items-center gap-3">
-                    <Camera className="h-5 w-5 text-purple-500" />
+                    <Camera className="h-5 w-5 text-primary" />
                     <div>
                       <p className="font-medium text-foreground">Lazy Load Images</p>
                       <p className="text-sm text-muted-foreground">Load images only when visible</p>

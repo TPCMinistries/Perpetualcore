@@ -35,7 +35,7 @@ export default function MemberCard({ member, showStatus = true, onClick }: Membe
   function getRoleBadgeColor(role: string) {
     switch (role) {
       case "owner":
-        return "bg-purple-100 text-purple-700 dark:bg-purple-900 dark:text-purple-300";
+        return "bg-primary/10 text-primary dark:bg-primary dark:text-primary";
       case "admin":
         return "bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300";
       case "manager":

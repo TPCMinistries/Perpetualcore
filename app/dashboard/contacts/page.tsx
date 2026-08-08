@@ -464,15 +464,15 @@ function ContactsPageContent() {
               />
             </div>
 
-            <div className="flex items-center gap-2 p-3 rounded-lg bg-violet-50 dark:bg-violet-900/20 border border-violet-200 dark:border-violet-800">
+            <div className="flex items-center gap-2 p-3 rounded-lg bg-primary/10 dark:bg-primary/20 border border-primary/20 dark:border-primary/40">
               <input
                 type="checkbox"
                 id="enrich"
                 checked={newContact.enrich_now}
                 onChange={(e) => setNewContact({ ...newContact, enrich_now: e.target.checked })}
-                className="rounded border-violet-300"
+                className="rounded border-primary/20"
               />
-              <label htmlFor="enrich" className="text-sm text-violet-700 dark:text-violet-300 flex items-center gap-2">
+              <label htmlFor="enrich" className="text-sm text-primary flex items-center gap-2">
                 <Sparkles className="h-4 w-4" />
                 Enrich with AI (uses Perplexity to find more info)
               </label>
@@ -580,8 +580,8 @@ function EmptyState({
   return (
     <Card className="border-0 shadow-lg bg-gradient-to-br from-white to-primary/50 dark:from-slate-800 dark:to-primary/20">
       <CardContent className="py-16 px-8 text-center">
-        <div className="h-20 w-20 mx-auto rounded-full bg-primary flex items-center justify-center mb-6 shadow-lg shadow-violet-200/50 dark:shadow-violet-900/30">
-          <Users className="h-10 w-10 text-violet-600 dark:text-violet-400" />
+        <div className="h-20 w-20 mx-auto rounded-full bg-primary flex items-center justify-center mb-6 shadow-lg shadow-primary/50 dark:shadow-primary/30">
+          <Users className="h-10 w-10 text-primary" />
         </div>
         <h3 className="text-xl font-semibold text-foreground dark:text-white mb-2">
           Build Your Network
@@ -608,7 +608,7 @@ function EmptyState({
           </Button>
           <Button
             onClick={onAddContact}
-            className="bg-primary text-white shadow-lg shadow-violet-500/25"
+            className="bg-primary text-white shadow-lg shadow-primary/25"
           >
             <UserPlus className="h-4 w-4 mr-2" />
             Add Contact

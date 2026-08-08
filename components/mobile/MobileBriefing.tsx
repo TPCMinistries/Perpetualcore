@@ -165,12 +165,12 @@ export function MobileBriefing({ userId }: MobileBriefingProps) {
                 "p-2 rounded-lg",
                 summary.automationAlerts > 0
                   ? "bg-red-50 dark:bg-red-950/30"
-                  : "bg-violet-50 dark:bg-violet-950/30"
+                  : "bg-primary/10 dark:bg-primary/30"
               )}>
                 {summary.automationAlerts > 0 ? (
                   <AlertCircle className="h-5 w-5 text-red-500" />
                 ) : (
-                  <Zap className="h-5 w-5 text-violet-500" />
+                  <Zap className="h-5 w-5 text-primary" />
                 )}
               </div>
               <div>

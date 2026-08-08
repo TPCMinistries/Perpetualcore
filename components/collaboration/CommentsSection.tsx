@@ -224,7 +224,7 @@ export function CommentsSection({
               Comments
             </h3>
             {unresolvedCount > 0 && (
-              <span className="px-2 py-0.5 rounded-full bg-violet-100 dark:bg-violet-900/30 text-violet-600 dark:text-violet-400 text-xs font-medium">
+              <span className="px-2 py-0.5 rounded-full bg-primary/10 dark:bg-primary/30 text-primary text-xs font-medium">
                 {unresolvedCount}
               </span>
             )}
@@ -278,7 +278,7 @@ export function CommentsSection({
                   "rounded-lg border p-4 transition-colors",
                   annotation.isResolved
                     ? "bg-slate-50 dark:bg-slate-800/50 border-slate-200 dark:border-slate-700 opacity-75"
-                    : "bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 hover:border-violet-200 dark:hover:border-violet-700"
+                    : "bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 hover:border-primary/20 dark:hover:border-primary/40"
                 )}
               >
                 {/* Quoted text */}
@@ -422,7 +422,7 @@ export function CommentsSection({
                     ) : (
                       <button
                         onClick={() => setReplyingTo(annotation.id)}
-                        className="flex items-center gap-1 text-xs text-slate-500 hover:text-violet-600 dark:hover:text-violet-400 transition-colors"
+                        className="flex items-center gap-1 text-xs text-slate-500 hover:text-primary dark:hover:text-primary transition-colors"
                       >
                         <Reply className="h-3.5 w-3.5" />
                         Reply
@@ -446,7 +446,7 @@ export function CommentsSection({
           className="min-h-[80px] resize-none mb-3"
         />
         <div className="flex items-center justify-between">
-          <button className="text-xs text-slate-500 hover:text-violet-600 flex items-center gap-1">
+          <button className="text-xs text-slate-500 hover:text-primary flex items-center gap-1">
             <AtSign className="h-3.5 w-3.5" />
             Mention
           </button>

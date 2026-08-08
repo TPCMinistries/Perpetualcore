@@ -860,13 +860,13 @@ function DailyCommandView({ onNavigate }: DailyCommandViewProps) {
             <CardHeader className="pb-3">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <TrendingUp className="h-5 w-5 text-purple-500" />
+                  <TrendingUp className="h-5 w-5 text-primary" />
                   <div>
                     <CardTitle className="text-base">Opportunities</CardTitle>
                     <CardDescription className="text-xs">{activeOpportunities} active</CardDescription>
                   </div>
                 </div>
-                <Button variant="ghost" size="sm" className="text-purple-600 text-xs">
+                <Button variant="ghost" size="sm" className="text-primary text-xs">
                   Open <ChevronRight className="h-3 w-3 ml-1" />
                 </Button>
               </div>
@@ -956,15 +956,15 @@ function DailyCommandView({ onNavigate }: DailyCommandViewProps) {
           </CardContent>
         </Card>
 
-        <Card className="border-purple-200 dark:border-purple-800/50">
+        <Card className="border-primary/20 dark:border-primary/50">
           <CardContent className="py-4">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-muted-foreground">Active Opportunities</p>
-                <p className="text-3xl font-bold text-purple-600">{activeOpportunities}</p>
+                <p className="text-3xl font-bold text-primary">{activeOpportunities}</p>
               </div>
-              <div className="h-12 w-12 rounded-xl bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center">
-                <TrendingUp className="h-6 w-6 text-purple-600" />
+              <div className="h-12 w-12 rounded-xl bg-primary/10 dark:bg-primary/30 flex items-center justify-center">
+                <TrendingUp className="h-6 w-6 text-primary" />
               </div>
             </div>
           </CardContent>
@@ -2148,7 +2148,7 @@ Examples:
                 <CheckCircle2 className="h-4 w-4" />
                 Decide
               </div>
-              <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-400 text-sm font-medium">
+              <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-primary/10 dark:bg-primary/30 text-primary text-sm font-medium">
                 <Users className="h-4 w-4" />
                 Delegate
               </div>
@@ -2240,7 +2240,7 @@ Examples:
                         variant="outline"
                         className={cn(
                           decision.status === "decided" && "border-green-500 text-green-600",
-                          decision.status === "delegated" && "border-purple-500 text-purple-600",
+                          decision.status === "delegated" && "border-primary/40 text-primary",
                           decision.status === "deferred" && "border-gray-500 text-muted-foreground",
                           decision.status === "pending" && "border-orange-500 text-orange-600"
                         )}
@@ -2284,8 +2284,8 @@ Examples:
 
                     {/* Delegated To */}
                     {decision.status === "delegated" && decision.delegated_to_user && (
-                      <div className="mt-3 p-2 rounded-lg bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-800/50">
-                        <p className="text-sm text-purple-700 dark:text-purple-400">
+                      <div className="mt-3 p-2 rounded-lg bg-primary/10 dark:bg-primary/20 border border-primary/20 dark:border-primary/50">
+                        <p className="text-sm text-primary">
                           <strong>Delegated to:</strong> {decision.delegated_to_user.full_name}
                         </p>
                       </div>
@@ -2723,13 +2723,13 @@ function OpportunitiesTracker({ onNavigateToDecision, navigationTarget, onNaviga
 
       {/* New Opportunity Form */}
       {showNewForm && (
-        <Card className="border-purple-200 dark:border-purple-800/50 bg-purple-50/50 dark:bg-purple-950/20">
+        <Card className="border-primary/20 dark:border-primary/50 bg-primary/50 dark:bg-primary/20">
           <CardContent className="py-5">
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <div className="h-10 w-10 rounded-xl bg-purple-100 dark:bg-purple-900/50 flex items-center justify-center">
-                    <Target className="h-5 w-5 text-purple-600" />
+                  <div className="h-10 w-10 rounded-xl bg-primary/10 dark:bg-primary/50 flex items-center justify-center">
+                    <Target className="h-5 w-5 text-primary" />
                   </div>
                   <div>
                     <h3 className="font-semibold">New Opportunity</h3>
@@ -2749,7 +2749,7 @@ function OpportunitiesTracker({ onNavigateToDecision, navigationTarget, onNaviga
                     placeholder="e.g., New Partnership with Acme Corp"
                     value={newOpportunity.title}
                     onChange={(e) => setNewOpportunity({ ...newOpportunity, title: e.target.value })}
-                    className="w-full px-3 py-2 rounded-lg border bg-background focus:outline-none focus:ring-2 focus:ring-purple-500"
+                    className="w-full px-3 py-2 rounded-lg border bg-background focus:outline-none focus:ring-2 focus:ring-primary"
                   />
                 </div>
 
@@ -2760,7 +2760,7 @@ function OpportunitiesTracker({ onNavigateToDecision, navigationTarget, onNaviga
                     value={newOpportunity.description}
                     onChange={(e) => setNewOpportunity({ ...newOpportunity, description: e.target.value })}
                     rows={3}
-                    className="w-full px-3 py-2 rounded-lg border bg-background focus:outline-none focus:ring-2 focus:ring-purple-500"
+                    className="w-full px-3 py-2 rounded-lg border bg-background focus:outline-none focus:ring-2 focus:ring-primary"
                   />
                 </div>
 
@@ -2772,7 +2772,7 @@ function OpportunitiesTracker({ onNavigateToDecision, navigationTarget, onNaviga
                       placeholder="50000"
                       value={newOpportunity.estimated_value}
                       onChange={(e) => setNewOpportunity({ ...newOpportunity, estimated_value: e.target.value })}
-                      className="w-full px-3 py-2 rounded-lg border bg-background focus:outline-none focus:ring-2 focus:ring-purple-500"
+                      className="w-full px-3 py-2 rounded-lg border bg-background focus:outline-none focus:ring-2 focus:ring-primary"
                     />
                   </div>
 
@@ -2781,7 +2781,7 @@ function OpportunitiesTracker({ onNavigateToDecision, navigationTarget, onNaviga
                     <select
                       value={newOpportunity.source}
                       onChange={(e) => setNewOpportunity({ ...newOpportunity, source: e.target.value })}
-                      className="w-full px-3 py-2 rounded-lg border bg-background focus:outline-none focus:ring-2 focus:ring-purple-500"
+                      className="w-full px-3 py-2 rounded-lg border bg-background focus:outline-none focus:ring-2 focus:ring-primary"
                     >
                       <option value="manual">Manual Entry</option>
                       <option value="inbound">Inbound Lead</option>
@@ -2799,19 +2799,19 @@ function OpportunitiesTracker({ onNavigateToDecision, navigationTarget, onNaviga
                       type="date"
                       value={newOpportunity.due_date}
                       onChange={(e) => setNewOpportunity({ ...newOpportunity, due_date: e.target.value })}
-                      className="w-full px-3 py-2 rounded-lg border bg-background focus:outline-none focus:ring-2 focus:ring-purple-500"
+                      className="w-full px-3 py-2 rounded-lg border bg-background focus:outline-none focus:ring-2 focus:ring-primary"
                     />
                   </div>
                 </div>
 
                 <div className="flex items-center justify-between pt-2">
                   <p className="text-sm text-muted-foreground flex items-center gap-2">
-                    <Sparkles className="h-4 w-4 text-purple-500" />
+                    <Sparkles className="h-4 w-4 text-primary" />
                     AI will automatically evaluate this opportunity using the 5-Factor Framework
                   </p>
                   <div className="flex items-center gap-2">
                     <Button variant="outline" onClick={() => setShowNewForm(false)}>Cancel</Button>
-                    <Button onClick={handleCreateOpportunity} disabled={creating} className="bg-purple-600 hover:bg-purple-700">
+                    <Button onClick={handleCreateOpportunity} disabled={creating} className="bg-primary hover:bg-primary">
                       {creating ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Plus className="h-4 w-4 mr-2" />}
                       Create Opportunity
                     </Button>
@@ -3544,7 +3544,7 @@ function OpportunityDetailPanel({
                 >
                   <div className="flex items-center gap-2">
                     {item.related_type === "decision" && <FileCheck className="h-4 w-4 text-blue-500" />}
-                    {item.related_type === "project" && <Briefcase className="h-4 w-4 text-purple-500" />}
+                    {item.related_type === "project" && <Briefcase className="h-4 w-4 text-primary" />}
                     {item.related_type === "opportunity" && <Target className="h-4 w-4 text-green-500" />}
                     <button
                       onClick={() => {

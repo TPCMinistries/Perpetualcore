@@ -226,11 +226,11 @@ export function HandoffContextForm({ leadId, token, defaultOwner }: HandoffConte
 
   return (
     <div className="grid gap-5">
-      <div className="rounded-lg border border-violet-100 bg-violet-50/60 p-4">
+      <div className="rounded-lg border border-primary/20 bg-primary/60 p-4">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <div className="flex items-center gap-2">
-              <Sparkles className="h-4 w-4 text-violet-700" />
+              <Sparkles className="h-4 w-4 text-primary" />
               <p className="text-sm font-semibold text-slate-950">Kickoff readiness</p>
             </div>
             <p className="mt-1 text-sm leading-6 text-slate-600">
@@ -323,7 +323,7 @@ export function HandoffContextForm({ leadId, token, defaultOwner }: HandoffConte
 
       <div className="rounded-lg border bg-slate-50 p-4">
         <div className="flex items-center gap-2">
-          <ClipboardCheck className="h-4 w-4 text-violet-600" />
+          <ClipboardCheck className="h-4 w-4 text-primary" />
           <p className="text-sm font-semibold text-slate-950">Brief preview</p>
         </div>
         <pre className="mt-3 max-h-72 overflow-auto whitespace-pre-wrap rounded-md border bg-white p-3 text-xs leading-5 text-slate-700">

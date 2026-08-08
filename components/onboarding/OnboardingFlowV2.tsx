@@ -214,8 +214,8 @@ function WelcomeStep({
       </div>
 
       <div className="grid grid-cols-3 gap-4 max-w-xl mx-auto pt-4">
-        <Card className="p-4 bg-primary border-purple-200 dark:border-purple-800">
-          <FileText className="h-8 w-8 text-purple-600 dark:text-purple-400 mx-auto mb-2" />
+        <Card className="p-4 bg-primary border-primary/20 dark:border-primary/40">
+          <FileText className="h-8 w-8 text-primary mx-auto mb-2" />
           <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">Infinite Documents</p>
           <p className="text-xs text-slate-600 dark:text-slate-400">Upload & search everything</p>
         </Card>
@@ -224,8 +224,8 @@ function WelcomeStep({
           <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">Infinite Memory</p>
           <p className="text-xs text-slate-600 dark:text-slate-400">AI that remembers</p>
         </Card>
-        <Card className="p-4 bg-primary border-indigo-200 dark:border-indigo-800">
-          <Users className="h-8 w-8 text-indigo-600 dark:text-indigo-400 mx-auto mb-2" />
+        <Card className="p-4 bg-primary border-primary/20 dark:border-primary/40">
+          <Users className="h-8 w-8 text-primary mx-auto mb-2" />
           <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">Infinite Teams</p>
           <p className="text-xs text-slate-600 dark:text-slate-400">Collaborate & share</p>
         </Card>
@@ -311,14 +311,14 @@ function UseCaseStep({
             key={useCase.id}
             onClick={() => handleSelect(useCase)}
             disabled={isLoading}
-            className="group relative p-6 rounded-xl border-2 border-slate-200 dark:border-slate-700 hover:border-purple-400 dark:hover:border-purple-500 bg-white dark:bg-slate-800 hover:shadow-lg transition-all text-left"
+            className="group relative p-6 rounded-xl border-2 border-slate-200 dark:border-slate-700 hover:border-primary/40 dark:hover:border-primary/40 bg-white dark:bg-slate-800 hover:shadow-lg transition-all text-left"
           >
             <div className="text-4xl mb-3">{useCase.icon}</div>
-            <h3 className="font-semibold text-lg mb-1 text-slate-900 dark:text-white group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors">
+            <h3 className="font-semibold text-lg mb-1 text-slate-900 dark:text-white group-hover:text-primary dark:group-hover:text-primary transition-colors">
               {useCase.title}
             </h3>
             <p className="text-sm text-slate-600 dark:text-slate-400">{useCase.description}</p>
-            <ArrowRight className="absolute top-6 right-6 h-5 w-5 text-slate-300 dark:text-slate-600 group-hover:text-purple-500 dark:group-hover:text-purple-400 group-hover:translate-x-1 transition-all" />
+            <ArrowRight className="absolute top-6 right-6 h-5 w-5 text-slate-300 dark:text-slate-600 group-hover:text-primary dark:group-hover:text-primary group-hover:translate-x-1 transition-all" />
           </button>
         ))}
       </div>
@@ -523,7 +523,7 @@ function TeamInviteStep({
       <Card className="p-6 max-w-lg mx-auto bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-800 dark:to-slate-900 border-slate-200 dark:border-slate-700">
         <div className="grid grid-cols-3 gap-4 mb-6">
           <div className="text-center">
-            <div className="text-3xl font-bold text-purple-600 dark:text-purple-400">∞</div>
+            <div className="text-3xl font-bold text-primary">∞</div>
             <p className="text-xs text-slate-600 dark:text-slate-400 mt-1">Team Members</p>
           </div>
           <div className="text-center">
@@ -531,7 +531,7 @@ function TeamInviteStep({
             <p className="text-xs text-slate-600 dark:text-slate-400 mt-1">Shared Docs</p>
           </div>
           <div className="text-center">
-            <div className="text-3xl font-bold text-indigo-600 dark:text-indigo-400">∞</div>
+            <div className="text-3xl font-bold text-primary">∞</div>
             <p className="text-xs text-slate-600 dark:text-slate-400 mt-1">Conversations</p>
           </div>
         </div>
@@ -581,11 +581,11 @@ function CompleteStep({
         </p>
       </div>
 
-      <Card className="p-6 max-w-xl mx-auto bg-primary dark:to-blue-950/30 border-purple-200 dark:border-purple-800">
+      <Card className="p-6 max-w-xl mx-auto bg-primary dark:to-blue-950/30 border-primary/20 dark:border-primary/40">
         <h3 className="font-semibold text-lg mb-4 text-slate-900 dark:text-white">What happens next:</h3>
         <div className="space-y-3 text-left">
           <div className="flex items-start gap-3">
-            <div className="h-6 w-6 rounded-full bg-purple-500 flex items-center justify-center flex-shrink-0 mt-0.5">
+            <div className="h-6 w-6 rounded-full bg-primary flex items-center justify-center flex-shrink-0 mt-0.5">
               <Check className="h-4 w-4 text-white" />
             </div>
             <p className="text-sm text-slate-700 dark:text-slate-300">
@@ -601,7 +601,7 @@ function CompleteStep({
             </p>
           </div>
           <div className="flex items-start gap-3">
-            <div className="h-6 w-6 rounded-full bg-indigo-500 flex items-center justify-center flex-shrink-0 mt-0.5">
+            <div className="h-6 w-6 rounded-full bg-primary flex items-center justify-center flex-shrink-0 mt-0.5">
               <Check className="h-4 w-4 text-white" />
             </div>
             <p className="text-sm text-slate-700 dark:text-slate-300">
@@ -622,7 +622,7 @@ function CompleteStep({
       </Button>
 
       <p className="text-xs text-slate-500 dark:text-slate-400">
-        Need help? Check out our <a href="/dashboard/training" className="text-purple-600 dark:text-purple-400 hover:underline">Quick Start Guide</a>
+        Need help? Check out our <a href="/dashboard/training" className="text-primary hover:underline">Quick Start Guide</a>
       </p>
     </div>
   );

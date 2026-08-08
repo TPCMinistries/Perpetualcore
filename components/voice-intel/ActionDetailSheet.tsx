@@ -177,7 +177,7 @@ export function ActionDetailSheet({
           {action.voice_memo_id && (
             <a
               href="/dashboard/voice-memos"
-              className="inline-flex items-center gap-1.5 text-sm text-violet-600 dark:text-violet-400 hover:underline"
+              className="inline-flex items-center gap-1.5 text-sm text-primary hover:underline"
             >
               <ExternalLink className="h-3.5 w-3.5" />
               View source voice memo

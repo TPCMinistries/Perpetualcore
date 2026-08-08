@@ -658,12 +658,12 @@ export function ContactsTableView({
                       onClick={(e) => handleRowClick(row.original, e)}
                       className={cn(
                         "group cursor-pointer transition-all duration-150",
-                        "hover:bg-violet-50/50 dark:hover:bg-violet-900/10",
+                        "hover:bg-primary/50 dark:hover:bg-primary/10",
                         index % 2 === 0
                           ? "bg-white dark:bg-slate-900/30"
                           : "bg-slate-50/30 dark:bg-slate-800/20",
-                        isSelected && "!bg-violet-100/70 dark:!bg-violet-900/30",
-                        isFocused && "ring-2 ring-inset ring-violet-500"
+                        isSelected && "!bg-primary/70 dark:!bg-primary/30",
+                        isFocused && "ring-2 ring-inset ring-primary"
                       )}
                     >
                       {row.getVisibleCells().map((cell) => (

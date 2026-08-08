@@ -315,9 +315,9 @@ export default function BrainDumpPage() {
             <div
               className={`h-2 w-2 rounded-full transition-colors ${
                 step === s
-                  ? "bg-violet-600"
+                  ? "bg-primary"
                   : ["input", "processing", "preview", "creating", "complete"].indexOf(step) > i
-                  ? "bg-violet-400"
+                  ? "bg-primary"
                   : "bg-muted"
               }`}
             />
@@ -325,7 +325,7 @@ export default function BrainDumpPage() {
               <div
                 className={`w-8 h-0.5 ${
                   ["input", "processing", "preview", "creating", "complete"].indexOf(step) > i
-                    ? "bg-violet-400"
+                    ? "bg-primary"
                     : "bg-muted"
                 }`}
               />
@@ -394,7 +394,7 @@ export default function BrainDumpPage() {
               transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
               className="inline-block"
             >
-              <Brain className="h-12 w-12 text-violet-600" />
+              <Brain className="h-12 w-12 text-primary" />
             </motion.div>
             <h3 className="mt-4 text-lg font-semibold">Analyzing your brain dump...</h3>
             <p className="text-muted-foreground mt-2">
@@ -413,7 +413,7 @@ export default function BrainDumpPage() {
             className="space-y-6"
           >
             {/* Stats Summary */}
-            <Card className="border-violet-200 dark:border-violet-800 bg-violet-50/50 dark:bg-violet-950/20">
+            <Card className="border-primary/20 dark:border-primary/40 bg-primary/50 dark:bg-primary/20">
               <CardContent className="p-6">
                 <div className="flex items-start justify-between">
                   <div>
@@ -427,19 +427,19 @@ export default function BrainDumpPage() {
                 </div>
                 <div className="grid grid-cols-4 gap-4 mt-4">
                   <div className="text-center">
-                    <div className="text-2xl font-bold text-violet-600">{stats?.entities || 0}</div>
+                    <div className="text-2xl font-bold text-primary">{stats?.entities || 0}</div>
                     <div className="text-xs text-muted-foreground">Entities</div>
                   </div>
                   <div className="text-center">
-                    <div className="text-2xl font-bold text-violet-600">{stats?.projects || 0}</div>
+                    <div className="text-2xl font-bold text-primary">{stats?.projects || 0}</div>
                     <div className="text-xs text-muted-foreground">Projects</div>
                   </div>
                   <div className="text-center">
-                    <div className="text-2xl font-bold text-violet-600">{stats?.tasks || 0}</div>
+                    <div className="text-2xl font-bold text-primary">{stats?.tasks || 0}</div>
                     <div className="text-xs text-muted-foreground">Tasks</div>
                   </div>
                   <div className="text-center">
-                    <div className="text-2xl font-bold text-violet-600">{stats?.subtasks || 0}</div>
+                    <div className="text-2xl font-bold text-primary">{stats?.subtasks || 0}</div>
                     <div className="text-xs text-muted-foreground">Subtasks</div>
                   </div>
                 </div>
@@ -493,7 +493,7 @@ export default function BrainDumpPage() {
                             <ChevronRight className="h-4 w-4 text-muted-foreground" />
                           )}
                         </button>
-                        <Building2 className="h-5 w-5 text-violet-600" />
+                        <Building2 className="h-5 w-5 text-primary" />
                         <div className="flex-1">
                           {editingItem === `${entityKey}-name` ? (
                             <div className="flex items-center gap-2">
@@ -740,7 +740,7 @@ export default function BrainDumpPage() {
             exit={{ opacity: 0, y: -20 }}
             className="text-center py-12"
           >
-            <Loader2 className="h-12 w-12 text-violet-600 animate-spin mx-auto" />
+            <Loader2 className="h-12 w-12 text-primary animate-spin mx-auto" />
             <h3 className="mt-4 text-lg font-semibold">Creating your structure...</h3>
             <p className="text-muted-foreground mt-2">
               Setting up entities, projects, and tasks

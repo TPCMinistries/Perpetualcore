@@ -357,7 +357,7 @@ export function ActionItemsList({
                       <div className="mt-3 flex items-center gap-2">
                         <div className="flex-1 h-1 bg-muted rounded-full overflow-hidden">
                           <div
-                            className="h-full bg-violet-500 rounded-full"
+                            className="h-full bg-primary rounded-full"
                             style={{ width: `${item.confidence * 100}%` }}
                           />
                         </div>

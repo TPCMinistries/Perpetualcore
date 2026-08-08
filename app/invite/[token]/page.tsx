@@ -94,7 +94,7 @@ export default function InviteAcceptPage() {
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-slate-950">
-        <Loader2 className="h-8 w-8 animate-spin text-purple-600" />
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
     );
   }
@@ -179,9 +179,9 @@ export default function InviteAcceptPage() {
               ) : (
                 <>
                   {/* Valid invitation */}
-                  <div className="rounded-xl bg-primary dark:to-blue-950/30 border border-purple-200 dark:border-purple-800 p-6 space-y-4">
+                  <div className="rounded-xl bg-primary dark:to-blue-950/30 border border-primary/20 dark:border-primary/40 p-6 space-y-4">
                     <div className="flex items-center gap-3">
-                      <Users className="h-5 w-5 text-purple-600" />
+                      <Users className="h-5 w-5 text-primary" />
                       <div>
                         <p className="font-semibold text-slate-900 dark:text-white">
                           {invitation.organizationName}

@@ -115,7 +115,7 @@ export function ContactsListView({
               "group flex items-center gap-4 p-4 cursor-pointer transition-colors",
               "hover:bg-muted/30",
               isSelected && "bg-primary/5",
-              isFocused && "ring-2 ring-inset ring-violet-500"
+              isFocused && "ring-2 ring-inset ring-primary"
             )}
           >
             {/* Checkbox */}

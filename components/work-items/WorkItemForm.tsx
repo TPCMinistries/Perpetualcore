@@ -503,7 +503,7 @@ export function WorkItemForm({
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <Sparkles className="h-4 w-4 text-purple-500" />
+                    <Sparkles className="h-4 w-4 text-primary" />
                     <span className="text-sm font-medium">AI Analysis</span>
                   </div>
                   <Button
@@ -617,9 +617,9 @@ export function WorkItemForm({
 
                       {/* Next Action */}
                       {analysis.next_action && (
-                        <div className="bg-purple-50 dark:bg-purple-950/20 rounded-lg p-3">
+                        <div className="bg-primary/10 dark:bg-primary/20 rounded-lg p-3">
                           <div className="flex items-center gap-2 text-sm">
-                            <Sparkles className="h-4 w-4 text-purple-500" />
+                            <Sparkles className="h-4 w-4 text-primary" />
                             <span className="font-medium">Next Action:</span>
                           </div>
                           <p className="text-sm mt-1">{analysis.next_action}</p>

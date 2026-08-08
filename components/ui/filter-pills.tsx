@@ -84,7 +84,7 @@ export function TabFilter<T extends string>({
             className={cn(
               "px-4 py-3 text-sm font-medium transition-colors relative",
               value === option.key
-                ? "text-violet-600 dark:text-violet-400"
+                ? "text-primary"
                 : "text-muted-foreground hover:text-foreground"
             )}
           >
@@ -94,7 +94,7 @@ export function TabFilter<T extends string>({
                 className={cn(
                   "ml-2 text-xs px-1.5 py-0.5 rounded-full",
                   value === option.key
-                    ? "bg-violet-100 dark:bg-violet-900/30 text-violet-600 dark:text-violet-400"
+                    ? "bg-primary/10 dark:bg-primary/30 text-primary"
                     : "bg-muted text-muted-foreground"
                 )}
               >
@@ -102,7 +102,7 @@ export function TabFilter<T extends string>({
               </span>
             )}
             {value === option.key && (
-              <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-violet-600 dark:bg-violet-400 rounded-full" />
+              <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary rounded-full" />
             )}
           </button>
         ))}

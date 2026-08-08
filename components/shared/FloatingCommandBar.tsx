@@ -99,7 +99,7 @@ export function FloatingCommandBar({
               className="relative group/folder hover:bg-slate-100 dark:hover:bg-slate-800/60 transition-all duration-300 rounded-xl px-3 py-2 h-auto"
             >
               <div className="absolute -inset-1 bg-gradient-to-r from-primary/0 to-primary/0 group-hover/folder:from-primary/10 group-hover/folder:to-primary/10 rounded-xl blur transition-all duration-300" />
-              <FolderPlus className="w-4 h-4 text-slate-600 dark:text-slate-400 group-hover/folder:text-indigo-600 dark:group-hover/folder:text-indigo-400 transition-colors relative" />
+              <FolderPlus className="w-4 h-4 text-slate-600 dark:text-slate-400 group-hover/folder:text-primary dark:group-hover/folder:text-primary transition-colors relative" />
             </Button>
 
             {/* AI Assistant quick access */}
@@ -109,7 +109,7 @@ export function FloatingCommandBar({
               className="relative group/ai hover:bg-slate-100 dark:hover:bg-slate-800/60 transition-all duration-300 rounded-xl px-3 py-2 h-auto"
             >
               <div className="absolute -inset-1 bg-gradient-to-r from-primary/0 to-primary/0 group-hover/ai:from-primary/10 group-hover/ai:to-primary/10 rounded-xl blur transition-all duration-300" />
-              <Sparkles className="w-4 h-4 text-slate-600 dark:text-slate-400 group-hover/ai:text-purple-600 dark:group-hover/ai:text-purple-400 transition-colors relative" />
+              <Sparkles className="w-4 h-4 text-slate-600 dark:text-slate-400 group-hover/ai:text-primary dark:group-hover/ai:text-primary transition-colors relative" />
             </Button>
 
             {/* Settings */}

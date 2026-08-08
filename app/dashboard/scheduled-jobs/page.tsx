@@ -322,14 +322,14 @@ export default function ScheduledJobsPage() {
           </div>
         </Card>
 
-        <Card className="p-6 bg-primary border-purple-100 dark:border-purple-900/20 hover:shadow-lg transition-all duration-300">
+        <Card className="p-6 bg-primary border-primary/20 hover:shadow-lg transition-all duration-300">
           <div className="flex items-center justify-between">
             <div>
-              <div className="h-12 w-12 rounded-xl bg-purple-100 dark:bg-purple-900/40 flex items-center justify-center mb-3 shadow-sm">
-                <Activity className="h-6 w-6 text-purple-600 dark:text-purple-400" />
+              <div className="h-12 w-12 rounded-xl bg-primary/10 dark:bg-primary/40 flex items-center justify-center mb-3 shadow-sm">
+                <Activity className="h-6 w-6 text-primary" />
               </div>
-              <p className="text-sm text-purple-700 dark:text-purple-300 font-medium">Total Executions</p>
-              <p className="text-3xl font-bold text-purple-900 dark:text-purple-100 mt-1">{stats.total_executions}</p>
+              <p className="text-sm text-primary font-medium">Total Executions</p>
+              <p className="text-3xl font-bold text-primary mt-1">{stats.total_executions}</p>
             </div>
           </div>
         </Card>
@@ -381,16 +381,16 @@ export default function ScheduledJobsPage() {
 
       {/* Job Templates Suggestions */}
       {jobs.length === 0 && (
-        <Card className="p-6 bg-gradient-to-br from-primary/50 to-primary/50 dark:from-primary/20 dark:to-primary/20 border-purple-100 dark:border-purple-900/20">
+        <Card className="p-6 bg-gradient-to-br from-primary/50 to-primary/50 dark:from-primary/20 dark:to-primary/20 border-primary/20">
           <div className="flex items-center gap-3 mb-6">
             <div className="h-10 w-10 rounded-lg bg-primary flex items-center justify-center shadow-md">
               <Zap className="h-5 w-5 text-white" />
             </div>
             <div>
-              <h3 className="font-semibold text-lg text-purple-900 dark:text-purple-100">
+              <h3 className="font-semibold text-lg text-primary">
                 Popular Job Templates
               </h3>
-              <p className="text-sm text-purple-700 dark:text-purple-300">
+              <p className="text-sm text-primary">
                 Get started quickly with pre-configured automation templates
               </p>
             </div>
@@ -398,13 +398,13 @@ export default function ScheduledJobsPage() {
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <Link href="/dashboard/scheduled-jobs/templates?template=daily-summary">
-              <Card className="p-5 bg-card/80 dark:bg-card/80 hover:bg-card dark:hover:bg-muted border-purple-100 dark:border-purple-900/40 hover:border-purple-300 dark:hover:border-purple-700 transition-all cursor-pointer hover:shadow-lg group">
+              <Card className="p-5 bg-card/80 dark:bg-card/80 hover:bg-card dark:hover:bg-muted border-primary/20 dark:border-primary/40 hover:border-primary/20 dark:hover:border-primary/40 transition-all cursor-pointer hover:shadow-lg group">
                 <div className="flex items-start gap-3 mb-3">
                   <div className="h-10 w-10 rounded-lg bg-gradient-to-br from-blue-100 to-cyan-100 dark:from-blue-900/40 dark:to-cyan-900/40 flex items-center justify-center group-hover:scale-110 transition-transform">
                     <Calendar className="h-5 w-5 text-blue-600 dark:text-blue-400" />
                   </div>
                   <div className="flex-1">
-                    <h4 className="font-semibold text-purple-900 dark:text-purple-100 mb-1 group-hover:text-purple-700 dark:group-hover:text-purple-300">
+                    <h4 className="font-semibold text-primary mb-1 group-hover:text-primary dark:group-hover:text-primary">
                       Daily Summary Report
                     </h4>
                     <p className="text-xs text-muted-foreground line-clamp-2">
@@ -412,7 +412,7 @@ export default function ScheduledJobsPage() {
                     </p>
                   </div>
                 </div>
-                <div className="flex items-center gap-2 text-xs text-purple-600 dark:text-purple-400">
+                <div className="flex items-center gap-2 text-xs text-primary">
                   <Clock className="h-3 w-3" />
                   <span>Daily at 9am</span>
                 </div>
@@ -420,13 +420,13 @@ export default function ScheduledJobsPage() {
             </Link>
 
             <Link href="/dashboard/scheduled-jobs/templates?template=weekly-backup">
-              <Card className="p-5 bg-card/80 dark:bg-card/80 hover:bg-card dark:hover:bg-muted border-purple-100 dark:border-purple-900/40 hover:border-purple-300 dark:hover:border-purple-700 transition-all cursor-pointer hover:shadow-lg group">
+              <Card className="p-5 bg-card/80 dark:bg-card/80 hover:bg-card dark:hover:bg-muted border-primary/20 dark:border-primary/40 hover:border-primary/20 dark:hover:border-primary/40 transition-all cursor-pointer hover:shadow-lg group">
                 <div className="flex items-start gap-3 mb-3">
                   <div className="h-10 w-10 rounded-lg bg-gradient-to-br from-green-100 to-emerald-100 dark:from-green-900/40 dark:to-emerald-900/40 flex items-center justify-center group-hover:scale-110 transition-transform">
                     <Activity className="h-5 w-5 text-green-600 dark:text-green-400" />
                   </div>
                   <div className="flex-1">
-                    <h4 className="font-semibold text-purple-900 dark:text-purple-100 mb-1 group-hover:text-purple-700 dark:group-hover:text-purple-300">
+                    <h4 className="font-semibold text-primary mb-1 group-hover:text-primary dark:group-hover:text-primary">
                       Data Sync & Backup
                     </h4>
                     <p className="text-xs text-muted-foreground line-clamp-2">
@@ -434,7 +434,7 @@ export default function ScheduledJobsPage() {
                     </p>
                   </div>
                 </div>
-                <div className="flex items-center gap-2 text-xs text-purple-600 dark:text-purple-400">
+                <div className="flex items-center gap-2 text-xs text-primary">
                   <Clock className="h-3 w-3" />
                   <span>Weekly on Sunday</span>
                 </div>
@@ -442,13 +442,13 @@ export default function ScheduledJobsPage() {
             </Link>
 
             <Link href="/dashboard/scheduled-jobs/templates?template=hourly-monitor">
-              <Card className="p-5 bg-card/80 dark:bg-card/80 hover:bg-card dark:hover:bg-muted border-purple-100 dark:border-purple-900/40 hover:border-purple-300 dark:hover:border-purple-700 transition-all cursor-pointer hover:shadow-lg group">
+              <Card className="p-5 bg-card/80 dark:bg-card/80 hover:bg-card dark:hover:bg-muted border-primary/20 dark:border-primary/40 hover:border-primary/20 dark:hover:border-primary/40 transition-all cursor-pointer hover:shadow-lg group">
                 <div className="flex items-start gap-3 mb-3">
                   <div className="h-10 w-10 rounded-lg bg-gradient-to-br from-orange-100 to-amber-100 dark:from-orange-900/40 dark:to-amber-900/40 flex items-center justify-center group-hover:scale-110 transition-transform">
                     <TrendingUp className="h-5 w-5 text-orange-600 dark:text-orange-400" />
                   </div>
                   <div className="flex-1">
-                    <h4 className="font-semibold text-purple-900 dark:text-purple-100 mb-1 group-hover:text-purple-700 dark:group-hover:text-purple-300">
+                    <h4 className="font-semibold text-primary mb-1 group-hover:text-primary dark:group-hover:text-primary">
                       System Health Monitor
                     </h4>
                     <p className="text-xs text-muted-foreground line-clamp-2">
@@ -456,7 +456,7 @@ export default function ScheduledJobsPage() {
                     </p>
                   </div>
                 </div>
-                <div className="flex items-center gap-2 text-xs text-purple-600 dark:text-purple-400">
+                <div className="flex items-center gap-2 text-xs text-primary">
                   <Clock className="h-3 w-3" />
                   <span>Every hour</span>
                 </div>
@@ -494,7 +494,7 @@ export default function ScheduledJobsPage() {
                     <div className="flex items-center gap-2 mb-1">
                       <div className={`h-8 w-8 rounded-lg flex items-center justify-center ${
                         job.job_type === "workflow"
-                          ? "bg-purple-100 dark:bg-purple-900/40"
+                          ? "bg-primary/10 dark:bg-primary/40"
                           : job.job_type === "agent"
                           ? "bg-blue-100 dark:bg-blue-900/40"
                           : "bg-muted dark:bg-muted"

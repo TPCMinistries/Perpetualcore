@@ -311,7 +311,7 @@ export default function TasksPage() {
                   <div className="h-4 w-48 bg-muted dark:bg-card rounded animate-pulse" />
                 </div>
               </div>
-              <div className="h-10 w-32 bg-violet-200 dark:bg-violet-900/50 rounded-lg animate-pulse" />
+              <div className="h-10 w-32 bg-primary/20 dark:bg-primary/50 rounded-lg animate-pulse" />
             </div>
           </div>
           {/* Stats Skeleton */}
@@ -369,7 +369,7 @@ export default function TasksPage() {
           actions={
             <Button
               onClick={() => setShowNewTask(!showNewTask)}
-              className="bg-primary text-white shadow-lg shadow-violet-500/25"
+              className="bg-primary text-white shadow-lg shadow-primary/25"
             >
               <Plus className="h-4 w-4 mr-2" />
               New Task
@@ -428,8 +428,8 @@ export default function TasksPage() {
             <Card className="border-border dark:border-border bg-card shadow-lg overflow-hidden">
               <CardHeader className="border-b border-border dark:border-border bg-muted/50 dark:bg-card/30 py-4">
                 <div className="flex items-center gap-3">
-                  <div className="p-2 rounded-lg bg-violet-100 dark:bg-violet-900/30">
-                    <Plus className="h-4 w-4 text-violet-600 dark:text-violet-400" />
+                  <div className="p-2 rounded-lg bg-primary/10 dark:bg-primary/30">
+                    <Plus className="h-4 w-4 text-primary" />
                   </div>
                   <CardTitle className="text-base font-semibold text-foreground dark:text-foreground">
                     New Task
@@ -530,7 +530,7 @@ export default function TasksPage() {
                 <StaggeredGridItem key={task.id}>
                 <div
                   onClick={() => router.push(`/dashboard/tasks/${task.id}`)}
-                  className={`group relative bg-card rounded-xl border border-border dark:border-border hover:border-violet-300 dark:hover:border-violet-700 hover:shadow-lg transition-all cursor-pointer ${
+                  className={`group relative bg-card rounded-xl border border-border dark:border-border hover:border-primary/20 dark:hover:border-primary/40 hover:shadow-lg transition-all cursor-pointer ${
                     task.status === "done" || task.status === "completed"
                       ? "opacity-60"
                       : ""
@@ -554,7 +554,7 @@ export default function TasksPage() {
                         {task.status === "done" || task.status === "completed" ? (
                           <CheckCircle2 className="h-5 w-5 text-emerald-500" />
                         ) : (
-                          <Circle className="h-5 w-5 text-muted-foreground dark:text-muted-foreground group-hover/check:text-violet-500 transition-colors" />
+                          <Circle className="h-5 w-5 text-muted-foreground dark:text-muted-foreground group-hover/check:text-primary transition-colors" />
                         )}
                       </button>
 
@@ -641,7 +641,7 @@ export default function TasksPage() {
 
                           {/* Deliverables count */}
                           {task.deliverable_count && task.deliverable_count > 0 && (
-                            <span className="inline-flex items-center gap-1.5 text-xs font-medium text-violet-700 dark:text-violet-400 bg-violet-100 dark:bg-violet-900/30 px-2.5 py-1 rounded-full">
+                            <span className="inline-flex items-center gap-1.5 text-xs font-medium text-primary bg-primary/10 dark:bg-primary/30 px-2.5 py-1 rounded-full">
                               <FileText className="h-3 w-3" />
                               {task.deliverable_count} deliverable
                               {task.deliverable_count > 1 ? "s" : ""}

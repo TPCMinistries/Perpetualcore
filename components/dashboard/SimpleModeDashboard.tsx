@@ -187,8 +187,8 @@ export function SimpleModeDashboard({ userName, userId }: SimpleModeDashboardPro
         <Card>
           <CardContent className="pt-6">
             <div className="flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-indigo-100 dark:bg-indigo-900/30">
-                <Sparkles className="h-5 w-5 text-indigo-600 dark:text-indigo-400" />
+              <div className="p-2 rounded-lg bg-primary/10 dark:bg-primary/30">
+                <Sparkles className="h-5 w-5 text-primary" />
               </div>
               <div>
                 <p className="text-2xl font-bold">{employees.length}</p>
@@ -226,8 +226,8 @@ export function SimpleModeDashboard({ userName, userId }: SimpleModeDashboardPro
         <Card>
           <CardContent className="pt-6">
             <div className="flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-violet-100 dark:bg-violet-900/30">
-                <Zap className="h-5 w-5 text-violet-600 dark:text-violet-400" />
+              <div className="p-2 rounded-lg bg-primary/10 dark:bg-primary/30">
+                <Zap className="h-5 w-5 text-primary" />
               </div>
               <div>
                 <p className="text-2xl font-bold">Instant</p>
@@ -240,7 +240,7 @@ export function SimpleModeDashboard({ userName, userId }: SimpleModeDashboardPro
 
       {/* Setup CTA (if not seeded) */}
       {!seeded && (
-        <Card className="bg-gradient-to-r from-primary/10 to-primary/10 border-indigo-200 dark:border-indigo-800">
+        <Card className="bg-gradient-to-r from-primary/10 to-primary/10 border-primary/20 dark:border-primary/40">
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div className="space-y-1">

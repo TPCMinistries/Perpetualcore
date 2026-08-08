@@ -175,7 +175,7 @@ export default function FormBlock({ block }: FormBlockProps) {
           disabled={submitState === "loading"}
           className={cn(
             "w-full h-9 text-sm",
-            "bg-violet-600 hover:bg-violet-700 text-white"
+            "bg-primary hover:bg-primary text-white"
           )}
         >
           {submitState === "loading" ? (

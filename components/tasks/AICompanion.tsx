@@ -214,7 +214,7 @@ When suggesting content changes, format them clearly so the user can easily copy
         <Button
           variant="outline"
           size="sm"
-          className="gap-2 border-violet-200 dark:border-violet-800 text-violet-600 dark:text-violet-400 hover:bg-violet-50 dark:hover:bg-violet-950/30"
+          className="gap-2 border-primary/20 dark:border-primary/40 text-primary hover:bg-primary/10 dark:hover:bg-primary/30"
         >
           <Sparkles className="h-4 w-4" />
           AI Assistant
@@ -249,7 +249,7 @@ When suggesting content changes, format them clearly so the user can easily copy
                 className={cn(
                   "max-w-[80%] rounded-xl px-4 py-3 relative group",
                   message.role === "user"
-                    ? "bg-violet-600 text-white"
+                    ? "bg-primary text-white"
                     : "bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-slate-100"
                 )}
               >
@@ -285,7 +285,7 @@ When suggesting content changes, format them clearly so the user can easily copy
                                 toast.success(`Applied to ${suggestion.platform}!`);
                               }
                             }}
-                            className="inline-flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-full bg-violet-100 dark:bg-violet-900/30 text-violet-600 dark:text-violet-400 hover:bg-violet-200 dark:hover:bg-violet-900/50 transition-colors"
+                            className="inline-flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-full bg-primary/10 dark:bg-primary/30 text-primary hover:bg-primary/20 dark:hover:bg-primary/50 transition-colors"
                           >
                             {getPlatformIcon(suggestion.platform)}
                             Apply to {suggestion.platform.charAt(0).toUpperCase() + suggestion.platform.slice(1)}
@@ -309,7 +309,7 @@ When suggesting content changes, format them clearly so the user can easily copy
                 <Bot className="h-4 w-4 text-white" />
               </div>
               <div className="bg-slate-100 dark:bg-slate-800 rounded-xl px-4 py-3">
-                <Loader2 className="h-4 w-4 animate-spin text-violet-500" />
+                <Loader2 className="h-4 w-4 animate-spin text-primary" />
               </div>
             </div>
           )}
@@ -327,7 +327,7 @@ When suggesting content changes, format them clearly so the user can easily copy
                   onClick={() => {
                     setInput(qp.prompt);
                   }}
-                  className="text-xs px-3 py-1.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-violet-100 dark:hover:bg-violet-900/30 hover:text-violet-600 dark:hover:text-violet-400 transition-colors"
+                  className="text-xs px-3 py-1.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-primary/10 dark:hover:bg-primary/30 hover:text-primary dark:hover:text-primary transition-colors"
                 >
                   <Wand2 className="h-3 w-3 inline mr-1" />
                   {qp.label}

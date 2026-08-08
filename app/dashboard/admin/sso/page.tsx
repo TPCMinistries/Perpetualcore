@@ -111,7 +111,7 @@ export default function SSOOverviewPage() {
                           {provider.provider_type}
                         </Badge>
                         {provider.enforce_sso && (
-                          <Badge className="text-xs bg-purple-100 text-purple-700">Enforced</Badge>
+                          <Badge className="text-xs bg-primary/10 text-primary">Enforced</Badge>
                         )}
                       </div>
                       <div className="flex items-center gap-2 mt-1 text-xs text-muted-foreground">

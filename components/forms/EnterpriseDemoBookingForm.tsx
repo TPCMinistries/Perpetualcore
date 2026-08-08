@@ -74,23 +74,23 @@ export default function EnterpriseDemoBookingForm() {
 
   if (isSuccess) {
     return (
-      <div className="bg-primary rounded-2xl p-8 border border-purple-200 dark:border-purple-800">
+      <div className="bg-primary rounded-2xl p-8 border border-primary/20 dark:border-primary/40">
         <div className="text-center">
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-purple-100 dark:bg-purple-900/50 mb-4">
-            <CheckCircle2 className="h-8 w-8 text-purple-600 dark:text-purple-400" />
+          <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary/10 dark:bg-primary/50 mb-4">
+            <CheckCircle2 className="h-8 w-8 text-primary" />
           </div>
-          <h3 className="text-2xl font-bold text-purple-900 dark:text-purple-100 mb-2">
+          <h3 className="text-2xl font-bold text-primary mb-2">
             Demo Request Received!
           </h3>
-          <p className="text-purple-700 dark:text-purple-300 mb-4">
+          <p className="text-primary mb-4">
             Our enterprise team will contact you within 24 hours to schedule your personalized demo.
           </p>
-          <p className="text-sm text-purple-600 dark:text-purple-400">
+          <p className="text-sm text-primary">
             Check your email for confirmation and preparation details.
           </p>
           <button
             onClick={() => setIsSuccess(false)}
-            className="mt-6 text-sm text-purple-700 dark:text-purple-300 hover:underline"
+            className="mt-6 text-sm text-primary hover:underline"
           >
             Submit another request
           </button>
@@ -112,7 +112,7 @@ export default function EnterpriseDemoBookingForm() {
           required
           value={formData.full_name}
           onChange={(e) => setFormData({ ...formData, full_name: e.target.value })}
-          className="w-full px-4 py-3 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
+          className="w-full px-4 py-3 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
           placeholder="Jane Smith"
         />
       </div>
@@ -128,7 +128,7 @@ export default function EnterpriseDemoBookingForm() {
           required
           value={formData.email}
           onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-          className="w-full px-4 py-3 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
+          className="w-full px-4 py-3 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
           placeholder="jane@company.com"
         />
       </div>
@@ -145,7 +145,7 @@ export default function EnterpriseDemoBookingForm() {
             required
             value={formData.company_name}
             onChange={(e) => setFormData({ ...formData, company_name: e.target.value })}
-            className="w-full px-4 py-3 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
+            className="w-full px-4 py-3 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
             placeholder="Acme Corporation"
           />
         </div>
@@ -160,7 +160,7 @@ export default function EnterpriseDemoBookingForm() {
             id="job_title"
             value={formData.job_title}
             onChange={(e) => setFormData({ ...formData, job_title: e.target.value })}
-            className="w-full px-4 py-3 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
+            className="w-full px-4 py-3 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
             placeholder="VP of Engineering"
           />
         </div>
@@ -177,7 +177,7 @@ export default function EnterpriseDemoBookingForm() {
             id="phone"
             value={formData.phone}
             onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-            className="w-full px-4 py-3 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
+            className="w-full px-4 py-3 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
             placeholder="+1 (555) 123-4567"
           />
         </div>
@@ -191,7 +191,7 @@ export default function EnterpriseDemoBookingForm() {
             id="company_size"
             value={formData.company_size}
             onChange={(e) => setFormData({ ...formData, company_size: e.target.value })}
-            className="w-full px-4 py-3 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
+            className="w-full px-4 py-3 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
           >
             <option value="">Select company size...</option>
             <option value="1-50">1-50 employees</option>
@@ -213,7 +213,7 @@ export default function EnterpriseDemoBookingForm() {
             id="industry"
             value={formData.industry}
             onChange={(e) => setFormData({ ...formData, industry: e.target.value })}
-            className="w-full px-4 py-3 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
+            className="w-full px-4 py-3 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
           >
             <option value="">Select industry...</option>
             <option value="Technology">Technology</option>
@@ -237,7 +237,7 @@ export default function EnterpriseDemoBookingForm() {
             id="estimated_users"
             value={formData.estimated_users}
             onChange={(e) => setFormData({ ...formData, estimated_users: e.target.value })}
-            className="w-full px-4 py-3 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
+            className="w-full px-4 py-3 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
           >
             <option value="">Select number of users...</option>
             <option value="1-25">1-25 users</option>
@@ -258,7 +258,7 @@ export default function EnterpriseDemoBookingForm() {
           id="use_case"
           value={formData.use_case}
           onChange={(e) => setFormData({ ...formData, use_case: e.target.value })}
-          className="w-full px-4 py-3 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
+          className="w-full px-4 py-3 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
         >
           <option value="">Select primary use case...</option>
           <option value="Internal Knowledge Management">Internal Knowledge Management</option>
@@ -290,13 +290,13 @@ export default function EnterpriseDemoBookingForm() {
           ].map((feature) => (
             <label
               key={feature}
-              className="flex items-center space-x-3 p-3 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg cursor-pointer hover:border-purple-400 dark:hover:border-purple-500 transition-all"
+              className="flex items-center space-x-3 p-3 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg cursor-pointer hover:border-primary/40 dark:hover:border-primary/40 transition-all"
             >
               <input
                 type="checkbox"
                 checked={formData.required_features.includes(feature)}
                 onChange={() => toggleArrayField("required_features", feature)}
-                className="w-4 h-4 text-purple-600 bg-white dark:bg-slate-700 border-slate-300 dark:border-slate-600 rounded focus:ring-2 focus:ring-purple-500"
+                className="w-4 h-4 text-primary bg-white dark:bg-slate-700 border-slate-300 dark:border-slate-600 rounded focus:ring-2 focus:ring-primary"
               />
               <span className="text-sm text-slate-700 dark:text-slate-300">{feature}</span>
             </label>
@@ -320,13 +320,13 @@ export default function EnterpriseDemoBookingForm() {
           ].map((compliance) => (
             <label
               key={compliance}
-              className="flex items-center space-x-3 p-3 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg cursor-pointer hover:border-purple-400 dark:hover:border-purple-500 transition-all"
+              className="flex items-center space-x-3 p-3 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg cursor-pointer hover:border-primary/40 dark:hover:border-primary/40 transition-all"
             >
               <input
                 type="checkbox"
                 checked={formData.compliance_requirements.includes(compliance)}
                 onChange={() => toggleArrayField("compliance_requirements", compliance)}
-                className="w-4 h-4 text-purple-600 bg-white dark:bg-slate-700 border-slate-300 dark:border-slate-600 rounded focus:ring-2 focus:ring-purple-500"
+                className="w-4 h-4 text-primary bg-white dark:bg-slate-700 border-slate-300 dark:border-slate-600 rounded focus:ring-2 focus:ring-primary"
               />
               <span className="text-sm text-slate-700 dark:text-slate-300">{compliance}</span>
             </label>
@@ -344,7 +344,7 @@ export default function EnterpriseDemoBookingForm() {
           value={formData.notes}
           onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
           rows={4}
-          className="w-full px-4 py-3 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all resize-none"
+          className="w-full px-4 py-3 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:ring-2 focus:ring-primary focus:border-transparent transition-all resize-none"
           placeholder="Tell us about your specific requirements, timeline, or any questions you have..."
         />
       </div>

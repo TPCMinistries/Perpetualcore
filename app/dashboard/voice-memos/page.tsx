@@ -283,8 +283,8 @@ export default function VoiceMemosPage() {
             </div>
           ) : (
             <div className="flex flex-col items-center gap-4">
-              <div className="h-20 w-20 rounded-full bg-violet-100 dark:bg-violet-900/30 flex items-center justify-center">
-                <Headphones className="h-10 w-10 text-violet-600 dark:text-violet-400" />
+              <div className="h-20 w-20 rounded-full bg-primary/10 dark:bg-primary/30 flex items-center justify-center">
+                <Headphones className="h-10 w-10 text-primary" />
               </div>
               <p className="text-sm text-muted-foreground">
                 Click to record a new voice memo
@@ -292,7 +292,7 @@ export default function VoiceMemosPage() {
               <Button
                 onClick={startRecording}
                 size="lg"
-                className="gap-2 bg-violet-600 hover:bg-violet-700"
+                className="gap-2 bg-primary hover:bg-primary"
               >
                 <Mic className="h-4 w-4" />
                 Start Recording
@@ -334,7 +334,7 @@ export default function VoiceMemosPage() {
               key={memo.id}
               className={`transition-all ${
                 expandedMemoId === memo.id
-                  ? "ring-2 ring-violet-500/30"
+                  ? "ring-2 ring-primary/30"
                   : ""
               }`}
             >
@@ -408,7 +408,7 @@ export default function VoiceMemosPage() {
                         {processingMemoId === memo.id ? (
                           <Loader2 className="h-4 w-4 animate-spin" />
                         ) : (
-                          <Sparkles className="h-4 w-4 text-violet-500" />
+                          <Sparkles className="h-4 w-4 text-primary" />
                         )}
                       </Button>
                     )}
@@ -449,8 +449,8 @@ export default function VoiceMemosPage() {
 
                     {/* AI Insights */}
                     {memo.ai_summary && (
-                      <div className="bg-violet-50 dark:bg-violet-950/20 rounded-lg p-3 space-y-3">
-                        <h4 className="text-sm font-medium text-violet-700 dark:text-violet-300 flex items-center gap-1">
+                      <div className="bg-primary/10 dark:bg-primary/20 rounded-lg p-3 space-y-3">
+                        <h4 className="text-sm font-medium text-primary flex items-center gap-1">
                           <Sparkles className="h-3.5 w-3.5" />
                           AI Insights
                         </h4>

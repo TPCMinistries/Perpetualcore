@@ -35,7 +35,7 @@ export default async function DashboardLayout({
       <header className="sticky top-0 z-30 border-b border-slate-200 bg-white/95 backdrop-blur">
         <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
           <Link href="/dashboard" className="flex items-center gap-3 font-semibold">
-            <span className="h-3 w-3 rounded-sm bg-violet-600" />
+            <span className="h-3 w-3 rounded-sm bg-primary" />
             <span>Perpetual Core</span>
           </Link>
           <nav className="hidden items-center gap-5 text-sm text-slate-600 lg:flex">

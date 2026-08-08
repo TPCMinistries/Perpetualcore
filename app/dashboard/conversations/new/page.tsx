@@ -191,7 +191,7 @@ export default function NewConversationPage() {
           </Link>
           <div>
             <h1 className="text-4xl font-bold text-primary flex items-center gap-3">
-              <MessageSquare className="h-10 w-10 text-indigo-600" />
+              <MessageSquare className="h-10 w-10 text-primary" />
               New Team Conversation
             </h1>
             <p className="text-muted-foreground mt-2">
@@ -245,12 +245,12 @@ export default function NewConversationPage() {
                   onClick={() => setFormData({ ...formData, conversation_type: "channel" })}
                   className={`p-4 rounded-lg border-2 transition-all ${
                     formData.conversation_type === "channel"
-                      ? "border-indigo-600 bg-indigo-50 dark:bg-indigo-950/30"
-                      : "border-border hover:border-indigo-300"
+                      ? "border-primary/40 bg-primary/10 dark:bg-primary/30"
+                      : "border-border hover:border-primary/20"
                   }`}
                 >
                   <div className="flex flex-col items-center gap-2 text-center">
-                    <Hash className="h-5 w-5 text-indigo-600" />
+                    <Hash className="h-5 w-5 text-primary" />
                     <div className="font-semibold">Channel</div>
                     <div className="text-xs text-muted-foreground">
                       Team collaboration
@@ -263,12 +263,12 @@ export default function NewConversationPage() {
                   onClick={() => setFormData({ ...formData, conversation_type: "dm" })}
                   className={`p-4 rounded-lg border-2 transition-all ${
                     formData.conversation_type === "dm"
-                      ? "border-indigo-600 bg-indigo-50 dark:bg-indigo-950/30"
-                      : "border-border hover:border-indigo-300"
+                      ? "border-primary/40 bg-primary/10 dark:bg-primary/30"
+                      : "border-border hover:border-primary/20"
                   }`}
                 >
                   <div className="flex flex-col items-center gap-2 text-center">
-                    <UserCircle className="h-5 w-5 text-indigo-600" />
+                    <UserCircle className="h-5 w-5 text-primary" />
                     <div className="font-semibold">Direct Message</div>
                     <div className="text-xs text-muted-foreground">
                       1-on-1 chat
@@ -281,12 +281,12 @@ export default function NewConversationPage() {
                   onClick={() => setFormData({ ...formData, conversation_type: "group_dm" })}
                   className={`p-4 rounded-lg border-2 transition-all ${
                     formData.conversation_type === "group_dm"
-                      ? "border-indigo-600 bg-indigo-50 dark:bg-indigo-950/30"
-                      : "border-border hover:border-indigo-300"
+                      ? "border-primary/40 bg-primary/10 dark:bg-primary/30"
+                      : "border-border hover:border-primary/20"
                   }`}
                 >
                   <div className="flex flex-col items-center gap-2 text-center">
-                    <Users className="h-5 w-5 text-indigo-600" />
+                    <Users className="h-5 w-5 text-primary" />
                     <div className="font-semibold">Group DM</div>
                     <div className="text-xs text-muted-foreground">
                       Small group
@@ -444,12 +444,12 @@ export default function NewConversationPage() {
                   onClick={() => setFormData({ ...formData, is_private: false })}
                   className={`flex-1 p-4 rounded-lg border-2 transition-all ${
                     !formData.is_private
-                      ? "border-indigo-600 bg-indigo-50 dark:bg-indigo-950/30"
-                      : "border-border hover:border-indigo-300"
+                      ? "border-primary/40 bg-primary/10 dark:bg-primary/30"
+                      : "border-border hover:border-primary/20"
                   }`}
                 >
                   <div className="flex items-center gap-3">
-                    <Globe className="h-5 w-5 text-indigo-600" />
+                    <Globe className="h-5 w-5 text-primary" />
                     <div className="text-left">
                       <div className="font-semibold">Team Visible</div>
                       <div className="text-xs text-muted-foreground">
@@ -464,12 +464,12 @@ export default function NewConversationPage() {
                   onClick={() => setFormData({ ...formData, is_private: true })}
                   className={`flex-1 p-4 rounded-lg border-2 transition-all ${
                     formData.is_private
-                      ? "border-indigo-600 bg-indigo-50 dark:bg-indigo-950/30"
-                      : "border-border hover:border-indigo-300"
+                      ? "border-primary/40 bg-primary/10 dark:bg-primary/30"
+                      : "border-border hover:border-primary/20"
                   }`}
                 >
                   <div className="flex items-center gap-3">
-                    <Lock className="h-5 w-5 text-indigo-600" />
+                    <Lock className="h-5 w-5 text-primary" />
                     <div className="text-left">
                       <div className="font-semibold">Private</div>
                       <div className="text-xs text-muted-foreground">

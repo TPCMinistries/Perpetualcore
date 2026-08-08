@@ -39,7 +39,7 @@ export default function QuickActionsToolbar({
       >
         {/* Label */}
         <div className="flex items-center gap-2 px-3 py-2 border-r border-slate-200 dark:border-slate-800">
-          <Sparkles className="h-4 w-4 text-purple-500" />
+          <Sparkles className="h-4 w-4 text-primary" />
           <span className="text-xs font-medium text-slate-700 dark:text-slate-300">
             Quick Actions
           </span>

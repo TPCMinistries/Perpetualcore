@@ -200,13 +200,13 @@ export function EmptyState({
               </p>
               <button
                 onClick={() => onSuggestionClick(firstChatPrompt)}
-                className="w-full p-4 rounded-xl border-2 border-purple-200 dark:border-purple-800 bg-primary dark:to-blue-950/30 hover:border-purple-400 dark:hover:border-purple-600 hover:shadow-md transition-all text-left group"
+                className="w-full p-4 rounded-xl border-2 border-primary/20 dark:border-primary/40 bg-primary dark:to-blue-950/30 hover:border-primary/40 dark:hover:border-primary/40 hover:shadow-md transition-all text-left group"
               >
                 <div className="flex items-center justify-between gap-3">
                   <p className="text-sm font-medium text-slate-700 dark:text-slate-200 leading-relaxed">
                     "{firstChatPrompt}"
                   </p>
-                  <ArrowRight className="h-4 w-4 text-purple-500 flex-shrink-0 group-hover:translate-x-1 transition-transform" />
+                  <ArrowRight className="h-4 w-4 text-primary flex-shrink-0 group-hover:translate-x-1 transition-transform" />
                 </div>
               </button>
             </motion.div>
@@ -230,7 +230,7 @@ export function EmptyState({
                     variant="outline"
                     size="sm"
                     onClick={() => onSuggestionClick(suggestion.prompt)}
-                    className="text-xs gap-1.5 h-9 hover:bg-violet-50 hover:border-violet-300 dark:hover:bg-violet-900/20"
+                    className="text-xs gap-1.5 h-9 hover:bg-primary/10 hover:border-primary/20 dark:hover:bg-primary/20"
                   >
                     <span>{suggestion.icon}</span>
                     {suggestion.text}
@@ -242,7 +242,7 @@ export function EmptyState({
                     variant="outline"
                     size="sm"
                     onClick={() => onSuggestionClick(prompt.prompt)}
-                    className="text-xs gap-1.5 h-9 hover:bg-violet-50 hover:border-violet-300 dark:hover:bg-violet-900/20"
+                    className="text-xs gap-1.5 h-9 hover:bg-primary/10 hover:border-primary/20 dark:hover:bg-primary/20"
                   >
                     <span>{prompt.icon}</span>
                     {prompt.text}
@@ -293,7 +293,7 @@ export function EmptyState({
               variant="outline"
               size="sm"
               onClick={() => onSuggestionClick(prompt.prompt)}
-              className="text-xs gap-1.5 h-9 hover:bg-violet-50 hover:border-violet-300 dark:hover:bg-violet-900/20"
+              className="text-xs gap-1.5 h-9 hover:bg-primary/10 hover:border-primary/20 dark:hover:bg-primary/20"
             >
               <span>{prompt.icon}</span>
               {prompt.text}
@@ -329,7 +329,7 @@ export function EmptyState({
                 >
                   {item.type === 'meeting' && <Calendar className="h-3.5 w-3.5 text-blue-500 flex-shrink-0" />}
                   {item.type === 'task' && <CheckSquare className="h-3.5 w-3.5 text-amber-500 flex-shrink-0" />}
-                  {item.type === 'document' && <FileText className="h-3.5 w-3.5 text-violet-500 flex-shrink-0" />}
+                  {item.type === 'document' && <FileText className="h-3.5 w-3.5 text-primary flex-shrink-0" />}
                   <span className="text-slate-700 dark:text-slate-300 max-w-[150px] truncate">
                     {item.item.title}
                   </span>
@@ -355,22 +355,22 @@ export function EmptyState({
             transition={{ delay: 0.2 }}
             className="mt-auto"
           >
-            <div className="bg-primary dark:to-slate-900 rounded-xl border border-violet-200 dark:border-violet-800/50 overflow-hidden">
+            <div className="bg-primary dark:to-slate-900 rounded-xl border border-primary/20 dark:border-primary/50 overflow-hidden">
               {/* Header with toggle */}
               <button
                 onClick={() => setShowConversations(!showConversations)}
-                className="w-full px-4 py-3 flex items-center justify-between bg-violet-100/50 dark:bg-violet-900/20 hover:bg-violet-100 dark:hover:bg-violet-900/30 transition-colors"
+                className="w-full px-4 py-3 flex items-center justify-between bg-primary/50 dark:bg-primary/20 hover:bg-primary/10 dark:hover:bg-primary/30 transition-colors"
               >
                 <div className="flex items-center gap-2">
-                  <MessageSquare className="h-4 w-4 text-violet-600 dark:text-violet-400" />
-                  <span className="text-sm font-medium text-violet-900 dark:text-violet-100">
+                  <MessageSquare className="h-4 w-4 text-primary" />
+                  <span className="text-sm font-medium text-primary">
                     Recent conversations
                   </span>
-                  <span className="text-xs text-violet-600 dark:text-violet-400 bg-violet-200 dark:bg-violet-800 px-1.5 py-0.5 rounded-full">
+                  <span className="text-xs text-primary bg-primary/20 dark:bg-primary px-1.5 py-0.5 rounded-full">
                     {recentConversations.length}
                   </span>
                 </div>
-                <div className="flex items-center gap-2 text-violet-600 dark:text-violet-400">
+                <div className="flex items-center gap-2 text-primary">
                   <span className="text-xs">{showConversations ? "Hide" : "Show"}</span>
                   {showConversations ? (
                     <ChevronUp className="h-4 w-4" />
@@ -387,7 +387,7 @@ export function EmptyState({
                     <button
                       key={conv.id}
                       onClick={() => onSelectConversation?.(conv.id)}
-                      className="w-full text-left px-3 py-2 rounded-lg hover:bg-violet-50 dark:hover:bg-violet-900/20 transition-colors"
+                      className="w-full text-left px-3 py-2 rounded-lg hover:bg-primary/10 dark:hover:bg-primary/20 transition-colors"
                     >
                       <div className="flex items-center justify-between gap-2">
                         <span className="text-sm text-slate-700 dark:text-slate-300 truncate">

@@ -243,7 +243,7 @@ export default function DeveloperPortalPage() {
                 </p>
               </div>
               <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-primary/10 to-primary/10 flex items-center justify-center">
-                <Zap className="h-6 w-6 text-purple-600" />
+                <Zap className="h-6 w-6 text-primary" />
               </div>
             </div>
             <div className="flex items-center gap-2 mt-2 text-sm text-muted-foreground">

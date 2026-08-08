@@ -113,7 +113,7 @@ export function DocumentCard({
     if (fileType.includes("csv") || fileType.includes("sheet"))
       return <Sheet className={`${iconProps} text-green-500`} strokeWidth={1.5} />;
     if (fileType.includes("markdown"))
-      return <FileText className={`${iconProps} text-purple-500`} strokeWidth={1.5} />;
+      return <FileText className={`${iconProps} text-primary`} strokeWidth={1.5} />;
     return <File className={`${iconProps} text-gray-400`} strokeWidth={1.5} />;
   }
 
@@ -279,7 +279,7 @@ export function DocumentCard({
             </div>
           )}
           {doc.status === "completed" && doc.document_type && (
-            <span className="text-xs px-3 py-1.5 bg-gradient-to-r from-primary/10 to-primary/10 text-purple-600 dark:text-purple-400 border border-purple-500/30 rounded-xl font-semibold backdrop-blur-xl">
+            <span className="text-xs px-3 py-1.5 bg-gradient-to-r from-primary/10 to-primary/10 text-primary border border-primary/30 rounded-xl font-semibold backdrop-blur-xl">
               {doc.document_type}
             </span>
           )}
@@ -293,7 +293,7 @@ export function DocumentCard({
               className="w-full flex items-center justify-between text-left mb-2 hover:opacity-80 transition-opacity"
             >
               <div className="flex items-center gap-2">
-                <Sparkles className="h-4 w-4 text-purple-500" />
+                <Sparkles className="h-4 w-4 text-primary" />
                 <span className="text-sm font-medium text-foreground">
                   AI Summary
                 </span>
@@ -318,7 +318,7 @@ export function DocumentCard({
                     <ul className="space-y-1 text-xs text-muted-foreground">
                       {doc.key_points.map((point, idx) => (
                         <li key={idx} className="flex items-start gap-2">
-                          <span className="text-purple-500 mt-0.5">•</span>
+                          <span className="text-primary mt-0.5">•</span>
                           <span>{point}</span>
                         </li>
                       ))}
@@ -466,7 +466,7 @@ export function DocumentCard({
                 <Button
                   variant="outline"
                   size="sm"
-                  className="flex-1 backdrop-blur-xl bg-gradient-to-r from-primary/10 to-primary/10 border-purple-500/30 hover:bg-purple-500/20 hover:border-purple-500/50 text-purple-600 dark:text-purple-400 font-semibold h-11 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300"
+                  className="flex-1 backdrop-blur-xl bg-gradient-to-r from-primary/10 to-primary/10 border-primary/30 hover:bg-primary/20 hover:border-primary/50 text-primary font-semibold h-11 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300"
                   onClick={() => onGenerateSummary(doc.id)}
                   disabled={generatingSummary === doc.id}
                 >

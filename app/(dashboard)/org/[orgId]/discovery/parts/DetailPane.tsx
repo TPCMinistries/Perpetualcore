@@ -1501,7 +1501,7 @@ export function DetailPane({
           </div>
         </div>
         <div className="flex gap-3">
-          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-violet-50 text-violet-700">
+          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
             <FileCheck2 className="h-4 w-4" />
           </div>
           <div>

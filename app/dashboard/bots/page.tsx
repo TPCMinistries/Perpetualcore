@@ -254,7 +254,7 @@ export default function BotsPage() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="relative overflow-hidden rounded-3xl bg-primary border border-violet-100 dark:border-violet-900/20 p-8 shadow-lg">
+      <div className="relative overflow-hidden rounded-3xl bg-primary border border-primary/20 p-8 shadow-lg">
         <div className="absolute inset-0 bg-grid-pattern opacity-5"></div>
         <div className="relative flex items-center justify-between">
           <div className="flex items-center gap-4">
@@ -265,7 +265,7 @@ export default function BotsPage() {
               <h1 className="text-3xl font-bold text-primary">
                 Bot Builder
               </h1>
-              <p className="text-violet-700 dark:text-violet-300 mt-1">
+              <p className="text-primary mt-1">
                 Create and manage automated workflows
               </p>
             </div>

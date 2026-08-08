@@ -146,7 +146,7 @@ export function OperateClient({
               key={feature.title}
               className="rounded-xl border bg-card p-5 opacity-60"
             >
-              <feature.icon className="h-5 w-5 text-violet-500 mb-3" />
+              <feature.icon className="h-5 w-5 text-primary mb-3" />
               <h3 className="font-medium text-sm mb-1">{feature.title}</h3>
               <p className="text-xs text-muted-foreground">
                 {feature.description}
@@ -211,7 +211,7 @@ export function OperateClient({
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {OPERATE_FEATURES.map((feature) => (
             <div key={feature.title} className="rounded-xl border bg-card p-5">
-              <feature.icon className="h-5 w-5 text-violet-500 mb-3" />
+              <feature.icon className="h-5 w-5 text-primary mb-3" />
               <h3 className="font-medium text-sm mb-1">{feature.title}</h3>
               <p className="text-xs text-muted-foreground">
                 {feature.description}

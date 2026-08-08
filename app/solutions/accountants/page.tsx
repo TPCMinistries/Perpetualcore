@@ -663,7 +663,7 @@ export default function AccountantsPage() {
         <div className="container mx-auto px-4">
           <div className="max-w-6xl mx-auto">
             <div className="text-center mb-16">
-              <div className="inline-flex items-center gap-2 bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 px-4 py-2 rounded-full text-sm font-semibold mb-4">
+              <div className="inline-flex items-center gap-2 bg-primary/10 dark:bg-primary/30 text-primary px-4 py-2 rounded-full text-sm font-semibold mb-4">
                 <Brain className="h-4 w-4" />
                 Your Firm's Institutional Brain
               </div>
@@ -956,8 +956,8 @@ export default function AccountantsPage() {
               {/* New Regulation Changes */}
               <Card className="border-2 hover:border-primary transition-all">
                 <CardHeader>
-                  <div className="h-12 w-12 rounded-full bg-purple-100 dark:bg-purple-900/20 flex items-center justify-center mb-3">
-                    <FileSpreadsheet className="h-6 w-6 text-purple-600 dark:text-purple-400" />
+                  <div className="h-12 w-12 rounded-full bg-primary/10 dark:bg-primary/20 flex items-center justify-center mb-3">
+                    <FileSpreadsheet className="h-6 w-6 text-primary" />
                   </div>
                   <CardTitle className="text-2xl">Regulatory Changes</CardTitle>
                   <CardDescription>Stay current with evolving tax law</CardDescription>

@@ -119,14 +119,14 @@ export function LinkReportToProfile({
         </DialogHeader>
         {loading ? (
           <div className="flex min-h-36 items-center justify-center gap-2 text-sm text-slate-600">
-            <Loader2 className="h-4 w-4 animate-spin text-indigo-600" /> Loading profiles…
+            <Loader2 className="h-4 w-4 animate-spin text-primary" /> Loading profiles…
           </div>
         ) : subjects.length === 0 ? (
-          <div className="rounded-xl border border-dashed border-indigo-200 bg-indigo-50 p-6 text-center">
-            <UserRound className="mx-auto h-6 w-6 text-indigo-700" />
+          <div className="rounded-xl border border-dashed border-primary/20 bg-primary/10 p-6 text-center">
+            <UserRound className="mx-auto h-6 w-6 text-primary" />
             <p className="mt-3 font-semibold text-slate-950">No active consented profile is available.</p>
             <p className="mt-2 text-sm leading-6 text-slate-600">Create the profile and record longitudinal consent before linking evidence.</p>
-            <Button asChild className="mt-4 bg-indigo-600 hover:bg-indigo-700">
+            <Button asChild className="mt-4 bg-primary hover:bg-primary">
               <Link href="/dashboard/development/profiles"><Plus className="mr-2 h-4 w-4" />Create a profile</Link>
             </Button>
           </div>
@@ -151,7 +151,7 @@ export function LinkReportToProfile({
         <DialogFooter>
           <Button type="button" variant="outline" onClick={() => setOpen(false)}>Cancel</Button>
           {subjects.length > 0 && (
-            <Button type="button" onClick={() => void linkReport()} disabled={!subjectId || !participantLabel || linking} className="bg-indigo-600 hover:bg-indigo-700">
+            <Button type="button" onClick={() => void linkReport()} disabled={!subjectId || !participantLabel || linking} className="bg-primary hover:bg-primary">
               {linking ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Link2 className="mr-2 h-4 w-4" />}
               Link evidence
             </Button>

@@ -169,7 +169,7 @@ export function CalendarHeader({ onConnectCalendar }: CalendarHeaderProps) {
                   checked={state.filters.showFollowups}
                   onCheckedChange={toggleFollowups}
                 >
-                  <Users className="h-4 w-4 mr-2 text-violet-500" />
+                  <Users className="h-4 w-4 mr-2 text-primary" />
                   Follow-ups
                 </DropdownMenuCheckboxItem>
               </DropdownMenuContent>

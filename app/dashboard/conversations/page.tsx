@@ -101,8 +101,8 @@ export default function TeamConversationsPage() {
           <Card className="border-border dark:border-border bg-card p-12">
             <div className="text-center max-w-2xl mx-auto space-y-6">
               <div className="flex justify-center">
-                <div className="h-20 w-20 rounded-2xl bg-indigo-50 dark:bg-indigo-950/30 flex items-center justify-center">
-                  <MessageSquare className="h-10 w-10 text-indigo-600 dark:text-indigo-400" />
+                <div className="h-20 w-20 rounded-2xl bg-primary/10 dark:bg-primary/30 flex items-center justify-center">
+                  <MessageSquare className="h-10 w-10 text-primary" />
                 </div>
               </div>
               <div>
@@ -117,7 +117,7 @@ export default function TeamConversationsPage() {
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-4">
                 <div className="p-4 rounded-lg border border-border dark:border-border bg-muted dark:bg-card/50">
-                  <Users className="h-8 w-8 text-indigo-600 dark:text-indigo-400 mx-auto mb-3" />
+                  <Users className="h-8 w-8 text-primary mx-auto mb-3" />
                   <h3 className="font-semibold text-foreground dark:text-foreground mb-1">Collaborate</h3>
                   <p className="text-sm text-muted-foreground dark:text-muted-foreground">
                     Work together with team members on projects
@@ -125,7 +125,7 @@ export default function TeamConversationsPage() {
                 </div>
 
                 <div className="p-4 rounded-lg border border-border dark:border-border bg-muted dark:bg-card/50">
-                  <Sparkles className="h-8 w-8 text-purple-600 dark:text-purple-400 mx-auto mb-3" />
+                  <Sparkles className="h-8 w-8 text-primary mx-auto mb-3" />
                   <h3 className="font-semibold text-foreground dark:text-foreground mb-1">AI Powered</h3>
                   <p className="text-sm text-muted-foreground dark:text-muted-foreground">
                     Get intelligent responses from Claude AI
@@ -174,7 +174,7 @@ export default function TeamConversationsPage() {
 
                     {/* Context Badge */}
                     {conv.context_type && (
-                      <div className="inline-flex items-center px-2 py-1 rounded-full text-xs bg-indigo-50 dark:bg-indigo-950/30 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800">
+                      <div className="inline-flex items-center px-2 py-1 rounded-full text-xs bg-primary/10 dark:bg-primary/30 text-primary border border-primary/20 dark:border-primary/40">
                         {conv.context_type === "document" && <FileText className="h-3 w-3 mr-1" />}
                         {conv.context_type}
                       </div>

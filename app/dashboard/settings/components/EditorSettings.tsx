@@ -54,7 +54,7 @@ export function EditorSettings({ preferences, onUpdatePreference }: EditorSettin
 
         <div className="flex items-center justify-between p-4 rounded-lg border border-border dark:border-border hover:bg-muted dark:hover:bg-muted/50 transition-colors">
           <div className="flex items-center gap-3">
-            <AlignLeft className="h-5 w-5 text-purple-500" />
+            <AlignLeft className="h-5 w-5 text-primary" />
             <div>
               <p className="font-medium text-foreground dark:text-white">Line Numbers</p>
               <p className="text-sm text-muted-foreground dark:text-muted-foreground">Show line numbers in code editor</p>

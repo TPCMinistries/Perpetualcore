@@ -150,7 +150,7 @@ export default async function ExecutiveDashboardPage() {
         <div className="max-w-7xl mx-auto px-6 py-8">
           {/* Header */}
           <div className="mb-8 flex items-center gap-4">
-            <div className="h-12 w-12 rounded-2xl bg-primary shadow-lg shadow-violet-500/20 flex items-center justify-center">
+            <div className="h-12 w-12 rounded-2xl bg-primary shadow-lg shadow-primary/20 flex items-center justify-center">
               <Crown className="h-6 w-6 text-white" />
             </div>
             <div>
@@ -164,11 +164,11 @@ export default async function ExecutiveDashboardPage() {
           </div>
 
           {/* Empty CTA */}
-          <Card className="border-dashed border-2 border-violet-300/50 dark:border-violet-700/50">
+          <Card className="border-dashed border-2 border-primary/50">
             <CardContent className="py-20">
               <div className="text-center max-w-lg mx-auto">
                 <div className="mx-auto w-20 h-20 rounded-3xl bg-gradient-to-br from-primary/10 to-primary/10 dark:from-primary/20 dark:to-primary/20 flex items-center justify-center mb-6">
-                  <Users className="h-10 w-10 text-violet-500 dark:text-violet-400" />
+                  <Users className="h-10 w-10 text-primary" />
                 </div>
                 <h2 className="text-xl font-semibold text-foreground mb-3">
                   Your executive team hasn&apos;t been assembled yet
@@ -180,7 +180,7 @@ export default async function ExecutiveDashboardPage() {
                 </p>
                 <Button
                   asChild
-                  className="h-12 px-8 bg-primary text-white shadow-lg shadow-violet-500/25 rounded-xl text-base"
+                  className="h-12 px-8 bg-primary text-white shadow-lg shadow-primary/25 rounded-xl text-base"
                 >
                   <Link href="/api/assistants/seed" prefetch={false}>
                     <Sparkles className="mr-2 h-5 w-5" />
@@ -206,7 +206,7 @@ export default async function ExecutiveDashboardPage() {
         {/* Header */}
         <div className="mb-8 flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <div className="h-12 w-12 rounded-2xl bg-primary shadow-lg shadow-violet-500/20 flex items-center justify-center">
+            <div className="h-12 w-12 rounded-2xl bg-primary shadow-lg shadow-primary/20 flex items-center justify-center">
               <Crown className="h-6 w-6 text-white" />
             </div>
             <div>

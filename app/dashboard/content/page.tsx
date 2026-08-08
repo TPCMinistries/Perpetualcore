@@ -565,7 +565,7 @@ export default function ContentPage() {
               </div>
               <div className="flex gap-2">
                 <div className="h-10 w-28 bg-muted rounded-lg animate-pulse" />
-                <div className="h-10 w-36 bg-violet-200 dark:bg-violet-900/50 rounded-lg animate-pulse" />
+                <div className="h-10 w-36 bg-primary/20 dark:bg-primary/50 rounded-lg animate-pulse" />
               </div>
             </div>
           </div>
@@ -643,7 +643,7 @@ export default function ContentPage() {
                 else setShowNewContent(true);
               }}>
                 <DialogTrigger asChild>
-                  <Button className="bg-primary text-white shadow-lg shadow-violet-500/25">
+                  <Button className="bg-primary text-white shadow-lg shadow-primary/25">
                     <Plus className="h-4 w-4 mr-2" />
                     Create Content
                   </Button>
@@ -668,8 +668,8 @@ export default function ContentPage() {
                           <ChevronLeft className="h-4 w-4" />
                         </Button>
                       )}
-                      <div className="p-2 rounded-lg bg-violet-100 dark:bg-violet-900/30">
-                        <PenSquare className="h-4 w-4 text-violet-600 dark:text-violet-400" />
+                      <div className="p-2 rounded-lg bg-primary/10 dark:bg-primary/30">
+                        <PenSquare className="h-4 w-4 text-primary" />
                       </div>
                       {dialogView === "templates" && "Choose a Template"}
                       {dialogView === "form" && (selectedTemplate ? `Template: ${selectedTemplate.name}` : "Create New Content")}
@@ -694,11 +694,11 @@ export default function ContentPage() {
                               <div
                                 key={template.id}
                                 onClick={() => applyTemplate(template)}
-                                className="rounded-lg border border-border p-4 cursor-pointer hover:border-violet-300 dark:hover:border-violet-600 hover:bg-violet-50/50 dark:hover:bg-violet-900/10 transition-all"
+                                className="rounded-lg border border-border p-4 cursor-pointer hover:border-primary/20 dark:hover:border-primary/40 hover:bg-primary/50 dark:hover:bg-primary/10 transition-all"
                               >
                                 <div className="flex items-center gap-3">
                                   <div className="h-9 w-9 rounded-lg bg-muted flex items-center justify-center flex-shrink-0">
-                                    <Zap className="h-4 w-4 text-violet-600 dark:text-violet-400" />
+                                    <Zap className="h-4 w-4 text-primary" />
                                   </div>
                                   <div className="flex-1 min-w-0">
                                     <h4 className="font-medium text-sm text-foreground">
@@ -725,16 +725,16 @@ export default function ContentPage() {
                     <div className="space-y-4 py-4">
                       {/* Streaming preview */}
                       {isStreaming && (
-                        <div className="rounded-lg border border-violet-200 dark:border-violet-800 bg-violet-50/50 dark:bg-violet-900/10 p-4">
+                        <div className="rounded-lg border border-primary/20 dark:border-primary/40 bg-primary/50 dark:bg-primary/10 p-4">
                           <div className="flex items-center gap-2 mb-3">
-                            <Loader2 className="h-4 w-4 animate-spin text-violet-500" />
-                            <span className="text-sm font-medium text-violet-600 dark:text-violet-400">
+                            <Loader2 className="h-4 w-4 animate-spin text-primary" />
+                            <span className="text-sm font-medium text-primary">
                               Writing with {generationModel}...
                             </span>
                           </div>
                           <p className="text-sm text-foreground whitespace-pre-wrap max-h-64 overflow-y-auto">
                             {streamingText}
-                            <span className="inline-block w-1.5 h-4 bg-violet-500 animate-pulse ml-0.5 align-middle" />
+                            <span className="inline-block w-1.5 h-4 bg-primary animate-pulse ml-0.5 align-middle" />
                           </p>
                         </div>
                       )}
@@ -770,8 +770,8 @@ export default function ContentPage() {
                                   className={cn(
                                     "rounded-lg border p-4 cursor-pointer transition-all",
                                     selectedVariation === idx
-                                      ? "border-violet-500 bg-violet-50/50 dark:bg-violet-900/20 ring-1 ring-violet-500"
-                                      : "border-border hover:border-violet-300 dark:hover:border-violet-600"
+                                      ? "border-primary/40 bg-primary/50 dark:bg-primary/20 ring-1 ring-primary"
+                                      : "border-border hover:border-primary/20 dark:hover:border-primary/40"
                                   )}
                                 >
                                   <div className="flex items-center justify-between mb-2">
@@ -794,7 +794,7 @@ export default function ContentPage() {
                                   {(variation.hashtags?.length ?? 0) > 0 && (
                                     <div className="flex flex-wrap gap-1 mt-2">
                                       {variation.hashtags!.map((tag, i) => (
-                                        <span key={i} className="text-xs text-violet-600 dark:text-violet-400">
+                                        <span key={i} className="text-xs text-primary">
                                           #{tag}
                                         </span>
                                       ))}
@@ -834,12 +834,12 @@ export default function ContentPage() {
                         {!selectedTemplate && (
                           <div
                             onClick={() => setDialogView("templates")}
-                            className="rounded-lg border border-dashed border-violet-300 dark:border-violet-700 p-3 cursor-pointer hover:bg-violet-50/50 dark:hover:bg-violet-900/10 transition-colors"
+                            className="rounded-lg border border-dashed border-primary/20 dark:border-primary/40 p-3 cursor-pointer hover:bg-primary/50 dark:hover:bg-primary/10 transition-colors"
                           >
                             <div className="flex items-center gap-3 text-sm">
-                              <Zap className="h-4 w-4 text-violet-500" />
+                              <Zap className="h-4 w-4 text-primary" />
                               <span className="text-muted-foreground">
-                                Start from a <strong className="text-violet-600 dark:text-violet-400">template</strong> — 10 pre-built prompts for social, blog, email & more
+                                Start from a <strong className="text-primary">template</strong> — 10 pre-built prompts for social, blog, email & more
                               </span>
                             </div>
                           </div>
@@ -847,9 +847,9 @@ export default function ContentPage() {
 
                         {/* Template fields */}
                         {selectedTemplate && (
-                          <div className="rounded-lg border border-violet-200 dark:border-violet-800 bg-violet-50/30 dark:bg-violet-900/10 p-4 space-y-3">
+                          <div className="rounded-lg border border-primary/20 dark:border-primary/40 bg-primary/30 dark:bg-primary/10 p-4 space-y-3">
                             <div className="flex items-center justify-between">
-                              <span className="text-sm font-medium text-violet-600 dark:text-violet-400">
+                              <span className="text-sm font-medium text-primary">
                                 {selectedTemplate.name}
                               </span>
                               <Button
@@ -1100,17 +1100,17 @@ export default function ContentPage() {
                 </div>
               </CardContent>
             </Card>
-            <Card className="border-violet-200 dark:border-violet-800/50 bg-violet-50/50 dark:bg-violet-900/20">
+            <Card className="border-primary/20 dark:border-primary/50 bg-primary/50 dark:bg-primary/20">
               <CardContent className="p-5">
                 <div className="flex items-center gap-3">
-                  <div className="p-2 rounded-lg bg-violet-100 dark:bg-violet-900/30">
-                    <Clock className="h-4 w-4 text-violet-600 dark:text-violet-400" />
+                  <div className="p-2 rounded-lg bg-primary/10 dark:bg-primary/30">
+                    <Clock className="h-4 w-4 text-primary" />
                   </div>
                   <div>
-                    <p className="text-sm text-violet-600 dark:text-violet-400">
+                    <p className="text-sm text-primary">
                       Scheduled
                     </p>
-                    <p className="text-2xl font-bold text-violet-700 dark:text-violet-300">
+                    <p className="text-2xl font-bold text-primary">
                       {stats.scheduled}
                     </p>
                   </div>
@@ -1236,7 +1236,7 @@ export default function ContentPage() {
                 >
                   <Card
                     onClick={() => router.push(`/dashboard/content/${item.id}`)}
-                    className="border-border bg-background hover:shadow-lg hover:border-violet-300 dark:hover:border-violet-700 transition-all cursor-pointer group"
+                    className="border-border bg-background hover:shadow-lg hover:border-primary/20 dark:hover:border-primary/40 transition-all cursor-pointer group"
                   >
                     <CardContent className="p-5">
                       <div className="flex items-start justify-between mb-3">
@@ -1293,7 +1293,7 @@ export default function ContentPage() {
                         </DropdownMenu>
                       </div>
 
-                      <h3 className="font-semibold text-foreground mb-2 line-clamp-2 group-hover:text-violet-600 dark:group-hover:text-violet-400 transition-colors">
+                      <h3 className="font-semibold text-foreground mb-2 line-clamp-2 group-hover:text-primary dark:group-hover:text-primary transition-colors">
                         {item.title}
                       </h3>
 
@@ -1345,7 +1345,7 @@ export default function ContentPage() {
                 >
                   <Card
                     onClick={() => router.push(`/dashboard/content/${item.id}`)}
-                    className="border-border bg-background hover:shadow-md hover:border-violet-300 dark:hover:border-violet-700 transition-all cursor-pointer group"
+                    className="border-border bg-background hover:shadow-md hover:border-primary/20 dark:hover:border-primary/40 transition-all cursor-pointer group"
                   >
                     <CardContent className="p-4">
                       <div className="flex items-center gap-4">
@@ -1353,7 +1353,7 @@ export default function ContentPage() {
                           <PlatformIcon className="h-5 w-5 text-muted-foreground" />
                         </div>
                         <div className="flex-1 min-w-0">
-                          <h3 className="font-medium text-foreground truncate group-hover:text-violet-600 dark:group-hover:text-violet-400 transition-colors">
+                          <h3 className="font-medium text-foreground truncate group-hover:text-primary dark:group-hover:text-primary transition-colors">
                             {item.title}
                           </h3>
                           <p className="text-sm text-muted-foreground">

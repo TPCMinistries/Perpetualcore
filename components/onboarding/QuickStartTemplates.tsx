@@ -194,11 +194,11 @@ export function QuickStartTemplates({ onDismiss, compact = false }: QuickStartTe
 
   if (compact) {
     return (
-      <Card className="border-dashed border-2 border-violet-200 dark:border-violet-800 bg-gradient-to-br from-primary/50 to-primary/50 dark:from-primary/20 dark:to-primary/20">
+      <Card className="border-dashed border-2 border-primary/20 dark:border-primary/40 bg-gradient-to-br from-primary/50 to-primary/50 dark:from-primary/20 dark:to-primary/20">
         <CardContent className="p-4">
           <div className="flex items-center gap-3">
-            <div className="p-2 rounded-lg bg-violet-100 dark:bg-violet-900">
-              <Rocket className="h-5 w-5 text-violet-600 dark:text-violet-400" />
+            <div className="p-2 rounded-lg bg-primary/10 dark:bg-primary">
+              <Rocket className="h-5 w-5 text-primary" />
             </div>
             <div className="flex-1">
               <p className="font-medium text-sm">Quick Start Templates</p>
@@ -207,7 +207,7 @@ export function QuickStartTemplates({ onDismiss, compact = false }: QuickStartTe
             <Button
               size="sm"
               onClick={() => router.push("/dashboard/getting-started")}
-              className="bg-violet-600 hover:bg-violet-700"
+              className="bg-primary hover:bg-primary"
             >
               Explore
               <ArrowRight className="h-3 w-3 ml-1" />
@@ -298,7 +298,7 @@ export function QuickStartTemplates({ onDismiss, compact = false }: QuickStartTe
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-2xl font-bold flex items-center gap-2">
-            <Rocket className="h-6 w-6 text-violet-600" />
+            <Rocket className="h-6 w-6 text-primary" />
             Quick Start Templates
           </h2>
           <p className="text-muted-foreground mt-1">
@@ -323,7 +323,7 @@ export function QuickStartTemplates({ onDismiss, compact = false }: QuickStartTe
             <Card
               className={`cursor-pointer transition-all hover:shadow-lg hover:scale-[1.02] border-2 ${
                 selectedTemplate?.id === template.id
-                  ? "border-violet-500 shadow-violet-100"
+                  ? "border-primary/40 shadow-primary"
                   : "border-transparent hover:border-slate-200 dark:hover:border-slate-700"
               }`}
               onClick={() => handleSelectTemplate(template)}

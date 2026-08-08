@@ -269,7 +269,7 @@ export default function MeetingDetailPage({ params }: { params: Promise<{ id: st
           )}
 
           {meeting.promises && meeting.promises.length > 0 && (
-            <Badge className="py-1.5 px-3 bg-violet-50 dark:bg-violet-500/10 text-violet-600 dark:text-violet-400 border-0">
+            <Badge className="py-1.5 px-3 bg-primary/10 text-primary border-0">
               <Handshake className="h-3.5 w-3.5 mr-1.5" />
               {meeting.promises.length} promise{meeting.promises.length > 1 ? "s" : ""}
             </Badge>
@@ -352,7 +352,7 @@ export default function MeetingDetailPage({ params }: { params: Promise<{ id: st
               <Card className="border-0 shadow-lg shadow-slate-200/50 dark:shadow-none bg-card/50">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2 text-lg">
-                    <ListChecks className="h-5 w-5 text-violet-500" />
+                    <ListChecks className="h-5 w-5 text-primary" />
                     Next Steps
                   </CardTitle>
                 </CardHeader>
@@ -360,7 +360,7 @@ export default function MeetingDetailPage({ params }: { params: Promise<{ id: st
                   <ul className="space-y-2">
                     {meeting.next_steps.map((step, i) => (
                       <li key={i} className="flex items-start gap-3">
-                        <div className="h-5 w-5 rounded border-2 border-violet-300 dark:border-violet-600 flex-shrink-0" />
+                        <div className="h-5 w-5 rounded border-2 border-primary/20 dark:border-primary/40 flex-shrink-0" />
                         <span className="text-foreground dark:text-muted-foreground">{step}</span>
                       </li>
                     ))}

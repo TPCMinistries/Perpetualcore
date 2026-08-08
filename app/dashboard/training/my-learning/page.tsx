@@ -147,7 +147,7 @@ export default function MyLearningPage() {
               </div>
 
               <div className="p-4 rounded-lg border border-border bg-background/50">
-                <Award className="h-8 w-8 text-purple-600 mx-auto mb-3" />
+                <Award className="h-8 w-8 text-primary mx-auto mb-3" />
                 <h3 className="font-semibold text-foreground mb-1">Earn Certificates</h3>
                 <p className="text-sm text-muted-foreground">
                   Get recognized for completing courses

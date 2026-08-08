@@ -73,7 +73,7 @@ export function ChatMessages({
             >
               {/* Assistant Avatar */}
               {message.role === "assistant" && (
-                <div className="flex-shrink-0 w-8 h-8 rounded-full bg-primary shadow-lg shadow-violet-500/20 flex items-center justify-center">
+                <div className="flex-shrink-0 w-8 h-8 rounded-full bg-primary shadow-lg shadow-primary/20 flex items-center justify-center">
                   <Bot className="h-4 w-4 text-white" />
                 </div>
               )}
@@ -204,7 +204,7 @@ export function ChatMessages({
               animate={{ opacity: 1, y: 0 }}
               className="flex gap-4"
             >
-              <div className="flex-shrink-0 w-8 h-8 rounded-full bg-primary shadow-lg shadow-violet-500/20 flex items-center justify-center">
+              <div className="flex-shrink-0 w-8 h-8 rounded-full bg-primary shadow-lg shadow-primary/20 flex items-center justify-center">
                 <Bot className="h-4 w-4 text-white" />
               </div>
               <div className="bg-card/80 backdrop-blur-sm border border-border/50 rounded-2xl px-4 py-3">
@@ -213,7 +213,7 @@ export function ChatMessages({
                     {[0, 1, 2].map((i) => (
                       <div
                         key={i}
-                        className="h-2 w-2 rounded-full bg-violet-400 animate-bounce"
+                        className="h-2 w-2 rounded-full bg-primary animate-bounce"
                         style={{ animationDelay: `${i * 150}ms` }}
                       />
                     ))}

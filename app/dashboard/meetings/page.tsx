@@ -296,7 +296,7 @@ export default function MeetingsPage() {
         actions={
           <Dialog open={showNewMeeting} onOpenChange={setShowNewMeeting}>
             <DialogTrigger asChild>
-              <Button className="h-11 px-5 bg-primary text-white shadow-lg shadow-violet-500/25 border-0">
+              <Button className="h-11 px-5 bg-primary text-white shadow-lg shadow-primary/25 border-0">
                 <Plus className="h-4 w-4 mr-2" />
                 Add Meeting
               </Button>
@@ -485,7 +485,7 @@ export default function MeetingsPage() {
             >
               <Card
                 onClick={() => router.push(`/dashboard/meetings/${meeting.id}`)}
-                className="border-border dark:border-border bg-card hover:shadow-lg hover:shadow-violet-500/5 hover:border-violet-200 dark:hover:border-violet-800/50 transition-all cursor-pointer group"
+                className="border-border dark:border-border bg-card hover:shadow-lg hover:shadow-primary/5 hover:border-primary/20 dark:hover:border-primary/50 transition-all cursor-pointer group"
               >
                 <CardContent className="p-6">
                   <div className="flex items-start justify-between">
@@ -519,7 +519,7 @@ export default function MeetingsPage() {
                         )}
                       </div>
 
-                      <h3 className="text-lg font-semibold text-foreground dark:text-white mb-2 group-hover:text-violet-600 dark:group-hover:text-violet-400 transition-colors">
+                      <h3 className="text-lg font-semibold text-foreground dark:text-white mb-2 group-hover:text-primary dark:group-hover:text-primary transition-colors">
                         {meeting.meeting_title}
                       </h3>
 
@@ -543,7 +543,7 @@ export default function MeetingsPage() {
                         {/* Key topics count */}
                         {meeting.key_topics &&
                           meeting.key_topics.length > 0 && (
-                            <span className="inline-flex items-center gap-1.5 text-xs font-medium text-violet-600 dark:text-violet-400 bg-violet-50 dark:bg-violet-500/10 px-2.5 py-1 rounded-full">
+                            <span className="inline-flex items-center gap-1.5 text-xs font-medium text-primary bg-primary/10 px-2.5 py-1 rounded-full">
                               <MessageSquare className="h-3 w-3" />
                               {meeting.key_topics.length} topic
                               {meeting.key_topics.length > 1 ? "s" : ""}

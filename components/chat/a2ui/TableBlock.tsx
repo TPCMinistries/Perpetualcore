@@ -36,7 +36,7 @@ export default function TableBlock({ block }: TableBlockProps) {
         }
         return (
           <button
-            className="flex items-center gap-1 text-xs font-semibold hover:text-violet-600 dark:hover:text-violet-400 transition-colors"
+            className="flex items-center gap-1 text-xs font-semibold hover:text-primary dark:hover:text-primary transition-colors"
             onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
           >
             {col.label}

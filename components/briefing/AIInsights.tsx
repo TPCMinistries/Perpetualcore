@@ -118,7 +118,7 @@ export function AIInsights({ insights, onDismiss }: AIInsightsProps) {
               repeatDelay: 3
             }}
           >
-            <Brain className="h-4 w-4 text-violet-500" />
+            <Brain className="h-4 w-4 text-primary" />
           </motion.div>
           AI Insights
           {visibleInsights.length > 0 && (

@@ -269,7 +269,7 @@ export default function VoiceIntelPage() {
           className="flex w-full items-center justify-between px-4 py-3 text-left hover:bg-muted transition-colors"
         >
           <div className="flex items-center gap-2">
-            <FileText className="h-4 w-4 text-indigo-500" />
+            <FileText className="h-4 w-4 text-primary" />
             <span className="text-sm font-medium text-foreground">
               Paste Transcript
             </span>
@@ -296,7 +296,7 @@ export default function VoiceIntelPage() {
               placeholder="Title (optional) — e.g. 'Meeting with Dr. Silber'"
               value={pasteTitle}
               onChange={(e) => setPasteTitle(e.target.value)}
-              className="w-full rounded-md border border-border bg-muted px-3 py-2 text-sm placeholder:text-muted-foreground focus:border-indigo-300 focus:outline-none focus:ring-1 focus:ring-indigo-300"
+              className="w-full rounded-md border border-border bg-muted px-3 py-2 text-sm placeholder:text-muted-foreground focus:border-primary/20 focus:outline-none focus:ring-1 focus:ring-primary"
             />
             <textarea
               ref={textareaRef}
@@ -304,7 +304,7 @@ export default function VoiceIntelPage() {
               value={pasteText}
               onChange={(e) => setPasteText(e.target.value)}
               rows={6}
-              className="w-full rounded-md border border-border bg-muted px-3 py-2 text-sm placeholder:text-muted-foreground focus:border-indigo-300 focus:outline-none focus:ring-1 focus:ring-indigo-300 resize-y"
+              className="w-full rounded-md border border-border bg-muted px-3 py-2 text-sm placeholder:text-muted-foreground focus:border-primary/20 focus:outline-none focus:ring-1 focus:ring-primary resize-y"
             />
             <div className="flex items-center justify-between">
               <div className="text-xs text-muted-foreground">
@@ -335,7 +335,7 @@ export default function VoiceIntelPage() {
                 <button
                   onClick={handlePasteSubmit}
                   disabled={!pasteText.trim() || pasteLoading}
-                  className="inline-flex items-center gap-2 rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  className="inline-flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-sm font-medium text-white hover:bg-primary disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                 >
                   {pasteLoading ? (
                     <>
@@ -416,7 +416,7 @@ export default function VoiceIntelPage() {
           {/* Pattern Insights */}
           <div>
             <h3 className="text-lg font-semibold text-foreground flex items-center gap-2 mb-3">
-              <TrendingUp className="h-5 w-5 text-indigo-500" />
+              <TrendingUp className="h-5 w-5 text-primary" />
               Pattern Insights
             </h3>
             {patternsLoading ? (
@@ -440,7 +440,7 @@ export default function VoiceIntelPage() {
                       <span
                         className={`mt-0.5 inline-block h-2 w-2 rounded-full ${
                           p.type === "entity_focus"
-                            ? "bg-indigo-500"
+                            ? "bg-primary"
                             : p.type === "relationship"
                             ? "bg-emerald-500"
                             : p.type === "action_trend"
@@ -466,7 +466,7 @@ export default function VoiceIntelPage() {
           {/* Entity Breakdown */}
           <div>
             <h3 className="text-lg font-semibold text-foreground flex items-center gap-2 mb-3">
-              <Building2 className="h-5 w-5 text-violet-500" />
+              <Building2 className="h-5 w-5 text-primary" />
               Entity Breakdown
             </h3>
             {entitiesLoading ? (

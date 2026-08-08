@@ -190,7 +190,7 @@ export function MobileNav({ userProfile }: MobileNavProps) {
                                 "text-[10px] font-medium px-1.5 py-0.5 rounded-md",
                                 active
                                   ? "bg-white/20 text-white"
-                                  : "bg-violet-500/20 text-violet-300"
+                                  : "bg-primary/20 text-primary"
                               )}
                             >
                               {item.adaptiveConfig.badge === "coming-soon"

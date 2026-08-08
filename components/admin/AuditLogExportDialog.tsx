@@ -81,7 +81,7 @@ export default function AuditLogExportDialog({
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <Download className="h-5 w-5 text-violet-600" />
+            <Download className="h-5 w-5 text-primary" />
             Export Audit Logs
           </DialogTitle>
           <DialogDescription>

@@ -809,7 +809,7 @@ export default function ContactDetailPage() {
           <Button
             variant="outline"
             onClick={handleFetchInsights}
-            className="border-violet-200 dark:border-violet-800 text-violet-700 dark:text-violet-400 hover:bg-violet-50 dark:hover:bg-violet-900/20"
+            className="border-primary/20 dark:border-primary/40 text-primary hover:bg-primary/10 dark:hover:bg-primary/20"
           >
             <Sparkles className="h-4 w-4 mr-2" />
             AI Insights
@@ -926,7 +926,7 @@ export default function ContactDetailPage() {
                   size="sm"
                   onClick={handleFetchInsights}
                   disabled={insightsLoading}
-                  className="h-8 text-violet-600 hover:text-violet-700 hover:bg-violet-50"
+                  className="h-8 text-primary hover:text-primary hover:bg-primary/10"
                 >
                   {insightsLoading ? (
                     <Loader2 className="h-4 w-4 animate-spin" />
@@ -940,10 +940,10 @@ export default function ContactDetailPage() {
               </CardHeader>
               <CardContent className="space-y-4">
                 {contact.ai_summary && (
-                  <div className="p-3 rounded-lg bg-primary border border-violet-100 dark:border-violet-800">
+                  <div className="p-3 rounded-lg bg-primary border border-primary/20 dark:border-primary/40">
                     <div className="flex items-center gap-2 mb-2">
-                      <Sparkles className="h-4 w-4 text-violet-500" />
-                      <Label className="text-violet-700 dark:text-violet-300 font-medium">AI Summary</Label>
+                      <Sparkles className="h-4 w-4 text-primary" />
+                      <Label className="text-primary font-medium">AI Summary</Label>
                     </div>
                     <p className="text-sm">{contact.ai_summary}</p>
                   </div>
@@ -1301,7 +1301,7 @@ export default function ContactDetailPage() {
                               {noteAiProcessing === note.id ? (
                                 <Loader2 className="h-4 w-4 mr-2 animate-spin" />
                               ) : (
-                                <Sparkles className="h-4 w-4 mr-2 text-violet-500" />
+                                <Sparkles className="h-4 w-4 mr-2 text-primary" />
                               )}
                               Summarize with AI
                             </DropdownMenuItem>
@@ -1515,7 +1515,7 @@ export default function ContactDetailPage() {
               </Card>
               <Card className="p-4">
                 <div className="flex items-center gap-2">
-                  <Sparkles className="h-4 w-4 text-purple-500" />
+                  <Sparkles className="h-4 w-4 text-primary" />
                   <span className="text-sm text-muted-foreground">Suggested</span>
                 </div>
                 <p className="text-2xl font-bold mt-1">{networkData.stats.suggestionsCount}</p>
@@ -1614,7 +1614,7 @@ export default function ContactDetailPage() {
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <Sparkles className="h-5 w-5 text-purple-500" />
+                  <Sparkles className="h-5 w-5 text-primary" />
                   Suggested Connections
                 </CardTitle>
                 <CardDescription>
@@ -1626,7 +1626,7 @@ export default function ContactDetailPage() {
                   {networkData.suggestedConnections.map((suggestion) => (
                     <div
                       key={suggestion.contact.id}
-                      className="flex items-center gap-3 p-3 rounded-lg border bg-purple-50/50 dark:bg-purple-950/20 hover:bg-purple-100/50 dark:hover:bg-purple-900/30 transition-colors"
+                      className="flex items-center gap-3 p-3 rounded-lg border bg-primary/50 dark:bg-primary/20 hover:bg-primary/50 dark:hover:bg-primary/30 transition-colors"
                     >
                       <Avatar
                         className="h-10 w-10 cursor-pointer"
@@ -1928,7 +1928,7 @@ export default function ContactDetailPage() {
                   {interactionAiProcessing ? (
                     <Loader2 className="h-3 w-3 mr-1 animate-spin" />
                   ) : (
-                    <Sparkles className="h-3 w-3 mr-1 text-violet-500" />
+                    <Sparkles className="h-3 w-3 mr-1 text-primary" />
                   )}
                   Enhance Summary
                 </Button>
@@ -2141,7 +2141,7 @@ export default function ContactDetailPage() {
         <DialogContent className="sm:max-w-[600px] max-h-[80vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
-              <Sparkles className="h-5 w-5 text-violet-500" />
+              <Sparkles className="h-5 w-5 text-primary" />
               AI Insights for {contact.full_name}
             </DialogTitle>
             <DialogDescription>
@@ -2151,7 +2151,7 @@ export default function ContactDetailPage() {
 
           {insightsLoading ? (
             <div className="flex items-center justify-center py-12">
-              <Loader2 className="h-8 w-8 animate-spin text-violet-500" />
+              <Loader2 className="h-8 w-8 animate-spin text-primary" />
               <span className="ml-3 text-muted-foreground">Analyzing relationship...</span>
             </div>
           ) : insights ? (
@@ -2204,8 +2204,8 @@ export default function ContactDetailPage() {
 
               {/* Next Best Action */}
               {insights.next_best_action && (
-                <div className="p-4 rounded-lg bg-violet-50 dark:bg-violet-900/20 border border-violet-200 dark:border-violet-800">
-                  <Label className="text-violet-700 dark:text-violet-300">Next Best Action</Label>
+                <div className="p-4 rounded-lg bg-primary/10 dark:bg-primary/20 border border-primary/20 dark:border-primary/40">
+                  <Label className="text-primary">Next Best Action</Label>
                   <p className="mt-1 font-medium">{insights.next_best_action}</p>
                 </div>
               )}
@@ -2217,8 +2217,8 @@ export default function ContactDetailPage() {
                   <ul className="mt-2 space-y-2">
                     {insights.suggested_actions.map((action: string, i: number) => (
                       <li key={i} className="flex items-start gap-2 text-sm">
-                        <span className="w-5 h-5 rounded-full bg-violet-100 dark:bg-violet-900/30 flex items-center justify-center flex-shrink-0 mt-0.5">
-                          <span className="text-xs text-violet-600 dark:text-violet-400">{i + 1}</span>
+                        <span className="w-5 h-5 rounded-full bg-primary/10 dark:bg-primary/30 flex items-center justify-center flex-shrink-0 mt-0.5">
+                          <span className="text-xs text-primary">{i + 1}</span>
                         </span>
                         {action}
                       </li>

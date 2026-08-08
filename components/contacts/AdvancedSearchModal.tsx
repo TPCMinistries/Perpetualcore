@@ -283,7 +283,7 @@ export function AdvancedSearchModal({
       <DialogContent className="max-w-2xl max-h-[85vh] flex flex-col">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <Search className="h-5 w-5 text-violet-500" />
+            <Search className="h-5 w-5 text-primary" />
             Advanced Search
           </DialogTitle>
           <DialogDescription>
@@ -679,7 +679,7 @@ export function AdvancedSearchModal({
           <Button variant="outline" onClick={() => onOpenChange(false)}>
             Cancel
           </Button>
-          <Button onClick={handleApplyFilters} className="bg-violet-600 hover:bg-violet-700">
+          <Button onClick={handleApplyFilters} className="bg-primary hover:bg-primary">
             <Search className="h-4 w-4 mr-2" />
             Apply Filters
           </Button>

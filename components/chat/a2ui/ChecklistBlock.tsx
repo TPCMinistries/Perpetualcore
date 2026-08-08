@@ -53,7 +53,7 @@ export default function ChecklistBlock({ block }: ChecklistBlockProps) {
       <div className="flex items-center gap-2 mb-3">
         <div className="flex-1 h-1.5 rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden">
           <div
-            className="h-full bg-violet-500 rounded-full transition-all duration-300"
+            className="h-full bg-primary rounded-full transition-all duration-300"
             style={{
               width: `${items.length > 0 ? (checkedCount / items.length) * 100 : 0}%`,
             }}
@@ -79,7 +79,7 @@ export default function ChecklistBlock({ block }: ChecklistBlockProps) {
               onCheckedChange={(checked) =>
                 handleToggle(item.id, checked as boolean)
               }
-              className="data-[state=checked]:bg-violet-500 data-[state=checked]:border-violet-500"
+              className="data-[state=checked]:bg-primary data-[state=checked]:border-primary/40"
             />
             <span
               className={cn(

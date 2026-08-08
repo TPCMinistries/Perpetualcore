@@ -397,7 +397,7 @@ export default function NewAgentPage() {
               <Card className="border-border bg-muted">
                 <CardHeader className="pb-4">
                   <div className="flex items-center gap-2">
-                    <Settings2 className="h-5 w-5 text-purple-600" />
+                    <Settings2 className="h-5 w-5 text-primary" />
                     <CardTitle className="text-lg text-foreground">
                       {selectedType?.label} Settings
                     </CardTitle>

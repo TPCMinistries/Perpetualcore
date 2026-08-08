@@ -221,7 +221,7 @@ export function SmartCollections({
       <Button
         onClick={generateClusters}
         disabled={isGenerating}
-        className="w-full bg-gradient-to-r from-primary/20 to-primary/20 hover:from-primary/30 hover:to-primary/30 text-white border border-purple-500/30 hover:border-purple-500/50"
+        className="w-full bg-gradient-to-r from-primary/20 to-primary/20 hover:from-primary/30 hover:to-primary/30 text-white border border-primary/30 hover:border-primary/50"
       >
         {isGenerating ? (
           <>
@@ -271,7 +271,7 @@ export function SmartCollections({
                   className={cn(
                     "rounded-lg border transition-all",
                     isSelected
-                      ? "bg-white/10 border-purple-500/50"
+                      ? "bg-white/10 border-primary/50"
                       : "bg-white/5 border-white/10 hover:bg-white/[0.07] hover:border-white/20"
                   )}
                 >
@@ -313,7 +313,7 @@ export function SmartCollections({
                           <Pin className="h-3 w-3 text-amber-400" />
                         )}
                         {collection.type === "auto" && (
-                          <Sparkles className="h-3 w-3 text-purple-400" />
+                          <Sparkles className="h-3 w-3 text-primary" />
                         )}
                       </div>
                       <p className="text-xs text-slate-400">

@@ -236,8 +236,8 @@ export default function AIReadinessQuiz() {
                 { icon: Download, text: "Receive a custom implementation roadmap" },
               ].map((item, i) => (
                 <div key={i} className="flex items-center gap-3 text-slate-700 dark:text-slate-300">
-                  <div className="w-10 h-10 rounded-full bg-purple-100 dark:bg-purple-900 flex items-center justify-center flex-shrink-0">
-                    <item.icon className="h-5 w-5 text-purple-600 dark:text-purple-400" />
+                  <div className="w-10 h-10 rounded-full bg-primary/10 dark:bg-primary flex items-center justify-center flex-shrink-0">
+                    <item.icon className="h-5 w-5 text-primary" />
                   </div>
                   <span className="font-medium">{item.text}</span>
                 </div>
@@ -276,7 +276,7 @@ export default function AIReadinessQuiz() {
                 <span className="text-sm font-medium text-slate-600 dark:text-slate-400">
                   Question {step} of {questions.length}
                 </span>
-                <span className="text-sm font-medium text-purple-600 dark:text-purple-400">
+                <span className="text-sm font-medium text-primary">
                   {Math.round(progress)}% Complete
                 </span>
               </div>
@@ -294,8 +294,8 @@ export default function AIReadinessQuiz() {
                   onClick={() => handleAnswer(currentQuestion.id, option.value, option.points)}
                   className={`w-full text-left p-6 rounded-xl border-2 transition-all duration-300 ${
                     currentAnswer?.answer === option.value
-                      ? "border-purple-500 bg-purple-50 dark:bg-purple-950 shadow-lg"
-                      : "border-slate-200 dark:border-slate-800 hover:border-purple-300 dark:hover:border-purple-700 hover:shadow-md"
+                      ? "border-primary/40 bg-primary/10 dark:bg-primary shadow-lg"
+                      : "border-slate-200 dark:border-slate-800 hover:border-primary/20 dark:hover:border-primary/40 hover:shadow-md"
                   }`}
                 >
                   <div className="flex items-center justify-between">
@@ -303,7 +303,7 @@ export default function AIReadinessQuiz() {
                       {option.label}
                     </span>
                     {currentAnswer?.answer === option.value && (
-                      <CheckCircle2 className="h-6 w-6 text-purple-600" />
+                      <CheckCircle2 className="h-6 w-6 text-primary" />
                     )}
                   </div>
                 </button>
@@ -446,7 +446,7 @@ export default function AIReadinessQuiz() {
     <div className="min-h-screen bg-primary dark:from-slate-950 dark:to-slate-900 py-12 px-4">
       <div className="max-w-4xl mx-auto space-y-6">
         {/* Score Card */}
-        <Card className="border-2 border-purple-200 dark:border-purple-800">
+        <Card className="border-2 border-primary/20 dark:border-primary/40">
           <CardContent className="p-8">
             <div className="text-center mb-8">
               <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-100 mb-2">
@@ -496,14 +496,14 @@ export default function AIReadinessQuiz() {
             </p>
 
             <div className="grid md:grid-cols-2 gap-4 mb-6">
-              <div className="bg-purple-50 dark:bg-purple-950 rounded-lg p-6">
+              <div className="bg-primary/10 dark:bg-primary rounded-lg p-6">
                 <div className="flex items-center gap-3 mb-2">
-                  <Clock className="h-6 w-6 text-purple-600 dark:text-purple-400" />
+                  <Clock className="h-6 w-6 text-primary" />
                   <span className="font-bold text-slate-900 dark:text-slate-100">
                     Time Savings
                   </span>
                 </div>
-                <p className="text-2xl font-bold text-purple-600 dark:text-purple-400">
+                <p className="text-2xl font-bold text-primary">
                   {recommendation.potential}
                 </p>
               </div>
@@ -538,7 +538,7 @@ export default function AIReadinessQuiz() {
                 ))}
               </ul>
               {segmentData && (
-                <div className="mt-4 pt-4 border-t border-purple-200 dark:border-purple-800">
+                <div className="mt-4 pt-4 border-t border-primary/20 dark:border-primary/40">
                   <p className="text-sm text-slate-600 dark:text-slate-400">
                     <strong>Estimated Value:</strong> {segmentData.estimatedValue}
                   </p>
@@ -554,7 +554,7 @@ export default function AIReadinessQuiz() {
             <h2 className="text-3xl font-bold mb-4">
               Ready to Transform Your Workflow?
             </h2>
-            <p className="text-lg mb-6 text-purple-100">
+            <p className="text-lg mb-6 text-primary">
               {segment === "enterprise"
                 ? "Let's discuss a custom enterprise implementation plan"
                 : segment === "consulting"
@@ -572,12 +572,12 @@ export default function AIReadinessQuiz() {
                 }
               }}
               size="lg"
-              className="bg-white text-purple-600 hover:bg-purple-50 h-14 px-8 text-lg font-bold"
+              className="bg-white text-primary hover:bg-primary/10 h-14 px-8 text-lg font-bold"
             >
               {segmentData?.recommendedCTA || "Get Started"}
               <ArrowRight className="ml-2 h-5 w-5" />
             </Button>
-            <p className="text-sm text-purple-100 mt-4">
+            <p className="text-sm text-primary mt-4">
               {segment === "enterprise"
                 ? "Executive briefing • White-glove implementation • ROI guarantee"
                 : segment === "consulting"

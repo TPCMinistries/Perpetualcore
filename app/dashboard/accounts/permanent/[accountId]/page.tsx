@@ -628,12 +628,12 @@ export default function PermanentAccountPage() {
         ))}
       </div>
 
-      <Card className="overflow-hidden rounded-lg border-violet-200 bg-gradient-to-br from-white via-primary/40 to-white shadow-none">
+      <Card className="overflow-hidden rounded-lg border-primary/20 bg-gradient-to-br from-white via-primary/40 to-white shadow-none">
         <CardHeader>
           <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
             <div>
               <div className="flex flex-wrap items-center gap-2">
-                <Badge className="rounded-md bg-violet-600">AI operating plan</Badge>
+                <Badge className="rounded-md bg-primary">AI operating plan</Badge>
                 {assistantPlan?.generatedAt ? (
                   <Badge variant="outline" className="rounded-md">
                     Updated {formatDateTime(assistantPlan.generatedAt)}
@@ -682,7 +682,7 @@ export default function PermanentAccountPage() {
             <div className="grid gap-5 xl:grid-cols-[1fr_0.95fr]">
               <div className="space-y-4">
                 <div className="rounded-lg border bg-white p-5">
-                  <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-violet-600">First lane</p>
+                  <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-primary">First lane</p>
                   <p className="mt-3 text-lg font-semibold leading-7 text-slate-950">
                     {assistantPlan.accountPlan.firstLane}
                   </p>
@@ -701,7 +701,7 @@ export default function PermanentAccountPage() {
                   ))}
                 </div>
                 <div className="rounded-lg border bg-white p-5">
-                  <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-violet-600">
+                  <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-primary">
                     Commercial next step
                   </p>
                   <p className="mt-3 text-sm font-semibold leading-6 text-slate-950">
@@ -758,19 +758,19 @@ export default function PermanentAccountPage() {
           <CardHeader>
             <div className="flex items-center justify-between gap-4">
               <CardTitle className="text-xl">Account task plan</CardTitle>
-              <ListChecks className="h-5 w-5 text-violet-600" />
+              <ListChecks className="h-5 w-5 text-primary" />
             </div>
             <p className="text-sm leading-6 text-slate-600">
               Generate a reusable kickoff plan for this permanent account, then mark the work as it moves.
             </p>
           </CardHeader>
           <CardContent>
-            <div className="mb-4 flex flex-wrap items-center justify-between gap-3 rounded-lg border bg-violet-50 p-4">
+            <div className="mb-4 flex flex-wrap items-center justify-between gap-3 rounded-lg border bg-primary/10 p-4">
               <div>
-                <p className="text-sm font-semibold text-violet-950">
+                <p className="text-sm font-semibold text-primary">
                   {openTaskCount > 0 ? `${openTaskCount} open operating tasks` : "No account task plan yet"}
                 </p>
-                <p className="mt-1 text-sm leading-5 text-violet-800">
+                <p className="mt-1 text-sm leading-5 text-primary">
                   These tasks stay with the account even when there is no original lead room.
                 </p>
               </div>
@@ -836,17 +836,17 @@ export default function PermanentAccountPage() {
             <CardHeader>
               <div className="flex items-center justify-between gap-4">
                 <CardTitle className="text-xl">Next operating action</CardTitle>
-                <Sparkles className="h-5 w-5 text-violet-600" />
+                <Sparkles className="h-5 w-5 text-primary" />
               </div>
             </CardHeader>
             <CardContent>
-              <div className="rounded-lg border bg-violet-50 p-4">
-                <p className="text-sm font-semibold text-violet-950">
+              <div className="rounded-lg border bg-primary/10 p-4">
+                <p className="text-sm font-semibold text-primary">
                   {primaryEngagement?.next_step ||
                     readString(metadata, "last_account_next_action") ||
                     "Define the first accountable operating lane."}
                 </p>
-                <p className="mt-2 text-sm leading-6 text-violet-800">
+                <p className="mt-2 text-sm leading-6 text-primary">
                   Use the operator prompt when you want AI to reason across the account, tasks, updates, and
                   engagement instead of treating this like a one-off lead.
                 </p>
@@ -870,7 +870,7 @@ export default function PermanentAccountPage() {
             <CardHeader>
               <div className="flex items-center justify-between gap-4">
                 <CardTitle className="text-xl">Contact and source</CardTitle>
-                <ShieldCheck className="h-5 w-5 text-violet-600" />
+                <ShieldCheck className="h-5 w-5 text-primary" />
               </div>
             </CardHeader>
             <CardContent className="space-y-3">
@@ -902,7 +902,7 @@ export default function PermanentAccountPage() {
         <CardHeader>
           <div className="flex items-center justify-between gap-4">
             <CardTitle className="text-xl">Account update log</CardTitle>
-            <Save className="h-5 w-5 text-violet-600" />
+            <Save className="h-5 w-5 text-primary" />
           </div>
           <p className="text-sm leading-6 text-slate-600">
             Capture decisions, risks, and next actions so the assistant has durable account memory.
@@ -983,7 +983,7 @@ export default function PermanentAccountPage() {
           <CardHeader>
             <div className="flex items-center justify-between gap-4">
               <CardTitle className="text-xl">Engagements</CardTitle>
-              <BriefcaseBusiness className="h-5 w-5 text-violet-600" />
+              <BriefcaseBusiness className="h-5 w-5 text-primary" />
             </div>
             <p className="text-sm leading-6 text-slate-600">
               The active commercial and delivery lanes attached to this permanent account.
@@ -1036,7 +1036,7 @@ export default function PermanentAccountPage() {
           <CardHeader>
             <div className="flex items-center justify-between gap-4">
               <CardTitle className="text-xl">Handoff context</CardTitle>
-              <CalendarClock className="h-5 w-5 text-violet-600" />
+              <CalendarClock className="h-5 w-5 text-primary" />
             </div>
             <p className="text-sm leading-6 text-slate-600">
               Context captured from package intake or client handoff, stored on the permanent account.
@@ -1075,7 +1075,7 @@ export default function PermanentAccountPage() {
           <CardHeader>
             <div className="flex items-center justify-between gap-4">
               <CardTitle className="text-xl">Account notes</CardTitle>
-              <CheckCircle2 className="h-5 w-5 text-violet-600" />
+              <CheckCircle2 className="h-5 w-5 text-primary" />
             </div>
           </CardHeader>
           <CardContent>

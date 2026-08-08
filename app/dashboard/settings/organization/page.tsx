@@ -284,8 +284,8 @@ export default function OrganizationSettingsPage() {
         <Card>
           <CardHeader className="border-b border-border bg-muted/50">
             <div className="flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-violet-100 dark:bg-violet-900/30">
-                <Building2 className="h-4 w-4 text-violet-600 dark:text-violet-400" />
+              <div className="p-2 rounded-lg bg-primary/10 dark:bg-primary/30">
+                <Building2 className="h-4 w-4 text-primary" />
               </div>
               <div>
                 <CardTitle className="text-base">Organization Details</CardTitle>
@@ -305,8 +305,8 @@ export default function OrganizationSettingsPage() {
                     className="h-16 w-16 rounded-xl object-cover border-2 border-border"
                   />
                 ) : (
-                  <div className="h-16 w-16 rounded-xl bg-primary flex items-center justify-center border-2 border-dashed border-violet-300 dark:border-violet-700">
-                    <Building2 className="h-8 w-8 text-violet-500 dark:text-violet-400" />
+                  <div className="h-16 w-16 rounded-xl bg-primary flex items-center justify-center border-2 border-dashed border-primary/20 dark:border-primary/40">
+                    <Building2 className="h-8 w-8 text-primary" />
                   </div>
                 )}
                 <div className="flex-1">
@@ -687,8 +687,8 @@ export default function OrganizationSettingsPage() {
           <CardContent className="pt-6 space-y-4">
             <div className="flex items-center justify-between p-4 rounded-xl bg-muted/50">
               <div className="flex items-center gap-3">
-                <div className="p-2 rounded-lg bg-violet-100 dark:bg-violet-900/30">
-                  <Key className="h-4 w-4 text-violet-600 dark:text-violet-400" />
+                <div className="p-2 rounded-lg bg-primary/10 dark:bg-primary/30">
+                  <Key className="h-4 w-4 text-primary" />
                 </div>
                 <div>
                   <Label className="text-foreground">API Access</Label>
@@ -754,7 +754,7 @@ export default function OrganizationSettingsPage() {
         <Button
           onClick={handleSave}
           disabled={saving}
-          className="bg-primary shadow-lg shadow-violet-500/25"
+          className="bg-primary shadow-lg shadow-primary/25"
         >
           {saving ? (
             <>

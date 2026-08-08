@@ -985,7 +985,7 @@ export default function AccountsPage() {
         <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
           <div className="max-w-3xl">
             <div className="mb-3 flex items-center gap-2">
-              <span className="h-2 w-2 rounded-full bg-violet-600" />
+              <span className="h-2 w-2 rounded-full bg-primary" />
               <p className="font-mono text-xs uppercase tracking-[0.2em] text-slate-500">
                 Perpetual Core Account OS
               </p>
@@ -1019,32 +1019,32 @@ export default function AccountsPage() {
       ) : null}
 
       {sourceLeadId ? (
-        <Card className="overflow-hidden rounded-lg border-violet-200 shadow-none">
+        <Card className="overflow-hidden rounded-lg border-primary/20 shadow-none">
           <CardContent className="p-0">
             <div className="grid gap-0 lg:grid-cols-[1.1fr_0.9fr]">
-              <div className="bg-violet-50 p-5">
+              <div className="bg-primary/10 p-5">
                 <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                   <div>
-                    <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-violet-700">
+                    <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-primary">
                       Source lead context
                     </p>
                     {sourceLeadLoading ? (
-                      <p className="mt-3 text-sm text-violet-900">
+                      <p className="mt-3 text-sm text-primary">
                         Loading lead context...
                       </p>
                     ) : sourceLead ? (
                       <>
-                        <h2 className="mt-3 text-xl font-semibold text-violet-950">
+                        <h2 className="mt-3 text-xl font-semibold text-primary">
                           {getLeadCompany(sourceLead) ||
                             getLeadName(sourceLead)}
                         </h2>
-                        <p className="mt-1 text-sm text-violet-800">
+                        <p className="mt-1 text-sm text-primary">
                           {getLeadName(sourceLead)}
                           {sourceLead.title ? ` - ${sourceLead.title}` : ""}
                         </p>
                       </>
                     ) : (
-                      <p className="mt-3 text-sm text-violet-900">
+                      <p className="mt-3 text-sm text-primary">
                         Opened from a lead record. Use this workspace to confirm
                         the handoff.
                       </p>
@@ -1053,7 +1053,7 @@ export default function AccountsPage() {
                   <Button
                     asChild
                     variant="outline"
-                    className="shrink-0 rounded-md border-violet-200 bg-white"
+                    className="shrink-0 rounded-md border-primary/20 bg-white"
                   >
                     <Link
                       href={`/dashboard/leads?lead=${encodeURIComponent(sourceLeadId)}`}
@@ -1065,7 +1065,7 @@ export default function AccountsPage() {
 
                 {sourceLead ? (
                   <div className="mt-5 grid gap-3 sm:grid-cols-3">
-                    <div className="rounded-md border border-violet-200 bg-white p-3">
+                    <div className="rounded-md border border-primary/20 bg-white p-3">
                       <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-slate-500">
                         Status
                       </p>
@@ -1073,7 +1073,7 @@ export default function AccountsPage() {
                         {normalizeStatus(sourceLead.status || "new")}
                       </p>
                     </div>
-                    <div className="rounded-md border border-violet-200 bg-white p-3">
+                    <div className="rounded-md border border-primary/20 bg-white p-3">
                       <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-slate-500">
                         Value
                       </p>
@@ -1083,7 +1083,7 @@ export default function AccountsPage() {
                           : "Scope pending"}
                       </p>
                     </div>
-                    <div className="rounded-md border border-violet-200 bg-white p-3">
+                    <div className="rounded-md border border-primary/20 bg-white p-3">
                       <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-slate-500">
                         Next touch
                       </p>
@@ -1097,7 +1097,7 @@ export default function AccountsPage() {
                 ) : null}
               </div>
 
-              <div className="border-t border-violet-100 bg-white p-5 lg:border-l lg:border-t-0">
+              <div className="border-t border-primary/20 bg-white p-5 lg:border-l lg:border-t-0">
                 {sourceLead ? (
                   <>
                     {(() => {
@@ -1106,7 +1106,7 @@ export default function AccountsPage() {
                       return (
                         <div>
                           <div className="flex items-start gap-3">
-                            <div className="rounded-md bg-violet-100 p-2 text-violet-700">
+                            <div className="rounded-md bg-primary/10 p-2 text-primary">
                               <Target className="h-4 w-4" />
                             </div>
                             <div>
@@ -1184,7 +1184,7 @@ export default function AccountsPage() {
           <CardHeader>
             <div className="flex items-center justify-between gap-4">
               <CardTitle className="text-xl">Delivery kickoff room</CardTitle>
-              <PackageCheck className="h-5 w-5 text-violet-600" />
+              <PackageCheck className="h-5 w-5 text-primary" />
             </div>
             <p className="text-sm leading-6 text-slate-600">
               This is the bridge from sold interest to installed work. The
@@ -1195,7 +1195,7 @@ export default function AccountsPage() {
           <CardContent className="grid gap-3 lg:grid-cols-5">
             {kickoffChecklist.map((step, index) => (
               <div key={step.title} className="rounded-lg border bg-white p-4">
-                <span className="flex h-7 w-7 items-center justify-center rounded-full bg-violet-100 text-xs font-semibold text-violet-700">
+                <span className="flex h-7 w-7 items-center justify-center rounded-full bg-primary/10 text-xs font-semibold text-primary">
                   {index + 1}
                 </span>
                 <p className="mt-4 text-sm font-semibold text-slate-950">
@@ -1216,7 +1216,7 @@ export default function AccountsPage() {
             <CardHeader>
               <div className="flex items-center justify-between gap-4">
                 <CardTitle className="text-xl">Handoff copy kit</CardTitle>
-                <MessagesSquare className="h-5 w-5 text-violet-600" />
+                <MessagesSquare className="h-5 w-5 text-primary" />
               </div>
               <p className="text-sm leading-6 text-slate-600">
                 Copy clean language into email, proposal notes, or the internal
@@ -1229,9 +1229,9 @@ export default function AccountsPage() {
                   key={action.label}
                   type="button"
                   onClick={() => copyAccountText(action.label, action.body)}
-                  className="rounded-lg border bg-white p-4 text-left transition hover:border-violet-300 hover:bg-violet-50/40"
+                  className="rounded-lg border bg-white p-4 text-left transition hover:border-primary/20 hover:bg-primary/40"
                 >
-                  <action.icon className="h-5 w-5 text-violet-600" />
+                  <action.icon className="h-5 w-5 text-primary" />
                   <p className="mt-4 text-sm font-semibold text-slate-950">
                     {action.label}
                   </p>
@@ -1247,7 +1247,7 @@ export default function AccountsPage() {
             <CardHeader>
               <div className="flex items-center justify-between gap-4">
                 <CardTitle className="text-xl">Lead history</CardTitle>
-                <CalendarClock className="h-5 w-5 text-violet-600" />
+                <CalendarClock className="h-5 w-5 text-primary" />
               </div>
               <p className="text-sm leading-6 text-slate-600">
                 Recent lead activity stays visible when you move from sales into
@@ -1313,13 +1313,13 @@ export default function AccountsPage() {
         ))}
       </div>
 
-      <Card className="overflow-hidden rounded-lg border-violet-200 bg-white shadow-none">
+      <Card className="overflow-hidden rounded-lg border-primary/20 bg-white shadow-none">
         <CardContent className="p-0">
           <div className="grid gap-0 lg:grid-cols-[0.95fr_1.05fr]">
             <div className="bg-gradient-to-br from-primary via-white to-slate-50 p-5">
               <div className="flex items-start justify-between gap-4">
                 <div>
-                  <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-violet-700">
+                  <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-primary">
                     Today&apos;s account command
                   </p>
                   <h2 className="mt-3 text-2xl font-semibold tracking-tight text-slate-950">
@@ -1331,7 +1331,7 @@ export default function AccountsPage() {
                     account room for active delivery work.
                   </p>
                 </div>
-                <Sparkles className="h-5 w-5 shrink-0 text-violet-600" />
+                <Sparkles className="h-5 w-5 shrink-0 text-primary" />
               </div>
               <div className="mt-5 grid gap-3 sm:grid-cols-3">
                 {[
@@ -1353,7 +1353,7 @@ export default function AccountsPage() {
                 ].map(([label, value, detail]) => (
                   <div
                     key={label}
-                    className="rounded-lg border border-violet-100 bg-white p-4"
+                    className="rounded-lg border border-primary/20 bg-white p-4"
                   >
                     <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-slate-500">
                       {label}
@@ -1382,7 +1382,7 @@ export default function AccountsPage() {
               </Button>
             </div>
 
-            <div className="border-t border-violet-100 p-5 lg:border-l lg:border-t-0">
+            <div className="border-t border-primary/20 p-5 lg:border-l lg:border-t-0">
               {accountCommandPlan.focusAccounts.length === 0 ? (
                 <div className="rounded-lg border border-dashed p-5 text-sm text-slate-600">
                   No priority account actions in the current filter.
@@ -1512,7 +1512,7 @@ export default function AccountsPage() {
                   visible without opening every room.
                 </p>
               </div>
-              <Bot className="h-5 w-5 text-violet-600" />
+              <Bot className="h-5 w-5 text-primary" />
             </div>
           </CardHeader>
           <CardContent className="space-y-3">
@@ -1649,7 +1649,7 @@ export default function AccountsPage() {
             <CardHeader>
               <div className="flex items-center justify-between gap-4">
                 <CardTitle className="text-xl">Readiness breakdown</CardTitle>
-                <Target className="h-5 w-5 text-violet-600" />
+                <Target className="h-5 w-5 text-primary" />
               </div>
             </CardHeader>
             <CardContent className="grid gap-3 sm:grid-cols-2">
@@ -1709,7 +1709,7 @@ export default function AccountsPage() {
             <CardHeader>
               <div className="flex items-center justify-between gap-4">
                 <CardTitle className="text-xl">Recent package starts</CardTitle>
-                <CircleDollarSign className="h-5 w-5 text-violet-600" />
+                <CircleDollarSign className="h-5 w-5 text-primary" />
               </div>
             </CardHeader>
             <CardContent className="space-y-3">
@@ -1838,7 +1838,7 @@ export default function AccountsPage() {
                   motion, overdue, or missing.
                 </p>
               </div>
-              <CalendarClock className="h-5 w-5 text-violet-600" />
+              <CalendarClock className="h-5 w-5 text-primary" />
             </div>
           </CardHeader>
           <CardContent className="space-y-3">
@@ -1998,7 +1998,7 @@ export default function AccountsPage() {
               [...paidAccounts, ...pursuitAccounts].map((client) => (
                 <div
                   key={client.id}
-                  className="grid gap-4 rounded-lg border bg-white p-4 transition hover:border-violet-300 hover:bg-violet-50/40 md:grid-cols-[1fr_150px_180px]"
+                  className="grid gap-4 rounded-lg border bg-white p-4 transition hover:border-primary/20 hover:bg-primary/40 md:grid-cols-[1fr_150px_180px]"
                 >
                   <div>
                     <div className="flex flex-wrap items-center gap-2">
@@ -2126,7 +2126,7 @@ export default function AccountsPage() {
             <CardHeader>
               <div className="flex items-center justify-between gap-4">
                 <CardTitle className="text-xl">Paid-client handoff</CardTitle>
-                <PackageCheck className="h-5 w-5 text-violet-600" />
+                <PackageCheck className="h-5 w-5 text-primary" />
               </div>
             </CardHeader>
             <CardContent className="space-y-3">
@@ -2135,7 +2135,7 @@ export default function AccountsPage() {
                   key={step}
                   className="flex gap-3 rounded-lg border bg-white p-3"
                 >
-                  <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-violet-100 text-xs font-semibold text-violet-700">
+                  <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary/10 text-xs font-semibold text-primary">
                     {index + 1}
                   </span>
                   <p className="text-sm leading-6 text-slate-700">{step}</p>
@@ -2148,7 +2148,7 @@ export default function AccountsPage() {
             <CardHeader>
               <div className="flex items-center justify-between gap-4">
                 <CardTitle className="text-xl">Next actions</CardTitle>
-                <CalendarClock className="h-5 w-5 text-violet-600" />
+                <CalendarClock className="h-5 w-5 text-primary" />
               </div>
             </CardHeader>
             <CardContent className="space-y-3">
@@ -2161,7 +2161,7 @@ export default function AccountsPage() {
                   <Link
                     key={action.id}
                     href={action.href}
-                    className="block rounded-lg border bg-white p-4 transition hover:border-violet-300 hover:bg-violet-50/40"
+                    className="block rounded-lg border bg-white p-4 transition hover:border-primary/20 hover:bg-primary/40"
                   >
                     <div className="flex items-center justify-between gap-3">
                       <p className="text-sm font-semibold text-slate-950">
@@ -2191,7 +2191,7 @@ export default function AccountsPage() {
         <CardHeader>
           <div className="flex items-center justify-between gap-4">
             <CardTitle className="text-xl">Adaptive AI layer</CardTitle>
-            <Bot className="h-5 w-5 text-violet-600" />
+            <Bot className="h-5 w-5 text-primary" />
           </div>
           <p className="text-sm leading-6 text-slate-600">
             The assistant should work across the account rather than trap you in
@@ -2202,7 +2202,7 @@ export default function AccountsPage() {
         <CardContent className="grid gap-3 md:grid-cols-4">
           {aiJobs.map((job) => (
             <div key={job.title} className="rounded-lg border bg-white p-4">
-              <job.icon className="h-5 w-5 text-violet-600" />
+              <job.icon className="h-5 w-5 text-primary" />
               <p className="mt-4 text-sm font-semibold text-slate-950">
                 {job.title}
               </p>
@@ -2218,7 +2218,7 @@ export default function AccountsPage() {
         <CardHeader>
           <div className="flex items-center justify-between gap-4">
             <CardTitle className="text-xl">Lane playbook</CardTitle>
-            <BriefcaseBusiness className="h-5 w-5 text-violet-600" />
+            <BriefcaseBusiness className="h-5 w-5 text-primary" />
           </div>
         </CardHeader>
         <CardContent className="grid gap-3 md:grid-cols-4">
@@ -2247,9 +2247,9 @@ export default function AccountsPage() {
       <div className="grid gap-4 md:grid-cols-3">
         <Link
           href="/dashboard/proposals"
-          className="group rounded-lg border bg-white p-5 transition hover:border-violet-300 hover:bg-violet-50/40"
+          className="group rounded-lg border bg-white p-5 transition hover:border-primary/20 hover:bg-primary/40"
         >
-          <ClipboardCheck className="h-5 w-5 text-violet-600" />
+          <ClipboardCheck className="h-5 w-5 text-primary" />
           <p className="mt-4 text-sm font-semibold text-slate-950">
             Draft proposal
           </p>
@@ -2260,9 +2260,9 @@ export default function AccountsPage() {
         </Link>
         <Link
           href="/packages"
-          className="group rounded-lg border bg-white p-5 transition hover:border-violet-300 hover:bg-violet-50/40"
+          className="group rounded-lg border bg-white p-5 transition hover:border-primary/20 hover:bg-primary/40"
         >
-          <CircleDollarSign className="h-5 w-5 text-violet-600" />
+          <CircleDollarSign className="h-5 w-5 text-primary" />
           <p className="mt-4 text-sm font-semibold text-slate-950">
             Send package
           </p>
@@ -2273,9 +2273,9 @@ export default function AccountsPage() {
         </Link>
         <Link
           href="/dashboard/operating"
-          className="group rounded-lg border bg-white p-5 transition hover:border-violet-300 hover:bg-violet-50/40"
+          className="group rounded-lg border bg-white p-5 transition hover:border-primary/20 hover:bg-primary/40"
         >
-          <CheckCircle2 className="h-5 w-5 text-violet-600" />
+          <CheckCircle2 className="h-5 w-5 text-primary" />
           <p className="mt-4 text-sm font-semibold text-slate-950">
             Operating dashboard
           </p>

@@ -397,7 +397,7 @@ export function DiscoveryClient({
               <p className="mt-1 text-xl font-semibold text-zinc-950">{rows.length}</p>
             </div>
             <div className="p-4">
-              <SlidersHorizontal className="mb-2 h-4 w-4 text-violet-700" />
+              <SlidersHorizontal className="mb-2 h-4 w-4 text-primary" />
               <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-zinc-500">
                 Filters
               </p>

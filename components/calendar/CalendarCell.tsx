@@ -54,7 +54,7 @@ export function CalendarCell({
         "min-h-[100px] p-1 border-r border-b border-slate-200 dark:border-slate-800",
         "cursor-pointer transition-colors",
         !isCurrentMonth && "bg-slate-50 dark:bg-slate-900/50",
-        isSelected && "bg-violet-50 dark:bg-violet-950/30",
+        isSelected && "bg-primary/10 dark:bg-primary/30",
         !isSelected && "hover:bg-slate-50 dark:hover:bg-slate-800/50"
       )}
       onClick={handleCellClick}

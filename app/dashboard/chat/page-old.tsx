@@ -1012,7 +1012,7 @@ export default function ChatPage() {
                 className={cn(
                   "flex items-end gap-2 p-2 rounded-2xl border transition-all",
                   isDragging
-                    ? "border-violet-400 bg-violet-50 dark:bg-violet-950/20"
+                    ? "border-primary/40 bg-primary/10 dark:bg-primary/20"
                     : "border-border dark:border-border bg-card hover:border-border dark:hover:border-border"
                 )}
               >

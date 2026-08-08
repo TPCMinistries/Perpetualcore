@@ -135,7 +135,7 @@ export function AdaptiveSidebar({ profile, isCollapsed }: AdaptiveSidebarProps) 
                       <h3 className={cn(
                         "text-[11px] font-medium uppercase tracking-widest transition-colors",
                         group.isPrioritized
-                          ? "text-violet-400"
+                          ? "text-primary"
                           : "text-white/30 group-hover:text-white/50"
                       )}>
                         {group.section}
@@ -150,7 +150,7 @@ export function AdaptiveSidebar({ profile, isCollapsed }: AdaptiveSidebarProps) 
                     <h3 className={cn(
                       "text-[11px] font-medium uppercase tracking-widest",
                       group.isPrioritized
-                        ? "text-violet-400"
+                        ? "text-primary"
                         : "text-white/30"
                     )}>
                       {group.section}
@@ -200,7 +200,7 @@ export function AdaptiveSidebar({ profile, isCollapsed }: AdaptiveSidebarProps) 
                             "text-[10px] font-medium px-1.5 py-0.5 rounded-md",
                             active
                               ? "bg-white/20 text-white"
-                              : "bg-violet-500/20 text-violet-300"
+                              : "bg-primary/20 text-primary"
                           )}
                         >
                           {item.adaptiveConfig.badge === "coming-soon"
@@ -225,7 +225,7 @@ export function AdaptiveSidebar({ profile, isCollapsed }: AdaptiveSidebarProps) 
       {!isCollapsed && currentWorkspace.id !== "default" && (
         <div className="px-3 py-2">
           <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-white/[0.04]">
-            <Sparkles className="h-4 w-4 text-violet-400" />
+            <Sparkles className="h-4 w-4 text-primary" />
             <span className="text-xs text-white/40">
               {currentWorkspace.name} active
             </span>

@@ -155,7 +155,7 @@ export function ChatSidebar({
                         className={cn(
                           "w-full text-left px-3 py-2 rounded-lg text-sm transition-colors",
                           selectedAdvisor === advisor.id
-                            ? "bg-violet-100 dark:bg-violet-900/30 text-violet-900 dark:text-violet-100"
+                            ? "bg-primary/10 dark:bg-primary/30 text-primary"
                             : "text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/50"
                         )}
                       >
@@ -172,7 +172,7 @@ export function ChatSidebar({
                     ))}
                     <a
                       href="/dashboard/assistants"
-                      className="block text-center text-xs text-violet-600 dark:text-violet-400 hover:underline py-2"
+                      className="block text-center text-xs text-primary hover:underline py-2"
                     >
                       See all advisors →
                     </a>

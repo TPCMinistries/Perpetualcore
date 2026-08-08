@@ -324,7 +324,7 @@ function QuickActionsStep() {
         </p>
       </div>
       <div className="space-y-4">
-        <Card className="p-6 bg-primary border-purple-200">
+        <Card className="p-6 bg-primary border-primary/20">
           <div className="flex items-start gap-4">
             <div className="h-10 w-10 rounded-full bg-primary flex items-center justify-center flex-shrink-0">
               <Sparkles className="h-5 w-5 text-white" />
@@ -409,8 +409,8 @@ function CompleteStep() {
           </p>
         </Card>
 
-        <Card className="p-5 bg-primary border-purple-200 dark:border-purple-900/20">
-          <h3 className="font-semibold mb-2 text-purple-900 dark:text-purple-100">💡 Need Help?</h3>
+        <Card className="p-5 bg-primary border-primary/20">
+          <h3 className="font-semibold mb-2 text-primary">💡 Need Help?</h3>
           <p className="text-sm text-muted-foreground">
             Access this tour anytime from Settings. Check documentation or contact support whenever you need assistance.
           </p>

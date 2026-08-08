@@ -391,7 +391,7 @@ export default function IntegrationsPage() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="relative overflow-hidden rounded-3xl bg-primary border border-indigo-100 dark:border-indigo-900/20 p-8 shadow-lg">
+      <div className="relative overflow-hidden rounded-3xl bg-primary border border-primary/20 p-8 shadow-lg">
         <div className="absolute inset-0 bg-grid-pattern opacity-5"></div>
         <div className="relative flex items-center justify-between">
           <div className="flex items-center gap-4">
@@ -402,14 +402,14 @@ export default function IntegrationsPage() {
               <h1 className="text-3xl font-bold text-primary">
                 Integrations
               </h1>
-              <p className="text-indigo-700 dark:text-indigo-300 mt-1">
+              <p className="text-primary mt-1">
                 Connect your favorite tools and services
               </p>
             </div>
           </div>
           <div className="hidden md:block">
             <div className="text-right">
-              <div className="text-3xl font-bold text-indigo-600 dark:text-indigo-400">
+              <div className="text-3xl font-bold text-primary">
                 {connectedCount}/{integrations.length}
               </div>
               <p className="text-sm text-muted-foreground">Connected</p>

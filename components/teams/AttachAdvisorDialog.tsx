@@ -174,7 +174,7 @@ export function AttachAdvisorDialog({
                     onClick={() => setSelectedAdvisor(advisor)}
                     className={`flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-colors ${
                       selectedAdvisor?.id === advisor.id
-                        ? "border-violet-500 bg-violet-50 dark:bg-violet-950/20"
+                        ? "border-primary/40 bg-primary/10 dark:bg-primary/20"
                         : "border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700"
                     }`}
                   >
@@ -183,7 +183,7 @@ export function AttachAdvisorDialog({
                       <div className="flex items-center gap-2">
                         <p className="font-medium truncate">{advisor.name}</p>
                         {selectedAdvisor?.id === advisor.id && (
-                          <CheckCircle2 className="h-4 w-4 text-violet-600 flex-shrink-0" />
+                          <CheckCircle2 className="h-4 w-4 text-primary flex-shrink-0" />
                         )}
                       </div>
                       <p className="text-sm text-muted-foreground line-clamp-1">
@@ -235,7 +235,7 @@ export function AttachAdvisorDialog({
           <Button
             onClick={handleAttach}
             disabled={!selectedAdvisor || attaching}
-            className="bg-violet-600 hover:bg-violet-700"
+            className="bg-primary hover:bg-primary"
           >
             {attaching ? (
               <Loader2 className="h-4 w-4 animate-spin mr-2" />

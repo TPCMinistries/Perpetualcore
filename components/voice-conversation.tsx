@@ -400,7 +400,7 @@ export function VoiceConversation({ onClose }: VoiceConversationProps) {
       case "speaking":
         return "bg-emerald-500";
       case "connecting":
-        return "bg-purple-500";
+        return "bg-primary";
       default:
         return "bg-slate-400";
     }

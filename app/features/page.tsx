@@ -246,10 +246,10 @@ export default function FeaturesPage() {
             {ENTERPRISE_FEATURES.map((feature, index) => {
               const Icon = feature.icon;
               return (
-                <Card key={index} className="border-purple-200 dark:border-purple-800 bg-purple-50/50 dark:bg-purple-950/20">
+                <Card key={index} className="border-primary/20 dark:border-primary/40 bg-primary/50 dark:bg-primary/20">
                   <CardHeader className="pb-2">
-                    <div className="w-10 h-10 rounded-lg bg-purple-100 dark:bg-purple-900 flex items-center justify-center mb-3">
-                      <Icon className="h-5 w-5 text-purple-600 dark:text-purple-400" />
+                    <div className="w-10 h-10 rounded-lg bg-primary/10 dark:bg-primary flex items-center justify-center mb-3">
+                      <Icon className="h-5 w-5 text-primary" />
                     </div>
                     <CardTitle className="text-lg">{feature.title}</CardTitle>
                   </CardHeader>

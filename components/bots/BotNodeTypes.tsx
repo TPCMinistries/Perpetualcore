@@ -139,13 +139,13 @@ export const LogicNode = memo(({ data, selected }: NodeProps) => {
   return (
     <div className={cn(
       "min-w-[180px] rounded-xl border-2 bg-white dark:bg-slate-900 shadow-lg transition-all",
-      selected ? "ring-2 ring-purple-500 ring-offset-2" : "",
-      "border-purple-300 dark:border-purple-700"
+      selected ? "ring-2 ring-primary ring-offset-2" : "",
+      "border-primary/20 dark:border-primary/40"
     )}>
       <Handle
         type="target"
         position={Position.Top}
-        className="!w-3 !h-3 !bg-purple-500 !border-2 !border-white dark:!border-slate-900"
+        className="!w-3 !h-3 !bg-primary !border-2 !border-white dark:!border-slate-900"
       />
       <div className="flex items-center gap-2 px-3 py-2 rounded-t-lg bg-primary">
         <div className="h-6 w-6 rounded-md bg-white/20 flex items-center justify-center">

@@ -257,8 +257,8 @@ export default function TeachPage() {
       <Card className="border-border dark:border-border bg-card">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <div className="h-10 w-10 rounded-lg bg-violet-50 dark:bg-violet-950/30 flex items-center justify-center">
-              <Sparkles className="h-5 w-5 text-violet-600 dark:text-violet-400" />
+            <div className="h-10 w-10 rounded-lg bg-primary/10 dark:bg-primary/30 flex items-center justify-center">
+              <Sparkles className="h-5 w-5 text-primary" />
             </div>
             <span className="text-foreground dark:text-foreground">What to Teach</span>
           </CardTitle>
@@ -280,7 +280,7 @@ export default function TeachPage() {
           </div>
           <div className="mt-4">
             <Link href="/dashboard/onboarding/brain-dump">
-              <Button className="w-full bg-violet-600 hover:bg-violet-700 text-white gap-2">
+              <Button className="w-full bg-primary hover:bg-primary text-white gap-2">
                 <Brain className="h-4 w-4" />
                 Start Brain Dump
                 <ChevronRight className="h-4 w-4" />
@@ -328,7 +328,7 @@ export default function TeachPage() {
               <Button
                 onClick={handleQuickNoteSubmit}
                 disabled={submitting || !quickNote.trim()}
-                className="bg-violet-600 hover:bg-violet-700 text-white gap-2"
+                className="bg-primary hover:bg-primary text-white gap-2"
               >
                 {submitting ? (
                   <Loader2 className="h-4 w-4 animate-spin" />

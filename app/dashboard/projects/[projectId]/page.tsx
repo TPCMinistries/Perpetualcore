@@ -695,7 +695,7 @@ export default function ProjectDetailPage() {
                 <Card>
                   <CardHeader className="pb-3">
                     <div className="flex items-center gap-2">
-                      <Sparkles className="h-5 w-5 text-purple-500" />
+                      <Sparkles className="h-5 w-5 text-primary" />
                       <CardTitle className="text-base">Project Assistant</CardTitle>
                     </div>
                     <CardDescription className="text-xs">

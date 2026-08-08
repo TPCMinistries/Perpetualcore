@@ -506,7 +506,7 @@ export function AIDocumentComposer({
                         "flex-1 rounded-2xl px-4 py-3 text-sm",
                         message.role === "assistant"
                           ? "bg-muted"
-                          : "bg-violet-600 text-white"
+                          : "bg-primary text-white"
                       )}
                     >
                       <div
@@ -608,7 +608,7 @@ export function AIDocumentComposer({
                   type="submit"
                   size="icon"
                   disabled={!inputValue.trim() || isThinking}
-                  className="bg-violet-600 hover:bg-violet-700"
+                  className="bg-primary hover:bg-primary"
                 >
                   <Send className="h-4 w-4" />
                 </Button>

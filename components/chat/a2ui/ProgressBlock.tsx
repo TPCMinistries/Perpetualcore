@@ -28,7 +28,7 @@ export default function ProgressBlock({ block }: ProgressBlockProps) {
                     step.status === "complete" &&
                       "bg-emerald-500 border-emerald-500",
                     step.status === "current" &&
-                      "bg-violet-500 border-violet-500 animate-pulse",
+                      "bg-primary border-primary/40 animate-pulse",
                     step.status === "pending" &&
                       "bg-transparent border-slate-300 dark:border-slate-600"
                   )}
@@ -60,7 +60,7 @@ export default function ProgressBlock({ block }: ProgressBlockProps) {
                     step.status === "complete" &&
                       "text-emerald-700 dark:text-emerald-400",
                     step.status === "current" &&
-                      "text-violet-700 dark:text-violet-400",
+                      "text-primary",
                     step.status === "pending" &&
                       "text-slate-400 dark:text-slate-500"
                   )}

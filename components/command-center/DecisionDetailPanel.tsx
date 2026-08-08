@@ -731,7 +731,7 @@ export function DecisionDetailPanel({
                 <Button
                   variant="outline"
                   onClick={() => setShowDelegateDialog(true)}
-                  className="border-purple-300 text-purple-600 hover:bg-purple-50"
+                  className="border-primary/20 text-primary hover:bg-primary/10"
                 >
                   <Users className="h-4 w-4 mr-2" />
                   Delegate
@@ -885,9 +885,9 @@ export function DecisionDetailPanel({
 
               {/* Delegated Info */}
               {decision.status === "delegated" && decision.delegated_to_user && (
-                <Card className="border-purple-200 bg-purple-50 dark:bg-purple-900/20">
+                <Card className="border-primary/20 bg-primary/10 dark:bg-primary/20">
                   <CardContent className="py-4">
-                    <h4 className="text-sm font-medium mb-2 flex items-center gap-2 text-purple-700 dark:text-purple-400">
+                    <h4 className="text-sm font-medium mb-2 flex items-center gap-2 text-primary">
                       <Users className="h-4 w-4" />
                       Delegated
                     </h4>
@@ -1133,7 +1133,7 @@ export function DecisionDetailPanel({
                           <TrendingUp className="h-5 w-5 text-green-500" />
                         )}
                         {item.related_type === "decision" && (
-                          <FileCheck className="h-5 w-5 text-purple-500" />
+                          <FileCheck className="h-5 w-5 text-primary" />
                         )}
                         <div className="flex-1">
                           <p className="font-medium text-sm">{item.related_title}</p>
@@ -1304,7 +1304,7 @@ export function DecisionDetailPanel({
         <DialogContent>
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
-              <Users className="h-5 w-5 text-purple-600" />
+              <Users className="h-5 w-5 text-primary" />
               Delegate Decision
             </DialogTitle>
           </DialogHeader>
@@ -1331,7 +1331,7 @@ export function DecisionDetailPanel({
                 value={delegateNotes}
                 onChange={(e) => setDelegateNotes(e.target.value)}
                 rows={3}
-                className="w-full px-3 py-2 rounded-lg border bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                className="w-full px-3 py-2 rounded-lg border bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-primary"
               />
             </div>
           </div>
@@ -1340,7 +1340,7 @@ export function DecisionDetailPanel({
             <Button
               onClick={handleDelegate}
               disabled={processing}
-              className="bg-purple-600 hover:bg-purple-700"
+              className="bg-primary hover:bg-primary"
             >
               {processing ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Users className="h-4 w-4 mr-2" />}
               Delegate
@@ -1565,7 +1565,7 @@ export function DecisionDetailPanel({
                   >
                     {item.type === "opportunity" && <TrendingUp className="h-4 w-4 text-green-500" />}
                     {item.type === "project" && <Briefcase className="h-4 w-4 text-blue-500" />}
-                    {item.type === "decision" && <FileCheck className="h-4 w-4 text-purple-500" />}
+                    {item.type === "decision" && <FileCheck className="h-4 w-4 text-primary" />}
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-medium truncate">{item.title}</p>
                       <p className="text-xs text-muted-foreground capitalize">{item.type}</p>

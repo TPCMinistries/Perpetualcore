@@ -77,7 +77,7 @@ export default function QuickStartLesson3() {
             </div>
             <div className="p-4 bg-card rounded-lg border">
               <div className="flex items-center gap-2 mb-2">
-                <Zap className="h-5 w-5 text-purple-600" />
+                <Zap className="h-5 w-5 text-primary" />
                 <h4 className="font-semibold text-sm">Document Backup</h4>
               </div>
               <p className="text-xs text-muted-foreground">
@@ -223,7 +223,7 @@ export default function QuickStartLesson3() {
           </p>
 
           <div className="grid md:grid-cols-3 gap-4">
-            <div className="p-4 bg-purple-50 dark:bg-purple-950/20 rounded-lg border border-purple-200">
+            <div className="p-4 bg-primary/10 dark:bg-primary/20 rounded-lg border border-primary/20">
               <h4 className="font-semibold text-sm mb-2">⏰ Schedule</h4>
               <p className="text-xs text-muted-foreground">
                 Run at specific times (e.g., every weekday at 8 AM)
@@ -243,7 +243,7 @@ export default function QuickStartLesson3() {
             </div>
           </div>
 
-          <Card className="p-6 bg-primary dark:to-blue-950/20 border-purple-200">
+          <Card className="p-6 bg-primary dark:to-blue-950/20 border-primary/20">
             <h4 className="font-semibold mb-3">Recommended Trigger for Daily Summary</h4>
             <div className="p-4 bg-card rounded-lg border">
               <p className="font-medium text-sm mb-2">Schedule: Every Weekday at 8:00 AM</p>
@@ -338,7 +338,7 @@ export default function QuickStartLesson3() {
                 Click any execution to see detailed logs for each step, including input/output data.
               </p>
             </div>
-            <div className="p-4 bg-purple-50 dark:bg-purple-950/20 rounded-lg border border-purple-200">
+            <div className="p-4 bg-primary/10 dark:bg-primary/20 rounded-lg border border-primary/20">
               <h4 className="font-semibold text-sm mb-2">⚠️ Error Alerts</h4>
               <p className="text-xs text-muted-foreground">
                 Get notified if a workflow fails so you can fix issues quickly.
@@ -352,7 +352,7 @@ export default function QuickStartLesson3() {
             </div>
           </div>
 
-          <div className="bg-purple-50 dark:bg-purple-950/20 border border-purple-200 dark:border-purple-800 rounded-lg p-6 mt-4">
+          <div className="bg-primary/10 dark:bg-primary/20 border border-primary/20 dark:border-primary/40 rounded-lg p-6 mt-4">
             <h4 className="font-semibold mb-3">Next Steps with Workflows</h4>
             <ul className="space-y-2 ml-6 text-sm">
               <li className="list-disc">Add conditional logic to handle different scenarios (e.g., different summary format on Mondays)</li>

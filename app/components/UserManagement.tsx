@@ -97,7 +97,7 @@ export default function UserManagement() {
           <div className="text-sm text-slate-400">Total Users</div>
         </div>
         <div className="bg-slate-800/50 rounded-xl border border-slate-700/50 p-4">
-          <div className="text-2xl font-bold text-purple-400">{users.filter(u => u.is_super_admin).length}</div>
+          <div className="text-2xl font-bold text-primary">{users.filter(u => u.is_super_admin).length}</div>
           <div className="text-sm text-slate-400">Super Admins</div>
         </div>
         <div className="bg-slate-800/50 rounded-xl border border-slate-700/50 p-4">
@@ -136,7 +136,7 @@ export default function UserManagement() {
                 <td className="px-6 py-4 text-sm">
                   <div className="flex gap-2">
                     {user.is_super_admin && (
-                      <span className="px-2 py-1 bg-purple-500/20 text-purple-400 rounded-full text-xs font-medium">
+                      <span className="px-2 py-1 bg-primary/20 text-primary rounded-full text-xs font-medium">
                         🛡️ Super Admin
                       </span>
                     )}
@@ -222,7 +222,7 @@ export default function UserManagement() {
                 <label className="block text-sm text-slate-400 mb-2">Current Role</label>
                 <div className="flex gap-2">
                   {selectedUser.is_super_admin && (
-                    <span className="px-3 py-2 bg-purple-500/20 text-purple-400 rounded-lg text-sm font-medium">
+                    <span className="px-3 py-2 bg-primary/20 text-primary rounded-lg text-sm font-medium">
                       🛡️ Super Admin
                     </span>
                   )}
@@ -256,7 +256,7 @@ export default function UserManagement() {
                     <>
                       <button
                         onClick={() => toggleAdminStatus(selectedUser, true, true)}
-                        className="w-full px-4 py-3 bg-purple-500/20 hover:bg-purple-500/30 text-purple-400 rounded-lg transition-colors text-sm font-medium"
+                        className="w-full px-4 py-3 bg-primary/20 hover:bg-primary/30 text-primary rounded-lg transition-colors text-sm font-medium"
                       >
                         ⬆️ Promote to Super Admin
                       </button>

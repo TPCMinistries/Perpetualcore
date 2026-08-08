@@ -163,7 +163,7 @@ export default function DemoModePage() {
         <h3 className="font-semibold mb-4">What's Included in Demo Data</h3>
         <div className="grid gap-4 sm:grid-cols-2">
           <div className="flex items-start gap-3">
-            <div className="h-8 w-8 rounded-lg bg-purple-100 flex items-center justify-center flex-shrink-0">
+            <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
               <span className="text-lg">📄</span>
             </div>
             <div>

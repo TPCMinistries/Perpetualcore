@@ -435,7 +435,7 @@ export default function HandoffsPage() {
         <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
           <div className="max-w-3xl">
             <div className="mb-3 flex items-center gap-2">
-              <span className="h-2 w-2 rounded-full bg-violet-600" />
+              <span className="h-2 w-2 rounded-full bg-primary" />
               <p className="font-mono text-xs uppercase tracking-[0.2em] text-slate-500">
                 Perpetual Core Handoff Command
               </p>
@@ -511,13 +511,13 @@ export default function HandoffsPage() {
         ))}
       </div>
 
-      <Card className="overflow-hidden rounded-lg border-violet-200 shadow-none">
+      <Card className="overflow-hidden rounded-lg border-primary/20 shadow-none">
         <CardContent className="p-0">
           <div className="grid gap-0 lg:grid-cols-[0.85fr_1.15fr]">
             <div className="bg-slate-950 p-5 text-white">
               <div className="flex items-start justify-between gap-4">
                 <div>
-                  <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-violet-200">
+                  <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-primary">
                     Operator focus
                   </p>
                   <h2 className="mt-3 text-2xl font-semibold tracking-tight">
@@ -531,7 +531,7 @@ export default function HandoffsPage() {
                       : "Add or close a lead to create a handoff queue."}
                   </p>
                 </div>
-                <Bot className="h-5 w-5 shrink-0 text-violet-300" />
+                <Bot className="h-5 w-5 shrink-0 text-primary" />
               </div>
               <div className="mt-5 rounded-lg border border-white/10 bg-white/5 p-4">
                 <div className="flex items-center justify-between gap-3">
@@ -574,7 +574,7 @@ export default function HandoffsPage() {
                   key={item.title}
                   className="rounded-lg border bg-slate-50 p-4"
                 >
-                  <item.icon className="h-5 w-5 text-violet-600" />
+                  <item.icon className="h-5 w-5 text-primary" />
                   <p className="mt-4 text-sm font-semibold text-slate-950">
                     {item.title}
                   </p>
@@ -655,7 +655,7 @@ export default function HandoffsPage() {
                 return (
                   <div
                     key={account.id}
-                    className="grid gap-4 rounded-lg border bg-white p-4 transition hover:border-violet-300 hover:bg-violet-50/30 lg:grid-cols-[minmax(0,1fr)_190px_190px]"
+                    className="grid gap-4 rounded-lg border bg-white p-4 transition hover:border-primary/20 hover:bg-primary/30 lg:grid-cols-[minmax(0,1fr)_190px_190px]"
                   >
                     <div>
                       <div className="flex flex-wrap items-center gap-2">
@@ -825,7 +825,7 @@ export default function HandoffsPage() {
                 sequence.
               </p>
             </div>
-            <Sparkles className="h-5 w-5 text-violet-600" />
+            <Sparkles className="h-5 w-5 text-primary" />
           </div>
         </CardHeader>
         <CardContent className="grid gap-3 md:grid-cols-4">
@@ -848,7 +848,7 @@ export default function HandoffsPage() {
             ],
           ].map(([title, detail]) => (
             <div key={title} className="rounded-lg border bg-white p-4">
-              <CheckCircle2 className="h-5 w-5 text-violet-600" />
+              <CheckCircle2 className="h-5 w-5 text-primary" />
               <p className="mt-4 text-sm font-semibold text-slate-950">
                 {title}
               </p>

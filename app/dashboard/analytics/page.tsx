@@ -113,7 +113,7 @@ export default function AnalyticsPage() {
     return (
       <DashboardPageWrapper>
         <div className="flex flex-col items-center justify-center h-64">
-          <Loader2 className="h-8 w-8 animate-spin text-violet-500" />
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
           <p className="mt-4 text-muted-foreground">Loading analytics...</p>
         </div>
       </DashboardPageWrapper>
@@ -218,7 +218,7 @@ export default function AnalyticsPage() {
         <Card className="mb-8 overflow-hidden">
           <CardHeader className="border-b border-border">
             <CardTitle className="flex items-center gap-3">
-              <div className="h-10 w-10 rounded-xl bg-primary flex items-center justify-center shadow-lg shadow-violet-500/25">
+              <div className="h-10 w-10 rounded-xl bg-primary flex items-center justify-center shadow-lg shadow-primary/25">
                 <TrendingUp className="h-5 w-5 text-white" />
               </div>
               <div>
@@ -250,7 +250,7 @@ export default function AnalyticsPage() {
                         })}
                       </div>
                       <div className="flex items-center gap-2">
-                        <span className="w-2 h-2 rounded-full bg-violet-500" />
+                        <span className="w-2 h-2 rounded-full bg-primary" />
                         Messages: {day.messages}
                       </div>
                       <div className="flex items-center gap-2">
@@ -317,8 +317,8 @@ export default function AnalyticsPage() {
               <div className="space-y-3">
                 <div className="flex items-center justify-between p-3 bg-muted/50 rounded-xl">
                   <div className="flex items-center gap-3">
-                    <div className="h-8 w-8 rounded-lg bg-violet-100 dark:bg-violet-900/30 flex items-center justify-center">
-                      <MessageSquare className="h-4 w-4 text-violet-600 dark:text-violet-400" />
+                    <div className="h-8 w-8 rounded-lg bg-primary/10 dark:bg-primary/30 flex items-center justify-center">
+                      <MessageSquare className="h-4 w-4 text-primary" />
                     </div>
                     <span className="text-sm font-medium text-foreground">Chat Messages</span>
                   </div>
@@ -355,7 +355,7 @@ export default function AnalyticsPage() {
                   <span className="font-semibold text-foreground">{data.ai.aiNotifications}</span>
                 </div>
 
-                <div className="mt-4 p-4 bg-gradient-to-r from-primary/10 to-primary/10 dark:from-primary/20 dark:to-primary/20 rounded-xl border border-violet-200 dark:border-violet-800">
+                <div className="mt-4 p-4 bg-gradient-to-r from-primary/10 to-primary/10 dark:from-primary/20 dark:to-primary/20 rounded-xl border border-primary/20 dark:border-primary/40">
                   <div className="flex items-center justify-between">
                     <span className="font-semibold text-foreground">Total AI Interactions</span>
                     <span className="text-2xl font-bold text-primary">
@@ -423,8 +423,8 @@ export default function AnalyticsPage() {
 
                 <div className="flex items-center justify-between p-3 bg-muted/50 rounded-xl">
                   <div className="flex items-center gap-3">
-                    <div className="h-8 w-8 rounded-lg bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center">
-                      <Activity className="h-4 w-4 text-indigo-600 dark:text-indigo-400" />
+                    <div className="h-8 w-8 rounded-lg bg-primary/10 dark:bg-primary/30 flex items-center justify-center">
+                      <Activity className="h-4 w-4 text-primary" />
                     </div>
                     <span className="text-sm font-medium text-foreground">Most Active Hour</span>
                   </div>

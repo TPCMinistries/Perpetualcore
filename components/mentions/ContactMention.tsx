@@ -210,7 +210,7 @@ export function MentionDropdown({
       case "close":
         return "bg-amber-100 text-amber-700";
       case "connected":
-        return "bg-purple-100 text-purple-700";
+        return "bg-primary/10 text-primary";
       case "acquaintance":
         return "bg-blue-100 text-blue-700";
       default:
@@ -331,11 +331,11 @@ export function MentionedContactsPills({
         <Badge
           key={contact.id}
           variant="secondary"
-          className="pl-1 pr-2 py-1 gap-1.5 bg-violet-100 dark:bg-violet-900/30 text-violet-700 dark:text-violet-300 hover:bg-violet-200 dark:hover:bg-violet-900/50"
+          className="pl-1 pr-2 py-1 gap-1.5 bg-primary/10 dark:bg-primary/30 text-primary hover:bg-primary/20 dark:hover:bg-primary/50"
         >
           <Avatar className="h-4 w-4">
             <AvatarImage src={contact.avatar_url} />
-            <AvatarFallback className="bg-violet-500 text-white text-[8px]">
+            <AvatarFallback className="bg-primary text-white text-[8px]">
               {contact.full_name.charAt(0)}
             </AvatarFallback>
           </Avatar>
@@ -343,7 +343,7 @@ export function MentionedContactsPills({
           <button
             type="button"
             onClick={() => onRemove(contact.id)}
-            className="ml-1 h-3 w-3 rounded-full hover:bg-violet-300 dark:hover:bg-violet-800 flex items-center justify-center"
+            className="ml-1 h-3 w-3 rounded-full hover:bg-primary/30 dark:hover:bg-primary flex items-center justify-center"
           >
             ×
           </button>

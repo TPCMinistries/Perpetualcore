@@ -530,7 +530,7 @@ export default function TeamSettingsPage() {
           <div className="grid gap-4 md:grid-cols-2">
             <div className="p-4 rounded-lg border">
               <div className="flex items-center gap-2 mb-2">
-                <Crown className="h-5 w-5 text-purple-600" />
+                <Crown className="h-5 w-5 text-primary" />
                 <h3 className="font-semibold">Owner</h3>
               </div>
               <p className="text-sm text-muted-foreground">

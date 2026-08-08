@@ -102,13 +102,13 @@ export function SimplifiedModeToggle({ onModeChange, compact = false }: Simplifi
                 onClick={() => handleModeChange(mode.id)}
                 className={`w-full flex items-center gap-3 p-2 rounded-lg text-left transition-colors ${
                   currentMode === mode.id
-                    ? "bg-violet-100 dark:bg-violet-900/30"
+                    ? "bg-primary/10 dark:bg-primary/30"
                     : "hover:bg-muted"
                 }`}
               >
                 <div className={`p-1.5 rounded ${
                   currentMode === mode.id
-                    ? "bg-violet-200 dark:bg-violet-800 text-violet-600 dark:text-violet-300"
+                    ? "bg-primary/20 dark:bg-primary text-primary"
                     : "bg-muted text-muted-foreground"
                 }`}>
                   {mode.icon}
@@ -117,7 +117,7 @@ export function SimplifiedModeToggle({ onModeChange, compact = false }: Simplifi
                   <div className="flex items-center gap-2">
                     <span className="text-sm font-medium">{mode.name}</span>
                     {currentMode === mode.id && (
-                      <Check className="h-3 w-3 text-violet-600" />
+                      <Check className="h-3 w-3 text-primary" />
                     )}
                   </div>
                   <p className="text-xs text-muted-foreground truncate">
@@ -148,14 +148,14 @@ export function SimplifiedModeToggle({ onModeChange, compact = false }: Simplifi
             onClick={() => handleModeChange(mode.id)}
             className={`flex-1 p-3 rounded-lg border-2 transition-all ${
               currentMode === mode.id
-                ? "border-violet-500 bg-violet-50 dark:bg-violet-950/30"
+                ? "border-primary/40 bg-primary/10 dark:bg-primary/30"
                 : "border-transparent bg-background hover:border-muted"
             }`}
           >
             <div className="flex flex-col items-center gap-1.5">
               <div className={`p-2 rounded-lg ${
                 currentMode === mode.id
-                  ? "bg-violet-100 dark:bg-violet-900 text-violet-600 dark:text-violet-300"
+                  ? "bg-primary/10 dark:bg-primary text-primary"
                   : "bg-muted text-muted-foreground"
               }`}>
                 {mode.icon}

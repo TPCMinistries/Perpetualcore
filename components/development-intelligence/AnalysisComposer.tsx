@@ -164,11 +164,11 @@ export function AnalysisComposer() {
   }
 
   return (
-    <Card className="overflow-hidden border-indigo-200 bg-white shadow-none">
-      <div className="border-b border-indigo-100 bg-indigo-50 px-6 py-6 sm:px-8">
+    <Card className="overflow-hidden border-primary/20 bg-white shadow-none">
+      <div className="border-b border-primary/20 bg-primary/10 px-6 py-6 sm:px-8">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
           <div>
-            <p className="text-sm font-semibold text-indigo-700">Create a new report</p>
+            <p className="text-sm font-semibold text-primary">Create a new report</p>
             <h2 className="mt-1 text-2xl font-semibold tracking-tight text-slate-950">What do you want to understand?</h2>
             <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-600">Choose the conversation type, add your authorized source, and Development Intelligence will build an evidence-linked report.</p>
           </div>
@@ -179,7 +179,7 @@ export function AnalysisComposer() {
       <CardContent className="space-y-8 p-6 sm:p-8">
         <fieldset>
           <legend className="flex items-center gap-3 text-sm font-semibold text-slate-950">
-            <span className="flex h-7 w-7 items-center justify-center rounded-full bg-indigo-600 text-xs text-white">1</span>
+            <span className="flex h-7 w-7 items-center justify-center rounded-full bg-primary text-xs text-white">1</span>
             Choose the coaching goal
           </legend>
           <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
@@ -191,10 +191,10 @@ export function AnalysisComposer() {
                   type="button"
                   onClick={() => setLens(item.value)}
                   aria-pressed={selected}
-                  className={`relative min-h-36 cursor-pointer rounded-xl border p-4 text-left transition-colors duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-600 focus-visible:ring-offset-2 ${selected ? "border-indigo-500 bg-indigo-50" : "border-slate-200 bg-white hover:border-indigo-300 hover:bg-indigo-50/40"}`}
+                  className={`relative min-h-36 cursor-pointer rounded-xl border p-4 text-left transition-colors duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 ${selected ? "border-primary/40 bg-primary/10" : "border-slate-200 bg-white hover:border-primary/20 hover:bg-primary/40"}`}
                 >
-                  {selected && <span className="absolute right-3 top-3 flex h-5 w-5 items-center justify-center rounded-full bg-indigo-600 text-white"><Check className="h-3 w-3" /></span>}
-                  <item.icon className={`h-5 w-5 ${selected ? "text-indigo-700" : "text-slate-500"}`} />
+                  {selected && <span className="absolute right-3 top-3 flex h-5 w-5 items-center justify-center rounded-full bg-primary text-white"><Check className="h-3 w-3" /></span>}
+                  <item.icon className={`h-5 w-5 ${selected ? "text-primary" : "text-slate-500"}`} />
                   <span className="mt-3 block text-sm font-semibold text-slate-950">{item.label}</span>
                   <span className="mt-1 block text-xs leading-5 text-slate-600">{item.description}</span>
                 </button>
@@ -205,7 +205,7 @@ export function AnalysisComposer() {
 
         <fieldset>
           <legend className="flex items-center gap-3 text-sm font-semibold text-slate-950">
-            <span className="flex h-7 w-7 items-center justify-center rounded-full bg-indigo-600 text-xs text-white">2</span>
+            <span className="flex h-7 w-7 items-center justify-center rounded-full bg-primary text-xs text-white">2</span>
             Add the authorized conversation
           </legend>
           <div className="mt-4 grid gap-3 sm:grid-cols-2">
@@ -213,18 +213,18 @@ export function AnalysisComposer() {
               type="button"
               onClick={() => { setSourceMode("media"); setConsentConfirmed(false); }}
               aria-pressed={sourceMode === "media"}
-              className={`flex min-h-20 cursor-pointer items-center gap-4 rounded-xl border px-4 text-left transition-colors duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-600 focus-visible:ring-offset-2 ${sourceMode === "media" ? "border-indigo-500 bg-indigo-50" : "border-slate-200 hover:border-indigo-300"}`}
+              className={`flex min-h-20 cursor-pointer items-center gap-4 rounded-xl border px-4 text-left transition-colors duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 ${sourceMode === "media" ? "border-primary/40 bg-primary/10" : "border-slate-200 hover:border-primary/20"}`}
             >
-              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white text-indigo-700"><FileAudio className="h-5 w-5" /></span>
+              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white text-primary"><FileAudio className="h-5 w-5" /></span>
               <span><span className="block text-sm font-semibold text-slate-950">Upload audio or video</span><span className="mt-1 block text-xs text-slate-600">Original file or a Zoom, Teams, or Meet export</span></span>
             </button>
             <button
               type="button"
               onClick={() => { setSourceMode("transcript"); setConsentConfirmed(false); }}
               aria-pressed={sourceMode === "transcript"}
-              className={`flex min-h-20 cursor-pointer items-center gap-4 rounded-xl border px-4 text-left transition-colors duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-600 focus-visible:ring-offset-2 ${sourceMode === "transcript" ? "border-indigo-500 bg-indigo-50" : "border-slate-200 hover:border-indigo-300"}`}
+              className={`flex min-h-20 cursor-pointer items-center gap-4 rounded-xl border px-4 text-left transition-colors duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 ${sourceMode === "transcript" ? "border-primary/40 bg-primary/10" : "border-slate-200 hover:border-primary/20"}`}
             >
-              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white text-indigo-700"><FileText className="h-5 w-5" /></span>
+              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white text-primary"><FileText className="h-5 w-5" /></span>
               <span><span className="block text-sm font-semibold text-slate-950">Paste a transcript</span><span className="mt-1 block text-xs text-slate-600">Fastest when the text is already available</span></span>
             </button>
           </div>
@@ -245,15 +245,15 @@ export function AnalysisComposer() {
           {sourceMode === "media" ? (
             <div className="mt-5 space-y-2">
               <Label htmlFor="media-file">Recording</Label>
-              <label htmlFor="media-file" className="flex min-h-48 cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed border-indigo-200 bg-indigo-50/40 px-6 text-center transition-colors duration-200 hover:border-indigo-500 hover:bg-indigo-50 focus-within:ring-2 focus-within:ring-indigo-600 focus-within:ring-offset-2">
-                <span className="flex h-12 w-12 items-center justify-center rounded-full bg-white text-indigo-700"><Upload className="h-6 w-6" /></span>
+              <label htmlFor="media-file" className="flex min-h-48 cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed border-primary/20 bg-primary/40 px-6 text-center transition-colors duration-200 hover:border-primary/40 hover:bg-primary/10 focus-within:ring-2 focus-within:ring-primary focus-within:ring-offset-2">
+                <span className="flex h-12 w-12 items-center justify-center rounded-full bg-white text-primary"><Upload className="h-6 w-6" /></span>
                 <span className="mt-3 font-semibold text-slate-950">{mediaFile ? mediaFile.name : "Choose an audio or video file"}</span>
                 <span className="mt-1 text-xs text-slate-500">MP3, MP4, M4A, WAV, or WebM · up to 25 MB</span>
                 <Input id="media-file" type="file" accept="audio/mpeg,audio/mp3,audio/mp4,audio/x-m4a,audio/wav,audio/x-wav,audio/webm,video/mp4,video/webm" className="sr-only" onChange={(event) => setMediaFile(event.target.files?.[0] || null)} />
               </label>
               <p className="text-xs leading-5 text-slate-500">The recording is processed in a private two-hour staging vault, then removed. The saved report contains only analysis and short evidence excerpts.</p>
               <div className="flex gap-3 rounded-xl border border-slate-200 bg-slate-50 p-4 text-xs leading-5 text-slate-700">
-                <MessagesSquare className="mt-0.5 h-4 w-4 shrink-0 text-indigo-700" aria-hidden="true" />
+                <MessagesSquare className="mt-0.5 h-4 w-4 shrink-0 text-primary" aria-hidden="true" />
                 <p><span className="font-semibold text-slate-950">Using a meeting platform?</span> Export the authorized recording or transcript from Zoom, Microsoft Teams, or Google Meet, then add it here. Direct account connections are not required.</p>
               </div>
             </div>
@@ -268,7 +268,7 @@ export function AnalysisComposer() {
 
         <fieldset>
           <legend className="flex items-center gap-3 text-sm font-semibold text-slate-950">
-            <span className="flex h-7 w-7 items-center justify-center rounded-full bg-indigo-600 text-xs text-white">3</span>
+            <span className="flex h-7 w-7 items-center justify-center rounded-full bg-primary text-xs text-white">3</span>
             Confirm authorization and create the report
           </legend>
           <div className="mt-4 rounded-xl border border-emerald-200 bg-emerald-50 p-4 sm:p-5">

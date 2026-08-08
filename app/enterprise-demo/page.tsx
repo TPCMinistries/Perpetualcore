@@ -14,7 +14,7 @@ export default function EnterpriseDemoPage() {
         <div className="relative max-w-7xl mx-auto px-4 py-24 sm:px-6 lg:px-8">
           <div className="text-center">
             <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm px-4 py-2 rounded-full mb-6 border border-white/20">
-              <Building2 className="h-4 w-4 text-purple-400" />
+              <Building2 className="h-4 w-4 text-primary" />
               <span className="text-sm font-semibold text-white">
                 Enterprise Solution
               </span>
@@ -169,7 +169,7 @@ export default function EnterpriseDemoPage() {
                 ))}
               </div>
 
-              <div className="mt-8 bg-primary dark:to-blue-950/30 rounded-2xl p-8 border border-purple-200 dark:border-purple-800">
+              <div className="mt-8 bg-primary dark:to-blue-950/30 rounded-2xl p-8 border border-primary/20 dark:border-primary/40">
                 <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-4">
                   Enterprise Plan Pricing
                 </h3>
@@ -210,7 +210,7 @@ export default function EnterpriseDemoPage() {
                     </p>
                   </div>
 
-                  <div className="border-t border-purple-200 dark:border-purple-700 pt-4">
+                  <div className="border-t border-primary/20 dark:border-primary/40 pt-4">
                     <p className="text-sm font-semibold text-slate-900 dark:text-white mb-2">
                       Need more than 250 users?
                     </p>
@@ -268,8 +268,8 @@ export default function EnterpriseDemoPage() {
                 </h4>
                 <div className="space-y-4 text-sm">
                   <div className="flex items-start gap-3">
-                    <div className="flex-shrink-0 w-10 h-10 rounded-lg bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center">
-                      <span className="text-lg font-bold text-purple-600 dark:text-purple-400">$2.1M</span>
+                    <div className="flex-shrink-0 w-10 h-10 rounded-lg bg-primary/10 dark:bg-primary/30 flex items-center justify-center">
+                      <span className="text-lg font-bold text-primary">$2.1M</span>
                     </div>
                     <div>
                       <p className="font-medium text-slate-900 dark:text-white">Avg Annual Savings</p>
@@ -304,7 +304,7 @@ export default function EnterpriseDemoPage() {
                 </p>
                 <a
                   href="mailto:enterprise@perpetualcore.com"
-                  className="text-sm font-semibold text-purple-600 dark:text-purple-400 hover:underline"
+                  className="text-sm font-semibold text-primary hover:underline"
                 >
                   enterprise@perpetualcore.com
                 </a>
@@ -322,7 +322,7 @@ export default function EnterpriseDemoPage() {
           </h2>
           <div className="grid md:grid-cols-3 gap-8 text-center">
             <div className="p-6">
-              <p className="text-5xl font-bold text-purple-400 mb-2">99.9%</p>
+              <p className="text-5xl font-bold text-primary mb-2">99.9%</p>
               <p className="text-sm text-slate-300">Uptime SLA with Enterprise Support</p>
             </div>
             <div className="p-6">

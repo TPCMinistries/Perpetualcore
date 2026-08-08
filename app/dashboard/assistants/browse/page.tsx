@@ -141,7 +141,7 @@ export default function BrowseTemplatesPage() {
   return (
     <div className="space-y-8">
       {/* Header Section with Gradient Background */}
-      <div className="relative overflow-hidden rounded-3xl bg-primary dark:to-orange-950/20 border border-purple-100 dark:border-purple-900/20 p-8 shadow-lg">
+      <div className="relative overflow-hidden rounded-3xl bg-primary dark:to-orange-950/20 border border-primary/20 p-8 shadow-lg">
         <div className="absolute inset-0 bg-grid-pattern opacity-5"></div>
         <div className="relative">
           <Button variant="ghost" size="sm" asChild className="mb-4">
@@ -160,7 +160,7 @@ export default function BrowseTemplatesPage() {
                 <div className="text-3xl font-bold text-primary">
                   Assistant Templates
                 </div>
-                <p className="text-purple-700 dark:text-purple-300 text-sm">
+                <p className="text-primary text-sm">
                   Pre-configured AI assistants ready to use
                 </p>
               </div>

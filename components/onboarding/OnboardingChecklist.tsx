@@ -105,7 +105,7 @@ export function OnboardingChecklist() {
 
   if (isLoading) {
     return (
-      <Card className="border-violet-200/60 dark:border-violet-800/40 bg-gradient-to-br from-primary/50 to-blue-50/50 dark:from-primary/20 dark:to-blue-950/20">
+      <Card className="border-primary/60 dark:border-primary/40 bg-gradient-to-br from-primary/50 to-blue-50/50 dark:from-primary/20 dark:to-blue-950/20">
         <CardContent className="p-6">
           <div className="animate-pulse space-y-4">
             <div className="flex gap-4">
@@ -128,7 +128,7 @@ export function OnboardingChecklist() {
   }
 
   return (
-    <Card className="border-violet-200/60 dark:border-violet-800/40 bg-gradient-to-br from-primary/50 to-blue-50/50 dark:from-primary/20 dark:to-blue-950/20">
+    <Card className="border-primary/60 dark:border-primary/40 bg-gradient-to-br from-primary/50 to-blue-50/50 dark:from-primary/20 dark:to-blue-950/20">
       <CardContent className="p-6">
         {/* Header */}
         <div className="flex items-start gap-4 mb-5">
@@ -185,7 +185,7 @@ export function OnboardingChecklist() {
                 className={`flex items-center gap-4 p-4 rounded-lg border transition-all duration-200 ${
                   step.completed
                     ? "border-emerald-200 dark:border-emerald-800/60 bg-emerald-50 dark:bg-emerald-950/30 cursor-default pointer-events-none"
-                    : "border-slate-200/80 dark:border-slate-700/60 bg-white/80 dark:bg-slate-900/60 hover:border-violet-300 dark:hover:border-violet-700 hover:shadow-md hover:scale-[1.01]"
+                    : "border-slate-200/80 dark:border-slate-700/60 bg-white/80 dark:bg-slate-900/60 hover:border-primary/20 dark:hover:border-primary/40 hover:shadow-md hover:scale-[1.01]"
                 }`}
               >
                 {/* Status icon */}

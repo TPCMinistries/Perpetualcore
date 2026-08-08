@@ -171,7 +171,7 @@ export function AIContextButton({
       onClick={() => setIsOpen(!isOpen)}
       className={`rounded-full shadow-lg ${
         isOpen
-          ? "bg-violet-600 hover:bg-violet-700"
+          ? "bg-primary hover:bg-primary"
           : "bg-primary"
       }`}
       size="lg"
@@ -221,7 +221,7 @@ export function AIContextButton({
                 {/* Header */}
                 <div className="p-3 border-b bg-primary">
                   <div className="flex items-center gap-2">
-                    <Bot className="h-5 w-5 text-violet-600" />
+                    <Bot className="h-5 w-5 text-primary" />
                     <span className="font-medium">AI Assistant</span>
                     <Badge variant="secondary" className="ml-auto text-xs">
                       Context-aware
@@ -261,7 +261,7 @@ export function AIContextButton({
                       className="p-3 border-b max-h-60 overflow-y-auto"
                     >
                       <div className="flex items-start gap-2">
-                        <Bot className="h-4 w-4 text-violet-500 mt-1 flex-shrink-0" />
+                        <Bot className="h-4 w-4 text-primary mt-1 flex-shrink-0" />
                         <div className="flex-1 min-w-0">
                           <p className="text-sm whitespace-pre-wrap">{response}</p>
                           <div className="flex gap-2 mt-2">

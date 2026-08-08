@@ -329,8 +329,8 @@ export default function SupportPage() {
         <Card className="hover:shadow-lg transition-shadow border-border dark:border-border bg-card">
           <CardContent className="p-6">
             <div className="flex items-start gap-4">
-              <div className="h-12 w-12 rounded-lg bg-purple-50 dark:bg-purple-950/30 flex items-center justify-center flex-shrink-0">
-                <Mail className="h-6 w-6 text-purple-600 dark:text-purple-400" />
+              <div className="h-12 w-12 rounded-lg bg-primary/10 dark:bg-primary/30 flex items-center justify-center flex-shrink-0">
+                <Mail className="h-6 w-6 text-primary" />
               </div>
               <div>
                 <h3 className="font-semibold mb-1 text-foreground dark:text-foreground">Email Support</h3>
@@ -507,7 +507,7 @@ export default function SupportPage() {
             <Button variant="outline" className="h-auto p-4 justify-start border-border dark:border-border" asChild>
               <a href="https://community.aios-platform.com" target="_blank" rel="noopener noreferrer">
                 <div className="flex items-start gap-3">
-                  <MessageSquare className="h-5 w-5 text-purple-600 dark:text-purple-400 flex-shrink-0 mt-0.5" />
+                  <MessageSquare className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" />
                   <div className="text-left">
                     <p className="font-medium mb-1 text-foreground dark:text-foreground">Community Forum</p>
                     <p className="text-xs text-muted-foreground dark:text-muted-foreground">

@@ -305,7 +305,7 @@ export default function EmailTemplatesPage() {
                     )}
                   </div>
                   {template.is_ai_generated && (
-                    <Sparkles className="h-4 w-4 text-purple-500" />
+                    <Sparkles className="h-4 w-4 text-primary" />
                   )}
                 </div>
               </CardHeader>

@@ -374,7 +374,7 @@ export default function TaskDetailPage() {
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white dark:from-slate-950 dark:to-slate-900 flex items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-violet-500" />
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
     );
   }
@@ -421,7 +421,7 @@ export default function TaskDetailPage() {
                     {task.status === "done" ? (
                       <CheckCircle2 className="h-7 w-7 text-green-500" />
                     ) : (
-                      <Circle className="h-7 w-7 text-muted-foreground dark:text-muted-foreground group-hover:text-violet-500 transition-colors" />
+                      <Circle className="h-7 w-7 text-muted-foreground dark:text-muted-foreground group-hover:text-primary transition-colors" />
                     )}
                   </button>
                   <h1
@@ -678,7 +678,7 @@ export default function TaskDetailPage() {
                             }
                           </span>
                           {deliverable.ai_generated && (
-                            <span className="ml-2 text-xs text-violet-600 dark:text-violet-400">AI Generated</span>
+                            <span className="ml-2 text-xs text-primary">AI Generated</span>
                           )}
                         </div>
                       </div>
@@ -794,7 +794,7 @@ export default function TaskDetailPage() {
                     ) : (
                       <div
                         onClick={() => startEditing(deliverable)}
-                        className="bg-card rounded-lg p-4 border border-border dark:border-border cursor-text hover:border-violet-300 dark:hover:border-violet-500/50 hover:shadow-sm transition-all group/content"
+                        className="bg-card rounded-lg p-4 border border-border dark:border-border cursor-text hover:border-primary/20 dark:hover:border-primary/50 hover:shadow-sm transition-all group/content"
                       >
                         <p className="whitespace-pre-wrap text-sm text-foreground dark:text-muted-foreground">
                           {deliverable.content}
@@ -842,7 +842,7 @@ export default function TaskDetailPage() {
               {subtasks.map((subtask) => (
                 <div
                   key={subtask.id}
-                  className="flex items-center gap-3 p-3 rounded-xl bg-muted dark:bg-card/50 border border-border dark:border-border/50 hover:border-violet-300 dark:hover:border-violet-500/50 cursor-pointer transition-all"
+                  className="flex items-center gap-3 p-3 rounded-xl bg-muted dark:bg-card/50 border border-border dark:border-border/50 hover:border-primary/20 dark:hover:border-primary/50 cursor-pointer transition-all"
                   onClick={() => router.push(`/dashboard/tasks/${subtask.id}`)}
                 >
                   {subtask.status === "done" ? (

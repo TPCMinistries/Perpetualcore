@@ -294,7 +294,7 @@ export default function AgentDetailPage({ params }: { params: { id: string } }) 
                 size="sm"
                 onClick={runAgent}
                 disabled={running || !agent.enabled}
-                className="border-purple-300 dark:border-purple-700 text-purple-600 dark:text-purple-400"
+                className="border-primary/20 dark:border-primary/40 text-primary"
               >
                 {running ? (
                   <>
@@ -415,8 +415,8 @@ export default function AgentDetailPage({ params }: { params: { id: string } }) 
         <Card className="border-border dark:border-border">
           <CardContent className="pt-6">
             <div className="flex items-center gap-3">
-              <div className="h-10 w-10 rounded-lg bg-purple-100 dark:bg-purple-950 flex items-center justify-center">
-                <TrendingUp className="h-5 w-5 text-purple-600 dark:text-purple-400" />
+              <div className="h-10 w-10 rounded-lg bg-primary/10 dark:bg-primary flex items-center justify-center">
+                <TrendingUp className="h-5 w-5 text-primary" />
               </div>
               <div>
                 <p className="text-sm text-muted-foreground dark:text-muted-foreground">Success Rate</p>

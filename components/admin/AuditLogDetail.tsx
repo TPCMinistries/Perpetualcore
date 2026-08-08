@@ -77,7 +77,7 @@ export default function AuditLogDetail({ logId, open, onOpenChange }: AuditLogDe
       <SheetContent side="right" className="w-full sm:max-w-lg overflow-y-auto">
         <SheetHeader>
           <SheetTitle className="flex items-center gap-2">
-            <Shield className="h-5 w-5 text-violet-600" />
+            <Shield className="h-5 w-5 text-primary" />
             Audit Log Detail
           </SheetTitle>
           <SheetDescription>

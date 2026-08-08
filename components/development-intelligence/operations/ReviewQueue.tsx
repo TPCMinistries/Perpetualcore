@@ -60,16 +60,16 @@ export function ReviewQueue({ queue }: { queue: ReviewQueueItem[] }) {
 
   if (queue.length === 0) {
     return (
-      <Card className="border-dashed border-indigo-200 bg-indigo-50/40 shadow-none">
+      <Card className="border-dashed border-primary/20 bg-primary/40 shadow-none">
         <CardContent className="flex flex-col items-center px-6 py-14 text-center">
-          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-white text-indigo-700">
+          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-white text-primary">
             <FileSearch className="h-6 w-6" aria-hidden="true" />
           </div>
           <h2 className="mt-4 text-xl font-semibold text-slate-950">Nothing is waiting for review.</h2>
           <p className="mt-2 max-w-lg text-sm leading-6 text-slate-600">
             New reports appear here after analysis. The source must be authorized before it is submitted.
           </p>
-          <Button asChild className="mt-5 min-h-11 bg-indigo-600 hover:bg-indigo-700">
+          <Button asChild className="mt-5 min-h-11 bg-primary hover:bg-primary">
             <Link href="/dashboard/development#new-analysis">Create a report</Link>
           </Button>
         </CardContent>
@@ -82,7 +82,7 @@ export function ReviewQueue({ queue }: { queue: ReviewQueueItem[] }) {
       <section aria-labelledby="actionable-review-heading">
         <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
           <div>
-            <p className="text-sm font-semibold text-indigo-700">Action required</p>
+            <p className="text-sm font-semibold text-primary">Action required</p>
             <h2 id="actionable-review-heading" className="mt-1 text-2xl font-semibold tracking-tight text-slate-950">
               Review evidence before it is used
             </h2>
@@ -158,7 +158,7 @@ function ReviewQueueCard({ item }: { item: ReviewQueueItem }) {
               </p>
             )}
           </div>
-          <Button asChild variant={item.actionable ? "default" : "outline"} className={item.actionable ? "min-h-11 shrink-0 bg-indigo-600 hover:bg-indigo-700" : "min-h-11 shrink-0"}>
+          <Button asChild variant={item.actionable ? "default" : "outline"} className={item.actionable ? "min-h-11 shrink-0 bg-primary hover:bg-primary" : "min-h-11 shrink-0"}>
             <Link href={`/dashboard/development/analyses/${item.id}`}>
               {item.actionable ? <ClipboardCheck className="mr-2 h-4 w-4" aria-hidden="true" /> : null}
               {item.actionable ? "Inspect and decide" : "Open report"}

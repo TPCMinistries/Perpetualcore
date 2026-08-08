@@ -208,7 +208,7 @@ export function ContactsCommandPalette({
             <Search className="h-8 w-8 text-muted-foreground mb-2" />
             <p className="text-sm text-muted-foreground">No contacts found</p>
             <button
-              className="text-sm text-violet-600 hover:underline mt-1"
+              className="text-sm text-primary hover:underline mt-1"
               onClick={() => runAction(onAddContact)}
             >
               Add new contact
@@ -295,7 +295,7 @@ export function ContactsCommandPalette({
                     onSelect={() => runAction(action.action)}
                     className={cn(isActive && "bg-accent")}
                   >
-                    <Icon className={cn("mr-2 h-4 w-4", isActive && "text-violet-600")} />
+                    <Icon className={cn("mr-2 h-4 w-4", isActive && "text-primary")} />
                     <span>{action.label}</span>
                     {action.shortcut && (
                       <CommandShortcut>{action.shortcut}</CommandShortcut>

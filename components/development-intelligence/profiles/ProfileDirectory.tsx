@@ -165,16 +165,16 @@ export function ProfileDirectory() {
       <DevelopmentNav />
       <Link
         href="/dashboard/development"
-        className="inline-flex min-h-11 items-center gap-2 text-sm font-medium text-slate-600 transition-colors hover:text-indigo-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-600 focus-visible:ring-offset-2"
+        className="inline-flex min-h-11 items-center gap-2 text-sm font-medium text-slate-600 transition-colors hover:text-primary focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
       >
         <ArrowLeft className="h-4 w-4" />
         Development Intelligence
       </Link>
 
-      <section className="overflow-hidden rounded-[28px] border border-indigo-200 bg-[#f5f3ff] px-6 py-8 sm:px-9 sm:py-10">
+      <section className="overflow-hidden rounded-[28px] border border-primary/20 bg-[#f5f3ff] px-6 py-8 sm:px-9 sm:py-10">
         <div className="grid gap-7 lg:grid-cols-[1fr_auto] lg:items-end">
           <div>
-            <Badge className="border border-indigo-200 bg-white text-indigo-800 hover:bg-white">
+            <Badge className="border border-primary/20 bg-white text-primary hover:bg-white">
               <UsersRound className="mr-1.5 h-3.5 w-3.5" />
               Consent-based profiles
             </Badge>
@@ -187,7 +187,7 @@ export function ProfileDirectory() {
           </div>
           <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
             <DialogTrigger asChild>
-              <Button size="lg" className="min-h-12 bg-indigo-600 hover:bg-indigo-700">
+              <Button size="lg" className="min-h-12 bg-primary hover:bg-primary">
                 <Plus className="mr-2 h-4 w-4" />
                 Create consented profile
               </Button>
@@ -235,7 +235,7 @@ export function ProfileDirectory() {
                       </SelectContent>
                     </Select>
                   </div>
-                  <div className="rounded-xl border border-indigo-200 bg-indigo-50 p-4">
+                  <div className="rounded-xl border border-primary/20 bg-primary/10 p-4">
                     <div className="flex items-start gap-3">
                       <Checkbox
                         id="longitudinal-consent"
@@ -244,10 +244,10 @@ export function ProfileDirectory() {
                         className="mt-0.5"
                       />
                       <div>
-                        <Label htmlFor="longitudinal-consent" className="cursor-pointer leading-5 text-indigo-950">
+                        <Label htmlFor="longitudinal-consent" className="cursor-pointer leading-5 text-primary">
                           I confirm this person explicitly authorized longitudinal development tracking.
                         </Label>
-                        <p className="mt-1 text-xs leading-5 text-indigo-800">
+                        <p className="mt-1 text-xs leading-5 text-primary">
                           They may withdraw consent later. Withdrawal stops future linking and preserves an auditable record of what changed.
                         </p>
                       </div>
@@ -256,7 +256,7 @@ export function ProfileDirectory() {
                 </div>
                 <DialogFooter className="gap-2 sm:gap-0">
                   <Button type="button" variant="outline" onClick={() => setDialogOpen(false)} disabled={creating}>Cancel</Button>
-                  <Button type="submit" disabled={creating || !displayLabel.trim() || !consentConfirmed} className="bg-indigo-600 hover:bg-indigo-700">
+                  <Button type="submit" disabled={creating || !displayLabel.trim() || !consentConfirmed} className="bg-primary hover:bg-primary">
                     {creating ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <ShieldCheck className="mr-2 h-4 w-4" />}
                     Create profile
                   </Button>
@@ -275,7 +275,7 @@ export function ProfileDirectory() {
         ].map((item) => (
           <Card key={item.label} className="border-slate-200 shadow-none">
             <CardContent className="flex items-center gap-4 p-5">
-              <div className={`rounded-xl p-3 ${item.tone === "emerald" ? "bg-emerald-50 text-emerald-700" : item.tone === "amber" ? "bg-amber-50 text-amber-700" : "bg-indigo-50 text-indigo-700"}`}>
+              <div className={`rounded-xl p-3 ${item.tone === "emerald" ? "bg-emerald-50 text-emerald-700" : item.tone === "amber" ? "bg-amber-50 text-amber-700" : "bg-primary/10 text-primary"}`}>
                 <item.icon className="h-5 w-5" />
               </div>
               <div><p className="text-2xl font-semibold text-slate-950">{item.value}</p><p className="text-sm text-slate-600">{item.label}</p></div>
@@ -287,7 +287,7 @@ export function ProfileDirectory() {
       <section>
         <div className="mb-5 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <div>
-            <p className="text-sm font-semibold text-indigo-700">People</p>
+            <p className="text-sm font-semibold text-primary">People</p>
             <h2 className="mt-1 text-2xl font-semibold tracking-tight text-slate-950">Authorized longitudinal profiles</h2>
             <p className="mt-2 text-sm text-slate-600">Open a profile to inspect linked evidence, trends, consent history, and commitments.</p>
           </div>
@@ -300,16 +300,16 @@ export function ProfileDirectory() {
         </div>
 
         {loading ? (
-          <Card className="border-slate-200 shadow-none"><CardContent className="flex min-h-48 items-center justify-center gap-3 text-sm text-slate-600"><Loader2 className="h-5 w-5 animate-spin text-indigo-600" />Loading profiles…</CardContent></Card>
+          <Card className="border-slate-200 shadow-none"><CardContent className="flex min-h-48 items-center justify-center gap-3 text-sm text-slate-600"><Loader2 className="h-5 w-5 animate-spin text-primary" />Loading profiles…</CardContent></Card>
         ) : loadError ? (
           <Card className="border-rose-200 bg-rose-50 shadow-none"><CardContent className="p-6"><h3 className="font-semibold text-rose-950">Profiles could not be loaded</h3><p className="mt-2 text-sm text-rose-800">{loadError}</p><Button variant="outline" className="mt-4 border-rose-300 bg-white" onClick={() => void loadSubjects()}>Try again</Button></CardContent></Card>
         ) : subjects.length === 0 ? (
-          <Card className="border-dashed border-indigo-200 bg-indigo-50/40 shadow-none">
+          <Card className="border-dashed border-primary/20 bg-primary/40 shadow-none">
             <CardContent className="flex flex-col items-center px-6 py-12 text-center">
-              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-white text-indigo-700"><UserRound className="h-6 w-6" /></div>
+              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-white text-primary"><UserRound className="h-6 w-6" /></div>
               <h3 className="mt-4 text-lg font-semibold text-slate-950">Create the first consented profile.</h3>
               <p className="mt-2 max-w-lg text-sm leading-6 text-slate-600">A profile becomes useful after an authorized person is linked to one or more reviewed conversations.</p>
-              <Button className="mt-5 min-h-11 bg-indigo-600 hover:bg-indigo-700" onClick={() => setDialogOpen(true)}><Plus className="mr-2 h-4 w-4" />Create profile</Button>
+              <Button className="mt-5 min-h-11 bg-primary hover:bg-primary" onClick={() => setDialogOpen(true)}><Plus className="mr-2 h-4 w-4" />Create profile</Button>
             </CardContent>
           </Card>
         ) : filteredSubjects.length === 0 ? (
@@ -317,12 +317,12 @@ export function ProfileDirectory() {
         ) : (
           <div className="grid gap-4 lg:grid-cols-2">
             {filteredSubjects.map((subject) => (
-              <Link key={subject.id} href={`/dashboard/development/profiles/${subject.id}`} className="group rounded-xl focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-600 focus-visible:ring-offset-2">
-                <Card className="h-full border-slate-200 shadow-none transition-colors group-hover:border-indigo-300 group-hover:bg-indigo-50/30">
+              <Link key={subject.id} href={`/dashboard/development/profiles/${subject.id}`} className="group rounded-xl focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2">
+                <Card className="h-full border-slate-200 shadow-none transition-colors group-hover:border-primary/20 group-hover:bg-primary/30">
                   <CardContent className="p-5">
                     <div className="flex items-start justify-between gap-4">
                       <div className="flex min-w-0 items-start gap-3">
-                        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-indigo-50 text-indigo-700"><UserRound className="h-5 w-5" /></div>
+                        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary"><UserRound className="h-5 w-5" /></div>
                         <div className="min-w-0"><h3 className="truncate font-semibold text-slate-950">{subject.displayLabel}</h3><p className="mt-1 text-sm text-slate-500">{subjectTypeLabels[subject.subjectType]}</p></div>
                       </div>
                       <Badge variant="outline" className={subject.consentState === "active" ? "border-emerald-200 bg-emerald-50 text-emerald-800" : "border-amber-200 bg-amber-50 text-amber-800"}>
@@ -335,7 +335,7 @@ export function ProfileDirectory() {
                       <div><p className="font-semibold text-slate-950">{subject.observationCount}</p><p className="text-xs text-slate-500">Signals</p></div>
                       <div><p className="font-semibold text-slate-950">{subject.openCommitmentCount}</p><p className="text-xs text-slate-500">Open actions</p></div>
                     </div>
-                    <div className="mt-4 flex items-center justify-between text-xs text-slate-500"><span>{subject.lastObservedAt ? `Last evidence ${new Date(subject.lastObservedAt).toLocaleDateString()}` : "No evidence linked yet"}</span><span className="inline-flex items-center font-medium text-indigo-700">Open profile <ArrowRight className="ml-1 h-3.5 w-3.5" /></span></div>
+                    <div className="mt-4 flex items-center justify-between text-xs text-slate-500"><span>{subject.lastObservedAt ? `Last evidence ${new Date(subject.lastObservedAt).toLocaleDateString()}` : "No evidence linked yet"}</span><span className="inline-flex items-center font-medium text-primary">Open profile <ArrowRight className="ml-1 h-3.5 w-3.5" /></span></div>
                   </CardContent>
                 </Card>
               </Link>

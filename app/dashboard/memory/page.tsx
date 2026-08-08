@@ -78,12 +78,12 @@ const MEMORY_TYPE_COLORS: Record<string, string> = {
   project:
     "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400",
   relationship:
-    "bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400",
+    "bg-primary/10 text-primary dark:bg-primary/30 dark:text-primary",
   goal: "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400",
   style:
-    "bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400",
+    "bg-primary/10 text-primary dark:bg-primary/30 dark:text-primary",
   context:
-    "bg-violet-100 text-violet-700 dark:bg-violet-900/30 dark:text-violet-400",
+    "bg-primary/10 text-primary dark:bg-primary/30 dark:text-primary",
   skill:
     "bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400",
   challenge: "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400",
@@ -207,7 +207,7 @@ export default function MemoryPage() {
         ]}
         actions={
           <Link href="/dashboard/onboarding/brain-dump">
-            <Button className="h-11 px-5 bg-primary text-white shadow-lg shadow-violet-500/25 border-0">
+            <Button className="h-11 px-5 bg-primary text-white shadow-lg shadow-primary/25 border-0">
               <Plus className="h-4 w-4 mr-2" />
               Teach AI
             </Button>
@@ -221,11 +221,11 @@ export default function MemoryPage() {
         animate={{ opacity: 1, y: 0 }}
         className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8"
       >
-        <Card className="border-violet-200 dark:border-violet-800/50 bg-gradient-to-br from-primary to-white dark:from-primary/50 dark:to-slate-900 col-span-1 md:col-span-2">
+        <Card className="border-primary/20 dark:border-primary/50 bg-gradient-to-br from-primary to-white dark:from-primary/50 dark:to-slate-900 col-span-1 md:col-span-2">
           <CardContent className="pt-6">
             <div className="flex items-center gap-4">
               <div className="h-16 w-16 rounded-full bg-primary flex items-center justify-center">
-                <Database className="h-8 w-8 text-violet-600 dark:text-violet-400" />
+                <Database className="h-8 w-8 text-primary" />
               </div>
               <div>
                 <p className="text-sm text-muted-foreground dark:text-muted-foreground">
@@ -331,7 +331,7 @@ export default function MemoryPage() {
             <CardHeader className="border-b border-border dark:border-border bg-muted/50 dark:bg-card/30">
               <CardTitle className="flex items-center gap-3">
                 <div className="h-10 w-10 rounded-xl bg-primary flex items-center justify-center">
-                  <Brain className="h-5 w-5 text-violet-600 dark:text-violet-400" />
+                  <Brain className="h-5 w-5 text-primary" />
                 </div>
                 <span className="text-foreground dark:text-foreground">
                   What AI Remembers
@@ -351,7 +351,7 @@ export default function MemoryPage() {
                       return (
                         <div
                           key={type}
-                          className="flex items-center justify-between p-3 bg-muted dark:bg-card/50 rounded-lg border border-border dark:border-border hover:border-violet-200 dark:hover:border-violet-800/50 transition-colors"
+                          className="flex items-center justify-between p-3 bg-muted dark:bg-card/50 rounded-lg border border-border dark:border-border hover:border-primary/20 dark:hover:border-primary/50 transition-colors"
                         >
                           <div className="flex items-center gap-3">
                             <div
@@ -438,8 +438,8 @@ export default function MemoryPage() {
                       key={idx}
                       className="flex items-start gap-3 p-2 rounded-lg hover:bg-muted dark:hover:bg-muted/50 transition-colors"
                     >
-                      <div className="h-6 w-6 rounded-full bg-violet-100 dark:bg-violet-900/50 flex items-center justify-center flex-shrink-0 mt-0.5">
-                        <Sparkles className="h-3 w-3 text-violet-600 dark:text-violet-400" />
+                      <div className="h-6 w-6 rounded-full bg-primary/10 dark:bg-primary/50 flex items-center justify-center flex-shrink-0 mt-0.5">
+                        <Sparkles className="h-3 w-3 text-primary" />
                       </div>
                       <div className="flex-1 min-w-0">
                         <p className="text-sm text-foreground dark:text-muted-foreground truncate">
@@ -479,10 +479,10 @@ export default function MemoryPage() {
           <CardContent className="pt-6">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <Link href="/dashboard/onboarding/brain-dump" className="block">
-                <div className="p-4 border border-border dark:border-border rounded-xl hover:border-violet-300 dark:hover:border-violet-600 hover:bg-violet-50 dark:hover:bg-violet-950/20 transition-all cursor-pointer group">
+                <div className="p-4 border border-border dark:border-border rounded-xl hover:border-primary/20 dark:hover:border-primary/40 hover:bg-primary/10 dark:hover:bg-primary/20 transition-all cursor-pointer group">
                   <div className="flex items-center gap-3 mb-2">
                     <div className="h-10 w-10 rounded-xl bg-primary flex items-center justify-center transition-colors">
-                      <Brain className="h-5 w-5 text-violet-600 dark:text-violet-400" />
+                      <Brain className="h-5 w-5 text-primary" />
                     </div>
                     <span className="font-medium text-foreground dark:text-foreground">
                       Brain Dump

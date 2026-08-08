@@ -167,7 +167,7 @@ export function InteractiveChatDemo() {
                       transition={{ duration: 0.4, delay: 0.6 }}
                       className="ml-9 mt-2"
                     >
-                      <div className="inline-flex items-start gap-2 rounded-lg bg-purple-500/10 border border-purple-500/20 px-3 py-2 text-xs text-purple-600 dark:text-purple-400">
+                      <div className="inline-flex items-start gap-2 rounded-lg bg-primary/10 border border-primary/20 px-3 py-2 text-xs text-primary">
                         <Sparkles className="h-3.5 w-3.5 flex-shrink-0 mt-0.5" />
                         <span>{msg.learning}</span>
                       </div>

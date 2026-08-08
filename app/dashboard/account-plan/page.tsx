@@ -506,13 +506,13 @@ export default function AccountPlanPage() {
         </div>
       </div>
 
-      <Card className="overflow-hidden rounded-lg border-violet-200 bg-white shadow-none">
+      <Card className="overflow-hidden rounded-lg border-primary/20 bg-white shadow-none">
         <CardContent className="p-0">
           <div className="grid gap-0 lg:grid-cols-[0.95fr_1.05fr]">
-            <div className="border-b border-violet-100 bg-gradient-to-br from-primary via-white to-slate-50 p-5 lg:border-b-0 lg:border-r">
+            <div className="border-b border-primary/20 bg-gradient-to-br from-primary via-white to-slate-50 p-5 lg:border-b-0 lg:border-r">
               <div className="flex items-start justify-between gap-4">
                 <div>
-                  <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-violet-700">
+                  <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-primary">
                     Pursuit planner
                   </p>
                   <h2 className="mt-3 text-2xl font-semibold tracking-tight text-slate-950">
@@ -524,7 +524,7 @@ export default function AccountPlanPage() {
                     follow-up language.
                   </p>
                 </div>
-                <Bot className="h-5 w-5 shrink-0 text-violet-600" />
+                <Bot className="h-5 w-5 shrink-0 text-primary" />
               </div>
 
               <div className="mt-5 grid gap-4">
@@ -609,8 +609,8 @@ export default function AccountPlanPage() {
             </div>
 
             <div className="p-5">
-              <div className="rounded-lg border border-violet-100 bg-violet-50/60 p-4">
-                <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-violet-700">
+              <div className="rounded-lg border border-primary/20 bg-primary/60 p-4">
+                <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-primary">
                   Recommended start
                 </p>
                 <div className="mt-3 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
@@ -667,11 +667,11 @@ export default function AccountPlanPage() {
         </CardContent>
       </Card>
 
-      <Card className="rounded-lg border-violet-200 bg-white shadow-none">
+      <Card className="rounded-lg border-primary/20 bg-white shadow-none">
         <CardHeader>
           <div className="flex items-center justify-between gap-4">
             <CardTitle className="text-xl">How to scale the offer</CardTitle>
-            <Bot className="h-5 w-5 text-violet-600" />
+            <Bot className="h-5 w-5 text-primary" />
           </div>
           <p className="text-sm leading-6 text-muted-foreground">
             Use the same operating-system thesis, but change the first invoice

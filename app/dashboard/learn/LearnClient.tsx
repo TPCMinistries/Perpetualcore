@@ -117,7 +117,7 @@ export function LearnClient({ userEmail, userName }: LearnClientProps) {
             key={stat.label}
             className="rounded-xl border bg-card p-4 text-center"
           >
-            <stat.icon className="h-5 w-5 text-violet-500 mx-auto mb-2" />
+            <stat.icon className="h-5 w-5 text-primary mx-auto mb-2" />
             <p className="text-lg font-semibold">{stat.value}</p>
             <p className="text-xs text-muted-foreground">{stat.label}</p>
           </div>
@@ -146,7 +146,7 @@ export function LearnClient({ userEmail, userName }: LearnClientProps) {
                   {track.price}
                 </span>
               </div>
-              <h4 className="font-medium mb-1 group-hover:text-violet-600 transition-colors">
+              <h4 className="font-medium mb-1 group-hover:text-primary transition-colors">
                 {track.name}
               </h4>
               <p className="text-sm text-muted-foreground mb-3">

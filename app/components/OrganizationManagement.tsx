@@ -141,7 +141,7 @@ export default function OrganizationManagement() {
                 <p className="text-sm text-slate-400 truncate">/{org.slug}</p>
               </div>
               {org.is_beta_tester && (
-                <span className="px-2 py-1 bg-purple-500/20 text-purple-400 text-xs rounded-full whitespace-nowrap ml-2">
+                <span className="px-2 py-1 bg-primary/20 text-primary text-xs rounded-full whitespace-nowrap ml-2">
                   Beta
                 </span>
               )}
@@ -153,7 +153,7 @@ export default function OrganizationManagement() {
                 <span>{org.member_count} members</span>
               </div>
               <span className={`px-2 py-1 rounded-full text-xs ${
-                org.subscription_tier === 'enterprise' ? 'bg-purple-500/20 text-purple-400' :
+                org.subscription_tier === 'enterprise' ? 'bg-primary/20 text-primary' :
                 org.subscription_tier === 'team' ? 'bg-cyan-500/20 text-cyan-400' :
                 'bg-slate-500/20 text-slate-400'
               }`}>

@@ -253,7 +253,7 @@ export default function WorkspacesPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
-        <Loader2 className="h-8 w-8 animate-spin text-indigo-500" />
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
     );
   }
@@ -261,7 +261,7 @@ export default function WorkspacesPage() {
   return (
     <div className="space-y-8">
       {/* Header */}
-      <div className="relative overflow-hidden rounded-3xl bg-primary border border-indigo-100 dark:border-indigo-900/20 p-8 shadow-lg">
+      <div className="relative overflow-hidden rounded-3xl bg-primary border border-primary/20 p-8 shadow-lg">
         <div className="absolute inset-0 bg-grid-pattern opacity-5" />
         <div className="relative flex items-center justify-between">
           <div className="flex items-center gap-4">
@@ -272,7 +272,7 @@ export default function WorkspacesPage() {
               <h1 className="text-3xl font-bold text-primary">
                 Agent Workspaces
               </h1>
-              <p className="text-indigo-700 dark:text-indigo-300 mt-1">
+              <p className="text-primary mt-1">
                 Route channels to isolated agent personas
               </p>
             </div>

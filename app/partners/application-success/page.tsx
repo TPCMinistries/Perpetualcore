@@ -76,20 +76,20 @@ export default function PartnerApplicationSuccessPage() {
           </Card>
 
           {/* Earning Potential */}
-          <Card className="mb-8 bg-gradient-to-r from-primary/10 to-primary/10 border-purple-200 dark:border-purple-800">
+          <Card className="mb-8 bg-gradient-to-r from-primary/10 to-primary/10 border-primary/20 dark:border-primary/40">
             <CardContent className="pt-6">
               <h3 className="font-semibold mb-3">Your Earning Potential</h3>
               <div className="grid md:grid-cols-3 gap-4 text-sm">
                 <div>
-                  <div className="text-2xl font-bold text-purple-600 dark:text-purple-400">20%</div>
+                  <div className="text-2xl font-bold text-primary">20%</div>
                   <div className="text-muted-foreground">Starting commission</div>
                 </div>
                 <div>
-                  <div className="text-2xl font-bold text-purple-600 dark:text-purple-400">12 mo</div>
+                  <div className="text-2xl font-bold text-primary">12 mo</div>
                   <div className="text-muted-foreground">Recurring duration</div>
                 </div>
                 <div>
-                  <div className="text-2xl font-bold text-purple-600 dark:text-purple-400">$600</div>
+                  <div className="text-2xl font-bold text-primary">$600</div>
                   <div className="text-muted-foreground">Per Pro plan referral</div>
                 </div>
               </div>

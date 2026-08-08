@@ -855,7 +855,7 @@ export default function InboxPage() {
                     />
                     <span className="flex-1 text-left truncate">{folder.name}</span>
                     {folder.is_smart && (
-                      <Sparkles className="h-3 w-3 text-violet-500" />
+                      <Sparkles className="h-3 w-3 text-primary" />
                     )}
                     {folder.unread_count > 0 && (
                       <span className="text-xs bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-400 px-1.5 rounded">
@@ -1211,7 +1211,7 @@ export default function InboxPage() {
                   onClick={() => !triaging && setAiInsightsExpanded(!aiInsightsExpanded)}
                 >
                   <div className="flex items-center gap-4">
-                    <div className="flex items-center gap-2 text-violet-600 dark:text-violet-400">
+                    <div className="flex items-center gap-2 text-primary">
                       {triaging ? (
                         <RefreshCw className="h-4 w-4 animate-spin" />
                       ) : (
@@ -1256,7 +1256,7 @@ export default function InboxPage() {
                       {/* Summary */}
                       {selectedEmail.ai_summary && (
                         <div>
-                          <h4 className="text-xs font-semibold text-violet-700 dark:text-violet-300 uppercase tracking-wide mb-1">Summary</h4>
+                          <h4 className="text-xs font-semibold text-primary uppercase tracking-wide mb-1">Summary</h4>
                           <p className="text-sm text-foreground dark:text-foreground">{selectedEmail.ai_summary}</p>
                         </div>
                       )}
@@ -1334,7 +1334,7 @@ export default function InboxPage() {
                         {selectedEmail.requires_response && (
                           <Button
                             size="sm"
-                            className="gap-1 bg-violet-600 hover:bg-violet-700"
+                            className="gap-1 bg-primary hover:bg-primary"
                             onClick={(e) => {
                               e.stopPropagation();
                               setComposerMode("ai-reply");

@@ -156,7 +156,7 @@ export function AICommandBar() {
         layout
         className={`relative rounded-xl border transition-all duration-200 ${
           focused
-            ? "border-violet-500/50 shadow-lg shadow-violet-500/10 bg-background"
+            ? "border-primary/50 shadow-lg shadow-primary/10 bg-background"
             : "border-border bg-muted/30 hover:bg-muted/50"
         }`}
       >
@@ -166,9 +166,9 @@ export function AICommandBar() {
             transition={loading ? { duration: 1, repeat: Infinity, ease: "linear" } : {}}
           >
             {loading ? (
-              <Loader2 className="h-5 w-5 text-violet-500" />
+              <Loader2 className="h-5 w-5 text-primary" />
             ) : (
-              <Sparkles className="h-5 w-5 text-violet-500" />
+              <Sparkles className="h-5 w-5 text-primary" />
             )}
           </motion.div>
 
@@ -196,7 +196,7 @@ export function AICommandBar() {
                   type="submit"
                   size="sm"
                   disabled={loading}
-                  className="bg-violet-600 hover:bg-violet-700"
+                  className="bg-primary hover:bg-primary"
                 >
                   <Send className="h-4 w-4" />
                 </Button>
@@ -257,14 +257,14 @@ export function AICommandBar() {
               className="border-t px-4 py-3"
             >
               <div className="flex items-start gap-3">
-                <Bot className="h-5 w-5 text-violet-500 mt-0.5" />
+                <Bot className="h-5 w-5 text-primary mt-0.5" />
                 <div className="flex-1">
                   <p className="text-sm whitespace-pre-wrap">{response}</p>
                   <Button
                     variant="link"
                     size="sm"
                     onClick={() => router.push(`/dashboard/chat?prompt=${encodeURIComponent(input)}`)}
-                    className="text-xs text-violet-500 p-0 h-auto mt-2"
+                    className="text-xs text-primary p-0 h-auto mt-2"
                   >
                     Continue conversation
                     <ChevronRight className="h-3 w-3 ml-1" />

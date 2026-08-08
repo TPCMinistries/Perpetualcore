@@ -167,7 +167,7 @@ export function DocumentChatModal({
                     }`}
                   >
                     {message.role === "assistant" ? (
-                      <div className="prose prose-sm dark:prose-invert max-w-none prose-headings:text-foreground prose-headings:font-semibold prose-p:text-foreground prose-p:leading-relaxed prose-strong:text-foreground prose-strong:font-semibold prose-ul:text-foreground prose-ol:text-foreground prose-li:text-foreground prose-blockquote:border-purple-500 prose-blockquote:text-muted-foreground prose-blockquote:italic">
+                      <div className="prose prose-sm dark:prose-invert max-w-none prose-headings:text-foreground prose-headings:font-semibold prose-p:text-foreground prose-p:leading-relaxed prose-strong:text-foreground prose-strong:font-semibold prose-ul:text-foreground prose-ol:text-foreground prose-li:text-foreground prose-blockquote:border-primary/40 prose-blockquote:text-muted-foreground prose-blockquote:italic">
                         <ReactMarkdown>{message.content}</ReactMarkdown>
                       </div>
                     ) : (
@@ -218,7 +218,7 @@ export function DocumentChatModal({
               onKeyDown={handleKeyDown}
               placeholder="Ask a question about this document..."
               disabled={isLoading}
-              className="flex-1 px-4 py-3 bg-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500/50 text-foreground placeholder:text-muted-foreground disabled:opacity-50"
+              className="flex-1 px-4 py-3 bg-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 text-foreground placeholder:text-muted-foreground disabled:opacity-50"
             />
             <Button
               type="submit"

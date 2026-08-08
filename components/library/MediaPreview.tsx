@@ -183,7 +183,7 @@ export function MediaPreview({
 
         {/* Transcription indicator */}
         {hasExtractedContent && (
-          <div className="absolute -bottom-1 -right-1 h-5 w-5 rounded-full bg-violet-500 flex items-center justify-center">
+          <div className="absolute -bottom-1 -right-1 h-5 w-5 rounded-full bg-primary flex items-center justify-center">
             <Sparkles className="h-3 w-3 text-white" />
           </div>
         )}
@@ -220,7 +220,7 @@ export function MediaPreview({
               {/* Play button */}
               <button
                 onClick={togglePlay}
-                className="h-14 w-14 rounded-full bg-purple-500 hover:bg-purple-600 text-white flex items-center justify-center transition-colors shadow-lg"
+                className="h-14 w-14 rounded-full bg-primary hover:bg-primary text-white flex items-center justify-center transition-colors shadow-lg"
               >
                 {isPlaying ? (
                   <Pause className="h-6 w-6" />
@@ -237,7 +237,7 @@ export function MediaPreview({
                   onClick={seek}
                 >
                   <div
-                    className="h-full bg-purple-500 rounded-full relative"
+                    className="h-full bg-primary rounded-full relative"
                     style={{ width: `${(currentTime / mediaDuration) * 100 || 0}%` }}
                   >
                     <div className="absolute right-0 top-1/2 -translate-y-1/2 h-4 w-4 bg-white rounded-full shadow opacity-0 group-hover:opacity-100 transition-opacity" />
@@ -401,7 +401,7 @@ export function MediaPreview({
         {aiDescription && (
           <div className="bg-slate-50 dark:bg-slate-900/50 rounded-lg p-3">
             <div className="flex items-center gap-2 text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-              <Sparkles className="h-4 w-4 text-violet-500" />
+              <Sparkles className="h-4 w-4 text-primary" />
               AI Description
             </div>
             <p className="text-sm text-slate-600 dark:text-slate-400">
@@ -454,7 +454,7 @@ export function MediaPreview({
               className="w-full flex items-center justify-between p-3 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
             >
               <div className="flex items-center gap-2 text-sm font-medium text-slate-700 dark:text-slate-300">
-                <FileText className="h-4 w-4 text-purple-500" />
+                <FileText className="h-4 w-4 text-primary" />
                 Transcription
                 {duration && (
                   <span className="text-xs text-slate-400">
@@ -595,7 +595,7 @@ export function MediaThumbnail({
 
       {/* Transcription indicator */}
       {hasTranscription && (
-        <div className="absolute top-2 right-2 h-6 w-6 rounded-full bg-violet-500/90 flex items-center justify-center">
+        <div className="absolute top-2 right-2 h-6 w-6 rounded-full bg-primary/90 flex items-center justify-center">
           <FileText className="h-3 w-3 text-white" />
         </div>
       )}

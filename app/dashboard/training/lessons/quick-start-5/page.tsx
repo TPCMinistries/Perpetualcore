@@ -87,10 +87,10 @@ export default function QuickStartLesson5() {
               </p>
             </Card>
 
-            <Card className="p-4 border-purple-200 dark:border-purple-800">
+            <Card className="p-4 border-primary/20 dark:border-primary/40">
               <div className="flex items-center gap-3 mb-3">
-                <div className="h-10 w-10 rounded-lg bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center">
-                  <MessageSquare className="h-5 w-5 text-purple-600" />
+                <div className="h-10 w-10 rounded-lg bg-primary/10 dark:bg-primary/30 flex items-center justify-center">
+                  <MessageSquare className="h-5 w-5 text-primary" />
                 </div>
                 <div>
                   <h4 className="font-semibold text-sm">Communication</h4>
@@ -132,10 +132,10 @@ export default function QuickStartLesson5() {
               </p>
             </Card>
 
-            <Card className="p-4 border-indigo-200 dark:border-indigo-800">
+            <Card className="p-4 border-primary/20 dark:border-primary/40">
               <div className="flex items-center gap-3 mb-3">
-                <div className="h-10 w-10 rounded-lg bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center">
-                  <Zap className="h-5 w-5 text-indigo-600" />
+                <div className="h-10 w-10 rounded-lg bg-primary/10 dark:bg-primary/30 flex items-center justify-center">
+                  <Zap className="h-5 w-5 text-primary" />
                 </div>
                 <div>
                   <h4 className="font-semibold text-sm">Developer Tools</h4>
@@ -148,7 +148,7 @@ export default function QuickStartLesson5() {
             </Card>
           </div>
 
-          <div className="bg-purple-50 dark:bg-purple-950/20 border border-purple-200 dark:border-purple-800 rounded-lg p-4">
+          <div className="bg-primary/10 dark:bg-primary/20 border border-primary/20 dark:border-primary/40 rounded-lg p-4">
             <p className="text-sm">
               <strong>New integrations are added regularly!</strong> Check the Integrations page for the full list of 50+ supported tools.
             </p>
@@ -399,7 +399,7 @@ export default function QuickStartLesson5() {
               </ul>
             </div>
 
-            <div className="p-4 bg-purple-50 dark:bg-purple-950/20 rounded-lg border border-purple-200">
+            <div className="p-4 bg-primary/10 dark:bg-primary/20 rounded-lg border border-primary/20">
               <h4 className="font-semibold text-sm mb-2">🤖 Build Specialized Agents</h4>
               <p className="text-xs text-muted-foreground mb-2">
                 Create agents for specific use cases:
@@ -501,7 +501,7 @@ export default function QuickStartLesson5() {
           </div>
         </div>
 
-        <div className="mt-4 p-4 bg-purple-50 dark:bg-purple-950/20 rounded-lg">
+        <div className="mt-4 p-4 bg-primary/10 dark:bg-primary/20 rounded-lg">
           <p className="text-sm font-medium mb-2">Bonus Points:</p>
           <ul className="text-sm text-muted-foreground space-y-1">
             <li>• Add conditional logic (different format for busy vs. light weeks)</li>

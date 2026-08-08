@@ -219,10 +219,10 @@ export function LessonLayout({
 
       {/* Practice Exercise (if provided) */}
       {practiceExercise && currentSection === sections.length && (
-        <Card className="border-purple-200 dark:border-purple-800">
+        <Card className="border-primary/20 dark:border-primary/40">
           <CardContent className="p-8">
             <div className="flex items-center gap-3 mb-6">
-              <Target className="h-6 w-6 text-purple-600" />
+              <Target className="h-6 w-6 text-primary" />
               <h2 className="text-2xl font-bold">Practice Exercise</h2>
             </div>
             {practiceExercise}

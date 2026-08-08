@@ -16,9 +16,9 @@ import type {
 export function QualityDashboard({ quality }: { quality: DevelopmentQualitySnapshot }) {
   if (quality.reportCount === 0) {
     return (
-      <Card className="border-dashed border-indigo-200 bg-indigo-50/40 shadow-none">
+      <Card className="border-dashed border-primary/20 bg-primary/40 shadow-none">
         <CardContent className="flex flex-col items-center px-6 py-14 text-center">
-          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-white text-indigo-700">
+          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-white text-primary">
             <BarChart3 className="h-6 w-6" aria-hidden="true" />
           </div>
           <h2 className="mt-4 text-xl font-semibold text-slate-950">Quality indicators begin with the first report.</h2>
@@ -92,7 +92,7 @@ export function QualityDashboard({ quality }: { quality: DevelopmentQualitySnaps
         <Card className="border-slate-200 shadow-none">
           <CardContent className="p-6">
             <div className="flex items-start gap-3">
-              <div className="rounded-xl bg-indigo-50 p-3 text-indigo-700">
+              <div className="rounded-xl bg-primary/10 p-3 text-primary">
                 <BarChart3 className="h-5 w-5" aria-hidden="true" />
               </div>
               <div>
@@ -150,7 +150,7 @@ function MetricCard({
     ? "bg-emerald-50 text-emerald-700"
     : tone === "amber"
       ? "bg-amber-50 text-amber-700"
-      : "bg-indigo-50 text-indigo-700";
+      : "bg-primary/10 text-primary";
 
   return (
     <Card className="border-slate-200 shadow-none">
@@ -193,7 +193,7 @@ function DistributionCard({
                   <dd className="shrink-0 text-slate-600">{item.count} · {item.percent}%</dd>
                 </div>
                 <div className="mt-2 h-2 overflow-hidden rounded-full bg-slate-100" role="img" aria-label={`${item.label}: ${item.count}, ${item.percent}%`}>
-                  <div className="h-full rounded-full bg-indigo-600" style={{ width: `${item.percent}%` }} />
+                  <div className="h-full rounded-full bg-primary" style={{ width: `${item.percent}%` }} />
                 </div>
               </div>
             ))}

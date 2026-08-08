@@ -263,7 +263,7 @@ export default function AgentsPage() {
               <div className="flex gap-2">
                 <div className="h-10 w-28 bg-muted rounded-lg animate-pulse" />
                 <div className="h-10 w-28 bg-muted rounded-lg animate-pulse" />
-                <div className="h-10 w-32 bg-violet-200 dark:bg-violet-900/50 rounded-lg animate-pulse" />
+                <div className="h-10 w-32 bg-primary/20 dark:bg-primary/50 rounded-lg animate-pulse" />
               </div>
             </div>
           </div>
@@ -345,7 +345,7 @@ export default function AgentsPage() {
                 </Button>
               </Link>
               <Link href="/dashboard/agents/new">
-                <Button className="bg-primary text-white shadow-lg shadow-violet-500/25">
+                <Button className="bg-primary text-white shadow-lg shadow-primary/25">
                   <Plus className="h-4 w-4 mr-2" />
                   New Agent
                 </Button>
@@ -412,8 +412,8 @@ export default function AgentsPage() {
               <CardHeader className="border-b border-border bg-muted/50 py-4">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <div className="p-2 rounded-lg bg-violet-100 dark:bg-violet-900/30">
-                      <Wand2 className="h-4 w-4 text-violet-600 dark:text-violet-400" />
+                    <div className="p-2 rounded-lg bg-primary/10 dark:bg-primary/30">
+                      <Wand2 className="h-4 w-4 text-primary" />
                     </div>
                     <CardTitle className="text-base font-semibold text-foreground">
                       AI-Powered Agent Suggestions
@@ -459,7 +459,7 @@ export default function AgentsPage() {
                                 <Icon className={`h-5 w-5 ${colors.text}`} />
                               </div>
                               <div className="flex-1 min-w-0">
-                                <h4 className="font-medium text-sm mb-1 truncate text-foreground group-hover:text-violet-600 dark:group-hover:text-violet-400 transition-colors">
+                                <h4 className="font-medium text-sm mb-1 truncate text-foreground group-hover:text-primary dark:group-hover:text-primary transition-colors">
                                   {suggestion.title}
                                 </h4>
                                 <p className="text-xs text-muted-foreground line-clamp-2">
@@ -635,7 +635,7 @@ export default function AgentsPage() {
                     <Card
                       className={`border-border bg-background transition-all hover:shadow-lg ${
                         agent.enabled
-                          ? "hover:border-violet-300 dark:hover:border-violet-700"
+                          ? "hover:border-primary/20 dark:hover:border-primary/40"
                           : "opacity-70 hover:opacity-100"
                       }`}
                     >
@@ -652,7 +652,7 @@ export default function AgentsPage() {
                               <AgentIcon
                                 className={`h-7 w-7 ${
                                   agent.enabled
-                                    ? "text-violet-600 dark:text-violet-400"
+                                    ? "text-primary"
                                     : "text-muted-foreground dark:text-muted-foreground"
                                 }`}
                               />
@@ -757,9 +757,9 @@ export default function AgentsPage() {
                               <Button
                                 size="sm"
                                 variant="outline"
-                                className="border-border hover:bg-violet-50 dark:hover:bg-violet-900/20 hover:border-violet-300 dark:hover:border-violet-700"
+                                className="border-border hover:bg-primary/10 dark:hover:bg-primary/20 hover:border-primary/20 dark:hover:border-primary/40"
                               >
-                                <Eye className="h-4 w-4 text-violet-600 dark:text-violet-400" />
+                                <Eye className="h-4 w-4 text-primary" />
                               </Button>
                             </Link>
                             <Button

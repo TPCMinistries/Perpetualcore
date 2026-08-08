@@ -87,9 +87,9 @@ export default function QuickStartLesson4() {
             Let's upload your first documents! The Knowledge Base is organized into <strong>collections</strong> that group related documents together.
           </p>
 
-          <Card className="p-6 border-purple-200 dark:border-purple-800">
+          <Card className="p-6 border-primary/20 dark:border-primary/40">
             <h4 className="font-semibold mb-4 flex items-center gap-2">
-              <BookOpen className="h-5 w-5 text-purple-600" />
+              <BookOpen className="h-5 w-5 text-primary" />
               Action Required
             </h4>
             <ol className="space-y-3 ml-6 mb-4">
@@ -173,11 +173,11 @@ export default function QuickStartLesson4() {
                 <p className="text-xs font-medium">Text</p>
               </div>
               <div className="p-2 bg-card rounded border text-center">
-                <FileText className="h-6 w-6 mx-auto mb-1 text-purple-600" />
+                <FileText className="h-6 w-6 mx-auto mb-1 text-primary" />
                 <p className="text-xs font-medium">Markdown</p>
               </div>
               <div className="p-2 bg-card rounded border text-center">
-                <FileText className="h-6 w-6 mx-auto mb-1 text-indigo-600" />
+                <FileText className="h-6 w-6 mx-auto mb-1 text-primary" />
                 <p className="text-xs font-medium">CSV</p>
               </div>
               <div className="p-2 bg-card rounded border text-center">
@@ -265,9 +265,9 @@ export default function QuickStartLesson4() {
             </div>
           </Card>
 
-          <div className="bg-purple-50 dark:bg-purple-950/20 border border-purple-200 dark:border-purple-800 rounded-lg p-6">
+          <div className="bg-primary/10 dark:bg-primary/20 border border-primary/20 dark:border-primary/40 rounded-lg p-6">
             <h4 className="font-semibold mb-3 flex items-center gap-2">
-              <Brain className="h-5 w-5 text-purple-600" />
+              <Brain className="h-5 w-5 text-primary" />
               Understanding AI Answers
             </h4>
             <p className="text-sm text-muted-foreground mb-3">
@@ -353,7 +353,7 @@ export default function QuickStartLesson4() {
           </p>
 
           <div className="grid md:grid-cols-2 gap-4">
-            <div className="p-4 bg-purple-50 dark:bg-purple-950/20 rounded-lg border border-purple-200">
+            <div className="p-4 bg-primary/10 dark:bg-primary/20 rounded-lg border border-primary/20">
               <h4 className="font-semibold text-sm mb-2">🏷️ Document Metadata</h4>
               <p className="text-xs text-muted-foreground">
                 Add tags, categories, and custom fields to make documents easier to find and organize.
@@ -383,7 +383,7 @@ export default function QuickStartLesson4() {
                 Configure AI Agents to use specific collections as their knowledge source.
               </p>
             </div>
-            <div className="p-4 bg-indigo-50 dark:bg-indigo-950/20 rounded-lg border border-indigo-200">
+            <div className="p-4 bg-primary/10 dark:bg-primary/20 rounded-lg border border-primary/20">
               <h4 className="font-semibold text-sm mb-2">🔒 Version Control</h4>
               <p className="text-xs text-muted-foreground">
                 Track document versions and roll back to previous versions if needed.

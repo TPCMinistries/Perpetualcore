@@ -400,7 +400,7 @@ export default function ConversationPage() {
     return (
       <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5 flex items-center justify-center">
         <div className="text-center">
-          <div className="h-12 w-12 rounded-full border-4 border-indigo-200 border-t-indigo-600 animate-spin mx-auto mb-4"></div>
+          <div className="h-12 w-12 rounded-full border-4 border-primary/20 border-t-indigo-600 animate-spin mx-auto mb-4"></div>
           <p className="text-muted-foreground">Loading conversation...</p>
         </div>
       </div>
@@ -428,7 +428,7 @@ export default function ConversationPage() {
                   {conversation.title}
                 </h1>
                 {conversation.context_type && (
-                  <span className="inline-flex items-center px-2 py-1 rounded-full text-xs bg-indigo-100 dark:bg-indigo-950 text-indigo-700 dark:text-indigo-300">
+                  <span className="inline-flex items-center px-2 py-1 rounded-full text-xs bg-primary/10 dark:bg-primary text-primary">
                     {conversation.context_type === "document" && <FileText className="h-3 w-3 mr-1" />}
                     {conversation.context_type}
                   </span>
@@ -491,7 +491,7 @@ export default function ConversationPage() {
                 variant="outline"
                 size="sm"
                 onClick={() => setAiEnabled(!aiEnabled)}
-                className={aiEnabled ? "bg-indigo-50 dark:bg-indigo-950 border-indigo-300 dark:border-indigo-700" : ""}
+                className={aiEnabled ? "bg-primary/10 dark:bg-primary border-primary/20 dark:border-primary/40" : ""}
               >
                 {aiEnabled ? (
                   <>
@@ -548,7 +548,7 @@ export default function ConversationPage() {
               <div
                 key={message.id}
                 className={`flex gap-3 ${
-                  message.role === "assistant" ? "bg-indigo-50/50 dark:bg-indigo-950/20 -mx-6 px-6 py-4" : ""
+                  message.role === "assistant" ? "bg-primary/50 dark:bg-primary/20 -mx-6 px-6 py-4" : ""
                 }`}
               >
               {/* Avatar */}
@@ -610,7 +610,7 @@ export default function ConversationPage() {
 
             {/* Typing Indicator */}
             {sending && (
-              <div className="flex gap-3 bg-indigo-50/50 dark:bg-indigo-950/20 -mx-6 px-6 py-4 animate-fade-in">
+              <div className="flex gap-3 bg-primary/50 dark:bg-primary/20 -mx-6 px-6 py-4 animate-fade-in">
                 <div className="flex-shrink-0">
                   <div className="h-10 w-10 rounded-full bg-primary flex items-center justify-center text-white">
                     <Bot className="h-5 w-5" />
@@ -622,9 +622,9 @@ export default function ConversationPage() {
                     <span className="text-xs text-muted-foreground">thinking...</span>
                   </div>
                   <div className="flex items-center gap-1">
-                    <div className="h-2 w-2 rounded-full bg-indigo-600 animate-bounce" style={{ animationDelay: "0ms" }}></div>
-                    <div className="h-2 w-2 rounded-full bg-indigo-600 animate-bounce" style={{ animationDelay: "150ms" }}></div>
-                    <div className="h-2 w-2 rounded-full bg-indigo-600 animate-bounce" style={{ animationDelay: "300ms" }}></div>
+                    <div className="h-2 w-2 rounded-full bg-primary animate-bounce" style={{ animationDelay: "0ms" }}></div>
+                    <div className="h-2 w-2 rounded-full bg-primary animate-bounce" style={{ animationDelay: "150ms" }}></div>
+                    <div className="h-2 w-2 rounded-full bg-primary animate-bounce" style={{ animationDelay: "300ms" }}></div>
                   </div>
                 </div>
               </div>
