@@ -42,7 +42,7 @@ const TREE: Branch = {
               rec: {
                 product: "Sage",
                 productCode: "03",
-                href: "https://sage.perpetualcore.com",
+                href: "https://sage-saas.perpetualcore.com",
                 external: true,
                 rationale:
                   "Personal AI OS with ambient context and your voice. Coach + chief of staff + strategist — not a chatbot you re-explain yourself to every morning. Lives in Telegram, voice, and web.",
