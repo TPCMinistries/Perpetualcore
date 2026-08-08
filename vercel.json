@@ -118,55 +118,55 @@
     },
     {
       "path": "/api/cron/rfp-discovery-federal?source=sam_gov",
-      "schedule": "0 */6 * * *"
+      "schedule": "0 6 * * *"
     },
     {
       "path": "/api/cron/rfp-discovery-federal?source=grants_gov",
-      "schedule": "4 */6 * * *"
+      "schedule": "4 6 * * *"
     },
     {
       "path": "/api/cron/rfp-discovery-federal?source=simpler_grants",
-      "schedule": "8 */6 * * *"
+      "schedule": "8 6 * * *"
     },
     {
       "path": "/api/cron/rfp-discovery-federal?source=sbir_gov",
-      "schedule": "12 */6 * * *"
+      "schedule": "12 6 * * *"
     },
     {
       "path": "/api/cron/rfp-discovery-federal?source=fed_register",
-      "schedule": "16 */6 * * *"
+      "schedule": "16 6 * * *"
     },
     {
       "path": "/api/cron/rfp-discovery-federal?source=nih_grants",
-      "schedule": "20 */6 * * *"
+      "schedule": "20 6 * * *"
     },
     {
       "path": "/api/cron/rfp-discovery-federal?source=nih_guide_notices",
-      "schedule": "24 */6 * * *"
+      "schedule": "24 6 * * *"
     },
     {
       "path": "/api/cron/rfp-discovery-federal?source=nsf_grants",
-      "schedule": "28 */6 * * *"
+      "schedule": "28 6 * * *"
     },
     {
       "path": "/api/cron/rfp-discovery-state-city",
-      "schedule": "30 */6 * * *"
+      "schedule": "30 6 * * *"
     },
     {
       "path": "/api/cron/rfp-discovery-curated",
-      "schedule": "40 */6 * * *"
+      "schedule": "40 6 * * *"
     },
     {
       "path": "/api/cron/rfp-score-coverage-repair",
-      "schedule": "45 */6 * * *"
+      "schedule": "45 6 * * *"
     },
     {
       "path": "/api/cron/rfp-canonical-backfill",
-      "schedule": "50 */6 * * *"
+      "schedule": "50 6 * * *"
     },
     {
       "path": "/api/cron/rfp-enrichment-backfill",
-      "schedule": "55 */6 * * *"
+      "schedule": "55 6 * * *"
     },
     {
       "path": "/api/cron/rfp-sequences",
