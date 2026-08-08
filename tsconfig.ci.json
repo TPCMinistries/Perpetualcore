@@ -15,6 +15,7 @@
     "app/api/health/rfp/**/*.ts",
     "app/api/rfp/**/*.ts",
     "app/api/webhooks/rfp-stripe/**/*.ts",
+    "app/api/contact-sales/**/*.ts",
     "app/contact-sales/rfp-engine/**/*.ts",
     "app/contact-sales/rfp-engine/**/*.tsx",
     "components/rfp/**/*.ts",

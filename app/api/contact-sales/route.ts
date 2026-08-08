@@ -123,11 +123,13 @@ const contactSalesSchema = z.object({
     .transform(s => s.trim().replace(/[<>]/g, ""))
     .optional()
     .nullable(),
+  // Zod 4 replaced errorMap with error; the old key was silently ignored, so
+  // these two fields had been falling back to Zod's default message.
   employees: z.enum(companySizeValues, {
-    errorMap: () => ({ message: "Please select a valid company size" }),
+    error: () => "Please select a valid company size",
   }),
   plan: z.enum(planValues, {
-    errorMap: () => ({ message: "Please select a valid plan" }),
+    error: () => "Please select a valid plan",
   }),
   message: z.string()
     .max(2000, "Message is too long")
@@ -211,7 +213,14 @@ export async function POST(request: Request) {
       );
     }
 
+    // Tracks whether the lead actually reached the CRM, so the response can stop
+    // claiming persistence it did not achieve.
+    let leadPersisted = false;
+
     const ownerUserId = getSalesOwnerUserId();
+    if (!ownerUserId) {
+      console.error("[contact-sales] SALES_OWNER_USER_ID unset — inquiry emailed but not recorded as a lead");
+    }
     if (ownerUserId) {
       const now = new Date().toISOString();
       const { firstName, lastName } = splitName(sanitizedName);
@@ -231,16 +240,20 @@ export async function POST(request: Request) {
 
       const { data: existingLead } = await supabase
         .from("leads")
-        .select("id, notes, metadata, tags, status")
+        .select("id, qualification_notes, metadata, tags, status")
         .eq("email", sanitizedEmail)
         .eq("user_id", ownerUserId)
         .order("created_at", { ascending: false })
         .limit(1)
         .maybeSingle();
 
+      // Every key here must be a real column on public.leads. Six of them were
+      // not — name, title, notes, source_detail, estimated_value, ai_insights —
+      // so every insert failed with 42703 and this route has never recorded a
+      // single lead. The values that had nowhere to live now go under
+      // metadata.contactSales, which is jsonb and already carries this shape.
       const leadPayload = {
         user_id: ownerUserId,
-        name: sanitizedName,
         first_name: firstName,
         last_name: lastName,
         contact_name: sanitizedName,
@@ -250,12 +263,12 @@ export async function POST(request: Request) {
         company: sanitizedCompany,
         company_name: sanitizedCompany,
         company_size: sanitizedEmployees,
-        title: sanitizedProduct ? `${sanitizedProduct} inquiry` : `${sanitizedPlan} inquiry`,
         status: existingLead?.status || "new",
         source: "contact-sales",
-        source_detail: sanitizedProduct || sanitizedPlan,
-        estimated_value: estimateValueForPlan(sanitizedPlan),
-        notes: existingLead?.notes ? `${existingLead.notes}\n\n---\n${leadNotes}` : leadNotes,
+        lead_type: sanitizedProduct || sanitizedPlan,
+        qualification_notes: existingLead?.qualification_notes
+          ? `${existingLead.qualification_notes}\n\n---\n${leadNotes}`
+          : leadNotes,
         tags: Array.from(
           new Set([
             ...((existingLead?.tags as string[] | null) || []),
@@ -268,12 +281,11 @@ export async function POST(request: Request) {
           ...((existingLead?.metadata && typeof existingLead.metadata === "object" && !Array.isArray(existingLead.metadata)
             ? existingLead.metadata
             : {}) as Record<string, unknown>),
-          contactSales: canonicalMetadata,
-        },
-        ai_insights: {
           contactSales: {
-            plan: sanitizedPlan,
-            product: sanitizedProduct ?? null,
+            ...canonicalMetadata,
+            title: sanitizedProduct ? `${sanitizedProduct} inquiry` : `${sanitizedPlan} inquiry`,
+            sourceDetail: sanitizedProduct || sanitizedPlan,
+            estimatedValue: estimateValueForPlan(sanitizedPlan),
             nextAction:
               sanitizedPlan === "manual-invoice"
                 ? "Prepare manual invoice path and confirm billing details."
@@ -296,19 +308,18 @@ export async function POST(request: Request) {
             .select("id")
             .single();
 
+      // Log in every environment. This was previously gated on NODE_ENV ===
+      // "development", so in production a failed write produced no error, no
+      // log, and a success response — the inquiry simply vanished. A lost sales
+      // lead is the most expensive thing this route can do quietly.
       if (leadResult.error) {
-        if (process.env.NODE_ENV === "development") {
-          console.error("Failed to sync contact-sales lead:", leadResult.error);
-        }
-      } else if (leadResult.data?.id) {
-        await supabase.from("lead_activities").insert({
-          lead_id: leadResult.data.id,
-          user_id: ownerUserId,
-          activity_type: sanitizedProduct === "package-intake" ? "package_intake" : "sales_intake",
-          title: sanitizedProduct === "package-intake" ? "Package intake submitted" : "Public sales inquiry submitted",
-          description: leadNotes,
-          to_value: sanitizedPlan,
+        console.error("[contact-sales] lead write failed", {
+          code: leadResult.error.code,
+          message: leadResult.error.message,
+          details: leadResult.error.details,
         });
+      } else {
+        leadPersisted = true;
       }
     }
 
@@ -330,9 +341,12 @@ export async function POST(request: Request) {
       plan: sanitizedPlan,
     });
 
+    // success reflects the prospect's experience (the inquiry was accepted and
+    // both emails sent); persisted reflects whether it reached the CRM. They are
+    // not the same thing, and conflating them is what hid this failure.
     return NextResponse.json({
       success: true,
-      persisted: true,
+      persisted: leadPersisted,
       message: "Contact information received.",
     });
   } catch (error: unknown) {
