@@ -35,7 +35,7 @@ const PRODUCT_DOCS = [
   {
     name: "Sage",
     body: "Personal AI OS — voice clone setup, Telegram/web bindings, ambient capture.",
-    href: "https://sage.perpetualcore.com",
+    href: "https://sage-saas.perpetualcore.com",
     external: true,
   },
   {

@@ -37,7 +37,7 @@ const CORE_SYSTEMS = [
     status: "Private live system",
     headline: "Persistent context for operators carrying more than one company.",
     audience: "For founders and multi-company operators",
-    href: "https://sage.perpetualcore.com",
+    href: "https://sage-saas.perpetualcore.com",
     accent: "#8b7cff",
     icon: BrainCircuit,
     span: "lg:col-span-7",

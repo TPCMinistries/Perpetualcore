@@ -1,5 +1,5 @@
 /**
- * /products/sage — Sage entry point. Full surface at sage.perpetualcore.com.
+ * /products/sage — Sage entry point. Full surface at sage-saas.perpetualcore.com.
  * Visual register matches homepage v6.
  */
 
@@ -103,7 +103,7 @@ export default function SagePage() {
 
           <div className="flex flex-col sm:flex-row items-start gap-4">
             <Button size="lg" asChild className="text-sm font-medium px-7 h-11 shadow-none bg-foreground text-background hover:bg-foreground/90 rounded-[6px]">
-              <a href="https://sage.perpetualcore.com" target="_blank" rel="noopener noreferrer">
+              <a href="https://sage-saas.perpetualcore.com" target="_blank" rel="noopener noreferrer">
                 Meet Sage <ArrowUpRight className="ml-2 h-4 w-4" />
               </a>
             </Button>
@@ -252,7 +252,7 @@ export default function SagePage() {
             <SectionRail index="—" label="Front door" />
             <div className="max-w-2xl">
               <h3 className="text-3xl sm:text-4xl lg:text-5xl font-semibold leading-[1.1] tracking-[-0.025em] text-foreground mb-6">
-                Sage doesn&apos;t live here. Sage lives at sage.perpetualcore.com.
+                Sage doesn&apos;t live here. Sage lives at sage-saas.perpetualcore.com.
               </h3>
               <p className="text-base text-muted-foreground leading-[1.7] mb-10">
                 This page is the front door, not the room. Open Sage on its own surface and start
@@ -260,7 +260,7 @@ export default function SagePage() {
               </p>
               <div className="flex flex-col sm:flex-row items-start gap-5">
                 <Button size="lg" asChild className="text-sm font-medium h-11 px-7 shadow-none bg-foreground text-background hover:bg-foreground/90 rounded-[6px]">
-                  <a href="https://sage.perpetualcore.com" target="_blank" rel="noopener noreferrer">
+                  <a href="https://sage-saas.perpetualcore.com" target="_blank" rel="noopener noreferrer">
                     Meet Sage <ArrowUpRight className="ml-2 h-4 w-4" />
                   </a>
                 </Button>
