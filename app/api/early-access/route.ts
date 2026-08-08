@@ -214,10 +214,13 @@ export async function POST(request: Request) {
     // per CLAUDE.md "Background/server operations" rule.
     const supabase = createAdminClient();
 
-    // Best-effort insert. If the `early_access` table doesn't exist
-    // yet, swallow the error and continue — the user still gets a
-    // success response and the email is captured in server logs for
-    // Lorenzo to backfill later.
+    // Best-effort insert: the caller is told they're on the list either way.
+    // public.early_access did not exist until migration 20260808, so every
+    // signup failed here — and the log below was gated on NODE_ENV ===
+    // "development", so in production the address was not written to the table
+    // OR to the logs. The comment claimed it was "captured in server logs for
+    // Lorenzo to backfill later"; it was captured nowhere. The log now runs in
+    // every environment so the claim is actually true if this ever fails again.
     const { error: dbError } = await supabase.from("early_access").insert({
       email: validated.email,
       product: validated.product ?? null,
@@ -225,9 +228,9 @@ export async function POST(request: Request) {
       created_at: new Date().toISOString(),
     } as never);
 
-    if (dbError && process.env.NODE_ENV === "development") {
-      console.warn(
-        "[early-access] insert failed (table may not exist yet):",
+    if (dbError) {
+      console.error(
+        `[early-access] insert failed — signup NOT stored. email=${validated.email} product=${validated.product ?? "none"}:`,
         dbError.message
       );
     }

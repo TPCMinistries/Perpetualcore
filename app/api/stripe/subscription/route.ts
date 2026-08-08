@@ -46,7 +46,7 @@ export async function GET(req: NextRequest) {
 
     return NextResponse.json({ subscription });
   } catch (error) {
-    if (isDev) console.error("Subscription fetch error:", error);
+    console.error("[stripe-subscription] fetch failed:", error);
     return NextResponse.json(
       { error: "Failed to fetch subscription" },
       { status: 500 }
