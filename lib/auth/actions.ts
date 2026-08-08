@@ -4,6 +4,9 @@ import { createClient } from "@/lib/supabase/server";
 import { SignUpInput, SignInInput } from "@/lib/validations/auth";
 import { redirect } from "next/navigation";
 import { headers } from "next/headers";
+import type { Database } from "@/lib/supabase/database.types";
+
+type BetaInviteCode = Database["public"]["Tables"]["beta_invite_codes"]["Row"];
 
 /**
  * Derive the origin of the current request so auth redirects work across
@@ -20,15 +23,6 @@ async function getRequestOrigin(): Promise<string> {
   return envUrl || "https://www.perpetualcore.com";
 }
 
-function slugify(text: string): string {
-  return text
-    .toLowerCase()
-    .replace(/[^\w\s-]/g, "")
-    .replace(/\s+/g, "-")
-    .replace(/--+/g, "-")
-    .trim();
-}
-
 function safeAuthNext(value: string | undefined): string | null {
   if (!value) return null;
   if (!value.startsWith("/") || value.startsWith("//")) return null;
@@ -41,7 +35,7 @@ export async function signUp(data: SignUpInput, nextPath?: string) {
 
   // Validate beta code if provided
   let betaTier: string | null = null;
-  let betaCodeData: any = null;
+  let betaCodeData: BetaInviteCode | null = null;
   if (data.betaCode) {
     const { data: inviteCode, error: codeError } = await supabase
       .from("beta_invite_codes")
@@ -59,7 +53,10 @@ export async function signUp(data: SignUpInput, nextPath?: string) {
     }
 
     // Check if code has reached max uses
-    if (inviteCode.uses_count >= inviteCode.max_uses) {
+    if (
+      inviteCode.max_uses !== null &&
+      (inviteCode.uses_count ?? 0) >= inviteCode.max_uses
+    ) {
       return { error: "This invite code has been fully redeemed" };
     }
 
@@ -168,20 +165,18 @@ export async function signUp(data: SignUpInput, nextPath?: string) {
       // Increment uses count
       await supabase
         .from("beta_invite_codes")
-        .update({ uses_count: betaCodeData.uses_count + 1 })
+        .update({ uses_count: (betaCodeData.uses_count ?? 0) + 1 })
         .eq("id", betaCodeData.id);
     }
   } else if (data.organizationName) {
     // Regular user: create their own organization
-    const orgSlug = `${slugify(data.organizationName)}-${Date.now()}`;
-
     const { error: orgError } = await supabase.rpc(
       "create_organization_and_profile",
       {
         user_id: authData.user.id,
         user_email: data.email,
+        user_full_name: data.fullName,
         org_name: data.organizationName,
-        org_slug: orgSlug,
       }
     );
 

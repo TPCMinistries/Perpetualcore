@@ -31952,6 +31952,7 @@ export type Database = {
           isSetofReturn: true
         }
       }
+      press_ensure_workspace: { Args: { p_user_id: string }; Returns: string }
       press_has_org_role: {
         Args: { p_org_id: string; p_roles?: string[] }
         Returns: boolean

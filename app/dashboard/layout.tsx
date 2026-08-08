@@ -11,6 +11,7 @@ const primaryNav = [
   { label: "Handoffs", href: "/dashboard/handoffs" },
   { label: "Scripts", href: "/dashboard/sales-script" },
   { label: "Proposals", href: "/dashboard/proposals" },
+  { label: "Press", href: "/press/studio" },
   { label: "Packages", href: "/packages" },
   { label: "Briefing", href: "/dashboard/home" },
   { label: "Operate", href: "/dashboard/operate" },

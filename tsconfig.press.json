@@ -1,0 +1,20 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "incremental": false
+  },
+  "include": [
+    "next-env.d.ts",
+    "app/api/press/**/*.ts",
+    "app/dashboard/press/**/*.ts",
+    "app/dashboard/press/**/*.tsx",
+    "app/products/press/**/*.tsx",
+    "app/press/**/*.tsx",
+    "components/press/**/*.ts",
+    "components/press/**/*.tsx",
+    "lib/press/**/*.ts",
+    "scripts/press/**/*.ts",
+    "tests/unit/press-*.test.ts"
+  ],
+  "exclude": ["node_modules"]
+}
