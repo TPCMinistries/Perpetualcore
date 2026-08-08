@@ -13,25 +13,11 @@ import Stripe from "stripe";
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-// Informational chatter stays behind isDev to keep production logs readable.
-// Errors never do: this route is how money becomes entitlement, and a payment
-// that fails to process silently is indistinguishable from one that never
-// happened. Every console.error below runs in every environment.
 const isDev = process.env.NODE_ENV === "development";
 
-let stripeClient: Stripe | null = null;
-
-function getStripe(): Stripe {
-  if (stripeClient) return stripeClient;
-
-  const secretKey = process.env.STRIPE_SECRET_KEY;
-  if (!secretKey) throw new Error("STRIPE_SECRET_KEY is not set");
-
-  stripeClient = new Stripe(secretKey, {
-    apiVersion: "2024-12-18.acacia",
-  });
-  return stripeClient;
-}
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
+  apiVersion: "2024-12-18.acacia",
+});
 
 const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET!;
 
@@ -86,11 +72,10 @@ export async function POST(req: NextRequest) {
   let event: Stripe.Event;
 
   try {
-    const stripe = getStripe();
     event = stripe.webhooks.constructEvent(body, signature, webhookSecret);
   } catch (err: unknown) {
     const errorMessage = err instanceof Error ? err.message : "Unknown error";
-    console.error(`[stripe-webhook] signature verification failed:`, errorMessage);
+    if (isDev) console.error(`Webhook signature verification failed:`, errorMessage);
     return NextResponse.json(
       { error: `Webhook Error: ${errorMessage}` },
       { status: 400 }
@@ -159,7 +144,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ received: true });
   } catch (error: unknown) {
     const errorMessage = error instanceof Error ? error.message : "Unknown error";
-    console.error(`[stripe-webhook] processing failed for ${event.type} (${event.id}):`, errorMessage);
+    if (isDev) console.error(`Error processing webhook:`, errorMessage);
 
     // Mark event as failed (but still record it to prevent infinite retries)
     await markEventProcessed(supabase, event.id, event.type, "failed", errorMessage);
@@ -504,7 +489,6 @@ async function handleSubscriptionCreated(
   const status = subscription.status;
 
   // Get customer email
-  const stripe = getStripe();
   const customer = await stripe.customers.retrieve(customerId);
   const email = (customer as Stripe.Customer).email;
 
@@ -645,7 +629,6 @@ async function handleSubscriptionDeleted(
   // Send cancellation email
   const customerId = subscription.customer as string;
   try {
-    const stripe = getStripe();
     const customer = await stripe.customers.retrieve(customerId);
     const customerEmail = (customer as Stripe.Customer).email;
     if (customerEmail) {

@@ -52,27 +52,11 @@ export const PC_PRODUCTS: Record<string, ProductManifestEntry> = {
     category: "BusinessApplication",
     status: "invite",
   },
-  "development-intelligence": {
-    slug: "development-intelligence",
-    name: "Development Intelligence",
-    description:
-      "Evidence-linked conversation analysis for workforce development, interviews, meetings, and leadership coaching—with human review and longitudinal progress built in.",
-    category: "BusinessApplication",
-    status: "live",
-  },
   "rfp-sentry": {
     slug: "rfp-sentry",
     name: "RFP Sentry",
     description:
       "Bid intelligence and compliance gate. RFPs scored against your capability statement, past wins, and team capacity. Federal, state, and foundation pipelines monitored on cadence.",
-    category: "BusinessApplication",
-    status: "invite",
-  },
-  press: {
-    slug: "press",
-    name: "Press",
-    description:
-      "Media production system running the HeyGen, ElevenLabs, Opus Clips, and Descript jobs as open-source models on hardware we own. $0/month to run. By invitation.",
     category: "BusinessApplication",
     status: "invite",
   },

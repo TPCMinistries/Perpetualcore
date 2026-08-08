@@ -1,5 +1,5 @@
 import Stripe from "stripe";
-import { getStripe } from "./client";
+import { stripe } from "./client";
 import { createAdminClient } from "@/lib/supabase/server";
 import {
   sendTrialEndingEmail,
@@ -454,5 +454,5 @@ export function verifyStripeWebhook(
   signature: string,
   webhookSecret: string
 ): Stripe.Event {
-  return getStripe().webhooks.constructEvent(payload, signature, webhookSecret);
+  return stripe.webhooks.constructEvent(payload, signature, webhookSecret);
 }

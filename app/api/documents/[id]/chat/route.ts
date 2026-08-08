@@ -5,17 +5,9 @@ import Anthropic from "@anthropic-ai/sdk";
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-let anthropicClient: Anthropic | null = null;
-
-function getAnthropicClient(): Anthropic {
-  const apiKey = process.env.ANTHROPIC_API_KEY;
-  if (!apiKey) {
-    throw new Error("ANTHROPIC_API_KEY is not configured");
-  }
-
-  anthropicClient ??= new Anthropic({ apiKey });
-  return anthropicClient;
-}
+const anthropic = new Anthropic({
+  apiKey: process.env.ANTHROPIC_API_KEY!,
+});
 
 /**
  * POST /api/documents/[id]/chat
@@ -142,7 +134,7 @@ ${context}
 Please answer the user's questions based solely on this document's content.`;
 
     // Call Claude with streaming disabled for now (can enable later)
-    const response = await getAnthropicClient().messages.create({
+    const response = await anthropic.messages.create({
       model: "claude-3-haiku-20240307",
       max_tokens: 2048,
       system: systemPrompt,

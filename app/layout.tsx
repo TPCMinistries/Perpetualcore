@@ -2,12 +2,15 @@ import type { Metadata, Viewport } from "next";
 import { Inter, JetBrains_Mono, Instrument_Serif } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
+import { QueryProvider } from "@/lib/providers/query-provider";
+import { Analytics } from "@vercel/analytics/react";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { organizationSchema, websiteSchema } from "@/lib/seo/structured-data";
 import { CookieConsent } from "@/components/landing/CookieConsent";
-import { DeferredPublicRuntime } from "@/components/landing/DeferredPublicRuntime";
-import { PublicWebVitals } from "@/components/analytics/PublicWebVitals";
-import { PublicConversionTracker } from "@/components/analytics/PublicConversionTracker";
+import { CrispChat } from "@/components/landing/CrispChat";
+import { ExitIntent } from "@/components/landing/ExitIntent";
+import { ServiceWorkerReset } from "@/components/system/ServiceWorkerReset";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -28,7 +31,6 @@ const instrumentSerif = Instrument_Serif({
   subsets: ["latin"],
   variable: "--font-display",
   display: "swap",
-  preload: false,
   style: ["normal", "italic"],
   weight: ["400"],
 });
@@ -46,10 +48,10 @@ export const viewport: Viewport = {
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || "https://perpetualcore.com"),
   title: {
-    default: "Perpetual Core — AI systems that work as one company",
+    default: "Perpetual Core — The venture studio attached to the Perpetual Engine",
     template: "%s | Perpetual Core",
   },
-  description: "Perpetual Core is an operator-built AI systems company: a governed intelligence platform, a marketplace of specialized products and capabilities, and a studio that installs them into real organizations.",
+  description: "Perpetual Core is a first-of-its-kind AI venture studio powered by the Perpetual Engine. We build, install, and scale AI-native operating systems, products, and ventures for mission-driven institutions.",
   keywords: [
     "AI venture studio",
     "AI implementation studio",
@@ -78,22 +80,22 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     siteName: "Perpetual Core",
-    title: "Perpetual Core — AI systems that work as one company",
-    description: "Governed company context, specialized AI systems, and human-approved workflows. Start with one capability and expand into a company-wide operating system.",
+    title: "Perpetual Core — The venture studio attached to the Perpetual Engine",
+    description: "A first-of-its-kind AI venture studio building AI-native operating systems, products, and ventures for mission-driven institutions.",
     locale: "en_US",
     images: [
       {
         url: "/og-image.png",
         width: 1200,
         height: 630,
-        alt: "Perpetual Core — governed intelligence and specialized AI systems for companies",
+        alt: "Perpetual Core — the venture studio attached to the Perpetual Engine",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Perpetual Core — AI systems that work as one company",
-    description: "A governed intelligence platform, capability marketplace, and implementation studio.",
+    title: "Perpetual Core — The venture studio attached to the Perpetual Engine",
+    description: "A first-of-its-kind AI venture studio powered by the Perpetual Engine.",
     images: ["/og-image.png"],
   },
   robots: {
@@ -106,6 +108,15 @@ export const metadata: Metadata = {
       "max-image-preview": "large",
       "max-snippet": -1,
     },
+  },
+  icons: {
+    icon: [
+      { url: "/favicon.ico" },
+      { url: "/favicon-16x16.png", sizes: "16x16", type: "image/png" },
+      { url: "/favicon-32x32.png", sizes: "32x32", type: "image/png" },
+    ],
+    apple: [{ url: "/apple-touch-icon.png", sizes: "180x180" }],
+    shortcut: "/favicon.ico",
   },
 };
 
@@ -127,18 +138,22 @@ export default function RootLayout({
         />
       </head>
       <body className={inter.className}>
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="system"
-          enableSystem
-          disableTransitionOnChange
-        >
-          {children}
-        </ThemeProvider>
+        <QueryProvider>
+          <ThemeProvider
+            attribute="class"
+            defaultTheme="system"
+            enableSystem
+            disableTransitionOnChange
+          >
+            {children}
+          </ThemeProvider>
+        </QueryProvider>
         <CookieConsent />
-        <DeferredPublicRuntime />
-        <PublicConversionTracker />
-        <PublicWebVitals />
+        <CrispChat />
+        <ExitIntent />
+        <ServiceWorkerReset />
+        <Analytics />
+        <SpeedInsights />
       </body>
     </html>
   );

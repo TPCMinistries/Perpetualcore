@@ -21,30 +21,6 @@ const VALID_EVENTS: AnalyticsEventType[] = [
   "churn",
 ];
 
-const PUBLIC_METADATA_KEYS = new Set([
-  "surface",
-  "placement",
-  "product",
-  "status",
-  "delivery",
-  "destinationHost",
-  "metric",
-  "rating",
-  "value",
-]);
-
-function sanitizePublicMetadata(value: unknown): Record<string, string | number> {
-  if (!value || typeof value !== "object" || Array.isArray(value)) return {};
-
-  const sanitized: Record<string, string | number> = {};
-  for (const [key, item] of Object.entries(value)) {
-    if (!PUBLIC_METADATA_KEYS.has(key)) continue;
-    if (typeof item === "string") sanitized[key] = item.slice(0, 120);
-    if (typeof item === "number" && Number.isFinite(item)) sanitized[key] = item;
-  }
-  return sanitized;
-}
-
 /**
  * POST /api/analytics/track
  *
@@ -61,19 +37,6 @@ export async function POST(request: NextRequest) {
     if (!event_type || !VALID_EVENTS.includes(event_type)) {
       return NextResponse.json({ error: "Invalid event_type" }, { status: 400 });
     }
-    if (
-      (event_name !== undefined &&
-        event_name !== null &&
-        (typeof event_name !== "string" || event_name.length > 120)) ||
-      (page_path !== undefined &&
-        page_path !== null &&
-        (typeof page_path !== "string" || page_path.length > 300)) ||
-      (page_url !== undefined &&
-        page_url !== null &&
-        (typeof page_url !== "string" || page_url.length > 1000))
-    ) {
-      return NextResponse.json({ error: "Invalid event payload" }, { status: 400 });
-    }
 
     // Get authenticated user if available
     let userId: string | null = null;
@@ -86,23 +49,6 @@ export async function POST(request: NextRequest) {
     } catch {
       // Anonymous visitor — that's fine
     }
-
-    const hasConsent = request.cookies.get("pc_consent")?.value === "accepted";
-    if (!userId && !hasConsent) {
-      return new NextResponse(null, { status: 204 });
-    }
-
-    const isPublicEvent =
-      !userId &&
-      typeof metadata === "object" &&
-      metadata !== null &&
-      !Array.isArray(metadata) &&
-      (metadata as Record<string, unknown>).surface === "public";
-    const safeMetadata = isPublicEvent
-      ? sanitizePublicMetadata(metadata)
-      : metadata && typeof metadata === "object" && !Array.isArray(metadata)
-        ? metadata
-        : {};
 
     // Read UTM from cookie
     const utmCookie = request.cookies.get(UTM_COOKIE_NAME)?.value;
@@ -132,9 +78,9 @@ export async function POST(request: NextRequest) {
       p_referrer: utm?.referrer || referer || null,
       p_page_url: page_url || null,
       p_page_path: page_path || null,
-      p_metadata: safeMetadata,
-      p_user_agent: isPublicEvent ? null : userAgent || null,
-      p_ip_address: isPublicEvent ? null : ip || null,
+      p_metadata: metadata || {},
+      p_user_agent: userAgent || null,
+      p_ip_address: ip || null,
     });
 
     if (error) {

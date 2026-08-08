@@ -7,17 +7,9 @@ import { rateLimiters, checkRateLimit } from "@/lib/rate-limit";
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-let openAIClient: OpenAI | null = null;
-
-function getOpenAIClient(): OpenAI {
-  const apiKey = process.env.OPENAI_API_KEY;
-  if (!apiKey) {
-    throw new Error("OPENAI_API_KEY is not configured");
-  }
-
-  openAIClient ??= new OpenAI({ apiKey });
-  return openAIClient;
-}
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY,
+});
 
 interface Message {
   role: "user" | "assistant" | "system";
@@ -99,7 +91,7 @@ export async function POST(req: NextRequest) {
     });
 
     // Stream response from OpenAI
-    const stream = await getOpenAIClient().chat.completions.create({
+    const stream = await openai.chat.completions.create({
       model: "gpt-4o-mini",
       messages: messages,
       stream: true,

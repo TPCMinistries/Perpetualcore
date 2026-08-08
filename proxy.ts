@@ -2,7 +2,6 @@ import { createServerClient, type CookieOptions } from '@supabase/ssr';
 import { NextResponse, type NextRequest } from 'next/server';
 import { Ratelimit } from '@upstash/ratelimit';
 import { Redis } from '@upstash/redis';
-import { isIPAllowed, getOrgIdForUser } from '@/lib/compliance/ip-check';
 import {
   extractUTMFromURL,
   serializeUTM,
@@ -17,9 +16,8 @@ import {
 const PRODUCT_INTENT_COOKIE = 'pc_product_intent';
 const RFP_INTENT_MAX_AGE = 60 * 60 * 24; // 24 hours
 
-// Shared unauthenticated API rate limiter — 200 requests per minute per IP.
-// Authenticated product traffic uses route-level controls so normal dashboard
-// polling does not spend distributed Redis commands on every request.
+// Blanket API rate limiter — 200 requests per minute per IP
+// Individual routes can enforce stricter limits on top of this
 let apiRateLimiter: Ratelimit | null = null;
 try {
   if (process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN) {
@@ -30,7 +28,7 @@ try {
       }),
       limiter: Ratelimit.fixedWindow(200, '60 s'),
       prefix: 'mw:api',
-      analytics: false,
+      analytics: true,
     });
   }
 } catch {
@@ -73,6 +71,16 @@ function isRfpAppPath(pathname: string): boolean {
   return (
     pathname.startsWith('/api/') ||
     pathname.startsWith('/_next') ||
+    pathname === '/robots.txt' ||
+    pathname === '/sitemap.xml' ||
+    pathname === '/manifest.json' ||
+    pathname === '/favicon.ico' ||
+    pathname === '/icon' ||
+    pathname === '/apple-icon' ||
+    pathname.startsWith('/favicon-') ||
+    pathname.startsWith('/apple-touch-icon') ||
+    pathname.startsWith('/opengraph-image') ||
+    pathname.startsWith('/twitter-image') ||
     pathname.startsWith('/auth/') ||
     pathname.startsWith('/login') ||
     pathname.startsWith('/signup') ||
@@ -88,6 +96,7 @@ function isRfpAppPath(pathname: string): boolean {
     pathname.startsWith('/unsubscribe') ||
     pathname === '/privacy' ||
     pathname === '/terms' ||
+    pathname === '/ai-disclosure' ||
     pathname.startsWith('/rfp')
   );
 }
@@ -175,35 +184,6 @@ export async function proxy(request: NextRequest) {
     return publicResponse;
   }
 
-  // The legacy Mac worker API was removed when Press moved to the Mac Mini
-  // private runtime. Return a stable terminal response before session refresh
-  // or Redis so stale workers cannot create a paid retry loop.
-  if (pathname === '/api/press/worker/jobs/claim') {
-    return NextResponse.json(
-      {
-        error: 'Press worker endpoint retired',
-        code: 'PRESS_WORKER_ENDPOINT_RETIRED',
-      },
-      {
-        status: 410,
-        headers: {
-          'Cache-Control': 'public, max-age=3600',
-        },
-      }
-    );
-  }
-
-  // Machine-to-machine Company Graph receipts are authenticated inside the
-  // These routes perform their own server-side bearer authentication. Skip
-  // session refresh and the shared Redis limiter so an exhausted public API
-  // quota cannot interrupt bounded internal health signals.
-  if (
-    pathname === '/api/internal/company-graph-readiness'
-    || pathname === '/api/internal/operating-health'
-  ) {
-    return NextResponse.next();
-  }
-
   let response = NextResponse.next({
     request: {
       headers: request.headers,
@@ -283,43 +263,31 @@ export async function proxy(request: NextRequest) {
   // immediately before looked signed-in.
   const { data: { user } } = await supabase.auth.getUser();
 
-  // Rate limit unauthenticated API routes (after session refresh so the route
-  // handler sees a valid cookie), then short-circuit before analytics + IP
-  // whitelist. Authenticated APIs use their route-level controls.
+  // Rate limit API routes (after session refresh so the route handler sees
+  // a valid cookie), then short-circuit before analytics + IP whitelist.
   if (request.nextUrl.pathname.startsWith('/api/')) {
     if (
       apiRateLimiter &&
-      !user &&
       !request.nextUrl.pathname.startsWith('/api/cron/') &&
       !request.nextUrl.pathname.startsWith('/api/webhooks/')
     ) {
       const ip = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim()
         || request.headers.get('x-real-ip')
         || 'unknown';
-      try {
-        const result = await apiRateLimiter.limit(`mw:${ip}`);
-        if (!result.success) {
-          const reset = Math.ceil((result.reset - Date.now()) / 1000);
-          return NextResponse.json(
-            { error: 'Too many requests', retryAfter: reset },
-            {
-              status: 429,
-              headers: {
-                'Retry-After': reset.toString(),
-                'X-RateLimit-Limit': result.limit.toString(),
-                'X-RateLimit-Remaining': '0',
-              },
-            }
-          );
-        }
-      } catch {
-        // Availability fallback only. Route handlers continue to apply their
-        // own validation and any tighter route-level controls.
-        console.warn(JSON.stringify({
-          level: 'warning',
-          message: 'Shared API rate limiter unavailable; route-level controls remain active',
-          route: request.nextUrl.pathname,
-        }));
+      const result = await apiRateLimiter.limit(`mw:${ip}`);
+      if (!result.success) {
+        const reset = Math.ceil((result.reset - Date.now()) / 1000);
+        return NextResponse.json(
+          { error: 'Too many requests', retryAfter: reset },
+          {
+            status: 429,
+            headers: {
+              'Retry-After': reset.toString(),
+              'X-RateLimit-Limit': result.limit.toString(),
+              'X-RateLimit-Remaining': '0',
+            },
+          }
+        );
       }
     }
     if (markRfpIntent) setRfpIntentCookie(response, request);
@@ -374,12 +342,36 @@ export async function proxy(request: NextRequest) {
   // IP Whitelist + Session Duration checks for authenticated users
   if (user) {
     try {
-      const orgId = await getOrgIdForUser(user.id);
+      const rfp = supabase as unknown as {
+        from: (table: string) => any;
+        rpc: (
+          fn: string,
+          args: Record<string, unknown>,
+        ) => Promise<{ data: boolean | null; error: { message: string } | null }>;
+      };
+      const { data: profile } = await rfp
+        .from('profiles')
+        .select('organization_id')
+        .eq('id', user.id)
+        .maybeSingle();
+      const orgId =
+        profile && typeof profile.organization_id === 'string'
+          ? profile.organization_id
+          : null;
       if (orgId) {
         const ip = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim()
           || request.headers.get('x-real-ip')
           || 'unknown';
-        const { allowed } = await isIPAllowed(ip, orgId);
+        const { data: allowed, error: ipCheckError } =
+          ip === 'unknown'
+            ? { data: true, error: null }
+            : await rfp.rpc('check_ip_whitelist', {
+                check_ip: ip,
+                org_id: orgId,
+              });
+        if (ipCheckError) {
+          console.error('IP whitelist check error:', ipCheckError);
+        }
         if (!allowed) {
           return NextResponse.json(
             { error: 'Access denied: IP not whitelisted' },
@@ -421,10 +413,6 @@ export const config = {
      * - favicon.ico (favicon file)
      * Feel free to modify this pattern to include more paths.
      */
-    /*
-     * meridian and meridian-static are rewritten to a separate Next.js zone
-     * (see next.config.mjs). Auth middleware must not touch them.
-     */
-    '/((?!_next/static|_next/image|favicon.ico|meridian|meridian-static|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
+    '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
   ],
 };

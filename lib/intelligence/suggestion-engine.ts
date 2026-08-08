@@ -6,16 +6,9 @@
 import { createClient } from "@/lib/supabase/server";
 import OpenAI from "openai";
 
-let openai: OpenAI | null = null;
-
-function getOpenAI(): OpenAI {
-  const apiKey = process.env.OPENAI_API_KEY;
-  if (!apiKey) {
-    throw new Error("OPENAI_API_KEY is required to generate suggestions");
-  }
-  openai ??= new OpenAI({ apiKey });
-  return openai;
-}
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY!,
+});
 
 export interface Suggestion {
   type: 'action' | 'optimization' | 'reminder' | 'recommendation' | 'insight';
@@ -209,7 +202,7 @@ Return JSON with suggestions array, each with:
 - basedOnPatterns: string[] (pattern IDs if applicable)
 - tags: string[]`;
 
-    const response = await getOpenAI().chat.completions.create({
+    const response = await openai.chat.completions.create({
       model: "gpt-4o-mini",
       messages: [
         {
@@ -256,5 +249,6 @@ export async function getPendingSuggestions(
 
   return data || [];
 }
+
 
 

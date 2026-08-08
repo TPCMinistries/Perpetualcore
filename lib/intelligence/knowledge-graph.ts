@@ -6,16 +6,9 @@
 import { createClient } from "@/lib/supabase/server";
 import OpenAI from "openai";
 
-let openai: OpenAI | null = null;
-
-function getOpenAI(): OpenAI {
-  const apiKey = process.env.OPENAI_API_KEY;
-  if (!apiKey) {
-    throw new Error("OPENAI_API_KEY is required to extract knowledge relationships");
-  }
-  openai ??= new OpenAI({ apiKey });
-  return openai;
-}
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY!,
+});
 
 export interface KnowledgeRelationship {
   sourceConcept: string;
@@ -106,7 +99,7 @@ Return JSON with relationships array, each with:
 - confidence: number (0.0 to 1.0)
 - evidence: string[] (quotes or references)`;
 
-    const response = await getOpenAI().chat.completions.create({
+    const response = await openai.chat.completions.create({
       model: "gpt-4o-mini",
       messages: [
         {
@@ -384,5 +377,6 @@ export async function findConceptClusters(
   // Sort clusters by size (largest first)
   return clusters.sort((a, b) => b.length - a.length);
 }
+
 
 

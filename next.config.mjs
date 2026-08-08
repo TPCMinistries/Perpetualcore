@@ -25,7 +25,6 @@ const nextConfig = {
     serverActions: {
       bodySizeLimit: '10mb',
     },
-    serverSourceMaps: false,
     // Enable optimized package imports for better tree-shaking
     optimizePackageImports: ['lucide-react', '@radix-ui/react-icons'],
   },
@@ -39,7 +38,17 @@ const nextConfig = {
   // Production optimizations
   compress: true,
   reactStrictMode: true,
-  productionBrowserSourceMaps: false,
+
+  webpack(config) {
+    config.ignoreWarnings = [
+      ...(config.ignoreWarnings ?? []),
+      {
+        module: /node_modules\/e2b\/dist\/index\.mjs/,
+        message: /Critical dependency: the request of a dependency is an expression/,
+      },
+    ];
+    return config;
+  },
 
   // Skip TypeScript checking during build - codebase is too large for Vercel's memory limits
   // Type checking is handled by: IDE (real-time), ESLint (via @typescript-eslint), and CI
@@ -50,22 +59,6 @@ const nextConfig = {
   // Performance optimizations
   poweredByHeader: false,
   generateEtags: true,
-
-  // Multi-zone: /meridian is served by the standalone Meridian app (Next 16 +
-  // three.js), not by this codebase. Only these three path prefixes leave this
-  // deployment; everything else is unaffected. Set MERIDIAN_ZONE_URL in Vercel
-  // to the Meridian production URL — when it is unset these rewrites are
-  // omitted entirely so a missing env var can never break the site.
-  async rewrites() {
-    const zone = process.env.MERIDIAN_ZONE_URL;
-    if (!zone) return [];
-    const origin = zone.startsWith('http') ? zone : `https://${zone}`;
-    return [
-      { source: '/meridian', destination: `${origin}/meridian` },
-      { source: '/meridian/:path*', destination: `${origin}/meridian/:path*` },
-      { source: '/meridian-static/:path*', destination: `${origin}/meridian-static/:path*` },
-    ];
-  },
 
   // 301 redirects for retired routes per BRAND_ARCHITECTURE §7
   async redirects() {
@@ -89,14 +82,6 @@ const nextConfig = {
     ];
 
     return [
-      {
-        // hq.perpetualcore.com is a vanity host for the owner command center;
-        // the app itself serves /hq on every host, so only the root needs a hop.
-        source: "/",
-        has: [{ type: "host", value: "hq.perpetualcore.com" }],
-        destination: "https://perpetualcore.com/hq",
-        permanent: false,
-      },
       ...industryToSolution.map(([from, to]) => ({
         source: `/industries/${from}`,
         destination: `/solutions/${to}`,
@@ -133,33 +118,6 @@ const nextConfig = {
         source: "/products/rfp-engine",
         destination: "/rfp",
         permanent: true,
-      },
-      {
-        // Branded entry point for the DBNA Ops client platform
-        // (Perpetual Core services build, separate Vercel app).
-        // Temporary: destination moves to ops.thedbna.org once the
-        // custom-domain decision is made — do not mark permanent or
-        // browsers will cache the vercel.app URL.
-        source: "/dbna",
-        destination: "https://dbna-ops.vercel.app",
-        permanent: false,
-      },
-      {
-        // Branded review link for the HDGM site rebuild (Perpetual
-        // Core services build, separate Vercel app). Temporary:
-        // destination moves to hdgministries.org after the Wix DNS
-        // cutover — do not mark permanent or browsers will cache the
-        // vercel.app URL.
-        source: "/hdgm",
-        destination: "https://hdg-ministries.vercel.app",
-        permanent: false,
-      },
-      {
-        // Uppercase variant (Next redirects are case-sensitive; the
-        // link is shared as perpetualcore.com/HDGM).
-        source: "/HDGM",
-        destination: "https://hdg-ministries.vercel.app",
-        permanent: false,
       },
       {
         // /contact alias → existing /contact-sales surface.

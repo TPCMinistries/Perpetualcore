@@ -66,12 +66,11 @@ export default function LeadMagnetPage() {
   const [firstName, setFirstName] = useState("");
   const [email, setEmail] = useState("");
   const [company, setCompany] = useState("");
-  const [marketingConsent, setMarketingConsent] = useState(false);
   const [submitState, setSubmitState] = useState<SubmitState>("idle");
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    if (!firstName.trim() || !email.trim() || !marketingConsent) return;
+    if (!firstName.trim() || !email.trim()) return;
     setSubmitState("submitting");
     try {
       const res = await fetch("/api/leads/capture", {
@@ -83,7 +82,6 @@ export default function LeadMagnetPage() {
           company: company.trim() || undefined,
           source: "lead_magnet",
           leadMagnet: "ai_os_map",
-          marketingConsent,
           metadata: { magnet: "ai-operating-system-map" },
         }),
       });
@@ -184,16 +182,6 @@ export default function LeadMagnetPage() {
                   <ArrowRight className="ml-2 h-3.5 w-3.5" />
                 )}
               </Button>
-              <label className="flex cursor-pointer items-start gap-2 text-xs leading-5 text-muted-foreground">
-                <input
-                  type="checkbox"
-                  required
-                  checked={marketingConsent}
-                  onChange={(event) => setMarketingConsent(event.target.checked)}
-                  className="mt-0.5 h-4 w-4"
-                />
-                Email me the map and occasional Perpetual Core operating notes. Unsubscribe any time.
-              </label>
               {submitState === "error" && (
                 <p className="text-xs text-red-500 leading-[1.6]">
                   Submit failed. Try again, or read it directly:{" "}

@@ -17,17 +17,9 @@ interface RouteContext {
   params: Promise<{ contactId: string }>;
 }
 
-let openAIClient: OpenAI | null = null;
-
-function getOpenAIClient(): OpenAI {
-  const apiKey = process.env.OPENAI_API_KEY;
-  if (!apiKey) {
-    throw new Error("OPENAI_API_KEY is not configured");
-  }
-
-  openAIClient ??= new OpenAI({ apiKey });
-  return openAIClient;
-}
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY,
+});
 
 /**
  * POST - Generate AI outreach message for a contact
@@ -149,7 +141,7 @@ export async function POST(req: NextRequest, context: RouteContext) {
     const tones: OutreachTone[] = ["casual", "professional", "formal"];
 
     for (const tone of tones) {
-      const response = await getOpenAIClient().chat.completions.create({
+      const response = await openai.chat.completions.create({
         model: "gpt-4o-mini",
         messages: [
           {

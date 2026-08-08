@@ -7,16 +7,9 @@
 import { createAdminClient } from "@/lib/supabase/server";
 import OpenAI from "openai";
 
-let openai: OpenAI | null = null;
-
-function getOpenAI(): OpenAI {
-  const apiKey = process.env.OPENAI_API_KEY;
-  if (!apiKey) {
-    throw new Error("OPENAI_API_KEY is required to extract commitments");
-  }
-  openai ??= new OpenAI({ apiKey });
-  return openai;
-}
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY!,
+});
 
 export interface ExtractedCommitment {
   type: "task" | "follow_up" | "meeting" | "reminder" | "promise";
@@ -65,7 +58,7 @@ export async function extractCommitmentsFromConversation(
     .join("\n\n");
 
   try {
-    const response = await getOpenAI().chat.completions.create({
+    const response = await openai.chat.completions.create({
       model: "gpt-4o-mini",
       messages: [
         {

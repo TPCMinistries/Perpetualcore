@@ -5,17 +5,9 @@ import OpenAI from "openai";
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-let openAIClient: OpenAI | null = null;
-
-function getOpenAIClient(): OpenAI {
-  const apiKey = process.env.OPENAI_API_KEY;
-  if (!apiKey) {
-    throw new Error("OPENAI_API_KEY is not configured");
-  }
-
-  openAIClient ??= new OpenAI({ apiKey });
-  return openAIClient;
-}
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY!,
+});
 
 /**
  * POST /api/knowledge/search
@@ -54,7 +46,7 @@ export async function POST(req: NextRequest) {
     console.log(`🔍 Semantic search query: "${query}"`);
 
     // Generate embedding for the search query
-    const embeddingResponse = await getOpenAIClient().embeddings.create({
+    const embeddingResponse = await openai.embeddings.create({
       model: "text-embedding-3-small",
       input: query,
       dimensions: 1536,

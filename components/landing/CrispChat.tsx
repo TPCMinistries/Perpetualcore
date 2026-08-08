@@ -48,7 +48,7 @@ export function CrispChat() {
       return;
     }
 
-    // Consent gate. Matches the rule in proxy.ts: explicit cookie consent
+    // Consent gate. Matches the rule in middleware.ts: explicit cookie consent
     // OR a logged-in account context. We can only see the cookie here.
     const consent = document.cookie.match(/(?:^|; )pc_consent=([^;]*)/);
     const accepted = consent?.[1] === "accepted";

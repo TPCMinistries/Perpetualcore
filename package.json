@@ -5,12 +5,12 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "NODE_OPTIONS='--max-old-space-size=4096' next build",
+    "build": "NODE_OPTIONS='--max-old-space-size=4096' next build --webpack",
     "start": "next start",
     "lint": "NODE_OPTIONS='--max-old-space-size=4096' eslint app lib components --ext .ts,.tsx",
     "type-check": "npm run type-check:release",
     "type-check:legacy": "tsc --noEmit",
-    "type-check:release": "tsc --noEmit --project tsconfig.ci.json --pretty false",
+    "type-check:release": "npm run type-check:rfp",
     "type-check:rfp": "npm run type-check:rfp:launch",
     "type-check:rfp:launch": "tsc --noEmit --project tsconfig.rfp-launch.json --pretty false",
     "type-check:rfp:marketing": "tsc --noEmit --project tsconfig.rfp-marketing.json --pretty false",
@@ -21,12 +21,16 @@
     "test:coverage": "vitest run --coverage",
     "test:e2e": "playwright test",
     "test:e2e:rfp-auth": "playwright test tests/e2e/rfp-authenticated.spec.ts --project=chromium",
+    "test:e2e:rfp-visual": "playwright test tests/e2e/rfp-visual.spec.ts --project=chromium",
     "test:e2e:ui": "playwright test --ui",
     "test:e2e:headed": "playwright test --headed",
+    "verify:rfp-release": "npm run lint -- --quiet && npm run type-check:release && npm audit --audit-level=high --omit=dev && npm run build",
+    "verify:rfp-production": "npm run test:e2e:rfp-auth && npm run test:e2e:rfp-visual",
     "playwright:install": "playwright install",
     "seed:rfp-demo": "tsx scripts/seed-rfp-demo-org.ts",
     "smoke:rfp-apis": "tsx scripts/smoke-test-rfp-apis.ts",
-    "types:supabase": "supabase gen types typescript --project-id hgxxxmtfmvguotkowxbu --schema public > lib/supabase/database.types.ts"
+    "types:supabase": "supabase gen types typescript --project-id hgxxxmtfmvguotkowxbu --schema public > lib/supabase/database.types.ts",
+    "verify:rfp-dedup": "tsx scripts/verify-rfp-dedup.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.67.0",

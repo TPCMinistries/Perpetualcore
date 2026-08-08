@@ -28,6 +28,8 @@ import { describe, it, expect, beforeAll, afterAll, vi } from "vitest";
 import { createClient as createSupaClient } from "@supabase/supabase-js";
 import * as fs from "fs";
 import * as path from "path";
+import { SECTION_TYPES } from "@/lib/rfp/draft/sections";
+import { REVIEWER_FINDINGS_SECTION_TYPE } from "@/lib/rfp/review/rubric";
 
 // ---------------------------------------------------------------------------
 // Load real env from .env.local (same pattern as sibling RLS test)
@@ -58,29 +60,34 @@ function loadEnvLocal(): Record<string, string> {
 
 const envVars = loadEnvLocal();
 
+function realEnv(key: string): string {
+  const value = process.env[key] ?? "";
+  if (value === "https://test.supabase.co" || value === "test-anon-key") return "";
+  return value;
+}
+
 const SUPABASE_URL =
-  envVars.NEXT_PUBLIC_SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL || "";
+  realEnv("NEXT_PUBLIC_SUPABASE_URL") || envVars.NEXT_PUBLIC_SUPABASE_URL || "";
 const SUPABASE_ANON_KEY =
+  realEnv("NEXT_PUBLIC_SUPABASE_ANON_KEY") ||
   envVars.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
   "";
 const SUPABASE_SERVICE_ROLE_KEY =
+  realEnv("SUPABASE_SERVICE_ROLE_KEY") ||
   envVars.SUPABASE_SERVICE_ROLE_KEY ||
-  process.env.SUPABASE_SERVICE_ROLE_KEY ||
   "";
 
-const RLS_TESTS_ENABLED =
-  process.env.RUN_RFP_RLS_TESTS === "true" &&
-  Boolean(SUPABASE_URL && SUPABASE_ANON_KEY && SUPABASE_SERVICE_ROLE_KEY);
-const RLS_TEST_URL = SUPABASE_URL || "http://127.0.0.1:54321";
-const RLS_TEST_ANON_KEY = SUPABASE_ANON_KEY || "rls-anon-placeholder";
-const RLS_TEST_SERVICE_ROLE_KEY =
-  SUPABASE_SERVICE_ROLE_KEY || "rls-service-role-placeholder";
+if (!SUPABASE_URL || !SUPABASE_ANON_KEY || !SUPABASE_SERVICE_ROLE_KEY) {
+  throw new Error(
+    "RLS test requires NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_ANON_KEY, " +
+      "and SUPABASE_SERVICE_ROLE_KEY in .env.local",
+  );
+}
 
 // Make the env values visible to the route modules at import time.
-process.env.NEXT_PUBLIC_SUPABASE_URL = RLS_TEST_URL;
-process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY = RLS_TEST_ANON_KEY;
-process.env.SUPABASE_SERVICE_ROLE_KEY = RLS_TEST_SERVICE_ROLE_KEY;
+process.env.NEXT_PUBLIC_SUPABASE_URL = SUPABASE_URL;
+process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY = SUPABASE_ANON_KEY;
+process.env.SUPABASE_SERVICE_ROLE_KEY = SUPABASE_SERVICE_ROLE_KEY;
 
 // ---------------------------------------------------------------------------
 // SDK-boundary mocks. These MUST be hoisted above route imports.
@@ -96,13 +103,13 @@ vi.mock("@/lib/supabase/server", async () => {
       const headers: Record<string, string> = activeAccessToken
         ? { Authorization: `Bearer ${activeAccessToken}` }
         : {};
-      return createSupa(RLS_TEST_URL, RLS_TEST_ANON_KEY, {
+      return createSupa(SUPABASE_URL, SUPABASE_ANON_KEY, {
         global: { headers },
         auth: { persistSession: false },
       });
     },
     createAdminClient: () =>
-      createSupa(RLS_TEST_URL, RLS_TEST_SERVICE_ROLE_KEY, {
+      createSupa(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
         auth: { persistSession: false },
       }),
   };
@@ -188,7 +195,7 @@ vi.mock("@/lib/rfp/draft/generate", async () => {
 // ---------------------------------------------------------------------------
 // Clients + state
 // ---------------------------------------------------------------------------
-const admin = createSupaClient(RLS_TEST_URL, RLS_TEST_SERVICE_ROLE_KEY, {
+const admin = createSupaClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
   auth: { persistSession: false },
 });
 
@@ -310,6 +317,76 @@ beforeAll(async () => {
     .single();
   if (prop.error) throw new Error(`Seed proposal: ${prop.error.message}`);
   proposalA = prop.data!.id;
+
+  const sections = await admin.from("rfp_proposal_sections").insert([
+    ...SECTION_TYPES.map((sectionType) => ({
+      proposal_id: proposalA,
+      section_type: sectionType,
+      content: `Submission-ready ${sectionType} narrative for tenant isolation. No unresolved markers remain.`,
+      version: 1,
+      last_drafted_by_agent_at: new Date().toISOString(),
+    })),
+    {
+      proposal_id: proposalA,
+      section_type: REVIEWER_FINDINGS_SECTION_TYPE,
+      content: JSON.stringify({
+        findings: [],
+        overall_score: 91,
+        summary: "Submission-ready draft for tenant isolation.",
+        tokens_in: 100,
+        tokens_out: 40,
+        cost_usd: 0,
+        model: "test-model",
+        session_id: `rls-review-${testRunId}`,
+      }),
+      version: 1,
+      last_drafted_by_agent_at: new Date().toISOString(),
+    },
+  ]);
+  if (sections.error) throw new Error(`Seed proposal sections: ${sections.error.message}`);
+
+  const readinessChecks = await admin.from("rfp_compliance_checks").insert([
+    {
+      proposal_id: proposalA,
+      check_type: "compliance_matrix_v1",
+      status: "pass",
+      details_json: {
+        kind: "compliance_matrix_v1",
+        overall_status: "pass",
+        missing_count: 0,
+        needs_review_count: 0,
+        critical_count: 0,
+        items: [],
+      },
+    },
+    {
+      proposal_id: proposalA,
+      check_type: "packet_checklist_v1",
+      status: "pass",
+      details_json: {
+        kind: "packet_checklist_v1",
+        overall_status: "pass",
+        due_date: "2026-07-10",
+        submission_url: "https://example.test/submit",
+        deadline_timezone: "America/New_York",
+        submission_method: "Portal upload",
+        submission_portal: "Example Portal",
+        forms: ["Narrative"],
+        question_deadlines: [],
+        items: [
+          {
+            id: "source-link",
+            label: "Source posting available",
+            status: "met",
+            notes: "Source URL is available.",
+          },
+        ],
+      },
+    },
+  ]);
+  if (readinessChecks.error) {
+    throw new Error(`Seed readiness checks: ${readinessChecks.error.message}`);
+  }
 }, 30000);
 
 // ---------------------------------------------------------------------------
@@ -447,9 +524,7 @@ async function callPackageRedraft(proposalId: string) {
 // ---------------------------------------------------------------------------
 // Test cases
 // ---------------------------------------------------------------------------
-describe.skipIf(!RLS_TESTS_ENABLED)(
-  "RFP new-endpoint tenant isolation",
-  () => {
+describe("RFP new-endpoint tenant isolation", () => {
   // -------------------------------------------------------------------------
   // 1. Proposal status transitions
   // -------------------------------------------------------------------------
@@ -496,13 +571,13 @@ describe.skipIf(!RLS_TESTS_ENABLED)(
       await admin.from("rfp_proposals").update({ status: "draft" }).eq("id", proposalA);
     });
 
-    it("PATCH status='withdrawn' succeeds (full lifecycle vocabulary)", async () => {
+    it("PATCH status='no_bid' succeeds (Phase 20 lifecycle vocabulary)", async () => {
       const res = await withToken(userA.access_token, () =>
-        callPatchStatus(proposalA, { status: "withdrawn" }),
+        callPatchStatus(proposalA, { status: "no_bid" }),
       );
       expect(res.status).toBe(200);
       const body = await res.json();
-      expect(body.status).toBe("withdrawn");
+      expect(body.status).toBe("no_bid");
 
       await admin.from("rfp_proposals").update({ status: "draft" }).eq("id", proposalA);
     });
@@ -754,5 +829,4 @@ describe.skipIf(!RLS_TESTS_ENABLED)(
       process.env.RFP_PLATFORM_ADMIN_USER_IDS = prev;
     });
   });
-  },
-);
+});

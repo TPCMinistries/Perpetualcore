@@ -5,19 +5,9 @@ import Stripe from "stripe";
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-let stripeClient: Stripe | null = null;
-
-function getStripe(): Stripe {
-  if (stripeClient) return stripeClient;
-
-  const secretKey = process.env.STRIPE_SECRET_KEY;
-  if (!secretKey) throw new Error("STRIPE_SECRET_KEY is not set");
-
-  stripeClient = new Stripe(secretKey, {
-    apiVersion: "2024-12-18.acacia",
-  });
-  return stripeClient;
-}
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
+  apiVersion: "2024-12-18.acacia",
+});
 
 /**
  * POST - Purchase marketplace item
@@ -136,7 +126,6 @@ export async function POST(req: NextRequest) {
       cancel_url: cancelUrl,
     };
 
-    const stripe = getStripe();
     const session = await stripe.checkout.sessions.create(sessionParams);
 
     // Create pending purchase record (will be updated to 'completed' by webhook)

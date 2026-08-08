@@ -1,16 +1,9 @@
 import OpenAI from "openai";
 import { createClient } from "@/lib/supabase/server";
 
-let openai: OpenAI | null = null;
-
-function getOpenAI(): OpenAI {
-  const apiKey = process.env.OPENAI_API_KEY;
-  if (!apiKey) {
-    throw new Error("OPENAI_API_KEY is required to search documents");
-  }
-  openai ??= new OpenAI({ apiKey });
-  return openai;
-}
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY!,
+});
 
 export interface SearchResult {
   content: string;
@@ -36,7 +29,7 @@ export async function searchDocuments(
 
   try {
     // Generate embedding for the query
-    const embeddingResponse = await getOpenAI().embeddings.create({
+    const embeddingResponse = await openai.embeddings.create({
       model: "text-embedding-3-small",
       input: query,
       dimensions: 1536,

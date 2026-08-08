@@ -6,28 +6,13 @@ import OpenAI from "openai";
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-let anthropicClient: Anthropic | null = null;
-let openAIClient: OpenAI | null = null;
+const anthropic = new Anthropic({
+  apiKey: process.env.ANTHROPIC_API_KEY!,
+});
 
-function getAnthropicClient(): Anthropic {
-  const apiKey = process.env.ANTHROPIC_API_KEY;
-  if (!apiKey) {
-    throw new Error("ANTHROPIC_API_KEY is not configured");
-  }
-
-  anthropicClient ??= new Anthropic({ apiKey });
-  return anthropicClient;
-}
-
-function getOpenAIClient(): OpenAI {
-  const apiKey = process.env.OPENAI_API_KEY;
-  if (!apiKey) {
-    throw new Error("OPENAI_API_KEY is not configured");
-  }
-
-  openAIClient ??= new OpenAI({ apiKey });
-  return openAIClient;
-}
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY!,
+});
 
 /**
  * Generate summary using Claude (primary)
@@ -38,7 +23,7 @@ async function generateWithClaude(prompt: string): Promise<{
   outputTokens: number;
   provider: string;
 }> {
-  const response = await getAnthropicClient().messages.create({
+  const response = await anthropic.messages.create({
     model: "claude-3-haiku-20240307",
     max_tokens: 1024,
     messages: [{ role: "user", content: prompt }],
@@ -63,7 +48,7 @@ async function generateWithOpenAI(prompt: string): Promise<{
   outputTokens: number;
   provider: string;
 }> {
-  const response = await getOpenAIClient().chat.completions.create({
+  const response = await openai.chat.completions.create({
     model: "gpt-4o-mini",
     max_tokens: 1024,
     messages: [{ role: "user", content: prompt }],

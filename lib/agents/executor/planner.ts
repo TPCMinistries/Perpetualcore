@@ -9,17 +9,7 @@ import Anthropic from "@anthropic-ai/sdk";
 import { PlanStep, SENSITIVE_TOOLS, MAX_PLAN_STEPS } from "./types";
 import { CORE_TOOLS } from "@/lib/ai/tools/registry";
 
-let anthropic: Anthropic | null = null;
-
-function getAnthropicClient(): Anthropic {
-  const apiKey = process.env.ANTHROPIC_API_KEY;
-  if (!apiKey) {
-    throw new Error("ANTHROPIC_API_KEY is required to create an agent plan");
-  }
-
-  anthropic ??= new Anthropic({ apiKey });
-  return anthropic;
-}
+const anthropic = new Anthropic();
 
 /**
  * Decompose a goal into a list of executable plan steps.
@@ -43,7 +33,7 @@ export async function decomposeGoal(
     ? `\nThe user suggested these steps:\n${stepsHint.map((h, i) => `${i + 1}. ${h}`).join("\n")}`
     : "";
 
-  const response = await getAnthropicClient().messages.create({
+  const response = await anthropic.messages.create({
     model: "claude-sonnet-4-20250514",
     max_tokens: 2000,
     messages: [
@@ -93,7 +83,7 @@ Respond with ONLY a JSON array of steps, no other text:
     const jsonMatch = content.text.match(/\[[\s\S]*\]/);
     if (!jsonMatch) throw new Error("No JSON array found");
     rawSteps = JSON.parse(jsonMatch[0]);
-  } catch {
+  } catch (e) {
     throw new Error(`Failed to parse planner response: ${content.text.slice(0, 200)}`);
   }
 

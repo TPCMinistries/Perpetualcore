@@ -7,35 +7,15 @@ export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 export const maxDuration = 30;
 
-let openAIClient: OpenAI | null = null;
-type ServiceClient = ReturnType<typeof createClient>;
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY!,
+});
 
-let serviceClient: ServiceClient | null = null;
-
-function getOpenAIClient(): OpenAI {
-  const apiKey = process.env.OPENAI_API_KEY;
-  if (!apiKey) {
-    throw new Error("OPENAI_API_KEY is not configured");
-  }
-
-  openAIClient ??= new OpenAI({ apiKey });
-  return openAIClient;
-}
-
-function getServiceClient(): ServiceClient {
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  if (!supabaseUrl) {
-    throw new Error("NEXT_PUBLIC_SUPABASE_URL is not configured");
-  }
-
-  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-  if (!serviceRoleKey) {
-    throw new Error("SUPABASE_SERVICE_ROLE_KEY is not configured");
-  }
-
-  serviceClient ??= createClient(supabaseUrl, serviceRoleKey);
-  return serviceClient;
-}
+// Service role client for n8n webhook calls (bypasses RLS)
+const serviceClient = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_ROLE_KEY!
+);
 
 interface SearchRequest {
   query: string;
@@ -97,7 +77,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Use service role client for n8n webhook calls
-    const supabase = getServiceClient();
+    const supabase = serviceClient;
 
     // Get user's organization
     const { data: profile, error: profileError } = await supabase
@@ -174,7 +154,7 @@ async function performVectorSearch(
 ): Promise<SearchResult[]> {
   try {
     // Generate embedding for query
-    const embeddingResponse = await getOpenAIClient().embeddings.create({
+    const embeddingResponse = await openai.embeddings.create({
       model: "text-embedding-3-small",
       input: query,
       dimensions: 1536,
@@ -322,7 +302,7 @@ export async function GET(req: NextRequest) {
     const { searchParams } = new URL(req.url);
     const userId = searchParams.get("user_id");
 
-    const supabase = getServiceClient();
+    const supabase = serviceClient;
 
     // Get total document count
     let docQuery = supabase

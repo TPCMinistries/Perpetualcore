@@ -12,7 +12,6 @@
 
 import { useState, type FormEvent } from "react";
 import { ArrowRight, Check } from "lucide-react";
-import { trackClientEvent } from "@/lib/analytics/track-event";
 
 type Variant = "inline" | "footer";
 
@@ -20,7 +19,6 @@ type Props = {
   variant?: Variant;
   source?: string;
   className?: string;
-  tone?: "light" | "dark";
 };
 
 type SubmitState = "idle" | "submitting" | "success" | "error";
@@ -29,16 +27,14 @@ export function NewsletterCapture({
   variant = "footer",
   source = "newsletter",
   className = "",
-  tone = "light",
 }: Props) {
   const [firstName, setFirstName] = useState("");
   const [email, setEmail] = useState("");
   const [state, setState] = useState<SubmitState>("idle");
-  const [marketingConsent, setMarketingConsent] = useState(false);
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    if (!firstName.trim() || !email.trim() || !marketingConsent) return;
+    if (!firstName.trim() || !email.trim()) return;
     setState("submitting");
     try {
       const res = await fetch("/api/leads/capture", {
@@ -48,15 +44,10 @@ export function NewsletterCapture({
           firstName: firstName.trim(),
           email: email.trim().toLowerCase(),
           source,
-          marketingConsent,
           metadata: { variant },
         }),
       });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      trackClientEvent("cta_click", {
-        event_name: "newsletter_submit_success",
-        metadata: { surface: "public", placement: variant },
-      });
       setState("success");
     } catch (err) {
       console.error("Newsletter capture error:", err);
@@ -68,11 +59,7 @@ export function NewsletterCapture({
     return (
       <div
         className={`flex items-center gap-3 text-sm ${
-          variant === "inline"
-            ? "text-foreground"
-            : tone === "dark"
-              ? "text-white/72"
-              : "text-muted-foreground"
+          variant === "inline" ? "text-foreground" : "text-muted-foreground"
         } ${className}`}
       >
         <Check className="h-4 w-4 text-emerald-500" />
@@ -121,16 +108,6 @@ export function NewsletterCapture({
           {state === "submitting" ? "Sending…" : "Subscribe"}
           {state !== "submitting" && <ArrowRight className="ml-2 h-3.5 w-3.5" />}
         </button>
-        <label className="sm:col-span-3 flex cursor-pointer items-start gap-2 text-xs leading-5 text-muted-foreground">
-          <input
-            type="checkbox"
-            required
-            checked={marketingConsent}
-            onChange={(event) => setMarketingConsent(event.target.checked)}
-            className="mt-0.5 h-4 w-4"
-          />
-          Email me this resource and occasional Perpetual Core operating notes. I can unsubscribe any time.
-        </label>
         {state === "error" && (
           <p className="sm:col-span-3 text-xs text-red-500">
             Submit failed. Try again, or email lorenzo@perpetualcore.com.
@@ -141,8 +118,6 @@ export function NewsletterCapture({
   }
 
   // footer variant — single row, compact
-  const dark = tone === "dark";
-
   return (
     <form
       onSubmit={handleSubmit}
@@ -160,11 +135,7 @@ export function NewsletterCapture({
           onChange={(e) => setFirstName(e.target.value)}
           placeholder="First name"
           autoComplete="given-name"
-          className={`h-10 border px-3 text-xs transition focus:outline-none focus:ring-2 ${
-            dark
-              ? "border-white/16 bg-white/[0.04] text-white placeholder:text-white/48 focus:border-[#8b7cff] focus:ring-[#8b7cff]/40"
-              : "border-border bg-background text-foreground placeholder:text-muted-foreground focus:border-foreground focus:ring-[#5548d9]/20"
-          }`}
+          className="h-9 px-3 bg-background border border-border text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-foreground transition"
         />
         <label className="sr-only" htmlFor="nl-email-footer">
           Email
@@ -177,38 +148,16 @@ export function NewsletterCapture({
           onChange={(e) => setEmail(e.target.value)}
           placeholder="you@company.com"
           autoComplete="email"
-          className={`h-10 border px-3 text-xs transition focus:outline-none focus:ring-2 ${
-            dark
-              ? "border-white/16 bg-white/[0.04] text-white placeholder:text-white/48 focus:border-[#8b7cff] focus:ring-[#8b7cff]/40"
-              : "border-border bg-background text-foreground placeholder:text-muted-foreground focus:border-foreground focus:ring-[#5548d9]/20"
-          }`}
+          className="h-9 px-3 bg-background border border-border text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-foreground transition"
         />
       </div>
       <button
         type="submit"
         disabled={state === "submitting"}
-        className={`h-10 px-4 text-xs font-semibold transition disabled:opacity-60 ${
-          dark
-            ? "rounded-none bg-white text-black hover:bg-[#54e6b1]"
-            : "rounded-[6px] bg-foreground text-background hover:bg-foreground/90"
-        }`}
+        className="h-9 px-4 bg-foreground text-background text-xs font-medium hover:bg-foreground/90 transition disabled:opacity-60 rounded-[6px]"
       >
         {state === "submitting" ? "…" : "Subscribe"}
       </button>
-      <label
-        className={`col-span-2 flex cursor-pointer items-start gap-2 text-[11px] leading-4 ${
-          dark ? "text-white/54" : "text-muted-foreground"
-        }`}
-      >
-        <input
-          type="checkbox"
-          required
-          checked={marketingConsent}
-          onChange={(event) => setMarketingConsent(event.target.checked)}
-          className="mt-0.5 h-3.5 w-3.5"
-        />
-        Send me the resource and occasional operating notes. Unsubscribe any time.
-      </label>
       {state === "error" && (
         <p className="col-span-2 text-xs text-red-500">
           Submit failed. Try again.

@@ -6,16 +6,9 @@
 import { createClient } from "@/lib/supabase/server";
 import OpenAI from "openai";
 
-let openai: OpenAI | null = null;
-
-function getOpenAI(): OpenAI {
-  const apiKey = process.env.OPENAI_API_KEY;
-  if (!apiKey) {
-    throw new Error("OPENAI_API_KEY is required to extract entities");
-  }
-  openai ??= new OpenAI({ apiKey });
-  return openai;
-}
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY!,
+});
 
 export interface ExtractedEntity {
   entityType: "person" | "organization" | "date" | "amount" | "location" | "email" | "phone" | "url" | "product" | "event";
@@ -79,7 +72,7 @@ Guidelines:
 - Include only clearly identified entities
 - Maximum ${maxEntities} entities`;
 
-    const response = await getOpenAI().chat.completions.create({
+    const response = await openai.chat.completions.create({
       model: "gpt-4o-mini",
       messages: [
         {

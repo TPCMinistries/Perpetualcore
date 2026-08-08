@@ -1,30 +1,17 @@
 import Stripe from "stripe";
 
-let stripeClient: Stripe | null = null;
+if (!process.env.STRIPE_SECRET_KEY) {
+  throw new Error("STRIPE_SECRET_KEY is not set");
+}
 
 /**
- * Return the memoized Stripe client.
- *
- * Initialization is deferred until a request actually needs Stripe so builds
- * can complete without runtime-only environment variables. The configuration
- * error remains explicit at runtime.
+ * Stripe client instance
+ * Configured with API version and TypeScript support
  */
-export function getStripe(): Stripe {
-  if (stripeClient) {
-    return stripeClient;
-  }
-
-  const secretKey = process.env.STRIPE_SECRET_KEY;
-  if (!secretKey) {
-    throw new Error("STRIPE_SECRET_KEY is not set");
-  }
-
-  stripeClient = new Stripe(secretKey, {
-    apiVersion: "2025-09-30.clover",
-    typescript: true,
-  });
-  return stripeClient;
-}
+export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
+  apiVersion: "2025-09-30.clover",
+  typescript: true,
+});
 
 /**
  * Stripe pricing configuration

@@ -54,3 +54,7 @@ next-env.d.ts
 
 # Claude Code worktrees
 .claude/worktrees/
+
+# Supabase CLI local state (machine-specific — must not cross Macs)
+supabase/.temp/
+supabase/.branches/

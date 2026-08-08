@@ -1,15 +1,8 @@
 import OpenAI from "openai";
 
-let openai: OpenAI | null = null;
-
-function getOpenAI(): OpenAI {
-  const apiKey = process.env.OPENAI_API_KEY;
-  if (!apiKey) {
-    throw new Error("OPENAI_API_KEY is required to transcribe audio");
-  }
-  openai ??= new OpenAI({ apiKey });
-  return openai;
-}
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY,
+});
 
 /**
  * Transcribe an audio blob using OpenAI Whisper API
@@ -18,7 +11,7 @@ function getOpenAI(): OpenAI {
 export async function transcribeAudio(
   audioFile: File
 ): Promise<{ text: string; language?: string }> {
-  const transcription = await getOpenAI().audio.transcriptions.create({
+  const transcription = await openai.audio.transcriptions.create({
     file: audioFile,
     model: "whisper-1",
     language: "en",

@@ -9,17 +9,7 @@ interface RouteContext {
   params: Promise<{ contactId: string }>;
 }
 
-let anthropicClient: Anthropic | null = null;
-
-function getAnthropicClient(): Anthropic {
-  const apiKey = process.env.ANTHROPIC_API_KEY;
-  if (!apiKey) {
-    throw new Error("ANTHROPIC_API_KEY is not configured");
-  }
-
-  anthropicClient ??= new Anthropic({ apiKey });
-  return anthropicClient;
-}
+const anthropic = new Anthropic();
 
 // POST - AI actions on notes (summarize, expand, extract actions)
 export async function POST(req: NextRequest, context: RouteContext) {
@@ -104,7 +94,7 @@ Return only valid JSON array, like: ["Key point 1", "Key point 2", "Key point 3"
         break;
     }
 
-    const response = await getAnthropicClient().messages.create({
+    const response = await anthropic.messages.create({
       model: "claude-sonnet-4-20250514",
       max_tokens: 1024,
       messages: [

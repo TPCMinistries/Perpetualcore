@@ -8,8 +8,9 @@
  * Visual register matches homepage v6.
  */
 
-import { useEffect, useState, type FormEvent } from "react";
+import { Suspense, useState, type FormEvent } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { ArrowRight, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -27,8 +28,6 @@ import { Footer } from "@/components/landing/Footer";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { serviceSchema } from "@/lib/seo/structured-data";
 import { toast } from "sonner";
-import { SkipLink } from "@/components/ui/accessibility";
-import { trackClientEvent } from "@/lib/analytics/track-event";
 
 type SubmitState = "idle" | "submitting" | "success" | "error";
 
@@ -60,8 +59,8 @@ const COMPANY_SIZE_OPTIONS = [
 const WHAT_HAPPENS_NEXT = [
   {
     index: "01",
-    title: "Target: reply within one business day",
-    body: "A human reviews every durably received submission. You get a real reply, not an automated qualification decision.",
+    title: "Reply within one business day",
+    body: "A human on the team reads every submission. You get a real reply, not an autoresponder.",
   },
   {
     index: "02",
@@ -104,48 +103,27 @@ function SectionRail({ index, label }: { index: string; label: string }) {
 }
 
 function ContactSalesForm() {
+  const searchParams = useSearchParams();
+  const planFromUrl = searchParams.get("plan") || "";
+  const productFromUrl = searchParams.get("product") || "";
+  const intentFromUrl = searchParams.get("intent") || "";
+  const sessionFromUrl = searchParams.get("session_id") || "";
+  const isPostPaymentIntake = intentFromUrl === "post-payment-intake";
+  const isManualInvoice = intentFromUrl === "manual-invoice";
+
   const [formData, setFormData] = useState({
     name: "",
     email: "",
     company: "",
     phone: "",
     employees: "",
-    plan: "company-ai-os",
-    product: "",
-    message: "",
-  });
-  const [requestContext, setRequestContext] = useState({
-    product: "",
-    intent: "",
+    plan: planFromUrl || (isManualInvoice ? "manual-invoice" : isPostPaymentIntake ? "guided-setup" : "company-ai-os"),
+    product: productFromUrl,
+    message: isPostPaymentIntake
+      ? `I already completed a Perpetual Core package checkout${sessionFromUrl ? ` (${sessionFromUrl})` : ""}. Here is the operating context we should use for onboarding: `
+      : "",
   });
   const [submitState, setSubmitState] = useState<SubmitState>("idle");
-  const isPostPaymentIntake = requestContext.intent === "post-payment-intake";
-  const isManualInvoice = requestContext.intent === "manual-invoice";
-
-  useEffect(() => {
-    const searchParams = new URLSearchParams(window.location.search);
-    const plan = searchParams.get("plan") || "";
-    const product = searchParams.get("product") || "";
-    const intent = searchParams.get("intent") || "";
-    const sessionId = searchParams.get("session_id") || "";
-
-    setRequestContext({ product, intent });
-    setFormData((current) => ({
-      ...current,
-      plan:
-        plan ||
-        (intent === "manual-invoice"
-          ? "manual-invoice"
-          : intent === "post-payment-intake"
-            ? "guided-setup"
-            : current.plan),
-      product,
-      message:
-        intent === "post-payment-intake"
-          ? `I already completed a Perpetual Core package checkout${sessionId ? ` (${sessionId})` : ""}. Here is the operating context we should use for onboarding: `
-          : current.message,
-    }));
-  }, []);
 
   const handleChange = (field: string, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
@@ -163,25 +141,8 @@ function ContactSalesForm() {
       if (!response.ok) {
         throw new Error("Failed to submit");
       }
-      const result: unknown = await response.json();
-      if (
-        !result ||
-        typeof result !== "object" ||
-        !("persisted" in result) ||
-        result.persisted !== true
-      ) {
-        throw new Error("Inquiry was not durably stored");
-      }
-      trackClientEvent("cta_click", {
-        event_name: "contact_sales_submit_success",
-        metadata: {
-          surface: "public",
-          placement: "contact-sales-form",
-          product: formData.product || "general",
-        },
-      });
       setSubmitState("success");
-      toast.success("Got it. Your inquiry was safely received.");
+      toast.success("Got it. We'll reply within one business day.");
     } catch (err) {
       console.error("Contact sales error:", err);
       setSubmitState("error");
@@ -200,7 +161,7 @@ function ContactSalesForm() {
           <p className="mt-6 text-base text-muted-foreground leading-[1.7]">
             A human on the team reads every submission. We'll reply to{" "}
             <span className="text-foreground font-medium">{formData.email}</span>{" "}
-            after review. Our target is one business day.
+            within one business day with a 30-minute scoping window.
           </p>
           <div className="mt-10 flex flex-wrap gap-3 justify-center">
             <Button asChild variant="outline" className="text-sm font-medium h-10 px-5 shadow-none rounded-[6px]">
@@ -231,12 +192,12 @@ function ContactSalesForm() {
                 : isManualInvoice
                   ? "Use this form when the buying process needs ACH, procurement review, a custom first payment, or a manual Stripe invoice."
                 : "Perpetual Core installs AI operating systems across sales, operations, knowledge, customer communication, and leadership visibility. We can start with one high-leverage workflow, but we scope it with the larger company system in view."}
-              {requestContext.product && (
+              {productFromUrl && (
                 <>
                   {" "}
                   You're asking about{" "}
                   <span className="text-foreground font-medium capitalize">
-                    {requestContext.product.replace(/-/g, " ")}
+                    {productFromUrl.replace(/-/g, " ")}
                   </span>
                   .
                 </>
@@ -250,11 +211,7 @@ function ContactSalesForm() {
       <section className="border-t border-border py-16 sm:py-20">
         <div className="container mx-auto px-6 sm:px-8">
           <div className="grid lg:grid-cols-[1fr_320px] gap-12 lg:gap-16">
-            <form
-              onSubmit={handleSubmit}
-              className="space-y-6"
-              aria-busy={submitState === "submitting"}
-            >
+            <form onSubmit={handleSubmit} className="space-y-6">
               <div className="grid gap-3 sm:grid-cols-2">
                 {INTAKE_PROMPTS.map((prompt) => (
                   <div key={prompt.title} className="border border-border bg-surface-hover/40 p-4">
@@ -271,9 +228,7 @@ function ContactSalesForm() {
                   </Label>
                   <Input
                     id="name"
-                    name="name"
                     required
-                    autoComplete="name"
                     value={formData.name}
                     onChange={(e) => handleChange("name", e.target.value)}
                     placeholder="Jane Operator"
@@ -285,10 +240,8 @@ function ContactSalesForm() {
                   </Label>
                   <Input
                     id="email"
-                    name="email"
                     type="email"
                     required
-                    autoComplete="email"
                     value={formData.email}
                     onChange={(e) => handleChange("email", e.target.value)}
                     placeholder="jane@yourcompany.com"
@@ -303,9 +256,7 @@ function ContactSalesForm() {
                   </Label>
                   <Input
                     id="company"
-                    name="company"
                     required
-                    autoComplete="organization"
                     value={formData.company}
                     onChange={(e) => handleChange("company", e.target.value)}
                     placeholder="Acme Holdings"
@@ -317,9 +268,7 @@ function ContactSalesForm() {
                   </Label>
                   <Input
                     id="phone"
-                    name="phone"
                     type="tel"
-                    autoComplete="tel"
                     value={formData.phone}
                     onChange={(e) => handleChange("phone", e.target.value)}
                     placeholder="+1 (555) 000-0000"
@@ -336,7 +285,7 @@ function ContactSalesForm() {
                     value={formData.employees}
                     onValueChange={(value) => handleChange("employees", value)}
                   >
-                    <SelectTrigger id="employees" aria-required="true">
+                    <SelectTrigger id="employees">
                       <SelectValue placeholder="Select range" />
                     </SelectTrigger>
                     <SelectContent>
@@ -356,7 +305,7 @@ function ContactSalesForm() {
                     value={formData.plan}
                     onValueChange={(value) => handleChange("plan", value)}
                   >
-                    <SelectTrigger id="plan" aria-required="true">
+                    <SelectTrigger id="plan">
                       <SelectValue placeholder="Select band" />
                     </SelectTrigger>
                     <SelectContent>
@@ -376,7 +325,6 @@ function ContactSalesForm() {
                 </Label>
                 <Textarea
                   id="message"
-                  name="message"
                   required
                   rows={5}
                   value={formData.message}
@@ -388,30 +336,13 @@ function ContactSalesForm() {
               <Button
                 type="submit"
                 disabled={submitState === "submitting"}
-                aria-describedby={submitState === "error" ? "contact-submit-error" : undefined}
                 className="text-sm font-medium h-11 px-6 shadow-none bg-foreground text-background hover:bg-foreground/90 rounded-[6px]"
-                data-pc-event="marketplace_contact_intent"
-                data-placement="contact-sales-form"
               >
                 {submitState === "submitting" ? "Sending…" : "Map My AI Operating System"}
                 {submitState !== "submitting" && (
                   <ArrowRight className="ml-2 h-3.5 w-3.5" />
                 )}
               </Button>
-
-              {submitState === "error" && (
-                <p
-                  id="contact-submit-error"
-                  role="alert"
-                  className="text-sm font-medium text-red-700"
-                >
-                  We couldn’t submit the form. Try again or email{" "}
-                  <a className="underline" href="mailto:lorenzo@perpetualcore.com">
-                    lorenzo@perpetualcore.com
-                  </a>
-                  .
-                </p>
-              )}
 
               <p className="text-xs text-muted-foreground leading-[1.7]">
                 By submitting you agree to our{" "}
@@ -491,6 +422,14 @@ function ContactSalesForm() {
   );
 }
 
+const PAGE_LOADING_FALLBACK = (
+  <section className="container mx-auto px-6 sm:px-8 py-32 text-center">
+    <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
+      Loading…
+    </p>
+  </section>
+);
+
 export default function ContactSalesPage() {
   return (
     <div className="min-h-screen bg-background">
@@ -502,11 +441,10 @@ export default function ContactSalesPage() {
           category: "AI Implementation Services",
         })}
       />
-      <SkipLink />
       <Navbar />
-      <main id="main-content">
+      <Suspense fallback={PAGE_LOADING_FALLBACK}>
         <ContactSalesForm />
-      </main>
+      </Suspense>
       <Footer />
     </div>
   );

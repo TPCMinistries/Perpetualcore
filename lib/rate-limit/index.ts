@@ -105,9 +105,7 @@ export function createRateLimiter(config: RateLimitConfig) {
           redis,
           limiter: Ratelimit.fixedWindow(limit, `${interval} s`),
           prefix: `ratelimit:${prefix}`,
-          // Vercel already provides request-level observability. Disabling
-          // Upstash analytics avoids extra Redis commands on every check.
-          analytics: false,
+          analytics: true,
         })
       : null;
 
@@ -228,13 +226,6 @@ export const rateLimiters = {
 
   /** Strict rate limit for sensitive operations - 5 per minute */
   strict: createRateLimiter({ interval: 60, limit: 5, prefix: "strict" }),
-
-  /** Transcript analysis - 3 per 10 minutes per authenticated user */
-  developmentAnalysis: createRateLimiter({
-    interval: 600,
-    limit: 3,
-    prefix: "development-analysis",
-  }),
 };
 
 /**

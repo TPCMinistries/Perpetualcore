@@ -5,17 +5,9 @@ import Anthropic from "@anthropic-ai/sdk";
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-let anthropicClient: Anthropic | null = null;
-
-function getAnthropicClient(): Anthropic {
-  const apiKey = process.env.ANTHROPIC_API_KEY;
-  if (!apiKey) {
-    throw new Error("ANTHROPIC_API_KEY is not configured");
-  }
-
-  anthropicClient ??= new Anthropic({ apiKey });
-  return anthropicClient;
-}
+const anthropic = new Anthropic({
+  apiKey: process.env.ANTHROPIC_API_KEY!,
+});
 
 /**
  * POST /api/documents/[id]/auto-tag
@@ -110,7 +102,7 @@ Provide tags that are:
 Respond ONLY with a JSON array of 3-5 tag names, nothing else.
 Example: ["Legal", "Contract", "Q1 2024", "High Priority", "Client Facing"]`;
 
-    const response = await getAnthropicClient().messages.create({
+    const response = await anthropic.messages.create({
       model: "claude-3-haiku-20240307",
       max_tokens: 256,
       messages: [

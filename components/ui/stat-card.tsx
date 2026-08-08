@@ -63,12 +63,9 @@ const trendColors = {
 };
 
 function AnimatedValue({ value }: { value: string | number }) {
-  const isCountable =
-    typeof value === "number" && Number.isInteger(value) && value >= 0;
-  const animatedCount = useCountUp(isCountable ? value : 0);
-
-  // If the value is a pure integer, count up to it.
-  if (isCountable) {
+  // If the value is a pure integer, count up to it
+  if (typeof value === "number" && Number.isInteger(value) && value >= 0) {
+    const animatedCount = useCountUp(value);
     return <>{animatedCount.toLocaleString()}</>;
   }
   // If it's a string like "1,234" or "$5.2K" or "89%", just fade it in

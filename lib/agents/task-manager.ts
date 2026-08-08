@@ -9,16 +9,9 @@ import { createAdminClient } from "@/lib/supabase/server";
 import Anthropic from "@anthropic-ai/sdk";
 import { logger } from "@/lib/logging";
 
-let anthropic: Anthropic | null = null;
-
-function getAnthropic(): Anthropic {
-  const apiKey = process.env.ANTHROPIC_API_KEY;
-  if (!apiKey) {
-    throw new Error("ANTHROPIC_API_KEY is required to manage tasks with AI");
-  }
-  anthropic ??= new Anthropic({ apiKey });
-  return anthropic;
-}
+const anthropic = new Anthropic({
+  apiKey: process.env.ANTHROPIC_API_KEY!,
+});
 
 interface Task {
   id: string;
@@ -75,7 +68,7 @@ async function analyzeTasks(tasks: Task[]): Promise<TaskAnalysis> {
     .join("\n");
 
   try {
-    const message = await getAnthropic().messages.create({
+    const message = await anthropic.messages.create({
       model: "claude-3-haiku-20240307",
       max_tokens: 1024,
       messages: [

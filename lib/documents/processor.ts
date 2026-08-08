@@ -4,26 +4,14 @@ import { chunkText } from "./chunker";
 import { createAdminClient } from "@/lib/supabase/server";
 import { generateEmbeddings } from "./embeddings";
 
-let openai: OpenAI | null = null;
-let anthropic: Anthropic | null = null;
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY!,
+});
 
-function getOpenAI(): OpenAI {
-  const apiKey = process.env.OPENAI_API_KEY;
-  if (!apiKey) {
-    throw new Error("OPENAI_API_KEY is required to generate document search embeddings");
-  }
-  openai ??= new OpenAI({ apiKey });
-  return openai;
-}
-
-function getAnthropic(): Anthropic {
-  const apiKey = process.env.ANTHROPIC_API_KEY;
-  if (!apiKey) {
-    throw new Error("ANTHROPIC_API_KEY is required for AI document extraction");
-  }
-  anthropic ??= new Anthropic({ apiKey });
-  return anthropic;
-}
+// Only create Anthropic client if API key is available
+const anthropic = process.env.ANTHROPIC_API_KEY
+  ? new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
+  : null;
 
 export interface DocumentChunk {
   content: string;
@@ -156,10 +144,10 @@ export async function extractText(
       }
 
       // Fallback to Claude's native PDF understanding if API key available
-      if (process.env.ANTHROPIC_API_KEY) {
+      if (anthropic) {
         const base64Pdf = buffer.toString("base64");
         try {
-          const message = await getAnthropic().messages.create({
+          const message = await anthropic.messages.create({
           model: "claude-sonnet-4-20250514",
           max_tokens: 8192,
           messages: [
@@ -210,10 +198,10 @@ export async function extractText(
       }
 
       // Fallback to Claude API for problematic DOCX files (if API key available)
-      if (process.env.ANTHROPIC_API_KEY) {
+      if (anthropic) {
         const base64Doc = buffer.toString("base64");
 
-        const message = await getAnthropic().messages.create({
+        const message = await anthropic.messages.create({
           model: "claude-3-haiku-20240307",
           max_tokens: 4096,
           messages: [
@@ -447,7 +435,7 @@ export async function semanticSearch(
   topK: number = 5
 ): Promise<{ content: string; similarity: number }[]> {
   // Generate embedding for the query
-  const queryEmbeddingResponse = await getOpenAI().embeddings.create({
+  const queryEmbeddingResponse = await openai.embeddings.create({
     model: "text-embedding-3-small",
     input: query,
     dimensions: 1536,

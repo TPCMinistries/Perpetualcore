@@ -10,10 +10,10 @@ Grouped by category. Each maps to exactly one roadmap phase (see Traceability). 
 
 ### Foundation & Data Model (FND)
 
-- [ ] **FND-01**: A unified canonical opportunity model stores both government contracts (NAICS/PSC/set-aside/agency) and grants (CFDA/eligibility/cost-share/funder) in one queryable schema
-- [ ] **FND-02**: Opportunities ingested from multiple sources are normalized and deduplicated so one real opportunity appears once
-- [ ] **FND-03**: A pgvector HNSW index + SECURITY DEFINER match RPC enables vault retrieval at >50 docs/org without in-Node cosine
-- [ ] **FND-04**: Each org has an entitlement record (coverage level + per-operation quotas) independently overridable by an operator
+- [x] **FND-01**: A unified canonical opportunity model stores both government contracts (NAICS/PSC/set-aside/agency) and grants (CFDA/eligibility/cost-share/funder) in one queryable schema
+- [x] **FND-02**: Opportunities ingested from multiple sources are normalized and deduplicated so one real opportunity appears once
+- [x] **FND-03**: A pgvector HNSW index + SECURITY DEFINER match RPC enables vault retrieval at >50 docs/org without in-Node cosine
+- [x] **FND-04**: Each org has an entitlement record (coverage level + per-operation quotas) independently overridable by an operator
 
 ### Discovery & Coverage (DISCO)
 
@@ -24,29 +24,30 @@ Grouped by category. Each maps to exactly one roadmap phase (see Traceability). 
 - [ ] **DISCO-05**: Discovery UI shows verified counts read from `rfp_opportunities` (no static or inflated claims)
 - [ ] **DISCO-06**: User can save searches and receive alerts when new matching opportunities appear
 - [ ] **DISCO-07**: Each source reports health (last success, row delta, drift) against an SLA; threshold breaches alert the operator
+- [ ] **DISCO-10**: The product can ingest opportunities from ANY US state via a declarative connector registry (`rfp_state_coverage`: socrata/ckan/aggregator/scrape) — adding a Socrata/CKAN state needs only a config row, not new code. Tri-state (NY, NYC, NJ) ships live from open-data APIs; ≥20 states live via generic connectors; per-state coverage status is visible. See `.planning/STATE-COVERAGE-PLAN.md` + `.planning/research/STATE-SOURCE-MAP.md`.
 
 ### Fit Scoring (SCORE)
 
-- [ ] **SCORE-01**: Each opportunity shows a fit score with a plain-English explanation of why it fits
-- [ ] **SCORE-02**: The explanation cites the org's own vault artifacts / prior wins (evidence-grounded, not black-box)
-- [ ] **SCORE-03**: The score breaks down by dimension (mission fit, eligibility, track record, capacity, funder relationship)
-- [ ] **SCORE-04**: The score flags disqualifiers (e.g., missing past-performance threshold, ineligible entity type)
+- [x] **SCORE-01**: Each opportunity shows a fit score with a plain-English explanation of why it fits
+- [x] **SCORE-02**: The explanation cites the org's own vault artifacts / prior wins (evidence-grounded, not black-box)
+- [x] **SCORE-03**: The score breaks down by dimension (mission fit, eligibility, track record, capacity, funder relationship)
+- [x] **SCORE-04**: The score flags disqualifiers (e.g., missing past-performance threshold, ineligible entity type)
 
 ### Drafting, Review & Compliance (REVIEW)
 
-- [ ] **REVIEW-01**: System extracts the actual evaluation criteria from a solicitation (gov Section L/M; grant funder priorities) with weights
-- [ ] **REVIEW-02**: A multi-agent reviewer panel scores the draft against those extracted criteria, not generic writing quality
-- [ ] **REVIEW-03**: Reviewer findings anchor to draft sections with severity and a suggested fix
-- [ ] **REVIEW-04**: Compliance gate v1 checks page limits, required attachments, budget math, eligibility, and deadline+timezone before submit
-- [ ] **REVIEW-05**: Draft output carries an AI-use disclosure notice and the compliance gate includes an AI-disclosure checklist item (GSA GSAR 552.239-7001 / NIH)
-- [ ] **REVIEW-06**: User can upload PDF/DOCX into the vault and attach solicitation documents, parsed reliably on Vercel serverless
+- [x] **REVIEW-01**: System extracts the actual evaluation criteria from a solicitation (gov Section L/M; grant funder priorities) with weights
+- [x] **REVIEW-02**: A multi-agent reviewer panel scores the draft against those extracted criteria, not generic writing quality
+- [x] **REVIEW-03**: Reviewer findings anchor to draft sections with severity and a suggested fix
+- [x] **REVIEW-04**: Compliance gate v1 checks page limits, required attachments, budget math, eligibility, and deadline+timezone before submit
+- [x] **REVIEW-05**: Draft output carries an AI-use disclosure notice and the compliance gate includes an AI-disclosure checklist item (GSA GSAR 552.239-7001 / NIH)
+- [x] **REVIEW-06**: User can upload PDF/DOCX into the vault and attach solicitation documents, parsed reliably on Vercel serverless
 
 ### Submission & Amendments (SUBMIT)
 
-- [ ] **SUBMIT-01**: User can assemble a submission packet (sections + attachments + compliance summary + audit trail)
-- [ ] **SUBMIT-02**: User can record and track submission status per pursuit
-- [ ] **SUBMIT-03**: System re-polls active pursuits and diffs solicitation amendments/addenda against the original capture
-- [ ] **SUBMIT-04**: Material amendment changes alert the user and re-trigger compliance/fit checks
+- [x] **SUBMIT-01**: User can assemble a submission packet (sections + attachments + compliance summary + audit trail)
+- [x] **SUBMIT-02**: User can record and track submission status per pursuit
+- [x] **SUBMIT-03**: System re-polls active pursuits and diffs solicitation amendments/addenda against the original capture
+- [x] **SUBMIT-04**: Material amendment changes alert the user and re-trigger compliance/fit checks
 
 ### Win/Loss Learning (LEARN)
 
@@ -58,29 +59,35 @@ Grouped by category. Each maps to exactly one roadmap phase (see Traceability). 
 - [ ] **BILL-01**: Self-serve Stripe checkout for all tiers with trial → automatic org provisioning
 - [ ] **BILL-02**: Plans map to coverage levels + quotas; entitlements enforced in app and RLS
 - [ ] **BILL-03**: Usage metering uses Stripe Meters (legacy metered prices migrated before live mode)
-- [ ] **BILL-04**: A per-tenant AI cost ledger enforces a hard spend limit BEFORE each LLM call fires
+- [x] **BILL-04**: A per-tenant AI cost ledger enforces a hard spend limit BEFORE each LLM call fires
 - [ ] **BILL-05**: Transparent pricing and a risk-reversal guarantee are presented on the pricing surface
 
 ### Operator Console & Monitoring (ADMIN)
 
-- [ ] **ADMIN-01**: Operator console shows orgs, drafts/week, reviewer runs, vault chunks, and MRR by tier
-- [ ] **ADMIN-02**: Operator sees AI cost and gross margin per org, with budget alarms
-- [ ] **ADMIN-03**: Operator sees source health/drift with a manual "rerun now" control
-- [ ] **ADMIN-04**: `/api/health/rfp` returns JSON status (scraper last success, drift open, cron last run, error rate) wired to a status monitor
-- [ ] **ADMIN-05**: Operator can toggle per-org feature flags / entitlement overrides
+- [x] **ADMIN-01**: Operator console shows orgs, drafts/week, reviewer runs, vault chunks, and MRR by tier
+  - 2026-06-13: `/admin/rfp` totals and per-org rows now include active RFP MRR/tier data.
+- [x] **ADMIN-02**: Operator sees AI cost and gross margin per org, with budget alarms
+  - 2026-06-13: `/admin/rfp` per-org rows show AI cost, gross margin, and monthly AI budget cap status; operator queue flags margin risk and unfunded AI spend.
+- [x] **ADMIN-03**: Operator sees source health/drift with a manual "rerun now" control
+- [x] **ADMIN-04**: `/api/health/rfp` returns JSON status (scraper last success, drift open, cron last run, error rate) wired to a status monitor
+  - 2026-06-11: JSON fields complete in code (`scraper_last_success`, `open_drift_events`, `last_cron`, `cron_24h.error_rate_percent`). External uptime/status monitor wiring remains.
+  - 2026-06-13: Hourly `RFP Health Monitor` automation created against `https://rfp.perpetualcore.com/api/health/rfp`.
+- [x] **ADMIN-05**: Operator can toggle per-org feature flags / entitlement overrides
+  - 2026-06-13: `/admin/rfp` has gated per-org coverage, AI budget, and quota override controls backed by `rfp_entitlements`.
 
 ### Trust, Security & Legal (TRUST)
 
-- [ ] **TRUST-01**: RLS audit passes and a cross-tenant CI test (Org A cannot read Org B's data) is a required check
-- [ ] **TRUST-02**: Per-tenant isolation for vault + proposals is verified; no service-role misuse in user-context paths
-- [ ] **TRUST-03**: Legal pages are live: Terms of Service, Privacy Policy, AI-use disclosure
-- [ ] **TRUST-04**: Data-source ToS compliance verified; no redistribution of license-restricted data (Candid excluded; ProPublica/IRS 990 used)
+- [x] **TRUST-01**: RLS audit passes and a cross-tenant CI test (Org A cannot read Org B's data) is a required check
+- [x] **TRUST-02**: Per-tenant isolation for vault + proposals is verified; no service-role misuse in user-context paths
+- [x] **TRUST-03**: Legal pages are live: Terms of Service, Privacy Policy, AI-use disclosure
+- [x] **TRUST-04**: Data-source ToS compliance verified; no redistribution of license-restricted data (Candid excluded; ProPublica/IRS 990 used)
 
 ### Onboarding / First-Time UX (FTUE)
 
-- [ ] **FTUE-01**: A new org reaches first scored opportunities within one session via a ≤5-field setup (org type, mission, geography, funding types)
-- [ ] **FTUE-02**: A guided checklist moves the user org → voice → vault → first draft → review
-- [ ] **FTUE-03**: Every key surface (Discovery / Proposals / Vault / Voice) has a real empty state with one clear CTA toward first qualified draft
+- [x] **FTUE-01**: A new org reaches first scored opportunities within one session via a ≤5-field setup (org type, mission, geography, funding types)
+- [x] **FTUE-02**: A guided checklist moves the user org → voice → vault → first draft → review
+- [x] **FTUE-03**: Every key surface (Discovery / Proposals / Vault / Voice) has a real empty state with one clear CTA toward first qualified draft
+  - 2026-06-11: Code complete. Remaining launch hardening: authenticated E2E for create org → scored Discovery → first draft.
 
 ### Launch Readiness (LAUNCH)
 
@@ -113,10 +120,10 @@ Tracked, not in this roadmap.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| FND-01 | Phase 14 | Pending |
-| FND-02 | Phase 14 | Pending |
-| FND-03 | Phase 14 | Pending |
-| FND-04 | Phase 14 | Pending |
+| FND-01 | Phase 14 | Complete |
+| FND-02 | Phase 14 | Complete |
+| FND-03 | Phase 14 | Complete |
+| FND-04 | Phase 14 | Complete |
 | DISCO-01 | Phase 15 | Pending |
 | DISCO-02 | Phase 15 | Pending |
 | DISCO-03 | Phase 16 | Pending |
@@ -124,47 +131,48 @@ Tracked, not in this roadmap.
 | DISCO-05 | Phase 15 | Pending |
 | DISCO-06 | Phase 16 | Pending |
 | DISCO-07 | Phase 15 | Pending |
-| SCORE-01 | Phase 18 | Pending |
-| SCORE-02 | Phase 18 | Pending |
-| SCORE-03 | Phase 18 | Pending |
-| SCORE-04 | Phase 18 | Pending |
-| REVIEW-01 | Phase 19 | Pending |
-| REVIEW-02 | Phase 19 | Pending |
-| REVIEW-03 | Phase 19 | Pending |
-| REVIEW-04 | Phase 19 | Pending |
-| REVIEW-05 | Phase 19 | Pending |
-| REVIEW-06 | Phase 19 | Pending |
-| SUBMIT-01 | Phase 20 | Pending |
-| SUBMIT-02 | Phase 20 | Pending |
-| SUBMIT-03 | Phase 20 | Pending |
-| SUBMIT-04 | Phase 20 | Pending |
+| DISCO-10 | Phase 16 | Pending |
+| SCORE-01 | Phase 18 | Complete |
+| SCORE-02 | Phase 18 | Complete |
+| SCORE-03 | Phase 18 | Complete |
+| SCORE-04 | Phase 18 | Complete |
+| REVIEW-01 | Phase 19 | Complete |
+| REVIEW-02 | Phase 19 | Complete |
+| REVIEW-03 | Phase 19 | Complete |
+| REVIEW-04 | Phase 19 | Complete |
+| REVIEW-05 | Phase 19 | Complete |
+| REVIEW-06 | Phase 19 | Complete |
+| SUBMIT-01 | Phase 20 | Complete |
+| SUBMIT-02 | Phase 20 | Complete |
+| SUBMIT-03 | Phase 20 | Complete |
+| SUBMIT-04 | Phase 20 | Complete |
 | LEARN-01 | Phase 21 | Pending |
 | LEARN-02 | Phase 21 | Pending |
 | BILL-01 | Phase 23 | Pending |
 | BILL-02 | Phase 23 | Pending |
 | BILL-03 | Phase 23 | Pending |
-| BILL-04 | Phase 17 | Pending |
+| BILL-04 | Phase 17 | Complete |
 | BILL-05 | Phase 23 | Pending |
-| ADMIN-01 | Phase 24 | Pending |
-| ADMIN-02 | Phase 24 | Pending |
-| ADMIN-03 | Phase 24 | Pending |
-| ADMIN-04 | Phase 24 | Pending |
-| ADMIN-05 | Phase 24 | Pending |
-| TRUST-01 | Phase 22 | Pending |
-| TRUST-02 | Phase 22 | Pending |
-| TRUST-03 | Phase 22 | Pending |
-| TRUST-04 | Phase 22 | Pending |
-| FTUE-01 | Phase 24 | Pending |
-| FTUE-02 | Phase 24 | Pending |
-| FTUE-03 | Phase 24 | Pending |
+| ADMIN-01 | Phase 24 | Complete |
+| ADMIN-02 | Phase 24 | Complete |
+| ADMIN-03 | Phase 24 | Complete |
+| ADMIN-04 | Phase 24 | Complete |
+| ADMIN-05 | Phase 24 | Complete |
+| TRUST-01 | Phase 22 | Complete |
+| TRUST-02 | Phase 22 | Complete |
+| TRUST-03 | Phase 22 | Complete |
+| TRUST-04 | Phase 22 | Complete |
+| FTUE-01 | Phase 24 | Complete |
+| FTUE-02 | Phase 24 | Complete |
+| FTUE-03 | Phase 24 | Complete |
 | LAUNCH-01 | Phase 13 | Pending |
 | LAUNCH-02 | Phase 25 | Pending |
 | LAUNCH-03 | Phase 13 | Complete |
 | LAUNCH-04 | Phase 13 | Complete |
 
 **Coverage:**
-- v2.0 requirements: 43 total
-- Mapped to phases: 43
+- v2.0 requirements: 44 total
+- Mapped to phases: 44
 - Unmapped: 0
 
 ---

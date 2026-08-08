@@ -46,7 +46,6 @@ import {
   MessagesSquare,
   Palette,
   AudioLines,
-  ScanSearch,
   // New icons for redesign
   LayoutDashboard,
   Workflow,
@@ -882,18 +881,6 @@ export const NAVIGATION_CONFIG_V2: NavigationSection[] = [
           complexity: "standard",
           badge: "new",
           helpText: "Brain-classified voice memos with action queue — red/yellow/green tiers",
-        },
-      },
-      {
-        name: "Development Intelligence",
-        href: "/dashboard/development",
-        icon: ScanSearch,
-        adaptiveConfig: {
-          visibleFor: ["intermediate", "advanced"],
-          complexity: "standard",
-          badge: "new",
-          helpText:
-            "Evidence-linked coaching, meeting development, interview quality, and human review",
         },
       },
       {

@@ -2,19 +2,9 @@ import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import Stripe from "stripe";
 
-let stripeClient: Stripe | null = null;
-
-function getStripe(): Stripe {
-  if (stripeClient) return stripeClient;
-
-  const secretKey = process.env.STRIPE_SECRET_KEY;
-  if (!secretKey) throw new Error("STRIPE_SECRET_KEY is not set");
-
-  stripeClient = new Stripe(secretKey, {
-    apiVersion: "2024-12-18.acacia",
-  });
-  return stripeClient;
-}
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
+  apiVersion: "2024-12-18.acacia",
+});
 
 export async function POST(request: Request) {
   try {
@@ -56,7 +46,6 @@ export async function POST(request: Request) {
     }
 
     // Create portal session
-    const stripe = getStripe();
     const session = await stripe.billingPortal.sessions.create({
       customer: subscription.stripe_customer_id,
       return_url: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard/settings/billing`,

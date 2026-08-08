@@ -14,16 +14,9 @@ import { generateProactiveInsights, ProactiveInsight } from "./proactive-insight
 import { sendSlackMessage, getSlackCredentials, formatBriefingForSlack } from "@/lib/slack/client";
 import OpenAI from "openai";
 
-let openai: OpenAI | null = null;
-
-function getOpenAI(): OpenAI {
-  const apiKey = process.env.OPENAI_API_KEY;
-  if (!apiKey) {
-    throw new Error("OPENAI_API_KEY is required to generate proactive nudges");
-  }
-  openai ??= new OpenAI({ apiKey });
-  return openai;
-}
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY!,
+});
 
 // Telegram config
 const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
@@ -253,7 +246,7 @@ async function formatNudgesForChannel(
     .join("\n\n");
 
   try {
-    const response = await getOpenAI().chat.completions.create({
+    const response = await openai.chat.completions.create({
       model: "gpt-4o-mini",
       messages: [
         {
@@ -573,7 +566,7 @@ export async function handleNudgeResponse(
   const nudgeData = nudge.nudge_data as NudgeOpportunity[];
 
   try {
-    const completion = await getOpenAI().chat.completions.create({
+    const completion = await openai.chat.completions.create({
       model: "gpt-4o-mini",
       messages: [
         {

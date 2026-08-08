@@ -14,26 +14,9 @@ import { extractCommitmentsFromConversation } from "@/lib/ai/commitment-extracto
 const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
 const TELEGRAM_API = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}`;
 
-let openai: OpenAI | null = null;
-let anthropic: Anthropic | null = null;
-
-function getOpenAI(): OpenAI {
-  const apiKey = process.env.OPENAI_API_KEY;
-  if (!apiKey) {
-    throw new Error("OPENAI_API_KEY is required to generate Telegram responses");
-  }
-  openai ??= new OpenAI({ apiKey });
-  return openai;
-}
-
-function getAnthropic(): Anthropic {
-  const apiKey = process.env.ANTHROPIC_API_KEY;
-  if (!apiKey) {
-    throw new Error("ANTHROPIC_API_KEY is required to generate Telegram responses");
-  }
-  anthropic ??= new Anthropic({ apiKey });
-  return anthropic;
-}
+// Initialize AI clients
+const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 
 export interface TelegramMessage {
   message_id: number;
@@ -310,7 +293,7 @@ Or send me your account email and I'll help you set it up!`;
     let response: string;
 
     if (process.env.ANTHROPIC_API_KEY) {
-      const completion = await getAnthropic().messages.create({
+      const completion = await anthropic.messages.create({
         model: "claude-sonnet-4-20250514",
         max_tokens: 1024,
         system: systemPrompt,
@@ -322,7 +305,7 @@ Or send me your account email and I'll help you set it up!`;
           ? completion.content[0].text
           : "I couldn't generate a response.";
     } else if (process.env.OPENAI_API_KEY) {
-      const completion = await getOpenAI().chat.completions.create({
+      const completion = await openai.chat.completions.create({
         model: "gpt-4o",
         max_tokens: 1024,
         messages: [

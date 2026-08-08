@@ -1,17 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import Anthropic from "@anthropic-ai/sdk";
 
-let anthropicClient: Anthropic | null = null;
-
-function getAnthropicClient(): Anthropic {
-  const apiKey = process.env.ANTHROPIC_API_KEY;
-  if (!apiKey) {
-    throw new Error("ANTHROPIC_API_KEY is not configured");
-  }
-
-  anthropicClient ??= new Anthropic({ apiKey });
-  return anthropicClient;
-}
+const anthropic = new Anthropic({
+  apiKey: process.env.ANTHROPIC_API_KEY!,
+});
 
 export async function POST(req: NextRequest) {
   try {
@@ -25,7 +17,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Use Claude to analyze user needs and suggest configuration
-    const response = await getAnthropicClient().messages.create({
+    const response = await anthropic.messages.create({
       model: "claude-sonnet-4-20250514",
       max_tokens: 1024,
       messages: [
