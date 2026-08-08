@@ -9,6 +9,17 @@ export const dynamic = "force-dynamic";
 
 type InsightRecord = Record<string, unknown>;
 
+/**
+ * The shape the account-sync and handoff-task helpers expect. Several of its
+ * fields — name, title, stage, estimated_value, notes, ai_insights — are NOT
+ * columns on public.leads; they never were. This route used to select and write
+ * them directly, so every insert failed with 42703 and /package-intake returned
+ * 500 to every visitor. See the contact-sales fix for the same bug class.
+ *
+ * The type stays as-is because the helpers are built on it. What changed is
+ * that it is now *derived* from real columns via toLeadRecord() rather than
+ * read straight off the table.
+ */
 type LeadRecord = {
   id: string;
   user_id: string | null;
@@ -27,6 +38,38 @@ type LeadRecord = {
   created_at?: string | null;
   updated_at?: string | null;
 };
+
+/** Columns that actually exist on public.leads. */
+const LEAD_COLUMNS =
+  "id,user_id,contact_name,email,phone,company,company_name,status,qualification_notes,metadata,tags,created_at,updated_at";
+
+/**
+ * Project a real leads row into the LeadRecord shape the helpers consume.
+ * Fields with no column live under metadata.packageIntake, written by this route.
+ */
+function toLeadRecord(row: Record<string, unknown>): LeadRecord {
+  const metadata = isRecord(row.metadata) ? row.metadata : {};
+  const pkg = isRecord(metadata.packageIntake) ? metadata.packageIntake : {};
+  const str = (v: unknown) => (typeof v === "string" ? v : null);
+  return {
+    id: String(row.id),
+    user_id: str(row.user_id),
+    name: str(row.contact_name),
+    email: str(row.email),
+    phone: str(row.phone),
+    company: str(row.company_name) ?? str(row.company),
+    title: str(pkg.title),
+    status: str(row.status),
+    stage: str(pkg.stage),
+    estimated_value: typeof pkg.estimatedValue === "number" ? pkg.estimatedValue : null,
+    notes: str(row.qualification_notes),
+    metadata: row.metadata,
+    tags: row.tags,
+    ai_insights: isRecord(metadata.aiInsights) ? metadata.aiInsights : {},
+    created_at: str(row.created_at),
+    updated_at: str(row.updated_at),
+  };
+}
 
 const packageValues = [
   "software-access",
@@ -100,7 +143,7 @@ async function findLead(
   if (leadId) {
     const { data, error } = await supabase
       .from("leads")
-      .select("id,user_id,name,email,phone,company,title,status,stage,estimated_value,notes,metadata,tags,ai_insights,created_at,updated_at")
+      .select(LEAD_COLUMNS)
       .eq("id", leadId)
       .eq("user_id", ownerUserId)
       .maybeSingle();
@@ -111,13 +154,13 @@ async function findLead(
       if (leadEmail && leadEmail !== email) {
         return { lead: null, error: "Lead email does not match this intake." };
       }
-      return { lead: data as LeadRecord, error: null };
+      return { lead: toLeadRecord(data as Record<string, unknown>), error: null };
     }
   }
 
   const { data, error } = await supabase
     .from("leads")
-    .select("id,user_id,name,email,phone,company,title,status,stage,estimated_value,notes,metadata,tags,ai_insights,created_at,updated_at")
+    .select(LEAD_COLUMNS)
     .eq("email", email)
     .eq("user_id", ownerUserId)
     .order("created_at", { ascending: false })
@@ -125,7 +168,7 @@ async function findLead(
     .maybeSingle();
 
   if (error) throw error;
-  return { lead: (data as LeadRecord | null) || null, error: null };
+  return { lead: data ? toLeadRecord(data as Record<string, unknown>) : null, error: null };
 }
 
 export async function POST(request: Request) {
@@ -179,9 +222,12 @@ export async function POST(request: Request) {
       .filter(Boolean)
       .join("\n\n");
 
+    // Every key must be a real column on public.leads. title, stage,
+    // estimated_value, source_detail, name, notes and ai_insights are not, and
+    // writing them is what made this route 500 on every submission. They now
+    // live under metadata (jsonb) and are projected back out by toLeadRecord().
     const leadPayload = {
       user_id: ownerUserId,
-      name: data.name,
       first_name: firstName,
       last_name: lastName,
       contact_name: data.name,
@@ -191,13 +237,10 @@ export async function POST(request: Request) {
       company: data.company,
       company_name: data.company,
       company_size: data.employees,
-      title: `${data.packageLabel} intake`,
       status: "won",
-      stage: "delivery_handoff",
       source: "package-intake",
-      source_detail: data.packageId,
-      estimated_value: estimateValueForPackage(data.packageId),
-      notes: existingLead?.notes ? `${existingLead.notes}\n\n---\n${intakeNotes}` : intakeNotes,
+      lead_type: data.packageId,
+      qualification_notes: existingLead?.notes ? `${existingLead.notes}\n\n---\n${intakeNotes}` : intakeNotes,
       tags: Array.from(new Set([...currentTags, "package-intake", "client-handoff", data.packageId])),
       metadata: {
         ...currentMetadata,
@@ -206,29 +249,32 @@ export async function POST(request: Request) {
           packageLabel: data.packageLabel,
           sessionId: data.sessionId || null,
           submittedAt: now,
+          title: `${data.packageLabel} intake`,
+          stage: "delivery_handoff",
+          estimatedValue: estimateValueForPackage(data.packageId),
         },
-      },
-      ai_insights: {
-        ...currentInsights,
-        packageIntake: {
-          packageId: data.packageId,
-          packageLabel: data.packageLabel,
-          sessionId: data.sessionId || null,
-          submittedAt: now,
-          employees: data.employees,
-        },
-        accountHandoffContext: {
-          ...(isRecord(currentInsights.accountHandoffContext) ? currentInsights.accountHandoffContext : {}),
-          ...context,
-        },
-        accountOfferName: data.packageLabel,
-        accountNextStep: "Confirm kickoff window and generate the account operating plan.",
-        closePath: {
-          ...(isRecord(currentInsights.closePath) ? currentInsights.closePath : {}),
-          paymentStatus: "paid",
-          buyerStage: "delivery_handoff",
-          commercialNextStep: "Confirm kickoff window and generate the account operating plan.",
-          updatedAt: now,
+        aiInsights: {
+          ...currentInsights,
+          packageIntake: {
+            packageId: data.packageId,
+            packageLabel: data.packageLabel,
+            sessionId: data.sessionId || null,
+            submittedAt: now,
+            employees: data.employees,
+          },
+          accountHandoffContext: {
+            ...(isRecord(currentInsights.accountHandoffContext) ? currentInsights.accountHandoffContext : {}),
+            ...context,
+          },
+          accountOfferName: data.packageLabel,
+          accountNextStep: "Confirm kickoff window and generate the account operating plan.",
+          closePath: {
+            ...(isRecord(currentInsights.closePath) ? currentInsights.closePath : {}),
+            paymentStatus: "paid",
+            buyerStage: "delivery_handoff",
+            commercialNextStep: "Confirm kickoff window and generate the account operating plan.",
+            updatedAt: now,
+          },
         },
       },
       updated_at: now,
@@ -239,7 +285,7 @@ export async function POST(request: Request) {
           .from("leads")
           .update(leadPayload)
           .eq("id", existingLead.id)
-          .select("id,user_id,name,email,phone,company,title,status,stage,estimated_value,notes,metadata,tags,ai_insights,created_at,updated_at")
+          .select(LEAD_COLUMNS)
           .single()
       : await supabase
           .from("leads")
@@ -247,75 +293,85 @@ export async function POST(request: Request) {
             ...leadPayload,
             created_at: now,
           })
-          .select("id,user_id,name,email,phone,company,title,status,stage,estimated_value,notes,metadata,tags,ai_insights,created_at,updated_at")
+          .select(LEAD_COLUMNS)
           .single();
 
     if (leadResult.error || !leadResult.data) {
+      console.error("[package-intake] lead write failed", {
+        code: leadResult.error?.code,
+        message: leadResult.error?.message,
+        details: leadResult.error?.details,
+      });
       return NextResponse.json({ error: "Could not save package intake" }, { status: 500 });
     }
 
-    const leadRecord = leadResult.data as LeadRecord;
-    const accountSync = await syncPermanentAccount({
-      lead: leadRecord,
-      userId: ownerUserId,
-      createdFrom: "package_intake",
-    });
-    const leadInsights = isRecord(leadRecord.ai_insights) ? leadRecord.ai_insights : {};
-    const existingNotes = leadRecord.notes?.trim() || "";
-    const nextNotes = existingNotes.includes(accountSync.account.id)
-      ? existingNotes
-      : existingNotes
-        ? `${existingNotes}\n\n---\n${accountSync.handoffBlock}`
-        : accountSync.handoffBlock;
-    const { data: syncedLead, error: syncedLeadError } = await supabase
-      .from("leads")
-      .update({
-        notes: nextNotes,
-        ai_insights: {
-          ...leadInsights,
-          ...accountSync.nextInsights,
-        },
-        updated_at: new Date().toISOString(),
-      })
-      .eq("id", leadRecord.id)
-      .eq("user_id", ownerUserId)
-      .select("id,user_id,name,email,phone,company,title,status,stage,estimated_value,notes,metadata,tags,ai_insights,created_at,updated_at")
-      .single();
+    // From here the customer's intake IS captured. Everything below is internal
+    // automation — account sync, handoff tasks — and none of it may turn a
+    // captured intake into an error for the person who submitted it. Previously
+    // a failure in any of it returned 500 and the buyer saw a broken form after
+    // having already paid.
+    const leadRecord = toLeadRecord(leadResult.data as Record<string, unknown>);
+    let accountSync: Awaited<ReturnType<typeof syncPermanentAccount>> | null = null;
+    let taskSync: Awaited<ReturnType<typeof createMissingHandoffTasks>> | null = null;
 
-    if (syncedLeadError || !syncedLead) {
-      return NextResponse.json({ error: "Package intake saved, but account sync failed" }, { status: 500 });
+    try {
+      accountSync = await syncPermanentAccount({
+        lead: leadRecord,
+        userId: ownerUserId,
+        createdFrom: "package_intake",
+      });
+
+      const metadata = isRecord(leadRecord.metadata) ? leadRecord.metadata : {};
+      const leadInsights = isRecord(leadRecord.ai_insights) ? leadRecord.ai_insights : {};
+      const existingNotes = leadRecord.notes?.trim() || "";
+      const nextNotes = existingNotes.includes(accountSync.account.id)
+        ? existingNotes
+        : existingNotes
+          ? `${existingNotes}\n\n---\n${accountSync.handoffBlock}`
+          : accountSync.handoffBlock;
+
+      const { error: syncedLeadError } = await supabase
+        .from("leads")
+        .update({
+          qualification_notes: nextNotes,
+          metadata: {
+            ...metadata,
+            aiInsights: { ...leadInsights, ...accountSync.nextInsights },
+          } as never,
+          updated_at: new Date().toISOString(),
+        })
+        .eq("id", leadRecord.id)
+        .eq("user_id", ownerUserId);
+
+      if (syncedLeadError) {
+        console.error("[package-intake] account-sync writeback failed", syncedLeadError);
+      }
+    } catch (err) {
+      console.error("[package-intake] account sync failed (intake still captured)", err);
     }
 
-    const taskSync = await createMissingHandoffTasks(supabase, leadRecord, context);
+    try {
+      taskSync = await createMissingHandoffTasks(supabase, leadRecord, context);
+    } catch (err) {
+      console.error("[package-intake] handoff task creation failed (intake still captured)", err);
+    }
 
-    await supabase.from("lead_activities").insert({
-      lead_id: leadRecord.id,
-      user_id: ownerUserId,
-      activity_type: "package_intake",
-      title: "Package intake submitted",
-      description: `${getAccountName(leadRecord)} submitted kickoff context. ${taskSync.created} kickoff task${taskSync.created === 1 ? "" : "s"} created.`,
-      to_value: data.packageId,
-    });
-
-    await supabase.from("lead_activities").insert({
-      lead_id: leadRecord.id,
-      user_id: ownerUserId,
-      activity_type: "account_synced",
-      title: "Permanent account synced from intake",
-      description: `${getPermanentAccountName(leadRecord)} is now stored in pc_accounts with a ${accountSync.lane.offerName} engagement.`,
-    });
+    // NOTE: the previous lead_activities inserts are gone — public.lead_activities
+    // does not exist in this database, so they could never have succeeded.
 
     return NextResponse.json({
       success: true,
-      leadId: syncedLead.id,
+      leadId: leadRecord.id,
       context,
       taskSync,
-      accountSync: {
-        accountId: accountSync.account.id,
-        engagementId: accountSync.engagement.id,
-        offerName: accountSync.lane.offerName,
-        nextStep: accountSync.lane.nextStep,
-      },
+      accountSync: accountSync
+        ? {
+            accountId: accountSync.account.id,
+            engagementId: accountSync.engagement.id,
+            offerName: accountSync.lane.offerName,
+            nextStep: accountSync.lane.nextStep,
+          }
+        : null,
     });
   } catch (error) {
     console.error("Package intake error:", error);
