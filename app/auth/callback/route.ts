@@ -3,6 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { logAudit, extractRequestContext } from "@/lib/audit/logger";
 import { trackSignup } from "@/lib/analytics/server-events";
 import { ANON_COOKIE_NAME, UTM_COOKIE_NAME, deserializeUTM } from "@/lib/analytics/utm-store";
+import { safeAuthNext } from "@/lib/auth/redirects";
 
 /**
  * GET /auth/callback
@@ -33,7 +34,7 @@ export async function GET(request: NextRequest) {
   const requestHost = (request.headers.get("host") || "").toLowerCase().split(":")[0];
   const isRfpHost = requestHost === "rfp.perpetualcore.com" || requestHost === "rfp.localhost";
   const defaultNext = isRfpHost ? "/orgs" : "/dashboard";
-  const next = searchParams.get("next") || defaultNext;
+  const next = safeAuthNext(searchParams.get("next")) || defaultNext;
   const error = searchParams.get("error");
   const errorDescription = searchParams.get("error_description");
 

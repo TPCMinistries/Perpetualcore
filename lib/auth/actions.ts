@@ -5,6 +5,7 @@ import { SignUpInput, SignInInput } from "@/lib/validations/auth";
 import { redirect } from "next/navigation";
 import { headers } from "next/headers";
 import type { Database } from "@/lib/supabase/database.types";
+import { safeAuthNext } from "@/lib/auth/redirects";
 
 type BetaInviteCode = Database["public"]["Tables"]["beta_invite_codes"]["Row"];
 
@@ -21,13 +22,6 @@ async function getRequestOrigin(): Promise<string> {
   if (host) return `${proto}://${host}`;
   const envUrl = process.env.NEXT_PUBLIC_APP_URL?.trim();
   return envUrl || "https://www.perpetualcore.com";
-}
-
-function safeAuthNext(value: string | undefined): string | null {
-  if (!value) return null;
-  if (!value.startsWith("/") || value.startsWith("//")) return null;
-  if (value.startsWith("/api/") || value.startsWith("/auth/callback")) return null;
-  return value;
 }
 
 export async function signUp(data: SignUpInput, nextPath?: string) {
@@ -346,6 +340,35 @@ export async function signInWithMagicLink(email: string, nextPath?: string) {
   }
 
   return { success: true };
+}
+
+export async function signInWithGoogle(nextPath?: string) {
+  const supabase = await createClient();
+  const origin = await getRequestOrigin();
+  const next = safeAuthNext(nextPath);
+  const callbackUrl = new URL("/auth/callback", origin);
+  if (next) callbackUrl.searchParams.set("next", next);
+
+  const { data, error } = await supabase.auth.signInWithOAuth({
+    provider: "google",
+    options: {
+      redirectTo: callbackUrl.toString(),
+      skipBrowserRedirect: true,
+      queryParams: {
+        prompt: "select_account",
+      },
+    },
+  });
+
+  if (error) {
+    return { error: error.message };
+  }
+
+  if (!data.url) {
+    return { error: "Google sign-in is temporarily unavailable." };
+  }
+
+  return { url: data.url };
 }
 
 export async function updatePassword(newPassword: string) {
