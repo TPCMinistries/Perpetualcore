@@ -93,6 +93,16 @@ async function main() {
   const funnelFindings: Finding[] = funnelCap
     ? await settled(runCapability(funnelCap, { runSql, now }).then((r) => r.findings), [])
     : [];
+  const intakeCap = getCapability('intake-contract');
+  const intakeFindings: Finding[] = intakeCap
+    ? await settled(runCapability(intakeCap, { runSql, now }).then((r) => r.findings), [])
+    : [];
+  const intakeLine =
+    intakeFindings.find((f) => f.severity === 'critical')?.summary ??
+    intakeFindings.find((f) => f.severity === 'warn')?.summary ??
+    intakeFindings.find((f) => f.severity === 'ok')?.summary ??
+    null;
+
   const funnelLine =
     funnelFindings.find((f) => f.severity === 'critical')?.summary ??
     funnelFindings.find((f) => f.severity === 'warn')?.summary ??
@@ -171,6 +181,7 @@ async function main() {
     pnlHeadline,
     revenueCrewLine,
     funnelLine,
+    intakeLine,
   };
   const md = composeBrief(briefInput);
 

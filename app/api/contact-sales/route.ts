@@ -3,6 +3,7 @@ import { createAdminClient } from "@/lib/supabase/server";
 import { sendSalesInquiryEmail, sendSalesConfirmationEmail } from "@/lib/email";
 import { z } from "zod";
 import { validationErrorResponse } from "@/lib/validations/schemas";
+import { COMPANY_SIZE_VALUES, PLAN_VALUES } from "@/lib/intake/contracts";
 
 // This endpoint serves the engagement intake (homepage CTA), the Atlas
 // flagship intake (/products/atlas), and the Atlas Discovery audit
@@ -43,34 +44,13 @@ function isRateLimited(ip: string): boolean {
   return false;
 }
 
-const companySizeValues = [
-  "1-10",
-  "11-50",
-  "51-200",
-  "201-500",
-  "501-1000",
-  "1000+",
-  "1001+",
-] as const;
+const companySizeValues = COMPANY_SIZE_VALUES;
 
-const planValues = [
-  "software-access",
-  "guided-setup",
-  "first-workflow",
-  "operating-lane-deposit",
-  "manual-invoice",
-  "company-ai-os",
-  "department-ai-os",
-  "studio-sprint-30",
-  "studio-retainer",
-  "product-subscription",
-  "venture-partner",
-  "institute-partner",
-  "exploring",
-  "Pro",
-  "Enterprise",
-  "Custom",
-] as const;
+// Imported, not redeclared: the intake-contract capability checks these same
+// values against the CHECK constraint on sales_contacts.interested_in every
+// night. A local copy could drift from what is verified — which is the bug
+// that made this route 503 on every submission for months.
+const planValues = PLAN_VALUES;
 
 function splitName(name: string) {
   const parts = name.trim().split(/\s+/).filter(Boolean);
