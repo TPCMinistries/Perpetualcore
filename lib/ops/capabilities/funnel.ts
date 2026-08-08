@@ -119,6 +119,57 @@ export const funnel: Capability = {
     )) as Row[];
     const all30 = num(total30, 'c');
 
+    // Traffic denominator. Counted by DISTINCT ip_address, deliberately NOT by
+    // anonymous_id: proxy.ts only issues the pc_anon_id cookie when consent is
+    // accepted, so every non-consenting visitor carries anonymous_id = NULL and
+    // they all collapse into one bucket. Counting identities that way showed
+    // visitors "falling" 87 -> 1 between April and August 2026 while distinct
+    // IPs were at their HIGHEST in July — a pure artifact that briefly convinced
+    // this capability's author the site had no traffic at all. IPs include bots,
+    // so treat these as an upper bound, but they are not consent-gated.
+    const traffic = (await ctx.runSql(
+      BRAIN_TARGET,
+      `select
+         count(distinct ip_address) filter (where created_at >= now() - interval '1 day')::int   as d1,
+         count(distinct ip_address) filter (where created_at >= now() - interval '7 days')::int  as d7,
+         count(distinct ip_address) filter (where created_at >= now() - interval '30 days')::int as d30,
+         count(*) filter (where created_at >= now() - interval '30 days')::int                   as events30,
+         count(*) filter (where created_at >= now() - interval '30 days'
+                            and anonymous_id is null and user_id is null)::int                   as anon_null30
+       from public.analytics_events`,
+    )) as Row[];
+    const visits1 = num(traffic, 'd1');
+    const visits7 = num(traffic, 'd7');
+    const visits30 = num(traffic, 'd30');
+    const events30 = num(traffic, 'events30');
+    const anonNull30 = num(traffic, 'anon_null30');
+
+    metrics.push(
+      { day, source: 'site:perpetualcore', segment: 'ip', metric: 'visits_24h', value: visits1 },
+      { day, source: 'site:perpetualcore', segment: 'ip', metric: 'visits_7d', value: visits7 },
+      { day, source: 'site:perpetualcore', segment: 'ip', metric: 'visits_30d', value: visits30 },
+    );
+
+    findings.push({
+      severity: 'info',
+      project: 'Funnel',
+      summary: `traffic: ${visits1} distinct IPs in 24h, ${visits7} in 7d, ${visits30} in 30d`,
+      detail: 'Counted by IP because consent-gated anonymous_id under-counts. IPs include bots — upper bound.',
+    });
+
+    // If most events carry no identity, any conversion RATE computed from
+    // anonymous_id is meaningless. Say so rather than let someone quote it.
+    if (events30 > 0 && anonNull30 / events30 > 0.5) {
+      findings.push({
+        severity: 'warn',
+        project: 'Funnel',
+        summary: `${anonNull30}/${events30} events in 30d have no identity — conversion RATE is not measurable by anonymous_id`,
+        detail:
+          'proxy.ts issues pc_anon_id only on consent, so unconsented visitors are indistinguishable. ' +
+          'This is GDPR-correct, not a bug. Use IP counts, or restrict rate maths to consented traffic.',
+      });
+    }
+
     metrics.push(
       { day, source: 'site:perpetualcore', segment: 'revenue_intent', metric: 'leads_30d', value: intent30 },
       { day, source: 'site:perpetualcore', segment: 'all', metric: 'leads_30d', value: all30 },
