@@ -3,7 +3,6 @@ import { Suspense } from "react";
 import {
   ArrowRight,
   ArrowUpRight,
-  BrainCircuit,
   ChevronRight,
   Cpu,
   FileSearch,
@@ -25,23 +24,12 @@ import { Navbar } from "@/components/landing/Navbar";
 import { Footer } from "@/components/landing/Footer";
 
 export const metadata = {
-  title: "Perpetual Core — AI systems that run real companies",
+  title: "Perpetual Core — We build the system your company runs on",
   description:
-    "Perpetual Core builds and operates specialized intelligence systems across opportunity, research, people, education, care, and media—connected through Sage.",
+    "Perpetual Core is a studio. We install AI operating systems inside companies—sales, operations, knowledge, customer communication, executive reporting—and we run the ones we build. Sage, our first product, is available today.",
 };
 
 const CORE_SYSTEMS = [
-  {
-    name: "Sage",
-    category: "Operating intelligence",
-    status: "Private live system",
-    headline: "Persistent context for operators carrying more than one company.",
-    audience: "For founders and multi-company operators",
-    href: "https://sage-saas.perpetualcore.com",
-    accent: "#8b7cff",
-    icon: BrainCircuit,
-    span: "lg:col-span-7",
-  },
   {
     name: "RFP Engine",
     category: "Opportunity intelligence",
@@ -51,7 +39,7 @@ const CORE_SYSTEMS = [
     href: "https://rfp.perpetualcore.com",
     accent: "#4ea7ff",
     icon: FileSearch,
-    span: "lg:col-span-5",
+    span: "lg:col-span-4",
   },
   {
     name: "Sentinel",
@@ -62,7 +50,7 @@ const CORE_SYSTEMS = [
     href: "https://sentinel.perpetualcore.com",
     accent: "#54e6b1",
     icon: SearchCheck,
-    span: "lg:col-span-6",
+    span: "lg:col-span-4",
   },
   {
     name: "Janice",
@@ -73,7 +61,7 @@ const CORE_SYSTEMS = [
     href: "https://janice.perpetualcore.com",
     accent: "#ffb85c",
     icon: UsersRound,
-    span: "lg:col-span-6",
+    span: "lg:col-span-4",
   },
 ] as const;
 
@@ -88,7 +76,7 @@ const PRIVATE_SYSTEMS = [
     name: "Scribe",
     status: "Private release",
     body: "A voice-led publishing studio for turning recorded thinking into refined work.",
-    href: "https://scribe.perpetualcore.com",
+    href: "/contact-sales",
   },
   {
     name: "Atlas",
@@ -134,27 +122,29 @@ const OPERATED_SYSTEMS = [
   },
 ] as const;
 
+/**
+ * Two offers, not three abstractions. The previous set —
+ * "Deploy a system / Install intelligence / Build a venture" — hid the custom
+ * build behind a label nobody could decode, and put a self-serve product and a
+ * venture partnership on the same shelf. A visitor has exactly two real doors:
+ * buy Sage today, or have the studio build their system.
+ */
 const ENGAGEMENTS = [
   {
     number: "01",
-    title: "Deploy a system",
-    body: "Use a specialized product for an urgent operating job.",
-    href: "/marketplace",
-    cta: "Explore systems",
+    title: "Start with Sage",
+    body: "An AI chief of staff that knows your work, your people, and what you're trying to get done. It briefs your day, drafts in your voice, and overnight it stages work for your approval. Sage is how we run Perpetual Core—it's the first system we've opened to everyone else.",
+    href: "https://sage-saas.perpetualcore.com",
+    cta: "See Sage",
+    external: true,
   },
   {
     number: "02",
-    title: "Install intelligence",
-    body: "Connect approved context, people, and workflows across the company.",
+    title: "Or we build yours",
+    body: "Most companies don't need another tool. They need the work itself to run differently—the intake that never gets answered, the report nobody assembles, the knowledge that lives in six people's heads. We start where the clearest measurable win is, build the system that does that job, and expand from there.",
     href: "/contact-sales",
-    cta: "Design the operating layer",
-  },
-  {
-    number: "03",
-    title: "Build a venture",
-    body: "Turn a repeatable intelligence system into a company with us.",
-    href: "/fund",
-    cta: "Build with Perpetual Core",
+    cta: "Start a conversation",
+    external: false,
   },
 ] as const;
 
@@ -195,14 +185,15 @@ export default function HomePage() {
               </div>
 
               <h1 className="mt-8 text-[52px] font-semibold leading-[0.91] tracking-[-0.065em] text-white sm:text-[72px] lg:text-[86px]">
-                AI systems that
-                <span className="block text-white/52">run real companies.</span>
+                We build the system
+                <span className="block text-white/52">your company runs on.</span>
               </h1>
 
               <p className="mt-8 max-w-[630px] text-[17px] leading-8 text-white/64 sm:text-[20px]">
-                Perpetual Core builds and operates specialized intelligence
-                systems across opportunity, research, people, education, care,
-                and media—connected through Sage.
+                Perpetual Core is a studio. We install AI operating systems
+                inside companies—sales, operations, knowledge, customer
+                communication, executive reporting—and we run the ones we build.
+                Sage, our first product, is available today.
               </p>
 
               <div className="mt-9 flex flex-col gap-3 sm:flex-row">
@@ -211,13 +202,16 @@ export default function HomePage() {
                   size="lg"
                   className="min-h-12 rounded-none bg-white px-6 text-sm font-semibold uppercase tracking-[0.06em] text-black hover:bg-[#54e6b1]"
                 >
-                  <Link
-                    href="/marketplace"
-                    data-pc-event="home_primary_marketplace"
+                  <a
+                    href="https://sage-saas.perpetualcore.com"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    data-pc-event="home_primary_sage"
                     data-placement="hero"
+                    data-product="sage"
                   >
-                    Explore live systems <ArrowRight className="ml-2 h-4 w-4" />
-                  </Link>
+                    Start with Sage <ArrowRight className="ml-2 h-4 w-4" />
+                  </a>
                 </Button>
                 <Button
                   asChild
@@ -225,7 +219,13 @@ export default function HomePage() {
                   variant="outline"
                   className="min-h-12 rounded-none border-white/18 bg-transparent px-6 text-sm font-semibold text-white hover:bg-white/8 hover:text-white"
                 >
-                  <Link href="/#intelligence-layer">See the operating layer</Link>
+                  <Link
+                    href="/contact-sales"
+                    data-pc-event="home_primary_build"
+                    data-placement="hero"
+                  >
+                    Build ours together
+                  </Link>
                 </Button>
               </div>
 
@@ -267,7 +267,7 @@ export default function HomePage() {
                   Verified core systems
                 </p>
                 <h2 className="mt-5 max-w-3xl text-4xl font-semibold leading-[0.98] tracking-[-0.05em] sm:text-6xl">
-                  The network is already operating.
+                  Systems already operating.
                 </h2>
               </div>
               <p className="max-w-2xl text-base leading-8 text-white/54 lg:justify-self-end">
@@ -473,32 +473,57 @@ export default function HomePage() {
                   Work with Perpetual Core
                 </p>
                 <h2 className="mt-5 text-4xl font-semibold tracking-[-0.05em] sm:text-5xl">
-                  Three ways into the network.
+                  Two ways to start.
                 </h2>
               </div>
               <Layers3 className="hidden h-9 w-9 text-white/18 sm:block" aria-hidden="true" />
             </div>
 
-            <div className="mt-12 grid gap-px border border-white/10 bg-white/10 lg:grid-cols-3">
-              {ENGAGEMENTS.map((item) => (
-                <Link
-                  key={item.number}
-                  href={item.href}
-                  data-pc-event="home_engagement_open"
-                  data-placement="ways-into-network"
-                  data-product={item.title}
-                  className="group flex min-h-[280px] flex-col bg-[#0a0a0e] p-7 transition hover:bg-[#111119] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8b7cff] sm:p-9"
-                >
-                  <span className="font-mono text-[11px] text-white/56">{item.number}</span>
-                  <Workflow className="mt-12 h-5 w-5 text-[#8b7cff]" aria-hidden="true" />
-                  <h3 className="mt-5 text-2xl font-semibold tracking-[-0.03em]">{item.title}</h3>
-                  <p className="mt-3 text-sm leading-6 text-white/64">{item.body}</p>
-                  <span className="mt-auto inline-flex items-center pt-10 text-sm font-semibold text-white">
-                    {item.cta}
-                    <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
-                  </span>
-                </Link>
-              ))}
+            <div className="mt-12 grid gap-px border border-white/10 bg-white/10 lg:grid-cols-2">
+              {ENGAGEMENTS.map((item) => {
+                const cardClass =
+                  "group flex min-h-[280px] flex-col bg-[#0a0a0e] p-7 transition hover:bg-[#111119] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8b7cff] sm:p-9";
+                const inner = (
+                  <>
+                    <span className="font-mono text-[11px] text-white/56">{item.number}</span>
+                    <Workflow className="mt-12 h-5 w-5 text-[#8b7cff]" aria-hidden="true" />
+                    <h3 className="mt-5 text-2xl font-semibold tracking-[-0.03em]">{item.title}</h3>
+                    <p className="mt-3 text-sm leading-6 text-white/64">{item.body}</p>
+                    <span className="mt-auto inline-flex items-center pt-10 text-sm font-semibold text-white">
+                      {item.cta}
+                      <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
+                    </span>
+                  </>
+                );
+
+                // Sage lives on its own host, so that card has to be a real
+                // anchor with target/rel rather than a Next route.
+                return item.external ? (
+                  <a
+                    key={item.number}
+                    href={item.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    data-pc-event="home_engagement_open"
+                    data-placement="ways-to-start"
+                    data-product={item.title}
+                    className={cardClass}
+                  >
+                    {inner}
+                  </a>
+                ) : (
+                  <Link
+                    key={item.number}
+                    href={item.href}
+                    data-pc-event="home_engagement_open"
+                    data-placement="ways-to-start"
+                    data-product={item.title}
+                    className={cardClass}
+                  >
+                    {inner}
+                  </Link>
+                );
+              })}
             </div>
           </div>
         </section>
