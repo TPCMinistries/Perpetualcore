@@ -8,6 +8,7 @@ import { revenueProbes } from './capabilities/revenue-probes';
 import { strategist } from './capabilities/strategist';
 import { speedToLead } from './capabilities/speed-to-lead';
 import { reactivation } from './capabilities/reactivation';
+import { funnel } from './capabilities/funnel';
 
 /**
  * The Command Deck, as data. Every tile / voice-intent / cron job resolves a
@@ -25,6 +26,7 @@ export const CAPABILITIES: Capability[] = [
   strategist,
   speedToLead,
   reactivation,
+  funnel,
   // repo-sync, deliverability, env-check, ... land here as they're built.
 ];
 

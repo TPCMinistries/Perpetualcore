@@ -51,6 +51,9 @@ export interface BriefInput {
   pnlHeadline: string | null;
   /** combined speed-to-lead + reactivation headline line, or null if neither ran */
   revenueCrewLine: string | null;
+  /** worst-severity headline from the funnel capability — demand and whether the
+   *  instrument measuring it is alive — or null if it did not run */
+  funnelLine: string | null;
 }
 
 interface Move {
@@ -135,6 +138,11 @@ export function renderBriefTelegram(i: BriefInput): string {
   // Revenue Crew (speed-to-lead + reactivation — queued outbound, never auto-sent)
   if (i.revenueCrewLine) {
     out.push(`🤝 Revenue Crew: ${i.revenueCrewLine.replace(/[*_`]/g, '')}`);
+  }
+
+  // Funnel — demand, and whether the thing measuring demand is alive
+  if (i.funnelLine) {
+    out.push(`🫗 Funnel: ${i.funnelLine.replace(/[*_`]/g, '')}`);
   }
 
   // Security
@@ -223,6 +231,11 @@ export function composeBrief(i: BriefInput): string {
   // Revenue Crew — queued outbound (speed-to-lead + reactivation), never auto-sent
   L.push('## Revenue Crew');
   L.push(i.revenueCrewLine ? `- ${i.revenueCrewLine}` : '- No revenue-crew run found — run `npx tsx scripts/ops/run.ts speed-to-lead`.');
+  L.push('');
+
+  // Funnel — demand by source, plus a check that the instrument itself is alive
+  L.push('## Funnel');
+  L.push(i.funnelLine ? `- ${i.funnelLine}` : '- No funnel run found — run `npx tsx scripts/ops/run.ts funnel`.');
   L.push('');
 
   // Pipeline
