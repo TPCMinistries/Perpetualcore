@@ -89,6 +89,26 @@ const nextConfig = {
     ];
 
     return [
+      // Three parallel agent surfaces retired into /dashboard/assistants.
+      //
+      // The dashboard carried four implementations of one idea — agent/,
+      // agents/, assistants/ and bots/ — 16 routes and ~5,900 lines, each with
+      // its own API and tables. Only assistants/ was ever used: 15 assistants,
+      // 14 conversations, 11 messages. The other three had ZERO rows across
+      // agent_actions, agent_inbox, agent_activity_feed, ai_agents,
+      // bot_executions, bot_installations and bot_marketplace — never used, by
+      // anyone, since they were written.
+      //
+      // Redirected rather than deleted because /dashboard/agents was the most
+      // linked destination in the whole product (25 internal links). Removing
+      // the pages without this would have turned the best-linked surface into a
+      // 404 — the routes were dead, the links to them were not.
+      { source: '/dashboard/agent', destination: '/dashboard/assistants', permanent: true },
+      { source: '/dashboard/agent/:path*', destination: '/dashboard/assistants', permanent: true },
+      { source: '/dashboard/agents', destination: '/dashboard/assistants', permanent: true },
+      { source: '/dashboard/agents/:path*', destination: '/dashboard/assistants', permanent: true },
+      { source: '/dashboard/bots', destination: '/dashboard/assistants', permanent: true },
+      { source: '/dashboard/bots/:path*', destination: '/dashboard/assistants', permanent: true },
       {
         // hq.perpetualcore.com is a vanity host for the owner command center;
         // the app itself serves /hq on every host, so only the root needs a hop.

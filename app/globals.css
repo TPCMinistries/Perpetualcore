@@ -29,7 +29,7 @@
     --secondary-foreground: 220 13% 11%;
     --muted: 226 34% 96%;
     --muted-foreground: 220 11% 42%;
-    --accent: 247 100% 97%;
+    --accent: 201 96% 96%;        /* was a faint indigo tint — the one token the retune missed */
     --accent-foreground: 220 13% 11%;
 
     --destructive: 0 84% 60%;
