@@ -18,6 +18,14 @@ test.describe("Authentication Flow", () => {
     await expect(signInButton).toBeVisible({ timeout: 10000 });
   });
 
+  test("login page offers Google sign in", async ({ page }) => {
+    await page.goto("/login?next=/press/studio");
+
+    await expect(
+      page.getByRole("button", { name: "Continue with Google" })
+    ).toBeVisible({ timeout: 10000 });
+  });
+
   test("shows error for invalid credentials", async ({ page }) => {
     await page.goto("/login");
 
@@ -45,6 +53,9 @@ test.describe("Authentication Flow", () => {
     // Should have signup form elements
     const emailInput = page.locator('input[type="email"]').first();
     await expect(emailInput).toBeVisible({ timeout: 10000 });
+    await expect(
+      page.getByRole("button", { name: "Continue with Google" })
+    ).toBeVisible({ timeout: 10000 });
   });
 
   test("auth callback route handles missing params gracefully", async ({ request }) => {

@@ -18,13 +18,8 @@ import {
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Loader2 } from "lucide-react";
-
-function safeNext(value: string | null): string | null {
-  if (!value) return null;
-  if (!value.startsWith("/") || value.startsWith("//")) return null;
-  if (value.startsWith("/api/") || value.startsWith("/auth/callback")) return null;
-  return value;
-}
+import { GoogleOAuthButton } from "@/components/auth/GoogleOAuthButton";
+import { safeAuthNext as safeNext } from "@/lib/auth/redirects";
 
 export function SignupForm() {
   const router = useRouter();
@@ -90,6 +85,16 @@ export function SignupForm() {
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+        <GoogleOAuthButton />
+
+        <div className="flex items-center gap-3" aria-hidden="true">
+          <span className="h-px flex-1 bg-border" />
+          <span className="text-xs font-medium uppercase tracking-[0.14em] text-muted-foreground">
+            or use email
+          </span>
+          <span className="h-px flex-1 bg-border" />
+        </div>
+
         <FormField
           control={form.control}
           name="fullName"

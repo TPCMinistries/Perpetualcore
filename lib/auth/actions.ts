@@ -4,6 +4,10 @@ import { createClient } from "@/lib/supabase/server";
 import { SignUpInput, SignInInput } from "@/lib/validations/auth";
 import { redirect } from "next/navigation";
 import { headers } from "next/headers";
+import type { Database } from "@/lib/supabase/database.types";
+import { safeAuthNext } from "@/lib/auth/redirects";
+
+type BetaInviteCode = Database["public"]["Tables"]["beta_invite_codes"]["Row"];
 
 /**
  * Derive the origin of the current request so auth redirects work across
@@ -20,28 +24,12 @@ async function getRequestOrigin(): Promise<string> {
   return envUrl || "https://www.perpetualcore.com";
 }
 
-function slugify(text: string): string {
-  return text
-    .toLowerCase()
-    .replace(/[^\w\s-]/g, "")
-    .replace(/\s+/g, "-")
-    .replace(/--+/g, "-")
-    .trim();
-}
-
-function safeAuthNext(value: string | undefined): string | null {
-  if (!value) return null;
-  if (!value.startsWith("/") || value.startsWith("//")) return null;
-  if (value.startsWith("/api/") || value.startsWith("/auth/callback")) return null;
-  return value;
-}
-
 export async function signUp(data: SignUpInput, nextPath?: string) {
   const supabase = await createClient();
 
   // Validate beta code if provided
   let betaTier: string | null = null;
-  let betaCodeData: any = null;
+  let betaCodeData: BetaInviteCode | null = null;
   if (data.betaCode) {
     const { data: inviteCode, error: codeError } = await supabase
       .from("beta_invite_codes")
@@ -59,7 +47,10 @@ export async function signUp(data: SignUpInput, nextPath?: string) {
     }
 
     // Check if code has reached max uses
-    if (inviteCode.uses_count >= inviteCode.max_uses) {
+    if (
+      inviteCode.max_uses !== null &&
+      (inviteCode.uses_count ?? 0) >= inviteCode.max_uses
+    ) {
       return { error: "This invite code has been fully redeemed" };
     }
 
@@ -168,20 +159,18 @@ export async function signUp(data: SignUpInput, nextPath?: string) {
       // Increment uses count
       await supabase
         .from("beta_invite_codes")
-        .update({ uses_count: betaCodeData.uses_count + 1 })
+        .update({ uses_count: (betaCodeData.uses_count ?? 0) + 1 })
         .eq("id", betaCodeData.id);
     }
   } else if (data.organizationName) {
     // Regular user: create their own organization
-    const orgSlug = `${slugify(data.organizationName)}-${Date.now()}`;
-
     const { error: orgError } = await supabase.rpc(
       "create_organization_and_profile",
       {
         user_id: authData.user.id,
         user_email: data.email,
+        user_full_name: data.fullName,
         org_name: data.organizationName,
-        org_slug: orgSlug,
       }
     );
 
@@ -351,6 +340,35 @@ export async function signInWithMagicLink(email: string, nextPath?: string) {
   }
 
   return { success: true };
+}
+
+export async function signInWithGoogle(nextPath?: string) {
+  const supabase = await createClient();
+  const origin = await getRequestOrigin();
+  const next = safeAuthNext(nextPath);
+  const callbackUrl = new URL("/auth/callback", origin);
+  if (next) callbackUrl.searchParams.set("next", next);
+
+  const { data, error } = await supabase.auth.signInWithOAuth({
+    provider: "google",
+    options: {
+      redirectTo: callbackUrl.toString(),
+      skipBrowserRedirect: true,
+      queryParams: {
+        prompt: "select_account",
+      },
+    },
+  });
+
+  if (error) {
+    return { error: error.message };
+  }
+
+  if (!data.url) {
+    return { error: "Google sign-in is temporarily unavailable." };
+  }
+
+  return { url: data.url };
 }
 
 export async function updatePassword(newPassword: string) {
