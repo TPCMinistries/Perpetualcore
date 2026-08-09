@@ -106,8 +106,8 @@ async function applyCompletedResult(job: PressJob, result: Record<string, unknow
       p_language: parsed.language ?? "",
       p_segments: parsed.segments.map((segment, position) => ({
         position,
-        start_ms: segment.startMs,
-        end_ms: segment.endMs,
+        startMs: segment.startMs,
+        endMs: segment.endMs,
         speaker: segment.speaker ?? null,
         text: segment.text,
         confidence: segment.confidence ?? null,

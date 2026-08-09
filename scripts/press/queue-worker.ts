@@ -468,6 +468,7 @@ async function tick(): Promise<boolean> {
   } catch (error) {
     clearInterval(heartbeat);
     const message = error instanceof Error ? error.message : String(error);
+    process.stderr.write(`Press job ${response.job.id} failed: ${message.slice(0, 2000)}\n`);
     await report(response.job, {
       status: "failed",
       errorMessage: message.slice(0, 4000),

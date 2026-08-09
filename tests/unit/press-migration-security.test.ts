@@ -35,6 +35,10 @@ const jobFencingSql = readFileSync(
   resolve(process.cwd(), "supabase/migrations/20260809193000_press_job_fencing_and_result_idempotency.sql"),
   "utf8",
 );
+const workspaceOnboardingSecuritySql = readFileSync(
+  resolve(process.cwd(), "supabase/migrations/20260809201500_press_workspace_onboarding_security.sql"),
+  "utf8",
+);
 
 describe("Press foundation migration security contract", () => {
   it("defines every runtime table with RLS", () => {
@@ -138,7 +142,7 @@ describe("Press foundation migration security contract", () => {
 
   it("creates a first-use workspace through the trusted server boundary only", () => {
     expect(workspaceOnboardingSql).toContain("v_user_id uuid := p_user_id");
-    expect(workspaceOnboardingSql).toMatch(/press_ensure_workspace\(p_user_id uuid\)[\s\S]+SECURITY INVOKER/);
+    expect(workspaceOnboardingSql).toContain("press_ensure_workspace(p_user_id uuid)");
     expect(workspaceOnboardingSql).toContain("auth.role() IS DISTINCT FROM 'service_role'");
     expect(workspaceOnboardingSql).toContain("SET search_path = public, pg_temp");
     expect(workspaceOnboardingSql).toContain(
@@ -188,5 +192,18 @@ describe("Press foundation migration security contract", () => {
     expect(jobFencingSql).toContain("WHERE source_job_id = p_job_id");
     expect(jobFencingSql).toContain("press_clips_source_job_position_uidx");
     expect(jobFencingSql).toContain("REVOKE ALL ON FUNCTION public.press_replace_transcript_for_job");
+  });
+
+  it("runs workspace onboarding with auth access but only for the service role", () => {
+    expect(workspaceOnboardingSecuritySql).toMatch(
+      /ALTER FUNCTION public\.press_ensure_workspace\(uuid\) SECURITY DEFINER/i,
+    );
+    expect(workspaceOnboardingSecuritySql).toContain("SET search_path = public, pg_temp");
+    expect(workspaceOnboardingSecuritySql).toMatch(
+      /REVOKE ALL ON FUNCTION public\.press_ensure_workspace\(uuid\)[\s\S]+authenticated/i,
+    );
+    expect(workspaceOnboardingSecuritySql).toContain(
+      "GRANT EXECUTE ON FUNCTION public.press_ensure_workspace(uuid) TO service_role",
+    );
   });
 });
