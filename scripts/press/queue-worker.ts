@@ -15,6 +15,7 @@ import { basename, join } from "node:path";
 import { Readable, Transform } from "node:stream";
 import { pipeline } from "node:stream/promises";
 import { spawn } from "node:child_process";
+import { createCanvas } from "canvas";
 
 type SupportedJobType = "probe_media" | "transcribe_media" | "score_clips" | "render_clip";
 
@@ -256,15 +257,6 @@ function scoreTranscript(
   return selected;
 }
 
-function srtTime(milliseconds: number): string {
-  const safe = Math.max(0, Math.round(milliseconds));
-  const hours = Math.floor(safe / 3_600_000);
-  const minutes = Math.floor((safe % 3_600_000) / 60_000);
-  const seconds = Math.floor((safe % 60_000) / 1000);
-  const millis = safe % 1000;
-  return `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")},${String(millis).padStart(3, "0")}`;
-}
-
 async function uploadFile(url: string, path: string, contentType: string): Promise<void> {
   const body = Readable.toWeb(createReadStream(path)) as BodyInit;
   const init: RequestInit & { duplex: "half" } = {
@@ -342,23 +334,39 @@ async function processJob(job: ClaimedJob): Promise<Record<string, unknown>> {
         `scale=${target.width}:${target.height}:force_original_aspect_ratio=increase`,
         `crop=${target.width}:${target.height}:(iw-ow)*${focalPoint.x.toFixed(3)}:(ih-oh)*${focalPoint.y.toFixed(3)}`,
       );
+      const captionOverlays: Array<{ path: string; startSeconds: number; endSeconds: number }> = [];
       if (captionSegments.length && render.captionStyle !== "none") {
-        const srt = captionSegments.map((segment, index) => {
-          const start = Math.max(segment.startMs, clip.startMs) - clip.startMs;
-          const end = Math.min(segment.endMs, clip.endMs) - clip.startMs;
+        for (const [index, segment] of captionSegments.entries()) {
           const clean = segment.text.replace(/<[^>]*>/g, "").replace(/\s+/g, " ").trim();
-          return `${index + 1}\n${srtTime(start)} --> ${srtTime(end)}\n${clean}\n`;
-        }).join("\n");
-        await writeFile(join(workDir, "captions.srt"), srt, { encoding: "utf8", mode: 0o600 });
-        const style = captionAssStyle(render.captionStyle ?? "minimal", captionPosition);
-        filters.push(`subtitles=captions.srt:force_style='${style}'`);
+          if (!clean) continue;
+          const captionPath = join(workDir, `caption-${index}.png`);
+          await writeCaptionOverlay({
+            path: captionPath,
+            text: clean,
+            width: target.width,
+            height: target.height,
+            style: render.captionStyle ?? "minimal",
+            position: captionPosition,
+          });
+          captionOverlays.push({
+            path: captionPath,
+            startSeconds: (Math.max(segment.startMs, clip.startMs) - clip.startMs) / 1000,
+            endSeconds: (Math.min(segment.endMs, clip.endMs) - clip.startMs) / 1000,
+          });
+        }
       }
       const outputPath = join(workDir, "render.mp4");
+      const durationSeconds = (clip.endMs - clip.startMs) / 1000;
+      const captionInputs = captionOverlays.flatMap((overlay) => ["-loop", "1", "-i", overlay.path]);
+      const videoFilterArgs = captionOverlays.length
+        ? buildCaptionFilterArgs(filters, captionOverlays)
+        : ["-map", "0:v:0", "-vf", filters.join(",")];
       await run("ffmpeg", [
         "-hide_banner", "-loglevel", "error", "-y",
         "-ss", String(clip.startMs / 1000), "-i", sourcePath,
-        "-t", String((clip.endMs - clip.startMs) / 1000),
-        "-map", "0:v:0", "-map", "0:a?", "-vf", filters.join(","),
+        ...captionInputs,
+        "-t", String(durationSeconds),
+        ...videoFilterArgs, "-map", "0:a?",
         "-c:v", "libx264", "-preset", "medium", "-crf", "20",
         "-c:a", "aac", "-b:a", "128k", "-movflags", "+faststart", outputPath,
       ], workDir);
@@ -435,14 +443,94 @@ function clampNumber(value: unknown, key: string, fallback: number) {
     : fallback;
 }
 
-function captionAssStyle(style: string, position: "top" | "center" | "bottom") {
-  const alignment = position === "top" ? 8 : position === "center" ? 5 : 2;
-  const preset = style === "bold"
-    ? "FontName=Arial,FontSize=28,Bold=1,PrimaryColour=&H00FFFFFF,OutlineColour=&H00000000,BorderStyle=3,Outline=2,Shadow=0,MarginV=90"
-    : style === "brand"
-      ? "FontName=Arial,FontSize=24,Bold=1,PrimaryColour=&H00FFFFFF,OutlineColour=&H00A13B12,BorderStyle=1,Outline=4,Shadow=1,MarginV=90"
-      : "FontName=Arial,FontSize=22,Bold=0,PrimaryColour=&H00FFFFFF,OutlineColour=&H00000000,BorderStyle=1,Outline=2,Shadow=1,MarginV=70";
-  return `${preset},Alignment=${alignment}`;
+function buildCaptionFilterArgs(
+  baseFilters: string[],
+  overlays: Array<{ startSeconds: number; endSeconds: number }>,
+): string[] {
+  const chains = [`[0:v]${baseFilters.join(",")}[caption-base]`];
+  overlays.forEach((overlay, index) => {
+    const inputLabel = index === 0 ? "caption-base" : `caption-${index - 1}`;
+    const outputLabel = index === overlays.length - 1 ? "press-video" : `caption-${index}`;
+    const enable = `between(t\\,${overlay.startSeconds.toFixed(3)}\\,${overlay.endSeconds.toFixed(3)})`;
+    chains.push(`[${inputLabel}][${index + 1}:v]overlay=0:0:enable='${enable}'[${outputLabel}]`);
+  });
+  return ["-filter_complex", chains.join(";"), "-map", "[press-video]"];
+}
+
+function wrapCaptionText(
+  measureText: (value: string) => number,
+  text: string,
+  maxWidth: number,
+  maxLines = 3,
+): string[] {
+  const words = text.split(/\s+/).filter(Boolean);
+  const lines: string[] = [];
+  let current = "";
+  for (const word of words) {
+    const candidate = current ? `${current} ${word}` : word;
+    if (!current || measureText(candidate) <= maxWidth) {
+      current = candidate;
+      continue;
+    }
+    lines.push(current);
+    current = word;
+    if (lines.length === maxLines - 1) break;
+  }
+  if (current && lines.length < maxLines) lines.push(current);
+  const usedWords = lines.join(" ").split(/\s+/).filter(Boolean).length;
+  if (usedWords < words.length && lines.length) {
+    let finalLine = lines[lines.length - 1];
+    while (finalLine && measureText(`${finalLine}…`) > maxWidth) {
+      finalLine = finalLine.split(" ").slice(0, -1).join(" ");
+    }
+    lines[lines.length - 1] = `${finalLine || words[usedWords - 1] || ""}…`;
+  }
+  return lines;
+}
+
+async function writeCaptionOverlay(input: {
+  path: string;
+  text: string;
+  width: number;
+  height: number;
+  style: string;
+  position: "top" | "center" | "bottom";
+}): Promise<void> {
+  const canvas = createCanvas(input.width, input.height);
+  const context = canvas.getContext("2d");
+  const fontSize = Math.max(42, Math.round(Math.min(input.width, input.height) * 0.055));
+  const isBold = input.style === "bold" || input.style === "brand";
+  context.font = `${isBold ? "700" : "600"} ${fontSize}px Arial, sans-serif`;
+  const maxWidth = input.width * 0.82;
+  const lines = wrapCaptionText((value) => context.measureText(value).width, input.text, maxWidth);
+  const lineHeight = Math.round(fontSize * 1.24);
+  const horizontalPadding = Math.round(fontSize * 0.55);
+  const verticalPadding = Math.round(fontSize * 0.42);
+  const contentWidth = Math.max(...lines.map((line) => context.measureText(line).width), fontSize * 2);
+  const boxWidth = Math.min(input.width * 0.92, contentWidth + horizontalPadding * 2);
+  const boxHeight = lines.length * lineHeight + verticalPadding * 2;
+  const boxX = (input.width - boxWidth) / 2;
+  const boxY = input.position === "top"
+    ? input.height * 0.1
+    : input.position === "center"
+      ? (input.height - boxHeight) / 2
+      : input.height - boxHeight - input.height * 0.1;
+  const radius = Math.max(18, Math.round(fontSize * 0.35));
+
+  context.beginPath();
+  context.roundRect(boxX, boxY, boxWidth, boxHeight, radius);
+  context.fillStyle = input.style === "brand" ? "rgba(157, 62, 22, 0.94)" : "rgba(10, 10, 10, 0.82)";
+  context.fill();
+  context.fillStyle = "#ffffff";
+  context.textAlign = "center";
+  context.textBaseline = "middle";
+  context.shadowColor = "rgba(0, 0, 0, 0.45)";
+  context.shadowBlur = Math.round(fontSize * 0.12);
+  lines.forEach((line, index) => {
+    const y = boxY + verticalPadding + lineHeight * (index + 0.5);
+    context.fillText(line, input.width / 2, y, maxWidth);
+  });
+  await writeFile(input.path, canvas.toBuffer("image/png"), { mode: 0o600 });
 }
 
 async function tick(): Promise<boolean> {

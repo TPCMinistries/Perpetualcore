@@ -39,6 +39,10 @@ const workspaceOnboardingSecuritySql = readFileSync(
   resolve(process.cwd(), "supabase/migrations/20260809201500_press_workspace_onboarding_security.sql"),
   "utf8",
 );
+const resultConflictTargetsSql = readFileSync(
+  resolve(process.cwd(), "supabase/migrations/20260809210000_press_result_conflict_targets.sql"),
+  "utf8",
+);
 
 describe("Press foundation migration security contract", () => {
   it("defines every runtime table with RLS", () => {
@@ -205,5 +209,17 @@ describe("Press foundation migration security contract", () => {
     expect(workspaceOnboardingSecuritySql).toContain(
       "GRANT EXECUTE ON FUNCTION public.press_ensure_workspace(uuid) TO service_role",
     );
+  });
+
+  it("provides non-partial conflict targets for idempotent worker results", () => {
+    expect(resultConflictTargetsSql).toContain("DROP INDEX IF EXISTS public.press_transcripts_source_job_uidx");
+    expect(resultConflictTargetsSql).toMatch(
+      /CREATE UNIQUE INDEX press_transcripts_source_job_uidx\s+ON public\.press_transcripts \(source_job_id\);/i,
+    );
+    expect(resultConflictTargetsSql).toContain("DROP INDEX IF EXISTS public.press_clips_source_job_position_uidx");
+    expect(resultConflictTargetsSql).toMatch(
+      /CREATE UNIQUE INDEX press_clips_source_job_position_uidx\s+ON public\.press_clips \(source_job_id, source_position\);/i,
+    );
+    expect(resultConflictTargetsSql).not.toMatch(/WHERE source_job_id IS NOT NULL/i);
   });
 });
